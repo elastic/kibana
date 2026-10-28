@@ -64,11 +64,11 @@ const renderFlyout = ({
 } = {}) => {
   const query$ = new BehaviorSubject<Query | undefined>(initialQuery);
   const filters$ = new BehaviorSubject<Filter[] | undefined>(initialFilters);
-  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(initialDataViews);
+  const dataSources$ = new BehaviorSubject<DataView[] | undefined>(initialDataViews);
   const api = {
     query$,
     filters$,
-    dataViews$,
+    dataSources$,
     setQuery: jest.fn((query?: Query) => query$.next(query)),
     setFilters: jest.fn((filters?: Filter[]) => filters$.next(filters)),
   } as unknown as VegaEmbeddableApi;

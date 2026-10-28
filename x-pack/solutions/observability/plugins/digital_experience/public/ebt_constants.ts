@@ -5,6 +5,32 @@
  * 2.0.
  */
 
+/**
+ * Click actions of Digital Experience that `EBT_CLICK_ACTIONS` from `@kbn/ebt-click` has no shared
+ * name for; named after the user's intent, as that package asks.
+ */
+export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
+  /** The user opens a filter's options. */
+  OPEN_FILTER: 'openFilter',
+  /** The user narrows the list, e.g. to one environment or source. */
+  SET_FILTER: 'setFilter',
+  /** The user opens the list of columns to show or hide. */
+  SELECT_COLUMNS: 'selectColumns',
+  /** The user loads the list again after it failed. */
+  RETRY_LOAD: 'retryLoad',
+} as const;
+
+/**
+ * Clicks already carry the app in their `applicationId` context (`digital_experience`), so element
+ * names don't repeat it.
+ */
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
-  APPLICATION_LINK: 'digitalExperienceApplicationLink',
+  APPLICATION_LINK: 'applicationLink',
+  DOCS_LINK: 'applicationsDocsLink',
+  CLASSIC_DATA_HINT: 'classicDataHint',
+  ENVIRONMENT_FILTER: 'environmentFilter',
+  SOURCE_FILTER: 'sourceFilter',
+  COLUMN_SELECTOR: 'columnSelector',
+  RETRY: 'applicationsRetry',
+  SHOW_ALL_ENVIRONMENTS: 'showAllEnvironments',
 } as const;

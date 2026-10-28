@@ -22,7 +22,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { AccessControlInput } from '@kbn/entity-access-control';
@@ -86,17 +86,12 @@ export const WorkflowAccessControlModal = ({
   const [isSaving, setIsSaving] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isInvalidAccess, setIsInvalidAccess] = useState(false);
-  const uids = [ownerId, ...(value.entries ?? []).map(({ id }) => id)].filter((id): id is string =>
-    Boolean(id)
-  );
   const { data: profiles = [] } = useQuery({
-    queryKey: ['workflowAccessProfiles', ...uids],
-    enabled: uids.length > 0,
+    queryKey: ['workflowAccessProfiles', workflow.id],
     queryFn: () =>
-      userProfile.bulkGet<UserProfileWithAvatar['data']>({
-        uids: new Set(uids),
-        dataPath: 'avatar',
-      }),
+      http.get<UserProfileWithAvatar[]>(
+        `/internal/workflows/${encodeURIComponent(workflow.id)}/access_control/_profiles`
+      ),
   });
   const {
     data: suggestedProfiles = [],
@@ -111,6 +106,15 @@ export const WorkflowAccessControlModal = ({
         { name: debouncedSearch, size: 20, dataPath: 'avatar' }
       ),
   });
+  // Entries added in this session are not saved yet, so their profiles come from the suggestions.
+  const [pickedProfiles, setPickedProfiles] = useState<UserProfileWithAvatar[]>([]);
+  useEffect(() => {
+    if (suggestedProfiles.length === 0) return;
+    setPickedProfiles((previous) => [
+      ...previous.filter(({ uid }) => !suggestedProfiles.some((profile) => profile.uid === uid)),
+      ...suggestedProfiles,
+    ]);
+  }, [suggestedProfiles]);
   const save = async () => {
     setIsSaving(true);
     setHasError(false);
@@ -195,7 +199,11 @@ export const WorkflowAccessControlModal = ({
           ownerId={ownerId}
           currentUserId={currentProfile?.uid}
           canManage={!isCurrentProfileLoading && workflow.permissions?.manage}
-          profiles={currentProfile ? [...profiles, currentProfile] : profiles}
+          profiles={
+            currentProfile
+              ? [...profiles, ...pickedProfiles, currentProfile]
+              : [...profiles, ...pickedProfiles]
+          }
           suggestedProfiles={suggestedProfiles}
           onSearch={setSearch}
           roles={roles}

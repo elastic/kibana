@@ -97,7 +97,14 @@ export const registerHuntBehaviorRoute = ({
             });
           }
 
-          const { text, report_id, llm_confidence_threshold, iocs, article_context } = request.body;
+          const {
+            text,
+            report_id,
+            llm_confidence_threshold,
+            iocs,
+            excluded_iocs,
+            article_context,
+          } = request.body;
           const esClient = core.elasticsearch.client.asCurrentUser;
           // What the generated query may read: the same default data view Tier 1 searches.
           const indexPatterns = await resolveHuntUniverse(context, logger);
@@ -110,6 +117,7 @@ export const registerHuntBehaviorRoute = ({
               report_id,
               llm_confidence_threshold,
               iocs,
+              ...(excluded_iocs !== undefined ? { excluded_iocs } : {}),
               article_context,
               allowed_indices: indexPatterns,
             },

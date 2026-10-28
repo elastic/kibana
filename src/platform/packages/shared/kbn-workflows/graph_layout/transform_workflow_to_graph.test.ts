@@ -44,8 +44,27 @@ describe('transformWorkflowToGraph', () => {
     );
     const triggerEdges = r.edges.filter((e) => e.target === 'first');
     expect(triggerEdges).toHaveLength(2);
+    expect(
+      r.nodes.filter((node) => node.type === 'trigger').map((node) => node.data.label)
+    ).toEqual(['Manual', 'Scheduled']);
     // sequential
     expect(r.edges).toContainEqual(expect.objectContaining({ source: 'first', target: 'second' }));
+  });
+
+  it('labels unknown trigger types with the id unless getTriggerLabel is provided', () => {
+    const workflow = minimal({
+      triggers: [{ type: 'slack2.message', enabled: true }] as unknown as WorkflowYaml['triggers'],
+    });
+
+    const unlabeled = transformWorkflowToGraph(workflow);
+    expect(unlabeled.nodes.find((node) => node.type === 'trigger')?.data.label).toBe(
+      'slack2.message'
+    );
+
+    const labeled = transformWorkflowToGraph(workflow, () => 'Slack - Message');
+    expect(labeled.nodes.find((node) => node.type === 'trigger')?.data.label).toBe(
+      'Slack - Message'
+    );
   });
 
   it('labels if-branch edges as true / false', () => {

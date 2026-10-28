@@ -164,6 +164,126 @@ describe('When using the ArtifactListPage component', () => {
         expect(getAllByTestId('testPage-simpleTable-columnEnabled').length).toBeGreaterThan(0);
       });
 
+      describe('and the enabled status filter is used', () => {
+        const ENABLED_KQL = `(not exception-list-agnostic.attributes.tags:"${DISABLED_ARTIFACT_TAG}")`;
+        const DISABLED_KQL = `(exception-list-agnostic.attributes.tags:"${DISABLED_ARTIFACT_TAG}")`;
+
+        const getLastListFilter = (): string | undefined =>
+          (
+            mockedApi.responseProvider.trustedAppsList.mock.lastCall?.[0].query as {
+              filter?: string;
+            }
+          )?.filter;
+
+        it('should not show the filter when showEnabledColumn is false', async () => {
+          const { queryByTestId } = await renderWithListData({ showAsSimpleTable: true });
+
+          expect(queryByTestId('enabledStatusFilter')).not.toBeInTheDocument();
+        });
+
+        it('should ignore the enabledStatus URL param when showEnabledColumn is false', async () => {
+          history.push('somepage?enabledStatus=disabled');
+
+          await renderWithListData({ showAsSimpleTable: true });
+
+          expect(getLastListFilter()).toBeUndefined();
+        });
+
+        it('should show only enabled artifacts when Enabled is selected', async () => {
+          const { getByTestId } = await renderWithListData({
+            showAsSimpleTable: true,
+            showEnabledColumn: true,
+          });
+
+          await userEvent.click(getByTestId('enabledStatusFilter-enabled'));
+
+          await waitFor(() => {
+            expect(history.location.search).toMatch(/enabledStatus=enabled/);
+            expect(getLastListFilter()).toEqual(ENABLED_KQL);
+          });
+          expect(getByTestId('enabledStatusFilter-enabled')).toHaveAttribute(
+            'aria-pressed',
+            'true'
+          );
+        });
+
+        it('should show only disabled artifacts when Disabled is selected', async () => {
+          const { getByTestId } = await renderWithListData({
+            showAsSimpleTable: true,
+            showEnabledColumn: true,
+          });
+
+          await userEvent.click(getByTestId('enabledStatusFilter-disabled'));
+
+          await waitFor(() => {
+            expect(history.location.search).toMatch(/enabledStatus=disabled/);
+            expect(getLastListFilter()).toEqual(DISABLED_KQL);
+          });
+        });
+
+        it('should keep the current page when the status changes', async () => {
+          history.push('somepage?page=2');
+          const { getByTestId } = await renderWithListData({
+            showAsSimpleTable: true,
+            showEnabledColumn: true,
+          });
+
+          await userEvent.click(getByTestId('enabledStatusFilter-disabled'));
+
+          await waitFor(() => {
+            expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+              expect.objectContaining({
+                query: expect.objectContaining({ page: 2, filter: DISABLED_KQL }),
+              })
+            );
+          });
+          expect(history.location.search).toMatch(/page=2(&|$)/);
+        });
+
+        it('should clear the filter when the selected button is clicked again', async () => {
+          history.push('somepage?enabledStatus=disabled');
+          const { getByTestId } = await renderWithListData({
+            showAsSimpleTable: true,
+            showEnabledColumn: true,
+          });
+          expect(getLastListFilter()).toEqual(DISABLED_KQL);
+
+          await userEvent.click(getByTestId('enabledStatusFilter-disabled'));
+
+          await waitFor(() => {
+            expect(history.location.search).not.toMatch(/enabledStatus/);
+            expect(getLastListFilter()).toBeUndefined();
+          });
+        });
+
+        it('should combine with the search filter', async () => {
+          history.push('somepage?enabledStatus=enabled');
+          const { getByTestId } = await renderWithListData({
+            showAsSimpleTable: true,
+            showEnabledColumn: true,
+          });
+
+          await userEvent.type(getByTestId('searchField'), 'fooFooFoo{enter}');
+
+          await waitFor(() => {
+            expect(getLastListFilter()).toMatch(/\*fooFooFoo\*/);
+          });
+          expect(history.location.search).toMatch(/enabledStatus=enabled/);
+          expect(getLastListFilter()).toContain(ENABLED_KQL);
+        });
+
+        it('should combine with the policy filter', async () => {
+          const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
+          history.push(`somepage?enabledStatus=disabled&includedPolicies=${policyId}`);
+
+          await renderWithListData({ showAsSimpleTable: true, showEnabledColumn: true });
+
+          expect(getLastListFilter()).toEqual(
+            `((exception-list-agnostic.attributes.tags:"policy:${policyId}")) AND ${DISABLED_KQL}`
+          );
+        });
+      });
+
       it('should update the full artifact with the disabled tag when the switch is turned off', async () => {
         const { getAllByTestId } = await renderWithListData({
           showAsSimpleTable: true,
@@ -253,6 +373,19 @@ describe('When using the ArtifactListPage component', () => {
         expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
         expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
         expect(queryByTestId('formMock')).not.toBeInTheDocument();
+      });
+
+      it('should pass the policy assignment info tooltip to the view flyout', async () => {
+        history.push('somepage?show=view&itemId=123');
+
+        const { findByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          policyAssignmentInfoTooltip: 'Some assignment info',
+        });
+
+        expect(
+          await findByTestId('testPage-viewFlyout-policyAssignmentInfoTooltip')
+        ).toBeInTheDocument();
       });
 
       it('should not open the view flyout when show=view has no itemId', async () => {
@@ -457,6 +590,26 @@ describe('When using the ArtifactListPage component', () => {
           );
         });
       });
+
+      it('should request only the first page when the sort changes on a later page', async () => {
+        history.push('somepage?page=2');
+        const { getByText } = await renderWithListData({ showAsSimpleTable: true });
+
+        await userEvent.click(getByText('Name'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+              query: expect.objectContaining({ page: 1, sort_field: 'name' }),
+            })
+          );
+        });
+        expect(mockedApi.responseProvider.trustedAppsList).not.toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({ page: 2, sort_field: 'name' }),
+          })
+        );
+      });
     });
 
     it('should show card actions', async () => {
@@ -501,6 +654,139 @@ describe('When using the ArtifactListPage component', () => {
 
       await waitFor(() => {
         expect(history.location.search).toMatch(/pageSize=20/);
+      });
+    });
+
+    describe('and the only item on the last page is deleted', () => {
+      let isItemDeleted: boolean;
+
+      beforeEach(() => {
+        isItemDeleted = false;
+
+        const { trustedAppsList, trustedAppDelete } = mockedApi.responseProvider;
+        const defaultListImplementation = trustedAppsList.getMockImplementation();
+        const defaultDeleteImplementation = trustedAppDelete.getMockImplementation();
+
+        trustedAppDelete.mockImplementation((options) => {
+          isItemDeleted = true;
+          return defaultDeleteImplementation?.(options) as ReturnType<typeof trustedAppDelete>;
+        });
+
+        trustedAppsList.mockImplementation((options) => {
+          const response = defaultListImplementation?.(options) as ReturnType<
+            typeof trustedAppsList
+          >;
+          const total = isItemDeleted ? 20 : 21;
+          const isLastPage = response.page > Math.floor(total / response.per_page);
+
+          return {
+            ...response,
+            total,
+            data: isLastPage ? response.data.slice(0, total % response.per_page) : response.data,
+          };
+        });
+
+        history.push('somepage?page=3');
+      });
+
+      it('should navigate to the previous page when shown as cards', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData();
+        await waitFor(() => {
+          expect(getAllByTestId('testPage-card')).toHaveLength(1);
+        });
+
+        await getFirstCard({ showActions: true });
+        await userEvent.click(getByTestId('testPage-card-cardDeleteAction'), {
+          pointerEventsCheck: 0,
+        });
+        await userEvent.click(getByTestId('testPage-deleteModal-submitButton'));
+
+        await waitFor(() => {
+          expect(history.location.search).toMatch(/page=2/);
+          expect(getAllByTestId('testPage-card')).toHaveLength(10);
+        });
+      });
+
+      it('should navigate to the previous page when shown as simple table', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+        await waitFor(() => {
+          expect(getAllByTestId('testPage-simpleTable-rowActions-button')).toHaveLength(1);
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-rowActions-button')[0]);
+        await userEvent.click(getByTestId('testPage-simpleTable-cardDeleteAction'), {
+          pointerEventsCheck: 0,
+        });
+        await userEvent.click(getByTestId('testPage-deleteModal-submitButton'));
+
+        await waitFor(() => {
+          expect(history.location.search).toMatch(/page=2/);
+          expect(getAllByTestId('testPage-simpleTable-rowActions-button')).toHaveLength(10);
+        });
+      });
+    });
+
+    describe('and navigating back from a smaller result set to a later page', () => {
+      beforeEach(() => {
+        const { trustedAppsList } = mockedApi.responseProvider;
+        const defaultListImplementation = trustedAppsList.getMockImplementation();
+
+        trustedAppsList.mockImplementation((options) => {
+          const response = defaultListImplementation?.(options) as ReturnType<
+            typeof trustedAppsList
+          >;
+          const { filter } = options.query as { filter?: string };
+          const total = filter ? 5 : 30;
+          const itemsBeforePage = (response.page - 1) * response.per_page;
+
+          return {
+            ...response,
+            total,
+            data: response.data.slice(0, Math.max(0, total - itemsBeforePage)),
+          };
+        });
+
+        history.push('somepage?page=3');
+      });
+
+      const navigateToFilteredListAndBack = async (getItems: () => HTMLElement[]) => {
+        await waitFor(() => {
+          expect(getItems()).toHaveLength(10);
+        });
+
+        act(() => {
+          history.push('somepage?page=1&filter=fooFooFoo');
+        });
+        await waitFor(() => {
+          expect(getItems()).toHaveLength(5);
+        });
+
+        act(() => {
+          history.goBack();
+        });
+        await waitFor(() => {
+          expect(getItems()).toHaveLength(10);
+        });
+      };
+
+      it('should stay on the restored page when shown as cards', async () => {
+        const { queryAllByTestId } = await renderWithListData();
+
+        await navigateToFilteredListAndBack(() => queryAllByTestId('testPage-card'));
+
+        expect(history.location.search).toBe('?page=3');
+      });
+
+      it('should stay on the restored page when shown as simple table', async () => {
+        const { queryAllByTestId } = await renderWithListData({ showAsSimpleTable: true });
+
+        await navigateToFilteredListAndBack(() =>
+          queryAllByTestId('testPage-simpleTable-rowActions-button')
+        );
+
+        expect(history.location.search).toBe('?page=3');
       });
     });
 
@@ -753,6 +1039,76 @@ describe('When using the ArtifactListPage component', () => {
         await waitFor(() => {
           expect(renderResult.getByTestId('testPage-list-noResults')).toBeTruthy();
         });
+      });
+    });
+
+    describe('and the search bar is used on a later page', () => {
+      const expectPageRequested = async (page: number) => {
+        await waitFor(() => {
+          expect(history.location.search).toMatch(new RegExp(`page=${page}(&|$)`));
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+            expect.objectContaining({ query: expect.objectContaining({ page }) })
+          );
+        });
+      };
+
+      beforeEach(async () => {
+        history.push('somepage?page=2');
+        await renderWithListData();
+      });
+
+      it('should keep the current page when the policy filter changes', async () => {
+        const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
+        const firstPolicyTestId = `policiesSelectorButton-policySelector-policy-${policyId}`;
+
+        await userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
+        await waitFor(() => {
+          expect(renderResult.getAllByTestId(firstPolicyTestId).length > 0).toBeTruthy();
+        });
+        await userEvent.click(renderResult.getAllByTestId(firstPolicyTestId)[0]);
+
+        await waitFor(() => {
+          expect(history.location.search).toMatch(new RegExp(`includedPolicies=${policyId}`));
+        });
+        await expectPageRequested(2);
+      });
+
+      it('should keep the current page when the search filter changes', async () => {
+        await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo{enter}');
+
+        await waitFor(() => {
+          expect(history.location.search).toMatch(/fooFooFoo/);
+        });
+        await expectPageRequested(2);
+      });
+
+      it('should move to the last page when the filtered results no longer reach the current page', async () => {
+        const { trustedAppsList } = mockedApi.responseProvider;
+        const defaultListImplementation = trustedAppsList.getMockImplementation();
+        trustedAppsList.mockImplementation((options) => {
+          const response = defaultListImplementation?.(options) as ReturnType<
+            typeof trustedAppsList
+          >;
+          const { filter } = options.query as { filter?: string };
+
+          return filter ? { ...response, total: 5, data: response.data.slice(0, 5) } : response;
+        });
+
+        await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo{enter}');
+
+        await expectPageRequested(1);
+        expect(history.location.search).toMatch(/fooFooFoo/);
+      });
+
+      it('should keep the current page when Refresh is clicked without filter changes', async () => {
+        await userEvent.click(renderResult.getByTestId('searchButton'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+            expect.objectContaining({ query: expect.objectContaining({ page: 2 }) })
+          );
+        });
+        expect(history.location.search).toMatch(/page=2(&|$)/);
       });
     });
   });

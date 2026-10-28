@@ -182,6 +182,13 @@ export interface HuntCoordinatorCoreResult {
    */
   incomplete?: HuntIncompleteness[];
   /**
+   * Report IOCs excluded by adjudication and not searched by this run. Present only when
+   * the run used the report's IOC list (not a caller-supplied override) and at least one
+   * searchable IOC was ineligible. This is not an `incomplete` gap: the run is complete,
+   * it chose not to search those values.
+   */
+  excluded_report_iocs?: { count: number };
+  /**
    * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible
    * entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
    */
@@ -584,6 +591,9 @@ const huntCoordinatorCore = async (
   // alone — still searched the report's IOCs and could confirm a hit on them.
   const iocs = callerIocs ?? reportContext?.iocs ?? [];
   const techniques = callerTechniques ?? reportContext?.techniques ?? [];
+  // Caller-supplied IOCs replace the report's list, so adjudication exclusions from the
+  // report are not coverage this run chose to skip (same gating as `truncated` below).
+  const excludedIocs = callerIocs === undefined ? reportContext?.excluded_iocs : undefined;
   // Clamp after merge: request schema bounds caller `text`, but report-loaded
   // `content.body_text` has no such bound and must not exceed the Tier 2 contract.
   const text = clampHuntReportText(callerText ?? reportContext?.text);
@@ -704,6 +714,7 @@ const huntCoordinatorCore = async (
       // come back. The report has to stay eligible.
       completeness: 'incomplete_retryable',
       completed_successfully: false,
+      ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
     };
   }
 
@@ -860,6 +871,7 @@ const huntCoordinatorCore = async (
       completeness,
       completed_successfully: completedSuccessfully(completeness),
       ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
+      ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
     };
   };
 
@@ -910,6 +922,7 @@ const huntCoordinatorCore = async (
       completeness,
       completed_successfully: completedSuccessfully(completeness),
       ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
+      ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
     };
   }
 
@@ -965,6 +978,9 @@ const huntCoordinatorCore = async (
         report_id: reportId,
         llm_confidence_threshold: llmThreshold,
         iocs: iocs.map((ioc) => ({ type: ioc.type, value: ioc.value })),
+        ...(excludedIocs && excludedIocs.values.length > 0
+          ? { excluded_iocs: excludedIocs.values }
+          : {}),
         article_context: articleContext,
         window: tier1Raw.time_range,
         size,
@@ -1051,6 +1067,7 @@ const huntCoordinatorCore = async (
     completeness,
     completed_successfully: completedSuccessfully(completeness),
     ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
+    ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
   };
 
   if (!hasConfirmedHit) {
