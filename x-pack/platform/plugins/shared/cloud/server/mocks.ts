@@ -41,6 +41,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     },
     isInTrial: jest.fn().mockReturnValue(false),
     trialDaysLeft: jest.fn().mockReturnValue(undefined),
+    registerBillingAccessChecker: jest.fn(),
   };
 }
 

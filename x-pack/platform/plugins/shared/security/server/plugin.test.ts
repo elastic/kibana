@@ -378,6 +378,24 @@ describe('Security Plugin', () => {
         }).setup(mockCoreSetup, mockSetupDependencies)
       ).not.toThrow();
     });
+
+    it('setup() registers a billing access checker with the cloud plugin when UIAM is enabled', () => {
+      const cloud = cloudMock.createSetup();
+      serverlessPlugin({
+        enabled: true,
+        url: 'https://uiam',
+        sharedSecret: 'shared-secret',
+      }).setup(mockCoreSetup, { ...mockSetupDependencies, cloud });
+
+      expect(cloud.registerBillingAccessChecker).toHaveBeenCalledWith(expect.any(Function));
+    });
+  });
+
+  it('setup() does not register a billing access checker without UIAM', () => {
+    const cloud = cloudMock.createSetup();
+    plugin.setup(mockCoreSetup, { ...mockSetupDependencies, cloud });
+
+    expect(cloud.registerBillingAccessChecker).not.toHaveBeenCalled();
   });
 
   describe('stop()', () => {

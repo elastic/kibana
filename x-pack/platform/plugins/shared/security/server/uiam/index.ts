@@ -18,6 +18,7 @@ export {
   getProtectedResourceMetadataUrl,
   resolveProtectedResource,
 } from './oauth_protected_resource';
+export { createBillingAccessChecker } from './billing_access';
 export type {
   ServiceAccountAssumableBy,
   UiamListServiceAccountsResponse,

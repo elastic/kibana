@@ -69,7 +69,11 @@ import {
 import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
-import { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE, UiamService } from './uiam';
+import {
+  createBillingAccessChecker,
+  KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE,
+  UiamService,
+} from './uiam';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
 import type { UserProfileServiceStartInternal } from './user_profile';
@@ -166,6 +170,8 @@ export class SecurityPlugin
    * contract, but service accounts are started later.
    */
   private cloudProjectContext?: CloudProjectContext;
+  /** Created during `start` when UIAM is enabled. */
+  private uiam?: UiamService;
 
   private readonly serviceAccountsService: ServiceAccountsService;
   private serviceAccountsStart?: ServiceAccountsServiceStart | null;
@@ -324,6 +330,14 @@ export class SecurityPlugin
     securityFeatures.forEach((securityFeature) =>
       features.registerElasticsearchFeature(securityFeature)
     );
+
+    // Cloud asks this checker whether a user may see billing: UIAM decides, based on whether the
+    // user may read the organization's billing details.
+    if (cloud && config.uiam?.enabled) {
+      cloud.registerBillingAccessChecker(
+        createBillingAccessChecker(() => this.uiam, organizationId)
+      );
+    }
 
     if (cloud?.cloudId) {
       this.elasticsearchUrl = this.decodeElasticsearchUrlFromCloudId(cloud.cloudId);
@@ -540,6 +554,7 @@ export class SecurityPlugin
           kibanaVersion: this.initializerContext.env.packageInfo.version,
         })
       : undefined;
+    this.uiam = uiam;
 
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
