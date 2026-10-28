@@ -17,5 +17,4 @@ export {
 export {
   NightshiftSettingsLocatorDefinition,
   type NightshiftSettingsLocator,
-  type NightshiftSettingsLocatorParams,
 } from './settings_locator';

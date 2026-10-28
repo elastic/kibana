@@ -6,16 +6,12 @@
  */
 
 import { NIGHTSHIFT_APP_ID, NIGHTSHIFT_SETTINGS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { NightshiftSettingsLocatorParams } from '@kbn/nightshift-shared';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
-
-export interface NightshiftSettingsLocatorParams extends SerializableRecord {
-  tab?: 'general' | 'investigations' | 'detections';
-}
 
 export type NightshiftSettingsLocator = LocatorPublic<NightshiftSettingsLocatorParams>;
 
-/** Server-side copy of the locator the `nightshift` plugin registers in the browser, with the same id. */
+/** Server-side copy of the `nightshift` plugin's browser locator, with the same id. */
 export class NightshiftSettingsLocatorDefinition
   implements LocatorDefinition<NightshiftSettingsLocatorParams>
 {
