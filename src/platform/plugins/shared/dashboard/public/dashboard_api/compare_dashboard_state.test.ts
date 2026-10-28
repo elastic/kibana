@@ -208,5 +208,40 @@ describe('diffDashboardStates', () => {
         })
       ).toEqual({ panels: current.panels });
     });
+
+    describe('compare cache', () => {
+      const panelsState = (config: object) =>
+        state({ panels: [lensPanel({ id: 'panel-1', config })] });
+
+      it('compares a panel again only when the child or a config object changes', () => {
+        const child = { type: 'lens', compareSerializedState: jest.fn(() => true) };
+        const baseline = panelsState({ title: 'Count' });
+        const current = panelsState({ title: 'Count' });
+
+        diffDashboardStates(baseline, current, { 'panel-1': child });
+        diffDashboardStates(baseline, { ...current }, { 'panel-1': child });
+        expect(child.compareSerializedState).toHaveBeenCalledTimes(1);
+
+        diffDashboardStates(baseline, panelsState({ title: 'Count' }), { 'panel-1': child });
+        expect(child.compareSerializedState).toHaveBeenCalledTimes(2);
+
+        diffDashboardStates(panelsState({ title: 'Count' }), current, { 'panel-1': child });
+        expect(child.compareSerializedState).toHaveBeenCalledTimes(3);
+
+        const otherChild = { type: 'lens', compareSerializedState: jest.fn(() => true) };
+        diffDashboardStates(baseline, current, { 'panel-1': otherChild });
+        expect(otherChild.compareSerializedState).toHaveBeenCalledTimes(1);
+      });
+
+      it('keeps the result of a loaded panel apart from the same configs before it loaded', () => {
+        const baseline = panelsState({ title: 'Count' });
+        const current = panelsState({ title: 'Count', description: '' });
+
+        expect(diffDashboardStates(baseline, current)).toEqual({ panels: current.panels });
+        expect(
+          diffDashboardStates(baseline, current, { 'panel-1': { type: 'lens', ...ignoreConfig } })
+        ).toEqual({});
+      });
+    });
   });
 });
