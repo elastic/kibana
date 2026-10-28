@@ -1,0 +1,132 @@
+{
+  "operations": {
+    "cancelStatement": [
+      {
+        "method": "post",
+        "path": "/api/v2/statements/{statementHandle}/cancel",
+        "source": "sqlapi"
+      }
+    ],
+    "cortexSearch": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/api/v2/databases/{database}/schemas/{schema}/cortex-search-services/{service_name}:query",
+        "source": "cortexSearch"
+      }
+    ],
+    "describeTable": [
+      {
+        "method": "get",
+        "path": "/api/v2/databases/{database}/schemas/{schema}/tables/{name}",
+        "source": "table"
+      }
+    ],
+    "describeView": [
+      {
+        "method": "get",
+        "path": "/api/v2/databases/{database}/schemas/{schema}/views/{name}",
+        "source": "view"
+      }
+    ],
+    "executeStatement": [
+      {
+        "method": "post",
+        "path": "/api/v2/statements",
+        "source": "sqlapi"
+      }
+    ],
+    "getStatementStatus": [
+      {
+        "method": "get",
+        "path": "/api/v2/statements/{statementHandle}",
+        "source": "sqlapi"
+      }
+    ],
+    "listCortexSearchServices": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/api/v2/databases/{database}/schemas/{schema}/cortex-search-services",
+        "source": "cortexSearch"
+      }
+    ],
+    "listDatabases": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/api/v2/databases",
+        "source": "database"
+      }
+    ],
+    "listSchemas": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/api/v2/databases/{database}/schemas",
+        "source": "schema"
+      }
+    ],
+    "listTables": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/api/v2/databases/{database}/schemas/{schema}/tables",
+        "source": "table"
+      }
+    ],
+    "listViews": [
+      {
+        "method": "get",
+        "pagination": "none",
+        "path": "/api/v2/databases/{database}/schemas/{schema}/views",
+        "source": "view"
+      }
+    ],
+    "runQuery": [
+      {
+        "method": "post",
+        "path": "/api/v2/statements",
+        "source": "sqlapi"
+      }
+    ]
+  },
+  "sources": {
+    "cortexSearch": {
+      "apiVersion": "0.1.0",
+      "fetchedAt": "2026-10-07T20:21:40.588Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/snowflakedb/snowflake-rest-api-specs/main/specifications/cortex-search-service.yaml"
+    },
+    "database": {
+      "apiVersion": "0.0.1",
+      "fetchedAt": "2026-10-07T20:48:44.919Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/snowflakedb/snowflake-rest-api-specs/main/specifications/database.yaml"
+    },
+    "schema": {
+      "apiVersion": "0.0.1",
+      "fetchedAt": "2026-10-07T20:48:44.919Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/snowflakedb/snowflake-rest-api-specs/main/specifications/schema.yaml"
+    },
+    "sqlapi": {
+      "apiVersion": "2.0.0",
+      "fetchedAt": "2026-10-07T20:48:44.920Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/snowflakedb/snowflake-rest-api-specs/main/specifications/sqlapi.yaml"
+    },
+    "table": {
+      "apiVersion": "0.0.1",
+      "fetchedAt": "2026-10-07T20:48:44.920Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/snowflakedb/snowflake-rest-api-specs/main/specifications/table.yaml"
+    },
+    "view": {
+      "apiVersion": "0.0.1",
+      "fetchedAt": "2026-10-07T20:48:44.921Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/snowflakedb/snowflake-rest-api-specs/main/specifications/view.yaml"
+    }
+  }
+}

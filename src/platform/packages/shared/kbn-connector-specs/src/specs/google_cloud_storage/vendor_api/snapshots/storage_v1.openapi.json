@@ -1,0 +1,1386 @@
+{
+  "components": {
+    "schemas": {
+      "Bucket": {
+        "properties": {
+          "acl": {
+            "items": {
+              "$ref": "#/components/schemas/BucketAccessControl"
+            },
+            "type": "array"
+          },
+          "autoclass": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "terminalStorageClass": {
+                "type": "string"
+              },
+              "terminalStorageClassUpdateTime": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "toggleTime": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "billing": {
+            "properties": {
+              "requesterPays": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "cors": {
+            "items": {
+              "properties": {
+                "maxAgeSeconds": {
+                  "format": "int32",
+                  "type": "integer"
+                },
+                "method": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "origin": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "responseHeader": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "customPlacementConfig": {
+            "properties": {
+              "dataLocations": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "defaultEventBasedHold": {
+            "type": "boolean"
+          },
+          "defaultObjectAcl": {
+            "items": {
+              "$ref": "#/components/schemas/ObjectAccessControl"
+            },
+            "type": "array"
+          },
+          "encryption": {
+            "properties": {
+              "customerManagedEncryptionEnforcementConfig": {
+                "properties": {
+                  "effectiveTime": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "restrictionMode": {
+                    "enum": [
+                      "NotRestricted",
+                      "FullyRestricted"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "customerSuppliedEncryptionEnforcementConfig": {
+                "properties": {
+                  "effectiveTime": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "restrictionMode": {
+                    "enum": [
+                      "NotRestricted",
+                      "FullyRestricted"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "defaultKmsKeyName": {
+                "type": "string"
+              },
+              "googleManagedEncryptionEnforcementConfig": {
+                "properties": {
+                  "effectiveTime": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "restrictionMode": {
+                    "enum": [
+                      "NotRestricted",
+                      "FullyRestricted"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "generation": {
+            "format": "int64",
+            "type": "string"
+          },
+          "hardDeleteTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "hierarchicalNamespace": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "iamConfiguration": {
+            "properties": {
+              "bucketPolicyOnly": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "lockedTime": {
+                    "format": "date-time",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "publicAccessPrevention": {
+                "type": "string"
+              },
+              "uniformBucketLevelAccess": {
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "lockedTime": {
+                    "format": "date-time",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "id": {
+            "type": "string"
+          },
+          "ipFilter": {
+            "properties": {
+              "allowAllServiceAgentAccess": {
+                "type": "boolean"
+              },
+              "allowCrossOrgVpcs": {
+                "type": "boolean"
+              },
+              "mode": {
+                "type": "string"
+              },
+              "publicNetworkSource": {
+                "properties": {
+                  "allowedIpCidrRanges": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              },
+              "vpcNetworkSources": {
+                "items": {
+                  "properties": {
+                    "allowedIpCidrRanges": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    },
+                    "network": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "kind": {
+            "default": "storage#bucket",
+            "type": "string"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "lifecycle": {
+            "properties": {
+              "rule": {
+                "items": {
+                  "properties": {
+                    "action": {
+                      "properties": {
+                        "storageClass": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "condition": {
+                      "properties": {
+                        "age": {
+                          "format": "int32",
+                          "type": "integer"
+                        },
+                        "createdBefore": {
+                          "format": "date",
+                          "type": "string"
+                        },
+                        "customTimeBefore": {
+                          "format": "date",
+                          "type": "string"
+                        },
+                        "daysSinceCustomTime": {
+                          "format": "int32",
+                          "type": "integer"
+                        },
+                        "daysSinceNoncurrentTime": {
+                          "format": "int32",
+                          "type": "integer"
+                        },
+                        "isLive": {
+                          "type": "boolean"
+                        },
+                        "matchesPattern": {
+                          "type": "string"
+                        },
+                        "matchesPrefix": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "matchesStorageClass": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "matchesSuffix": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "noncurrentTimeBefore": {
+                          "format": "date",
+                          "type": "string"
+                        },
+                        "numNewerVersions": {
+                          "format": "int32",
+                          "type": "integer"
+                        },
+                        "sizeAboveBytes": {
+                          "format": "int64",
+                          "type": "string"
+                        },
+                        "sizeBelowBytes": {
+                          "format": "int64",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "location": {
+            "type": "string"
+          },
+          "locationType": {
+            "type": "string"
+          },
+          "logging": {
+            "properties": {
+              "logBucket": {
+                "type": "string"
+              },
+              "logObjectPrefix": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "metageneration": {
+            "format": "int64",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectRetention": {
+            "properties": {
+              "mode": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "owner": {
+            "properties": {
+              "entity": {
+                "type": "string"
+              },
+              "entityId": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "projectNumber": {
+            "format": "uint64",
+            "type": "string"
+          },
+          "retentionPolicy": {
+            "properties": {
+              "effectiveTime": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "isLocked": {
+                "type": "boolean"
+              },
+              "retentionPeriod": {
+                "format": "int64",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "rpo": {
+            "type": "string"
+          },
+          "satisfiesPZI": {
+            "type": "boolean"
+          },
+          "satisfiesPZS": {
+            "type": "boolean"
+          },
+          "selfLink": {
+            "type": "string"
+          },
+          "softDeletePolicy": {
+            "properties": {
+              "effectiveTime": {
+                "format": "date-time",
+                "type": "string"
+              },
+              "hardDeletePause": {
+                "properties": {
+                  "effectiveTime": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              },
+              "retentionDurationSeconds": {
+                "format": "int64",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "softDeleteTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "storageClass": {
+            "type": "string"
+          },
+          "timeCreated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "versioning": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "website": {
+            "properties": {
+              "mainPageSuffix": {
+                "type": "string"
+              },
+              "notFoundPage": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "BucketAccessControl": {
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "entity": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "storage#bucketAccessControl",
+            "type": "string"
+          },
+          "projectTeam": {
+            "properties": {
+              "projectNumber": {
+                "type": "string"
+              },
+              "team": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "role": {
+            "type": "string"
+          },
+          "selfLink": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Buckets": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Bucket"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "default": "storage#buckets",
+            "type": "string"
+          },
+          "nextPageToken": {
+            "type": "string"
+          },
+          "unreachable": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Object": {
+        "properties": {
+          "acl": {
+            "items": {
+              "$ref": "#/components/schemas/ObjectAccessControl"
+            },
+            "type": "array"
+          },
+          "bucket": {
+            "type": "string"
+          },
+          "cacheControl": {
+            "type": "string"
+          },
+          "componentCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "contentDisposition": {
+            "type": "string"
+          },
+          "contentEncoding": {
+            "type": "string"
+          },
+          "contentLanguage": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "contexts": {
+            "properties": {
+              "custom": {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/ObjectCustomContextPayload"
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "crc32c": {
+            "type": "string"
+          },
+          "customTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "customerEncryption": {
+            "properties": {
+              "encryptionAlgorithm": {
+                "type": "string"
+              },
+              "keySha256": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "eventBasedHold": {
+            "type": "boolean"
+          },
+          "generation": {
+            "format": "int64",
+            "type": "string"
+          },
+          "hardDeleteTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "storage#object",
+            "type": "string"
+          },
+          "kmsKeyName": {
+            "type": "string"
+          },
+          "md5Hash": {
+            "type": "string"
+          },
+          "mediaLink": {
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "metageneration": {
+            "format": "int64",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "properties": {
+              "entity": {
+                "type": "string"
+              },
+              "entityId": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "restoreToken": {
+            "type": "string"
+          },
+          "retention": {
+            "properties": {
+              "mode": {
+                "type": "string"
+              },
+              "retainUntilTime": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "retentionExpirationTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "selfLink": {
+            "type": "string"
+          },
+          "size": {
+            "format": "uint64",
+            "type": "string"
+          },
+          "softDeleteTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "storageClass": {
+            "type": "string"
+          },
+          "temporaryHold": {
+            "type": "boolean"
+          },
+          "timeCreated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timeDeleted": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timeFinalized": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timeStorageClassUpdated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ObjectAccessControl": {
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "entity": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string"
+          },
+          "etag": {
+            "type": "string"
+          },
+          "generation": {
+            "format": "int64",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "default": "storage#objectAccessControl",
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          },
+          "projectTeam": {
+            "properties": {
+              "projectNumber": {
+                "type": "string"
+              },
+              "team": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "role": {
+            "type": "string"
+          },
+          "selfLink": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ObjectCustomContextPayload": {
+        "properties": {
+          "createTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "extendedDataTypeUrl": {
+            "type": "string"
+          },
+          "updateTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Objects": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Object"
+            },
+            "type": "array"
+          },
+          "kind": {
+            "default": "storage#objects",
+            "type": "string"
+          },
+          "nextPageToken": {
+            "type": "string"
+          },
+          "prefixes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+            "scopes": {
+              "https://www.googleapis.com/auth/cloud-platform": "View and manage your data across Google Cloud Platform services",
+              "https://www.googleapis.com/auth/cloud-platform.read-only": "View your data across Google Cloud Platform services",
+              "https://www.googleapis.com/auth/devstorage.full_control": "Manage your data and permissions in Google Cloud Storage",
+              "https://www.googleapis.com/auth/devstorage.read_only": "View your data in Google Cloud Storage",
+              "https://www.googleapis.com/auth/devstorage.read_write": "Manage your data in Google Cloud Storage"
+            },
+            "tokenUrl": "https://oauth2.googleapis.com/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Cloud Storage JSON API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/b": {
+      "get": {
+        "operationId": "storage.buckets.list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userIp",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": "1000",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prefix",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "softDeleted",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "projection",
+            "schema": {
+              "enum": [
+                "full",
+                "noAcl"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userProject",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "returnPartialSuccess",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Buckets"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform.read-only",
+              "https://www.googleapis.com/auth/devstorage.full_control",
+              "https://www.googleapis.com/auth/devstorage.read_only",
+              "https://www.googleapis.com/auth/devstorage.read_write"
+            ]
+          }
+        ]
+      }
+    },
+    "/b/{bucket}/o": {
+      "get": {
+        "operationId": "storage.objects.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bucket",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userIp",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "delimiter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endOffset",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeTrailingDelimiter",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": "1000",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prefix",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "projection",
+            "schema": {
+              "enum": [
+                "full",
+                "noAcl"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startOffset",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userProject",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "versions",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "matchGlob",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "softDeleted",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeFoldersAsPrefixes",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Objects"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform.read-only",
+              "https://www.googleapis.com/auth/devstorage.full_control",
+              "https://www.googleapis.com/auth/devstorage.read_only",
+              "https://www.googleapis.com/auth/devstorage.read_write"
+            ]
+          }
+        ]
+      }
+    },
+    "/b/{bucket}/o/{object}": {
+      "get": {
+        "operationId": "storage.objects.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bucket",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "object",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userIp",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "generation",
+            "schema": {
+              "format": "int64",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ifGenerationMatch",
+            "schema": {
+              "format": "int64",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ifGenerationNotMatch",
+            "schema": {
+              "format": "int64",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ifMetagenerationMatch",
+            "schema": {
+              "format": "int64",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ifMetagenerationNotMatch",
+            "schema": {
+              "format": "int64",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "projection",
+            "schema": {
+              "enum": [
+                "full",
+                "noAcl"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userProject",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "softDeleted",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "restoreToken",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/cloud-platform.read-only",
+              "https://www.googleapis.com/auth/devstorage.full_control",
+              "https://www.googleapis.com/auth/devstorage.read_only",
+              "https://www.googleapis.com/auth/devstorage.read_write"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://storage.googleapis.com/storage/v1"
+    }
+  ]
+}

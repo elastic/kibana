@@ -1,0 +1,207 @@
+{
+  "operations": {
+    "callGraphAPI": [
+      {
+        "method": "get",
+        "path": "/sites/{site-id}",
+        "source": "v1"
+      }
+    ],
+    "downloadDriveItem": [
+      {
+        "method": "get",
+        "path": "/drives/{drive-id}/items/{driveItem-id}/content",
+        "source": "v1"
+      }
+    ],
+    "downloadItemFromURL": [],
+    "getAllSites": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/sites",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/sites/getAllSites",
+        "source": "v1"
+      }
+    ],
+    "getDriveItems": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/drives/{drive-id}/root/children",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/drives/{drive-id}/root:/{path}:/children",
+        "source": "v1"
+      }
+    ],
+    "getSite": [
+      {
+        "method": "get",
+        "path": "/sites/{site-id}",
+        "source": "v1"
+      }
+    ],
+    "getSiteDrives": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/sites/{site-id}/drives",
+        "source": "v1"
+      }
+    ],
+    "getSiteListItems": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/sites/{site-id}/lists/{list-id}/items",
+        "source": "v1"
+      }
+    ],
+    "getSiteLists": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/sites/{site-id}/lists",
+        "source": "v1"
+      }
+    ],
+    "getSitePageContents": [],
+    "getSitePages": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/sites/{site-id}/pages",
+        "source": "v1"
+      }
+    ],
+    "search": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "in": "body",
+            "offsetParam": "requests[0].from",
+            "sizeParam": "requests[0].size"
+          },
+          "response": {
+            "itemsPath": "value[0].hitsContainers[0].hits",
+            "totalPath": "value[0].hitsContainers[0].total"
+          },
+          "style": "offset"
+        },
+        "path": "/search/query",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "v1.0",
+      "fetchedAt": "2026-10-07T20:57:48.018Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/microsoftgraph/msgraph-metadata/master/openapi/v1.0/openapi.yaml"
+    }
+  },
+  "unmatched": {
+    "downloadItemFromURL": [
+      {
+        "method": "get",
+        "path": "/sites/{site}/_layouts/15/download.aspx",
+        "reason": "A pre-authenticated @microsoft.graph.downloadUrl on the tenant's *.sharepoint.com host, not a Microsoft Graph operation; Graph returns it on driveItems for downloading without Graph credentials (https://learn.microsoft.com/en-us/graph/api/resources/driveitem?view=graph-rest-1.0#instance-attributes)."
+      }
+    ],
+    "getSitePageContents": [
+      {
+        "method": "get",
+        "path": "/v1.0/sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage",
+        "reason": "Documented as GET /sites/{site-id}/pages/{page-id}/microsoft.graph.sitePage (https://learn.microsoft.com/en-us/graph/api/sitepage-get?view=graph-rest-1.0); the spec only has it with the namespace alias, as .../graph.sitePage. An overlay copy cannot be used, as the snapshot does not keep microsoft.graph.sitePage, which no recorded operation of the published spec references."
+      }
+    ]
+  }
+}
