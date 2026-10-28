@@ -13,6 +13,7 @@ import type {
   StartServicesAccessor,
 } from '@kbn/core/server';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
+import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
 import {
@@ -25,6 +26,7 @@ import { WatchlistConfigClient as WatchlistConfigClientClass } from '../manageme
 import {
   WatchlistEntitySourceClient,
   watchlistEntitySourceTypeName,
+  getLastFullSyncMarkersIndex,
 } from '../entity_sources/infra';
 import { watchlistConfigTypeName } from '../management/saved_object/watchlist_config_type';
 import type { StartPlugins } from '../../../../plugin';
@@ -32,7 +34,7 @@ import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { ENTITY_ANALYTICS_WATCHLISTS_PREFIX } from '../entities/utils';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
-export const PREBUILT_WATCHLISTS_VERSION = 2;
+export const PREBUILT_WATCHLISTS_VERSION = 3;
 
 const WATCHLIST_INDEX_TEMPLATE_NAME = 'entity_analytics_watchlists';
 
@@ -95,6 +97,9 @@ export const getPrebuiltWatchlists = (namespace: string) => [
         enabled: true,
         managed: true,
         queryRule: OKTA_QUERY_RULE,
+        integrations: {
+          syncMarkerIndex: getLastFullSyncMarkersIndex(namespace, 'entityanalytics_okta'),
+        },
       },
       {
         type: 'entity_analytics_integration' as const,
@@ -104,6 +109,9 @@ export const getPrebuiltWatchlists = (namespace: string) => [
         enabled: true,
         managed: true,
         queryRule: AD_QUERY_RULE,
+        integrations: {
+          syncMarkerIndex: getLastFullSyncMarkersIndex(namespace, 'entityanalytics_ad'),
+        },
       },
     ],
   },
@@ -287,19 +295,53 @@ const ensureEntitySources = async ({
 
   for (const entitySourceInput of entitySources) {
     const { sources } = await sourceClient.list({ name: entitySourceInput.name, per_page: 1 });
-    const existingId = sources[0]?.id;
+    const existing = sources[0];
 
-    if (existingId) {
+    if (existing) {
       logger.debug(
         `Entity source '${entitySourceInput.name}' already exists, ensuring link to watchlist`
       );
-      await watchlistClient.addEntitySourceReference(watchlistId, existingId);
+      await watchlistClient.addEntitySourceReference(watchlistId, existing.id);
+      await backfillSyncMarkerIndex({ sourceClient, logger, entitySourceInput, existing });
     } else {
       const entitySource = await sourceClient.create(entitySourceInput);
       await watchlistClient.addEntitySourceReference(watchlistId, entitySource.id);
       logger.info(`Entity source '${entitySourceInput.name}' created and linked to watchlist`);
     }
   }
+};
+
+/**
+ * Backfills `integrations.syncMarkerIndex` on a pre-existing managed integration source that
+ * was created before the prebuilt definitions carried it.
+ */
+const backfillSyncMarkerIndex = async ({
+  sourceClient,
+  logger,
+  entitySourceInput,
+  existing,
+}: {
+  sourceClient: WatchlistEntitySourceClient;
+  logger: Logger;
+  entitySourceInput: PrebuiltWatchlistDefinition['entitySources'][number];
+  existing: MonitoringEntitySource;
+}): Promise<void> => {
+  const expectedSyncMarkerIndex =
+    entitySourceInput.type === 'entity_analytics_integration'
+      ? entitySourceInput.integrations?.syncMarkerIndex
+      : undefined;
+
+  if (!expectedSyncMarkerIndex || existing.integrations?.syncMarkerIndex) {
+    return;
+  }
+
+  await sourceClient.update({
+    id: existing.id,
+    integrations: { syncMarkerIndex: expectedSyncMarkerIndex },
+  });
+  logger.info(
+    `Backfilled missing integrations.syncMarkerIndex on entity source '${entitySourceInput.name}'`
+  );
 };
 
 /**

@@ -100,6 +100,13 @@ export const createDeletionDetectionService = ({
     range?: { gt?: string; lte?: string }
   ): Promise<void> => {
     if (source.type === 'entity_analytics_integration') {
+      if (!source.integrations?.syncMarkerIndex) {
+        logger.warn(
+          `[WatchlistSync] Source ${source.id} (${source.name}) has no integrations.syncMarkerIndex configured; deletion detection cannot run for it and removed entities will never be cleaned up from this source.`
+        );
+        return;
+      }
+
       const hasNewFullSync = await syncMarkersService.detectNewFullSync(source);
       if (!hasNewFullSync) {
         logger.debug(

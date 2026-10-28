@@ -26,12 +26,18 @@ const mockWatchlistCreate = jest.fn();
 const mockAddEntitySourceReference = jest.fn();
 const mockEntitySourceCreate = jest.fn();
 const mockEntitySourceList = jest.fn();
+const mockEntitySourceUpdate = jest.fn();
 
 jest.mock('../entity_sources/infra', () => ({
   WatchlistEntitySourceClient: jest.fn().mockImplementation(() => ({
     create: (...args: unknown[]) => mockEntitySourceCreate(...args),
     list: (...args: unknown[]) => mockEntitySourceList(...args),
+    update: (...args: unknown[]) => mockEntitySourceUpdate(...args),
   })),
+  getLastFullSyncMarkersIndex: (namespace: string, integration: string) =>
+    integration === 'entityanalytics_ad'
+      ? `logs-entityanalytics_ad.user-${namespace}`
+      : `logs-entityanalytics_okta.entity-${namespace}`,
 }));
 
 jest.mock('../management/watchlist_config', () => ({
@@ -111,6 +117,7 @@ describe('installPrebuiltWatchlists', function () {
     });
     mockEntitySourceCreate.mockResolvedValue({ id: 'entity-source-id' });
     mockEntitySourceList.mockResolvedValue({ sources: [] });
+    mockEntitySourceUpdate.mockResolvedValue({ id: 'entity-source-id' });
     mockAddEntitySourceReference.mockResolvedValue(undefined);
     // Mirror core `find` behavior: the hidden `space` type is only queryable when
     // it is explicitly passed via `includedHiddenTypes`; otherwise `find` returns
@@ -232,6 +239,103 @@ describe('installPrebuiltWatchlists', function () {
     expect(mockEntitySourceCreate).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'ad', managed: true })
     );
+  });
+
+  it('sets integrations.syncMarkerIndex when creating the okta and ad entity sources', async () => {
+    mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
+    mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+
+    await callInstall();
+
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'okta',
+        integrations: { syncMarkerIndex: 'logs-entityanalytics_okta.entity-default' },
+      })
+    );
+    expect(mockEntitySourceCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'ad',
+        integrations: { syncMarkerIndex: 'logs-entityanalytics_ad.user-default' },
+      })
+    );
+  });
+
+  describe('backfilling integrations.syncMarkerIndex on existing entity sources', () => {
+    it('backfills syncMarkerIndex when an existing managed integration source is missing it', async () => {
+      mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
+      mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+      mockEntitySourceList.mockResolvedValue({
+        sources: [
+          {
+            id: 'existing-okta-source-id',
+            type: 'entity_analytics_integration',
+            name: 'okta',
+            managed: true,
+            enabled: true,
+            // No `integrations` block — simulates a source created before this fix.
+          },
+        ],
+      });
+
+      await callInstall();
+
+      expect(mockEntitySourceCreate).not.toHaveBeenCalled();
+      expect(mockEntitySourceUpdate).toHaveBeenCalledWith({
+        id: 'existing-okta-source-id',
+        integrations: { syncMarkerIndex: 'logs-entityanalytics_okta.entity-default' },
+      });
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "Backfilled missing integrations.syncMarkerIndex on entity source 'okta'"
+        )
+      );
+    });
+
+    it('does not touch existing syncData when backfilling syncMarkerIndex', async () => {
+      mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
+      mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+      mockEntitySourceList.mockResolvedValue({
+        sources: [
+          {
+            id: 'existing-okta-source-id',
+            type: 'entity_analytics_integration',
+            name: 'okta',
+            managed: true,
+            enabled: true,
+            integrations: { syncData: { lastFullSync: '2024-01-01T00:00:00Z' } },
+          },
+        ],
+      });
+
+      await callInstall();
+
+      expect(mockEntitySourceUpdate).toHaveBeenCalledWith({
+        id: 'existing-okta-source-id',
+        integrations: { syncMarkerIndex: 'logs-entityanalytics_okta.entity-default' },
+      });
+    });
+
+    it('does not backfill when syncMarkerIndex is already set', async () => {
+      mockSoClient.find.mockResolvedValue(buildSpacesResponse(['default']));
+      mockWatchlistGet.mockRejectedValue(new Error('Saved object not found'));
+      mockEntitySourceList.mockResolvedValue({
+        sources: [
+          {
+            id: 'existing-okta-source-id',
+            type: 'entity_analytics_integration',
+            name: 'okta',
+            managed: true,
+            enabled: true,
+            integrations: { syncMarkerIndex: 'logs-entityanalytics_okta.entity-default' },
+          },
+        ],
+      });
+
+      await callInstall();
+
+      expect(mockEntitySourceUpdate).not.toHaveBeenCalled();
+    });
   });
 
   it('entity source index patterns use each space namespace', async () => {
@@ -391,6 +495,17 @@ describe('installPrebuiltWatchlists', function () {
   it('has no duplicate prebuilt watchlist names', () => {
     const names = getPrebuiltWatchlists('default').map((w) => w.name);
     expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('every prebuilt entity_analytics_integration source has integrations.syncMarkerIndex', () => {
+    const integrationSources = getPrebuiltWatchlists('default').flatMap((w) =>
+      w.entitySources.filter((source) => source.type === 'entity_analytics_integration')
+    );
+
+    expect(integrationSources.length).toBeGreaterThan(0);
+    for (const source of integrationSources) {
+      expect(source.integrations?.syncMarkerIndex).toBeTruthy();
+    }
   });
 
   it('registers an index template for .entity_analytics.watchlists.*', async () => {

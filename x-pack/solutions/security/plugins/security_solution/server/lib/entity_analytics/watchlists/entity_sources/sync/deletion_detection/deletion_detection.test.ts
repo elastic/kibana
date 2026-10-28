@@ -216,6 +216,25 @@ describe('DeletionDetectionService', () => {
   });
 
   describe('integration sources', () => {
+    it('warns and skips deletion detection when syncMarkerIndex is not configured', async () => {
+      const sourceWithoutMarkerIndex: WatchlistDataSources.MonitoringEntitySource = {
+        ...integrationSource,
+        integrations: undefined,
+      };
+
+      const service = createService();
+      await service.deletionDetection(sourceWithoutMarkerIndex, ['euid-1'], emptyWatchlistsByEuid);
+
+      // No search at all — not even the sync marker lookup, since there's no index to query.
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(applyBulkRemoveSource).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `Source ${sourceWithoutMarkerIndex.id} (${sourceWithoutMarkerIndex.name}) has no integrations.syncMarkerIndex configured`
+        )
+      );
+    });
+
     it('skips deletion detection when no new full sync is detected', async () => {
       // No completed event in sync marker index
       mockGetLastFullSyncMarker.mockResolvedValue(undefined);
