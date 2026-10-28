@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
+import { getESQLSources, getEsqlColumns, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { useEsqlCallbacks } from './use_esql_callbacks';
 
@@ -135,6 +135,34 @@ describe('useEsqlCallbacks', () => {
       undefined,
       undefined,
       '_alias:*'
+    );
+  });
+
+  it('runs the sources lookup with the routing set in the rule query', async () => {
+    mockGetESQLSources.mockResolvedValue([]);
+    jest.mocked(getProjectRoutingFromEsqlQuery).mockReturnValue('_alias:_origin');
+    const mockCps = {
+      cpsManager: { getDefaultProjectRouting: () => '_alias:*' },
+    } as unknown as CPSPluginStart;
+
+    const { result } = renderHook(() =>
+      useEsqlCallbacks({
+        application,
+        http,
+        search: mockSearch,
+        cps: mockCps,
+        query: 'SET project_routing = "_alias:_origin"; FROM logs-*',
+      })
+    );
+
+    await result.current.getSources!();
+
+    expect(mockGetESQLSources).toHaveBeenCalledWith(
+      { application, http },
+      undefined,
+      undefined,
+      undefined,
+      '_alias:_origin'
     );
   });
 

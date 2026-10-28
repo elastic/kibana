@@ -22,6 +22,8 @@ export interface UseEsqlCallbacksParams {
   search: ISearchStart['search'];
   /** CPS service, used to run the lookups with the rule project routing */
   cps?: CPSPluginStart;
+  /** Rule query, used to read its `SET project_routing` for the sources lookup */
+  query?: string;
 }
 
 /**
@@ -46,7 +48,14 @@ export const useEsqlCallbacks = ({
   http,
   search,
   cps,
+  query,
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
+  // getSources doesn't receive the query, so read its routing from the rule query
+  const sourcesProjectRouting = useMemo(
+    () => getRuleProjectRouting(query ?? '', cps),
+    [query, cps]
+  );
+
   return useMemo<ESQLCallbacks>(
     () => ({
       getSources: async () =>
@@ -55,17 +64,17 @@ export const useEsqlCallbacks = ({
           undefined,
           undefined,
           undefined,
-          getRuleProjectRouting('', cps)
+          sourcesProjectRouting
         ),
-      getColumnsFor: async ({ query }: { query?: string } | undefined = {}) =>
+      getColumnsFor: async ({ query: columnsQuery }: { query?: string } | undefined = {}) =>
         getEsqlColumns({
-          esqlQuery: query,
+          esqlQuery: columnsQuery,
           search,
-          projectRouting: getRuleProjectRouting(query ?? '', cps),
+          projectRouting: getRuleProjectRouting(columnsQuery ?? '', cps),
         }),
       getDatasets: async () => getDatasets(http),
       getViews: async () => getViews(http),
     }),
-    [application, http, search, cps]
+    [application, http, search, cps, sourcesProjectRouting]
   );
 };
