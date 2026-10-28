@@ -382,6 +382,25 @@ export const ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID = 'alertzero_frontier' as c
  */
 export const ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID = 'alertzero_template_models' as const;
 
+/**
+ * `pluginId` values for token-usage attribution (`feature_id` in the token-usage index) on the
+ * Hunt and Threat Intel model calls that no managed workflow wraps. Each is sent with
+ * `aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID`, so cost rolls up under the AlertZero
+ * parent and still splits by caller.
+ */
+export const ALERTZERO_HUNT_SWEEP_TELEMETRY_PLUGIN_ID = 'alertzero_hunt_sweep' as const;
+export const ALERTZERO_HUNT_TIER2_TELEMETRY_PLUGIN_ID = 'alertzero_hunt_tier2' as const;
+export const ALERTZERO_THREAT_INTEL_ASSESS_RELEVANCE_TELEMETRY_PLUGIN_ID =
+  'alertzero_threat_intel_assess_relevance' as const;
+export const ALERTZERO_THREAT_INTEL_CLASSIFY_SEVERITY_TELEMETRY_PLUGIN_ID =
+  'alertzero_threat_intel_classify_severity' as const;
+export const ALERTZERO_THREAT_INTEL_ENRICH_REPORT_TELEMETRY_PLUGIN_ID =
+  'alertzero_threat_intel_enrich_report' as const;
+export const ALERTZERO_THREAT_INTEL_ENRICH_TAXONOMY_TELEMETRY_PLUGIN_ID =
+  'alertzero_threat_intel_enrich_taxonomy' as const;
+export const ALERTZERO_THREAT_INTEL_EXTRACT_DIAMOND_TELEMETRY_PLUGIN_ID =
+  'alertzero_threat_intel_extract_diamond' as const;
+
 /** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_ESCALATION = 'escalation' as const;

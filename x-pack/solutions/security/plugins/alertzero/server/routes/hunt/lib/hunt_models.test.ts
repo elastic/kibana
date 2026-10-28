@@ -12,6 +12,7 @@ import {
   ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/alertzero-common';
 import { mostSevereFailure, resolveHuntModels } from './hunt_models';
 import { resolveScopedModel } from './scoped_model';
@@ -29,7 +30,14 @@ const modelFor = (featureId: string) =>
   ({ connector: { id: featureId } } as unknown as ScopedModel);
 
 const resolve = (tiers?: Array<'efficient' | 'balanced' | 'frontier'>) =>
-  resolveHuntModels({ inference, request, uiSettingsClient, logger, tiers });
+  resolveHuntModels({
+    inference,
+    telemetryPluginId: 'alertzero_hunt_sweep',
+    request,
+    uiSettingsClient,
+    logger,
+    tiers,
+  });
 
 describe('resolveHuntModels', () => {
   beforeEach(() => {
@@ -56,6 +64,20 @@ describe('resolveHuntModels', () => {
 
     expect(Object.keys(models)).toEqual(['frontier']);
     expect(resolveScopedModelMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('attributes every resolved tier model to the caller-provided telemetry plugin id', async () => {
+    await resolve();
+
+    expect(resolveScopedModelMock).toHaveBeenCalledTimes(2);
+    for (const call of resolveScopedModelMock.mock.calls) {
+      expect(call[0].chatModelOptions).toEqual({
+        telemetryMetadata: {
+          pluginId: 'alertzero_hunt_sweep',
+          aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+        },
+      });
+    }
   });
 
   it('leaves the other tiers intact when one has no usable connector', async () => {
