@@ -1750,10 +1750,23 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       inputs: { investigation_id: 'inv-1', telemetry_target: 'c0' },
       status: ExecutionStatus.FAILED,
     });
-    await makeClient({ telemetryConfig }).ensureForFailure('inv-1', 'exec-1');
+    await makeClient({ telemetryConfig }).ensureForFailure(
+      'inv-1',
+      'exec-1',
+      'Sandbox startup failed'
+    );
     expect(installInvestigationAgentMock).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: SPACE_ID, availability: mockAgentAvailability })
     );
+    expect(conversations.addEvents).toHaveBeenCalledWith({
+      conversationId: 'inv-1',
+      events: [
+        {
+          type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+          data: { execution_id: 'exec-1', reason: 'Sandbox startup failed' },
+        },
+      ],
+    });
     expect(conversations.create).toHaveBeenCalledWith(
       expect.objectContaining({
         agentId: 'nightshift.investigation',
