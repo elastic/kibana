@@ -1028,6 +1028,114 @@ describe('createEndpointLookupService', () => {
     });
   });
 
+  describe('resolveByIp', () => {
+    it('queries united endpoint metadata by exact IP and returns one live endpoint', async () => {
+      const getHostMetadataList = jest.fn().mockResolvedValue({
+        data: [
+          {
+            metadata: {
+              elastic: { agent: { id: 'agent-ip' } },
+              host: { hostname: 'ip-host', os: { platform: 'linux' } },
+            },
+            host_status: HostStatus.HEALTHY,
+            policy_info: { agent: { configured: { id: 'agent-policy-ip' } } },
+          },
+        ],
+        total: 1,
+      });
+      const { lookup } = buildService({ getHostMetadataList });
+
+      await expect(lookup.resolveByIp('10.0.0.7')).resolves.toEqual({
+        kind: 'found',
+        endpoint: {
+          agentId: 'agent-ip',
+          agentType: 'endpoint',
+          packages: ['endpoint'],
+          status: HostStatus.HEALTHY,
+          hostName: 'ip-host',
+          platform: 'linux',
+          policyId: 'agent-policy-ip',
+        },
+      });
+      expect(getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({ kuery: 'united.endpoint.host.ip: "10.0.0.7"' }),
+        undefined
+      );
+    });
+
+    it('keeps the newest live document when deduplicating metadata for one agent', async () => {
+      const { lookup } = buildService({
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { elastic: { agent: { id: 'agent-a' } } },
+              host_status: HostStatus.OFFLINE,
+              // Newer but offline: liveness must outrank recency.
+              last_checkin: '2026-10-20T12:00:00.000Z',
+            },
+            {
+              metadata: { elastic: { agent: { id: 'agent-a' } } },
+              host_status: HostStatus.HEALTHY,
+              last_checkin: '2026-10-20T11:00:00.000Z',
+            },
+          ],
+          total: 2,
+        }),
+      });
+
+      await expect(lookup.resolveByIp('10.0.0.9')).resolves.toMatchObject({
+        kind: 'found',
+        endpoint: { agentId: 'agent-a', status: HostStatus.HEALTHY },
+      });
+    });
+
+    it('returns ambiguity rather than guessing when an IP belongs to two live endpoints', async () => {
+      const { lookup } = buildService({
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { elastic: { agent: { id: 'agent-a' } } },
+              host_status: HostStatus.HEALTHY,
+            },
+            {
+              metadata: { elastic: { agent: { id: 'agent-b' } } },
+              host_status: HostStatus.HEALTHY,
+            },
+          ],
+          total: 2,
+        }),
+      });
+
+      expect(await lookup.resolveByIp('10.0.0.8')).toEqual({
+        kind: 'ambiguous',
+        candidates: [
+          { agentId: 'agent-a', status: HostStatus.HEALTHY },
+          { agentId: 'agent-b', status: HostStatus.HEALTHY },
+        ],
+      });
+    });
+
+    it('deduplicates historical metadata documents for the same agent', async () => {
+      const { lookup } = buildService({
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { elastic: { agent: { id: 'agent-a' } } },
+              host_status: HostStatus.OFFLINE,
+            },
+            {
+              metadata: { elastic: { agent: { id: 'agent-a' } } },
+              host_status: HostStatus.HEALTHY,
+            },
+          ],
+          total: 2,
+        }),
+      });
+
+      expect(await lookup.resolveByIp('10.0.0.9')).toHaveProperty('kind', 'found');
+    });
+  });
+
   describe('resolveByAgentId', () => {
     const buildByIdService = (
       agent: Record<string, unknown> | Error,
