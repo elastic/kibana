@@ -13,6 +13,7 @@ import {
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   ESCALATIONS_UI_CAPABILITY_SHOW,
 } from '../common/escalations/constants';
+import { INVESTIGATIONS_UI_CAPABILITY_READ } from '../common/investigations/constants';
 import { IMPACT_ATTACHMENT_TYPE } from '../common/impact/attachment';
 import { SET_IMPACT_TOOL_ID } from '../common/impact/constants';
 import { SUBJECT_ATTACHMENT_TYPE } from '../common/subjects/constants';
@@ -61,6 +62,7 @@ const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = 
   const workflowsExtensions = { registerStepDefinition: jest.fn() };
   const agentBuilder = {
     attachments: { registerType: jest.fn() },
+    callbacks: { registerConversationResolver: jest.fn() },
     conversationEvents: { register: jest.fn() },
     tools: { register: jest.fn() },
   };
@@ -140,9 +142,9 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(INVESTIGATIONS_API_PRIVILEGE_READ).toBe('read_investigations');
       expect(privileges.all.api).toEqual([INVESTIGATIONS_API_PRIVILEGE_READ]);
-      expect(privileges.all.ui).toEqual([]);
+      expect(privileges.all.ui).toEqual([INVESTIGATIONS_UI_CAPABILITY_READ]);
       expect(privileges.read.api).toEqual([INVESTIGATIONS_API_PRIVILEGE_READ]);
-      expect(privileges.read.ui).toEqual([]);
+      expect(privileges.read.ui).toEqual([INVESTIGATIONS_UI_CAPABILITY_READ]);
     });
 
     it('keeps investigations in a sub-feature with a manage privilege', () => {
@@ -236,6 +238,15 @@ describe('AgenticInvestigationsPlugin', () => {
       );
     });
 
+    it('registers the Slack thread conversation resolver during setup', () => {
+      const { agentBuilder } = setupPlugin();
+
+      expect(agentBuilder.callbacks.registerConversationResolver).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.callbacks.registerConversationResolver).toHaveBeenCalledWith(
+        expect.any(Function)
+      );
+    });
+
     it('does not resolve the authorization service until a step actually runs', () => {
       const { coreSetup } = setupPlugin();
 
@@ -251,22 +262,25 @@ describe('AgenticInvestigationsPlugin', () => {
       ).not.toMatch(/proposals/i);
     });
 
-    it('registers the escalation timeline event types', () => {
+    it('registers the investigation and escalation timeline event types', () => {
       const { agentBuilder } = setupPlugin();
 
       expect(
         agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
       ).toEqual([
+        'investigation_severity_changed',
         'escalation_created_from_investigation',
         'escalation_investigation_linked',
         'escalation_attachments_synced',
       ]);
     });
 
-    it('registers no escalation timeline event types when escalations are disabled', () => {
+    it('registers only the investigation timeline event types when escalations are disabled', () => {
       const { agentBuilder } = setupPlugin({ escalationsEnabled: false });
 
-      expect(agentBuilder.conversationEvents.register).not.toHaveBeenCalled();
+      expect(
+        agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
+      ).toEqual(['investigation_severity_changed']);
     });
 
     it('registers the HTTP routes for every entity', () => {

@@ -670,7 +670,7 @@
       "observability"
     ],
     "github": {
-      "team": "elastic/observability-bi"
+      "team": "elastic/obs-bi-team"
     }
   },
   {
@@ -779,6 +779,20 @@
     }
   },
   {
+    "id": "automatic-migrations",
+    "name": "Automatic Migrations",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/automatic-migrations",
+      "label": "Team:Automatic Migrations"
+    },
+    "responsibilities": [
+      "SIEM rule and dashboard automatic migrations"
+    ]
+  },
+  {
     "id": "security-data-engineering",
     "name": "Security Data Engineering",
     "areas": [
@@ -833,16 +847,6 @@
     "github": {
       "team": "elastic/security-detection-engineering",
       "label": "Team:Detection Engineering"
-    }
-  },
-  {
-    "id": "security-detection-platform",
-    "name": "Security Detection Platform",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-detection-platform"
     }
   },
   {

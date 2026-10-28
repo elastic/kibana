@@ -6,9 +6,8 @@
  */
 
 /**
- * Validation contract shared by the io-ts schemas and their zod twins during
- * the zod migration: both flavors must accept/reject the same inputs with the
- * same messages, so the bounds and messages live here exactly once.
+ * Validation contract shared by the SLO schemas: the bounds and messages for
+ * the SLO id and projectRoutings live here exactly once.
  */
 
 export const MIN_SLO_ID_LENGTH = 8;

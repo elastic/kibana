@@ -17,8 +17,8 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/packages/shared/presentation/presentation_publishing
 dependsOn:
+  - '@kbn/data-source'
   - '@kbn/es-query'
-  - '@kbn/data-views-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/core-execution-context-common'
   - '@kbn/utility-types'
@@ -38,6 +38,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

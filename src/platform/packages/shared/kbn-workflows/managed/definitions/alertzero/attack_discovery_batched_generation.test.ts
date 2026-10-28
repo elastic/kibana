@@ -34,6 +34,7 @@ interface ParsedWorkflow {
   enabled?: boolean;
   name?: string;
   outputs?: Array<{ name: string }>;
+  settings?: { timeout?: string };
   steps?: ParsedStep[];
   triggers?: Array<{ type?: string; inputs?: { properties?: Record<string, unknown> } }>;
 }
@@ -96,8 +97,19 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
   });
 
   describe('inputs', () => {
-    it('exposes exactly batch_size, connector_id and lookback', () => {
-      expect(Object.keys(inputs()).sort()).toEqual(['batch_size', 'connector_id', 'lookback']);
+    it('exposes exactly batch_size, connector_id, lookback and max_alerts', () => {
+      expect(Object.keys(inputs()).sort()).toEqual([
+        'batch_size',
+        'connector_id',
+        'lookback',
+        'max_alerts',
+      ]);
+    });
+
+    it('defaults max_alerts to a full day and keeps it inside one page of batches', () => {
+      expect(inputs().max_alerts).toEqual(
+        expect.objectContaining({ default: 10000, minimum: 100, maximum: 10000, type: 'integer' })
+      );
     });
 
     it('defaults batch_size to 100', () => {
@@ -136,8 +148,11 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(query()).toMatch(/\| KEEP _id$/);
     });
 
-    it('sorts by @timestamp so batches are contiguous in time', () => {
-      expect(query()).toContain('SORT @timestamp ASC');
+    // The cap drops everything past LIMIT, so the kept rows have to be the newest.
+    // Descending order also makes the first batch that newest slice.
+    it('sorts newest first so the cap keeps the most recent alerts', () => {
+      expect(query().indexOf('| SORT @timestamp DESC')).toBeGreaterThan(-1);
+      expect(query().indexOf('| SORT @timestamp DESC')).toBeLessThan(query().indexOf('| LIMIT'));
     });
 
     it('retrieves only open and acknowledged alerts', () => {
@@ -183,8 +198,38 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(query()).toContain('METADATA _id');
     });
 
-    it('derives the LIMIT from batch_size so the fan-out cap cannot be exceeded', () => {
-      expect(query()).toContain('LIMIT {{ inputs.batch_size | times: 100 | at_most: 10000 }}');
+    it('derives the LIMIT from the alert cap and the 100-branch ceiling', () => {
+      expect(query()).toContain(
+        '{%- assign branch_ceiling = inputs.batch_size | times: 100 | at_most: 10000 -%}'
+      );
+      expect(query()).toContain(
+        '{%- assign alert_limit = inputs.max_alerts | default: 10000 | at_most: branch_ceiling -%}'
+      );
+      expect(query()).toContain('| LIMIT {{ alert_limit }}');
+    });
+
+    it('renders the prorated cap, and never more branches than the batch size allows', async () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const limitOf = async (maxAlerts: number | undefined, batchSize: number) => {
+        const rendered = await engine.parseAndRender(query(), {
+          inputs: {
+            batch_size: batchSize,
+            lookback: '24h',
+            ...(maxAlerts === undefined ? {} : { max_alerts: maxAlerts }),
+          },
+          workflow: { spaceId: 'default' },
+        });
+        return Number(/\| LIMIT (\d+)/.exec(rendered)?.[1]);
+      };
+
+      expect(await limitOf(undefined, 100)).toBe(10000);
+      expect(await limitOf(416, 100)).toBe(416);
+      expect(await limitOf(100, 100)).toBe(100);
+      expect(await limitOf(10000, 50)).toBe(5000);
+    });
+
+    it('gives the child 12h so a slow scan can return to the runner', () => {
+      expect(parsed.settings?.timeout).toBe('12h');
     });
   });
 
@@ -341,6 +386,15 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     // gate on, generation dropped false-positive chains before any review ran.
     it('turns off the ground-truth gate on the run step', () => {
       expect(fanOut().steps?.[0].with?.ground_truth_gate_enabled).toBe(false);
+    });
+
+    // An unset cyber-domain row resolves to nothing, so the frontier tier stays
+    // in charge. The order is the resolution order.
+    it('tries the cyber-domain row before the frontier tier', () => {
+      expect(fanOut().steps?.[0].with?.feature_id).toEqual([
+        'alertzero_template_models',
+        'alertzero_frontier',
+      ]);
     });
 
     // Step IO is keyed by step id and returns the latest execution, so two

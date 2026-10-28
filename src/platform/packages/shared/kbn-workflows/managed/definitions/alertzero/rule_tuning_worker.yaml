@@ -320,6 +320,32 @@ steps:
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"
 
+  # Telemetry: the sweep's outcome.
+  - name: report_worker_run_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: worker_run_completed
+      candidates_found: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]' | size }}"
+      items_dispatched: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size }}"
+      # Reviews already running plus the ones this sweep started, as the coverage sweep counts.
+      items_in_flight: |-
+        {%- assign started = steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size -%}
+        {{ steps.collect_active_rules.output.expected | default: 0 | plus: started }}
+      source_read_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null }}"
+      lookup_failed: "${{ steps.list_active_reviews.error != null }}"
+      degraded_reason: "{% if steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null or steps.list_active_reviews.error != null %}dependency_unavailable{% else %}none{% endif %}"
+      run_outcome: |-
+        {%- assign requested = steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size -%}
+        {%- if steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null -%}
+        failed_source_unavailable
+        {%- elsif requested > 0 -%}
+        produced
+        {%- else -%}
+        empty_nothing_found
+        {%- endif -%}
+
   # Decisions are not known here: each review reports its own outcome and tags its
   # alerts once its gate resolves.
   - name: emit_result

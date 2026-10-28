@@ -5,7 +5,10 @@ CLIs that turn CI test results into GitHub issues on `elastic/kibana`.
 ## `node scripts/report_failed_tests`
 
 Reads the JUnit and Scout reports of a CI job and files or updates one `failed-test` issue per
-failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job.
+failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job. With
+`--report-failing-suites` it also files one `Failing … suite` issue per test file whose tests
+started failing every attempt build after build, by the Scout test events, in `elastic/kibana` or
+the `--failing-suites-repo owner/name` given.
 
 Issues for FTR, Jest (unit and integration) and Scout tests link to the
 [Single test history](https://ops.kibana.dev/s/ci/app/dashboards#/view/test-failure-history)
@@ -13,6 +16,13 @@ dashboard in the CI space, which shows the test's daily passed and failed attemp
 failure percentage and its recent failed attempts with their Buildkite jobs. Existing issues get
 the link the next time the reporter updates them; failure comments on `main` include it too.
 Tests without an exact file path get no link.
+
+For every failure the reporter asks ci-stats which `failed-test` issue tracks the test, by name,
+file or Scout test id, and links it from the failure's HTML report, the Buildkite annotation and
+the Slack message. If that issue is a flaky suite issue (see below), the failure is recorded there
+as on a per-test issue: the count goes up, the issue is reopened if needed and a comment names the
+test and the build. The count is kept in the issue's `failed-test` metadata; the daily report's
+body and `flaky-test-suite` metadata are left alone.
 
 ## `node scripts/report_flaky_test_issues`
 

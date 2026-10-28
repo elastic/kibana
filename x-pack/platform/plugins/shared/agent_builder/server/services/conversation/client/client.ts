@@ -17,6 +17,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConversationOrigin,
   ConversationRoundAuthor,
+  ConversationRoundAuthorDecoration,
   ConversationUpdatedTriggerEvent,
   ConversationWriteSource,
   FeedbackChipId,
@@ -232,7 +233,10 @@ export interface ConversationClient {
     options: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   getUser(): CurrentUser;
-  getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined;
+  getAuthor(
+    originAuthor?: ConversationRoundAuthor,
+    decoration?: ConversationRoundAuthorDecoration
+  ): ConversationRoundAuthor | undefined;
 }
 
 /**
@@ -477,7 +481,9 @@ class ConversationClientImpl implements ConversationClient {
     if (!this.eventEmitter) {
       return;
     }
-    const attachmentEvents = writtenEvents.filter(isAttachmentEvent);
+    const attachmentEvents = writtenEvents
+      .filter(isAttachmentEvent)
+      .filter((event) => !event.data.hidden);
     if (attachmentEvents.length === 0) {
       return;
     }
@@ -1566,14 +1572,27 @@ class ConversationClientImpl implements ConversationClient {
     return this.user;
   }
 
-  getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined {
+  getAuthor(
+    originAuthor?: ConversationRoundAuthor,
+    decoration?: ConversationRoundAuthorDecoration
+  ): ConversationRoundAuthor | undefined {
     if (originAuthor) {
       return originAuthor;
     }
 
     const { id, username, type } = this.getUser();
+    if (id === undefined) {
+      return undefined;
+    }
 
-    return id === undefined ? undefined : { id, username, ...(type ? { type } : {}) };
+    const fullName = type === 'service_account' ? decoration?.full_name : undefined;
+
+    return {
+      id,
+      username,
+      ...(type ? { type } : {}),
+      ...(fullName ? { full_name: fullName } : {}),
+    };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {

@@ -5,52 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../hooks/use_kibana';
 import { SlackAppCard } from '../settings/components/apps_section';
 import { CustomContextSnippets } from '../custom_context/custom_context_flyout';
 import { useFetchCustomContext } from '../custom_context/use_fetch_custom_context';
-import {
-  SandboxSecretsPanel,
-  type SandboxSecretPreset,
-} from '../sandbox_secrets/sandbox_secrets_flyout';
+import { ConnectSourcesGrid } from '../sandbox_connectors/connect_sources_grid';
+import { ConnectedConnectors } from '../sandbox_connectors/connected_connectors';
 
-/** Conventional secret names, so the agent recognizes the tool behind a secret. */
-const SECRET_PRESETS: SandboxSecretPreset[] = [
-  {
-    id: 'github',
-    label: i18n.translate('xpack.nightshift.onboarding.connect.githubPreset', {
-      defaultMessage: 'GitHub token',
-    }),
-    iconType: 'logoGithub',
-    keys: ['GITHUB_TOKEN'],
-  },
-  {
-    id: 'elasticsearch',
-    label: i18n.translate('xpack.nightshift.onboarding.connect.elasticsearchPreset', {
-      defaultMessage: 'Another Elastic deployment',
-    }),
-    iconType: 'logoElasticsearch',
-    keys: ['ELASTICSEARCH_URL', 'ELASTICSEARCH_API_KEY'],
-  },
-];
-
-/** Step 1: give the sandbox credentials, connect Slack, and optionally describe the system. */
 export function OnboardingConnectStep(): React.ReactElement {
   const { application } = useKibana().services;
-  // Same privilege as the Apps section of the Nightshift settings.
   const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const [connectedCollapseSignal, setConnectedCollapseSignal] = useState(0);
 
   return (
     <div data-test-subj="nightshiftOnboardingConnectStep">
@@ -65,30 +34,25 @@ export function OnboardingConnectStep(): React.ReactElement {
         <p>
           {i18n.translate('xpack.nightshift.onboarding.connect.description', {
             defaultMessage:
-              "Nightshift already sees this deployment's telemetry. Give it credentials for at least one other tool to look at. Connecting Slack and describing your system are optional.",
+              "Nightshift already sees this deployment's telemetry. Connect other tools through Kibana connectors so it can look there too. Everything on this step is optional.",
           })}
         </p>
       </EuiText>
 
-      <EuiSpacer size="m" />
-      <SectionTitle
-        isRequired
-        title={i18n.translate('xpack.nightshift.onboarding.secrets.title', {
-          defaultMessage: 'Credentials for your tools',
-        })}
-      />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.nightshift.onboarding.secrets.description', {
-            defaultMessage:
-              "Nightshift works from a sandbox. Save at least one credential, such as a GitHub token or another Elastic deployment's URL and API key, and it looks there too. Values are stored encrypted and never shown again.",
+      <EuiSpacer size="l" />
+      <EuiTitle size="s">
+        <h3>
+          {i18n.translate('xpack.nightshift.onboarding.connectors.title', {
+            defaultMessage: 'Connect other sources',
           })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiPanel hasBorder paddingSize="m" data-test-subj="nightshiftOnboardingSecrets">
-        <SandboxSecretsPanel presets={SECRET_PRESETS} />
-      </EuiPanel>
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <div data-test-subj="nightshiftOnboardingConnectors">
+        <ConnectSourcesGrid onConnected={() => setConnectedCollapseSignal((n) => n + 1)} />
+        <EuiSpacer size="m" />
+        <ConnectedConnectors collapseSignal={connectedCollapseSignal} />
+      </div>
 
       <EuiSpacer size="l" />
       <div data-test-subj="nightshiftOnboardingSlack">
@@ -107,13 +71,7 @@ export function OnboardingConnectStep(): React.ReactElement {
   );
 }
 
-function SectionTitle({
-  title,
-  isRequired = false,
-}: {
-  title: string;
-  isRequired?: boolean;
-}): React.ReactElement {
+function SectionTitle({ title }: { title: string }): React.ReactElement {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -123,13 +81,9 @@ function SectionTitle({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBadge color="hollow">
-          {isRequired
-            ? i18n.translate('xpack.nightshift.onboarding.requiredBadge', {
-                defaultMessage: 'Required',
-              })
-            : i18n.translate('xpack.nightshift.onboarding.optionalBadge', {
-                defaultMessage: 'Optional',
-              })}
+          {i18n.translate('xpack.nightshift.onboarding.optionalBadge', {
+            defaultMessage: 'Optional',
+          })}
         </EuiBadge>
       </EuiFlexItem>
     </EuiFlexGroup>

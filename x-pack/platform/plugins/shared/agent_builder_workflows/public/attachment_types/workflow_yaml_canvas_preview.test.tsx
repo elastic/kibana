@@ -10,6 +10,7 @@ import React from 'react';
 import { parseWorkflowForGraph, WorkflowYamlCanvasPreview } from './workflow_yaml_canvas_preview';
 
 jest.mock('@kbn/workflows-ui', () => ({
+  useOptionalWorkflowsUiServices: () => null,
   ReactFlowProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   TypeIcon: () => <span data-test-subj="mockTypeIcon" />,
   WorkflowYamlPreview: ({

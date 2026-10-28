@@ -214,6 +214,14 @@ describe('ArtifactSimpleTable', () => {
     expect(renderResult.getByTestId('testTable-noResults')).toHaveTextContent('No items found');
   });
 
+  it('names the row actions menu button after the artifact of that row', () => {
+    render();
+
+    expect(renderResult.getByTestId('testTable-rowActions-button')).toHaveAccessibleName(
+      `Open actions for ${item.name}`
+    );
+  });
+
   it('opens the row actions menu with edit and delete', async () => {
     render();
 
@@ -523,14 +531,46 @@ describe('ArtifactSimpleTable', () => {
       expect(renderResult.getByTestId('policyMenuItem-2')).toHaveTextContent('Policy two');
     });
 
-    it('shows the policy id when the policy is not in the policies map', () => {
+    it('shows the policy id as not accessible when the policy is not in the policies map', async () => {
       render({
         items: [generator.generate({ ...item, tags: [buildPerPolicyTag('policy-unknown')] })],
       });
 
+      const firstPolicy = renderResult.getByTestId('testTable-columnPolicyAssignment-firstPolicy');
+      expect(firstPolicy).toHaveTextContent('policy-unknown');
+      expect(firstPolicy).not.toHaveAttribute('href');
+      expect(firstPolicy.style.color).not.toBe('');
+
+      fireEvent.mouseOver(firstPolicy);
+
+      await waitFor(() => {
+        expect(
+          renderResult.getByText('Policy is not accessible from the current space')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('does not show the policy as not accessible while policies are loading', async () => {
+      useArtifactAssignedPoliciesMock.mockReturnValue({
+        policies: {},
+        isLoading: true,
+      });
+
+      render({
+        items: [generator.generate({ ...item, tags: [buildPerPolicyTag('policy-1')] })],
+      });
+
+      const firstPolicy = renderResult.getByTestId('testTable-columnPolicyAssignment-firstPolicy');
+      expect(firstPolicy.style.color).toBe('');
+
+      fireEvent.mouseOver(firstPolicy);
+
+      await waitFor(() => {
+        expect(renderResult.getByRole('tooltip')).toHaveTextContent('policy-1');
+      });
       expect(
-        renderResult.getByTestId('testTable-columnPolicyAssignment-firstPolicy')
-      ).toHaveTextContent('policy-unknown');
+        renderResult.queryByText('Policy is not accessible from the current space')
+      ).not.toBeInTheDocument();
     });
   });
 });
