@@ -70,6 +70,18 @@ describe('toEsql', () => {
     );
   });
 
+  it('also matches entities without a risk level when Unknown is selected', () => {
+    const filters = {
+      ...NONE,
+      rowsMode: 'individual' as const,
+      entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.Unknown] },
+    };
+
+    expect(toEsql(filters).entityExpression).toBe(
+      '(entity.risk.calculated_level IN ("Unknown") OR entity.risk.calculated_level IS NULL)'
+    );
+  });
+
   it('keeps the tile entities and their records in individual rows', () => {
     expect(toEsql({ ...NONE, tileEntityIds: ['host:a'], rowsMode: 'individual' })).toEqual({
       searchExpression: undefined,
@@ -120,7 +132,14 @@ describe('toDsl', () => {
             { terms: { 'entity.relationships.resolution.risk.calculated_level': ['High'] } },
             {
               bool: {
-                filter: [{ terms: { 'entity.risk.calculated_level': ['High'] } }],
+                filter: [
+                  {
+                    bool: {
+                      should: [{ terms: { 'entity.risk.calculated_level': ['High'] } }],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
                 must_not: [
                   { exists: { field: 'entity.relationships.resolution.risk.calculated_level' } },
                 ],
@@ -132,7 +151,32 @@ describe('toDsl', () => {
       },
     ]);
     expect(toDsl({ ...filters, rowsMode: 'individual' })?.bool.filter).toEqual([
-      { terms: { 'entity.risk.calculated_level': ['High'] } },
+      {
+        bool: {
+          should: [{ terms: { 'entity.risk.calculated_level': ['High'] } }],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
+  });
+
+  it('also matches entities without a risk level when Unknown is selected', () => {
+    const filters = {
+      ...NONE,
+      rowsMode: 'individual' as const,
+      entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.Unknown] },
+    };
+
+    expect(toDsl(filters)?.bool.filter).toEqual([
+      {
+        bool: {
+          should: [
+            { terms: { 'entity.risk.calculated_level': ['Unknown'] } },
+            { bool: { must_not: { exists: { field: 'entity.risk.calculated_level' } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
     ]);
   });
 
