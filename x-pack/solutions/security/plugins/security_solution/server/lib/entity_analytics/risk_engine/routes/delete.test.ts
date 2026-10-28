@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { RISK_ENGINE_CLEANUP_URL } from '../../../../../common/constants';
 import {
   serverMock,
@@ -13,172 +12,83 @@ import {
   requestMock,
 } from '../../../detection_engine/routes/__mocks__';
 import { riskEnginePrivilegesMock } from './risk_engine_privileges.mock';
-import { riskEngineDataClientMock } from '../risk_engine_data_client.mock';
 import { riskEngineCleanupRoute } from './delete';
+import { deleteSavedObjects } from '../utils/saved_object_configuration';
 
-describe('risk engine cleanup route', () => {
+jest.mock('../utils/saved_object_configuration', () => ({
+  deleteSavedObjects: jest.fn(),
+}));
+
+describe('riskEngineCleanupRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ReturnType<typeof requestContextMock.convertContext>;
-  let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
-  let mockRiskEngineDataClient: ReturnType<typeof riskEngineDataClientMock.create>;
+  let clients: ReturnType<typeof requestContextMock.createMockClients>;
   let getStartServicesMock: jest.Mock;
 
-  beforeEach(() => {
-    server = serverMock.create();
-    const { clients } = requestContextMock.createTools();
-    mockRiskEngineDataClient = riskEngineDataClientMock.create();
-    context = requestContextMock.convertContext(
-      requestContextMock.create({
-        ...clients,
-        riskEngineDataClient: mockRiskEngineDataClient,
-      })
-    );
-    mockTaskManagerStart = taskManagerMock.createStart();
-  });
-
-  const buildRequest = () => {
-    return requestMock.create({
+  const buildRequest = () =>
+    requestMock.create({
       method: 'delete',
       path: RISK_ENGINE_CLEANUP_URL,
-      body: {},
-    });
-  };
-  describe('invokes the risk engine cleanup route', () => {
-    beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([
-        {},
-        {
-          taskManager: mockTaskManagerStart,
-          security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
-        },
-      ]);
-      riskEngineCleanupRoute(server.router, getStartServicesMock, false);
     });
 
-    it('should call the router with the correct route and handler', async () => {
-      const request = buildRequest();
-      await server.inject(request, context);
-      expect(mockRiskEngineDataClient.tearDown).toHaveBeenCalled();
-    });
-
-    it('returns a 200 when cleanup is successful', async () => {
-      const request = buildRequest();
-      const response = await server.inject(request, context);
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({ cleanup_successful: true });
-    });
-
-    it('returns a 400 when cleanup endpoint is called multiple times', async () => {
-      mockRiskEngineDataClient.tearDown.mockImplementation(async () => {
-        return [Error('Risk engine is disabled or deleted already.')];
-      });
-      const request = buildRequest();
-      const response = await server.inject(request, context);
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({
-        cleanup_successful: false,
-        errors: [
-          {
-            seq: 1,
-            error: 'Error: Risk engine is disabled or deleted already.',
-          },
-        ],
-        status_code: 400,
-      });
-    });
-
-    it('returns a 500 when cleanup is unsuccessful', async () => {
-      mockRiskEngineDataClient.tearDown.mockImplementation(() => {
-        throw new Error('Error tearing down');
-      });
-      const request = buildRequest();
-      const response = await server.inject(request, context);
-      expect(response.status).toBe(500);
-      expect(response.body).toEqual({
-        errors: {
-          error: '{}',
-          seq: 1,
-        },
-        cleanup_successful: false,
-        status_code: 500,
-      });
-    });
-
-    it('returns a 500 when cleanup is unsuccessful with multiple errors', async () => {
-      mockRiskEngineDataClient.tearDown.mockImplementation(async () => {
-        return [
-          Error('Error while removing risk scoring task'),
-          Error('Error while deleting saved objects'),
-          Error('Error while removing risk score index'),
-        ];
-      });
-      const request = buildRequest();
-      const response = await server.inject(request, context);
-      expect(response.status).toBe(500);
-      expect(response.body).toEqual({
-        errors: [
-          {
-            seq: 1,
-            error: 'Error: Error while removing risk scoring task',
-          },
-          {
-            seq: 2,
-            error: 'Error: Error while deleting saved objects',
-          },
-          {
-            seq: 3,
-            error: 'Error: Error while removing risk score index',
-          },
-        ],
-        cleanup_successful: false,
-        status_code: 500,
-      });
-    });
-  });
-  describe('when task manager is unavailable', () => {
-    beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([
-        {},
-        {
-          security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
-        },
-      ]);
-      riskEngineCleanupRoute(server.router, getStartServicesMock, false);
-    });
-
-    it('returns a 400 when task manager is unavailable', async () => {
-      const request = buildRequest();
-      const response = await server.inject(request, context);
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({
-        message:
-          'Task Manager is unavailable, but is required by the risk engine. Please enable the taskManager plugin and try again.',
-        status_code: 400,
-      });
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    server = serverMock.create();
+    const tools = requestContextMock.createTools();
+    clients = tools.clients;
+    context = requestContextMock.convertContext(tools.context);
+    clients.riskScoreDataClient.tearDown.mockResolvedValue([]);
+    (deleteSavedObjects as jest.Mock).mockResolvedValue(undefined);
+    getStartServicesMock = jest.fn().mockResolvedValue([
+      {},
+      {
+        security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
+      },
+    ]);
+    riskEngineCleanupRoute(server.router, getStartServicesMock);
   });
 
-  describe('when user does not have the required privileges', () => {
-    beforeEach(() => {
-      getStartServicesMock = jest.fn().mockResolvedValue([
-        {},
-        {
-          taskManager: mockTaskManagerStart,
-          security: riskEnginePrivilegesMock.createMockSecurityStartWithNoRiskEngineAccess(),
-        },
-      ]);
-      riskEngineCleanupRoute(server.router, getStartServicesMock, false);
-    });
+  it('returns 403 and does not delete indices when risk engine privileges are missing', async () => {
+    getStartServicesMock.mockResolvedValue([
+      {},
+      {
+        security: riskEnginePrivilegesMock.createMockSecurityStartWithNoRiskEngineAccess(),
+      },
+    ]);
 
-    it('returns a 403 when user does not have the required privileges', async () => {
-      const request = buildRequest();
-      const response = await server.inject(request, context);
-      expect(response.status).toBe(403);
-      expect(response.body).toEqual({
-        message:
-          'User is missing risk engine privileges.  Missing cluster privileges to run the risk engine: manage_transform. Missing cluster privileges to enable the risk engine: manage_index_templates, manage_transform, manage_ingest_pipelines.',
-        status_code: 403,
-      });
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(403);
+    expect(clients.core.elasticsearch.client.asCurrentUser.indices.delete).not.toHaveBeenCalled();
+    expect(clients.riskScoreDataClient.tearDown).not.toHaveBeenCalled();
+  });
+
+  it('deletes the caller risk-score index and lookup index as the current user', async () => {
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({ cleanup_successful: true });
+    expect(clients.core.elasticsearch.client.asCurrentUser.indices.delete).toHaveBeenCalledWith(
+      { index: 'risk-score.risk-score-default' },
+      { ignore: [404] }
+    );
+    expect(clients.core.elasticsearch.client.asCurrentUser.indices.delete).toHaveBeenCalledWith(
+      { index: '.entity_analytics.risk_score.lookup-default' },
+      { ignore: [404] }
+    );
+    expect(clients.core.elasticsearch.client.asInternalUser.indices.delete).not.toHaveBeenCalled();
+  });
+
+  it('returns 500 when cleanup reports a real error', async () => {
+    clients.riskScoreDataClient.tearDown.mockResolvedValue([new Error('index delete denied')]);
+
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(500);
+    expect(response.body).toEqual({
+      cleanup_successful: false,
+      errors: [{ seq: 1, error: 'index delete denied' }],
+      status_code: 500,
     });
   });
 });

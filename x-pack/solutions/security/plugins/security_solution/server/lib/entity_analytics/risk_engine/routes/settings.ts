@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
@@ -13,8 +14,12 @@ import { RISK_ENGINE_SETTINGS_URL, APP_ID } from '../../../../../common/constant
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
+import { getConfiguration } from '../utils/saved_object_configuration';
 
-export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['router']) => {
+export const riskEngineSettingsRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger
+) => {
   router.versioned
     .get({
       access: 'internal',
@@ -35,10 +40,14 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
         const siemResponse = buildSiemResponse(response);
 
         const securitySolution = await context.securitySolution;
-        const riskEngineClient = securitySolution.getRiskEngineDataClient();
+        const coreContext = await context.core;
 
         try {
-          const result = await riskEngineClient.getConfiguration();
+          const result = await getConfiguration({
+            savedObjectsClient: coreContext.savedObjects.client,
+            logger,
+            namespace: securitySolution.getSpaceId(),
+          });
           securitySolution.getAuditLogger()?.log({
             message: 'User accessed risk engine configuration information',
             event: {

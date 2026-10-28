@@ -21,6 +21,8 @@ import { usersUrl } from '../../../urls/navigation';
 import { waitForTabToBeLoaded } from '../../../tasks/common';
 import { ENABLE_RISK_SCORE_BUTTON } from '../../../screens/entity_analytics';
 
+const RISK_SCORE_MAINTAINER_STATUS_URL = '/internal/security/entity_store/entity_maintainers*';
+
 describe(
   'Users stats and tables',
   {
@@ -42,6 +44,10 @@ describe(
     });
 
     beforeEach(() => {
+      cy.intercept('GET', RISK_SCORE_MAINTAINER_STATUS_URL, {
+        statusCode: 200,
+        body: { maintainers: [] },
+      }).as('riskScoreMaintainerStatus');
       login();
       visitWithTimeRange(usersUrl('allUsers'));
     });

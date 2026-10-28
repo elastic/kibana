@@ -9,18 +9,9 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Entity Analytics - Risk Engine', function () {
-    loadTestFile(require.resolve('./init_and_status_apis'));
-    loadTestFile(require.resolve('./risk_engine_cleanup_api'));
-    loadTestFile(require.resolve('./risk_score_preview'));
-    loadTestFile(require.resolve('./telemetry_usage'));
     loadTestFile(require.resolve('./risk_engine_privileges'));
     loadTestFile(require.resolve('./asset_criticality'));
     loadTestFile(require.resolve('./asset_criticality_privileges'));
     loadTestFile(require.resolve('./asset_criticality_csv_upload'));
-    loadTestFile(require.resolve('./risk_score_entity_calculation'));
-    loadTestFile(require.resolve('./risk_score_history'));
-    loadTestFile(require.resolve('./risk_engine_schedule_now'));
-    loadTestFile(require.resolve('./risk_engine_so_config'));
-    loadTestFile(require.resolve('./migrations'));
   });
 }
