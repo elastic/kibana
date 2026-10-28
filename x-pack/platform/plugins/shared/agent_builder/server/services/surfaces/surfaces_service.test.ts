@@ -66,14 +66,18 @@ const unmappedAttachmentsService = {
 
 const context = { request: httpServerMock.createKibanaRequest(), spaceId: 'space-1' };
 
+const getBaseUrl = (spaceId: string) => `https://kibana.example.com/s/${spaceId}`;
+
 const renderPayload = (
   event: RoundCompleteEvent,
-  attachmentsService: AttachmentServiceStart = unmappedAttachmentsService
+  attachmentsService: AttachmentServiceStart = unmappedAttachmentsService,
+  baseUrlFor: (spaceId: string) => string | undefined = getBaseUrl
 ) =>
   new SurfacesServiceImpl({
     attachmentsService,
     logger: loggerMock.create(),
     isomer: isomerPluginMock.createStartContract(),
+    getBaseUrl: baseUrlFor,
   }).renderPayload(event, { originType: ConversationOriginType.Slack, ...context });
 
 describe('renderPayload', () => {
@@ -103,6 +107,31 @@ describe('renderPayload', () => {
     expect(toSurfaceComposition).toHaveBeenCalledWith(expect.anything(), context);
   });
 
+  describe('Kibana app links', () => {
+    const event = createRoundCompleteEvent('See: <render_attachment id="a1" />', [esqlAttachment]);
+    const attachmentsService = {
+      getTypeDefinition: () => ({
+        toSurfaceComposition: () => ({
+          type: 'view',
+          body: [{ type: 'link', label: 'Open in Discover', app: 'discover', path: '#/' }],
+        }),
+      }),
+    } as unknown as AttachmentServiceStart;
+
+    it("resolve against the Kibana URL of the round's space", async () => {
+      const slack = JSON.stringify(await renderPayload(event, attachmentsService));
+
+      expect(slack).toContain('https://kibana.example.com/s/space-1/app/discover#/');
+    });
+
+    it('are left out when no Kibana URL resolves', async () => {
+      const slack = JSON.stringify(await renderPayload(event, attachmentsService, () => undefined));
+
+      expect(slack).toContain('See:');
+      expect(slack).not.toContain('Open in Discover');
+    });
+  });
+
   it('leaves out unmapped attachments', async () => {
     const event = createRoundCompleteEvent('Here: <render_attachment id="a1" />', [esqlAttachment]);
 
@@ -129,6 +158,7 @@ describe('renderPayload', () => {
       attachmentsService: unmappedAttachmentsService,
       logger,
       isomer,
+      getBaseUrl,
     });
     const event = createRoundCompleteEvent('Hello');
     const options = { originType: ConversationOriginType.Slack, ...context };
@@ -158,6 +188,7 @@ describe('renderPayload', () => {
       attachmentsService: unmappedAttachmentsService,
       logger: loggerMock.create(),
       isomer,
+      getBaseUrl,
     });
 
     await expect(

@@ -34,6 +34,7 @@ const surfacesDeps = {
     attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
     logger: loggerMock.create(),
     isomer: isomerPluginMock.createStartContract(),
+    getBaseUrl: () => 'https://kibana.example.com',
   }),
   request,
 };
