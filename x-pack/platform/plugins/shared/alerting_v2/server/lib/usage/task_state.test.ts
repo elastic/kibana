@@ -168,4 +168,61 @@ describe('alerting v2 telemetry task state', () => {
       expect(() => v5.schema.validate(v4State)).toThrow();
     });
   });
+
+  describe('v6', () => {
+    const v6 = stateSchemaByVersion[6];
+
+    const v5State = {
+      has_errors: false,
+      runs: 5,
+      action_policies_count: 7,
+    };
+
+    const newFields = {
+      action_policies_count_by_status: { enabled: 5, disabled: 1, snoozed: 1 },
+      action_policies_count_by_grouping_mode: { per_alert: 6, all: 1 },
+      action_policies_count_by_throttle_strategy: { none: 4, every_time: 3 },
+      action_policies_workflows_per_policy: { p50: 1, p99: 3, avg: 1.4 },
+      action_policies_count_with_multiple_workflows: 2,
+    };
+
+    it('adds the action policy configuration counters as undefined', () => {
+      const result = v6.up(cloneDeep(v5State));
+
+      expect(result).toMatchObject({
+        action_policies_count_by_status: undefined,
+        action_policies_count_by_grouping_mode: undefined,
+        action_policies_count_by_throttle_strategy: undefined,
+        action_policies_workflows_per_policy: undefined,
+        action_policies_count_with_multiple_workflows: undefined,
+      });
+    });
+
+    it('preserves the counters it does not own', () => {
+      expect(v6.up(cloneDeep(v5State))).toMatchObject(v5State);
+    });
+
+    it('produces a state the v6 schema accepts', () => {
+      expect(() => v6.schema.validate(v6.up(cloneDeep(v5State)))).not.toThrow();
+    });
+
+    it('accepts the new counters, including null percentiles', () => {
+      expect(() =>
+        v6.schema.validate({
+          ...v5State,
+          ...newFields,
+          action_policies_workflows_per_policy: { p50: null, p99: null, avg: null },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a count_by value outside the known vocabulary', () => {
+      expect(() =>
+        v6.schema.validate({
+          ...v5State,
+          action_policies_count_by_throttle_strategy: { burst: 1 },
+        })
+      ).toThrow();
+    });
+  });
 });
