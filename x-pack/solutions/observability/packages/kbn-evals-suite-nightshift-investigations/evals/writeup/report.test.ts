@@ -34,6 +34,7 @@ const taskRun = (caseId: string, reply: string | undefined, repetition = 0): Tas
   output: {
     case_id: caseId,
     round_index: 1,
+    reply_type: 'answer',
     question: 'Were customers charged?',
     recorded_reply: LONG,
     replay_chars: 10,
@@ -86,7 +87,7 @@ describe('toWriteupRows and formatReport', () => {
       vs_baseline: { win: 4 },
       gates: { pass: true },
     });
-    expect(ok.recorded.gates.pass).toBe(false);
+    expect(ok.recorded.gates?.pass).toBe(false);
     expect(ok.baseline?.gates?.pass).toBe(false);
     expect(failed).toMatchObject({ reply: null, error: 'empty reply', gates: null, faith: null });
   });
@@ -101,7 +102,9 @@ describe('toWriteupRows and formatReport', () => {
     expect(summary).toContain('| current | 1/2 | 1/1 |');
     expect(summary).toContain('| main | 2/2 | 0/2 |');
     expect(summary).toContain('| recorded | 2/2 | 0/2 |');
-    expect(summary).toContain('current vs main, head to head: 4 wins, 0 losses, 0 ties.');
+    expect(summary).toContain(
+      '| Head to head, wins–losses | 4–0 (0 ties) | 4–0 (0 ties) | 0–0 (0 ties) |'
+    );
     expect(report).toContain('- case/r2, sample 0');
   });
 });

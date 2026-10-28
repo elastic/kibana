@@ -25,34 +25,50 @@ const shorterWins = () => ({
 });
 
 describe('comparePair', () => {
+  const replay = buildReplay(
+    [{ input: { message: 'Were customers charged?' }, steps: [] }],
+    0,
+    'prompt'
+  );
+
   it('asks in both orders and counts from the first reply’s side', async () => {
     const client = shorterWins();
     const tally = await comparePair(client as never, {
-      question: 'Were customers charged?',
-      firstRound: false,
+      replay,
+      panel: 'Verdict: payment DNS failure',
       a: 'No.',
       b: 'No, and here is a much longer reply.',
       votes: 2,
     });
-    expect(tally).toEqual({ win: 4, loss: 0, tie: 0, failed: 0 });
+    expect(tally).toMatchObject({ win: 4, loss: 0, tie: 0, failed: 0 });
+    expect(tally.reasons).toEqual(Array(4).fill({ winner: 'a', reason: 'shorter' }));
     expect(client.chatComplete).toHaveBeenCalledTimes(4);
     expect(client.chatComplete.mock.calls[0][0]).toMatchObject({
       toolChoice: { function: 'judge_pair' },
     });
   });
 
+  it('shows the judge the evidence, the panel and the latest message', async () => {
+    const client = shorterWins();
+    await comparePair(client as never, {
+      replay,
+      panel: 'Verdict: payment DNS failure',
+      a: 'a',
+      b: 'bb',
+      votes: 1,
+    });
+    const content = String(client.chatComplete.mock.calls[0][0].messages[0].content);
+    expect(content).toContain('# What the agent had seen\n## USER\nWere customers charged?');
+    expect(content).toContain('# What the panel shows now\nVerdict: payment DNS failure');
+    expect(content).toContain("# The user's latest message\nWere customers charged?");
+  });
+
   it('counts a judge that never answers as failed', async () => {
     const client = {
       chatComplete: jest.fn().mockResolvedValue({ content: 'no tool', toolCalls: [] }),
     };
-    const tally = await comparePair(client, {
-      question: 'q',
-      firstRound: true,
-      a: 'a',
-      b: 'b',
-      votes: 1,
-    });
-    expect(tally).toEqual({ win: 0, loss: 0, tie: 0, failed: 2 });
+    const tally = await comparePair(client, { replay, panel: '', a: 'a', b: 'b', votes: 1 });
+    expect(tally).toMatchObject({ win: 0, loss: 0, tie: 0, failed: 2 });
   });
 });
 

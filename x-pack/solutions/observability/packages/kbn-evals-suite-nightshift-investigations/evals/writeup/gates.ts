@@ -8,6 +8,10 @@
 // Deterministic checks on a free-text chat reply, the way a reader gets it. Nothing here relies
 // on a schema: the lead, the points and the length are read off the markdown the model wrote.
 // Table rows and `<render_attachment>` tags aren't prose, so they don't count toward its length.
+// Short replies get the strict shape; a reply to a request for more gets a word cap and nothing
+// else on its shape, since a list, a walk-through or the queries behind a result need room.
+
+import { isLongReplyType, type ReplyType } from './types';
 
 export interface ReplyGateMetrics {
   words: number;
@@ -50,6 +54,18 @@ export const REPLY_GATE_LIMITS = {
   maxTableRows: 12,
 } as const;
 
+/** Word cap by reply type, not counting table rows or attachments. */
+export const REPLY_MAX_WORDS: Record<ReplyType, number> = {
+  wrapup: REPLY_GATE_LIMITS.maxWords,
+  answer: REPLY_GATE_LIMITS.maxWords,
+  summary: REPLY_GATE_LIMITS.maxWords,
+  action: REPLY_GATE_LIMITS.maxWords,
+  method: 300,
+  list: 200,
+  detail: 400,
+  visual: 150,
+};
+
 const countWords = (text: string) => text.split(/\s+/).filter(Boolean).length;
 const RENDER_ATTACHMENT = /<render_attachment\b[^>]*\/?>/g;
 const plain = (text: string) =>
@@ -82,11 +98,8 @@ export const knownNumbers = (corpus: string): Set<string> =>
     ...(corpus.match(/\d+(\.\d+)?/g) ?? []),
   ]);
 
-export const runReplyGates = (
-  reply: string,
-  roundIndex: number,
-  known: Set<string>
-): ReplyGates => {
+export const runReplyGates = (reply: string, type: ReplyType, known: Set<string>): ReplyGates => {
+  const long = isLongReplyType(type);
   const all = reply
     .split('\n')
     .map((l) => l.trimEnd())
@@ -135,20 +148,23 @@ export const runReplyGates = (
   if (metrics.words < limits.minWords && !tableRows && !attachmentShown) {
     failed.push(`only ${metrics.words} words`);
   }
-  if (metrics.words > limits.maxWords) failed.push(`${metrics.words} words`);
+  if (metrics.words > REPLY_MAX_WORDS[type]) failed.push(`${metrics.words} words`);
   if (metrics.leadWords > limits.maxLeadWords) {
     failed.push(`first sentence ${metrics.leadWords} words`);
   }
-  if (roundIndex === 0 && !points && sentences.length > limits.maxWrapUpSentences) {
-    failed.push(`wrap-up ${sentences.length} sentences`);
+  if (!long) {
+    if (type === 'wrapup' && !points && sentences.length > limits.maxWrapUpSentences) {
+      failed.push(`wrap-up ${sentences.length} sentences`);
+    }
+    if (points > limits.maxPoints) failed.push(`${points} points`);
+    if (within20 < limits.minWithin20) {
+      failed.push(`sentences ≤20 words ${Math.round(within20 * 100)}%`);
+    }
+    if (headings) failed.push(`${headings} headings`);
   }
-  if (points > limits.maxPoints) failed.push(`${points} points`);
-  if (within20 < limits.minWithin20) {
-    failed.push(`sentences ≤20 words ${Math.round(within20 * 100)}%`);
-  }
-  if (headings) failed.push(`${headings} headings`);
   if (tableRows > limits.maxTableRows) failed.push(`table of ${tableRows} rows in the reply`);
-  if (method.length) failed.push(`method: ${method.join(', ')}`);
+  // Saying how a result was produced is the answer to a method question.
+  if (method.length && type !== 'method') failed.push(`method: ${method.join(', ')}`);
   if (attachmentUnshown) failed.push("mentions an attachment it doesn't show");
   if (ungroundedNumbers.length) {
     failed.push(`ungrounded numbers: ${ungroundedNumbers.slice(0, 5).join(', ')}`);

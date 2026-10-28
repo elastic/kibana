@@ -1508,5 +1508,11 @@
       "reply": "19 of 96 checkout attempts failed between 18:39–20:09 UTC.\n- All 19 failed on GetProduct lookup for Explorascope (OLJCESPC7Z).\n- product-catalog blocked that lookup via a feature flag, not an outage.\n- Frontend showed 38 error spans, but that's 19 failures double-counted.",
       "source": "variant-b"
     }
+  ],
+  "follow_ups": [
+    {
+      "message": "List the services that were affected and how each one was affected.",
+      "type": "list"
+    }
   ]
 }

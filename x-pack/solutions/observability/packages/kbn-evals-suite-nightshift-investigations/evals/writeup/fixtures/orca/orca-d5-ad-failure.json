@@ -1507,5 +1507,11 @@
       "reply": "Yes, GetAds recovered on its own by 16:56 UTC, with 0% errors through 18:00 UTC.\n- Last GetAds failure was at 16:49:13 UTC, down from ~9.3% error rate during the incident.\n- No deploy or config change found; likely the adFailure chaos flag stopped on its own.\n- Telemetry ends at 18:00 UTC, so recovery beyond that time is unconfirmed.",
       "source": "variant-b"
     }
+  ],
+  "follow_ups": [
+    {
+      "message": "Show me a chart of the ad failures over the incident window.",
+      "type": "visual"
+    }
   ]
 }

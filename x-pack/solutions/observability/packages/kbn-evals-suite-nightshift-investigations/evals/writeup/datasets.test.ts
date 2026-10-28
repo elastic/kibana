@@ -9,6 +9,7 @@ import { mkdtempSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { toWriteupConversation } from './build';
+import { isLongReplyType } from './types';
 import {
   ORCA_WRITEUP_DATASET,
   loadWriteupDataset,
@@ -129,6 +130,38 @@ describe('toWriteupExamples', () => {
     });
   });
 
+  it('tags each round with the reply its question calls for', () => {
+    const tagged = toWriteupExamples({
+      ...conversation,
+      reply_types: [{ round_index: 1, type: 'action' }],
+    });
+    expect(tagged.map((e) => e.metadata.reply_type)).toEqual(['wrapup', 'action']);
+    expect(toWriteupExamples(conversation).map((e) => e.metadata.reply_type)).toEqual([
+      'wrapup',
+      'answer',
+    ]);
+  });
+
+  it('adds a follow-up question after the last answered round, with no recorded reply', () => {
+    const examples = toWriteupExamples({
+      ...conversation,
+      follow_ups: [{ message: 'Walk me through it step by step.', type: 'detail' }],
+    });
+    const followUp = examples.at(-1)!;
+    expect(followUp.metadata).toMatchObject({
+      case_id: 'case/more1',
+      round_index: 2,
+      reply_type: 'detail',
+    });
+    expect(followUp.output).toEqual({ recorded_reply: '' });
+    expect(followUp.input.rounds).toHaveLength(3);
+    expect(followUp.input.rounds[1].response).toEqual({ message: 'No.' });
+    expect(followUp.input.rounds[2]).toEqual({
+      input: { message: 'Walk me through it step by step.' },
+      steps: [],
+    });
+  });
+
   it('rewrites only the last round when asked', () => {
     expect(toWriteupExamples(conversation, 'last').map((e) => e.metadata.case_id)).toEqual([
       'case/r2',
@@ -218,9 +251,18 @@ describe('the committed ORCA conversations', () => {
     }
   });
 
-  it('have a golden for every rewritten round', () => {
-    expect(dataset.examples.filter((e) => !e.output.golden).map((e) => e.metadata.case_id)).toEqual(
-      []
+  it('have a golden for every recorded round', () => {
+    expect(
+      dataset.examples
+        .filter((e) => e.output.recorded_reply && !e.output.golden)
+        .map((e) => e.metadata.case_id)
+    ).toEqual([]);
+  });
+
+  it('include requests for more, which no recorded round makes', () => {
+    const long = dataset.examples.filter((e) => isLongReplyType(e.metadata.reply_type ?? 'answer'));
+    expect(new Set(long.map((e) => e.metadata.reply_type))).toEqual(
+      new Set(['detail', 'list', 'method', 'visual'])
     );
   });
 });

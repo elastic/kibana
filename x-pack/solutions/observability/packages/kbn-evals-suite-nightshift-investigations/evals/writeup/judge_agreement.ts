@@ -60,7 +60,8 @@ export const judgeAgreement = (runs: WriteupResults[]): string => {
   ];
   for (const pair of PAIRS) {
     const cells = runs.map((_, i) => {
-      const s = (k: keyof PairTally) => rowsOf(i).reduce((n, r) => n + (r[pair]?.[k] ?? 0), 0);
+      const s = (k: Exclude<keyof PairTally, 'reasons'>) =>
+        rowsOf(i).reduce((n, r) => n + (r[pair]?.[k] ?? 0), 0);
       return `${s('win')}–${s('loss')}–${s('tie')}`;
     });
     out.push(`| ${pair.replace('_', ' ')} | ${cells.join(' | ')} |`);

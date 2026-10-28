@@ -22,7 +22,7 @@
 
 import { MessageRole, type Message, type ToolCall } from '@kbn/inference-common';
 import { stepsFromRound } from '@kbn/nightshift-investigations-plugin/server/investigation_round/round_loader';
-import type { RecordedRound } from './types';
+import type { RecordedRound, ReplyAttachment } from './types';
 
 export interface Replay {
   system: string;
@@ -174,3 +174,77 @@ export const replayText = (replay: Replay, budget = 300_000): string => {
     .join('\n\n');
   return text.length > budget ? `…[earlier history cut]\n${text.slice(-budget)}` : text;
 };
+
+type Params = Record<string, unknown>;
+
+/**
+ * What the investigation panel shows when the replayed round's reply is written: the latest
+ * summary, verdict and severity, impact, hypotheses and proposed actions, from the agent's own
+ * recording calls. The reader has it open, so a judge needs it to tell what a reply adds.
+ */
+export const panelText = (rounds: readonly RecordedRound[], roundIndex: number): string => {
+  const calls = rounds
+    .slice(0, roundIndex + 1)
+    .flatMap((round) => stepsFromRound(round.steps))
+    .flatMap((s) =>
+      s.kind === 'tool' ? [{ id: s.toolId, params: (s.params ?? {}) as Params }] : []
+    );
+  const last = (pattern: RegExp) => [...calls].reverse().find((c) => pattern.test(c.id))?.params;
+  // Metadata calls may set one field at a time, so merge them in order.
+  const meta: Params = {};
+  for (const c of calls) {
+    if (/set_conversation_metadata$/.test(c.id)) Object.assign(meta, c.params.metadata ?? {});
+  }
+  const impact = last(/set_impact$/);
+  const hypotheses = (last(/set_hypotheses$/)?.hypotheses ?? []) as Params[];
+  const proposals = calls
+    .filter((c) => /proposals[._]create$/.test(c.id))
+    .map((c) => c.params.title);
+  const parts = [
+    meta.severity && `Severity: ${meta.severity}`,
+    meta.summary && `Summary: ${meta.summary}`,
+    meta.verdict && `Verdict: ${meta.verdict}`,
+    impact?.summary && `Impact: ${impact.summary}`,
+    hypotheses.length &&
+      `Hypotheses:\n${hypotheses
+        .map((h) => `- [${h.status}, ${h.confidence}] ${h.candidate}: ${h.reason ?? ''}`)
+        .join('\n')}`,
+    proposals.length && `Proposed actions:\n${proposals.map((t) => `- ${t}`).join('\n')}`,
+  ].filter(Boolean);
+  return parts.length ? parts.join('\n\n') : '(nothing recorded yet)';
+};
+
+/** Attachments the recorded rounds created, which a replayed reply may show again. */
+export const recordedAttachments = (
+  rounds: readonly RecordedRound[],
+  roundIndex: number
+): ReplyAttachment[] =>
+  rounds
+    .slice(0, roundIndex + 1)
+    .flatMap((round) => stepsFromRound(round.steps))
+    .flatMap((s) => {
+      if (s.kind !== 'tool' || !/attachments[._]add$/.test(s.toolId)) return [];
+      const result = (s.results?.[0] as { data?: { attachment_id?: string } } | undefined)?.data;
+      if (!result?.attachment_id) return [];
+      const params = (s.params ?? {}) as Params;
+      const data = params.data as { content?: unknown } | undefined;
+      return [
+        {
+          id: result.attachment_id,
+          type: String(params.type ?? 'text'),
+          content: typeof data?.content === 'string' ? data.content : JSON.stringify(data ?? {}),
+        },
+      ];
+    });
+
+/**
+ * A reply as a judge reads it: each attachment it shows written out where its tag sits, so a reply
+ * that shows a table or chart isn't read as empty, and a tag with nothing behind it reads as such.
+ */
+export const expandAttachments = (reply: string, attachments: readonly ReplyAttachment[]): string =>
+  reply.replace(/<render_attachment\s+id="([^"]+)"[^>]*\/?>/g, (_tag, id: string) => {
+    const attachment = attachments.find((a) => a.id === id);
+    return attachment
+      ? `[Attachment shown inline (${attachment.type}):\n${attachment.content.slice(0, 3_000)}\n]`
+      : '[Attachment tag with no attachment behind it]';
+  });

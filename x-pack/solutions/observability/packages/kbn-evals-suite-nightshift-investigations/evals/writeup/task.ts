@@ -20,8 +20,14 @@ import {
   type Message,
   type ToolCall,
 } from '@kbn/inference-common';
-import { RECORDING_TOOL, buildReplay, type Replay } from './replay';
-import type { GeneratedReply, WriteupExample, WriteupTaskOutput } from './types';
+import { RECORDING_TOOL, buildReplay, safeToolName, type Replay } from './replay';
+import {
+  defaultReplyType,
+  type GeneratedReply,
+  type ReplyAttachment,
+  type WriteupExample,
+  type WriteupTaskOutput,
+} from './types';
 
 export const INVESTIGATOR_PROMPT_PATH =
   'x-pack/solutions/observability/plugins/nightshift_investigations/server/agents/investigation/instructions/investigator.md.text';
@@ -66,11 +72,42 @@ const MAX_EXTRA_CALLS = 6;
 const MAX_FAILURES = 3;
 const countWords = (text: string) => text.split(/\s+/).filter(Boolean).length;
 
+/** Agent Builder offers this on every conversation, whether or not the recorded run used it. */
+const ATTACHMENTS_ADD = safeToolName('attachments.add');
+
+/**
+ * The result a replayed tool call gets. An attachment is kept, so a judge can read what the reply
+ * shows. Other recording calls succeed. Queries can't run in a replay, so they get "No new
+ * results": an error that named the replay came back in replies as "Let me finalize my reply".
+ */
+const replayToolResult = (
+  name: string,
+  args: Record<string, unknown>,
+  attachments: ReplyAttachment[]
+): Record<string, unknown> => {
+  if (name === ATTACHMENTS_ADD) {
+    const id = `replay-attachment-${attachments.length + 1}`;
+    let data: unknown = args.data;
+    try {
+      data = typeof data === 'string' ? JSON.parse(data) : data;
+    } catch {
+      // keep the raw string
+    }
+    const content = (data as { content?: unknown } | undefined)?.content;
+    attachments.push({
+      id,
+      type: String(args.type ?? 'text'),
+      content: typeof content === 'string' ? content : JSON.stringify(data ?? {}),
+    });
+    return { attachment_id: id, type: args.type ?? 'text', version: 1 };
+  }
+  return RECORDING_TOOL.test(name) ? { result: 'ok' } : { result: 'No new results.' };
+};
+
 /**
  * Asks the model for its next message, as the agent loop would. The model may still call tools
- * first, as it can in production: often a last recording call before it replies. Recording calls
- * get a plain success; queries can't run in a replay, so they get an error saying so. The loop
- * stops at the first reply with text, after at most six extra calls.
+ * first, as it can in production: often a last recording call or an attachment before it
+ * replies. The loop stops at the first reply with text, after at most six extra calls.
  */
 export const replayReply = async (
   inferenceClient: Pick<BoundInferenceClient, 'chatComplete'>,
@@ -79,26 +116,38 @@ export const replayReply = async (
 ): Promise<GeneratedReply> => {
   // Schemas stay loose so no call fails validation; the model only needs the names.
   const tools = Object.fromEntries(
-    replay.toolNames.map((name) => [
+    [...new Set([...replay.toolNames, ATTACHMENTS_ADD])].map((name) => [
       name,
-      { description: `Investigation tool ${name}.`, schema: { type: 'object', properties: {} } },
+      {
+        description:
+          name === ATTACHMENTS_ADD
+            ? 'Add an attachment to the conversation: { type, data }.'
+            : `Investigation tool ${name}.`,
+        schema: { type: 'object', properties: {} },
+      },
     ])
   ) as Record<string, { description: string; schema: { type: 'object'; properties: {} } }>;
   const messages: Message[] = [...replay.messages];
   const extraCalls: string[] = [];
+  const attachments: ReplyAttachment[] = [];
   let lastError = '';
   for (let calls = 0, failures = 0; calls < MAX_EXTRA_CALLS && failures < MAX_FAILURES; ) {
     try {
       const response = await inferenceClient.chatComplete({
         system: replay.system,
         messages,
-        ...(replay.toolNames.length ? { tools, toolChoice: ToolChoiceType.auto } : {}),
+        tools,
+        toolChoice: ToolChoiceType.auto,
       });
       const text = String(response.content ?? '').trim();
       const toolCalls: ToolCall[] = response.toolCalls ?? [];
       if (!toolCalls.length) {
         if (countWords(text) >= 8 || /render_attachment/.test(text)) {
-          return { reply: text, extra_calls: extraCalls };
+          return {
+            reply: text,
+            extra_calls: extraCalls,
+            ...(attachments.length ? { attachments } : {}),
+          };
         }
         lastError = text ? `short reply: ${text}` : 'empty reply';
         failures++;
@@ -108,16 +157,16 @@ export const replayReply = async (
       messages.push({ role: MessageRole.Assistant, content: text || null, toolCalls });
       for (const call of toolCalls) {
         extraCalls.push(call.function.name);
+        const args = (
+          typeof call.function.arguments === 'string'
+            ? JSON.parse(call.function.arguments || '{}')
+            : call.function.arguments ?? {}
+        ) as Record<string, unknown>;
         messages.push({
           role: MessageRole.Tool,
           name: call.function.name,
           toolCallId: call.toolCallId,
-          response: RECORDING_TOOL.test(call.function.name)
-            ? { result: 'ok' }
-            : {
-                error:
-                  "Not available in this replay: this round's queries are done. Answer from what you have.",
-              },
+          response: replayToolResult(call.function.name, args, attachments),
         });
       }
     } catch (error) {
@@ -134,7 +183,7 @@ export const replayReply = async (
 
 /** A JSON file cache keyed by content hash. Failed generations aren't cached. */
 export const createGenerationCache = (dir = join(WRITEUP_DATA_DIR, 'cache')) => ({
-  key: (parts: string[]) => hashText(['v1', ...parts].join('\n')),
+  key: (parts: string[]) => hashText(['v2', ...parts].join('\n')),
   read(key: string): GeneratedReply | undefined {
     const file = join(dir, `${key}.json`);
     return existsSync(file)
@@ -195,6 +244,7 @@ export const createWriteupTask = ({
     return {
       case_id: example.metadata.case_id,
       round_index: roundIndex,
+      reply_type: example.metadata.reply_type ?? defaultReplyType(roundIndex),
       question: replay.question,
       recorded_reply: example.output.recorded_reply,
       replay_chars: replay.chars,

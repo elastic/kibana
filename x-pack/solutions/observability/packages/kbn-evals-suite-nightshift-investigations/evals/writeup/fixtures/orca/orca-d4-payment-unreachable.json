@@ -971,5 +971,11 @@
       "reply": "No customers were charged; all 127 Charge calls from 21:20–22:50 UTC failed.\n- Payment service never received requests; DNS failures blocked the gRPC calls before arrival.\n- No money moved for any of the ~124 failed checkout attempts.",
       "source": "variant-b"
     }
+  ],
+  "follow_ups": [
+    {
+      "message": "Which queries did you run to get these numbers, and against what data?",
+      "type": "method"
+    }
   ]
 }

@@ -14,7 +14,12 @@ import {
   REPLY_VS_BASELINE_EVALUATOR,
   REPLY_VS_GOLDEN_EVALUATOR,
 } from './evaluators';
-import type { WriteupExample, WriteupTaskOutput } from './types';
+import {
+  isLongReplyType,
+  type ReplyType,
+  type WriteupExample,
+  type WriteupTaskOutput,
+} from './types';
 
 type TaskRun = DatasetRunResult['runs'][string];
 type EvaluationRun = DatasetRunResult['evaluationRuns'][number];
@@ -23,6 +28,7 @@ type EvaluationRun = DatasetRunResult['evaluationRuns'][number];
 export interface WriteupRow {
   case_id: string;
   round_index: number;
+  reply_type: ReplyType;
   sample: number;
   question: string;
   reply: string | null;
@@ -35,7 +41,8 @@ export interface WriteupRow {
   vs_golden: PairTally | null;
   vs_baseline: PairTally | null;
   golden: string | null;
-  recorded: { reply: string; gates: ReplyGates };
+  /** Empty, with no gates, for a follow-up question production never answered. */
+  recorded: { reply: string; gates: ReplyGates | null };
   baseline: { reply: string | null; gates: ReplyGates | null } | null;
 }
 
@@ -64,7 +71,7 @@ export const toWriteupRows = (
       const expected = run.expected as WriteupExample['output'];
       const known = knownNumbers(replayCorpus(input.rounds, input.round_index));
       const gates = (reply?: string | null) =>
-        reply ? runReplyGates(reply, input.round_index, known) : null;
+        reply ? runReplyGates(reply, output.reply_type, known) : null;
       const result = (name: string) =>
         evaluationRuns.find((e) => e.experimentRunId === runId && e.name === name)?.result;
       const tally = (name: string) => {
@@ -77,6 +84,7 @@ export const toWriteupRows = (
       return {
         case_id: output.case_id,
         round_index: output.round_index,
+        reply_type: output.reply_type,
         sample: run.repetition,
         question: output.question,
         reply: output.reply ?? null,
@@ -88,7 +96,7 @@ export const toWriteupRows = (
         vs_golden: tally(REPLY_VS_GOLDEN_EVALUATOR),
         vs_baseline: tally(REPLY_VS_BASELINE_EVALUATOR),
         golden: expected.golden ?? null,
-        recorded: { reply: expected.recorded_reply, gates: gates(expected.recorded_reply)! },
+        recorded: { reply: expected.recorded_reply, gates: gates(expected.recorded_reply) },
         baseline: output.baseline
           ? { reply: output.baseline.reply ?? null, gates: gates(output.baseline.reply) }
           : null,
@@ -186,10 +194,11 @@ export const formatReport = (results: WriteupResults): { summary: string; report
           ),
         ]
       : []),
-    // The recorded reply is the same for every sample; count each round once.
+    // The recorded reply is the same for every sample; count each round once. Added follow-ups
+    // have none.
     summarize(
       'recorded',
-      rows.filter((r) => r.sample === 0).map((r) => r.recorded),
+      rows.filter((r) => r.sample === 0 && r.recorded.reply).map((r) => r.recorded),
       [],
       null
     ),
@@ -203,10 +212,19 @@ export const formatReport = (results: WriteupResults): { summary: string; report
     ),
   ];
   if (results.baseline) {
-    const h2h = sumTallies(rows.map((r) => r.vs_baseline));
+    // Split by what the question asked for: a prompt can win short answers and lose requests for
+    // more, and the total hides it.
+    const h2h = (keep: (r: WriteupRow) => boolean) => {
+      const t = sumTallies(rows.filter(keep).map((r) => r.vs_baseline));
+      return `${t.win}–${t.loss} (${t.tie} ties)`;
+    };
     table.push(
       '',
-      `${results.prompt.label} vs ${results.baseline.label}, head to head: ${h2h.win} wins, ${h2h.loss} losses, ${h2h.tie} ties.`
+      `| ${results.prompt.label} vs ${results.baseline.label} | All | Short questions | Requests for more |`,
+      '| --- | --- | --- | --- |',
+      `| Head to head, wins–losses | ${h2h(() => true)} | ${h2h(
+        (r) => !isLongReplyType(r.reply_type)
+      )} | ${h2h((r) => isLongReplyType(r.reply_type))} |`
     );
   }
   const header = [
@@ -224,7 +242,10 @@ export const formatReport = (results: WriteupResults): { summary: string; report
       .join('\n');
   const detail: string[] = ['## Per round', ''];
   for (const r of rows.filter((x) => x.sample === 0)) {
-    detail.push(`### ${r.case_id}: ${r.question.slice(0, 140).replace(/\n/g, ' ')}`, '');
+    detail.push(
+      `### ${r.case_id} (${r.reply_type}): ${r.question.slice(0, 140).replace(/\n/g, ' ')}`,
+      ''
+    );
     const status = (g: ReplyGates | null, error?: string) => {
       if (!g) return error ?? '';
       const failed = g.failed.filter((f) => !/^\d+ words$/.test(f));
@@ -246,7 +267,9 @@ export const formatReport = (results: WriteupResults): { summary: string; report
         ''
       );
     }
-    detail.push(`**recorded** (${status(r.recorded.gates)})`, '', quote(r.recorded.reply), '');
+    if (r.recorded.reply) {
+      detail.push(`**recorded** (${status(r.recorded.gates)})`, '', quote(r.recorded.reply), '');
+    }
     if (r.golden) detail.push('**golden**', '', quote(r.golden), '');
     if (r.unsupported_claims.length) {
       detail.push('Unsupported claims:', ...r.unsupported_claims.map((c) => `- ${c}`), '');

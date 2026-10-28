@@ -10,7 +10,13 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { buildModelFromConnector, type EvalConnector } from '@kbn/evals';
 import { knownNumbers, runReplyGates } from './gates';
 import { comparePair, judgeFaithfulness, winShare } from './judges';
-import { buildReplay, replayCorpus } from './replay';
+import {
+  buildReplay,
+  expandAttachments,
+  panelText,
+  recordedAttachments,
+  replayCorpus,
+} from './replay';
 import type { WriteupEvaluator, WriteupExample, WriteupTaskOutput } from './types';
 
 export const REPLY_GENERATED_EVALUATOR = 'reply_generated';
@@ -22,8 +28,11 @@ export const REPLY_VS_BASELINE_EVALUATOR = 'reply_vs_baseline';
 
 const NO_REPLY = { score: null, label: 'n/a', explanation: 'No reply was generated.' };
 
-const gatesFor = ({ rounds, round_index: roundIndex }: WriteupExample['input'], reply: string) =>
-  runReplyGates(reply, roundIndex, knownNumbers(replayCorpus(rounds, roundIndex)));
+const gatesFor = (
+  { rounds, round_index: roundIndex }: WriteupExample['input'],
+  output: WriteupTaskOutput,
+  reply: string
+) => runReplyGates(reply, output.reply_type, knownNumbers(replayCorpus(rounds, roundIndex)));
 
 /** Whether the model wrote a reply at all; quality scores below skip runs that didn't. */
 export const replyGeneratedEvaluator: WriteupEvaluator = {
@@ -46,7 +55,7 @@ export const replyGatesEvaluator: WriteupEvaluator = {
   direction: 'maximize',
   evaluate: async ({ input, output }) => {
     if (!output.reply) return NO_REPLY;
-    const gates = gatesFor(input, output.reply);
+    const gates = gatesFor(input, output, output.reply);
     return {
       score: gates.pass ? 1 : 0,
       label: gates.pass ? 'pass' : 'fail',
@@ -63,7 +72,7 @@ export const replyWordsEvaluator: WriteupEvaluator = {
   direction: 'neutral',
   evaluate: async ({ input, output }) => {
     if (!output.reply) return NO_REPLY;
-    const { metrics } = gatesFor(input, output.reply);
+    const { metrics } = gatesFor(input, output, output.reply);
     return {
       score: metrics.words,
       explanation: `${metrics.words} words, first sentence ${metrics.leadWords}, ${metrics.points} points.`,
@@ -117,21 +126,23 @@ const pairEvaluator = (
   other: (
     expected: WriteupExample['output'],
     output: WriteupTaskOutput
-  ) => { text?: string; missing: string }
+  ) => { text?: string; attachments?: WriteupTaskOutput['attachments']; missing: string }
 ): WriteupEvaluator => ({
   name,
   kind: 'LLM',
   direction: 'maximize',
   getModel: getModelFactory(deps.evaluationConnector),
-  evaluate: async ({ output, expected }) => {
+  evaluate: async ({ input, output, expected }) => {
     if (!output.reply) return NO_REPLY;
-    const { text, missing } = other(expected, output);
+    const { text, attachments, missing } = other(expected, output);
     if (!text) return { score: null, label: 'n/a', explanation: missing };
+    // A reply may show an attachment the recorded rounds created, or one it made itself.
+    const recorded = recordedAttachments(input.rounds, input.round_index);
     const tally = await comparePair(deps.inferenceClient, {
-      question: output.question,
-      firstRound: output.round_index === 0,
-      a: output.reply,
-      b: text,
+      replay: buildReplay(input.rounds, input.round_index, ''),
+      panel: panelText(input.rounds, input.round_index),
+      a: expandAttachments(output.reply, [...(output.attachments ?? []), ...recorded]),
+      b: expandAttachments(text, [...(attachments ?? []), ...recorded]),
       votes: deps.votes,
       log: deps.log,
     });
@@ -157,6 +168,7 @@ export const createReplyVsGoldenEvaluator = (deps: JudgeDeps) =>
 export const createReplyVsBaselineEvaluator = (deps: JudgeDeps) =>
   pairEvaluator(deps, REPLY_VS_BASELINE_EVALUATOR, (_expected, output) => ({
     text: output.baseline?.reply,
+    attachments: output.baseline?.attachments,
     missing: output.baseline
       ? `The baseline prompt produced no reply: ${output.baseline.error}`
       : 'No NIGHTSHIFT_WRITEUP_BASELINE_PROMPT was set.',

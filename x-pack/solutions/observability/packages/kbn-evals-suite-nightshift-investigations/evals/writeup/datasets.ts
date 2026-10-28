@@ -10,7 +10,13 @@ import { join } from 'path';
 import { z } from '@kbn/zod/v4';
 import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
 import { DatasetTags } from '@kbn/evals-common';
-import { recordedRoundSchema, writeupExampleSchema, type WriteupExample } from './types';
+import {
+  REPLY_TYPES,
+  defaultReplyType,
+  recordedRoundSchema,
+  writeupExampleSchema,
+  type WriteupExample,
+} from './types';
 
 /** The committed synthetic conversations: ORCA investigations with scripted follow-ups. */
 export const ORCA_FIXTURES_DIR = join(__dirname, 'fixtures', 'orca');
@@ -31,6 +37,17 @@ export const writeupConversationSchema = z.object({
   case_id: z.string().min(1),
   rounds: z.array(recordedRoundSchema).min(1),
   goldens: z.array(goldenSchema).default([]),
+  /** Rounds whose question calls for something other than the default (see `defaultReplyType`). */
+  reply_types: z
+    .array(z.object({ round_index: z.number().int().min(0), type: z.enum(REPLY_TYPES) }))
+    .optional(),
+  /**
+   * Questions added after the last recorded round, for requests no real conversation made (a
+   * walk-through, the queries, a chart). The context is real; only the question is added.
+   */
+  follow_ups: z
+    .array(z.object({ message: z.string().min(1), type: z.enum(REPLY_TYPES) }))
+    .optional(),
 });
 export type WriteupConversation = z.infer<typeof writeupConversationSchema>;
 
@@ -60,7 +77,10 @@ export const toWriteupExamples = (
   const indexes = conversation.rounds.flatMap((round, index) =>
     round.response?.message?.trim() ? [index] : []
   );
-  return (rounds === 'last' ? indexes.slice(-1) : indexes).map((roundIndex) => {
+  const typeOf = (roundIndex: number) =>
+    conversation.reply_types?.find((t) => t.round_index === roundIndex)?.type ??
+    defaultReplyType(roundIndex);
+  const recorded = (rounds === 'last' ? indexes.slice(-1) : indexes).map((roundIndex) => {
     const kept = conversation.rounds.slice(0, roundIndex + 1);
     const replayed = kept[roundIndex];
     const { response, ...withoutReply } = replayed;
@@ -75,10 +95,36 @@ export const toWriteupExamples = (
         case_id: `${conversation.case_id}/r${roundIndex + 1}`,
         conversation_case_id: conversation.case_id,
         round_index: roundIndex,
+        reply_type: typeOf(roundIndex),
         ...(golden ? { golden_source: golden.source } : {}),
       },
     };
   });
+  // A follow-up comes after the last round that has a reply.
+  const lastAnswered = indexes.at(-1);
+  const followUps =
+    lastAnswered === undefined
+      ? []
+      : (conversation.follow_ups ?? []).map((followUp, i): WriteupExample => {
+          const roundIndex = lastAnswered + 1;
+          return {
+            input: {
+              rounds: [
+                ...conversation.rounds.slice(0, roundIndex),
+                { input: { message: followUp.message }, steps: [] },
+              ],
+              round_index: roundIndex,
+            },
+            output: { recorded_reply: '' },
+            metadata: {
+              case_id: `${conversation.case_id}/more${i + 1}`,
+              conversation_case_id: conversation.case_id,
+              round_index: roundIndex,
+              reply_type: followUp.type,
+            },
+          };
+        });
+  return [...recorded, ...followUps];
 };
 
 const assertDistinctCaseIds = (examples: ReadonlyArray<{ metadata: { case_id: string } }>) => {

@@ -395,9 +395,11 @@ its own writing.
   results, the reply it sent), then the rewritten round's user message and tool calls, including the
   agent's recording calls. Steps are read with the plugin's own `stepsFromRound`. Results stay whole
   up to 20,000 characters within a 420,000-character budget; earlier rounds are clipped first.
-- **Output**: the model's next message, as free markdown. Tools stay declared, so the model may
-  still call one before it replies, as it can in production. Recording calls get a plain success;
-  queries get an error saying they can't run in a replay. Extra calls are listed in the report.
+- **Output**: the model's next message, as free markdown. Tools stay declared, plus
+  `attachments.add`, which Agent Builder always offers, so the model may still call one before it
+  replies, as it can in production. Recording calls get a plain success, an attachment is kept so a
+  judge can read what the reply shows, and queries get "No new results." (an error that named the
+  replay came back in replies as "Let me finalize my reply"). Extra calls are listed in the report.
 - **Still different from production**: Agent Builder wraps the prompt in its own instructions and
   compacts history its own way, earlier thinking isn't replayed, and tool calls stay as recorded,
   so a prompt that would have queried differently can't show it.
@@ -413,16 +415,32 @@ its own writing.
 | `reply_vs_golden`    | LLM  | Pairwise against the round's golden reply, in both orders; a tie counts half.                |
 | `reply_vs_baseline`  | LLM  | Pairwise against the baseline prompt's reply, when `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT` is set. |
 
-The gates ([`gates.ts`](evals/writeup/gates.ts)) read the markdown the model wrote: at most
-100 words, a first sentence of 22 words or fewer, at most 3 points (a first-round wrap-up without
-points: at most 4 sentences), 90% or more of sentences at 20 words or fewer, no headings or bold
-labels, no method narration ("I queried…"), and every number of two or more digits found in what
-the agent saw. A short Markdown table is allowed: its rows count toward neither words nor sentences,
-and only a table over 12 rows fails (a longer list belongs in an attachment). A reply that mentions
-an attachment ("attached", "the table above") must show one with a `<render_attachment>` tag. The
-minimum length doesn't apply when a table or an attachment carries the answer, and tag lines are
-skipped when finding the first sentence. The pairwise judge sees only the question and the two replies, so it judges
-the reply rather than the evidence.
+Each round is tagged with the kind of reply its question calls for. Short: `wrapup` (the
+investigation's first message), `answer` (a direct follow-up), `summary` and `action` (a request to
+do something). Long, where the user asked for more: `method` (how a result was produced), `list`,
+`detail` (an explanation or walk-through) and `visual`. A round without a tag is a wrap-up when it
+opens the conversation and an answer otherwise.
+
+The gates ([`gates.ts`](evals/writeup/gates.ts)) read the markdown the model wrote. Every reply
+needs a first sentence of 22 words or fewer, every number of two or more digits found in what the
+agent saw, no method narration ("I queried…") unless the question asked for the method, and no
+table over 12 rows (a longer list belongs in an attachment). A short reply also gets at most 100
+words, at most 3 points (a wrap-up without points: at most 4 sentences), 90% or more of sentences at
+20 words or fewer, and no headings or bold labels. A long reply gets a word cap by type (method 300,
+list 200, detail 400, visual 150) and nothing else on its shape. Table rows count toward neither
+words nor sentences. A reply that mentions an attachment ("attached", "the table above") must show
+one with a `<render_attachment>` tag. The minimum length doesn't apply when a table or an
+attachment carries the answer, and tag lines are skipped when finding the first sentence.
+
+The pairwise judge ([`judges.ts`](evals/writeup/judges.ts)) reads what the agent had seen, what the
+investigation panel shows (summary, verdict, impact, hypotheses, proposed actions), the latest
+message and the two replies, with each attachment a reply shows written out where its tag sits. It
+doesn't see the reply type or the prompt's rules: it picks the reply this reader would rather get,
+judging correctness first, then whether it leads with what matters, fits what the question asked
+for, and is easy to follow. Terser isn't better by itself, and a reply that restates the panel
+loses. Its rubric was checked against a person's blind picks on 30 replayed pairs; the report splits
+the head to head into short questions and requests for more, since a prompt can win one and lose
+the other.
 
 Each run prints a summary table with one row per prompt, plus `recorded`, the reply the
 conversation actually got, and writes `report.md` and `results.json` under
@@ -476,6 +494,11 @@ The committed dataset, `nightshift/writeup`, holds five synthetic ORCA investiga
 `main` with Sonnet 5 and then got two scripted follow-up questions, so every conversation has its
 first-round wrap-up and two question replies rewritten. Their goldens are seeded from variant B's brief
 of the reply each round got (an answer line and up to three points), as the prototype's were.
+
+None of those questions asks for more, so each file also has a `follow_ups` entry: one request for
+a walk-through, a list, the queries, a chart or a timeline, asked after the last round. The context
+is real; only the question is added, so it has no recorded reply and no golden. Rebuilding the
+fixtures keeps each file's `follow_ups` and `reply_types`.
 
 Customer 0 conversations must not be committed. Keep them in a private conversations file and run
 it directly, or store it once as an evaluations dataset and select it by name:

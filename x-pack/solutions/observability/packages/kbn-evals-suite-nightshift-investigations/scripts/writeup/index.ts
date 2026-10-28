@@ -139,9 +139,22 @@ new RunWithCommands(
         if (fixturesDir) {
           mkdirSync(fixturesDir, { recursive: true });
           for (const conversation of conversations) {
+            const path = join(fixturesDir, `${conversation.case_id}.json`);
+            // Reply types and added follow-ups aren't in the export; keep the ones on file.
+            const { reply_types: replyTypes, follow_ups: followUps } = existsSync(path)
+              ? (JSON.parse(readFileSync(path, 'utf8')) as Partial<typeof conversation>)
+              : {};
             writeFileSync(
-              join(fixturesDir, `${conversation.case_id}.json`),
-              `${JSON.stringify(conversation, null, 2)}\n`
+              path,
+              `${JSON.stringify(
+                {
+                  ...conversation,
+                  ...(replyTypes ? { reply_types: replyTypes } : {}),
+                  ...(followUps ? { follow_ups: followUps } : {}),
+                },
+                null,
+                2
+              )}\n`
             );
           }
         } else {

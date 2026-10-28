@@ -2009,5 +2009,11 @@
       "reply": "Make the DbContext per-message, make order upserts idempotent, and add bounded retry with a DLQ.\n- Shared DbContext tracked conflicting OrderEntity instances, causing the key conflict.\n- Unconditional DbContext.Add() at Consumer.cs:102 failed on reprocessed orderId.\n- No retry limit let one order reprocess 101 times in 30 ms, causing a 2.5-hour storm.",
       "source": "variant-b"
     }
+  ],
+  "follow_ups": [
+    {
+      "message": "Walk me through this in detail, step by step. I need to explain it to the team.",
+      "type": "detail"
+    }
   ]
 }

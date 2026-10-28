@@ -43,9 +43,9 @@ const example: WriteupExample = {
 
 const REPLY = 'Payment DNS lookups failed, so checkout returned errors for an hour.';
 const reply = (content: string) => ({ content, toolCalls: [] });
-const call = (name: string) => ({
+const call = (name: string, args: Record<string, unknown> = {}) => ({
   content: '',
-  toolCalls: [{ toolCallId: `t-${name}`, function: { name, arguments: {} } }],
+  toolCalls: [{ toolCallId: `t-${name}`, function: { name, arguments: args } }],
 });
 
 const fakeClient = (responses: unknown[]) => {
@@ -68,7 +68,7 @@ describe('replayReply', () => {
     );
   });
 
-  it('acknowledges recording calls, refuses queries, then takes the reply', async () => {
+  it('acknowledges recording calls, answers queries with no new results, then takes the reply', async () => {
     const client = fakeClient([
       call('agentic_investigations_set_hypotheses'),
       call('nightshift_sandbox_bash'),
@@ -82,7 +82,26 @@ describe('replayReply', () => {
     const { messages } = client.chatComplete.mock.calls[2][0];
     const toolMessages = messages.filter((m: { role: string }) => m.role === MessageRole.Tool);
     expect(toolMessages.at(-2).response).toEqual({ result: 'ok' });
-    expect(toolMessages.at(-1).response.error).toMatch(/Not available in this replay/);
+    // Nothing that names the replay, which came back in replies as narration.
+    expect(toolMessages.at(-1).response).toEqual({ result: 'No new results.' });
+  });
+
+  it('offers attachments.add and keeps what the model attached', async () => {
+    const client = fakeClient([
+      call('attachments_add', { type: 'text', data: { content: '| a | b |' } }),
+      reply(`${REPLY}\n<render_attachment id="replay-attachment-1"/>`),
+    ]);
+    const out = await replayReply(client, replay);
+    expect(Object.keys(client.chatComplete.mock.calls[0][0].tools)).toContain('attachments_add');
+    expect(out.attachments).toEqual([
+      { id: 'replay-attachment-1', type: 'text', content: '| a | b |' },
+    ]);
+    const { messages } = client.chatComplete.mock.calls[1][0];
+    expect(messages.at(-1).response).toEqual({
+      attachment_id: 'replay-attachment-1',
+      type: 'text',
+      version: 1,
+    });
   });
 
   it('retries a short reply and a failed call, then gives up with the last error', async () => {
@@ -117,6 +136,7 @@ describe('createWriteupTask', () => {
     expect(first).toMatchObject({
       case_id: 'case/r1',
       round_index: 0,
+      reply_type: 'wrapup',
       question: 'Why did checkout fail?',
       recorded_reply: 'Payment failed.',
       prompt_hash: 'h1',

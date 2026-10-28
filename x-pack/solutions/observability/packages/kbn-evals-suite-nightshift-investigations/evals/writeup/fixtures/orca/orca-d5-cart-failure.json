@@ -1661,5 +1661,11 @@
       "reply": "frontend-proxy enforces a fixed 15 s request timeout, unrelated to cart's actual retry time.\n- Client spans cut off at 14.997–15.006s every time, a timeout signature.\n- cart's EmptyCart span ran 130s–1227s, still retrying Redis after proxy gave up.\n- Users saw errors at a fixed 15s mark regardless of cart's eventual success or failure.",
       "source": "variant-b"
     }
+  ],
+  "follow_ups": [
+    {
+      "message": "Give me the full timeline, with the evidence behind each step.",
+      "type": "detail"
+    }
   ]
 }
