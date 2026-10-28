@@ -9,6 +9,7 @@
 
 export {
   SamlSessionManager,
+  type CustomSamlRealmOptions,
   type GetCookieOptions,
   type HostOptions,
   type SamlSessionManagerOptions,

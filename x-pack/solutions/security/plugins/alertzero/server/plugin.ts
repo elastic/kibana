@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
@@ -15,12 +14,15 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
+import { chunk } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
 import {
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_ENABLED_SETTING_ID,
+  ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
   TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
@@ -33,13 +35,9 @@ import {
 } from '../common/constants';
 import type { AlertZeroConfig } from './config';
 
-// The investigation and escalation flyouts and AlertZero's queue use the shared
-// `agenticInvestigations` routes, which require these API privileges. Cross-plugin server imports
-// are forbidden, so they are spelled out here and pinned by the plugin tests.
-const INVESTIGATIONS_API_PRIVILEGE_READ = 'read_investigations';
-const INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations';
-const ESCALATIONS_API_PRIVILEGE_READ = 'read_escalations';
-const ESCALATIONS_API_PRIVILEGE_MANAGE = 'manage_escalations';
+const INVESTIGATION_SUMMARY_PLUGIN_ID = 'agentic_investigations_summary';
+const PROPOSAL_READ_CONCURRENCY = 5;
+
 import type {
   AlertZeroRequestHandlerContext,
   AlertZeroPluginSetup,
@@ -52,6 +50,7 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
+import { ensureFingerprintIndexMapping } from './context_engine/ensure_fingerprint_index';
 import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
@@ -64,10 +63,13 @@ import { ScanFailuresService } from './services/scan_failures/scan_failures_serv
 import { ActionsService } from './services/actions/actions_service';
 import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
+import { isSpaceSupported } from './lib/is_space_supported';
 import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertzero_access';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import type { StoryProposal } from './services/investigation_summary/format_story';
+import { resolveScopedModel } from './routes/hunt/lib/scoped_model';
 import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabled';
 import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 import { enumerateSpaceIds } from './lib/enumerate_space_ids';
@@ -115,13 +117,11 @@ export class AlertZeroPlugin
   private agentBuilderConversations?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['conversations'];
-  private agentBuilderExecution?: NonNullable<
-    AlertZeroStartDependencies['agentBuilder']
-  >['execution'];
   private agentBuilderAttachments?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['attachments'];
   private searchInferenceEndpoints?: AlertZeroStartDependencies['searchInferenceEndpoints'];
+  private inference?: AlertZeroStartDependencies['inference'];
   private huntServices?: HuntServices;
   private fleetAgentService?: AgentService;
   private coreStart?: CoreStart;
@@ -149,9 +149,21 @@ export class AlertZeroPlugin
     this.threatIntelSupplyWorkflowInstaller = installer;
   };
 
-  private readonly alertZeroStartContract = (): AlertZeroPluginStart => ({
-    registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
-  });
+  /**
+   * False while the fingerprint template install is in flight, and after it fails.
+   * `start` cannot return a promise, so the matcher reads this as it changes.
+   */
+  private fingerprintWritesAllowed = true;
+
+  private readonly alertZeroStartContract = (): AlertZeroPluginStart => {
+    const plugin = this;
+    return {
+      registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
+      get attackFingerprintWritesAllowed() {
+        return plugin.fingerprintWritesAllowed;
+      },
+    };
+  };
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
@@ -206,8 +218,8 @@ export class AlertZeroPlugin
     });
     if (agentBuilder && proposals && agenticInvestigations) {
       const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
-        const [core, { security }] = await coreSetup.getStartServices();
-        return { core, security };
+        const [core, { security, spaces }] = await coreSetup.getStartServices();
+        return { core, security, spaces, isServerless: this.isServerless };
       });
       registerAgentType(agentBuilder);
       registerAttachments(agentBuilder);
@@ -218,11 +230,15 @@ export class AlertZeroPlugin
       });
       agentBuilder.skills.register(createActionDiscoverySkill(assertAlertZeroAccess));
       // `ai.conversation.updated` is opt-in, so Agent Builder only emits it where a consumer
-      // subscribes. Scoped per space, like the routes, so spaces without AlertZero stay quiet.
+      // subscribes. Scoped per space, like the routes, so spaces without AlertZero, and Classic
+      // spaces, stay quiet.
       agentBuilder.conversations.enableUpdatedTrigger({
         templateIds: [TEMPLATE_ID_INVESTIGATION, TEMPLATE_ID_ESCALATION],
         isEnabled: async (request) => {
-          const [{ savedObjects, uiSettings }] = await coreSetup.getStartServices();
+          const [{ savedObjects, uiSettings }, { spaces }] = await coreSetup.getStartServices();
+          if (!(await isSpaceSupported({ isServerless: this.isServerless, spaces, request }))) {
+            return false;
+          }
           return uiSettings
             .asScopedToClient(savedObjects.getScopedClient(request))
             .get<boolean>(ALERTZERO_ENABLED_SETTING_ID);
@@ -237,8 +253,9 @@ export class AlertZeroPlugin
       workflowsExtensions,
       getActionsService: () => this.requireActionsService(),
       getConversations: () => this.requireAgentBuilderConversations(),
-      getExecution: (params) => this.requireAgentBuilderExecution().executeAgent(params),
-      resolveConnectorId: (request) => this.resolveSummaryConnectorId(request),
+      resolveChatModel: (request) => this.resolveSummaryChatModel(request),
+      getProposals: (proposalIds, spaceId, request) =>
+        this.readProposals(proposalIds, spaceId, request),
       getHuntServices: () => this.requireHuntServices(),
       getResolveHostEnrollment: makeScopedResolveHostEnrollment(
         () => this.fleetAgentService,
@@ -261,24 +278,13 @@ export class AlertZeroPlugin
       privileges: {
         all: {
           app: ['kibana'],
-          api: [
-            ALERTZERO_API_PRIVILEGE_READ,
-            ALERTZERO_API_PRIVILEGE_WRITE,
-            INVESTIGATIONS_API_PRIVILEGE_READ,
-            INVESTIGATIONS_API_PRIVILEGE_MANAGE,
-            ESCALATIONS_API_PRIVILEGE_READ,
-            ESCALATIONS_API_PRIVILEGE_MANAGE,
-          ],
+          api: [ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE],
           savedObject: { all: [], read: [] },
           ui: ['show', 'write'],
         },
         read: {
           app: ['kibana'],
-          api: [
-            ALERTZERO_API_PRIVILEGE_READ,
-            INVESTIGATIONS_API_PRIVILEGE_READ,
-            ESCALATIONS_API_PRIVILEGE_READ,
-          ],
+          api: [ALERTZERO_API_PRIVILEGE_READ],
           savedObject: { all: [], read: [] },
           ui: ['show'],
         },
@@ -287,10 +293,15 @@ export class AlertZeroPlugin
 
     coreSetup.http.registerRouteHandlerContext<AlertZeroRequestHandlerContext, 'alertzero'>(
       'alertzero',
-      async (context) => ({
+      async (context, request) => ({
         hasRequiredDependencies: Boolean(
           agentBuilder && proposals && agenticInvestigations && this.serviceAccountsEnabled
         ),
+        isSpaceSupported: await isSpaceSupported({
+          isServerless: this.isServerless,
+          spaces: this.spaces,
+          request,
+        }),
         subscription: getSubscriptionAvailability({
           isServerless: this.isServerless,
           serverlessTierAvailable: this.serverlessTierAvailable,
@@ -329,13 +340,25 @@ export class AlertZeroPlugin
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
-    this.agentBuilderExecution = plugins.agentBuilder?.execution;
     this.agentBuilderAttachments = plugins.agentBuilder?.attachments;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+    this.inference = plugins.inference;
 
     if (!this.config.enabled) {
       return this.alertZeroStartContract();
     }
+
+    // Plugin start cannot return a promise. Writes stay refused until this settles, so a
+    // worker that runs in that gap reviews every attack and does not auto-create the index.
+    this.fingerprintWritesAllowed = false;
+    void ensureFingerprintIndexMapping(core.elasticsearch.client.asInternalUser, this.logger).then(
+      (allowed) => {
+        this.fingerprintWritesAllowed = allowed;
+      },
+      () => {
+        this.fingerprintWritesAllowed = false;
+      }
+    );
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
 
@@ -466,36 +489,63 @@ export class AlertZeroPlugin
     return this.requireStarted(this.agentBuilderConversations, 'agentBuilder.conversations');
   }
 
-  private requireAgentBuilderExecution(): NonNullable<
-    AlertZeroStartDependencies['agentBuilder']
-  >['execution'] {
-    return this.requireStarted(this.agentBuilderExecution, 'agentBuilder.execution');
-  }
-
   private requireAgentBuilderAttachments(): NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['attachments'] {
     return this.requireStarted(this.agentBuilderAttachments, 'agentBuilder.attachments');
   }
 
-  private async resolveSummaryConnectorId(request: KibanaRequest): Promise<string | undefined> {
-    const searchInferenceEndpoints = this.searchInferenceEndpoints;
-    if (!searchInferenceEndpoints) {
-      return undefined;
-    }
+  private async resolveSummaryChatModel(request: KibanaRequest) {
+    const core = this.requireCoreStart();
+    const outcome = await resolveScopedModel({
+      inference: this.inference,
+      searchInferenceEndpoints: this.searchInferenceEndpoints,
+      featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+      request,
+      uiSettingsClient: core.uiSettings.asScopedToClient(
+        core.savedObjects.getScopedClient(request)
+      ),
+      logger: this.logger.get('investigation-summary'),
+      chatModelOptions: {
+        telemetryMetadata: {
+          pluginId: INVESTIGATION_SUMMARY_PLUGIN_ID,
+          aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+        },
+      },
+    });
+    return outcome.ok ? outcome.model.chatModel : undefined;
+  }
+
+  private async readProposals(
+    proposalIds: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<Record<string, StoryProposal>> {
     try {
-      const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-        ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
-        request
-      );
-      return endpoints[0]?.connectorId;
+      const proposals = this.requireProposals();
+      // The service reads as the internal user, so the caller's own privilege is checked first.
+      await proposals.getProposalPrivileges().assertCanRead(request);
+      const service = proposals.getProposalsService();
+      const found: Array<[string, StoryProposal]> = [];
+      for (const batch of chunk(proposalIds, PROPOSAL_READ_CONCURRENCY)) {
+        const results = await Promise.allSettled(
+          batch.map((id) => service.get(id, spaceId, request))
+        );
+        results.forEach((result, index) => {
+          if (result.status === 'fulfilled') {
+            const { title, status, decision, comment, supersededBy } = result.value;
+            found.push([batch[index], { title, status, decision, comment, supersededBy }]);
+          } else {
+            this.logger.debug(
+              `AlertZero investigation summary could not read proposal ${batch[index]}. ${result.reason}`
+            );
+          }
+        });
+      }
+      return Object.fromEntries(found);
     } catch (error) {
-      this.logger.warn(
-        `AlertZero investigation summary connector could not be resolved. ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      return undefined;
+      this.logger.debug(`AlertZero investigation summary could not read proposals. ${error}`);
+      return {};
     }
   }
 

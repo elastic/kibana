@@ -12,6 +12,7 @@ jest.mock('uuid', () => ({
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
@@ -111,6 +112,7 @@ describe('manageActionPolicyTool', () => {
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
         versions: [
           {
             data: {
@@ -246,6 +248,7 @@ describe('manageActionPolicyTool', () => {
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
         origin: 'policy-uuid',
         versions: [
           {
@@ -316,7 +319,7 @@ describe('manageActionPolicyTool', () => {
       expect(results[0].data?.message).toContain('does not declare `inputs.payload`');
     });
 
-    it('surfaces variable-ref errors from validateWorkflow as workflowDiagnostics warnings', async () => {
+    it('returns an error result for variable-ref errors from validateWorkflow when set_destinations is used', async () => {
       const deps = createDeps();
       deps.getWorkflowClient = jest.fn(() => ({
         getWorkflow: jest.fn().mockResolvedValue({
@@ -350,7 +353,7 @@ describe('manageActionPolicyTool', () => {
       const result = await tool.handler(
         {
           operations: [
-            { operation: 'set_metadata', name: 'Variable Ref Warning Policy' },
+            { operation: 'set_metadata', name: 'Variable Ref Error Policy' },
             {
               operation: 'set_destinations',
               destinations: [{ type: 'workflow', id: 'wf-1' }],
@@ -361,22 +364,13 @@ describe('manageActionPolicyTool', () => {
       );
 
       const { results } = result as {
-        results: Array<{
-          type: string;
-          data?: {
-            workflowDiagnostics?: Array<{ destinationId: string; source: string; message: string }>;
-          };
-        }>;
+        results: Array<{ type: string; data?: { message?: string } }>;
       };
       expect(deps.validateWorkflow).toHaveBeenCalled();
-      expect(results[0].type).toBe(ToolResultType.other);
-      expect(results[0].data?.workflowDiagnostics).toEqual([
-        expect.objectContaining({
-          destinationId: 'wf-1',
-          source: 'workflow-validation',
-          message: expect.stringContaining('episodez'),
-        }),
-      ]);
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data?.message).toContain('[error] [invalidVariablePath]');
+      expect(results[0].data?.message).toContain('episodez');
+      expect(ctx.attachments.add).not.toHaveBeenCalled();
     });
 
     it('omits workflowDiagnostics entirely when the destination workflow is fully valid', async () => {
@@ -518,6 +512,7 @@ describe('manageActionPolicyTool', () => {
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
         origin: 'policy-persisted-id',
         versions: [
           {
@@ -553,6 +548,7 @@ describe('manageActionPolicyTool', () => {
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
         versions: [
           {
             data: {

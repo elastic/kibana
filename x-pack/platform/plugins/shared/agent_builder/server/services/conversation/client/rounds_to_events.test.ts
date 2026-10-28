@@ -590,6 +590,20 @@ describe('service account attribution', () => {
       });
     });
 
+    it('keeps the display name a workflow recorded for a service account author', () => {
+      const actor = userMessageActor(undefined, {
+        author: { ...serviceAccount, full_name: 'Attack Discovery Review' },
+      });
+
+      expect(actor).toEqual({
+        type: EventActorType.user,
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        full_name: 'Attack Discovery Review',
+        principal_type: 'service_account',
+      });
+    });
+
     it('marks a service account owner on the fallback branch', () => {
       const conversation = baseConversation([]);
 

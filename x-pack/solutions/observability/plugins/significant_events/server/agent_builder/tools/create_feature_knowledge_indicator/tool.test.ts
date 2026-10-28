@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import { SourceWriteConflictError } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import {
@@ -251,6 +252,34 @@ describe('ki_feature_create tool', () => {
         error_message: 'write failed',
       })
     );
+  });
+
+  it('tells the agent whether a refused write is worth retrying', async () => {
+    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
+    const bulk = jest
+      .fn()
+      .mockRejectedValueOnce(new SourceWriteConflictError('lease_held', 'being updated'))
+      .mockRejectedValueOnce(new SourceWriteConflictError('source_disabled', 'disabled'));
+    const tool = createFeatureKnowledgeIndicatorTool({
+      getScopedClients: createScopedClients({ bulk }),
+      server,
+      logger,
+      telemetry,
+    });
+
+    if (!('handler' in tool)) {
+      throw new Error('ki_feature_create must be a builtin tool');
+    }
+
+    const retryable = await invokeHandler(tool, featureParams, createMockToolContext());
+    const final = await invokeHandler(tool, featureParams, createMockToolContext());
+
+    expect(retryable).toMatchObject({
+      results: [{ data: { metadata: { reason: 'lease_held', retryable: true } } }],
+    });
+    expect(final).toMatchObject({
+      results: [{ data: { metadata: { reason: 'source_disabled', retryable: false } } }],
+    });
   });
 
   it('does not let a Nightshift reader create a feature KI', async () => {

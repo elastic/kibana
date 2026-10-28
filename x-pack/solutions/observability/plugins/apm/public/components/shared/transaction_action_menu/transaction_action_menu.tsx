@@ -8,10 +8,6 @@
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  ASSET_DETAILS_LOCATOR_ID,
-  type AssetDetailsLocatorParams,
-} from '@kbn/observability-shared-plugin/common';
-import {
   ActionMenu,
   ActionMenuDivider,
   getContextMenuItemsFromActions,
@@ -22,25 +18,16 @@ import {
   SectionTitle,
 } from '@kbn/observability-shared-plugin/public';
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
-import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
-import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/common';
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { O11Y_APM_TRANSACTION_CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
-import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
-import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
-import { getSections } from './sections';
 import { CustomLinkFlyout } from './custom_link_flyout';
-import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
+import { useTransactionActionMenuSections } from './use_transaction_action_menu_sections';
 
 interface Props {
   readonly transaction?: Transaction;
@@ -102,14 +89,38 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
           />
         }
       >
-        <ActionMenuSections transaction={transaction} profilingLocators={profilingLocators} />
-        {hasGoldLicense && (
-          <CustomLinkMenuSection
-            transaction={transaction}
-            openCreateCustomLinkFlyout={openCustomLinkFlyout}
-          />
-        )}
+        <TransactionActionMenuContent
+          transaction={transaction}
+          profilingLocators={profilingLocators}
+          hasGoldLicense={!!hasGoldLicense}
+          onCreateCustomLink={openCustomLinkFlyout}
+        />
       </ActionMenu>
+    </>
+  );
+}
+
+/** The Investigate menu's sections and custom links, without a popover around them. */
+export function TransactionActionMenuContent({
+  transaction,
+  profilingLocators,
+  hasGoldLicense,
+  onCreateCustomLink,
+}: {
+  transaction?: Transaction;
+  profilingLocators?: ProfilingLocators;
+  hasGoldLicense: boolean;
+  onCreateCustomLink: () => void;
+}) {
+  return (
+    <>
+      <ActionMenuSections transaction={transaction} profilingLocators={profilingLocators} />
+      {hasGoldLicense && (
+        <CustomLinkMenuSection
+          transaction={transaction}
+          openCreateCustomLinkFlyout={onCreateCustomLink}
+        />
+      )}
     </>
   );
 }
@@ -121,53 +132,8 @@ function ActionMenuSections({
   transaction?: Transaction;
   profilingLocators?: ProfilingLocators;
 }) {
-  const { core, uiActions, share, metricsDataAccess } = useApmPluginContext();
-  const location = useLocation();
-  const apmRouter = useApmRouter();
-  const { dataView } = useAdHocApmDataView();
-
-  const metricsIndicesAsync = useAsync(() => {
-    return metricsDataAccess?.metricsClient.metricsIndices() ?? Promise.resolve(undefined);
-  }, [metricsDataAccess]);
-
-  const metricsIndices = metricsIndicesAsync.value?.metricIndices;
-
-  const logsLocator = getLogsLocatorFromUrlService(share?.url)!;
-
-  const uptimeLocator = share?.url?.locators?.get(uptimeOverviewLocatorID);
-
-  const infraLinksAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfraUiAvailable);
-
-  const assetDetailsLocator =
-    share?.url?.locators?.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
-
-  const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
-
-  const {
-    query: { rangeFrom, rangeTo, environment },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view',
-    '/dependencies/operation'
-  );
-
-  const sections = getSections({
-    transaction,
-    basePath: core.http.basePath,
-    location,
-    apmRouter,
-    infraLinksAvailable,
-    uptimeLocator,
-    profilingLocators,
-    rangeFrom,
-    rangeTo,
-    environment,
-    logsLocator,
-    dataViewId: dataView?.id,
-    assetDetailsLocator,
-    discoverLocator,
-    metricsIndices,
-  });
+  const { uiActions } = useApmPluginContext();
+  const sections = useTransactionActionMenuSections(transaction, profilingLocators);
 
   const externalMenuItems = useAsync(() => {
     return transaction

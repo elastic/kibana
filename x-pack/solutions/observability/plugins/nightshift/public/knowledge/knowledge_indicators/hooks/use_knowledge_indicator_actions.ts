@@ -14,11 +14,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/management-settings-ids';
 import { useCallback, useMemo } from 'react';
-import {
-  DISCOVERY_QUERIES_QUERY_KEY,
-  DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
-  FEATURES_QUERY_KEY,
-} from '../../../data/query_keys';
+import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY } from '../../../data/query_keys';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useQueriesApi, type PromoteResult } from '../../../data/rules/use_queries_api';
 import { useStreamFeaturesApi } from '../../../data/knowledge_indicators/use_stream_features_api';
@@ -65,7 +61,6 @@ export function useKnowledgeIndicatorActions({
   const invalidateData = useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-      queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: [...FEATURES_QUERY_KEY, sourceId] }),
       queryClient.invalidateQueries({ queryKey: [...FEATURES_QUERY_KEY, 'all'] }),
     ]);

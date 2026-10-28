@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { OPEN_PROPOSAL_STATUSES } from '../../../../../common/proposals/open_statuses';
+import { OPEN_PROPOSAL_STATUSES } from '@kbn/proposals-common';
 import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../../../common/proposals/origin';
 import type { HasOpenProposal } from './run_package_report';
 

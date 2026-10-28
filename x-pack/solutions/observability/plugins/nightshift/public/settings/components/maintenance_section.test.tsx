@@ -23,7 +23,7 @@ let mockMaintenanceStatus: Pick<
 >;
 let mockMaintenanceActions: Pick<
   ReturnType<typeof useSignificantEventsMaintenanceActions>,
-  'pause' | 'resume' | 'isPausing' | 'isResuming'
+  'pause' | 'resume' | 'isPausing' | 'isMutating'
 >;
 
 jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
@@ -44,7 +44,7 @@ describe('MaintenanceSection', () => {
       pause,
       resume,
       isPausing: false,
-      isResuming: false,
+      isMutating: false,
     };
   });
 
@@ -132,5 +132,25 @@ describe('MaintenanceSection', () => {
     expect(
       screen.queryByTestId('streams-settings-maintenance-activity-counts')
     ).not.toBeInTheDocument();
+  });
+
+  it('locks activity controls and an open confirmation during another maintenance action', () => {
+    const panel = (
+      <I18nProvider>
+        <MaintenanceSection canManage />
+      </I18nProvider>
+    );
+    const { rerender } = render(panel);
+    fireEvent.click(screen.getByTestId('streams-settings-maintenance-toggle-button'));
+
+    mockMaintenanceActions = { ...mockMaintenanceActions, isMutating: true };
+    rerender(
+      <I18nProvider>
+        <MaintenanceSection canManage />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('streams-settings-maintenance-toggle-button')).toBeDisabled();
+    expect(screen.getByTestId('streams-settings-maintenance-confirm-button')).toBeDisabled();
   });
 });

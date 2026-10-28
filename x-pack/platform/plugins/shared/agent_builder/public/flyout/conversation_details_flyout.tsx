@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -22,6 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
 import {
@@ -33,6 +34,7 @@ import type { ConversationTemplatesService } from '../services/conversation_temp
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
+import { getConversationDetailsFlyoutWidthProps } from './conversation_details_flyout_width';
 
 export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
   defaultMessage: 'Chat info',
@@ -43,6 +45,8 @@ const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.
 });
 
 const POLL_INTERVAL_MS = 5_000;
+
+const isNotFoundError = (error: IHttpFetchError | null): boolean => error?.response?.status === 404;
 
 type ResolvedTab = ConversationTemplateTabDefinition & { id: string };
 
@@ -200,6 +204,7 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
+  onNotFound?: () => void;
 }
 
 /**
@@ -212,16 +217,27 @@ export const ConversationDetailsFlyoutSnapshot = ({
   conversationsService,
   conversationTemplatesService,
   titleId,
+  onNotFound,
 }: ConversationDetailsFlyoutSnapshotProps) => {
   const {
     data: conversation,
+    error,
     isLoading,
     refetch,
-  } = useQuery({
+  } = useQuery<Conversation, IHttpFetchError>({
     queryKey: ['conversation-details-flyout-snapshot', conversationId],
     queryFn: () => conversationsService.get({ conversationId }),
-    refetchInterval: POLL_INTERVAL_MS,
+    retry: (failureCount, httpError) => !isNotFoundError(httpError) && failureCount < 3,
+    refetchInterval: (data, query) =>
+      isNotFoundError(query.state.error) ? false : POLL_INTERVAL_MS,
   });
+
+  const isNotFound = isNotFoundError(error);
+  useEffect(() => {
+    if (isNotFound) {
+      onNotFound?.();
+    }
+  }, [isNotFound, onNotFound]);
 
   const refetchConversation = useCallback(async () => {
     await refetch();
@@ -267,6 +283,9 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   });
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
+  // Resolved once per open: EUI re-seeds the flyout whenever `size` changes, so reading the
+  // remembered width again on every render would fight the user's drag.
+  const widthPropsRef = useRef(getConversationDetailsFlyoutWidthProps());
 
   const trailingActions = useMemo(() => {
     if (!conversation?.template_id) {
@@ -285,7 +304,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
       historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
       flyoutMenuDisplayMode="always"
       flyoutMenuProps={{ title: FLYOUT_TITLE, trailingActions }}
-      size="s"
+      {...widthPropsRef.current}
       type="push"
       paddingSize="m"
       css={flyoutMenuRowStyles}

@@ -6,7 +6,15 @@
  */
 
 import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
-import { isProposalSettling, isTerminal, proposalChartsSummaryQuerySchema } from './proposal';
+import {
+  isProposalSettling,
+  isAwaitingRetry,
+  isTerminal,
+  OPEN_PROPOSAL_STATUSES,
+  proposalChartsSummaryQuerySchema,
+  proposalStatusSchema,
+  SETTLED_PROPOSAL_STATUSES,
+} from './proposal';
 import { reviseProposalResponseSchema } from './revision';
 
 describe('proposalChartsSummaryQuerySchema', () => {
@@ -49,6 +57,25 @@ describe('proposalChartsSummaryQuerySchema', () => {
   });
 });
 
+describe('isAwaitingRetry', () => {
+  it('is true for an approved, failed proposal with no successor yet', () => {
+    expect(isAwaitingRetry({ decision: 'approved', status: 'failed' })).toBe(true);
+  });
+
+  it('is false once the retry has replaced it', () => {
+    expect(
+      isAwaitingRetry({ decision: 'approved', status: 'failed', supersededBy: 'retry-1' })
+    ).toBe(false);
+  });
+
+  it('is false for any other status or decision', () => {
+    expect(isAwaitingRetry({ decision: 'approved', status: 'executing' })).toBe(false);
+    expect(isAwaitingRetry({ decision: 'approved', status: 'succeeded' })).toBe(false);
+    expect(isAwaitingRetry({ decision: 'dismissed', status: 'failed' })).toBe(false);
+    expect(isAwaitingRetry({ decision: undefined, status: 'pending' })).toBe(false);
+  });
+});
+
 describe('isProposalSettling', () => {
   it('reads true for an approved proposal whose action has not finished running yet', () => {
     expect(isProposalSettling({ decision: 'approved', status: 'executing' })).toBe(true);
@@ -84,6 +111,28 @@ describe('isTerminal', () => {
   it.each(['pending', 'executing'] as const)('treats %s as still open', (status) => {
     expect(isTerminal(status)).toBe(false);
   });
+});
+
+describe('proposal status groups', () => {
+  it('lists the open and settled statuses', () => {
+    expect(OPEN_PROPOSAL_STATUSES).toEqual(['pending', 'executing']);
+    expect(SETTLED_PROPOSAL_STATUSES).toEqual(['succeeded', 'failed', 'expired', 'no_action']);
+  });
+
+  it('never puts a status in both groups', () => {
+    expect(OPEN_PROPOSAL_STATUSES.filter((s) => SETTLED_PROPOSAL_STATUSES.includes(s))).toEqual([]);
+  });
+
+  it('keeps `superseded` out of both groups because its successor represents it', () => {
+    expect([...OPEN_PROPOSAL_STATUSES, ...SETTLED_PROPOSAL_STATUSES]).not.toContain('superseded');
+  });
+
+  it.each(proposalStatusSchema.options)(
+    'agrees with isTerminal about %s: terminal unless open',
+    (status) => {
+      expect(isTerminal(status)).toBe(!OPEN_PROPOSAL_STATUSES.includes(status));
+    }
+  );
 });
 
 describe('reviseProposalResponseSchema', () => {

@@ -45,6 +45,10 @@ const CustomEventRow = ({ item, conversationId, isStreaming }: CustomEventRowPro
     min-inline-size: ${euiTheme.size.l};
   `;
 
+  const contentColumnStyles = css`
+    min-inline-size: 0;
+  `;
+
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -59,7 +63,7 @@ const CustomEventRow = ({ item, conversationId, isStreaming }: CustomEventRowPro
       >
         {header && <EuiIcon type={header.icon} size="l" aria-label={header.iconTitle} />}
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={true} css={contentColumnStyles}>
         <EuiFlexGroup direction="column" gutterSize="s">
           {header && (
             <EuiFlexItem grow={false}>
