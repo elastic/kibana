@@ -81,3 +81,20 @@ declare module '*?raw' {
   // eslint-disable-next-line import/no-default-export
   export default string;
 }
+
+// EUI icon assets are SVGR modules loaded lazily by workflow step definitions
+// (`@elastic/eui/es/components/icon/assets/<name>`); EUI ships no declaration for the wildcard.
+declare module '@elastic/eui/es/components/icon/assets/*' {
+  import type * as React from 'react';
+
+  interface SVGRProps {
+    title?: string;
+    titleId?: string;
+  }
+  export const icon: ({
+    title,
+    titleId,
+    ...props
+  }: React.SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element;
+  export {};
+}

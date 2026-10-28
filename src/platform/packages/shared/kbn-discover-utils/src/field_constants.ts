@@ -45,6 +45,7 @@ export const OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE =
 export const OTEL_ATTRIBUTES_EXCEPTION_MESSAGE = 'attributes.exception.message';
 export const OTEL_ATTRIBUTES_EXCEPTION_STACKTRACE = 'attributes.exception.stacktrace';
 export const OTEL_EVENT_NAME_FIELD = 'event_name';
+export const OTEL_SEVERITY_TEXT_FIELD = 'severity_text';
 
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';

@@ -9,7 +9,7 @@ steps:
     key: pre_build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -22,9 +22,10 @@ steps:
     label: 'Pick Test Group Run Order'
     depends_on: pre_build
     agents:
-      provider: k8s
-      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
-      imageUID: 1000
+      image: family/kibana-minimal-ubuntu-2604
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
     timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -32,26 +33,6 @@ steps:
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
       FTR_CONFIGS_DEPS: 'build'
       FTR_TEST_CHANNELS: ci-on-commit
-    plugins:
-      - sparse-checkout#v1.6.0:
-          no_cone: true
-          paths:
-            - '/.buildkite/'
-            - '/.node-version'
-            - '/package.json'
-            - '/tsconfig.base.json'
-            - '/versions.json'
-            - '**/kibana.jsonc'
-            - '**/tsconfig.json'
-            - '**/jest.config.js'
-            - '**/jest.integration.config.js'
-            - '**/*.test.js'
-            - '**/*.test.mjs'
-            - '**/*.test.ts'
-            - '**/*.test.tsx'
-          cleanup_sparse_state: true
-          post_checkout:
-            unshallow: true
     retry:
       automatic:
         - exit_status: '*'
@@ -79,11 +60,10 @@ steps:
       image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c4d-standard-16
-      diskType: hyperdisk-balanced
+      machineType: n2d-custom-16-32768
       diskSizeGb: 50
       buildDirectory: /dev/shm/bk
-      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: build
     timeout_in_minutes: 60
     retry:
@@ -99,7 +79,7 @@ steps:
       provider: gcp
       machineType: n2d-standard-8
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
     key: quick_checks
     timeout_in_minutes: 60
     retry:
@@ -115,7 +95,7 @@ steps:
       provider: gcp
       machineType: n2d-standard-2
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
     key: checks
     timeout_in_minutes: 60
     retry:
@@ -184,7 +164,7 @@ steps:
       provider: gcp
       machineType: n2d-highmem-4
       preemptible: true
-      spotZones: us-central1-b,us-central1-c,us-central1-f
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c
     key: check_oas_snapshot
     timeout_in_minutes: 60
     retry:
@@ -228,7 +208,7 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -248,6 +228,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2d-standard-8
+      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
     key: build_scout_tests
     timeout_in_minutes: 20
     env:
@@ -269,6 +250,7 @@ steps:
     depends_on:
       - build
     build:
+      message: '${BUILDKITE_MESSAGE}'
       branch: '${BUILDKITE_BRANCH}'
       commit: '${BUILDKITE_COMMIT}'
       env:
@@ -296,7 +278,7 @@ steps:
   - command: .buildkite/scripts/steps/openapi_publishing/publish_oas_docs.sh
     label: 'Publish OAS docs to bump.sh'
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -343,7 +325,7 @@ steps:
       - sparse-checkout#v1.6.0:
           paths:
             - .buildkite
-            - .node-version
+            - .nvmrc
             - package.json
             - tsconfig.base.json
             - versions.json
@@ -355,7 +337,7 @@ steps:
     label: Trigger container image build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2

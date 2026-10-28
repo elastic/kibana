@@ -13,7 +13,10 @@ import {
   ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW,
   ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
   ALERTZERO_ACTION_WORKFLOW_IDS,
+  ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
@@ -26,11 +29,13 @@ import {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
 } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
+import { convertToWorkflowGraph } from '../../../graph';
 import {
   type ConcurrencySettings,
   DEFAULT_PARALLEL_MAX_FAN_OUT,
   type ParallelConcurrencyObject,
   WorkflowSchema,
+  type WorkflowYaml,
 } from '../../../spec/schema';
 
 /**
@@ -67,7 +72,11 @@ interface YamlStep {
   else?: YamlStep[];
   cases?: Array<{ match: string; steps: YamlStep[] }>;
   default?: YamlStep[];
-  'on-failure'?: { continue?: boolean; fallback?: YamlStep[] };
+  'on-failure'?: {
+    continue?: boolean;
+    fallback?: YamlStep[];
+    retry?: { 'max-attempts'?: number; delay?: string };
+  };
 }
 
 interface YamlWorkflow {
@@ -187,6 +196,7 @@ describe('Attack Discovery worker chain', () => {
   it.each([
     ['worker', ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.yaml],
     ['review', ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.yaml],
+    ['attach', ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.yaml],
     ['journal note', ALERTZERO_JOURNAL_NOTE_WORKFLOW.yaml],
     ['forensics handoff', ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW.yaml],
     [
@@ -229,12 +239,14 @@ describe('Attack Discovery worker chain', () => {
       expect(dispatch?.['on-failure']).toBeUndefined();
     });
 
-    // #19276 names all three settings. `scheduleInterval` has no behavioral use in the
-    // skeleton, so dropping it would be easy and would silently break the contract.
+    // #19276 names autonomy, settings version and the schedule interval. The interval
+    // string is traceability on the runner; the alert cap derived from it is forwarded
+    // separately. Dropping either would be easy and would silently break the contract.
     it.each([
       ['autonomy', 'consts.worker_settings.autonomy'],
       ['settings_version', 'consts.worker_settings.settingsVersion'],
       ['schedule_interval', 'consts.worker_settings.scheduleInterval'],
+      ['max_alerts', 'consts.worker_settings.maxAlerts'],
     ])('forwards the %s worker setting', (input, reference) => {
       expect(asInputs(dispatch)[input]).toContain(reference);
     });
@@ -242,6 +254,7 @@ describe('Attack Discovery worker chain', () => {
     it.each([
       ['autonomy', '${{ consts.worker_settings.autonomy }}'],
       ['schedule_interval', '${{ consts.worker_settings.scheduleInterval }}'],
+      ['max_alerts', '${{ consts.worker_settings.maxAlerts }}'],
     ])('forwards %s with a type-preserving template', (input, template) => {
       expect(asInputs(dispatch)[input]).toBe(template);
     });
@@ -299,8 +312,14 @@ describe('Attack Discovery worker chain', () => {
 
     // The child runs N pipelines, each with its own 30m branch-timeout, so this
     // bounds the whole batched run rather than a single pipeline's 30m budget.
+    // 12h covers a slow 10k scan (about 8h20m) and still returns before the next
+    // 24h schedule, so the review fan-out can run.
     it('sets a step timeout that bounds the whole batched child', () => {
-      expect(run?.timeout).toBe('4h');
+      expect(run?.timeout).toBe('12h');
+    });
+
+    it('caps retrieval at the prorated alert count, defaulting to a full day', () => {
+      expect(asInputs(run).max_alerts).toBe('${{ inputs.max_alerts | default: 10000 }}');
     });
 
     it('leaves failure propagation alone so a failed generation fails the run', () => {
@@ -338,9 +357,9 @@ describe('Attack Discovery worker chain', () => {
       expect(stepIn(workerSteps, 'current_batch')?.with?.attacks).toBe('${{ foreach.item }}');
     });
 
-    it('drains discoveries in batches so parallel never exceeds its fan-out ceiling', () => {
+    it('drains reviews in batches so parallel never exceeds its fan-out ceiling', () => {
       expect(stepIn(workerSteps, 'run_review_batches')?.foreach).toContain(
-        'steps.resolve_fanout.output.batches'
+        'steps.resolve_dispatch.output.review_batches'
       );
     });
 
@@ -522,12 +541,16 @@ describe('Attack Discovery worker chain', () => {
     // asserting the template text alone would not catch the shape mismatch.
     describe('per-attack review inputs', () => {
       const liquidEngine = createWorkflowLiquidEngine();
-      // Exactly what `transform_to_alert_documents` writes.
+      // `match_fingerprints` reads the persisted dotted keys and emits these fields.
       const persistedAttack = {
-        'kibana.alert.attack_discovery.title': 'Suspicious lateral movement',
-        'kibana.alert.attack_discovery.alert_ids': ['alert-1', 'alert-2'],
-        'kibana.alert.attack_discovery.summary_markdown': 'A **summary**',
-        'kibana.alert.uuid': 'attack-hash-1',
+        attack_discovery_id: 'attack-hash-1',
+        title: 'Suspicious lateral movement',
+        alert_ids: ['alert-1', 'alert-2'],
+        summary_markdown: 'A **summary**',
+        related_investigation_id: '',
+        related_link_reason: '',
+        sibling_alert_ids: ['alert-3'],
+        sibling_attack_discovery_ids: ['attack-hash-2'],
       };
 
       const render = (template: unknown) =>
@@ -546,6 +569,9 @@ describe('Attack Discovery worker chain', () => {
       it.each([
         ['title', 'Suspicious lateral movement'],
         ['alert_ids', '["alert-1","alert-2"]'],
+        ['sibling_alert_ids', '["alert-3"]'],
+        ['sibling_attack_discovery_ids', '["attack-hash-2"]'],
+        ['related_link_reason', ''],
         ['summary_markdown', 'A **summary**'],
         ['attack_discovery_id', 'attack-hash-1'],
       ])('resolves %s against a persisted attack document', async (field, expected) => {
@@ -937,9 +963,15 @@ describe('Attack Discovery worker chain', () => {
       });
 
       // Impact reads the correlated alerts through the Security step, and nothing reads the
-      // attack from Elasticsearch.
-      it('reads no Elasticsearch index itself', () => {
-        expect(reviewSteps.filter((step) => step.type.startsWith('elasticsearch.'))).toEqual([]);
+      // attack from Elasticsearch. The only direct read is the one that verifies the
+      // correlated alerts were retired, and it reads the detection alerts index.
+      it('reads Elasticsearch only to verify the retired alerts', () => {
+        const reads = reviewSteps.filter((step) => step.type.startsWith('elasticsearch.'));
+
+        expect(reads.map((step) => step.name)).toEqual(['verify_alerts_retired']);
+        expect(new Set(reads.map((step) => step.with?.index))).toEqual(
+          new Set(['.alerts-security.alerts-{{ workflow.spaceId }}'])
+        );
       });
 
       it('does not run an agent against the Investigation', () => {
@@ -1654,8 +1686,10 @@ describe('Attack Discovery worker chain', () => {
         expect(stepIn(reviewSteps, name)?.with?.update_related_alerts).toBe(false);
       });
 
-      it.each(closes)('closes by the persisted document id in %s', (name) => {
-        expect(stepIn(reviewSteps, name)?.with?.ids).toEqual(['{{ inputs.attack_discovery_id }}']);
+      it.each(closes)('closes the canonical attack and its same-run siblings in %s', (name) => {
+        expect(stepIn(reviewSteps, name)?.with?.ids).toBe(
+          '${{ inputs.sibling_attack_discovery_ids | default: consts.no_alert_ids | push: inputs.attack_discovery_id }}'
+        );
       });
     });
 
@@ -1760,8 +1794,12 @@ describe('Attack Discovery worker chain', () => {
         expect(JSON.stringify(readback?.with)).toContain('steps.escalation_gate.output.proposalId');
       });
 
-      it('calls the versioned internal proposals route', () => {
-        expect(JSON.stringify(readback?.with)).toContain('/internal/proposals/');
+      // Raw kibana.request is sent verbatim. An unprefixed path 404s in a named
+      // space, and the journal then falls back to "unspecified".
+      it('reads the proposal in the executing space', () => {
+        expect(JSON.stringify(readback?.with)).toContain(
+          '/s/{{ workflow.spaceId }}/internal/proposals/{{ steps.escalation_gate.output.proposalId }}'
+        );
       });
 
       // The two axes are what separate a decline from a lapse, so the read-back is no
@@ -2030,6 +2068,319 @@ describe('Attack Discovery worker chain', () => {
     });
   });
 
+  // The alerts behind an escalated attack leave the Worker's queue: acknowledged, and
+  // tagged with the tag batched generation excludes. Without it, every Worker run
+  // while the gate is parked correlates the same alerts into a near-duplicate attack.
+  describe('retiring the correlated alerts', () => {
+    // Every step in order, between `resolve_escalation` and `escalation_gate`.
+    const retireSteps = [
+      'tag_correlated_alerts',
+      'acknowledge_correlated_alerts',
+      'verify_alerts_retired',
+      'resolve_alerts_retired',
+      'journal_alerts_retired',
+    ] as const;
+    const writes = ['tag_correlated_alerts', 'acknowledge_correlated_alerts'] as const;
+    const alertWriteTypes = [
+      'security.setAlertTags',
+      'security.setAlertStatus',
+      'kibana.SetAlertsStatus',
+    ];
+    const retried = [
+      'tag_correlated_alerts',
+      'acknowledge_correlated_alerts',
+      'verify_alerts_retired',
+    ] as const;
+    const topLevelNames = review.steps.map((step) => step.name);
+    const generation = parse(
+      ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.yaml
+    ) as YamlWorkflow;
+
+    const stripExpression = (expression: unknown): string =>
+      String(expression)
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim();
+
+    const evaluateIf = (name: string, context: Record<string, unknown>): unknown =>
+      createWorkflowLiquidEngine().evalValueSync(
+        stripExpression(stepIn(reviewSteps, name)?.if),
+        context
+      );
+
+    const escalationContext = (escalate: boolean, alertIds?: string[]) => ({
+      steps: { resolve_escalation: { output: { escalate } } },
+      inputs: alertIds === undefined ? {} : { alert_ids: alertIds },
+    });
+
+    const evaluateResolved = (field: string, context: Record<string, unknown>): unknown =>
+      createWorkflowLiquidEngine().evalValueSync(
+        stripExpression(stepIn(reviewSteps, 'resolve_alerts_retired')?.with?.[field]),
+        context
+      );
+
+    const renderJournal = (retired: Record<string, unknown>): Promise<string> =>
+      createWorkflowLiquidEngine().parseAndRender(
+        asInputs(stepIn(reviewSteps, 'journal_alerts_retired')).message,
+        {
+          consts: review.consts,
+          execution: { id: 'review-exec-1' },
+          steps: { resolve_alerts_retired: { output: retired } },
+        }
+      );
+
+    const queryFilters = (name: string) =>
+      ((stepIn(reviewSteps, name)?.with?.query as { bool?: { filter?: unknown[] } })?.bool
+        ?.filter ?? []) as unknown[];
+
+    it('uses the az:ad_correlated tag', () => {
+      expect(review.consts?.ad_correlated_tag).toBe('az:ad_correlated');
+    });
+
+    it('tags with the tag batched generation excludes', () => {
+      const retrieve = stepIn(flatten(generation.steps), 'retrieve_alert_ids');
+      const mustNot = (retrieve?.with?.filter as { bool?: { must_not?: unknown[] } })?.bool
+        ?.must_not;
+
+      expect(mustNot).toContainEqual({
+        terms: { 'kibana.alert.workflow_tags': [review.consts?.ad_correlated_tag] },
+      });
+    });
+
+    it.each([
+      ['tag_correlated_alerts', 'security.setAlertTags'],
+      ['acknowledge_correlated_alerts', 'kibana.SetAlertsStatus'],
+      ['verify_alerts_retired', 'elasticsearch.search'],
+      ['resolve_alerts_retired', 'data.set'],
+      ['journal_alerts_retired', 'workflow.execute'],
+    ] as const)('implements %s as a real %s step', (name, type) => {
+      expect(stepIn(reviewSteps, name)?.type).toBe(type);
+    });
+
+    // The gate can park the run for up to 168h, so retiring the alerts after the
+    // decision would leave them in the queue for every Worker run in that window. The
+    // tag comes first, because it is what keeps the alerts out of the next run and so
+    // must not depend on the status write.
+    it('runs in order after the escalation is resolved and before the gate', () => {
+      const order = ['resolve_escalation', ...retireSteps, 'escalation_gate'].map((name) =>
+        topLevelNames.indexOf(name)
+      );
+
+      expect(order).not.toContain(-1);
+      expect([...order].sort((a, b) => a - b)).toEqual(order);
+    });
+
+    // False positives are handled separately, and a failed analysis is not a verdict
+    // about the attack, so neither touches the alerts.
+    it('writes to the alerts nowhere else', () => {
+      expect(
+        reviewSteps.filter((step) => alertWriteTypes.includes(step.type)).map((step) => step.name)
+      ).toEqual([...writes]);
+    });
+
+    it.each(retireSteps)('runs %s for an escalated attack with alerts', (name) => {
+      expect(evaluateIf(name, escalationContext(true, ['alert-1']))).toBe(true);
+    });
+
+    it.each(retireSteps)('skips %s when the verdict does not escalate', (name) => {
+      expect(evaluateIf(name, escalationContext(false, ['alert-1']))).toBe(false);
+    });
+
+    // The tag write rejects an empty id list.
+    it.each(retireSteps)('skips %s when the review was given no alerts', (name) => {
+      expect(evaluateIf(name, escalationContext(true, []))).toBe(false);
+      expect(evaluateIf(name, escalationContext(true))).toBe(false);
+    });
+
+    it('tags every correlated alert, adding the tag without removing any', () => {
+      const tagStep = asWith(stepIn(reviewSteps, 'tag_correlated_alerts')) as Record<
+        string,
+        unknown
+      >;
+
+      expect(tagStep.alert_ids).toBe('${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}');
+      expect(tagStep.tags_to_add).toEqual(['{{ consts.ad_correlated_tag }}']);
+      expect(tagStep.tags_to_remove).toBeUndefined();
+    });
+
+    // The status script drops `workflow_reason`, so acknowledging a closed alert would
+    // reopen it and lose its close reason. By query, the status check and the write are
+    // one update-by-query: an alert closed before it starts does not match, and one closed
+    // while it runs is a version conflict, which `conflicts: proceed` skips.
+    describe('acknowledging only open alerts', () => {
+      const acknowledge = stepIn(reviewSteps, 'acknowledge_correlated_alerts');
+
+      it('acknowledges by query, never by id', () => {
+        expect(acknowledge?.type).toBe('kibana.SetAlertsStatus');
+        expect(acknowledge?.with?.status).toBe('acknowledged');
+        expect(acknowledge?.with?.signal_ids).toBeUndefined();
+      });
+
+      it('targets exactly the correlated alerts', () => {
+        expect(queryFilters('acknowledge_correlated_alerts')).toContainEqual({
+          ids: { values: '${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}' },
+        });
+      });
+
+      it('matches only the alerts that are still open', () => {
+        expect(queryFilters('acknowledge_correlated_alerts')).toContainEqual({
+          term: { 'kibana.alert.workflow_status': 'open' },
+        });
+      });
+
+      // `abort` would fail the step on a conflict, and the retry would then re-send it.
+      it('skips an alert changed mid-flight instead of failing', () => {
+        expect(acknowledge?.with?.conflicts).toBe('proceed');
+      });
+
+      it('bounds the write well below the transport default', () => {
+        expect(acknowledge?.timeout).toBe('60s');
+      });
+    });
+
+    describe('reading the alerts back', () => {
+      const verify = stepIn(reviewSteps, 'verify_alerts_retired');
+      const aggregations = (verify?.with?.aggregations ?? {}) as Record<
+        string,
+        { filter?: { term?: Record<string, string> } }
+      >;
+
+      it('reads back exactly the correlated alerts', () => {
+        expect(asWith(verify).index).toBe('.alerts-security.alerts-{{ workflow.spaceId }}');
+        expect(verify?.with?.query).toEqual({
+          ids: { values: '${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}' },
+        });
+      });
+
+      it.each([
+        ['tagged', 'kibana.alert.workflow_tags', '{{ consts.ad_correlated_tag }}'],
+        ['open', 'kibana.alert.workflow_status', 'open'],
+        ['acknowledged', 'kibana.alert.workflow_status', 'acknowledged'],
+        ['closed', 'kibana.alert.workflow_status', 'closed'],
+      ])('counts the %s alerts', (name, field, value) => {
+        expect(aggregations[name]?.filter?.term).toEqual({ [field]: value });
+      });
+
+      const readBack = {
+        steps: {
+          verify_alerts_retired: {
+            output: {
+              hits: { total: { value: 4 }, hits: [] },
+              aggregations: {
+                tagged: { doc_count: 4 },
+                open: { doc_count: 0 },
+                acknowledged: { doc_count: 3 },
+                closed: { doc_count: 1 },
+              },
+            },
+          },
+        },
+        inputs: { alert_ids: ['a', 'b', 'c', 'd'] },
+      };
+
+      it.each([
+        ['read', true],
+        ['requested', 4],
+        ['tagged', 4],
+        ['open', 0],
+        ['acknowledged', 3],
+        ['closed', 1],
+      ])('resolves %s from the read-back', (field, value) => {
+        expect(evaluateResolved(field, readBack)).toBe(value);
+      });
+
+      it('counts the sibling attacks in the retirement', () => {
+        expect(
+          evaluateResolved('requested', {
+            inputs: { alert_ids: ['a', 'b'], sibling_alert_ids: ['c'] },
+          })
+        ).toBe(3);
+      });
+
+      it('marks a failed read-back as unread', () => {
+        expect(
+          evaluateResolved('read', {
+            steps: { verify_alerts_retired: { error: { type: 'Error' } } },
+            inputs: { alert_ids: ['a'] },
+          })
+        ).toBe(false);
+      });
+    });
+
+    // Bookkeeping, not the lifecycle: nothing here may cancel the escalation.
+    it.each(retried)('retries %s and then continues', (name) => {
+      const onFailure = stepIn(reviewSteps, name)?.['on-failure'];
+
+      expect(onFailure?.retry?.['max-attempts']).toBe(3);
+      expect(onFailure?.continue).toBe(true);
+    });
+
+    it('continues past a failed journal note', () => {
+      expect(stepIn(reviewSteps, 'journal_alerts_retired')?.['on-failure']?.continue).toBe(true);
+    });
+
+    // The note reports the alerts as read back, because a write can return 200 and
+    // change nothing.
+    describe('the journal note', () => {
+      const retired = (overrides: Record<string, unknown> = {}) => ({
+        read: true,
+        requested: 4,
+        tagged: 4,
+        open: 0,
+        acknowledged: 4,
+        closed: 0,
+        ...overrides,
+      });
+
+      it('reports every alert tagged and acknowledged', async () => {
+        const rendered = await renderJournal(retired());
+
+        expect(rendered).toContain(
+          'Tagged 4 of 4 correlated detection alert(s) az:ad_correlated, so later Worker runs skip them.'
+        );
+        expect(rendered).toContain('Acknowledged: 4.');
+        expect(rendered).not.toContain('review-exec-1');
+      });
+
+      it('says later runs may correlate the untagged alerts again', async () => {
+        const rendered = await renderJournal(retired({ tagged: 1 }));
+
+        expect(rendered).toContain('Tagged 1 of 4');
+        expect(rendered).toContain('later Worker runs may correlate the other 3 again');
+        expect(rendered).toContain('review-exec-1');
+      });
+
+      it('names alerts left closed rather than acknowledged', async () => {
+        const rendered = await renderJournal(retired({ acknowledged: 3, closed: 1 }));
+
+        expect(rendered).toContain('Acknowledged: 3; already closed and left as they were: 1.');
+      });
+
+      it('names alerts the acknowledge did not reach', async () => {
+        const rendered = await renderJournal(retired({ acknowledged: 0, open: 4 }));
+
+        expect(rendered).toContain('still open, because acknowledging them did not land: 4');
+        expect(rendered).toContain('review-exec-1');
+      });
+
+      it('says the outcome is unknown when the read-back failed', async () => {
+        const rendered = await renderJournal(retired({ read: false }));
+
+        expect(rendered).toContain('Could not read the 4 correlated detection alert(s) back');
+        expect(rendered).not.toContain('Tagged');
+        expect(rendered).toContain('review-exec-1');
+      });
+
+      // An internal failure's message would land in the Investigation, where every
+      // later agent round reads it as user input.
+      it('never relays an error', () => {
+        expect(asInputs(stepIn(reviewSteps, 'journal_alerts_retired')).message).not.toContain(
+          '.error'
+        );
+      });
+    });
+  });
+
   describe('handoff contracts', () => {
     // `workflow.execute` resolves to the child's `context.output`, so a child without an
     // explicit `workflow.output` step hands its parent nothing.
@@ -2147,21 +2498,17 @@ describe('Attack Discovery worker chain', () => {
 
   describe('the Investigation journal helper', () => {
     const append = stepIn(journalNoteSteps, 'append_note');
-    const request = append?.with as { body?: { trigger_mode?: string }; path?: string } | undefined;
 
-    it('POSTs the chat converse route, not the agent_builder converse route', () => {
-      expect(request?.path).toContain('/api/chat/converse');
+    it('persists a user_message without running the agent, named after the calling Worker', () => {
+      expect(append?.type).toBe('ai.conversation.add_user_message');
+      expect(append?.with).toEqual({
+        conversation_id: '{{ inputs.conversation_id }}',
+        message: '{{ inputs.message }}',
+        author_name: '{{ inputs.author_name | default: workflow.name }}',
+      });
     });
 
-    it('prefixes the converse path with the executing space', () => {
-      expect(request?.path).toContain('/s/{{ workflow.spaceId }}/');
-    });
-
-    it('persists a user_message without running the agent', () => {
-      expect(request?.body?.trigger_mode).toBe('never');
-    });
-
-    it('continues when the converse call fails', () => {
+    it('continues when the note fails', () => {
       expect(append?.['on-failure']?.continue).toBe(true);
     });
 
@@ -2175,6 +2522,7 @@ describe('Attack Discovery worker chain', () => {
 
     const INFLECTIONS = [
       'journal_review_started',
+      'journal_related_investigation',
       'journal_evidence_attached',
       'journal_impact_recorded',
       'journal_analysis_started',
@@ -2182,6 +2530,7 @@ describe('Attack Discovery worker chain', () => {
       'journal_fp_closed',
       'journal_attack_status_false_positive',
       'journal_analysis_failed',
+      'journal_alerts_retired',
       'journal_decision_recorded',
       'journal_attack_status_declined',
     ] as const;
@@ -2202,6 +2551,35 @@ describe('Attack Discovery worker chain', () => {
           (step) => step.with?.['workflow-id'] === ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID
         )
       ).toBe(true);
+    });
+
+    it('renders a built-in account link without calling the earlier investigation a false positive', () => {
+      const inputs = stepIn(reviewSteps, 'journal_related_investigation')?.with?.inputs as
+        | { message?: string }
+        | undefined;
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
+        inputs: {
+          related_link_reason: 'builtin_account',
+          related_investigation_id: 'inv-1',
+        },
+      });
+
+      expect(rendered.replace(/\s+/g, ' ').trim()).toBe(
+        'This attack shares only a built-in account on the same host with Investigation inv-1 and does not share its alerts. It is reviewed on its own.'
+      );
+    });
+
+    it('renders the closed false-positive note when the link has no built-in reason', () => {
+      const inputs = stepIn(reviewSteps, 'journal_related_investigation')?.with?.inputs as
+        | { message?: string }
+        | undefined;
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
+        inputs: { related_link_reason: '', related_investigation_id: 'inv-1' },
+      });
+
+      expect(rendered.replace(/\s+/g, ' ').trim()).toBe(
+        'This attack shares entities with closed false-positive Investigation inv-1 and does not share its alerts. It is reviewed on its own.'
+      );
     });
 
     it('calls the journal helper at each agreed inflection', () => {
@@ -2298,6 +2676,42 @@ describe('Attack Discovery worker chain', () => {
     it('fails the handoff after journaling the KI error', () => {
       expect(stepIn(fallback, 'fail_handoff')?.type).toBe('workflow.fail');
     });
+
+    // The step error is an object. Interpolating it stringifies to "[object Object]";
+    // the gate stores this rendered message as the proposal's previousExecutionError.
+    it('renders the knowledge indicator error message on the proposal failure', () => {
+      const cause =
+        'action [indices:admin/auto_create] is unauthorized for user [editor] on indices [ai-index-idx-security-investigations]';
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+        String(stepIn(fallback, 'fail_handoff')?.with?.message),
+        {
+          steps: {
+            write_analyze_endpoint_ki: {
+              error: { type: 'security_exception', message: cause },
+            },
+          },
+        }
+      );
+
+      expect(rendered).toBe(`Forensics handoff failed: knowledge indicator write failed. ${cause}`);
+    });
+
+    it('renders the same knowledge indicator error message in the journal note', () => {
+      const cause =
+        'action [indices:admin/auto_create] is unauthorized for user [editor] on indices [ai-index-idx-security-investigations]';
+      const inputs = stepIn(fallback, 'journal_handoff_failed')?.with?.inputs as
+        | { message?: string }
+        | undefined;
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
+        steps: {
+          write_analyze_endpoint_ki: {
+            error: { type: 'security_exception', message: cause },
+          },
+        },
+      });
+
+      expect(rendered).toBe(`Forensics handoff failed: knowledge indicator write failed. ${cause}`);
+    });
   });
 
   // The derived id makes a concurrent re-review harmless for the Investigation — one
@@ -2338,20 +2752,20 @@ describe('Attack Discovery worker chain', () => {
     expect(review.settings?.timeout).toBe('176h');
   });
 
-  // Neither the floor nor the runner sets `settings.timeout`, so both take the
-  // engine's 6h default — and that is correct only because neither one waits on a
-  // human. The runner's longest wait is the 4h generation step, and the floor's is the
-  // runner. Were either to park on the review's escalation gate instead, the same
-  // default would become a 6h guillotine: the timeout is wall-clock from `startedAt`,
-  // so a parked run burns it, and tripping it cancels the child it was waiting on.
+  // Generation of a full scan can run about 8h20m on a slow day. The engine default
+  // is 6h, and a workflow timeout cancels the child this run is waiting on, so review
+  // dispatch never starts. 12h covers that scan and still ends before the next 24h
+  // schedule. Reviews are dispatched detached, so this budget is not waiting on a
+  // person. Were either workflow to park on the review's escalation gate instead, 12h
+  // would become a guillotine: the timeout is wall-clock from `startedAt`.
   it.each([
     ['floor', floor],
     ['worker', worker],
-  ])('leaves the %s workflow-level timeout at its generous default', (_name, workflow) => {
-    expect(workflow.settings?.timeout).toBeUndefined();
+  ])('gives the %s workflow 12h so a slow scan can dispatch reviews', (_name, workflow) => {
+    expect(workflow.settings?.timeout).toBe('12h');
   });
 
-  // The invariant that default rests on, asserted directly rather than inferred from
+  // The invariant the 12h budget rests on, asserted directly rather than inferred from
   // the fan-out's step type. A `workflow.execute` to the review is the one way to
   // reintroduce the park, and it would regress silently: the YAML stays valid and
   // every other assertion here still passes.
@@ -2399,6 +2813,984 @@ describe('Attack Discovery worker chain', () => {
 
     it('every steps.run_generation.output.<field> reference is a field the child emits', () => {
       expect(referenced.filter((field) => !emitted.includes(field))).toEqual([]);
+    });
+  });
+
+  // The Attack Discovery Worker reports its domain outcomes through the AlertZero
+  // plugin's `alertzero.reportWorkerOutcome` step. The step's input schema is the real
+  // contract, and the plugin's own test validates every `with` block below against it.
+  // This package cannot import solution code, so the step id and each event's
+  // allowed keys are duplicated here rather than imported; if the step schema changes,
+  // the plugin's contract test fails first and these follow.
+  describe('Worker outcome telemetry', () => {
+    const REPORT_STEP_TYPE = 'alertzero.reportWorkerOutcome';
+
+    const REPORT_EVENT_KEYS: Record<string, readonly string[]> = {
+      ad_worker_analysis_completed: ['analysis_error', 'event', 'verdict'],
+      ad_worker_handoff_resolved: ['auto_approve_requested', 'event', 'outcome', 'verdict'],
+      worker_investigation_closed: ['close_reason', 'event', 'investigation_id'],
+      ad_worker_review_started: ['event', 'investigation_id', 'is_rereview'],
+      ad_worker_run_completed: [
+        'alerts_analyzed',
+        'attacks_generated',
+        'attacks_persisted',
+        'batches_failed',
+        'batches_total',
+        'event',
+        'run_outcome',
+      ],
+      worker_run_completed: [
+        'candidates_found',
+        'degraded_reason',
+        'event',
+        'items_dispatched',
+        'items_failed',
+        'items_in_flight',
+        'lookup_failed',
+        'run_outcome',
+        'source_read_failed',
+      ],
+    };
+
+    const fpTpAnalysis = parse(
+      ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW.yaml
+    ) as YamlWorkflow;
+    const batchedGeneration = parse(
+      ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.yaml
+    ) as YamlWorkflow;
+
+    // Configured like the engine's templating engine: with `strictVariables` off, a
+    // missing value renders as `''` rather than throwing.
+    const runtimeLiquid = createWorkflowLiquidEngine({
+      strictFilters: true,
+      strictVariables: false,
+    });
+
+    // Renders one `with` value the way the engine does: a whole-value `${{ }}` keeps
+    // its type, and anything else renders as a string template.
+    const renderValue = (value: unknown, context: Record<string, unknown>): unknown => {
+      if (typeof value === 'string' && value.startsWith('${{') && value.endsWith('}}')) {
+        return runtimeLiquid.evalValueSync(value.slice(3, -2).trim(), context);
+      }
+      return typeof value === 'string' ? runtimeLiquid.parseAndRenderSync(value, context) : value;
+    };
+
+    const reportSteps = (steps: YamlStep[]) =>
+      steps.filter((step) => step.type === REPORT_STEP_TYPE);
+
+    const topLevelNames = (workflow: YamlWorkflow) => workflow.steps.map((step) => step.name);
+
+    const allReportSteps = [...reportSteps(workerSteps), ...reportSteps(reviewSteps)];
+
+    const renderField = (
+      steps: YamlStep[],
+      stepName: string,
+      field: string,
+      context: Record<string, unknown>
+    ): unknown => renderValue(stepIn(steps, stepName)?.with?.[field], context);
+
+    it('reports run_completed from the runner, in its own vocabulary and the shared one', () => {
+      expect(reportSteps(workerSteps).map((step) => step.with?.event)).toEqual([
+        'ad_worker_run_completed',
+        'worker_run_completed',
+      ]);
+    });
+
+    it('reports review_started, analysis_completed, handoff_resolved and both Investigation closes from the review', () => {
+      expect(reportSteps(reviewSteps).map((step) => [step.name, step.with?.event])).toEqual([
+        ['report_review_started', 'ad_worker_review_started'],
+        ['report_analysis_completed', 'ad_worker_analysis_completed'],
+        ['report_investigation_closed_false_positive', 'worker_investigation_closed'],
+        ['report_handoff_resolved', 'ad_worker_handoff_resolved'],
+        ['report_investigation_closed_declined', 'worker_investigation_closed'],
+      ]);
+    });
+
+    it.each([
+      ['Watch Floor worker', floorSteps],
+      ['batched generation', flatten(batchedGeneration.steps)],
+      ['FP/TP analysis', flatten(fpTpAnalysis.steps)],
+      ['journal note', journalNoteSteps],
+      ['forensics handoff', forensicsSteps],
+    ])('adds no report step to the %s', (_name, steps) => {
+      expect(reportSteps(steps)).toEqual([]);
+    });
+
+    it.each(allReportSteps.map((step) => [step.name, step] as const))(
+      '%s sends only the keys its event allows',
+      (_name, step) => {
+        const allowed = REPORT_EVENT_KEYS[String(step.with?.event)] ?? [];
+
+        expect(Object.keys(step.with ?? {}).filter((key) => !allowed.includes(key))).toEqual([]);
+      }
+    );
+
+    // A report is telemetry. It must never fail, delay or cancel the Worker run.
+    it.each(allReportSteps.map((step) => [step.name, step] as const))(
+      '%s continues on failure',
+      (_name, step) => {
+        expect(step['on-failure']?.continue).toBe(true);
+      }
+    );
+
+    // The step gives up after 20s on its own, so a YAML timeout would only repeat that bound.
+    it.each(allReportSteps.map((step) => [step.name, step] as const))(
+      '%s sets no timeout of its own',
+      (_name, step) => {
+        expect(step.timeout).toBeUndefined();
+      }
+    );
+
+    // A step with `on-failure` cannot sit inside a `parallel` branch
+    // (graph build rejects it), and nothing here may run inside a gate. Top-level
+    // placement rules out both, and also any `switch` arm or `foreach` body. The one
+    // exception is the false-positive close report, which has to follow its close
+    // inside the verdict switch's `false_positive` arm (see `investigation_closed`).
+    it.each(
+      allReportSteps
+        .filter((step) => step.name !== 'report_investigation_closed_false_positive')
+        .map((step) => [step.name] as const)
+    )('%s is a top-level step', (name) => {
+      expect([...topLevelNames(worker), ...topLevelNames(review)]).toContain(name);
+    });
+
+    // A switch arm is a real subgraph, so unlike a `parallel` branch it accepts a
+    // step-level `on-failure`. Building the graph is what proves it.
+    it('builds the review execution graph with the report steps in place', () => {
+      // The raw parse, not `WorkflowSchema.parse`: the schema strips `on-failure` from
+      // every nested step (see `YamlStep` above), which would make the switch-arm check
+      // vacuous.
+      const graph = convertToWorkflowGraph(
+        parse(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.yaml) as WorkflowYaml
+      );
+
+      expect(
+        reportSteps(reviewSteps).map(({ name }) => graph.hasNode(`enterContinue_${name}`))
+      ).toEqual([true, true, true, true, true]);
+    });
+
+    it('leaves the escalation gate failure behavior unchanged', () => {
+      expect(stepIn(reviewSteps, 'escalation_gate')?.['on-failure']).toBeUndefined();
+    });
+
+    describe('run_completed', () => {
+      const names = topLevelNames(worker);
+      const report = stepIn(workerSteps, 'report_run_completed');
+
+      it('is the runner report step', () => {
+        expect(report?.type).toBe(REPORT_STEP_TYPE);
+      });
+
+      it('reports after every review batch has dispatched', () => {
+        expect(names.indexOf('report_run_completed')).toBeGreaterThan(
+          names.indexOf('run_review_batches')
+        );
+      });
+
+      // `workflow.output` ends the run, so a report after it would never execute.
+      it('reports immediately before the shared run report and the run output', () => {
+        expect(names.slice(names.indexOf('report_run_completed'))).toEqual([
+          'report_run_completed',
+          'report_worker_run_completed',
+          'emit_result',
+        ]);
+      });
+
+      it('keeps the existing runner steps in their order', () => {
+        expect(
+          names.filter(
+            (name) => name !== 'report_run_completed' && name !== 'report_worker_run_completed'
+          )
+        ).toEqual([
+          'run_generation',
+          'resolve_fanout',
+          'log_empty_run',
+          'match_fingerprints',
+          'resolve_dispatch',
+          'run_review_batches',
+          'run_unmatched_reviews',
+          'run_attach_batches',
+          'emit_result',
+        ]);
+      });
+
+      it.each([
+        ['alerts_analyzed', 'steps.run_generation.output.alerts_analyzed'],
+        ['batches_total', 'steps.run_generation.output.batches_total'],
+        ['batches_failed', 'steps.run_generation.output.batches_failed'],
+        ['attacks_generated', 'steps.run_generation.output.discoveries_generated'],
+        ['attacks_persisted', 'steps.resolve_fanout.output.attack_count'],
+      ])('sources %s from %s', (field, source) => {
+        expect(report?.with?.[field]).toBe(`\${{ ${source} | default: 0 }}`);
+      });
+
+      it.each(['alerts_analyzed', 'batches_total', 'batches_failed', 'attacks_generated'])(
+        'reports %s as a number',
+        (field) => {
+          expect(
+            renderField(workerSteps, 'report_run_completed', field, {
+              steps: {
+                run_generation: {
+                  output: {
+                    alerts_analyzed: 250,
+                    batches_failed: 1,
+                    batches_total: 3,
+                    discoveries_generated: 7,
+                  },
+                },
+              },
+            })
+          ).toEqual(expect.any(Number));
+        }
+      );
+
+      it.each(['alerts_analyzed', 'batches_total', 'batches_failed', 'attacks_generated'])(
+        'reports %s as 0 when the generation output lacks it',
+        (field) => {
+          expect(
+            renderField(workerSteps, 'report_run_completed', field, {
+              steps: { run_generation: { output: {} } },
+            })
+          ).toBe(0);
+        }
+      );
+
+      describe('run_outcome', () => {
+        interface RunScenario {
+          batchesFailed: number;
+          batchesTotal: number;
+          generated: number;
+          persisted: number;
+        }
+
+        const renderRunOutcome = ({
+          batchesFailed,
+          batchesTotal,
+          generated,
+          persisted,
+        }: RunScenario): unknown =>
+          renderField(workerSteps, 'report_run_completed', 'run_outcome', {
+            steps: {
+              resolve_fanout: { output: { attack_count: persisted } },
+              run_generation: {
+                output: {
+                  batches_failed: batchesFailed,
+                  batches_total: batchesTotal,
+                  discoveries_generated: generated,
+                },
+              },
+            },
+          });
+
+        it.each([
+          [
+            'produced',
+            'attacks persisted with every batch delivered',
+            { batchesFailed: 0, batchesTotal: 3, generated: 5, persisted: 4 },
+          ],
+          [
+            'empty_no_alerts',
+            'no alert to batch',
+            { batchesFailed: 0, batchesTotal: 0, generated: 0, persisted: 0 },
+          ],
+          [
+            'empty_no_attacks',
+            'every batch delivered and the model found no attack',
+            { batchesFailed: 0, batchesTotal: 2, generated: 0, persisted: 0 },
+          ],
+          [
+            'empty_all_duplicates',
+            'every generated attack already persisted by an earlier run',
+            { batchesFailed: 0, batchesTotal: 2, generated: 3, persisted: 0 },
+          ],
+          [
+            'degraded_partial',
+            'attacks persisted while some batches failed',
+            { batchesFailed: 1, batchesTotal: 3, generated: 2, persisted: 2 },
+          ],
+          [
+            'degraded_partial',
+            'no attack while some batches failed',
+            { batchesFailed: 1, batchesTotal: 3, generated: 0, persisted: 0 },
+          ],
+          [
+            'failed_all_batches',
+            'every batch failed',
+            { batchesFailed: 3, batchesTotal: 3, generated: 0, persisted: 0 },
+          ],
+        ] as const)('renders %s for %s', (expected, _scenario, scenario) => {
+          expect(renderRunOutcome(scenario)).toBe(expected);
+        });
+
+        it('renders a closed value when the generation output is missing entirely', () => {
+          expect(
+            renderField(workerSteps, 'report_run_completed', 'run_outcome', {
+              steps: { resolve_fanout: { output: {} }, run_generation: { output: {} } },
+            })
+          ).toBe('empty_no_alerts');
+        });
+
+        // `skipped_space_disabled` was in the RFC's vocabulary, but nothing in the
+        // runner produces it: a disabled space never launches the run at all.
+        it('never renders skipped_space_disabled', () => {
+          expect(String(report?.with?.run_outcome)).not.toContain('skipped_space_disabled');
+        });
+      });
+    });
+
+    describe('worker_run_completed', () => {
+      const report = stepIn(workerSteps, 'report_worker_run_completed');
+
+      interface RunScenario {
+        batchesFailed: number;
+        batchesTotal: number;
+        generated: number;
+        persisted: number;
+      }
+
+      const renderWith = ({ batchesFailed, batchesTotal, generated, persisted }: RunScenario) =>
+        Object.fromEntries(
+          Object.keys(report?.with ?? {}).map((field) => [
+            field,
+            renderField(workerSteps, 'report_worker_run_completed', field, {
+              steps: {
+                resolve_fanout: { output: { attack_count: persisted } },
+                run_generation: {
+                  output: {
+                    alerts_analyzed: batchesTotal * 100,
+                    batches_failed: batchesFailed,
+                    batches_total: batchesTotal,
+                    discoveries_generated: generated,
+                  },
+                },
+              },
+            }),
+          ])
+        );
+
+      it('is the shared run report step', () => {
+        expect(report?.type).toBe(REPORT_STEP_TYPE);
+      });
+
+      // Each Attack Discovery run outcome maps to exactly one shared outcome.
+      it.each([
+        [
+          'produced',
+          'produced',
+          { batchesFailed: 0, batchesTotal: 3, generated: 5, persisted: 4 },
+          false,
+        ],
+        [
+          'empty_no_alerts',
+          'empty_nothing_pending',
+          { batchesFailed: 0, batchesTotal: 0, generated: 0, persisted: 0 },
+          false,
+        ],
+        [
+          'empty_no_attacks',
+          'empty_nothing_found',
+          { batchesFailed: 0, batchesTotal: 2, generated: 0, persisted: 0 },
+          false,
+        ],
+        [
+          'empty_all_duplicates',
+          'empty_nothing_found',
+          { batchesFailed: 0, batchesTotal: 2, generated: 3, persisted: 0 },
+          false,
+        ],
+        [
+          'degraded_partial',
+          'degraded_partial',
+          { batchesFailed: 1, batchesTotal: 3, generated: 2, persisted: 2 },
+          true,
+        ],
+        [
+          'failed_all_batches',
+          'failed_all_items',
+          { batchesFailed: 3, batchesTotal: 3, generated: 0, persisted: 0 },
+          true,
+        ],
+      ] as const)('maps %s to %s', (adOutcome, sharedOutcome, scenario, degraded) => {
+        const adRendered = renderField(workerSteps, 'report_run_completed', 'run_outcome', {
+          steps: {
+            resolve_fanout: { output: { attack_count: scenario.persisted } },
+            run_generation: {
+              output: {
+                batches_failed: scenario.batchesFailed,
+                batches_total: scenario.batchesTotal,
+                discoveries_generated: scenario.generated,
+              },
+            },
+          },
+        });
+
+        expect({ adRendered, shared: renderWith(scenario) }).toEqual({
+          adRendered: adOutcome,
+          shared: {
+            candidates_found: scenario.batchesTotal,
+            degraded_reason: degraded ? 'dependency_unavailable' : 'none',
+            event: 'worker_run_completed',
+            items_dispatched: scenario.batchesTotal,
+            items_failed: scenario.batchesFailed,
+            items_in_flight: 0,
+            run_outcome: sharedOutcome,
+          },
+        });
+      });
+
+      it('renders closed values when the generation output is missing entirely', () => {
+        expect(
+          ['run_outcome', 'degraded_reason'].map((field) =>
+            renderField(workerSteps, 'report_worker_run_completed', field, {
+              steps: { resolve_fanout: { output: {} }, run_generation: { output: {} } },
+            })
+          )
+        ).toEqual(['empty_nothing_pending', 'none']);
+      });
+    });
+
+    describe('review_started', () => {
+      const names = topLevelNames(review);
+      const report = stepIn(reviewSteps, 'report_review_started');
+
+      it('is a review report step', () => {
+        expect(report?.type).toBe(REPORT_STEP_TYPE);
+      });
+
+      // `verify_investigation` has no `on-failure`, so reaching the report means the
+      // Investigation exists and its id joins Investigation events to the run.
+      it('reports immediately after the Investigation is verified', () => {
+        expect(names.indexOf('report_review_started') - names.indexOf('verify_investigation')).toBe(
+          1
+        );
+      });
+
+      it('reports the derived Investigation id', () => {
+        expect(report?.with?.investigation_id).toBe(derivedInvestigationId);
+      });
+
+      // The create 409s on a re-review and continues, so its error is the signal.
+      it.each([
+        [true, 'the create conflicted with an existing Investigation', { error: { type: 'x' } }],
+        [false, 'the create opened the Investigation', { output: { conversation_id: 'x' } }],
+      ])('reports is_rereview %s when %s', (expected, _scenario, openInvestigation) => {
+        expect(
+          renderField(reviewSteps, 'report_review_started', 'is_rereview', {
+            steps: { open_investigation: openInvestigation },
+          })
+        ).toBe(expected);
+      });
+    });
+
+    describe('analysis_completed', () => {
+      const names = topLevelNames(review);
+      const report = stepIn(reviewSteps, 'report_analysis_completed');
+
+      it('is a review report step', () => {
+        expect(report?.type).toBe(REPORT_STEP_TYPE);
+      });
+
+      it('reports immediately after the verdict is recorded', () => {
+        expect(names.indexOf('report_analysis_completed') - names.indexOf('refresh_verdict')).toBe(
+          1
+        );
+      });
+
+      // `refresh_verdict` is conditional; the report must not inherit its guard.
+      it('reports for every verdict', () => {
+        expect(report?.if).toBeUndefined();
+      });
+
+      it('reports the resolved verdict', () => {
+        expect(report?.with?.verdict).toBe('{{ steps.resolve_analysis.output.verdict }}');
+      });
+
+      it.each([
+        [true, 'the analysis child failed', { error: { message: 'boom' } }],
+        [false, 'the analysis child completed', { output: { verdict: 'true_positive' } }],
+      ])('reports analysis_error %s when %s', (expected, _scenario, runAnalysis) => {
+        expect(
+          renderField(reviewSteps, 'report_analysis_completed', 'analysis_error', {
+            steps: { run_fp_tp_analysis: runAnalysis },
+          })
+        ).toBe(expected);
+      });
+    });
+
+    describe('handoff_resolved', () => {
+      const names = topLevelNames(review);
+      const report = stepIn(reviewSteps, 'report_handoff_resolved');
+
+      it('is a review report step', () => {
+        expect(report?.type).toBe(REPORT_STEP_TYPE);
+      });
+
+      it('reports immediately after the decision is recorded', () => {
+        expect(names.indexOf('report_handoff_resolved') - names.indexOf('record_decision')).toBe(1);
+      });
+
+      // `record_decision` is an unconditional `data.set`, so without this guard every
+      // non-escalated review would report a handoff that never happened.
+      it('reports only for an escalated review', () => {
+        expect(report?.if).toBe('${{ steps.resolve_escalation.output.escalate == true }}');
+      });
+
+      it('reports the verdict that escalated', () => {
+        expect(report?.with?.verdict).toBe('{{ steps.resolve_analysis.output.verdict }}');
+      });
+
+      it('reports whether the review asked the gate to auto-approve', () => {
+        expect(
+          renderField(reviewSteps, 'report_handoff_resolved', 'auto_approve_requested', {
+            steps: { resolve_escalation: { output: { auto_approve: true } } },
+          })
+        ).toBe(true);
+      });
+
+      it.each([
+        [
+          'approved',
+          'an approved handoff whose action succeeded',
+          { approved: true, declined: false, expired: false },
+          { decision: 'approved', status: 'succeeded' },
+        ],
+        [
+          'dismissed',
+          'a dismissed handoff',
+          { approved: false, declined: true, expired: false },
+          { decision: 'dismissed', status: 'no_action' },
+        ],
+        [
+          'expired',
+          'a proposal nobody decided',
+          { approved: false, declined: false, expired: true },
+          { status: 'expired' },
+        ],
+        [
+          'approved_action_failed',
+          'an approved handoff whose action failed',
+          { approved: false, declined: false, expired: false },
+          { decision: 'approved', status: 'failed' },
+        ],
+      ])('renders outcome %s for %s', (expected, _scenario, recordDecision, gate) => {
+        expect(
+          renderField(reviewSteps, 'report_handoff_resolved', 'outcome', {
+            steps: {
+              escalation_gate: { output: gate },
+              record_decision: { output: recordDecision },
+            },
+          })
+        ).toBe(expected);
+      });
+    });
+
+    // The Worker reports its own Investigation closes, one report right after each of
+    // the review's two close sites. Each close continues on failure, so the report is
+    // guarded on the close having succeeded; otherwise a failed close would still
+    // count as closed.
+    describe('investigation_closed', () => {
+      const falsePositiveArm =
+        (stepIn(reviewSteps, 'apply_verdict')?.cases ?? []).find(
+          ({ match }) => match === 'false_positive'
+        )?.steps ?? [];
+      const armNames = falsePositiveArm.map(({ name }) => name);
+      const names = topLevelNames(review);
+      const falsePositiveReport = stepIn(reviewSteps, 'report_investigation_closed_false_positive');
+      const declinedReport = stepIn(reviewSteps, 'report_investigation_closed_declined');
+
+      const closeReasonOf = (name: string) =>
+        (stepIn(reviewSteps, name)?.with?.updates as { close_reason?: string })?.close_reason;
+
+      const renderIf = (step: YamlStep | undefined, context: Record<string, unknown>) =>
+        renderValue(step?.if, context);
+
+      it.each([
+        ['report_investigation_closed_false_positive', falsePositiveReport],
+        ['report_investigation_closed_declined', declinedReport],
+      ])('%s is a review report step', (_name, report) => {
+        expect(report?.type).toBe(REPORT_STEP_TYPE);
+      });
+
+      it.each([
+        ['report_investigation_closed_false_positive', falsePositiveReport],
+        ['report_investigation_closed_declined', declinedReport],
+      ])('%s reports the derived Investigation id', (_name, report) => {
+        expect(report?.with?.investigation_id).toBe(derivedInvestigationId);
+      });
+
+      // The reported reason is the literal the close writes, so the two cannot drift.
+      it.each([
+        ['report_investigation_closed_false_positive', 'close_investigation_false_positive'],
+        ['report_investigation_closed_declined', 'close_investigation_declined'],
+      ])('%s reports the close reason %s writes', (name, close) => {
+        expect(stepIn(reviewSteps, name)?.with?.close_reason).toBe(closeReasonOf(close));
+      });
+
+      it.each([
+        ['report_investigation_closed_false_positive', 'false_positive'],
+        ['report_investigation_closed_declined', 'other'],
+      ])('%s reports close_reason %s', (name, reason) => {
+        expect(stepIn(reviewSteps, name)?.with?.close_reason).toBe(reason);
+      });
+
+      describe('after a false-positive close', () => {
+        // Inside the arm, before the attack close: that close fails the run when it
+        // fails, so a report after the switch would miss an Investigation that was
+        // already closed.
+        it('reports immediately after close_investigation_false_positive in its arm', () => {
+          expect(
+            armNames.indexOf('report_investigation_closed_false_positive') -
+              armNames.indexOf('close_investigation_false_positive')
+          ).toBe(1);
+        });
+
+        it('keeps the close as the first step of the arm', () => {
+          expect(armNames[0]).toBe('close_investigation_false_positive');
+        });
+
+        it('keeps the existing arm steps in their order', () => {
+          expect(
+            armNames.filter((name) => name !== 'report_investigation_closed_false_positive')
+          ).toEqual([
+            'close_investigation_false_positive',
+            'close_attack_false_positive',
+            'journal_fp_closed',
+            'journal_attack_status_false_positive',
+          ]);
+        });
+
+        // A human can close the Investigation while the analysis runs. The patch then
+        // succeeds without changing `status`, and that close is already reported by
+        // Agentic Investigations, so reporting it here would count it twice.
+        it('reports only when the close succeeded and changed the status', () => {
+          expect(falsePositiveReport?.if).toBe(
+            "${{ steps.close_investigation_false_positive.error == blank and steps.close_investigation_false_positive.output.changed_fields contains 'status' }}"
+          );
+        });
+
+        it.each([
+          [
+            true,
+            'the close changed the status',
+            { output: { changed_fields: ['status', 'close_reason', 'verdict'] } },
+          ],
+          [
+            false,
+            'the Investigation was already closed',
+            { output: { changed_fields: ['close_reason', 'verdict'] } },
+          ],
+          [false, 'the close was a no-op', { output: { changed_fields: [] } }],
+          [false, 'the close failed and continued', { error: { message: 'boom' } }],
+        ])('renders the guard %s when %s', (expected, _scenario, close) => {
+          expect(
+            renderIf(falsePositiveReport, {
+              steps: { close_investigation_false_positive: close },
+            })
+          ).toBe(expected);
+        });
+      });
+
+      describe('after a declined escalation', () => {
+        it('reports immediately after close_investigation_declined', () => {
+          expect(
+            names.indexOf('report_investigation_closed_declined') -
+              names.indexOf('close_investigation_declined')
+          ).toBe(1);
+        });
+
+        // A human close through Agentic Investigations dismisses the pending gate, which
+        // resumes this review as a decline. Its close then finds the Investigation
+        // already closed and changes no `status`, so it must not report a second close.
+        it('reports only for a declined escalation whose close succeeded and changed the status', () => {
+          expect(declinedReport?.if).toBe(
+            "${{ steps.record_decision.output.declined == true and steps.close_investigation_declined.error == blank and steps.close_investigation_declined.output.changed_fields contains 'status' }}"
+          );
+        });
+
+        it.each([
+          [
+            true,
+            'a decline whose close changed the status',
+            true,
+            { output: { changed_fields: ['status', 'close_reason', 'verdict'] } },
+          ],
+          [
+            false,
+            'a decline after a human already closed the Investigation',
+            true,
+            { output: { changed_fields: ['close_reason', 'verdict'] } },
+          ],
+          [false, 'a decline whose close failed', true, { error: { message: 'boom' } }],
+          [false, 'no decline, so no close ran', false, undefined],
+        ])('renders the guard %s for %s', (expected, _scenario, declined, close) => {
+          expect(
+            renderIf(declinedReport, {
+              steps: {
+                ...(close ? { close_investigation_declined: close } : {}),
+                record_decision: { output: { declined } },
+              },
+            })
+          ).toBe(expected);
+        });
+      });
+    });
+
+    describe('reports added without reordering the review', () => {
+      it('keeps the existing review steps in their order', () => {
+        const withoutReports = topLevelNames(review).filter(
+          (name) =>
+            ![
+              'report_review_started',
+              'report_analysis_completed',
+              'report_handoff_resolved',
+              'report_investigation_closed_declined',
+            ].includes(name)
+        );
+
+        expect(withoutReports).toEqual([
+          'resolve_investigation_id',
+          'resolve_display_text',
+          'open_investigation',
+          'verify_investigation',
+          'append_workflow_execution',
+          'journal_review_started',
+          'journal_related_investigation',
+          'attach_discovery',
+          'attach_alerts',
+          'verify_evidence',
+          'journal_evidence_attached',
+          'collect_impact_entities',
+          'attach_impact',
+          'journal_impact_recorded',
+          'journal_analysis_started',
+          'run_fp_tp_analysis',
+          'resolve_analysis',
+          'attach_verdict',
+          'refresh_verdict',
+          'journal_analysis_finished',
+          'resolve_context',
+          'apply_verdict',
+          'resolve_escalation',
+          'tag_correlated_alerts',
+          'acknowledge_correlated_alerts',
+          'verify_alerts_retired',
+          'resolve_alerts_retired',
+          'journal_alerts_retired',
+          'escalation_gate',
+          'read_proposal_decision',
+          'record_decision',
+          'journal_decision_recorded',
+          'record_forensics_handoff',
+          'close_investigation_declined',
+          'close_attack_declined',
+          'journal_attack_status_declined',
+          'record_decision_lapsed',
+          'emit_result',
+        ]);
+      });
+    });
+
+    describe('managed versions', () => {
+      // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
+      it('bumps the runner to version 12 so the billable flag reconciles', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(12);
+      });
+
+      it('continues when fingerprint matching fails', () => {
+        expect(stepIn(workerSteps, 'match_fingerprints')?.['on-failure']?.continue).toBe(true);
+      });
+
+      it('reviews the generated attacks when fingerprint matching fails', () => {
+        const fallback = stepIn(workerSteps, 'run_unmatched_reviews');
+
+        expect(fallback?.if).toBe('${{ steps.match_fingerprints.error != blank }}');
+        expect(fallback?.foreach).toBe('${{ steps.resolve_fanout.output.batches }}');
+        expect(stepIn(workerSteps, 'run_unmatched_review')?.with?.['workflow-id']).toBe(
+          ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID
+        );
+      });
+
+      it('bumps the review to version 15 so the billable flag reconciles', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(15);
+      });
+    });
+
+    describe('attach', () => {
+      const attach = parse(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.yaml) as YamlWorkflow;
+      const attachSteps = flatten(attach.steps);
+
+      it('is installed with the Attack Discovery workflows', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS).toContain(
+          ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID
+        );
+      });
+
+      it('launches from the runner for each matched attack', () => {
+        expect(stepIn(workerSteps, 'run_attach')?.with?.['workflow-id']).toBe(
+          ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID
+        );
+      });
+
+      it('passes the matched investigation id through, so a continuation does not open its own', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).investigation_id).toBe(
+          '{{ foreach.item.investigation_id }}'
+        );
+      });
+
+      it('passes the continuation alert ids through as a typed array', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).alert_ids).toBe(
+          '${{ foreach.item.alert_ids }}'
+        );
+      });
+
+      it('waits for the review to create the investigation', () => {
+        expect(stepIn(attachSteps, 'wait_for_investigation')?.type).toBe(
+          'ai.conversation.metadata.read'
+        );
+        expect(stepIn(attachSteps, 'wait_for_investigation')?.with?.conversation_id).toBe(
+          '{{ inputs.investigation_id }}'
+        );
+      });
+
+      it('retries that read for the 15 minutes a missing investigation stays in flight', () => {
+        expect(stepIn(attachSteps, 'wait_for_investigation')?.['on-failure']).toEqual({
+          retry: { 'max-attempts': 30, delay: '30s' },
+        });
+      });
+
+      it('does not create the investigation', () => {
+        expect(attachSteps.some((step) => step.type === 'ai.conversation.create')).toBe(false);
+      });
+
+      it('attaches the attack discovery to the matched investigation', () => {
+        expect(stepIn(attachSteps, 'attach_discovery')?.with).toEqual(
+          expect.objectContaining({
+            conversation_id: '{{ inputs.investigation_id }}',
+            origin: '{{ inputs.attack_discovery_id }}',
+            type: 'security.attack_discovery',
+          })
+        );
+      });
+
+      it('attaches the continuation alerts in batches on that same investigation', () => {
+        expect(stepIn(attachSteps, 'attach_alerts')?.foreach).toBe(
+          '{{ inputs.alert_ids | default: consts.no_alert_ids | chunk: consts.alerts_per_attachment }}'
+        );
+      });
+
+      it('stores each alert batch as a security.alerts attachment', () => {
+        expect(stepIn(attachSteps, 'attach_alert_batch')?.with).toEqual(
+          expect.objectContaining({
+            conversation_id: '{{ inputs.investigation_id }}',
+            type: 'security.alerts',
+            data: { alertIds: '${{ foreach.item }}' },
+          })
+        );
+      });
+
+      it('journals the match, then the attachment attempt, then alert tagging', () => {
+        expect(attach.steps?.map((step) => step.name)).toEqual([
+          'wait_for_investigation',
+          'journal_attach_started',
+          'attach_discovery',
+          'attach_alerts',
+          'journal_evidence_attached',
+          'collect_impact_entities',
+          'attach_impact',
+          'journal_impact_recorded',
+          'tag_correlated_alerts',
+          'acknowledge_correlated_alerts',
+          'journal_alerts_retired',
+        ]);
+      });
+
+      it('journals the match before any attachment write', () => {
+        const names = attach.steps?.map((step) => step.name) ?? [];
+        expect(names.indexOf('journal_attach_started')).toBeLessThan(
+          names.indexOf('attach_discovery')
+        );
+      });
+
+      it('says why FP/TP was skipped', () => {
+        expect(asInputs(stepIn(attachSteps, 'journal_attach_started')).message).toContain(
+          'FP/TP analysis was skipped because this attack matches one already under investigation.'
+        );
+      });
+
+      it('does not claim the attachments landed in the opening note', () => {
+        expect(asInputs(stepIn(attachSteps, 'journal_attach_started')).message).not.toContain(
+          'Attempted attachment'
+        );
+      });
+
+      it('journals the attachment attempt after the alert batches', () => {
+        const names = attach.steps?.map((step) => step.name) ?? [];
+        expect(names.indexOf('journal_evidence_attached')).toBeGreaterThan(
+          names.indexOf('attach_alerts')
+        );
+      });
+
+      it('points at the attachment list instead of claiming every batch landed', () => {
+        expect(asInputs(stepIn(attachSteps, 'journal_evidence_attached')).message).toContain(
+          'See the attachment list for what landed.'
+        );
+      });
+
+      it('journals alert retirement only for a handed-off true positive or inconclusive', () => {
+        expect(stepIn(attachSteps, 'journal_alerts_retired')?.if).toBe(
+          '${{ inputs.journal_alerts_retired == true and inputs.alert_ids != blank }}'
+        );
+      });
+
+      it('passes the retirement journal flag through as a typed boolean', () => {
+        expect(asInputs(stepIn(workerSteps, 'run_attach')).journal_alerts_retired).toBe(
+          '${{ foreach.item.journal_alerts_retired }}'
+        );
+      });
+
+      it('keeps the tag step error message out of the journal', () => {
+        expect(asInputs(stepIn(attachSteps, 'journal_alerts_retired')).message).not.toContain(
+          'error.message'
+        );
+      });
+
+      it('bumps the attach workflow to version 6 so the billable flag reconciles', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(6);
+      });
+
+      it('acknowledges the open alerts it tags', () => {
+        const acknowledge = stepIn(attachSteps, 'acknowledge_correlated_alerts');
+
+        expect(acknowledge?.type).toBe('kibana.SetAlertsStatus');
+        expect(acknowledge?.with?.status).toBe('acknowledged');
+        expect(acknowledge?.if).toBe(
+          '${{ inputs.tag_correlated_alerts == true and inputs.alert_ids != blank }}'
+        );
+        expect(acknowledge?.with?.query).toEqual({
+          bool: {
+            filter: [
+              { ids: { values: '${{ inputs.alert_ids }}' } },
+              { term: { 'kibana.alert.workflow_status': 'open' } },
+            ],
+          },
+        });
+      });
+
+      it('records the continuation hosts and users on the matched investigation', () => {
+        expect(stepIn(attachSteps, 'attach_impact')?.with?.conversationId).toBe(
+          '{{ inputs.investigation_id }}'
+        );
+      });
+
+      it('does not run FP/TP analysis', () => {
+        expect(JSON.stringify(attachSteps)).not.toContain(
+          ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID
+        );
+      });
+
+      it('does not open the forensics proposal', () => {
+        expect(JSON.stringify(attachSteps)).not.toContain(ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID);
+      });
     });
   });
 });

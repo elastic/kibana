@@ -17,7 +17,6 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
-  createPanelFailureResult,
   getErrorMessage,
   type PanelContentAttempt,
   type VisPanelResolutionRequest,
@@ -49,7 +48,7 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
  * {@link PanelContentAttempt} contract.
  *
  * It trusts the request's `renderer` (Lens when omitted). On edits,
- * `edit_panels` sets it from the existing panel and rejects panels neither
+ * upsert sets it from the existing panel and rejects panels neither
  * renderer can edit, so the existing panel always matches the renderer.
  */
 export const createVisPanelResolver = ({
@@ -59,8 +58,6 @@ export const createVisPanelResolver = ({
   esClient,
 }: VisPanelResolverDeps) => {
   return async ({
-    operationType,
-    identifier,
     nlQuery,
     index,
     chartType,
@@ -128,7 +125,7 @@ export const createVisPanelResolver = ({
         ...(result.authoringNote ? { authoringNote: result.authoringNote } : {}),
       };
     } catch (error) {
-      return createPanelFailureResult(operationType, identifier, getErrorMessage(error));
+      return { type: 'failure', error: getErrorMessage(error) };
     }
   };
 };

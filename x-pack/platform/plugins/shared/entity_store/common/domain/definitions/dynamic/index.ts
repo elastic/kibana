@@ -6,7 +6,6 @@
  */
 
 export {
-  ATTRIBUTE_NAME_PATTERN,
   INDEX_PATTERN_PATTERN,
   LITERAL_FIELD_PATH_PATTERN,
   MAX_ATTRIBUTE_NAME_LENGTH,
@@ -30,4 +29,9 @@ export type {
   DynamicSource,
   DynamicValueLabels,
 } from './dynamic_block_schema';
-export { assertDynamicDefinitionRules } from './dynamic_definition_rules';
+export {
+  MAX_DYNAMIC_IDENTITY_FIELDS,
+  assertDynamicDefinitionRules,
+  getIdentityFields,
+  getPresenceFilter,
+} from './dynamic_definition_rules';

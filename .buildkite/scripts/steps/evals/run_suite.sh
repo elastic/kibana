@@ -448,7 +448,7 @@ EOF
           KBN_EVALS: "1"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
-          GITHUB_PR_NUMBER: "${EVAL_PR_NUMBER:-}"
+          EVAL_PR_NUMBER: "${EVAL_PR_NUMBER:-}"
           FRESH_BASELINE_PR_EXPERIMENT_ID: "${FRESH_BASELINE_PR_EXPERIMENT_ID}"
         depends_on:
 EOF
@@ -513,6 +513,9 @@ if [[ -n "$EVAL_SUITE_SCOUT_HOOK" ]]; then
     _scout_hook_config='{}'
   fi
   _scout_hook_output="$(printf '%s' "$_scout_hook_config" | bash "$EVAL_SUITE_SCOUT_HOOK")"
+  # The native evals CLI invokes this hook again; give it the same suite-owned input.
+  KBN_EVALS_SCOUT_HOOK_CONFIG_B64="$(printf '%s' "$_scout_hook_config" | base64)"
+  export KBN_EVALS_SCOUT_HOOK_CONFIG_B64
   # Piped, not `<<<`: older bash backs here-strings with a temp file, and this holds the private key.
   while IFS= read -r _scout_hook_name; do
     [[ -z "$_scout_hook_name" ]] && continue

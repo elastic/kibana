@@ -1,3 +1,4 @@
+cbor2
 @launchdarkly/js-client-sdk
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
@@ -41,7 +42,6 @@ react-element-to-jsx-string
 @babel/plugin-transform-class-static-block
 @swc/core
 lightningcss
-tar-fs
 browserslist
 react-day-picker
 mysql2

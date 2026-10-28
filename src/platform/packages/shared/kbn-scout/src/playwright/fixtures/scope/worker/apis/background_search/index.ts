@@ -63,6 +63,7 @@ export const getBackgroundSearchApiHelper = (
   const apiHeaders = (cookieHeader: Record<string, string>) => ({
     [ELASTIC_HTTP_VERSION_HEADER]: BACKGROUND_SEARCH_API_VERSION,
     'kbn-xsrf': 'scout',
+    'x-elastic-internal-origin': 'kibana',
     ...cookieHeader,
   });
 

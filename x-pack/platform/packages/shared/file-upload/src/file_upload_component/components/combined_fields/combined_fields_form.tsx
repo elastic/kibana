@@ -266,7 +266,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
 
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
-                    content={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
+                    content={i18n.translate('xpack.fileUpload.removeCombinedFieldsLabel', {
                       defaultMessage: 'Remove combined field',
                     })}
                     disableScreenReaderOutput
@@ -275,7 +275,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
                       iconType="trash"
                       color="danger"
                       onClick={this.removeCombinedField.bind(null, idx)}
-                      aria-label={i18n.translate('xpack.dataVisualizer.removeCombinedFieldsLabel', {
+                      aria-label={i18n.translate('xpack.fileUpload.removeCombinedFieldsLabel', {
                         defaultMessage: 'Remove combined field',
                       })}
                     />

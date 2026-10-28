@@ -7,7 +7,7 @@
 
 /** @type {import('@jest/types').Config.InitialOptions} */
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../',
   roots: ['<rootDir>/x-pack/solutions/vectordb/plugins/serverless_vectordb'],
 };

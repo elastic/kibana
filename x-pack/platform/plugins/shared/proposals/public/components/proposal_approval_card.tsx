@@ -11,16 +11,24 @@ import { EuiLoadingSpinner, EuiSpacer, useEuiTheme, useGeneratedHtmlId } from '@
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApprovalContent } from '@kbn/proposals-ui';
 import type { ApprovalAction, DeclineParams } from '@kbn/proposals-ui';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import { isAwaitingDecision } from '@kbn/proposals-common';
+import {
+  isAwaitingDecision,
+  isTodoProposal,
+  PROPOSALS_UI_CAPABILITY_DECIDE,
+} from '@kbn/proposals-common';
 import {
   useApproveProposal,
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  useIsReopeningProposal,
   useProposal,
+  useReopenProposal,
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 
@@ -39,6 +47,13 @@ const toFriendlyError = (error: unknown): Error => {
         i18n.translate('xpack.proposals.proposalCard.conflictError', {
           defaultMessage:
             'This proposal is no longer available to decide. Refresh the page to see its current status.',
+        })
+      );
+    }
+    if (error.response?.status === 403) {
+      return new Error(
+        i18n.translate('xpack.proposals.proposalCard.forbiddenErrorMessage', {
+          defaultMessage: "You don't have permission to decide proposals.",
         })
       );
     }
@@ -72,10 +87,16 @@ export interface ProposalApprovalCardProps {
 export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalId }) => {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'ApprovalChatCard' });
+  const {
+    services: { application },
+  } = useKibana<CoreStart>();
+  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
 
   const proposalQuery = useProposal(proposalId);
   const approveMutation = useApproveProposal();
   const dismissMutation = useDismissProposal();
+  const reopenMutation = useReopenProposal();
+  const isReopening = useIsReopeningProposal(proposalId);
   const isApproving = useIsApprovingProposal(proposalId);
   const isDeclining = useIsDecliningProposal(proposalId);
   const isSubmitting = isApproving ? 'applying' : isDeclining ? 'declining' : undefined;
@@ -110,6 +131,14 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     [dismissMutation, proposalId]
   );
 
+  const handleReopen = useCallback(async () => {
+    try {
+      await reopenMutation.mutateAsync({ id: proposalId });
+    } catch (err) {
+      throw toFriendlyError(err);
+    }
+  }, [reopenMutation, proposalId]);
+
   const liveProposal = proposalQuery.data;
 
   if (proposalQuery.isLoading) {
@@ -130,19 +159,27 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const isReplaced =
     liveProposal.supersededBy !== undefined || liveProposal.status === 'superseded';
   const isPending = isAwaitingDecision(liveProposal);
-  const secondaryActions: ApprovalAction[] | undefined = isReplaced
-    ? [
-        {
-          label: i18n.translate('xpack.proposals.proposalCard.dismiss', {
-            defaultMessage: 'Dismiss',
-          }),
-          color: 'danger',
-          onClick: () => undefined,
-          isDisabled: true,
-          'data-test-subj': `proposalDismiss-${proposalId}`,
-        },
-      ]
-    : undefined;
+  // Marked as applied, then as not applied: the successor card below it is the live one, and
+  // there is nothing on this one left to decide.
+  const isUnapplied =
+    isReplaced &&
+    isTodoProposal(liveProposal) &&
+    liveProposal.decision === 'approved' &&
+    liveProposal.status === 'no_action';
+  const secondaryActions: ApprovalAction[] | undefined =
+    isReplaced && !isUnapplied
+      ? [
+          {
+            label: i18n.translate('xpack.proposals.proposalCard.dismiss', {
+              defaultMessage: 'Dismiss',
+            }),
+            color: 'danger',
+            onClick: () => undefined,
+            isDisabled: true,
+            'data-test-subj': `proposalDismiss-${proposalId}`,
+          },
+        ]
+      : undefined;
 
   return (
     <div
@@ -153,12 +190,14 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         key={isReplaced ? 'replaced' : 'current'}
         proposal={liveProposal}
         titleId={titleId}
-        readOnly={isReplaced}
+        readOnly={isReplaced || !canDecide}
         isSubmitting={isReplaced ? undefined : isSubmitting}
         currentActorName={currentActorName}
-        onApprove={isPending || isReplaced ? handleApprove : undefined}
+        onApprove={(isPending || isReplaced) && !isUnapplied ? handleApprove : undefined}
         secondaryActions={secondaryActions}
         onDismiss={isPending && !isReplaced ? handleDismiss : undefined}
+        onReopen={handleReopen}
+        isReopening={isReopening}
         data-test-subj={`proposalCard-${proposalId}`}
       />
       {isReplaced && (
@@ -168,9 +207,15 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
             <KbnInfoCallout
               announceOnMount
               size="s"
-              title={i18n.translate('xpack.proposals.proposalCard.replacedTitle', {
-                defaultMessage: 'This proposal has been replaced.',
-              })}
+              title={
+                isUnapplied
+                  ? i18n.translate('xpack.proposals.proposalCard.unappliedTitle', {
+                      defaultMessage: 'Marked as not applied. It is offered again below.',
+                    })
+                  : i18n.translate('xpack.proposals.proposalCard.replacedTitle', {
+                      defaultMessage: 'This proposal has been replaced.',
+                    })
+              }
             />
           </div>
           <EuiSpacer size="m" />

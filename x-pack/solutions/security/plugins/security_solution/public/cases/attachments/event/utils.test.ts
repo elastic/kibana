@@ -5,10 +5,28 @@
  * 2.0.
  */
 
-import { getNonEmptyField, generateEventAttachmentWithoutOwner } from './utils';
+import {
+  getNonEmptyField,
+  generateEventAttachmentWithoutOwner,
+  getPageIndexInRange,
+} from './utils';
 import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
 describe('event utils', () => {
+  describe('getPageIndexInRange', () => {
+    it('keeps a page index that is in range', () => {
+      expect(getPageIndexInRange({ pageIndex: 1, totalItems: 26, pageSize: 25 })).toBe(1);
+    });
+
+    it('moves to the last page when removals empty the current one', () => {
+      expect(getPageIndexInRange({ pageIndex: 1, totalItems: 25, pageSize: 25 })).toBe(0);
+    });
+
+    it('returns the first page when nothing is left', () => {
+      expect(getPageIndexInRange({ pageIndex: 2, totalItems: 0, pageSize: 25 })).toBe(0);
+    });
+  });
+
   describe('getNonEmptyField', () => {
     it('returns the same value for non-empty strings', () => {
       expect(getNonEmptyField('logs-*')).toBe('logs-*');

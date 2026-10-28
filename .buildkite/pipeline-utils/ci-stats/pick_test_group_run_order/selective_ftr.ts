@@ -71,7 +71,6 @@ export const FTR_CRITICAL_PATHS: readonly string[] = [
   'scripts/functional_test_runner.js',
   'package.json',
   'pnpm-lock.yaml',
-  '.node-version',
   '.nvmrc',
   'config/**/*.yml',
   'config/node.options',
@@ -116,6 +115,25 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   '**/test/scout{_*,}/**',
 ];
 
+/**
+ * Modules directly owning changed files, ignoring FTR-irrelevant paths so e.g. a plugin's
+ * `test/scout/**` changes don't count as changes to that plugin. Returns null on failure.
+ */
+export async function getFtrRelevantModules(
+  changedFiles: readonly string[]
+): Promise<Set<string> | null> {
+  return getAffectedPackages(undefined, {
+    changedFiles: [...changedFiles],
+    strategy: 'git',
+    includeDownstream: false,
+    ignorePatterns: FTR_IRRELEVANT_PATHS,
+    ignoreUncategorizedChanges: true,
+  }).catch((error) => {
+    console.error('Error getting affected packages for FTR skip check', error);
+    return null;
+  });
+}
+
 /** True when this PR should omit FTR configs. */
 export function shouldSkipFtrTests(
   affectedModules: ReadonlySet<string>,
@@ -147,15 +165,7 @@ export function shouldSkipFtrTests(
 
 /** Directly affected modules when the diff cannot affect FTR; null when FTR must run. */
 export async function getFtrSkipModules(changedFiles: string[]): Promise<string[] | null> {
-  const directlyAffected = await getAffectedPackages(undefined, {
-    changedFiles,
-    strategy: 'git',
-    includeDownstream: false,
-    ignoreUncategorizedChanges: true,
-  }).catch((error) => {
-    console.error('Error getting affected packages for FTR skip check', error);
-    return null;
-  });
+  const directlyAffected = await getFtrRelevantModules(changedFiles);
 
   if (directlyAffected === null || !shouldSkipFtrTests(directlyAffected, changedFiles)) {
     return null;

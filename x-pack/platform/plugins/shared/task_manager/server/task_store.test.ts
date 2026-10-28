@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
-import { first } from 'rxjs';
+import { first, firstValueFrom } from 'rxjs';
 
 import type {
   TaskInstance,
@@ -36,10 +36,11 @@ import { SavedObjectsErrorHelpers, SPACES_EXTENSION_ID } from '@kbn/core/server'
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { mockLogger } from './test_utils';
+import { createEsResponseError, mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk, isOk } from './lib/result_type';
 import { MsearchError } from './lib/errors';
+import { getBackpressureReason } from './lib/backpressure_reason';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import type {
   EncryptedSavedObjectsClient,
@@ -425,6 +426,41 @@ describe('TaskStore', () => {
         id: 'testid',
         version: '123',
       });
+    });
+
+    test('passes refreshApiKey false to grantApiKeys', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+      const grantApiKeys = jest
+        .spyOn(EsApiKeyStrategy.prototype, 'grantApiKeys')
+        .mockResolvedValueOnce(new Map());
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      scopedSavedObjectsClient.create.mockImplementation(
+        async (type: string, attributes: unknown) => ({
+          id: 'testid',
+          type,
+          attributes,
+          references: [],
+          version: '123',
+        })
+      );
+
+      await store.schedule(task as TaskInstance, { request, refreshApiKey: false });
+
+      const calls = [...grantApiKeys.mock.calls];
+      grantApiKeys.mockRestore();
+
+      expect(calls).toEqual([
+        [[task], request, coreStart.security, expect.objectContaining({ refreshApiKey: false })],
+      ]);
     });
 
     test('errors when scheduling a task with API key if unable to encrypt SO', async () => {
@@ -1086,6 +1122,42 @@ describe('TaskStore', () => {
       expect(await firstErrorPromise).toMatchInlineSnapshot(
         `[Error: Unexpected status code from taskStore::msearch: 429]`
       );
+    });
+
+    test('pushes a request-level error to errors$ once and rethrows it', async () => {
+      const emittedErrors: Error[] = [];
+      const subscription = store.errors$.subscribe((e) => emittedErrors.push(e));
+      const requestError = createEsResponseError(503, 'unavailable');
+      esClient.msearch.mockRejectedValue(requestError);
+
+      await expect(store.msearch([{}])).rejects.toBe(requestError);
+
+      expect(emittedErrors).toEqual([requestError]);
+      expect(getBackpressureReason(requestError)).toBe('es_unavailable');
+      subscription.unsubscribe();
+    });
+
+    test('pushes a single MsearchError to errors$ when a search in the response fails', async () => {
+      const emittedErrors: Error[] = [];
+      const subscription = store.errors$.subscribe((e) => emittedErrors.push(e));
+      esClient.msearch.mockResponse({
+        took: 0,
+        responses: [
+          {
+            took: 0,
+            _shards: { failed: 0, successful: 1, total: 1 },
+            timed_out: false,
+            status: 503,
+          },
+        ],
+      } as estypes.MsearchResponse);
+
+      await expect(store.msearch([{}])).rejects.toBeInstanceOf(MsearchError);
+
+      expect(emittedErrors).toHaveLength(1);
+      expect(emittedErrors[0]).toBeInstanceOf(MsearchError);
+      expect(getBackpressureReason(emittedErrors[0])).toBe('msearch_5xx');
+      subscription.unsubscribe();
     });
   });
 
@@ -3313,6 +3385,50 @@ describe('TaskStore', () => {
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: malformed response]`);
     });
 
+    test('pushes a rejected bulk request to errors$ as a too_many_requests error', async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+      const requestError = createEsResponseError(429, 'es_rejected_execution_exception');
+      const firstError = firstValueFrom(store.errors$);
+      esClient.bulk.mockRejectedValue(requestError);
+
+      await expect(store.bulkPartialUpdate([task])).rejects.toBe(requestError);
+
+      const emittedError = await firstError;
+      expect(emittedError).toBe(requestError);
+      expect(getBackpressureReason(emittedError)).toBe('too_many_requests');
+    });
+
+    test('pushes a rejected bulk item to errors$ as a too_many_requests error', async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+      const firstError = firstValueFrom(store.errors$);
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            update: {
+              _id: 'task:324242',
+              _index: 'test-index',
+              status: 429,
+              error: { reason: 'rejected execution', type: 'es_rejected_execution_exception' },
+            },
+          },
+        ],
+        took: 10,
+      });
+
+      await store.bulkPartialUpdate([task]);
+
+      expect(getBackpressureReason(await firstError)).toBe('too_many_requests');
+    });
+
     test('skips the update with invalid interval', async () => {
       const task1 = {
         id: 'task1',
@@ -3812,6 +3928,32 @@ describe('TaskStore', () => {
         `"Failure"`
       );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test('removes nothing when a task has invalid JSON', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          mockTask1,
+          { ...mockTask2, attributes: { ...mockTask2.attributes, params: '{invalid' } },
+        ],
+      });
+      await expect(store.bulkRemove(['task1', 'task2'])).rejects.toThrow(
+        `Task "task2"'s params field has invalid JSON: {invalid`
+      );
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+      expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    test('removes nothing when the API keys cannot be decrypted', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [mockTask1, mockTask2],
+      });
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockRejectedValue(new Error('Decryption unavailable'));
+      await expect(store.bulkRemove(['task1', 'task2'])).rejects.toThrow('Decryption unavailable');
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+      expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
     });
 
     test('marks API keys for invalidation when task has uiamApiKey but no apiKey', async () => {
@@ -4440,6 +4582,66 @@ describe('TaskStore', () => {
           'Refreshing index to get recently created API keys for tasks'
         );
         expect(logger.error).toHaveBeenCalledWith('Error refreshing index tasky: bad refresh');
+      });
+
+      test('returns an unreadable task error for a task with invalid JSON, and the other tasks', async () => {
+        const unreadableTask = taskWithApiKey('task2', 'encryptedKey2');
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            taskWithApiKey('task1', 'encryptedKey1'),
+            { ...unreadableTask, attributes: { ...unreadableTask.attributes, params: '{invalid' } },
+          ],
+        });
+        mockDecryptedApiKeys([{ task1: 'decryptedKey1' }]);
+
+        const result = await decryptingStore.bulkGet(['task1', 'task2']);
+
+        expect(apiKeysOf(result)).toEqual(['decryptedKey1', undefined]);
+        expect(result[1]).toEqual(
+          asErr({
+            type: 'task',
+            id: 'task2',
+            error: {
+              error: 'Internal Server Error',
+              message: `Task "task2"'s params field has invalid JSON: {invalid`,
+              statusCode: 500,
+              metadata: { isUnreadableTask: true },
+            },
+          })
+        );
+      });
+
+      test('returns errors for tasks with API keys when the API keys cannot be decrypted, and the other tasks', async () => {
+        const taskWithoutApiKey = taskWithApiKey('task2', '');
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            taskWithApiKey('task1', 'encryptedKey1'),
+            {
+              ...taskWithoutApiKey,
+              attributes: _.omit(taskWithoutApiKey.attributes, 'apiKey', 'userScope'),
+            },
+          ],
+        });
+        esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
+          .fn()
+          .mockRejectedValue(new Error('Decryption unavailable'));
+        const firstErrorPromise = decryptingStore.errors$.pipe(first()).toPromise();
+
+        const result = await decryptingStore.bulkGet(['task1', 'task2']);
+
+        expect(result[0]).toEqual(
+          asErr({
+            type: 'task',
+            id: 'task1',
+            error: {
+              error: 'Internal Server Error',
+              message: "Unable to decrypt the task's API keys: Decryption unavailable",
+              statusCode: 500,
+            },
+          })
+        );
+        expect(isOk(result[1]) && result[1].value.id).toBe('task2');
+        expect(await firstErrorPromise).toEqual(new Error('Decryption unavailable'));
       });
     });
   });

@@ -15,6 +15,7 @@ import {
 } from '@kbn/alerting-v2-utils';
 import {
   OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_BASE_PATH,
   type ObservabilityAlertingLinkId,
 } from '@kbn/deeplinks-observability';
 import { hasObservabilityCapabilities } from '@kbn/observability-shared-plugin/public';
@@ -44,6 +45,13 @@ const getAlertsIsActive: NonNullable<RootNodeDefinition['getIsActive']> = ({
 }) =>
   pathNameSerialized.startsWith(prepend('/app/observability/alerting')) ||
   pathNameSerialized.startsWith(prepend('/app/observability/alerts'));
+
+// The visible `Rules` link points to Universal rules, so it also has to cover the Classic pages
+// (list, logs and settings), whose own link is hidden from the side nav.
+const getRulesIsActive: NonNullable<PanelOpenerChildDefinition['getIsActive']> = ({
+  pathNameSerialized,
+  prepend,
+}) => pathNameSerialized.startsWith(prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}/rules`));
 
 const hasManagementCapability = (core: CoreStart, capabilityId: string): boolean =>
   core.application.capabilities.management?.insightsAndAlerting?.[capabilityId] === true;
@@ -108,7 +116,7 @@ const getRuleManagementSection = (core: CoreStart): PanelOpenerChildDefinition[]
   const rulesChildren: PanelOpenerChildDefinition[] = [];
 
   if (canReadV2Rules) {
-    rulesChildren.push({ link: obsAlertingLink('rules-v2') });
+    rulesChildren.push({ link: obsAlertingLink('rules-v2'), getIsActive: getRulesIsActive });
     rulesChildren.push({ link: obsAlertingLink('rule-library') });
     rulesChildren.push({ link: obsAlertingLink('rules-v1'), sideNavStatus: 'hidden' });
   } else {

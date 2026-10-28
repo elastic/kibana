@@ -8,6 +8,8 @@
 import {
   extractDefaultDynamicKafkaTopics,
   extractDefaultStaticKafkaTopic,
+  extractKafkaOutputSecrets,
+  getSecretToSend,
 } from './use_output_form';
 
 describe('use_output_form', () => {
@@ -138,6 +140,74 @@ describe('use_output_form', () => {
       });
 
       expect(res).toEqual('something');
+    });
+  });
+
+  describe('getSecretToSend', () => {
+    it('sends the secret value when there is no plain text value', () => {
+      expect(getSecretToSend('', 'NEW SECRET', { id: 'stored' })).toEqual('NEW SECRET');
+      expect(getSecretToSend('', { id: 'stored' }, { id: 'stored' })).toEqual({ id: 'stored' });
+    });
+
+    it('removes a stored secret the user cleared', () => {
+      expect(getSecretToSend('', '', { id: 'stored' })).toBeNull();
+      expect(getSecretToSend(undefined, undefined, { id: 'stored' })).toBeNull();
+    });
+
+    it('removes a stored secret the user replaced with a plain text value', () => {
+      expect(getSecretToSend('PLAIN', '', { id: 'stored' })).toBeNull();
+    });
+
+    it('sends nothing when there is no secret value and nothing is stored', () => {
+      expect(getSecretToSend('', '', undefined)).toBeUndefined();
+      expect(getSecretToSend('PLAIN', '', undefined)).toBeUndefined();
+    });
+  });
+
+  describe('extractKafkaOutputSecrets', () => {
+    const givenInputs = ({
+      sslKey = '',
+      sslKeySecret,
+      password = '',
+      passwordSecret,
+    }: {
+      sslKey?: string;
+      sslKeySecret?: string | { id: string };
+      password?: string;
+      passwordSecret?: string | { id: string };
+    }) =>
+      ({
+        kafkaSslKeyInput: { value: sslKey },
+        kafkaSslKeySecretInput: { value: sslKeySecret },
+        kafkaAuthPasswordInput: { value: password },
+        kafkaAuthPasswordSecretInput: { value: passwordSecret },
+      } as unknown as Parameters<typeof extractKafkaOutputSecrets>[0]);
+
+    it('returns null when there is no secret to send', () => {
+      expect(extractKafkaOutputSecrets(givenInputs({}))).toBeNull();
+    });
+
+    it('sends the secret values', () => {
+      expect(
+        extractKafkaOutputSecrets(
+          givenInputs({ sslKeySecret: 'SSL KEY', passwordSecret: { id: 'stored-password' } }),
+          undefined,
+          { password: { id: 'stored-password' } }
+        )
+      ).toEqual({ ssl: { key: 'SSL KEY' }, password: { id: 'stored-password' } });
+    });
+
+    it('removes the stored secrets the user cleared', () => {
+      expect(
+        extractKafkaOutputSecrets(
+          givenInputs({ sslKeySecret: '', passwordSecret: '' }),
+          undefined,
+          {
+            ssl: { key: { id: 'stored-ssl-key' } },
+            password: { id: 'stored-password' },
+          }
+        )
+      ).toEqual({ ssl: { key: null }, password: null });
     });
   });
 });

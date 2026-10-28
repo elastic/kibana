@@ -473,7 +473,7 @@ describe('getAll()', () => {
       expect(result[0]).not.toHaveProperty('config');
     });
 
-    test.skip('get system actions correctly', async () => {
+    test('get system actions correctly', async () => {
       const expectedResult = {
         total: 1,
         per_page: 10,
@@ -484,6 +484,7 @@ describe('getAll()', () => {
             type: 'type',
             attributes: {
               name: 'test',
+              actionTypeId: '.test-connector-type',
               isMissingSecrets: false,
               config: {
                 foo: 'bar',
