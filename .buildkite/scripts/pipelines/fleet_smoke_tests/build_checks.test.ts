@@ -33,7 +33,7 @@ const makeBuild = (overrides: Partial<Build>): Build =>
     finished_at: '2026-10-28T10:30:00Z',
     web_url: 'https://buildkite.com/elastic/fleet-smoke-tests/builds/1',
     ...overrides,
-  }) as Build;
+  } as Build);
 
 describe('filterFinishedMainBuilds', () => {
   it('keeps only passed and failed builds on main', () => {

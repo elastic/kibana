@@ -17,14 +17,13 @@ import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { BuildkiteClient, type Build } from '#pipeline-utils';
-
 import {
   filterFinishedMainBuilds,
   findConsecutiveScheduledFailures,
   findQualityGateFailures,
   type CheckWindow,
 } from './build_checks.ts';
+import { BuildkiteClient, type Build } from '#pipeline-utils';
 
 const SMOKE_TESTS_PIPELINE_SLUG = 'fleet-smoke-tests';
 const BUILD_SEARCH_WINDOW_DAYS = 7;
