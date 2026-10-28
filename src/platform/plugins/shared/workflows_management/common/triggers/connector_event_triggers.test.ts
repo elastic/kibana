@@ -31,10 +31,12 @@ const expectedConnectorEventTitles = (specs: ConnectorSpec[]): Map<string, strin
         return [];
       }
       const displayName = connectorTriggerDisplayName(spec.metadata.displayName);
-      return Object.values(events.definitions).map(
-        (eventDefinition) =>
-          [eventDefinition.eventId, `${displayName} - ${eventDefinition.title}`] as const
-      );
+      return Object.values(events.definitions)
+        .filter((eventDefinition) => eventDefinition.eventId !== HITL_SLACK_ACTION_EVENT_ID)
+        .map(
+          (eventDefinition) =>
+            [eventDefinition.eventId, `${displayName} - ${eventDefinition.title}`] as const
+        );
     })
   );
 
