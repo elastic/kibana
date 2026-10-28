@@ -308,10 +308,13 @@ export const resolveProfileEnvOverrides = async ({
 export const resolveEvaluationConnectorId = async (
   repoRoot: string,
   log: ToolingLog,
-  flagsReader: FlagsReader
+  flagsReader: FlagsReader,
+  suite?: EvalSuiteDefinition
 ): Promise<string> => {
   const evaluationConnectorId =
-    flagsReader.string('evaluation-connector-id') ?? process.env.EVAL_CONNECTOR_ID;
+    flagsReader.string('evaluation-connector-id') ??
+    (process.env.EVAL_CONNECTOR_ID || undefined) ??
+    suite?.defaultJudge;
 
   if (evaluationConnectorId) {
     return evaluationConnectorId;
@@ -351,7 +354,12 @@ export const resolveEvalRunContext = async ({
   profile,
   suite,
 }: ResolveEvalRunContextOptions): Promise<EvalRunContext> => {
-  const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
+  const evaluationConnectorId = await resolveEvaluationConnectorId(
+    repoRoot,
+    log,
+    flagsReader,
+    suite
+  );
 
   let projects: string[] = [];
   const projectFlag = flagsReader.string('project');

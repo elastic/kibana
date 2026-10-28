@@ -13,7 +13,11 @@ import { registerGetInvestigationsCountRoute } from './get_investigations_count'
 
 /** Context stub that satisfies `withAlertZeroEnabled` — setting returns `true` so the route proceeds. */
 const makeContext = () => ({
-  alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+  alertzero: Promise.resolve({
+    subscription: 'available',
+    hasRequiredDependencies: true,
+    isSpaceSupported: true,
+  }),
   core: Promise.resolve({
     uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
   }),
