@@ -55,15 +55,29 @@ export const STATUS_AT = (status: string, date: string) =>
     values: { status, date },
   });
 
-export const CREATED_BY_ON = (createdBy: string, date: string) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.createdByMetadata', {
-    defaultMessage: 'Created by: {createdBy} on {date}',
+export const CREATED_BY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.createdByMetadataLabel',
+  {
+    defaultMessage: 'Created by',
+  }
+);
+
+export const CREATED_BY_VALUE = (createdBy: string, date: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.createdByMetadataValue', {
+    defaultMessage: '{createdBy} on {date}',
     values: { createdBy, date },
   });
 
-export const UPDATED_BY_ON = (updatedBy: string, date: string) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.updatedByMetadata', {
-    defaultMessage: 'Updated by: {updatedBy} on {date}',
+export const UPDATED_BY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.updatedByMetadataLabel',
+  {
+    defaultMessage: 'Updated by',
+  }
+);
+
+export const UPDATED_BY_VALUE = (updatedBy: string, date: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.updatedByMetadataValue', {
+    defaultMessage: '{updatedBy} on {date}',
     values: { updatedBy, date },
   });
 

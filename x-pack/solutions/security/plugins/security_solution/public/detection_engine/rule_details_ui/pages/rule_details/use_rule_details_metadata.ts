@@ -50,14 +50,16 @@ export const useRuleDetailsMetadata = ({
     };
     const createdByItem: AppHeaderMetadataItem = {
       type: 'text',
-      label: i18n.CREATED_BY_ON(createdBy ?? i18n.UNKNOWN, formatDate(rule.created_at)),
+      label: i18n.CREATED_BY_LABEL,
+      value: i18n.CREATED_BY_VALUE(createdBy ?? i18n.UNKNOWN, formatDate(rule.created_at)),
       'data-test-subj': 'ruleDetailsCreatedBy',
     };
     const updatedByItem: AppHeaderMetadataItem | undefined =
       rule.updated_by != null
         ? {
             type: 'text',
-            label: i18n.UPDATED_BY_ON(updatedBy ?? i18n.UNKNOWN, formatDate(rule.updated_at)),
+            label: i18n.UPDATED_BY_LABEL,
+            value: i18n.UPDATED_BY_VALUE(updatedBy ?? i18n.UNKNOWN, formatDate(rule.updated_at)),
             'data-test-subj': 'ruleDetailsUpdatedBy',
           }
         : undefined;

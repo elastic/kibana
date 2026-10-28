@@ -140,8 +140,8 @@ describe('RuleDetailsAppHeader', () => {
     renderHeader();
 
     expect(screen.getByTestId('ruleStatus')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleDetailsCreatedBy')).toHaveTextContent('Created by: elastic');
-    expect(screen.getByTestId('ruleDetailsUpdatedBy')).toHaveTextContent('Updated by: elastic');
+    expect(screen.getByTestId('ruleDetailsCreatedBy')).toHaveTextContent('Created by elastic');
+    expect(screen.getByTestId('ruleDetailsUpdatedBy')).toHaveTextContent('Updated by elastic');
   });
 
   it('renders the tabs', () => {

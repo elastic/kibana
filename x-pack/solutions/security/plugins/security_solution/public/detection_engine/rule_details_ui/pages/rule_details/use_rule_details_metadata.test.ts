@@ -50,11 +50,13 @@ describe('useRuleDetailsMetadata', () => {
       }),
       expect.objectContaining({
         type: 'text',
-        label: 'Created by: analyst on Oct 10, 2024 @ 00:11:03.176',
+        label: 'Created by',
+        value: 'analyst on Oct 10, 2024 @ 00:11:03.176',
       }),
       expect.objectContaining({
         type: 'text',
-        label: 'Updated by: other analyst on Feb 8, 2026 @ 04:37:53.533',
+        label: 'Updated by',
+        value: 'other analyst on Feb 8, 2026 @ 04:37:53.533',
       }),
     ]);
   });
