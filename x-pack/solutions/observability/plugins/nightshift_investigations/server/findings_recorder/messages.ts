@@ -17,7 +17,12 @@ import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_t
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
 import { TIME_CONVERTER_TOOL_ID } from '../tools/time_converter/tool';
-import { ANSWER_MAX_CHARS, QUESTION_MAX_CHARS, TOOL_RESULT_MAX_CHARS } from './constants';
+import {
+  ANSWER_MAX_CHARS,
+  QUESTION_MAX_CHARS,
+  RECORDER_RESULTS_DIR,
+  TOOL_RESULT_MAX_CHARS,
+} from './constants';
 import { LIVE_INSTRUCTION, FINAL_INSTRUCTION } from './prompt';
 
 /** The tool the recorder answers with. Its earlier answers are replayed under this name. */
@@ -72,24 +77,50 @@ export const groupTurns = (steps: readonly ConversationRoundStep[]): AgentTurn[]
   return turns;
 };
 
-const resultText = ({ results }: ToolCallStep): string => {
+const fullResultText = ({ results }: ToolCallStep): string => {
   if (!results?.length) return '(no result)';
-  return clip(
-    results
-      .map(({ data }) => {
-        const { stdout, stderr, text, message } = (data ?? {}) as Record<string, unknown>;
-        const parts = [stdout, text, message, stderr].filter(
-          (part): part is string => typeof part === 'string' && part.length > 0
-        );
-        return parts.length > 0 ? parts.join(' ') : JSON.stringify(data ?? {});
-      })
-      .join('\n'),
-    TOOL_RESULT_MAX_CHARS
-  );
+  return results
+    .map(({ data }) => {
+      const { stdout, stderr, text, message } = (data ?? {}) as Record<string, unknown>;
+      const parts = [stdout, text, message, stderr].filter(
+        (part): part is string => typeof part === 'string' && part.length > 0
+      );
+      return parts.length > 0 ? parts.join(' ') : JSON.stringify(data ?? {});
+    })
+    .join('\n');
 };
 
+/** A result as the recorder sees it: clipped, and pointing at the file that holds all of it. */
+const resultText = (call: ToolCallStep, fullOutputPath?: string): string => {
+  const text = fullResultText(call);
+  if (text.length <= TOOL_RESULT_MAX_CHARS) return text;
+  const shown = text.slice(0, TOOL_RESULT_MAX_CHARS);
+  const hidden = text.length - TOOL_RESULT_MAX_CHARS;
+  return fullOutputPath
+    ? `${shown}… [${hidden} more characters; full output in ${fullOutputPath}]`
+    : `${shown}… [${hidden} more characters]`;
+};
+
+/**
+ * The tool results too long to be replayed whole, each with the file the final pass writes it to.
+ * The path is stable for a round (call order and tool id), so the replay and the files agree.
+ */
+export const clippedResultFiles = (
+  steps: readonly ConversationRoundStep[]
+): Array<{ toolCallId: string; path: string; content: string }> =>
+  steps.filter(isToolCallStep).flatMap((call, index) => {
+    const content = fullResultText(call);
+    if (content.length <= TOOL_RESULT_MAX_CHARS) return [];
+    const toolId = call.tool_id.replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 60);
+    const path = `${RECORDER_RESULTS_DIR}/${String(index + 1).padStart(3, '0')}-${toolId}.txt`;
+    return [{ toolCallId: call.tool_call_id, path, content }];
+  });
+
 /** The messages an agent turn produced: what it said and asked for, then each tool's result. */
-const turnMessages = ({ text, calls }: AgentTurn): Message[] => {
+const turnMessages = (
+  { text, calls }: AgentTurn,
+  resultPaths: ReadonlyMap<string, string>
+): Message[] => {
   const toolCalls: ToolCall[] = calls.map((call) => ({
     toolCallId: call.tool_call_id,
     function: { name: call.tool_id, arguments: (call.params ?? {}) as Record<string, never> },
@@ -105,7 +136,7 @@ const turnMessages = ({ text, calls }: AgentTurn): Message[] => {
         role: MessageRole.Tool,
         name: call.tool_id,
         toolCallId: call.tool_call_id,
-        response: resultText(call),
+        response: resultText(call, resultPaths.get(call.tool_call_id)),
       })
     ),
   ];
@@ -132,6 +163,7 @@ export const buildRecorderMessages = ({
   final,
   answer,
   notices = [],
+  resultPaths = new Map(),
 }: {
   question?: string;
   steps: readonly ConversationRoundStep[];
@@ -141,6 +173,8 @@ export const buildRecorderMessages = ({
   answer?: string;
   /** What people did to the investigation outside the agent's steps, such as changing its severity. */
   notices?: readonly string[];
+  /** Where the full text of each clipped tool result is, by tool call id. Final pass only. */
+  resultPaths?: ReadonlyMap<string, string>;
 }): Message[] => {
   const agentTurns = groupTurns(steps);
   const messages: Message[] = [
@@ -152,7 +186,7 @@ export const buildRecorderMessages = ({
   let cursor = 0;
   earlier.forEach((turn, index) => {
     const upTo = Math.min(turn.atGroups, agentTurns.length);
-    for (; cursor < upTo; cursor++) messages.push(...turnMessages(agentTurns[cursor]));
+    for (; cursor < upTo; cursor++) messages.push(...turnMessages(agentTurns[cursor], resultPaths));
     const toolCallId = `recorder-${index}`;
     messages.push(
       { role: MessageRole.User, content: turn.final ? FINAL_INSTRUCTION : LIVE_INSTRUCTION },
@@ -177,7 +211,8 @@ export const buildRecorderMessages = ({
       }
     );
   });
-  for (; cursor < agentTurns.length; cursor++) messages.push(...turnMessages(agentTurns[cursor]));
+  for (; cursor < agentTurns.length; cursor++)
+    messages.push(...turnMessages(agentTurns[cursor], resultPaths));
   // The final message is not a step, so without this the recorder rates from the steps alone and
   // can disagree with what the agent told the user.
   if (final && answer) {

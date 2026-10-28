@@ -13,6 +13,7 @@ import {
 import { MessageRole } from '@kbn/inference-common';
 import {
   buildRecorderMessages,
+  clippedResultFiles,
   countTurns,
   extractAnswer,
   groupTurns,
@@ -253,5 +254,48 @@ describe('extractAnswer', () => {
   it('is nothing when the round has no response', () => {
     expect(extractAnswer({})).toBeUndefined();
     expect(extractAnswer({ responseMessage: '' })).toBeUndefined();
+  });
+});
+
+describe('clipped tool results', () => {
+  const long = 'row\n'.repeat(1_000);
+  const withLong: ConversationRoundStep[] = [
+    toolStep('g1', 'c1', 'nightshift_sandbox_bash', { command: 'curl a' }, { stdout: 'short' }),
+    toolStep('g2', 'c2', 'nightshift_sandbox_bash', { command: 'curl b' }, { stdout: long }),
+  ];
+
+  it('lists only the results too long to be replayed, with a stable path each', () => {
+    expect(clippedResultFiles(withLong)).toEqual([
+      {
+        toolCallId: 'c2',
+        path: '/workspace/.recorder/results/002-nightshift_sandbox_bash.txt',
+        content: long,
+      },
+    ]);
+    expect(clippedResultFiles([])).toEqual([]);
+  });
+
+  it('points a clipped result at its file, and leaves a short one alone', () => {
+    const messages = buildRecorderMessages({
+      steps: withLong,
+      turns: [],
+      final: true,
+      answer: 'Done.',
+      resultPaths: new Map([
+        ['c2', '/workspace/.recorder/results/002-nightshift_sandbox_bash.txt'],
+      ]),
+    });
+    const responses = messages.filter((m) => m.role === MessageRole.Tool).map((m) => m.response);
+    expect(responses[0]).toBe('short');
+    expect(responses[1]).toContain(
+      'full output in /workspace/.recorder/results/002-nightshift_sandbox_bash.txt'
+    );
+  });
+
+  it('clips without a path when none was written', () => {
+    const messages = buildRecorderMessages({ steps: withLong, turns: [], final: false });
+    const last = messages.filter((m) => m.role === MessageRole.Tool).pop();
+    expect(last?.response).toContain('more characters]');
+    expect(JSON.stringify(last?.response)).not.toContain('full output in');
   });
 });

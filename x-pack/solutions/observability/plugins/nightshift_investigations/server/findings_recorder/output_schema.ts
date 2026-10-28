@@ -396,3 +396,27 @@ export const FINDINGS_JSON_SCHEMA = {
   },
   required: ['summary', 'hypotheses'],
 } as const;
+
+const { evidence: _hypothesisEvidence, ...LIVE_HYPOTHESIS_PROPERTIES } =
+  FINDINGS_JSON_SCHEMA.properties.hypotheses.items.properties;
+
+/**
+ * What a live pass may answer while the investigation runs: the summary and the hypothesis tree.
+ * The rest of the record, with its evidence, is written once, from the final pass.
+ */
+export const LIVE_FINDINGS_JSON_SCHEMA = {
+  type: 'object',
+  properties: {
+    summary: FINDINGS_JSON_SCHEMA.properties.summary,
+    hypotheses: {
+      ...FINDINGS_JSON_SCHEMA.properties.hypotheses,
+      description:
+        'Every candidate cause considered so far, each with its own confidence, status and reason. A snapshot: it replaces the stored list. At most 8.',
+      items: {
+        ...FINDINGS_JSON_SCHEMA.properties.hypotheses.items,
+        properties: LIVE_HYPOTHESIS_PROPERTIES,
+      },
+    },
+  },
+  required: ['summary', 'hypotheses'],
+} as const;

@@ -80,6 +80,7 @@ import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/reg
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerFindingsRecorder } from './findings_recorder';
+import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
 import { createDecisionTreeTools } from './tools/decision_tree';
@@ -284,6 +285,9 @@ export class NightshiftInvestigationsPlugin
         decisionTreesEnabled: this.decisionTreesEnabled,
       });
       if (plugins.agenticInvestigations && config.findings_recorder.enabled) {
+        const getRecorderOutputRedactor = createSandboxOutputRedactorProvider({
+          getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+        });
         // Records summary, severity, hypotheses and impact from outside the agent, so the
         // investigator needs no recording tools. Every dependency is read lazily: hooks are
         // registered in setup() but only run once the plugin has started.
@@ -295,6 +299,22 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             getAgenticInvestigations: () => this.agenticInvestigations,
+            // The final pass reads the investigation's own workspace (read-only), through the
+            // same gate and output redaction as the investigator's tools.
+            getWorkspace: async ({ request, conversationId, allowedConnectorIds }) => {
+              const sandboxStart = getGatedSandboxStart();
+              if (!sandboxStart) return undefined;
+              const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+              const redactor = await getRecorderOutputRedactor({
+                request,
+                allowedConnectorIds,
+                resolvedCredentials: new Map(),
+              });
+              return createRecorderWorkspace({
+                session: sandboxStart.getSessionForSpace(spaceId, conversationId),
+                redactor,
+              });
+            },
             logger: this.logger.get('findings_recorder'),
           },
           logger: this.logger.get('findings_recorder'),

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { getEventActorDisplayName, type ConversationRoundStep } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { MessageRole, type Message, type ToolCall } from '@kbn/inference-common';
 import { INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE } from '@kbn/agentic-investigations-plugin/common';
 import type { Hypothesis, ImpactEntity } from '@kbn/agentic-investigations-plugin/common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
@@ -17,18 +19,28 @@ import { createInvestigationUsageTelemetry } from '../lib/investigation_usage_te
 import type { PassGuard, RecorderMemory } from './coordinator';
 import {
   buildRecorderMessages,
+  clippedResultFiles,
   countTurns,
   toolNamesToDefine,
   STRUCTURED_OUTPUT_TOOL,
 } from './messages';
 import {
   FINDINGS_JSON_SCHEMA,
+  LIVE_FINDINGS_JSON_SCHEMA,
   entityIdFor,
   findingsOutputSchema,
   limitFindings,
   type FindingsRecord,
 } from './output_schema';
 import { FINDINGS_RECORDER_SYSTEM_PROMPT } from './prompt';
+import { RECORDER_MAX_TOOL_CALLS, RECORDER_MAX_TOOL_ROUNDS } from './constants';
+import {
+  RECORDER_LIST_FILES_SCHEMA,
+  RECORDER_LIST_FILES_TOOL,
+  RECORDER_READ_FILE_SCHEMA,
+  RECORDER_READ_FILE_TOOL,
+  type RecorderWorkspace,
+} from './workspace_tools';
 
 export interface FindingsPassDeps {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
@@ -36,6 +48,15 @@ export interface FindingsPassDeps {
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
   getAgenticInvestigations: () => AgenticInvestigationsPluginStart | undefined;
+  /**
+   * A read-only view of the investigation's sandbox workspace, for the final pass. Absent or
+   * resolving to `undefined` when there is no sandbox: the final pass then answers without files.
+   */
+  getWorkspace?: (args: {
+    request: KibanaRequest;
+    conversationId: string;
+    allowedConnectorIds: readonly string[];
+  }) => Promise<RecorderWorkspace | undefined>;
   logger: Logger;
 }
 
@@ -52,12 +73,52 @@ export interface FindingsPassParams {
   answer?: string;
   /** The connector the investigation ran on, so the recorder uses the same model. */
   connectorId?: string;
+  /** The connectors the investigator may use, so their credentials are redacted from file reads. */
+  allowedConnectorIds?: readonly string[];
 }
 
 const MAX_METADATA_TEXT_LENGTH = 10_000;
 const FALLBACK_SUMMARY_CHARS = 1_000;
 /** A malformed structured answer is the usual failure, so a pass asks again before giving up. */
 const MAX_ATTEMPTS = 2;
+
+type RecordEntity = NonNullable<FindingsRecord['impact_entities']>[number];
+
+/**
+ * The entities to store. An entity the model lists again without evidence keeps the evidence
+ * already stored for it, since a write replaces the whole list.
+ */
+export const toImpactEntities = (
+  entities: readonly RecordEntity[],
+  stored: readonly ImpactEntity[]
+): ImpactEntity[] => {
+  const storedById = new Map(stored.map((entity) => [entity.id, entity]));
+  return entities.map(({ name, type, evidence }) => {
+    const id = entityIdFor(name);
+    const kept = evidence ?? storedById.get(id)?.evidence;
+    return { id, name, ...(type ? { type } : {}), ...(kept ? { evidence: kept } : {}) };
+  });
+};
+
+type RecordHypothesis = FindingsRecord['hypotheses'][number];
+
+/**
+ * The hypotheses to store, each keeping the evidence already stored for the same candidate when
+ * the pass gave none. A write replaces the whole list, and a live pass does not carry evidence.
+ */
+export const withStoredEvidence = (
+  hypotheses: readonly RecordHypothesis[],
+  stored: readonly Hypothesis[]
+): RecordHypothesis[] => {
+  const evidenceByCandidate = new Map(
+    stored.map(({ candidate, evidence }) => [candidate, evidence])
+  );
+  return hypotheses.map((hypothesis) => {
+    if (hypothesis.evidence?.length) return hypothesis;
+    const kept = evidenceByCandidate.get(hypothesis.candidate);
+    return kept?.length ? { ...hypothesis, evidence: kept } : hypothesis;
+  });
+};
 
 /** Keeps the first confirmed hypothesis: at most one may be the root cause. */
 export const limitToOneConfirmed = (hypotheses: FindingsRecord['hypotheses']): Hypothesis[] => {
@@ -114,24 +175,6 @@ const severityNotices = ({ events = [] }: ConversationLike): string[] =>
  * the stored hypotheses with whatever the follow-up looked at. It lives only in the recorder's
  * conversation: nothing is added to the agent's.
  */
-type RecordEntity = NonNullable<FindingsRecord['impact_entities']>[number];
-
-/**
- * The entities to store. An entity the model lists again without evidence keeps the evidence
- * already stored for it, since a write replaces the whole list.
- */
-export const toImpactEntities = (
-  entities: readonly RecordEntity[],
-  stored: readonly ImpactEntity[]
-): ImpactEntity[] => {
-  const storedById = new Map(stored.map((entity) => [entity.id, entity]));
-  return entities.map(({ name, type, evidence }) => {
-    const id = entityIdFor(name);
-    const kept = evidence ?? storedById.get(id)?.evidence;
-    return { id, name, ...(type ? { type } : {}), ...(kept ? { evidence: kept } : {}) };
-  });
-};
-
 const storedRecord = async (
   agenticInvestigations: AgenticInvestigationsPluginStart,
   request: KibanaRequest,
@@ -188,6 +231,7 @@ export const runFindingsPass = async (
     question,
     answer,
     connectorId,
+    allowedConnectorIds = [],
   }: FindingsPassParams
 ): Promise<boolean> => {
   const { logger } = deps;
@@ -221,14 +265,52 @@ export const runFindingsPass = async (
       if (stored) memory.remember({ atGroups: 0, final: false, answer: stored });
     }
     const notices = severityNotices(conversation);
-    const messages = buildRecorderMessages({
-      question,
-      steps,
-      turns: memory.turns(),
-      final,
-      answer,
-      notices,
-    });
+
+    // The final pass can read the investigation's workspace. The round's long tool results are
+    // written there first, so what the recorder is shown clipped can be read in full.
+    const workspace = final
+      ? await deps
+          .getWorkspace?.({ request, conversationId, allowedConnectorIds })
+          .catch((error) => {
+            logger.warn(
+              `Findings recorder has no workspace for ${conversationId}: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            return undefined;
+          })
+      : undefined;
+    const resultFiles = workspace ? clippedResultFiles(steps) : [];
+    const resultsWritten =
+      workspace && resultFiles.length > 0
+        ? await workspace.writeResults(resultFiles).then(
+            () => true,
+            (error) => {
+              logger.warn(
+                `Findings recorder could not write tool results for ${conversationId}: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+              return false;
+            }
+          )
+        : false;
+    const buildMessages = (withFiles: boolean) =>
+      buildRecorderMessages({
+        question,
+        steps,
+        turns: memory.turns(),
+        final,
+        answer,
+        notices,
+        ...(withFiles && resultsWritten
+          ? {
+              resultPaths: new Map(resultFiles.map(({ toolCallId, path }) => [toolCallId, path])),
+            }
+          : {}),
+      });
+    const messages = buildMessages(Boolean(workspace));
+
     // The agent's tool calls are replayed as they happened, so each tool needs a definition for
     // the provider to accept them. The list is fixed so the cached prefix survives from one pass
     // to the next. The recorder never calls them: only the answer tool is forced.
@@ -241,39 +323,139 @@ export const runFindingsPass = async (
         },
       ])
     );
-    const tools = {
-      ...replayed,
+    const answerTool = {
       [STRUCTURED_OUTPUT_TOOL]: {
         description:
           "Use the following schema to respond to the user's request in structured data, so it can be parsed and handled.",
-        schema: FINDINGS_JSON_SCHEMA,
+        // While the investigation runs the record is only the summary and the hypotheses.
+        schema: final ? FINDINGS_JSON_SCHEMA : LIVE_FINDINGS_JSON_SCHEMA,
+      },
+    };
+    const tools = { ...replayed, ...answerTool };
+    const toolsWithFiles = {
+      ...tools,
+      [RECORDER_READ_FILE_TOOL]: {
+        description:
+          "Reads a file in the investigation's workspace. Use it for the full output of a tool result that was clipped.",
+        schema: RECORDER_READ_FILE_SCHEMA,
+      },
+      [RECORDER_LIST_FILES_TOOL]: {
+        description: "Lists a directory in the investigation's workspace.",
+        schema: RECORDER_LIST_FILES_SCHEMA,
       },
     };
 
-    for (let attempt = 1; attempt <= MAX_ATTEMPTS && !output && !guard.signal.aborted; attempt++) {
+    interface ModelCall {
+      toolCallId: string;
+      function: { name: string; arguments: unknown };
+    }
+    const ask = async (
+      conversationMessages: Message[],
+      toolDefinitions: Record<string, unknown>,
+      toolChoice: unknown
+    ) =>
+      (await model.inferenceClient.chatComplete({
+        system: FINDINGS_RECORDER_SYSTEM_PROMPT,
+        messages: conversationMessages,
+        tools: toolDefinitions as never,
+        toolChoice: toolChoice as never,
+        // The conversation only grows at the end, so ask for the prefix to be cached, as the
+        // agent's own calls do: a retry or the next pass then reads most of it back.
+        cacheControl: { type: 'ephemeral', ttl: '5m' },
+        sessionId: conversationId,
+        abortSignal: guard.signal,
+      })) as unknown as { content?: string | null; toolCalls?: ModelCall[] };
+
+    const parseRecord = (raw: unknown, label: string): FindingsRecord | undefined => {
+      const parsed = findingsOutputSchema.safeParse(raw);
+      if (parsed.success) return limitFindings(parsed.data);
+      logger.warn(
+        `Findings recorder returned an invalid record (${label}): ${parsed.error.message}`
+      );
+      return undefined;
+    };
+
+    const runWorkspaceTool = async (call: ModelCall, ws: RecorderWorkspace): Promise<string> => {
+      const args = (call.function.arguments ?? {}) as Record<string, unknown>;
       try {
-        const response = (await model.inferenceClient.chatComplete({
-          system: FINDINGS_RECORDER_SYSTEM_PROMPT,
-          messages,
-          tools: tools as never,
-          toolChoice: { function: STRUCTURED_OUTPUT_TOOL } as never,
-          // The conversation only grows at the end, so ask for the prefix to be cached, as the
-          // agent's own calls do: a retry or the next pass then reads most of it back.
-          cacheControl: { type: 'ephemeral', ttl: '5m' },
-          sessionId: conversationId,
-          abortSignal: guard.signal,
-        })) as unknown as {
-          toolCalls?: Array<{ function: { name: string; arguments: unknown } }>;
-        };
-        const call = response.toolCalls?.find((c) => c.function.name === STRUCTURED_OUTPUT_TOOL);
-        const parsed = findingsOutputSchema.safeParse(call?.function.arguments);
-        if (parsed.success) {
-          output = limitFindings(parsed.data);
-        } else {
+        if (call.function.name === RECORDER_READ_FILE_TOOL) {
+          return await ws.readFile({
+            path: String(args.path ?? ''),
+            offset: typeof args.offset === 'number' ? args.offset : undefined,
+            length: typeof args.length === 'number' ? args.length : undefined,
+          });
+        }
+        if (call.function.name === RECORDER_LIST_FILES_TOOL) {
+          return await ws.listFiles({ dir: String(args.dir ?? '') });
+        }
+        return `Error: ${call.function.name} is not available here. Answer with structuredOutput.`;
+      } catch (error) {
+        return `Error: ${error instanceof Error ? error.message : String(error)}`;
+      }
+    };
+
+    /**
+     * The final pass with files: the model may read a few files, then must answer. Returns
+     * nothing when it never answers, so the caller falls back to a single call without files.
+     */
+    const readThenAnswer = async (ws: RecorderWorkspace): Promise<FindingsRecord | undefined> => {
+      const conversationSoFar: Message[] = [...messages];
+      let used = 0;
+      for (let round = 1; round <= RECORDER_MAX_TOOL_ROUNDS && !guard.signal.aborted; round++) {
+        const mustAnswer = round === RECORDER_MAX_TOOL_ROUNDS || used >= RECORDER_MAX_TOOL_CALLS;
+        const response = await ask(
+          conversationSoFar,
+          toolsWithFiles,
+          mustAnswer ? { function: STRUCTURED_OUTPUT_TOOL } : 'auto'
+        );
+        const calls = response.toolCalls ?? [];
+        const answerCall = calls.find((call) => call.function.name === STRUCTURED_OUTPUT_TOOL);
+        if (answerCall)
+          return parseRecord(answerCall.function.arguments, `with files, round ${round}`);
+        if (calls.length === 0) return undefined;
+        conversationSoFar.push({
+          role: MessageRole.Assistant,
+          content: response.content ?? null,
+          toolCalls: calls as unknown as ToolCall[],
+        });
+        for (const call of calls) {
+          used++;
+          conversationSoFar.push({
+            role: MessageRole.Tool,
+            name: call.function.name,
+            toolCallId: call.toolCallId,
+            response:
+              used > RECORDER_MAX_TOOL_CALLS
+                ? 'Error: no more files can be read. Answer with structuredOutput now.'
+                : await runWorkspaceTool(call, ws),
+          });
+        }
+      }
+      return undefined;
+    };
+
+    if (workspace) {
+      try {
+        output = await readThenAnswer(workspace);
+      } catch (error) {
+        if (!guard.signal.aborted) {
           logger.warn(
-            `Findings recorder returned an invalid record (attempt ${attempt}): ${parsed.error.message}`
+            `Findings recorder could not read files for ${conversationId}, answering without them: ${
+              error instanceof Error ? error.message : String(error)
+            }`
           );
         }
+      }
+    }
+
+    // One call, forced to answer. This is every live pass, and the final pass when it has no
+    // files or could not use them. The replay carries no file paths it could not follow.
+    const plainMessages = workspace ? buildMessages(false) : messages;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS && !output && !guard.signal.aborted; attempt++) {
+      try {
+        const response = await ask(plainMessages, tools, { function: STRUCTURED_OUTPUT_TOOL });
+        const call = response.toolCalls?.find((c) => c.function.name === STRUCTURED_OUTPUT_TOOL);
+        output = parseRecord(call?.function.arguments, `attempt ${attempt}`);
       } catch (error) {
         if (!guard.signal.aborted) {
           // A tool validation error says which fields failed only in its metadata.
@@ -300,57 +482,68 @@ export const runFindingsPass = async (
   if (!output && !(final && answer)) return false;
   if (!guard.claimWrite()) return false;
 
+  // While the investigation runs only the summary and the hypotheses are recorded. A live answer
+  // that carries more is not written: the rest is written once, from the final pass.
+  const record: FindingsRecord | undefined =
+    output && !final
+      ? {
+          summary: output.summary,
+          hypotheses: output.hypotheses.map((hypothesis) => omit(hypothesis, 'evidence')),
+        }
+      : output;
+
   const writer = agenticInvestigations.getFindingsWriter(request);
   const conversations = await agentBuilder.conversations.getScopedClient({ request });
   // A severity a user chose is theirs: the recorder is told so, and never replaces it either way.
   // Read again here, not before the model call: a user may change it while the model is answering.
   const severityChosenByUser =
     severityNotices(await readConversation(agentBuilder, request, conversationId)).length > 0;
-  const verdict = final ? output?.verdict ?? answer?.slice(0, MAX_METADATA_TEXT_LENGTH) : undefined;
+  const verdict = final ? record?.verdict ?? answer?.slice(0, MAX_METADATA_TEXT_LENGTH) : undefined;
+  // A write replaces the hypothesis and entity lists, so what is stored is read first to keep the
+  // evidence of what the pass lists again without any.
+  const stored = record
+    ? await writer.getFindings({ conversationId }).catch(() => undefined)
+    : undefined;
 
   const writes: Array<[string, () => Promise<unknown>]> = [
     [
       'metadata',
       () =>
         conversations.patchMetadata(conversationId, {
-          ...(output?.summary
-            ? { summary: output.summary }
+          ...(record?.summary
+            ? { summary: record.summary }
             : // A final pass without a record replaces an early live summary with the answer.
             final && answer
             ? { summary: answer.slice(0, FALLBACK_SUMMARY_CHARS) }
             : {}),
-          ...(output?.severity && !severityChosenByUser ? { severity: output.severity } : {}),
+          ...(final && record?.severity && !severityChosenByUser
+            ? { severity: record.severity }
+            : {}),
           ...(verdict ? { verdict } : {}),
         }),
     ],
   ];
-  if (output) {
+  if (record) {
     writes.push([
       'hypotheses',
       () =>
         writer.setHypotheses({
           conversationId,
-          hypotheses: limitToOneConfirmed(output.hypotheses),
+          hypotheses: limitToOneConfirmed(
+            withStoredEvidence(record.hypotheses, stored?.hypotheses ?? [])
+          ),
         }),
     ]);
-    if (output.impact_summary) {
+    if (final && record.impact_summary) {
       const {
         impact_summary: impactSummary,
         impact_entities: entities,
         impact_evidence: impactEvidence,
-      } = output;
+      } = record;
       writes.push([
         'impact',
-        async () => {
-          // A write replaces the entity list, so what is stored is read first to keep its evidence.
-          const stored =
-            entities !== undefined && entities.length >= 2
-              ? await writer
-                  .getFindings({ conversationId })
-                  .then(({ impactEntities }) => impactEntities ?? [])
-                  .catch(() => [])
-              : [];
-          return writer.setImpact({
+        () =>
+          writer.setImpact({
             conversationId,
             summary: impactSummary,
             // Omitted keeps the stored evidence; `null` removes it.
@@ -359,11 +552,13 @@ export const runFindingsPass = async (
             // affected in different ways, so a shorter list clears it.
             ...(entities !== undefined
               ? {
-                  entities: entities.length >= 2 ? toImpactEntities(entities, stored) : [],
+                  entities:
+                    entities.length >= 2
+                      ? toImpactEntities(entities, stored?.impactEntities ?? [])
+                      : [],
                 }
               : {}),
-          });
-        },
+          }),
       ]);
     }
   }
@@ -380,11 +575,11 @@ export const runFindingsPass = async (
   });
   const wrote = results.some((result) => result.status === 'fulfilled');
   // What the model answered stays in its conversation, so the next pass builds on it.
-  if (wrote && output) {
+  if (wrote && record) {
     memory.remember({
       atGroups: countTurns(steps),
       final,
-      answer: output as Record<string, unknown>,
+      answer: record as Record<string, unknown>,
     });
   }
   return wrote;

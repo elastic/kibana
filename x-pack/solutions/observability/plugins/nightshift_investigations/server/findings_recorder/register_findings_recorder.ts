@@ -90,8 +90,15 @@ export const registerFindingsRecorder = ({
         mode: HookExecutionMode.blocking,
         timeout: AFTER_EXECUTION_HOOK_TIMEOUT_MS,
         handler: async (context) => {
-          const { agentId, conversationId, conversationAccess, round, request, connectorId } =
-            context;
+          const {
+            agentId,
+            conversationId,
+            conversationAccess,
+            round,
+            request,
+            connectorId,
+            agentConfiguration,
+          } = context;
           if (
             agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID ||
             !conversationId ||
@@ -119,6 +126,7 @@ export const registerFindingsRecorder = ({
                   question: round.input?.message,
                   answer,
                   connectorId,
+                  allowedConnectorIds: agentConfiguration?.connector_ids ?? [],
                 }),
             });
           } catch (error) {

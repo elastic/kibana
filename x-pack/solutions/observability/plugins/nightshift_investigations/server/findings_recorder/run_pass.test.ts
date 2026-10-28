@@ -63,6 +63,7 @@ describe('runFindingsPass', () => {
     answers = [answerWith(output)] as unknown[],
     earlier = [] as never[],
     events = [] as Array<Record<string, unknown>>,
+    workspace = undefined as unknown,
   } = {}) => {
     const writer = {
       setHypotheses: jest.fn().mockResolvedValue(undefined),
@@ -88,6 +89,7 @@ describe('runFindingsPass', () => {
       getSavedObjects: () => ({} as never),
       getUiSettings: () => ({} as never),
       getAgenticInvestigations: () => ({ getFindingsWriter: () => writer } as never),
+      ...(workspace ? { getWorkspace: jest.fn().mockResolvedValue(workspace) } : {}),
       logger: loggerMock.create(),
     };
     return { deps, writer, patchMetadata, chatComplete, memory };
@@ -247,7 +249,7 @@ describe('runFindingsPass', () => {
       ],
     });
 
-    await run(deps, memory);
+    await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
     expect(writer.setImpact).toHaveBeenCalledWith(expect.objectContaining({ evidence }));
     expect(writer.setHypotheses).toHaveBeenCalledWith({
@@ -284,12 +286,30 @@ describe('runFindingsPass', () => {
     );
   });
 
-  it('writes summary, severity, hypotheses and impact from a live pass, without a verdict', async () => {
+  it('writes only the summary and the hypotheses from a live pass', async () => {
     const { deps, writer, patchMetadata, memory } = setup();
 
     await expect(run(deps, memory)).resolves.toBe(true);
 
-    expect(patchMetadata).toHaveBeenCalledWith('c1', { summary: output.summary, severity: 'high' });
+    // The severity, verdict and impact the model sent are left for the final pass.
+    expect(patchMetadata).toHaveBeenCalledWith('c1', { summary: output.summary });
+    expect(writer.setHypotheses).toHaveBeenCalledWith({
+      conversationId: 'c1',
+      hypotheses: output.hypotheses,
+    });
+    expect(writer.setImpact).not.toHaveBeenCalled();
+  });
+
+  it('writes the summary, severity, verdict, hypotheses and impact from the final pass', async () => {
+    const { deps, writer, patchMetadata, memory } = setup();
+
+    await expect(run(deps, memory, { answer: 'Root cause: bad deploy' })).resolves.toBe(true);
+
+    expect(patchMetadata).toHaveBeenCalledWith('c1', {
+      summary: output.summary,
+      severity: 'high',
+      verdict: output.verdict,
+    });
     expect(writer.setHypotheses).toHaveBeenCalledWith({
       conversationId: 'c1',
       hypotheses: output.hypotheses,
@@ -302,11 +322,48 @@ describe('runFindingsPass', () => {
     });
   });
 
+  it('asks a live pass for the live schema and a final pass for the full one', async () => {
+    const live = setup();
+    await run(live.deps, live.memory);
+    const final = setup();
+    await run(final.deps, final.memory, { answer: 'Root cause: bad deploy' });
+
+    const schemaOf = (chatComplete: jest.Mock) =>
+      chatComplete.mock.calls[0][0].tools.structuredOutput.schema.properties;
+    expect(Object.keys(schemaOf(live.chatComplete))).toEqual(['summary', 'hypotheses']);
+    expect(Object.keys(schemaOf(final.chatComplete))).toEqual(
+      expect.arrayContaining(['verdict', 'severity', 'impact_summary', 'impact_entities'])
+    );
+  });
+
+  it('keeps stored hypothesis evidence through a live pass, which carries none', async () => {
+    const stored = { description: 'Pool at 100%.' };
+    const { deps, writer, memory } = setup({
+      answers: [
+        answerWith({
+          ...output,
+          hypotheses: [{ ...output.hypotheses[0], evidence: [{ description: 'ignored' }] }],
+        }),
+      ],
+    });
+    writer.getFindings.mockResolvedValue({
+      hypotheses: [{ ...output.hypotheses[0], evidence: [stored] }],
+      impactEntities: [],
+    });
+
+    await run(deps, memory);
+
+    expect(writer.setHypotheses).toHaveBeenCalledWith({
+      conversationId: 'c1',
+      hypotheses: [expect.objectContaining({ candidate: 'Bad deploy', evidence: [stored] })],
+    });
+  });
+
   it('keeps the stored entities and evidence when a pass leaves them out', async () => {
     const { impact_entities: _omitted, ...withoutEntities } = output;
     const { deps, writer, memory } = setup({ answers: [answerWith(withoutEntities)] });
 
-    await run(deps, memory);
+    await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
     const [params] = writer.setImpact.mock.calls[0];
     expect(params).not.toHaveProperty('entities');
@@ -318,7 +375,7 @@ describe('runFindingsPass', () => {
       answers: [answerWith({ ...output, impact_entities: [] })],
     });
 
-    await run(deps, memory);
+    await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
     expect(writer.setImpact).toHaveBeenCalledWith(expect.objectContaining({ entities: [] }));
   });
@@ -328,7 +385,7 @@ describe('runFindingsPass', () => {
       answers: [answerWith({ ...output, impact_evidence: null })],
     });
 
-    await run(deps, memory);
+    await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
     expect(writer.setImpact).toHaveBeenCalledWith(expect.objectContaining({ evidence: null }));
   });
@@ -341,7 +398,7 @@ describe('runFindingsPass', () => {
       ],
     });
 
-    await run(deps, memory);
+    await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
     const [{ entities }] = writer.setImpact.mock.calls[0];
     expect(entities[0].name).toBe(longName);
@@ -370,7 +427,7 @@ describe('runFindingsPass', () => {
       ],
     });
 
-    await run(deps, memory);
+    await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
     const [{ entities }] = writer.setImpact.mock.calls[0];
     expect(entities).toEqual([
@@ -391,7 +448,7 @@ describe('runFindingsPass', () => {
       impactEntities: [{ id: 'payments', name: 'payments', evidence: stored }],
     });
 
-    await run(deps, memory);
+    await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
     const [{ entities }] = writer.setImpact.mock.calls[0];
     expect(entities).toEqual([
@@ -517,7 +574,7 @@ describe('runFindingsPass', () => {
     const { deps, writer, patchMetadata, memory } = setup();
     writer.setHypotheses.mockRejectedValue(new Error('conflict'));
 
-    await expect(run(deps, memory)).resolves.toBe(true);
+    await expect(run(deps, memory, { answer: 'Root cause: bad deploy' })).resolves.toBe(true);
     expect(patchMetadata).toHaveBeenCalled();
     expect(writer.setImpact).toHaveBeenCalled();
     expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('hypotheses'));
@@ -529,6 +586,176 @@ describe('runFindingsPass', () => {
     await expect(run({ ...deps, getAgenticInvestigations: () => undefined }, memory)).resolves.toBe(
       false
     );
+  });
+});
+
+describe('runFindingsPass with workspace files', () => {
+  const request = httpServerMock.createKibanaRequest();
+  const guard = { signal: new AbortController().signal, claimWrite: jest.fn(() => true) };
+  const long = 'x'.repeat(3_000);
+  const stepsWithLongResult = [
+    {
+      type: 'tool_call',
+      tool_id: 'nightshift_sandbox_bash',
+      tool_call_id: 'tc1',
+      tool_call_group_id: 'g1',
+      params: { command: 'curl metrics' },
+      results: [{ type: 'other', data: { stdout: long } }],
+    },
+  ] as never[];
+
+  const workspace = () => ({
+    writeResults: jest.fn().mockResolvedValue(undefined),
+    readFile: jest.fn().mockResolvedValue('t,value\n01:10,3\n01:11,412'),
+    listFiles: jest.fn().mockResolvedValue('f 3000 /workspace/.recorder/results/001-x.txt'),
+  });
+  const readCall = (id: string, path: string) => ({
+    content: '',
+    toolCalls: [{ toolCallId: id, function: { name: 'recorder_read_file', arguments: { path } } }],
+  });
+
+  const setupFiles = (answers: unknown[], ws = workspace()) => {
+    const writer = {
+      setHypotheses: jest.fn().mockResolvedValue(undefined),
+      setImpact: jest.fn().mockResolvedValue(undefined),
+      getFindings: jest.fn().mockResolvedValue({ hypotheses: [], impactEntities: [] }),
+    };
+    const chatComplete = jest.fn();
+    answers.forEach((answer) => chatComplete.mockResolvedValueOnce(answer));
+    chatComplete.mockResolvedValue({ content: '' });
+    jest
+      .mocked(createOptimizeModel)
+      .mockResolvedValue({ inferenceClient: { chatComplete } } as never);
+    const memory: RecorderMemory = { turns: jest.fn(() => []), remember: jest.fn() };
+    const getWorkspace = jest.fn().mockResolvedValue(ws);
+    const deps: FindingsPassDeps = {
+      getAgentBuilder: () =>
+        ({
+          conversations: {
+            getScopedClient: async () => ({
+              patchMetadata: jest.fn().mockResolvedValue(undefined),
+              get: async () => ({ events: [] }),
+            }),
+          },
+        } as never),
+      getInference: () => ({} as never),
+      getSavedObjects: () => ({} as never),
+      getUiSettings: () => ({} as never),
+      getAgenticInvestigations: () => ({ getFindingsWriter: () => writer } as never),
+      getWorkspace,
+      logger: loggerMock.create(),
+    };
+    const run = (extra = {}) =>
+      runFindingsPass(deps, {
+        request,
+        conversationId: 'c1',
+        steps: stepsWithLongResult,
+        guard,
+        memory,
+        question: 'Why?',
+        answer: 'Root cause: bad deploy',
+        ...extra,
+      });
+    return { run, ws, chatComplete, writer, getWorkspace, deps };
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    guard.claimWrite.mockReturnValue(true);
+  });
+
+  it('writes the full text of a clipped result and tells the recorder where it is', async () => {
+    const { run, ws, chatComplete } = setupFiles([answerWith(output)]);
+
+    await run();
+
+    expect(ws.writeResults).toHaveBeenCalledWith([
+      expect.objectContaining({
+        path: '/workspace/.recorder/results/001-nightshift_sandbox_bash.txt',
+        content: long,
+      }),
+    ]);
+    const sent = JSON.stringify(chatComplete.mock.calls[0][0].messages);
+    expect(sent).toContain(
+      'full output in /workspace/.recorder/results/001-nightshift_sandbox_bash.txt'
+    );
+  });
+
+  it('lets the final pass read a file, then answers with what it read', async () => {
+    const { run, ws, chatComplete, writer } = setupFiles([
+      readCall('r1', '/workspace/.recorder/results/001-nightshift_sandbox_bash.txt'),
+      answerWith({ ...output, impact_evidence: { description: 'Errors went from 3 to 412.' } }),
+    ]);
+
+    await expect(run()).resolves.toBe(true);
+
+    expect(ws.readFile).toHaveBeenCalledWith({
+      path: '/workspace/.recorder/results/001-nightshift_sandbox_bash.txt',
+      offset: undefined,
+      length: undefined,
+    });
+    // The second call sees the file's text as the tool's result.
+    const second = chatComplete.mock.calls[1][0].messages;
+    expect(JSON.stringify(second.slice(-2))).toContain('01:11,412');
+    expect(chatComplete.mock.calls[0][0].toolChoice).toBe('auto');
+    expect(chatComplete.mock.calls[0][0].tools).toHaveProperty('recorder_read_file');
+    expect(writer.setImpact).toHaveBeenCalledWith(
+      expect.objectContaining({ evidence: { description: 'Errors went from 3 to 412.' } })
+    );
+  });
+
+  it('gives a live pass no workspace and no file tools', async () => {
+    const { run, getWorkspace, chatComplete } = setupFiles([answerWith(output)]);
+
+    await run({ answer: undefined });
+
+    expect(getWorkspace).not.toHaveBeenCalled();
+    expect(chatComplete.mock.calls[0][0].tools).not.toHaveProperty('recorder_read_file');
+  });
+
+  it('forces the answer once the reads are used up', async () => {
+    const reads = Array.from({ length: 5 }, (_, i) => readCall(`r${i}`, '/workspace/a.txt'));
+    const { run, chatComplete } = setupFiles([...reads, answerWith(output)]);
+
+    await run();
+
+    const choices = chatComplete.mock.calls.map(([call]) => call.toolChoice);
+    expect(choices.slice(0, 4)).toEqual(['auto', 'auto', 'auto', 'auto']);
+    expect(choices[4]).toEqual({ function: 'structuredOutput' });
+  });
+
+  it('answers a read it cannot make with an error, and keeps going', async () => {
+    const { run, ws } = setupFiles([readCall('r1', '/etc/passwd'), answerWith(output)]);
+    ws.readFile.mockResolvedValue('Error: Only paths under /workspace can be read.');
+
+    await expect(run()).resolves.toBe(true);
+  });
+
+  it('falls back to one call without files when the model never answers with them', async () => {
+    const { run, chatComplete, writer } = setupFiles([
+      { content: 'I have what I need.', toolCalls: [] },
+      answerWith(output),
+    ]);
+
+    await expect(run()).resolves.toBe(true);
+
+    const fallback = chatComplete.mock.calls[1][0];
+    expect(fallback.tools).not.toHaveProperty('recorder_read_file');
+    expect(fallback.toolChoice).toEqual({ function: 'structuredOutput' });
+    // The replay no longer points at files it cannot be given.
+    expect(JSON.stringify(fallback.messages)).not.toContain('full output in');
+    expect(writer.setImpact).toHaveBeenCalled();
+  });
+
+  it('answers without files when there is no workspace', async () => {
+    const { run, deps, chatComplete } = setupFiles([answerWith(output)]);
+    (deps.getWorkspace as jest.Mock).mockRejectedValue(new Error('sandbox is not configured'));
+
+    await expect(run()).resolves.toBe(true);
+
+    expect(chatComplete).toHaveBeenCalledTimes(1);
+    expect(chatComplete.mock.calls[0][0].tools).not.toHaveProperty('recorder_read_file');
+    expect(deps.logger.warn).toHaveBeenCalledWith(expect.stringContaining('no workspace'));
   });
 });
 
