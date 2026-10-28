@@ -91,10 +91,23 @@ export const convertMarkdownReference = ({
 // Neither the text nor the target may contain `[`, so a failed match never rescans what follows.
 const LINK = /\[[^\][]*\]\(([^)\s[]+\.md)\)/g;
 
+const resolveLink = (link: string, indexUrl: URL): string | undefined => {
+  try {
+    const url = new URL(link, indexUrl);
+    return url.origin === indexUrl.origin ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 /**
  * The Markdown pages an `llms.txt` index links to (https://llmstxt.org), as absolute URLs
- * resolved against the index's URL, in order and without duplicates.
+ * resolved against the index's URL, in order and without duplicates. Links to another origin
+ * and links that aren't valid URLs are skipped, so the index can't point a fetch elsewhere.
  */
-export const readLlmsIndex = (text: string, indexUrl: string): string[] => [
-  ...new Set([...text.matchAll(LINK)].map(([, link]) => new URL(link, indexUrl).href)),
-];
+export const readLlmsIndex = (text: string, indexUrl: string): string[] => {
+  const index = new URL(indexUrl);
+  return [
+    ...new Set([...text.matchAll(LINK)].flatMap(([, link]) => resolveLink(link, index) ?? [])),
+  ];
+};

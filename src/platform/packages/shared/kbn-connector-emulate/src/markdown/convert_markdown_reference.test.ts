@@ -100,13 +100,29 @@ describe('readLlmsIndex', () => {
       '- [The Run object](jobs/v2/run/object.md)',
       '- [Trigger a new job run](jobs/v2/run-now.md)',
       '- [Terms of service](https://example.com/terms)',
-      '- [Web Search](https://api-dashboard.search.brave.com/api-reference/web/search/get/index.html.md): Search the web',
     ].join('\n');
 
     expect(readLlmsIndex(index, 'https://docs.databricks.com/api/llms.txt')).toEqual([
       'https://docs.databricks.com/api/jobs/v2/run-now.md',
       'https://docs.databricks.com/api/jobs/v2/run/object.md',
-      'https://api-dashboard.search.brave.com/api-reference/web/search/get/index.html.md',
+    ]);
+  });
+
+  it('skips links to another origin and links that are not valid URLs', () => {
+    const index = [
+      '- [Run](run.md)',
+      '- [Other host](https://evil.example.com/run.md)',
+      '- [Internal](http://169.254.169.254/latest/meta-data.md)',
+      '- [Other port](https://docs.databricks.com:8443/run.md)',
+      '- [Other scheme](http://docs.databricks.com/run.md)',
+      '- [Malformed](https://exa%mple.com/run.md)',
+      '- [No host](https://:80/run.md)',
+      '- [Absolute](https://docs.databricks.com/api/jobs/v2/get.md)',
+    ].join('\n');
+
+    expect(readLlmsIndex(index, 'https://docs.databricks.com/api/llms.txt')).toEqual([
+      'https://docs.databricks.com/api/run.md',
+      'https://docs.databricks.com/api/jobs/v2/get.md',
     ]);
   });
 
