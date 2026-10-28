@@ -19,6 +19,7 @@ jest.mock('./connector_manifest', () => ({
   writeConnectorManifest: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock('./elastic_manifest', () => ({
+  ...jest.requireActual('./elastic_manifest'),
   writeElasticManifest: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -230,66 +231,6 @@ describe('createSandboxWorkspaceManager', () => {
     expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(1);
   });
 
-  describe('sandbox secrets', () => {
-    const createManagerWithSecrets = (listKeysForSandbox: jest.Mock) =>
-      createSandboxWorkspaceManager({
-        getDeps: () => ({ sandboxSecretsClient: { listKeysForSandbox } }),
-        logger,
-      });
-
-    it('passes the secret keys available to the caller to the manifest', async () => {
-      const listKeysForSandbox = jest.fn().mockResolvedValue(['GITHUB_TOKEN']);
-      const session = createSessionMock(true);
-      const callContext = createCallContext(['connector-1']);
-
-      await createManagerWithSecrets(listKeysForSandbox).ensureWorkspaceReady({
-        session,
-        callContext,
-      });
-
-      expect(listKeysForSandbox).toHaveBeenCalledWith(callContext.request);
-      expect(mockWriteConnectorManifest).toHaveBeenCalledWith(
-        expect.objectContaining({ secretKeys: ['GITHUB_TOKEN'] })
-      );
-    });
-
-    it('rewrites the manifest when the secret keys change', async () => {
-      const listKeysForSandbox = jest
-        .fn()
-        .mockResolvedValueOnce(['GITHUB_TOKEN'])
-        .mockResolvedValueOnce(['GITHUB_TOKEN'])
-        .mockResolvedValueOnce(['GITHUB_TOKEN', 'NEW_KEY']);
-      const managerWithSecrets = createManagerWithSecrets(listKeysForSandbox);
-      const session = createSessionMock(false);
-      const callContext = createCallContext(['connector-1']);
-
-      await managerWithSecrets.ensureWorkspaceReady({ session, callContext });
-      await managerWithSecrets.ensureWorkspaceReady({ session, callContext });
-      expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(1);
-
-      await managerWithSecrets.ensureWorkspaceReady({ session, callContext });
-      expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(2);
-      expect(mockWriteConnectorManifest).toHaveBeenLastCalledWith(
-        expect.objectContaining({ secretKeys: ['GITHUB_TOKEN', 'NEW_KEY'] })
-      );
-    });
-
-    it('treats a failing secrets lookup as no secrets and logs a warning', async () => {
-      const listKeysForSandbox = jest.fn().mockRejectedValue(new Error('boom'));
-      const session = createSessionMock(true);
-
-      await createManagerWithSecrets(listKeysForSandbox).ensureWorkspaceReady({
-        session,
-        callContext: createCallContext(['connector-1']),
-      });
-
-      expect(mockWriteConnectorManifest).toHaveBeenCalledWith(
-        expect.objectContaining({ secretKeys: [] })
-      );
-      expect(loggingSystemMock.collect(logger).warn).toHaveLength(1);
-    });
-  });
-
   describe('telemetryConnectorId', () => {
     let managerWithTelemetry: ReturnType<typeof createSandboxWorkspaceManager>;
     let actions: ReturnType<typeof actionsMock.createStart>;
@@ -329,7 +270,10 @@ describe('createSandboxWorkspaceManager', () => {
       });
 
       expect(mockWriteElasticManifest).toHaveBeenCalledWith(
-        expect.objectContaining({ connectorId: 'elasticsearch-telemetry', session })
+        expect.objectContaining({
+          credentials: { kind: 'connector', connectorId: 'elasticsearch-telemetry' },
+          session,
+        })
       );
     });
 
@@ -350,6 +294,23 @@ describe('createSandboxWorkspaceManager', () => {
       expect(mockWriteElasticManifest).toHaveBeenCalledWith(
         expect.objectContaining({ readableIndices: 'Read remote-a:logs-service-*' })
       );
+    });
+
+    it('does not write the elastic manifest when the telemetry connector is denied', async () => {
+      const session = createSessionMock(false);
+      const configuredManager = createSandboxWorkspaceManager({
+        getDeps: () => ({ actions }),
+        telemetryConnectorId: 'elasticsearch-telemetry',
+        telemetryReadableIndices: 'Read remote-a:logs-service-*',
+        logger,
+      });
+
+      await configuredManager.ensureWorkspaceReady({
+        session,
+        callContext: createCallContext(['other']),
+      });
+
+      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
     });
 
     it('does not write elastic manifest when telemetryConnectorId is not set', async () => {

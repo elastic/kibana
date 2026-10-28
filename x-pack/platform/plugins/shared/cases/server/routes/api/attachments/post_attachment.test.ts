@@ -22,11 +22,18 @@ describe('postAttachmentRoute', () => {
     body: { type: 'comment', data: { content: 'hello' }, owner: 'securitySolution' },
   };
 
-  const callHandler = () =>
-    postAttachmentRoute.handler({ context, request, response } as unknown as HandlerArgs);
+  const incrementAttachmentTypeCounters = jest.fn();
 
-  const getHandlerError = () =>
-    callHandler().then(
+  const callHandler = (body: object = request.body) =>
+    postAttachmentRoute.handler({
+      context,
+      request: { ...request, body },
+      response,
+      incrementAttachmentTypeCounters,
+    } as unknown as HandlerArgs);
+
+  const getHandlerError = (body?: object) =>
+    callHandler(body).then(
       () => {
         throw new Error('Expected the handler to throw');
       },
@@ -48,6 +55,27 @@ describe('postAttachmentRoute', () => {
     expect(response.created).toHaveBeenCalledWith({
       body: expect.objectContaining({ type: 'comment', data: { content: 'test' } }),
     });
+    expect(incrementAttachmentTypeCounters).toHaveBeenCalledWith(['comment']);
+  });
+
+  it('does not count the attachment when the create fails', async () => {
+    casesClientMock.attachments.add.mockRejectedValue(new Error('create failed'));
+
+    await getHandlerError();
+
+    expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
+  });
+
+  it('rejects a file attachment with a 400 before calling the client', async () => {
+    const error = await getHandlerError({
+      type: 'file',
+      attachmentId: 'file-1',
+      owner: 'securitySolution',
+    });
+
+    expect(error.boomify().output.statusCode).toBe(400);
+    expect(casesClientMock.attachments.add).not.toHaveBeenCalled();
+    expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
   });
 
   it('throws a 500 when the created attachment is missing from the case', async () => {
@@ -60,5 +88,6 @@ describe('postAttachmentRoute', () => {
     );
     expect(error.boomify().output.statusCode).toBe(500);
     expect(response.created).not.toHaveBeenCalled();
+    expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
   });
 });

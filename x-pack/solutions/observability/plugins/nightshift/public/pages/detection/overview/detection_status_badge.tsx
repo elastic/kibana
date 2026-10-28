@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiHealth, EuiSkeletonRectangle, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiHealth, EuiIcon, EuiSkeletonRectangle, EuiToolTip } from '@elastic/eui';
 import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
 import React from 'react';
 import {
-  ENABLED_STATUS_LABEL,
+  MONITORING_STATUS_LABEL,
   PAUSED_STATUS_LABEL,
   STATUS_ERROR_TOOLTIP,
   STATUS_LOADING_LABEL,
@@ -20,12 +20,14 @@ export interface DetectionStatusBadgeProps {
   status: SignificantEventsMaintenanceStatus | undefined;
   isLoading: boolean;
   isError: boolean;
+  'data-test-subj'?: string;
 }
 
 export const DetectionStatusBadge = ({
   status,
   isLoading,
   isError,
+  'data-test-subj': dataTestSubj = 'nightshiftDetectionStatus',
 }: DetectionStatusBadgeProps): React.ReactElement => {
   if (isLoading) {
     return (
@@ -41,7 +43,7 @@ export const DetectionStatusBadge = ({
   if (isError || !status) {
     return (
       <EuiToolTip content={STATUS_ERROR_TOOLTIP}>
-        <EuiHealth color="subdued" data-test-subj="nightshiftDetectionStatusUnknown">
+        <EuiHealth color="subdued" data-test-subj={`${dataTestSubj}Unknown`}>
           {UNKNOWN_STATUS_LABEL}
         </EuiHealth>
       </EuiToolTip>
@@ -50,8 +52,9 @@ export const DetectionStatusBadge = ({
 
   const isPaused = status.state === 'paused';
   return (
-    <EuiHealth color={isPaused ? 'warning' : 'success'} data-test-subj="nightshiftDetectionStatus">
-      {isPaused ? PAUSED_STATUS_LABEL : ENABLED_STATUS_LABEL}
-    </EuiHealth>
+    <EuiBadge color="hollow" data-test-subj={dataTestSubj}>
+      <EuiIcon type="dot" color={isPaused ? 'warning' : 'primary'} aria-hidden={true} />{' '}
+      {isPaused ? PAUSED_STATUS_LABEL : MONITORING_STATUS_LABEL}
+    </EuiBadge>
   );
 };

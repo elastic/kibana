@@ -143,14 +143,18 @@ export const links: LinkItem = {
       description: i18n.translate(
         'xpack.securitySolution.appLinks.coverageOverviewDashboardDescription',
         {
-          defaultMessage: 'Review and maintain your protections MITRE ATT&CK® coverage.',
+          defaultMessage:
+            'Review and maintain your protections MITRE ATT&CK and MITRE ATLAS coverage.',
         }
       ),
       path: COVERAGE_OVERVIEW_PATH,
       capabilities: RULES_UI_READ_PRIVILEGE,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
-          defaultMessage: 'MITRE ATT&CK Coverage',
+          defaultMessage: 'MITRE ATT&CK coverage',
+        }),
+        i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboardAtlas', {
+          defaultMessage: 'MITRE ATLAS coverage',
         }),
       ],
     },

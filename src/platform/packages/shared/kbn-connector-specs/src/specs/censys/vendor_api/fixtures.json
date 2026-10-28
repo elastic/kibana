@@ -1,0 +1,17 @@
+{
+  "censEyeJobResult": {
+    "input": {
+      "jobId": "3f2a1b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b"
+    }
+  },
+  "censEyeJobStatus": {
+    "input": {
+      "jobId": "3f2a1b4c-5d6e-4f70-8a9b-0c1d2e3f4a5b"
+    }
+  },
+  "scanStatus": {
+    "input": {
+      "scanId": "7c9d8e1f-2a3b-4c5d-9e6f-a1b2c3d4e5f6"
+    }
+  }
+}

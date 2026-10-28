@@ -9,10 +9,12 @@ import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   HasTypeDisplayName,
   HasEditCapabilities,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesDataLoading,
   PublishesEsql,
   PublishesWritableTimeRange,
@@ -97,10 +99,11 @@ const panelMeasureCss = css({
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
   HasEditCapabilities &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesDataLoading &
   PublishesEsql &
-  PublishesWritableTimeRange;
+  PublishesWritableTimeRange &
+  HasInspectorAdapters;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentEmbeddableState,
@@ -135,6 +138,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     let isRetained = false;
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
+    const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const isGenerating$ = new BehaviorSubject<boolean>(false);
     const chatGeneratingCallbacks = {
@@ -158,7 +162,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           ? parentApi.timeRange$.getValue() ?? undefined
           : undefined)
     );
-    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
     // Starts true so the panel is not reported as render-complete before its first fetch resolves;
     // screenshotting would otherwise capture an empty panel.
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -212,8 +216,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       serializeState,
       esql$,
       approximationApplied$,
-      dataViews$,
+      dataSources$,
       dataLoading$,
+      // A static panel makes no request, so it offers no Inspect entry.
+      getInspectorAdapters: () =>
+        esqlQuery$.getValue() ? { requests: requestAdapter } : undefined,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom panel',
@@ -362,7 +369,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           ).pipe(catchError(() => of(undefined)));
         })
       )
-      .subscribe((dataView) => dataViews$.next(dataView ? [dataView] : undefined));
+      .subscribe((dataView) => dataSources$.next(dataView ? [dataView] : undefined));
 
     const fetchSubscription = fetch$(api).subscribe((ctx) => {
       isApproximate$.next(ctx.isApproximate);
@@ -534,6 +541,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               isAiAvailable={Boolean(agentBuilder) && viewMode === 'edit'}
               isGenerating={isGenerating}
               isInteractive={viewMode !== 'non-interactive'}
+              requestAdapter={requestAdapter}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}

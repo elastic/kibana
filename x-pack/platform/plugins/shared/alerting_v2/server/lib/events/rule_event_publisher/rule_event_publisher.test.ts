@@ -26,7 +26,10 @@ describe('RuleEventPublisher', () => {
 
   beforeEach(() => {
     ({ publisher, eventBus } = createRuleEventPublisher());
-    context = { request: httpServerMock.createKibanaRequest(), origin: 'internal' };
+    context = {
+      request: httpServerMock.createKibanaRequest(),
+      origin: { actor: 'internal', channel: 'api' },
+    };
   });
 
   const cases = [

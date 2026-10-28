@@ -124,9 +124,11 @@ The `getAttachmentList` children receive `onRemove` and `isRemoving`. Cases owns
 
 - Show remove controls only when `onRemove` is set. It's unset when the user can't delete.
 - Disable remove controls while `isRemoving` is true.
-- Call `onRemove({ savedObjectIds })` to remove attachments. The confirm modal counts attachments, so use it only when each attachment references 1 id.
+- Call `onRemove({ savedObjectIds })` to remove whole attachments. The confirm modal counts attachments, so use it only when each attachment references 1 id.
+- Call `onRemove({ attachmentIds })` to remove referenced ids, e.g. alert ids or file ids. Grouped attachments keep their other ids. File ids also remove a file whose attachment was never created.
 - Pass `{ onSuccess }` as the second argument to clear a selection after removal.
 - Set `getCountLabel` so the modal and activity entry name the type.
+- For an alerts table, `getRemoveFromCaseActions({ onRemove, key, label })` returns the bulk action and the row callback.
 
 ## Schema
 

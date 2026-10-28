@@ -1,5 +1,5 @@
 {
-  "sha1": "f34156b2b7095a570c124c2e5b637dfd85813ba9",
+  "sha1": "7152c876138c3e4036ad1d3a26e79fc8af8e7548",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -162,6 +162,26 @@
       }
     },
     {
+      "id": "097c759d9a3a9ff-591f404b0802fbf",
+      "title": "Advanced settings - common settings renders every common space and global setting field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/common_settings_fields.spec.ts",
+        "line": 55,
+        "column": 24
+      }
+    },
+    {
       "id": "4c6123f145685f5-2eae084fca89f8f",
       "title": "Advanced settings - disable animations disables animations while preserving completion events and exemptions",
       "expectedStatus": "passed",
@@ -173,6 +193,64 @@
         "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/disable_animations.spec.ts",
         "line": 23,
         "column": 60
+      }
+    },
+    {
+      "id": "56be6e862ac9594-a9844b276c65446",
+      "title": "Advanced settings - serverless setting validation blocks saving an invalid value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/serverless_setting_validation.spec.ts",
+        "line": 27,
+        "column": 25
+      }
+    },
+    {
+      "id": "9f0eb31a4bbd8d0-079d7ba5b670fdd",
+      "title": "Advanced settings - settings form updates a setting and resets it to its default value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/settings_form.spec.ts",
+        "line": 30,
+        "column": 27
+      }
+    },
+    {
+      "id": "9f0eb31a4bbd8d0-85511ca838c8adf",
+      "title": "Advanced settings - settings form shows the page reload toast for a setting that requires a page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/advanced_settings/test/scout/ui/tests/settings_form.spec.ts",
+        "line": 44,
+        "column": 13
       }
     },
     {

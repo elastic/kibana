@@ -12,7 +12,7 @@ import {
   THREAT_INTEL_INDICATORS_INDEX,
   type ListSourcesItem,
 } from '../../../../common/threat_intel';
-import { apiTest, tags, testData, SECURITY_READ_ONLY_ROLE } from '../fixtures';
+import { apiTest, tags, TI_HEADERS, SECURITY_READ_ONLY_ROLE } from '../fixtures';
 
 /**
  * Shaped from the route's own response type so a field rename cannot leave this
@@ -41,7 +41,7 @@ apiTest.describe('Threat Intel - source catalog API', { tag: [...tags.stateful.c
 
   apiTest.beforeAll(async ({ samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-    adminHeaders = { ...testData.TI_HEADERS, ...cookieHeader };
+    adminHeaders = { ...TI_HEADERS, ...cookieHeader };
   });
 
   apiTest(
@@ -128,7 +128,7 @@ apiTest.describe('Threat Intel - source catalog API', { tag: [...tags.stateful.c
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser(SECURITY_READ_ONLY_ROLE);
       const readOnlyHeaders = {
-        ...testData.TI_HEADERS,
+        ...TI_HEADERS,
         ...cookieHeader,
       };
 

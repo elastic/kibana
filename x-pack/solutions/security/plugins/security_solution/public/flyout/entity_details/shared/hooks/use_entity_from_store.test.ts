@@ -6,6 +6,7 @@
  */
 
 import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
+import type { InspectQuery } from '@kbn/entity-store/common';
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   applyEntityStoreSearchCachePatch,
@@ -15,6 +16,7 @@ import {
 } from './use_entity_from_store';
 import {
   buildEntityIdFilter,
+  RESOLUTION_GROUP_RISK_SORT_FIELD,
   RESOLVED_MODE_MAX_RECORDS,
   RESOLVED_TO_FIELD,
 } from '../../../../../common/entity_analytics/entity_store/resolution_group';
@@ -125,6 +127,7 @@ describe('useEntityFromStore', () => {
       expect(params.perPage).toBe(1);
       expect(result.current.entityRecord?.entity?.id).toBe('host-1');
       expect(result.current.aliasRecords).toEqual([]);
+      expect(result.current.aliasCount).toBe(0);
     });
 
     it('returns a null entityRecord when the returned record does not match entityId', async () => {
@@ -162,10 +165,26 @@ describe('useEntityFromStore', () => {
   });
 
   describe('entityId path (resolved mode)', () => {
-    it('matches the target on entity.id or aliases on resolved_to, with a widened perPage', async () => {
-      mockFetchEntitiesListV2.mockResolvedValue({
-        records: [hostRecord('alias-1'), hostRecord('target'), hostRecord('alias-2')],
-      });
+    /** Answers the target lookup (perPage 1) and the aliases lookup separately. */
+    const mockTargetAndAliases = (
+      target: EntityStoreRecord[],
+      aliases: EntityStoreRecord[],
+      extra?: { inspect?: { target: InspectQuery; aliases: InspectQuery }; aliasesTotal?: number }
+    ) => {
+      mockFetchEntitiesListV2.mockImplementation(
+        async ({ params }: { params: { perPage: number } }) =>
+          params.perPage === 1
+            ? { records: target, total: target.length, inspect: extra?.inspect?.target }
+            : {
+                records: aliases,
+                total: extra?.aliasesTotal ?? aliases.length,
+                inspect: extra?.inspect?.aliases,
+              }
+      );
+    };
+
+    it('fetches the target by id and its aliases riskiest-first, capped to the group size', async () => {
+      mockTargetAndAliases([hostRecord('target')], [hostRecord('alias-1'), hostRecord('alias-2')]);
 
       const { result } = renderHook(
         () =>
@@ -180,26 +199,70 @@ describe('useEntityFromStore', () => {
 
       await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
 
-      const [{ params }] = mockFetchEntitiesListV2.mock.calls[0];
-      expect(JSON.parse(params.filterQuery)).toEqual({
-        bool: {
-          should: [
-            { term: { 'entity.id': 'target' } },
-            { term: { 'entity.relationships.resolution.resolved_to': 'target' } },
-          ],
-          minimum_should_match: 1,
-        },
+      expect(mockFetchEntitiesListV2).toHaveBeenCalledTimes(2);
+      const [[{ params: targetParams }], [{ params: aliasParams }]] =
+        mockFetchEntitiesListV2.mock.calls;
+      expect(JSON.parse(targetParams.filterQuery)).toEqual({
+        bool: { filter: [{ term: { 'entity.id': 'target' } }] },
       });
-      expect(params.perPage).toBe(RESOLVED_MODE_MAX_RECORDS);
-      // The primary record is the target, not necessarily the first hit; aliases exclude it.
+      expect(targetParams.perPage).toBe(1);
+      expect(JSON.parse(aliasParams.filterQuery)).toEqual({
+        term: { [RESOLVED_TO_FIELD]: 'target' },
+      });
+      // The target takes one of the member slots; the riskiest aliases fill the rest.
+      expect(aliasParams.perPage).toBe(RESOLVED_MODE_MAX_RECORDS - 1);
+      expect(aliasParams.sortField).toBe(RESOLUTION_GROUP_RISK_SORT_FIELD);
+      expect(aliasParams.sortOrder).toBe('desc');
+
       expect(result.current.entityRecord?.entity?.id).toBe('target');
       expect(result.current.aliasRecords.map((r) => r.entity?.id)).toEqual(['alias-1', 'alias-2']);
     });
 
+    it('keeps the aliases in the order the store returned them (riskiest first)', async () => {
+      mockTargetAndAliases(
+        [hostRecord('target')],
+        [hostRecord('risky'), hostRecord('medium'), hostRecord('low')]
+      );
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+      expect(result.current.aliasRecords.map((r) => r.entity?.id)).toEqual([
+        'risky',
+        'medium',
+        'low',
+      ]);
+    });
+
+    it('never lists the target among the aliases if the aliases lookup returns it', async () => {
+      mockTargetAndAliases([hostRecord('target')], [hostRecord('alias-1'), hostRecord('target')]);
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+      expect(result.current.aliasRecords.map((r) => r.entity?.id)).toEqual(['alias-1']);
+    });
+
     it('returns a null entityRecord rather than promoting an alias when the target itself is not returned', async () => {
-      mockFetchEntitiesListV2.mockResolvedValue({
-        records: [hostRecord('alias-1'), hostRecord('alias-2')],
-      });
+      mockTargetAndAliases([], [hostRecord('alias-1'), hostRecord('alias-2')]);
 
       const { result } = renderHook(
         () =>
@@ -219,7 +282,7 @@ describe('useEntityFromStore', () => {
     });
 
     it('returns no aliases when only the target resolves', async () => {
-      mockFetchEntitiesListV2.mockResolvedValue({ records: [hostRecord('target')] });
+      mockTargetAndAliases([hostRecord('target')], []);
 
       const { result } = renderHook(
         () =>
@@ -236,6 +299,53 @@ describe('useEntityFromStore', () => {
       expect(result.current.aliasRecords).toEqual([]);
     });
 
+    it('reports the full alias count from the store even when the loaded aliases are capped', async () => {
+      mockTargetAndAliases([hostRecord('target')], [hostRecord('alias-1'), hostRecord('alias-2')], {
+        aliasesTotal: 250,
+      });
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+      expect(result.current.aliasRecords).toHaveLength(2);
+      expect(result.current.aliasCount).toBe(250);
+    });
+
+    it('merges the inspect payloads of both lookups so the inspector shows each query', async () => {
+      mockTargetAndAliases([hostRecord('target')], [hostRecord('alias-1')], {
+        inspect: {
+          target: { dsl: ['target-dsl'], response: ['target-response'] },
+          aliases: { dsl: ['aliases-dsl'], response: ['aliases-response'] },
+        },
+      });
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+      expect(result.current.inspect).toEqual({
+        dsl: ['target-dsl', 'aliases-dsl'],
+        response: ['target-response', 'aliases-response'],
+      });
+    });
+
     it('uses distinct query caches for single and resolved mode of the same id', async () => {
       const queryClient = createQueryClient();
       mockFetchEntitiesListV2.mockResolvedValue({ records: [hostRecord('target')] });
@@ -248,7 +358,8 @@ describe('useEntityFromStore', () => {
       await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalledTimes(1));
 
       rerender({ mode: 'resolved' });
-      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalledTimes(2));
+      // Resolved mode issues the target and aliases lookups.
+      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalledTimes(3));
 
       const keys = queryClient
         .getQueryCache()

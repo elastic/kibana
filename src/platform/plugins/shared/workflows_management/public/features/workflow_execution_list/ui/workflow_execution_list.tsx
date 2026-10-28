@@ -24,9 +24,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { getUserDisplayName } from '@kbn/user-profile-components';
 import type { WorkflowExecutionListDto, WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { getExecutionHistoryColumns } from './workflow_execution_list_columns';
 import {
@@ -35,6 +33,11 @@ import {
 } from './workflow_execution_list_filters';
 import { WorkflowExecutionListFooter } from './workflow_execution_list_footer';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
+import {
+  executedByFallbackLabel,
+  getExecutedByLabel,
+  getExecutedByProfiles,
+} from '../../../entities/user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 
 export interface WorkflowExecutionListProps {
@@ -58,39 +61,7 @@ export interface WorkflowExecutionListProps {
 }
 
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 'm' };
-const USER_PROFILES_STALE_TIME = 60 * 1000;
 const EMPTY_EXECUTED_BY_USER_PROFILES = new Map<string, UserProfileWithAvatar>();
-
-const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfileWithAvatar> =>
-  profiles.reduce<Map<string, UserProfileWithAvatar>>((acc, profile) => {
-    acc.set(profile.uid, profile);
-    return acc;
-  }, new Map<string, UserProfileWithAvatar>());
-
-const getExecutedByLabel = (
-  profile?: UserProfileWithAvatar,
-  fallbackLabel?: string
-): string | undefined => {
-  if (!profile?.user) return fallbackLabel;
-
-  return getUserDisplayName(profile.user) || fallbackLabel;
-};
-
-const useExecutedByUserProfiles = ({ enabled, uids }: { enabled: boolean; uids: string[] }) => {
-  const { userProfile } = useKibana().services;
-
-  return useQuery<UserProfileWithAvatar[], Error, Map<string, UserProfileWithAvatar>>(
-    ['workflowsExecutionListExecutedByUserProfiles', ...uids],
-    () => userProfile.bulkGet({ uids: new Set(uids), dataPath: 'avatar' }),
-    {
-      enabled: enabled && uids.length > 0,
-      keepPreviousData: true,
-      retry: false,
-      select: profilesToMap,
-      staleTime: USER_PROFILES_STALE_TIME,
-    }
-  );
-};
 
 export const WorkflowExecutionList = ({
   filters,
@@ -126,17 +97,19 @@ export const WorkflowExecutionList = ({
     return Array.from(uniqueUsers).sort();
   }, [executions, filters.executedBy]);
 
-  const { data: executedByUserProfiles = EMPTY_EXECUTED_BY_USER_PROFILES } =
-    useExecutedByUserProfiles({
-      enabled: showExecutor,
-      uids: executedByValuesToResolve,
-    });
+  const executedByUserProfiles = useMemo(
+    () =>
+      showExecutor
+        ? getExecutedByProfiles(executions?.results ?? [])
+        : EMPTY_EXECUTED_BY_USER_PROFILES,
+    [executions, showExecutor]
+  );
 
   const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
     const options = executedByValuesToResolve.flatMap((executedBy) => {
       const label = getExecutedByLabel(
         executedByUserProfiles.get(executedBy),
-        showUnresolvedExecutors ? executedBy : undefined
+        executedByFallbackLabel(executedBy, showUnresolvedExecutors)
       );
 
       return label ? [{ label, value: executedBy }] : [];
@@ -266,10 +239,9 @@ export const WorkflowExecutionList = ({
               'data-selected': isSelected ? 'true' : 'false',
               'data-last-viewed': isLastViewed ? 'true' : 'false',
               'data-started-at': execution.startedAt || 'null',
-              'data-executed-by-label':
-                showExecutor && showUnresolvedExecutors && execution.executedBy
-                  ? execution.executedBy
-                  : undefined,
+              'data-executed-by-label': showExecutor
+                ? executedByFallbackLabel(execution.executedBy, showUnresolvedExecutors)
+                : undefined,
               onClick: () => handleRowClick(execution),
               onKeyDown: (e: React.KeyboardEvent) => {
                 if (e.key === 'Enter' || e.key === ' ') {
