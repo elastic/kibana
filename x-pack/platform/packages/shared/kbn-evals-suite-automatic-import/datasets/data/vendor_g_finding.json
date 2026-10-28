@@ -1,0 +1,1134 @@
+{
+  "id": "vendor_g_finding",
+  "title": "Vendor G finding",
+  "description": "Security findings",
+  "cohort": "recent",
+  "format": "json",
+  "samples": [
+    {
+      "line": "{\"activity_id\":1,\"activity_name\":\"Create\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Compliance Finding\",\"class_uid\":2003,\"cloud\":{\"account\":{\"uid\":\"123456789012\"},\"provider\":\"AWS\",\"region\":\"us-east-2\"},\"compliance\":{\"control\":\"SQS.3\",\"standards\":[\"standards/aws-foundational-security-best-practices/v/1.0.0\"],\"status\":\"Pass\",\"status_id\":1},\"finding_info\":{\"analytic\":{\"category\":\"AWS::Config::ConfigRule\",\"name\":\"securityhub-sqs-queue-no-public-access-abcdef12\",\"type\":\"Rule\",\"type_id\":1},\"created_time\":1758273439594,\"created_time_dt\":\"2025-09-19T09:17:19.594Z\",\"desc\":\"This controls checks whether an Amazon SQS access policy allows public access to an SQS queue. The control fails if an SQS access policy allows public access to the queue.\",\"first_seen_time\":1758273437503,\"first_seen_time_dt\":\"2025-09-19T09:17:17.503Z\",\"last_seen_time\":1758273437503,\"last_seen_time_dt\":\"2025-09-19T09:17:17.503Z\",\"modified_time\":1758273439594,\"modified_time_dt\":\"2025-09-19T09:17:19.594Z\",\"title\":\"SQS queue access policies should not allow public access\",\"types\":[\"Software and Configuration Checks/Industry and Regulatory Standards\",\"Posture Management\"],\"uid\":\"arn:aws:securityhub:us-east-2:123456789012:security-control/SQS.3/finding/7abcdef4-abcd-1234-5678-501234567894\"},\"metadata\":{\"product\":{\"name\":\"Security Hub\",\"uid\":\"arn:aws:securityhub:us-east-2::productv2/aws/securityhub\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\"],\"uid\":\"d1bc4b01234567890123456789abcdefabcdefabcdefabcdef123456\",\"version\":\"1.6.0\"},\"remediation\":{\"desc\":\"For information on how to correct this issue, consult the AWS Security Hub controls documentation.\",\"references\":[\"https://docs.aws.amazon.com/console/securityhub/SQS.3/remediation\"]},\"resources\":[{\"cloud_partition\":\"aws\",\"owner\":{\"account\":{\"uid\":\"123456789012\"}},\"region\":\"us-east-2\",\"type\":\"AWS::SQS::Queue\",\"uid\":\"https://sqs.us-east-2.amazonaws.com/123456789012/securityhubfinding\",\"uid_alt\":\"arn:aws:sqs:us-east-2:123456789012:securityhubfinding\"}],\"severity\":\"Informational\",\"severity_id\":1,\"status\":\"Resolved\",\"status_id\":4,\"time\":1758273439594,\"time_dt\":\"2025-09-19T09:17:19.594Z\",\"type_name\":\"Compliance Finding: Create\",\"type_uid\":200301,\"vendor_attributes\":{\"severity\":\"Informational\",\"severity_id\":1}}",
+      "expected": {
+        "@timestamp": "2025-09-19T09:17:19.594Z",
+        "cloud": {
+          "account": {
+            "id": "123456789012"
+          },
+          "provider": "aws",
+          "region": "us-east-2",
+          "service": {
+            "name": "AWS::SQS::Queue"
+          }
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "rule": {
+          "description": "This controls checks whether an Amazon SQS access policy allows public access to an SQS queue. The control fails if an SQS access policy allows public access to the queue.",
+          "id": "SQS.3",
+          "name": "SQS queue access policies should not allow public access",
+          "reference": [
+            "https://docs.aws.amazon.com/console/securityhub/SQS.3/remediation"
+          ]
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "Create",
+          "created": "2025-09-19T09:17:19.594Z",
+          "id": "arn:aws:securityhub:us-east-2:123456789012:security-control/SQS.3/finding/7abcdef4-abcd-1234-5678-501234567894",
+          "kind": "state",
+          "outcome": "success",
+          "provider": "AWS",
+          "severity": 21,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"activity_id\":1,\"activity_name\":\"Create\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Compliance Finding\",\"class_uid\":2003,\"cloud\":{\"account\":{\"uid\":\"123456789012\"},\"provider\":\"AWS\",\"region\":\"us-east-2\"},\"compliance\":{\"control\":\"SQS.1\",\"standards\":[\"standards/aws-foundational-security-best-practices/v/1.0.0\"],\"status\":\"Fail\",\"status_id\":3},\"finding_info\":{\"analytic\":{\"category\":\"AWS::Config::ConfigRule\",\"name\":\"securityhub-sqs-queue-encrypted-12345678\",\"type\":\"Rule\",\"type_id\":1},\"created_time\":1758273447903,\"created_time_dt\":\"2025-09-19T09:17:27.903Z\",\"desc\":\"This control checks whether Amazon SQS queues are encrypted at rest.\",\"first_seen_time\":1758273437473,\"first_seen_time_dt\":\"2025-09-19T09:17:17.473Z\",\"last_seen_time\":1758273437473,\"last_seen_time_dt\":\"2025-09-19T09:17:17.473Z\",\"modified_time\":1758273447903,\"modified_time_dt\":\"2025-09-19T09:17:27.903Z\",\"title\":\"Amazon SQS queues should be encrypted at rest\",\"types\":[\"Software and Configuration Checks/Industry and Regulatory Standards\",\"Posture Management\"],\"uid\":\"arn:aws:securityhub:us-east-2:123456789012:security-control/SQS.1/finding/7dabcdef-1234-8912-5678-5012345678904\"},\"metadata\":{\"product\":{\"name\":\"Security Hub\",\"uid\":\"arn:aws:securityhub:us-east-2::productv2/aws/securityhub\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\"],\"uid\":\"d1bc4b01234567890123456789abcdefabcd0123456789cdef123456\",\"version\":\"1.6.0\"},\"remediation\":{\"desc\":\"For information on how to correct this issue, consult the AWS Security Hub controls documentation.\",\"references\":[\"https://docs.aws.amazon.com/console/securityhub/SQS.1/remediation\"]},\"resources\":[{\"cloud_partition\":\"aws\",\"owner\":{\"account\":{\"uid\":\"123456789012\"}},\"region\":\"us-east-2\",\"type\":\"AWS::SQS::Queue\",\"uid\":\"https://sqs.us-east-2.amazonaws.com/123456789012/securityhubfinding\",\"uid_alt\":\"arn:aws:sqs:us-east-2:123456789012:securityhubfinding\"}],\"severity\":\"Medium\",\"severity_id\":3,\"status\":\"New\",\"status_id\":1,\"time\":1758273447903,\"time_dt\":\"2025-09-19T09:17:27.903Z\",\"type_name\":\"Compliance Finding: Create\",\"type_uid\":200301,\"vendor_attributes\":{\"severity\":\"Medium\",\"severity_id\":3}}",
+      "expected": {
+        "@timestamp": "2025-09-19T09:17:27.903Z",
+        "cloud": {
+          "account": {
+            "id": "123456789012"
+          },
+          "provider": "aws",
+          "region": "us-east-2",
+          "service": {
+            "name": "AWS::SQS::Queue"
+          }
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "rule": {
+          "description": "This control checks whether Amazon SQS queues are encrypted at rest.",
+          "id": "SQS.1",
+          "name": "Amazon SQS queues should be encrypted at rest",
+          "reference": [
+            "https://docs.aws.amazon.com/console/securityhub/SQS.1/remediation"
+          ]
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "Create",
+          "created": "2025-09-19T09:17:27.903Z",
+          "id": "arn:aws:securityhub:us-east-2:123456789012:security-control/SQS.1/finding/7dabcdef-1234-8912-5678-5012345678904",
+          "kind": "state",
+          "outcome": "unknown",
+          "provider": "AWS",
+          "severity": 47,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"activity_id\":1,\"activity_name\":\"Create\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Compliance Finding\",\"class_uid\":2003,\"cloud\":{\"account\":{\"uid\":\"123456789012\"},\"provider\":\"AWS\",\"region\":\"us-east-2\"},\"compliance\":{\"control\":\"IAM.1\",\"requirements\":[\"CIS AWS Foundations Benchmark v1.2.0/1.22\"],\"standards\":[\"ruleset/cis-aws-foundations-benchmark/v/1.2.0\",\"standards/aws-foundational-security-best-practices/v/1.0.0\"],\"status\":\"Pass\",\"status_id\":1},\"finding_info\":{\"analytic\":{\"category\":\"AWS::Config::ConfigRule\",\"name\":\"securityhub-iam-policy-no-statements-with-admin-access-babcdefe\",\"type\":\"Rule\",\"type_id\":1},\"created_time\":1758273558940,\"created_time_dt\":\"2025-09-19T09:19:18.940Z\",\"desc\":\"This AWS control checks whether the default version of AWS Identity and Access Management (IAM) policies (also known as customer managed policies) do not have administrator access with a statement that has \\\"Effect\\\": \\\"Allow\\\" with \\\"Action\\\": \\\"*\\\" over \\\"Resource\\\": \\\"*\\\". It only checks for the Customer Managed Policies that you created, but not inline and AWS Managed Policies.\",\"first_seen_time\":1758273549612,\"first_seen_time_dt\":\"2025-09-19T09:19:09.612Z\",\"last_seen_time\":1758273549612,\"last_seen_time_dt\":\"2025-09-19T09:19:09.612Z\",\"modified_time\":1758273558940,\"modified_time_dt\":\"2025-09-19T09:19:18.940Z\",\"title\":\"IAM policies should not allow full \\\"*\\\" administrative privileges\",\"types\":[\"Software and Configuration Checks/Industry and Regulatory Standards\",\"Posture Management\"],\"uid\":\"arn:aws:securityhub:us-east-2:123456789012:security-control/IAM.1/finding/11233211-1234-efab-abcd-701234567892\"},\"metadata\":{\"product\":{\"name\":\"Security Hub\",\"uid\":\"arn:aws:securityhub:us-east-2::productv2/aws/securityhub\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\"],\"uid\":\"d1bc4b01234567890123456789abcdefefabcdefabcdef123451234566\",\"version\":\"1.6.0\"},\"remediation\":{\"desc\":\"For information on how to correct this issue, consult the AWS Security Hub controls documentation.\",\"references\":[\"https://docs.aws.amazon.com/console/securityhub/IAM.1/remediation\"]},\"resources\":[{\"cloud_partition\":\"aws\",\"owner\":{\"account\":{\"uid\":\"123456789012\"}},\"region\":\"global\",\"type\":\"AWS::IAM::Policy\",\"uid\":\"AJKSDBVKJJKVBJDSVBWKURGBFWK\",\"uid_alt\":\"arn:aws:iam::123456789012:policy/service-role/Amazon_EventBridge_Invoke_Sqs_1412345678\"}],\"severity\":\"Informational\",\"severity_id\":1,\"status\":\"Resolved\",\"status_id\":4,\"time\":1758273558940,\"time_dt\":\"2025-09-19T09:19:18.940Z\",\"type_name\":\"Compliance Finding: Create\",\"type_uid\":200301,\"vendor_attributes\":{\"severity\":\"Informational\",\"severity_id\":1}}",
+      "expected": {
+        "@timestamp": "2025-09-19T09:19:18.940Z",
+        "cloud": {
+          "account": {
+            "id": "123456789012"
+          },
+          "provider": "aws",
+          "region": "global",
+          "service": {
+            "name": "AWS::IAM::Policy"
+          }
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "rule": {
+          "description": "This AWS control checks whether the default version of AWS Identity and Access Management (IAM) policies (also known as customer managed policies) do not have administrator access with a statement that has \"Effect\": \"Allow\" with \"Action\": \"*\" over \"Resource\": \"*\". It only checks for the Customer Managed Policies that you created, but not inline and AWS Managed Policies.",
+          "id": "IAM.1",
+          "name": "IAM policies should not allow full \"*\" administrative privileges",
+          "reference": [
+            "https://docs.aws.amazon.com/console/securityhub/IAM.1/remediation"
+          ],
+          "ruleset": [
+            "CIS AWS Foundations Benchmark v1.2.0/1.22"
+          ]
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "Create",
+          "created": "2025-09-19T09:19:18.940Z",
+          "id": "arn:aws:securityhub:us-east-2:123456789012:security-control/IAM.1/finding/11233211-1234-efab-abcd-701234567892",
+          "kind": "state",
+          "outcome": "success",
+          "provider": "AWS",
+          "severity": 21,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"activity_id\":1,\"activity_name\":\"Create\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Compliance Finding\",\"class_uid\":2003,\"cloud\":{\"account\":{\"uid\":\"123456789012\"},\"provider\":\"AWS\",\"region\":\"us-east-2\"},\"compliance\":{\"control\":\"KMS.1\",\"standards\":[\"standards/aws-foundational-security-best-practices/v/1.0.0\"],\"status\":\"Pass\",\"status_id\":1},\"finding_info\":{\"analytic\":{\"category\":\"AWS::Config::ConfigRule\",\"name\":\"securityhub-iam-customer-policy-blocked-kms-actions-0abcdefe\",\"type\":\"Rule\",\"type_id\":1},\"created_time\":1758273553640,\"created_time_dt\":\"2025-09-19T09:19:13.640Z\",\"desc\":\"Checks whether the default version of IAM customer managed policies allow principals to use the AWS Key Management Service (KMS) decryption actions on all resources. This control fails if kms:Decrypt or kms:ReEncryptFrom actions are allowed on all KMS keys. The control evaluates both attached and unattached customer managed policies. It does not check inline policies or AWS managed policies.\",\"first_seen_time\":1758273549591,\"first_seen_time_dt\":\"2025-09-19T09:19:09.591Z\",\"last_seen_time\":1758273549591,\"last_seen_time_dt\":\"2025-09-19T09:19:09.591Z\",\"modified_time\":1758273553640,\"modified_time_dt\":\"2025-09-19T09:19:13.640Z\",\"title\":\"IAM customer managed policies should not allow decryption actions on all KMS keys\",\"types\":[\"Software and Configuration Checks/Industry and Regulatory Standards\",\"Posture Management\"],\"uid\":\"arn:aws:securityhub:us-east-2:123456789012:security-control/KMS.1/finding/11233211-5678-efab-abcd-701234567892\"},\"metadata\":{\"product\":{\"name\":\"Security Hub\",\"uid\":\"arn:aws:securityhub:us-east-2::productv2/aws/securityhub\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\"],\"uid\":\"d1234b01234567890123456789abcde1234defabcdefabcdef123456\",\"version\":\"1.6.0\"},\"remediation\":{\"desc\":\"For information on how to correct this issue, consult the AWS Security Hub controls documentation.\",\"references\":[\"https://docs.aws.amazon.com/console/securityhub/KMS.1/remediation\"]},\"resources\":[{\"cloud_partition\":\"aws\",\"owner\":{\"account\":{\"uid\":\"123456789012\"}},\"region\":\"global\",\"type\":\"AWS::IAM::Policy\",\"uid\":\"AVSHDBVJBSKVBSDVSDB\",\"uid_alt\":\"arn:aws:iam::123456789012:policy/service-role/Amazon_EventBridge_Invoke_Sqs_1451083178\"}],\"severity\":\"Informational\",\"severity_id\":1,\"status\":\"Resolved\",\"status_id\":4,\"time\":1758273553640,\"time_dt\":\"2025-09-19T09:19:13.640Z\",\"type_name\":\"Compliance Finding: Create\",\"type_uid\":200301,\"vendor_attributes\":{\"severity\":\"Informational\",\"severity_id\":1}}",
+      "expected": {
+        "@timestamp": "2025-09-19T09:19:13.640Z",
+        "cloud": {
+          "account": {
+            "id": "123456789012"
+          },
+          "provider": "aws",
+          "region": "global",
+          "service": {
+            "name": "AWS::IAM::Policy"
+          }
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "rule": {
+          "description": "Checks whether the default version of IAM customer managed policies allow principals to use the AWS Key Management Service (KMS) decryption actions on all resources. This control fails if kms:Decrypt or kms:ReEncryptFrom actions are allowed on all KMS keys. The control evaluates both attached and unattached customer managed policies. It does not check inline policies or AWS managed policies.",
+          "id": "KMS.1",
+          "name": "IAM customer managed policies should not allow decryption actions on all KMS keys",
+          "reference": [
+            "https://docs.aws.amazon.com/console/securityhub/KMS.1/remediation"
+          ]
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "Create",
+          "created": "2025-09-19T09:19:13.640Z",
+          "id": "arn:aws:securityhub:us-east-2:123456789012:security-control/KMS.1/finding/11233211-5678-efab-abcd-701234567892",
+          "kind": "state",
+          "outcome": "success",
+          "provider": "AWS",
+          "severity": 21,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"activity_id\":2,\"activity_name\":\"Update\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Vulnerability Finding\",\"class_uid\":2002,\"cloud\":{\"account\":{\"type\":\"AWS Account\",\"type_id\":10,\"uid\":\"123456789012\"},\"provider\":\"AWS\",\"region\":\"us-east-2\"},\"finding_info\":{\"created_time\":1758187630345,\"created_time_dt\":\"2025-09-18T09:27:10.345Z\",\"desc\":\"The HTTP/2 protocol allows a denial of service (server resource consumption) because request cancellation can reset many streams quickly, as exploited in the wild in August through October 2023.\",\"first_seen_time\":1748539687919,\"first_seen_time_dt\":\"2025-05-29T17:28:07.919Z\",\"last_seen_time\":1758904048631,\"last_seen_time_dt\":\"2025-09-26T16:27:28.631Z\",\"modified_time\":1758904048631,\"modified_time_dt\":\"2025-09-26T16:27:28.631Z\",\"title\":\"CVE-2023-44487 - golang.org/x/net, google.golang.org/grpc\",\"types\":[\"Software and Configuration Checks/Vulnerabilities/CVE\",\"Vulnerabilities\"],\"uid\":\"arn:aws:inspector2:us-east-2:123456789012:finding/71234567890abcdefabcdefabcdef12e\"},\"metadata\":{\"product\":{\"name\":\"Inspector\",\"uid\":\"arn:aws:securityhub:us-east-2::productv2/aws/inspector\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\"],\"uid\":\"d1bc4b01234567890abcdef789abcdefabcdefabcdefabcabcdef456\",\"version\":\"1.6.0\"},\"resources\":[{\"cloud_partition\":\"aws\",\"data\":{\"awsEc2InstanceDetails\":{\"iamInstanceProfileArn\":\"arn:aws:iam::123456789012:instance-profile/eks-1123abc1-5678-efab-abcd-701abcdef892\",\"imageId\":\"ami-abcdefa123456789\",\"ipV4Addresses\":[\"10.90.1.245\",\"10.90.1.45\",\"10.90.1.168\",\"10.90.1.157\",\"1.128.0.1\",\"10.90.1.103\",\"10.90.1.197\",\"10.90.1.220\",\"10.90.1.86\",\"10.90.1.29\",\"10.90.1.18\",\"10.90.1.181\",\"10.90.1.161\",\"10.90.1.229\",\"10.90.1.108\",\"10.90.1.219\",\"10.90.1.9\",\"10.90.1.106\",\"10.90.1.206\"],\"launchedAt\":\"2025-05-29T16:06:08Z\",\"platform\":\"AMAZON_LINUX_2\",\"subnetId\":\"subnet-abcdefabcd1267890\",\"type\":\"t3.medium\",\"vpcId\":\"vpc-abcdefabcd1abcd90\"}},\"owner\":{\"account\":{\"uid\":\"123456789012\"}},\"region\":\"us-east-2\",\"tags\":[{\"name\":\"aws:autoscaling:groupName\",\"value\":\"eks-demo_prod_linux-1123abc1-5678-efab-abcd-701abcdef892\"},{\"name\":\"aws:ec2:fleet-id\",\"value\":\"fleet-aaaeeaac-ef12-abcd-8490-20123456789b\"},{\"name\":\"k8s.io/cluster-autoscaler/demo_prod\",\"value\":\"owned\"},{\"name\":\"aws:eks:cluster-name\",\"value\":\"demo_prod\"},{\"name\":\"eks:cluster-name\",\"value\":\"demo_prod\"},{\"name\":\"aws:ec2launchtemplate:version\",\"value\":\"6\"},{\"name\":\"eks:nodegroup-name\",\"value\":\"demo_prod_linux\"},{\"name\":\"k8s.io/cluster-autoscaler/enabled\",\"value\":\"true\"},{\"name\":\"kubernetes.io/cluster/demo_prod\",\"value\":\"owned\"},{\"name\":\"aws:ec2launchtemplate:id\",\"value\":\"lt-098dabcdefabcdef2\"}],\"type\":\"AWS::EC2::Instance\",\"uid\":\"i-0abcdef012345678b\"}],\"severity\":\"High\",\"severity_id\":4,\"status\":\"New\",\"status_id\":1,\"time\":1758904048631,\"time_dt\":\"2025-09-26T16:27:28.631Z\",\"type_name\":\"Vulnerability Finding: Update\",\"type_uid\":200202,\"vendor_attributes\":{\"severity\":\"High\",\"severity_id\":4},\"vulnerabilities\":[{\"affected_packages\":[{\"epoch\":0,\"fixed_in_version\":\"0.17.0\",\"name\":\"golang.org/x/net\",\"package_manager\":\"GOBINARY\",\"path\":\"vol-abcdef0123456789ab:/p1:opt/cni/bin/aws-cni\",\"version\":\"v0.1.0\"},{\"epoch\":0,\"fixed_in_version\":\"1.58.3\",\"name\":\"google.golang.org/grpc\",\"package_manager\":\"GOBINARY\",\"path\":\"vol-abcdef0123456789ab:/p1:opt/cni/bin/aws-cni\",\"version\":\"v1.31.0\"}],\"cve\":{\"created_time\":1696947310000,\"created_time_dt\":\"2023-10-10T14:15:10.000Z\",\"cvss\":[{\"base_score\":7.5,\"severity\":\"HIGH\",\"vector_string\":\"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H\",\"vendor_name\":\"NVD\",\"version\":\"3.1\"}],\"desc\":\"The HTTP/2 protocol allows a denial of service (server resource consumption) because request cancellation can reset many streams quickly, as exploited in the wild in August through October 2023.\",\"epss\":{\"score\":\"0.94422\"},\"modified_time\":1749662994000,\"modified_time_dt\":\"2025-06-11T17:29:54.000Z\",\"uid\":\"CVE-2023-44487\"},\"exploit_last_seen_time\":1758859157000,\"exploit_last_seen_time_dt\":\"2025-09-26T03:59:17.000Z\",\"fix_coverage\":\"Complete\",\"fix_coverage_id\":1,\"is_exploit_available\":true,\"is_fix_available\":true,\"references\":[\"https://github.com/microsoft/CBL-Mariner/pull/6381\",\"https://github.com/grpc/grpc/releases/tag/v1.59.2\",\"https://github.com/eclipse/jetty.project/issues/10679\",\"https://blog.cloudflare.com/technical-breakdown-http2-rapid-reset-ddos-attack/\",\"https://www.debian.org/security/2023/dsa-5522\",\"https://github.com/etcd-io/etcd/issues/16740\",\"https://www.debian.org/security/2023/dsa-5521\",\"https://www.cisa.gov/news-events/alerts/2023/10/10/http2-rapid-reset-vulnerability-cve-2023-44487\",\"https://github.com/haproxy/haproxy/issues/2312\",\"https://github.com/caddyserver/caddy/issues/5877\",\"https://github.com/netty/netty/commit/58f75f665aa81a8cbcf6ffa74820042a285c5e61\",\"https://github.com/apache/tomcat/tree/main/java/org/apache/coyote/http2\",\"https://github.com/advisories/GHSA-qppj-fm5r-hxr3\",\"https://tomcat.apache.org/security-10.html#Fixed_in_Apache_Tomcat_10.1.14\",\"https://github.com/dotnet/announcements/issues/277\",\"https://github.com/envoyproxy/envoy/pull/30055\",\"https://github.com/openresty/openresty/issues/930\",\"https://lists.debian.org/debian-lts-announce/2023/10/msg00020.html\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/LKYHSZQFDNR7RSA7LHVLLIAQMVYCUGBG/\",\"https://lists.debian.org/debian-lts-announce/2023/10/msg00047.html\",\"https://lists.apache.org/thread/5py8h42mxfsn8l1wy6o41xwhsjlsd87q\",\"https://github.com/apache/apisix/issues/10320\",\"https://github.com/projectcontour/contour/pull/5826\",\"https://openssf.org/blog/2023/10/10/http-2-rapid-reset-vulnerability-highlights-need-for-rapid-response/\",\"https://github.com/Kong/kong/discussions/11741\",\"https://github.com/h2o/h2o/pull/3291\",\"https://github.com/advisories/GHSA-vx74-f528-fxqg\",\"https://github.com/oqtane/oqtane.framework/discussions/3367\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ZKQSIKIAT5TJ3WSLU3RDBQ35YX4GY4V3/\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/VSRDIV77HNKUSM7SJC5BKE5JSHLHU2NK/\",\"https://nvd.nist.gov/vuln/detail/CVE-2023-44487\",\"https://github.com/junkurihara/rust-rpxy/issues/97\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/JIZSEFC3YKCGABA2BZW6ZJRMDZJMB7PJ/\",\"https://github.com/nodejs/node/pull/50121\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ZB43REMKRQR62NJEI7I5NQ4FSXNLBKRT/\",\"https://www.debian.org/security/2023/dsa-5570\",\"https://github.com/line/armeria/pull/5232\",\"https://github.com/arkrwn/PoC/tree/main/CVE-2023-44487\",\"https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-http2-reset-d8Kf32vZ\",\"https://github.com/nghttp2/nghttp2/pull/1961\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ZLU6U2R2IC2K64NDPNMV55AUAO65MAF4/\",\"https://my.f5.com/manage/s/article/K000137106\",\"https://github.com/apache/httpd/blob/afcdbeebbff4b0c50ea26cdd16e178c0d1f24152/modules/http2/h2_mplx.c#L1101-L1113\",\"https://github.com/varnishcache/varnish-cache/issues/3996\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/JMEXY22BFG5Q64HQCM5CK2Q7KDKVV4TY/\",\"https://github.com/alibaba/tengine/issues/1872\",\"https://lists.debian.org/debian-lts-announce/2023/10/msg00024.html\",\"https://github.com/dotnet/core/blob/e4613450ea0da7fd2fc6b61dfb2c1c1dec1ce9ec/release-notes/6.0/6.0.23/6.0.23.md?plain=1#L73\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/CLB4TW7KALB3EEQWNWCN7OUIWWVWWCG2/\",\"https://bugzilla.redhat.com/show_bug.cgi?id=2242803\",\"https://msrc.microsoft.com/blog/2023/10/microsoft-response-to-distributed-denial-of-service-ddos-attacks-against-http/2/\",\"https://groups.google.com/g/golang-announce/c/iNNxDTCjZvo\",\"https://github.com/golang/go/issues/63417\",\"https://lists.debian.org/debian-lts-announce/2023/11/msg00001.html\",\"https://aws.amazon.com/security/security-bulletins/AWS-2023-011/\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/LNMZJCDHGLJJLXO4OXWJMTVQRNWOC7UL/\",\"https://blog.qualys.com/vulnerabilities-threat-research/2023/10/10/cve-2023-44487-http-2-rapid-reset-attack\",\"https://netty.io/news/2023/10/10/4-1-100-Final.html\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/VHUHTSXLXGXS7JYKBXTA3VINUPHTNGVU/\",\"https://github.com/kazu-yamamoto/http2/commit/f61d41a502bd0f60eb24e1ce14edc7b6df6722a1\",\"https://security.gentoo.org/glsa/202311-09\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/HT7T2R4MQKLIF4ODV4BDLPARWFPCJ5CZ/\",\"https://ubuntu.com/security/CVE-2023-44487\",\"https://github.com/facebook/proxygen/pull/466\",\"https://github.com/kubernetes/kubernetes/pull/121120\",\"https://lists.debian.org/debian-lts-announce/2023/10/msg00023.html\",\"https://bugzilla.suse.com/show_bug.cgi?id=1216123\",\"https://github.com/nghttp2/nghttp2/releases/tag/v1.57.0\",\"https://www.debian.org/security/2023/dsa-5558\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/WLPRQ5TWUQQXYWBJM7ECYDAIL2YVKIUH/\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/WE2I52RHNNU42PX6NZ2RBUHSFFJ2LVZX/\",\"https://github.com/tempesta-tech/tempesta/issues/1986\",\"https://github.com/h2o/h2o/security/advisories/GHSA-2m7v-gc89-fjqf\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/2MBEPPC36UBVOZZNAXFHKLFGSLCMN5LI/\",\"https://github.com/grpc/grpc-go/pull/6703\",\"https://github.com/apache/trafficserver/pull/10564\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/KSEGD2IWKNUO3DWY4KQGUQM5BISRWHQE/\",\"https://www.debian.org/security/2023/dsa-5540\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/3N4NJ7FR4X4FPZUGNTQAPSTVB2HB2Y4A/\",\"https://cgit.freebsd.org/ports/commit/?id=c64c329c2c1752f46b73e3e6ce9f4329be6629f9\",\"https://github.com/advisories/GHSA-xpw8-rcwv-8f8p\",\"https://access.redhat.com/security/cve/cve-2023-44487\",\"https://lists.debian.org/debian-lts-announce/2023/11/msg00012.html\",\"https://www.debian.org/security/2023/dsa-5549\",\"https://github.com/apache/httpd-site/pull/10\",\"https://github.com/opensearch-project/data-prepper/issues/3474\",\"https://github.com/akka/akka-http/issues/4323\",\"https://github.com/linkerd/website/pull/1695/commits/4b9c6836471bc8270ab48aae6fd2181bc73fd632\",\"https://mailman.nginx.org/pipermail/nginx-devel/2023-October/S36Q5HBXR7CAIMPLLPRSSSYR4PCMWILK.html\",\"https://lists.debian.org/debian-lts-announce/2023/10/msg00045.html\",\"https://gist.github.com/adulau/7c2bfb8e9cdbe4b35a5e131c66a0c088\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/E72T67UPDRXHIDLO3OROR25YAMN4GGW5/\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/XFOIBB4YFICHDM7IBOP7PWXW3FX4HLL2/\",\"https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-44487\",\"https://forums.swift.org/t/swift-nio-http2-security-update-cve-2023-44487-http-2-dos/67764\",\"https://github.com/caddyserver/caddy/releases/tag/v2.7.5\",\"https://cloud.google.com/blog/products/identity-security/google-cloud-mitigated-largest-ddos-attack-peaking-above-398-million-rps/\",\"https://github.com/icing/mod_h2/blob/0a864782af0a942aa2ad4ed960a6b32cd35bcf0a/mod_http2/README.md?plain=1#L239-L244\",\"https://github.com/micrictor/http2-rst-stream\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/BFQD3KUEMFBHPAPBGLWQC34L4OWL5HAZ/\",\"https://github.com/bcdannyboy/CVE-2023-44487\",\"https://martinthomson.github.io/h2-stream-limits/draft-thomson-httpbis-h2-stream-limits.html\",\"https://github.com/kazu-yamamoto/http2/issues/93\",\"https://cloud.google.com/blog/products/identity-security/how-it-works-the-novel-http2-rapid-reset-ddos-attack\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/X6QXN4ORIVF6XBW4WWFE7VNPVC74S45Y/\",\"https://blog.cloudflare.com/zero-day-rapid-reset-http2-record-breaking-ddos-attack/\",\"https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/FNA62Q767CFAFHBCDKYNPBMZWB7TWYVU/\",\"https://github.com/Azure/AKS/issues/3947\",\"https://github.com/ninenines/cowboy/issues/1615\",\"https://lists.w3.org/Archives/Public/ietf-http-wg/2023OctDec/0025.html\"],\"severity\":\"HIGH\"}]}",
+      "expected": {
+        "@timestamp": "2025-09-26T16:27:28.631Z",
+        "cloud": {
+          "account": {
+            "id": "123456789012"
+          },
+          "instance": {
+            "id": "i-0abcdef012345678b"
+          },
+          "machine": {
+            "type": "t3.medium"
+          },
+          "provider": "aws",
+          "region": "us-east-2",
+          "service": {
+            "name": "AWS::EC2::Instance"
+          }
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "host": {
+          "id": "i-0abcdef012345678b",
+          "ip": [
+            "10.90.1.245",
+            "10.90.1.45",
+            "10.90.1.168",
+            "10.90.1.157",
+            "1.128.0.1",
+            "10.90.1.103",
+            "10.90.1.197",
+            "10.90.1.220",
+            "10.90.1.86",
+            "10.90.1.29",
+            "10.90.1.18",
+            "10.90.1.181",
+            "10.90.1.161",
+            "10.90.1.229",
+            "10.90.1.108",
+            "10.90.1.219",
+            "10.90.1.9",
+            "10.90.1.106",
+            "10.90.1.206"
+          ],
+          "name": "i-0abcdef012345678b",
+          "type": "t3.medium"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "orchestrator": {
+          "cluster": {
+            "name": "demo_prod"
+          }
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "package": {
+          "name": [
+            "golang.org/x/net",
+            "google.golang.org/grpc"
+          ],
+          "version": [
+            "v0.1.0",
+            "v1.31.0"
+          ]
+        },
+        "related": {
+          "ip": [
+            "10.90.1.245",
+            "10.90.1.45",
+            "10.90.1.168",
+            "10.90.1.157",
+            "1.128.0.1",
+            "10.90.1.103",
+            "10.90.1.197",
+            "10.90.1.220",
+            "10.90.1.86",
+            "10.90.1.29",
+            "10.90.1.18",
+            "10.90.1.181",
+            "10.90.1.161",
+            "10.90.1.229",
+            "10.90.1.108",
+            "10.90.1.219",
+            "10.90.1.9",
+            "10.90.1.106",
+            "10.90.1.206"
+          ]
+        },
+        "rule": {
+          "description": "The HTTP/2 protocol allows a denial of service (server resource consumption) because request cancellation can reset many streams quickly, as exploited in the wild in August through October 2023.",
+          "name": "CVE-2023-44487 - golang.org/x/net, google.golang.org/grpc"
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "vulnerability": {
+          "classification": "CVSS",
+          "description": "The HTTP/2 protocol allows a denial of service (server resource consumption) because request cancellation can reset many streams quickly, as exploited in the wild in August through October 2023.",
+          "enumeration": "CVE",
+          "id": "CVE-2023-44487",
+          "reference": [
+            "https://github.com/microsoft/CBL-Mariner/pull/6381",
+            "https://github.com/grpc/grpc/releases/tag/v1.59.2",
+            "https://github.com/eclipse/jetty.project/issues/10679",
+            "https://blog.cloudflare.com/technical-breakdown-http2-rapid-reset-ddos-attack/",
+            "https://www.debian.org/security/2023/dsa-5522",
+            "https://github.com/etcd-io/etcd/issues/16740",
+            "https://www.debian.org/security/2023/dsa-5521",
+            "https://www.cisa.gov/news-events/alerts/2023/10/10/http2-rapid-reset-vulnerability-cve-2023-44487",
+            "https://github.com/haproxy/haproxy/issues/2312",
+            "https://github.com/caddyserver/caddy/issues/5877",
+            "https://github.com/netty/netty/commit/58f75f665aa81a8cbcf6ffa74820042a285c5e61",
+            "https://github.com/apache/tomcat/tree/main/java/org/apache/coyote/http2",
+            "https://github.com/advisories/GHSA-qppj-fm5r-hxr3",
+            "https://tomcat.apache.org/security-10.html#Fixed_in_Apache_Tomcat_10.1.14",
+            "https://github.com/dotnet/announcements/issues/277",
+            "https://github.com/envoyproxy/envoy/pull/30055",
+            "https://github.com/openresty/openresty/issues/930",
+            "https://lists.debian.org/debian-lts-announce/2023/10/msg00020.html",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/LKYHSZQFDNR7RSA7LHVLLIAQMVYCUGBG/",
+            "https://lists.debian.org/debian-lts-announce/2023/10/msg00047.html",
+            "https://lists.apache.org/thread/5py8h42mxfsn8l1wy6o41xwhsjlsd87q",
+            "https://github.com/apache/apisix/issues/10320",
+            "https://github.com/projectcontour/contour/pull/5826",
+            "https://openssf.org/blog/2023/10/10/http-2-rapid-reset-vulnerability-highlights-need-for-rapid-response/",
+            "https://github.com/Kong/kong/discussions/11741",
+            "https://github.com/h2o/h2o/pull/3291",
+            "https://github.com/advisories/GHSA-vx74-f528-fxqg",
+            "https://github.com/oqtane/oqtane.framework/discussions/3367",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ZKQSIKIAT5TJ3WSLU3RDBQ35YX4GY4V3/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/VSRDIV77HNKUSM7SJC5BKE5JSHLHU2NK/",
+            "https://nvd.nist.gov/vuln/detail/CVE-2023-44487",
+            "https://github.com/junkurihara/rust-rpxy/issues/97",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/JIZSEFC3YKCGABA2BZW6ZJRMDZJMB7PJ/",
+            "https://github.com/nodejs/node/pull/50121",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ZB43REMKRQR62NJEI7I5NQ4FSXNLBKRT/",
+            "https://www.debian.org/security/2023/dsa-5570",
+            "https://github.com/line/armeria/pull/5232",
+            "https://github.com/arkrwn/PoC/tree/main/CVE-2023-44487",
+            "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-http2-reset-d8Kf32vZ",
+            "https://github.com/nghttp2/nghttp2/pull/1961",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/ZLU6U2R2IC2K64NDPNMV55AUAO65MAF4/",
+            "https://my.f5.com/manage/s/article/K000137106",
+            "https://github.com/apache/httpd/blob/afcdbeebbff4b0c50ea26cdd16e178c0d1f24152/modules/http2/h2_mplx.c#L1101-L1113",
+            "https://github.com/varnishcache/varnish-cache/issues/3996",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/JMEXY22BFG5Q64HQCM5CK2Q7KDKVV4TY/",
+            "https://github.com/alibaba/tengine/issues/1872",
+            "https://lists.debian.org/debian-lts-announce/2023/10/msg00024.html",
+            "https://github.com/dotnet/core/blob/e4613450ea0da7fd2fc6b61dfb2c1c1dec1ce9ec/release-notes/6.0/6.0.23/6.0.23.md?plain=1#L73",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/CLB4TW7KALB3EEQWNWCN7OUIWWVWWCG2/",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2242803",
+            "https://msrc.microsoft.com/blog/2023/10/microsoft-response-to-distributed-denial-of-service-ddos-attacks-against-http/2/",
+            "https://groups.google.com/g/golang-announce/c/iNNxDTCjZvo",
+            "https://github.com/golang/go/issues/63417",
+            "https://lists.debian.org/debian-lts-announce/2023/11/msg00001.html",
+            "https://aws.amazon.com/security/security-bulletins/AWS-2023-011/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/LNMZJCDHGLJJLXO4OXWJMTVQRNWOC7UL/",
+            "https://blog.qualys.com/vulnerabilities-threat-research/2023/10/10/cve-2023-44487-http-2-rapid-reset-attack",
+            "https://netty.io/news/2023/10/10/4-1-100-Final.html",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/VHUHTSXLXGXS7JYKBXTA3VINUPHTNGVU/",
+            "https://github.com/kazu-yamamoto/http2/commit/f61d41a502bd0f60eb24e1ce14edc7b6df6722a1",
+            "https://security.gentoo.org/glsa/202311-09",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/HT7T2R4MQKLIF4ODV4BDLPARWFPCJ5CZ/",
+            "https://ubuntu.com/security/CVE-2023-44487",
+            "https://github.com/facebook/proxygen/pull/466",
+            "https://github.com/kubernetes/kubernetes/pull/121120",
+            "https://lists.debian.org/debian-lts-announce/2023/10/msg00023.html",
+            "https://bugzilla.suse.com/show_bug.cgi?id=1216123",
+            "https://github.com/nghttp2/nghttp2/releases/tag/v1.57.0",
+            "https://www.debian.org/security/2023/dsa-5558",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/WLPRQ5TWUQQXYWBJM7ECYDAIL2YVKIUH/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/WE2I52RHNNU42PX6NZ2RBUHSFFJ2LVZX/",
+            "https://github.com/tempesta-tech/tempesta/issues/1986",
+            "https://github.com/h2o/h2o/security/advisories/GHSA-2m7v-gc89-fjqf",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/2MBEPPC36UBVOZZNAXFHKLFGSLCMN5LI/",
+            "https://github.com/grpc/grpc-go/pull/6703",
+            "https://github.com/apache/trafficserver/pull/10564",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/KSEGD2IWKNUO3DWY4KQGUQM5BISRWHQE/",
+            "https://www.debian.org/security/2023/dsa-5540",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/3N4NJ7FR4X4FPZUGNTQAPSTVB2HB2Y4A/",
+            "https://cgit.freebsd.org/ports/commit/?id=c64c329c2c1752f46b73e3e6ce9f4329be6629f9",
+            "https://github.com/advisories/GHSA-xpw8-rcwv-8f8p",
+            "https://access.redhat.com/security/cve/cve-2023-44487",
+            "https://lists.debian.org/debian-lts-announce/2023/11/msg00012.html",
+            "https://www.debian.org/security/2023/dsa-5549",
+            "https://github.com/apache/httpd-site/pull/10",
+            "https://github.com/opensearch-project/data-prepper/issues/3474",
+            "https://github.com/akka/akka-http/issues/4323",
+            "https://github.com/linkerd/website/pull/1695/commits/4b9c6836471bc8270ab48aae6fd2181bc73fd632",
+            "https://mailman.nginx.org/pipermail/nginx-devel/2023-October/S36Q5HBXR7CAIMPLLPRSSSYR4PCMWILK.html",
+            "https://lists.debian.org/debian-lts-announce/2023/10/msg00045.html",
+            "https://gist.github.com/adulau/7c2bfb8e9cdbe4b35a5e131c66a0c088",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/E72T67UPDRXHIDLO3OROR25YAMN4GGW5/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/XFOIBB4YFICHDM7IBOP7PWXW3FX4HLL2/",
+            "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2023-44487",
+            "https://forums.swift.org/t/swift-nio-http2-security-update-cve-2023-44487-http-2-dos/67764",
+            "https://github.com/caddyserver/caddy/releases/tag/v2.7.5",
+            "https://cloud.google.com/blog/products/identity-security/google-cloud-mitigated-largest-ddos-attack-peaking-above-398-million-rps/",
+            "https://github.com/icing/mod_h2/blob/0a864782af0a942aa2ad4ed960a6b32cd35bcf0a/mod_http2/README.md?plain=1#L239-L244",
+            "https://github.com/micrictor/http2-rst-stream",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/BFQD3KUEMFBHPAPBGLWQC34L4OWL5HAZ/",
+            "https://github.com/bcdannyboy/CVE-2023-44487",
+            "https://martinthomson.github.io/h2-stream-limits/draft-thomson-httpbis-h2-stream-limits.html",
+            "https://github.com/kazu-yamamoto/http2/issues/93",
+            "https://cloud.google.com/blog/products/identity-security/how-it-works-the-novel-http2-rapid-reset-ddos-attack",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/X6QXN4ORIVF6XBW4WWFE7VNPVC74S45Y/",
+            "https://blog.cloudflare.com/zero-day-rapid-reset-http2-record-breaking-ddos-attack/",
+            "https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/FNA62Q767CFAFHBCDKYNPBMZWB7TWYVU/",
+            "https://github.com/Azure/AKS/issues/3947",
+            "https://github.com/ninenines/cowboy/issues/1615",
+            "https://lists.w3.org/Archives/Public/ietf-http-wg/2023OctDec/0025.html"
+          ],
+          "scanner": {
+            "vendor": "Inspector"
+          },
+          "score": {
+            "base": 7.5,
+            "version": "3.1"
+          },
+          "severity": "High"
+        },
+        "event": {
+          "action": "Update",
+          "category": [
+            "vulnerability"
+          ],
+          "created": "2025-09-26T16:27:28.631Z",
+          "id": "arn:aws:inspector2:us-east-2:123456789012:finding/71234567890abcdefabcdefabcdef12e",
+          "kind": "state",
+          "outcome": "unknown",
+          "provider": "AWS",
+          "severity": 73,
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor"
+      ]
+    },
+    {
+      "line": "{\"activity_id\":2,\"activity_name\":\"Update\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Vulnerability Finding\",\"class_uid\":2002,\"cloud\":{\"account\":{\"type\":\"AWS Account\",\"type_id\":10,\"uid\":\"123456789012\"},\"provider\":\"AWS\",\"region\":\"us-east-2\"},\"finding_info\":{\"created_time\":1757557651926,\"created_time_dt\":\"2025-09-11T02:27:31.926Z\",\"desc\":\"There is a defect in the CPython “tarfile” module affecting the “TarFile” extraction and entry enumeration APIs. The tar implementation would process tar archives with negative offsets without error, resulting in an infinite loop and deadlock during the parsing of maliciously crafted tar archives. \\n\\nThis vulnerability can be mitigated by including the following patch after importing the “tarfile” module:  https://gist.github.com/sethmlarson/abcdef0123456789abcdef0123456789\",\"first_seen_time\":1755692788521,\"first_seen_time_dt\":\"2025-08-20T12:26:28.521Z\",\"last_seen_time\":1758903843057,\"last_seen_time_dt\":\"2025-09-26T16:24:03.057Z\",\"modified_time\":1758903843057,\"modified_time_dt\":\"2025-09-26T16:24:03.057Z\",\"title\":\"CVE-2025-8194 - python, python-devel and 3 more\",\"types\":[\"Software and Configuration Checks/Vulnerabilities/CVE\",\"Vulnerabilities\"],\"uid\":\"arn:aws:inspector2:us-east-2:123456789012:finding/9abcdefabcdef0123456789abcdef121\"},\"metadata\":{\"product\":{\"name\":\"Inspector\",\"uid\":\"arn:aws:securityhub:us-east-2::productv2/aws/inspector\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\"],\"uid\":\"d1bc4b01234567890123456789abcdefabc0123456789bcdef123456\",\"version\":\"1.6.0\"},\"resources\":[{\"cloud_partition\":\"aws\",\"data\":{\"awsEc2InstanceDetails\":{\"iamInstanceProfileArn\":\"arn:aws:iam::123456789012:instance-profile/eks-1123abc1-5678-efab-abcd-701abcdef892\",\"imageId\":\"ami-abcdefa123456789\",\"ipV4Addresses\":[\"10.90.0.87\",\"10.90.0.60\",\"10.90.0.30\",\"10.90.0.74\",\"10.90.0.206\",\"10.90.0.207\",\"10.90.0.37\",\"10.90.0.149\",\"10.90.0.235\",\"175.16.199.1\",\"10.90.0.225\",\"10.90.0.212\",\"10.90.0.199\",\"10.90.0.240\",\"10.90.0.164\",\"10.90.0.160\",\"10.90.0.182\",\"10.90.0.70\",\"10.90.0.180\"],\"launchedAt\":\"2025-05-29T16:04:40Z\",\"platform\":\"AMAZON_LINUX_2\",\"subnetId\":\"subnet-abcdef12345678901\",\"type\":\"t3.medium\",\"vpcId\":\"vpc-abcdefabcd1abcd90\"}},\"owner\":{\"account\":{\"uid\":\"123456789012\"}},\"region\":\"us-east-2\",\"tags\":[{\"name\":\"aws:autoscaling:groupName\",\"value\":\"eks-demo_prod_linux-1123abc1-5678-efab-abcd-701abcdef892\"},{\"name\":\"aws:ec2:fleet-id\",\"value\":\"fleet-babcdefc-5678-abcd-1234-20123456789b\"},{\"name\":\"k8s.io/cluster-autoscaler/demo_prod\",\"value\":\"owned\"},{\"name\":\"aws:eks:cluster-name\",\"value\":\"demo_prod\"},{\"name\":\"eks:cluster-name\",\"value\":\"demo_prod\"},{\"name\":\"aws:ec2launchtemplate:version\",\"value\":\"6\"},{\"name\":\"eks:nodegroup-name\",\"value\":\"demo_prod_linux\"},{\"name\":\"k8s.io/cluster-autoscaler/enabled\",\"value\":\"true\"},{\"name\":\"kubernetes.io/cluster/demo_prod\",\"value\":\"owned\"},{\"name\":\"aws:ec2launchtemplate:id\",\"value\":\"lt-abcdefabcdef123456\"}],\"type\":\"AWS::EC2::Instance\",\"uid\":\"i-abcd1235cdef1234\"}],\"severity\":\"High\",\"severity_id\":4,\"status\":\"New\",\"status_id\":1,\"time\":1758903843057,\"time_dt\":\"2025-09-26T16:24:03.057Z\",\"type_name\":\"Vulnerability Finding: Update\",\"type_uid\":200202,\"vendor_attributes\":{\"severity\":\"High\",\"severity_id\":4},\"vulnerabilities\":[{\"affected_packages\":[{\"architecture\":\"X86_64\",\"epoch\":0,\"fixed_in_version\":\"0:2.7.18-1.amzn2.0.14\",\"name\":\"python\",\"package_manager\":\"OS\",\"release\":\"1.amzn2.0.12\",\"remediation\":{\"desc\":\"yum update python\"},\"version\":\"2.7.18\"},{\"architecture\":\"X86_64\",\"epoch\":0,\"fixed_in_version\":\"0:2.7.18-1.amzn2.0.14\",\"name\":\"python-devel\",\"package_manager\":\"OS\",\"release\":\"1.amzn2.0.12\",\"remediation\":{\"desc\":\"yum update python-devel\"},\"version\":\"2.7.18\"},{\"architecture\":\"X86_64\",\"epoch\":0,\"fixed_in_version\":\"0:2.7.18-1.amzn2.0.14\",\"name\":\"python-libs\",\"package_manager\":\"OS\",\"release\":\"1.amzn2.0.12\",\"remediation\":{\"desc\":\"yum update python-libs\"},\"version\":\"2.7.18\"},{\"architecture\":\"X86_64\",\"epoch\":0,\"fixed_in_version\":\"0:3.7.16-1.amzn2.0.19\",\"name\":\"python3\",\"package_manager\":\"OS\",\"release\":\"1.amzn2.0.17\",\"remediation\":{\"desc\":\"yum update python3\"},\"version\":\"3.7.16\"},{\"architecture\":\"X86_64\",\"epoch\":0,\"fixed_in_version\":\"0:3.7.16-1.amzn2.0.19\",\"name\":\"python3-libs\",\"package_manager\":\"OS\",\"release\":\"1.amzn2.0.17\",\"remediation\":{\"desc\":\"yum update python3-libs\"},\"version\":\"3.7.16\"}],\"cve\":{\"created_time\":1753660800000,\"created_time_dt\":\"2025-07-28T00:00:00.000Z\",\"cvss\":[{\"base_score\":7.5,\"severity\":\"HIGH\",\"vector_string\":\"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H\",\"vendor_name\":\"AMAZON_CVE\",\"version\":\"3.1\"},{\"base_score\":7.5,\"severity\":\"HIGH\",\"vector_string\":\"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H\",\"vendor_name\":\"NVD\",\"version\":\"3.1\"}],\"desc\":\"There is a defect in the CPython “tarfile” module affecting the “TarFile” extraction and entry enumeration APIs. The tar implementation would process tar archives with negative offsets without error, resulting in an infinite loop and deadlock during the parsing of maliciously crafted tar archives. \\n\\nThis vulnerability can be mitigated by including the following patch after importing the “tarfile” module:  https://gist.github.com/sethmlarson/abcdef0123456789abcdef0123456789\",\"epss\":{\"score\":\"0.00198\"},\"modified_time\":1753833600000,\"modified_time_dt\":\"2025-07-30T00:00:00.000Z\",\"uid\":\"CVE-2025-8194\"},\"fix_coverage\":\"Complete\",\"fix_coverage_id\":1,\"is_exploit_available\":false,\"is_fix_available\":true,\"references\":[\"https://alas.aws.amazon.com/AL2023/ALAS2023-2025-1135.html\",\"https://alas.aws.amazon.com/AL2/ALAS2-2025-2961.html\",\"https://explore.alas.aws.amazon.com/CVE-2025-8194.html\",\"https://alas.aws.amazon.com/AL2023/ALAS2023-2025-1147.html\",\"https://alas.aws.amazon.com/AL2/ALAS2-2025-2962.html\",\"https://alas.aws.amazon.com/AL2023/ALAS2023-2025-1136.html\",\"https://alas.aws.amazon.com/AL2023/ALAS2023-2025-1146.html\",\"https://explore.alas.aws.amazon.com/cve/json/v1/CVE-2025-8194.json\"],\"related_vulnerabilities\":[\"ALAS2-2025-2962\",\"ALAS2-2025-2961\",\"ALAS2023-2025-1147\",\"ALAS2023-2025-1136\",\"ALAS2023-2025-1135\",\"ALAS2023-2025-1146\"],\"severity\":\"Important\"}]}",
+      "expected": {
+        "@timestamp": "2025-09-26T16:24:03.057Z",
+        "cloud": {
+          "account": {
+            "id": "123456789012"
+          },
+          "instance": {
+            "id": "i-abcd1235cdef1234"
+          },
+          "machine": {
+            "type": "t3.medium"
+          },
+          "provider": "aws",
+          "region": "us-east-2",
+          "service": {
+            "name": "AWS::EC2::Instance"
+          }
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "host": {
+          "id": "i-abcd1235cdef1234",
+          "ip": [
+            "10.90.0.87",
+            "10.90.0.60",
+            "10.90.0.30",
+            "10.90.0.74",
+            "10.90.0.206",
+            "10.90.0.207",
+            "10.90.0.37",
+            "10.90.0.149",
+            "10.90.0.235",
+            "175.16.199.1",
+            "10.90.0.225",
+            "10.90.0.212",
+            "10.90.0.199",
+            "10.90.0.240",
+            "10.90.0.164",
+            "10.90.0.160",
+            "10.90.0.182",
+            "10.90.0.70",
+            "10.90.0.180"
+          ],
+          "name": "i-abcd1235cdef1234",
+          "type": "t3.medium"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "orchestrator": {
+          "cluster": {
+            "name": "demo_prod"
+          }
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "package": {
+          "name": [
+            "python",
+            "python-devel",
+            "python-libs",
+            "python3",
+            "python3-libs"
+          ],
+          "version": [
+            "2.7.18",
+            "2.7.18",
+            "2.7.18",
+            "3.7.16",
+            "3.7.16"
+          ]
+        },
+        "related": {
+          "ip": [
+            "10.90.0.87",
+            "10.90.0.60",
+            "10.90.0.30",
+            "10.90.0.74",
+            "10.90.0.206",
+            "10.90.0.207",
+            "10.90.0.37",
+            "10.90.0.149",
+            "10.90.0.235",
+            "175.16.199.1",
+            "10.90.0.225",
+            "10.90.0.212",
+            "10.90.0.199",
+            "10.90.0.240",
+            "10.90.0.164",
+            "10.90.0.160",
+            "10.90.0.182",
+            "10.90.0.70",
+            "10.90.0.180"
+          ]
+        },
+        "rule": {
+          "description": "There is a defect in the CPython “tarfile” module affecting the “TarFile” extraction and entry enumeration APIs. The tar implementation would process tar archives with negative offsets without error, resulting in an infinite loop and deadlock during the parsing of maliciously crafted tar archives. \n\nThis vulnerability can be mitigated by including the following patch after importing the “tarfile” module:  https://gist.github.com/sethmlarson/abcdef0123456789abcdef0123456789",
+          "name": "CVE-2025-8194 - python, python-devel and 3 more"
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "vulnerability": {
+          "classification": "CVSS",
+          "description": "There is a defect in the CPython “tarfile” module affecting the “TarFile” extraction and entry enumeration APIs. The tar implementation would process tar archives with negative offsets without error, resulting in an infinite loop and deadlock during the parsing of maliciously crafted tar archives. \n\nThis vulnerability can be mitigated by including the following patch after importing the “tarfile” module:  https://gist.github.com/sethmlarson/abcdef0123456789abcdef0123456789",
+          "enumeration": "CVE",
+          "id": "CVE-2025-8194",
+          "reference": [
+            "https://alas.aws.amazon.com/AL2023/ALAS2023-2025-1135.html",
+            "https://alas.aws.amazon.com/AL2/ALAS2-2025-2961.html",
+            "https://explore.alas.aws.amazon.com/CVE-2025-8194.html",
+            "https://alas.aws.amazon.com/AL2023/ALAS2023-2025-1147.html",
+            "https://alas.aws.amazon.com/AL2/ALAS2-2025-2962.html",
+            "https://alas.aws.amazon.com/AL2023/ALAS2023-2025-1136.html",
+            "https://alas.aws.amazon.com/AL2023/ALAS2023-2025-1146.html",
+            "https://explore.alas.aws.amazon.com/cve/json/v1/CVE-2025-8194.json"
+          ],
+          "scanner": {
+            "vendor": "Inspector"
+          },
+          "score": {
+            "base": 7.5,
+            "version": "3.1"
+          },
+          "severity": "High"
+        },
+        "event": {
+          "action": "Update",
+          "category": [
+            "vulnerability"
+          ],
+          "created": "2025-09-26T16:24:03.057Z",
+          "id": "arn:aws:inspector2:us-east-2:123456789012:finding/9abcdefabcdef0123456789abcdef121",
+          "kind": "state",
+          "outcome": "unknown",
+          "provider": "AWS",
+          "severity": 73,
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor"
+      ]
+    },
+    {
+      "line": "{\"activity_id\":2,\"activity_name\":\"Update\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Vulnerability Finding\",\"class_uid\":2002,\"cloud\":{\"account\":{\"type\":\"AWS Account\",\"type_id\":10,\"uid\":\"123456789012\"},\"provider\":\"AWS\",\"region\":\"us-east-2\"},\"finding_info\":{\"created_time\":1758097465573,\"created_time_dt\":\"2025-09-17T08:24:25.573Z\",\"desc\":\"In the Linux kernel, the following vulnerability has been resolved:\\n\\nblock: don't call rq_qos_ops->done_bio if the bio isn't tracked\",\"first_seen_time\":1758097465573,\"first_seen_time_dt\":\"2025-09-17T08:24:25.573Z\",\"last_seen_time\":1758903843057,\"last_seen_time_dt\":\"2025-09-26T16:24:03.057Z\",\"modified_time\":1758903843057,\"modified_time_dt\":\"2025-09-26T16:24:03.057Z\",\"title\":\"CVE-2021-47412 - kernel, kernel-devel and 1 more\",\"types\":[\"Software and Configuration Checks/Vulnerabilities/CVE\",\"Vulnerabilities\"],\"uid\":\"arn:aws:inspector2:us-east-2:123456789012:finding/4abcdefabcdef1234567891234567897\"},\"metadata\":{\"product\":{\"name\":\"Inspector\",\"uid\":\"arn:aws:securityhub:us-east-2::productv2/aws/inspector\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\"],\"uid\":\"d1bc4b01234567890abcdef129abcdefabcdefabcdefabcdef123456\",\"version\":\"1.6.0\"},\"resources\":[{\"cloud_partition\":\"aws\",\"data\":{\"awsEc2InstanceDetails\":{\"iamInstanceProfileArn\":\"arn:aws:iam::123456789012:instance-profile/eks-1123abc1-5678-efab-abcd-701abcdef892\",\"imageId\":\"ami-abcdefa123456789\",\"ipV4Addresses\":[\"10.90.0.87\",\"10.90.0.60\",\"10.90.0.30\",\"10.90.0.74\",\"10.90.0.206\",\"10.90.0.207\",\"10.90.0.37\",\"10.90.0.149\",\"10.90.0.235\",\"175.16.199.1\",\"10.90.0.225\",\"10.90.0.212\",\"10.90.0.199\",\"10.90.0.240\",\"10.90.0.164\",\"10.90.0.160\",\"10.90.0.182\",\"10.90.0.70\",\"10.90.0.180\"],\"launchedAt\":\"2025-05-29T16:04:40Z\",\"platform\":\"AMAZON_LINUX_2\",\"subnetId\":\"subnet-abcdef12345678901\",\"type\":\"t3.medium\",\"vpcId\":\"vpc-abcdefabcd1abcd90\"}},\"owner\":{\"account\":{\"uid\":\"123456789012\"}},\"region\":\"us-east-2\",\"tags\":[{\"name\":\"aws:autoscaling:groupName\",\"value\":\"eks-demo_prod_linux-1123abc1-5678-efab-abcd-701abcdef892\"},{\"name\":\"aws:ec2:fleet-id\",\"value\":\"fleet-babcdefc-5678-abcd-1234-20123456789b\"},{\"name\":\"k8s.io/cluster-autoscaler/demo_prod\",\"value\":\"owned\"},{\"name\":\"aws:eks:cluster-name\",\"value\":\"demo_prod\"},{\"name\":\"eks:cluster-name\",\"value\":\"demo_prod\"},{\"name\":\"aws:ec2launchtemplate:version\",\"value\":\"6\"},{\"name\":\"eks:nodegroup-name\",\"value\":\"demo_prod_linux\"},{\"name\":\"k8s.io/cluster-autoscaler/enabled\",\"value\":\"true\"},{\"name\":\"kubernetes.io/cluster/demo_prod\",\"value\":\"owned\"},{\"name\":\"aws:ec2launchtemplate:id\",\"value\":\"lt-abcdefabcdef123456\"}],\"type\":\"AWS::EC2::Instance\",\"uid\":\"i-abcd1235cdef1234\"}],\"severity\":\"Medium\",\"severity_id\":3,\"status\":\"New\",\"status_id\":1,\"time\":1758903843057,\"time_dt\":\"2025-09-26T16:24:03.057Z\",\"type_name\":\"Vulnerability Finding: Update\",\"type_uid\":200202,\"vendor_attributes\":{\"severity\":\"Medium\",\"severity_id\":3},\"vulnerabilities\":[{\"affected_packages\":[{\"architecture\":\"X86_64\",\"epoch\":0,\"fixed_in_version\":\"0:5.10.242-239.961.amzn2\",\"name\":\"kernel\",\"package_manager\":\"OS\",\"release\":\"228.935.amzn2\",\"remediation\":{\"desc\":\"yum update kernel\"},\"version\":\"5.10.236\"},{\"architecture\":\"X86_64\",\"epoch\":0,\"fixed_in_version\":\"0:5.10.242-239.961.amzn2\",\"name\":\"kernel-devel\",\"package_manager\":\"OS\",\"release\":\"228.935.amzn2\",\"remediation\":{\"desc\":\"yum update kernel-devel\"},\"version\":\"5.10.236\"},{\"architecture\":\"X86_64\",\"epoch\":0,\"fixed_in_version\":\"0:5.10.242-239.961.amzn2\",\"name\":\"kernel-headers\",\"package_manager\":\"OS\",\"release\":\"228.935.amzn2\",\"remediation\":{\"desc\":\"yum update kernel-headers\"},\"version\":\"5.10.236\"}],\"cve\":{\"created_time\":1716249600000,\"created_time_dt\":\"2024-05-21T00:00:00.000Z\",\"cvss\":[{\"base_score\":4.7,\"severity\":\"MEDIUM\",\"vector_string\":\"CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:N/A:H\",\"vendor_name\":\"AMAZON_CVE\",\"version\":\"3.1\"},{\"base_score\":5.5,\"severity\":\"MEDIUM\",\"vector_string\":\"CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:H\",\"vendor_name\":\"NVD\",\"version\":\"3.1\"}],\"desc\":\"In the Linux kernel, the following vulnerability has been resolved:\\n\\nblock: don't call rq_qos_ops->done_bio if the bio isn't tracked\",\"epss\":{\"score\":\"0.00034\"},\"modified_time\":1732752000000,\"modified_time_dt\":\"2024-11-28T00:00:00.000Z\",\"uid\":\"CVE-2021-47412\"},\"fix_coverage\":\"Complete\",\"fix_coverage_id\":1,\"is_exploit_available\":false,\"is_fix_available\":true,\"references\":[\"https://explore.alas.aws.amazon.com/cve/json/v1/CVE-2021-47412.json\",\"https://explore.alas.aws.amazon.com/CVE-2021-47412.html\",\"https://alas.aws.amazon.com/AL2/ALAS2KERNEL-5.10-2025-104.html\"],\"related_vulnerabilities\":[\"ALAS2KERNEL-5.10-2025-104\"],\"severity\":\"Medium\"}]}",
+      "expected": {
+        "@timestamp": "2025-09-26T16:24:03.057Z",
+        "cloud": {
+          "account": {
+            "id": "123456789012"
+          },
+          "instance": {
+            "id": "i-abcd1235cdef1234"
+          },
+          "machine": {
+            "type": "t3.medium"
+          },
+          "provider": "aws",
+          "region": "us-east-2",
+          "service": {
+            "name": "AWS::EC2::Instance"
+          }
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "host": {
+          "id": "i-abcd1235cdef1234",
+          "ip": [
+            "10.90.0.87",
+            "10.90.0.60",
+            "10.90.0.30",
+            "10.90.0.74",
+            "10.90.0.206",
+            "10.90.0.207",
+            "10.90.0.37",
+            "10.90.0.149",
+            "10.90.0.235",
+            "175.16.199.1",
+            "10.90.0.225",
+            "10.90.0.212",
+            "10.90.0.199",
+            "10.90.0.240",
+            "10.90.0.164",
+            "10.90.0.160",
+            "10.90.0.182",
+            "10.90.0.70",
+            "10.90.0.180"
+          ],
+          "name": "i-abcd1235cdef1234",
+          "type": "t3.medium"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "orchestrator": {
+          "cluster": {
+            "name": "demo_prod"
+          }
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "package": {
+          "name": [
+            "kernel",
+            "kernel-devel",
+            "kernel-headers"
+          ],
+          "version": [
+            "5.10.236",
+            "5.10.236",
+            "5.10.236"
+          ]
+        },
+        "related": {
+          "ip": [
+            "10.90.0.87",
+            "10.90.0.60",
+            "10.90.0.30",
+            "10.90.0.74",
+            "10.90.0.206",
+            "10.90.0.207",
+            "10.90.0.37",
+            "10.90.0.149",
+            "10.90.0.235",
+            "175.16.199.1",
+            "10.90.0.225",
+            "10.90.0.212",
+            "10.90.0.199",
+            "10.90.0.240",
+            "10.90.0.164",
+            "10.90.0.160",
+            "10.90.0.182",
+            "10.90.0.70",
+            "10.90.0.180"
+          ]
+        },
+        "rule": {
+          "description": "In the Linux kernel, the following vulnerability has been resolved:\n\nblock: don't call rq_qos_ops->done_bio if the bio isn't tracked",
+          "name": "CVE-2021-47412 - kernel, kernel-devel and 1 more"
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "vulnerability": {
+          "classification": "CVSS",
+          "description": "In the Linux kernel, the following vulnerability has been resolved:\n\nblock: don't call rq_qos_ops->done_bio if the bio isn't tracked",
+          "enumeration": "CVE",
+          "id": "CVE-2021-47412",
+          "reference": [
+            "https://explore.alas.aws.amazon.com/cve/json/v1/CVE-2021-47412.json",
+            "https://explore.alas.aws.amazon.com/CVE-2021-47412.html",
+            "https://alas.aws.amazon.com/AL2/ALAS2KERNEL-5.10-2025-104.html"
+          ],
+          "scanner": {
+            "vendor": "Inspector"
+          },
+          "score": {
+            "base": 4.7,
+            "version": "3.1"
+          },
+          "severity": "Medium"
+        },
+        "event": {
+          "action": "Update",
+          "category": [
+            "vulnerability"
+          ],
+          "created": "2025-09-26T16:24:03.057Z",
+          "id": "arn:aws:inspector2:us-east-2:123456789012:finding/4abcdefabcdef1234567891234567897",
+          "kind": "state",
+          "outcome": "unknown",
+          "provider": "AWS",
+          "severity": 47,
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor"
+      ]
+    },
+    {
+      "line": "{\"activity_id\":2,\"activity_name\":\"Update\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Compliance Finding\",\"class_uid\":2003,\"cloud\":{\"account\":{\"uid\":\"123456789012\"},\"provider\":\"AWS\",\"region\":\"us-east-2\"},\"compliance\":{\"control\":\"SSM.1\",\"standards\":[\"standards/aws-foundational-security-best-practices/v/1.0.0\"],\"status\":\"Fail\",\"status_id\":3},\"finding_info\":{\"analytic\":{\"category\":\"AWS::Config::ConfigRule\",\"name\":\"securityhub-ec2-instance-managed-by-ssm-ab123467\",\"type\":\"Rule\",\"type_id\":1},\"created_time\":1748541948106,\"created_time_dt\":\"2025-05-29T18:05:48.106Z\",\"desc\":\"This AWS control checks whether the Amazon EC2 instances in your account are managed by AWS Systems Manager.\",\"first_seen_time\":1748541944226,\"first_seen_time_dt\":\"2025-05-29T18:05:44.226Z\",\"last_seen_time\":1750372015643,\"last_seen_time_dt\":\"2025-06-19T22:26:55.643Z\",\"modified_time\":1758875220981,\"modified_time_dt\":\"2025-09-26T08:27:00.981Z\",\"title\":\"EC2 instances should be managed by AWS Systems Manager\",\"types\":[\"Software and Configuration Checks/Industry and Regulatory Standards\",\"Posture Management\"],\"uid\":\"arn:aws:securityhub:us-east-2:123456789012:security-control/SSM.1/finding/cabc123e-1235-ef12-abcd-6123456abcd1\"},\"metadata\":{\"product\":{\"name\":\"Security Hub\",\"uid\":\"arn:aws:securityhub:us-east-2::productv2/aws/securityhub\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\"],\"uid\":\"d1bc4b01234567890123456789abc123456def5bcdefabcdef123456\",\"version\":\"1.6.0\"},\"remediation\":{\"desc\":\"For information on how to correct this issue, consult the AWS Security Hub controls documentation.\",\"references\":[\"https://docs.aws.amazon.com/console/securityhub/SSM.1/remediation\"]},\"resources\":[{\"cloud_partition\":\"aws\",\"owner\":{\"account\":{\"uid\":\"123456789012\"}},\"region\":\"us-east-2\",\"tags\":[{\"name\":\"aws:autoscaling:groupName\",\"value\":\"eks-demo_prod_linux-1123abc1-5678-efab-abcd-701abcdef892\"},{\"name\":\"aws:ec2:fleet-id\",\"value\":\"fleet-babcdefc-5678-abcd-1234-20123456789b\"},{\"name\":\"k8s.io/cluster-autoscaler/demo_prod\",\"value\":\"owned\"},{\"name\":\"aws:eks:cluster-name\",\"value\":\"demo_prod\"},{\"name\":\"eks:cluster-name\",\"value\":\"demo_prod\"},{\"name\":\"aws:ec2launchtemplate:version\",\"value\":\"6\"},{\"name\":\"eks:nodegroup-name\",\"value\":\"demo_prod_linux\"},{\"name\":\"k8s.io/cluster-autoscaler/enabled\",\"value\":\"true\"},{\"name\":\"kubernetes.io/cluster/demo_prod\",\"value\":\"owned\"},{\"name\":\"aws:ec2launchtemplate:id\",\"value\":\"lt-abcdefabcdef123456\"}],\"type\":\"AWS::EC2::Instance\",\"uid\":\"i-abcd1235cdef1234\",\"uid_alt\":\"arn:aws:ec2:us-east-2:123456789012:instance/i-abcd1235cdef1234\"}],\"severity\":\"Medium\",\"severity_id\":3,\"status\":\"New\",\"status_id\":1,\"time\":1758875220981,\"time_dt\":\"2025-09-26T08:27:00.981Z\",\"type_name\":\"Compliance Finding: Update\",\"type_uid\":200302,\"vendor_attributes\":{\"severity\":\"Medium\",\"severity_id\":3}}",
+      "expected": {
+        "@timestamp": "2025-09-26T08:27:00.981Z",
+        "cloud": {
+          "account": {
+            "id": "123456789012"
+          },
+          "instance": {
+            "id": "i-abcd1235cdef1234"
+          },
+          "provider": "aws",
+          "region": "us-east-2",
+          "service": {
+            "name": "AWS::EC2::Instance"
+          }
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "host": {
+          "id": "i-abcd1235cdef1234",
+          "name": "i-abcd1235cdef1234"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "orchestrator": {
+          "cluster": {
+            "name": "demo_prod"
+          }
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "rule": {
+          "description": "This AWS control checks whether the Amazon EC2 instances in your account are managed by AWS Systems Manager.",
+          "id": "SSM.1",
+          "name": "EC2 instances should be managed by AWS Systems Manager",
+          "reference": [
+            "https://docs.aws.amazon.com/console/securityhub/SSM.1/remediation"
+          ]
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "Update",
+          "created": "2025-09-26T08:27:00.981Z",
+          "id": "arn:aws:securityhub:us-east-2:123456789012:security-control/SSM.1/finding/cabc123e-1235-ef12-abcd-6123456abcd1",
+          "kind": "state",
+          "outcome": "unknown",
+          "provider": "AWS",
+          "severity": 47,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"activity_id\":2,\"activity_name\":\"Update\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Compliance Finding\",\"class_uid\":2003,\"cloud\":{\"account\":{\"uid\":\"123456789012\"},\"provider\":\"AWS\",\"region\":\"us-east-2\"},\"compliance\":{\"assessments\":[{\"desc\":\"AWS Config evaluated your resources against the rule. The rule did not apply to the AWS resources in its scope, the specified resources were deleted, or the evaluation results were deleted.\",\"meets_criteria\":true,\"name\":\"CONFIG_EVALUATIONS_EMPTY\"}],\"control\":\"Redshift.3\",\"standards\":[\"standards/aws-foundational-security-best-practices/v/1.0.0\"],\"status\":\"Pass\",\"status_id\":1},\"finding_info\":{\"analytic\":{\"category\":\"AWS::Config::ConfigRule\",\"name\":\"securityhub-redshift-backup-enabled-abc12311\",\"type\":\"Rule\",\"type_id\":1},\"created_time\":1726096120044,\"created_time_dt\":\"2024-09-11T23:08:40.044Z\",\"desc\":\"This control checks whether an Amazon Redshift cluster has automated snapshots enabled, and a retention period greater than or equal to the specified time frame. The control fails if automated snapshots aren't enabled for the cluster, or if the retention period is less than the specified time frame. Unless you provide a custom parameter value for the retention period, Security Hub uses a default value of 7 days.\",\"first_seen_time\":1726096120044,\"first_seen_time_dt\":\"2024-09-11T23:08:40.044Z\",\"last_seen_time\":1758886482714,\"last_seen_time_dt\":\"2025-09-26T11:34:42.714Z\",\"modified_time\":1758886482714,\"modified_time_dt\":\"2025-09-26T11:34:42.714Z\",\"title\":\"Amazon Redshift clusters should have automatic snapshots enabled\",\"types\":[\"Software and Configuration Checks/Industry and Regulatory Standards\",\"Posture Management\"],\"uid\":\"arn:aws:securityhub:us-east-2:123456789012:security-control/Redshift.3/finding/c3abcd12-3456-7890-abdf-c2123456abcd\"},\"metadata\":{\"product\":{\"name\":\"Security Hub\",\"uid\":\"arn:aws:securityhub:us-east-2::productv2/aws/securityhub\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\"],\"uid\":\"d1bc4b01abcdef890123456789abcd12345efabcdefabcdef123ab6\",\"version\":\"1.6.0\"},\"remediation\":{\"desc\":\"For information on how to correct this issue, consult the AWS Security Hub controls documentation.\",\"references\":[\"https://docs.aws.amazon.com/console/securityhub/Redshift.3/remediation\"]},\"resources\":[{\"cloud_partition\":\"aws\",\"owner\":{\"account\":{\"uid\":\"123456789012\"}},\"region\":\"us-east-2\",\"type\":\"AWS::::Account\",\"uid\":\"123456789012\"}],\"severity\":\"Informational\",\"severity_id\":1,\"status\":\"Resolved\",\"status_id\":4,\"time\":1758886482714,\"time_dt\":\"2025-09-26T11:34:42.714Z\",\"type_name\":\"Compliance Finding: Update\",\"type_uid\":200302,\"vendor_attributes\":{\"severity\":\"Informational\",\"severity_id\":1}}",
+      "expected": {
+        "@timestamp": "2025-09-26T11:34:42.714Z",
+        "cloud": {
+          "account": {
+            "id": "123456789012"
+          },
+          "provider": "aws",
+          "region": "us-east-2",
+          "service": {
+            "name": "AWS::::Account"
+          }
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "rule": {
+          "description": "This control checks whether an Amazon Redshift cluster has automated snapshots enabled, and a retention period greater than or equal to the specified time frame. The control fails if automated snapshots aren't enabled for the cluster, or if the retention period is less than the specified time frame. Unless you provide a custom parameter value for the retention period, Security Hub uses a default value of 7 days.",
+          "id": "Redshift.3",
+          "name": "Amazon Redshift clusters should have automatic snapshots enabled",
+          "reference": [
+            "https://docs.aws.amazon.com/console/securityhub/Redshift.3/remediation"
+          ]
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "Update",
+          "created": "2025-09-26T11:34:42.714Z",
+          "id": "arn:aws:securityhub:us-east-2:123456789012:security-control/Redshift.3/finding/c3abcd12-3456-7890-abdf-c2123456abcd",
+          "kind": "state",
+          "outcome": "success",
+          "provider": "AWS",
+          "severity": 21,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"activity_id\":1,\"activity_name\":\"Create\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Vulnerability Finding\",\"class_uid\":2002,\"cloud\":{\"account\":{\"type\":\"AWS Account\",\"type_id\":10,\"uid\":\"123456789012\"},\"provider\":\"AWS\",\"region\":\"us-east-2\"},\"finding_info\":{\"created_time\":1758662368239,\"created_time_dt\":\"2025-09-23T21:19:28.239Z\",\"desc\":\"If the PATH environment variable contains paths which are executables (rather than just directories), passing certain strings to LookPath (\\\"\\\", \\\".\\\", and \\\"..\\\"), can result in the binaries listed in the PATH being unexpectedly returned.\",\"first_seen_time\":1758662368239,\"first_seen_time_dt\":\"2025-09-23T21:19:28.239Z\",\"last_seen_time\":1758662368239,\"last_seen_time_dt\":\"2025-09-23T21:19:28.239Z\",\"modified_time\":1758662368239,\"modified_time_dt\":\"2025-09-23T21:19:28.239Z\",\"title\":\"CVE-2025-47906 - go/stdlib\",\"types\":[\"Software and Configuration Checks/Vulnerabilities/CVE\"],\"uid\":\"arn:aws:inspector2:us-east-2:123456789012:finding/2123456789abcdefabcdef12345679\"},\"metadata\":{\"product\":{\"name\":\"Inspector\",\"uid\":\"arn:aws:securityhub:us-east-2::productv2/aws/inspector\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\"],\"uid\":\"d1bc4b0123456789012345abefabcdefabcdefab123890cdef123456\",\"version\":\"1.5.0\"},\"resources\":[{\"cloud_partition\":\"aws\",\"data\":{\"awsLambdaFunctionDetails\":{\"architectures\":[\"ARM64\"],\"codeSha256\":\"OBDFNBKKvsf/dfbSJFBVDKB64v1sJUYVJH/SV5nsdv5svssv=\",\"executionRoleArn\":\"arn:aws:iam::123456789012:role/cloudtrail-test-ab-LambdaExecutionRole-jVHJUFvbhIHVD6\",\"functionName\":\"cloudtrail-test-ab-LambdaFunction-jVHJUsdbdkj6\",\"lastModifiedAt\":\"2025-08-12T08:23:50Z\",\"layers\":[\"arn:aws:lambda:us-east-2:267093732750:layer:test-cloud-forwarder-ver-0-2-0:1\"],\"packageType\":\"ZIP\",\"runtime\":\"PYTHON_3_12\",\"version\":\"$LATEST\"}},\"name\":\"cloudtrail-test-ab-LambdaFunction-jVHJUsdbdkj6\",\"owner\":{\"account\":{\"uid\":\"123456789012\"}},\"region\":\"us-east-2\",\"tags\":[{\"name\":\"aws:cloudformation:stack-name\",\"value\":\"cloudtrail-test-ab\"},{\"name\":\"aws:cloudformation:stack-id\",\"value\":\"arn:aws:cloudformation:us-east-2:123456789012:stack/cloudtrail-test-ab/c3abcd12-3456-7890-abdf-c2123456abcd\"},{\"name\":\"aws:cloudformation:logical-id\",\"value\":\"LambdaFunction\"}],\"type\":\"AWS::Lambda::Function\",\"uid\":\"cloudtrail-test-ab-LambdaFunction-jVHJUsdbdkj6\",\"uid_alt\":\"arn:aws:lambda:us-east-2:123456789012:function:cloudtrail-test-ab-LambdaFunction-jVHJUsdbdkj6\"}],\"severity\":\"Medium\",\"severity_id\":3,\"status\":\"New\",\"status_id\":1,\"time\":1758662368239,\"time_dt\":\"2025-09-23T21:19:28.239Z\",\"type_name\":\"Vulnerability Finding: Create\",\"type_uid\":200201,\"vendor_attributes\":{\"severity\":\"Medium\",\"severity_id\":3},\"vulnerabilities\":[{\"affected_packages\":[{\"epoch\":0,\"fixed_in_version\":\"1.24.6\",\"name\":\"go/stdlib\",\"package_manager\":\"GENERIC\",\"path\":\"collector\",\"version\":\"1.24.0\"}],\"cve\":{\"created_time\":1758222937000,\"created_time_dt\":\"2025-09-18T19:15:37.000Z\",\"cvss\":[{\"base_score\":6.5,\"severity\":\"MEDIUM\",\"vector_string\":\"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L\",\"vendor_name\":\"NVD\",\"version\":\"3.1\"}],\"desc\":\"If the PATH environment variable contains paths which are executables (rather than just directories), passing certain strings to LookPath (\\\"\\\", \\\".\\\", and \\\"..\\\"), can result in the binaries listed in the PATH being unexpectedly returned.\",\"epss\":{\"score\":\"0.00017\"},\"modified_time\":1758297627000,\"modified_time_dt\":\"2025-09-19T16:00:27.000Z\",\"uid\":\"CVE-2025-47906\"},\"fix_coverage\":\"Complete\",\"fix_coverage_id\":1,\"is_exploit_available\":false,\"is_fix_available\":true,\"references\":[\"https://groups.google.com/g/golang-announce/c/x5MKroML2yM\",\"https://nvd.nist.gov/vuln/detail/CVE-2025-47906\"],\"severity\":\"MEDIUM\"}]}",
+      "expected": {
+        "@timestamp": "2025-09-23T21:19:28.239Z",
+        "cloud": {
+          "account": {
+            "id": "123456789012"
+          },
+          "provider": "aws",
+          "region": "us-east-2",
+          "service": {
+            "name": "AWS::Lambda::Function"
+          }
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "package": {
+          "name": [
+            "go/stdlib"
+          ],
+          "version": [
+            "1.24.0"
+          ]
+        },
+        "rule": {
+          "description": "If the PATH environment variable contains paths which are executables (rather than just directories), passing certain strings to LookPath (\"\", \".\", and \"..\"), can result in the binaries listed in the PATH being unexpectedly returned.",
+          "name": "CVE-2025-47906 - go/stdlib"
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "vulnerability": {
+          "classification": "CVSS",
+          "description": "If the PATH environment variable contains paths which are executables (rather than just directories), passing certain strings to LookPath (\"\", \".\", and \"..\"), can result in the binaries listed in the PATH being unexpectedly returned.",
+          "enumeration": "CVE",
+          "id": "CVE-2025-47906",
+          "reference": [
+            "https://groups.google.com/g/golang-announce/c/x5MKroML2yM",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-47906"
+          ],
+          "scanner": {
+            "vendor": "Inspector"
+          },
+          "score": {
+            "base": 6.5,
+            "version": "3.1"
+          },
+          "severity": "Medium"
+        },
+        "event": {
+          "action": "Create",
+          "category": [
+            "vulnerability"
+          ],
+          "created": "2025-09-23T21:19:28.239Z",
+          "id": "arn:aws:inspector2:us-east-2:123456789012:finding/2123456789abcdefabcdef12345679",
+          "kind": "state",
+          "outcome": "unknown",
+          "provider": "AWS",
+          "severity": 47,
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor"
+      ]
+    },
+    {
+      "line": "{\"activity_id\":1,\"activity_name\":\"Create\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Compliance Finding\",\"class_uid\":2003,\"cloud\":{\"account\":{\"uid\":\"123456789012\"},\"provider\":\"AWS\",\"region\":\"us-east-2\"},\"compliance\":{\"control\":\"SQS.3\",\"standards\":[\"standards/aws-foundational-security-best-practices/v/1.0.0\"],\"status\":\"Pass\",\"status_id\":1},\"finding_info\":{\"analytic\":{\"category\":\"AWS::Config::ConfigRule\",\"name\":\"securityhub-sqs-queue-no-public-access-abcdef12\",\"type\":\"Rule\",\"type_id\":1},\"created_time\":1758273439594,\"created_time_dt\":\"2025-09-19T09:17:19.594Z\",\"desc\":\"This controls checks whether an Amazon SQS access policy allows public access to an SQS queue. The control fails if an SQS access policy allows public access to the queue.\",\"first_seen_time\":1758273437503,\"first_seen_time_dt\":\"2025-09-19T09:17:17.503Z\",\"last_seen_time\":1758273437503,\"last_seen_time_dt\":\"2025-09-19T09:17:17.503Z\",\"modified_time\":1758273439594,\"modified_time_dt\":\"2025-09-19T09:17:19.594Z\",\"title\":\"SQS queue access policies should not allow public access\",\"types\":[\"Software and Configuration Checks/Industry and Regulatory Standards\",\"Posture Management\"],\"uid\":\"arn:aws:securityhub:us-east-2:123456789012:security-control/SQS.3/finding/cdef1234-abcd-5678-9012-601234567895\"},\"metadata\":{\"product\":{\"name\":\"Security Hub\",\"uid\":\"arn:aws:securityhub:us-east-2::productv2/aws/securityhub\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\"],\"uid\":\"d1bc4b01234567890123456789abcdefabcdefabcdefabcdef1234ff\",\"version\":\"1.6.0\"},\"remediation\":{\"desc\":\"For information on how to correct this issue, consult the AWS Security Hub controls documentation.\",\"references\":[\"https://docs.aws.amazon.com/console/securityhub/SQS.3/remediation\"]},\"resources\":[{\"cloud_partition\":\"aws\",\"owner\":{\"account\":{\"uid\":\"123456789012\"}},\"region\":\"us-east-2\",\"type\":\"AWS::SQS::Queue\",\"uid\":\"https://sqs.us-east-2.amazonaws.com/123456789012/securityhubfinding\",\"uid_alt\":\"arn:aws:sqs:us-east-2:123456789012:securityhubfinding\"}],\"severity\":\"Informational\",\"severity_id\":1,\"status\":\"Resolved\",\"status_id\":4,\"time\":1758273439594,\"time_dt\":\"2025-09-19T09:17:19.594Z\",\"type_name\":\"Compliance Finding: Create\",\"type_uid\":200301,\"vendor_attributes\":{\"severity\":\"Informational\",\"severity_id\":1},\"evidences\":[{\"name\":\"EVIDENCE_WITH_ACTOR\",\"actor\":{\"user\":{\"name\":\"example-user\",\"type\":\"User\",\"type_id\":1},\"process\":{\"name\":\"aws-cli\",\"pid\":12345,\"terminated_time_dt\":\"2025-09-19 09:17:19.594Z\",\"terminated_time\":1758273439594},\"session\":{\"uid\":\"session-abc123\",\"created_time_dt\":\"2025-09-19 09:00:00.000Z\",\"created_time\":1758272400000,\"expiration_time_dt\":\"2025-09-19 10:00:00.000Z\",\"expiration_time\":1758276000000}}},{\"name\":\"EVIDENCE_WITH_PROCESS\",\"process\":{\"name\":\"example-process\",\"pid\":99,\"terminated_time_dt\":\"2025-09-19 09:17:19.594Z\",\"terminated_time\":1758273439594}}]}",
+      "expected": {
+        "@timestamp": "2025-09-19T09:17:19.594Z",
+        "cloud": {
+          "account": {
+            "id": "123456789012"
+          },
+          "provider": "aws",
+          "region": "us-east-2",
+          "service": {
+            "name": "AWS::SQS::Queue"
+          }
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "rule": {
+          "description": "This controls checks whether an Amazon SQS access policy allows public access to an SQS queue. The control fails if an SQS access policy allows public access to the queue.",
+          "id": "SQS.3",
+          "name": "SQS queue access policies should not allow public access",
+          "reference": [
+            "https://docs.aws.amazon.com/console/securityhub/SQS.3/remediation"
+          ]
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "Create",
+          "created": "2025-09-19T09:17:19.594Z",
+          "id": "arn:aws:securityhub:us-east-2:123456789012:security-control/SQS.3/finding/cdef1234-abcd-5678-9012-601234567895",
+          "kind": "state",
+          "outcome": "success",
+          "provider": "AWS",
+          "severity": 21,
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"activity_id\":3,\"activity_name\":\"Close\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Vulnerability Finding\",\"class_uid\":2002,\"cloud\":{\"account\":{\"type\":\"AWS Account\",\"type_id\":10,\"uid\":\"111111111111\"},\"provider\":\"AWS\",\"region\":\"us-east-1\"},\"finding_info\":{\"created_time\":1786620786896,\"created_time_dt\":\"2026-08-13T11:33:06.896Z\",\"desc\":\"When expanding paths that begin with a tilde (~) followed by a username, the internal parse_tilde function extracts the username to determine the user's home directory. The implementation allocates memory for this username directly on the stack using the strndupa macro. Because the size of this allocation was determined by the length of the user-supplied input without any bounds checks, passing an excessively long username e.g. thousands of characters, forces the thread to exhaust its stack space. Thus if an application passes untrusted, attacker-controlled input to the wordexp function, an attacker can trigger a stack clash.\",\"first_seen_time\":1786620786896,\"first_seen_time_dt\":\"2026-08-13T11:33:06.896Z\",\"last_seen_time\":1786620786896,\"last_seen_time_dt\":\"2026-08-13T11:33:06.896Z\",\"modified_time\":1786889965902,\"modified_time_dt\":\"2026-08-16T14:19:25.902Z\",\"title\":\"CVE-2026-6791 - glibc\",\"types\":[\"Software and Configuration Checks/Vulnerabilities/CVE\",\"Vulnerabilities\"],\"uid\":\"arn:aws:inspector2:us-east-1:111111111111:finding/77db8f442137146caeb3fafd22fb4be1\"},\"metadata\":{\"extensions\":[{\"name\":\"aws\",\"uid\":\"998\",\"version\":\"1.1.0\"}],\"product\":{\"name\":\"Inspector\",\"uid\":\"arn:aws:securityhub:us-east-1::productv2/aws/inspector\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\",\"aws/cloud_resources\"],\"uid\":\"9d9ca4959bb3af722d741dfafccae5e85d1ef11568d557852b15b484c0dee17e\",\"version\":\"1.8.0\"},\"resources\":[{\"cloud_partition\":\"aws\",\"created_time\":1785858145296,\"created_time_dt\":\"2026-08-04T15:42:25.296Z\",\"image\":{\"architecture\":\"arm64\",\"created_time\":1785858145296,\"created_time_dt\":\"2026-08-04T15:42:25.296Z\",\"hash\":{\"algorithm\":\"SHA-256\",\"algorithm_id\":3,\"value\":\"a0e635c3771f522e654c224ca1aaa0eff751b1a4b7d199351724c417eb7c5cab\"},\"modified_time\":1785858145296,\"modified_time_dt\":\"2026-08-04T15:42:25.296Z\",\"name\":\"example-org/example-app\",\"registry_uid\":\"111111111111\",\"repository_name\":\"example-org/example-app\",\"tag\":\"20260804-154151-681\",\"uid\":\"sha256:a0e635c3771f522e654c224ca1aaa0eff751b1a4b7d199351724c417eb7c5cab\"},\"name\":\"example-org/example-app\",\"owner\":{\"account\":{\"uid\":\"111111111111\"}},\"provider\":\"AWS\",\"region\":\"us-east-1\",\"type\":\"AWS::ECR::Repository\",\"uid\":\"arn:aws:ecr:us-east-1:111111111111:repository/example-org/example-app\"},{\"cloud_partition\":\"aws\",\"owner\":{\"account\":{\"uid\":\"111111111111\"}},\"provider\":\"AWS\",\"region\":\"us-east-1\",\"type\":\"AWS::ECR::ContainerImage\",\"uid\":\"sha256:a0e635c3771f522e654c224ca1aaa0eff751b1a4b7d199351724c417eb7c5cab\"}],\"severity\":\"Unknown\",\"severity_id\":0,\"status\":\"New\",\"status_id\":1,\"time\":1786889965902,\"time_dt\":\"2026-08-16T14:19:25.902Z\",\"type_name\":\"Vulnerability Finding: Close\",\"type_uid\":200203,\"unmapped\":{\"affected_packages.sourceLayerHashes\":[\"sha256:0037b8fa7d2ba7a271f4b5732b5677e4c2bc8d861ffcaeb1430b358f45e00ff7\"]},\"vendor_attributes\":{\"severity\":\"Unknown\",\"severity_id\":0},\"vulnerabilities\":[{\"affected_packages\":[{\"architecture\":\"ARM64\",\"epoch\":0,\"fixed_in_version\":\"NotAvailable\",\"name\":\"glibc\",\"package_manager\":\"OS\",\"release\":\"12+deb13u3\",\"remediation\":{\"desc\":\"NotAvailable\"},\"version\":\"2.41\"}],\"cve\":{\"cvss\":[{\"base_score\":6.6,\"severity\":\"MEDIUM\",\"vector_string\":\"CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:L/VI:L/VA:H/SC:N/SI:L/SA:H/E:U/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X\",\"vendor_name\":\"NVD\",\"version\":\"4.0\"}],\"desc\":\"When expanding paths that begin with a tilde (~) followed by a username, the internal parse_tilde function extracts the username to determine the user's home directory. The implementation allocates memory for this username directly on the stack using the strndupa macro. Because the size of this allocation was determined by the length of the user-supplied input without any bounds checks, passing an excessively long username e.g. thousands of characters, forces the thread to exhaust its stack space. Thus if an application passes untrusted, attacker-controlled input to the wordexp function, an attacker can trigger a stack clash.\",\"epss\":{\"score\":\"0.00207\"},\"uid\":\"CVE-2026-6791\"},\"fix_coverage\":\"None\",\"fix_coverage_id\":3,\"is_exploit_available\":false,\"is_fix_available\":false,\"references\":[\"https://security-tracker.debian.org/tracker/CVE-2026-6791\"],\"severity\":\"not yet assigned\"}]}",
+      "expected": {
+        "@timestamp": "2026-08-16T14:19:25.902Z",
+        "cloud": {
+          "account": {
+            "id": "111111111111"
+          },
+          "provider": "aws",
+          "region": "us-east-1"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "package": {
+          "name": [
+            "glibc"
+          ],
+          "version": [
+            "2.41"
+          ]
+        },
+        "rule": {
+          "description": "When expanding paths that begin with a tilde (~) followed by a username, the internal parse_tilde function extracts the username to determine the user's home directory. The implementation allocates memory for this username directly on the stack using the strndupa macro. Because the size of this allocation was determined by the length of the user-supplied input without any bounds checks, passing an excessively long username e.g. thousands of characters, forces the thread to exhaust its stack space. Thus if an application passes untrusted, attacker-controlled input to the wordexp function, an attacker can trigger a stack clash.",
+          "name": "CVE-2026-6791 - glibc"
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "vulnerability": {
+          "classification": "CVSS",
+          "description": "When expanding paths that begin with a tilde (~) followed by a username, the internal parse_tilde function extracts the username to determine the user's home directory. The implementation allocates memory for this username directly on the stack using the strndupa macro. Because the size of this allocation was determined by the length of the user-supplied input without any bounds checks, passing an excessively long username e.g. thousands of characters, forces the thread to exhaust its stack space. Thus if an application passes untrusted, attacker-controlled input to the wordexp function, an attacker can trigger a stack clash.",
+          "enumeration": "CVE",
+          "id": "CVE-2026-6791",
+          "reference": [
+            "https://security-tracker.debian.org/tracker/CVE-2026-6791"
+          ],
+          "scanner": {
+            "vendor": "Inspector"
+          },
+          "score": {
+            "base": 6.6,
+            "version": "4.0"
+          }
+        },
+        "event": {
+          "action": "Close",
+          "category": [
+            "vulnerability"
+          ],
+          "created": "2026-08-16T14:19:25.902Z",
+          "id": "arn:aws:inspector2:us-east-1:111111111111:finding/77db8f442137146caeb3fafd22fb4be1",
+          "kind": "state",
+          "outcome": "unknown",
+          "provider": "AWS",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor"
+      ]
+    },
+    {
+      "line": "{\"activity_id\":1,\"activity_name\":\"Create\",\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Data Security Finding\",\"class_uid\":2006,\"cloud\":{\"account\":{\"type\":\"AWS Account\",\"type_id\":10,\"uid\":\"111111111111\"},\"provider\":\"AWS\",\"region\":\"us-east-1\"},\"databucket\":{\"cloud_partition\":\"aws\",\"created_time\":1786831863820,\"created_time_dt\":\"2026-08-15T22:11:03.820Z\",\"data\":{\"s3Bucket\":{\"allowsUnencryptedObjectUploads\":\"TRUE\",\"publicAccess\":{\"effectivePermission\":\"NOT_PUBLIC\",\"permissionConfiguration\":{\"accountLevelPermissions\":{\"blockPublicAccess\":{\"blockPublicAcls\":false,\"blockPublicPolicy\":false,\"ignorePublicAcls\":false,\"restrictPublicBuckets\":false}},\"bucketLevelPermissions\":{\"accessControlList\":{\"allowsPublicReadAccess\":false,\"allowsPublicWriteAccess\":false},\"blockPublicAccess\":{\"blockPublicAcls\":true,\"blockPublicPolicy\":true,\"ignorePublicAcls\":true,\"restrictPublicBuckets\":true},\"bucketPolicy\":{\"allowsPublicReadAccess\":false,\"allowsPublicWriteAccess\":false}}}}}},\"encryption_details\":{\"algorithm\":\"AES\",\"algorithm_id\":3,\"key_length\":256,\"type\":\"ServerSideEncryption\"},\"file\":{\"data_classifications\":[{\"category\":\"Security\",\"category_id\":6,\"classifier_details\":{\"type\":\"AUTOMATED_SENSITIVE_DATA_DISCOVERY\"},\"discovery_details\":[{\"count\":1,\"type\":\"HTTP_BASIC_AUTH_HEADER\"}],\"size\":411222,\"src_url\":\"s3://[export-config-not-set]/AWSLogs/111111111111/Macie/us-east-1/automated-sensitive-data-discovery/111111111111/ad293efd-67a9-1486-5e94-792ad43d5646.jsonl.gz\",\"status\":\"Complete\",\"status_id\":1,\"total\":1},{\"category\":\"Other\",\"category_id\":99,\"classifier_details\":{\"type\":\"AUTOMATED_SENSITIVE_DATA_DISCOVERY\"},\"size\":411222,\"src_url\":\"s3://[export-config-not-set]/AWSLogs/111111111111/Macie/us-east-1/automated-sensitive-data-discovery/111111111111/ad293efd-67a9-1486-5e94-792ad43d5646.jsonl.gz\",\"status\":\"Complete\",\"status_id\":1,\"total\":0}],\"encryption_details\":{\"algorithm\":\"AES\",\"algorithm_id\":3,\"key_length\":256,\"type\":\"ServerSideEncryption\"},\"ext\":\"gz\",\"is_encrypted\":true,\"is_public\":false,\"mime_type\":\"application/gzip\",\"modified_time\":1783376263000,\"modified_time_dt\":\"2026-07-06T22:17:43.000Z\",\"name\":\"AWSLogs/111111111111/ExampleServiceLogs/us-east-1/2026/07/06/22/data/a20deef0-8e07-eabb-64cd-5b18953d2412_input.json.gz\",\"path\":\"example-bucket-111111111111-us-east-1-an/AWSLogs/111111111111/ExampleServiceLogs/us-east-1/2026/07/06/22/data/a20deef0-8e07-eabb-64cd-5b18953d2412_input.json.gz\",\"size\":103911,\"storage_class\":\"STANDARD\",\"type\":\"Regular File\",\"type_id\":1,\"version\":\"apPLaV4VGbdAcywvztWDmLT8DedA9CNg\",\"xattributes\":{\"archived\":\"false\",\"eTag\":\"1edfc376e506393e89c2a544f3fe6904\",\"public-access\":\"false\",\"storage-class\":\"STANDARD\"}},\"is_encrypted\":true,\"is_public\":false,\"name\":\"example-bucket-111111111111-us-east-1-an\",\"owner\":{\"name\":\"null\",\"uid\":\"b94d27b9934d3e08a52e52d7da7dabfac484efe04294e576b47f5d6f50a5e93b\"},\"region\":\"us-east-1\",\"tags\":[{\"name\":\"division\",\"value\":\"acme\"},{\"name\":\"project\",\"value\":\"project-nest\"},{\"name\":\"team\",\"value\":\"team-bluebird\"},{\"name\":\"org\",\"value\":\"acme-labs\"},{\"name\":\"CreatorName\",\"value\":\"bluebird@example.com\"},{\"name\":\"keep-until\",\"value\":\"2027-05-31\"}],\"type\":\"S3\",\"type_id\":1,\"uid\":\"arn:aws:s3:::example-bucket-111111111111-us-east-1-an\"},\"finding_info\":{\"created_time\":1786831863820,\"created_time_dt\":\"2026-08-15T22:11:03.820Z\",\"desc\":\"The S3 object contains credentials data such as AWS secret access keys or private keys.\",\"last_seen_time\":1786831884502,\"last_seen_time_dt\":\"2026-08-15T22:11:24.502Z\",\"modified_time\":1786831863820,\"modified_time_dt\":\"2026-08-15T22:11:03.820Z\",\"title\":\"The S3 object contains credentials data\",\"types\":[\"SensitiveData:S3Object/Credentials\",\"Sensitive Data\"],\"uid\":\"e2ab324c77ca7211fa494bcfeb5a6d35\"},\"metadata\":{\"extensions\":[{\"name\":\"aws\",\"uid\":\"998\",\"version\":\"1.0.0\"}],\"product\":{\"name\":\"Macie\",\"uid\":\"arn:aws:securityhub:us-east-1::productv2/aws/macie\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"data_classification\",\"datetime\",\"aws/cloud_resources\"],\"uid\":\"18e14dd002eea74450c8896f344c2f741f99e9eaf4650563caa1a44453287401\",\"version\":\"1.8.0\"},\"resources\":[{\"cloud_partition\":\"aws\",\"name\":\"AWSLogs/111111111111/ExampleServiceLogs/us-east-1/2026/07/06/22/data/a20deef0-8e07-eabb-64cd-5b18953d2412_input.json.gz\",\"owner\":{\"account\":{\"type\":\"AWS Account\",\"type_id\":10,\"uid\":\"111111111111\"}},\"provider\":\"AWS\",\"region\":\"us-east-1\",\"type\":\"AWS::S3::Object\",\"uid\":\"AWSLogs/111111111111/ExampleServiceLogs/us-east-1/2026/07/06/22/data/a20deef0-8e07-eabb-64cd-5b18953d2412_input.json.gz\"},{\"cloud_partition\":\"aws\",\"created_time\":1778176827000,\"created_time_dt\":\"2026-05-07T18:00:27.000Z\",\"databucket\":{\"cloud_partition\":\"aws\",\"created_time\":1786831863820,\"created_time_dt\":\"2026-08-15T22:11:03.820Z\",\"data\":{\"s3Bucket\":{\"allowsUnencryptedObjectUploads\":\"TRUE\",\"publicAccess\":{\"effectivePermission\":\"NOT_PUBLIC\",\"permissionConfiguration\":{\"accountLevelPermissions\":{\"blockPublicAccess\":{\"blockPublicAcls\":false,\"blockPublicPolicy\":false,\"ignorePublicAcls\":false,\"restrictPublicBuckets\":false}},\"bucketLevelPermissions\":{\"accessControlList\":{\"allowsPublicReadAccess\":false,\"allowsPublicWriteAccess\":false},\"blockPublicAccess\":{\"blockPublicAcls\":true,\"blockPublicPolicy\":true,\"ignorePublicAcls\":true,\"restrictPublicBuckets\":true},\"bucketPolicy\":{\"allowsPublicReadAccess\":false,\"allowsPublicWriteAccess\":false}}}}}},\"encryption_details\":{\"algorithm\":\"AES\",\"algorithm_id\":3,\"key_length\":256,\"type\":\"ServerSideEncryption\"},\"file\":{\"data_classifications\":[{\"category\":\"Security\",\"category_id\":6,\"classifier_details\":{\"type\":\"AUTOMATED_SENSITIVE_DATA_DISCOVERY\"},\"discovery_details\":[{\"count\":1,\"type\":\"HTTP_BASIC_AUTH_HEADER\"}],\"size\":411222,\"src_url\":\"s3://[export-config-not-set]/AWSLogs/111111111111/Macie/us-east-1/automated-sensitive-data-discovery/111111111111/ad293efd-67a9-1486-5e94-792ad43d5646.jsonl.gz\",\"status\":\"Complete\",\"status_id\":1,\"total\":1},{\"category\":\"Other\",\"category_id\":99,\"classifier_details\":{\"type\":\"AUTOMATED_SENSITIVE_DATA_DISCOVERY\"},\"size\":411222,\"src_url\":\"s3://[export-config-not-set]/AWSLogs/111111111111/Macie/us-east-1/automated-sensitive-data-discovery/111111111111/ad293efd-67a9-1486-5e94-792ad43d5646.jsonl.gz\",\"status\":\"Complete\",\"status_id\":1,\"total\":0}],\"encryption_details\":{\"algorithm\":\"AES\",\"algorithm_id\":3,\"key_length\":256,\"type\":\"ServerSideEncryption\"},\"ext\":\"gz\",\"is_encrypted\":true,\"is_public\":false,\"mime_type\":\"application/gzip\",\"modified_time\":1783376263000,\"modified_time_dt\":\"2026-07-06T22:17:43.000Z\",\"name\":\"AWSLogs/111111111111/ExampleServiceLogs/us-east-1/2026/07/06/22/data/a20deef0-8e07-eabb-64cd-5b18953d2412_input.json.gz\",\"path\":\"example-bucket-111111111111-us-east-1-an/AWSLogs/111111111111/ExampleServiceLogs/us-east-1/2026/07/06/22/data/a20deef0-8e07-eabb-64cd-5b18953d2412_input.json.gz\",\"size\":103911,\"storage_class\":\"STANDARD\",\"type\":\"Regular File\",\"type_id\":1,\"version\":\"apPLaV4VGbdAcywvztWDmLT8DedA9CNg\",\"xattributes\":{\"archived\":\"false\",\"eTag\":\"1edfc376e506393e89c2a544f3fe6904\",\"public-access\":\"false\",\"storage-class\":\"STANDARD\"}},\"is_encrypted\":true,\"is_public\":false,\"name\":\"example-bucket-111111111111-us-east-1-an\",\"owner\":{\"name\":\"null\",\"uid\":\"b94d27b9934d3e08a52e52d7da7dabfac484efe04294e576b47f5d6f50a5e93b\"},\"region\":\"us-east-1\",\"tags\":[{\"name\":\"division\",\"value\":\"acme\"},{\"name\":\"project\",\"value\":\"project-nest\"},{\"name\":\"team\",\"value\":\"team-bluebird\"},{\"name\":\"org\",\"value\":\"acme-labs\"},{\"name\":\"CreatorName\",\"value\":\"bluebird@example.com\"},{\"name\":\"keep-until\",\"value\":\"2027-05-31\"}],\"type\":\"S3\",\"type_id\":1,\"uid\":\"arn:aws:s3:::example-bucket-111111111111-us-east-1-an\"},\"name\":\"example-bucket-111111111111-us-east-1-an\",\"owner\":{\"account\":{\"type\":\"AWS Account\",\"type_id\":10,\"uid\":\"111111111111\"}},\"provider\":\"AWS\",\"region\":\"us-east-1\",\"tags\":[{\"name\":\"division\",\"value\":\"acme\"},{\"name\":\"org\",\"value\":\"acme-labs\"},{\"name\":\"keep-until\",\"value\":\"2027-05-31\"},{\"name\":\"project\",\"value\":\"project-nest\"},{\"name\":\"team\",\"value\":\"team-bluebird\"},{\"name\":\"CreatorName\",\"value\":\"bluebird@example.com\"}],\"type\":\"AWS::S3::Bucket\",\"uid\":\"example-bucket-111111111111-us-east-1-an\",\"uid_alt\":\"arn:aws:s3:::example-bucket-111111111111-us-east-1-an\"}],\"severity\":\"High\",\"severity_id\":4,\"status\":\"New\",\"status_id\":1,\"time\":1786831863820,\"time_dt\":\"2026-08-15T22:11:03.820Z\",\"type_name\":\"Data Security Finding: Create\",\"type_uid\":200601,\"vendor_attributes\":{\"severity\":\"High\",\"severity_id\":4}}",
+      "expected": {
+        "@timestamp": "2026-08-15T22:11:03.820Z",
+        "cloud": {
+          "account": {
+            "id": "111111111111"
+          },
+          "provider": "aws",
+          "region": "us-east-1"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "rule": {
+          "description": "The S3 object contains credentials data such as AWS secret access keys or private keys.",
+          "name": "The S3 object contains credentials data"
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "Create",
+          "created": "2026-08-15T22:11:03.820Z",
+          "id": "e2ab324c77ca7211fa494bcfeb5a6d35",
+          "kind": "alert",
+          "outcome": "unknown",
+          "provider": "AWS",
+          "severity": 73,
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor"
+      ]
+    },
+    {
+      "line": "{\"activity_id\":2,\"activity_name\":\"Update\",\"anomaly_analyses\":[{\"analysis_targets\":[{\"name\":\"UserIdentity\"}],\"anomalies\":[{\"observation_parameter\":\"isUnusualUser\",\"observations\":[{\"value\":\"false\"}]},{\"observation_parameter\":\"ASNs\",\"observations\":[{\"value\":\"AS786 Jisc Services Limited\"},{\"value\":\"AS42689 Glide Student & Residential Limited\"}]}],\"baselines\":[{\"observation_parameter\":\"UserAgents\",\"observation_type\":\"Frequency\",\"observations\":[{\"value\":\"OTHER\"},{\"value\":\"aws-cli\"}],\"observed_pattern\":\"RARE\"},{\"observation_parameter\":\"UserAgents\",\"observation_type\":\"Frequency\",\"observations\":[{\"value\":\"MOBILE\"}],\"observed_pattern\":\"FREQUENT\"},{\"observation_parameter\":\"APIs\",\"observation_type\":\"Frequency\",\"observations\":[{\"value\":\"Converse\"}],\"observed_pattern\":\"FREQUENT\"},{\"observation_parameter\":\"APIs\",\"observation_type\":\"Frequency\",\"observations\":[{\"value\":\"ConverseStream\"},{\"value\":\"InvokeModel\"}],\"observed_pattern\":\"RARE\"}]},{\"analysis_targets\":[{\"name\":\"API\"}],\"anomalies\":[{\"observation_parameter\":\"AnomalousAPIs\",\"observations\":[{\"value\":\"bedrock.amazonaws.com:Converse:success\"}]}]}],\"category_name\":\"Findings\",\"category_uid\":2,\"class_name\":\"Detection Finding\",\"class_uid\":2004,\"cloud\":{\"account\":{\"type\":\"AWS Account\",\"type_id\":10,\"uid\":\"111111111111\"},\"cloud_partition\":\"aws\",\"provider\":\"AWS\",\"region\":\"us-east-1\"},\"count\":8,\"evidences\":[{\"api\":{\"operation\":\"Converse\",\"service\":{\"name\":\"bedrock.amazonaws.com\"}},\"data\":{\"additional_info\":{\"user_agent\":{\"full_user_agent\":\"Muesli/1.1.0 CFNetwork/3860.600.21 Darwin/25.5.0\",\"user_agent_category\":\"MOBILE\"}},\"resource_role\":\"TARGET\"},\"name\":\"AWS_API_CALL\",\"src_endpoint\":{\"autonomous_system\":{\"name\":\"Jisc Services Limited\",\"number\":786},\"ip\":\"203.0.113.2\",\"isp\":\"Janet University Network\",\"isp_org\":\"Janet University Network\",\"location\":{\"city\":\"City of Westminster\",\"country\":\"United Kingdom\",\"lat\":51.5026,\"long\":-0.1339}}}],\"finding_info\":{\"analytic\":{\"type\":\"Behavioral\",\"type_id\":2,\"uid\":\"1d37d2c7ee687266e4884dd6bfc66d75\"},\"created_time\":1786645138545,\"created_time_dt\":\"2026-08-13T18:18:58.545Z\",\"desc\":\"The IAM identity example-user (IAMUser:AIDAIOSFODNN7EXAMPLE) invoked the following API:\\n- bedrock.amazonaws.com: Converse completed without error.\\n\\nThis API call was invoked from 198.51.100.23 located in United Kingdom from Glide (ASN=42689).\\n\\nGuardDuty considers this invocation suspicious because:\\n- The organization Glide Student & Residential Limited (ASN=42689) has not been previously observed for this account.\",\"first_seen_time\":1786643600000,\"first_seen_time_dt\":\"2026-08-13T17:53:20.000Z\",\"last_seen_time\":1786643820000,\"last_seen_time_dt\":\"2026-08-13T17:57:00.000Z\",\"modified_time\":1786645138545,\"modified_time_dt\":\"2026-08-13T18:18:58.545Z\",\"product\":{\"uid\":\"1d37d2c7ee687266e4884dd6bfc66d75\"},\"title\":\"The user IAMUser : example-user is anomalously invoking APIs commonly used in Impact tactics.\",\"types\":[\"Threats\",\"Impact:IAMUser/AnomalousBehavior\"],\"uid\":\"arn:aws:guardduty:us-east-1:111111111111:detector/1d37d2c7ee687266e4884dd6bfc66d75/finding/85ef09ae1dc89550e87b4c11fb0af903\",\"uid_alt\":\"85ef09ae1dc89550e87b4c11fb0af903\"},\"metadata\":{\"extensions\":[{\"name\":\"aws\",\"uid\":\"998\",\"version\":\"1.1.0\"}],\"product\":{\"feature\":{\"name\":\"CloudTrailManagementEvent\"},\"name\":\"GuardDuty\",\"uid\":\"arn:aws:securityhub:us-east-1::productv2/aws/guardduty\",\"vendor_name\":\"AWS\"},\"profiles\":[\"cloud\",\"datetime\",\"aws/cloud_resources\"],\"uid\":\"64d10cf58a63f5cc5ff05630d2f673ad7a7eab1a5f7e9de1d04053f8dcf59a20\",\"version\":\"1.8.0\"},\"remediation\":{\"desc\":\"Please review the remediation guidance provided in the referenced documentation\",\"references\":[\"https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-iam.html#impact-iam-anomalousbehavior\"]},\"resources\":[{\"cloud_partition\":\"aws\",\"owner\":{\"account\":{\"type\":\"AWS Account\",\"type_id\":10,\"uid\":\"111111111111\"}},\"provider\":\"AWS\",\"region\":\"us-east-1\",\"role\":\"Target\",\"role_id\":1,\"type\":\"AWS::IAM::AccessKey\",\"uid\":\"AKIAIOSFODNN7EXAMPLE\",\"user\":{\"name\":\"example-user\",\"programmatic_credentials\":[{\"uid\":\"AKIAIOSFODNN7EXAMPLE\"}],\"type\":\"User\",\"type_id\":1,\"uid_alt\":\"AIDAIOSFODNN7EXAMPLE\"}},{\"cloud_partition\":\"aws\",\"name\":\"example-user\",\"owner\":{\"account\":{\"type\":\"AWS Account\",\"type_id\":10,\"uid\":\"111111111111\"}},\"provider\":\"AWS\",\"region\":\"us-east-1\",\"role\":\"Actor\",\"role_id\":2,\"type\":\"AWS::IAM::User\",\"uid\":\"AIDAIOSFODNN7EXAMPLE\"}],\"severity\":\"High\",\"severity_id\":4,\"status\":\"New\",\"status_id\":1,\"time\":1786645138545,\"time_dt\":\"2026-08-13T18:18:58.545Z\",\"type_name\":\"Detection Finding: Update\",\"type_uid\":200402,\"vendor_attributes\":{\"severity\":\"High\",\"severity_id\":4}}",
+      "expected": {
+        "@timestamp": "2026-08-13T18:18:58.545Z",
+        "cloud": {
+          "account": {
+            "id": "111111111111"
+          },
+          "provider": "aws",
+          "region": "us-east-1"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "observer": {
+          "vendor": "AWS Security Hub"
+        },
+        "organization": {
+          "name": "AWS"
+        },
+        "rule": {
+          "description": "The IAM identity example-user (IAMUser:AIDAIOSFODNN7EXAMPLE) invoked the following API:\n- bedrock.amazonaws.com: Converse completed without error.\n\nThis API call was invoked from 198.51.100.23 located in United Kingdom from Glide (ASN=42689).\n\nGuardDuty considers this invocation suspicious because:\n- The organization Glide Student & Residential Limited (ASN=42689) has not been previously observed for this account.",
+          "name": "The user IAMUser : example-user is anomalously invoking APIs commonly used in Impact tactics.",
+          "reference": [
+            "https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_finding-types-iam.html#impact-iam-anomalousbehavior"
+          ]
+        },
+        "tags": [
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "Update",
+          "created": "2026-08-13T18:18:58.545Z",
+          "id": "arn:aws:guardduty:us-east-1:111111111111:detector/1d37d2c7ee687266e4884dd6bfc66d75/finding/85ef09ae1dc89550e87b4c11fb0af903",
+          "kind": "alert",
+          "outcome": "unknown",
+          "provider": "AWS",
+          "severity": 73,
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor"
+      ]
+    }
+  ]
+}

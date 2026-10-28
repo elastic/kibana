@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import React, { useMemo, useState } from 'react';
 import {
   EuiButtonGroup,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiText,
   EuiToolTip,
   euiShadow,
@@ -33,14 +35,14 @@ export const getNodeHeight = (rulesCount: number): number => {
 
 export interface SequenceNodeData extends Record<string, unknown> {
   stepId: string;
-  rules: Array<{ ruleId: string; ruleName: string }>;
+  rules: Array<{ ruleId: string; ruleName: string; isMissing?: boolean }>;
   operator: 'and' | 'or';
   stageIndex: number;
   onRemoveRule: (stepId: string, ruleId: string) => void;
   onOperatorChange: (stepId: string, op: 'and' | 'or') => void;
   onDropRule: (
     stepId: string,
-    payload: { id: string; name: string; groupingFields: string[]; kind: 'alert' | 'signal' }
+    payload: { id: string; name: string; groupingFields: string[]; kind: RuleKind }
   ) => void;
   interactive?: boolean;
 }
@@ -107,7 +109,7 @@ export const SequenceNode: React.FC<NodeProps<SequenceNodeType>> = ({ data }) =>
         id: string;
         name: string;
         groupingFields: string[];
-        kind: 'alert' | 'signal';
+        kind: RuleKind;
       };
       data.onDropRule(data.stepId, payload);
     } catch {
@@ -161,6 +163,18 @@ export const SequenceNode: React.FC<NodeProps<SequenceNodeType>> = ({ data }) =>
                 gutterSize="xs"
                 responsive={false}
               >
+                {rule.isMissing && (
+                  <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
+                    <EuiIconTip
+                      type="warning"
+                      color="danger"
+                      size="s"
+                      content={i18n.translate('xpack.alertingV2.sequenceBuilder.node.ruleMissing', {
+                        defaultMessage: 'Rule not found or inaccessible',
+                      })}
+                    />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem css={{ minWidth: 0 }}>
                   <div
                     css={{
@@ -170,6 +184,7 @@ export const SequenceNode: React.FC<NodeProps<SequenceNodeType>> = ({ data }) =>
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       lineHeight: `${RULE_ROW_HEIGHT}px`,
+                      color: rule.isMissing ? euiTheme.colors.danger : undefined,
                     }}
                     title={rule.ruleName}
                   >

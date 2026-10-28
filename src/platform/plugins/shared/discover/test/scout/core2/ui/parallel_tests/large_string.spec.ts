@@ -52,13 +52,16 @@ spaceTest.describe('Discover large strings', { tag: '@local-stateful-classic' },
 
   spaceTest(
     'searches and highlights a term inside large string field data',
-    async ({ pageObjects }) => {
+    async ({ page, pageObjects }) => {
       await pageObjects.queryBar.setQuery('Newsletter');
       await pageObjects.discover.submitQuery();
       await pageObjects.discover.waitUntilTabIsLoaded();
 
       expect(await pageObjects.discover.getHitCountInt()).toBe(1);
-      await expect(pageObjects.discover.getSearchTermHighlights()).toHaveCount(1);
+
+      // the term is past the part of the value rendered in the grid, the full value is highlighted in the document flyout
+      await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
+      await expect(page.testSubj.locator('docViewerFlyout').locator('mark')).toHaveCount(1);
     }
   );
 });
