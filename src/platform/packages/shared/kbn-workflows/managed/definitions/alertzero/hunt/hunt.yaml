@@ -317,6 +317,9 @@ steps:
         totalHits: "${{ steps.read_hunt_result.output.data.result.tier1.counts.total_hits }}"
         # `compact` turns a nil (Tier 2 never ran) into `[]`, which the route treats as no ledger update.
         searchedTechniqueIds: "${{ steps.read_hunt_result.output.data.result.searched_technique_ids | compact }}"
+        # Deliberately not `compact`: a missing field renders as undefined, so the key is dropped from
+        # the body and the report keeps its recorded pending list. `[]` says Tier 2 ran and left none.
+        pendingTechniqueIds: "${{ steps.read_hunt_result.output.data.result.pending_technique_ids }}"
     on-failure:
       continue: true
 
