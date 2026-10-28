@@ -18,7 +18,6 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-test
 dependsOn:
   - '@kbn/kbn-client'
-  - '@kbn/std'
   - '@kbn/test-es-server'
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
