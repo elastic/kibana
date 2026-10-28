@@ -60,7 +60,6 @@ interface YamlWorkflow {
       subject?: string | string[];
     };
     privilege_probe_action_id?: string;
-    process_not_found_code?: string;
   };
   triggers?: Array<{
     inputs?: {
@@ -279,19 +278,11 @@ describe('AlertZero response-action workflows', () => {
     const stepByName = (name: string) => flatten(parsed.steps).find((step) => step.name === name);
     // Same options as the execution engine's templating engine.
     const liquid = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+    const notFound = { content: { code: notFoundCode } };
 
-    const renderProcessNotFound = (
-      endpointIds: string[],
-      codesByAgent: Record<string, string>
-    ): string => {
-      const outputs = Object.fromEntries(
-        Object.entries(codesByAgent).map(([agentId, code]) => [
-          agentId,
-          { type: 'json', content: { code } },
-        ])
-      );
-
-      return liquid.parseAndRenderSync(
+    // Renders the flag, evaluates the branch condition on it, and returns the fail type taken.
+    const failureType = (endpointIds: string[], outputs: Record<string, unknown>) => {
+      const processNotFound = liquid.parseAndRenderSync(
         String(stepByName('check_process_not_found')?.with?.process_not_found),
         {
           consts: parsed.consts,
@@ -299,41 +290,32 @@ describe('AlertZero response-action workflows', () => {
           steps: { poll_status: { output: { data: { outputs } } } },
         }
       );
+      const branchStep = stepByName('emit_failure_by_cause');
+      const condition = String(branchStep?.condition).slice(3, -2);
+      const branch = liquid.evalValueSync(condition, {
+        variables: { process_not_found: processNotFound },
+      })
+        ? branchStep?.steps
+        : branchStep?.else;
+      return branch?.find((step) => step.type === 'workflow.fail')?.with?.type;
     };
 
-    it('checks for the not-found code Defend reports for this command', () => {
-      expect(parsed.consts?.process_not_found_code).toBe(notFoundCode);
-    });
-
     it.each([
-      ['true', 'the only endpoint reports not-found', ['a'], { a: notFoundCode }],
       [
-        'true',
-        'every endpoint reports not-found',
+        'non-retryable when every endpoint reports not-found',
         ['a', 'b'],
-        { a: notFoundCode, b: notFoundCode },
+        { a: notFound, b: notFound },
+        ACTION_NON_RETRYABLE_ERROR_TYPE,
       ],
       [
-        'false',
-        'another endpoint reports a different code',
+        'retryable when another endpoint reports a different code',
         ['a', 'b'],
-        { a: notFoundCode, b: 'other' },
+        { a: notFound, b: { content: { code: 'other' } } },
+        undefined,
       ],
-      ['false', 'another endpoint has no output', ['a', 'b'], { a: notFoundCode }],
-      ['false', 'the endpoint reports a different code', ['a'], { a: 'other' }],
-    ])('process_not_found is %s when %s', (expected, _case, endpointIds, codesByAgent) => {
-      expect(renderProcessNotFound(endpointIds, codesByAgent)).toBe(expected);
-    });
-
-    it('fails as non-retryable only when the process was not found', () => {
-      expect(stepByName('emit_failure_by_cause')?.condition).toBe(
-        "${{ variables.process_not_found == 'true' }}"
-      );
-      expect(stepByName('emit_process_not_found')?.type).toBe('workflow.fail');
-      expect(stepByName('emit_process_not_found')?.with?.type).toBe(
-        ACTION_NON_RETRYABLE_ERROR_TYPE
-      );
-      expect(stepByName('emit_failure')?.with?.type).toBeUndefined();
+      ['retryable when another endpoint has no output', ['a', 'b'], { a: notFound }, undefined],
+    ])('fails as %s', (_case, endpointIds, outputs, expectedType) => {
+      expect(failureType(endpointIds, outputs)).toBe(expectedType);
     });
   });
 
