@@ -23,6 +23,34 @@ declare module 'monaco-editor/editor/editor.api' {
     // Define overloads for the getContribution method to allow for
     // better typing of the editor contributions of concerns to us
     export interface ICodeEditor {
+      getContribution(id: 'editor.contrib.findController'):
+        | (editor.IEditorContribution & {
+            /**
+             * Defined {@link https://github.com/microsoft/vscode/blob/95cce3c276e91d204108fe0afdeac803b4ab4776/src/vs/editor/contrib/find/browser/findController.ts#L464 here} with backing implementation
+             * {@link https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/find/browser/findWidget.ts#L122 here}
+             */
+            readonly _widget?: {
+              readonly _closeBtn?: { readonly domNode: HTMLElement };
+            } | null;
+            readonly _hoverService?: {
+              readonly _hoverStack?: ReadonlyArray<{
+                readonly options: {
+                  readonly target: HTMLElement | { targetElements: HTMLElement[] };
+                };
+                readonly hover: { readonly domNode: HTMLElement };
+              }>;
+            };
+            /**
+             * Defined {@link https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/find/browser/findController.ts#L242 here},
+             * and returns the {@link https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/find/browser/findState.ts#L67 FindReplaceState} for monaco,
+             * we've only selected values of interest to us.
+             */
+            getState: () => {
+              readonly isRevealed: boolean;
+              readonly onFindReplaceStateChange: monaco.IEvent<{ isRevealed?: boolean }>;
+            };
+          })
+        | null;
       getContribution(id: 'editor.contrib.suggestController'):
         | (editor.IEditorContribution & {
             // add type augmentation for the suggestController contribution for the widget property

@@ -39,6 +39,8 @@ import {
   useFitToContent,
   ReBroadcastMouseDownEvents,
   usePersistHoverContentWidget,
+  useFindWidgetHoverLabelCompact,
+  globalMonacoStyleOverrides,
 } from './mods';
 import { styles } from './editor.styles';
 
@@ -654,6 +656,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }, [_editor, ariaDescribedBy]);
 
   useFitToContent({ editor: _editor, fitToContent, isFullScreen });
+  useFindWidgetHoverLabelCompact(_editor);
   usePlaceholder({ placeholder, euiTheme, editor: _editor, value });
 
   const { CopyButton } = useCopy({ isCopyable, value });
@@ -685,6 +688,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       className="kibanaCodeEditor"
     >
       <Global styles={classNameCss} />
+      <Global styles={globalMonacoStyleOverrides} />
       {scopedStyles !== undefined && <Global styles={scopedStyles} />}
       {accessibilityOverlayEnabled && renderPrompt()}
       <FullScreenDisplay>
