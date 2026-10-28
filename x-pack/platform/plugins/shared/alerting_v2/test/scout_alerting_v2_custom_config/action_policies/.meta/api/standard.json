@@ -1,0 +1,120 @@
+{
+  "sha1": "141d95c709c8e0284f32e5a4814ac4ff3080f475",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "96da1d1ae4b29ab-51db02261293927",
+      "title": "Action policy changed EBT telemetry reports a created event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/action_policies/api/tests/ebt_telemetry.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "96da1d1ae4b29ab-ff66cdd9e213bdb",
+      "title": "Action policy changed EBT telemetry reports an updated event for a PATCH",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/action_policies/api/tests/ebt_telemetry.spec.ts",
+        "line": 66,
+        "column": 19
+      }
+    },
+    {
+      "id": "96da1d1ae4b29ab-47f4e9f6469c09d",
+      "title": "Action policy changed EBT telemetry reports an updated event when a PUT replaces a policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/action_policies/api/tests/ebt_telemetry.spec.ts",
+        "line": 84,
+        "column": 9
+      }
+    },
+    {
+      "id": "96da1d1ae4b29ab-78dd75331dc56b7",
+      "title": "Action policy changed EBT telemetry reports a deleted event with the enabled state at deletion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/action_policies/api/tests/ebt_telemetry.spec.ts",
+        "line": 106,
+        "column": 20
+      }
+    },
+    {
+      "id": "96da1d1ae4b29ab-76fbf0d7cbf9ef8",
+      "title": "Action policy changed EBT telemetry reports an enabled event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/action_policies/api/tests/ebt_telemetry.spec.ts",
+        "line": 126,
+        "column": 31
+      }
+    },
+    {
+      "id": "96da1d1ae4b29ab-eeabceb71b040c9",
+      "title": "Action policy changed EBT telemetry reports a disabled event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/action_policies/api/tests/ebt_telemetry.spec.ts",
+        "line": 149,
+        "column": 61
+      }
+    },
+    {
+      "id": "96da1d1ae4b29ab-e0f0d4529d7f1bc",
+      "title": "Action policy changed EBT telemetry reports one disabled event per policy for a bulk disable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/action_policies/api/tests/ebt_telemetry.spec.ts",
+        "line": 169,
+        "column": 9
+      }
+    },
+    {
+      "id": "96da1d1ae4b29ab-a3060851fbb072b",
+      "title": "Action policy changed EBT telemetry reports one deleted event per policy for a bulk delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/action_policies/api/tests/ebt_telemetry.spec.ts",
+        "line": 201,
+        "column": 47
+      }
+    }
+  ]
+}

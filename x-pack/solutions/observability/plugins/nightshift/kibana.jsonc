@@ -29,7 +29,8 @@
       "cps",
       "nightshiftInvestigations",
       "serverless",
-      "spaces"
+      "spaces",
+      "triggersActionsUi"
     ],
     "requiredBundles": ["esql", "kibanaReact", "nightshiftInvestigations", "stackConnectors"]
   }

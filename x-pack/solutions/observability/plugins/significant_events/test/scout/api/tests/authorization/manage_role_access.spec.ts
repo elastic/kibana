@@ -41,8 +41,6 @@ import {
   getFeaturesEndpoint,
   deleteSignificantEvent,
   executeTool,
-  isToolWriteLeaseConflict,
-  retryOnWriteLease,
   seedFeature,
   seedRuleBackedQuery,
   seedSignificantEvent,
@@ -195,13 +193,10 @@ for (const { name, label, role } of ROLES) {
       });
 
       apiTest('creates, lists and deletes a feature knowledge indicator', async ({ apiClient }) => {
-        const createResponse = await retryOnWriteLease({
-          send: () =>
-            apiClient.post(getFeaturesEndpoint(sourceId), {
-              headers,
-              body: buildFeature(featureId),
-              responseType: 'json',
-            }),
+        const createResponse = await apiClient.post(getFeaturesEndpoint(sourceId), {
+          headers,
+          body: buildFeature(featureId),
+          responseType: 'json',
         });
         expect(createResponse).toHaveStatusCode(200);
         expect(createResponse.body).toStrictEqual({ acknowledged: true });
@@ -215,26 +210,20 @@ for (const { name, label, role } of ROLES) {
           expect.arrayContaining([expect.objectContaining({ id: featureId, source_id: sourceId })])
         );
 
-        const deleteResponse = await retryOnWriteLease({
-          send: () =>
-            apiClient.delete(`${getFeaturesEndpoint(sourceId)}/${featureId}`, {
-              headers,
-              responseType: 'json',
-            }),
-        });
+        const deleteResponse = await apiClient.delete(
+          `${getFeaturesEndpoint(sourceId)}/${featureId}`,
+          { headers, responseType: 'json' }
+        );
         expect(deleteResponse).toHaveStatusCode(200);
       });
 
       apiTest(
         'creates and lists a rule-backed query knowledge indicator',
         async ({ apiClient }) => {
-          const createResponse = await retryOnWriteLease({
-            send: () =>
-              apiClient.put(`${QUERIES_ENDPOINT}/${queryId}`, {
-                headers,
-                body: buildRuleBackedQuery({ sourceId, viewName: sourceViewName }),
-                responseType: 'json',
-              }),
+          const createResponse = await apiClient.put(`${QUERIES_ENDPOINT}/${queryId}`, {
+            headers,
+            body: buildRuleBackedQuery({ sourceId, viewName: sourceViewName }),
+            responseType: 'json',
           });
           expect(createResponse).toHaveStatusCode(200);
 
@@ -287,17 +276,13 @@ for (const { name, label, role } of ROLES) {
       );
 
       apiTest('creates a knowledge indicator from Agent Builder', async ({ apiClient }) => {
-        const response = await retryOnWriteLease({
-          send: () =>
-            apiClient.post(TOOL_EXECUTE_ENDPOINT, {
-              headers: toolHeaders,
-              body: {
-                tool_id: KI_FEATURE_CREATE_TOOL_ID,
-                tool_params: { ...buildFeature(toolFeatureId), slug: sourceSlug },
-              },
-              responseType: 'json',
-            }),
-          isLeaseConflict: isToolWriteLeaseConflict,
+        const response = await apiClient.post(TOOL_EXECUTE_ENDPOINT, {
+          headers: toolHeaders,
+          body: {
+            tool_id: KI_FEATURE_CREATE_TOOL_ID,
+            tool_params: { ...buildFeature(toolFeatureId), slug: sourceSlug },
+          },
+          responseType: 'json',
         });
         expect(response).toHaveStatusCode(200);
         expect(response.body.results).toStrictEqual([

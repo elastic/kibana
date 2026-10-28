@@ -23,15 +23,22 @@ export {
   MAX_EVIDENCE_CHART_LABEL_LENGTH,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_REFERENCES,
+  MAX_EVIDENCE_REFERENCE_URL_LENGTH,
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   evidenceChartSchema,
+  evidenceReferenceSchema,
   investigationEvidenceSchema,
+  isEvidenceLinkReference,
 } from './evidence';
 export type {
   EvidenceChart,
   EvidenceChartAnnotation,
   EvidenceChartSeries,
+  EvidenceLinkReference,
+  EvidenceQueryReference,
+  EvidenceReference,
   InvestigationEvidence,
 } from './evidence';
 
@@ -153,6 +160,7 @@ export {
   INVESTIGATIONS_PRIVILEGES_URL,
   INVESTIGATIONS_SEVERITY_COUNTS_URL,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_READ,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from './investigations/constants';
 export type {
