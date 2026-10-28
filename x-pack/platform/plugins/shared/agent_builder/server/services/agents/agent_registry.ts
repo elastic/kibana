@@ -11,6 +11,7 @@ import {
   createAgentNotFoundError,
   createAgentUnavailableError,
   createBadRequestError,
+  createForbiddenError,
   SELF_AGENT_ID,
   type AgentAccessControl,
 } from '@kbn/agent-builder-common';
@@ -58,6 +59,15 @@ export interface AgentRegistry {
   getIds(opts?: AgentListOptions): Promise<string[]>;
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
+  /**
+   * Binds the agent to a service account, or unbinds it with `null`. Needs write access to the
+   * agent and the `manage_security` privilege; every conversation with the agent then runs as
+   * that account.
+   */
+  setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): Promise<InternalAgentDefinition>;
   delete(args: AgentDeleteRequest): Promise<boolean>;
   getAccessControl(agentId: string): Promise<AgentAccessControlResult>;
   updateAccessControl(
@@ -126,6 +136,11 @@ class AgentRegistryImpl implements AgentRegistry {
   async get(agentId: string, opts?: GetAgentOptions): Promise<InternalAgentDefinition> {
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
+        if (opts?.runAs !== undefined && isReadonlyProvider(provider)) {
+          throw createForbiddenError(
+            `Agent "${agentId}" is no longer bound to service account "${opts.runAs}".`
+          );
+        }
         const agent = await provider.get(agentId, opts);
         if (!(await this.isAvailable(agent))) {
           throw createAgentUnavailableError({ agentId });
@@ -196,6 +211,21 @@ class AgentRegistryImpl implements AgentRegistry {
         } else {
           return provider.update(agentId, update);
         }
+      }
+    }
+    throw createAgentNotFoundError({ agentId });
+  }
+
+  async setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): Promise<InternalAgentDefinition> {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(agentId)) {
+        if (isReadonlyProvider(provider)) {
+          throw createBadRequestError(`Agent ${agentId} is read-only and can't be updated`);
+        }
+        return provider.setServiceAccount(agentId, serviceAccountId);
       }
     }
     throw createAgentNotFoundError({ agentId });

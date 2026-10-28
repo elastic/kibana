@@ -311,6 +311,7 @@ export class ServiceManager {
       meteringService: this.services.metering,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      securityPlugin,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });

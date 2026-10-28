@@ -298,6 +298,7 @@ export const createClient = ({
   logger,
   esClient,
   user,
+  runAs,
   agentRegistry,
   conversationEvents,
   eventEmitter,
@@ -308,6 +309,8 @@ export const createClient = ({
   logger: Logger;
   esClient: ElasticsearchClient;
   user: CurrentUser;
+  /** Service account the execution runs as; see `GetAgentOptions.runAs`. */
+  runAs?: string;
   agentRegistry: AgentRegistry;
   conversationEvents: ConversationEventsServiceStart;
   eventEmitter?: ScopedConversationEventEmitter;
@@ -319,6 +322,7 @@ export const createClient = ({
     storage,
     esClient,
     user,
+    runAs,
     space,
     agentRegistry,
     conversationEvents,
@@ -390,6 +394,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly storage: ConversationStorage;
   private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
+  private readonly runAs?: string;
   private readonly agentRegistry: AgentRegistry;
   private readonly conversationEvents: ConversationEventsServiceStart;
   private readonly logger: Logger;
@@ -401,6 +406,7 @@ class ConversationClientImpl implements ConversationClient {
     storage,
     esClient,
     user,
+    runAs,
     space,
     agentRegistry,
     conversationEvents,
@@ -412,6 +418,7 @@ class ConversationClientImpl implements ConversationClient {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
     user: CurrentUser;
+    runAs?: string;
     space: string;
     agentRegistry: AgentRegistry;
     conversationEvents: ConversationEventsServiceStart;
@@ -423,6 +430,7 @@ class ConversationClientImpl implements ConversationClient {
     this.storage = storage;
     this.esClient = esClient;
     this.user = user;
+    this.runAs = runAs;
     this.space = space;
     this.agentRegistry = agentRegistry;
     this.conversationEvents = conversationEvents;
@@ -1696,7 +1704,10 @@ class ConversationClientImpl implements ConversationClient {
 
         if (allowed) {
           try {
-            await this.agentRegistry.get(conversation.agent_id, { access: 'use' });
+            await this.agentRegistry.get(conversation.agent_id, {
+              access: 'use',
+              ...(this.runAs !== undefined ? { runAs: this.runAs } : {}),
+            });
           } catch (error) {
             if (
               !isAgentNotFoundError(error) &&

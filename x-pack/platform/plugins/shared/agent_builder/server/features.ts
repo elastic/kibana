@@ -106,6 +106,29 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           },
         ],
       },
+      {
+        name: i18n.translate('xpack.agentBuilder.featureRegistry.subFeatures.serviceAccounts', {
+          defaultMessage: 'Service accounts',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: subFeaturePrivilegeIds.invokeBoundAgents,
+                name: i18n.translate(
+                  'xpack.agentBuilder.featureRegistry.subFeatures.invokeBoundAgents.privilege',
+                  { defaultMessage: 'Chat with agents that run as a service account' }
+                ),
+                includeIn: 'all',
+                api: [apiPrivileges.invokeBoundAgents],
+                savedObject: { all: [], read: [] },
+                ui: [uiPrivileges.invokeBoundAgents],
+              },
+            ],
+          },
+        ],
+      },
     ],
   });
 };

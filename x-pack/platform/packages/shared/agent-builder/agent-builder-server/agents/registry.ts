@@ -29,5 +29,9 @@ export interface AgentRegistry {
   list(opts?: AgentListOptions): Promise<InternalAgentDefinition[]>;
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
+  setServiceAccount(
+    agentId: string,
+    serviceAccountId: string | null
+  ): Promise<InternalAgentDefinition>;
   delete(args: AgentDeleteRequest): Promise<boolean>;
 }

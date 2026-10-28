@@ -16,6 +16,8 @@ import type { AgentUpdateRequest } from '../../../../common/agents';
 import {
   canChangeAgentAccessControl,
   canConfigureAgentApprovals,
+  canEditBoundAgent,
+  canConfigureAgentExecutionIdentity,
   canDeleteAgent,
   hasAgentReadAccess,
   hasAgentUseAccess,
@@ -127,17 +129,45 @@ export const hasConfigureApprovalsAccess = ({
     currentUser: user,
   });
 
+export const hasConfigureExecutionIdentityAccess = ({
+  source,
+  user,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+}): boolean =>
+  canConfigureAgentExecutionIdentity({
+    agentId: source.id,
+    accessControl: normalizeAccessControl(source),
+    owner: sourceToOwner(source),
+    currentUser: user,
+  });
+
+/** Whether the caller may edit the agent given its binding; see {@link canEditBoundAgent}. */
+export const hasEditBoundAgentAccess = ({
+  source,
+  user,
+}: {
+  source: AgentProperties;
+  user: CurrentUser;
+}): boolean =>
+  canEditBoundAgent({ boundServiceAccountId: source.service_account_id, currentUser: user });
+
 export const getAgentPermissions = ({
   source,
   user,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-}): AgentPermissions => ({
-  update_agent: hasWriteAccess({ source, user }),
-  update_access_control: hasManageAccessControlAccess({ source, user }),
-  update_approvals: hasConfigureApprovalsAccess({ source, user }),
-});
+}): AgentPermissions => {
+  // A bound agent is read-only for anyone who cannot bind it.
+  const editable = hasEditBoundAgentAccess({ source, user });
+  return {
+    update_agent: editable && hasWriteAccess({ source, user }),
+    update_access_control: editable && hasManageAccessControlAccess({ source, user }),
+    update_approvals: editable && hasConfigureApprovalsAccess({ source, user }),
+  };
+};
 
 /**
  * Redacts `access_control.entries` from a returned agent definition when the caller is not allowed
