@@ -51253,6 +51253,373 @@ paths:
         - content: Kibana
           name: product_name
   /api/fleet/cloud_onboarding_deployments:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_onboarding_deployments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List cloud onboarding deployments, newest first. Optionally filter by package name or provider.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+      operationId: get-fleet-cloud-onboarding-deployments
+      parameters:
+        - description: Only list deployments that cover this package.
+          in: query
+          name: packageName
+          required: false
+          schema:
+            maxLength: 255
+            minLength: 1
+            type: string
+        - description: Cloud provider.
+          in: query
+          name: provider
+          required: false
+          schema:
+            enum:
+              - aws
+              - azure
+              - gcp
+            type: string
+        - in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            maximum: 1000
+            minimum: 1
+            type: number
+        - in: query
+          name: perPage
+          required: false
+          schema:
+            default: 20
+            maximum: 100
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCloudOnboardingDeploymentsExample:
+                  description: Page of cloud onboarding deployments that cover the aws package
+                  value:
+                    items:
+                      - agentCount: 1
+                        attemptCount: 1
+                        connectorId: cloud-connector-id-1
+                        id: onboarding-deployment-id-1
+                        integrationName: aws-production
+                        mechanisms:
+                          - managed_integration
+                          - ecf
+                        packageNames:
+                          - aws
+                        packagePolicyIds:
+                          - package-policy-id-1
+                        packages:
+                          - name: aws
+                            title: AWS
+                            version: 8.11.0
+                        provider: aws
+                        services:
+                          - cloudtrail
+                          - vpcflow
+                        servicesByMethod:
+                          ecf:
+                            - vpcflow
+                          managed_integration:
+                            - cloudtrail
+                        status: succeeded
+                        updatedAt: '2026-10-20T10:15:00.000Z'
+                        updatedBy: elastic
+                    page: 1
+                    perPage: 20
+                    total: 1
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        agentCount:
+                          description: Agents enrolled in the deployment agent policies.
+                          minimum: 0
+                          type: number
+                        agentPolicyIds:
+                          description: Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.
+                          items:
+                            type: string
+                          maxItems: 1000
+                          type: array
+                        apiKeyId:
+                          description: Elasticsearch API key ID for push mechanisms (ecf). Set by the backend; used for key rotation/revocation.
+                          type: string
+                        attemptCount:
+                          description: Number of deployment attempts, including the current one.
+                          minimum: 1
+                          type: number
+                        authMethod:
+                          description: |-
+                            Authentication method. Allowed values depend on the delivery mechanism:
+
+                            - managed_integration: identity_federation | static_keys
+                            - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
+                          enum:
+                            - identity_federation
+                            - static_keys
+                            - temporary_keys
+                            - shared_credentials
+                            - assume_role
+                          type: string
+                        connectorId:
+                          description: ID of the fleet-cloud-connector this deployment belongs to. Absent for static-keys deployments.
+                          type: string
+                        dataFormat:
+                          description: 'Data format: ecs or otel.'
+                          enum:
+                            - ecs
+                            - otel
+                          type: string
+                        deploymentId:
+                          description: Opaque deployment identifier; for AWS, the CFN stack ARN.
+                          type: string
+                        deploymentName:
+                          description: Opaque deployment name; for AWS, the CFN stack name.
+                          type: string
+                        description:
+                          description: Integration description from the Service settings step.
+                          type: string
+                        ecfStacks:
+                          description: ECF CloudFormation stacks launched as part of this deployment. Written by the wizard after the user clicks Launch.
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              family:
+                                description: ECF template family.
+                                enum:
+                                  - unified
+                                  - otel
+                                  - crowdstrike
+                                type: string
+                              serviceIds:
+                                description: Service IDs active when the stack was last launched or updated.
+                                items:
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                maxItems: 1000
+                                type: array
+                              stackArn:
+                                description: CloudFormation stack ARN pasted by the user post-launch.
+                                maxLength: 2048
+                                minLength: 1
+                                type: string
+                              stackName:
+                                description: CloudFormation stack name (128-char AWS limit).
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              templateVersion:
+                                description: ECF semantic version resolved at launch time, e.g. "1.10.0".
+                                maxLength: 32
+                                minLength: 1
+                                type: string
+                            required:
+                              - family
+                              - stackName
+                              - templateVersion
+                          maxItems: 10
+                          type: array
+                        globalRegion:
+                          description: Global AWS region from the Service Settings step.
+                          type: string
+                        id:
+                          type: string
+                        integrationName:
+                          description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
+                          type: string
+                        mechanisms:
+                          items:
+                            description: 'Delivery mechanism: managed_integration, ecf, or agent_based.'
+                            enum:
+                              - managed_integration
+                              - ecf
+                              - agent_based
+                            type: string
+                          maxItems: 10
+                          type: array
+                        namespace:
+                          description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
+                          type: string
+                        packageNames:
+                          description: Names of the integration packages this deployment covers (e.g. aws, aws_bedrock). Used to list the deployments of a package.
+                          items:
+                            type: string
+                          maxItems: 100
+                          type: array
+                        packagePolicyIds:
+                          description: Package policy IDs created for this deployment (managed_integration and agent_based).
+                          items:
+                            type: string
+                          maxItems: 1000
+                          type: array
+                        packages:
+                          description: Packages of the deployment package policies with their deployed versions. Empty for ECF-only deployments.
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              name:
+                                description: Package name.
+                                type: string
+                              title:
+                                description: Package title.
+                                type: string
+                              version:
+                                description: Package version the deployment policies run.
+                                type: string
+                            required:
+                              - name
+                              - title
+                              - version
+                          maxItems: 100
+                          type: array
+                        policyIdsByInstance:
+                          additionalProperties:
+                            maxLength: 255
+                            type: string
+                          description: instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.
+                          type: object
+                        provider:
+                          description: Cloud provider.
+                          enum:
+                            - aws
+                            - azure
+                            - gcp
+                          type: string
+                        serviceNames:
+                          additionalProperties:
+                            maxLength: 256
+                            type: string
+                          description: Display name of each service as shown in the onboarding flow, by service ID.
+                          type: object
+                        services:
+                          description: Service IDs covered by this deployment.
+                          items:
+                            type: string
+                          maxItems: 1000
+                          type: array
+                        servicesByMethod:
+                          additionalProperties: false
+                          description: Service IDs by the delivery mechanism that deploys them.
+                          type: object
+                          properties:
+                            agent_based:
+                              items:
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            ecf:
+                              items:
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            managed_integration:
+                              items:
+                                type: string
+                              maxItems: 1000
+                              type: array
+                        serviceVars:
+                          additionalProperties:
+                            additionalProperties:
+                              nullable: true
+                            type: object
+                          description: Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.
+                          type: object
+                        status:
+                          description: Deployment status.
+                          enum:
+                            - pending
+                            - deploying
+                            - succeeded
+                            - failed
+                          type: string
+                        statusMessage:
+                          description: Error context when status is failed.
+                          type: string
+                        updatedAt:
+                          description: ISO timestamp of the last write.
+                          type: string
+                        updatedBy:
+                          description: Username of the user who last wrote the deployment.
+                          type: string
+                      required:
+                        - id
+                        - provider
+                        - mechanisms
+                        - services
+                        - status
+                        - attemptCount
+                        - packages
+                        - servicesByMethod
+                        - agentCount
+                    maxItems: 100
+                    type: array
+                  page:
+                    type: number
+                  perPage:
+                    type: number
+                  total:
+                    type: number
+                required:
+                  - items
+                  - total
+                  - page
+                  - perPage
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Get cloud onboarding deployments
+      tags:
+        - Fleet cloud onboarding deployments
+      x-state: Experimental; added in 9.7.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
     post:
       description: |-
         **Spaces method and path for this operation:**
@@ -51385,6 +51752,14 @@ paths:
                   description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                   maxLength: 100
                   type: string
+                packageNames:
+                  description: Names of the integration packages this deployment covers (e.g. aws, aws_bedrock). Used to list the deployments of a package.
+                  items:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  type: array
                 provider:
                   description: Cloud provider.
                   enum:
@@ -51392,6 +51767,12 @@ paths:
                     - azure
                     - gcp
                   type: string
+                serviceNames:
+                  additionalProperties:
+                    maxLength: 256
+                    type: string
+                  description: Display name of each service as shown in the onboarding flow, by service ID.
+                  type: object
                 services:
                   description: Service IDs to be covered by this deployment.
                   items:
@@ -51596,6 +51977,12 @@ paths:
                       namespace:
                         description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                         type: string
+                      packageNames:
+                        description: Names of the integration packages this deployment covers (e.g. aws, aws_bedrock). Used to list the deployments of a package.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
@@ -51615,6 +52002,12 @@ paths:
                           - azure
                           - gcp
                         type: string
+                      serviceNames:
+                        additionalProperties:
+                          maxLength: 256
+                          type: string
+                        description: Display name of each service as shown in the onboarding flow, by service ID.
+                        type: object
                       services:
                         description: Service IDs covered by this deployment.
                         items:
@@ -51638,6 +52031,12 @@ paths:
                         type: string
                       statusMessage:
                         description: Error context when status is failed.
+                        type: string
+                      updatedAt:
+                        description: ISO timestamp of the last write.
+                        type: string
+                      updatedBy:
+                        description: Username of the user who last wrote the deployment.
                         type: string
                     required:
                       - id
@@ -51952,6 +52351,12 @@ paths:
                       namespace:
                         description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                         type: string
+                      packageNames:
+                        description: Names of the integration packages this deployment covers (e.g. aws, aws_bedrock). Used to list the deployments of a package.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
@@ -51971,6 +52376,12 @@ paths:
                           - azure
                           - gcp
                         type: string
+                      serviceNames:
+                        additionalProperties:
+                          maxLength: 256
+                          type: string
+                        description: Display name of each service as shown in the onboarding flow, by service ID.
+                        type: object
                       services:
                         description: Service IDs covered by this deployment.
                         items:
@@ -51994,6 +52405,12 @@ paths:
                         type: string
                       statusMessage:
                         description: Error context when status is failed.
+                        type: string
+                      updatedAt:
+                        description: ISO timestamp of the last write.
+                        type: string
+                      updatedBy:
+                        description: Username of the user who last wrote the deployment.
                         type: string
                     required:
                       - id
@@ -52202,6 +52619,14 @@ paths:
                   maxLength: 100
                   nullable: true
                   type: string
+                packageNames:
+                  description: Names of the integration packages this deployment covers. Refreshed with the service set.
+                  items:
+                    maxLength: 255
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  type: array
                 packagePolicyIds:
                   description: Package policy IDs created for this deployment (managed_integration and agent_based).
                   items:
@@ -52213,6 +52638,12 @@ paths:
                   additionalProperties:
                     maxLength: 255
                     type: string
+                  type: object
+                serviceNames:
+                  additionalProperties:
+                    maxLength: 256
+                    type: string
+                  description: Display name of each service as shown in the onboarding flow, by service ID.
                   type: object
                 services:
                   description: Current service set for this deployment. Refreshed on each successful deploy so resume after an incremental service addition restores all deployed services.
@@ -52382,6 +52813,12 @@ paths:
                       namespace:
                         description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                         type: string
+                      packageNames:
+                        description: Names of the integration packages this deployment covers (e.g. aws, aws_bedrock). Used to list the deployments of a package.
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       packagePolicyIds:
                         description: Package policy IDs created for this deployment (managed_integration and agent_based).
                         items:
@@ -52401,6 +52838,12 @@ paths:
                           - azure
                           - gcp
                         type: string
+                      serviceNames:
+                        additionalProperties:
+                          maxLength: 256
+                          type: string
+                        description: Display name of each service as shown in the onboarding flow, by service ID.
+                        type: object
                       services:
                         description: Service IDs covered by this deployment.
                         items:
@@ -52424,6 +52867,12 @@ paths:
                         type: string
                       statusMessage:
                         description: Error context when status is failed.
+                        type: string
+                      updatedAt:
+                        description: ISO timestamp of the last write.
+                        type: string
+                      updatedBy:
+                        description: Username of the user who last wrote the deployment.
                         type: string
                     required:
                       - id
@@ -52665,6 +53114,12 @@ paths:
                         namespace:
                           description: Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.
                           type: string
+                        packageNames:
+                          description: Names of the integration packages this deployment covers (e.g. aws, aws_bedrock). Used to list the deployments of a package.
+                          items:
+                            type: string
+                          maxItems: 100
+                          type: array
                         packagePolicyIds:
                           description: Package policy IDs created for this deployment (managed_integration and agent_based).
                           items:
@@ -52684,6 +53139,12 @@ paths:
                             - azure
                             - gcp
                           type: string
+                        serviceNames:
+                          additionalProperties:
+                            maxLength: 256
+                            type: string
+                          description: Display name of each service as shown in the onboarding flow, by service ID.
+                          type: object
                         services:
                           description: Service IDs covered by this deployment.
                           items:
@@ -52707,6 +53168,12 @@ paths:
                           type: string
                         statusMessage:
                           description: Error context when status is failed.
+                          type: string
+                        updatedAt:
+                          description: ISO timestamp of the last write.
+                          type: string
+                        updatedBy:
+                          description: Username of the user who last wrote the deployment.
                           type: string
                       required:
                         - id
