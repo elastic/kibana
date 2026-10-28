@@ -33,7 +33,12 @@ const digitalExperienceConfig = schema.object({
       validate: validateFrequency,
     }),
     /** Number of transforms that split sessions by `session.id` range, to spread the work. */
-    partitions: schema.number({ defaultValue: 1, min: 1, max: SESSIONS_MAX_PARTITIONS }),
+    partitions: schema.number({
+      defaultValue: 1,
+      min: 1,
+      max: SESSIONS_MAX_PARTITIONS,
+      validate: (value) => (Number.isInteger(value) ? undefined : 'must be a whole number'),
+    }),
   }),
 });
 

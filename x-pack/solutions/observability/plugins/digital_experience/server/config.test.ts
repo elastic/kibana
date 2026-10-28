@@ -31,7 +31,7 @@ describe('digital_experience config', () => {
     expect(() => config.schema.validate({ sessions: { frequency } })).toThrow(/frequency/);
   });
 
-  it.each([0, 33])('rejects %s partitions', (partitions) => {
+  it.each([0, 33, 1.5])('rejects %s partitions', (partitions) => {
     expect(() => config.schema.validate({ sessions: { partitions } })).toThrow(/partitions/);
   });
 });

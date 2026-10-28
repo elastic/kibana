@@ -11,12 +11,15 @@ import type {
   QueryDslQueryContainer,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { TELEMETRY_SDK_LANGUAGE } from '@kbn/apm-types';
+import { BROWSER_SDK_LANGUAGE } from '../../common/otel_data';
 import {
   SESSIONS_DEFAULT_FREQUENCY,
   SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
   SESSIONS_JOURNEY_SIZE,
+  SESSIONS_JOURNEY_URL_CANDIDATES,
   SESSIONS_LOOKBACK_DAYS,
   SESSIONS_MAX_PAGE_SEARCH_SIZE,
   SESSIONS_MANAGED_BY,
@@ -99,12 +102,18 @@ export const SESSION_ATTRIBUTE_FIELDS = {
 
 type SessionAttribute = keyof typeof SESSION_ATTRIBUTE_FIELDS;
 
-const USER_FIELDS: readonly string[] = SESSION_ATTRIBUTE_FIELDS.user;
-const CLIENT_FIELDS: readonly string[] = (
-  Object.keys(SESSION_ATTRIBUTE_FIELDS) as SessionAttribute[]
-)
-  .filter((attribute) => attribute !== 'user')
-  .flatMap((attribute) => SESSION_ATTRIBUTE_FIELDS[attribute]);
+const fieldsOf = (...attributes: SessionAttribute[]): readonly string[] =>
+  attributes.flatMap((attribute) => SESSION_ATTRIBUTE_FIELDS[attribute]);
+
+/**
+ * Attributes read from the same event. Each group takes its latest event that has any of its
+ * fields, so user agent and geo still resolve when different events carry them.
+ */
+export const SESSION_ATTRIBUTE_GROUPS = {
+  user_seen: fieldsOf('user'),
+  user_agent_seen: fieldsOf('browser', 'browserVersion', 'os', 'device'),
+  geo_seen: fieldsOf('countryIso', 'region', 'city'),
+} as const;
 
 const existsAny = (fields: readonly string[]): QueryDslQueryContainer =>
   anyOf(...fields.map((field) => ({ exists: { field } })));
@@ -141,8 +150,16 @@ const pageUrls = (size: number, order: { first: 'asc' } | { last: 'desc' }) => (
   },
 });
 
+// Names match in any case: semconv writes `cls`, the web-vitals library `CLS`.
 const webVitalAgg = (name: WebVitalName) => ({
-  filter: { bool: { filter: [WEB_VITAL_FILTER, { term: { [WEB_VITAL_NAME_FIELD]: name } }] } },
+  filter: {
+    bool: {
+      filter: [
+        WEB_VITAL_FILTER,
+        { term: { [WEB_VITAL_NAME_FIELD]: { value: name, case_insensitive: true } } },
+      ],
+    },
+  },
   aggs: {
     p75: { percentiles: { field: WEB_VITAL_VALUE_FIELD, percents: [75] } },
   },
@@ -165,6 +182,7 @@ export const sessionsIndexMappings = {
     entry_page: { type: 'keyword' },
     exit_page: { type: 'keyword' },
     journey: { type: 'keyword' },
+    error: { properties: { message: { type: 'keyword', ignore_above: 1024 } } },
     user: { properties: { key: { type: 'keyword' } } },
     user_agent: {
       properties: {
@@ -286,6 +304,20 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
             return s == '' ? '/' : s;
           }
 
+          def viewsOf(def agg) {
+            def views = [];
+            def urls = agg instanceof Map ? agg.urls : null;
+            if (urls instanceof Map) {
+              for (entry in urls.entrySet()) {
+                def times = entry.getValue();
+                if (times instanceof Map) {
+                  views.add(['url': entry.getKey(), 'first': millisOf(times.first), 'last': millisOf(times.last)]);
+                }
+              }
+            }
+            return views;
+          }
+
           def fields = params.fields;
           long start = millisOf(ctx.start_time);
           long end = millisOf(ctx.end_time);
@@ -296,51 +328,40 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ctx.has_error = ctx.error_count > 0;
           ctx.bounced = ctx.page_view_count <= 1;
 
-          // Pages in first-view order; the exit page is the one viewed last.
-          def views = [];
-          for (agg in [ctx.pages, ctx.exit]) {
-            def urls = agg instanceof Map ? agg.urls : null;
-            if (urls instanceof Map) {
-              for (entry in urls.entrySet()) {
-                def times = entry.getValue();
-                if (times instanceof Map) {
-                  views.add(['url': entry.getKey(), 'first': millisOf(times.first), 'last': millisOf(times.last)]);
-                }
-              }
-            }
-          }
+          // Pages in first-view order, from the earliest page-view URLs only, so a page that
+          // is missing from them is never skipped over by a later one.
+          def views = viewsOf(ctx.pages);
           views.sort((a, b) -> Long.compare((long) a.first, (long) b.first));
           def journey = [];
-          String exitPage = null;
-          long exitAt = -1L;
           for (view in views) {
             String page = pathOf(view.url);
-            if (page == null) { continue; }
-            if (journey.size() < params.journeySize && journey.contains(page) == false) {
+            if (page != null && journey.size() < params.journeySize && journey.contains(page) == false) {
               journey.add(page);
             }
-            if ((long) view.last > exitAt) {
-              exitAt = (long) view.last;
-              exitPage = page;
-            }
+          }
+          // The exit page is the one viewed last, journey or not.
+          String exitPage = null;
+          for (view in viewsOf(ctx.exit)) {
+            exitPage = pathOf(view.url);
           }
           ctx.journey = journey;
           ctx.entry_page = journey.isEmpty() ? exitPage : journey[0];
           ctx.exit_page = exitPage != null ? exitPage : (journey.isEmpty() ? null : journey[journey.size() - 1]);
 
           def userBag = firstMetrics(ctx.user_seen);
-          def clientBag = firstMetrics(ctx.client_seen);
+          def userAgentBag = firstMetrics(ctx.user_agent_seen);
+          def geoBag = firstMetrics(ctx.geo_seen);
           ctx.user = ['key': firstOf(userBag, fields.user)];
           ctx.user_agent = [
-            'browser': firstOf(clientBag, fields.browser),
-            'browser_version': firstOf(clientBag, fields.browserVersion),
-            'os': firstOf(clientBag, fields.os),
-            'device': firstOf(clientBag, fields.device)
+            'browser': firstOf(userAgentBag, fields.browser),
+            'browser_version': firstOf(userAgentBag, fields.browserVersion),
+            'os': firstOf(userAgentBag, fields.os),
+            'device': firstOf(userAgentBag, fields.device)
           ];
           ctx.geo = [
-            'country_iso': firstOf(clientBag, fields.countryIso),
-            'region': firstOf(clientBag, fields.region),
-            'city': firstOf(clientBag, fields.city)
+            'country_iso': firstOf(geoBag, fields.countryIso),
+            'region': firstOf(geoBag, fields.region),
+            'city': firstOf(geoBag, fields.city)
           ];
 
           def vitals = new HashMap();
@@ -353,8 +374,28 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ctx.remove('pages');
           ctx.remove('exit');
           ctx.remove('user_seen');
-          ctx.remove('client_seen');
+          ctx.remove('user_agent_seen');
+          ctx.remove('geo_seen');
         `,
+      },
+    },
+  ],
+  // Index the session with the failure instead of failing the transform's bulk request. The raw
+  // aggregation objects are dropped, as the counts would not fit their `long` mappings.
+  on_failure: [
+    { set: { field: 'error.message', value: '{{{ _ingest.on_failure_message }}}' } },
+    {
+      remove: {
+        field: [
+          'page_view_count',
+          'click_count',
+          'error_count',
+          'pages',
+          'exit',
+          ...Object.keys(SESSION_ATTRIBUTE_GROUPS),
+          ...WEB_VITAL_NAMES,
+        ],
+        ignore_missing: true,
       },
     },
   ],
@@ -377,9 +418,16 @@ export const buildSessionsTransform = ({
       bool: {
         filter: [
           { range: { '@timestamp': { gte: `now-${SESSIONS_LOOKBACK_DAYS}d/d` } } },
+          // Browser SDKs only, like the applications list: backends can propagate `session.id`.
+          { term: { [TELEMETRY_SDK_LANGUAGE]: BROWSER_SDK_LANGUAGE } },
           { exists: { field: SOURCE_SESSION_ID_FIELD } },
           { exists: { field: SOURCE_SERVICE_NAME_FIELD } },
           ...partitionFilters(partition),
+        ],
+        // `exists` matches empty strings, which would merge unrelated events into one session.
+        must_not: [
+          { term: { [SOURCE_SESSION_ID_FIELD]: '' } },
+          { term: { [SOURCE_SERVICE_NAME_FIELD]: '' } },
         ],
       },
     },
@@ -387,14 +435,11 @@ export const buildSessionsTransform = ({
   dest: { index: SESSIONS_INDEX, pipeline: SESSIONS_PIPELINE_NAME },
   frequency,
   sync: { time: { field: '@timestamp', delay: SESSIONS_SYNC_DELAY } },
-  // Partitions share the dest index, so one retention policy covers them all.
-  ...(partition.index === 0
-    ? {
-        retention_policy: {
-          time: { field: 'end_time', max_age: `${SESSIONS_LOOKBACK_DAYS + 1}d` },
-        },
-      }
-    : {}),
+  // Every partition prunes the shared dest index, so cleanup doesn't depend on any one slice
+  // getting traffic; deleting the same expired documents twice is harmless.
+  retention_policy: {
+    time: { field: 'end_time', max_age: `${SESSIONS_LOOKBACK_DAYS + 1}d` },
+  },
   settings: { unattended: true, max_page_search_size: SESSIONS_MAX_PAGE_SEARCH_SIZE },
   _meta: { ...SESSIONS_META, partition: partition.index, partitions: partition.count },
   pivot: {
@@ -409,10 +454,11 @@ export const buildSessionsTransform = ({
       page_view_count: { filter: PAGE_VIEW_FILTER },
       click_count: { filter: CLICK_FILTER },
       error_count: { filter: ERROR_FILTER },
-      pages: pageUrls(SESSIONS_JOURNEY_SIZE, { first: 'asc' }),
+      pages: pageUrls(SESSIONS_JOURNEY_URL_CANDIDATES, { first: 'asc' }),
       exit: pageUrls(1, { last: 'desc' }),
-      user_seen: latestOf(USER_FIELDS),
-      client_seen: latestOf(CLIENT_FIELDS),
+      ...Object.fromEntries(
+        Object.entries(SESSION_ATTRIBUTE_GROUPS).map(([name, fields]) => [name, latestOf(fields)])
+      ),
       ...Object.fromEntries(WEB_VITAL_NAMES.map((name) => [name, webVitalAgg(name)])),
     },
   },

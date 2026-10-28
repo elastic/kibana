@@ -154,13 +154,69 @@ describe('getSession', () => {
       expect.objectContaining({
         query: {
           bool: {
-            filter: expect.arrayContaining([
+            filter: [
               { term: { [SOURCE_SESSION_ID_FIELD]: 'abc' } },
               { term: { [SOURCE_SERVICE_NAME_FIELD]: 'web' } },
-            ]),
+              // No upper bound, so events after the last checkpoint still show.
+              { range: { '@timestamp': { gte: at(-60_000) } } },
+            ],
           },
         },
       })
     );
   });
+
+  it('keeps the last page visit open until the newest raw event', async () => {
+    const client = elasticsearchServiceMock.createElasticsearchClient();
+    client.search
+      .mockResolvedValueOnce(summaryResponse({ start_time: START, end_time: at(3_000) }))
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)));
+
+    const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
+
+    // The summary ends at 3s, but the transform has not seen the events at 5s and 6s yet.
+    expect(detail?.pageVisits.at(-1)).toEqual(
+      expect.objectContaining({ page: '/cart', endTime: at(6_000), durationMs: 1_000 })
+    );
+  });
+
+  it('does not throw when the summary has no start or end time', async () => {
+    const client = elasticsearchServiceMock.createElasticsearchClient();
+    client.search
+      .mockResolvedValueOnce(summaryResponse({}))
+      .mockResolvedValueOnce(eventsResponse(events.slice(0, 5)));
+
+    const detail = await getSession(client, { serviceName: 'web', sessionId: 'abc' });
+
+    expect(detail?.timeline.map(({ offsetMs }) => offsetMs)).toEqual([
+      0, 1_000, 2_000, 5_000, 6_000,
+    ]);
+    expect(detail?.pageVisits.at(-1)?.endTime).toBe(at(6_000));
+    const eventsQuery = client.search.mock.calls[1][0]?.query?.bool?.filter;
+    expect(JSON.stringify(eventsQuery)).not.toContain('range');
+  });
+});
+
+const summaryResponse = (times: { start_time?: string; end_time?: string }) => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, failed: 0 },
+  hits: {
+    hits: [
+      {
+        _index: 'digital-experience-sessions-1',
+        _source: { session: { id: 'abc' }, service: { name: 'web' }, ...times },
+      },
+    ],
+  },
+});
+
+const eventsResponse = (sources: OtelSource[]) => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, failed: 0 },
+  hits: {
+    total: { value: sources.length, relation: 'eq' as const },
+    hits: sources.map((source) => ({ _index: 'logs', _source: source })),
+  },
 });

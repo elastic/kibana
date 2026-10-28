@@ -22,6 +22,7 @@ import {
   getSessionsStatus,
   lagSecondsOf,
 } from './sessions_setup';
+import { buildSessionsTransform } from './sessions_spec';
 
 type ScopedClient = ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
 type Client = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -159,8 +160,18 @@ describe('sessions setup', () => {
 
       const client = esClient.asSecondaryAuthUser;
       expect(client.transform.putTransform).not.toHaveBeenCalled();
-      expect(client.transform.updateTransform).toHaveBeenCalledWith(
-        expect.objectContaining({ transform_id: SESSIONS_TRANSFORM_ID, frequency: '5m' })
+      // Everything `_update` accepts, so spec changes reach existing installs; never the pivot.
+      const { pivot, ...updatable } = buildSessionsTransform({ frequency: '5m' });
+      expect(client.transform.updateTransform).toHaveBeenCalledWith(updatable);
+      expect(updatable).toEqual(
+        expect.objectContaining({
+          source: expect.any(Object),
+          dest: expect.any(Object),
+          sync: expect.any(Object),
+          settings: expect.any(Object),
+          retention_policy: expect.any(Object),
+          frequency: '5m',
+        })
       );
       expect(client.transform.stopTransform).not.toHaveBeenCalled();
       expect(client.transform.startTransform).toHaveBeenCalled();
@@ -176,6 +187,7 @@ describe('sessions setup', () => {
       expect(esClient.asSecondaryAuthUser.transform.stopTransform).toHaveBeenCalledWith({
         transform_id: SESSIONS_TRANSFORM_ID,
         force: true,
+        wait_for_completion: true,
       });
     });
 

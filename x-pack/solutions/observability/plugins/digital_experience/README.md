@@ -52,10 +52,15 @@ An Elasticsearch continuous transform summarizes EDOT Browser sessions from
 `traces-*.otel-*,logs-*.otel-*` into `digital-experience-sessions-<version>`, one document per
 `service.name` + `session.id`: start/end time and duration, page views with entry/exit page and
 journey, click and error counts, p75 Core Web Vitals, and user, browser, OS and geo attributes.
+Like the applications list, it only reads browser SDK data (`telemetry.sdk.language: webjs`), and
+it skips events with an empty `service.name` or `session.id`. User, user agent and geo each come
+from their own latest event that carries them.
 
-The journey lists distinct pages in first-view order (revisits are not repeated). The OTel templates
-map `url.*` fields as `wildcard`, which `top_metrics` cannot collect, and `scripted_metric` is not
-available on serverless, so the pages come from `terms` buckets with first/last view times.
+The journey lists distinct pages in first-view order (revisits are not repeated), from the first 30
+page-view URLs. The OTel templates map `url.*` fields as `wildcard`, which `top_metrics` cannot
+collect, and `scripted_metric` is not available on serverless, so the pages come from `terms`
+buckets with first/last view times. If the dest pipeline fails on a summary, the session is still
+indexed, with the failure in `error.message`.
 
 ### Enabling sessions
 
@@ -88,10 +93,11 @@ xpack.digital_experience.sessions:
 
 - **`frequency`**: an active session is re-read and rewritten once per checkpoint. Going from `1m`
   to `2m`–`5m` cuts background work roughly 2–5× for long sessions, and adds about the same time to
-  the session list's lag. Session detail always reads raw events, so it stays current.
+  the session list's lag. Session detail reads raw events with no upper time bound, so its
+  timeline stays current; its summary figures are as fresh as the last checkpoint.
 - **`partitions`**: transforms run one request at a time, so partitions are how the work spreads
   across transform nodes. They share the sessions index, document ids depend only on
-  `service.name` + `session.id`, and a single retention policy (partition 0) covers them all, so
+  `service.name` + `session.id`, and each partition's retention policy prunes the whole index, so
   changing the count rewrites documents in place without emptying the list. EDOT Browser session
   ids are random UUIDs, so the slices are even.
 

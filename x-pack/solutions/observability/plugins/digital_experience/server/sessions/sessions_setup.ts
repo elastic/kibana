@@ -154,17 +154,19 @@ export const enableSessions = async ({
       await client.transform.putTransform(transform);
       continue;
     }
-    // Updating also refreshes the stored credentials to the enabling user.
-    const { description, frequency, _meta } = transform;
-    await client.transform.updateTransform({
-      transform_id: transformId,
-      description,
-      frequency,
-      _meta,
-    });
+    // Sends everything `_update` accepts (all but the pivot, which a version bump replaces), so
+    // spec changes reach existing installs. Updating also refreshes the stored credentials to the
+    // enabling user.
+    const { pivot, defer_validation: deferValidation, ...updatable } = transform;
+    await client.transform.updateTransform(updatable);
     const { transforms } = await client.transform.getTransformStats({ transform_id: transformId });
     if (transforms[0]?.state === 'failed') {
-      await client.transform.stopTransform({ transform_id: transformId, force: true });
+      // Wait, or the start below can hit the stopping task and its 409 would be ignored.
+      await client.transform.stopTransform({
+        transform_id: transformId,
+        force: true,
+        wait_for_completion: true,
+      });
     }
   }
 

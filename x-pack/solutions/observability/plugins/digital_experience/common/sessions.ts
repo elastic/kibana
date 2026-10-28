@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from './otel_data';
+
 /** Bump when the transform pivot, dest pipeline, or dest mappings change. */
 export const SESSIONS_VERSION = 1;
 export const SESSIONS_MANAGED_BY = 'digital_experience';
 
-export const SESSIONS_SOURCE_INDICES = ['traces-*.otel-*', 'logs-*.otel-*'] as const;
+export const SESSIONS_SOURCE_INDICES = [OTEL_TRACES_INDEX, OTEL_LOGS_INDEX] as const;
 export const SESSIONS_TRANSFORM_ID = `digital-experience-sessions-${SESSIONS_VERSION}`;
 export const SESSIONS_TRANSFORM_PATTERN = 'digital-experience-sessions-*';
 export const SESSIONS_INDEX = `digital-experience-sessions-${SESSIONS_VERSION}`;
@@ -25,6 +27,11 @@ export const SESSIONS_MAX_PARTITIONS = 32;
 export const SESSIONS_LOOKBACK_DAYS = 30;
 /** Max page views kept, in order, for the session journey. */
 export const SESSIONS_JOURNEY_SIZE = 10;
+/**
+ * Page-view URLs collected per session to build the journey. Higher than the journey size, as
+ * URLs that differ only in their query or hash collapse into one page.
+ */
+export const SESSIONS_JOURNEY_URL_CANDIDATES = 3 * SESSIONS_JOURNEY_SIZE;
 
 /** EDOT Browser re-stamps `session.id` on every span and log after rotation. */
 export const SOURCE_SESSION_ID_FIELD = 'attributes.session.id';

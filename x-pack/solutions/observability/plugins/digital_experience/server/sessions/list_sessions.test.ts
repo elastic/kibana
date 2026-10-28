@@ -72,7 +72,11 @@ describe('buildListSessionsRequest', () => {
 
   it('never requests past the max result window', () => {
     const request = buildListSessionsRequest({ ...baseParams, page: 1000, perPage: 100 });
+    // Elasticsearch rejects `from + size` past the window, so `from` is capped too.
+    expect(request.from).toBe(10_000);
     expect(request.size).toBe(0);
+    const lastPage = buildListSessionsRequest({ ...baseParams, page: 99, perPage: 101 });
+    expect((lastPage.from ?? 0) + (lastPage.size ?? 0)).toBe(10_000);
   });
 
   it('searches session id exactly and other fields with escaped wildcards', () => {
@@ -174,6 +178,25 @@ describe('parseListSessionsResponse', () => {
       sessionsWithErrors: 5,
       webVitals: { lcp: 2100, inp: null, cls: null, fcp: null, ttfb: null },
     });
+  });
+
+  it('leaves out summaries without a session id or service name, which cannot be opened', () => {
+    const response = {
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, failed: 0 },
+      hits: {
+        total: { value: 3, relation: 'eq' },
+        hits: [
+          { _index: 'x', _source: sessionDoc },
+          { _index: 'x', _source: { ...sessionDoc, session: { id: '' } } },
+          { _index: 'x', _source: { ...sessionDoc, service: {} } },
+        ],
+      },
+    } as unknown as SearchResponse<SessionDocument, ListSessionsAggs>;
+
+    const { sessions } = parseListSessionsResponse(response, { page: 0, perPage: 25 });
+    expect(sessions.map(({ sessionId }) => sessionId)).toEqual([sessionDoc.session?.id]);
   });
 
   it('handles an empty or missing sessions index', () => {

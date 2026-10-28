@@ -25,7 +25,7 @@ import { toSessionSummary, type SessionDocument } from './list_sessions';
 
 /** Max raw events loaded for the session timeline. */
 export const SESSION_TIMELINE_SIZE = 1000;
-/** Widens the raw event window so events around the summary bounds are not cut off. */
+/** Widens the raw event window so events just before the summary start are not cut off. */
 const TIMELINE_SLACK_MS = 60_000;
 
 const TIMELINE_SOURCE = [
@@ -172,10 +172,12 @@ export const buildPageVisits = (
   const visits: SessionPageVisit[] = [];
   let current: SessionPageVisit | undefined;
 
+  let lastEventTime: string | undefined;
+
   const close = (endTime: string) => {
     if (current) {
       current.endTime = endTime;
-      current.durationMs = Math.max(0, Date.parse(endTime) - Date.parse(current.startTime));
+      current.durationMs = Math.max(0, Date.parse(endTime) - Date.parse(current.startTime)) || 0;
       visits.push(current);
     }
   };
@@ -185,6 +187,7 @@ export const buildPageVisits = (
     if (!event) {
       continue;
     }
+    lastEventTime = event.timestamp;
     const { page } = event;
     if (page && page !== current?.page && (event.kind === 'page_view' || !current)) {
       close(event.timestamp);
@@ -214,8 +217,22 @@ export const buildPageVisits = (
       current.webVitals[vital.name] = vital.value;
     }
   }
-  close(sessionEnd);
+  // Raw events can be newer than the summary, which is as fresh as the last checkpoint.
+  const sessionEndMs = Date.parse(sessionEnd);
+  const endsAfterSummary =
+    lastEventTime !== undefined &&
+    (!Number.isFinite(sessionEndMs) || Date.parse(lastEventTime) > sessionEndMs);
+  close(endsAfterSummary && lastEventTime ? lastEventTime : sessionEnd);
   return visits;
+};
+
+/** The summary's start time, or the first event's when the summary has none. */
+const sessionStartOf = (startMs: number, sources: OtelSource[]): number => {
+  if (Number.isFinite(startMs)) {
+    return startMs;
+  }
+  const first = sources[0]?.['@timestamp'];
+  return first ? Date.parse(first) || 0 : 0;
 };
 
 /** Loads a session summary and its raw events as the given (current) user. */
@@ -241,7 +258,6 @@ export const getSession = async (
   }
   const session: SessionSummary = toSessionSummary(doc);
   const startMs = Date.parse(session.startTime);
-  const endMs = Date.parse(session.endTime);
 
   const eventsResponse = await client.search<OtelSource>({
     index: [...SESSIONS_SOURCE_INDICES],
@@ -256,14 +272,17 @@ export const getSession = async (
         filter: [
           { term: { [SOURCE_SESSION_ID_FIELD]: sessionId } },
           { term: { [SOURCE_SERVICE_NAME_FIELD]: serviceName } },
-          {
-            range: {
-              '@timestamp': {
-                gte: new Date(startMs - TIMELINE_SLACK_MS).toISOString(),
-                lte: new Date(endMs + TIMELINE_SLACK_MS).toISOString(),
-              },
-            },
-          },
+          // No upper bound: events after the last checkpoint keep the timeline current at any
+          // transform frequency. Session ids are random UUIDs, so this can't reach another session.
+          ...(Number.isFinite(startMs)
+            ? [
+                {
+                  range: {
+                    '@timestamp': { gte: new Date(startMs - TIMELINE_SLACK_MS).toISOString() },
+                  },
+                },
+              ]
+            : []),
         ],
       },
     },
@@ -277,8 +296,8 @@ export const getSession = async (
 
   return {
     session,
-    timeline: buildTimeline(sources, startMs),
+    timeline: buildTimeline(sources, sessionStartOf(startMs, sources)),
     timelineTruncated: total > sources.length,
-    pageVisits: buildPageVisits(sources, startMs, session.endTime),
+    pageVisits: buildPageVisits(sources, sessionStartOf(startMs, sources), session.endTime),
   };
 };

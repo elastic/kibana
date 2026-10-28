@@ -129,10 +129,9 @@ const allOf = (filters: QueryDslQueryContainer[]): QueryDslQueryContainer =>
   filters.length > 0 ? { bool: { filter: filters } } : { match_all: {} };
 
 export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequest => {
-  const size = Math.max(
-    0,
-    Math.min(params.perPage, MAX_RESULT_WINDOW - params.page * params.perPage)
-  );
+  // Elasticsearch rejects `from + size` past the result window, so a later page is empty instead.
+  const from = Math.min(params.page * params.perPage, MAX_RESULT_WINDOW);
+  const size = Math.max(0, Math.min(params.perPage, MAX_RESULT_WINDOW - from));
   const facetAggs = Object.fromEntries(
     (Object.keys(SESSION_FACET_FIELDS) as FacetName[]).map((name) => [
       name,
@@ -161,7 +160,7 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
     ignore_unavailable: true,
     allow_no_indices: true,
     track_total_hits: true,
-    from: params.page * params.perPage,
+    from,
     size,
     sort: [{ [params.sortField]: params.sortDirection }, { 'session.id': 'asc' }],
     query: { bool: { filter: [...sessionScopeFilters(params), ...searchFilter(params.query)] } },
@@ -257,8 +256,9 @@ export const parseListSessionsResponse = (
   }
 
   return {
-    sessions: response.hits.hits.flatMap((hit) =>
-      hit._source ? [toSessionSummary(hit._source)] : []
+    // A summary without ids can't be opened; the transform skips empty ids, so this is defensive.
+    sessions: response.hits.hits.flatMap(({ _source: doc }) =>
+      doc?.session?.id && doc.service?.name ? [toSessionSummary(doc)] : []
     ),
     total,
     page,

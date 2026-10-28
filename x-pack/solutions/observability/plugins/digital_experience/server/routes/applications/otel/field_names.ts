@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-export const OTEL_LOGS_INDEX = 'logs-*.otel-*';
-export const OTEL_TRACES_INDEX = 'traces-*.otel-*';
-
-export const BROWSER_SDK_LANGUAGE = 'webjs';
-
 export const WEB_VITAL_NAME = 'browser.web_vital.name';
 export const WEB_VITAL_VALUE = 'browser.web_vital.value';
 

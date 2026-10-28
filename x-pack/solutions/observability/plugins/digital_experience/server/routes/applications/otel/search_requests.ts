@@ -31,11 +31,13 @@ import {
 } from '../constants';
 import {
   BROWSER_SDK_LANGUAGE,
+  OTEL_LOGS_INDEX,
+  OTEL_TRACES_INDEX,
+} from '../../../../common/otel_data';
+import {
   EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
   EVENT_WEB_VITAL,
-  OTEL_LOGS_INDEX,
-  OTEL_TRACES_INDEX,
   SPAN_KIND_CLIENT,
   SPAN_STATUS_ERROR,
   WEB_VITAL_NAME,
