@@ -45,7 +45,6 @@ export async function mountManagementSection(
     uiSettings: coreStart.uiSettings,
     settings: coreStart.settings,
     share: depsStart.share,
-    fileUpload: depsStart.fileUpload,
     application,
     executionContext,
     license,

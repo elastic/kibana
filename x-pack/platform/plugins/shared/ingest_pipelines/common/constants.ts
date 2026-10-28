@@ -18,3 +18,5 @@ export const PLUGIN_MIN_LICENSE_TYPE = basicLicense;
 export const API_BASE_PATH = '/api/ingest_pipelines';
 
 export const APP_CLUSTER_REQUIRED_PRIVILEGES = ['manage_pipeline', 'cluster:monitor/nodes/info'];
+
+export const PARSE_CSV_MAX_FILE_BYTES = 10 * 1024 * 1024;

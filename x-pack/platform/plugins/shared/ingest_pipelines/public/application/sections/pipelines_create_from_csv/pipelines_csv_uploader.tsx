@@ -18,7 +18,7 @@ import {
   EuiRadioGroup,
 } from '@elastic/eui';
 
-import { useKibana } from '../../../shared_imports';
+import { PARSE_CSV_MAX_FILE_BYTES } from '../../../../common/constants';
 import { FieldCopyAction } from '../../../../common/types';
 
 interface Props {
@@ -48,9 +48,7 @@ export const PipelinesCsvUploader: FC<Props> = ({
   hasFile,
 }) => {
   const [action, setAction] = useState<FieldCopyAction>(FieldCopyAction.Copy);
-  const { services } = useKibana();
-
-  const maxFileSize = services.fileUpload.getMaxBytesFormatted();
+  const maxFileSize = `${PARSE_CSV_MAX_FILE_BYTES / (1024 * 1024)} MB`;
 
   const options = getOptions(actionOptions);
 

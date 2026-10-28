@@ -118,7 +118,6 @@ export class IngestPipelinesPlugin
           uiSettings: core.uiSettings,
           settings: core.settings,
           share: startDependencies.share,
-          fileUpload: startDependencies.fileUpload,
           application,
           executionContext,
           license: this.license,

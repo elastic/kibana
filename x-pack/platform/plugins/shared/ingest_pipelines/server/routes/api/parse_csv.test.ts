@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { parseCsvBodySchema, parseCsvMaxFileBytes } from './parse_csv';
+import { PARSE_CSV_MAX_FILE_BYTES } from '../../../common/constants';
+import { parseCsvBodySchema } from './parse_csv';
 
 describe('parse_csv body schema', () => {
   it('accepts a CSV payload', () => {
@@ -18,18 +19,18 @@ describe('parse_csv body schema', () => {
     // A mapping CSV is small; keep the cap tight since the privilege check runs only after
     // the body is buffered. 10MB is plenty for any real CSV but avoids large allocations by
     // unprivileged callers.
-    expect(parseCsvMaxFileBytes).toBe(10 * 1024 * 1024);
+    expect(PARSE_CSV_MAX_FILE_BYTES).toBe(10 * 1024 * 1024);
 
     // A file at that limit is too large to build as a string in a test, so assert the
     // schema's declared max length matches the constant instead.
     const fileSchema = parseCsvBodySchema.getSchema().describe().keys?.file;
     const metas: Array<Record<string, unknown>> = fileSchema?.metas ?? [];
     const maxLengthMeta = metas.find((meta) => 'x-oas-max-length' in meta);
-    expect(maxLengthMeta?.['x-oas-max-length']).toBe(parseCsvMaxFileBytes);
+    expect(maxLengthMeta?.['x-oas-max-length']).toBe(PARSE_CSV_MAX_FILE_BYTES);
   });
 
   it('rejects a file larger than the ceiling', () => {
-    const tooLarge = 'a'.repeat(parseCsvMaxFileBytes + 1);
+    const tooLarge = 'a'.repeat(PARSE_CSV_MAX_FILE_BYTES + 1);
     expect(() => parseCsvBodySchema.validate({ file: tooLarge, copyAction: 'copy' })).toThrow(
       /maximum length/
     );
