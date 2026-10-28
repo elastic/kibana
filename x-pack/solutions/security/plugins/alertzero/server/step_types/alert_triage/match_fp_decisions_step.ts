@@ -15,6 +15,8 @@ import {
 import {
   DECISION_AUTO_CLOSE_SEVERITIES,
   DECISION_DAILY_CLOSE_CAP,
+  DECISION_NOTES_PER_SWEEP,
+  NOTE_CONCURRENCY,
   VERDICT_INCONCLUSIVE_TAG,
   TAG_CHUNK_SIZE,
   TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
@@ -37,6 +39,7 @@ import {
   fetchDecisionCandidates,
   statusCodeOf,
   tagAlerts,
+  writeAlertNotes,
 } from './ports';
 
 export interface MatchFpDecisionsStepDependencies {
@@ -68,6 +71,7 @@ const NOTHING = {
   close_failures: 0,
   excluded_by_severity: 0,
   tag_failures: 0,
+  notes_missing: 0,
 };
 
 /**
@@ -116,6 +120,29 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
         const decisionsSeen = new Set<string>();
         // Alerts each decision may still close today. Read once per decision, then counted down.
         const room = new Map<string, number>();
+        const decisionsById = new Map<string, StoredDecision>();
+        let notesLeft = DECISION_NOTES_PER_SWEEP;
+
+        /**
+         * Says on each alert why it was closed or kept out of analysis, so an analyst reading the
+         * alert does not have to look the decision up. A note that cannot be written never undoes
+         * the close: it is counted in `notes_missing`.
+         */
+        const addNotes = async (id: string, alertIds: string[], action: 'closed' | 'skipped') => {
+          const decision = decisionsById.get(id);
+          const allowed = alertIds.slice(0, notesLeft);
+          notesLeft -= allowed.length;
+          const failed =
+            decision === undefined || allowed.length === 0
+              ? allowed
+              : await writeAlertNotes(
+                  contextManager,
+                  allowed,
+                  noteText(decision, action),
+                  NOTE_CONCURRENCY
+                );
+          totals.notes_missing += alertIds.length - allowed.length + failed.length;
+        };
 
         const warn = (what: string, error: unknown) =>
           logger.warn(`${what}: ${error instanceof Error ? error.message : error}`);
@@ -160,12 +187,11 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
                 remove: [],
               });
               for (let from = 0; from < allowed.length; from += TAG_CHUNK_SIZE) {
-                await closeAlertsAsFalsePositive(
-                  contextManager,
-                  allowed.slice(from, from + TAG_CHUNK_SIZE)
-                );
-                totals.closed += Math.min(TAG_CHUNK_SIZE, allowed.length - from);
-                room.set(id, (room.get(id) ?? 0) - Math.min(TAG_CHUNK_SIZE, allowed.length - from));
+                const closing = allowed.slice(from, from + TAG_CHUNK_SIZE);
+                await closeAlertsAsFalsePositive(contextManager, closing);
+                totals.closed += closing.length;
+                room.set(id, (room.get(id) ?? 0) - closing.length);
+                await addNotes(id, closing, 'closed');
               }
             } catch (error) {
               totals.close_failures++;
@@ -183,6 +209,7 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
                 remove: [],
               });
               totals.skipped += alertIds.length;
+              await addNotes(id, alertIds, 'skipped');
             } catch (error) {
               totals.tag_failures++;
               warn(`Could not tag the alerts of decision ${id}`, error);
@@ -203,14 +230,18 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
             { after, includeTaggedByShadow: mode === 'on' }
           );
           const hashes = hashCandidates(found.candidates, input.space_id);
+          const decisionsByHash = await readDecisions({
+            mget: (params) => contextManager.getScopedEsClient().mget(params),
+            hashes: new Set(hashes.values()),
+            now,
+          });
+          for (const decisions of decisionsByHash.values()) {
+            for (const decision of decisions) decisionsById.set(decision.id, decision);
+          }
           const matches = matchDecisions({
             candidates: found.candidates,
             hashes,
-            decisionsByHash: await readDecisions({
-              mget: (params) => contextManager.getScopedEsClient().mget(params),
-              hashes: new Set(hashes.values()),
-              now,
-            }),
+            decisionsByHash,
             severities: DECISION_AUTO_CLOSE_SEVERITIES,
           });
 
@@ -244,6 +275,30 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
       }
     },
   });
+
+const noteText = (decision: StoredDecision, action: 'closed' | 'skipped'): string => {
+  const by = (verb: string) =>
+    [
+      decision.approver ? `${verb} by ${decision.approver}` : verb,
+      decision.decidedAt ? `on ${decision.decidedAt.slice(0, 10)}` : '',
+      decision.proposalId ? `(proposal ${decision.proposalId})` : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+  const what =
+    action === 'closed'
+      ? `**Closed by AlertZero** as a false positive, without analysis. It has exactly the pattern of decision \`${
+          decision.id
+        }\`, ${by('approved')}.`
+      : `**Kept out of analysis by AlertZero.** It has exactly the pattern of a dismissed proposal (\`${
+          decision.id
+        }\`, ${by('dismissed')}), so it is marked inconclusive and no closure is proposed.`;
+  return [
+    what,
+    '',
+    `To take the decision back, run the workflow \`system-security-floor-alert-triage-revoke-decision\` with \`decision_id: ${decision.id}\`.`,
+  ].join('\n');
+};
 
 interface MgetResponse {
   docs: Array<{ _id: string; found?: boolean; _source?: Record<string, unknown> }>;
