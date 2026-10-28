@@ -18,7 +18,11 @@ import type { EvaluationService } from './evaluation_service';
 export interface EvaluateParams {
   /** Judges call their connector, and traces are read, on behalf of this request. */
   request: KibanaRequest;
-  /** Space the evaluators are resolved in. Defaults to the request's space. */
+  /**
+   * Space the evaluators are resolved in. Defaults to the request's space. Pass it when the
+   * request doesn't carry the caller's space, as a workflow step's fake request doesn't
+   * (https://github.com/elastic/kibana/issues/284786).
+   */
   spaceId?: string;
   subject: EvaluateRequestBodyInput['subject'];
   evaluators: EvaluateRequestBodyInput['evaluators'];
