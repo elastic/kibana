@@ -8,11 +8,17 @@
 import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
 import {
   buildWriteCandidates,
-  fetchActiveEventsForDedup,
+  DEFAULT_INACTIVE_LOOKBACK_MS,
+  fetchInactiveEventsForReuse,
+  fetchLiveEventsForDedup,
   markDuplicateKeys,
+  reopenMatchingInactiveSeries,
   resolveDedupSkips,
 } from './dedup';
-import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import type {
+  InactiveSeriesHead,
+  RuleEventsClient,
+} from '../../../lib/significant_events/events/rule_events_client';
 import type { BulkResults, DedupCandidate, EventsWriteInput } from './types';
 
 type DetectionSignal = Extract<SignalEntry, { type: 'detection' }>;
@@ -73,8 +79,8 @@ const makeActiveEvent = (overrides: Partial<SignificantEvent> = {}): Significant
 
 const makeClient = (
   hits: SignificantEvent[] = []
-): jest.Mocked<Pick<RuleEventsClient, 'findLatestActive'>> & RuleEventsClient =>
-  ({ findLatestActive: jest.fn().mockResolvedValue({ hits }) } as never);
+): jest.Mocked<Pick<RuleEventsClient, 'findLatestLive'>> & RuleEventsClient =>
+  ({ findLatestLive: jest.fn().mockResolvedValue({ hits }) } as never);
 
 const dedupCandidates = (inputs: EventsWriteInput[]): DedupCandidate[] =>
   buildWriteCandidates(inputs).filter((c): c is DedupCandidate => c.mode === 'dedup');
@@ -181,19 +187,19 @@ describe('markDuplicateKeys', () => {
   });
 });
 
-describe('fetchActiveEventsForDedup', () => {
+describe('fetchLiveEventsForDedup', () => {
   it('does not scan when there are no dedup candidates', async () => {
     const client = makeClient();
 
-    await expect(fetchActiveEventsForDedup(client, [])).resolves.toEqual([]);
-    expect(client.findLatestActive).not.toHaveBeenCalled();
+    await expect(fetchLiveEventsForDedup(client, [])).resolves.toEqual([]);
+    expect(client.findLatestLive).not.toHaveBeenCalled();
   });
 
   it('runs one scan over the union of every candidate stream and rule', async () => {
     const hit = makeActiveEvent();
     const client = makeClient([hit]);
 
-    const events = await fetchActiveEventsForDedup(
+    const events = await fetchLiveEventsForDedup(
       client,
       dedupCandidates([
         makeInput(),
@@ -202,8 +208,8 @@ describe('fetchActiveEventsForDedup', () => {
     );
 
     expect(events).toEqual([hit]);
-    expect(client.findLatestActive).toHaveBeenCalledTimes(1);
-    expect(client.findLatestActive).toHaveBeenCalledWith({
+    expect(client.findLatestLive).toHaveBeenCalledTimes(1);
+    expect(client.findLatestLive).toHaveBeenCalledWith({
       sourceIds: ['logs.checkout', 'logs.payments'],
       ruleUuids: ['rule-abc', 'rule-xyz'],
     });
@@ -215,9 +221,9 @@ describe('fetchActiveEventsForDedup', () => {
   ])('omits $field from the scan when any candidate has none', async ({ field, override }) => {
     const client = makeClient();
 
-    await fetchActiveEventsForDedup(client, dedupCandidates([makeInput(), makeInput(override)]));
+    await fetchLiveEventsForDedup(client, dedupCandidates([makeInput(), makeInput(override)]));
 
-    expect(client.findLatestActive).toHaveBeenCalledWith(
+    expect(client.findLatestLive).toHaveBeenCalledWith(
       expect.objectContaining({ [field]: undefined })
     );
   });
@@ -409,5 +415,164 @@ describe('resolveDedupSkips', () => {
         ])
       ).toBe('event-b');
     });
+  });
+});
+
+const makeInactiveClient = (
+  hits: SignificantEvent[] = []
+): jest.Mocked<Pick<RuleEventsClient, 'findLatestInactiveByIdentity'>> & RuleEventsClient =>
+  ({ findLatestInactiveByIdentity: jest.fn().mockResolvedValue({ hits, heads: [] }) } as never);
+
+describe('fetchInactiveEventsForReuse', () => {
+  const now = Date.parse('2026-10-28T12:00:00.000Z');
+
+  it('does not query when there are no dedup candidates', async () => {
+    const client = makeInactiveClient();
+
+    await fetchInactiveEventsForReuse({
+      eventSearchClient: client,
+      dedupCandidates: [],
+      inactiveLookbackMs: DEFAULT_INACTIVE_LOOKBACK_MS,
+      now,
+    });
+
+    expect(client.findLatestInactiveByIdentity).not.toHaveBeenCalled();
+  });
+
+  it('bounds the read by the lookback it is given, not a fixed window', async () => {
+    const client = makeInactiveClient();
+
+    await fetchInactiveEventsForReuse({
+      eventSearchClient: client,
+      dedupCandidates: dedupCandidates([makeInput()]),
+      inactiveLookbackMs: 6 * 60 * 60 * 1000,
+      now,
+    });
+
+    expect(client.findLatestInactiveByIdentity).toHaveBeenCalledWith({
+      sourceIds: ['logs.checkout'],
+      ruleUuids: ['rule-abc'],
+      inactiveSince: '2026-10-28T06:00:00.000Z',
+    });
+  });
+
+  it('defaults the lookback to 48 hours', () => {
+    expect(DEFAULT_INACTIVE_LOOKBACK_MS).toBe(48 * 60 * 60 * 1000);
+  });
+
+  it('skips candidates that carry no sources or no rules', async () => {
+    const client = makeInactiveClient();
+
+    await fetchInactiveEventsForReuse({
+      eventSearchClient: client,
+      dedupCandidates: dedupCandidates([makeInput({ source_ids: [] }), makeInput({ signals: [] })]),
+      inactiveLookbackMs: DEFAULT_INACTIVE_LOOKBACK_MS,
+      now,
+    });
+
+    expect(client.findLatestInactiveByIdentity).not.toHaveBeenCalled();
+  });
+});
+
+describe('reopenMatchingInactiveSeries', () => {
+  const makeInactiveEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
+    makeActiveEvent({ status: 'inactive', event_id: 'closed-event-id', ...overrides });
+
+  const headsOf = (events: SignificantEvent[]): InactiveSeriesHead[] =>
+    events.flatMap(({ event_id: eventId }) =>
+      eventId === undefined
+        ? []
+        : [{ eventId, groupHash: `group-${eventId}`, episodeId: `episode-${eventId}` }]
+    );
+  const reopen = (
+    inputs: EventsWriteInput[],
+    events: SignificantEvent[],
+    heads: InactiveSeriesHead[] = headsOf(events)
+  ) => reopenMatchingInactiveSeries(buildWriteCandidates(inputs), { events, heads });
+
+  it('reuses the event_id of a closed series with the exact same identity', () => {
+    const [candidate] = reopen([makeInput()], [makeInactiveEvent()]);
+
+    expect(candidate).toMatchObject({
+      mode: 'snapshot',
+      index: 0,
+      eventId: 'closed-event-id',
+      input: { event_id: 'closed-event-id', title: 'Checkout latency' },
+    });
+  });
+
+  it('records the series head the reopened candidate continues, for the deactivation check', () => {
+    const [candidate] = reopen(
+      [makeInput()],
+      [makeInactiveEvent()],
+      [{ eventId: 'closed-event-id', groupHash: 'group-1', episodeId: 'episode-1' }]
+    );
+
+    expect(candidate).toMatchObject({
+      reopensSeries: { groupHash: 'group-1', episodeId: 'episode-1' },
+    });
+  });
+
+  it('leaves the batch a new event when the closed series has no known latest episode', () => {
+    const [candidate] = reopen([makeInput()], [makeInactiveEvent()], []);
+
+    expect(candidate.mode).toBe('dedup');
+  });
+
+  it('does not reopen a series for a partial overlap, either way', () => {
+    const subsetOfClosed = reopen(
+      [makeInput()],
+      [makeInactiveEvent({ signals: [makeSignal('rule-abc'), makeSignal('rule-def')] })]
+    );
+    const supersetOfClosed = reopen(
+      [makeInput({ signals: [makeSignal('rule-abc'), makeSignal('rule-def')] })],
+      [makeInactiveEvent()]
+    );
+
+    expect(subsetOfClosed[0].mode).toBe('dedup');
+    expect(supersetOfClosed[0].mode).toBe('dedup');
+  });
+
+  it('requires the same sources as well as the same rules', () => {
+    const [candidate] = reopen([makeInput()], [makeInactiveEvent({ source_ids: ['logs.cart'] })]);
+
+    expect(candidate.mode).toBe('dedup');
+  });
+
+  it('ignores a series that is not inactive', () => {
+    const [candidate] = reopen([makeInput()], [makeActiveEvent()]);
+
+    expect(candidate.mode).toBe('dedup');
+  });
+
+  it('reopens the newest closed series when several match', () => {
+    const [candidate] = reopen(
+      [makeInput()],
+      [
+        makeInactiveEvent({ event_id: 'older', '@timestamp': '2026-10-27T01:00:00.000Z' }),
+        makeInactiveEvent({ event_id: 'newer', '@timestamp': '2026-10-28T01:00:00.000Z' }),
+      ]
+    );
+
+    expect(candidate.eventId).toBe('newer');
+  });
+
+  it('compares confirmed rules only when the candidate has confirmed rules', () => {
+    const [candidate] = reopen(
+      [makeInput({ signals: [makeSignal('rule-abc'), makeSignal('rule-def', 'refutes')] })],
+      [makeInactiveEvent()]
+    );
+
+    expect(candidate).toMatchObject({ mode: 'snapshot', eventId: 'closed-event-id' });
+  });
+
+  it('leaves snapshot candidates and candidates without rules untouched', () => {
+    const results = reopen(
+      [makeInput({ event_id: 'explicit-id' }), makeInput({ signals: [] })],
+      [makeInactiveEvent()]
+    );
+
+    expect(results.map((c) => c.mode)).toEqual(['snapshot', 'dedup']);
+    expect(results[0].eventId).toBe('explicit-id');
   });
 });

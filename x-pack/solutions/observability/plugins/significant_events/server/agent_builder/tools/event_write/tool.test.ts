@@ -111,6 +111,15 @@ describe('events_write tool', () => {
     ).toBe(false);
   });
 
+  it('accepts reopen_deactivated as a boolean only', () => {
+    expect(
+      eventsWriteSchema.safeParse({ items: [{ ...input, reopen_deactivated: true }] }).success
+    ).toBe(true);
+    expect(
+      eventsWriteSchema.safeParse({ items: [{ ...input, reopen_deactivated: 'yes' }] }).success
+    ).toBe(false);
+  });
+
   it('rejects input without an items array', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
   });

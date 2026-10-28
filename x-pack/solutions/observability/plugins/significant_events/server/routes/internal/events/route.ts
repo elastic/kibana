@@ -8,7 +8,6 @@
 import {
   significantEventInvestigationSchema,
   significantEventStatusSchema,
-  significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   CHANGE_POINT_TYPES,
   severitySchema,
@@ -547,7 +546,12 @@ const eventsUpdateRoute = createServerRoute({
       id: z.string().max(255),
     }),
     body: z.object({
-      status: significantEventManualStatusSchema,
+      // Operator deactivation goes through Alerting v2's episode `deactivate` action;
+      // only reopening is accepted here.
+      status: z.literal('active', {
+        error:
+          'status must be "active". To mark a significant event inactive, use the Alerting v2 episode deactivate action.',
+      }),
       assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
   }),

@@ -252,6 +252,8 @@ export class SignificantEventsPlugin
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
+        internalEsClient: scopedClusterClient.asInternalUser,
+        logger: this.logger,
         space,
         getAlertEventsClient,
         triggerEmitter: createTriggerEmitter({

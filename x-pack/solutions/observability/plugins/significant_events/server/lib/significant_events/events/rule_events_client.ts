@@ -7,7 +7,7 @@
 
 import { esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   ALERT_EPISODE_STATUS,
@@ -16,6 +16,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  operatorFallbackAssessmentNote,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   SEVERITY_OPTIONS,
@@ -25,7 +26,7 @@ import {
   type SignalVerdict,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import { i18n } from '@kbn/i18n';
+import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
   MAX_DEDUP_SCAN_LIMIT,
   type CommonSearchOptions,
@@ -63,12 +64,66 @@ import { toRuleEvent } from './to_rule_event';
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
 
-/** Note recorded when an operator changes status without giving a reason. */
-export const operatorFallbackAssessmentNote = (status: 'active' | 'inactive'): string =>
-  i18n.translate('xpack.significantEvents.events.operatorFallbackAssessmentNote', {
-    defaultMessage: 'Manually set to {status} by an operator. No reason was given.',
-    values: { status },
-  });
+export type UpdateEventResult =
+  | { updated: true }
+  /** Not written: another writer got there first (`head`), or the series could not be read back. */
+  | { updated: false; head?: SignificantEvent };
+
+export type UpdateEventStatusResult =
+  | { updated: 1; ignored: 0; status: SignificantEventStatus }
+  | {
+      updated: 0;
+      ignored: 1;
+      status: SignificantEventStatus;
+      reason: LifecycleSkipReason | 'not_found' | 'superseded';
+    };
+
+/** The latest episode of a series, as `.rule-events` stores it: what a deactivation must point at. */
+export interface SeriesHead {
+  groupHash: string;
+  /** The `alert.id` of the series' latest version. */
+  episodeId: string;
+}
+
+/** An operator's deactivation of a series' current episode, read from `.alert-actions`. */
+export interface OperatorDeactivation {
+  groupHash: string;
+  episodeId: string;
+  reason: string;
+  deactivatedAt: string;
+}
+
+/** A `.alert-actions` row; `Readonly` keeps it a type alias, which `esqlToObjects` accepts. */
+type ActionRow = Readonly<{
+  '@timestamp': string;
+  group_hash: string;
+  alert_id: string | null;
+  action_type: 'deactivate' | 'activate';
+  'actor.type': string | null;
+  reason: string | null;
+}>;
+
+/** A closed series' latest episode, with the event it belongs to. */
+export type InactiveSeriesHead = SeriesHead & { eventId: string };
+
+/** A rule's membership in one live series, with that member's latest stored signal. */
+export interface LiveRuleMembership {
+  eventId: string | undefined;
+  status: SignificantEventStatus;
+  verdict: SignalVerdict;
+  /** The stored verification query, absent when the signal ran no query. */
+  esqlQuery: string | undefined;
+  /** Whether the stored query found rows when the verdict was made. */
+  evidenceFound: boolean;
+  /** When this member's signal was last verified: the agent's last verdict for the rule. */
+  verifiedAt: string | undefined;
+  /** When the series was opened: its earliest version. */
+  createdAt: string | undefined;
+  /** The sources the series covers. */
+  sourceIds: string[];
+  /** The series' title, for saying which event a decision rests on. */
+  eventTitle: string | undefined;
+}
 
 const isSignificantEventStatus = (status: AlertEpisodeStatus): status is SignificantEventStatus =>
   (SIGNIFICANT_EVENT_STATUS_OPTIONS as readonly string[]).includes(status);
@@ -94,7 +149,7 @@ interface RuleEventSourceRow {
   '@timestamp': string;
   [GROUP_HASH_FIELD]: string;
   severity?: AlertEventSeverity;
-  alert?: { status?: AlertEpisodeStatus };
+  alert?: { id?: string; status?: AlertEpisodeStatus };
   data_json: string;
 }
 
@@ -134,6 +189,7 @@ const decodeSignificantEventResponse = (
 ): SignificantEventResponse => ({
   ...decodeSignificantEvent(row),
   created_at: row.created_at,
+  ...(row.alert?.id !== undefined ? { episode_id: row.alert.id } : {}),
 });
 
 /**
@@ -314,38 +370,12 @@ const countBy = async <Key extends string>({
   }
 };
 
-export type UpdateEventResult =
-  | { updated: true }
-  /** Not written: another writer got there first (`head`), or the series could not be read back. */
-  | { updated: false; head?: SignificantEvent };
-
-export type UpdateEventStatusResult =
-  | { updated: 1; ignored: 0; status: SignificantEventStatus }
-  | {
-      updated: 0;
-      ignored: 1;
-      status: SignificantEventStatus;
-      reason: LifecycleSkipReason | 'not_found' | 'superseded';
-    };
-
-/** A rule's membership in one live series, with that member's latest stored signal. */
-export interface LiveRuleMembership {
-  eventId: string | undefined;
-  status: SignificantEventStatus;
-  verdict: SignalVerdict;
-  /** The stored verification query, absent when the signal ran no query. */
-  esqlQuery: string | undefined;
-  /** Whether the stored query found rows when the verdict was made. */
-  evidenceFound: boolean;
-  /** When this member's signal was last verified: the agent's last verdict for the rule. */
-  verifiedAt: string | undefined;
-  /** When the series was opened: its earliest version. */
-  createdAt: string | undefined;
-  /** The sources the series covers. */
-  sourceIds: string[];
-  /** The series' title, for saying which event a decision rests on. */
-  eventTitle: string | undefined;
-}
+/** Activate wins a tie on the timestamp, so a reopen is never read as still deactivated. */
+const isLaterAction = (candidate: ActionRow, current: ActionRow): boolean => {
+  const order = Date.parse(candidate['@timestamp']) - Date.parse(current['@timestamp']);
+  if (order !== 0) return order > 0;
+  return candidate.action_type === 'activate' && current.action_type !== 'activate';
+};
 
 /**
  * `.rule-events` client used by agent-side call sites (`event_search`, `event_write`'s dedup scan,
@@ -355,7 +385,7 @@ export interface LiveRuleMembership {
  * production.
  *
  * Not implemented here:
- * - `findLatestActive`, topology/continuation search, `attach` — agent/discovery reads (#1517).
+ * - `findLatestLive`, topology/continuation search, `attach` — agent/discovery reads (#1517).
  */
 export class RuleEventsClient {
   constructor(
@@ -364,6 +394,9 @@ export class RuleEventsClient {
       space: string;
       getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
       emitTrigger?: TriggerEmitter;
+      /** Reads `.alert-actions`, a private Alerting v2 index; falls back to `esClient`. */
+      internalEsClient?: ElasticsearchClient;
+      logger?: Logger;
     }
   ) {}
 
@@ -590,16 +623,17 @@ export class RuleEventsClient {
   }
 
   /**
-   * Returns the latest version per `group_hash` for all active ("open") events within the given
-   * time range, optionally narrowed to candidate source/rule identities so the scan stays
-   * proportional to the write batch instead of the whole space. Filters on the persisted
-   * `alert.status` column instead of a top-level `status` column, and reads `source_ids` /
+   * Returns the latest version per `group_hash` for all live (`active` or `recovering`) events
+   * within the given time range, optionally narrowed to candidate source/rule identities so the
+   * scan stays proportional to the write batch instead of the whole space. Filters on the
+   * persisted `alert.status` column instead of a top-level `status` column, and reads `source_ids` /
    * `signals.metadata.rule_uuid` through `FIELD_EXTRACT` since both live in the flattened `data`
    * column.
    *
-   * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events.
+   * Capped at MAX_DEDUP_SCAN_LIMIT distinct live events. Closed series are read separately by
+   * `findLatestInactiveByIdentity`, so they can never crowd live ones out of this cap.
    */
-  async findLatestActive(
+  async findLatestLive(
     options: CommonSearchOptions & { sourceIds?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }> {
     let query = applyTimeRange({
@@ -627,6 +661,126 @@ export class RuleEventsClient {
       fields: ['data_json'],
     });
     return { hits: hits.map(decodeSignificantEvent) };
+  }
+
+  /**
+   * Returns the closed (`inactive`) series whose latest version is no older than `inactiveSince`
+   * and that touch both the given sources and rules, one latest version per `group_hash`. The
+   * identity filters are required: they keep the scan proportional to the write batch, and an
+   * empty one reads as "nothing to match" rather than "everything".
+   *
+   * The time bound applies to a series' latest version, after it is picked, so an old version of a
+   * series that has since been reopened is never read as closed.
+   */
+  async findLatestInactiveByIdentity({
+    sourceIds,
+    ruleUuids,
+    inactiveSince,
+  }: {
+    sourceIds: string[];
+    ruleUuids: string[];
+    inactiveSince: string;
+  }): Promise<{ hits: SignificantEvent[]; heads: InactiveSeriesHead[] }> {
+    if (sourceIds.length === 0 || ruleUuids.length === 0) return { hits: [], heads: [] };
+
+    let query = pickLatestPerGroup(buildBaseQuery(this.clients.space), GROUP_HASH_FIELD);
+    query = applyTimeRange({ query, from: inactiveSince });
+    query = query.where`${eventStatus()} == ${esql.str(ALERT_EPISODE_STATUS.INACTIVE)}`
+      .where`${sourceIdsIntersects(sourceIds)}`.where`${ruleUuidsIntersects(ruleUuids)}`;
+
+    const rows = await executeEsqlQuery<RuleEventSourceRow>({
+      esClient: this.clients.esClient,
+      query: withDataJsonProjection(query).keep('_source', 'data_json').limit(MAX_DEDUP_SCAN_LIMIT),
+      fields: ['data_json'],
+    });
+    const hits = rows.map(decodeSignificantEvent);
+    return {
+      hits,
+      heads: rows.flatMap((row, index) => {
+        const { event_id: eventId } = hits[index];
+        return row.alert?.id !== undefined && eventId !== undefined
+          ? [{ eventId, groupHash: row[GROUP_HASH_FIELD], episodeId: row.alert.id }]
+          : [];
+      }),
+    };
+  }
+
+  /**
+   * Reads whether an operator deactivated each series' current episode, from Alerting v2's
+   * `.alert-actions` data stream (a private index: this plugin reads it, it does not own its
+   * schema). A series is deactivated when the latest `deactivate`/`activate` action on it is a user
+   * `deactivate` of the episode the series is still on. A reopened series is on a new episode, so
+   * an older deactivation never applies to it. Other actions (snooze, ack, assign, tag) are not
+   * read, so they never mask a deactivation. Keyed by `group_hash`.
+   *
+   * Any read failure counts as "not deactivated" and is logged: a missing index or an unreadable
+   * mapping must not break the write path that calls this.
+   */
+  async findOperatorDeactivations({
+    heads,
+  }: {
+    heads: readonly SeriesHead[];
+  }): Promise<Map<string, OperatorDeactivation>> {
+    const deactivations = new Map<string, OperatorDeactivation>();
+    if (heads.length === 0) return deactivations;
+
+    try {
+      const groupHashes = [...new Set(heads.map(({ groupHash }) => groupHash))];
+      const query = esql.from([ALERT_ACTIONS_DATA_STREAM], []).where`space_id == ${esql.str(
+        this.clients.space
+      )}`.where`group_hash IN (${groupHashes.map((hash) => esql.str(hash))})`
+        .where`action_type IN ("deactivate", "activate")`
+        .sort(['@timestamp', 'DESC'])
+        .keep('@timestamp', 'group_hash', 'alert_id', 'action_type', 'actor.type', 'reason');
+      if (this.clients.internalEsClient === undefined) {
+        this.clients.logger?.error(
+          `deactivation_check_degraded: reading ${ALERT_ACTIONS_DATA_STREAM} with the request's credentials because no internal client was given; a missing privilege reads as "not deactivated".`
+        );
+      }
+      const rows = esqlToObjects<ActionRow>(
+        await queryEsql({
+          esClient: this.clients.internalEsClient ?? this.clients.esClient,
+          query,
+        })
+      );
+
+      const latest = new Map<string, ActionRow>();
+      for (const row of rows) {
+        const current = latest.get(row.group_hash);
+        if (current === undefined || isLaterAction(row, current)) latest.set(row.group_hash, row);
+      }
+
+      // A deactivation with no reason carries the standard note and tells the agent nothing, so it
+      // is not held: the series reopens like any new event. Kibana's locale is instance-wide, so
+      // the browser and this server write and read the same text.
+      const noReasonNote = operatorFallbackAssessmentNote('inactive');
+      for (const { groupHash, episodeId } of heads) {
+        const action = latest.get(groupHash);
+        if (
+          action?.action_type !== 'deactivate' ||
+          action['actor.type'] !== 'user' ||
+          action.alert_id !== episodeId
+        ) {
+          continue;
+        }
+        const reason = (action.reason ?? '').trim();
+        if (reason === noReasonNote) continue;
+        deactivations.set(groupHash, {
+          groupHash,
+          episodeId,
+          reason,
+          deactivatedAt: action['@timestamp'],
+        });
+      }
+      return deactivations;
+    } catch (error) {
+      this.clients.logger?.error(
+        `deactivation_check_failed: could not read operator deactivations from ${ALERT_ACTIONS_DATA_STREAM}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return new Map();
+    }
   }
 
   /**

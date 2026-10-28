@@ -6,11 +6,16 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import {
+  INACTIVE_SERIES_LOOKBACK_HOURS,
   type SignificantEvent,
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
 } from '@kbn/significant-events-schema';
-import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import type {
+  InactiveSeriesHead,
+  RuleEventsClient,
+} from '../../../lib/significant_events/events/rule_events_client';
 import {
   confirmedSignals,
   extractDedupIdentity,
@@ -19,6 +24,14 @@ import {
 } from './episode_context';
 import type { BulkResults, DedupCandidate, EventsWriteInput, WriteCandidate } from './types';
 
+/** How far back a closed series is still a candidate for reuse: its latest version must be newer. */
+export const DEFAULT_INACTIVE_LOOKBACK_MS = INACTIVE_SERIES_LOOKBACK_HOURS * 60 * 60 * 1000;
+
+/** Closed series read for reuse, with the latest episode of each. */
+export interface InactiveSeries {
+  events: SignificantEvent[];
+  heads: InactiveSeriesHead[];
+}
 const normalizeEventId = (eventId: string | undefined): string | undefined =>
   eventId === '' ? undefined : eventId;
 
@@ -99,8 +112,8 @@ export const markDuplicateKeys = (
   return candidates.filter((c) => results[c.index] === undefined);
 };
 
-/** Single scan for dedup candidates: fetch all currently-active events for the batch. */
-export const fetchActiveEventsForDedup = async (
+/** Single scan for dedup candidates: fetch all currently-live events for the batch. */
+export const fetchLiveEventsForDedup = async (
   eventSearchClient: RuleEventsClient,
   dedupCandidates: DedupCandidate[]
 ): Promise<SignificantEvent[]> => {
@@ -110,7 +123,7 @@ export const fetchActiveEventsForDedup = async (
   // could exclude a candidate's genuine duplicate that has no value for that field.
   const allCandidatesHaveSourceIds = dedupCandidates.every((c) => c.input.source_ids.length > 0);
   const allCandidatesHaveRuleUuids = dedupCandidates.every((c) => c.ruleUuids.length > 0);
-  const { hits } = await eventSearchClient.findLatestActive({
+  const { hits } = await eventSearchClient.findLatestLive({
     sourceIds: allCandidatesHaveSourceIds
       ? [...new Set(dedupCandidates.flatMap((c) => c.input.source_ids))]
       : undefined,
@@ -119,6 +132,35 @@ export const fetchActiveEventsForDedup = async (
       : undefined,
   });
   return hits;
+};
+
+/**
+ * Reads the closed series that may be reopened by the dedup candidates. Only candidates with both
+ * sources and rules can match an identity, so the others are not looked up.
+ */
+export const fetchInactiveEventsForReuse = async ({
+  eventSearchClient,
+  dedupCandidates,
+  inactiveLookbackMs,
+  now = Date.now(),
+}: {
+  eventSearchClient: RuleEventsClient;
+  dedupCandidates: DedupCandidate[];
+  /** A closed series whose latest version is older than this many milliseconds is not reused. */
+  inactiveLookbackMs: number;
+  now?: number;
+}): Promise<InactiveSeries> => {
+  const identifiable = dedupCandidates.filter(
+    (c) => c.input.source_ids.length > 0 && c.ruleUuids.length > 0
+  );
+  if (identifiable.length === 0) return { events: [], heads: [] };
+
+  const { hits, heads } = await eventSearchClient.findLatestInactiveByIdentity({
+    sourceIds: [...new Set(identifiable.flatMap((c) => c.input.source_ids))],
+    ruleUuids: [...new Set(identifiable.flatMap((c) => c.ruleUuids))],
+    inactiveSince: new Date(now - inactiveLookbackMs).toISOString(),
+  });
+  return { events: hits, heads };
 };
 
 /**
@@ -198,4 +240,58 @@ export const resolveDedupSkips = (
   }
 
   return toWrite;
+};
+
+const newestFirst = (a: SignificantEvent, b: SignificantEvent): number => {
+  const timestampOrder = Date.parse(b['@timestamp']) - Date.parse(a['@timestamp']);
+  return timestampOrder !== 0 ? timestampOrder : (b.event_id ?? '').localeCompare(a.event_id ?? '');
+};
+
+/** The identity of an event as a dedup candidate would state it: its sources and rule set. */
+const identityOfEvent = (ev: SignificantEvent, confirmedOnly: boolean): string =>
+  makeIdentity({
+    sourceIds: ev.source_ids ?? [],
+    ruleUuids: extractRuleUuids(confirmedOnly ? confirmedSignals(ev.signals) : ev.signals),
+  });
+
+/**
+ * Turns each dedup candidate whose identity exactly matches a closed series into a continuation of
+ * that series: it keeps the series' `event_id`, so the write opens a new episode under it. A
+ * partial overlap never reopens a closed series, and a candidate that no closed series matches stays
+ * a new event. When several closed series match, the newest one is reopened.
+ */
+export const reopenMatchingInactiveSeries = (
+  candidates: WriteCandidate[],
+  { events, heads }: InactiveSeries
+): WriteCandidate[] => {
+  const newestInactive = events.toSorted(newestFirst);
+
+  return candidates.map((candidate): WriteCandidate => {
+    if (candidate.mode !== 'dedup' || candidate.ruleUuids.length === 0) return candidate;
+
+    const identity = makeIdentity({
+      sourceIds: candidate.input.source_ids,
+      ruleUuids: candidate.ruleUuids,
+    });
+    const closed = newestInactive.find(
+      (ev) =>
+        ev.event_id !== undefined &&
+        ev.status === ALERT_EPISODE_STATUS.INACTIVE &&
+        identityOfEvent(ev, candidate.confirmedOnly) === identity
+    );
+    if (closed?.event_id === undefined) return candidate;
+
+    // Without the series' latest episode a deactivation cannot be looked up, so the series is
+    // not reopened: the batch stays a new event.
+    const head = heads.find(({ eventId }) => eventId === closed.event_id);
+    if (head === undefined) return candidate;
+
+    return {
+      mode: 'snapshot',
+      index: candidate.index,
+      input: { ...candidate.input, event_id: closed.event_id },
+      eventId: closed.event_id,
+      reopensSeries: { groupHash: head.groupHash, episodeId: head.episodeId },
+    };
+  });
 };

@@ -285,6 +285,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
         {isDismissModalOpen && (
           <DismissEventModal
             eventId={latestEvent.event_id}
+            episodeId={latestEvent.episode_id}
             onClose={() => setIsDismissModalOpen(false)}
             onSuccess={() => {
               setIsDismissModalOpen(false);

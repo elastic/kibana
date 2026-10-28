@@ -65,7 +65,7 @@ jest.mock('../../../../hooks/use_trigger_investigation', () => ({
   })),
 }));
 jest.mock('../../../../hooks/use_update_significant_event', () => ({
-  useUpdateSignificantEvent: jest.fn(() => ({ updateEventStatus: jest.fn(), isUpdating: false })),
+  useUpdateSignificantEvent: jest.fn(() => ({ deactivateEvent: jest.fn(), isUpdating: false })),
 }));
 jest.mock('../../../../hooks/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: jest.fn(() => ({ blocksActivity: false })),

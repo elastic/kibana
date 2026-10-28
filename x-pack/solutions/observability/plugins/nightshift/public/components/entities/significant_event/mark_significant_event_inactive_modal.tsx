@@ -14,14 +14,19 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
   EuiText,
   EuiTextArea,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useState } from 'react';
+import {
+  INACTIVE_SERIES_LOOKBACK_HOURS,
+  MAX_DEACTIVATION_REASON_LENGTH,
+} from '@kbn/significant-events-schema';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
@@ -37,13 +42,39 @@ const MODAL_DESCRIPTION = i18n.translate(
   'xpack.nightshift.markSignificantEventInactiveModal.description',
   {
     defaultMessage:
-      'Mark this event inactive. Optionally add an assessment note to record the operator rationale.',
+      'Mark this event inactive. You can add a reason. It is recorded as the closure note and may be shown to the discovery agent if the same issue recurs within {hours} hours. The agent may reopen the event if it finds new evidence the reason does not explain.',
+    values: { hours: INACTIVE_SERIES_LOOKBACK_HOURS },
   }
 );
 
 const REASON_LABEL = i18n.translate(
   'xpack.nightshift.markSignificantEventInactiveModal.reasonLabel',
-  { defaultMessage: 'Assessment note (optional)' }
+  { defaultMessage: 'Reason (optional)' }
+);
+
+const REASON_HELP_TEXT = i18n.translate(
+  'xpack.nightshift.markSignificantEventInactiveModal.reasonHelpText',
+  {
+    defaultMessage:
+      'Optional. Up to {max} characters. If left empty, the agent is told only that an operator set this inactive.',
+    values: { max: MAX_DEACTIVATION_REASON_LENGTH },
+  }
+);
+
+const MISSING_EPISODE_CALLOUT_TITLE = i18n.translate(
+  'xpack.nightshift.markSignificantEventInactiveModal.missingEpisodeCallout',
+  {
+    defaultMessage:
+      'This event has no Alerting v2 episode and cannot be marked inactive from here.',
+  }
+);
+
+const REASON_TOO_LONG_ERROR = i18n.translate(
+  'xpack.nightshift.markSignificantEventInactiveModal.reasonTooLongError',
+  {
+    defaultMessage: 'The reason must be at most {max} characters',
+    values: { max: MAX_DEACTIVATION_REASON_LENGTH },
+  }
 );
 
 const CONFIRM_BUTTON_LABEL = i18n.translate(
@@ -58,14 +89,17 @@ const CANCEL_BUTTON_LABEL = i18n.translate(
 
 export const MarkSignificantEventInactiveModal = ({
   eventId,
+  episodeId,
   onClose,
   onSuccess,
 }: {
   eventId: string;
+  /** The `alert.id` of the event's latest version; Alerting v2 `deactivate` targets it. */
+  episodeId?: string;
   onClose: () => void;
   onSuccess?: () => void;
 }): React.ReactElement => {
-  const [assessmentNote, setAssessmentNote] = useState('');
+  const [reason, setReason] = useState('');
   const { closeSignificantEvent, closingEventId } = useCloseSignificantEvent({
     onClosed: onSuccess ?? onClose,
   });
@@ -73,6 +107,9 @@ export const MarkSignificantEventInactiveModal = ({
     prefix: 'nightshiftMarkSignificantEventInactiveModal',
   });
   const isUpdating = closingEventId === eventId;
+  const trimmedReason = reason.trim();
+  const canDeactivate = Boolean(episodeId);
+  const isReasonInvalid = trimmedReason.length > MAX_DEACTIVATION_REASON_LENGTH;
 
   return (
     <EuiModal
@@ -84,16 +121,32 @@ export const MarkSignificantEventInactiveModal = ({
         <EuiModalHeaderTitle id={modalTitleId}>{MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
+        {!canDeactivate && (
+          <>
+            <KbnWarningCallout
+              size="s"
+              title={MISSING_EPISODE_CALLOUT_TITLE}
+              data-test-subj="nightshiftMarkSignificantEventInactiveMissingEpisode"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         <EuiText size="s">
           <p>{MODAL_DESCRIPTION}</p>
         </EuiText>
-        <EuiFormRow label={REASON_LABEL} fullWidth>
+        <EuiFormRow
+          label={REASON_LABEL}
+          fullWidth
+          isInvalid={isReasonInvalid}
+          helpText={REASON_HELP_TEXT}
+          error={isReasonInvalid ? REASON_TOO_LONG_ERROR : undefined}
+        >
           <EuiTextArea
             fullWidth
-            value={assessmentNote}
-            onChange={(event) => setAssessmentNote(event.target.value)}
-            maxLength={MAX_TEXT_LENGTH}
-            disabled={isUpdating}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+            isInvalid={isReasonInvalid}
+            disabled={isUpdating || !canDeactivate}
             data-test-subj="nightshiftMarkSignificantEventInactiveReason"
           />
         </EuiFormRow>
@@ -109,9 +162,9 @@ export const MarkSignificantEventInactiveModal = ({
         <EuiButton
           color="danger"
           fill
-          onClick={() => closeSignificantEvent(eventId, assessmentNote)}
+          onClick={() => closeSignificantEvent({ eventId, episodeId, reason: trimmedReason })}
           isLoading={isUpdating}
-          isDisabled={isUpdating}
+          isDisabled={isUpdating || isReasonInvalid || !canDeactivate}
           data-test-subj="nightshiftMarkSignificantEventInactiveConfirm"
           {...getEbtProps({
             action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_SIGNIFICANT_EVENT,
