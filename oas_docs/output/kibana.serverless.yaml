@@ -48489,6 +48489,37 @@ paths:
                   description: Global AWS region from the Service Settings step.
                   maxLength: 64
                   type: string
+                instances:
+                  description: Service instances, including duplicates, being deployed. Used to restore the service list when the onboarding is resumed.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      instanceId:
+                        description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      isDuplicate:
+                        description: Whether the instance is a duplicate of another service.
+                        type: boolean
+                      name:
+                        description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                        maxLength: 255
+                        type: string
+                      serviceId:
+                        description: ID of the service this instance belongs to.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                    required:
+                      - instanceId
+                      - serviceId
+                      - name
+                      - isDuplicate
+                  maxItems: 1000
+                  type: array
+                  x-state: Experimental
                 integrationName:
                   description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                   maxLength: 160
@@ -48703,6 +48734,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -49059,6 +49121,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -49305,6 +49398,37 @@ paths:
                       - templateVersion
                   maxItems: 10
                   type: array
+                instances:
+                  description: Service instances, including duplicates, from the last deployment. Replaces the stored list, so instances removed since the last deployment are dropped.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      instanceId:
+                        description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      isDuplicate:
+                        description: Whether the instance is a duplicate of another service.
+                        type: boolean
+                      name:
+                        description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                        maxLength: 255
+                        type: string
+                      serviceId:
+                        description: ID of the service this instance belongs to.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                    required:
+                      - instanceId
+                      - serviceId
+                      - name
+                      - isDuplicate
+                  maxItems: 1000
+                  type: array
+                  x-state: Experimental
                 integrationName:
                   description: Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.
                   maxLength: 160
@@ -49489,6 +49613,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -49772,6 +49927,37 @@ paths:
                           type: string
                         id:
                           type: string
+                        instances:
+                          description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              instanceId:
+                                description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                                maxLength: 255
+                                minLength: 1
+                                type: string
+                              isDuplicate:
+                                description: Whether the instance is a duplicate of another service.
+                                type: boolean
+                              name:
+                                description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                                maxLength: 255
+                                type: string
+                              serviceId:
+                                description: ID of the service this instance belongs to.
+                                maxLength: 255
+                                minLength: 1
+                                type: string
+                            required:
+                              - instanceId
+                              - serviceId
+                              - name
+                              - isDuplicate
+                          maxItems: 1000
+                          type: array
+                          x-state: Experimental
                         integrationName:
                           description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                           type: string
