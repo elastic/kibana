@@ -54,6 +54,13 @@ export const RunStepInputSchema = lazySchema(() =>
     feature_id: z.union([z.string().max(256), z.array(z.string().max(256)).max(8)]).optional(),
     filter: z.record(z.string(), z.unknown()).optional(),
     /**
+     * Identifies the producer of these attacks. Contributes to the attack hash,
+     * so attacks from one producer never deduplicate against another producer's
+     * attacks built from the same alerts. Omit for Kibana Attack Discovery, whose
+     * existing hashes must not change.
+     */
+    generation_source: z.string().max(256).optional(),
+    /**
      * Whether the generation-phase ground-truth gate runs. Defaults to `true`.
      *
      * The gate runs the Attack Discovery skill to corroborate the candidate
