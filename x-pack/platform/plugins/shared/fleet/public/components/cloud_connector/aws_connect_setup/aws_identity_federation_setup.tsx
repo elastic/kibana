@@ -131,17 +131,19 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const trimmedStackArn = stackArn.trim();
   const stackArnInvalid = isStackArnInvalid(stackArn);
 
+  const hasAttachedCloudConnector = isEditPage && Boolean(initialConnectorId);
+
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
     if (hasSetInitialTab.current) return;
-    if (isEditPage) {
+    if (hasAttachedCloudConnector) {
       setSelectedTabId(TABS.EXISTING_CONNECTION);
       hasSetInitialTab.current = true;
     } else if (cloudConnectors.length > 0) {
       setSelectedTabId(TABS.EXISTING_CONNECTION);
       hasSetInitialTab.current = true;
     }
-  }, [cloudConnectors.length, isEditPage]);
+  }, [cloudConnectors.length, hasAttachedCloudConnector]);
 
   // When opening an edit page with an initialConnectorId the name isn't available yet — resolve
   // it from the connector list once loaded, without overwriting a name already set by a user action.
@@ -389,7 +391,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       tabs={tabs}
       selectedTabId={selectedTabId}
       onTabClick={handleTabClick}
-      isEditPage={isEditPage}
+      hasAttachedCloudConnector={hasAttachedCloudConnector}
       cloudProvider="aws"
       cloudConnectorsCount={cloudConnectors.length}
     />
