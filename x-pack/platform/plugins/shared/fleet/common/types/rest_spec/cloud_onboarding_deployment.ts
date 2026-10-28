@@ -87,6 +87,10 @@ export interface UpdateCloudOnboardingDeploymentRequest {
   };
 }
 
+export interface DeleteCloudOnboardingDeploymentResponse {
+  id: string;
+}
+
 export interface UpdateCloudOnboardingDeploymentResponse {
   item: CloudOnboardingDeployment;
 }

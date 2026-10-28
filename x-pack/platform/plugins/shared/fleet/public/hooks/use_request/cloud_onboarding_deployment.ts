@@ -11,6 +11,7 @@ import { API_VERSIONS, CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT } from '../../../com
 import type {
   CreateCloudOnboardingDeploymentRequest,
   CreateCloudOnboardingDeploymentResponse,
+  DeleteCloudOnboardingDeploymentResponse,
   GetCloudOnboardingDeploymentResponse,
   GetCloudOnboardingDeploymentsRequest,
   GetCloudOnboardingDeploymentsResponse,
@@ -36,6 +37,14 @@ export const sendGetCloudOnboardingDeployment = (id: string) => {
   return sendRequestForRq<GetCloudOnboardingDeploymentResponse>({
     path: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/${id}`,
     method: 'get',
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const sendDeleteCloudOnboardingDeployment = (id: string) => {
+  return sendRequestForRq<DeleteCloudOnboardingDeploymentResponse>({
+    path: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/${id}`,
+    method: 'delete',
     version: API_VERSIONS.public.v1,
   });
 };

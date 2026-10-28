@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, act, within } from '@testing-library/react';
+import { screen, act, within, waitFor } from '@testing-library/react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import type { CloudOnboardingDeploymentListItem } from '../../../../../../../../common/types';
@@ -14,13 +14,30 @@ import type { CloudOnboardingDeploymentListItem } from '../../../../../../../../
 import { InstancesTable } from './instances_table';
 
 const mockNavigateToApp = jest.fn();
+const mockAddSuccess = jest.fn();
+const mockAddError = jest.fn();
 
 jest.mock('../../../../../../../hooks', () => {
   const originalModule = jest.requireActual('../../../../../../../hooks');
   return {
     ...originalModule,
-    useStartServices: jest.fn(() => ({ application: { navigateToApp: mockNavigateToApp } })),
+    useStartServices: jest.fn(() => ({
+      application: { navigateToApp: mockNavigateToApp },
+      notifications: { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } },
+    })),
+    useAuthz: jest.fn(),
+    sendDeleteCloudOnboardingDeployment: jest.fn(),
   };
+});
+
+import { sendDeleteCloudOnboardingDeployment, useAuthz } from '../../../../../../../hooks';
+
+const mockUseAuthz = useAuthz as jest.Mock;
+const mockSendDelete = sendDeleteCloudOnboardingDeployment as jest.Mock;
+
+const authzWith = ({ allAgentPolicies = false, allIntegrations = false } = {}) => ({
+  fleet: { allAgentPolicies },
+  integrations: { all: allIntegrations },
 });
 
 const makeInstance = (
@@ -58,6 +75,8 @@ describe('InstancesTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAuthz.mockReturnValue(authzWith({ allAgentPolicies: true }));
+    mockSendDelete.mockResolvedValue({ id: 'deployment-1' });
   });
 
   it('renders one row per instance with its name, user and agents', () => {
@@ -170,6 +189,87 @@ describe('InstancesTable', () => {
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
       path: '/aws?deploymentId=deployment-1',
+    });
+  });
+
+  describe('delete action', () => {
+    const openDeleteModal = async () => {
+      await act(async () => {
+        screen.getByTestId('deleteInstanceAction').click();
+      });
+      return screen.getByTestId('deleteInstanceModal');
+    };
+
+    it.each([
+      ['agent policies', { allAgentPolicies: true }],
+      ['integrations', { allIntegrations: true }],
+    ])('is offered with write access to %s', (_, access) => {
+      mockUseAuthz.mockReturnValue(authzWith(access));
+      renderTable([makeInstance()]);
+
+      expect(screen.getByTestId('deleteInstanceAction')).toBeInTheDocument();
+    });
+
+    it('is not offered without write access', () => {
+      mockUseAuthz.mockReturnValue(authzWith());
+      renderTable([makeInstance()]);
+
+      expect(screen.queryByTestId('deleteInstanceAction')).not.toBeInTheDocument();
+    });
+
+    it('asks for confirmation and explains what is kept', async () => {
+      renderTable([makeInstance()]);
+
+      const modal = await openDeleteModal();
+
+      expect(within(modal).getByText('Delete instance AWS-collection-1?')).toBeInTheDocument();
+      expect(
+        within(modal).getByText(/are not removed and keep collecting data/)
+      ).toBeInTheDocument();
+      expect(mockSendDelete).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when cancelled', async () => {
+      renderTable([makeInstance()]);
+      const modal = await openDeleteModal();
+
+      await act(async () => {
+        within(modal).getByTestId('confirmModalCancelButton').click();
+      });
+
+      expect(screen.queryByTestId('deleteInstanceModal')).not.toBeInTheDocument();
+      expect(mockSendDelete).not.toHaveBeenCalled();
+    });
+
+    it('deletes the instance on confirm and closes the modal', async () => {
+      renderTable([makeInstance()]);
+      const modal = await openDeleteModal();
+
+      await act(async () => {
+        within(modal).getByTestId('confirmModalConfirmButton').click();
+      });
+
+      expect(mockSendDelete).toHaveBeenCalledWith('deployment-1');
+      expect(mockAddSuccess).toHaveBeenCalledWith('Deleted instance AWS-collection-1');
+      await waitFor(() =>
+        expect(screen.queryByTestId('deleteInstanceModal')).not.toBeInTheDocument()
+      );
+    });
+
+    it('shows an error and keeps the modal open when the delete fails', async () => {
+      const error = new Error('boom');
+      mockSendDelete.mockRejectedValue(error);
+      renderTable([makeInstance()]);
+      const modal = await openDeleteModal();
+
+      await act(async () => {
+        within(modal).getByTestId('confirmModalConfirmButton').click();
+      });
+
+      expect(mockAddError).toHaveBeenCalledWith(error, {
+        title: 'Could not delete instance AWS-collection-1',
+      });
+      expect(screen.getByTestId('deleteInstanceModal')).toBeInTheDocument();
     });
   });
 });

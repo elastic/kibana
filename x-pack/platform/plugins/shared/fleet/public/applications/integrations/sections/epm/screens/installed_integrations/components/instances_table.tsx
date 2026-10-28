@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useQueryClient } from '@kbn/react-query';
 import { EuiBasicTable, EuiLink, EuiToolTip } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,13 +16,22 @@ import type {
   CloudOnboardingDeploymentListItem,
   DeploymentMethod,
 } from '../../../../../../../../common/types';
-import { useStartServices } from '../../../../../../../hooks';
+import {
+  sendDeleteCloudOnboardingDeployment,
+  useAuthz,
+  useStartServices,
+} from '../../../../../../../hooks';
 import {
   ONBOARDING_APP_ID,
   ONBOARDING_AWS_PATH,
 } from '../../../../../../../services/aws_onboarding_override';
 
+import { DeleteInstanceModal } from './delete_instance_modal';
+
 const EMPTY_CELL = '-';
+
+const getInstanceName = (item: CloudOnboardingDeploymentListItem) =>
+  item.integrationName || item.deploymentName || item.id;
 
 const DEPLOYMENT_METHOD_LABELS: Record<DeploymentMethod, string> = {
   managed_integration: i18n.translate(
@@ -80,7 +90,37 @@ export const InstancesTable: React.FunctionComponent<{
   /** The package being viewed, whose deployed version the Version column shows. */
   packageName: string;
 }> = ({ instances, packageName }) => {
-  const { application } = useStartServices();
+  const { application, notifications } = useStartServices();
+  const authz = useAuthz();
+  // Matches the authz of DELETE /api/fleet/cloud_onboarding_deployments/{id}.
+  const canDelete = authz.fleet.allAgentPolicies || authz.integrations.all;
+  const queryClient = useQueryClient();
+  const [instanceToDelete, setInstanceToDelete] =
+    useState<CloudOnboardingDeploymentListItem | null>(null);
+
+  const deleteInstance = useCallback(
+    async (instance: CloudOnboardingDeploymentListItem) => {
+      try {
+        await sendDeleteCloudOnboardingDeployment(instance.id);
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.deleteSuccess', {
+            defaultMessage: 'Deleted instance {instanceName}',
+            values: { instanceName: getInstanceName(instance) },
+          })
+        );
+        setInstanceToDelete(null);
+        await queryClient.invalidateQueries({ queryKey: ['cloud_onboarding_deployments'] });
+      } catch (error) {
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.deleteError', {
+            defaultMessage: 'Could not delete instance {instanceName}',
+            values: { instanceName: getInstanceName(instance) },
+          }),
+        });
+      }
+    },
+    [notifications, queryClient]
+  );
 
   // No `newSession` state: `deploymentId` makes the onboarding app hydrate from that session.
   const openInstance = useCallback(
@@ -100,7 +140,7 @@ export const InstancesTable: React.FunctionComponent<{
       }),
       render: (_: unknown, item: CloudOnboardingDeploymentListItem) => (
         <EuiLink onClick={() => openInstance(item.id)} data-test-subj="instanceLink">
-          {item.integrationName || item.deploymentName || item.id}
+          {getInstanceName(item)}
         </EuiLink>
       ),
     },
@@ -163,17 +203,55 @@ export const InstancesTable: React.FunctionComponent<{
       }),
       render: (agentCount: number) => (agentCount > 0 ? agentCount : EMPTY_CELL),
     },
+    ...(canDelete
+      ? [
+          {
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.actionsColumn', {
+              defaultMessage: 'Actions',
+            }),
+            actions: [
+              {
+                name: i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.instances.deleteAction',
+                  { defaultMessage: 'Delete instance' }
+                ),
+                description: i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.instances.deleteActionDescription',
+                  { defaultMessage: 'Delete this instance' }
+                ),
+                icon: 'trash' as const,
+                type: 'icon' as const,
+                color: 'danger' as const,
+                onClick: (item: CloudOnboardingDeploymentListItem) => setInstanceToDelete(item),
+                'data-test-subj': 'deleteInstanceAction',
+              },
+            ],
+          },
+        ]
+      : []),
   ];
 
   return (
-    <EuiBasicTable
-      items={instances}
-      itemId="id"
-      columns={columns}
-      tableCaption={i18n.translate('xpack.fleet.epmInstalledIntegrations.instances.tableCaption', {
-        defaultMessage: 'Instances',
-      })}
-      rowProps={{ 'data-test-subj': 'instancesTableRow' }}
-    />
+    <>
+      <EuiBasicTable
+        items={instances}
+        itemId="id"
+        columns={columns}
+        tableCaption={i18n.translate(
+          'xpack.fleet.epmInstalledIntegrations.instances.tableCaption',
+          {
+            defaultMessage: 'Instances',
+          }
+        )}
+        rowProps={{ 'data-test-subj': 'instancesTableRow' }}
+      />
+      {instanceToDelete ? (
+        <DeleteInstanceModal
+          instanceName={getInstanceName(instanceToDelete)}
+          onClose={() => setInstanceToDelete(null)}
+          onConfirm={() => deleteInstance(instanceToDelete)}
+        />
+      ) : null}
+    </>
   );
 };
