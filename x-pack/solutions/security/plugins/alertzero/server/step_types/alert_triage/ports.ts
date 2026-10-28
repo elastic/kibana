@@ -11,6 +11,7 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   ALERT_FETCH_LIMIT,
+  TAG_CHUNK_SIZE,
   ALERT_SEVERITIES,
   BATCH_ALERT_CAP,
   OPEN_ALERT_STATUSES,
@@ -346,9 +347,37 @@ export const tagAlerts =
  * Closes alerts as false positives, the reason the closure action records. Throws unless every
  * alert was updated: a close that was only partly applied must not be reported as done.
  */
-export const closeAlertsAsFalsePositive = async (
+export const closeAlertsAsFalsePositive = (api: KibanaApi, alertIds: readonly string[]) =>
+  updateAlertStatus(api, alertIds, { status: 'closed', reason: 'false_positive' });
+
+/** Reopens alerts, in the chunks the status route takes. Throws unless every alert was updated. */
+export const openAlerts = async (api: KibanaApi, alertIds: readonly string[]): Promise<void> => {
+  for (let from = 0; from < alertIds.length; from += TAG_CHUNK_SIZE) {
+    await updateAlertStatus(api, alertIds.slice(from, from + TAG_CHUNK_SIZE), { status: 'open' });
+  }
+};
+
+/** The ids of the alerts that carry a tag, up to one page. Used by revoke to find what to put back. */
+export const findAlertIdsByTag = async (
   { callKibanaApi }: KibanaApi,
-  alertIds: readonly string[]
+  tag: string
+): Promise<string[]> => {
+  const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: ALERT_FETCH_LIMIT,
+      _source: false,
+      query: { bool: { filter: [{ term: { [ALERT_FIELDS.tags]: tag } }] } },
+    },
+  });
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+};
+
+const updateAlertStatus = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[],
+  change: { status: 'open' | 'closed'; reason?: 'false_positive' }
 ): Promise<void> => {
   const { body } = await callKibanaApi<{
     updated?: number;
@@ -357,12 +386,12 @@ export const closeAlertsAsFalsePositive = async (
   }>({
     method: 'POST',
     path: SIGNALS_STATUS_PATH,
-    body: { signal_ids: alertIds, status: 'closed', reason: 'false_positive' },
+    body: { signal_ids: alertIds, ...change },
   });
   const failureCount = body.failures?.length ?? 0;
   if (failureCount > 0 || (body.updated ?? 0) < alertIds.length) {
     throw new Error(
-      `Closing ${alertIds.length} alert(s) was not fully applied (updated: ${
+      `Setting ${alertIds.length} alert(s) to ${change.status} was not fully applied (updated: ${
         body.updated ?? 0
       }, conflicts: ${body.version_conflicts ?? 0}, failures: ${failureCount})`
     );

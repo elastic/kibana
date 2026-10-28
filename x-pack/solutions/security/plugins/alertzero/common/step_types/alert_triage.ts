@@ -19,6 +19,7 @@ export const TRIAGE_JOIN_PROPOSAL_STEP_ID = 'alertzero.triage.joinProposal' as c
 export const TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID = 'alertzero.triage.retagProposalAlerts' as const;
 export const TRIAGE_STORE_FP_DECISIONS_STEP_ID = 'alertzero.triage.storeFpDecisions' as const;
 export const TRIAGE_MATCH_FP_DECISIONS_STEP_ID = 'alertzero.triage.matchFpDecisions' as const;
+export const TRIAGE_REVOKE_FP_DECISION_STEP_ID = 'alertzero.triage.revokeFpDecision' as const;
 
 const idSchema = z.string().trim().min(1).max(256);
 
@@ -552,4 +553,51 @@ export const triageMatchFpDecisionsStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: matchFpDecisionsInputSchema,
   outputSchema: matchFpDecisionsOutputSchema,
+};
+
+export const REVOKE_FP_DECISION_STATUSES = ['ok', 'disabled', 'not_found'] as const;
+
+const revokeFpDecisionInputSchema = lazySchema(() =>
+  z.object({
+    decision_id: z
+      .string()
+      .regex(/^fp-(decision|dismissal)-[0-9a-f]{16}$/)
+      .describe('Id of the decision: `fp-decision-<hash>` or `fp-dismissal-<hash>`.'),
+  })
+);
+
+const revokeFpDecisionOutputSchema = lazySchema(() =>
+  z.object({
+    status: z
+      .enum(REVOKE_FP_DECISION_STATUSES)
+      .describe(
+        '`disabled` when the Context Engine is off in the space, `not_found` when no such decision exists. Its alerts are still put back.'
+      ),
+    alerts_reopened: z.number().describe('Alerts the decision closed that were reopened.'),
+    alerts_released: z
+      .number()
+      .describe('Alerts the decision kept out of analysis that went back to the backlog.'),
+    failures: z.number().describe('Steps of the revoke that failed. Run it again to finish.'),
+  })
+);
+
+export const triageRevokeFpDecisionStepCommonDefinition: CommonStepDefinition<
+  typeof revokeFpDecisionInputSchema,
+  typeof revokeFpDecisionOutputSchema
+> = {
+  id: TRIAGE_REVOKE_FP_DECISION_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageRevokeFpDecision.label', {
+    defaultMessage: 'Revoke a triage decision',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageRevokeFpDecision.description',
+    {
+      defaultMessage:
+        'Deletes a triage decision and puts back the alerts it closed or kept out of analysis.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: revokeFpDecisionInputSchema,
+  outputSchema: revokeFpDecisionOutputSchema,
 };

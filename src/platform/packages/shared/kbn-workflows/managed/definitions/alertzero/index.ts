@@ -35,6 +35,7 @@ import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_
 import { ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID } from './floor_alert_triage';
 import { ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID } from './floor_alert_triage_batch';
 import { ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID } from './floor_alert_triage_review';
+import { ALERTZERO_FLOOR_ALERT_TRIAGE_REVOKE_DECISION_WORKFLOW_ID } from './floor_alert_triage_revoke_decision';
 import { ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID } from './floor_attack_discovery';
 import { ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID } from './forensics_close_investigation_gate';
 import { ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_endpoint_analysis';
@@ -177,6 +178,10 @@ export {
   ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
 } from './floor_alert_triage_review';
 export {
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVOKE_DECISION_WORKFLOW,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVOKE_DECISION_WORKFLOW_ID,
+} from './floor_alert_triage_revoke_decision';
+export {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW,
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
 } from './floor_attack_discovery';
@@ -248,12 +253,14 @@ export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * The batch and the closure review the per-space Alert Triage sweep starts. Installed globally so
+ * The batch and the closure review the per-space Alert Triage sweep starts, and the revoke workflow
+ * that takes back a decision. Installed globally so
  * every space's sweep shares one copy; each inherits the starting workflow's space at run time.
  */
 export const ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS = [
   ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID,
   ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID,
+  ALERTZERO_FLOOR_ALERT_TRIAGE_REVOKE_DECISION_WORKFLOW_ID,
 ] as const;
 
 /**
