@@ -353,7 +353,7 @@ export const ALERTING_LOG_CODES = {
   /**
    * Publishing one alert-action domain event failed. The action is already
    * persisted, so the publisher logs the failure and continues with the rest
-   * of the batch, including telemetry.
+   * of the batch.
    */
   EVENTS_ALERT_ACTION_PUBLISH_FAILED: 'EVENTS_ALERT_ACTION_PUBLISH_FAILED',
 

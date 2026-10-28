@@ -9,8 +9,6 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AlertAction } from '../../../resources/datastreams/alert_actions';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
-import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
-import { ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE } from '../../telemetry/alert_action_ebt_event';
 import type { EventBus } from '../event_bus';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createAlertActionEventPublisher } from './alert_action_event_publisher.mock';
@@ -68,12 +66,11 @@ describe('AlertActionEventPublisher', () => {
 
   let publisher: AlertActionEventPublisher;
   let eventBus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
-  let ebtService: jest.Mocked<EbtServiceContract>;
   let mockLogger: jest.Mocked<Logger>;
   let request: KibanaRequest;
 
   beforeEach(() => {
-    ({ publisher, eventBus, ebtService, mockLogger } = createAlertActionEventPublisher());
+    ({ publisher, eventBus, mockLogger } = createAlertActionEventPublisher());
     request = httpServerMock.createKibanaRequest();
   });
 
@@ -310,125 +307,16 @@ describe('AlertActionEventPublisher', () => {
     });
   });
 
-  describe('telemetry', () => {
-    const apiOrigin = { actor: 'user', channel: 'api' } as const;
+  describe('origin', () => {
+    const publishedOrigin = () => eventBus.publish.mock.calls[0]?.[1]?.origin;
 
-    it('reports one event with alert_count 1 for a single action', () => {
+    it('publishes channel api when the request has no UI headers', () => {
       publisher.emitEpisodeActions(request, [createAction({ action_type: 'ack' })]);
 
-      expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
-      expect(ebtService.reportEvent).toHaveBeenCalledWith(
-        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        {
-          space_id: 'default',
-          rule_id: 'rule-1',
-          origin: apiOrigin,
-          alert_count: 1,
-        }
-      );
+      expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'api' });
     });
 
-    it('reports one event whose alert_count is the number of actions for one rule', () => {
-      publisher.emitEpisodeActions(request, [
-        createAction({ action_type: 'ack', alert_id: 'episode-1' }),
-        createAction({ action_type: 'ack', alert_id: 'episode-2' }),
-        createAction({ action_type: 'ack', alert_id: 'episode-3' }),
-      ]);
-
-      expect(eventBus.publish).toHaveBeenCalledTimes(3);
-      expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
-      expect(ebtService.reportEvent).toHaveBeenCalledWith(
-        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        expect.objectContaining({ rule_id: 'rule-1', alert_count: 3 })
-      );
-    });
-
-    // Documented contract: alert_count is the successful items for that rule,
-    // not the size of the whole API call.
-    it('reports one event per rule in a batch', () => {
-      publisher.emitEpisodeActions(request, [
-        createAction({ action_type: 'ack', rule_id: 'rule-a', alert_id: 'episode-1' }),
-        createAction({ action_type: 'ack', rule_id: 'rule-a', alert_id: 'episode-2' }),
-        createAction({ action_type: 'ack', rule_id: 'rule-b', alert_id: 'episode-3' }),
-      ]);
-
-      expect(ebtService.reportEvent.mock.calls.map((call) => call[1])).toEqual([
-        {
-          space_id: 'default',
-          rule_id: 'rule-a',
-          origin: apiOrigin,
-          alert_count: 2,
-        },
-        {
-          space_id: 'default',
-          rule_id: 'rule-b',
-          origin: apiOrigin,
-          alert_count: 1,
-        },
-      ]);
-    });
-
-    it('reports assign and clear-assignee as one assign event', () => {
-      publisher.emitEpisodeActions(request, [
-        createAction({ action_type: 'assign', assignee_uid: 'user-uid-1' }),
-        createAction({ action_type: 'assign', assignee_uid: null, alert_id: 'episode-2' }),
-      ]);
-
-      expect(eventBus.publish).toHaveBeenCalledTimes(2);
-      expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
-      expect(ebtService.reportEvent).toHaveBeenCalledWith(
-        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.assign,
-        {
-          space_id: 'default',
-          rule_id: 'rule-1',
-          origin: apiOrigin,
-          alert_count: 2,
-        }
-      );
-    });
-
-    it('omits rule_id when the alert has no rule id', () => {
-      publisher.emitEpisodeActions(request, [createAction({ action_type: 'ack', rule_id: null })]);
-
-      expect(ebtService.reportEvent).toHaveBeenCalledWith(
-        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        {
-          space_id: 'default',
-          origin: apiOrigin,
-          alert_count: 1,
-        }
-      );
-    });
-
-    it('does not report an unknown action type', () => {
-      publisher.emitEpisodeActions(request, [createAction({ action_type: 'unknown' })]);
-
-      expect(ebtService.reportEvent).not.toHaveBeenCalled();
-    });
-
-    it('does not count an unknown action toward alert_count', () => {
-      publisher.emitEpisodeActions(request, [
-        createAction({ action_type: 'unknown' }),
-        createAction({ action_type: 'ack', alert_id: 'episode-2' }),
-      ]);
-
-      expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
-      expect(ebtService.reportEvent).toHaveBeenCalledWith(
-        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        expect.objectContaining({ alert_count: 1 })
-      );
-    });
-
-    it('reports channel api when the request has no UI headers', () => {
-      publisher.emitEpisodeActions(request, [createAction({ action_type: 'ack' })]);
-
-      expect(ebtService.reportEvent).toHaveBeenCalledWith(
-        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        expect.objectContaining({ origin: { actor: 'user', channel: 'api' } })
-      );
-    });
-
-    it('reports channel ui and the execution-context app for a browser request', () => {
+    it('publishes channel ui and the execution-context app for a browser request', () => {
       const uiRequest = createRequest({
         ...UI_HEADERS,
         'x-kbn-context': executionContextHeader({ name: 'observability' }),
@@ -436,12 +324,11 @@ describe('AlertActionEventPublisher', () => {
 
       publisher.emitEpisodeActions(uiRequest, [createAction({ action_type: 'ack' })]);
 
-      expect(ebtService.reportEvent).toHaveBeenCalledWith(
-        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        expect.objectContaining({
-          origin: { actor: 'user', channel: 'ui', app: 'observability' },
-        })
-      );
+      expect(publishedOrigin()).toEqual({
+        actor: 'user',
+        channel: 'ui',
+        app: 'observability',
+      });
     });
 
     it('omits origin.app when a UI request has no execution context', () => {
@@ -449,9 +336,8 @@ describe('AlertActionEventPublisher', () => {
         createAction({ action_type: 'ack' }),
       ]);
 
-      const payload = ebtService.reportEvent.mock.calls[0]?.[1] as { origin: { app?: string } };
-      expect(payload.origin).toEqual({ actor: 'user', channel: 'ui' });
-      expect(payload.origin).not.toHaveProperty('app');
+      expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'ui' });
+      expect(publishedOrigin()).not.toHaveProperty('app');
     });
 
     it('omits origin.app when the execution-context app fails validation', () => {
@@ -462,22 +348,20 @@ describe('AlertActionEventPublisher', () => {
 
       publisher.emitEpisodeActions(uiRequest, [createAction({ action_type: 'ack' })]);
 
-      const payload = ebtService.reportEvent.mock.calls[0]?.[1] as { origin: { app?: string } };
-      expect(payload.origin).toEqual({ actor: 'user', channel: 'ui' });
+      expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'ui' });
     });
 
-    it('reports a fake request as internal on the system channel', () => {
+    it('publishes a fake request as internal on the system channel', () => {
       publisher.emitEpisodeActions(createRequest({}, { isFakeRequest: true }), [
         createAction({ action_type: 'ack' }),
       ]);
 
-      expect(ebtService.reportEvent).toHaveBeenCalledWith(
-        ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        expect.objectContaining({ origin: { actor: 'internal', channel: 'system' } })
-      );
+      expect(publishedOrigin()).toEqual({ actor: 'internal', channel: 'system' });
     });
+  });
 
-    it('still reports telemetry when publishing a domain event throws', () => {
+  describe('publish failures', () => {
+    it('logs and continues when publishing a domain event throws', () => {
       eventBus.publish.mockImplementation(() => {
         throw new Error('bus down');
       });
@@ -486,36 +370,11 @@ describe('AlertActionEventPublisher', () => {
         publisher.emitEpisodeActions(request, [createAction({ action_type: 'ack' })])
       ).not.toThrow();
 
-      expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Failed to publish alert action domain event',
         expect.objectContaining({
           labels: expect.objectContaining({
             code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_PUBLISH_FAILED,
-          }),
-        })
-      );
-    });
-
-    it('logs a telemetry failure and still publishes the domain event', () => {
-      const failure = new Error('telemetry down');
-      ebtService.reportEvent.mockImplementation(() => {
-        throw failure;
-      });
-
-      expect(() =>
-        publisher.emitEpisodeActions(request, [createAction({ action_type: 'ack' })])
-      ).not.toThrow();
-
-      expect(eventBus.publish).toHaveBeenCalledTimes(1);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Failed to report alert action telemetry',
-        expect.objectContaining({
-          labels: expect.objectContaining({
-            code: ALERTING_LOG_CODES.TELEMETRY_EBT_REPORT_FAILED,
-          }),
-          error: expect.objectContaining({
-            stack_trace: expect.stringContaining('telemetry down'),
           }),
         })
       );

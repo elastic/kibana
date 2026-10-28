@@ -15,9 +15,6 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
-import { EbtServiceToken } from '../../services/ebt_service/tokens';
-import { reportAppliedAlertActions } from '../../telemetry/alert_action_ebt_event';
 import type { EventBus } from '../event_bus';
 import {
   AlertingDomainEventBusToken,
@@ -67,9 +64,6 @@ export interface AlertActionEventPublisherContract {
  * alongside the publishing `KibanaRequest` as the bus's
  * {@link AlertingPublisherContext}.
  *
- * After the per-alert domain events, it reports one EBT event per action type,
- * space, and rule through {@link reportAppliedAlertActions}.
- *
  * Publishing is fire-and-forget — `publish` returns synchronously and
  * subscriber work runs on the next event-loop iteration. See
  * {@link EventBus} for the dispatch contract.
@@ -87,8 +81,7 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
   constructor(
     @inject(AlertingDomainEventBusToken)
     private readonly eventBus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
-    @inject(EbtServiceToken) private readonly ebtService: EbtServiceContract
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.logger = loggerService.forSubsystem('events');
   }
@@ -111,24 +104,6 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
           code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_PUBLISH_FAILED,
         });
       }
-    }
-
-    try {
-      reportAppliedAlertActions(
-        this.ebtService,
-        actions.map((action) => ({
-          actionType: action.action_type,
-          spaceId: action.space_id,
-          ruleId: action.rule_id,
-        })),
-        context.origin
-      );
-    } catch (error) {
-      this.logger.error({
-        message: () => 'Failed to report alert action telemetry',
-        error,
-        code: ALERTING_LOG_CODES.TELEMETRY_EBT_REPORT_FAILED,
-      });
     }
   }
 

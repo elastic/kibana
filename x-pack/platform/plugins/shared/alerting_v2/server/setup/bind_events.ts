@@ -10,6 +10,7 @@ import { AsyncDomainEventBus } from '../lib/events/event_bus';
 import { AlertingDomainEventBusToken } from '../lib/events/domain_events';
 import { AlertActionEventPublisher } from '../lib/events/alert_action_event_publisher/alert_action_event_publisher';
 import { AlertActionWorkflowSubscriber } from '../lib/events/alert_action_workflow_subscriber/alert_action_workflow_subscriber';
+import { AlertActionTelemetrySubscriber } from '../lib/events/alert_action_telemetry_subscriber/alert_action_telemetry_subscriber';
 import { RuleEventPublisher } from '../lib/events/rule_event_publisher/rule_event_publisher';
 import { RuleWorkflowSubscriber } from '../lib/events/rule_workflow_subscriber/rule_workflow_subscriber';
 import { RuleChangesHistorySubscriber } from '../lib/events/rule_changes_history_subscriber/rule_changes_history_subscriber';
@@ -20,10 +21,8 @@ import { RuleExecutorWorkflowSubscriber } from '../lib/events/rule_executor_work
 /**
  * DI bindings for the in-process event subsystem.
  *
- * Future subscribers (event log, telemetry, …) and additional publishers
- * (rule executor, dispatcher) should be registered here so the events
- * subsystem's wiring lives in a single place, parallel to its code in
- * `lib/events/`.
+ * Register publishers and subscribers here so the events subsystem's wiring
+ * lives in one place, next to its code in `lib/events/`.
  *
  * Subscribers are wired as singletons but are NOT activated here —
  * `start()` is called from `bindOnStart` so subscriptions only attach
@@ -39,6 +38,7 @@ export const bindEvents = ({ bind }: ContainerModuleLoadOptions) => {
    */
   bind(AlertActionEventPublisher).toSelf().inSingletonScope();
   bind(AlertActionWorkflowSubscriber).toSelf().inSingletonScope();
+  bind(AlertActionTelemetrySubscriber).toSelf().inSingletonScope();
 
   /**
    * Rule event publishers and subscribers.

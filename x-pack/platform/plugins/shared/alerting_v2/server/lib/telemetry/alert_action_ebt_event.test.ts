@@ -23,6 +23,7 @@ const action = (overrides: Partial<AppliedAlertAction> = {}): AppliedAlertAction
   actionType: 'ack',
   spaceId: 'default',
   ruleId: 'rule-1',
+  origin: apiUserOrigin,
   ...overrides,
 });
 
@@ -85,10 +86,12 @@ describe('alert action EBT events', () => {
 describe('buildAlertActionAppliedEventData', () => {
   it('projects space id, rule id, origin, and alert count', () => {
     expect(
-      buildAlertActionAppliedEventData(
-        { spaceId: 'default', ruleId: 'rule-1', alertCount: 3 },
-        apiUserOrigin
-      )
+      buildAlertActionAppliedEventData({
+        spaceId: 'default',
+        ruleId: 'rule-1',
+        origin: apiUserOrigin,
+        alertCount: 3,
+      })
     ).toEqual({
       space_id: 'default',
       rule_id: 'rule-1',
@@ -98,10 +101,12 @@ describe('buildAlertActionAppliedEventData', () => {
   });
 
   it('omits rule_id when the alert has no rule id', () => {
-    const data = buildAlertActionAppliedEventData(
-      { spaceId: 'default', ruleId: null, alertCount: 1 },
-      apiUserOrigin
-    );
+    const data = buildAlertActionAppliedEventData({
+      spaceId: 'default',
+      ruleId: null,
+      origin: apiUserOrigin,
+      alertCount: 1,
+    });
 
     expect(data).toEqual({
       space_id: 'default',
@@ -113,10 +118,12 @@ describe('buildAlertActionAppliedEventData', () => {
 
   it('keeps origin.app when the origin has one', () => {
     expect(
-      buildAlertActionAppliedEventData(
-        { spaceId: 'default', ruleId: 'rule-1', alertCount: 1 },
-        { actor: 'user', channel: 'ui', app: 'observability' }
-      ).origin
+      buildAlertActionAppliedEventData({
+        spaceId: 'default',
+        ruleId: 'rule-1',
+        origin: { actor: 'user', channel: 'ui', app: 'observability' },
+        alertCount: 1,
+      }).origin
     ).toEqual({ actor: 'user', channel: 'ui', app: 'observability' });
   });
 });
@@ -129,16 +136,12 @@ describe('reportAppliedAlertActions', () => {
   });
 
   it('reports one event per action type and rule', () => {
-    reportAppliedAlertActions(
-      ebtService,
-      [
-        action({ actionType: 'ack', ruleId: 'rule-a' }),
-        action({ actionType: 'ack', ruleId: 'rule-a' }),
-        action({ actionType: 'ack', ruleId: 'rule-b' }),
-        action({ actionType: 'snooze', ruleId: 'rule-a' }),
-      ],
-      apiUserOrigin
-    );
+    reportAppliedAlertActions(ebtService, [
+      action({ actionType: 'ack', ruleId: 'rule-a' }),
+      action({ actionType: 'ack', ruleId: 'rule-a' }),
+      action({ actionType: 'ack', ruleId: 'rule-b' }),
+      action({ actionType: 'snooze', ruleId: 'rule-a' }),
+    ]);
 
     expect(ebtService.reportEvent.mock.calls).toEqual([
       [
@@ -172,11 +175,10 @@ describe('reportAppliedAlertActions', () => {
   });
 
   it('counts assign and clear-assignee as one assign event', () => {
-    reportAppliedAlertActions(
-      ebtService,
-      [action({ actionType: 'assign' }), action({ actionType: 'assign' })],
-      apiUserOrigin
-    );
+    reportAppliedAlertActions(ebtService, [
+      action({ actionType: 'assign' }),
+      action({ actionType: 'assign' }),
+    ]);
 
     expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
     expect(ebtService.reportEvent).toHaveBeenCalledWith('alerting_v2_alert_assign_action_applied', {
@@ -188,11 +190,11 @@ describe('reportAppliedAlertActions', () => {
   });
 
   it('omits rule_id for the group of alerts that have none', () => {
-    reportAppliedAlertActions(
-      ebtService,
-      [action({ ruleId: 'rule-1' }), action({ ruleId: null }), action({ ruleId: null })],
-      apiUserOrigin
-    );
+    reportAppliedAlertActions(ebtService, [
+      action({ ruleId: 'rule-1' }),
+      action({ ruleId: null }),
+      action({ ruleId: null }),
+    ]);
 
     expect(ebtService.reportEvent.mock.calls.map((call) => call[1])).toEqual([
       {
@@ -210,16 +212,39 @@ describe('reportAppliedAlertActions', () => {
   });
 
   it('does not report an unknown action type', () => {
-    reportAppliedAlertActions(
-      ebtService,
-      [action({ actionType: 'unknown' }), action({ actionType: 'ack' })],
-      apiUserOrigin
-    );
+    reportAppliedAlertActions(ebtService, [
+      action({ actionType: 'unknown' }),
+      action({ actionType: 'ack' }),
+    ]);
 
     expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
     expect(ebtService.reportEvent).toHaveBeenCalledWith(
       'alerting_v2_alert_ack_action_applied',
       expect.objectContaining({ alert_count: 1 })
     );
+  });
+
+  it('reports one event per space', () => {
+    reportAppliedAlertActions(ebtService, [
+      action({ spaceId: 'default' }),
+      action({ spaceId: 'default' }),
+      action({ spaceId: 'space-b' }),
+    ]);
+
+    expect(ebtService.reportEvent.mock.calls.map((call) => call[1])).toEqual([
+      expect.objectContaining({ space_id: 'default', alert_count: 2 }),
+      expect.objectContaining({ space_id: 'space-b', alert_count: 1 }),
+    ]);
+  });
+
+  it('keeps actions with different origins in separate events', () => {
+    const internalOrigin = { actor: 'internal', channel: 'system' } as const;
+
+    reportAppliedAlertActions(ebtService, [action(), action({ origin: internalOrigin })]);
+
+    expect(ebtService.reportEvent.mock.calls.map((call) => call[1])).toEqual([
+      expect.objectContaining({ origin: apiUserOrigin, alert_count: 1 }),
+      expect.objectContaining({ origin: internalOrigin, alert_count: 1 }),
+    ]);
   });
 });

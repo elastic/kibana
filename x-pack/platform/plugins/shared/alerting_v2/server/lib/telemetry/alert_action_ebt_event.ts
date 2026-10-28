@@ -116,17 +116,19 @@ export const registerAlertActionTelemetryEvents = (analytics: AnalyticsServiceSe
   alertActionTelemetryEvents.forEach((eventConfig) => analytics.registerEventType(eventConfig));
 };
 
-/** A persisted alert action reduced to the fields telemetry is allowed to read. */
+/** An applied alert action reduced to the fields telemetry is allowed to read. */
 export interface AppliedAlertAction {
   readonly actionType: string;
   readonly spaceId: string;
   readonly ruleId: string | null;
+  readonly origin: EventOrigin;
 }
 
 interface AlertActionTelemetryGroup {
   actionType: AlertEpisodeActionType;
   spaceId: string;
   ruleId: string | null;
+  origin: EventOrigin;
   alertCount: number;
 }
 
@@ -136,14 +138,13 @@ const isReportedActionType = (actionType: string): actionType is AlertEpisodeAct
   reportedActionTypes.has(actionType);
 
 /**
- * One event per action type, space, and rule. A bulk call that spans rules
- * reports one event per rule, and `alert_count` is that group's size, so
+ * One event per action type, space, rule, and origin. A bulk call that spans
+ * rules reports one event per rule, and `alert_count` is that group's size, so
  * `rule_id` stays the rule that produced those alerts. Assign and
  * clear-assignee share `assign`.
  *
- * Action types outside {@link REPORTED_ALERT_ACTION_TYPES} are omitted. The
- * publisher already warns for those, and leaving them out keeps `alert_count`
- * equal to the reported actions rather than every persisted document.
+ * Action types outside {@link REPORTED_ALERT_ACTION_TYPES} are omitted, so
+ * `alert_count` counts reported actions only.
  */
 const groupAppliedAlertActions = (
   actions: readonly AppliedAlertAction[]
@@ -155,8 +156,11 @@ const groupAppliedAlertActions = (
       continue;
     }
 
-    // Action types, space ids, and rule ids cannot contain NUL.
-    const key = `${action.actionType}\0${action.spaceId}\0${action.ruleId ?? ''}`;
+    const { actor, channel, app = '' } = action.origin;
+    // Action types, space ids, rule ids, and origin fields cannot contain NUL.
+    const key = `${action.actionType}\0${action.spaceId}\0${
+      action.ruleId ?? ''
+    }\0${actor}\0${channel}\0${app}`;
     const existing = groups.get(key);
     if (existing) {
       existing.alertCount += 1;
@@ -167,6 +171,7 @@ const groupAppliedAlertActions = (
       actionType: action.actionType,
       spaceId: action.spaceId,
       ruleId: action.ruleId,
+      origin: action.origin,
       alertCount: 1,
     });
   }
@@ -176,25 +181,23 @@ const groupAppliedAlertActions = (
 
 /** Projects an alert-action telemetry payload. `rule_id` is omitted when it is null. */
 export const buildAlertActionAppliedEventData = (
-  group: Pick<AlertActionTelemetryGroup, 'spaceId' | 'ruleId' | 'alertCount'>,
-  origin: EventOrigin
+  group: Pick<AlertActionTelemetryGroup, 'spaceId' | 'ruleId' | 'origin' | 'alertCount'>
 ): AlertActionAppliedEbtData => ({
   space_id: group.spaceId,
   ...(group.ruleId != null ? { rule_id: group.ruleId } : {}),
-  origin,
+  origin: group.origin,
   alert_count: group.alertCount,
 });
 
-/** Reports one EBT event per action type, space, and rule for a persisted batch. */
+/** Reports one EBT event per action type, space, rule, and origin. */
 export const reportAppliedAlertActions = (
   ebtService: EbtServiceContract,
-  actions: readonly AppliedAlertAction[],
-  origin: EventOrigin
+  actions: readonly AppliedAlertAction[]
 ): void => {
   for (const group of groupAppliedAlertActions(actions)) {
     ebtService.reportEvent(
       ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE[group.actionType],
-      buildAlertActionAppliedEventData(group, origin)
+      buildAlertActionAppliedEventData(group)
     );
   }
 };
