@@ -109,7 +109,11 @@ test.describe(
         await expect
           .poll(
             async () => {
-              const { rawResponse } = await maps.getResponse('load join metrics (geo_shapes*)');
+              // the next line types a query
+              const { rawResponse } = await maps.getResponse(
+                'load join metrics (geo_shapes*)',
+                true
+              );
               return rawResponse.aggregations.join.buckets.length;
             },
             { timeout: 30_000 }

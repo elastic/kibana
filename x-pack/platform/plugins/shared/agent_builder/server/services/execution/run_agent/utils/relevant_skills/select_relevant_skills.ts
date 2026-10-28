@@ -76,6 +76,12 @@ const toRelevantSkill = (
   ...(relevanceNote ? { relevance_note: relevanceNote } : {}),
 });
 
+/** One earlier user message and, when the execution it started answered, that answer. */
+export interface RecentExchange {
+  input?: { message?: string };
+  response?: { message?: string };
+}
+
 /**
  * Builds a bounded, plain-text slice of recent conversation history to give the selector context
  * beyond the current message. Structurally typed so it accepts both raw and processed rounds, and
@@ -87,7 +93,7 @@ const toRelevantSkill = (
  * individually keeps every message represented; the maxChars value acts as a final backstop.
  */
 export const buildRecentContext = (
-  rounds: Array<{ input?: { message?: string }; response?: { message?: string } }>,
+  rounds: RecentExchange[],
   { maxChars = MAX_RECENT_CONTEXT_CHARS, maxRounds = MAX_RECENT_CONTEXT_ROUNDS } = {}
 ): string => {
   const recent = rounds.slice(-maxRounds);
@@ -146,8 +152,8 @@ export const selectRelevantSkills = async ({
   timeoutMs = RELEVANT_SKILLS_TIMEOUT_MS,
 }: SelectRelevantSkillsParams): Promise<RelevantSkillSelection> => {
   // Wrap the whole body (including the short-circuits, which call getSkillAbsolutePath) so this never
-  // throws: the eagerly-created promise in run_chat_agent must always resolve to a selection, never
-  // reject. On any failure we fall back to no notification.
+  // throws: the cycle hook and the search tool always get a selection. On any failure we fall back
+  // to no notification.
   try {
     if (skills.length === 0) {
       return { skills: [] };

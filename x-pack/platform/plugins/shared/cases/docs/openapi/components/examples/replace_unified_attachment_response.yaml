@@ -1,0 +1,27 @@
+summary: A replaced comment attachment.
+value:
+  {
+    "id": "8048b460-fe2b-11ec-b15d-779a7c8bbcc3",
+    "version": "WzI0LDFd",
+    "type": "comment",
+    "owner": "cases",
+    "data": {
+      "content": "An updated comment."
+    },
+    "created_at": "2026-09-30T19:32:13.104Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic",
+      "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+    },
+    "pushed_at": null,
+    "pushed_by": null,
+    "updated_at": "2026-10-01T08:45:21.512Z",
+    "updated_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic",
+      "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+    }
+  }

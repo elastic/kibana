@@ -20,6 +20,15 @@ export type {
   EvaluatorSummary,
   ModelConnectorSummary,
 } from './types';
+export type { EvaluateFn, EvaluateParams } from './evaluation/create_evaluate_contract';
+export { EvaluationExecutionError } from './evaluation/evaluation_execution_error';
+export type {
+  EvaluatorContext,
+  EvaluatorResult,
+  RegisteredEvaluatorDefinition,
+  TraceAccessor,
+} from './evaluators/types';
+export type { EvidenceRound, ToolCallEvidence } from './evaluators/evidence/types';
 
 export {
   generateExperimentRun,

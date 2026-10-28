@@ -17,6 +17,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
 import { PLUGIN_ID, PLUGIN_NAME, EVALS_API_PRIVILEGES, EVALS_UI_PRIVILEGES } from '../common';
 import type { EvalsConfig } from './config';
+import { createEvaluateContract } from './evaluation/create_evaluate_contract';
+import { createEvaluationService } from './evaluation/evaluation_service';
 import { createEvaluatorRegistry } from './evaluators/registry';
 import type { EvaluatorRegistry } from './evaluators/types';
 import {
@@ -53,6 +55,7 @@ export class EvalsPlugin
   private evaluationScoreService?: EvaluationScoreService;
   private evaluatorDefinitionService?: EvaluatorDefinitionService;
   private onlineScoreService?: OnlineScoreService;
+  private started = false;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -67,7 +70,12 @@ export class EvalsPlugin
     const { enabled, mode } = this.config;
     if (!enabled) {
       this.logger.info('Evals plugin is disabled');
-      return { enabled: false, mode, registerTaskProvider: () => {} };
+      return {
+        enabled: false,
+        mode,
+        registerTaskProvider: () => {},
+        registerEvaluator: () => {},
+      };
     }
 
     this.logger.info(`Setting up Evals plugin in ${mode} mode`);
@@ -90,6 +98,14 @@ export class EvalsPlugin
       enabled: true,
       mode,
       registerTaskProvider: (provider) => taskProviderRegistry.register(provider),
+      registerEvaluator: (definition) => {
+        if (this.started) {
+          throw new Error(
+            `Cannot register evaluator "${definition.name}": evaluators must be registered during setup`
+          );
+        }
+        evaluatorRegistry.register(definition);
+      },
     };
   }
 
@@ -97,17 +113,30 @@ export class EvalsPlugin
     if (!this.config.enabled) {
       return {};
     }
+    this.started = true;
 
     const evaluatorRegistry = this.evaluatorRegistry;
     if (!evaluatorRegistry) {
       throw new Error('Evaluator registry has not been initialized');
     }
 
+    // Runtime mode serves in-process callers, so `evaluate` is available in both modes.
+    const evaluate = createEvaluateContract({
+      evaluationService: createEvaluationService({
+        evaluatorRegistry,
+        logger: this.logger,
+        getInferenceStart: async () => plugins.inference,
+      }),
+      getSpaceId: (request) =>
+        plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      getTraceReader: (request) => coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+    });
+
     if (this.config.mode !== 'full') {
-      return {};
+      return { evaluate };
     }
 
-    return this.startFullProduct(coreStart, plugins, evaluatorRegistry);
+    return { ...this.startFullProduct(coreStart, plugins, evaluatorRegistry), evaluate };
   }
 
   stop() {}

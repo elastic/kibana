@@ -11,10 +11,23 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import { configSchema, type EvalsConfig } from './config';
 import { EvalsPlugin } from './plugin';
-import type { EvalsSetupDependencies, EvalsStartDependencies } from './types';
+import type { RegisteredEvaluatorDefinition } from './evaluators/types';
+import type { EvalsPluginSetup, EvalsSetupDependencies, EvalsStartDependencies } from './types';
+
+const RCA_QUALITY: RegisteredEvaluatorDefinition = {
+  name: 'nightshift_rca_quality',
+  version: '1.0.0',
+  kind: 'llm',
+  description: 'Grades a root cause analysis',
+  direction: 'maximize',
+  evaluate: jest.fn(),
+};
 
 describe('EvalsPlugin modes', () => {
-  const setup = (config: Partial<EvalsConfig>) => {
+  const setup = (
+    config: Partial<EvalsConfig>,
+    beforeStart: (setupContract: EvalsPluginSetup) => void = () => {}
+  ) => {
     const plugin = new EvalsPlugin(
       coreMock.createPluginInitializerContext({ enabled: true, mode: 'runtime', ...config })
     );
@@ -29,6 +42,7 @@ describe('EvalsPlugin modes', () => {
       inference: {} as InferenceServerSetup,
       workflowsExtensions,
     } as unknown as EvalsSetupDependencies);
+    beforeStart(setupContract);
     const startContract = plugin.start(coreMock.createStart(), {
       encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
       inference: {} as InferenceServerStart,
@@ -73,6 +87,26 @@ describe('EvalsPlugin modes', () => {
       expect(startContract.onlineScoreService).toBeUndefined();
       expect(startContract.listEvaluators).toBeUndefined();
     });
+
+    it('exposes evaluate(), which in-process callers such as Nightshift use', () => {
+      const { startContract } = setup({ mode: 'runtime' });
+
+      expect(startContract.evaluate).toEqual(expect.any(Function));
+    });
+
+    it('accepts evaluators registered during setup and refuses them after start', () => {
+      const { setupContract } = setup({ mode: 'runtime' }, (contract) => {
+        expect(() => contract.registerEvaluator(RCA_QUALITY)).not.toThrow();
+        // The registry's own validation runs, so registration reaches the real registry.
+        expect(() => contract.registerEvaluator({ ...RCA_QUALITY, name: 'correctness' })).toThrow(
+          'the name belongs to an evaluator that ships with Kibana'
+        );
+      });
+
+      expect(() => setupContract.registerEvaluator({ ...RCA_QUALITY, version: '2.0.0' })).toThrow(
+        'evaluators must be registered during setup'
+      );
+    });
   });
 
   describe('full', () => {
@@ -105,6 +139,7 @@ describe('EvalsPlugin modes', () => {
       expect(setupContract).toEqual(expect.objectContaining({ enabled: true, mode: 'full' }));
       expect(startContract.datasetService).toBeDefined();
       expect(startContract.listEvaluators).toBeDefined();
+      expect(startContract.evaluate).toEqual(expect.any(Function));
     });
   });
 

@@ -187,6 +187,26 @@ Each experiment runs one **task target** — the thing being evaluated for each 
 
 Other plugins can contribute their own production feature as an additional target, so the real feature — not a reimplementation — is what gets evaluated.
 
+## Registering evaluators from a plugin
+
+A plugin can ship its own evaluators through `registerEvaluator()` on the evals setup contract, so they live and version with the feature they grade.
+
+```ts
+evals.registerEvaluator({
+  name: 'nightshift_rca_quality',
+  version: '1.0.0',
+  kind: 'llm',
+  description: 'Grades a root cause analysis',
+  direction: 'maximize',
+  evaluate: async ({ round, inferenceClient }) => ({ scores: [/* ... */] }),
+});
+```
+
+- A registered evaluator is treated like the ones Kibana ships: it is listed and resolved as `built_in` in every space, and its name is reserved, so a user-defined evaluator can't be created under it or shadow it.
+- Names follow the same rules as user-defined ones, and versions must be semver. Registering several versions of one name is allowed; the latest is used unless a version is pinned.
+- Registration throws for a name Kibana ships, a name and version already registered, or a call made after setup.
+- Prefix names with the owning plugin, for example `nightshift_`. The registry can't tell which plugin registered a name, so two plugins could otherwise claim the same one. And when a registered name matches a user-defined evaluator already stored in a space, that stored evaluator is hidden and can no longer be updated or deleted, as happens for names Kibana ships.
+
 ## API routes
 
 All routes are internal (`elastic-api-version: 1`). Read routes require the `read_evals` privilege; write routes require `manage_evals`.
@@ -210,6 +230,23 @@ All routes are internal (`elastic-api-version: 1`). Read routes require the `rea
 - **Remotes** — manage remote Kibana configurations for dataset forwarding
 
 For full request/response schemas, see the OpenAPI definitions in [`@kbn/evals-common/impl/schemas/`](../../packages/shared/kbn-evals-common/impl/schemas/).
+
+### Evaluating in-process
+
+Server plugins can grade a trace without HTTP through `evaluate()` on the evals start contract. It runs the same evaluator execution as `_evaluate` and takes the same `subject` and `evaluators`, held to the same bounds.
+
+```ts
+const results = await evals.evaluate?.({
+  request,
+  subject: { traces: [{ trace_id: traceId }] },
+  evaluators: [{ name: 'groundedness', connector_id: judgeConnectorId }],
+});
+```
+
+- Evaluators are resolved in `spaceId` when given, otherwise in the request's space.
+- Traces are read as the request's current user, and judges call their connector on behalf of the request. Whenever a trace is read, that identity needs read access to `traces-*` and `logs-*`. For a workflow step, it is the identity behind the step's fake request.
+- Invalid input, an unknown evaluator, a trace that is not ready, or missing privileges to read the trace throws `EvaluationExecutionError`. A failing evaluator does not throw; it is returned as an `error` result next to the others.
+- A caller with read access to only some of the matching indices gets no privilege error, because Elasticsearch narrows wildcard searches to the indices it can read. Its trace can then look not ready instead (see [Reading normalized trace evidence](#reading-normalized-trace-evidence)).
 
 ## Dataset tags and maturity
 

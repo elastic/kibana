@@ -5,18 +5,39 @@
  * 2.0.
  */
 
-import type { ChatCompleteOptions, ChatCompleteAPI } from '@kbn/inference-common';
+import type {
+  ChatCompleteOptions,
+  ChatCompleteAPI,
+  FeatureChatCompleteAPI,
+  FeatureChatCompleteOptions,
+} from '@kbn/inference-common';
 import type { ChatCompleteApiWithCallback } from './callback_api';
+
+const isFeatureChatCompleteOptions = (
+  options: ChatCompleteOptions | FeatureChatCompleteOptions
+): options is FeatureChatCompleteOptions =>
+  'featureId' in options && options.featureId !== undefined;
 
 export function createChatCompleteApi(opts: {
   callbackApi: ChatCompleteApiWithCallback;
-}): ChatCompleteAPI;
+}): ChatCompleteAPI & FeatureChatCompleteAPI;
 export function createChatCompleteApi({
   callbackApi,
 }: {
   callbackApi: ChatCompleteApiWithCallback;
 }) {
-  return (options: ChatCompleteOptions) => {
+  return (options: ChatCompleteOptions | FeatureChatCompleteOptions) => {
+    if (isFeatureChatCompleteOptions(options)) {
+      const { featureId, stream, abortSignal, retryConfiguration, maxRetries, ...rest } = options;
+
+      const callback = (_context: unknown) => rest;
+
+      return callbackApi(
+        { featureId, stream, abortSignal, retryConfiguration, maxRetries },
+        callback
+      );
+    }
+
     const { connectorId, stream, abortSignal, retryConfiguration, maxRetries, ...rest } = options;
 
     const callback = (_context: unknown) => rest;
