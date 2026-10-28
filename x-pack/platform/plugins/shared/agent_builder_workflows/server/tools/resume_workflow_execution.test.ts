@@ -272,6 +272,32 @@ describe('resumeWorkflowExecutionTool', () => {
       expect(wm.management.resumeWorkflowExecution).toHaveBeenCalled();
     });
 
+    it('binds the answer to the paused step and resumes that step', async () => {
+      const wm = createWorkflowsManagement();
+      const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });
+      getExecutionState.mockResolvedValue({
+        execution_id: 'exec-1',
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        waiting_input: { step_execution_id: 's-2' },
+      });
+      const context = buildInteractiveContext(ConfirmationStatus.accepted);
+
+      await tool.handler({ executionId: 'exec-1', input: { approved: true } }, context as any);
+
+      // A different paused step gives a different id, so an earlier answer does not apply.
+      expect(context.prompts.checkConfirmationStatus).toHaveBeenCalledWith(
+        `${platformCoreTools.resumeWorkflowExecution}.tc-1.s-2`
+      );
+      expect(wm.management.resumeWorkflowExecution).toHaveBeenCalledWith(
+        'exec-1',
+        'default',
+        { approved: true },
+        context.request,
+        { channel: 'agent_builder', stepExecutionId: 's-2' }
+      );
+      expect(getExecutionState).toHaveBeenCalledTimes(2);
+    });
+
     it('does not resume after the user declines', async () => {
       const wm = createWorkflowsManagement();
       const tool = resumeWorkflowExecutionTool({ workflowsManagement: wm as any, getSecurity });

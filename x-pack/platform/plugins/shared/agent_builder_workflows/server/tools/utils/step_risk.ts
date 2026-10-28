@@ -126,6 +126,17 @@ const fromRegistries = (stepType: string): StepRisk | undefined => {
 export const getStepRisk = (stepType: string): StepRisk =>
   HANDWRITTEN_RISKS.get(stepType) ?? fromRegistries(stepType) ?? UNSAFE;
 
+const WAIT_STEPS_WITH_CHANNELS = new Set(['waitForInput', 'waitForApproval']);
+
+/**
+ * Classifies one step. A wait step with `channels` sends messages through connectors
+ * before it pauses, so it asks like a connector step.
+ */
+const getRiskOf = ({ stepType, stepYamlNode }: StepInfo): StepRisk =>
+  WAIT_STEPS_WITH_CHANNELS.has(stepType) && stepYamlNode.hasIn(['with', 'channels'])
+    ? UNSAFE
+    : getStepRisk(stepType);
+
 export interface UnsafeStep {
   step: StepInfo;
   risk: StepRisk;
@@ -140,7 +151,7 @@ export const findUnsafeSteps = (
   interactivity: InteractivityConfig
 ): UnsafeStep[] =>
   steps
-    .map((step) => ({ step, risk: getStepRisk(step.stepType) }))
+    .map((step) => ({ step, risk: getRiskOf(step) }))
     .filter(
       ({ risk }) => !risk.safe && !(risk.api && isApiAutoApproved({ interactivity, ...risk.api }))
     );

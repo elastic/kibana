@@ -6,8 +6,9 @@
  */
 
 import { kibanaRegistry } from '@elastic/schemas/kibana/tools/index.js';
+import { createNonInteractiveConfig } from '@kbn/agent-builder-common';
 import { getKibanaConnectors } from '@kbn/workflows';
-import { getStepRisk, getWorkflowSteps, KIBANA_STEP_APIS } from './step_risk';
+import { findUnsafeSteps, getStepRisk, getWorkflowSteps, KIBANA_STEP_APIS } from './step_risk';
 
 const normalizePath = (path: string): string => path.replace(/\{[^}]+\}/g, '{}');
 
@@ -61,6 +62,36 @@ describe('getStepRisk', () => {
         expect(patterns.map(normalizePath)).toContain(normalizePath(definition.path));
       }
     );
+  });
+});
+
+describe('findUnsafeSteps', () => {
+  it('asks for a wait step only when it sends messages through channels', () => {
+    const yaml = `name: wait
+triggers:
+  - type: manual
+steps:
+  - name: ask_in_kibana
+    type: waitForInput
+    with:
+      message: Which index?
+  - name: ask_in_slack
+    type: waitForApproval
+    with:
+      message: Approve?
+      channels:
+        slack_api:
+          connector-id: slack-api-1
+          channels: ['#alerts']
+`;
+    const result = getWorkflowSteps(yaml);
+    const steps = 'steps' in result ? result.steps : [];
+    expect(
+      findUnsafeSteps(steps, createNonInteractiveConfig()).map(({ step, risk }) => [
+        step.stepId,
+        risk,
+      ])
+    ).toEqual([['ask_in_slack', { safe: false, destructive: false }]]);
   });
 });
 

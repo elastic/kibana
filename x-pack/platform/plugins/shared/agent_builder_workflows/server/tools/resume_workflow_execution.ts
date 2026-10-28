@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
@@ -45,58 +46,77 @@ const buildConfirmationMessage = (input: Record<string, unknown>, waitingMessage
   return lines.join('\n');
 };
 
+type WaitingInput = NonNullable<Awaited<ReturnType<typeof getExecutionState>>>['waiting_input'];
+
+/** Loads the paused step once, so the prompt and the resume name the same step. */
+const createWaitingInputLoader = ({
+  request,
+  spaceId,
+  executionId,
+  workflowApi,
+  getSecurity,
+}: {
+  request: KibanaRequest;
+  spaceId: string;
+  executionId: string;
+  workflowApi: WorkflowsServerPluginSetup['management'];
+  getSecurity: () => SecurityPluginStart | undefined;
+}): (() => Promise<WaitingInput>) => {
+  let waitingInput: Promise<WaitingInput> | undefined;
+  return () => {
+    waitingInput ??= (async () => {
+      try {
+        if (
+          !(await hasWorkflowExecutionReadPrivilege({ security: getSecurity(), request, spaceId }))
+        ) {
+          return undefined;
+        }
+        const execution = await getExecutionState({ executionId, spaceId, workflowApi, request });
+        return execution?.waiting_input;
+      } catch {
+        // The dialog still shows the input, and the resume finds the paused step itself.
+        return undefined;
+      }
+    })();
+    return waitingInput;
+  };
+};
+
 /**
  * Asks the user to confirm the input before the workflow resumes. A paused step
  * waits for a human, so an agent must not answer it alone.
  */
 const confirmResume = ({
   toolContext,
-  workflowApi,
-  getSecurity,
-  executionId,
   input,
+  loadWaitingInput,
 }: {
   toolContext: ToolHandlerContext;
-  workflowApi: WorkflowsServerPluginSetup['management'];
-  getSecurity: () => SecurityPluginStart | undefined;
-  executionId: string;
   input: Record<string, unknown>;
+  loadWaitingInput: () => Promise<WaitingInput>;
 }) =>
   confirmToolCall({
     context: toolContext,
     toolId: platformCoreTools.resumeWorkflowExecution,
     api: RESUME_EXECUTION_API,
     declinedMessage: 'The user declined to resume this workflow execution. Do not retry it.',
-    getPrompt: async () => {
-      const { request, spaceId } = toolContext;
-      let waitingMessage: string | undefined;
-      try {
-        if (
-          await hasWorkflowExecutionReadPrivilege({ security: getSecurity(), request, spaceId })
-        ) {
-          const execution = await getExecutionState({ executionId, spaceId, workflowApi, request });
-          waitingMessage = execution?.waiting_input?.message;
-        }
-      } catch {
-        // The dialog still shows the input; the workflow's question is optional context.
-      }
-
-      return {
-        title: i18n.translate('workflows.agentBuilder.resumeExecution.confirmation.title', {
-          defaultMessage: 'Resume the paused workflow?',
-        }),
-        message: buildConfirmationMessage(input, waitingMessage),
-        confirm_text: i18n.translate(
-          'workflows.agentBuilder.resumeExecution.confirmation.confirmText',
-          { defaultMessage: 'Resume' }
-        ),
-        cancel_text: i18n.translate(
-          'workflows.agentBuilder.resumeExecution.confirmation.cancelText',
-          { defaultMessage: 'Cancel' }
-        ),
-        color: 'warning',
-      };
-    },
+    // An answer confirms one paused step; a new pause asks again.
+    getPromptKey: async () => (await loadWaitingInput())?.step_execution_id,
+    getPrompt: async () => ({
+      title: i18n.translate('workflows.agentBuilder.resumeExecution.confirmation.title', {
+        defaultMessage: 'Resume the paused workflow?',
+      }),
+      message: buildConfirmationMessage(input, (await loadWaitingInput())?.message),
+      confirm_text: i18n.translate(
+        'workflows.agentBuilder.resumeExecution.confirmation.confirmText',
+        { defaultMessage: 'Resume' }
+      ),
+      cancel_text: i18n.translate(
+        'workflows.agentBuilder.resumeExecution.confirmation.cancelText',
+        { defaultMessage: 'Cancel' }
+      ),
+      color: 'warning',
+    }),
   });
 
 const resumeWorkflowExecutionSchema = z.object({
@@ -160,19 +180,21 @@ export const resumeWorkflowExecutionTool = ({
           };
         }
 
-        const confirmation = await confirmResume({
-          toolContext,
+        const loadWaitingInput = createWaitingInputLoader({
+          request,
+          spaceId,
+          executionId,
           workflowApi,
           getSecurity,
-          executionId,
-          input,
         });
+        const confirmation = await confirmResume({ toolContext, input, loadWaitingInput });
         if (confirmation) {
           return confirmation;
         }
 
         await workflowApi.resumeWorkflowExecution(executionId, spaceId, input, request, {
           channel: 'agent_builder',
+          stepExecutionId: (await loadWaitingInput())?.step_execution_id,
         });
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
