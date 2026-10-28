@@ -81,7 +81,6 @@ export const kbnConfigRules: DummyRuleMap = {
 export const javascriptRules: DummyRuleMap = {
   'dot-notation': ['error', { allowKeywords: true }],
   'block-scoped-var': 'error',
-  // 'camelcase': ['error', { 'properties': 'never', 'allow': ['^UNSAFE_'] }],
   'consistent-return': 'off',
   'constructor-super': 'error',
   // '@eslint-community/eslint-comments/no-unused-disable': 'error',
@@ -93,9 +92,6 @@ export const javascriptRules: DummyRuleMap = {
   //     'groups': [['external', 'builtin'], 'internal', ['parent', 'sibling', 'index']]
   //   }
   // ],
-
-  // 'mocha/handle-done-callback': 'error',
-  // 'mocha/no-exclusive-tests': 'error',
   'no-caller': 'error',
   'no-cond-assign': 'error',
   'no-const-assign': 'error',
@@ -108,32 +104,12 @@ export const javascriptRules: DummyRuleMap = {
   // 'no-new': 'error',
   'no-new-wrappers': 'error',
   // 'no-path-concat': 'error',
-  // 'no-restricted-modules': [2, RESTRICTED_MODULES],
-  // 'no-restricted-syntax': [
-  //   'error',
-  //   {
-  //     'selector': 'TSEnumDeclaration[const=true]',
-  //     'message': 'Do not use `const` with enum declarations'
-  //   }
-  // ],
   // 'no-return-assign': 'error',
   'no-script-url': 'error',
   // 'no-undef': 'error',
-  // 'no-undef-init': 'error',
   'no-underscore-dangle': 'off',
-  // 'no-unsanitized/method': 'error',
-  // 'no-unsanitized/property': 'error',
   'no-unused-labels': 'error',
   'no-with': 'error',
-
-  // 'spaced-comment': [
-  //   'error',
-  //   'always',
-  //   {
-  //     'exceptions': ['/']
-  //   }
-  // ],
-  // 'strict': ['error', 'never'],
   'use-isnan': 'error',
   // 'yoda': 'off',
 };
@@ -143,6 +119,9 @@ export const javascriptOverrides: OxlintOverride[] = [
   {
     files: ['**/*.js', '**/*.mjs'],
     rules: {
+      '@kbn/compat/eslint-camelcase': ['error', { properties: 'never', allow: ['^UNSAFE_'] }],
+      '@kbn/compat/eslint-no-restricted-modules': ['error', { paths: ['gulp-util'] }],
+      '@kbn/compat/eslint-strict': ['error', 'never'],
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       'new-cap': ['error', { capIsNewExceptions: ['Private'] }],
       'no-global-assign': 'error',
@@ -158,6 +137,8 @@ export const javascriptOverrides: OxlintOverride[] = [
       'one-var': ['error', 'never'],
       'prefer-const': 'error',
       'valid-typeof': 'error',
+      'no-unsanitized/method': 'error',
+      'no-unsanitized/property': 'error',
       'prefer-object-spread': 'error',
     },
   },

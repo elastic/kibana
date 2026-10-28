@@ -345,7 +345,7 @@ export function estimateBucketSpanFactory(client) {
               { maxRetries: 0 }
             )
             .then((body) => {
-              // eslint-disable-next-line camelcase
+              // eslint-disable-next-line @kbn/compat/eslint-camelcase
               if (body.aggregations?.fields_bucket_counts?.buckets !== undefined) {
                 const buckets = body.aggregations.fields_bucket_counts.buckets;
                 fieldValues = buckets.map((b) => b.key);

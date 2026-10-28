@@ -54,7 +54,7 @@ describe('initializeStateManager', () => {
     expect(stateManager.api.setSnakeCaseKey).toBeDefined();
     expect(stateManager.api.snakeCaseKey$).toBeDefined();
     expect(
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // eslint-disable-next-line @kbn/compat/typescript-naming-convention
       (stateManager.api as unknown as { setSnake_case_key: unknown }).setSnake_case_key
     ).not.toBeDefined();
     expect(

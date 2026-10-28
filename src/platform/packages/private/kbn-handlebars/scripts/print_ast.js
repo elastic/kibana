@@ -3,7 +3,7 @@
  * Elasticsearch B.V licenses this file to you under the MIT License.
  * See `src/platform/packages/private/kbn-handlebars/LICENSE` for more information.
  */
-'use strict'; // eslint-disable-line strict
+'use strict'; // eslint-disable-line @kbn/compat/eslint-strict
 
 const { relative } = require('path');
 const { inspect } = require('util');

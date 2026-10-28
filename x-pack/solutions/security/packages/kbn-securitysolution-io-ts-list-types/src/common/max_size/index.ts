@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 import { PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';

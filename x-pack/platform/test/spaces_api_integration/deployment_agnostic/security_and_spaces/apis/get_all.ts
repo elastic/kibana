@@ -42,7 +42,7 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
     after(async () => {
       await deleteSpaces(spacesService);
     });
-    /* eslint-disable @typescript-eslint/naming-convention */
+    /* eslint-disable @kbn/compat/typescript-naming-convention */
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
@@ -86,7 +86,7 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
         },
       },
-      /* eslint-enable @typescript-eslint/naming-convention */
+      /* eslint-enable @kbn/compat/typescript-naming-convention */
     ].forEach((scenario) => {
       getAllTest(`user with no access can't access any spaces from ${scenario.spaceId}`, {
         spaceId: scenario.spaceId,

@@ -17,7 +17,7 @@ import { createConnectorAttributeMigration, configureConnectorIdMigration } from
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import type { ConfigurationAttributes } from '../../../common/types/domain';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line @kbn/compat/typescript-naming-convention
 const create_7_14_0_configSchema = (connector?: ESCaseConnectorWithId) => ({
   type: CASE_CONFIGURE_SAVED_OBJECT,
   id: '1',
@@ -40,7 +40,7 @@ const create_7_14_0_configSchema = (connector?: ESCaseConnectorWithId) => ({
   },
 });
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line @kbn/compat/typescript-naming-convention
 const create_7_9_0_configSchema = (
   overrides?: object
 ): SavedObjectUnsanitizedDoc<UnsanitizedConfigureConnector> => {

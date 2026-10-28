@@ -37,7 +37,7 @@ const MitreAttackContainer = styled.div`
 
 interface AddItemProps {
   field: FieldHook;
-  dataTestSubj: string; // eslint-disable-line react/no-unused-prop-types
+  dataTestSubj: string; // eslint-disable-line @kbn/compat/react-no-unused-prop-types
   idAria: string;
   isDisabled: boolean;
 }

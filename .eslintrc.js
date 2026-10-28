@@ -104,24 +104,12 @@ module.exports = {
       },
     },
     /**
-     * FormatJS linter for i18n code.
-     * https://formatjs.io/docs/tooling/linter
+     * `formatjs/*` rules run in oxlint (.oxlint/formatjs.mts). The plugin stays registered so
+     * `eslint-disable` directives naming its rules resolve.
      */
     {
-      files: [
-        'src/**/*.{js,mjs,ts,tsx}',
-        'x-pack/**/*.{js,mjs,ts,tsx}',
-        'packages/**/*.{js,mjs,ts,tsx}',
-        'src/platform/packages/**/*.{js,mjs,ts,tsx}',
-        'src/core/packages/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/packages/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/*/packages/**/*.{js,mjs,ts,tsx}',
-      ],
+      files: ['{src,x-pack,packages}/**/*.{js,mjs,ts,tsx}'],
       plugins: ['formatjs'],
-      rules: {
-        'formatjs/enforce-default-message': ['error', 'anything'],
-        'formatjs/enforce-description': 'off',
-      },
     },
 
     /**
@@ -151,158 +139,6 @@ module.exports = {
           },
         },
       ],
-    },
-
-    /**
-     * Files that run BEFORE node version check
-     */
-    {
-      files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
-      rules: {
-        'no-restricted-syntax': [
-          'error',
-          'ImportDeclaration',
-          'ExportNamedDeclaration',
-          'ExportDefaultDeclaration',
-          'ExportAllDeclaration',
-          'ArrowFunctionExpression',
-          'AwaitExpression',
-          'ClassDeclaration',
-          'RestElement',
-          'SpreadElement',
-          'YieldExpression',
-          'VariableDeclaration[kind="const"]',
-          'VariableDeclaration[kind="let"]',
-          'VariableDeclarator[id.type="ArrayPattern"]',
-          'VariableDeclarator[id.type="ObjectPattern"]',
-        ],
-      },
-    },
-
-    /**
-     * Files that run in the browser with only node-level transpilation
-     */
-    {
-      files: [
-        'src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/scroll_into_view_if_necessary.js',
-        '**/browser_exec_scripts/**/*.js',
-      ],
-      rules: {
-        'no-restricted-syntax': [
-          'error',
-          'ArrowFunctionExpression',
-          'AwaitExpression',
-          'ClassDeclaration',
-          'ImportDeclaration',
-          'RestElement',
-          'SpreadElement',
-          'YieldExpression',
-          'VariableDeclaration[kind="const"]',
-          'VariableDeclaration[kind="let"]',
-          'VariableDeclarator[id.type="ArrayPattern"]',
-          'VariableDeclarator[id.type="ObjectPattern"]',
-        ],
-      },
-    },
-
-    /**
-     * Files that run AFTER node version check
-     * and are not also transpiled with babel
-     */
-    {
-      files: [
-        '.eslintrc.js',
-        'packages/kbn-eslint-plugin-eslint/**/*',
-        'x-pack/gulpfile.js',
-        'x-pack/scripts/*.js',
-        '**/jest.config.js',
-      ],
-      excludedFiles: ['**/integration_tests/**/*'],
-      rules: {
-        'no-restricted-syntax': [
-          'error',
-          'ImportDeclaration',
-          'ExportNamedDeclaration',
-          'ExportDefaultDeclaration',
-          'ExportAllDeclaration',
-        ],
-      },
-    },
-
-    /**
-     * Harden specific rules
-     */
-    {
-      files: [
-        'src/platform/test/harden/*.js',
-        'src/platform/packages/shared/kbn-safer-lodash-set/test/*.js',
-      ],
-      rules: {
-        'mocha/handle-done-callback': 'off',
-      },
-    },
-    {
-      files: ['**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'no-restricted-modules': [
-          'error',
-          {
-            name: 'lodash.set',
-            message: 'Please use @kbn/safer-lodash-set instead',
-          },
-          {
-            name: 'lodash.setwith',
-            message: 'Please use @kbn/safer-lodash-set instead',
-          },
-          {
-            name: 'lodash.template',
-            message:
-              'lodash.template is unsafe, and not compatible with our content security policy.',
-          },
-          {
-            name: 'lodash/set',
-            message: 'Please use @kbn/safer-lodash-set/set instead',
-          },
-          {
-            name: 'lodash/setWith',
-            message: 'Please use @kbn/safer-lodash-set/setWith instead',
-          },
-          {
-            name: 'lodash/fp/set',
-            message: 'Please use @kbn/safer-lodash-set/fp/set instead',
-          },
-          {
-            name: 'lodash/fp/setWith',
-            message: 'Please use @kbn/safer-lodash-set/fp/setWith instead',
-          },
-          {
-            name: 'lodash/fp/assoc',
-            message: 'Please use @kbn/safer-lodash-set/fp/assoc instead',
-          },
-          {
-            name: 'lodash/fp/assocPath',
-            message: 'Please use @kbn/safer-lodash-set/fp/assocPath instead',
-          },
-          {
-            name: 'lodash/fp/template',
-            message:
-              'lodash.template is unsafe, and not compatible with our content security policy.',
-          },
-          {
-            name: 'lodash/template',
-            message:
-              'lodash.template is unsafe, and not compatible with our content security policy.',
-          },
-        ],
-      },
-    },
-    {
-      // This file is the security control that hardens lodash.template, so it must load the
-      // otherwise-restricted lodash template modules in order to wrap them with safe proxies.
-      files: ['src/setup_node_env/harden/index.js'],
-      rules: {
-        'no-restricted-modules': 'off',
-      },
     },
 
     /**
@@ -429,14 +265,8 @@ module.exports = {
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
-        'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
-        'react/no-typos': 'error',
-        'react/no-unused-prop-types': 'error',
-        'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
-        'require-atomic-updates': 'error',
       },
       overrides: [
         {
@@ -486,12 +316,7 @@ module.exports = {
         jest: true,
       },
       rules: {
-        'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
-        'react/no-typos': 'error',
-        'react/no-unused-prop-types': 'error',
-        'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
       },
     },
@@ -503,17 +328,9 @@ module.exports = {
         'x-pack/platform/test/*api_integration*/**/*.{js,ts}',
         'x-pack/platform/test/*functional/tests/**/*.{js,ts}',
       ],
-      extends: ['plugin:mocha/recommended'],
-      plugins: ['mocha'],
+      // `mocha/*` rules run in oxlint (.oxlint/mocha.mts). The mocha env stays for `no-undef`.
       env: {
         mocha: true,
-      },
-      rules: {
-        'mocha/no-mocha-arrows': 'off',
-        'mocha/no-exports': 'off',
-        'mocha/no-setup-in-describe': 'off',
-        'mocha/no-nested-tests': 'off',
-        'mocha/no-skipped-tests': 'off',
       },
     },
     {
@@ -533,7 +350,6 @@ module.exports = {
       rules: {
         'react-perf/jsx-no-new-object-as-prop': 'error',
         'react-perf/jsx-no-new-array-as-prop': 'error',
-        'react/jsx-no-bind': 'error',
       },
     },
     {
@@ -545,7 +361,6 @@ module.exports = {
       },
       rules: {
         complexity: 'error',
-        'consistent-return': 'error',
         'import/order': [
           'error',
           {
@@ -557,7 +372,6 @@ module.exports = {
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
-        'require-atomic-updates': 'error',
         'sort-keys': 'error',
       },
     },
@@ -652,7 +466,6 @@ module.exports = {
           },
         ],
         'react-hooks/exhaustive-deps': 'off',
-        '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
       },
     },
 
@@ -708,22 +521,8 @@ module.exports = {
     {
       files: ['x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        'padding-line-between-statements': [
-          'error',
-          {
-            blankLine: 'always',
-            prev: ['block-like'],
-            next: ['*'],
-          },
-          {
-            blankLine: 'always',
-            prev: ['*'],
-            next: ['return'],
-          },
-        ],
         // Rules from `eslint:recommended` and `plugin:react/recommended` that don't run in oxlint.
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
       },
     },
     {
@@ -736,7 +535,6 @@ module.exports = {
       rules: {
         'react-perf/jsx-no-new-object-as-prop': 'error',
         'react-perf/jsx-no-new-array-as-prop': 'error',
-        'react/jsx-no-bind': 'error',
       },
     },
 
@@ -839,14 +637,8 @@ module.exports = {
         'no-duplicate-imports': 'off',
         // rely on typescript
         'no-undef': 'off',
-        'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
-        'react/no-deprecated': 'error',
-        'react/no-typos': 'error',
-        'react/no-unused-prop-types': 'error',
-        'react/sort-default-props': 'error',
         'react/jsx-no-literals': 'error',
-        'require-atomic-updates': 'error',
         'import/order': [
           // This rule sorts import declarations
           'error',

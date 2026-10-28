@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function getEslintrcForGeneratedCode() {
-  return {
-    rules: {
-      '@typescript-eslint/naming-convention': 0,
-    },
-  };
-}
+const { wrapEslint8Plugin } = require('./eslint8_context');
+
+module.exports = wrapEslint8Plugin('mocha', require('eslint-plugin-mocha'));
