@@ -7,8 +7,8 @@
 import { BooleanFromString } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 
-import { sloHealthSchema } from '../../schema/zod/health';
-import { sloDefinitionSchema } from '../../schema/zod/slo';
+import { sloHealthSchema } from '../../schema/health';
+import { sloDefinitionSchema } from '../../schema/slo';
 
 const findSloDefinitionsParamsSchema = z.object({
   query: z

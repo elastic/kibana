@@ -9,6 +9,8 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_SERVERLESS_TAGS } from '../../tags';
 
+const { SERVICE_NAME, OTEL_APPS } = testData;
+
 const isClassicRumRequest = (url: string): boolean => /\/internal\/(apm|ux)\//.test(url);
 
 test.describe(
@@ -19,7 +21,7 @@ test.describe(
       await browserAuth.loginAsViewer();
     });
 
-    test('shows in the project nav without requesting Classic RUM data', async ({
+    test('lists only EDOT Browser applications without requesting Classic RUM data', async ({
       page,
       pageObjects: { digitalExperience },
     }) => {
@@ -30,15 +32,29 @@ test.describe(
         }
       });
 
-      await test.step('shows that applications are unavailable', async () => {
+      await test.step('lists the EDOT Browser applications and no Classic one', async () => {
         await digitalExperience.gotoApplications();
 
         await expect(digitalExperience.projectNavEntry).toBeVisible();
-        await expect(digitalExperience.applicationsUnavailable).toBeVisible();
+        await expect(digitalExperience.applicationLink(OTEL_APPS.shop)).toBeVisible();
+        await expect(digitalExperience.applicationLink(OTEL_APPS.checkout)).toBeVisible();
+        // The name has Classic RUM data on stateful only; here it's only its EDOT Browser row.
+        await expect(digitalExperience.applicationRow(SERVICE_NAME)).toContainText('EDOT Browser');
+        await expect(digitalExperience.classicDataHint(SERVICE_NAME)).toBeHidden();
+        await expect(
+          digitalExperience.applicationsTable.rows.filter({ hasText: 'Classic RUM' })
+        ).toHaveCount(0);
+        await expect(digitalExperience.sourceFilter).toBeHidden();
       });
 
-      await test.step('shows no Overview', async () => {
-        await digitalExperience.gotoApplication(testData.SERVICE_NAME);
+      await test.step('opens the placeholder from an EDOT Browser row', async () => {
+        await digitalExperience.applicationLink(OTEL_APPS.shop).click();
+
+        await expect(digitalExperience.otelOverviewPlaceholder).toBeVisible();
+      });
+
+      await test.step('shows no Classic Overview', async () => {
+        await digitalExperience.gotoApplication(SERVICE_NAME);
 
         await expect(digitalExperience.overviewEmpty).toBeVisible();
       });
