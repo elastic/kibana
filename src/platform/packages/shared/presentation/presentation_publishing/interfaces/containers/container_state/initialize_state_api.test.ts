@@ -15,7 +15,7 @@ interface SortState {
   source?: 'esql' | 'field';
 }
 
-const createStateApi = (normalizeSerializedState?: (state: SortState) => SortState) =>
+const createStateApi = () =>
   initializeStateApi<SortState>({
     uuid: 'panel-1',
     parentApi: {},
@@ -23,22 +23,14 @@ const createStateApi = (normalizeSerializedState?: (state: SortState) => SortSta
     applySerializedState: () => {},
     anyStateChange$: of(undefined),
     getComparators: () => ({ sort: 'deepEquality', source: 'referenceEquality' }),
-    normalizeSerializedState,
   });
 
 describe('initializeStateApi compareSerializedState', () => {
   const written: SortState = { source: 'esql', sort: { by: '_count' } };
   const loaded: SortState = { source: 'esql', sort: { by: '_key' } };
 
-  it('compares the serialized states as they are by default', () => {
+  it('compares the serialized states with the embeddable comparators', () => {
     expect(createStateApi().compareSerializedState(written, loaded)).toBe(false);
-  });
-
-  it('compares both states the way the embeddable normalizes them when it loads them', () => {
-    const stateApi = createStateApi((state) =>
-      state.source === 'esql' ? { ...state, sort: { by: '_key' } } : state
-    );
-
-    expect(stateApi.compareSerializedState(written, loaded)).toBe(true);
+    expect(createStateApi().compareSerializedState(written, written)).toBe(true);
   });
 });
