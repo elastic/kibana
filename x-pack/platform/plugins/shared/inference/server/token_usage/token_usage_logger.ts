@@ -106,17 +106,12 @@ export class TokenUsageLogger {
     }
 
     try {
-      const templateExists = await this.esClient!.indices.existsIndexTemplate({
+      // Always put the template so that existing installations pick up mapping changes
+      await this.esClient!.indices.putIndexTemplate({
         name: INDEX_TEMPLATE_NAME,
+        ...INDEX_TEMPLATE,
       });
-
-      if (!templateExists) {
-        await this.esClient!.indices.putIndexTemplate({
-          name: INDEX_TEMPLATE_NAME,
-          ...INDEX_TEMPLATE,
-        });
-        this.logger.info(`Created index template ${INDEX_TEMPLATE_NAME}`);
-      }
+      this.logger.debug(`Updated index template ${INDEX_TEMPLATE_NAME}`);
 
       const dataStreamExists = await this.esClient!.indices.exists({
         index: DATA_STREAM_NAME,
@@ -127,6 +122,19 @@ export class TokenUsageLogger {
           name: DATA_STREAM_NAME,
         });
         this.logger.info(`Created data stream ${DATA_STREAM_NAME}`);
+      } else {
+        // Adds new fields to the existing backing indices, the template only applies to new ones.
+        // A failed update must not block logging, the template still applies after rollover.
+        await this.esClient!.indices.putMapping({
+          index: DATA_STREAM_NAME,
+          ...INDEX_TEMPLATE.template.mappings,
+        }).then(
+          () => this.logger.debug(`Updated mappings of data stream ${DATA_STREAM_NAME}`),
+          (error) =>
+            this.logger.warn(
+              `Failed to update mappings of data stream ${DATA_STREAM_NAME}: ${error.message}`
+            )
+        );
       }
 
       this.dataStreamReady = true;
