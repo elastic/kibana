@@ -1625,5 +1625,85 @@ describe('huntBehavior', () => {
 
       expect(result.behaviors).toHaveLength(2);
     });
+
+    describe('techniques an earlier run left pending', () => {
+      it('reports one the extraction did not return as a retryable gap, so the run is not complete', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          {
+            ...executeParams,
+            already_searched_technique_ids: [],
+            pending_technique_ids: ['T1566'],
+          },
+          esClient
+        );
+
+        expect(result.incomplete).toEqual([
+          expect.objectContaining({ reason: 'generation_budget', technique_id: 'T1566' }),
+        ]);
+      });
+
+      it('reports it even when every extracted technique was already searched', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          {
+            ...executeParams,
+            already_searched_technique_ids: ['T1078.004'],
+            pending_technique_ids: ['T1566'],
+          },
+          esClient
+        );
+
+        expect(generateEsqlMock).not.toHaveBeenCalled();
+        expect(result.incomplete).toEqual([
+          expect.objectContaining({ reason: 'generation_budget', technique_id: 'T1566' }),
+        ]);
+        expect(result.next_step).toContain('stays pending');
+        expect(result.next_step).not.toContain('No extracted candidate survived validation');
+      });
+
+      it('reports it when the extraction returned nothing at all', async () => {
+        const result = await huntBehavior(
+          buildMockModel([]),
+          logger,
+          { ...executeParams, pending_technique_ids: ['T1566'] },
+          esClient
+        );
+
+        expect(result.status).toBe('no_behaviors_found');
+        expect(result.incomplete).toEqual([
+          expect.objectContaining({ reason: 'generation_budget', technique_id: 'T1566' }),
+        ]);
+      });
+
+      it('adds no gap for one the extraction returned again, which gets its own query', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate, t1566Candidate]),
+          logger,
+          { ...executeParams, pending_technique_ids: ['T1566'] },
+          esClient
+        );
+
+        expect(result.behaviors.map((b) => b.technique_id)).toContain('T1566');
+        expect(result.incomplete).toBeUndefined();
+      });
+
+      it('adds no gap for one an earlier run has since searched', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          {
+            ...executeParams,
+            already_searched_technique_ids: ['T1566'],
+            pending_technique_ids: ['T1566'],
+          },
+          esClient
+        );
+
+        expect(result.incomplete).toBeUndefined();
+      });
+    });
   });
 });

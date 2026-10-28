@@ -43,6 +43,12 @@ export interface ReportHuntContext {
    * the rest. Empty when no earlier run recorded any.
    */
   already_searched_technique_ids: string[];
+  /**
+   * The techniques earlier hunts left for a later one (the report's recorded pending ids), so a
+   * run can keep them as work to do even when its own extraction no longer returns them. Empty
+   * when none are recorded.
+   */
+  pending_technique_ids: string[];
   /** Descriptive fields the Investigation narratives cite; absent when the report does not carry them. */
   title?: string;
   source_name?: string;
@@ -82,6 +88,7 @@ interface StoredReportSource {
   evidence?: Array<{
     space_id?: string;
     hunted_technique_ids?: string[];
+    pending_technique_ids?: string[];
   }>;
   extracted?: {
     iocs?: Array<{ type?: string; value?: string; tier?: unknown; deferred_unreviewed?: unknown }>;
@@ -186,6 +193,7 @@ export const loadReportHuntContext = async ({
       'lineage.extraction_method',
       'evidence.space_id',
       'evidence.hunted_technique_ids',
+      'evidence.pending_technique_ids',
       'extracted.iocs',
       'extracted.ttps.techniques',
       'extracted.vulnerability.vendor',
@@ -283,9 +291,13 @@ export const loadReportHuntContext = async ({
   )
     .filter(isHuntTechnique)
     .slice(0, MAX_HUNT_TECHNIQUE_IDS);
+  const pending = (Array.isArray(ledger?.pending_technique_ids) ? ledger.pending_technique_ids : [])
+    .filter(isHuntTechnique)
+    .slice(0, MAX_HUNT_TECHNIQUE_IDS);
   return {
     extraction_pending: extractionPending,
     already_searched_technique_ids: alreadySearched,
+    pending_technique_ids: pending,
     ...(title !== undefined ? { title } : {}),
     ...(sourceName !== undefined ? { source_name: sourceName } : {}),
     ...(publishedAt !== undefined ? { published_at: publishedAt } : {}),

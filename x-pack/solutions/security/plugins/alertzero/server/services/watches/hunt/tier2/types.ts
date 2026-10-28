@@ -62,6 +62,12 @@ export interface HuntBehaviorParams {
    * rather than the same highest-confidence techniques again. They take no slot and leave no gap.
    */
   already_searched_technique_ids?: string[];
+  /**
+   * Technique ids earlier runs left for a later one. One this run's extraction does not return, and
+   * that nothing searched, is reported as a retryable gap, so it stays pending instead of the run
+   * reading as complete because the model happened to name different techniques.
+   */
+  pending_technique_ids?: string[];
 }
 
 /** A candidate behavior that passed ATT&CK catalog validation. */

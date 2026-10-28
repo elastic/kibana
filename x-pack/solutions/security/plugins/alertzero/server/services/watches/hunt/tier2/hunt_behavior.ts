@@ -703,8 +703,22 @@ export const huntBehavior = async (
     row_limit: rowLimitFromParams,
     allowed_indices: allowedIndices = [],
     already_searched_technique_ids: alreadySearchedIds = [],
+    pending_technique_ids: pendingIds = [],
   } = params;
   const alreadySearched = new Set(alreadySearchedIds);
+  // A technique an earlier run left for this one that nothing in this run accounts for: the model
+  // did not name it this time (or named it below the threshold), so it was never searched. Reported
+  // as a retryable gap, so the report stays pending instead of completing because extraction varied.
+  const pendingGaps = (accountedFor: ReadonlySet<string>): HuntIncompleteness[] =>
+    [...new Set(pendingIds)]
+      .filter((techniqueId) => !alreadySearched.has(techniqueId) && !accountedFor.has(techniqueId))
+      .map((technique_id) => ({
+        reason: 'generation_budget' as const,
+        technique_id,
+        detail:
+          `${technique_id} was left unsearched by an earlier run and this run's extraction did ` +
+          `not return it, so it is still to be searched.`,
+      }));
 
   const rowLimit = size ?? rowLimitFromParams;
   const canExecute =
@@ -763,17 +777,26 @@ export const huntBehavior = async (
     .filter((c) => c.llm_confidence >= llmThreshold);
 
   if (candidates.length === 0) {
+    const leftPending = pendingGaps(new Set());
     return {
       status: 'no_behaviors_found',
       report_id: reportId,
       behaviors: [],
       indexed_behaviors: [],
       has_hit: false,
+      ...(leftPending.length > 0 && { incomplete: leftPending }),
       message:
         'No behavioral candidates passed the LLM-confidence threshold. ' +
         'The report may be IOC-only or describe known/already-covered techniques.',
       next_step:
-        'Lower `llm_confidence_threshold` or fall back to IOC matching if the report is IOC-only.',
+        'Lower `llm_confidence_threshold` or fall back to IOC matching if the report is IOC-only.' +
+        (leftPending.length > 0
+          ? ` ${leftPending.length} technique${
+              leftPending.length === 1 ? '' : 's'
+            } an earlier run left unsearched ${
+              leftPending.length === 1 ? 'was' : 'were'
+            } not returned either, so the report stays pending.`
+          : ''),
     };
   }
 
@@ -884,6 +907,13 @@ export const huntBehavior = async (
   const gap = (technique_id: string, reason: HuntIncompleteReason, detail: string): void => {
     incomplete.push({ reason, technique_id, detail });
   };
+  const leftPending = pendingGaps(
+    new Set([
+      ...validated.map(({ technique_id: techniqueId }) => techniqueId),
+      ...incomplete.map(({ technique_id: techniqueId }) => techniqueId ?? ''),
+    ])
+  );
+  incomplete.push(...leftPending);
 
   if (validated.length > 0 && !esClient) {
     logger.debug(
@@ -1174,6 +1204,11 @@ export const huntBehavior = async (
       validated.length === 0 && skippedAsSearched.size > 0 && incomplete.length === 0
         ? 'Every extracted technique was already searched by an earlier run on this report, so ' +
           'there was nothing new to hunt.'
+        : validated.length === 0 &&
+          leftPending.length > 0 &&
+          incomplete.length === leftPending.length
+        ? 'Nothing new was extracted to hunt, and the techniques an earlier run left unsearched ' +
+          `were not returned either, so the report stays pending.${partialSuffix}`
         : validated.length === 0
         ? 'No extracted candidate survived validation: each was either absent from the ' +
           'canonical ATT&CK catalog or offered a quote the report does not contain. ' +

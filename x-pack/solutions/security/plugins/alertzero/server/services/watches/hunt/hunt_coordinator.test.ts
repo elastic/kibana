@@ -606,6 +606,7 @@ describe('huntCoordinator', () => {
       techniques: ['T1078.004'],
       text: 'report body text',
       already_searched_technique_ids: ['T1078.004', 'T1566'],
+      pending_technique_ids: ['T1059'],
     };
 
     it("hands the report's ledger to huntBehavior on a report-driven run", async () => {
@@ -627,7 +628,10 @@ describe('huntCoordinator', () => {
       expect(mockT2).toHaveBeenCalledWith(
         expect.anything(),
         logger,
-        expect.objectContaining({ already_searched_technique_ids: ['T1078.004', 'T1566'] }),
+        expect.objectContaining({
+          already_searched_technique_ids: ['T1078.004', 'T1566'],
+          pending_technique_ids: ['T1059'],
+        }),
         esClient,
         undefined
       );
@@ -650,6 +654,7 @@ describe('huntCoordinator', () => {
       );
 
       expect(mockT2.mock.calls.at(-1)?.[2]).not.toHaveProperty('already_searched_technique_ids');
+      expect(mockT2.mock.calls.at(-1)?.[2]).not.toHaveProperty('pending_technique_ids');
     });
 
     it('does not apply the ledger to text the caller supplied, which is a different search', async () => {

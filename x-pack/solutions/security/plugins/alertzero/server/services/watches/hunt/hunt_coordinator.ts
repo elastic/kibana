@@ -1002,7 +1002,10 @@ const huntCoordinatorCore = async (
         // replays the whole report (candidate selection lifts the hunt-once gate for it), and
         // caller-supplied text is a different search, so neither skips what an earlier run searched.
         ...(trigger === 'scheduled' && callerText === undefined && reportContext
-          ? { already_searched_technique_ids: reportContext.already_searched_technique_ids }
+          ? {
+              already_searched_technique_ids: reportContext.already_searched_technique_ids,
+              pending_technique_ids: reportContext.pending_technique_ids,
+            }
           : {}),
       },
       esClient,
