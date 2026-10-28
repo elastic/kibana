@@ -46,6 +46,21 @@ describe('renderElasticManifest', () => {
     expect(content).toContain('include_unmapped=true');
   });
 
+  it('teaches the agent to discover logs, metrics and traces on its own', () => {
+    const content = renderElasticManifest(connector('remote-telemetry'));
+
+    expect(content).toContain('## Discover what telemetry exists');
+    expect(content).toContain('`GET /_remote/info`');
+    expect(content).toContain('`GET /_resolve/index/<remote>:*`');
+    expect(content).toContain('`<kind>-<cloud>-<region>`');
+    expect(content).toContain('`logs-*`, `metrics-*`, `traces-*`, `service-*`');
+    expect(content).toContain('`no_such_remote_cluster_exception`');
+    expect(content).toContain('go to step 3');
+    // Discovery stays generic: no cluster-specific remote or stream names.
+    expect(content).not.toContain('metrics-gcp');
+    expect(content).not.toContain('kubernetes.state_container');
+  });
+
   it('steers remote queries to a specific data stream instead of logs-*', () => {
     const content = renderElasticManifest(connector('remote-telemetry'));
 
