@@ -83,7 +83,10 @@ describe('connection origin', () => {
       target: { kind: 'destination', id: 'es-a' },
     });
 
-    expect(readRoutes(next)).toEqual([{ destinations: ['es-b'] }]);
+    expect(readRoutes(next)).toEqual([
+      { when: 'true', destinations: [] },
+      { destinations: ['es-b'] },
+    ]);
     expect(next.unit.pipelines[1]?.config).toEqual([
       { name: 'sources', value: ['bulk'] },
       { name: 'destinations', value: ['es-a'] },

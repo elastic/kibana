@@ -256,7 +256,7 @@ const buildRoutingGraph = (
               telemetry: intersectSignals(pipeline.supported_telemetry, route?.telemetry),
               editable: true,
             },
-            'reconnect'
+            rule.targets.length > 0 ? 'reconnect' : 'connect'
           )
         );
         edges.push(

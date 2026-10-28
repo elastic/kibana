@@ -79,6 +79,52 @@ describe('unit repository', () => {
     });
   });
 
+  it('drops unconnected routing rules before saving', async () => {
+    const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
+    const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
+    const routedUnit: StreamsUnit.GetResponse = {
+      ...storedUnit,
+      unit: {
+        ...storedUnit.unit,
+        pipelines: [
+          {
+            id: 'main',
+            supported_telemetry: ['logs'],
+            config: [
+              { name: 'sources', value: ['otlp-input'] },
+              {
+                name: 'routes',
+                value: [{ when: 'true', destinations: [] }, { destinations: ['es-prod'] }],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const savedUnit: StreamsUnit.GetResponse = {
+      ...routedUnit,
+      unit: {
+        ...routedUnit.unit,
+        pipelines: [
+          {
+            id: 'main',
+            supported_telemetry: ['logs'],
+            config: [
+              { name: 'sources', value: ['otlp-input'] },
+              { name: 'routes', value: [{ destinations: ['es-prod'] }] },
+            ],
+          },
+        ],
+      },
+    };
+
+    await expect(repository.persist(routedUnit)).resolves.toEqual(savedUnit);
+    expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: savedUnit },
+      signal: null,
+    });
+  });
+
   it('warns when API keys for removed components may still be active', async () => {
     const addWarning = jest.fn();
     const fetch = jest

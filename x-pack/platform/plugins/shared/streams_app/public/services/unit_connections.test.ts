@@ -931,7 +931,7 @@ describe('routing rule connections', () => {
     ).toBe(routed);
   });
 
-  it('unhooks one destination from a rule and keeps the other rule', () => {
+  it('keeps a rule and its condition when its last destination is unhooked', () => {
     const routed = unitWith([
       {
         id: 'main',
@@ -955,8 +955,24 @@ describe('routing rule connections', () => {
     );
     const routes = next.unit.pipelines[0]?.config.find((entry) => entry.name === 'routes');
 
-    expect(routes?.value).toEqual([{ destinations: ['es-metrics'] }]);
+    expect(routes?.value).toEqual([
+      { when: 'body["service.name"] == "nginx"', destinations: [] },
+      { destinations: ['es-metrics'] },
+    ]);
     expect(disconnectSourceFromDestination(routed, 'otlp-input', 'es-metrics')).toBe(routed);
+
+    const reconnected = connectRouteToTarget(
+      next,
+      { pipelineId: 'main', ruleIndex: 0 },
+      destination('debug-out')
+    );
+
+    expect(
+      reconnected.unit.pipelines[0]?.config.find((entry) => entry.name === 'routes')?.value
+    ).toEqual([
+      { when: 'body["service.name"] == "nginx"', destinations: ['debug-out'] },
+      { destinations: ['es-metrics'] },
+    ]);
   });
 
   it('moves a routed line onto another rule', () => {
@@ -981,7 +997,10 @@ describe('routing rule connections', () => {
     });
     const routes = next.unit.pipelines[0]?.config.find((entry) => entry.name === 'routes');
 
-    expect(routes?.value).toEqual([{ destinations: ['es-metrics', 'es-logs'] }]);
+    expect(routes?.value).toEqual([
+      { when: 'true', destinations: [] },
+      { destinations: ['es-metrics', 'es-logs'] },
+    ]);
   });
 
   it('switches a single-target rule between a destination and a child pipeline', () => {

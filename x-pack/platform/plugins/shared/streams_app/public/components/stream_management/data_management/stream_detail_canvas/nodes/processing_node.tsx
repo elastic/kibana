@@ -23,14 +23,11 @@ export function ProcessingNode({ data, selected, dragging }: NodeProps<Processin
     values: { count: data.processorCount },
   });
 
+  console.log('PROC', data);
+
   return (
     <>
-      <Handle
-        type="target"
-        position={Position.Left}
-        isConnectable={false}
-        className={NODE_HANDLE_CLASS}
-      />
+      <Handle type="target" position={Position.Left} isConnectable={false} />
       <EuiPanel
         className="nokey"
         hasShadow={false}

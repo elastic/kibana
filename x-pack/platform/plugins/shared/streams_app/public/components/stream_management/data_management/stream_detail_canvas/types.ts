@@ -47,6 +47,7 @@ export interface RoutingNodeRule {
   handleId: string;
   label: string;
   isCatchAll: boolean;
+  connected: boolean;
   action?: 'copy' | 'move';
 }
 

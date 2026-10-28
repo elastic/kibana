@@ -880,9 +880,11 @@ const routeWithTargets = (rule: RouteRule, kind: RouteTarget['kind'], ids: strin
 
 /**
  * Pipeline config with one rule's targets replaced. A rule left with no targets
- * is removed. Undefined when the targets cannot be stored: a rule lists either
- * destinations or pipelines, a plain `destinations` list only holds
- * destinations, and telemetry-scoped wiring is left as it is.
+ * stays in place, keeping its condition, so it can be reconnected; unconnected
+ * rules are stripped when the unit is saved. Undefined when the targets cannot
+ * be stored: a rule lists either destinations or pipelines, a plain
+ * `destinations` list only holds destinations, and telemetry-scoped wiring is
+ * left as it is.
  */
 const withRuleTargets = (
   pipeline: UnitPipeline,
@@ -893,9 +895,9 @@ const withRuleTargets = (
   if (kinds.size > 1 || hasScopedWiring(pipeline.config)) {
     return undefined;
   }
-  const kind = targets[0]?.kind ?? 'destination';
   const ids = targets.map(({ id }) => id);
   if (!pipelineUsesRoutes(pipeline)) {
+    const kind = targets[0]?.kind ?? 'destination';
     return kind === 'destination'
       ? withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, ids)
       : undefined;
@@ -906,7 +908,8 @@ const withRuleTargets = (
       if (index !== ruleIndex) {
         return [route];
       }
-      return ids.length > 0 ? [routeWithTargets(route, kind, ids)] : [];
+      const currentKind = isDelegatingRoute(route) ? 'pipeline' : 'destination';
+      return [routeWithTargets(route, targets[0]?.kind ?? currentKind, ids)];
     })
   );
 };
@@ -970,7 +973,7 @@ export const connectRouteToTarget = (unit: Unit, rule: RouteRuleRef, target: Rou
   return writeRuleTargets(unit, rule, [...targets, target]);
 };
 
-/** Drops one target from a routing rule. A rule left with no targets is removed. */
+/** Drops one target from a routing rule. A rule left with no targets stays, unconnected. */
 export const disconnectRouteFromTarget = (
   unit: Unit,
   rule: RouteRuleRef,

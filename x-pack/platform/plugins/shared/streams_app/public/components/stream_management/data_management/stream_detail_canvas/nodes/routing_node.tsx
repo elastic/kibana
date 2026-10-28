@@ -80,8 +80,7 @@ function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
         type="source"
         position={Position.Right}
         isConnectable
-        // Each rule keeps one outgoing line. It can be moved, but not added to.
-        isConnectableStart={false}
+        isConnectableStart={!rule.connected}
       />
     </div>
   );

@@ -1039,6 +1039,7 @@ const buildRoutingNode = (routing: RoutingViewModel): RoutingNode => {
           isCatchAll: rule.when === undefined,
           action: rule.action,
           label,
+          connected: rule.targets.length > 0,
         };
       }),
     },

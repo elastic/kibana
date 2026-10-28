@@ -177,7 +177,10 @@ const dropMissingDelegations = (
         return [route];
       }
       const remaining = route.pipelines.filter((id) => pipelineIds.has(id));
-      return remaining.length > 0 ? [{ ...route, pipelines: remaining }] : [];
+      // A rule that was already unconnected keeps waiting to be reconnected.
+      return remaining.length > 0 || route.pipelines.length === 0
+        ? [{ ...route, pipelines: remaining }]
+        : [];
     });
     return routes.length > 0 ? [{ ...entry, value: routes }] : [];
   }),
@@ -209,4 +212,31 @@ export const pruneUnit = (previous: Unit, next: Unit): Unit => {
     ? next
     : replaceUnit(next, { pipelines });
   return removeOrphanedProcessors(withPipelines, referencedProcessorIds(previous));
+};
+
+const routeTargetCount = (route: RouteRule): number =>
+  isDelegatingRoute(route) ? route.pipelines.length : route.destinations.length;
+
+/**
+ * Drops routing rules left without targets, which the unit schema rejects, then
+ * cleans up pipelines that no longer forward anywhere as a result.
+ */
+export const withoutUnconnectedRoutes = (unit: Unit): Unit => {
+  const hasUnconnected = unit.unit.pipelines.some(({ config }) =>
+    readRoutes(config).some((route) => routeTargetCount(route) === 0)
+  );
+  if (!hasUnconnected) {
+    return unit;
+  }
+  const pipelines = unit.unit.pipelines.map((pipeline) => ({
+    ...pipeline,
+    config: pipeline.config.flatMap((entry): PipelineConfigEntry[] => {
+      if (entry.name !== PIPELINE_ENTRY.routes) {
+        return [entry];
+      }
+      const value = entry.value.filter((route) => routeTargetCount(route) > 0);
+      return value.length > 0 ? [{ ...entry, value }] : [];
+    }),
+  }));
+  return pruneUnit(unit, replaceUnit(unit, { pipelines }));
 };
