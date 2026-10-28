@@ -123,10 +123,14 @@ export async function deserializeState(
     }
   }
 
-  const newState = transformFromApiConfig(state) as LensRuntimeState;
-  if (newState.attributes) {
-    newState.attributes = dropLegacyAggregateQuerySlot(newState.attributes);
-  }
+  // transformFromApiConfig can return the parent's state object, which must not be mutated
+  const transformedState = transformFromApiConfig(state) as LensRuntimeState;
+  const newState: LensRuntimeState = transformedState.attributes
+    ? {
+        ...transformedState,
+        attributes: dropLegacyAggregateQuerySlot(transformedState.attributes),
+      }
+    : transformedState;
 
   if (newState.isNewPanel) {
     try {
