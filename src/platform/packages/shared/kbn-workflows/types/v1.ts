@@ -262,7 +262,8 @@ export interface EsWorkflowStepExecution {
    * Optional Human-In-The-Loop audit envelope, populated only by
    * HITL-aware steps (today: `wait_for_input`). Both the wrapper and
    * every property inside it are optional and MUST be treated as such
-   * by readers — the engine itself remains field-agnostic.
+   * by readers — the engine itself remains field-agnostic. `null` once a
+   * claim whose response was not applied is released.
    */
   hitl?: {
     /** Server-resolved username (or API-key principal) that submitted the response. */
@@ -271,7 +272,7 @@ export interface EsWorkflowStepExecution {
     respondedAt?: string;
     /** Free-form channel slug identifying the surface that submitted the response. */
     channel?: string;
-  };
+  } | null;
 
   /** Per-step normalized LLM token usage. See {@link WorkflowTokenUsage}. */
   usage?: WorkflowTokenUsage;

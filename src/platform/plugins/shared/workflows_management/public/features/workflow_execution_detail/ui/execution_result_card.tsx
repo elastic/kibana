@@ -45,6 +45,8 @@ const i18nTexts = {
 interface ExecutionResultCardProps {
   workflowExecution: WorkflowExecutionDto;
   failedPosition: FailedStepPosition | null;
+  /** Set when the run is paused on waitForInput. Result links to that step. */
+  waitingStepExecutionId?: string;
   onFocusFailedStep: (stepExecutionId: string) => void;
 }
 
@@ -52,6 +54,7 @@ interface ExecutionResultCardProps {
 export const ExecutionResultCard = ({
   workflowExecution,
   failedPosition,
+  waitingStepExecutionId,
   onFocusFailedStep,
 }: ExecutionResultCardProps) => {
   const { euiTheme } = useEuiTheme();
@@ -137,6 +140,23 @@ export const ExecutionResultCard = ({
                     : i18n.translate('workflows.executionFlyout.result.failed', {
                         defaultMessage: 'Failed',
                       })}
+                </EuiLink>
+              ) : waitingStepExecutionId ? (
+                <EuiLink
+                  color="warning"
+                  data-test-subj="workflowExecutionFlyoutResultLink"
+                  onClick={() => {
+                    onFocusFailedStep(waitingStepExecutionId);
+                  }}
+                  css={{
+                    fontWeight: 600,
+                    fontSize: '12px',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  {i18n.translate('workflows.executionFlyout.result.provideActionLinkText', {
+                    defaultMessage: 'Provide action',
+                  })}
                 </EuiLink>
               ) : (
                 <EuiText

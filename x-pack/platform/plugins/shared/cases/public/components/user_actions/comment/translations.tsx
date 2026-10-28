@@ -33,6 +33,23 @@ export const ATTACHMENT = i18n.translate('xpack.cases.userActions.attachment', {
   defaultMessage: 'Attachment',
 });
 
+export const EDITED_COMMENT = i18n.translate('xpack.cases.userActions.comment.editedComment', {
+  defaultMessage: 'edited comment',
+});
+
+export const EDITED_ATTACHMENT = i18n.translate(
+  'xpack.cases.userActions.comment.editedAttachment',
+  {
+    defaultMessage: 'edited attachment',
+  }
+);
+
+export const EDITED_ATTACHMENTS = (attachments: string) =>
+  i18n.translate('xpack.cases.userActions.comment.editedAttachments', {
+    defaultMessage: 'edited {attachments}',
+    values: { attachments },
+  });
+
 export const UNSAVED_DRAFT_COMMENT = i18n.translate(
   'xpack.cases.userActions.comment.unsavedDraftComment',
   {
