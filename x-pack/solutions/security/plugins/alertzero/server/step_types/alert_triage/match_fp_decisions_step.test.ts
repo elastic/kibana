@@ -7,7 +7,11 @@
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { HUNT_COVERAGE_AI_INDEX_DEST } from '../../../common/step_types/package_report';
-import { ALERT_FETCH_LIMIT, type DecisionAutoCloseMode } from '../../alert_triage/constants';
+import {
+  ALERT_FETCH_LIMIT,
+  DECISION_NOTES_PER_SWEEP,
+  type DecisionAutoCloseMode,
+} from '../../alert_triage/constants';
 import { decisionId, groupByStrictKey } from '../../alert_triage/fp_decisions';
 import { getTriageMatchFpDecisionsStepDefinition } from './match_fp_decisions_step';
 
@@ -28,7 +32,12 @@ const hashOf = (executable: string) =>
 const stored = (kind: 'false_positive' | 'do_not_propose', expiresAt = NOW + 86_400_000) => ({
   type: 'security.fp_decision',
   expires_at: new Date(expiresAt).toISOString(),
-  attributes: { decision: kind },
+  attributes: {
+    decision: kind,
+    approver: 'ana',
+    decided_at: '2026-10-20T08:00:00.000Z',
+    proposal_id: 'prop-1',
+  },
 });
 
 const setup = ({
@@ -41,6 +50,7 @@ const setup = ({
   closedToday = 0,
   countError,
   closeError,
+  noteError,
 }: {
   alerts: Array<[string, Record<string, unknown>]>;
   /** Stored decisions by document id. */
@@ -52,6 +62,7 @@ const setup = ({
   closedToday?: number;
   countError?: Error;
   closeError?: Error;
+  noteError?: Error;
 }) => {
   const callKibanaApi = jest.fn(
     async ({ path, body }: { path: string; body?: Record<string, any> }) => {
@@ -62,6 +73,10 @@ const setup = ({
         }
         if (searchError) throw searchError;
         return { body: { hits: { hits: alerts.map(([_id, _source]) => ({ _id, _source })) } } };
+      }
+      if (path.endsWith('/api/note')) {
+        if (noteError) throw noteError;
+        return { body: {} };
       }
       if (path.endsWith('/signals/status')) {
         if (closeError) throw closeError;
@@ -108,7 +123,14 @@ const setup = ({
     callKibanaApi.mock.calls
       .filter(([{ path }]) => path.endsWith('/signals/tags'))
       .map(([{ body }]) => body as { ids: string[]; tags: { tags_to_add: string[] } });
-  return { run, callKibanaApi, mget, tags, closes };
+  const notes = () =>
+    callKibanaApi.mock.calls
+      .filter(([{ path }]) => path.endsWith('/api/note'))
+      .map(
+        ([{ body }]) =>
+          (body as { note: { eventId: string; note: string; timelineId: string } }).note
+      );
+  return { run, callKibanaApi, mget, tags, closes, notes };
 };
 
 describe('triage match decisions step', () => {
@@ -489,5 +511,90 @@ describe('triage match decisions step in on mode', () => {
 
     expect(output).toEqual(expect.objectContaining({ would_close: 1, closed: 0 }));
     expect(closes()).toEqual([]);
+  });
+
+  it('writes a note on each closed alert that says which decision closed it, who approved it, and how to revoke it', async () => {
+    const { run, notes } = setup({
+      mode: 'on',
+      alerts: [
+        ['a', source('C:\\x.exe')],
+        ['b', source('C:\\x.exe')],
+      ],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    const { output } = await run();
+
+    expect(notes().map(({ eventId }) => eventId)).toEqual(['a', 'b']);
+    expect(notes()[0].timelineId).toBe('');
+    expect(notes()[0].note).toContain(idOf('C:\\x.exe'));
+    expect(notes()[0].note).toContain('approved by ana on 2026-10-20 (proposal prop-1)');
+    expect(notes()[0].note).toContain('system-security-floor-alert-triage-revoke-decision');
+    expect(output).toEqual(expect.objectContaining({ closed: 2, notes_missing: 0 }));
+  });
+
+  it('writes no note in shadow mode, where nothing is closed', async () => {
+    const { run, notes } = setup({
+      mode: 'shadow',
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    await run();
+
+    expect(notes()).toEqual([]);
+  });
+
+  it('keeps the alerts closed when their notes cannot be written, and counts the missing notes', async () => {
+    const { run } = setup({
+      mode: 'on',
+      noteError: new Error('notes down'),
+      alerts: [
+        ['a', source('C:\\x.exe')],
+        ['b', source('C:\\x.exe')],
+      ],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(
+      expect.objectContaining({ closed: 2, close_failures: 0, notes_missing: 2 })
+    );
+  });
+
+  it('writes a note on an alert a dismissed pattern kept out of analysis', async () => {
+    const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
+    const { run, notes } = setup({
+      mode: 'on',
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: { [id]: stored('do_not_propose') },
+    });
+
+    await run();
+
+    expect(notes()).toHaveLength(1);
+    expect(notes()[0].note).toContain('Kept out of analysis');
+    expect(notes()[0].note).toContain('dismissed by ana');
+  });
+
+  it('stops writing notes past the sweep limit, and still keeps every alert out of analysis', async () => {
+    const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
+    const many = Array.from(
+      { length: DECISION_NOTES_PER_SWEEP + 5 },
+      (_unused, i): [string, Record<string, unknown>] => [`a${i}`, source('C:\\x.exe')]
+    );
+    const { run, notes } = setup({
+      mode: 'on',
+      alerts: many,
+      decisions: { [id]: stored('do_not_propose') },
+    });
+
+    const { output } = await run();
+
+    expect(notes()).toHaveLength(DECISION_NOTES_PER_SWEEP);
+    expect(output).toEqual(
+      expect.objectContaining({ skipped: DECISION_NOTES_PER_SWEEP + 5, notes_missing: 5 })
+    );
   });
 });
