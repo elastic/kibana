@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { EntityAnalyticsNewHomePage } from './entity_analytics_new_home_page';
 import * as tileHooks from '../components/home/needs_attention_tiles/hooks';
@@ -337,6 +337,30 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
 
     expect(screen.queryByRole('progressbar', { name: 'Loading' })).not.toBeInTheDocument();
     expect(hooks.useNewEntityCount).toHaveBeenCalled();
+  });
+
+  it('renders the missing privileges callout inside the padded wrapper', () => {
+    mockPrivileges();
+    (useMissingRiskEnginePrivileges as jest.Mock).mockReturnValue({
+      isLoading: false,
+      hasAllRequiredPrivileges: false,
+      missingPrivileges: {
+        indexPrivileges: [['risk-score.risk-score-*', ['read']]],
+        clusterPrivileges: { enable: [], run: [] },
+      },
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    const wrapper = screen.getByTestId('entityAnalyticsPrivilegesCalloutWrapper');
+    expect(within(wrapper).getByText('Insufficient privileges')).toBeInTheDocument();
+    expect(within(wrapper).getByText('risk-score.risk-score-*')).toBeInTheDocument();
+  });
+
+  it('leaves the callout wrapper empty when no privilege is missing', () => {
+    mockPrivileges();
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('entityAnalyticsPrivilegesCalloutWrapper')).toBeEmptyDOMElement();
   });
 
   it.each([

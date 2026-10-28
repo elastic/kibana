@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import type { EvidenceChart } from '../../common/evidence';
 import { EvidenceView } from './evidence_view';
@@ -27,6 +27,9 @@ const chart: EvidenceChart = {
 };
 
 describe('EvidenceView', () => {
+  const openReferences = () =>
+    fireEvent.click(screen.getByTestId('investigationEvidenceReferences'));
+
   it('renders the chart followed by the Markdown description', () => {
     render(
       <EuiProvider>
@@ -39,6 +42,56 @@ describe('EvidenceView', () => {
       'href',
       'https://example.com'
     );
+    expect(screen.queryByTestId('investigationEvidenceReferences')).not.toBeInTheDocument();
+  });
+
+  it('keeps the description visible and the references in a closed popover by default', () => {
+    render(
+      <EuiProvider>
+        <EvidenceView
+          evidence={{
+            description: 'Errors spiked.',
+            references: [{ url: 'https://example.com' }, { query: 'FROM logs-*' }],
+          }}
+        />
+      </EuiProvider>
+    );
+
+    expect(screen.getByText('Errors spiked.')).toBeVisible();
+    expect(screen.getByTestId('investigationEvidenceReferences')).toHaveTextContent('2 references');
+    expect(screen.queryByTestId('evidenceReferenceQuery')).not.toBeInTheDocument();
+
+    openReferences();
+
+    expect(screen.getByTestId('evidenceReferenceQuery')).toBeInTheDocument();
+    expect(screen.getByTestId('evidenceReferenceLink')).toBeInTheDocument();
+  });
+
+  it('renders links in a new tab, with an icon for GitHub, and copyable queries', () => {
+    render(
+      <EuiProvider>
+        <EvidenceView
+          evidence={{
+            references: [
+              { url: 'https://github.com/elastic/kibana/pull/1', label: 'The PR' },
+              { url: 'https://example.com/dash' },
+              { query: 'FROM logs-* | LIMIT 1' },
+            ],
+          }}
+        />
+      </EuiProvider>
+    );
+    openReferences();
+
+    const [github, other] = screen.getAllByTestId('evidenceReferenceLink');
+    expect(github).toHaveAttribute('href', 'https://github.com/elastic/kibana/pull/1');
+    expect(github).toHaveTextContent('The PR');
+    expect(github).toHaveAttribute('target', '_blank');
+    expect(github).toHaveAttribute('rel', expect.stringContaining('noopener'));
+    expect(other).toHaveAttribute('href', 'https://example.com/dash');
+    expect(screen.getAllByTestId('evidenceReferenceIcon')).toHaveLength(2);
+    expect(screen.getByTestId('evidenceReferenceQuery')).toHaveTextContent('FROM logs-* | LIMIT 1');
+    expect(screen.getByTestId('evidenceReferenceCopyQuery')).toBeInTheDocument();
   });
 
   it('renders nothing for empty evidence', () => {

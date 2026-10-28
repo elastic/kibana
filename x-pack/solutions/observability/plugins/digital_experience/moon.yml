@@ -17,27 +17,45 @@ project:
   owner: '@elastic/obs-signals-rum-team'
   sourceRoot: x-pack/solutions/observability/plugins/digital_experience
 dependsOn:
+  - '@kbn/apm-data-access-plugin'
+  - '@kbn/apm-types'
+  - '@kbn/apm-types-shared'
+  - '@kbn/apm-utils'
+  - '@kbn/calculate-auto'
+  - '@kbn/charts-theme'
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/data-plugin'
   - '@kbn/deeplinks-observability'
   - '@kbn/ebt-click'
+  - '@kbn/elastic-agent-utils'
+  - '@kbn/es-errors'
+  - '@kbn/es-query'
   - '@kbn/features-plugin'
+  - '@kbn/field-formats-plugin'
   - '@kbn/i18n'
+  - '@kbn/i18n-react'
   - '@kbn/kibana-react-plugin'
   - '@kbn/observability-shared-plugin'
   - '@kbn/react-hooks'
+  - '@kbn/shared-ux-column-presets'
+  - '@kbn/ui-callout'
+  - '@kbn/server-route-repository'
+  - '@kbn/server-route-repository-client'
+  - '@kbn/server-route-repository-utils'
   - '@kbn/scout-oblt'
   - '@kbn/timerange'
   - '@kbn/typed-react-router-config'
   - '@kbn/unified-search-plugin'
   - '@kbn/ux-plugin'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

@@ -124,6 +124,7 @@ export {
   type InjectedContextStepData,
   createInjectedContextStep,
   isInjectedContextStep,
+  relevantSkillsHookId,
 } from './conversation';
 export {
   ChatEventType,
@@ -277,8 +278,13 @@ export {
   type AttachmentUpdatedEvent,
   type AttachmentDeletedEventData,
   type AttachmentDeletedEvent,
+  type AttachmentRestoredEventData,
+  type AttachmentRestoredEvent,
+  ATTACHMENT_EVENT_FORMAT,
+  isCurrentFormatAttachmentEvent,
   type AttachmentTimelineEvent,
   isAttachmentEvent,
+  isUserMessageEvent,
   ConversationActivityEventType,
   type ConversationCreatedActivityEventData,
   type ConversationCreatedActivityEvent,

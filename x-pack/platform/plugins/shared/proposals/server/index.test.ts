@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { ProposalAlreadyExistsError, ProposalConflictError, ProposalNotFoundError } from '.';
+import {
+  ProposalAlreadyExistsError,
+  ProposalConflictError,
+  ProposalLookupTruncatedError,
+  ProposalNotFoundError,
+} from '.';
 
 describe('proposals server entry point', () => {
   it('exports the errors a caller of the service has to recognise', () => {
     expect(new ProposalNotFoundError('id')).toBeInstanceOf(Error);
     expect(new ProposalAlreadyExistsError('taken')).toBeInstanceOf(ProposalAlreadyExistsError);
+    expect(new ProposalLookupTruncatedError('partial')).toBeInstanceOf(Error);
   });
 
   it('keeps a duplicate id a conflict, so a caller that only knows about conflicts still catches it', () => {

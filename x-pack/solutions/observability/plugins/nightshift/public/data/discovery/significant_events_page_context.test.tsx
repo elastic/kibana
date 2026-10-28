@@ -9,6 +9,16 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY } from '../../hooks/use_fetch_significant_events';
+import {
+  DETECTION_ENTITIES_QUERY_KEY,
+  DETECTION_OVERVIEW_QUERY_KEY,
+  DETECTIONS_LIST_QUERY_KEY,
+  EVENT_BY_ID_QUERY_KEY,
+  EVENT_LIFECYCLE_QUERY_KEY,
+  SIGNIFICANT_EVENTS_FACETS_QUERY_KEY,
+  SIGNIFICANT_EVENTS_LIST_QUERY_KEY,
+} from '../query_keys';
 import {
   SignificantEventsPageProvider,
   useSignificantEventsPageContext,
@@ -188,6 +198,42 @@ describe('SignificantEventsPageProvider', () => {
 
       await waitFor(() => expect(addDanger).toHaveBeenCalledTimes(1));
       expect(addDanger).toHaveBeenCalledWith(expect.objectContaining({ text: 'kaboom' }));
+    });
+
+    it('invalidates Nightshift event and detection queries when a run completes', async () => {
+      trigger.mockResolvedValue({ executionId: 'exec-1' });
+      const { result, setStatus, queryClient } = renderContext();
+      const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+
+      act(() => {
+        result.current.handleRun();
+      });
+      await waitFor(() => expect(result.current.isRunning).toBe(true));
+
+      act(() => {
+        setStatus({ status: SignificantEventsWorkflowStatus.InProgress, executionId: 'exec-1' });
+      });
+      act(() => {
+        setStatus({ status: SignificantEventsWorkflowStatus.Completed, executionId: 'exec-1' });
+      });
+
+      await waitFor(() => expect(addSuccess).toHaveBeenCalledTimes(1));
+      const keys = invalidateQueries.mock.calls.map(
+        ([filters]) => (filters as { queryKey?: unknown }).queryKey
+      );
+      expect(keys).toEqual(
+        expect.arrayContaining([
+          SIGNIFICANT_EVENTS_LIST_QUERY_KEY,
+          SIGNIFICANT_EVENTS_FACETS_QUERY_KEY,
+          EVENT_BY_ID_QUERY_KEY,
+          EVENT_LIFECYCLE_QUERY_KEY,
+          DETECTIONS_LIST_QUERY_KEY,
+          DETECTION_OVERVIEW_QUERY_KEY,
+          DETECTION_ENTITIES_QUERY_KEY,
+          NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
+        ])
+      );
+      expect(keys).not.toContainEqual(['significantEvents']);
     });
   });
 

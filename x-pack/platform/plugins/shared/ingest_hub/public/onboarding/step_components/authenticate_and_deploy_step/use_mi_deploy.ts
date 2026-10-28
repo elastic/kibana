@@ -399,6 +399,7 @@ export function useMiDeploy({
               storedServiceVars: serviceSettings?.serviceVars ?? {},
               globalRegion: serviceSettings?.globalRegion ?? '',
               namespace,
+              globalNamespace: serviceSettings?.namespace,
               authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),
               ...connectorOverride,
@@ -533,6 +534,7 @@ export function useMiDeploy({
             storedServiceVars: serviceSettings?.serviceVars ?? {},
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
+            globalNamespace: serviceSettings?.namespace,
             // A dirty update may have just stored new keys for the policies this updates: keep
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
@@ -637,6 +639,7 @@ export function useMiDeploy({
             storedServiceVars: serviceSettings?.serviceVars ?? {},
             globalRegion: serviceSettings?.globalRegion ?? '',
             namespace,
+            globalNamespace: serviceSettings?.namespace,
             // A dirty update may have just stored new keys for the policies this updates: keep
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
@@ -753,6 +756,7 @@ export function useMiDeploy({
               instances: serviceSettings?.instances ?? [],
               storedServiceVars,
               globalRegion,
+              globalNamespace: serviceSettings?.namespace,
               namespace,
               authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),

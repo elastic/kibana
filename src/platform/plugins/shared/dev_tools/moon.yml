@@ -33,6 +33,7 @@ tags:
   - prod
   - group-platform
   - shared
+  - scout-tests
 fileGroups:
   src:
     - common/*
