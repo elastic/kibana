@@ -77,8 +77,7 @@ export interface ChangeHistoryPreviewProps {
    */
   renderFooter?: (context: ChangeHistoryPreviewEditorContext | null) => ReactNode;
   /**
-   * Additional settings rendered in the settings popover below the mode setting.
-   * Compose `ChangeHistoryPreviewSettingsSection`s. Without it, the popover only appears when
+   * Additional settings rendered in the settings popover below the mode setting. Without it, the popover only appears when
    * more than one mode is supported.
    */
   extraSettings?: ReactNode;

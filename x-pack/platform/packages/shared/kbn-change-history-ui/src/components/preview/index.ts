@@ -10,7 +10,6 @@ export {
   CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT,
   ChangeHistoryPreviewFooterSpacer,
 } from './change_history_preview_footer';
-export { ChangeHistoryPreviewSettingsSection } from './change_history_preview_settings_popover';
 export type {
   ChangeHistoryPreviewProps,
   ChangeHistoryMonacoLanguage,

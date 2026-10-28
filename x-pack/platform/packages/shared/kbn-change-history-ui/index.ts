@@ -22,11 +22,7 @@ export type {
   ChangeHistoryTriggerProps,
   ChangeHistoryListGroupItemProps,
 } from './src/components/modal';
-export {
-  ChangeHistoryPreview,
-  ChangeHistoryPreviewFooterSpacer,
-  ChangeHistoryPreviewSettingsSection,
-} from './src/components/preview';
+export { ChangeHistoryPreview, ChangeHistoryPreviewFooterSpacer } from './src/components/preview';
 export type {
   ChangeHistoryPreviewProps,
   ChangeHistoryMonacoLanguage,

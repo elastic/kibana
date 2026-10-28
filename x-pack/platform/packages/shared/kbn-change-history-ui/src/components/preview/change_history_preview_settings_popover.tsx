@@ -52,8 +52,7 @@ export interface ChangeHistoryPreviewSettingsPopoverProps {
   modes: readonly ChangeHistoryPreviewModeOption[];
   selectedModeId: string;
   onModeChange: (modeId: string) => void;
-  /** Additional settings rendered below the compare mode setting; compose `ChangeHistoryPreviewSettingsSection`s. */
-  children?: ReactNode;
+  children?: ReactNode; // additional settings rendered below the compare mode setting
 }
 
 /**
@@ -135,23 +134,13 @@ export const ChangeHistoryPreviewSettingsPopover = ({
               onModeChange={onModeChange}
             />
           ) : null}
-          {children}
+          {children ? (
+            <EuiText component="div" css={styles.section}>
+              {children}
+            </EuiText>
+          ) : null}
         </div>
       </EuiText>
     </EuiPopover>
-  );
-};
-
-/** Padded block for a group of related settings inside the popover. */
-export const ChangeHistoryPreviewSettingsSection = ({
-  children,
-}: {
-  children: ReactNode;
-}): JSX.Element => {
-  const styles = useMemoCss(settingsPopoverStyles);
-  return (
-    <EuiText component="div" css={styles.section}>
-      {children}
-    </EuiText>
   );
 };

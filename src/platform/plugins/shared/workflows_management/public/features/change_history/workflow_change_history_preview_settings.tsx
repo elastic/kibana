@@ -9,7 +9,6 @@
 
 import { EuiCheckbox, useGeneratedHtmlId } from '@elastic/eui';
 import React from 'react';
-import { ChangeHistoryPreviewSettingsSection } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 
 const HIGHLIGHT_VALIDATION_ERRORS_LABEL = i18n.translate(
@@ -32,14 +31,12 @@ export const WorkflowChangeHistoryPreviewSettings = ({
   });
 
   return (
-    <ChangeHistoryPreviewSettingsSection>
-      <EuiCheckbox
-        id={highlightValidationId}
-        data-test-subj="workflowChangeHistoryHighlightValidationErrors"
-        label={HIGHLIGHT_VALIDATION_ERRORS_LABEL}
-        checked={highlightValidationErrors}
-        onChange={(event) => onHighlightValidationErrorsChange(event.target.checked)}
-      />
-    </ChangeHistoryPreviewSettingsSection>
+    <EuiCheckbox
+      id={highlightValidationId}
+      data-test-subj="workflowChangeHistoryHighlightValidationErrors"
+      label={HIGHLIGHT_VALIDATION_ERRORS_LABEL}
+      checked={highlightValidationErrors}
+      onChange={(event) => onHighlightValidationErrorsChange(event.target.checked)}
+    />
   );
 };

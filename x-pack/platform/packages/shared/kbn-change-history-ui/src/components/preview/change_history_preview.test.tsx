@@ -15,7 +15,6 @@ import type { ChangeHistoryDetail, ChangeHistoryListItem } from '../../types';
 import { TestProvider } from '../../test_utils/test_providers';
 import type { ChangeHistoryPreviewEditorContext } from './change_history_preview';
 import { ChangeHistoryPreview } from './change_history_preview';
-import { ChangeHistoryPreviewSettingsSection } from './change_history_preview_settings_popover';
 
 const detail: ChangeHistoryDetail = {
   id: 'change-1',
@@ -472,11 +471,7 @@ describe('ChangeHistoryPreview', () => {
     renderPreview({
       target: 'name: current\n',
       baseline: 'name: original\n',
-      extraSettings: (
-        <ChangeHistoryPreviewSettingsSection>
-          <span data-test-subj="customSetting">My setting</span>
-        </ChangeHistoryPreviewSettingsSection>
-      ),
+      extraSettings: <span data-test-subj="customSetting">My setting</span>,
     });
 
     fireEvent.click(screen.getByTestId('changeHistoryPreviewSettingsButton'));
@@ -497,11 +492,7 @@ describe('ChangeHistoryPreview', () => {
     jest.useFakeTimers();
     renderPreview({
       target: 'name: current\n',
-      extraSettings: (
-        <ChangeHistoryPreviewSettingsSection>
-          <span data-test-subj="customSetting">My setting</span>
-        </ChangeHistoryPreviewSettingsSection>
-      ),
+      extraSettings: <span data-test-subj="customSetting">My setting</span>,
     });
 
     fireEvent.click(screen.getByTestId('changeHistoryPreviewSettingsButton'));
