@@ -18,4 +18,8 @@ export const globalMonacoStyleOverrides = css`
     top: 50% !important;
     transform: translateY(-50%);
   }
+
+  .monaco-hover.workbench-hover.compact .hover-contents {
+    white-space: nowrap !important;
+  }
 `;
