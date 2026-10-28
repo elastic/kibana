@@ -1199,6 +1199,11 @@ platform_engineer:
         - .lists*
         - .items*
         - .alerts-security*
+        # Not granted by the ES controller. Stateful Scout security tests clone this descriptor
+        # into a custom role (kbn-scout-security browser_auth fixture, the `!config.serverless`
+        # branch), and need to write the alerts backing index to close and assign alerts.
+        # Added in https://github.com/elastic/kibana/pull/272769 — keep on the next sync.
+        - .internal.alerts-security.alerts-*
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
