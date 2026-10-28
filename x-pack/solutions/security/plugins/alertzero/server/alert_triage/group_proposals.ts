@@ -32,6 +32,8 @@ export interface GroupingHead {
   alertIds: readonly string[];
   /** The execution of the proposal's gate, which must still wait for input for a join to be safe. */
   workflowExecutionId?: string;
+  /** Set once an approval or dismissal released the gate; `revise()` refuses the proposal from then on. */
+  gateReleasedAt?: string;
 }
 
 export interface KeyGroup {
@@ -113,6 +115,7 @@ export const isJoinableHead = (head: GroupingHead, adding: number, now: number):
   head.status === 'pending' &&
   head.decision === undefined &&
   head.previousExecutionError === undefined &&
+  head.gateReleasedAt === undefined &&
   (head.expiresAt === undefined ||
     Date.parse(head.expiresAt) - now > GROUPED_PROPOSAL_JOIN_MARGIN_MS) &&
   head.revision < GROUPED_PROPOSAL_MAX_REVISIONS &&

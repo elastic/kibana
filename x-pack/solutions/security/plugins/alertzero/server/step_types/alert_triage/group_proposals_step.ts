@@ -91,6 +91,7 @@ const toHead = (proposal: {
   conversationId: string;
   actionInput?: Record<string, unknown>;
   workflowExecutionId?: string;
+  gateReleasedAt?: string;
 }): GroupingHead => {
   const alertIds = proposal.actionInput?.alertIds;
   return {
@@ -104,6 +105,7 @@ const toHead = (proposal: {
     conversationId: proposal.conversationId,
     alertIds: Array.isArray(alertIds) ? alertIds.map(String) : [],
     workflowExecutionId: proposal.workflowExecutionId,
+    gateReleasedAt: proposal.gateReleasedAt,
   };
 };
 
@@ -183,8 +185,19 @@ const createRuntime = async (
   };
   // A proposal is searchable before its create step has attached the card and its gate reached
   // `WAITING_FOR_INPUT`. A gate that was released or settled has a decision or a final status.
-  const isGateStarting = async ({ status, decision, workflowExecutionId }: GroupingHead) => {
-    if (status !== 'pending' || decision !== undefined || !workflowExecutionId || !management) {
+  const isGateStarting = async ({
+    status,
+    decision,
+    gateReleasedAt,
+    workflowExecutionId,
+  }: GroupingHead) => {
+    if (
+      status !== 'pending' ||
+      decision !== undefined ||
+      gateReleasedAt !== undefined ||
+      !workflowExecutionId ||
+      !management
+    ) {
       return false;
     }
     const execution = await management.getWorkflowExecution(workflowExecutionId, spaceId, {

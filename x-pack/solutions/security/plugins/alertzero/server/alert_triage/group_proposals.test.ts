@@ -79,6 +79,7 @@ describe('isJoinableHead', () => {
     ['decided', { decision: 'approved' }],
     ['settled', { status: 'succeeded' }],
     ['failed before', { previousExecutionError: 'close failed' }],
+    ['released', { gateReleasedAt: '2026-10-28T10:00:00.000Z' }],
     ['at the revision budget', { revision: GROUPED_PROPOSAL_MAX_REVISIONS }],
   ])('refuses a head that is %s', (_, overrides) => {
     expect(isJoinableHead(head(overrides), 1, NOW)).toBe(false);
