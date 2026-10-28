@@ -43,6 +43,7 @@ export function registerWorkflowsConnectorEventEmitter({
       connectorTypeId,
       correlationKey,
       request,
+      authenticatedUser,
     }) => {
       const workflowsExtensions = await getWorkflowsExtensionsStart();
       if (!workflowsExtensions) {
@@ -69,7 +70,11 @@ export function registerWorkflowsConnectorEventEmitter({
 
       try {
         const client = await workflowsExtensions.getClient(request);
-        await client.emitEvent(eventId, enriched);
+        if (authenticatedUser) {
+          await client.emitEvent(eventId, enriched, { authenticatedUser });
+        } else {
+          await client.emitEvent(eventId, enriched);
+        }
       } catch (error) {
         emitFailureCount += 1;
         throw error;

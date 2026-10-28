@@ -10,6 +10,7 @@ import type { ChatCompleteOptions, Model } from '@kbn/inference-common';
 import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import {
   createInferenceInternalError,
+  createInferenceRequestAbortedError,
   createInferenceRequestError,
   InferenceTaskErrorCode,
   getConnectorFamily,
@@ -30,7 +31,7 @@ import type {
   InferenceAnonymizationOptions,
   RegexWorkerService,
 } from '@kbn/ai-anonymization-server';
-import type { ActionsClientProvider } from '../types';
+import type { ActionsClientProvider, ScopedFeatureEndpointResolver } from '../types';
 import type {
   InferenceAdapterChatCompleteOptions,
   InferenceConnectorAdapterChatCompleteEvent,
@@ -73,6 +74,7 @@ interface CreateChatCompleteApiOptions {
   resolveConnectorId?: (connectorId: string) => Promise<string>;
   /** Decides whether an inference endpoint of the given service is called with `_stream`. */
   shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
+  resolveFeatureEndpoint?: ScopedFeatureEndpointResolver;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -81,10 +83,15 @@ type CreateChatCompleteApiOptionsKey =
   | 'retryConfiguration'
   | 'maxRetries';
 
+type ChatCompleteTarget =
+  | { connectorId: string; featureId?: never }
+  | { featureId: string; connectorId?: never };
+
 type ChatCompleteApiWithCallbackInitOptions = Pick<
   ChatCompleteOptions,
   CreateChatCompleteApiOptionsKey
-> & { connectorId: string };
+> &
+  ChatCompleteTarget;
 
 export interface ChatCompleteCallbackContext {
   model?: Partial<Model>;
@@ -134,46 +141,54 @@ export function createChatCompleteCallbackApi({
   getDefaultConnectorId,
   resolveConnectorId,
   shouldStreamInferenceEndpoint,
+  resolveFeatureEndpoint,
 }: CreateChatCompleteApiOptions) {
   return (
     {
-      connectorId,
       abortSignal,
       stream,
       maxRetries = 3,
       retryConfiguration = {},
+      ...target
     }: ChatCompleteApiWithCallbackInitOptions,
     callback: ChatCompleteApiWithCallbackCallback
   ) => {
     const inference$ = defer(() =>
-      resolveAndCreatePipeline({
-        connectorId,
-        endpointIdCache,
-        request,
-        actions,
-        esClient,
-        logger,
-        anonymizationRulesPromise,
-        regexWorker,
-        callback,
-        abortSignal,
-        stream,
-        namespace,
-        anonymization,
-        tokenUsageLogger,
-        isTokenUsageTrackingEnabled,
-        isDefaultConnectorOnly,
-        getDefaultConnectorId,
-        resolveConnectorId,
-        shouldStreamInferenceEndpoint,
-      })
+      resolveEndpoint({ target, resolveFeatureEndpoint, abortSignal })
     ).pipe(
-      retryHoldingTokenCountEvents({
-        maxRetry: maxRetries,
-        backoffMultiplier: retryConfiguration.backoffMultiplier,
-        initialDelay: retryConfiguration.initialDelay,
-        errorFilter: getRetryFilter(retryConfiguration.retryOn),
-      }),
+      switchMap(({ connectorId, ...parameters }) =>
+        defer(() =>
+          resolveAndCreatePipeline({
+            connectorId,
+            featureId: target.featureId,
+            endpointIdCache,
+            request,
+            actions,
+            esClient,
+            logger,
+            anonymizationRulesPromise,
+            regexWorker,
+            callback: (context) => ({ ...callback(context), ...parameters }),
+            abortSignal,
+            stream,
+            namespace,
+            anonymization,
+            tokenUsageLogger,
+            isTokenUsageTrackingEnabled,
+            isDefaultConnectorOnly,
+            getDefaultConnectorId,
+            resolveConnectorId,
+            shouldStreamInferenceEndpoint,
+          })
+        ).pipe(
+          retryHoldingTokenCountEvents({
+            maxRetry: maxRetries,
+            backoffMultiplier: retryConfiguration.backoffMultiplier,
+            initialDelay: retryConfiguration.initialDelay,
+            errorFilter: getRetryFilter(retryConfiguration.retryOn),
+          })
+        )
+      ),
       callbackManager ? handleLifecycleCallbacks({ callbackManager }) : identity,
       abortSignal ? handleCancellation(abortSignal) : identity
     );
@@ -184,6 +199,38 @@ export function createChatCompleteCallbackApi({
       return streamToResponse(inference$);
     }
   };
+}
+
+async function resolveEndpoint({
+  target,
+  resolveFeatureEndpoint,
+  abortSignal,
+}: {
+  target: ChatCompleteTarget;
+  resolveFeatureEndpoint?: ScopedFeatureEndpointResolver;
+  abortSignal?: AbortSignal;
+}): Promise<Pick<ChatCompleteOptions, 'connectorId' | 'temperature' | 'reasoning'>> {
+  if (target.featureId === undefined) {
+    return { connectorId: target.connectorId };
+  }
+  const { featureId } = target;
+  if (!resolveFeatureEndpoint) {
+    throw createInferenceInternalError(
+      `Cannot call chatComplete with featureId "${featureId}": no feature endpoint resolver is registered`
+    );
+  }
+  // Skips the resolver call for an already-aborted request; `handleCancellation` covers later aborts.
+  if (abortSignal?.aborted) {
+    throw createInferenceRequestAbortedError();
+  }
+  const endpoint = await resolveFeatureEndpoint(featureId);
+  if (!endpoint) {
+    throw createInferenceRequestError(
+      `No endpoint is available for feature "${featureId}". Check the feature's model settings and the default AI connector settings.`,
+      400
+    );
+  }
+  return endpoint;
 }
 
 function createChatCompletePipeline({
@@ -198,6 +245,7 @@ function createChatCompletePipeline({
   namespace,
   anonymization,
   connectorId,
+  featureId,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
 }: {
@@ -212,6 +260,7 @@ function createChatCompletePipeline({
   namespace: string;
   anonymization?: InferenceAnonymizationOptions;
   connectorId: string;
+  featureId?: string;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
 }) {
@@ -247,7 +296,7 @@ function createChatCompletePipeline({
                 connectorId,
                 model: callbackContext.model,
                 modelName,
-                featureId: metadata?.connectorTelemetry?.pluginId,
+                featureId: featureId ?? metadata?.connectorTelemetry?.pluginId,
                 parentFeatureId: metadata?.connectorTelemetry?.aggregateBy,
               }),
             logger,
@@ -383,6 +432,7 @@ function createChatCompletePipeline({
 
 function resolveAndCreatePipeline({
   connectorId,
+  featureId,
   endpointIdCache,
   request,
   actions,
@@ -403,6 +453,7 @@ function resolveAndCreatePipeline({
   shouldStreamInferenceEndpoint,
 }: {
   connectorId: string;
+  featureId?: string;
   endpointIdCache: InferenceEndpointIdCache;
   request: KibanaRequest;
   actions: ActionsClientProvider;
@@ -501,6 +552,7 @@ function resolveAndCreatePipeline({
         namespace,
         anonymization,
         connectorId,
+        featureId,
         tokenUsageLogger,
         isTokenUsageTrackingEnabled,
       }).pipe(
