@@ -60,6 +60,11 @@ export interface OperationParameter {
   readonly content?: MediaTypeContent;
   /** A path parameter whose value may span segments, as Azure's `x-ms-skip-url-encoding` marks. */
   readonly multiSegment?: true;
+  /**
+   * The array delimiter of a path or header parameter converted from Swagger 2.0 whose
+   * `collectionFormat` OpenAPI 3 can't express, kept as `x-collection-format`.
+   */
+  readonly delimiter?: string;
 }
 
 export interface MediaTypeContent {

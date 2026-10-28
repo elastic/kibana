@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coerceValue } from './coerce_value';
+import { coerceValue, getSchemaTypes } from './coerce_value';
 import { validateValue } from './schema_violations';
 import type { ContractOperation, OperationResponse, Violation } from './types';
 import { validateContent } from './validate_content';
@@ -44,7 +44,11 @@ const checkHeaders = (
       if (value === undefined) {
         return required ? [{ path, code: 'required', message: `${subject} is required` }] : [];
       }
-      const coerced = coerceValue(value, schema?.schema, operation.spec.document);
+      const { document } = operation.spec;
+      // Headers use the simple style, so arrays arrive comma-separated, as in `X-Ids: 1,2`.
+      const types = getSchemaTypes(schema?.schema, document);
+      const raw = types.has('array') && !types.has('string') ? value.split(/\s*,\s*/) : value;
+      const coerced = coerceValue(raw, schema?.schema, document);
       return validateValue(operation, schema, coerced, { path, subject, direction: 'response' });
     });
 

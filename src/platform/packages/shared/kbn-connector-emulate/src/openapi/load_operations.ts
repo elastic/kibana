@@ -35,6 +35,9 @@ const DEFAULT_STYLES: Readonly<Record<ParameterLocation, string>> = {
   cookie: 'form',
 };
 
+// Swagger 2.0 collection formats that convertSwagger2 keeps for path and header parameters.
+const COLLECTION_DELIMITERS: Readonly<Record<string, string>> = { ssv: ' ', tsv: '\t', pipes: '|' };
+
 const isParameterLocation = (value: unknown): value is ParameterLocation =>
   typeof value === 'string' && value in DEFAULT_STYLES;
 
@@ -206,6 +209,10 @@ export const loadOperations = (input: OpenApiDocument, source?: string): Contrac
       const explode = typeof value.explode === 'boolean' ? value.explode : style === 'form';
       const required = value.in === 'path' || value.required === true;
       const [content] = toContents(value, resolved, resolve);
+      const delimiter =
+        value.in === 'path' || value.in === 'header'
+          ? COLLECTION_DELIMITERS[String(value['x-collection-format'])]
+          : undefined;
       return [
         {
           name: String(value.name),
@@ -218,6 +225,7 @@ export const loadOperations = (input: OpenApiDocument, source?: string): Contrac
           ...(value.in === 'path' && value['x-ms-skip-url-encoding'] === true
             ? { multiSegment: true as const }
             : {}),
+          ...(delimiter === undefined ? {} : { delimiter }),
         },
       ];
     });

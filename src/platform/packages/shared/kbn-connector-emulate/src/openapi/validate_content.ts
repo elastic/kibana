@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coerceValue } from './coerce_value';
+import { coerceValue, wrapFormArrays } from './coerce_value';
 import type { Direction } from './schema_violations';
 import { validateValue } from './schema_violations';
 import type { ContractOperation, MediaTypeContent, Violation } from './types';
@@ -17,6 +17,10 @@ const FORM_MEDIA_TYPE = 'application/x-www-form-urlencoded';
 const SUBJECTS = { request: 'Request', response: 'Response' } as const;
 
 const getMediaType = (contentType = ''): string => contentType.split(';')[0].trim().toLowerCase();
+
+/** Whether a content type is one JSON document: `application/json` or a `+json` type. */
+export const isJsonMediaType = (contentType?: string): boolean =>
+  /[/+]json$/.test(getMediaType(contentType));
 
 // Specs key content by media type, by range such as `text/*`, or by `*/*`.
 const findContent = (contents: readonly MediaTypeContent[], mediaType: string) => {
@@ -28,7 +32,7 @@ const findContent = (contents: readonly MediaTypeContent[], mediaType: string) =
 
 // Multipart, binary and XML bodies arrive as text that their schemas don't describe.
 const canValidate = (mediaType: string): boolean =>
-  /[/+]json$/.test(mediaType) || mediaType === FORM_MEDIA_TYPE || mediaType.startsWith('text/');
+  isJsonMediaType(mediaType) || mediaType === FORM_MEDIA_TYPE || mediaType.startsWith('text/');
 
 const toFormFields = (body: string): Record<string, string | string[]> => {
   const fields: Record<string, string | string[]> = {};
@@ -67,9 +71,11 @@ export const validateContent = (
   if (!canValidate(mediaType)) {
     return [];
   }
+  const { document } = operation.spec;
+  const schema = content.schema?.schema;
   const value =
     mediaType === FORM_MEDIA_TYPE && typeof body === 'string'
-      ? coerceValue(toFormFields(body), content.schema?.schema, operation.spec.document)
+      ? coerceValue(wrapFormArrays(toFormFields(body), schema, document), schema, document)
       : body;
   return validateValue(operation, content.schema, value, {
     path: ['body'],

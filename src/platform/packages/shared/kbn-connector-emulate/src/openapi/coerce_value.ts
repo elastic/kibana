@@ -63,11 +63,39 @@ export const getSchemaTypes = (schema: unknown, document: OpenApiDocument): Set<
   return types;
 };
 
+/** The property names an object schema declares, across its allOf/anyOf/oneOf parts. */
+export const getPropertyNames = (schema: unknown, document: OpenApiDocument): Set<string> =>
+  new Set(
+    collectParts(schema, document).flatMap(({ properties }) =>
+      isRecord(properties) ? Object.keys(properties) : []
+    )
+  );
+
 const findSubschema = (
   schema: unknown,
   document: OpenApiDocument,
   pick: (node: SchemaNode) => unknown
 ): unknown => collectParts(schema, document).map(pick).find(isRecord);
+
+/**
+ * Reads a field sent once as a one-item array when its property can only be an array, as in
+ * `tags=1`. A property that also allows a scalar, such as `all` or a list of IDs, keeps it.
+ */
+export const wrapFormArrays = (
+  fields: Readonly<Record<string, string | string[]>>,
+  schema: unknown,
+  document: OpenApiDocument
+): Record<string, string | string[]> =>
+  Object.fromEntries(
+    Object.entries(fields).map(([key, value]) => {
+      const property = findSubschema(schema, document, ({ properties }) =>
+        isRecord(properties) ? properties[key] : undefined
+      );
+      const types = getSchemaTypes(property, document);
+      const onlyArray = types.size === 1 && types.has('array');
+      return [key, typeof value === 'string' && onlyArray ? [value] : value];
+    })
+  );
 
 const matchesPattern = (pattern: string, value: string): boolean => {
   try {

@@ -265,32 +265,32 @@ export const createOperationMatcher = (operations: readonly ContractOperation[])
         )}`,
       };
     }
-    const forMethod = candidates.filter(
-      ({ route }) => route.operation.method === method.toLowerCase()
-    );
-    // The most specific path template wins first, so `/items/new` takes precedence over
-    // `/items/{id}` whatever the request's parameters; discriminators only tell apart operations
-    // on that template, as `x-ms-paths` declares them.
-    const specificity = ({ route }: (typeof forMethod)[number]) =>
+    // The most specific path template wins before the method is considered, so `/items/new`
+    // takes precedence over `/items/{id}` whatever the request's parameters, and a method it
+    // doesn't declare gets 405 rather than falling through. Templates are compared by shape, so
+    // `/items/{id}` and `/items/{itemId}` from different specs are the same template.
+    // Discriminators only tell apart operations on that template, as `x-ms-paths` declares them.
+    const specificity = ({ route }: (typeof candidates)[number]) =>
       [route.parameterNames.length, -route.literalLength] as const;
-    const [mostSpecific] = forMethod.map(specificity).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-    const onTemplate = forMethod
-      .filter((candidate) => {
-        const [parameters, literal] = specificity(candidate);
-        return parameters === mostSpecific[0] && literal === mostSpecific[1];
-      })
+    const [mostSpecific] = candidates.map(specificity).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const onTemplate = candidates.filter((candidate) => {
+      const [parameters, literal] = specificity(candidate);
+      return parameters === mostSpecific[0] && literal === mostSpecific[1];
+    });
+    const forMethod = onTemplate
+      .filter(({ route }) => route.operation.method === method.toLowerCase())
       .map((candidate) => ({ ...candidate, ...discriminate(candidate.route, { url, headers }) }));
     // A conflicting discriminator rules an operation out only when another is left, so a request
     // to a single operation still reaches validation, which names the wrong value.
-    const consistent = onTemplate.filter(({ conflicts }) => !conflicts);
-    const [best] = (consistent.length > 0 ? consistent : onTemplate).sort(
+    const consistent = forMethod.filter(({ conflicts }) => !conflicts);
+    const [best] = (consistent.length > 0 ? consistent : forMethod).sort(
       (a, b) =>
         fixedQueryCount(b.route) - fixedQueryCount(a.route) ||
         b.matched - a.matched ||
         a.missing - b.missing
     );
     if (!best) {
-      const allowed = [...new Set(candidates.map(({ route }) => route.operation.method))];
+      const allowed = [...new Set(onTemplate.map(({ route }) => route.operation.method))];
       return {
         status: 405,
         message: `The path only allows ${allowed.map((name) => name.toUpperCase()).join(', ')}`,

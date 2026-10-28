@@ -60,6 +60,18 @@ describe('loadContractOperations', () => {
     expect(() => loadContractOperations(documentWith({ Item }))).toThrow(message);
   });
 
+  it('loads OpenAPI 3.1 refs to the boolean schema false', () => {
+    const operations = loadContractOperations({
+      ...documentWith({
+        Item: { type: 'object', properties: { never: { $ref: '#/components/schemas/Never' } } },
+        Never: false,
+      }),
+      openapi: '3.1.0',
+    });
+
+    expect(operations).toHaveLength(1);
+  });
+
   it('reports defects in components reached through nested refs', () => {
     const load = () =>
       loadContractOperations(

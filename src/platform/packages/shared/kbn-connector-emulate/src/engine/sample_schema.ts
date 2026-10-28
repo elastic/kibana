@@ -139,6 +139,43 @@ const mergeProperties = (left: unknown, right: unknown): SchemaNode | undefined 
   return merged;
 };
 
+// The `index`th distinct variant of a sampled item, for `uniqueItems` arrays: the next `enum`
+// value, a numbered string, the next number, or an object varying its first such property.
+const vary = (
+  value: unknown,
+  index: number,
+  schema: SchemaNode,
+  document: OpenApiDocument
+): unknown => {
+  if (Array.isArray(schema.enum) && schema.enum.length > index) {
+    return schema.enum[index];
+  }
+  if (typeof value === 'string') {
+    const suffix = String(index);
+    const max = numberOrUndefined(schema.maxLength) ?? Infinity;
+    return `${value.slice(0, Math.max(0, max - suffix.length))}${suffix}`;
+  }
+  if (typeof value === 'number') {
+    const step = numberOrUndefined(schema.multipleOf) ?? 1;
+    const up = value + index * step;
+    const maximum = numberOrUndefined(schema.maximum);
+    return maximum !== undefined && up > maximum ? value - index * step : up;
+  }
+  if (typeof value === 'boolean') {
+    return index === 1 ? !value : value;
+  }
+  if (isRecord(value) && isRecord(schema.properties)) {
+    const { properties } = schema;
+    for (const [name, property] of Object.entries(value)) {
+      const varied = vary(property, index, resolve(properties[name], document), document);
+      if (varied !== property) {
+        return { ...value, [name]: varied };
+      }
+    }
+  }
+  return value;
+};
+
 // Merges allOf parts into one schema before sampling, so that a property declared by several
 // parts gets the constraints of all of them (e.g. an `enum` in one and a plain `type` in another).
 const mergeAllOf = (parts: readonly unknown[], document: OpenApiDocument): SchemaNode =>
@@ -287,7 +324,7 @@ export const sampleSchema = (
         const minItems = numberOrUndefined(node.minItems) ?? 0;
         const maxItems = numberOrUndefined(node.maxItems) ?? Infinity;
         const typical = expands ? Math.max(minItems, 1) : minItems;
-        // Items are copies of one sample, so only `uniqueItems` arrays of one item stay valid.
+        // Boundary arrays aren't filled further when their items must be unique.
         const fullest =
           boundary && expands && node.uniqueItems !== true
             ? Math.max(
@@ -299,7 +336,16 @@ export const sampleSchema = (
         if (Array.isArray(node.items)) {
           return node.items.map((item, index) => child(item, 'items', index));
         }
-        return Array.from({ length: count }, () => child(node.items, 'items'));
+        const item = child(node.items, 'items');
+        // Each entry is its own copy, so changing one item (as a responder might) leaves the rest.
+        const copyOf = (index: number) => (index === 0 ? item : structuredClone(item));
+        if (node.uniqueItems === true) {
+          const itemSchema = resolve(node.items, document);
+          return Array.from({ length: count }, (_, index) =>
+            index === 0 ? item : vary(copyOf(index), index, itemSchema, document)
+          );
+        }
+        return Array.from({ length: count }, (_, index) => copyOf(index));
       }
       case 'string':
         return placeholderString(node, boundary);

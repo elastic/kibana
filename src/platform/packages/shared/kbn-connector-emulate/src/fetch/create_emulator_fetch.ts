@@ -13,6 +13,7 @@ import type {
   ContractResponse,
   NamedOperationRef,
   Responder,
+  ResponderContext,
   Violation,
 } from '../contract/types';
 import type {
@@ -26,7 +27,7 @@ import { collectNamedResponses, rejectUnknownNamedResponses } from '../engine/na
 import { createResponseEngine } from '../engine/response_engine';
 import type { PaginationOptions } from '../engine/paginate';
 import { withPagination } from '../engine/paginate';
-import { sampleResponse } from '../engine/sample_response';
+import { sampleBoundaryResponse, sampleResponse } from '../engine/sample_response';
 import type { GraphQLSpec } from '../graphql/graphql_protocol';
 import { createGraphQLProtocol, isGraphQLSpec, toEndpoint } from '../graphql/graphql_protocol';
 import type { McpSpec } from '../mcp/mcp_protocol';
@@ -35,6 +36,7 @@ import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
 import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import { isJsonMediaType } from '../openapi/validate_content';
 import { insufficientScopeChallenge } from '../openapi/validate_security';
 
 /** One request the mock received, for assertions in tests. */
@@ -79,10 +81,17 @@ export interface EmulatorOptions extends PaginationOptions {
   /** Responses captured from the vendor, served when they still conform to the spec. */
   readonly recordings?: readonly Recording[];
   /**
-   * Answers operations without a fixture or recording; defaults to the spec's examples,
-   * then deterministic samples of its schemas.
+   * Answers OpenAPI operations in front of the default chain: fixtures, recordings, then
+   * examples or samples. `context.next()` gives the default chain's answer, and `context.state`
+   * keeps what the responder needs across requests, e.g. to read back what it created. Answers
+   * may be promises, and are validated like any other.
    */
   readonly respond?: Responder;
+  /**
+   * How the default chain samples responses the spec has no example for: `typical` values, or
+   * values at the schema's upper bounds (`boundary`), which also skips examples.
+   */
+  readonly sampling?: 'typical' | 'boundary';
   /**
    * Answer 403 `insufficient_scope` when a bearer token the mock issued lacks the scopes an
    * operation's OAuth 2 requirements list. Off by default, as some specs declare scopes loosely.
@@ -95,6 +104,8 @@ export interface Emulator {
   readonly calls: ContractCall[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
+  /** Empties `calls` and the responder state, e.g. between tests. */
+  readonly reset: () => void;
 }
 
 const JSON_HEADERS = { 'content-type': 'application/json' };
@@ -115,13 +126,15 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
   // `request.body` undefined even when the request has one.
   const text = await request.text();
   let body: unknown = text || undefined;
+  let bodyError: string | undefined;
   if (text) {
     headers['content-length'] ??= String(Buffer.byteLength(text));
-    if (/json/.test(headers['content-type'] ?? '')) {
+    // NDJSON and JSON text sequences are several documents, so they stay text.
+    if (isJsonMediaType(headers['content-type'])) {
       try {
         body = JSON.parse(text);
-      } catch {
-        // Left as a string so validation reports it against the JSON schema.
+      } catch (error) {
+        bodyError = error instanceof Error ? error.message : String(error);
       }
     }
   }
@@ -131,6 +144,7 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
     query: toQuery(url.searchParams),
     headers,
     body,
+    ...(bodyError === undefined ? {} : { bodyError }),
   };
 };
 
@@ -194,9 +208,19 @@ const toOperationRef = ({ method, path, spec: { source } }: ContractOperation): 
 // HTTP sends no body with these, though specs such as Jira's declare content for 204 responses.
 const NULL_BODY_STATUSES = new Set([101, 204, 205, 304]);
 
+// JSON bodies are serialized whatever their value, so a JSON string or `null` stays JSON.
+const isJsonContent = (headers: ContractResponse['headers'] = {}): boolean =>
+  Object.entries(headers).some(
+    ([name, value]) => name.toLowerCase() === 'content-type' && isJsonMediaType(value)
+  );
+
 const toResponse = ({ statusCode, headers, body }: ContractResponse): Response => {
   const payload =
-    body === undefined || body === null || NULL_BODY_STATUSES.has(statusCode)
+    body === undefined || NULL_BODY_STATUSES.has(statusCode)
+      ? null
+      : isJsonContent(headers)
+      ? JSON.stringify(body)
+      : body === null
       ? null
       : typeof body === 'string'
       ? body
@@ -217,7 +241,8 @@ export const createEmulatorFetch = ({
   recordings,
   pagination,
   collectionSize,
-  respond = sampleResponse,
+  respond,
+  sampling = 'typical',
   checkScopes = false,
 }: EmulatorOptions): Emulator => {
   const operations = loadSpecs(specs);
@@ -225,16 +250,26 @@ export const createEmulatorFetch = ({
   const loadedProtocols = loadProtocols(specs, namedResponses);
   const protocols = toProtocolEndpoints(loadedProtocols);
   const tokenEndpoints = findTokenEndpoints(operations);
-  const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
-  const contract = createOpenApiAdapter(
+  const engine = createResponseEngine(operations, {
+    fixtures,
+    recordings,
+    fallback: sampling === 'boundary' ? sampleBoundaryResponse : sampleResponse,
+  });
+  // Paging applies to the default chain, so a responder that defers to `next()` pages too.
+  const defaultChain = withPagination(
     operations,
-    withPagination(
-      operations,
-      { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
-      engine.respond
-    ),
-    { checkScopes }
+    { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
+    engine.respond
   );
+  const contract = createOpenApiAdapter(operations, respond ?? defaultChain, { checkScopes });
+  const state = new Map<unknown, unknown>();
+  const contextFor = (operation: ContractOperation, request: ContractRequest) => {
+    const context: ResponderContext = {
+      state,
+      next: async () => defaultChain(operation, request, context),
+    };
+    return context;
+  };
   const calls: ContractCall[] = [];
 
   const handle = async (request: ContractRequest): Promise<ContractResponse> => {
@@ -320,7 +355,7 @@ export const createEmulatorFetch = ({
       };
     }
 
-    const response = contract.respond(operation, request);
+    const response = await contract.respond(operation, request, contextFor(operation, request));
     const responseViolations = contract.validateResponse(operation, response);
     calls.push({
       request: description,
@@ -344,5 +379,13 @@ export const createEmulatorFetch = ({
       loadedProtocols.map(({ source, protocol }) => ({ source, operations: protocol.operations }))
     ),
   ];
-  return { fetch: mockFetch, calls, rejectedResponses };
+  return {
+    fetch: mockFetch,
+    calls,
+    rejectedResponses,
+    reset: () => {
+      calls.length = 0;
+      state.clear();
+    },
+  };
 };
