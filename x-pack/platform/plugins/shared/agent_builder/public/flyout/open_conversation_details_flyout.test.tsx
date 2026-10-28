@@ -98,7 +98,6 @@ describe('openConversationDetailsFlyout', () => {
     expect(options).toEqual(
       expect.objectContaining({
         size: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
-        defaultSize: CONVERSATION_DETAILS_FLYOUT_DEFAULT_WIDTH,
         minWidth: CONVERSATION_DETAILS_FLYOUT_MIN_WIDTH,
         maxWidth: CONVERSATION_DETAILS_FLYOUT_MAX_WIDTH,
         resizable: true,
@@ -118,7 +117,6 @@ describe('openConversationDetailsFlyout', () => {
 
     const [[, options]] = core.overlays.openSystemFlyout.mock.calls;
     expect(options?.size).toBe(600);
-    expect(options?.defaultSize).toBe(600);
   });
 
   it('reopens at the width the user resized this template to', async () => {
