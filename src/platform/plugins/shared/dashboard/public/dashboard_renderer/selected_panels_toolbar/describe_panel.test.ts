@@ -39,7 +39,70 @@ describe('describePanel', () => {
     expect(describePanel(panel)).toEqual({
       description: 'Median of bytes by machine.os.keyword',
       icon: 'chartBarVertical',
+      breakdown: 'machine.os.keyword',
     });
+  });
+
+  test('finds the breakdown of an ES|QL pie chart from its configuration', () => {
+    const panel = lensPanel({
+      visualizationType: 'lnsPie',
+      state: {
+        visualization: {
+          shape: 'donut',
+          layers: [{ layerId: 'layer1', primaryGroups: ['os'], metrics: ['count'] }],
+        },
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer1: {
+                columns: [
+                  { columnId: 'os', fieldName: 'machine.os.keyword', meta: { type: 'string' } },
+                  { columnId: 'count', fieldName: 'Request Count', meta: { type: 'number' } },
+                ],
+              },
+            },
+          },
+        },
+      },
+    });
+    expect(describePanel(panel)).toEqual({
+      description: 'Request Count by machine.os.keyword',
+      icon: 'chartPie',
+      breakdown: 'machine.os.keyword',
+    });
+  });
+
+  test('finds the breakdown of an ES|QL bar chart from its split accessor', () => {
+    const panel = lensPanel({
+      visualizationType: 'lnsXY',
+      state: {
+        visualization: {
+          layers: [
+            {
+              layerId: 'layer1',
+              seriesType: 'bar_stacked',
+              xAccessor: 'time',
+              accessors: ['count'],
+              splitAccessors: ['code'],
+            },
+          ],
+        },
+        datasourceStates: {
+          textBased: {
+            layers: {
+              layer1: {
+                columns: [
+                  { columnId: 'time', fieldName: 'bucket', meta: { type: 'date' } },
+                  { columnId: 'code', fieldName: 'response.keyword', meta: { type: 'string' } },
+                  { columnId: 'count', fieldName: 'Request Count', meta: { type: 'number' } },
+                ],
+              },
+            },
+          },
+        },
+      },
+    });
+    expect(describePanel(panel).breakdown).toBe('response.keyword');
   });
 
   test('uses the custom label of a breakdown when there is one', () => {
@@ -56,6 +119,7 @@ describe('describePanel', () => {
     expect(describePanel(panel)).toEqual({
       description: 'Count of records by OS',
       icon: 'chartPie',
+      breakdown: 'OS',
     });
   });
 

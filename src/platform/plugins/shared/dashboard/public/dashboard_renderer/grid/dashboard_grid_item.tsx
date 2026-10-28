@@ -30,7 +30,6 @@ import { printViewportVisStyles } from '../print_styles';
 import { DASHBOARD_MARGIN_SIZE, SELECTION_DRAG_THRESHOLD_PX } from './constants';
 import { getHighlightStyles } from './highlight_styles';
 import { PanelContextMenuContext, SelectionPreviewContext } from './panel_context_menu';
-import { SelectedPanelActions } from './selected_panel_actions';
 import { isSelectionModifierPressed } from './selection_modifier';
 
 const selectedLabel = i18n.translate('dashboard.panel.selectedLabel', {
@@ -110,7 +109,6 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
     const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
     const previewSelectedPanelIds = useContext(SelectionPreviewContext);
     const isSelected = selectedPanelIds.has(id) || (previewSelectedPanelIds?.has(id) ?? false);
-    const showSelectedPanelActions = viewMode === 'edit' && selectedPanelIds.has(id);
     const isInSelectMode =
       viewMode === 'edit' && (isSelectMode || (previewSelectedPanelIds?.size ?? 0) > 0);
     const classes = classNames('dshDashboardGrid__item', {
@@ -233,7 +231,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
         if (!(e.currentTarget as HTMLElement).contains(target)) return false;
         if (
           target.closest(
-            'input, textarea, [contenteditable="true"], .embPanel__hoverActions, .embPanel__titleInlineEdit, [data-test-subj^="dashboardSelectedPanelActions"]'
+            'input, textarea, [contenteditable="true"], .embPanel__hoverActions, .embPanel__titleInlineEdit'
           )
         ) {
           return false;
@@ -328,9 +326,6 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
                 )}
               </span>
             )}
-            {showSelectedPanelActions && (
-              <SelectedPanelActions panelId={id} selectedPanelIds={selectedPanelIds} />
-            )}
             {children}
           </>
         ) : (
@@ -359,7 +354,7 @@ const dashboardGridItemStyles = {
         '&:has(> .dshDashboardGrid__hintArea)': {
           position: 'relative',
         },
-        // anchors the selection indicator and the selected panel actions to the panel's edges
+        // anchors the selection indicator to the panel's edges
         '&.dshDashboardGrid__item--selectMode': {
           position: 'relative',
           // in select mode a click anywhere on a panel selects it, so its content (chart tooltips,
@@ -417,7 +412,7 @@ const dashboardGridItemStyles = {
         backgroundColor: transparentize(euiTheme.colors.backgroundBasePrimary, 0.5),
       },
     }),
-  // Inset in the top-right corner; the selected panel actions sit on the top edge to its left
+  // Inset in the top-right corner
   selectionIndicator: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'absolute',

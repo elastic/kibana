@@ -304,14 +304,6 @@ export const topNavStrings = {
       defaultMessage: 'Open background searches',
     }),
   },
-  prettifyDashboard: {
-    label: i18n.translate('dashboard.topNav.prettifyDashboard.label', {
-      defaultMessage: 'Prettify dashboard',
-    }),
-    description: i18n.translate('dashboard.topNav.prettifyDashboard.description', {
-      defaultMessage: 'Arrange all panels in a uniform grid (16 columns × 10 rows each)',
-    }),
-  },
   saveMenu: {
     label: i18n.translate('dashboard.topNave.saveMenuButtonAriaLabel', {
       defaultMessage: 'Save options',
