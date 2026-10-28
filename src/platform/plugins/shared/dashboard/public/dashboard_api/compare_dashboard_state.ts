@@ -14,7 +14,6 @@ import {
   logStateDiff,
   shouldLogStateDiff,
 } from '@kbn/presentation-publishing';
-import { isDashboardSection } from '../../common';
 import { isDevMode } from '../services/dev_mode';
 import { deserializeLayout } from './layout_manager/deserialize_layout';
 import { getLayoutChanges } from './layout_manager/get_layout_changes';
@@ -45,42 +44,7 @@ export interface PanelTypeComparers {
   [panelType: string]: (baseline: object | undefined, current: object | undefined) => boolean;
 }
 
-// Panel configs keep their identity until the panel changes, so a compare result is reused while
-// the comparer, the baseline config and the current config are the same objects.
-const panelCompareCache = new WeakMap<object, WeakMap<object, WeakMap<object, boolean>>>();
-
-const getCachedPanelChange = (
-  comparerKey: object,
-  baselineConfig: object | undefined,
-  currentConfig: object | undefined,
-  compare: () => boolean
-) => {
-  if (!baselineConfig || !currentConfig || shouldLogStateDiff()) return compare();
-  const byBaseline = panelCompareCache.get(comparerKey) ?? new WeakMap();
-  panelCompareCache.set(comparerKey, byBaseline);
-  const byCurrent = byBaseline.get(baselineConfig) ?? new WeakMap();
-  byBaseline.set(baselineConfig, byCurrent);
-  const cached = byCurrent.get(currentConfig);
-  if (cached !== undefined) return cached;
-  const isChanged = compare();
-  byCurrent.set(currentConfig, isChanged);
-  return isChanged;
-};
-
-// deserializeLayout copies each panel config, so read the original objects for the cache.
-const getPanelConfigs = ({ panels, pinned_panels: pinnedPanels }: DashboardState) => {
-  const configs: { [id: string]: object | undefined } = {};
-  const addPanel = ({ id, config }: { id?: string; config?: object }) => {
-    if (id) configs[id] = config;
-  };
-  panels?.forEach((widget) =>
-    isDashboardSection(widget) ? widget.panels.forEach(addPanel) : addPanel(widget)
-  );
-  pinnedPanels?.forEach(addPanel);
-  return configs;
-};
-
-// The caches above rely on panels never being mutated in place, so dev mode freezes them to throw
+// The cache above relies on panels never being mutated in place, so dev mode freezes them to throw
 // on any such mutation. Frozen objects are skipped, since panel configs are shared across states.
 const freezeInDevMode = (value: unknown) => {
   if (!isDevMode || typeof value !== 'object' || value === null || Object.isFrozen(value)) return;
@@ -99,7 +63,6 @@ const diffLayout = (
   );
   const baselineLayout = getBaselineLayout(baseline);
   const currentLayout = deserializeLayout(current.panels, current.pinned_panels);
-  const currentConfigs = getPanelConfigs(current);
 
   const getPanelType = ({ layout }: typeof baselineLayout, panelId: string) =>
     (layout.panels[panelId] ?? layout.pinnedPanels[panelId])?.type;
@@ -113,16 +76,10 @@ const diffLayout = (
     if (getRefId(baselinePanel) !== getRefId(currentPanel)) return true;
     const child = children?.[panelId];
     if (apiComparesSerializedState(child) && apiHasType(child) && child.type === currentType) {
-      return getCachedPanelChange(
-        child,
+      return !child.compareSerializedState(
         baselinePanel,
-        currentConfigs[panelId],
-        () =>
-          !child.compareSerializedState(
-            baselinePanel,
-            currentPanel,
-            (key) => `panel: ${panelId}, key: ${key}`
-          )
+        currentPanel,
+        (key) => `panel: ${panelId}, key: ${key}`
       );
     }
     // a panel that has not loaded is compared with its type's comparer
@@ -130,12 +87,7 @@ const diffLayout = (
     // Until the comparer loads there is nothing to compare with, and loading it re-compares. A type
     // with no definition renders an error panel, whose config cannot change.
     if (!typeComparer) return false;
-    return getCachedPanelChange(
-      typeComparer,
-      baselinePanel,
-      currentConfigs[panelId],
-      () => !typeComparer(baselinePanel, currentPanel)
-    );
+    return !typeComparer(baselinePanel, currentPanel);
   };
 
   const { hasPanelChanges, hasPinnedPanelChanges } = getLayoutChanges(
