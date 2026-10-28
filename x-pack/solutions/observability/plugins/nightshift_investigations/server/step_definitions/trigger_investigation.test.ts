@@ -12,7 +12,12 @@ import { MAX_ARRAY_LENGTH, MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significa
 import { InvestigationQuotaDeniedError } from '../client/errors';
 import type { GetInvestigationsClient } from '../routes/types';
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
+import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
 import { triggerInvestigationStepDefinition } from './trigger_investigation';
+
+jest.mock('../lib/notifications/notify_investigation_quota_reached', () => ({
+  notifyInvestigationQuotaReached: jest.fn().mockResolvedValue(undefined),
+}));
 
 jest.mock('../lib/alert_snapshot', () => ({ fetchInvestigationAlertSnapshots: jest.fn() }));
 
@@ -28,7 +33,10 @@ const createContext = (input: Record<string, unknown>) =>
     logger,
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue(request),
-      getContext: jest.fn().mockReturnValue({ workflow: { id: 'wf-1', spaceId: 'test-space' } }),
+      getContext: jest.fn().mockReturnValue({
+        workflow: { id: 'wf-1', spaceId: 'test-space' },
+        kibanaUrl: 'https://kibana.example.com',
+      }),
     },
   } as never);
 
@@ -39,6 +47,8 @@ const createDefinition = (start: jest.Mock, soClient = savedObjectsClientMock.cr
   const getAutomationsSoClient = jest.fn().mockReturnValue(soClient);
   const getAlertsClient = jest.fn().mockResolvedValue({});
   const getEpisodeLookup = jest.fn().mockReturnValue({ spaceId: 'test-space' });
+  const getActions = jest.fn().mockReturnValue(undefined);
+  const settingsLocator = { getRedirectUrl: jest.fn() } as never;
   return {
     getAutomationsSoClient,
     getAlertsClient,
@@ -47,8 +57,11 @@ const createDefinition = (start: jest.Mock, soClient = savedObjectsClientMock.cr
       getInvestigationsClient,
       getAutomationsSoClient,
       getAlertsClient,
-      getEpisodeLookup
+      getEpisodeLookup,
+      getActions,
+      settingsLocator
     ),
+    getActions,
     getInvestigationsClient,
   };
 };
@@ -334,6 +347,64 @@ describe('triggerInvestigationStepDefinition', () => {
     expect(logger.info).toHaveBeenCalledWith(
       'Skipped investigation of significant_event/event-1: global investigation limit reached'
     );
+  });
+});
+
+describe('investigation quota notice', () => {
+  const slackThread = { workspace: 'W1', channel: 'C1', thread_ts: '1700000000.000100' };
+  const slackInput = {
+    subject_type: 'slack_thread',
+    slack_thread: slackThread,
+    message: 'Check this.',
+  };
+
+  beforeEach(() => jest.mocked(notifyInvestigationQuotaReached).mockClear());
+
+  it('tells the Slack thread when the global limit denies the start', async () => {
+    const error = new InvestigationQuotaDeniedError();
+    const soClient = savedObjectsClientMock.create();
+    const { definition, getActions } = createDefinition(
+      jest.fn().mockRejectedValue(error),
+      soClient
+    );
+
+    expect(await definition.handler(createContext(slackInput))).toEqual({
+      output: { skip_reason: 'investigation_limit' },
+    });
+
+    const [params] = jest.mocked(notifyInvestigationQuotaReached).mock.calls[0];
+    expect(params).toEqual(
+      expect.objectContaining({
+        getActions,
+        spaceId: 'test-space',
+        slackThread,
+        kibanaUrl: 'https://kibana.example.com',
+      })
+    );
+    expect(params.getSoClient()).toBe(soClient);
+  });
+
+  it.each([
+    ['an alert', { subject_type: 'alert', subject_id: 'alert-1', context: { alerts: [] } }],
+    ['a manual question', { subject_type: 'manual', message: 'Review errors.' }],
+  ])('does not post for %s', async (_name, input) => {
+    const error = new InvestigationQuotaDeniedError();
+    const { definition } = createDefinition(jest.fn().mockRejectedValue(error));
+
+    expect(await definition.handler(createContext(input))).toEqual({
+      output: { skip_reason: 'investigation_limit' },
+    });
+
+    expect(notifyInvestigationQuotaReached).not.toHaveBeenCalled();
+  });
+
+  it('does not post for other start failures', async () => {
+    const error = new Error('boom');
+    const { definition } = createDefinition(jest.fn().mockRejectedValue(error));
+
+    await expect(definition.handler(createContext(slackInput))).rejects.toBe(error);
+
+    expect(notifyInvestigationQuotaReached).not.toHaveBeenCalled();
   });
 });
 
