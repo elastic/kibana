@@ -140,6 +140,8 @@ const mockAlertingVTwo = {
     />
   ),
   CreateRuleOptionsFlyout: () => null,
+  migrateRule: jest.fn(async () => undefined),
+  createMigratedRule: jest.fn(async () => ({ ruleId: 'v2-rule-1', actionPolicyIds: [] })),
   CreateRuleFlyout: ({ flyoutType, onRuleCreated }: CreateRuleFlyoutProps) => (
     <button
       type="button"
@@ -360,7 +362,9 @@ describe('ObservabilityAlertingApp', () => {
   });
 
   it('navigates to the Universal rules page once the migrated rule is created', async () => {
-    const { getByTestId, history } = renderAt(`${OBSERVABILITY_ALERTING_RULES_MIGRATE_PATH}/abc-123`);
+    const { getByTestId, history } = renderAt(
+      `${OBSERVABILITY_ALERTING_RULES_MIGRATE_PATH}/abc-123`
+    );
     await waitFor(() => {
       expect(getByTestId('migrateRuleOriginalRuleError')).toBeInTheDocument();
     });

@@ -64,8 +64,8 @@ import {
   type BuilderStateUpdateOptions,
 } from './rule_builder';
 import { useEuiFlyoutReregister } from './use_eui_flyout_reregister';
-import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab } from './types';
-import { isBuilderConditionStepId } from './types';
+import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, StepId } from './types';
+import { isAlertConditionStepId, isBuilderConditionStepId } from './types';
 import { validateStep, evaluateStepValidation } from './validate_step';
 import {
   getSandboxTabs,
@@ -268,6 +268,11 @@ export interface ComposeDiscoverFlyoutProps {
   stackedOnPicker?: boolean;
   /** `push` keeps the host page visible beside the form. Defaults to `overlay`. */
   flyoutType?: 'overlay' | 'push';
+  /**
+   * Step to show. Read on mount, and again whenever a new object is passed, so
+   * hosts can jump to a step while the flyout is open.
+   */
+  stepRequest?: { stepId: StepId };
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -298,6 +303,16 @@ const flyoutTitleTextCss = css`
   text-overflow: ellipsis;
   white-space: nowrap;
 `;
+
+/** Resolves a step id to its index, treating the condition steps as interchangeable. */
+const getStepIndex = (isAlert: boolean, builderType?: string, stepId?: StepId): number => {
+  if (!stepId) return 0;
+  const ids = builderType ? getBuilderStepIds(isAlert) : getStepIds(isAlert);
+  const index = isAlertConditionStepId(stepId)
+    ? ids.findIndex(isAlertConditionStepId)
+    : ids.indexOf(stepId);
+  return Math.max(index, 0);
+};
 
 const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['status'] => {
   if (stepIndex < currentStep) return 'complete';
@@ -341,6 +356,7 @@ export function ComposeDiscoverFlyout({
   closeRequestRef,
   stackedOnPicker = false,
   flyoutType = 'overlay',
+  stepRequest,
 }: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
@@ -387,6 +403,7 @@ export function ComposeDiscoverFlyout({
     initialKind,
     isQueryPrePopulated: isDiscoverQueryPopulated || (mode === 'create' && isRuleQueryPopulated),
     forceYamlMode,
+    initialStep: getStepIndex(initialKind === 'alert', builderType, stepRequest?.stepId),
   });
 
   const lastFocusedRef = useRef<HTMLElement | null>(null);
@@ -986,6 +1003,13 @@ export function ComposeDiscoverFlyout({
 
   const { steps } = getSteps(isAlert, builderType);
   const currentStep = steps[uiState.step];
+
+  const appliedStepRequestRef = useRef(stepRequest);
+  useEffect(() => {
+    if (!stepRequest || stepRequest === appliedStepRequestRef.current) return;
+    appliedStepRequestRef.current = stepRequest;
+    dispatch({ type: 'SET_STEP', step: getStepIndex(isAlert, builderType, stepRequest.stepId) });
+  }, [stepRequest, isAlert, builderType, dispatch]);
   const isLastStep = uiState.step === steps.length - 1;
 
   // ── YAML mode state ──────────────────────────────────────────────────────

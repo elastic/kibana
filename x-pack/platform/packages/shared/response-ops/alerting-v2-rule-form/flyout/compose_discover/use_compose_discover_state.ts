@@ -32,6 +32,8 @@ export interface InitialStateConfig {
   isQueryPrePopulated?: boolean;
   /** When true, the flyout opens directly in YAML mode with the sandbox open. */
   forceYamlMode?: boolean;
+  /** Index of the step to open on. Defaults to the first step. */
+  initialStep?: number;
 }
 
 export const createInitialState = ({
@@ -39,11 +41,12 @@ export const createInitialState = ({
   initialKind = 'alert',
   isQueryPrePopulated = false,
   forceYamlMode = false,
+  initialStep = 0,
 }: InitialStateConfig): ComposeDiscoverState => ({
-  step: 0,
+  step: initialStep,
   activeTab: defaultTabForTabs(
     getSandboxTabs(initialKind === 'alert', {
-      step: 0,
+      step: initialStep,
       hasCustomRecovery: false,
       manualSplitEnabled: false,
     })

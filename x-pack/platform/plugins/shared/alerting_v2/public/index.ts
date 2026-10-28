@@ -97,10 +97,18 @@ export type {
   AlertingV2PublicStart,
   CreateRuleOptionsFlyoutLegacyItem,
   AlertingV2PageProps,
+  MigratedRule,
   PrivilegeCheck,
+  ActionMigrationNote,
+  ClassicRuleAction,
+  CreatedRuleMigration,
+  MigratedActionPolicy,
+  RuleMigration,
+  SkippedClassicAction,
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 export type { CreateRuleFlyoutProps } from './create_rule_flyout';
+export type { ClassicRule } from './migration/types';
 export type { AlertingV2HostApp, CreateAlertingV2HostApp } from '../common/locators';
 export type {
   AlertingV2RulesLocatorParams,
@@ -130,6 +138,14 @@ const pluginModule = new ContainerModule(({ bind }) => {
       return {
         CreateRuleOptionsFlyout,
         CreateRuleFlyout,
+        migrateRule: async (rule) => {
+          const { migrateRule } = await import('./migration/migrate_rule');
+          return migrateRule(rule);
+        },
+        createMigratedRule: async (migration) => {
+          const { createMigratedRule } = await import('./migration/migrate_rule');
+          return createMigratedRule(get(CoreStart('http')), migration);
+        },
         RulesPage: lazyPageWithContainer(
           () =>
             import('./application/composable_pages').then((m) => ({

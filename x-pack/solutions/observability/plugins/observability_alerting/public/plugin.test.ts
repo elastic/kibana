@@ -78,6 +78,8 @@ describe('ObservabilityAlertingPlugin', () => {
           ExecutionHistoryPage: () => null,
           CreateRuleOptionsFlyout: () => null,
           CreateRuleFlyout: () => null,
+          migrateRule: jest.fn(async () => undefined),
+          createMigratedRule: jest.fn(async () => ({ ruleId: 'v2-rule-1', actionPolicyIds: [] })),
           createAlertingV2HostApp: jest.fn((appId: string, paths: Record<string, string>) =>
             Object.fromEntries(
               Object.entries(paths).map(([k, v]) => [k, { app: appId, pathPrefix: v }])

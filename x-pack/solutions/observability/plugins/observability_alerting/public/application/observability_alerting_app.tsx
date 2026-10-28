@@ -176,6 +176,8 @@ export const ObservabilityAlertingApp = ({
     ActionPoliciesPage,
     ExecutionHistoryPage,
     CreateRuleFlyout,
+    migrateRule,
+    createMigratedRule,
     createAlertingV2HostApp: createHost,
   } = alertingVTwo;
 
@@ -276,6 +278,8 @@ export const ObservabilityAlertingApp = ({
               http={coreStart.http}
               setBreadcrumbs={setBreadcrumbs}
               CreateRuleFlyout={CreateRuleFlyout}
+              migrateRule={migrateRule}
+              createMigratedRule={createMigratedRule}
               onRuleCreated={navigateToUniversalRules}
             />
           </EuiPageSection>
