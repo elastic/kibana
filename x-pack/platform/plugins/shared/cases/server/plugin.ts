@@ -42,6 +42,8 @@ import type {
   CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
+import { CasesOperations } from './remote/cases_operations';
+import { CasesOperationsToken } from './remote/tokens';
 import type { CasesClientSource, GetCasesClientOptions } from './client/types';
 import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
@@ -319,6 +321,10 @@ export class CasePlugin
       this.caseConfig.attachments?.enabled === true,
       this.caseConfig.templates?.enabled === true,
       () => core.getStartServices()
+    );
+    core.remote.bind(
+      CasesOperationsToken,
+      (scopes) => new CasesOperations(scopes, getCasesClient('workflow'))
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 

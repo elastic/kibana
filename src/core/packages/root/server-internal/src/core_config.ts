@@ -24,6 +24,16 @@ const coreConfigSchema = schema.object({
    * between our kibana-controller and the Kibana versions.
    */
   enableStripUnknownConfigWorkaround: schema.boolean({ defaultValue: false }),
+  /**
+   * Backend for `core.remote`. Workflows register a graph; they do not choose this value.
+   * `worker_thread` is the proof backend. `in_process` runs the same graph on the coordinator
+   * and does not isolate the event loop.
+   */
+  remote: schema.object({
+    backend: schema.oneOf([schema.literal('worker_thread'), schema.literal('in_process')], {
+      defaultValue: 'worker_thread',
+    }),
+  }),
 });
 
 export type CoreConfigType = TypeOf<typeof coreConfigSchema>;

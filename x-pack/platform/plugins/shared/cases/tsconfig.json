@@ -12,6 +12,9 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-di",
+    "@kbn/core-remote-common",
+    "@kbn/core-remote-server",
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
     "@kbn/lens-common",

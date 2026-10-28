@@ -339,6 +339,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     userStorage: {
       register: deps.userStorage.register,
     },
+    remote: deps.remote,
   };
 }
 

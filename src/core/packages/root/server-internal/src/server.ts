@@ -72,6 +72,7 @@ import { CoreInjectionService } from '@kbn/core-di-server-internal';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { UserStorageService } from '@kbn/core-user-storage-server-internal';
+import { RemoteService } from '@kbn/core-remote-server-internal';
 import { setLazyConfigSchemaDisabled } from '@kbn/config-schema';
 import { setLazySchemaDisabled } from '@kbn/zod';
 import { registerServiceConfig } from './register_service_config';
@@ -120,6 +121,7 @@ export class Server {
   private readonly dataStreams: DataStreamsService;
   private readonly pubsub: PubSubService;
   private readonly userStorage: UserStorageService;
+  private readonly remote: RemoteService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -185,6 +187,7 @@ export class Server {
     this.dataStreams = new DataStreamsService(core);
     this.pubsub = new PubSubService(core);
     this.userStorage = new UserStorageService(core);
+    this.remote = new RemoteService(this.logger.get('remote'));
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -462,6 +465,8 @@ export class Server {
 
     const pricingSetup = await this.pricing.setup({ http: httpSetup });
 
+    this.remote.discover(this.discoveredPlugins!.standard.pluginPaths);
+
     const coreSetup: InternalCoreSetup = {
       analytics: analyticsSetup,
       capabilities: capabilitiesSetup,
@@ -492,6 +497,7 @@ export class Server {
       dataStreams: dataStreamsSetup,
       pubsub: pubsubSetup,
       userStorage: userStorageSetup,
+      remote: this.remote,
     };
 
     const { contracts, initialized } = await this.plugins.setup(coreSetup);
@@ -688,6 +694,11 @@ export class Server {
 
     await this.plugins.start(this.coreStart);
 
+    const remoteConfig = await firstValueFrom(
+      this.configService.atPath<CoreConfigType>(coreConfig.path)
+    );
+    await this.remote.start(remoteConfig.remote?.backend ?? 'worker_thread');
+
     await this.http.start();
 
     return this.coreStart;
@@ -701,6 +712,7 @@ export class Server {
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     this.pubsub.stop(); // Stop dispatching before consumers are torn down, so no handler starts against a stopped plugin
+    await this.remote.stop();
     await this.plugins.stop();
     await this.savedObjects.stop();
     await this.elasticsearch.stop();

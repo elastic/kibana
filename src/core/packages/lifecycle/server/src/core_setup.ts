@@ -38,6 +38,7 @@ import type { DataStreamsSetup } from '@kbn/core-data-streams-server';
 import type { PubSubSetup } from '@kbn/core-pubsub-server';
 import type { UserActivityServiceSetup } from '@kbn/core-user-activity-server';
 import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
+import type { RemoteSetup } from '@kbn/core-remote-server';
 import type { CoreStart } from './core_start';
 
 /**
@@ -109,6 +110,11 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   pubsub: PubSubSetup;
   /** {@link UserStorageServiceSetup} */
   userStorage: UserStorageServiceSetup;
+  /**
+   * Experimental remote execution. Plugins register an execution graph; Core chooses the backend.
+   * {@link RemoteSetup}
+   */
+  remote: RemoteSetup;
 }
 
 /**

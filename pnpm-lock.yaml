@@ -1559,6 +1559,15 @@ importers:
       '@kbn/core-pubsub-server-mocks':
         specifier: workspace:*
         version: link:src/core/packages/pubsub/server-mocks
+      '@kbn/core-remote-common':
+        specifier: workspace:*
+        version: link:src/core/packages/remote/common
+      '@kbn/core-remote-server':
+        specifier: workspace:*
+        version: link:src/core/packages/remote/server
+      '@kbn/core-remote-server-internal':
+        specifier: workspace:*
+        version: link:src/core/packages/remote/server-internal
       '@kbn/core-rendering-browser':
         specifier: workspace:*
         version: link:src/core/packages/rendering/browser
@@ -4442,6 +4451,9 @@ importers:
       canvg:
         specifier: 4.0.3
         version: 4.0.3
+      capnweb:
+        specifier: 0.12.0
+        version: 0.12.0
       cbor2:
         specifier: 2.4.0
         version: 2.4.0
@@ -7483,6 +7495,12 @@ importers:
   src/core/packages/pubsub/server-internal: {}
 
   src/core/packages/pubsub/server-mocks: {}
+
+  src/core/packages/remote/common: {}
+
+  src/core/packages/remote/server: {}
+
+  src/core/packages/remote/server-internal: {}
 
   src/core/packages/rendering/browser: {}
 
@@ -16799,6 +16817,9 @@ packages:
   canvg@4.0.3:
     resolution: {integrity: sha512-fKzMoMBwus3CWo1Uy8XJc4tqqn98RoRrGV6CsIkaNiQT5lOeHuMh4fOt+LXLzn2Wqtr4p/c2TOLz4xtu4oBlFA==}
     engines: {node: '>=12.0.0'}
+
+  capnweb@0.12.0:
+    resolution: {integrity: sha512-jgZ/LMtMVTi+RVlooIslH78Gg23XbDTdvcLghWx3oz17D6u5GuJARt+uhZk/wcTo+f81eeabfnow4d3zLBj+JQ==}
 
   case-sensitive-paths-webpack-plugin@2.4.0:
     resolution: {integrity: sha512-roIFONhcxog0JSSWbvVAh3OocukmSgpqOH6YpMkCvav/ySIV3JKg4Dc8vYtQjYi/UxpNE36r/9v+VqTQqgkYmw==}
@@ -33859,6 +33880,8 @@ snapshots:
       rgbcolor: 1.0.1
       stackblur-canvas: 2.7.0
       svg-pathdata: 6.0.3
+
+  capnweb@0.12.0: {}
 
   case-sensitive-paths-webpack-plugin@2.4.0: {}
 

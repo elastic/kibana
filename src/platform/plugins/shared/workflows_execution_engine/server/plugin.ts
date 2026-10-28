@@ -79,6 +79,16 @@ import {
   stampWorkflowTaskRunEventFields,
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import {
+  type WorkflowExecutorApi,
+  WorkflowExecutorToken,
+  WorkflowLogToken,
+  WorkflowStepCatalogToken,
+  WorkflowStepKind,
+  WorkflowStorageToken,
+} from './remote/tokens';
+import { WorkflowLog } from './remote/workflow_log';
+import { WorkflowStorage } from './remote/workflow_storage';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
 import { LogsRepository } from './repositories/logs_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
@@ -263,6 +273,14 @@ export class WorkflowsExecutionEnginePlugin
     const config = this.config;
 
     this.coreSetup = core;
+    if (config.remoteExecution.enabled) {
+      core.remote.register({
+        id: 'workflows',
+        root: WorkflowExecutorToken,
+        contributions: [WorkflowStepKind],
+        dependencies: [WorkflowStepCatalogToken],
+      });
+    }
     core.security.serviceAccounts.registerWorkloadType({
       type: WORKFLOW_SERVICE_ACCOUNT_TYPE,
       name: 'Workflow',
@@ -402,20 +420,32 @@ export class WorkflowsExecutionEnginePlugin
               }
 
               try {
-                const runResult = await runWorkflow({
-                  workflowExecutionRepository,
-                  stepExecutionRepository,
-                  workflowRunId,
-                  spaceId,
-                  signal: taskAbortController.signal,
-                  config,
-                  logger,
-                  fakeRequest,
-                  dependencies,
-                  workflowsExecutionEngine,
-                  meteringService: this.meteringService,
-                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-                });
+                let runResult: { shouldDeleteTask?: boolean } | undefined;
+                if (config.remoteExecution.enabled) {
+                  const session = await core.remote.whenReady<WorkflowExecutorApi>('workflows');
+                  const scopeId = session.openScope(fakeRequest);
+                  try {
+                    await session.stub.run({ scopeId, workflowRunId, spaceId });
+                  } finally {
+                    session.closeScope(scopeId);
+                  }
+                } else {
+                  const result = await runWorkflow({
+                    workflowExecutionRepository,
+                    stepExecutionRepository,
+                    workflowRunId,
+                    spaceId,
+                    signal: taskAbortController.signal,
+                    config,
+                    logger,
+                    fakeRequest,
+                    dependencies,
+                    workflowsExecutionEngine,
+                    meteringService: this.meteringService,
+                    internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  });
+                  runResult = result && typeof result === 'object' ? result : undefined;
+                }
 
                 // Prefer cancelled when TM aborted the claim so a later stamp does not
                 // overwrite cancel's semantic outcome (shared last-write-wins buffer).
@@ -1236,6 +1266,14 @@ export class WorkflowsExecutionEnginePlugin
       workflowTaskManager,
       workflowExecutionRepository
     );
+
+    if (this.config.remoteExecution.enabled && this.coreSetup) {
+      this.coreSetup.remote.bind(
+        WorkflowStorageToken,
+        () => new WorkflowStorage(workflowExecutionRepository, stepExecutionRepository, this.logger)
+      );
+      this.coreSetup.remote.bind(WorkflowLogToken, () => new WorkflowLog(this.logger));
+    }
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,

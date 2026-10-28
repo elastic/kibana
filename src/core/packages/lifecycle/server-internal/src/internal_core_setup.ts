@@ -36,6 +36,7 @@ import type { InternalCoreDiServiceSetup } from '@kbn/core-di-internal';
 import type { DataStreamsSetup } from '@kbn/core-data-streams-server';
 import type { InternalPubSubSetup } from '@kbn/core-pubsub-server-internal';
 import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
+import type { RemoteSetup } from '@kbn/core-remote-server';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -68,5 +69,6 @@ export interface InternalCoreSetup {
   dataStreams: DataStreamsSetup;
   pubsub: InternalPubSubSetup;
   userStorage: UserStorageServiceSetup;
+  remote: RemoteSetup;
   _plugins?: Map<string, any>;
 }

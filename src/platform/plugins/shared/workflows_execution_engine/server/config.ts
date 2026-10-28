@@ -78,6 +78,14 @@ const configSchema = schema.object({
   hitlExternalResume: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  /**
+   * Experimental. When enabled, workflow:run is delegated to the Core remote graph.
+   * Other task types stay on the existing engine. A workflow:run with an unmigrated
+   * step fails before any step runs; it is not sent back to the existing engine.
+   */
+  remoteExecution: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type EventTriggersConfig = TypeOf<typeof EventTriggersConfigSchema>;

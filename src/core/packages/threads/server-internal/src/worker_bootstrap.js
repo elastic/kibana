@@ -22,13 +22,32 @@ const { parentPort, workerData } = require('node:worker_threads');
 const { getHeapStatistics } = require('node:v8');
 
 // The entry is the consumer's worker file, so its path is only known at runtime.
-require(workerData.__entry); // eslint-disable-line import/no-dynamic-require
+const entryExports = require(workerData.__entry); // eslint-disable-line import/no-dynamic-require
 
-// The effective limit, since a process-wide --max-old-space-size overrides resourceLimits.
-parentPort.postMessage({
-  __kbnManagedWorker: 'ready',
-  heapSizeLimit: getHeapStatistics().heap_size_limit,
-});
+function postReady() {
+  // The effective limit, since a process-wide --max-old-space-size overrides resourceLimits.
+  parentPort.postMessage({
+    __kbnManagedWorker: 'ready',
+    heapSizeLimit: getHeapStatistics().heap_size_limit,
+  });
+}
+
+// Entries may export `ready()` when application startup is asynchronous. Module load alone is
+// not readiness. Entries that export nothing still report ready immediately.
+Promise.resolve()
+  .then(() => {
+    if (entryExports && typeof entryExports.ready === 'function') {
+      return entryExports.ready();
+    }
+  })
+  .then(postReady)
+  .catch((error) => {
+    const message = error instanceof Error ? error.stack || error.message : String(error);
+    parentPort.postMessage({ __kbnManagedWorker: 'failed', message });
+    // eslint-disable-next-line no-console
+    console.error(message);
+    process.exit(1);
+  });
 
 setInterval(() => {
   parentPort.postMessage({
