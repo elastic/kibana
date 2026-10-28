@@ -50,6 +50,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     query,
     defaultControls,
     spaceId,
+    parentFilters,
     onInit,
     controlsUrlState,
     setControlsUrlState,
@@ -142,12 +143,16 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   }, [filters, query]);
 
   const filtersForControls = useMemo(() => {
-    if (!spaceId) {
+    const scopeFilters = [
+      ...(spaceId ? [buildSpaceFilter(spaceId)] : []),
+      ...(parentFilters ?? []),
+    ];
+    if (scopeFilters.length === 0) {
       return validatedFilters;
     }
-    // Applied after validation so a bad user query drops those filters without dropping the space constraint.
-    return [...(validatedFilters ?? []), buildSpaceFilter(spaceId)];
-  }, [spaceId, validatedFilters]);
+    // Applied after validation so a bad user query drops those filters without dropping the scope constraints.
+    return [...(validatedFilters ?? []), ...scopeFilters];
+  }, [parentFilters, spaceId, validatedFilters]);
 
   const handleStateUpdates = useCallback(
     (newState: ControlGroupRuntimeState) => {
