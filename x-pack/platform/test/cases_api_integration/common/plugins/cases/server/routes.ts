@@ -200,7 +200,9 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         const client = await cases.getCasesClientWithRequest(request);
 
         return response.ok({
-          body: await client.cases.bulkCreate(request.body as BulkCreateCasesRequest),
+          body: await client.cases.bulkCreate(request.body as BulkCreateCasesRequest, {
+            extractObservablesSourceByCaseId: new Map(),
+          }),
         });
       } catch (error) {
         logger.error(`Error : ${error}`);

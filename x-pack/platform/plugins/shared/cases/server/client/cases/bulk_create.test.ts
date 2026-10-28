@@ -22,7 +22,8 @@ import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
-import { bulkCreate } from './bulk_create';
+import { bulkCreate as bulkCreateCases } from './bulk_create';
+import type { BulkCreateCasesClientOptions } from './bulk_create';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
@@ -57,6 +58,19 @@ describe('bulkCreate', () => {
       ...overrides,
     },
   ];
+
+  // The cases connector always passes a source per case id. Tests that do not check the source
+  // pass an empty map, so the cases are stored without a source.
+  const bulkCreate = (
+    data: Parameters<typeof bulkCreateCases>[0],
+    clientArgs: Parameters<typeof bulkCreateCases>[1],
+    casesClient: Parameters<typeof bulkCreateCases>[2],
+    options: Partial<BulkCreateCasesClientOptions> = {}
+  ) =>
+    bulkCreateCases(data, clientArgs, casesClient, {
+      extractObservablesSourceByCaseId: new Map(),
+      ...options,
+    });
 
   const caseSO = mockCases[0];
   const casesClientMock = createCasesClientMock();
@@ -344,7 +358,6 @@ describe('bulkCreate', () => {
               "description": "testing sir",
               "duration": null,
               "external_service": null,
-              "extract_observables_source": "explicit",
               "id": "mock-saved-object-id",
               "incremental_id": undefined,
               "observables": Array [],
@@ -387,7 +400,6 @@ describe('bulkCreate', () => {
               "description": "testing sir",
               "duration": null,
               "external_service": null,
-              "extract_observables_source": "explicit",
               "id": "mock-saved-object-id",
               "incremental_id": undefined,
               "observables": Array [],
@@ -2325,31 +2337,6 @@ describe('bulkCreate', () => {
       const getStoredRequests = (clientArgs: ReturnType<typeof createCasesClientMockArgs>) =>
         clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases;
 
-      describe('without a source map', () => {
-        it('stamps "space_default" when the caller omitted extractObservables', async () => {
-          const clientArgs = createClientArgsWithConfig(true);
-
-          await bulkCreate(
-            { cases: getCases({ settings: { syncAlerts: true } }) },
-            clientArgs,
-            extractObservablesCasesClient
-          );
-
-          const [request] = getStoredRequests(clientArgs);
-          expect(request.extract_observables_source).toBe('space_default');
-          expect(request.settings).not.toHaveProperty('extractObservablesSource');
-        });
-
-        it('stamps "explicit" when the caller set extractObservables', async () => {
-          const clientArgs = createClientArgsWithConfig(true);
-
-          await bulkCreate({ cases: getCases() }, clientArgs, extractObservablesCasesClient);
-
-          const [request] = getStoredRequests(clientArgs);
-          expect(request.extract_observables_source).toBe('explicit');
-        });
-      });
-
       describe('with a source map', () => {
         it('uses the map entry of each case id', async () => {
           const clientArgs = createClientArgsWithConfig(true);
@@ -2387,35 +2374,6 @@ describe('bulkCreate', () => {
             ['case-b', 'template'],
             ['case-c', 'space_default'],
           ]);
-          expect(clientArgs.logger.error).not.toHaveBeenCalled();
-        });
-
-        it('leaves the source unset and logs an error for a case without an entry', async () => {
-          const clientArgs = createClientArgsWithConfig(true);
-          clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
-            saved_objects: getSavedCases(['case-a', 'case-b']),
-          });
-          const [baseCase] = getCases({ settings: { syncAlerts: true } });
-
-          await bulkCreate(
-            {
-              cases: [
-                { ...baseCase, id: 'case-a' },
-                { ...baseCase, id: 'case-b' },
-              ],
-            },
-            clientArgs,
-            extractObservablesCasesClient,
-            { extractObservablesSourceByCaseId: new Map([['case-a', 'rule']]) }
-          );
-
-          const [first, second] = getStoredRequests(clientArgs);
-          expect(first.extract_observables_source).toBe('rule');
-          expect(second).not.toHaveProperty('extract_observables_source');
-          expect(clientArgs.logger.error).toHaveBeenCalledTimes(1);
-          expect(clientArgs.logger.error).toHaveBeenCalledWith(
-            expect.stringContaining(`case-b (owner: ${SECURITY_SOLUTION_OWNER})`)
-          );
         });
 
         it('does not guess "explicit" for a case without an entry when the caller set extractObservables', async () => {

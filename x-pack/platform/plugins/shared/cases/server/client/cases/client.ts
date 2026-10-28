@@ -87,7 +87,7 @@ export interface CasesSubClient {
    */
   bulkCreate(
     data: BulkCreateCasesRequest,
-    options?: BulkCreateCasesClientOptions
+    options: BulkCreateCasesClientOptions
   ): Promise<BulkCreateCasesResponse>;
   /**
    * Returns cases using Saved Objects find API (uses Kuery queries).
@@ -234,7 +234,7 @@ export const createCasesSubClient = (
     bulkCreate: withUsageCounter(
       usageCounterByMethod.bulkCreate,
       clientArgs,
-      (data: BulkCreateCasesRequest, options?: BulkCreateCasesClientOptions) =>
+      (data: BulkCreateCasesRequest, options: BulkCreateCasesClientOptions) =>
         bulkCreate(data, clientArgs, casesClient, options)
     ),
     find: (params: CasesFindRequestWithCustomFields) => find(params, clientArgs, casesClient),
