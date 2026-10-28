@@ -10,15 +10,20 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import {
+  drilldownsComparators,
+  type EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiPublishesSettings,
+  areComparatorsEqual,
   getViewModeSubject,
   initializeStateApi,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import {
   apiHasDisableTriggers,
@@ -55,7 +60,10 @@ import {
   ON_OPEN_PANEL_MENU,
   ON_SELECT_RANGE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
+import type {
+  VisualizeByReferenceState,
+  VisualizeEmbeddableState,
+} from '../../common/embeddable/types';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { getInspector, getTheme, getUiActions, getUsageCollection } from '../services';
 import { ACTION_CONVERT_TO_LENS } from '../triggers';
@@ -68,11 +76,48 @@ import type { VisualizeApi } from './types';
 import { initializeEditApi } from './initialize_edit_api';
 import { hasLibraryItemWithTitle } from '../utils/saved_objects_utils';
 
+const getComparators = (linkedToLibrary: boolean): StateComparators<VisualizeEmbeddableState> => ({
+  ...drilldownsComparators,
+  ...titleComparators,
+  ...timeRangeComparators,
+  savedObjectId: 'skip',
+  uiState: linkedToLibrary ? 'deepEquality' : 'skip',
+  savedVis: linkedToLibrary
+    ? 'skip'
+    : (a, b) => {
+        function deepOmitBy(value: any) {
+          if (value && !Array.isArray(value) && typeof value === 'object') {
+            const keys = Object.keys(value);
+            if (!keys.length) return;
+
+            const cleanedValue: Record<string, unknown> = {};
+            keys.forEach((key) => {
+              const cleanedSubvalue = deepOmitBy(value[key]);
+              if (cleanedSubvalue) {
+                cleanedValue[key] = cleanedSubvalue;
+              }
+            });
+            return cleanedValue;
+          }
+
+          return value;
+        }
+
+        return isEqual(deepOmitBy(a), deepOmitBy(b));
+      },
+});
+
 export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
   VisualizeEmbeddableState,
   VisualizeApi
 > = {
   type: VISUALIZE_EMBEDDABLE_TYPE,
+  compareSerializedState: (baseline, current) =>
+    areComparatorsEqual(
+      getComparators(Boolean((current as VisualizeByReferenceState | undefined)?.savedObjectId)),
+      baseline,
+      current
+    ),
   buildEmbeddable: async ({
     initializeDrilldownsManager,
     initialState,
@@ -233,38 +278,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$
       ).pipe(map(() => undefined)),
-      getComparators: () => {
-        return {
-          ...drilldownsManager.comparators,
-          ...titleComparators,
-          ...timeRangeComparators,
-          savedObjectId: 'skip',
-          uiState: linkedToLibrary ? 'deepEquality' : 'skip',
-          savedVis: linkedToLibrary
-            ? 'skip'
-            : (a, b) => {
-                function deepOmitBy(value: any) {
-                  if (value && !Array.isArray(value) && typeof value === 'object') {
-                    const keys = Object.keys(value);
-                    if (!keys.length) return;
-
-                    const cleanedValue: Record<string, unknown> = {};
-                    keys.forEach((key) => {
-                      const cleanedSubvalue = deepOmitBy(value[key]);
-                      if (cleanedSubvalue) {
-                        cleanedValue[key] = cleanedSubvalue;
-                      }
-                    });
-                    return cleanedValue;
-                  }
-
-                  return value;
-                }
-
-                return isEqual(deepOmitBy(a), deepOmitBy(b));
-              },
-        };
-      },
+      getComparators: () => getComparators(linkedToLibrary),
       applySerializedState: async (nextState) => {
         drilldownsManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
