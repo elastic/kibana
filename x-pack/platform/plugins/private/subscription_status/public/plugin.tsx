@@ -6,10 +6,14 @@
  */
 
 import React from 'react';
-import { distinctUntilChanged, type Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { defer, distinctUntilChanged, map, of, switchMap, type Subscription } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { resolveServerlessStatus } from './status/resolve_serverless';
+import { resolveSelfManagedStatus } from './status/resolve_self_managed';
+import type { SubscriptionStatus } from './status/types';
 import type { BadgeActionClickedEvent, BadgeOpenedEvent, BadgeShownEvent } from './telemetry';
 import {
   BADGE_ACTION_CLICKED_EVENT,
@@ -26,6 +30,12 @@ interface SubscriptionStatusSetupDeps {
 
 interface SubscriptionStatusStartDeps {
   cloud?: CloudStart;
+  licensing?: LicensingPluginStart;
+}
+
+interface ResolvedBadge {
+  status: SubscriptionStatus;
+  hasBillingAccess: boolean;
 }
 
 export class SubscriptionStatusPlugin
@@ -33,7 +43,7 @@ export class SubscriptionStatusPlugin
 {
   private csp?: string;
   private region?: string;
-  private flagSubscription?: Subscription;
+  private badgeSubscription?: Subscription;
 
   public setup(core: CoreSetup, { cloud }: SubscriptionStatusSetupDeps) {
     registerSubscriptionStatusEvents(core.analytics);
@@ -41,46 +51,83 @@ export class SubscriptionStatusPlugin
     this.region = cloud?.region;
   }
 
-  public start(core: CoreStart, { cloud }: SubscriptionStatusStartDeps) {
-    if (!cloud) return;
-    this.flagSubscription = core.featureFlags
+  public start(core: CoreStart, { cloud, licensing }: SubscriptionStatusStartDeps) {
+    const badge$ = this.getBadge$(core, cloud, licensing);
+    if (!badge$) return;
+
+    this.badgeSubscription = core.featureFlags
       .getBooleanValue$(ENABLED_FLAG, true)
-      .pipe(distinctUntilChanged())
-      .subscribe((enabled) => {
-        if (enabled) {
-          void this.showBadge(core, cloud);
-        } else {
+      .pipe(
+        distinctUntilChanged(),
+        switchMap((enabled) => (enabled ? badge$ : of(undefined))),
+        switchMap((badge) =>
+          badge
+            ? import('./components/subscription_badge').then(({ SubscriptionBadge }) => ({
+                ...badge,
+                SubscriptionBadge,
+              }))
+            : of(undefined)
+        )
+      )
+      .subscribe((badge) => {
+        if (!badge) {
           core.chrome.controls.subscriptionBadge.set(undefined);
+          return;
         }
+        const { status, hasBillingAccess, SubscriptionBadge } = badge;
+        const { analytics, application, chrome } = core;
+        const context = {
+          projectType: status.projectType,
+          licenseType: status.kind === 'popover' ? status.licenseType : undefined,
+        };
+
+        chrome.controls.subscriptionBadge.set(
+          <SubscriptionBadge
+            status={status}
+            onOpen={() => analytics.reportEvent<BadgeOpenedEvent>(BADGE_OPENED_EVENT, context)}
+            onAction={(action) =>
+              analytics.reportEvent<BadgeActionClickedEvent>(BADGE_ACTION_CLICKED_EVENT, {
+                action,
+                ...context,
+              })
+            }
+            onNavigate={(href) => application.navigateToUrl(href)}
+          />
+        );
+        analytics.reportEvent<BadgeShownEvent>(BADGE_SHOWN_EVENT, { hasBillingAccess, ...context });
       });
   }
 
   public stop() {
-    this.flagSubscription?.unsubscribe();
+    this.badgeSubscription?.unsubscribe();
   }
 
-  private async showBadge({ analytics, chrome }: CoreStart, cloud: CloudStart) {
-    const status = await resolveServerlessStatus({ cloud, csp: this.csp, region: this.region });
-    if (!status) return;
+  private getBadge$(
+    { application, docLinks }: CoreStart,
+    cloud?: CloudStart,
+    licensing?: LicensingPluginStart
+  ): Observable<ResolvedBadge | undefined> | undefined {
+    // Cloud Hosted and ECE are cloud-enabled; ECK reports as self-managed.
+    if (cloud?.isCloudEnabled) {
+      return defer(() =>
+        resolveServerlessStatus({ cloud, csp: this.csp, region: this.region })
+      ).pipe(map((status) => status && { status, hasBillingAccess: status.kind === 'popover' }));
+    }
+    if (!licensing) return undefined;
 
-    const { SubscriptionBadge } = await import('./components/subscription_badge');
-    const { projectType } = status;
-
-    chrome.controls.subscriptionBadge.set(
-      <SubscriptionBadge
-        status={status}
-        onOpen={() => analytics.reportEvent<BadgeOpenedEvent>(BADGE_OPENED_EVENT, { projectType })}
-        onAction={(action) =>
-          analytics.reportEvent<BadgeActionClickedEvent>(BADGE_ACTION_CLICKED_EVENT, {
-            action,
-            projectType,
-          })
-        }
-      />
+    const canManageLicense = Boolean(
+      application.capabilities.management?.stack?.license_management
     );
-    analytics.reportEvent<BadgeShownEvent>(BADGE_SHOWN_EVENT, {
-      hasBillingAccess: status.kind === 'popover',
-      projectType,
-    });
+    const urls = {
+      compareFeatures: docLinks.links.subscriptions,
+      manageLicense: application.getUrlForApp('management', { path: 'stack/license_management' }),
+    };
+
+    return licensing.license$.pipe(
+      map((license) => {
+        const status = resolveSelfManagedStatus({ license, canManageLicense, urls });
+        return status && { status, hasBillingAccess: canManageLicense };
+      })
+    );
   }
 }

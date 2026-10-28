@@ -1773,6 +1773,16 @@ groups:
           ech: unavailable
           self: ga
 
+      - setting: xpack.subscription_status.enabled
+        description: |
+          Set this value to false to hide the license badge in the {{kib}} header. The badge shows a trial with the days left, an expired trial, or the Basic license.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 9.7
+          ech: unavailable
+          self: ga
+
       - setting: xpack.upgrade_assistant.ui.enabled
         description: |
           Set this value to false to disable the Upgrade Assistant UI.

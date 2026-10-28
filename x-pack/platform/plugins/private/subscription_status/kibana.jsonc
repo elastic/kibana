@@ -8,10 +8,12 @@
   "plugin": {
     "id": "subscriptionStatus",
     "browser": true,
-    "server": false,
+    "server": true,
+    "configPath": ["xpack", "subscription_status"],
     "requiredPlugins": [],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "licensing"
     ]
   }
 }
