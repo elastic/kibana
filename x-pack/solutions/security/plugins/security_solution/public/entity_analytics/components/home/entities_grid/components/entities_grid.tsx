@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   EuiDataGrid,
   EuiProgress,
@@ -134,6 +134,8 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { dataView } = useContext(DataViewContext);
+  // EUI doesn't report leaving full screen when the grid unmounts (grouping, browser Back).
+  useEffect(() => () => onFullScreenChange?.(false), [onFullScreenChange]);
   const columns = useMemo(
     () => getReadableColumns(rowsColumns, readAccess),
     [rowsColumns, readAccess]

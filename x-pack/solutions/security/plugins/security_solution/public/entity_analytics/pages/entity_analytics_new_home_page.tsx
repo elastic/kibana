@@ -1208,8 +1208,6 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
   const onGroupChange = useCallback(
     (key: string) => {
-      // Grouping unmounts the grid, and EUI doesn't report leaving full screen when it unmounts.
-      if (key !== 'none') setIsGridFullScreen(false);
       if (key === 'none') return setGroupsSelected(['none']);
       const cleaned = groupsSelected.filter((g) => g !== 'none');
       setGroupsSelected(
