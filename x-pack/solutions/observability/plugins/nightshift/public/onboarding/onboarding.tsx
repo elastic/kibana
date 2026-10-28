@@ -33,22 +33,22 @@ import {
   type OnboardingStepId,
   type OnboardingStepState,
 } from './onboarding_steps';
+import { OnboardingEnableStep } from './enable_step';
 import { OnboardingConnectStep } from './connect_step';
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
-import { useFetchSandboxSecrets } from '../sandbox_secrets/use_fetch_sandbox_secrets';
 import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
 
 /** A step the user went back to; otherwise the step follows from the onboarding state. */
 type StepOverride = 'connect' | 'investigate' | undefined;
 
-const MEET_NIGHTSHIFT_TITLE = i18n.translate('xpack.nightshift.onboarding.heroTitle', {
-  defaultMessage: 'Meet Elastic Nightshift',
-});
-
 const HERO_TITLES: Record<OnboardingStepId, string> = {
-  enable: MEET_NIGHTSHIFT_TITLE,
-  connect: MEET_NIGHTSHIFT_TITLE,
+  enable: i18n.translate('xpack.nightshift.onboarding.heroTitleEnable', {
+    defaultMessage: 'Meet Elastic Nightshift',
+  }),
+  connect: i18n.translate('xpack.nightshift.onboarding.heroTitle', {
+    defaultMessage: 'Meet Elastic Nightshift',
+  }),
   investigate: i18n.translate('xpack.nightshift.onboarding.heroTitleInvestigate', {
     defaultMessage: 'Try first investigation',
   }),
@@ -84,11 +84,10 @@ export function NightshiftOnboarding({
   const startSuggestions = useStartOnboardingSuggestions();
   const [stepOverride, setStepOverride] = useState<StepOverride>();
 
-  // The exploration needs at least one saved sandbox secret; the server enforces it too.
-  const hasSecret = (useFetchSandboxSecrets().data?.keys.length ?? 0) > 0;
-
   const execution = data?.execution;
-  // Step 1 is done once an exploration run exists.
+  // Step 1 is done once the investigation agent is installed in the space.
+  const isEnabled = data?.agent_installed === true;
+  // Step 2 is done once an exploration run exists.
   const isConnected = execution != null;
 
   // A new execution (setup changed, or a retry) ends any detour.
@@ -98,12 +97,13 @@ export function NightshiftOnboarding({
     setStepOverride(undefined);
   }
 
-  const step: OnboardingStepId =
-    !isConnected || stepOverride === 'connect'
-      ? 'connect'
-      : latestInvestigation && stepOverride !== 'investigate'
-      ? 'automate'
-      : 'investigate';
+  const step: OnboardingStepId = !isEnabled
+    ? 'enable'
+    : !isConnected || stepOverride === 'connect'
+    ? 'connect'
+    : latestInvestigation && stepOverride !== 'investigate'
+    ? 'automate'
+    : 'investigate';
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -164,20 +164,22 @@ export function NightshiftOnboarding({
   }, [agentBuilder, closeInvestigation, selectedInvestigationId, shareInvestigationAction]);
 
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
-    // This onboarding only shows once the space is set up; see `NightshiftSetupOnboarding`.
-    enable: { status: 'complete' },
+    enable: {
+      status: isEnabled ? 'complete' : 'current',
+      hint: isEnabled
+        ? undefined
+        : i18n.translate('xpack.nightshift.onboarding.steps.enableHint', {
+            defaultMessage: 'One-time setup of this space',
+          }),
+    },
     connect: {
-      status: step === 'connect' ? 'current' : 'complete',
-      onClick: step !== 'connect' ? () => setStepOverride('connect') : undefined,
+      status: !isEnabled ? 'disabled' : step === 'connect' ? 'current' : 'complete',
+      onClick: isEnabled && step !== 'connect' ? () => setStepOverride('connect') : undefined,
       hint:
         step !== 'connect'
           ? undefined
-          : hasSecret
-          ? i18n.translate('xpack.nightshift.onboarding.steps.connectOptionalHint', {
-              defaultMessage: 'Slack and hints are optional',
-            })
-          : i18n.translate('xpack.nightshift.onboarding.steps.connectSecretRequiredHint', {
-              defaultMessage: 'Save at least one credential',
+          : i18n.translate('xpack.nightshift.onboarding.steps.connectOptionalHint', {
+              defaultMessage: 'Connectors, Slack and hints are optional',
             }),
     },
     investigate: {
@@ -209,7 +211,6 @@ export function NightshiftOnboarding({
           size="s"
           iconType="sortRight"
           iconSide="right"
-          isDisabled={!hasSecret}
           isLoading={startSuggestions.isLoading}
           onClick={() => startSuggestions.mutate()}
           data-test-subj="nightshiftOnboardingContinueButton"
@@ -267,7 +268,7 @@ export function NightshiftOnboarding({
     >
       <NightshiftHeader title={HERO_TITLES[step]} isGreetingInline />
       <EuiSpacer size="l" />
-      {step === 'connect' && !isConnected && (
+      {(step === 'enable' || (step === 'connect' && !isConnected)) && (
         <>
           <OnboardingIntroBanner />
           <EuiSpacer size="xl" />
@@ -288,6 +289,8 @@ export function NightshiftOnboarding({
         >
           {isInitialLoading ? (
             <EuiLoadingSpinner size="l" />
+          ) : step === 'enable' ? (
+            <OnboardingEnableStep />
           ) : step === 'connect' || !execution ? (
             <OnboardingConnectStep />
           ) : step === 'investigate' || !latestInvestigation ? (

@@ -24,7 +24,7 @@ export interface OnboardingStepState {
 
 const STEP_TITLES: Record<OnboardingStepId, string> = {
   enable: i18n.translate('xpack.nightshift.onboarding.steps.enable', {
-    defaultMessage: 'Enable Elastic Nightshift',
+    defaultMessage: 'Enable Nightshift',
   }),
   connect: i18n.translate('xpack.nightshift.onboarding.steps.connect', {
     defaultMessage: 'Add signals and alerts',
