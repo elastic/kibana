@@ -29,7 +29,10 @@ import {
   createTransformManagerMock,
 } from './mocks';
 import type { SloTelemetryReporter } from '../lib/telemetry';
-import { createSloTelemetryReporterMock } from '../lib/telemetry/slo_telemetry_service.mock';
+import {
+  createSloTelemetryReporterMock,
+  getReportedEvents,
+} from '../lib/telemetry/slo_telemetry_service.mock';
 import { ResetSLO } from './reset_slo';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
@@ -107,10 +110,12 @@ describe('ResetSLO', () => {
       await resetSLO.execute(slo.id);
 
       expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
-      expect(mockTelemetry.report).toHaveBeenCalledWith(
-        'slo_reset',
-        expect.objectContaining({ slo_id: 'irrelevant', revision: slo.revision + 1 })
-      );
+      expect(getReportedEvents(mockTelemetry)).toEqual([
+        [
+          'slo_reset',
+          expect.objectContaining({ slo_id: 'irrelevant', revision: slo.revision + 1 }),
+        ],
+      ]);
     });
   });
 

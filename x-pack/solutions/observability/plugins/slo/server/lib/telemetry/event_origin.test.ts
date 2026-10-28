@@ -42,6 +42,12 @@ describe('toEventOrigin', () => {
       expect(toEventOrigin(createRequest(UI_HEADERS)).channel).toBe('ui');
     });
 
+    it('is `api` when x-elastic-internal-origin is empty', () => {
+      const request = createRequest({ ...UI_HEADERS, 'x-elastic-internal-origin': '' });
+
+      expect(toEventOrigin(request).channel).toBe('api');
+    });
+
     it.each(Object.keys(UI_HEADERS))('is `api` when %s is missing', (missingHeader) => {
       const headers = Object.fromEntries(
         Object.entries(UI_HEADERS).filter(([header]) => header !== missingHeader)

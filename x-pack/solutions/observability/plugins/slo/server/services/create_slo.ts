@@ -145,7 +145,7 @@ export class CreateSLO {
       throw err;
     }
 
-    this.telemetry.report(SLO_CREATED_EBT_EVENT_TYPE, toSloDefinitionEbtData(slo));
+    this.telemetry.report(SLO_CREATED_EBT_EVENT_TYPE, () => toSloDefinitionEbtData(slo));
 
     return this.toResponse(slo);
   }

@@ -12,7 +12,10 @@ import { createSLO, createSLOWithCalendarTimeWindow } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { SloTelemetryReporter } from '../lib/telemetry';
-import { createSloTelemetryReporterMock } from '../lib/telemetry/slo_telemetry_service.mock';
+import {
+  createSloTelemetryReporterMock,
+  getReportedEvents,
+} from '../lib/telemetry/slo_telemetry_service.mock';
 import { BulkPurgeRollupData } from './bulk_purge_rollup_data';
 import { monthlyCalendarAligned } from './fixtures/time_window';
 
@@ -121,11 +124,16 @@ describe('purge rollup data', () => {
         purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-03-01') },
       });
 
-      expect(mockTelemetry.report).toHaveBeenCalledWith('slo_rollup_data_purged', {
-        slo_count: 2,
-        purge_policy_type: 'fixed_time',
-        force: false,
-      });
+      expect(getReportedEvents(mockTelemetry)).toEqual([
+        [
+          'slo_rollup_data_purged',
+          {
+            slo_count: 2,
+            purge_policy_type: 'fixed_time',
+            force: false,
+          },
+        ],
+      ]);
     });
 
     it('reports a forced purge', async () => {
@@ -137,11 +145,16 @@ describe('purge rollup data', () => {
         force: true,
       });
 
-      expect(mockTelemetry.report).toHaveBeenCalledWith('slo_rollup_data_purged', {
-        slo_count: 1,
-        purge_policy_type: 'fixed_age',
-        force: true,
-      });
+      expect(getReportedEvents(mockTelemetry)).toEqual([
+        [
+          'slo_rollup_data_purged',
+          {
+            slo_count: 1,
+            purge_policy_type: 'fixed_age',
+            force: true,
+          },
+        ],
+      ]);
     });
   });
 

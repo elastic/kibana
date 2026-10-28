@@ -69,7 +69,7 @@ export class ResetSLO {
 
     await this.repository.update(resetedSlo);
 
-    this.telemetry.report(SLO_RESET_EBT_EVENT_TYPE, toSloDefinitionEbtData(resetedSlo));
+    this.telemetry.report(SLO_RESET_EBT_EVENT_TYPE, () => toSloDefinitionEbtData(resetedSlo));
 
     return resetSLOResponseSchema.encode(resetedSlo);
   }

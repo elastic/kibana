@@ -19,7 +19,10 @@ import { SUMMARY_TEMP_INDEX_NAME } from '../../common/constants';
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
 import type { SLODefinition } from '../domain/models';
 import type { SloTelemetryReporter } from '../lib/telemetry';
-import { createSloTelemetryReporterMock } from '../lib/telemetry/slo_telemetry_service.mock';
+import {
+  createSloTelemetryReporterMock,
+  getReportedEvents,
+} from '../lib/telemetry/slo_telemetry_service.mock';
 import { CreateSLO } from './create_slo';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
@@ -87,15 +90,17 @@ describe('CreateSLO', () => {
       await createSLO.execute(sloParams);
 
       expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
-      expect(mockTelemetry.report).toHaveBeenCalledWith(
-        'slo_created',
-        expect.objectContaining({
-          slo_id: 'unique-id',
-          revision: 1,
-          indicator_type: 'sli.apm.transactionErrorRate',
-          budgeting_method: sloParams.budgetingMethod,
-        })
-      );
+      expect(getReportedEvents(mockTelemetry)).toEqual([
+        [
+          'slo_created',
+          expect.objectContaining({
+            slo_id: 'unique-id',
+            revision: 1,
+            indicator_type: 'sli.apm.transactionErrorRate',
+            budgeting_method: sloParams.budgetingMethod,
+          }),
+        ],
+      ]);
     });
 
     it('does not report telemetry when inspecting', async () => {

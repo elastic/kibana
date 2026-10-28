@@ -222,11 +222,11 @@ export class UpdateSLO {
   }
 
   private reportUpdated(originalSlo: SLODefinition, updatedSlo: SLODefinition) {
-    this.telemetry.report(SLO_UPDATED_EBT_EVENT_TYPE, {
+    this.telemetry.report(SLO_UPDATED_EBT_EVENT_TYPE, () => ({
       ...toSloDefinitionEbtData(updatedSlo),
       revision_bumped: updatedSlo.revision !== originalSlo.revision,
       changed_fields: getChangedFields(originalSlo, updatedSlo),
-    });
+    }));
   }
 
   private async isRevisionBumpRequired(originalSlo: SLODefinition, updatedSlo: SLODefinition) {

@@ -37,7 +37,7 @@ const eventOriginEbtSchema: SchemaObject<EventOrigin> = {
       type: 'keyword',
       _meta: {
         description:
-          'Who made the change: `user` for a request carrying credentials, or `internal` for the Kibana internal user acting on its own.',
+          'Who made the change: always `user`, as SLO changes run with the credentials of the requesting user.',
       },
     },
     channel: {
@@ -160,7 +160,8 @@ const sloUpdatedEbtSchema: RootSchema<WithOrigin<SloUpdatedEbtData>> = {
   revision_bumped: {
     type: 'boolean',
     _meta: {
-      description: 'Whether the update changed a field that required a new revision.',
+      description:
+        'Whether the update created a new revision, because a breaking field changed or the SLO resources were outdated.',
     },
   },
   changed_fields: {

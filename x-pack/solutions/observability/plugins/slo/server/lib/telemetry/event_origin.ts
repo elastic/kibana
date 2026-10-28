@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
 type EventOriginChannel = 'system' | 'ui' | 'api';
 
@@ -14,6 +15,8 @@ export interface EventOrigin {
   channel: EventOriginChannel;
   app?: string;
 }
+
+const UI_REQUEST_HEADERS = ['kbn-version', 'referer', X_ELASTIC_INTERNAL_ORIGIN_REQUEST] as const;
 
 const EXECUTION_CONTEXT_HEADER = 'x-kbn-context';
 
@@ -24,9 +27,7 @@ const getChannel = (request: KibanaRequest): EventOriginChannel => {
     return 'system';
   }
 
-  const { headers } = request;
-  const isUiRequest =
-    request.isInternalApiRequest && Boolean(headers['kbn-version']) && Boolean(headers.referer);
+  const isUiRequest = UI_REQUEST_HEADERS.every((header) => Boolean(request.headers[header]));
   return isUiRequest ? 'ui' : 'api';
 };
 

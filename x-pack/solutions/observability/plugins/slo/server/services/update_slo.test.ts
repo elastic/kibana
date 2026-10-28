@@ -26,7 +26,10 @@ import {
 } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
 import type { SloTelemetryReporter } from '../lib/telemetry';
-import { createSloTelemetryReporterMock } from '../lib/telemetry/slo_telemetry_service.mock';
+import {
+  createSloTelemetryReporterMock,
+  getReportedEvents,
+} from '../lib/telemetry/slo_telemetry_service.mock';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
@@ -229,16 +232,18 @@ describe('UpdateSLO', () => {
         await updateSLO.execute(slo.id, { name: 'updated name', tags: ['new-tag'] });
 
         expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
-        expect(mockTelemetry.report).toHaveBeenCalledWith(
-          'slo_updated',
-          expect.objectContaining({
-            slo_id: slo.id,
-            revision: slo.revision,
-            tags_count: 1,
-            revision_bumped: false,
-            changed_fields: ['name', 'tags'],
-          })
-        );
+        expect(getReportedEvents(mockTelemetry)).toEqual([
+          [
+            'slo_updated',
+            expect.objectContaining({
+              slo_id: slo.id,
+              revision: slo.revision,
+              tags_count: 1,
+              revision_bumped: false,
+              changed_fields: ['name', 'tags'],
+            }),
+          ],
+        ]);
       });
 
       function expectNonBreakingChangeUpdatedResources() {
@@ -293,16 +298,18 @@ describe('UpdateSLO', () => {
       await updateSLO.execute(slo.id, { groupBy: 'host.name' });
 
       expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
-      expect(mockTelemetry.report).toHaveBeenCalledWith(
-        'slo_updated',
-        expect.objectContaining({
-          slo_id: slo.id,
-          revision: slo.revision + 1,
-          group_by_count: 1,
-          revision_bumped: true,
-          changed_fields: ['groupBy'],
-        })
-      );
+      expect(getReportedEvents(mockTelemetry)).toEqual([
+        [
+          'slo_updated',
+          expect.objectContaining({
+            slo_id: slo.id,
+            revision: slo.revision + 1,
+            group_by_count: 1,
+            revision_bumped: true,
+            changed_fields: ['groupBy'],
+          }),
+        ],
+      ]);
     });
 
     it('considers a settings change as a breaking change', async () => {

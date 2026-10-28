@@ -62,11 +62,11 @@ export async function runBulkDelete(
     .filter((result) => result.success === true)
     .map((result) => result.id);
 
-  telemetry.report(SLO_BULK_DELETED_EBT_EVENT_TYPE, {
+  telemetry.report(SLO_BULK_DELETED_EBT_EVENT_TYPE, () => ({
     requested_count: params.list.length,
     succeeded_count: itemsDeletedSuccessfully.length,
     failed_count: results.length - itemsDeletedSuccessfully.length,
-  });
+  }));
 
   try {
     await Promise.all([

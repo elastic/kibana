@@ -12,7 +12,7 @@ import type { EventOrigin } from './event_origin';
 export interface SloTelemetryReporter {
   report<EventType extends SloEbtEventType>(
     eventType: EventType,
-    data: SloEbtEventMap[EventType]
+    getData: () => SloEbtEventMap[EventType]
   ): void;
 }
 
@@ -25,11 +25,11 @@ export class SloTelemetryService {
   /** Returns a reporter attaching the given origin to every event, never throwing on failure. */
   public getReporter(origin: EventOrigin): SloTelemetryReporter {
     return {
-      report: (eventType, data) => {
+      report: (eventType, getData) => {
         try {
-          this.analytics.reportEvent(eventType, { ...data, origin });
+          this.analytics.reportEvent(eventType, { ...getData(), origin });
         } catch (error) {
-          this.logger.debug(`Failed to report ${eventType} telemetry event: ${error.message}`);
+          this.logger.warn(`Failed to report ${eventType} telemetry event: ${error.message}`);
         }
       },
     };

@@ -13,7 +13,10 @@ import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SloTelemetryReporter } from '../lib/telemetry';
-import { createSloTelemetryReporterMock } from '../lib/telemetry/slo_telemetry_service.mock';
+import {
+  createSloTelemetryReporterMock,
+  getReportedEvents,
+} from '../lib/telemetry/slo_telemetry_service.mock';
 import { SLONotFound } from '../errors';
 import { DeleteSLO } from './delete_slo';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
@@ -80,10 +83,12 @@ describe('DeleteSLO', () => {
       await deleteSLO.execute(slo.id);
 
       expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
-      expect(mockTelemetry.report).toHaveBeenCalledWith(
-        'slo_deleted',
-        expect.objectContaining({ slo_id: 'irrelevant', enabled: false, bulk: false })
-      );
+      expect(getReportedEvents(mockTelemetry)).toEqual([
+        [
+          'slo_deleted',
+          expect.objectContaining({ slo_id: 'irrelevant', enabled: false, bulk: false }),
+        ],
+      ]);
     });
 
     it('reports a bulk deletion', async () => {
@@ -96,14 +101,27 @@ describe('DeleteSLO', () => {
         bulk: true,
       });
 
-      expect(mockTelemetry.report).toHaveBeenCalledWith(
-        'slo_deleted',
-        expect.objectContaining({ slo_id: 'irrelevant', bulk: true })
-      );
+      expect(getReportedEvents(mockTelemetry)).toEqual([
+        ['slo_deleted', expect.objectContaining({ slo_id: 'irrelevant', bulk: true })],
+      ]);
     });
   });
 
   describe('unhappy path', () => {
+    it('reports the deletion when cleaning up the SLO data fails', async () => {
+      const slo = createSLO({ id: 'irrelevant' });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockScopedClusterClient.asCurrentUser.deleteByQuery.mockRejectedValue(
+        new Error('cleanup failure')
+      );
+
+      await expect(deleteSLO.execute(slo.id)).rejects.toThrow('cleanup failure');
+
+      expect(getReportedEvents(mockTelemetry)).toEqual([
+        ['slo_deleted', expect.objectContaining({ slo_id: 'irrelevant', bulk: false })],
+      ]);
+    });
+
     it('does not report telemetry when the SLO is not found', async () => {
       mockRepository.findById.mockRejectedValueOnce(new SLONotFound('SLO [irrelevant] not found'));
 

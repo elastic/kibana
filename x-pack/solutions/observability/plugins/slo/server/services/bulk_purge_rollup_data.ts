@@ -55,11 +55,11 @@ export class BulkPurgeRollupData {
       },
     });
 
-    this.telemetry.report(SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE, {
+    this.telemetry.report(SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE, () => ({
       slo_count: slos.length,
       purge_policy_type: params.purgePolicy.purgeType,
       force: params.force ?? false,
-    });
+    }));
 
     return { taskId: response.task };
   }

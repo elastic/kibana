@@ -76,16 +76,16 @@ export class DeleteSLO {
       this.repository.deleteById(slo.id, { ignoreNotFound: true }),
     ]);
 
+    this.telemetry.report(SLO_DELETED_EBT_EVENT_TYPE, () => ({
+      ...toSloDefinitionEbtData(slo),
+      bulk: options.bulk ?? false,
+    }));
+
     await Promise.all([
       this.deleteRollupData(slo.id, options.skipDataDeletion),
       this.deleteSummaryData(slo.id, options.skipDataDeletion),
       this.deleteAssociatedRules(slo.id, options.skipRuleDeletion),
     ]);
-
-    this.telemetry.report(SLO_DELETED_EBT_EVENT_TYPE, {
-      ...toSloDefinitionEbtData(slo),
-      bulk: options.bulk ?? false,
-    });
   }
 
   private async deleteRollupData(sloId: string, skip: boolean): Promise<void> {

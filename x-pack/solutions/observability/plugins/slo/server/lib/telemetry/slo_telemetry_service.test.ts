@@ -18,7 +18,7 @@ describe('SloTelemetryService', () => {
     const analytics = { reportEvent: jest.fn() };
     const service = new SloTelemetryService(analytics, loggingSystemMock.createLogger());
 
-    service.getReporter(origin).report(SLO_BULK_DELETED_EBT_EVENT_TYPE, data);
+    service.getReporter(origin).report(SLO_BULK_DELETED_EBT_EVENT_TYPE, () => data);
 
     expect(analytics.reportEvent).toHaveBeenCalledWith(SLO_BULK_DELETED_EBT_EVENT_TYPE, {
       ...data,
@@ -36,10 +36,24 @@ describe('SloTelemetryService', () => {
     const service = new SloTelemetryService(analytics, logger);
 
     expect(() =>
-      service.getReporter(origin).report(SLO_BULK_DELETED_EBT_EVENT_TYPE, data)
+      service.getReporter(origin).report(SLO_BULK_DELETED_EBT_EVENT_TYPE, () => data)
     ).not.toThrow();
-    expect(logger.debug).toHaveBeenCalledWith(
+    expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining(SLO_BULK_DELETED_EBT_EVENT_TYPE)
     );
+  });
+
+  it('logs and swallows a failure to build the event data', () => {
+    const analytics = { reportEvent: jest.fn() };
+    const logger = loggingSystemMock.createLogger();
+    const service = new SloTelemetryService(analytics, logger);
+
+    expect(() =>
+      service.getReporter(origin).report(SLO_BULK_DELETED_EBT_EVENT_TYPE, () => {
+        throw new Error('invalid definition');
+      })
+    ).not.toThrow();
+    expect(analytics.reportEvent).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid definition'));
   });
 });
