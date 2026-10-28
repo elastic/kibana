@@ -297,7 +297,10 @@ export const ExecutionResultCard = ({
                     defaultMessage: 'Run as',
                   })}
               {': '}
-              <ServiceAccountName id={workflowExecution.effectiveIdentity.id} />
+              <ServiceAccountName
+                id={workflowExecution.effectiveIdentity.id}
+                workload={{ executionId: workflowExecution.id }}
+              />
             </EuiText>
           )}
         </div>

@@ -607,7 +607,11 @@ export const WorkflowYAMLEditor = ({
   }, [insertedStepRange]);
 
   // Decorations
-  useServiceAccountDecorations({ editor: editorRef.current, isEditorMounted });
+  useServiceAccountDecorations({
+    editor: editorRef.current,
+    isEditorMounted,
+    workflowId: workflow?.id,
+  });
   useTriggerTypeDecorations({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,

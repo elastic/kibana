@@ -15,18 +15,20 @@ import { createServiceAccountDirectory } from './service_account_directory';
 describe('service account directory', () => {
   const http = httpServiceMock.createStartContract();
   const isEnabled = jest.fn();
+  const canManage = jest.fn();
   let queryClient: QueryClient;
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient = new QueryClient();
     isEnabled.mockReturnValue(true);
+    canManage.mockReturnValue(true);
   });
   afterEach(() => queryClient.clear());
 
   it('encodes opaque IDs and deduplicates lookups', async () => {
     const account = { id: 'kibana/a/b', name: 'Readable account', enabled: true, assumable: true };
     http.get.mockResolvedValue(account);
-    const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
     expect(await Promise.all([directory.get(account.id), directory.get(account.id)])).toEqual([
       account,
       account,
@@ -37,14 +39,14 @@ describe('service account directory', () => {
 
   it.each([403, 404, 500])('returns no name on HTTP %s without retrying', async (statusCode) => {
     http.get.mockRejectedValue({ response: { status: statusCode } });
-    const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
     expect(await directory.get('missing')).toBeNull();
     expect(http.get).toHaveBeenCalledTimes(1);
   });
 
   it('does not query or expose cached values with the feature disabled', async () => {
     http.get.mockResolvedValue({ id: 'a', name: 'Cached' });
-    const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
     await directory.get('a');
     isEnabled.mockReturnValue(false);
     expect(await directory.get('a')).toBeNull();
@@ -52,9 +54,59 @@ describe('service account directory', () => {
     expect(http.get).toHaveBeenCalledTimes(1);
   });
 
+  it('makes no directory request for a user who cannot manage service accounts', async () => {
+    canManage.mockReturnValue(false);
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
+    expect(await directory.get('a')).toBeNull();
+    expect(await directory.describe('a')).toBeNull();
+    expect(http.get).not.toHaveBeenCalled();
+  });
+
+  it('describes any account from the directory for a user who can manage them', async () => {
+    const account = { id: 'a', name: 'Directory name', enabled: true, assumable: true, roles: [] };
+    http.get.mockResolvedValue(account);
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
+    expect(await directory.describe('a', 'workflow-1')).toEqual(account);
+    expect(http.get).toHaveBeenCalledWith('/internal/security/service_account/a');
+  });
+
+  describe('for a user who cannot manage service accounts', () => {
+    const bound = { id: 'kibana/bound', name: 'Bound account', enabled: true, assumable: false };
+    beforeEach(() => canManage.mockReturnValue(false));
+
+    it('describes the account the saved workflow is bound to', async () => {
+      http.get.mockResolvedValue({ serviceAccount: bound });
+      const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
+      expect(await directory.describe('kibana/bound', 'workflow/1')).toEqual(bound);
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/workflows/workflow/workflow%2F1/service_account',
+        { version: '1' }
+      );
+    });
+
+    it('does not describe an account the workflow is not bound to', async () => {
+      http.get.mockResolvedValue({ serviceAccount: bound });
+      const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
+      expect(await directory.describe('kibana/other', 'workflow-1')).toBeNull();
+    });
+
+    it('describes nothing for an unsaved workflow', async () => {
+      const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
+      expect(await directory.describe('kibana/bound')).toBeNull();
+      expect(http.get).not.toHaveBeenCalled();
+    });
+
+    it('describes nothing when the workflow lookup fails', async () => {
+      http.get.mockRejectedValue({ response: { status: 404 } });
+      const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
+      expect(await directory.describe('kibana/bound', 'workflow-1')).toBeNull();
+    });
+  });
+
   it('requests subsequent directory pages using the opaque cursor', async () => {
     http.get.mockResolvedValue({ serviceAccounts: [], nextPage: 'opaque-page' });
-    const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
     const page = await directory.list();
     if (!page || 'error' in page) throw new Error('Expected a directory page');
     await directory.list(page.nextPage);
@@ -69,7 +121,7 @@ describe('service account directory', () => {
       http.get.mockRejectedValue(
         createHttpFetchError('Failed', 'Error', undefined, { status } as Response)
       );
-      const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+      const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
       expect(await directory.list()).toEqual({
         error: status === 403 ? 'forbidden' : 'unavailable',
       });
@@ -81,7 +133,7 @@ describe('service account directory', () => {
     http.get
       .mockRejectedValueOnce(new Error('Offline'))
       .mockResolvedValueOnce({ serviceAccounts: [] });
-    const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
     expect(await directory.list()).toEqual({ error: 'unavailable' });
     expect(await directory.list()).toEqual({ serviceAccounts: [] });
     expect(http.get).toHaveBeenCalledTimes(2);
@@ -91,7 +143,7 @@ describe('service account directory', () => {
     http.get
       .mockResolvedValueOnce({ serviceAccounts: [] })
       .mockResolvedValueOnce({ serviceAccounts: [{ id: 'a', name: 'New' }] });
-    const directory = createServiceAccountDirectory(http, queryClient, isEnabled);
+    const directory = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
     await directory.list();
     expect(await directory.list(undefined, true)).toEqual({
       serviceAccounts: [{ id: 'a', name: 'New' }],
@@ -103,10 +155,10 @@ describe('service account directory', () => {
     http.get
       .mockResolvedValueOnce({ id: 'a', name: 'Visible' })
       .mockRejectedValueOnce({ status: 403 });
-    const first = createServiceAccountDirectory(http, queryClient, isEnabled);
+    const first = createServiceAccountDirectory(http, queryClient, isEnabled, canManage);
     expect(await first.get('a')).toMatchObject({ name: 'Visible' });
     const otherClient = new QueryClient();
-    const other = createServiceAccountDirectory(http, otherClient, isEnabled);
+    const other = createServiceAccountDirectory(http, otherClient, isEnabled, canManage);
     expect(await other.get('a')).toBeNull();
     otherClient.clear();
   });

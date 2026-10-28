@@ -17,7 +17,11 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
+import type {
+  CreateServiceAccountServerParams,
+  ServiceAccount,
+  ServiceAccountSummary,
+} from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
 import type {
   AuditLogger,
@@ -477,6 +481,35 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
     const stored = (await this.credentialStore.findExisting([id])).has(id);
     return toDirectoryEntry(account, await this.isAssumable(esClient, principal, stored));
+  }
+
+  /**
+   * Reads the account as `kibana_system`, which can read service accounts but not their tokens.
+   * So `assumable` comes from the stored credential alone, the same as in {@link list}.
+   */
+  async getSummary(id: string): Promise<ServiceAccountSummary | null> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot get a service account: security features are disabled in Elasticsearch'
+      );
+    }
+
+    const principal = parseEsServiceAccountId(id);
+    if (!principal) {
+      return null;
+    }
+
+    const account = await this.readAccount(
+      this.clusterClient.asInternalUser,
+      principal.namespace,
+      principal.name
+    );
+    if (!account) {
+      return null;
+    }
+
+    const assumable = (await this.credentialStore.findExisting([id])).has(id);
+    return { id: account.id, name: account.name, enabled: account.enabled, assumable };
   }
 
   /**
