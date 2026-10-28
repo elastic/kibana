@@ -17,7 +17,7 @@
 
 import { runPreBuild } from '../pull_request/pre_build.ts';
 import { emitPipeline, getAgentImageConfig, getPipeline } from '#pipeline-utils';
-import { prBaseSteps, renderSteps } from '#pipeline-utils/step-library';
+import { prBaseSteps, renderSteps, localCheck } from '#pipeline-utils/step-library';
 
 // Steps of the PR pipeline's base steps that only validate the code statically.
 // The local check (`check`) lives in its own fragment and is appended below.
@@ -45,7 +45,7 @@ const STATIC_CHECK_STEP_KEYS = ['quick_checks', 'checks', 'linting', 'check_type
     emitPipeline([
       getAgentImageConfig({ returnYaml: true }),
       renderSteps(staticCheckSteps, { header: true }),
-      getPipeline('.buildkite/pipelines/pull_request/local_check.yml'),
+      renderSteps(localCheck()),
       // Completes the CI Stats build and commit status that pre_build starts; always runs.
       getPipeline('.buildkite/pipelines/pull_request/post_build.yml'),
     ]);
