@@ -159,19 +159,19 @@ Agent Builder's `agent_builder_conversation_fields_changed` counts every close, 
 
 ### `alertzero_worker_investigation_reopened`
 
-Emitted when the Hunt Worker reopens an Investigation a previous run closed, so a new run on the same threat report records into active work.
+Emitted when a Worker reopens an Investigation a previous run closed, so a new run on the same subject records into active work: the Hunt Worker on a threat report, the Rule Coverage Worker on a detection gap, the Rule Tuning Worker on a rule.
 
-- Hunt's find-or-create route (`routes/hunt/find_or_create_investigation.ts`) reopens it in TypeScript, not YAML, so the route reports it once the reopen succeeds. Reporting never fails the find-or-create.
-- It has no run envelope and no `run_id`, because the route doesn't verify which run called it. Only the Hunt Worker's find-or-create step calls the route, so the event is attributed to that Worker.
+- The find-or-create routes (`routes/hunt/find_or_create_investigation.ts` for Hunt, `routes/investigations/find_or_create_investigation.ts` for the Detection Watch reviews) reopen it in TypeScript, not YAML, so the route reports it once the reopen succeeds. Reporting never fails the find-or-create.
+- It has no run envelope and no `run_id`, because the routes don't verify which run called them. The Hunt route is only called by the Hunt Worker's find-or-create step; the Detection Watch route takes the Worker id in its body (an enum of the two review Workers) and attributes the event to it.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `worker_id` | keyword | yes | Catalog id of the Worker that reopened the Investigation (the Hunt Worker) |
+| `worker_id` | keyword | yes | Catalog id of the Worker that reopened the Investigation |
 | `watch_tag` | keyword | yes | The Worker's catalog watch tag |
 | `is_default_space` | boolean | yes | Whether the Investigation is in the default space |
-| `investigation_id` | keyword | yes | The Investigation the Worker reopened. A Hunt Investigation id is a UUID v5 of the threat report id |
+| `investigation_id` | keyword | yes | The Investigation the Worker reopened. A Hunt Investigation id is a UUID v5 of the threat report id; a Detection Watch one is a UUID v5 of the Worker and its subject (the knowledge indicator id or the rule id) |
 
-The reopen keeps the Investigation's last `close_reason`, since the template has no value meaning "not closed", so read the reason only from close events. Agent Builder's `agent_builder_conversation_fields_changed` also reports the reopen (`status` to `open`, with `source: server_api`); this event is what says the Hunt Worker made it.
+The reopen keeps the Investigation's last `close_reason`, since the template has no value meaning "not closed", so read the reason only from close events. Agent Builder's `agent_builder_conversation_fields_changed` also reports the reopen (`status` to `open`, with `source: server_api`); this event is what says which Worker made it.
 
 ### `alertzero_worker_run_completed`
 

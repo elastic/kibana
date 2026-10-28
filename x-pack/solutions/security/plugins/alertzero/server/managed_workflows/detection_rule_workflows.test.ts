@@ -8,6 +8,10 @@
 import { parse } from 'yaml';
 import { MAX_TITLE_LENGTH } from '@kbn/proposals-common';
 import type { RuleCoverageWorkerExtras, RuleTuningWorkerExtras } from '@kbn/alertzero-common';
+import {
+  ALERTZERO_FIND_OR_CREATE_INVESTIGATION_URL,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+} from '@kbn/alertzero-common';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
@@ -390,7 +394,9 @@ describe('detection rule workflows', () => {
       const gate = all.find(({ name }) => name === 'entry_gate')!;
       expect(gate.type).toBe('if');
       expect(gate.condition).toContain("inputs.autonomy_level == 'manual'");
-      expect(gate.condition).toContain('steps.create_investigation.output.conversation_id != null');
+      expect(gate.condition).toContain(
+        'steps.find_or_create_investigation.output.investigationConversationId != null'
+      );
       expect((gate.steps ?? []).map(({ name }) => name)).toEqual([
         'propose_entry',
         'entry_decision',
@@ -483,7 +489,9 @@ describe('detection rule workflows', () => {
       // One switch on the change type: the engine runs the first matching arm only.
       const fork = all.find(({ name }) => name === 'propose_tuning')!;
       expect(fork.type).toBe('switch');
-      expect(fork.if).toContain('steps.create_investigation.output.conversation_id != null');
+      expect(fork.if).toContain(
+        'steps.find_or_create_investigation.output.investigationConversationId != null'
+      );
       expect(fork.expression).toContain('steps.diagnose_rule.output.structured_output.change_type');
       expect((fork.cases ?? []).map(({ match }) => match)).toEqual([
         'query',
@@ -1163,6 +1171,34 @@ describe('detection rule workflows', () => {
         });
       });
 
+      // One investigation per rule (elastic/security-team#20386): a rule whose tuning
+      // proposal expired is harvested again by the next sweep, and `ai.conversation.create`
+      // would open a second investigation each time. The route derives the id from the
+      // rule, so every review of the rule lands on the same investigation.
+      it('finds or opens the rule investigation through the AlertZero route', () => {
+        const step = reviewSteps.find(({ name }) => name === 'find_or_create_investigation')!;
+
+        expect(step.type).toBe('kibana.request');
+        expect(step.with?.method).toBe('POST');
+        expect(step.with?.path).toBe(
+          `/s/{{ workflow.spaceId }}${ALERTZERO_FIND_OR_CREATE_INVESTIGATION_URL}`
+        );
+        expect(step.with?.body).toEqual(
+          expect.objectContaining({
+            workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+            subjectId: '{{ inputs.rule_uuid }}',
+            workflowExecutionId: '{{ execution.id }}',
+          })
+        );
+        expect(step).not.toHaveProperty('on-failure');
+        expect(reviewSteps.map(({ type }) => type)).not.toContain('ai.conversation.create');
+
+        const resumed = reviewSteps.find(({ name }) => name === 'post_resumed')!;
+        expect(resumed.type).toBe('ai.conversation.add_user_message');
+        expect(resumed.if).toContain('steps.find_or_create_investigation.output.created != true');
+        expect(resumed['on-failure']).toEqual({ continue: true });
+      });
+
       // No agent runs in the investigation to reference an attachment, so without
       // `render_inline` the analyst only finds these in the attachment list.
       it.each(['attach_rule', 'refresh_rule_attachment', 'attach_exception', 'attach_alerts'])(
@@ -1172,7 +1208,7 @@ describe('detection rule workflows', () => {
 
           expect(step.with?.render_inline).toBe(true);
           expect(step.with?.conversation_id).toBe(
-            '{{ steps.create_investigation.output.conversation_id }}'
+            '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
           );
           expect(step['on-failure']).toEqual({ continue: true });
         }
@@ -1343,10 +1379,12 @@ describe('detection rule workflows', () => {
         const input = note.with as Record<string, string>;
 
         expect(note.type).toBe('ai.conversation.add_user_message');
-        expect(note.if).toContain('steps.create_investigation.output.conversation_id != null');
+        expect(note.if).toContain(
+          'steps.find_or_create_investigation.output.investigationConversationId != null'
+        );
         expect(note['on-failure']).toEqual({ continue: true });
         expect(input.conversation_id).toBe(
-          '{{ steps.create_investigation.output.conversation_id }}'
+          '{{ steps.find_or_create_investigation.output.investigationConversationId }}'
         );
         expect(input.author_name).toBe('{{ consts.author_name }}');
         expect(input.message).toContain(field);

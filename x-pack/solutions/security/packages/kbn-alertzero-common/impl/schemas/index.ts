@@ -101,3 +101,7 @@ export {
   WriteHuntEvidenceResponse,
 } from './hunt/write_hunt_evidence_route.gen';
 export { huntResultSchema, isoDatetimeSchema, type HuntResult } from './hunt/hunt_result';
+export {
+  FindOrCreateWorkerInvestigationRequestBody,
+  FindOrCreateWorkerInvestigationResponse,
+} from './investigations/find_or_create_investigation_route.gen';

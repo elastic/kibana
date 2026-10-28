@@ -67,6 +67,13 @@ export const HUNT_REPORTS_INDEX = '.kibana-threat-reports' as const;
 export const HUNT_INVESTIGATION_ID_NAMESPACE = 'hunt:report:' as const;
 
 /**
+ * Investigation conversation id namespace for a Detection Watch review's subject (a coverage
+ * gap, a tuned rule): the id is
+ * `uuidv5(${WORKER_INVESTIGATION_ID_NAMESPACE}${spaceId}|${workerId}|${subjectId})`.
+ */
+export const WORKER_INVESTIGATION_ID_NAMESPACE = 'worker:subject:' as const;
+
+/**
  * Global-catalog space sentinel on `.kibana-threat-reports`. Reads filter to
  * `{terms: { space_id: [currentSpaceId, HUNT_GLOBAL_SPACE_ID] }}`; feedback
  * writes are always space-scoped to the caller's concrete space, never this sentinel.

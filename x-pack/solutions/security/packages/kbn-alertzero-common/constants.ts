@@ -58,6 +58,13 @@ export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as cons
 export const ALERTZERO_INVESTIGATIONS_COUNT_URL =
   `${ALERTZERO_INTERNAL_URL}/investigations/count` as const;
 
+/**
+ * Mints or verifies the one Investigation a Detection Watch review keeps per subject (a
+ * coverage gap, a tuned rule), called by the review workflows through `kibana.request`.
+ */
+export const ALERTZERO_FIND_OR_CREATE_INVESTIGATION_URL =
+  `${ALERTZERO_INTERNAL_URL}/investigations/find_or_create` as const;
+
 // --- Hunt services ---
 // Exported here, not just from the alertzero plugin's own common/constants.ts, so the
 // platform-level kbn-workflows managed-definitions tests can assert Hunt Watch's managed

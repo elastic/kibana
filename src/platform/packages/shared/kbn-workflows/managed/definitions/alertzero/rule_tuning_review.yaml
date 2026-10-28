@@ -152,27 +152,56 @@ steps:
     on-failure:
       continue: true
 
-  # Human-facing record of this review, deliberately separate from diagnose_rule's
+  # Human-facing record of this rule's tuning, deliberately separate from diagnose_rule's
   # own conversation: the agent transcript stays opaque, the investigation is where
   # analysts collaborate and where both proposal gates attach their decision. Public
-  # so anyone in the space can pick it up. Created before diagnosis so the manual
+  # so anyone in the space can pick it up. Found before diagnosis so the manual
   # entry gate has somewhere to land. No on-failure: without an investigation there
   # is nowhere to propose, so the review fails, the alerts stay untagged, and the
   # next sweep retries.
-  - name: create_investigation
-    type: ai.conversation.create
+  #
+  # One investigation per rule. A rule is reviewed again when its proposal expires
+  # (the alerts are only tagged after the gate resolves, so the harvest returns the
+  # rule until then), and that review must add to the same investigation rather than
+  # open another one next to it. The route derives the investigation id from the
+  # space, this worker and the rule id (a uuidv5 no workflow step can compute),
+  # creates it on the first review, and on every later one returns the same id,
+  # reopens it if closed, refreshes the description and records this run. `created`
+  # says which path ran, so `post_resumed` can say the review resumed.
+  - name: find_or_create_investigation
+    type: kibana.request
     if: >-
       ${{ steps.fetch_rule.error == null
         and steps.fetch_rule.output.enabled == true }}
     with:
-      title: "Rule tuning: {{ steps.fetch_rule.output.name }}"
-      access_control:
-        access_mode: public
-      template_id: investigation
-      metadata:
-        status: open
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/alertzero/investigations/find_or_create"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        workerId: system-security-detection-rule-tuning
+        subjectId: "{{ inputs.rule_uuid }}"
+        title: "Rule tuning: {{ steps.fetch_rule.output.name }}"
         description: "{{ inputs.fp_count }} false-positive alerts on rule {{ steps.fetch_rule.output.name }} in the last {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days"
-        workflow_execution_ids: ["{{ execution.id }}"]
+        workflowExecutionId: "{{ execution.id }}"
+
+  # Tells the analyst this is not the first review of the rule. Appended without
+  # running the investigation agent, as the notes after diagnosis are. Losing the
+  # note is not a reason to fail the review.
+  - name: post_resumed
+    type: ai.conversation.add_user_message
+    if: >-
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
+        and steps.find_or_create_investigation.output.created != true }}
+    with:
+      author_name: "{{ consts.author_name }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
+      message: |-
+        **Review resumed.** An earlier review opened this investigation and reached no applied decision, so the rule was reviewed again. The proposal below replaces the earlier one.
+    on-failure:
+      continue: true
 
   # A snapshot of the rule as it was when this review started. The rule card reads
   # `origin` as the saved-object id for View rule, edit and its saved-rule diff,
@@ -181,9 +210,9 @@ steps:
   # up by rule_id. The fixed attachment id makes the refresh below deterministic.
   - name: attach_rule
     type: ai.attachment.add
-    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    if: "${{ steps.find_or_create_investigation.output.investigationConversationId != null }}"
     with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       id: "tuned-rule"
       type: security.rule
       origin: "{{ inputs.rule_uuid }}"
@@ -200,9 +229,9 @@ steps:
   # a second copy.
   - name: attach_alerts
     type: ai.attachment.add
-    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    if: "${{ steps.find_or_create_investigation.output.investigationConversationId != null }}"
     with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       id: fp-alerts
       type: security.alerts
       data:
@@ -225,7 +254,7 @@ steps:
     type: if
     condition: >-
       ${{ inputs.autonomy_level == 'manual'
-        and steps.create_investigation.output.conversation_id != null }}
+        and steps.find_or_create_investigation.output.investigationConversationId != null }}
     steps:
       - name: propose_entry
         type: workflow.execute
@@ -233,7 +262,7 @@ steps:
           workflow-id: system-create-alertzero-proposal
           run-as-mode: inherit
           inputs:
-            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             # Raised before any diagnosis, so the comment's own heading is the only
             # name this proposal has.
             title: Review rule for tuning
@@ -274,7 +303,7 @@ steps:
               - name: close_investigation_declined
                 type: ai.conversation.metadata.patch
                 with:
-                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                   updates:
                     status: closed
                     close_reason: other
@@ -289,7 +318,7 @@ steps:
                   continue: true
                 with:
                   event: worker_investigation_closed
-                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                   close_reason: other
 
               # Telemetry: the review's outcome when the analyst declined it.
@@ -314,7 +343,7 @@ steps:
                     {%- elsif steps.fetch_rule.output.type != blank -%}
                     custom
                     {%- endif -%}
-                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
 
               # workflow.output terminates the run, so no later step needs to check
               # the entry decision.
@@ -352,7 +381,7 @@ steps:
                     {%- elsif steps.fetch_rule.output.type != blank -%}
                     custom
                     {%- endif -%}
-                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
 
               - name: stop_expired
                 type: workflow.output
@@ -959,11 +988,11 @@ steps:
   - name: post_fp_pattern
     type: ai.conversation.add_user_message
     if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
         and steps.diagnose_rule.output.structured_output.fp_pattern != blank }}
     with:
       author_name: "{{ consts.author_name }}"
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       message: |-
         **False positive pattern**
         **Rule:** {{ steps.fetch_rule.output.name }}
@@ -975,11 +1004,11 @@ steps:
   - name: post_reasoning
     type: ai.conversation.add_user_message
     if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
         and steps.diagnose_rule.output.structured_output.reasoning != blank }}
     with:
       author_name: "{{ consts.author_name }}"
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       message: |-
         **Tuning reasoning**
         **Rule:** {{ steps.fetch_rule.output.name }}
@@ -994,11 +1023,11 @@ steps:
   - name: post_risk_score_note
     type: ai.conversation.add_user_message
     if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
         and steps.diagnose_rule.output.structured_output.change_type == 'risk_score' }}
     with:
       author_name: "{{ consts.author_name }}"
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       message: |-
         **Risk score change**
         **Rule:** {{ steps.fetch_rule.output.name }}
@@ -1130,7 +1159,7 @@ steps:
   # tag steps, so the alerts stay unreviewed and the next sweep retries the rule.
   - name: propose_tuning
     type: switch
-    if: "${{ steps.create_investigation.output.conversation_id != null }}"
+    if: "${{ steps.find_or_create_investigation.output.investigationConversationId != null }}"
     expression: "{{ steps.diagnose_rule.output.structured_output.change_type }}"
     cases:
       - match: query
@@ -1141,7 +1170,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               run-as-mode: inherit
               inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
@@ -1163,7 +1192,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               run-as-mode: inherit
               inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
@@ -1186,7 +1215,7 @@ steps:
           - name: attach_exception
             type: ai.attachment.add
             with:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
               id: "proposed-exception"
               type: security.exception
               data:
@@ -1203,7 +1232,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               run-as-mode: inherit
               inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-add-rule-exception
@@ -1237,7 +1266,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               run-as-mode: inherit
               inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
@@ -1260,7 +1289,7 @@ steps:
               workflow-id: system-create-alertzero-proposal
               run-as-mode: inherit
               inputs:
-                conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+                conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
                 title: "{{ steps.compose_proposal.output.title }}"
                 comment: "{{ steps.compose_proposal.output.comment }}"
                 actionWorkflowId: system-alertzero-action-edit-rule
@@ -1283,7 +1312,7 @@ steps:
           workflow-id: system-create-alertzero-proposal
           run-as-mode: inherit
           inputs:
-            conversationId: "{{ steps.create_investigation.output.conversation_id }}"
+            conversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             title: "{{ steps.compose_proposal.output.title }}"
             comment: "{{ steps.compose_proposal.output.comment }}"
             impact: low
@@ -1369,7 +1398,7 @@ steps:
         and steps.refetch_rule.error == null
         and steps.refetch_rule.output.id != null }}
     with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       attachment_id: "tuned-rule"
       data:
         text: "{{ steps.refetch_rule.output | json }}"
@@ -1425,10 +1454,10 @@ steps:
   - name: close_investigation_applied
     type: ai.conversation.metadata.patch
     if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
         and steps.record_proposal_action_decision.output.approved == true }}
     with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       updates:
         status: closed
         close_reason: resolved
@@ -1445,16 +1474,16 @@ steps:
       continue: true
     with:
       event: worker_investigation_closed
-      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       close_reason: resolved
 
   - name: close_investigation_dismissed
     type: ai.conversation.metadata.patch
     if: >-
-      ${{ steps.create_investigation.output.conversation_id != null
+      ${{ steps.find_or_create_investigation.output.investigationConversationId != null
         and steps.record_proposal_action_decision.output.dismissed == true }}
     with:
-      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       updates:
         status: closed
         close_reason: other
@@ -1469,7 +1498,7 @@ steps:
       continue: true
     with:
       event: worker_investigation_closed
-      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
       close_reason: other
 
   # Telemetry: the review's outcome. A change type the arms above don't name is `manual`.
@@ -1528,7 +1557,7 @@ steps:
         {%- elsif steps.fetch_rule.output.type != blank -%}
         custom
         {%- endif -%}
-      investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      investigation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
 
   - name: emit_result
     type: workflow.output
