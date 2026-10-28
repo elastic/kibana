@@ -203,9 +203,11 @@ steps:
           with:
             author_name: "{{ consts.author_name }}"
             conversation_id: "{{ inputs.actionInput.investigation_id }}"
+            # The KI write error is unbounded and, unlike the journal note helper's 8000,
+            # this step does not cap `message`.
             message: >-
               Forensics handoff failed: knowledge indicator write failed.
-              {{ steps.write_analyze_endpoint_ki.error.message }}
+              {{ steps.write_analyze_endpoint_ki.error.message | truncate: 2000 }}
           on-failure:
             continue: true
         - name: fail_handoff

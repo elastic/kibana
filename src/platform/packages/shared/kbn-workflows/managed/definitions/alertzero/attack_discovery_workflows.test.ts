@@ -2663,6 +2663,21 @@ describe('Attack Discovery worker chain', () => {
 
       expect(rendered).toBe(`Forensics handoff failed: knowledge indicator write failed. ${cause}`);
     });
+
+    it('caps an oversized knowledge indicator error in the journal note', () => {
+      const inputs = stepIn(fallback, 'journal_handoff_failed')?.with as
+        | { message?: string }
+        | undefined;
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(String(inputs?.message), {
+        steps: {
+          write_analyze_endpoint_ki: {
+            error: { type: 'security_exception', message: 'x'.repeat(10_000) },
+          },
+        },
+      });
+
+      expect(rendered.length).toBeLessThan(2100);
+    });
   });
 
   // The derived id makes a concurrent re-review harmless for the Investigation — one
