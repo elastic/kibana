@@ -458,7 +458,9 @@ steps:
         to the recommendation; confidence is how sure you are that the change removes
         the false positives without losing detections.
 
-        Write every text field of the proposal in ASD-STE100 Simplified Technical English.
+        Write every text field of the proposal in ASD-STE100 Simplified Technical English:
+        sentences of 20 words or less, active voice, one topic for each sentence, no em
+        dashes. Write fp_pattern and reasoning as markdown.
       schema:
         # Omit the root type so Agent Builder wraps this union under a property;
         # the LangChain-to-inference adapter drops root-level oneOf constraints.
@@ -893,9 +895,9 @@ steps:
   # keeps only what the decision needs. `ai.conversation.add_user_message` appends
   # a user_message without running the investigation agent. Called directly rather
   # than through the journal note workflow, because this run allows one synchronous child per wake-up
-  # cycle and the proposal gate below is that child. User messages render as plain
-  # text, so no markdown. If a note fails, compose_proposal keeps that text so the
-  # analyst still sees it.
+  # cycle and the proposal gate below is that child. The chat renders markdown in
+  # user messages. If a note fails, compose_proposal keeps that text so the analyst
+  # still sees it.
   - name: post_fp_pattern
     type: ai.conversation.add_user_message
     if: >-
@@ -905,7 +907,8 @@ steps:
       author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: |-
-        False positive pattern for {{ steps.fetch_rule.output.name }}:
+        **False positive pattern**
+        **Rule:** {{ steps.fetch_rule.output.name }}
 
         {{ steps.diagnose_rule.output.structured_output.fp_pattern }}
     on-failure:
@@ -920,7 +923,10 @@ steps:
       author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: |-
-        Reasoning behind the tuning proposal for {{ steps.fetch_rule.output.name }}:
+        **Tuning reasoning**
+        **Rule:** {{ steps.fetch_rule.output.name }}
+        **Change type:** `{{ steps.diagnose_rule.output.structured_output.change_type }}`
+        **Confidence:** {{ steps.diagnose_rule.output.structured_output.confidence }}
 
         {{ steps.diagnose_rule.output.structured_output.reasoning }}
     on-failure:
@@ -936,9 +942,11 @@ steps:
       author_name: "{{ consts.author_name }}"
       conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
       message: |-
-        About the proposed risk score change for {{ steps.fetch_rule.output.name }}:
+        **Risk score change**
+        **Rule:** {{ steps.fetch_rule.output.name }}
+        **Severity:** `{{ steps.fetch_rule.output.severity }}` → `{{ steps.diagnose_rule.output.structured_output.proposed_severity }}`
 
-        A risk score change does not change which alerts fire. If you approve, the future alerts of the rule change severity from {{ steps.fetch_rule.output.severity }} to {{ steps.diagnose_rule.output.structured_output.proposed_severity }}. Existing alerts keep their severity. The false positive count in the proposal is the evidence for this change.
+        A risk score change does not change which alerts fire. If you approve, future alerts of the rule get the new severity. Existing alerts keep their severity. The false positive count in the proposal is the evidence for this change.
     on-failure:
       continue: true
 
