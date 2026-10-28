@@ -17,7 +17,7 @@ jest.mock('../../hooks/use_kibana', () => ({
   }),
 }));
 
-const feature = (uuid: string): Feature => ({
+const feature = (uuid: string, overrides: Partial<Feature> = {}): Feature => ({
   uuid,
   id: 'redis',
   source_id: 'src-logs',
@@ -25,15 +25,13 @@ const feature = (uuid: string): Feature => ({
   description: 'cache',
   properties: {},
   confidence: 80,
+  ...overrides,
 });
 
 const aggregated: AggregatedFeature = {
   ...feature('u1'),
   sources: ['src-logs', 'src-payments'],
-  instances: [
-    { source_id: 'src-logs', uuid: 'u1', confidence: 80 },
-    { source_id: 'src-payments', uuid: 'u2', confidence: 70 },
-  ],
+  instances: [feature('u1'), feature('u2', { source_id: 'src-payments', confidence: 70 })],
 };
 
 const expectOperations = (operations: unknown[]) =>

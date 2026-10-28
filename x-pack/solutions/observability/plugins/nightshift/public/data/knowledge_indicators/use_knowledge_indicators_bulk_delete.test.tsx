@@ -9,6 +9,7 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
+import type { Feature } from '@kbn/significant-events-schema';
 import { BULK_WRITE_CONFLICT_MESSAGE } from '../../common/errors';
 import type { BulkOperationResult } from './use_discovery_features_api';
 import { useKnowledgeIndicatorsBulkDelete } from './use_knowledge_indicators_bulk_delete';
@@ -35,9 +36,8 @@ jest.mock('./use_discovery_features_api', () => ({
   useDiscoveryFeaturesApi: () => ({ deleteFeaturesInBulk: mockDeleteFeaturesInBulk }),
 }));
 
-const featureKI = (id: string): KnowledgeIndicator => ({
-  kind: 'feature',
-  feature: {
+const featureKI = (id: string): KnowledgeIndicator => {
+  const feature: Feature = {
     id,
     uuid: `uuid-${id}`,
     source_id: 'logs.test',
@@ -45,8 +45,12 @@ const featureKI = (id: string): KnowledgeIndicator => ({
     description: '',
     properties: {},
     confidence: 80,
-  },
-});
+  };
+  return {
+    kind: 'feature',
+    feature: { ...feature, sources: [feature.source_id], instances: [feature] },
+  };
+};
 
 const queryKI = (id: string): KnowledgeIndicator => ({
   kind: 'query',

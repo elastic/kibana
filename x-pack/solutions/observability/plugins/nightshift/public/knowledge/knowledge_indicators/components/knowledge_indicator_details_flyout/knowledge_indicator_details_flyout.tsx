@@ -404,7 +404,7 @@ export function KnowledgeIndicatorDetailsFlyout({
               <>
                 <EuiFlexItem>
                   <FlyoutMetadataCard title={SEVERITY_LABEL}>
-                    <SeverityBadge score={knowledgeIndicator.query.severity_score} />
+                    <SeverityBadge score={viewedKnowledgeIndicator.query.severity_score} />
                   </FlyoutMetadataCard>
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -442,7 +442,7 @@ export function KnowledgeIndicatorDetailsFlyout({
           ) : (
             <KnowledgeIndicatorQueryDetailsContent
               query={viewedKnowledgeIndicator.query}
-              occurrences={occurrencesByQueryId[knowledgeIndicator.query.id]}
+              occurrences={occurrencesByQueryId[viewedKnowledgeIndicator.query.id]}
               streamFeatures={streamFeatures}
             />
           )}

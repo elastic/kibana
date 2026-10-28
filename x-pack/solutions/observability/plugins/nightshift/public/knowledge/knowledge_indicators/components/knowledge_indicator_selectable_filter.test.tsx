@@ -32,10 +32,10 @@ function makeFeatureKI(
   otherSourceIds: string[] = []
 ): KnowledgeIndicator {
   const feature = makeFeature(overrides);
-  const instances = [feature.source_id, ...otherSourceIds].map((sourceId, index) => ({
+  const instances: Feature[] = [feature.source_id, ...otherSourceIds].map((sourceId, index) => ({
+    ...feature,
     source_id: sourceId,
     uuid: `${feature.uuid}-${index}`,
-    confidence: feature.confidence,
   }));
   return {
     kind: 'feature',
