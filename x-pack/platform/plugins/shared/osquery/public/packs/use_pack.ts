@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { buildPath } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import type { PackItem } from './types';
@@ -20,7 +21,10 @@ export const usePack = ({ packId, skip = false }: UsePack) => {
 
   return useQuery<{ data: PackItem }, unknown, PackItem>(
     ['pack', { packId }],
-    () => http.get(`/api/osquery/packs/${packId}`, { version: API_VERSIONS.public.v1 }),
+    () =>
+      http.get(buildPath('/api/osquery/packs/{packId}', { packId }), {
+        version: API_VERSIONS.public.v1,
+      }),
     {
       select: (response) => response?.data,
       keepPreviousData: true,

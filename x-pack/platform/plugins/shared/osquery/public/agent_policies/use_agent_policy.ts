@@ -9,6 +9,7 @@ import { useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { buildPath } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -26,9 +27,12 @@ export const useAgentPolicy = ({ policyId, skip, silent }: UseAgentPolicy) => {
   return useQuery<{ item: AgentPolicy }, Error, AgentPolicy>(
     ['agentPolicy', { policyId }],
     () =>
-      http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`, {
-        version: API_VERSIONS.internal.v1,
-      }),
+      http.get(
+        buildPath('/internal/osquery/fleet_wrapper/agent_policies/{policyId}', { policyId }),
+        {
+          version: API_VERSIONS.internal.v1,
+        }
+      ),
     {
       enabled: !!(policyId && !skip),
       keepPreviousData: true,

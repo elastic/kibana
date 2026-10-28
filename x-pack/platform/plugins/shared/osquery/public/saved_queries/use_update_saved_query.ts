@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 
+import { buildPath } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
@@ -31,7 +32,7 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
 
   return useMutation(
     (payload) =>
-      http.put(`/api/osquery/saved_queries/${savedQueryId}`, {
+      http.put(buildPath('/api/osquery/saved_queries/{savedQueryId}', { savedQueryId }), {
         version: API_VERSIONS.public.v1,
         body: JSON.stringify(payload),
       }),

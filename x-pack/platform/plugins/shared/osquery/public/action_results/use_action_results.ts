@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
+import { buildPath } from '@kbn/core-http-browser';
 import type { InspectResponse } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type { ResultEdges, Direction } from '../../common/search_strategy';
@@ -104,7 +105,10 @@ export const useActionResults = ({
     () => {
       if (isScheduled) {
         return http.get<ActionResultsResponse>(
-          `/api/osquery/scheduled_results/${scheduleId}/${executionCount}`,
+          buildPath('/api/osquery/scheduled_results/{scheduleId}/{executionCount}', {
+            scheduleId,
+            executionCount,
+          }),
           {
             version: API_VERSIONS.public.v1,
             query: {
@@ -118,21 +122,24 @@ export const useActionResults = ({
         );
       }
 
-      return http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
-        version: API_VERSIONS.public.v1,
-        query: {
-          page: activePage,
-          pageSize: limit,
-          sort: sortField,
-          sortOrder: direction,
-          ...(kuery && { kuery }),
-          ...(startDate && { startDate }),
-          ...(currentPageAgentIds.length > 0 && {
-            agentIds: currentPageAgentIds.join(','),
-          }),
-          totalAgents: agentIds?.length ?? 0,
-        },
-      });
+      return http.get<ActionResultsResponse>(
+        buildPath('/api/osquery/action_results/{actionId}', { actionId }),
+        {
+          version: API_VERSIONS.public.v1,
+          query: {
+            page: activePage,
+            pageSize: limit,
+            sort: sortField,
+            sortOrder: direction,
+            ...(kuery && { kuery }),
+            ...(startDate && { startDate }),
+            ...(currentPageAgentIds.length > 0 && {
+              agentIds: currentPageAgentIds.join(','),
+            }),
+            totalAgents: agentIds?.length ?? 0,
+          },
+        }
+      );
     },
     {
       select: (response) => {

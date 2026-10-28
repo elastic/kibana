@@ -9,6 +9,7 @@ import { useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
+import { buildPath } from '@kbn/core-http-browser';
 import { useKibana } from '../common/lib/kibana';
 import type { ResultEdges, Direction, ResultsStrategyResponse } from '../../common/search_strategy';
 import { API_VERSIONS } from '../../common/constants';
@@ -75,7 +76,10 @@ export const useAllResults = ({
     () => {
       if (isScheduled) {
         return http.get<{ data: ResultsStrategyResponse }>(
-          `/api/osquery/scheduled_results/${scheduleId}/${executionCount}/results`,
+          buildPath('/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results', {
+            scheduleId,
+            executionCount,
+          }),
           {
             version: API_VERSIONS.public.v1,
             query: {
@@ -93,7 +97,10 @@ export const useAllResults = ({
       }
 
       return http.get<{ data: ResultsStrategyResponse }>(
-        `/api/osquery/live_queries/${liveQueryActionId}/results/${actionId}`,
+        buildPath('/api/osquery/live_queries/{liveQueryActionId}/results/{actionId}', {
+          liveQueryActionId,
+          actionId,
+        }),
         {
           version: API_VERSIONS.public.v1,
           query: {

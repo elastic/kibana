@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { sendGetPackagePolicy, sendGetEndpointSecurityPackage } from './ingest';
+import {
+  sendGetPackagePolicy,
+  sendGetEndpointSecurityPackage,
+  sendPutPackagePolicy,
+} from './ingest';
+import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy/get_policy_data_for_update';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { PACKAGE_POLICY_API_ROOT, epmRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { policyListApiPathHandlers } from '../../pages/policy/store/test_mock_utils';
@@ -32,6 +38,26 @@ describe('ingest service', () => {
         },
         version: API_VERSIONS.public.v1,
       });
+    });
+    it('encodes the package policy id so it cannot traverse to another API path', async () => {
+      await sendGetPackagePolicy(http, '../../../internal/security/users/foo');
+      expect(http.get).toHaveBeenCalledWith(
+        `${PACKAGE_POLICY_API_ROOT}/..%2F..%2F..%2Finternal%2Fsecurity%2Fusers%2Ffoo`,
+        { version: API_VERSIONS.public.v1 }
+      );
+    });
+  });
+
+  describe('sendPutPackagePolicy()', () => {
+    it('encodes the package policy id so it cannot traverse to another API path', async () => {
+      const packagePolicy = getPolicyDataForUpdate(
+        new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy()
+      );
+      await sendPutPackagePolicy(http, '../../../internal/security/users/foo', packagePolicy);
+      expect(http.put).toHaveBeenCalledWith(
+        `${PACKAGE_POLICY_API_ROOT}/..%2F..%2F..%2Finternal%2Fsecurity%2Fusers%2Ffoo`,
+        { version: API_VERSIONS.public.v1, body: JSON.stringify(packagePolicy) }
+      );
     });
   });
 

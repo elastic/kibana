@@ -90,6 +90,26 @@ describe('useCopyPack', () => {
     expect(invalidateSpy).toHaveBeenCalledWith([PACKS_ID]);
   });
 
+  it('encodes the pack id so it cannot traverse to another API path', async () => {
+    mockHttp.post.mockResolvedValue({
+      data: { saved_object_id: 'new-pack-id', name: 'my-pack_copy' },
+    });
+
+    const { result } = renderHook(
+      () => useCopyPack({ packId: '../../../internal/security/users/foo' }),
+      { wrapper: createWrapper(queryClient) }
+    );
+
+    await act(async () => {
+      await result.current.mutateAsync();
+    });
+
+    expect(mockHttp.post).toHaveBeenCalledWith(
+      '/api/osquery/packs/..%2F..%2F..%2Finternal%2Fsecurity%2Fusers%2Ffoo/copy',
+      { version: '2023-10-31' }
+    );
+  });
+
   it('shows an error toast on failure', async () => {
     const error = { body: { error: 'Not Found', message: 'Pack not found' } };
     mockHttp.post.mockRejectedValue(error);

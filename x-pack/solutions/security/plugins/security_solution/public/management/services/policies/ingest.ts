@@ -6,6 +6,7 @@
  */
 
 import type { HttpFetchOptions, HttpStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import type {
   GetAgentStatusResponse,
   GetPackagePoliciesResponse,
@@ -37,10 +38,13 @@ export const sendGetPackagePolicy = (
   packagePolicyId: string,
   options?: HttpFetchOptions
 ) => {
-  return http.get<GetPolicyResponse>(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
-    ...options,
-    version: API_VERSIONS.public.v1,
-  });
+  return http.get<GetPolicyResponse>(
+    buildPath(`${INGEST_API_PACKAGE_POLICIES}/{packagePolicyId}`, { packagePolicyId }),
+    {
+      ...options,
+      version: API_VERSIONS.public.v1,
+    }
+  );
 };
 
 /**
@@ -78,11 +82,14 @@ export const sendPutPackagePolicy = (
   packagePolicy: NewPolicyData,
   options: Exclude<HttpFetchOptions, 'body'> = {}
 ): Promise<UpdatePolicyResponse> => {
-  return http.put(`${INGEST_API_PACKAGE_POLICIES}/${packagePolicyId}`, {
-    ...options,
-    version: API_VERSIONS.public.v1,
-    body: JSON.stringify(packagePolicy),
-  });
+  return http.put(
+    buildPath(`${INGEST_API_PACKAGE_POLICIES}/{packagePolicyId}`, { packagePolicyId }),
+    {
+      ...options,
+      version: API_VERSIONS.public.v1,
+      body: JSON.stringify(packagePolicy),
+    }
+  );
 };
 
 /**
