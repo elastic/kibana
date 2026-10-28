@@ -1054,6 +1054,24 @@ steps:
 
       - match: no_rule
         steps:
+          # Nothing was proposed, so this note is the only message in the chat saying why.
+          # The reason is cut to 2000 characters: `system-alertzero-journal-note` rejects
+          # messages over 8000.
+          - name: note_no_rule
+            type: workflow.execute
+            on-failure:
+              continue: true
+            with:
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
+                author_name: "{{ consts.author_name }}"
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                message: |-
+                  **No rule could be drafted for this gap.** {{ steps.run_rule_creation.output.skip_reason | truncate: 2000 }}
+
+                  Nothing was proposed. The investigation is closed and the gap will not be checked again.
+
           - name: close_investigation_no_rule
             type: ai.conversation.metadata.patch
             with:

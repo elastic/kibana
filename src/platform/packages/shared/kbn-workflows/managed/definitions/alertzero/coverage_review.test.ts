@@ -512,6 +512,7 @@ describe('Detection Coverage review', () => {
         'report_investigation_closed_dismissed',
       ]);
       expect(caseSteps('no_rule')).toEqual([
+        'note_no_rule',
         'close_investigation_no_rule',
         'report_investigation_closed_no_rule',
       ]);
@@ -523,6 +524,27 @@ describe('Detection Coverage review', () => {
       expect(dismissed).not.toHaveProperty('if');
       expect((resolved?.with?.updates as Record<string, string>).status).toBe('closed');
       expect((dismissed?.with?.updates as Record<string, string>).status).toBe('closed');
+    });
+
+    // Nothing was proposed, so the note is the only message in the chat saying why.
+    it('notes why no rule was drafted, within the journal limit', () => {
+      const note = stepByName('note_no_rule');
+      expect(note?.['on-failure']?.continue).toBe(true);
+      expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
+      expect(inputsOf(note).conversation_id).toBe(
+        '{{ steps.create_investigation.output.conversation_id }}'
+      );
+
+      const render = (skipReason: string) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(inputsOf(note).message as string, {
+          steps: { run_rule_creation: { output: { skip_reason: skipReason } } },
+        });
+      expect(render('No data source exists for the gap.')).toBe(
+        '**No rule could be drafted for this gap.** No data source exists for the gap.\n\n' +
+          'Nothing was proposed. The investigation is closed and the gap will not be checked again.'
+      );
+      // `system-alertzero-journal-note` rejects a message over 8000 characters.
+      expect(render('x'.repeat(10000)).length).toBeLessThanOrEqual(8000);
     });
 
     // An approved report applied nothing and confirmed nothing, so the gap is not
