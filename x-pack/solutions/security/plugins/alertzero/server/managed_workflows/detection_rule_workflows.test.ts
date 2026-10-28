@@ -619,8 +619,8 @@ describe('detection rule workflows', () => {
       // STATS over doc values; the harvest then reads only the FPs of the rules that
       // passed, so the unreviewed queue never dilutes or inflates the rate.
       it('measures FP rate independently from the unreviewed work queue', () => {
-        expect(screenQuery).toContain('fp_rate_count = COUNT(*) WHERE is_fp');
-        expect(screenQuery).toContain('fp_rate_count * 100 >= total_count');
+        expect(screenQuery).toContain('fp_count = COUNT(*) WHERE is_fp');
+        expect(screenQuery).toContain('fp_count * 100 >= total_count');
         expect(screenQuery).not.toContain('INLINE STATS');
         expect(harvestQuery).not.toContain('total_count');
 
@@ -646,16 +646,15 @@ describe('detection rule workflows', () => {
         expect(harvestQuery).toContain(
           'WHERE fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}'
         );
-        expect(harvestQuery).not.toContain('fp_rate_count');
       });
 
       // A reviewed rule keeps its tagged FPs in the window and would outrank
-      // unreviewed rules for the screen's slots on fp_rate_count alone; ranking on
+      // unreviewed rules for the screen's slots on fp_count alone; ranking on
       // untagged FPs lets it fall out while the rate gate still counts every FP.
       it('ranks the screen on untagged false positives', () => {
         expect(screenQuery).toContain('| SORT untagged_fp_count DESC');
-        expect(screenQuery).not.toContain('SORT fp_rate_count');
-        expect(screenQuery).toContain('fp_rate_count * 100 >= total_count');
+        expect(screenQuery).not.toContain('SORT fp_count');
+        expect(screenQuery).toContain('fp_count * 100 >= total_count');
       });
 
       // The review tags only the newest 100 ids; the watermark retires the older

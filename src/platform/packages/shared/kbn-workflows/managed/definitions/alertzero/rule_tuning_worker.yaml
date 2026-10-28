@@ -222,7 +222,7 @@ steps:
 
   # Scoped to one space because the tag API writes to the space's own alerts index, so
   # a cross-space harvest would keep rediagnosing alerts it can never mark.
-  # `total_count` spans every alert the rule produced in the window. `fp_rate_count`
+  # `total_count` spans every alert the rule produced in the window. `fp_count`
   # includes reviewed false positives so processing a batch does not dilute the rule's
   # measured FP rate. A rule reviewed earlier in the window would otherwise keep
   # passing both gates and hold a screen slot an unreviewed rule needs, so the screen
@@ -260,18 +260,18 @@ steps:
         | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
             AND `kibana.alert.workflow_reason` == "false_positive"
         | STATS total_count = COUNT(*),
-            fp_rate_count = COUNT(*) WHERE is_fp,
+            fp_count = COUNT(*) WHERE is_fp,
             untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"),
             last_fp_at = MAX(@timestamp) WHERE is_fp,
             reviewed_watermark = MAX(@timestamp) WHERE is_fp AND MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}")
           BY `kibana.alert.rule.uuid`, `kibana.alert.rule.revision`
         | WHERE (reviewed_watermark IS NULL OR last_fp_at > reviewed_watermark)
           AND untagged_fp_count >= {{ inputs.min_fp_count | default: consts.min_fp_count }}
-          AND fp_rate_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
+          AND fp_count * 100 >= total_count * {{ inputs.min_fp_rate_pct | default: consts.min_fp_rate_pct }}
         | SORT untagged_fp_count DESC
         | LIMIT {{ consts.max_screened_rules }}
         | EVAL rule_revision_key = CONCAT(",", `kibana.alert.rule.uuid`, "@", TO_STRING(`kibana.alert.rule.revision`), ",")
-        | KEEP `kibana.alert.rule.uuid`, total_count, fp_rate_count, rule_revision_key
+        | KEEP `kibana.alert.rule.uuid`, total_count, fp_count, rule_revision_key
     on-failure:
       continue: true
 
