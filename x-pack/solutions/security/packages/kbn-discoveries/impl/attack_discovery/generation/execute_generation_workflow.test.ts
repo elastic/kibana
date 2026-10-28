@@ -903,6 +903,16 @@ describe('executeGenerationWorkflow', () => {
           },
         },
         http: { basePath: { get: jest.fn().mockReturnValue('') } },
+        security: {
+          authc: {
+            apiKeys: {
+              grantAsInternalUser: jest
+                .fn()
+                .mockResolvedValue({ api_key: 'test-api-key', id: 'test-api-key-id' }),
+              invalidateAsInternalUser: jest.fn().mockResolvedValue({}),
+            },
+          },
+        },
       } as unknown as CoreStart;
       const logger = {
         debug: jest.fn(),
@@ -956,10 +966,14 @@ describe('executeGenerationWorkflow', () => {
         return mockAnonymizationFields;
       });
 
-      await run({ ensureSpaceResources });
+      const logger = await run({ ensureSpaceResources });
 
       expect(ensureSpaceResources).toHaveBeenCalledWith('default');
       expect(order).toEqual(['ensure', 'fetch']);
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        "Could not install the AI Assistant resources for space 'default'"
+      );
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('pipeline API key'));
     });
 
     it('warns and still fetches the anonymization fields when the install fails', async () => {

@@ -123,6 +123,7 @@ export {
   writeAttackDiscoveryEvent,
 } from './impl/attack_discovery/persistence/event_logging';
 export type { EventLogRefresher } from './impl/attack_discovery/persistence/event_logging';
+export type { ElasticAssistantStart } from './impl/attack_discovery/generation/types';
 
 // Defend Insights
 export {

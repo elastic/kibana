@@ -150,6 +150,8 @@ export interface ElasticAssistantPluginStart {
    * stream with its default fields, conversations, prompts, ...) if they are missing. These are
    * otherwise created lazily the first time an AI Assistant data client is created for the space.
    * Callers that read them directly, such as Attack Discovery generation, call this first.
+   * No AI Assistant license check: callers enforce their own authorization, and it only
+   * installs the defaults a licensed space gets on first use.
    * @returns `false` when the install failed.
    */
   ensureSpaceResources: (spaceId: string) => Promise<boolean>;

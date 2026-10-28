@@ -60,6 +60,7 @@ import {
 } from './run_manual_orchestration';
 import type {
   DefaultWorkflowIds,
+  ElasticAssistantStart,
   ExecuteGenerationWorkflowParams,
   ParsedApiConfig,
   WorkflowConfig,
@@ -603,13 +604,11 @@ export async function executeGenerationWorkflow({
 
     authenticatedUser = createAuthenticatedUserForEventLogging({ authenticationInfo });
 
-    // The anonymization fields data stream is created lazily, when an AI Assistant data client
-    // is first created for the space. A space that never opened the AI Assistant or Attack
-    // discovery UI has none, so install it here rather than fail every batch with
-    // `index_not_found_exception`. A failed install is logged, and the fetch below still fails
-    // with its own error.
+    // A space that never opened the AI Assistant has no anonymization fields data stream yet;
+    // without this every batch fails with `index_not_found_exception`. A failed install is
+    // only logged: the fetch below then fails with its own error.
     const { elasticAssistant } = pluginsStart as {
-      elasticAssistant?: { ensureSpaceResources?: (spaceId: string) => Promise<boolean> };
+      elasticAssistant?: ElasticAssistantStart;
     };
 
     if ((await elasticAssistant?.ensureSpaceResources?.(spaceId)) === false) {

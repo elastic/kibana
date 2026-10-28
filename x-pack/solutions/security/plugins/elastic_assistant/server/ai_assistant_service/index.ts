@@ -599,7 +599,7 @@ export class AIAssistantService {
    *
    * Callers that read these resources without creating an AI Assistant data client, such as
    * Attack Discovery generation, call this first so a space that never opened the AI
-   * Assistant still has them. No license check: the data-client factories do that themselves.
+   * Assistant still has them. Deliberately no license check; see the plugin start contract.
    *
    * @returns `false` when the install failed and the retry failed too.
    */
