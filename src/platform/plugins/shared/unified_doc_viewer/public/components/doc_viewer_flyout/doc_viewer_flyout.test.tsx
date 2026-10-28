@@ -17,6 +17,7 @@ import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewerFlyout, type UnifiedDocViewerFlyoutProps } from './doc_viewer_flyout';
+import { useDocViewerFlyoutId } from './doc_viewer_flyout_id_context';
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -167,6 +168,22 @@ describe('UnifiedDocViewerFlyout', () => {
 
     await user.click(shareButton);
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('provides its flyout id to the content it renders', () => {
+    const HeaderWithFlyoutId = () => (
+      <div data-test-subj="docViewerFlyoutHeaderFlyoutId" data-flyout-id={useDocViewerFlyoutId()} />
+    );
+
+    render(
+      <UnifiedDocViewerFlyout
+        {...buildProps({ renderCustomHeader: () => <HeaderWithFlyoutId /> })}
+      />
+    );
+
+    expect(
+      screen.getByTestId('docViewerFlyoutHeaderFlyoutId').getAttribute('data-flyout-id')
+    ).toMatch(/^docViewerFlyout/);
   });
 
   describe('document pinning behavior', () => {

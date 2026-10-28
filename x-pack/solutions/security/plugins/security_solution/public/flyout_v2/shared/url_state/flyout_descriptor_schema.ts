@@ -309,43 +309,51 @@ export const cspVulnerabilityDescriptorSchema = z.object({
   eventId: str.optional(),
 });
 
-/** UI trigger to attribute when a descriptor is restored from URL state. */
-const originShape = { origin: z.enum(FLYOUT_ORIGIN).optional() };
+/** Fields every descriptor may carry, whatever its kind. */
+const commonShape = {
+  /** UI trigger to attribute when a descriptor is restored from URL state. */
+  origin: z.enum(FLYOUT_ORIGIN).optional(),
+  /**
+   * Set on a chain root that was opened as the child of a flyout the chain does not store (e.g.
+   * Discover's doc viewer), so a restore can reopen it as that flyout's child.
+   */
+  asChild: z.literal(true).optional(),
+};
 
 export const flyoutDescriptorSchema = z.discriminatedUnion('kind', [
-  documentDescriptorSchema.extend(originShape),
-  documentFromPatternDescriptorSchema.extend(originShape),
-  analyzerDescriptorSchema.extend(originShape),
-  sessionViewDescriptorSchema.extend(originShape),
-  documentEntitiesDescriptorSchema.extend(originShape),
-  documentCorrelationsDescriptorSchema.extend(originShape),
-  documentPrevalenceDescriptorSchema.extend(originShape),
-  documentResponseDescriptorSchema.extend(originShape),
-  documentThreatIntelligenceDescriptorSchema.extend(originShape),
-  documentInvestigationGuideDescriptorSchema.extend(originShape),
-  documentGraphDescriptorSchema.extend(originShape),
-  notesDescriptorSchema.extend(originShape),
-  attackDescriptorSchema.extend(originShape),
-  attackCorrelationsDescriptorSchema.extend(originShape),
-  attackEntitiesDescriptorSchema.extend(originShape),
-  hostDescriptorSchema.extend(originShape),
-  userDescriptorSchema.extend(originShape),
-  serviceDescriptorSchema.extend(originShape),
-  genericEntityDescriptorSchema.extend(originShape),
-  entityRiskInputsDescriptorSchema.extend(originShape),
-  entityAnomalyInsightsDescriptorSchema.extend(originShape),
-  entityAlertsInsightsDescriptorSchema.extend(originShape),
-  entityMisconfigurationInsightsDescriptorSchema.extend(originShape),
-  entityVulnerabilityInsightsDescriptorSchema.extend(originShape),
-  entityGraphViewDescriptorSchema.extend(originShape),
-  entityResolutionDescriptorSchema.extend(originShape),
-  entityEntraInsightsDescriptorSchema.extend(originShape),
-  entityOktaInsightsDescriptorSchema.extend(originShape),
-  networkDescriptorSchema.extend(originShape),
-  ruleDescriptorSchema.extend(originShape),
-  iocDescriptorSchema.extend(originShape),
-  cspMisconfigurationDescriptorSchema.extend(originShape),
-  cspVulnerabilityDescriptorSchema.extend(originShape),
+  documentDescriptorSchema.extend(commonShape),
+  documentFromPatternDescriptorSchema.extend(commonShape),
+  analyzerDescriptorSchema.extend(commonShape),
+  sessionViewDescriptorSchema.extend(commonShape),
+  documentEntitiesDescriptorSchema.extend(commonShape),
+  documentCorrelationsDescriptorSchema.extend(commonShape),
+  documentPrevalenceDescriptorSchema.extend(commonShape),
+  documentResponseDescriptorSchema.extend(commonShape),
+  documentThreatIntelligenceDescriptorSchema.extend(commonShape),
+  documentInvestigationGuideDescriptorSchema.extend(commonShape),
+  documentGraphDescriptorSchema.extend(commonShape),
+  notesDescriptorSchema.extend(commonShape),
+  attackDescriptorSchema.extend(commonShape),
+  attackCorrelationsDescriptorSchema.extend(commonShape),
+  attackEntitiesDescriptorSchema.extend(commonShape),
+  hostDescriptorSchema.extend(commonShape),
+  userDescriptorSchema.extend(commonShape),
+  serviceDescriptorSchema.extend(commonShape),
+  genericEntityDescriptorSchema.extend(commonShape),
+  entityRiskInputsDescriptorSchema.extend(commonShape),
+  entityAnomalyInsightsDescriptorSchema.extend(commonShape),
+  entityAlertsInsightsDescriptorSchema.extend(commonShape),
+  entityMisconfigurationInsightsDescriptorSchema.extend(commonShape),
+  entityVulnerabilityInsightsDescriptorSchema.extend(commonShape),
+  entityGraphViewDescriptorSchema.extend(commonShape),
+  entityResolutionDescriptorSchema.extend(commonShape),
+  entityEntraInsightsDescriptorSchema.extend(commonShape),
+  entityOktaInsightsDescriptorSchema.extend(commonShape),
+  networkDescriptorSchema.extend(commonShape),
+  ruleDescriptorSchema.extend(commonShape),
+  iocDescriptorSchema.extend(commonShape),
+  cspMisconfigurationDescriptorSchema.extend(commonShape),
+  cspVulnerabilityDescriptorSchema.extend(commonShape),
 ]);
 
 /** The open flyout chain: a root descriptor and an optional child. */

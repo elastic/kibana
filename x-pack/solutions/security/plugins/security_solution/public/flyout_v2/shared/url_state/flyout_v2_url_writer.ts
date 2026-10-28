@@ -36,8 +36,9 @@ const writeGenerations: Record<string, number> = {};
 
 /**
  * Stack of write-generations currently believed to be "open" for a given `urlParamKey`, mirroring
- * the shape of the URL array: index 0 is the root (session:'start'), index 1 is the child
- * (session:'inherit'). Capped at 2 entries, same as the URL itself.
+ * the shape of the URL array: index 0 is the root (session:'start', or a child of a flyout the
+ * chain does not store), index 1 is the child (session:'inherit'). Capped at 2 entries, same as the
+ * URL itself.
  *
  * The generation guard alone is not sufficient: when a root flyout with an open child is closed
  * as a whole (e.g. the tools flyout AND its child both dismissed together), EUI fires the CHILD's
@@ -52,6 +53,13 @@ const writeGenerations: Record<string, number> = {};
  * that never got popped (e.g. a flyout unmounted through a path that skipped `onClose`).
  */
 const openGenerationStacks: Record<string, number[]> = {};
+
+/**
+ * Generation of the open session:'start' root, per `urlParamKey`. Only its close ends the session:
+ * a chain root opened as a child of an unstored flyout (e.g. Discover's doc viewer) is replaced in
+ * that flyout's child slot by the next child, which keeps the session going.
+ */
+const sessionRootGenerations: Record<string, number | undefined> = {};
 
 /**
  * Child generations closed together with their root, per `urlParamKey`. When a session ends (Back,
@@ -73,7 +81,9 @@ export interface FlyoutUrlWriter {
    *   Use for session:'start' opens — any existing chain is cleared.
    * `mode = 'inherit'`: appends `descriptor` to the current URL array (capped at 2).
    *   Use for session:'inherit' / `...AsChild` opens so the restore array contains
-   *   both the parent (index 0) and the child (index 1).
+   *   both the parent (index 0) and the child (index 1). Without a stored session:'start' root
+   *   (the parent is not stored, e.g. Discover's doc viewer), the array becomes `[descriptor]`
+   *   marked `asChild`.
    */
   writeOnOpen: (descriptor: FlyoutDescriptor, mode?: 'start' | 'inherit') => void;
   /**
@@ -87,8 +97,9 @@ export interface FlyoutUrlWriter {
    */
   buildOnClose: (fallback: FlyoutDescriptor | null) => () => void;
   /**
-   * The root (index 0) descriptor of the current chain, or `null`. Reads the same storage the
-   * writer writes to, so callers computing a child's close fallback never read the URL directly.
+   * The session:'start' root (index 0) descriptor of the current chain, or `null` (also when the
+   * root is the child of an unstored flyout). Reads the same storage the writer writes to, so
+   * callers computing a child's close fallback never read the URL directly.
    */
   readRootDescriptor: () => FlyoutDescriptor | null;
 }
@@ -148,9 +159,9 @@ export const useFlyoutV2UrlWriter = (urlParamKey: string, historyKey: symbol): F
   // Using history.replace (not push) means no extra Back/Forward stops are created.
   // Mark before replace so useFlyoutV2RestoreFromUrl's history listener ignores self-writes.
   const writeToUrl = useCallback(
-    (stack: FlyoutV2UrlParamValue | null) => {
+    (stack: FlyoutV2UrlParamValue | null, isOpen: boolean) => {
       if (isDocViewerChain) {
-        writeDocViewerFlyoutChain(stack);
+        writeDocViewerFlyoutChain(stack, isOpen);
         return;
       }
       if (!hasUsableHistory) return;
@@ -169,31 +180,49 @@ export const useFlyoutV2UrlWriter = (urlParamKey: string, historyKey: symbol): F
 
   const canWrite = hasUsableHistory || isDocViewerChain;
 
+  // The chain's session:'start' root; a root marked `asChild` is itself the child of an unstored
+  // flyout, so it is not the parent of the next child.
+  const readSessionRoot = useCallback((): FlyoutDescriptor | null => {
+    const [root] = readCurrentStack();
+    return root && !root.asChild ? root : null;
+  }, [readCurrentStack]);
+
   const writeOnOpen = useCallback(
     (descriptor: FlyoutDescriptor, mode: 'start' | 'inherit' = 'start') => {
       if (!canWrite) return;
       const generation = (writeGenerations[urlParamKey] ?? 0) + 1;
       writeGenerations[urlParamKey] = generation;
 
-      if (mode === 'inherit') {
-        // A child open keeps the session-start root (index 0) and sets the child slot to the new
-        // descriptor — REPLACING any existing child. A child opened from within another child
-        // (e.g. tool -> document -> host) must persist as [root, currentDeepestChild]; appending and
-        // slicing to 2 would instead keep the stale first two entries and drop the newest child (the
-        // one the user is actually looking at).
-        const [root] = readCurrentStack();
-        writeToUrl(root ? [root, descriptor] : [descriptor]);
+      if (mode === 'start') {
+        // A 'start' open is a new top-level flyout; discard any existing chain.
+        writeToUrl([descriptor], true);
+        openGenerationStacks[urlParamKey] = [generation];
+        sessionRootGenerations[urlParamKey] = generation;
+        closedWithRootGenerations[urlParamKey]?.clear();
+        return;
+      }
+
+      // A child open keeps the session-start root (index 0) and sets the child slot to the new
+      // descriptor — REPLACING any existing child. A child opened from within another child
+      // (e.g. tool -> document -> host) must persist as [root, currentDeepestChild]; appending and
+      // slicing to 2 would instead keep the stale first two entries and drop the newest child (the
+      // one the user is actually looking at).
+      const root = readSessionRoot();
+      if (root) {
+        writeToUrl([root, descriptor], true);
         // Keep the root's generation (index 0), replace the child's (index 1) — mirrors the URL.
         const [rootGeneration] = openGenerationStacks[urlParamKey] ?? [];
         openGenerationStacks[urlParamKey] = [rootGeneration ?? generation, generation];
-      } else {
-        // A 'start' open is a new top-level flyout; discard any existing chain.
-        writeToUrl([descriptor]);
-        openGenerationStacks[urlParamKey] = [generation];
-        closedWithRootGenerations[urlParamKey]?.clear();
+        return;
       }
+
+      // The parent is not stored (e.g. Discover's doc viewer), so the child is the whole chain and
+      // replaces any previous child, the same way the parent's child slot does.
+      writeToUrl([{ ...descriptor, asChild: true }], true);
+      openGenerationStacks[urlParamKey] = [generation];
+      sessionRootGenerations[urlParamKey] = undefined;
     },
-    [canWrite, urlParamKey, readCurrentStack, writeToUrl]
+    [canWrite, urlParamKey, readSessionRoot, writeToUrl]
   );
 
   const buildOnClose = useCallback(
@@ -206,13 +235,18 @@ export const useFlyoutV2UrlWriter = (urlParamKey: string, historyKey: symbol): F
         if (closedWithRoot.delete(ownGeneration)) return;
 
         const stack = openGenerationStacks[urlParamKey] ?? [];
-        const ownIndex = stack.indexOf(ownGeneration);
-        if (ownIndex === 0) {
-          // The root closing ends its whole session, so its child is closed too.
-          stack.slice(1).forEach((childGeneration) => closedWithRoot.add(childGeneration));
+        if (ownGeneration === sessionRootGenerations[urlParamKey]) {
+          // The session root closing ends its whole session, so its child is closed too.
+          stack
+            .filter((openGeneration) => openGeneration !== ownGeneration)
+            .forEach((childGeneration) => closedWithRoot.add(childGeneration));
           stack.length = 0;
-        } else if (ownIndex !== -1) {
-          stack.splice(ownIndex, 1);
+          sessionRootGenerations[urlParamKey] = undefined;
+        } else {
+          const ownIndex = stack.indexOf(ownGeneration);
+          if (ownIndex !== -1) {
+            stack.splice(ownIndex, 1);
+          }
         }
 
         // If something with a newer generation is STILL open, this close is a cascade-eviction
@@ -220,15 +254,15 @@ export const useFlyoutV2UrlWriter = (urlParamKey: string, historyKey: symbol): F
         const hasNewerStillOpen = stack.some((openGeneration) => openGeneration > ownGeneration);
         if (hasNewerStillOpen) return;
 
-        writeToUrl(fallback ? [fallback] : null);
+        writeToUrl(fallback ? [fallback] : null, false);
       };
     },
     [canWrite, urlParamKey, writeToUrl]
   );
 
   const readRootDescriptor = useCallback(
-    (): FlyoutDescriptor | null => (canWrite ? readCurrentStack()[0] ?? null : null),
-    [canWrite, readCurrentStack]
+    (): FlyoutDescriptor | null => (canWrite ? readSessionRoot() : null),
+    [canWrite, readSessionRoot]
   );
 
   return useMemo(

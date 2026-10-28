@@ -6,32 +6,13 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { useDefaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import React, { useEffect, useState } from 'react';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/attack/main/header';
-import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
-import { NotesDetails } from '../../flyout_v2/shared/tools/notes';
-import { useFlyoutV2UrlWriter } from '../../flyout_v2/shared/url_state/flyout_v2_url_writer';
-import {
-  FLYOUT_DESCRIPTOR_KIND,
-  urlParamKeyForHistoryKey,
-} from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
-import { formatFlyoutTitle, NOTES_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
-import { getAttackTitleValue } from '../../flyout_v2/attack/utils/get_attack_title';
-import {
-  FLYOUT_ORIGIN,
-  FLYOUT_SESSION_KIND,
-  FLYOUT_SURFACE,
-  FLYOUT_TOOL,
-  FLYOUT_TYPE,
-} from '../../common/lib/telemetry';
-import { trackFlyoutOpen } from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
+import { useOpenNotesFlyout } from '../use_open_notes_flyout';
 
 export interface AttackFlyoutHeaderProps {
   hit: DataTableRecord;
@@ -46,62 +27,15 @@ export const AttackFlyoutHeader = ({
   storePromise,
   onAttackUpdated,
 }: AttackFlyoutHeaderProps) => {
-  const history = useHistory();
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
-  const isSecurityApp = useIsInSecurityApp();
-  const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
-  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(
-    urlParamKeyForHistoryKey(historyKey),
-    historyKey
-  );
-  const attackTitle = useMemo(() => getAttackTitleValue(hit), [hit]);
 
-  const openNotesFlyout = useCallback(() => {
-    if (!services || !store) {
-      return;
-    }
-
-    const { _id: documentId, _index: indexName } = hit.raw;
-    if (documentId && indexName) {
-      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.notes, documentId, indexName });
-    }
-    const ref = services.overlays?.openSystemFlyout(
-      flyoutProviders({
-        services,
-        store,
-        history,
-        children: <NotesDetails hit={hit} />,
-      }),
-      {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: FLYOUT_SESSION_KIND.START,
-        title: formatFlyoutTitle(NOTES_TITLE, attackTitle),
-        onClose: buildOnClose(null),
-      }
-    );
-    if (ref) {
-      trackFlyoutOpen(services.telemetry, ref, {
-        surface: FLYOUT_SURFACE.TOOL,
-        flyoutType: FLYOUT_TYPE.ATTACK,
-        tool: FLYOUT_TOOL.NOTES,
-        session: FLYOUT_SESSION_KIND.START,
-        origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
-      });
-    }
-  }, [
-    attackTitle,
-    buildOnClose,
-    defaultToolsFlyoutProperties,
-    history,
-    historyKey,
+  const openNotesFlyout = useOpenNotesFlyout({
     hit,
     services,
     store,
-    writeOnOpen,
-  ]);
+    origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+  });
 
   useEffect(() => {
     let isCanceled = false;

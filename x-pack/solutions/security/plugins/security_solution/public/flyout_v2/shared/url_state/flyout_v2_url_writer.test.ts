@@ -494,6 +494,66 @@ describe('useFlyoutV2UrlWriter', () => {
       expect(docViewerFlyoutChain.stack).toEqual([]);
     });
 
+    describe('for a child of the doc viewer itself (no stored root)', () => {
+      const hostDescriptor = { kind: 'host', hostName: 'web-01' } as const;
+      const userDescriptor = { kind: 'user', userName: 'alice' } as const;
+
+      it('stores the child alone, marked as a child', () => {
+        const { result } = renderDocViewerWriter();
+
+        act(() => {
+          result.current.writeOnOpen(hostDescriptor, 'inherit');
+        });
+
+        expect(docViewerFlyoutChain.stack).toEqual([{ ...hostDescriptor, asChild: true }]);
+        expect(result.current.readRootDescriptor()).toBeNull();
+      });
+
+      it('keeps the chain when a child replaces it in the doc viewer child slot', () => {
+        const { result } = renderDocViewerWriter();
+
+        let hostOnClose!: () => void;
+        let userOnClose!: () => void;
+        act(() => {
+          const hostParent = result.current.readRootDescriptor();
+          result.current.writeOnOpen(hostDescriptor, 'inherit');
+          hostOnClose = result.current.buildOnClose(hostParent);
+        });
+        act(() => {
+          const userParent = result.current.readRootDescriptor();
+          result.current.writeOnOpen(userDescriptor, 'inherit');
+          userOnClose = result.current.buildOnClose(userParent);
+        });
+
+        expect(docViewerFlyoutChain.stack).toEqual([{ ...userDescriptor, asChild: true }]);
+
+        // The flyout manager replaces the host in the child slot, which fires its onClose.
+        act(() => {
+          hostOnClose();
+        });
+
+        expect(docViewerFlyoutChain.stack).toEqual([{ ...userDescriptor, asChild: true }]);
+
+        act(() => {
+          userOnClose();
+        });
+
+        expect(docViewerFlyoutChain.stack).toEqual([]);
+      });
+
+      it('replaces the child when a tool starts a new session', () => {
+        const { result } = renderDocViewerWriter();
+
+        act(() => {
+          result.current.writeOnOpen(hostDescriptor, 'inherit');
+          result.current.writeOnOpen(analyzerDescriptor('doc-1'));
+        });
+
+        expect(docViewerFlyoutChain.stack).toEqual([analyzerDescriptor('doc-1')]);
+        expect(result.current.readRootDescriptor()).toEqual(analyzerDescriptor('doc-1'));
+      });
+    });
+
     it('writes to the chain even when history is not usable', () => {
       const wrapper: React.FC<{ children?: React.ReactNode }> = ({ children }) =>
         children as React.ReactElement;

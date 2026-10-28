@@ -10,7 +10,8 @@ import { isEqual } from 'lodash/fp';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { useFlyoutApi } from '../../use_flyout_api';
-import { docViewerFlyoutChain } from './flyout_v2_doc_viewer_chain';
+import { claimDocViewerFlyoutChain, docViewerFlyoutChain } from './flyout_v2_doc_viewer_chain';
+import { useDocViewerFlyoutChainSessionKey } from './use_doc_viewer_flyout_chain_session_key';
 import type { FlyoutV2DocViewerStateProps } from './flyout_v2_doc_viewer_state_schema';
 import type { FlyoutDescriptor, FlyoutV2UrlParamValue } from './flyout_v2_url_param';
 import type { RestoreContext } from './use_flyout_v2_restore';
@@ -58,7 +59,7 @@ const getRestoreContext = (descriptor: FlyoutDescriptor, hit: DataTableRecord): 
  * The chain lives in `docViewerFlyoutChain`, which outlives this tab: flyouts can open and close
  * while another doc viewer tab is selected. The chain is only reported to the host while the tab
  * is mounted (a detached tab's `onInitialStateChange` would overwrite the other tabs' state), and
- * on remount for the same document the live chain wins over `initialState`.
+ * once the doc viewer session has a live chain, it wins over `initialState`.
  */
 export const useFlyoutV2DocViewerState = ({
   hit,
@@ -66,6 +67,7 @@ export const useFlyoutV2DocViewerState = ({
   onInitialStateChange,
 }: UseFlyoutV2DocViewerStateParams): void => {
   const flyoutApi = useFlyoutApi();
+  const sessionKey = useDocViewerFlyoutChainSessionKey(hit);
   const [initialStack] = useState<FlyoutV2UrlParamValue>(() => initialState?.flyoutV2 ?? []);
   const flyoutApiRef = useRef(flyoutApi);
   const hitRef = useRef(hit);
@@ -77,8 +79,6 @@ export const useFlyoutV2DocViewerState = ({
     onInitialStateChangeRef.current = onInitialStateChange;
   }, [flyoutApi, hit, onInitialStateChange]);
 
-  const { id: hitId } = hit;
-
   useEffect(() => {
     const report = (stack: FlyoutV2UrlParamValue) =>
       onInitialStateChangeRef.current?.({ flyoutV2: stack.length > 0 ? stack : undefined });
@@ -86,15 +86,16 @@ export const useFlyoutV2DocViewerState = ({
     let restoreTimeout: ReturnType<typeof setTimeout> | undefined;
     let isRestorePending = false;
 
-    if (docViewerFlyoutChain.hitId === hitId) {
-      // The tab remounted (doc viewer tab switch) while the host state was kept: flyouts may have
-      // opened or closed meanwhile, so hand the live chain to the host instead of reopening it.
+    if (docViewerFlyoutChain.sessionKey === sessionKey && docViewerFlyoutChain.isLive) {
+      // The tab remounted (doc viewer tab switch), or flyouts opened from the doc viewer header or
+      // footer before it first mounted: hand the live chain to the host instead of reopening it.
       if (!isEqual(docViewerFlyoutChain.stack, initialStack)) {
         report(docViewerFlyoutChain.stack);
       }
     } else {
-      docViewerFlyoutChain.hitId = hitId;
+      claimDocViewerFlyoutChain(sessionKey);
       docViewerFlyoutChain.stack = initialStack;
+      docViewerFlyoutChain.isLive = true;
       const [first, second] = initialStack;
 
       if (first) {
@@ -105,12 +106,9 @@ export const useFlyoutV2DocViewerState = ({
           isRestorePending = false;
           const { current: api } = flyoutApiRef;
           const { current: displayedHit } = hitRef;
-          openDescriptorAsStart(
-            first,
-            getRestoreContext(first, displayedHit),
-            api,
-            FLYOUT_ORIGIN.URL_RESTORE
-          );
+          // A root marked `asChild` was opened as the doc viewer's own child.
+          const openFirst = first.asChild ? openDescriptorAsChild : openDescriptorAsStart;
+          openFirst(first, getRestoreContext(first, displayedHit), api, FLYOUT_ORIGIN.URL_RESTORE);
           if (second) {
             openDescriptorAsChild(
               second,
@@ -131,9 +129,9 @@ export const useFlyoutV2DocViewerState = ({
         docViewerFlyoutChain.report = undefined;
       }
       // Unmounted before the chain was reopened: let the next mount restore it.
-      if (isRestorePending && docViewerFlyoutChain.hitId === hitId) {
-        docViewerFlyoutChain.hitId = undefined;
+      if (isRestorePending && docViewerFlyoutChain.sessionKey === sessionKey) {
+        docViewerFlyoutChain.isLive = false;
       }
     };
-  }, [hitId, initialStack]);
+  }, [sessionKey, initialStack]);
 };

@@ -9,12 +9,22 @@ import { act, renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useFlyoutV2DocViewerState } from './use_flyout_v2_doc_viewer_state';
 import type { UseFlyoutV2DocViewerStateParams } from './use_flyout_v2_doc_viewer_state';
-import { docViewerFlyoutChain, writeDocViewerFlyoutChain } from './flyout_v2_doc_viewer_chain';
+import {
+  claimDocViewerFlyoutChain,
+  docViewerFlyoutChain,
+  writeDocViewerFlyoutChain,
+} from './flyout_v2_doc_viewer_chain';
+import { useDocViewerFlyoutChainSessionKey } from './use_doc_viewer_flyout_chain_session_key';
 import { useFlyoutApi } from '../../use_flyout_api';
 import { createFlyoutApiMock } from '../../use_flyout_api.mock';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
 
 jest.mock('../../use_flyout_api');
+
+let mockDocViewerFlyoutId: string | undefined;
+jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
+  useDocViewerFlyoutId: () => mockDocViewerFlyoutId,
+}));
 
 const mockFlyoutApi = createFlyoutApiMock();
 
@@ -33,6 +43,14 @@ const analyzerDescriptor = {
   indexName: '.alerts-security.alerts-default',
 } as const;
 const hostDescriptor = { kind: 'host', hostName: 'web-01' } as const;
+const notesDescriptor = {
+  kind: 'notes',
+  documentId: 'alert-1',
+  indexName: '.alerts-security.alerts-default',
+} as const;
+
+const getSessionKey = (record: DataTableRecord) =>
+  renderHook(() => useDocViewerFlyoutChainSessionKey(record)).result.current;
 
 const renderDocViewerState = (props: Partial<UseFlyoutV2DocViewerStateParams> = {}) =>
   renderHook(() => useFlyoutV2DocViewerState({ hit, ...props }));
@@ -47,7 +65,9 @@ describe('useFlyoutV2DocViewerState', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     (useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
-    docViewerFlyoutChain.hitId = undefined;
+    mockDocViewerFlyoutId = 'doc-viewer-1';
+    docViewerFlyoutChain.sessionKey = undefined;
+    docViewerFlyoutChain.isLive = false;
     docViewerFlyoutChain.stack = [];
     docViewerFlyoutChain.report = undefined;
   });
@@ -62,7 +82,7 @@ describe('useFlyoutV2DocViewerState', () => {
       renderDocViewerState({ onInitialStateChange });
 
       act(() => {
-        writeDocViewerFlyoutChain([analyzerDescriptor, hostDescriptor]);
+        writeDocViewerFlyoutChain([analyzerDescriptor, hostDescriptor], true);
       });
 
       expect(onInitialStateChange).toHaveBeenLastCalledWith({
@@ -70,7 +90,7 @@ describe('useFlyoutV2DocViewerState', () => {
       });
 
       act(() => {
-        writeDocViewerFlyoutChain(null);
+        writeDocViewerFlyoutChain(null, false);
       });
 
       expect(onInitialStateChange).toHaveBeenLastCalledWith({ flyoutV2: undefined });
@@ -92,7 +112,7 @@ describe('useFlyoutV2DocViewerState', () => {
 
       unmount();
       act(() => {
-        writeDocViewerFlyoutChain(null);
+        writeDocViewerFlyoutChain(null, false);
       });
 
       expect(docViewerFlyoutChain.stack).toEqual([]);
@@ -101,13 +121,13 @@ describe('useFlyoutV2DocViewerState', () => {
     });
   });
 
-  describe('remount for the same document', () => {
+  describe('remount in the same doc viewer session', () => {
     it('reports the live chain instead of reopening a flyout closed meanwhile', () => {
       const initialState = { flyoutV2: [analyzerDescriptor] };
       const first = renderDocViewerState({ initialState });
       runTimers();
       first.unmount();
-      writeDocViewerFlyoutChain(null);
+      writeDocViewerFlyoutChain(null, false);
       mockFlyoutApi.openAnalyzer.mockClear();
 
       const onInitialStateChange = jest.fn();
@@ -121,13 +141,29 @@ describe('useFlyoutV2DocViewerState', () => {
     it('reports a chain opened meanwhile', () => {
       const first = renderDocViewerState();
       first.unmount();
-      writeDocViewerFlyoutChain([analyzerDescriptor]);
+      writeDocViewerFlyoutChain([analyzerDescriptor], true);
 
       const onInitialStateChange = jest.fn();
       renderDocViewerState({ onInitialStateChange });
       runTimers();
 
       expect(onInitialStateChange).toHaveBeenCalledWith({ flyoutV2: [analyzerDescriptor] });
+      expect(mockFlyoutApi.openAnalyzer).not.toHaveBeenCalled();
+    });
+
+    it('reports flyouts opened from the doc viewer header before the first mount', () => {
+      claimDocViewerFlyoutChain(getSessionKey(hit));
+      writeDocViewerFlyoutChain([notesDescriptor], true);
+
+      const onInitialStateChange = jest.fn();
+      renderDocViewerState({
+        initialState: { flyoutV2: [analyzerDescriptor] },
+        onInitialStateChange,
+      });
+      runTimers();
+
+      expect(onInitialStateChange).toHaveBeenCalledWith({ flyoutV2: [notesDescriptor] });
+      expect(docViewerFlyoutChain.stack).toEqual([notesDescriptor]);
       expect(mockFlyoutApi.openAnalyzer).not.toHaveBeenCalled();
     });
 
@@ -217,15 +253,56 @@ describe('useFlyoutV2DocViewerState', () => {
     });
 
     it('restores a different document even if another one was tracked before', () => {
-      writeDocViewerFlyoutChain([hostDescriptor]);
-      docViewerFlyoutChain.hitId = 'alert-other';
+      claimDocViewerFlyoutChain(getSessionKey(createHit('alert-other')));
+      writeDocViewerFlyoutChain([hostDescriptor], true);
 
       renderDocViewerState({ initialState: { flyoutV2: [analyzerDescriptor] } });
       runTimers();
 
-      expect(docViewerFlyoutChain.hitId).toBe('alert-1');
+      expect(docViewerFlyoutChain.sessionKey).toBe(getSessionKey(hit));
       expect(docViewerFlyoutChain.stack).toEqual([analyzerDescriptor]);
       expect(mockFlyoutApi.openAnalyzer).toHaveBeenCalledTimes(1);
+    });
+
+    it('restores the same document in another doc viewer instead of reusing its chain', () => {
+      const first = renderDocViewerState();
+      act(() => {
+        writeDocViewerFlyoutChain([hostDescriptor], true);
+      });
+      first.unmount();
+
+      // e.g. the document collapsed and expanded again, or shown in another Discover tab
+      mockDocViewerFlyoutId = 'doc-viewer-2';
+      const onInitialStateChange = jest.fn();
+      renderDocViewerState({
+        initialState: { flyoutV2: [analyzerDescriptor] },
+        onInitialStateChange,
+      });
+      runTimers();
+
+      expect(docViewerFlyoutChain.stack).toEqual([analyzerDescriptor]);
+      expect(mockFlyoutApi.openAnalyzer).toHaveBeenCalledTimes(1);
+      expect(onInitialStateChange).not.toHaveBeenCalled();
+    });
+
+    it('restores when only a flyout of a previous session closed in this one', () => {
+      claimDocViewerFlyoutChain(getSessionKey(hit));
+      writeDocViewerFlyoutChain(null, false);
+
+      renderDocViewerState({ initialState: { flyoutV2: [analyzerDescriptor] } });
+      runTimers();
+
+      expect(mockFlyoutApi.openAnalyzer).toHaveBeenCalledTimes(1);
+    });
+
+    it("reopens a root opened as the doc viewer's child as its child", () => {
+      renderDocViewerState({ initialState: { flyoutV2: [{ ...hostDescriptor, asChild: true }] } });
+      runTimers();
+
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(
+        expect.objectContaining({ hostName: 'web-01', origin: FLYOUT_ORIGIN.URL_RESTORE })
+      );
+      expect(mockFlyoutApi.openHostFlyout).not.toHaveBeenCalled();
     });
 
     it('restores only once when its dependencies change', () => {
