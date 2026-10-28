@@ -15,11 +15,11 @@ interface FixtureAlert {
   wide: number | null;
 }
 
-// The fixture comes from the Python prototype (`scripts/export_key_parity.py`). Two alerts must share
+// The fixture holds the groups an offline reference implementation gave (see the fixture header). Two alerts must share
 // a key here exactly when they share it there, so Grouping, Decisions and the back-test cannot drift
 // from the reference the replay numbers were computed with. Registry hive names and SIDs are not in it:
 // only this module normalises them (see pattern_key.test.ts).
-describe('pattern keys match the Python prototype', () => {
+describe('pattern keys match the reference implementation', () => {
   const alerts: FixtureAlert[] = PARITY_ALERTS;
 
   const partition = (keyOf: (alert: FixtureAlert) => string | number | null | undefined) => {
@@ -44,7 +44,7 @@ describe('pattern keys match the Python prototype', () => {
     );
   });
 
-  it('has no strict key for exactly the alerts the prototype has none for', () => {
+  it('has no strict key for exactly the alerts the reference has none for', () => {
     const noStrict = (keyOf: (alert: FixtureAlert) => unknown) =>
       alerts.filter((alert) => keyOf(alert) == null).map(({ id }) => id);
     expect(noStrict((alert) => buildPatternKeys(alert.doc).strict)).toEqual(

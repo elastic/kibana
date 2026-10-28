@@ -78,11 +78,11 @@ const replay = async ({ docs, batches }: ReplayParityScenario) => {
   };
 };
 
-// The fixture comes from the Python replay (`scripts/export_simulate_parity.py`). The planner has
+// The fixture holds the output of an offline replay (see the fixture header). The planner has
 // to make the proposals the investigation's numbers were computed with, so the replay's prediction
 // (-81% proposals) is what this code does on the same batches. The scenarios' parameters are the
 // ones the plan ships, and the constants below fail the test if either side changes them alone.
-describe('the grouping planner matches the replay prototype', () => {
+describe('the grouping planner matches the offline replay', () => {
   it('uses the caps the fixture was generated with', () => {
     expect(GROUPED_PROPOSAL_MAX_ALERTS).toBe(1000);
     expect(GROUPED_PROPOSAL_MAX_REVISIONS).toBe(20);

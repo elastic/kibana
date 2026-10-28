@@ -15,7 +15,8 @@
  * - wide: the strict condition with the executable and file path cut to their folder. Missing
  *   fields are empty values, so an alert with none of them gets `rule + detection`.
  *
- * The Python prototype in `grouping-prototype/` is the reference. The parity test checks both agree.
+ * An offline reference implementation of the keys, not checked in because it works on real alert data,
+ * produced the parity fixture. The parity test checks that this module groups the fixture alerts the same way.
  */
 
 type AlertDocument = Record<string, unknown>;
