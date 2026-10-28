@@ -70,7 +70,7 @@ const knowledgeIndicatorsTabLabel = i18n.translate(
 const automationsLockedAriaLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel',
   {
-    defaultMessage: 'Automations locked. Add a source above to unlock automations.',
+    defaultMessage: 'Automations locked. Add a source in the Sources tab to unlock automations.',
   }
 );
 

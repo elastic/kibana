@@ -54,65 +54,89 @@ describe('useSourcesEditor', () => {
     jest.clearAllMocks();
   });
 
-  it('starts idle', () => {
-    const { result } = renderEditor();
+  it('returns idle controls while there is no AI index', () => {
+    const { result } = renderEditor({ index: undefined });
 
-    expect(result.current.editing).toBeUndefined();
+    expect(result.current.selectedSources).toEqual([]);
+    expect(result.current.hasChanges).toBe(false);
+    expect(result.current.isSaving).toBe(false);
+    expect(mockSaveSources).not.toHaveBeenCalled();
   });
 
-  it('seeds the draft from persisted sources when editing starts', () => {
+  it('seeds the draft from persisted sources as soon as the AI index loads', () => {
     const { result } = renderEditor();
 
-    act(() => result.current.startEditing());
-
-    expect(result.current.editing?.selectedSources).toEqual([
+    expect(result.current.selectedSources).toEqual([
       { type: 'esql', id: 'FROM logs-*', label: 'FROM logs-*', value: 'FROM logs-*' },
     ]);
-    expect(result.current.editing?.hasChanges).toBe(false);
+    expect(result.current.hasChanges).toBe(false);
   });
 
-  it('persists and closes the session on save', async () => {
+  it('persists changes on save and keeps the draft with the saved selection', async () => {
     const { result, onSaved } = renderEditor();
 
-    act(() => result.current.startEditing());
     act(() =>
-      result.current.editing?.setSelectedSources([
+      result.current.setSelectedSources([
         { type: 'esql', id: 'FROM other', label: 'FROM other', value: 'FROM other' },
       ])
     );
 
     await act(async () => {
-      await result.current.editing?.save();
+      await result.current.save();
     });
 
     expect(mockSaveSources).toHaveBeenCalledWith(aiIndex, [
       { type: 'esql', id: 'FROM other', label: 'FROM other', value: 'FROM other' },
     ]);
     expect(onSaved).toHaveBeenCalledTimes(1);
-    expect(result.current.editing).toBeUndefined();
+    expect(result.current.selectedSources).toEqual([
+      { type: 'esql', id: 'FROM other', label: 'FROM other', value: 'FROM other' },
+    ]);
+    expect(result.current.hasChanges).toBe(false);
   });
 
-  it('drops the session on cancel', () => {
+  it('reverts unsaved changes on cancel', () => {
     const { result } = renderEditor();
 
-    act(() => result.current.startEditing());
-    act(() => result.current.editing?.cancel());
+    act(() =>
+      result.current.setSelectedSources([
+        { type: 'esql', id: 'FROM other', label: 'FROM other', value: 'FROM other' },
+      ])
+    );
+    expect(result.current.hasChanges).toBe(true);
 
-    expect(result.current.editing).toBeUndefined();
+    act(() => result.current.cancel());
+
+    expect(result.current.selectedSources).toEqual([
+      { type: 'esql', id: 'FROM logs-*', label: 'FROM logs-*', value: 'FROM logs-*' },
+    ]);
+    expect(result.current.hasChanges).toBe(false);
   });
 
-  it('drops the session when the AI index id changes', () => {
+  it('reseeds the draft from scratch when the AI index id changes', () => {
     const { result, rerender } = renderEditor();
 
-    act(() => result.current.startEditing());
-    expect(result.current.editing).toBeDefined();
+    act(() =>
+      result.current.setSelectedSources([
+        { type: 'esql', id: 'FROM other', label: 'FROM other', value: 'FROM other' },
+      ])
+    );
 
-    rerender({ aiIndex: { ...aiIndex, id: 'another-ai-index' } });
+    rerender({
+      aiIndex: {
+        ...aiIndex,
+        id: 'another-ai-index',
+        sources: [{ type: 'esql', value: 'FROM another' }],
+      },
+    });
 
-    expect(result.current.editing).toBeUndefined();
+    expect(result.current.selectedSources).toEqual([
+      { type: 'esql', id: 'FROM another', label: 'FROM another', value: 'FROM another' },
+    ]);
+    expect(result.current.hasChanges).toBe(false);
   });
 
-  it('does not clear a newer session when a stale save resolves', async () => {
+  it('does not clear a newer draft when a stale save resolves', async () => {
     let resolveSave: (value: boolean) => void = () => {};
     mockSaveSources.mockReturnValueOnce(
       new Promise<boolean>((resolve) => {
@@ -122,43 +146,46 @@ describe('useSourcesEditor', () => {
 
     const { result, rerender } = renderEditor();
 
-    act(() => result.current.startEditing());
     act(() =>
-      result.current.editing?.setSelectedSources([
+      result.current.setSelectedSources([
         { type: 'esql', id: 'FROM stale', label: 'FROM stale', value: 'FROM stale' },
       ])
     );
 
     let savePromise: Promise<void> | undefined;
     act(() => {
-      savePromise = result.current.editing?.save();
+      savePromise = result.current.save();
     });
 
-    rerender({ aiIndex: { ...aiIndex, id: 'another-ai-index' } });
-    act(() => result.current.startEditing());
-    const newerSelected = result.current.editing?.selectedSources;
+    rerender({
+      aiIndex: {
+        ...aiIndex,
+        id: 'another-ai-index',
+        sources: [{ type: 'esql', value: 'FROM newer' }],
+      },
+    });
+    const newerSelected = result.current.selectedSources;
 
     resolveSave(true);
     await act(async () => {
       await savePromise;
     });
 
-    expect(result.current.editing?.selectedSources).toEqual(newerSelected);
+    expect(result.current.selectedSources).toEqual(newerSelected);
   });
 
   it('ignores draft changes while a save is in progress', () => {
     mockIsSaving = true;
     const { result } = renderEditor();
 
-    act(() => result.current.startEditing());
-    const before = result.current.editing?.selectedSources;
+    const before = result.current.selectedSources;
 
     act(() =>
-      result.current.editing?.setSelectedSources([
+      result.current.setSelectedSources([
         { type: 'esql', id: 'FROM blocked', label: 'FROM blocked', value: 'FROM blocked' },
       ])
     );
 
-    expect(result.current.editing?.selectedSources).toEqual(before);
+    expect(result.current.selectedSources).toEqual(before);
   });
 });

@@ -5,31 +5,18 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiNotificationBadge,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-} from '@elastic/eui';
-import { getEbtProps } from '@kbn/ebt-click';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
-import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
+import React, { useMemo } from 'react';
 import { useCanReadConnectors } from '../../hooks/use_can_read_connectors';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { useHasRendered } from '../../hooks/use_has_rendered';
 import { createIndexEsqlQuery, hasSelectedEsqlQuery } from '../../utils/sources';
-import { getSourceDisplay } from '../source_display';
-import { SourceRow } from '../source_row';
+import { SelectedSourcesList } from '../selected_sources_list';
+import { SourceTypePanel } from '../source_type_panel';
 import { ConnectorsTab } from './connectors_tab';
 import { ElasticsearchSourcesTab } from './elasticsearch_sources_tab';
 import type { SelectedSource } from './types';
-
-type TabId = 'esql' | 'connectors';
 
 interface SourcePickerProps {
   selectedSources: SelectedSource[];
@@ -37,28 +24,25 @@ interface SourcePickerProps {
 }
 
 export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) => {
-  const [selectedTab, setSelectedTab] = useState<TabId>('esql');
   const hasRendered = useHasRendered();
 
-  const hasSelectedConnectorSources = useMemo(
-    () => selectedSources.some((source) => source.type === 'connector'),
+  const esqlSources = useMemo(
+    () => selectedSources.filter((source) => source.type === 'esql'),
     [selectedSources]
   );
-  const canReadConnectors = useCanReadConnectors();
+  const connectorSources = useMemo(
+    () => selectedSources.filter((source) => source.type === 'connector'),
+    [selectedSources]
+  );
 
+  const canReadConnectors = useCanReadConnectors();
   const { connectorNameById, connectorActionTypeById } = useDataConnectors({
-    enabled: hasSelectedConnectorSources && canReadConnectors,
+    enabled: connectorSources.length > 0 && canReadConnectors,
   });
 
-  const selectedEsqlCount = useMemo(
-    () => selectedSources.filter((source) => source.type === 'esql').length,
-    [selectedSources]
-  );
-
   const selectedConnectorIds = useMemo(
-    () =>
-      selectedSources.filter((source) => source.type === 'connector').map((source) => source.value),
-    [selectedSources]
+    () => connectorSources.map((source) => source.value),
+    [connectorSources]
   );
 
   const addEsqlSource = (query: string) => {
@@ -97,108 +81,64 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
 
   return (
     <div data-test-subj="contextSourcePicker">
-      <EuiTabs data-test-subj="contextSourcePickerTabs">
-        <EuiTab
-          isSelected={selectedTab === 'esql'}
-          onClick={() => setSelectedTab('esql')}
-          prepend={<EuiIcon type="tablePlus" aria-hidden={true} />}
-          append={
-            selectedEsqlCount > 0 ? (
-              <EuiNotificationBadge>{selectedEsqlCount}</EuiNotificationBadge>
-            ) : undefined
-          }
-          data-test-subj="contextSourcePickerTab-esql"
-          {...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
-            action: CONTEXT_ENGINE_UI_EBT.action.sources.TAB_ESQL,
-          })}
-        >
+      <SourceTypePanel
+        badgeCount={esqlSources.length}
+        data-test-subj="contextElasticsearchDataPanel"
+        title={
           <FormattedMessage
             id="xpack.contextEngine.sourcePicker.tabs.elasticsearch"
             defaultMessage="Elasticsearch data"
           />
-        </EuiTab>
-        <EuiTab
-          isSelected={selectedTab === 'connectors'}
-          onClick={() => setSelectedTab('connectors')}
-          prepend={<EuiIcon type="plugs" aria-hidden={true} />}
-          append={
-            selectedConnectorIds.length > 0 ? (
-              <EuiNotificationBadge>{selectedConnectorIds.length}</EuiNotificationBadge>
-            ) : undefined
-          }
-          data-test-subj="contextSourcePickerTab-connectors"
-          {...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexEditFlyoutSourcePicker,
-            action: CONTEXT_ENGINE_UI_EBT.action.sources.TAB_CONNECTORS,
-          })}
-        >
-          <FormattedMessage
-            id="xpack.contextEngine.sourcePicker.tabs.connectors"
-            defaultMessage="Connectors"
-          />
-        </EuiTab>
-      </EuiTabs>
-
-      <EuiSpacer size="m" />
-
-      {selectedTab === 'esql' && (
+        }
+      >
         <ElasticsearchSourcesTab
           selectedSources={selectedSources}
           onAddIndex={addIndexSource}
           onAddEsql={addEsqlSource}
         />
-      )}
-      {selectedTab === 'connectors' && (
+        {esqlSources.length > 0 && (
+          <>
+            <EuiSpacer size="m" />
+            <SelectedSourcesList
+              sources={esqlSources}
+              connectorNameById={connectorNameById}
+              connectorActionTypeById={connectorActionTypeById}
+              onRemove={removeSource}
+              animateOnMount={hasRendered}
+            />
+          </>
+        )}
+      </SourceTypePanel>
+
+      <EuiSpacer size="m" />
+
+      <SourceTypePanel
+        badgeCount={connectorSources.length}
+        data-test-subj="contextConnectorsPanel"
+        title={
+          <FormattedMessage
+            id="xpack.contextEngine.sourcePicker.tabs.connectors"
+            defaultMessage="Connectors"
+          />
+        }
+      >
         <ConnectorsTab
           selectedConnectorIds={selectedConnectorIds}
           onToggle={toggleConnectorSource}
         />
-      )}
-
-      {selectedSources.length > 0 && (
-        <>
-          <EuiSpacer size="l" />
-          <EuiTitle size="xxs">
-            <h3>
-              <FormattedMessage
-                id="xpack.contextEngine.sourcePicker.selectedTitle"
-                defaultMessage="Selected sources ({count})"
-                values={{ count: selectedSources.length }}
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {selectedSources.map((source, index) => {
-              const { label, typeLabel, icon, content } = getSourceDisplay(
-                source.type,
-                source.value,
-                {
-                  connectorNameById,
-                  connectorActionTypeById,
-                }
-              );
-
-              return (
-                <EuiFlexItem key={`${source.type}-${source.id}`}>
-                  <SourceRow
-                    animateOnMount={hasRendered}
-                    label={label}
-                    typeLabel={typeLabel}
-                    icon={icon}
-                    sourceType={source.type}
-                    onRemove={() => removeSource(source)}
-                    data-test-subj={`contextSelectedSource-${source.type}-${index}`}
-                  >
-                    {content}
-                  </SourceRow>
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-        </>
-      )}
+        {connectorSources.length > 0 && (
+          <>
+            <EuiSpacer size="m" />
+            <SelectedSourcesList
+              sources={connectorSources}
+              connectorNameById={connectorNameById}
+              connectorActionTypeById={connectorActionTypeById}
+              onRemove={removeSource}
+              animateOnMount={hasRendered}
+            />
+          </>
+        )}
+      </SourceTypePanel>
     </div>
   );
 };

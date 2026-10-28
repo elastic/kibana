@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import type { SelectedSource } from '../components/source_picker';
 import { areSourceSelectionsEqual, toSelectedSources } from '../utils/sources';
@@ -25,73 +25,75 @@ export interface SourcesEditorEditingControls {
   cancel: () => void;
 }
 
-export interface UseSourcesEditorResult {
-  startEditing: () => void;
-  editing: SourcesEditorEditingControls | undefined;
+interface Draft {
+  aiIndexId: string;
+  initialSources: SelectedSource[];
+  selectedSources: SelectedSource[];
 }
 
+/**
+ * sources. The draft is seeded from `aiIndex` as soon as it loads (or reloads under a different id),
+ * and survives saves so the picker stays editable without a separate view mode.
+ */
 export const useSourcesEditor = ({
   aiIndex,
   onSaved,
-}: UseSourcesEditorParams): UseSourcesEditorResult => {
-  const [session, setSession] = useState<{
-    initialSources: SelectedSource[];
-    selectedSources: SelectedSource[];
-  }>();
+}: UseSourcesEditorParams): SourcesEditorEditingControls => {
+  const [draft, setDraft] = useState<Draft>();
   const { saveSources, isSaving } = useSaveAiIndexSources();
 
-  // Discard a stale session if the route switches to a different AI index.
-  useEffect(() => {
-    setSession(undefined);
-  }, [aiIndex?.id]);
+  if (aiIndex === undefined) {
+    if (draft !== undefined) {
+      setDraft(undefined);
+    }
+  } else if (draft?.aiIndexId !== aiIndex.id) {
+    const initialSources = toSelectedSources(aiIndex.sources);
+    setDraft({ aiIndexId: aiIndex.id, initialSources, selectedSources: initialSources });
+  }
 
-  const startEditing = useCallback(() => {
-    const initialSources = toSelectedSources(aiIndex?.sources ?? []);
-    setSession({ initialSources, selectedSources: initialSources });
-  }, [aiIndex?.sources]);
-
-  const cancel = useCallback(() => setSession(undefined), []);
+  const cancel = useCallback(() => {
+    setDraft((current) =>
+      current ? { ...current, selectedSources: current.initialSources } : current
+    );
+  }, []);
 
   const setSelectedSources = useCallback(
     (selectedSources: SelectedSource[]) => {
       if (isSaving) {
         return;
       }
-      setSession((current) => (current ? { ...current, selectedSources } : current));
+      setDraft((current) => (current ? { ...current, selectedSources } : current));
     },
     [isSaving]
   );
 
   const hasChanges = useMemo(() => {
-    if (!session) {
+    if (!draft) {
       return false;
     }
-    return !areSourceSelectionsEqual(session.selectedSources, session.initialSources);
-  }, [session]);
+    return !areSourceSelectionsEqual(draft.selectedSources, draft.initialSources);
+  }, [draft]);
 
   const save = useCallback(async () => {
-    if (!session || !aiIndex) {
+    if (!draft || !aiIndex) {
       return;
     }
-    const startedSession = session;
-    const saved = await saveSources(aiIndex, session.selectedSources);
+    const startedDraft = draft;
+    const saved = await saveSources(aiIndex, draft.selectedSources);
     if (saved) {
-      setSession((current) => (current === startedSession ? undefined : current));
+      setDraft((current) =>
+        current === startedDraft ? { ...current, initialSources: current.selectedSources } : current
+      );
       onSaved();
     }
-  }, [aiIndex, onSaved, saveSources, session]);
+  }, [aiIndex, draft, onSaved, saveSources]);
 
   return {
-    startEditing,
-    editing: session
-      ? {
-          selectedSources: session.selectedSources,
-          setSelectedSources,
-          hasChanges,
-          isSaving,
-          save,
-          cancel,
-        }
-      : undefined,
+    selectedSources: draft?.selectedSources ?? [],
+    setSelectedSources,
+    hasChanges,
+    isSaving,
+    save,
+    cancel,
   };
 };
