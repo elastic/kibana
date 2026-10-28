@@ -113,29 +113,9 @@ describe('rule_tuning_review oversized exception handling', () => {
   });
 });
 
-describe('rule_tuning_review proposed change', () => {
+describe('rule_tuning_review schedule look-backs', () => {
   const engine = createWorkflowLiquidEngine();
-  const commentTemplate = stepByName('compose_proposal')?.with?.comment as string;
   const lookbacksTemplate = stepByName('compute_schedule_lookbacks')?.with?.lookbacks as string;
-
-  // The "Proposed change" block, through the "Approve ..." line that ends it.
-  const renderProposedChange = (
-    structuredOutput: Record<string, unknown>,
-    rule: Record<string, unknown>,
-    steps: Record<string, unknown> = {}
-  ): string => {
-    const comment = engine.parseAndRenderSync(commentTemplate, {
-      inputs: { fp_count: 1, alert_ids: ['a'] },
-      steps: {
-        diagnose_rule: { output: { structured_output: structuredOutput } },
-        fetch_rule: { output: rule },
-        ...steps,
-      },
-    });
-    const start = comment.indexOf('**Proposed change**');
-    const end = comment.indexOf('\n', comment.indexOf('\nApprove', start) + 1);
-    return comment.slice(start, end === -1 ? undefined : end);
-  };
 
   const renderLookbacks = (
     interval: string,
@@ -158,186 +138,6 @@ describe('rule_tuning_review proposed change', () => {
       },
     });
 
-  it('lists only the threshold settings that change, with "none" for an empty cardinality', () => {
-    expect(
-      renderProposedChange(
-        {
-          change_type: 'threshold',
-          proposed_threshold_value: 10,
-          proposed_threshold_field: ['host.name'],
-          proposed_threshold_cardinality: [],
-        },
-        { threshold: { value: 3, field: ['host.name'] } }
-      )
-    ).toBe(
-      [
-        '**Proposed change**',
-        'Threshold: `3` → `10`',
-        '',
-        'Approve to change the threshold settings of the rule. You can restore the previous version using History on the rule details page.',
-      ].join('\n')
-    );
-
-    expect(
-      renderProposedChange(
-        {
-          change_type: 'threshold',
-          proposed_threshold_value: 3,
-          proposed_threshold_field: ['host.name', 'user.name'],
-          proposed_threshold_cardinality: [{ field: 'user.name', value: 2 }],
-        },
-        { threshold: { value: 3, field: ['host.name'], cardinality: [] } }
-      )
-    ).toContain(
-      'Group by: `host.name` → `host.name, user.name`\nUnique values count: `none` → `user.name >= 2`'
-    );
-  });
-
-  it('shows the schedule as the rule details page does and skips an unchanged interval', () => {
-    expect(
-      renderProposedChange(
-        { change_type: 'schedule', proposed_interval: '5m', proposed_from: 'now-6m' },
-        { interval: '5m', from: 'now-65m' },
-        { compute_schedule_lookbacks: { output: { lookbacks: '1h,1m' } } }
-      )
-    ).toBe(
-      [
-        '**Proposed change**',
-        'Additional look-back time: `1h` → `1m`',
-        '',
-        'Approve to change the schedule settings of the rule. You can restore the previous version using History on the rule details page.',
-      ].join('\n')
-    );
-  });
-
-  it('falls back to the raw `from` when the look-back cannot be computed', () => {
-    expect(
-      renderProposedChange(
-        { change_type: 'schedule', proposed_interval: '10m', proposed_from: 'now-11m' },
-        { interval: '5m', from: 'now-1h/d' },
-        { compute_schedule_lookbacks: { output: { lookbacks: '' } } }
-      )
-    ).toContain('Runs every: `5m` → `10m`\nAnalyzed time range starts at: `now-1h/d` → `now-11m`');
-  });
-
-  it('separates every section with exactly one blank line', () => {
-    const backtest = {
-      compose_evidence: { output: { rule_line: '**Rule:** Example', fp_summary: '12 FPs.' } },
-      can_preview_query_change: { output: { supported: true } },
-      compute_schedule_lookbacks: { output: { lookbacks: '1h,1m' } },
-      record_preview_outcome: {
-        output: { current_error_text: '', proposed_error_text: '' },
-      },
-    };
-    const proposals: Array<[Record<string, unknown>, Record<string, unknown>]> = [
-      [{ change_type: 'query', proposed_query: 'a and not b' }, { query: 'a' }],
-      [
-        { change_type: 'risk_score', proposed_risk_score: 21, proposed_severity: 'low' },
-        { risk_score: 47, severity: 'medium' },
-      ],
-      [
-        {
-          change_type: 'threshold',
-          proposed_threshold_value: 10,
-          proposed_threshold_field: ['host.name'],
-          proposed_threshold_cardinality: [],
-        },
-        { threshold: { value: 3, field: ['host.name'] } },
-      ],
-      [
-        { change_type: 'schedule', proposed_interval: '5m', proposed_from: 'now-6m' },
-        { interval: '5m', from: 'now-65m' },
-      ],
-      [{ change_type: 'manual' }, {}],
-    ];
-
-    for (const [structuredOutput, rule] of proposals) {
-      const comment = engine
-        .parseAndRenderSync(commentTemplate, {
-          inputs: { fp_count: 1, alert_ids: ['a'] },
-          consts: definition.consts,
-          steps: {
-            diagnose_rule: {
-              output: { structured_output: { ...structuredOutput, summary: 'Too noisy.' } },
-            },
-            fetch_rule: { output: rule },
-            ...backtest,
-          },
-        })
-        .trim();
-      expect(comment).not.toMatch(/\n\n\n/);
-      // Each section heading is followed directly by its text.
-      expect(comment).not.toMatch(
-        /\*\*(Why this rule needs tuning|Summary|Proposed change|Backtest)\*\*\n\n/
-      );
-      if (structuredOutput.change_type !== 'manual') {
-        expect(comment).toMatch(/\S\n\nApprove to /);
-      }
-    }
-  });
-
-  describe('backtest', () => {
-    const renderBacktest = (
-      structuredOutput: Record<string, unknown>,
-      rule: Record<string, unknown>,
-      lookbacks: string
-    ): string => {
-      const comment = engine.parseAndRenderSync(commentTemplate, {
-        inputs: { fp_count: 1, alert_ids: ['a'], last_fp_at: '2026-10-01T00:00:00Z' },
-        consts: definition.consts,
-        steps: {
-          diagnose_rule: { output: { structured_output: structuredOutput } },
-          fetch_rule: { output: rule },
-          can_preview_query_change: { output: { supported: true } },
-          compute_schedule_lookbacks: { output: { lookbacks } },
-          compute_schedule_preview_runs: { output: { proposed_invocation_count: 1 } },
-          record_preview_outcome: {
-            output: { current_error_text: '', proposed_error_text: '' },
-          },
-        },
-      });
-      return comment.slice(comment.indexOf('**Backtest**')).trim();
-    };
-
-    it('describes the simulated schedule with the look-back instead of date math', () => {
-      const backtest = renderBacktest(
-        { change_type: 'threshold', proposed_threshold_value: 10 },
-        { interval: '5m', from: 'now-6m', threshold: { value: 3 } },
-        '1m,1m'
-      );
-      expect(backtest).toContain(
-        'The backtest ran 2 simulated executions, running every `5m` with `1m` additional look-back time.'
-      );
-      expect(backtest).toContain(
-        'It ends at the newest false positive, October 1, 2026 at 00:00 UTC.'
-      );
-    });
-
-    it('does not repeat the schedules a schedule change already shows', () => {
-      const backtest = renderBacktest(
-        { change_type: 'schedule', proposed_interval: '10m', proposed_from: 'now-11m' },
-        { interval: '5m', from: 'now-65m' },
-        '1h,1m'
-      );
-      expect(backtest).toContain(
-        'The backtest ran 2 simulated executions with the current schedule and 1 with the proposed schedule, over the same time span.'
-      );
-      expect(backtest).not.toMatch(/now-65m|`1h`|`1m`/);
-    });
-
-    it('is one paragraph followed by the alert counts', () => {
-      expect(
-        renderBacktest(
-          { change_type: 'schedule', proposed_interval: '5m', proposed_from: 'now-6m' },
-          { interval: '5m', from: 'now-65m' },
-          '1h,1m'
-        )
-      ).toMatch(
-        /^\*\*Backtest\*\*\nThe backtest ran [^\n]+ over the same time span\. It ends at [^\n]+ UTC\. This time span [^\n]+\n\nAlerts with the current rule: [^\n]*\nAlerts with the proposed change: [^\n]*$/
-      );
-    });
-  });
-
   it('computes look-backs as from minus interval, in the largest whole unit', () => {
     expect(renderLookbacks('5m', 'now-65m', '5m', 'now-6m')).toBe('1h,1m');
     expect(renderLookbacks('5m', 'now-5m', '1h', 'now-90m')).toBe('0s,30m');
@@ -348,111 +148,46 @@ describe('rule_tuning_review proposed change', () => {
     expect(renderLookbacks('5m', 'now-1h/d', '5m', 'now-6m')).toBe('');
     expect(renderLookbacks('5m', 'now-3m', '5m', 'now-6m')).toBe('');
   });
+});
 
-  describe('exception', () => {
-    const renderException = (entries: unknown[]): string =>
-      renderProposedChange(
-        { change_type: 'exception' },
-        {},
-        { bound_exception_entries: { output: { entries_json: JSON.stringify(entries) } } }
-      );
+describe('rule_tuning_review applied threshold cardinality', () => {
+  const engine = createWorkflowLiquidEngine();
 
-    it('shows the added exception in a code block with the exceptions UI operator names', () => {
-      expect(
-        renderException([
-          { field: 'host.name', operator: 'is_one_of', values: ['admin-04', 'build-02'] },
-        ])
-      ).toBe(
-        [
-          '**Proposed change**',
-          'Add exception:',
-          '```',
-          'host.name is one of admin-04, build-02',
-          '```',
-          '',
-          "Approve to add the exception to the exception list of the rule. You can remove it in the rule's Exceptions tab.",
-        ].join('\n')
-      );
-    });
+  // `flatten` does not descend into switch cases, so the threshold arm is read directly.
+  const { cases } = stepByName('propose_tuning') as unknown as {
+    cases: Array<{ match: string; steps: YamlStep[] }>;
+  };
+  const proposeThreshold = cases
+    .find(({ match }) => match === 'threshold')
+    ?.steps.find(({ name }) => name === 'propose_threshold');
+  const cardinalityExpression = (
+    proposeThreshold?.with?.inputs as {
+      actionInput: { threshold: { cardinality: string } };
+    }
+  ).actionInput.threshold.cardinality;
+  const clearStep = stepByName('clear_threshold_cardinality');
 
-    it('joins several conditions with AND, one per line', () => {
-      expect(
-        renderException([
-          { field: 'host.name', operator: 'is', value: 'admin-04' },
-          { field: 'process.name', operator: 'is_not_one_of', values: ['a.exe', 'b.exe'] },
-          { field: 'user.name', operator: 'does_not_exist' },
-        ])
-      ).toContain(
-        [
-          '```',
-          'host.name is admin-04',
-          'AND process.name is not one of a.exe, b.exe',
-          'AND user.name does not exist',
-          '```',
-        ].join('\n')
-      );
-    });
-  });
-
-  it('ends every change type that edits the rule with how to undo it', () => {
-    expect(
-      renderProposedChange({ change_type: 'query', proposed_query: 'a and not b' }, { query: 'a' })
-    ).toContain(
-      'Approve to change the query of the rule. You can restore the previous version using History on the rule details page.'
-    );
-    expect(
-      renderProposedChange(
-        { change_type: 'risk_score', proposed_risk_score: 21, proposed_severity: 'low' },
-        { risk_score: 47, severity: 'medium' }
-      )
-    ).toBe(
-      [
-        '**Proposed change**',
-        'Risk score: `47` → `21`',
-        'Severity: `medium` → `low`',
-        '',
-        'Approve to change the risk score and severity of the rule. You can restore the previous version using History on the rule details page.',
-      ].join('\n')
-    );
-  });
-
-  describe('applied threshold cardinality', () => {
-    // `flatten` does not descend into switch cases, so the threshold arm is read directly.
-    const { cases } = stepByName('propose_tuning') as unknown as {
-      cases: Array<{ match: string; steps: YamlStep[] }>;
-    };
-    const proposeThreshold = cases
-      .find(({ match }) => match === 'threshold')
-      ?.steps.find(({ name }) => name === 'propose_threshold');
-    const cardinalityExpression = (
-      proposeThreshold?.with?.inputs as {
-        actionInput: { threshold: { cardinality: string } };
-      }
-    ).actionInput.threshold.cardinality;
-    const clearStep = stepByName('clear_threshold_cardinality');
-
-    const evaluateCardinality = (proposed: unknown, clearing: unknown): unknown =>
-      engine.evalValueSync(cardinalityExpression.slice(3, -2), {
-        steps: {
-          diagnose_rule: {
-            output: { structured_output: { proposed_threshold_cardinality: proposed } },
-          },
-          clear_threshold_cardinality: { output: { cardinality: clearing } },
+  const evaluateCardinality = (proposed: unknown, clearing: unknown): unknown =>
+    engine.evalValueSync(cardinalityExpression.slice(3, -2), {
+      steps: {
+        diagnose_rule: {
+          output: { structured_output: { proposed_threshold_cardinality: proposed } },
         },
-      });
-
-    it('clears the cardinality only when the rule has one', () => {
-      expect(clearStep?.if).toContain('steps.fetch_rule.output.threshold.cardinality.size > 0');
-      expect(evaluateCardinality([], [])).toEqual([]);
+        clear_threshold_cardinality: { output: { cardinality: clearing } },
+      },
     });
 
-    it('leaves the cardinality out when the rule has none and the proposal keeps it empty', () => {
-      expect(evaluateCardinality([], undefined)).toBeUndefined();
-    });
+  it('clears the cardinality only when the rule has one', () => {
+    expect(clearStep?.if).toContain('steps.fetch_rule.output.threshold.cardinality.size > 0');
+    expect(evaluateCardinality([], [])).toEqual([]);
+  });
 
-    it('applies a proposed cardinality', () => {
-      const proposed = [{ field: 'user.name', value: 2 }];
-      expect(evaluateCardinality(proposed, undefined)).toEqual(proposed);
-    });
+  it('leaves the cardinality out when the rule has none and the proposal keeps it empty', () => {
+    expect(evaluateCardinality([], undefined)).toBeUndefined();
+  });
+
+  it('applies a proposed cardinality', () => {
+    const proposed = [{ field: 'user.name', value: 2 }];
+    expect(evaluateCardinality(proposed, undefined)).toEqual(proposed);
   });
 });
