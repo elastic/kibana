@@ -15,6 +15,7 @@ const mockRequestSave = jest.fn();
 const mockCancel = jest.fn();
 const mockOpenCustomContext = jest.fn();
 let mockRunLimitGroups: readonly string[] = [];
+let mockRunLimitExhaustionCallouts: string | undefined;
 const mockKibanaServices = {
   application: { navigateToUrl: jest.fn() },
   http: {},
@@ -29,7 +30,10 @@ jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({ services: mockKibanaServices }),
 }));
 jest.mock('./components/run_limits_section', () => ({
-  RunLimitsSection: () => <div data-test-subj="run-limits-section" />,
+  RunLimitsSection: ({ exhaustionCallouts }: { exhaustionCallouts: string }) => {
+    mockRunLimitExhaustionCallouts = exhaustionCallouts;
+    return <div data-test-subj="run-limits-section" />;
+  },
 }));
 jest.mock('./components/use_run_limits_form', () => ({
   useRunLimitsForm: ({ groups }: { groups: readonly string[] }) => {
@@ -54,6 +58,7 @@ describe('InvestigationsSettingsTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRunLimitGroups = [];
+    mockRunLimitExhaustionCallouts = undefined;
     mockRequestSave.mockResolvedValue('saved');
   });
 
@@ -71,6 +76,7 @@ describe('InvestigationsSettingsTab', () => {
       'Investigation process'
     );
     expect(mockRunLimitGroups).toEqual(['investigation']);
+    expect(mockRunLimitExhaustionCallouts).toBe('automations');
     fireEvent.click(screen.getByTestId('streams-settings-save-button'));
 
     await waitFor(() => expect(mockRequestSave).toHaveBeenCalledTimes(1));
