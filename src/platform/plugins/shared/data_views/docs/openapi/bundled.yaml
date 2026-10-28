@@ -2541,7 +2541,7 @@ components:
         override:
           type: boolean
           description: |
-            Override an existing data view if a data view with the provided name already exists in the current space. If `data_view.name` is omitted or empty, `data_view.title` is used as the name. When a matching name is found, the existing data view is deleted and a replacement is created. If the existing data view is shared with other spaces, it is deleted from all of those spaces. The replacement uses the spaces specified in `data_view.namespaces`, or only the current space if `data_view.namespaces` is omitted or empty; the existing space assignments are not preserved automatically. Unless `data_view.id` is specified, the replacement has a new ID, which can break saved objects that reference the previous ID. This option also allows overwriting an existing data view with the provided `data_view.id`.
+            Overwrite a data view with the same name or ID. The name is `data_view.name`, or `data_view.title` if the name is omitted or empty; it's matched against the stored names of data views in the current space. A name match deletes the existing data view from all spaces and creates a replacement in `data_view.namespaces`, or in the current space if that's omitted or empty. If no name matches, an ID match keeps the existing spaces unless a non-empty `data_view.namespaces` is provided. Unless `data_view.id` is provided, a new ID is generated, which can break existing references.
           default: false
     typemeta_response:
       type: object
