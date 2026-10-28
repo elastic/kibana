@@ -19,6 +19,8 @@ import {
   initializeTimeRangeManager,
   timeRangeComparators,
   titleComparators,
+  areComparatorsEqual,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
@@ -28,12 +30,21 @@ import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } fr
 import type { PatternAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/pattern_analysis';
 import { getPatternAnalysisComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
-import { initializePatternAnalysisControls } from './initialize_pattern_analysis_controls';
+import {
+  initializePatternAnalysisControls,
+  patternAnalysisControlsComparators,
+} from './initialize_pattern_analysis_controls';
 import type { PatternAnalysisEmbeddableApi } from './types';
 import { canUseAiops } from '../../capabilities';
 import { toUiMinimumTimeRange } from '../../../common/embeddables/pattern_analysis/normalize_legacy_state';
 
 export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_TYPE;
+
+const comparators: StateComparators<PatternAnalysisEmbeddableState> = {
+  ...timeRangeComparators,
+  ...titleComparators,
+  ...patternAnalysisControlsComparators,
+};
 
 export const getPatternAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
@@ -43,6 +54,8 @@ export const getPatternAnalysisEmbeddableFactory = (
     PatternAnalysisEmbeddableApi
   > = {
     type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
       canUseAiops(coreStart, true);
@@ -50,11 +63,8 @@ export const getPatternAnalysisEmbeddableFactory = (
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const titleManager = initializeTitleManager(initialState);
 
-      const {
-        patternAnalysisControlsApi,
-        serializePatternAnalysisChartState,
-        patternAnalysisControlsComparators,
-      } = initializePatternAnalysisControls(runtimeState);
+      const { patternAnalysisControlsApi, serializePatternAnalysisChartState } =
+        initializePatternAnalysisControls(runtimeState);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -99,11 +109,7 @@ export const getPatternAnalysisEmbeddableFactory = (
             map(() => undefined)
           )
         ),
-        getComparators: () => ({
-          ...timeRangeComparators,
-          ...titleComparators,
-          ...patternAnalysisControlsComparators,
-        }),
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           timeRangeManager.reinitializeState(nextState);
           titleManager.reinitializeState(nextState);

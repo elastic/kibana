@@ -19,6 +19,14 @@ type PatternAnalysisState = Pick<
   | 'random_sampler_probability'
 >;
 
+export const patternAnalysisControlsComparators: StateComparators<PatternAnalysisState> = {
+  data_view_id: 'referenceEquality',
+  field_name: 'referenceEquality',
+  minimum_time_range: 'referenceEquality',
+  random_sampler_mode: 'referenceEquality',
+  random_sampler_probability: 'referenceEquality',
+};
+
 export const initializePatternAnalysisControls = (state: PatternAnalysisEmbeddableState) => {
   const dataViewId = new BehaviorSubject(state.data_view_id);
   const fieldName = new BehaviorSubject(state.field_name);
@@ -44,14 +52,6 @@ export const initializePatternAnalysisControls = (state: PatternAnalysisEmbeddab
     };
   };
 
-  const patternAnalysisControlsComparators: StateComparators<PatternAnalysisState> = {
-    data_view_id: 'referenceEquality',
-    field_name: 'referenceEquality',
-    minimum_time_range: 'referenceEquality',
-    random_sampler_mode: 'referenceEquality',
-    random_sampler_probability: 'referenceEquality',
-  };
-
   const patternAnalysisControlsApi: PatternAnalysisComponentApi = {
     dataViewId,
     fieldName,
@@ -64,6 +64,5 @@ export const initializePatternAnalysisControls = (state: PatternAnalysisEmbeddab
   return {
     patternAnalysisControlsApi,
     serializePatternAnalysisChartState,
-    patternAnalysisControlsComparators,
   };
 };
