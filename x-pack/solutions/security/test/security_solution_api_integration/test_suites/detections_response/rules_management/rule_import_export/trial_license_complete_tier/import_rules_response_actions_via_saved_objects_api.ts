@@ -17,7 +17,7 @@ import {
   getRuleSOById,
 } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
+import type { CustomRole } from '../../../../../config/services/types';
 
 /**
  * A user with rule management and Saved Objects management privileges, but no Endpoint
@@ -31,23 +31,36 @@ import { ROLE } from '../../../../../config/services/security_solution_edr_workf
  * `createRule`/`updateRule` logic (see `import_rules_response_actions.ts`), so they were
  * never part of this bypass.
  */
+
+const RULE_ENABLE_ONLY_ROLE: CustomRole = {
+  name: 'rule_enable_object_management_all',
+  privileges: {
+    elasticsearch: {},
+    kibana: [
+      {
+        feature: {
+          securitySolutionRulesV4: ['read', 'security_solution_enable_disable_rules'],
+          savedObjectsManagement: ['all'],
+        },
+        spaces: ['default'],
+      },
+    ],
+  },
+};
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
   const utils = getService('securitySolutionUtils');
-  const rolesUsersProvider = getService('rolesUsersProvider');
 
   describe('@ess @serverless @skipInServerlessMKI import rules with endpoint response actions via the generic Saved Objects API', () => {
     let superTestResponseActionsNoAuthz: TestAgent;
 
     before(async () => {
-      superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
-        name: ROLE.endpoint_response_actions_no_access,
-        privileges: rolesUsersProvider.loader.getPreDefinedRole(
-          ROLE.endpoint_response_actions_no_access
-        ),
-      });
+      superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole(
+        RULE_ENABLE_ONLY_ROLE
+      );
     });
 
     after(async () => {
