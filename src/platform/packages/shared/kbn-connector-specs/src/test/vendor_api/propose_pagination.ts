@@ -184,13 +184,19 @@ const parametersOf = (document: JsonObject, pathItem: JsonObject, operation: Jso
       in: location,
       schema: resolveObject(document, schema),
     }));
+  // An operation's parameter overrides a path-level one with the same name and location.
+  const effective = [
+    ...new Map(
+      declared.map((parameter) => [`${parameter.in}:${parameter.name}`, parameter])
+    ).values(),
+  ];
   const body = jsonSchemaOf(document, resolveObject(document, operation.requestBody).content);
   const bodyFields = body
     ? fieldsOf(document, body)
         .filter(({ schema }) => !isJsonObject(schema.properties))
         .map(({ path, schema }) => ({ name: path, in: 'body' as const, schema }))
     : [];
-  return [...declared, ...bodyFields];
+  return [...effective, ...bodyFields];
 };
 
 interface SuccessResponse {

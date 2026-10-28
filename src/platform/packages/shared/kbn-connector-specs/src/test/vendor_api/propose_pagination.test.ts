@@ -239,6 +239,32 @@ describe('assessPagination', () => {
     });
   });
 
+  it('lets an operation parameter override a path-level one instead of competing with it', () => {
+    const document = {
+      openapi: '3.0.3',
+      paths: {
+        '/list': {
+          parameters: [query('page', { type: 'integer' })],
+          get: {
+            parameters: [query('page', { type: 'integer', minimum: 0 })],
+            responses: json({
+              type: 'object',
+              properties: { items: { type: 'array', items: {} } },
+            }),
+          },
+        },
+      },
+    };
+
+    const assessment = assessPagination(document, { method: 'get', path: '/list' });
+
+    expect(assessment.listLike && assessment.proposal?.pagination).toEqual({
+      style: 'page',
+      request: { pageParam: 'page', firstPage: 0 },
+      response: { itemsPath: 'items' },
+    });
+  });
+
   it('flags collections it cannot propose pagination for', () => {
     expect(assess({ responses: json({ type: 'array', items: {} }) })).toEqual({
       listLike: true,
