@@ -63,3 +63,7 @@ export function isOperation(operationCandidate: unknown): operationCandidate is 
     'columnId' in operationCandidate
   );
 }
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}

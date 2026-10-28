@@ -39,7 +39,17 @@ export const ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS = {
   // `floor_alert_triage.yaml` decides `autoApprove` on `autonomy == 'supervised'` alone, which
   // leaves `assisted` meaning the same as `manual`.
   allowedAutonomyLevels: ['manual', 'supervised'],
-  extras: { defaultValue: { autoCloseConfidenceScoreMinThreshold: 0.85 } },
+  scheduleInterval: { defaultValue: '15m' },
+  extras: {
+    defaultValue: {
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      budgetPerHour: 1300,
+      lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
+    },
+  },
 } as const satisfies WorkerSettingsDefaults;
 
 export const ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS = {
@@ -52,7 +62,10 @@ export const ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS = {
 } as const satisfies WorkerSettingsDefaults;
 
 export const CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS = {
-  allowedAutonomyLevels: WORKER_AUTONOMY_LEVELS,
+  // Manual only: Hunt Watch locks autonomy at the settings-page level too (see
+  // `CONTINUOUS_THREAT_HUNT_SETTINGS` in @kbn/alertzero-common). A stored assisted/supervised
+  // value from before the lock is read and rendered as manual.
+  allowedAutonomyLevels: ['manual'],
   scheduleInterval: { defaultValue: '4h' },
 } as const satisfies WorkerSettingsDefaults;
 

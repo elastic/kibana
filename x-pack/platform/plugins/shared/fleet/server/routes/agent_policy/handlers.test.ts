@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import { agentPolicyService, appContextService } from '../../services';
+import { agentPolicyService, appContextService, packagePolicyService } from '../../services';
 import { listFleetProxies } from '../../services/fleet_proxies';
 
 import type { FleetRequestHandlerContext } from '../..';
@@ -16,16 +16,21 @@ import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { AgentClient } from '../../services/agents';
 import type { AgentPolicy } from '../../types';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
+import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
 import {
   bulkGetAgentPoliciesHandler,
   copyAgentPolicyHandler,
   createAgentPolicyHandler,
+  deleteAgentPoliciesHandler,
   downloadFullAgentPolicy,
   getFullAgentPolicy,
   GetListAgentPolicyOutputsHandler,
   getAgentPoliciesHandler,
+  getAgentPoliciesPackagePoliciesSummaryHandler,
   populateAssignedAgentsCount,
+  updateAgentPolicyHandler,
 } from './handlers';
 
 jest.mock('../../services/agent_policy', () => {
@@ -35,6 +40,8 @@ jest.mock('../../services/agent_policy', () => {
       list: jest.fn(),
       getByIds: jest.fn(),
       copy: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
       listAllOutputsForPolicies: jest.fn(),
       getFullAgentPolicy: jest.fn(),
       getFleetServerPolicy: jest.fn(),
@@ -48,6 +55,10 @@ jest.mock('../../services/agent_policy_create', () => {
     createAgentPolicyWithPackages: jest.fn(),
   };
 });
+
+jest.mock('../../services/spaces/agent_policy', () => ({
+  updateAgentPolicySpaces: jest.fn(),
+}));
 
 jest.mock('../../services/fleet_proxies', () => ({
   listFleetProxies: jest.fn().mockResolvedValue({ items: [] }),
@@ -124,6 +135,51 @@ describe('Agent policy API handlers', () => {
     });
   });
 
+  describe('deleteAgentPoliciesHandler', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appContextService.start(createAppContextStartContractMock());
+      agentPolicyServiceMock.delete.mockResolvedValue({ id: 'policy-1', name: 'Policy' } as any);
+    });
+
+    const deleteRequest = (force?: boolean) =>
+      httpServerMock.createKibanaRequest({ body: { agentPolicyId: 'policy-1', force } });
+
+    it('rejects deleting an agentless policy without force', async () => {
+      agentPolicyServiceMock.get.mockResolvedValue({
+        id: 'policy-1',
+        supports_agentless: true,
+      } as any);
+
+      await expect(deleteAgentPoliciesHandler(context, deleteRequest(), response)).rejects.toThrow(
+        'To delete managed integrations, use the managed integrations API.'
+      );
+      expect(agentPolicyServiceMock.delete).not.toHaveBeenCalled();
+    });
+
+    it('allows deleting an agentless policy with force', async () => {
+      await deleteAgentPoliciesHandler(context, deleteRequest(true), response);
+
+      expect(agentPolicyServiceMock.delete).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'policy-1',
+        expect.objectContaining({ force: true })
+      );
+    });
+
+    it('allows deleting a regular policy without force', async () => {
+      agentPolicyServiceMock.get.mockResolvedValue({
+        id: 'policy-1',
+        supports_agentless: false,
+      } as any);
+
+      await deleteAgentPoliciesHandler(context, deleteRequest(), response);
+
+      expect(agentPolicyServiceMock.delete).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('copyAgentPolicyHandler', () => {
     const copiedAgentPolicy = { id: 'copied-policy', name: 'Copied policy' } as AgentPolicy;
 
@@ -186,6 +242,88 @@ describe('Agent policy API handlers', () => {
     });
   });
 
+  describe('updateAgentPolicyHandler', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appContextService.start(createAppContextStartContractMock());
+      // Tag each SO client with the space it was created for so tests can assert which space a lookup used.
+      jest
+        .spyOn(appContextService, 'getInternalUserSOClientForSpaceId')
+        .mockImplementation((spaceId) => ({ spaceTag: spaceId } as any));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      appContextService.stop();
+    });
+
+    it('should reject updating an agentless agent policy before applying any space change', async () => {
+      agentPolicyServiceMock.get.mockResolvedValue({
+        id: 'agentless-policy',
+        supports_agentless: true,
+      } as AgentPolicy);
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentPolicyId: 'agentless-policy' },
+        body: { name: 'Agentless policy', namespace: 'default', space_ids: ['*'] },
+      });
+
+      await expect(updateAgentPolicyHandler(context, request, response)).rejects.toThrow(
+        /To update managed integrations/
+      );
+      // The guard looks the policy up in the request space, not the target `space_ids[0]`
+      expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+        { spaceTag: 'default' },
+        'agentless-policy',
+        false
+      );
+      expect(updateAgentPolicySpaces).not.toHaveBeenCalled();
+      expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
+    });
+
+    it('should reject setting supports_agentless on update before applying any space change', async () => {
+      agentPolicyServiceMock.get.mockResolvedValue({ id: 'policy' } as AgentPolicy);
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentPolicyId: 'policy' },
+        body: {
+          name: 'Policy',
+          namespace: 'default',
+          supports_agentless: true,
+          space_ids: ['*'],
+        },
+      });
+
+      await expect(updateAgentPolicyHandler(context, request, response)).rejects.toThrow(
+        /To update managed integrations/
+      );
+      expect(updateAgentPolicySpaces).not.toHaveBeenCalled();
+      expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
+    });
+
+    it('should abort without applying any change when the policy is not found in the request space', async () => {
+      agentPolicyServiceMock.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('fleet-agent-policies', 'policy')
+      );
+      const request = httpServerMock.createKibanaRequest({
+        params: { agentPolicyId: 'policy' },
+        body: { name: 'Policy', namespace: 'default', space_ids: ['space-b'] },
+      });
+
+      await expect(updateAgentPolicyHandler(context, request, response)).rejects.toThrow(
+        /not found/i
+      );
+      expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+        { spaceTag: 'default' },
+        'policy',
+        false
+      );
+      expect(appContextService.getInternalUserSOClientForSpaceId).not.toHaveBeenCalledWith(
+        'space-b'
+      );
+      expect(updateAgentPolicySpaces).not.toHaveBeenCalled();
+      expect(agentPolicyServiceMock.update).not.toHaveBeenCalled();
+    });
+  });
+
   describe('GetListAgentPolicyOutputsHandler', () => {
     it('should deduplicate ids', async () => {
       const request = httpServerMock.createKibanaRequest({
@@ -219,6 +357,34 @@ describe('Agent policy API handlers', () => {
     });
   });
 
+  describe('getAgentPoliciesHandler for users without agent policies read privilege', () => {
+    it('keeps supports_agentless in the sanitized policies', async () => {
+      agentPolicyServiceMock.list.mockResolvedValue({
+        items: [
+          { id: 'agentless-policy', name: 'Agentless', supports_agentless: true },
+          { id: 'regular-policy', name: 'Regular', supports_agentless: false },
+        ] as AgentPolicy[],
+        total: 2,
+        page: 1,
+        perPage: 20,
+      });
+      const request = httpServerMock.createKibanaRequest({ query: {} });
+      // Agents read only: no agent policies read
+      (request as any).authzResult = {
+        [FLEET_API_PRIVILEGES.AGENTS.READ]: true,
+        [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ]: false,
+      };
+
+      await getAgentPoliciesHandler(context, request, response);
+
+      const { items } = (response.ok as jest.Mock).mock.calls[0][0].body;
+      expect(items).toEqual([
+        expect.objectContaining({ id: 'agentless-policy', supports_agentless: true }),
+        expect.objectContaining({ id: 'regular-policy', supports_agentless: false }),
+      ]);
+    });
+  });
+
   describe('bulkGetAgentPoliciesHandler', () => {
     it('should deduplicate ids', async () => {
       agentPolicyServiceMock.getByIds.mockResolvedValueOnce([]);
@@ -233,6 +399,43 @@ describe('Agent policy API handlers', () => {
         ['1'],
         expect.anything()
       );
+    });
+  });
+
+  describe('getAgentPoliciesPackagePoliciesSummaryHandler', () => {
+    const summary = {
+      count: 4301,
+      has_fleet_server: false,
+      has_managed: false,
+      has_root_integrations: true,
+      has_shared: false,
+    };
+
+    it('should return the summary by agent policy id using the user scoped client', async () => {
+      const getSummarySpy = jest
+        .spyOn(packagePolicyService, 'getSummaryForAgentPolicies')
+        .mockResolvedValueOnce(new Map([['policy-1', summary]]));
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['policy-1'] } });
+
+      await getAgentPoliciesPackagePoliciesSummaryHandler(context, request, response);
+
+      expect(getSummarySpy).toHaveBeenCalledWith((await context.core).savedObjects.client, [
+        'policy-1',
+      ]);
+      expect(response.ok).toHaveBeenCalledWith({ body: { items: { 'policy-1': summary } } });
+    });
+
+    it('should deduplicate ids', async () => {
+      const getSummarySpy = jest
+        .spyOn(packagePolicyService, 'getSummaryForAgentPolicies')
+        .mockResolvedValueOnce(new Map());
+      const request = httpServerMock.createKibanaRequest({
+        body: { ids: ['policy-1', 'policy-1', 'policy-2'] },
+      });
+
+      await getAgentPoliciesPackagePoliciesSummaryHandler(context, request, response);
+
+      expect(getSummarySpy).toHaveBeenCalledWith(expect.anything(), ['policy-1', 'policy-2']);
     });
   });
 

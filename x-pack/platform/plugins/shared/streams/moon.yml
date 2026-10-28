@@ -35,7 +35,6 @@ dependsOn:
   - '@kbn/licensing-plugin'
   - '@kbn/zod'
   - '@kbn/streams-schema'
-  - '@kbn/significant-events-schema'
   - '@kbn/server-route-repository'
   - '@kbn/es-errors'
   - '@kbn/lock-manager'
@@ -89,6 +88,9 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/server-http-tools'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/data-plugin'
 tags:
   - plugin
   - prod
@@ -104,6 +106,4 @@ fileGroups:
     - types/**/*
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

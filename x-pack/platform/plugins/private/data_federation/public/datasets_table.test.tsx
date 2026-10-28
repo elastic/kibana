@@ -16,23 +16,7 @@ import type { DataSetWithName } from '../common';
 import { CREATE_DATASET_PATH, getEditDatasetPath } from './app_paths';
 import type { DataSetListRow } from './datasets_table';
 import { DatasetsTable } from './datasets_table';
-
-const docLinksMock = {
-  links: {
-    dataFederation: {
-      overview: '',
-      quickstart: '',
-      dataSources: '',
-      datasets: '',
-      datasetSettings: '',
-      authentication: '',
-      staticCredentials: '',
-      federatedIdentity: '',
-      querying: '',
-      security: '',
-    },
-  },
-};
+import { docLinksMock } from './doc_links_mock';
 
 const createDataSetRow = ({
   name,

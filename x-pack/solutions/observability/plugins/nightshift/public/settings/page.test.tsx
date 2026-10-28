@@ -47,10 +47,7 @@ jest.mock('./detections_settings_tab', () => ({
 const mockUseAppsEnabled = useAppsEnabled as jest.MockedFunction<typeof useAppsEnabled>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const headerProps = {
-  onManagementClick: jest.fn(),
-  managementHref: '/app/significant_events/streams',
-};
+const headerProps = {};
 
 const renderPage = (path: string) => {
   const history = createMemoryHistory({ initialEntries: [path] });
@@ -76,6 +73,7 @@ describe('SettingsPage', () => {
       services: {
         application: {
           getUrlForApp: (_appId: string, { path }: { path: string }) => `/app/nightshift${path}`,
+          capabilities: { nightshift: { manage: true } },
         },
       },
     } as never);

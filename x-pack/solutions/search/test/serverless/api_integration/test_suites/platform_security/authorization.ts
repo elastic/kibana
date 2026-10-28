@@ -5,7 +5,15 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const ALERTING_V2_FEATURE_IDS = [
+  'alerting_v2_rules',
+  'alerting_v2_alerts',
+  'alerting_v2_action_policies',
+  'alerting_v2_execution_history',
+];
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
@@ -221,6 +229,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:tag/find",
                 "saved_object:tag/open_point_in_time",
                 "saved_object:tag/close_point_in_time",
+                "saved_object:vega/bulk_get",
+                "saved_object:vega/get",
+                "saved_object:vega/find",
+                "saved_object:vega/open_point_in_time",
+                "saved_object:vega/close_point_in_time",
                 "saved_object:config/bulk_get",
                 "saved_object:config/get",
                 "saved_object:config/find",
@@ -281,6 +294,13 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/delete",
                 "saved_object:lens/bulk_delete",
                 "saved_object:lens/share_to_space",
+                "saved_object:vega/create",
+                "saved_object:vega/bulk_create",
+                "saved_object:vega/update",
+                "saved_object:vega/bulk_update",
+                "saved_object:vega/delete",
+                "saved_object:vega/bulk_delete",
+                "saved_object:vega/share_to_space",
                 "ui:visualize/show",
                 "ui:visualize/delete",
                 "ui:visualize/save",
@@ -474,6 +494,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:tag/find",
                 "saved_object:tag/open_point_in_time",
                 "saved_object:tag/close_point_in_time",
+                "saved_object:vega/bulk_get",
+                "saved_object:vega/get",
+                "saved_object:vega/find",
+                "saved_object:vega/open_point_in_time",
+                "saved_object:vega/close_point_in_time",
                 "saved_object:config/bulk_get",
                 "saved_object:config/get",
                 "saved_object:config/find",
@@ -537,6 +562,13 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/delete",
                 "saved_object:lens/bulk_delete",
                 "saved_object:lens/share_to_space",
+                "saved_object:vega/create",
+                "saved_object:vega/bulk_create",
+                "saved_object:vega/update",
+                "saved_object:vega/bulk_update",
+                "saved_object:vega/delete",
+                "saved_object:vega/bulk_delete",
+                "saved_object:vega/share_to_space",
                 "saved_object:url/create",
                 "saved_object:url/bulk_create",
                 "saved_object:url/update",
@@ -661,6 +693,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:markdown/find",
                 "saved_object:markdown/open_point_in_time",
                 "saved_object:markdown/close_point_in_time",
+                "saved_object:vega/bulk_get",
+                "saved_object:vega/get",
+                "saved_object:vega/find",
+                "saved_object:vega/open_point_in_time",
+                "saved_object:vega/close_point_in_time",
                 "saved_object:query/bulk_get",
                 "saved_object:query/get",
                 "saved_object:query/find",
@@ -819,6 +856,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:markdown/find",
                 "saved_object:markdown/open_point_in_time",
                 "saved_object:markdown/close_point_in_time",
+                "saved_object:vega/bulk_get",
+                "saved_object:vega/get",
+                "saved_object:vega/find",
+                "saved_object:vega/open_point_in_time",
+                "saved_object:vega/close_point_in_time",
                 "saved_object:query/bulk_get",
                 "saved_object:query/get",
                 "saved_object:query/find",
@@ -1066,6 +1108,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:tag/find",
                 "saved_object:tag/open_point_in_time",
                 "saved_object:tag/close_point_in_time",
+                "saved_object:vega/bulk_get",
+                "saved_object:vega/get",
+                "saved_object:vega/find",
+                "saved_object:vega/open_point_in_time",
+                "saved_object:vega/close_point_in_time",
                 "saved_object:config/bulk_get",
                 "saved_object:config/get",
                 "saved_object:config/find",
@@ -1120,6 +1167,13 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/delete",
                 "saved_object:lens/bulk_delete",
                 "saved_object:lens/share_to_space",
+                "saved_object:vega/create",
+                "saved_object:vega/bulk_create",
+                "saved_object:vega/update",
+                "saved_object:vega/bulk_update",
+                "saved_object:vega/delete",
+                "saved_object:vega/bulk_delete",
+                "saved_object:vega/share_to_space",
                 "ui:visualize_v2/show",
                 "ui:visualize_v2/delete",
                 "ui:visualize_v2/save",
@@ -1284,6 +1338,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:tag/find",
                 "saved_object:tag/open_point_in_time",
                 "saved_object:tag/close_point_in_time",
+                "saved_object:vega/bulk_get",
+                "saved_object:vega/get",
+                "saved_object:vega/find",
+                "saved_object:vega/open_point_in_time",
+                "saved_object:vega/close_point_in_time",
                 "saved_object:config/bulk_get",
                 "saved_object:config/get",
                 "saved_object:config/find",
@@ -1341,6 +1400,13 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:lens/delete",
                 "saved_object:lens/bulk_delete",
                 "saved_object:lens/share_to_space",
+                "saved_object:vega/create",
+                "saved_object:vega/bulk_create",
+                "saved_object:vega/update",
+                "saved_object:vega/bulk_update",
+                "saved_object:vega/delete",
+                "saved_object:vega/bulk_delete",
+                "saved_object:vega/share_to_space",
                 "saved_object:url/create",
                 "saved_object:url/bulk_create",
                 "saved_object:url/update",
@@ -1455,6 +1521,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:markdown/find",
                 "saved_object:markdown/open_point_in_time",
                 "saved_object:markdown/close_point_in_time",
+                "saved_object:vega/bulk_get",
+                "saved_object:vega/get",
+                "saved_object:vega/find",
+                "saved_object:vega/open_point_in_time",
+                "saved_object:vega/close_point_in_time",
                 "saved_object:config/bulk_get",
                 "saved_object:config/get",
                 "saved_object:config/find",
@@ -1602,6 +1673,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:markdown/find",
                 "saved_object:markdown/open_point_in_time",
                 "saved_object:markdown/close_point_in_time",
+                "saved_object:vega/bulk_get",
+                "saved_object:vega/get",
+                "saved_object:vega/find",
+                "saved_object:vega/open_point_in_time",
+                "saved_object:vega/close_point_in_time",
                 "saved_object:config/bulk_get",
                 "saved_object:config/get",
                 "saved_object:config/find",
@@ -2661,6 +2737,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:scheduled_report/share_to_space",
                 "ui:dashboard_v2/downloadCsv",
                 "api:generateReport",
+                "ui:dashboard_v2/generateScreenshot",
                 "ui:discover_v2/generateCsv",
               ],
               "minimal_all": Array [
@@ -2742,6 +2819,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:scheduled_report/share_to_space",
                 "ui:dashboard_v2/downloadCsv",
                 "api:generateReport",
+                "ui:dashboard_v2/generateScreenshot",
                 "ui:discover_v2/generateCsv",
               ],
               "minimal_read": Array [
@@ -2861,6 +2939,19 @@ export default function ({ getService }: FtrProviderContext) {
             },
           }
         `);
+      });
+
+      it('does not expose alerting v2 feature privileges', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/security/privileges')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        const featureIds = Object.keys(body.features);
+        for (const featureId of ALERTING_V2_FEATURE_IDS) {
+          expect(featureIds).to.not.contain(featureId);
+        }
       });
     });
   });

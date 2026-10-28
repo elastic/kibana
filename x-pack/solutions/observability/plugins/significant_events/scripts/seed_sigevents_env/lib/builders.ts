@@ -27,8 +27,7 @@ export function buildFeaturePayloads(ctx: SeedContext, manifest: LogsManifest): 
     const runtime = 'runtime' in svc ? String(svc.runtime) : 'unknown';
     const infraDeps = 'infraDeps' in svc && Array.isArray(svc.infraDeps) ? [...svc.infraDeps] : [];
     features.push({
-      id: deterministicId(ctx.streamName, 'feature', 'entity', svc.name),
-      stream_name: ctx.streamName,
+      id: deterministicId(ctx.sourceId, 'feature', 'entity', svc.name),
       type: 'entity',
       subtype: 'service',
       title: svc.name,
@@ -45,8 +44,7 @@ export function buildFeaturePayloads(ctx: SeedContext, manifest: LogsManifest): 
   for (const dep of manifest.activeInfraDeps) {
     const subtype = DEP_TO_CATEGORY[dep] ?? 'database';
     features.push({
-      id: deterministicId(ctx.streamName, 'feature', 'infra-entity', dep),
-      stream_name: ctx.streamName,
+      id: deterministicId(ctx.sourceId, 'feature', 'infra-entity', dep),
       type: 'entity',
       subtype,
       title: dep,
@@ -71,8 +69,7 @@ export function buildFeaturePayloads(ctx: SeedContext, manifest: LogsManifest): 
       'service_dependency';
 
     features.push({
-      id: deterministicId(ctx.streamName, 'feature', 'dependency', key),
-      stream_name: ctx.streamName,
+      id: deterministicId(ctx.sourceId, 'feature', 'dependency', key),
       type: 'dependency',
       subtype,
       title: `${edge.source} → ${edge.target}`,

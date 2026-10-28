@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 27 as const;
+export const ESO_TYPES_COUNT = 28 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -73,13 +73,13 @@ describe('checking changes on all registered encrypted SO types', () => {
         "api_key_pending_invalidation": "4dafadadaaca2f2f3f6038ee8363b71b2d101371ca98c34d2b6aa2a96f7e71c5",
         "api_key_to_invalidate": "d7a3423a74032bb5ecce9a0975e8ea1d5d5171348f99173df54b2fa0dfd3de43",
         "cloud-connect-api-key": "8c0ae7a780c411145ae4aaf7a70235672c9ccfb56d011c322da3c4eeb258f32d",
+        "connector_signing_key": "8e057274baed93aeb5f595f55856a8a1b225000c8d9be5cea78831b93ef9a374",
         "connector_token": "e446f5ff0fbf516f63398e474f126332b4c31e316daa613c6cb8c863400110c5",
         "fleet-fleet-server-host": "3b8d0809aaf8a133596307bc29328207c7ceee1dc72233da75141ec47ad8d327",
         "fleet-message-signing-keys": "5cdcf6bf85247267f8876bda4226e871dbfefe01f050e898db7cbc267d57a275",
         "fleet-uninstall-tokens": "6e7d75921dcce46e566f175eab1b0e3825fe565f20cdb3c984e7037934d61e23",
         "ingest-download-sources": "b3740796eab0a91736e43bd22f7489cbf6f2ad0241ae370d1c8195b6a8d8ad52",
         "ingest-outputs": "d66716d5333484a25c57f7917bead5ac2576ec57a4b9eb61701b573f35ab62ad",
-        "nightshift-secrets": "dda5d9c34f2dfad530fd3ce2f7d30aa1b626e925ba8da6469f7da62136e2d8aa",
         "oauth_state": "b01289e5c133db9d4d802a2b838e43cce4a8399566dedb21de551da57c88894a",
         "privmon-api-key": "7d7b76b3bc5287a784518731ba66d4f761052177fc04b1a85e5605846ab9de42",
         "service-account-credential": "5d9f328d92718249b324fbd5d01332bcef80be980003d510a3bd24af230244ff",
@@ -87,6 +87,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "synthetics-monitor": "de18413761b36881d871e677c248336a70c90f0508e58f4162ee4cd579be2148",
         "synthetics-monitor-multi-space": "c05bd0271eb934cef46af2fc32591ac6ed10b20ac34e049fd0d3ca1362fd4136",
         "synthetics-param": "747ba9d1b7addf5b131713abe7868bd767af6ce0cf8b6b0f335f4ef34b280c7e",
+        "synthetics-secret-connection": "fcf558d5ef016148d52dd9b2c40de4ae986bcf627c058db338c31ef1eb6cf282",
         "task": "bba5345e2443d1dd107d1f9de8810cbfbfe74941bc6d1b1dbe8c61e175f57b75",
         "uptime-synthetics-api-key": "5ca81f180763e85397fa8c6508adcd60efd0f916e29bac6dcd5b4564f1db7375",
         "user_connector_token": "7f818fe3827daa31d23b874e480176d105e629cf5da88f5f4e56033e78c3acca",
@@ -147,6 +148,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|11",
         "alert|10",
         "alert|1",
+        "alerting_action_policy|6",
         "alerting_action_policy|5",
         "alerting_action_policy|4",
         "alerting_action_policy|3",
@@ -159,6 +161,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "api_key_to_invalidate|2",
         "api_key_to_invalidate|1",
         "cloud-connect-api-key|1",
+        "connector_signing_key|1",
         "connector_token|2",
         "connector_token|1",
         "fleet-fleet-server-host|2",
@@ -174,15 +177,19 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|4",
         "ingest-outputs|3",
         "ingest-outputs|2",
+        "ingest-outputs|13",
+        "ingest-outputs|12",
         "ingest-outputs|11",
         "ingest-outputs|10",
         "ingest-outputs|1",
-        "nightshift-secrets|1",
         "oauth_state|1",
         "service-account-credential|1",
         "service-account-workload-binding|1",
+        "synthetics-monitor|3",
         "synthetics-monitor|2",
         "synthetics-monitor|1",
+        "synthetics-monitor-multi-space|1",
+        "synthetics-secret-connection|1",
         "task|9",
         "task|8",
         "task|7",

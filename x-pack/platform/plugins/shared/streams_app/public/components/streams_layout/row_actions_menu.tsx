@@ -19,8 +19,8 @@ import { useBoolean } from '@kbn/react-hooks';
 
 export const ROW_ACTIONS_COLUMN_WIDTH = 72;
 
-const SHOW_ON_CANVAS_LABEL = i18n.translate('xpack.streams.streamsLayout.showOnCanvasTooltip', {
-  defaultMessage: 'Show on canvas',
+const SHOW_ON_CANVAS_LABEL = i18n.translate('xpack.streams.streamsLayout.showOnMapTooltip', {
+  defaultMessage: 'Show on map',
 });
 
 interface RowActionsMenuProps {
@@ -45,13 +45,10 @@ export const RowActionsMenu = ({
     defaultMessage: 'Open actions for {entityName}',
     values: { entityName },
   });
-  const showOnCanvasLabel = i18n.translate(
-    'xpack.streams.streamsLayout.showOnCanvasButtonAriaLabel',
-    {
-      defaultMessage: 'Show {entityName} on canvas',
-      values: { entityName },
-    }
-  );
+  const showOnCanvasLabel = i18n.translate('xpack.streams.streamsLayout.showOnMapButtonAriaLabel', {
+    defaultMessage: 'Show {entityName} on map',
+    values: { entityName },
+  });
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>

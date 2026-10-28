@@ -12,6 +12,7 @@ import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plu
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ActionType as CommonActionType } from '../common';
 import { areValidFeatures, MAX_FEATURE_ID_LENGTH } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
@@ -24,6 +25,7 @@ import type {
   ActionTypeSecrets,
   InMemoryConnector,
 } from './types';
+import { isSandboxCapableConnectorType } from './application/connector/lib/is_sandbox_capable_connector';
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
@@ -37,6 +39,7 @@ export interface ActionTypeRegistryOpts {
 interface ListOpts {
   featureId?: string;
   exposeValidation?: boolean;
+  sandboxCapableOnly?: boolean;
 }
 
 export class ActionTypeRegistry {
@@ -270,12 +273,15 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(
-    { featureId, exposeValidation }: ListOpts = { exposeValidation: false }
+    { featureId, exposeValidation, sandboxCapableOnly }: ListOpts = { exposeValidation: false }
   ): CommonActionType[] {
     return Array.from(this.actionTypes)
       .filter(([_, actionType]) => {
         return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
       })
+      .filter(([_, actionType]) =>
+        sandboxCapableOnly ? isSandboxCapableConnectorType(actionType) : true
+      )
       .map(([actionTypeId, actionType]) => ({
         id: actionTypeId,
         name: actionType.name,
@@ -315,5 +321,12 @@ export class ActionTypeRegistry {
 
   isDeprecated(actionTypeId: string): boolean {
     return Boolean(this.actionTypes.get(actionTypeId)?.isDeprecated);
+  }
+
+  /**
+   * Returns the connector spec stored for a spec-backed type, or undefined.
+   */
+  public getSpec(id: string): ConnectorSpec | undefined {
+    return this.actionTypes.get(id)?.spec;
   }
 }

@@ -194,6 +194,38 @@ describe('DataSourceBrowser views', () => {
 
     await userEvent.click(await getResourceList().findByRole('option', { name: /errors_view/ }));
 
-    expect(onSelect).toHaveBeenCalledWith('errors_view', DataSourceSelectionChange.Add);
+    expect(onSelect).toHaveBeenCalledWith('errors_view', DataSourceSelectionChange.Add, {
+      isView: true,
+    });
+  });
+
+  it('still reports a view as a view when an enricher rewrites its type', async () => {
+    // Streams rewrites a view's type to the backing stream's, so `type` cannot identify a view.
+    const { onSelect } = renderBrowser({
+      esql: {
+        enrichViews: jest.fn(async (enriched: EsqlView[]) =>
+          enriched.map((view) => ({ ...view, type: SOURCES_TYPES.QUERY_STREAM }))
+        ),
+      },
+    });
+
+    const view = await getResourceList().findByRole('option', { name: /errors_view/ });
+    expect(view).toHaveTextContent('Stream');
+
+    await userEvent.click(view);
+
+    expect(onSelect).toHaveBeenCalledWith('errors_view', DataSourceSelectionChange.Add, {
+      isView: true,
+    });
+  });
+
+  it('does not report a plain index as a view', async () => {
+    const { onSelect } = renderBrowser();
+
+    await userEvent.click(await getResourceList().findByRole('option', { name: /logs-\*/ }));
+
+    expect(onSelect).toHaveBeenCalledWith('logs-*', DataSourceSelectionChange.Add, {
+      isView: false,
+    });
   });
 });

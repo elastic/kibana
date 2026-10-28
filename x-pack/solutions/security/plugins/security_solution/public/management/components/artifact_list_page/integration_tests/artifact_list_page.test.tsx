@@ -118,6 +118,15 @@ describe('When using the ArtifactListPage component', () => {
       expect(getByTestId('testPage-list-loader')).toBeTruthy();
     });
 
+    it('should not open flyout when show=view is present in the URL', async () => {
+      history.push('somepage?show=view&itemId=123');
+
+      const { queryByTestId } = await renderWithListData();
+
+      expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+      expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+    });
+
     it(`should show cards with results`, async () => {
       const { findAllByTestId, getByTestId } = await renderWithListData();
 
@@ -153,6 +162,126 @@ describe('When using the ArtifactListPage component', () => {
         });
 
         expect(getAllByTestId('testPage-simpleTable-columnEnabled').length).toBeGreaterThan(0);
+      });
+
+      describe('and the enabled status filter is used', () => {
+        const ENABLED_KQL = `(not exception-list-agnostic.attributes.tags:"${DISABLED_ARTIFACT_TAG}")`;
+        const DISABLED_KQL = `(exception-list-agnostic.attributes.tags:"${DISABLED_ARTIFACT_TAG}")`;
+
+        const getLastListFilter = (): string | undefined =>
+          (
+            mockedApi.responseProvider.trustedAppsList.mock.lastCall?.[0].query as {
+              filter?: string;
+            }
+          )?.filter;
+
+        it('should not show the filter when showEnabledColumn is false', async () => {
+          const { queryByTestId } = await renderWithListData({ showAsSimpleTable: true });
+
+          expect(queryByTestId('enabledStatusFilter')).not.toBeInTheDocument();
+        });
+
+        it('should ignore the enabledStatus URL param when showEnabledColumn is false', async () => {
+          history.push('somepage?enabledStatus=disabled');
+
+          await renderWithListData({ showAsSimpleTable: true });
+
+          expect(getLastListFilter()).toBeUndefined();
+        });
+
+        it('should show only enabled artifacts when Enabled is selected', async () => {
+          const { getByTestId } = await renderWithListData({
+            showAsSimpleTable: true,
+            showEnabledColumn: true,
+          });
+
+          await userEvent.click(getByTestId('enabledStatusFilter-enabled'));
+
+          await waitFor(() => {
+            expect(history.location.search).toMatch(/enabledStatus=enabled/);
+            expect(getLastListFilter()).toEqual(ENABLED_KQL);
+          });
+          expect(getByTestId('enabledStatusFilter-enabled')).toHaveAttribute(
+            'aria-pressed',
+            'true'
+          );
+        });
+
+        it('should show only disabled artifacts when Disabled is selected', async () => {
+          const { getByTestId } = await renderWithListData({
+            showAsSimpleTable: true,
+            showEnabledColumn: true,
+          });
+
+          await userEvent.click(getByTestId('enabledStatusFilter-disabled'));
+
+          await waitFor(() => {
+            expect(history.location.search).toMatch(/enabledStatus=disabled/);
+            expect(getLastListFilter()).toEqual(DISABLED_KQL);
+          });
+        });
+
+        it('should reset to the first page when the status changes', async () => {
+          history.push('somepage?page=2');
+          const { getByTestId } = await renderWithListData({
+            showAsSimpleTable: true,
+            showEnabledColumn: true,
+          });
+
+          await userEvent.click(getByTestId('enabledStatusFilter-disabled'));
+
+          await waitFor(() => {
+            expect(history.location.search).toMatch(/page=1(&|$)/);
+            expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+              expect.objectContaining({
+                query: expect.objectContaining({ page: 1, filter: DISABLED_KQL }),
+              })
+            );
+          });
+        });
+
+        it('should clear the filter when the selected button is clicked again', async () => {
+          history.push('somepage?enabledStatus=disabled');
+          const { getByTestId } = await renderWithListData({
+            showAsSimpleTable: true,
+            showEnabledColumn: true,
+          });
+          expect(getLastListFilter()).toEqual(DISABLED_KQL);
+
+          await userEvent.click(getByTestId('enabledStatusFilter-disabled'));
+
+          await waitFor(() => {
+            expect(history.location.search).not.toMatch(/enabledStatus/);
+            expect(getLastListFilter()).toBeUndefined();
+          });
+        });
+
+        it('should combine with the search filter', async () => {
+          history.push('somepage?enabledStatus=enabled');
+          const { getByTestId } = await renderWithListData({
+            showAsSimpleTable: true,
+            showEnabledColumn: true,
+          });
+
+          await userEvent.type(getByTestId('searchField'), 'fooFooFoo{enter}');
+
+          await waitFor(() => {
+            expect(getLastListFilter()).toMatch(/\*fooFooFoo\*/);
+          });
+          expect(history.location.search).toMatch(/enabledStatus=enabled/);
+          expect(getLastListFilter()).toContain(ENABLED_KQL);
+        });
+
+        it('should combine with the policy filter', async () => {
+          const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
+          history.push(`somepage?enabledStatus=disabled&includedPolicies=${policyId}`);
+
+          await renderWithListData({ showAsSimpleTable: true, showEnabledColumn: true });
+
+          expect(getLastListFilter()).toEqual(
+            `((exception-list-agnostic.attributes.tags:"policy:${policyId}")) AND ${DISABLED_KQL}`
+          );
+        });
       });
 
       it('should update the full artifact with the disabled tag when the switch is turned off', async () => {
@@ -197,6 +326,138 @@ describe('When using the ArtifactListPage component', () => {
         expect(getByTestId('testPage-simpleTable-cardDeleteAction')).toBeInTheDocument();
       });
 
+      it('should open the view flyout when the name is clicked', async () => {
+        const { getAllByTestId, getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          allowCardEditAction: false,
+          allowCardCreateAction: false,
+          allowCardDeleteAction: false,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+        expect(queryByTestId('formMock')).not.toBeInTheDocument();
+        expect(history.location.search).toMatch(/show=view/);
+        expect(history.location.search).toMatch(/itemId=/);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-title')).toHaveTextContent(/Generated Exception/);
+        });
+        expect(getByTestId('testPage-viewFlyout-lastUpdated')).toHaveTextContent(
+          /Last updated: Apr 20, 2020 @ 15:25:31/
+        );
+        expect(getByTestId('testPage-viewFlyout-os-osBadge-windows')).toHaveTextContent('Windows');
+        expect(getByTestId('testPage-viewFlyout-updatedByAvatar')).toBeInTheDocument();
+        expect(getByTestId('testPage-viewFlyout-description')).toHaveTextContent(
+          'created by ExceptionListItemGenerator'
+        );
+        expect(getByTestId('testPage-viewFlyout-definitionTitle')).toHaveTextContent('Definition');
+        expect(getByTestId('viewModeComponent')).toBeInTheDocument();
+        expect(getByTestId('testPage-viewFlyout-policyAssignmentTitle')).toHaveTextContent(
+          'Policy assignment'
+        );
+        expect(getByTestId('testPage-viewFlyout-policyAssignment-global')).toHaveTextContent(
+          'Applied globally.'
+        );
+      });
+
+      it('should open the view flyout from the show=view URL without the edit form', async () => {
+        history.push('somepage?show=view&itemId=123');
+
+        const { getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+        expect(queryByTestId('formMock')).not.toBeInTheDocument();
+      });
+
+      it('should pass the policy assignment info tooltip to the view flyout', async () => {
+        history.push('somepage?show=view&itemId=123');
+
+        const { findByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          policyAssignmentInfoTooltip: 'Some assignment info',
+        });
+
+        expect(
+          await findByTestId('testPage-viewFlyout-policyAssignmentInfoTooltip')
+        ).toBeInTheDocument();
+      });
+
+      it('should not open the view flyout when show=view has no itemId', async () => {
+        history.push('somepage?show=view');
+
+        const { queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+        expect(queryByTestId('testPage-viewFlyout-loader')).not.toBeInTheDocument();
+      });
+
+      it('should disable the artifact from the view flyout and refresh the list', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-enabledSwitch')).toBeEnabled();
+        });
+
+        const listCallsBeforeToggle = mockedApi.responseProvider.trustedAppsList.mock.calls.length;
+
+        await userEvent.click(getByTestId('testPage-viewFlyout-enabledSwitch'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppUpdate).toHaveBeenCalled();
+          expect(mockedApi.responseProvider.trustedAppsList.mock.calls.length).toBeGreaterThan(
+            listCallsBeforeToggle
+          );
+        });
+
+        const updateRequest = mockedApi.responseProvider.trustedAppUpdate.mock.calls[0][0];
+        const updateBody = JSON.parse(updateRequest.body as string);
+
+        expect(updateBody.tags).toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
+
+      it('should show a read-only enabled switch in the view flyout without write privilege', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+          allowCardEditAction: false,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-enabledSwitch')).toBeDisabled();
+        });
+      });
+
+      it('should close the view flyout and clear the view URL params', async () => {
+        history.push('somepage?show=view&itemId=123');
+
+        const { getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getByTestId('euiFlyoutCloseButton'));
+
+        await waitFor(() => {
+          expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+        });
+        expect(history.location.search).not.toMatch(/show=view/);
+        expect(history.location.search).not.toMatch(/itemId=/);
+      });
+
       it('should display the Edit flyout when table edit action is clicked', async () => {
         const { getByTestId, getAllByTestId } = await renderWithListData({
           showAsSimpleTable: true,
@@ -206,6 +467,34 @@ describe('When using the ArtifactListPage component', () => {
         await userEvent.click(getByTestId('testPage-simpleTable-cardEditAction'));
 
         expect(getByTestId('testPage-flyout')).toBeTruthy();
+      });
+
+      it('should close the view flyout when delete succeeds', async () => {
+        const { getAllByTestId, getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        });
+
+        await userEvent.click(getByTestId('testPage-viewFlyout-takeActionButton'));
+        await userEvent.click(getByTestId('testPage-viewFlyout-cardDeleteAction'));
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-deleteModal')).toBeInTheDocument();
+        });
+
+        await userEvent.click(getByTestId('testPage-deleteModal-submitButton'));
+
+        await waitFor(() => {
+          expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+          expect(queryByTestId('testPage-deleteModal')).not.toBeInTheDocument();
+        });
+        expect(history.location.search).not.toMatch(/show=view/);
+        expect(history.location.search).not.toMatch(/itemId=/);
       });
 
       it('should display the Delete modal when table delete action is clicked', async () => {
@@ -597,6 +886,54 @@ describe('When using the ArtifactListPage component', () => {
         await waitFor(() => {
           expect(renderResult.getByTestId('testPage-list-noResults')).toBeTruthy();
         });
+      });
+    });
+
+    describe('and the search bar is used on a later page', () => {
+      const expectFirstPageRequested = async () => {
+        await waitFor(() => {
+          expect(history.location.search).toMatch(/page=1(&|$)/);
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+            expect.objectContaining({ query: expect.objectContaining({ page: 1 }) })
+          );
+        });
+      };
+
+      beforeEach(async () => {
+        history.push('somepage?page=2');
+        await renderWithListData();
+      });
+
+      it('should reset to the first page when the policy filter changes', async () => {
+        const policyId = mockedApi.responseProvider.endpointPackagePolicyList().items[0].id;
+        const firstPolicyTestId = `policiesSelectorButton-policySelector-policy-${policyId}`;
+
+        await userEvent.click(renderResult.getByTestId('policiesSelectorButton'));
+        await waitFor(() => {
+          expect(renderResult.getAllByTestId(firstPolicyTestId).length > 0).toBeTruthy();
+        });
+        await userEvent.click(renderResult.getAllByTestId(firstPolicyTestId)[0]);
+
+        await expectFirstPageRequested();
+        expect(history.location.search).toMatch(new RegExp(`includedPolicies=${policyId}`));
+      });
+
+      it('should reset to the first page when the search filter changes', async () => {
+        await userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo{enter}');
+
+        await expectFirstPageRequested();
+        expect(history.location.search).toMatch(/fooFooFoo/);
+      });
+
+      it('should keep the current page when Refresh is clicked without filter changes', async () => {
+        await userEvent.click(renderResult.getByTestId('searchButton'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenLastCalledWith(
+            expect.objectContaining({ query: expect.objectContaining({ page: 2 }) })
+          );
+        });
+        expect(history.location.search).toMatch(/page=2(&|$)/);
       });
     });
   });

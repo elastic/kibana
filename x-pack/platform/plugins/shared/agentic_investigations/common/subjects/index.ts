@@ -8,7 +8,7 @@
 export {
   INVESTIGATION_SUBJECT_TRIGGER_TYPES,
   INVESTIGATION_SUBJECT_TYPES,
-  MAX_SLACK_SEEN_EVENT_IDS,
+  MAX_SLACK_SEEN_EVENTS,
   MAX_SUBJECT_ID_LENGTH,
   MAX_SUBJECTS_PER_CONVERSATION,
   MAX_SUBJECTS_PER_REQUEST,
@@ -26,6 +26,7 @@ export {
   investigationSubjectSchema,
   investigationSubjectTriggerTypeSchema,
   investigationSubjectTypeSchema,
+  slackSeenEventSchema,
   slackThreadSubjectSchema,
 } from './subject';
 
@@ -36,5 +37,6 @@ export type {
   InvestigationSubjectKey,
   InvestigationSubjectTriggerType,
   InvestigationSubjectType,
+  SlackSeenEvent,
   SlackThreadSubject,
 } from './subject';

@@ -14,13 +14,15 @@ import {
   resolveSignificantEventsTuningConfig,
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
-import { useDeveloperMode } from '../hooks/use_developer_mode';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { useKibana } from '../../hooks/use_kibana';
-import { useBlocksNewActivity } from '../hooks/use_significant_events_maintenance';
-import { getFormattedError } from '../utils/errors';
+import { useBlocksNewActivity } from '../../data/maintenance/use_significant_events_maintenance';
+import { getFormattedError } from '../../common/errors';
 import { configToAnnotatedYaml } from './significant_events_tuning_config_editor';
 import { useContinuousExtractionSettings } from './use_continuous_extraction_settings';
 import { useScheduledDiscoverySettings } from './use_scheduled_discovery_settings';
+
+type DetectionActivitySaveResult = 'saved' | 'failed' | 'noop';
 
 const useSettingsPermissions = () => {
   const { application } = useKibana().services;
@@ -37,8 +39,6 @@ const useSettingsPermissions = () => {
   };
 };
 
-export const useCanEditSettings = (): boolean => useSettingsPermissions().canEditSettings;
-
 export const useDetectionSettingsForm = () => {
   const core = useKibana().services;
 
@@ -48,7 +48,7 @@ export const useDetectionSettingsForm = () => {
   // the user never triggers a partial save that 403s halfway through.
   const { canManage, canManageAndConfigure, canSaveAdvancedSettings, canEditSettings } =
     useSettingsPermissions();
-  const { isDeveloperMode, setDeveloperMode, isSaving: isDeveloperModeSaving } = useDeveloperMode();
+  const { isDeveloperMode, isSaving: isDeveloperModeSaving } = useDeveloperMode();
 
   // Pause turns these Settings toggles off (and Resume restores only those that
   // were previously on). While paused, the toggles are not editable.
@@ -64,7 +64,7 @@ export const useDetectionSettingsForm = () => {
     !canEditSettings || !draftEnabled || blocksActivity;
 
   const continuousExtraction = useContinuousExtractionSettings({
-    globalClient: core.settings.globalClient,
+    client: core.settings.client,
     http: core.http,
     enabledFromStatus: maintenanceStatus?.featureSettings?.continuousOnboardingEnabled,
   });
@@ -127,7 +127,11 @@ export const useDetectionSettingsForm = () => {
     scheduledDiscovery.reset();
   }, [continuousExtraction, scheduledDiscovery]);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (): Promise<DetectionActivitySaveResult> => {
+    if (!hasActivitySettingsChanges) {
+      return 'noop';
+    }
+
     setIsSaving(true);
     try {
       if (canEditSettings && continuousExtraction.hasChanged) {
@@ -137,6 +141,7 @@ export const useDetectionSettingsForm = () => {
       if (canEditSettings && scheduledDiscovery.hasChanged) {
         await scheduledDiscovery.save();
       }
+      return 'saved';
     } catch (err) {
       core.notifications.toasts.addDanger({
         title: i18n.translate('xpack.nightshift.settings.saveErrorTitle', {
@@ -144,10 +149,17 @@ export const useDetectionSettingsForm = () => {
         }),
         text: getFormattedError(err).message,
       });
+      return 'failed';
     } finally {
       setIsSaving(false);
     }
-  }, [core.notifications.toasts, continuousExtraction, scheduledDiscovery, canEditSettings]);
+  }, [
+    canEditSettings,
+    continuousExtraction,
+    core.notifications.toasts,
+    hasActivitySettingsChanges,
+    scheduledDiscovery,
+  ]);
 
   const [isSavingTuningConfig, setIsSavingTuningConfig] = useState(false);
 
@@ -208,7 +220,6 @@ export const useDetectionSettingsForm = () => {
     canManageAndConfigure,
     canSaveAdvancedSettings,
     isDeveloperMode,
-    setDeveloperMode,
     isDeveloperModeSaving,
     isBlocked,
     activityBlockTooltip,

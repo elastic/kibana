@@ -200,7 +200,7 @@ export function StepMapping() {
       <MappingHeader docLinks={docLinks} />
 
       <div data-test-subj="createDatasetWizardMappedFields">
-        <EuiSpacer size="m" />
+        <EuiSpacer size="xl" />
         <TimeseriesDataSection
           isEnabled={isTimeseriesEnabled}
           shouldShowValidation={hasAttemptedValidation}

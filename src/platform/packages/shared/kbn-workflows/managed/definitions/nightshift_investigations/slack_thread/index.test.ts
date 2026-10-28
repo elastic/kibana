@@ -9,6 +9,7 @@
 
 import { parse } from 'yaml';
 import { NIGHTSHIFT_SLACK_THREAD_WORKFLOW } from '.';
+import { createWorkflowLiquidEngine } from '../../../../common/utils';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '../investigation';
 
 interface WorkflowStep {
@@ -36,6 +37,17 @@ const requireStep = (name: string): WorkflowStep => {
 };
 
 describe('Nightshift Slack thread workflow', () => {
+  // A direct run takes its event from the caller, so it could continue any thread with made-up text.
+  it('fails every run its Slack trigger did not start', () => {
+    const [guard] = workflow.steps;
+    expect(guard).toEqual({
+      name: 'refuse_direct_runs',
+      type: 'if',
+      condition: `not execution.triggeredBy : "${workflow.triggers[0].type}"`,
+      steps: [expect.objectContaining({ name: 'refuse', type: 'workflow.fail' })],
+    });
+  });
+
   it('continues an existing investigation on human thread replies with text only', () => {
     expect(workflow.triggers).toEqual([
       {
@@ -66,10 +78,10 @@ describe('Nightshift Slack thread workflow', () => {
     }
   });
 
-  it('gives the event back when its investigation was not run for it', () => {
+  it('gives the event back when its investigation failed, so a redelivery is handled', () => {
     expect(requireStep('release_event')).toMatchObject({
       type: 'kibana.request',
-      if: "${{ steps.investigate.error != null and steps.get_investigation.output.status != 'failed' }}",
+      if: '${{ steps.investigate.error != null }}',
       with: {
         body: {
           create: false,
@@ -97,10 +109,11 @@ describe('Nightshift Slack thread workflow', () => {
     });
     expect(requireStep('in_investigation_thread').steps?.map(({ name }) => name)).toEqual([
       'set_investigation_url',
+      'render_started',
       'post_started',
       'record_status_message',
       'investigate',
-      'get_investigation',
+      'render_result',
       'release_event',
       'set_result',
       'update_result',
@@ -118,6 +131,14 @@ describe('Nightshift Slack thread workflow', () => {
     });
     // A later run must not blank the previous findings for as long as its own run takes.
     expect(postStarted.with).not.toHaveProperty('messageTs');
+    expect(requireStep('render_started')).toMatchObject({
+      type: 'nightshift.renderSlackMessage',
+      if: '${{ steps.find_investigation.output.status_message_ts == null }}',
+      with: { phase: 'started' },
+    });
+    expect(postStarted.with?.blocks).toBe(
+      '${{ steps.render_started.output.blocks | default: [] }}'
+    );
     expect(requireStep('record_status_message')).toMatchObject({
       with: { body: { create: false, status_message_ts: '{{ steps.post_started.output.ts }}' } },
       'on-failure': { retry: { 'max-attempts': 3 }, continue: true },
@@ -137,6 +158,8 @@ describe('Nightshift Slack thread workflow', () => {
     });
     expect(investigate.with?.inputs).not.toHaveProperty('slack');
     expect(investigate.with?.inputs).not.toHaveProperty('conversation_id');
+    // Agent Builder titles the investigation, so the run passes no title.
+    expect(investigate.with?.inputs).not.toHaveProperty('title');
   });
 
   it("reports this run's result, not a previous run's record", () => {
@@ -144,39 +167,72 @@ describe('Nightshift Slack thread workflow', () => {
     expect(setResult?.status_message_ts).toBe(
       '${{ steps.post_started.output.ts | default: steps.find_investigation.output.status_message_ts }}'
     );
-    expect(setResult?.result_text).toContain(
-      "steps.investigate.error == null and steps.get_investigation.output.status == 'completed'"
-    );
+    expect(setResult?.result_blocks).toBe('${{ steps.render_result.output.blocks | default: [] }}');
   });
 
-  it('reports a failure only when the record failed or no run ever started it', () => {
-    expect(requireStep('set_result').with?.report).toBe(
-      "{% if steps.investigate.error == null and steps.get_investigation.output.status == 'completed' %}findings" +
-        "{% elsif steps.get_investigation.output.status == 'failed' %}failure" +
-        "{% elsif steps.investigate.error != null and steps.get_investigation.output.status == 'pending' %}failure" +
-        '{% else %}none{% endif %}'
-    );
+  it.each([
+    ['completed', { error: null }],
+    ['failed', { error: { message: 'boom' } }],
+  ])('renders the result as %s the same way automation notifications do', (phase, investigate) => {
+    const renderResult = requireStep('render_result');
+    expect(renderResult).toMatchObject({
+      type: 'nightshift.renderSlackMessage',
+      with: {
+        investigation_id: '{{ steps.find_investigation.output.investigation_id }}',
+      },
+    });
+    expect(
+      createWorkflowLiquidEngine().parseAndRenderSync(String(renderResult.with?.phase), {
+        steps: { investigate },
+      })
+    ).toBe(phase);
   });
 
-  it('keeps the findings within the 4,000 characters Slack takes on an edit', () => {
-    expect(requireStep('set_result').with?.result_text).toContain(
-      '{{ steps.get_investigation.output.summary | truncate: 3000 }}'
-    );
+  it.each([
+    ['finished', { error: null }, 'The investigation finished.'],
+    ['failed', { error: { message: 'boom' } }, 'Investigation failed.'],
+  ])('falls back to a plain link when rendering a %s run fails', (_, investigate, expected) => {
+    const resultText = requireStep('set_result').with?.result_text;
+    if (typeof resultText !== 'string') throw new Error('Expected set_result.result_text');
+
+    const rendered = createWorkflowLiquidEngine().parseAndRenderSync(resultText, {
+      steps: { investigate, render_result: {} },
+      variables: { investigation_url: 'https://kibana/app/nightshift' },
+    });
+
+    expect(rendered).toContain(expected);
+    expect(rendered).toContain('<https://kibana/app/nightshift|View the investigation>');
+  });
+
+  it('uses the rendered text when there is one', () => {
+    const resultText = requireStep('set_result').with?.result_text;
+    if (typeof resultText !== 'string') throw new Error('Expected set_result.result_text');
+
+    const rendered = createWorkflowLiquidEngine().parseAndRenderSync(resultText, {
+      steps: { investigate: { error: null }, render_result: { output: { text: 'Rendered' } } },
+      variables: { investigation_url: 'https://kibana/app/nightshift' },
+    });
+
+    expect(rendered).toBe('Rendered');
   });
 
   it('edits the status message with the result, and posts a new one when it cannot', () => {
     expect(requireStep('update_result')).toMatchObject({
       type: 'slack2.updateMessage',
-      if: "${{ variables.report != 'none' and variables.status_message_ts != null }}",
-      with: { messageTs: '{{ variables.status_message_ts }}', text: '{{ variables.result_text }}' },
+      if: '${{ variables.status_message_ts != null }}',
+      with: {
+        messageTs: '{{ variables.status_message_ts }}',
+        text: '{{ variables.result_text }}',
+        blocks: '${{ variables.result_blocks }}',
+      },
       // A transient failure must not leave the thread a second status message.
       'on-failure': { retry: { 'max-attempts': 3 }, continue: true },
     });
     const postResult = requireStep('post_result');
     expect(postResult).toMatchObject({
       type: 'slack2.sendMessage',
-      if: "${{ variables.report != 'none' and steps.update_result.output.ts == null }}",
-      with: { text: '{{ variables.result_text }}' },
+      if: '${{ steps.update_result.output.ts == null }}',
+      with: { text: '{{ variables.result_text }}', blocks: '${{ variables.result_blocks }}' },
     });
     expect(postResult.with).not.toHaveProperty('messageTs');
   });

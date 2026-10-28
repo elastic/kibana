@@ -65,10 +65,12 @@ test.describe('Workflow administrator sharing', { tag: tags.stateful.classic }, 
     await browserAuth.loginAsAdmin();
     const editor = pageObjects.workflowEditor;
     await editor.gotoWorkflow(workflowId);
-    await expect(page.testSubj.locator('workflowBottomBarRunButton')).toBeDisabled();
+    await expect(editor.runButton).toBeDisabled();
     await editor.openAccessDialog();
     await expect(page.getByRole('heading', { name: 'Access control', exact: true })).toBeVisible();
-    await expect(page.getByText("You are editing another user's access settings")).toBeVisible();
+    await expect(
+      page.getByText("You are editing another user's access settings", { exact: true })
+    ).toBeVisible();
     await editor.addAccessUser(admin.displayName);
     await editor.setAccessRole(admin.username, 'executor');
     await page.screenshot({
@@ -76,7 +78,7 @@ test.describe('Workflow administrator sharing', { tag: tags.stateful.classic }, 
       animations: 'disabled',
     });
     await editor.saveAccess();
-    await expect(page.testSubj.locator('workflowBottomBarRunButton')).toBeEnabled();
+    await expect(editor.runButton).toBeEnabled();
     await expect(editor.saveButton).toBeDisabled();
     const saved = await apiClient.get(`s/${scoutSpace.id}/api/workflows/workflow/${workflowId}`, {
       headers: ownerHeaders,

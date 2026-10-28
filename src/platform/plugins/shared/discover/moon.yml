@@ -85,6 +85,8 @@ dependsOn:
   - '@kbn/calculate-width-from-char-count'
   - '@kbn/deeplinks-observability'
   - '@kbn/esql-utils'
+  - '@kbn/esql-controls-utils'
+  - '@kbn/esql-language'
   - '@kbn/data-source'
   - '@kbn/managed-content-badge'
   - '@kbn/deeplinks-analytics'
@@ -127,7 +129,6 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/shared-ux-document-data-cascade'
   - '@kbn/zod'
-  - '@kbn/zod-helpers'
   - '@kbn/cps'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/shared-ux-error-boundary'
@@ -177,7 +178,6 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/discover-session-constants'
-  - '@kbn/field-types'
   - '@kbn/esql-browser'
 tags:
   - plugin
@@ -193,6 +193,4 @@ fileGroups:
     - test/**/*
     - .storybook/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

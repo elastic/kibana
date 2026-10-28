@@ -24,7 +24,7 @@ const evaluate = (
 
 const balanceReaderSignal: SignalEntry = {
   type: 'detection',
-  stream_name: 'logs',
+  source_id: 'logs',
   description: 'Balance reader connectivity failure',
   verdict: 'inconclusive',
   metadata: {

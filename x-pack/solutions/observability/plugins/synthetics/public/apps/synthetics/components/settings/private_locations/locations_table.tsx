@@ -44,6 +44,10 @@ import { ResetMonitorModal } from '../../monitors_page/management/monitor_list_t
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 import { isFixableByResetStatus } from '../../common/hooks/status_labels';
 import { DeleteLocationModal } from './delete_location_modal';
+import {
+  BrowserCompleteAgentCallout,
+  locationLabelsWithoutCompleteAgent,
+} from '../../common/components/browser_complete_agent_callout';
 
 interface ListItem extends PrivateLocation {
   monitors: number;
@@ -104,7 +108,7 @@ export const PrivateLocationsTable = ({
   const { canSave } = useSyntheticsSettingsContext();
   const { hasAtLeast } = useLicense();
   // Stats carry the server's answer (license + rebalance switch); license is the pre-load fallback.
-  const isAgentSharding = hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
+  const isShardingActive = hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
 
   const { services } = useKibana<ClientPluginsStart>();
 
@@ -173,7 +177,7 @@ export const PrivateLocationsTable = ({
           locationStats={agentStatsByLocation.get(item.id)}
           // The expanded panel already shows the agent count, so drop the badge there.
           hideAgentCount={expandedIds.has(item.id)}
-          isAgentSharding={agentStatsByLocation.get(item.id)?.isAgentSharding ?? isAgentSharding}
+          isShardingActive={agentStatsByLocation.get(item.id)?.isShardingActive ?? isShardingActive}
         />
       ),
     },
@@ -301,6 +305,11 @@ export const PrivateLocationsTable = ({
           agentPolicyId={item.agentPolicyId}
           locationLabel={item.label}
           locationMonitorCount={item.monitors}
+          missingCompleteAgent={
+            !agentStatsLoading &&
+            (locationMonitors.find((location) => location.id === item.id)?.browserCount ?? 0) > 0 &&
+            !agentStatsByLocation.get(item.id)?.agents.some((agent) => agent.complete)
+          }
         />
       );
     }
@@ -309,38 +318,30 @@ export const PrivateLocationsTable = ({
 
   const renderToolRight = () => {
     return [
-      <EuiFlexGroup
+      <EuiButton
         key="refreshPrivateLocations"
-        direction="column"
-        gutterSize="xs"
-        alignItems="center"
-        responsive={false}
+        data-test-subj="syntheticsRefreshPrivateLocationsButton"
+        iconType="refresh"
+        onClick={refreshApp}
+        isLoading={loading || agentStatsLoading}
       >
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="syntheticsRefreshPrivateLocationsButton"
-            iconType="refresh"
-            onClick={refreshApp}
-            isLoading={loading || agentStatsLoading}
-          >
-            {REFRESH_LABEL}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-            <FormattedMessage
-              id="xpack.synthetics.monitorManagement.lastUpdated"
-              defaultMessage="Updated {time}"
-              values={{ time: <RelativeTimestamp timestamp={lastRefresh} /> }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>,
+        {REFRESH_LABEL}
+      </EuiButton>,
     ];
   };
 
+  const locationsMissingCompleteAgent = locationLabelsWithoutCompleteAgent(
+    [...agentStatsByLocation.values()],
+    locationMonitors,
+    Boolean(loading || agentStatsLoading)
+  );
+
   return (
     <div>
+      <BrowserCompleteAgentCallout
+        locationLabels={locationsMissingCompleteAgent}
+        scope="locations"
+      />
       <EuiInMemoryTable<ListItem>
         itemId={'id'}
         tableLayout="auto"
@@ -354,6 +355,20 @@ export const PrivateLocationsTable = ({
             label={PRIVATE_LOCATIONS}
             pageIndex={pageIndex}
             pageSize={pageSize}
+            rightContent={
+              <EuiText
+                size="xs"
+                color="subdued"
+                className="eui-textNoWrap"
+                data-test-subj="syntheticsPrivateLocationsLastUpdated"
+              >
+                <FormattedMessage
+                  id="xpack.synthetics.monitorManagement.lastUpdated"
+                  defaultMessage="Updated {time}"
+                  values={{ time: <RelativeTimestamp timestamp={lastRefresh} /> }}
+                />
+              </EuiText>
+            }
           />
         }
         pagination={{

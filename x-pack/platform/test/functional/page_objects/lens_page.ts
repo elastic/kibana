@@ -277,27 +277,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       const field = opts.field;
       if (field) {
-        // Close too early discards the operation→field transition. Do not wait on the
-        // combobox input: setElement types `field` as a filter before the option is
-        // clicked. data-selected-field is the committed option display name and
-        // updates only after insertOrReplaceColumn. Independent of aria-invalid
-        // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
-        // Re-select on failure because EUI drops the option click under load, and the filter text
-        // setElement leaves behind makes both its own check and the input read back as `field`.
-        await retry.try(
-          async () => {
-            await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
-            await retry.waitForWithTimeout('field selection to commit', 10_000, async () => {
-              const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-              const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
-              return committedLabel === field;
-            });
-          },
-          {
-            description: `configureDimension - select field [${field}]`,
-            timeout: 60_000,
-            onFailureBlock: async () => comboBox.clearInputField('indexPattern-dimension-field'),
-          }
+        await this.selectCommittedOptionFromComboBox(
+          'indexPattern-dimension-field',
+          'data-selected-field',
+          field
         );
       }
 
@@ -1216,6 +1199,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const paginationControl = await testSubjects.find('lnsWorkspaceErrorsPaginationControl');
       const paginationItems = await paginationControl.findAllByCssSelector('.euiPagination__item');
       return paginationItems.length;
+    },
+
+    /** Waits for the visible warnings in the config panel to settle on the expected count */
+    async assertWorkspaceErrorCount(expectedCount: number) {
+      await retry.waitForWithTimeout(
+        `workspace error count to be ${expectedCount}`,
+        10_000,
+        async () => {
+          const actualCount = await this.getWorkspaceErrorCount();
+          if (actualCount !== expectedCount) {
+            throw new Error(`Expected ${expectedCount} workspace errors, found ${actualCount}`);
+          }
+          return true;
+        }
+      );
     },
 
     async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {

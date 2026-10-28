@@ -344,6 +344,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.logger.error('Failed to register entity attachment type', e);
       });
 
+    // Always register the attack attachment renderer so that attachments created
+    // while the feature flag was enabled continue to display correctly after the
+    // flag is disabled. The flag gates server-side writes; client-side rendering
+    // must be unconditional to avoid "Attachment type is not registered" errors.
+    // Lazily imported to keep the attack attachment module out of the page-load bundle.
+    import('./cases/attachments/attack')
+      .then(({ getAttackAttachment }) => {
+        cases.attachmentFramework.registerAttachment(getAttackAttachment());
+      })
+      .catch((e) => {
+        this.logger.error('Failed to register attack attachment type', e);
+      });
+
     this.registerDiscoverSharedFeatures(core, plugins);
 
     return this.contract.getSetupContract();
@@ -434,6 +447,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
         uiSettings: core.uiSettings,
+        rendering: core.rendering,
+        spaces: plugins.spaces,
+        registerImpactEntityOpener: plugins.agenticInvestigations?.registerImpactEntityOpener,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({
@@ -570,7 +586,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       search: plugins.data.search.search,
       resolveSecurityCanvasContext,
     });
-    registerAttacksFlyoutGroupedAttachment({ register, getSpaceId, resolveSecurityCanvasContext });
+    registerAttacksFlyoutGroupedAttachment({
+      register,
+      application: core.application,
+      getSpaceId,
+      resolveSecurityCanvasContext,
+    });
     registerRulesFlyoutGroupedAttachment({
       register,
       application: core.application,

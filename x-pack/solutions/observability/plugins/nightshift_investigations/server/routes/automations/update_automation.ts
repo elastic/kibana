@@ -10,7 +10,9 @@ import { z } from '@kbn/zod/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
+import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
+import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
 
@@ -42,25 +44,19 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       description: z.string().max(5000).nullable().optional(),
       tags: z.array(z.string().max(32)).max(50).optional(),
       isEnabled: z.boolean().optional(),
-      trigger: z.object({ rows: z.array(triggerRowSchema).min(1) }).optional(),
+      trigger: z.object({ rows: z.array(triggerRowSchema).min(1).max(100) }).optional(),
       execution: z
         .object({
-          promptTemplate: z.string().max(50000).nullable().optional(),
+          promptTemplate: promptTemplateSchema.nullable().optional(),
           reasoningMode: z.enum(['investigate', 'observe']).optional(),
           agentId: z.string().max(512).optional(),
           connectorId: z.string().max(512).optional(),
         })
         .optional(),
-      completion: z
-        .object({
-          action: z.enum(['create_investigation', 'post_to_slack', 'silent']).nullable().optional(),
-          targetMode: z.enum(['thread', 'channel', 'self']).nullable().optional(),
-          destination: z.string().max(500).nullable().optional(),
-        })
-        .optional(),
+      completions: z.array(automationCompletionSchema).max(10).optional(),
       runtime: z
         .object({
-          dailyDispatchLimit: z.number().int().min(0).nullable().optional(),
+          dailyDispatchLimit: z.number().int().min(1).nullable().optional(),
           timeoutSeconds: z.number().int().min(1).optional(),
           dedupeWindowSeconds: z.number().int().min(0).optional(),
           overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
@@ -90,20 +86,25 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
         tags: body.tags,
         isEnabled: body.isEnabled,
         trigger: body.trigger,
+        completions: body.completions,
       }),
       execution: applyChanges(existing.attributes.execution, body.execution ?? {}),
-      completion: applyChanges(existing.attributes.completion, body.completion ?? {}),
       runtime: applyChanges(existing.attributes.runtime, body.runtime ?? {}),
       updatedAt: new Date().toISOString(),
     };
 
+    const completions = z.array(automationCompletionSchema).max(10).safeParse(merged.completions);
+    if (!completions.success) throw badRequest(completions.error.message);
+    merged.completions = completions.data;
+
+    validateScheduledAutomation(merged);
+
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {
       try {
-        const yaml = generateWorkflowYaml(params.path.id, merged);
         await workflowsManagement.management.updateWorkflow(
           existing.attributes.workflowId,
-          { yaml },
+          { yaml: generateWorkflowYaml({ automationId: params.path.id, automation: merged }) },
           spaceId,
           request
         );

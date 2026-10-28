@@ -18,7 +18,6 @@ project:
   sourceRoot: x-pack/platform/plugins/private/esql_views
 dependsOn:
   - '@kbn/app-header'
-  - '@kbn/config-schema'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
@@ -34,6 +33,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/i18n'
   - '@kbn/management-plugin'
+  - '@kbn/scout'
   - '@kbn/share-plugin'
   - '@kbn/utility-types'
 tags:
@@ -47,7 +47,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

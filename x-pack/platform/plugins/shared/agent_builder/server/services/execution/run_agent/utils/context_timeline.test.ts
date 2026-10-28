@@ -10,11 +10,15 @@ import {
   ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
+  isAttachmentEvent,
 } from '@kbn/agent-builder-common';
 import {
   BOOM,
   T0,
+  T1,
   abortedExec0Timeline,
+  activityEventFixture,
+  attachmentEventFixture,
   completedRoundTimeline,
   customEventFixture,
   eventsNativeConversation,
@@ -22,20 +26,25 @@ import {
   pausedAndResumedRoundTimeline,
   pausedRoundTimeline,
   timelineFromRounds,
+  userMessageEvent,
 } from '../../../../test_utils/timeline';
 import {
-  customEvents,
+  standaloneEvents,
   eventsForContext,
+  executionSteps,
   groupTimelineEntries,
+  groupTimelineExecutions,
   groupTimelineRounds,
   isAwaitingPrompt,
   isInterruptedRound,
-  isTimelineCustomEvent,
+  isTimelineStandaloneEvent,
   isTimelineRound,
   isTimelineStandaloneUserMessage,
   lastExecutionTerminal,
+  linkedInputEvents,
   roundInterruption,
   roundResponse,
+  standaloneUserMessages,
   type ContextTimelineEvent,
   type TimelineEntry,
 } from './context_timeline';
@@ -45,7 +54,7 @@ const agentActor = { type: EventActorType.agent, id: 'agent-1' };
 
 /** The id of the event an entry is ordered by. */
 const entryId = (entry: TimelineEntry<ContextTimelineEvent>): string =>
-  isTimelineCustomEvent(entry) ? entry.event.id : entry.userMessage.id;
+  isTimelineStandaloneEvent(entry) ? entry.event.id : entry.userMessage.id;
 
 /** A completed round's raw timeline events (alias for readability). */
 const completedRoundEvents = completedRoundTimeline;
@@ -80,6 +89,76 @@ const independentIdsRound = (): TimelineEvent[] =>
       },
     },
   ] as unknown as TimelineEvent[];
+
+/** An execution a schedule started: no user message triggered it, so it forms no round. */
+const scheduledExecutionEvents = (): TimelineEvent[] =>
+  [
+    {
+      id: 'es',
+      type: TimelineEventType.executionStarted,
+      created_at: '2026-01-01T00:02:00.000Z',
+      actor: agentActor,
+      execution_id: 'exec-sched',
+      data: { trigger_type: 'schedule' },
+    },
+    {
+      id: 'et',
+      type: TimelineEventType.executionTerminated,
+      created_at: '2026-01-01T00:02:01.000Z',
+      actor: agentActor,
+      execution_id: 'exec-sched',
+      data: {
+        steps: [{ type: ConversationRoundStepType.reasoning, reasoning: 'snapshot' }],
+        model_usage: { connector_id: '', llm_calls: 0, input_tokens: 0, output_tokens: 0 },
+        time_to_first_token: 0,
+        time_to_last_token: 0,
+        outcome: { type: 'responded', response: { message: 'tick' } },
+      },
+    },
+  ] as unknown as TimelineEvent[];
+
+describe('groupTimelineExecutions', () => {
+  it('returns every execution with its triggers, including one no user message started', () => {
+    const timeline = [...independentIdsRound(), ...scheduledExecutionEvents()];
+
+    const executions = groupTimelineExecutions(timeline).map(({ id, triggers, events }) => ({
+      id,
+      triggers: triggers.map((event) => event.id),
+      events: events.map((event) => event.id),
+    }));
+
+    expect(executions).toEqual([
+      { id: 'exec-abc', triggers: ['um'], events: ['ec'] },
+      { id: 'exec-sched', triggers: [], events: ['es', 'et'] },
+    ]);
+    // the rounds view keeps only the execution a user message triggered
+    expect(groupTimelineRounds(timeline).map((round) => round.id)).toEqual(['exec-abc']);
+  });
+});
+
+describe('executionSteps', () => {
+  it('orders step events by sequence, and falls back to the terminal snapshot without any', () => {
+    const [started, terminated] = scheduledExecutionEvents();
+    const step = (sequence: number, reasoning: string): TimelineEvent =>
+      ({
+        id: `step-${sequence}`,
+        type: TimelineEventType.executionStep,
+        created_at: '2026-01-01T00:02:00.500Z',
+        actor: agentActor,
+        execution_id: 'exec-sched',
+        data: { sequence, step: { type: ConversationRoundStepType.reasoning, reasoning } },
+      } as unknown as TimelineEvent);
+
+    expect(executionSteps([started, step(1, 'second'), step(0, 'first'), terminated])).toEqual([
+      { type: ConversationRoundStepType.reasoning, reasoning: 'first' },
+      { type: ConversationRoundStepType.reasoning, reasoning: 'second' },
+    ]);
+    expect(executionSteps([started, terminated])).toEqual([
+      { type: ConversationRoundStepType.reasoning, reasoning: 'snapshot' },
+    ]);
+    expect(executionSteps(failedExecutionEvents('f', '2026-01-01T00:03:00.000Z'))).toEqual([]);
+  });
+});
 
 describe('groupTimelineRounds', () => {
   it('groups a normalized timeline into rounds, in order', () => {
@@ -229,7 +308,7 @@ describe('groupTimelineEntries with custom events', () => {
     const entries = groupTimelineEntries(timeline);
 
     expect(entries.map(entryId)).toEqual(['a::user_message', 'note', 'b::user_message']);
-    expect(isTimelineCustomEvent(entries[1])).toBe(true);
+    expect(isTimelineStandaloneEvent(entries[1])).toBe(true);
     expect(isTimelineRound(entries[1])).toBe(false);
     expect(isTimelineStandaloneUserMessage(entries[1])).toBe(false);
   });
@@ -245,14 +324,13 @@ describe('groupTimelineEntries with custom events', () => {
       ...completedRoundEvents('a', sameInstant),
     ];
 
-    expect(groupTimelineEntries(stored).map((entry) => isTimelineCustomEvent(entry))).toEqual([
+    expect(groupTimelineEntries(stored).map((entry) => isTimelineStandaloneEvent(entry))).toEqual([
       false,
       true,
     ]);
-    expect(groupTimelineEntries(reversed).map((entry) => isTimelineCustomEvent(entry))).toEqual([
-      true,
-      false,
-    ]);
+    expect(groupTimelineEntries(reversed).map((entry) => isTimelineStandaloneEvent(entry))).toEqual(
+      [true, false]
+    );
   });
 
   it('breaks a timestamp tie with a failed execution and a standalone message by stored position', () => {
@@ -318,7 +396,7 @@ describe('groupTimelineEntries with custom events', () => {
       'c::user_message',
       'n7',
     ]);
-    expect(entries.map((entry) => isTimelineCustomEvent(entry))).toEqual([
+    expect(entries.map((entry) => isTimelineStandaloneEvent(entry))).toEqual([
       false,
       true,
       false,
@@ -331,8 +409,141 @@ describe('groupTimelineEntries with custom events', () => {
     expect(groupTimelineRounds(stored).map((round) => round.id)).toEqual(['a', 'f', 'b', 'c']);
   });
 
-  it('is ignored by groupTimelineRounds and selected by customEvents', () => {
+  it('is ignored by groupTimelineRounds and selected by standaloneEvents', () => {
     expect(groupTimelineRounds(timeline).map((round) => round.id)).toEqual(['a', 'b']);
-    expect(customEvents(timeline).map((event) => event.id)).toEqual(['note']);
+    expect(standaloneEvents(timeline).map((event) => event.id)).toEqual(['note']);
+  });
+
+  it('is told apart from activity events, which standaloneEvents never selects', () => {
+    const renamed = activityEventFixture({ id: 'renamed', created_at: T1 });
+    expect(standaloneEvents([...timeline, renamed]).map((event) => event.id)).toEqual(['note']);
+  });
+});
+
+describe('standaloneUserMessages', () => {
+  it('keeps a message as standalone when only its input attachment events point at it', () => {
+    const message = {
+      id: 'm1',
+      type: TimelineEventType.userMessage,
+      created_at: T0,
+      actor: userActor,
+      data: { message: 'note' },
+    } as TimelineEvent;
+    const linked = {
+      id: 'att',
+      type: TimelineEventType.attachmentAdded,
+      created_at: T0,
+      actor: userActor,
+      trigger_event_id: 'm1',
+      data: {
+        attachment_id: 'a1',
+        attachment_type: 'text',
+        current_version: 1,
+        render_inline: false,
+        source: 'chat_input',
+        format: 2,
+      },
+    } as TimelineEvent;
+    expect(standaloneUserMessages([message, linked]).map((event) => event.id)).toEqual(['m1']);
+  });
+});
+
+describe('attachment events on the context timeline', () => {
+  it('re-stamps resume attachment events into their folded round', () => {
+    const conversation = eventsNativeConversation([
+      ...pausedAndResumedRoundTimeline(),
+      attachmentEventFixture({ id: 'att-exec0', executionId: 'r1::execution', toolCallId: 'c1' }),
+      attachmentEventFixture({
+        id: 'att-exec1',
+        executionId: 'r1::execution::1',
+        source: 'chat_input',
+        triggerEventId: 'r1::prompt_response::1',
+      }),
+    ]);
+
+    const [round] = groupTimelineRounds(eventsForContext(conversation));
+
+    expect(
+      round.events.filter(isAttachmentEvent).map((event) => [event.id, event.execution_id])
+    ).toEqual([
+      ['att-exec0', 'r1::execution'],
+      ['att-exec1', 'r1::execution'],
+    ]);
+    expect(standaloneEvents(eventsForContext(conversation))).toEqual([]);
+  });
+
+  it('gives a standalone message its linked input events and no standalone entry for them', () => {
+    const message = { ...userMessageEvent('m'), id: 'm1' } as TimelineEvent;
+    const linked = attachmentEventFixture({
+      id: 'att',
+      source: 'chat_input',
+      triggerEventId: 'm1',
+    });
+    const entries = groupTimelineEntries(
+      eventsForContext(eventsNativeConversation([message, linked]))
+    );
+
+    expect(entries).toHaveLength(1);
+    expect(
+      isTimelineStandaloneUserMessage(entries[0]) && entries[0].events.map((event) => event.id)
+    ).toEqual(['att']);
+  });
+
+  it('makes out-of-execution events standalone entries in timeline order', () => {
+    const conversation = eventsNativeConversation([
+      ...completedRoundTimeline('r1', T0),
+      attachmentEventFixture({ id: 'api', source: 'http_api', createdAt: T1 }),
+      attachmentEventFixture({
+        id: 'legacy-workflow',
+        source: 'workflow',
+        createdAt: T1,
+        legacy: true,
+      }),
+    ]);
+    const entries = groupTimelineEntries(eventsForContext(conversation));
+
+    expect(
+      entries.map((entry) => (isTimelineStandaloneEvent(entry) ? entry.event.id : 'round'))
+    ).toEqual(['round', 'api', 'legacy-workflow']);
+  });
+
+  it('never makes legacy chat_input events standalone entries', () => {
+    const conversation = eventsNativeConversation([
+      {
+        ...userMessageEvent('m'),
+        id: 'm1',
+        data: { message: 'x', attachment_refs: [{ attachment_id: 'a', version: 1 }] },
+      } as TimelineEvent,
+      attachmentEventFixture({ id: 'old-input', source: 'chat_input', legacy: true }),
+    ]);
+
+    expect(standaloneEvents(eventsForContext(conversation))).toEqual([]);
+  });
+
+  it('falls back to its own position for a chat_input event whose message is missing', () => {
+    const orphan = attachmentEventFixture({
+      id: 'orphan',
+      source: 'chat_input',
+      triggerEventId: 'gone',
+    });
+
+    expect(
+      standaloneEvents(eventsForContext(eventsNativeConversation([orphan]))).map(
+        (event) => event.id
+      )
+    ).toEqual(['orphan']);
+  });
+});
+
+describe('linkedInputEvents', () => {
+  it('selects the current-format chat_input events linked to the message', () => {
+    const events = [
+      attachmentEventFixture({ id: 'a', source: 'chat_input', triggerEventId: 'm1' }),
+      attachmentEventFixture({ id: 'b', source: 'execution', triggerEventId: 'm1' }),
+      attachmentEventFixture({ id: 'c', source: 'chat_input', triggerEventId: 'm1', legacy: true }),
+      attachmentEventFixture({ id: 'd', source: 'chat_input', triggerEventId: 'm2' }),
+    ];
+
+    expect(linkedInputEvents(events, 'm1').map((event) => event.id)).toEqual(['a']);
   });
 });

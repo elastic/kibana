@@ -6,10 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import { CUSTOM_YARA_SIGNATURES_PAGE_LABELS } from '../translations';
+import {
+  CUSTOM_YARA_SIGNATURES_PAGE_LABELS,
+  POLICY_ASSIGNMENT_INFO_TOOLTIP,
+} from '../translations';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { CustomYaraSignaturesApiClient } from '../service/api_client';
 import { CustomYaraSignaturesForm } from './components/custom_yara_signatures_form';
+import { CustomYaraSignaturesViewMode } from './components/custom_yara_signatures_view_mode';
 import { useHttp } from '../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -41,6 +45,8 @@ export const CustomYaraSignaturesList = memo(() => {
       allowCardCreateAction={canWriteCustomYaraSignatures}
       showAsSimpleTable
       showEnabledColumn
+      ViewModeComponent={CustomYaraSignaturesViewMode}
+      policyAssignmentInfoTooltip={POLICY_ASSIGNMENT_INFO_TOOLTIP}
     />
   );
 });

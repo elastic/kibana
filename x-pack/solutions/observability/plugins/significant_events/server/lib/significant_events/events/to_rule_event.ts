@@ -30,7 +30,7 @@ export const toRuleEvent = (event: SignificantEvent): CreateAlertEventData => {
       title: event.title,
       summary: event.summary,
       confidence: event.confidence,
-      stream_names: event.stream_names,
+      source_ids: event.source_ids,
       symptom_hypothesis: event.symptom_hypothesis,
       assessment_note: event.assessment_note,
       signals: event.signals,

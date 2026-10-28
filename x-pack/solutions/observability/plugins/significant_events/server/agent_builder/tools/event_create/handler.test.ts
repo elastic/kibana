@@ -13,11 +13,10 @@ jest.mock('../event_write/handler', () => ({
 }));
 
 const baseInput = {
-  stream_names: ['logs.checkout'],
+  source_ids: ['logs.checkout'],
   title: 'Checkout latency',
   symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',
   summary: 'P99 latency breached SLO',
-  severity: 'high' as const,
   confidence: 0.8,
 };
 
@@ -34,7 +33,6 @@ describe('createEventToolHandler', () => {
     await createEventToolHandler({
       eventSearchClient: {} as never,
       eventInput: baseInput,
-      alertEventsClient: {} as never,
     });
 
     expect(eventsWriteHandler).toHaveBeenCalledWith(
@@ -45,8 +43,7 @@ describe('createEventToolHandler', () => {
   it('passes explicit status through', async () => {
     await createEventToolHandler({
       eventSearchClient: {} as never,
-      eventInput: { ...baseInput, status: 'inactive' as const },
-      alertEventsClient: {} as never,
+      eventInput: { ...baseInput, status: 'inactive' },
     });
 
     expect(eventsWriteHandler).toHaveBeenCalledWith(
@@ -58,7 +55,6 @@ describe('createEventToolHandler', () => {
     const result = await createEventToolHandler({
       eventSearchClient: {} as never,
       eventInput: baseInput,
-      alertEventsClient: {} as never,
     });
 
     expect(result).toEqual({ event_id: 'agent-event-abcd1234', acknowledged: true });
@@ -68,7 +64,6 @@ describe('createEventToolHandler', () => {
     await createEventToolHandler({
       eventSearchClient: {} as never,
       eventInput: baseInput,
-      alertEventsClient: {} as never,
     });
 
     const delegatedInput = (eventsWriteHandler as jest.Mock).mock.calls[0][0].input;
@@ -78,19 +73,15 @@ describe('createEventToolHandler', () => {
     expect(delegatedInput).not.toHaveProperty('workflow_execution_id');
   });
 
-  it('passes alertEventsClient and logger through to eventsWriteHandler', async () => {
-    const alertEventsClient = { createAlertEvent: jest.fn() } as never;
+  it('passes the logger through to eventsWriteHandler', async () => {
     const logger = { error: jest.fn() } as never;
 
     await createEventToolHandler({
       eventSearchClient: {} as never,
       eventInput: baseInput,
-      alertEventsClient,
       logger,
     });
 
-    expect(eventsWriteHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ alertEventsClient, logger })
-    );
+    expect(eventsWriteHandler).toHaveBeenCalledWith(expect.objectContaining({ logger }));
   });
 });

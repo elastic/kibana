@@ -90,13 +90,12 @@ describe('RuleChangeHistoryApi', () => {
   });
 
   describe('getRuleChangeEvent', () => {
-    it('GETs the change by id and scopes the lookup with the rule id', async () => {
+    it('GETs the change by id', async () => {
       const { api, http } = buildApi();
 
-      await api.getRuleChangeEvent({ id: 'rule-1', eventId: 'evt-1' });
+      await api.getRuleChangeEvent({ eventId: 'evt-1' });
 
       expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/change_history/rules/evt-1', {
-        query: { rule_id: 'rule-1' },
         signal: undefined,
       });
     });
@@ -104,10 +103,9 @@ describe('RuleChangeHistoryApi', () => {
     it('encodes the change id path parameter', async () => {
       const { api, http } = buildApi();
 
-      await api.getRuleChangeEvent({ id: 'a/b', eventId: 'c/d' });
+      await api.getRuleChangeEvent({ eventId: 'c/d' });
 
       expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/change_history/rules/c%2Fd', {
-        query: { rule_id: 'a/b' },
         signal: undefined,
       });
     });
@@ -116,7 +114,7 @@ describe('RuleChangeHistoryApi', () => {
       const { api, http } = buildApi();
       const signal = new AbortController().signal;
 
-      await api.getRuleChangeEvent({ id: 'rule-1', eventId: 'evt-1', signal });
+      await api.getRuleChangeEvent({ eventId: 'evt-1', signal });
 
       expect(http.get).toHaveBeenCalledWith(
         '/internal/alerting/v2/change_history/rules/evt-1',
@@ -129,18 +127,14 @@ describe('RuleChangeHistoryApi', () => {
       const detail = { id: 'evt-1', snapshot: { name: 'rule' } };
       http.get.mockResolvedValueOnce(detail);
 
-      await expect(api.getRuleChangeEvent({ id: 'rule-1', eventId: 'evt-1' })).resolves.toEqual(
-        detail
-      );
+      await expect(api.getRuleChangeEvent({ eventId: 'evt-1' })).resolves.toEqual(detail);
     });
 
     it('propagates errors from http.get', async () => {
       const { api, http } = buildApi();
       http.get.mockRejectedValueOnce(new Error('nope'));
 
-      await expect(api.getRuleChangeEvent({ id: 'rule-1', eventId: 'evt-1' })).rejects.toThrow(
-        'nope'
-      );
+      await expect(api.getRuleChangeEvent({ eventId: 'evt-1' })).rejects.toThrow('nope');
     });
   });
 });

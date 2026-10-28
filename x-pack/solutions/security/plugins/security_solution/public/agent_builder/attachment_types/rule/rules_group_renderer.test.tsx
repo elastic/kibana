@@ -61,6 +61,71 @@ describe('createRulesGroupRenderer', () => {
     );
   });
 
+  it('renders nothing for a drafted rule', () => {
+    render(
+      <ul>
+        <Renderer attachments={[rule({ id: 'rule-draft' })]} />
+      </ul>
+    );
+
+    expect(screen.queryByRole('listitem')).not.toBeInTheDocument();
+    expect(getUrlForApp).not.toHaveBeenCalled();
+  });
+
+  it('ignores a drafted rule next to a saved rule', () => {
+    render(
+      <ul>
+        <Renderer attachments={[rule({ id: 'rule-draft' }), rule({ id: 'b', origin: 'r1' })]} />
+      </ul>
+    );
+
+    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(screen.getByRole('button')).toBeInTheDocument();
+    expect(getUrlForApp).not.toHaveBeenCalled();
+  });
+
+  it('does not count a drafted rule in the collapsed rules row', () => {
+    render(
+      <ul>
+        <Renderer
+          attachments={[
+            rule({ id: 'rule-draft' }),
+            rule({ id: 'a', origin: 'r1' }),
+            rule({ id: 'b', origin: 'r2' }),
+          ]}
+        />
+      </ul>
+    );
+
+    expect(screen.getByText('2 rules')).toBeInTheDocument();
+    expect(getUrlForApp).toHaveBeenCalledWith(
+      'securitySolutionUI',
+      expect.objectContaining({ deepLinkId: 'rules', path: '/management' })
+    );
+  });
+
+  it('collapses several rules into one row linking to rules management', () => {
+    render(
+      <ul>
+        <Renderer
+          attachments={[
+            rule({ id: 'a', origin: 'r1' }),
+            rule({ id: 'b', origin: 'r2' }),
+            rule({ id: 'c', origin: 'r2' }),
+          ]}
+        />
+      </ul>
+    );
+
+    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(screen.getByText('2 rules')).toBeInTheDocument();
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/app/security/rules/management');
+    expect(getUrlForApp).toHaveBeenCalledWith(
+      'securitySolutionUI',
+      expect.objectContaining({ deepLinkId: 'rules', path: '/management' })
+    );
+  });
+
   it('shows a rule attached twice once', () => {
     render(
       <ul>
@@ -85,25 +150,14 @@ describe('createRulesGroupRenderer', () => {
     expect(path.split('&')).toHaveLength(1);
   });
 
-  it('keeps unsaved rules that share a name as separate rows', () => {
+  it('counts unsaved rules that share a name separately', () => {
     render(
       <ul>
         <Renderer attachments={[rule({ id: 'a' }), rule({ id: 'b' })]} />
       </ul>
     );
 
-    expect(screen.getAllByRole('listitem')).toHaveLength(2);
-  });
-
-  it('renders one row per rule', () => {
-    render(
-      <ul>
-        <Renderer
-          attachments={[rule({ id: 'a', origin: 'r1' }), rule({ id: 'b', origin: 'r2' })]}
-        />
-      </ul>
-    );
-
-    expect(screen.getAllByRole('listitem')).toHaveLength(2);
+    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(screen.getByText('2 rules')).toBeInTheDocument();
   });
 });

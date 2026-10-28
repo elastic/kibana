@@ -968,6 +968,85 @@ createTaskRunner({ taskInstance, fakeRequest}: RunContext) {
 },
 ```
 
+### Service account scope
+
+Instead of an API key, a task can run as the service account bound to a workload. This requires service accounts to be enabled (`xpack.security.serviceAccounts.enabled`).
+
+The task type lists the workload types its tasks can run as, which its plugin registers with `core.security.serviceAccounts.registerWorkloadType`. It also passes in the plugin's `withScopedRequestForWorkload`: Core scopes workload calls to the plugin that registered the workload type, so Task Manager can't make that call itself:
+
+```js
+public setup(core: CoreSetup, plugins: { taskManager }) {
+  taskManager.registerTaskDefinitions({
+    myWorkflowTask: {
+      title: 'My workflow task',
+      runAs: {
+        // At least one. Must match /^[a-z0-9_]+$/, and `task_identity` is reserved.
+        workloadTypes: ['my_workflow'],
+        withScopedRequest: async (params, fn) => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.security.serviceAccounts.withScopedRequestForWorkload(params, fn);
+        },
+      },
+      createTaskRunner,
+    },
+  });
+}
+```
+
+To schedule a task as a workload, pass `runAs` on the task instance. No `request` is needed, and Task Manager doesn't create an API key for the task, even if a `request` is passed:
+
+```js
+const task = await taskManager.schedule({
+  taskType: 'myWorkflowTask',
+  schedule: { interval: '5m' },
+  params,
+  runAs: {
+    workloadType: 'my_workflow',
+    workloadId: workflow.id,
+    spaceId,
+    // The service account the workload is expected to be bound to, or `null` for whichever is bound.
+    expectedServiceAccountId: binding.serviceAccountId,
+  },
+});
+```
+
+Scheduling throws if service accounts are disabled, if the Encrypted Saved Objects plugin can't encrypt, if the task type doesn't list `workloadType`, or if a `runAs` field is invalid.
+
+Task Manager stores `runAs` as the task's `credential` (with `type: 'service_account'`), together with a random value in the encrypted `encryptedCredential` field. `credential` is part of that field's AAD, so `encryptedCredential` can't be decrypted once `credential` is changed outside Task Manager.
+
+`runAs` is set only when the task is created:
+
+- Update APIs and middleware can't change it.
+- `ensureScheduled` throws a conflict error (409) if the existing task's `runAs` doesn't match the call's, including when only one of them has a `runAs`.
+- `bulkSchedule` throws a conflict error (409) for a `runAs` task whose id already exists, and for a task that would overwrite an existing task with a `credential`. `schedule` never overwrites an existing task.
+
+To catch these conflicts, check `error.statusCode === 409`, which all three APIs set. `bulkSchedule` throws a saved-object error payload rather than an `Error`, so `SavedObjectsErrorHelpers.isConflictError` doesn't detect its conflicts.
+
+To change `runAs`, remove the task and schedule it again.
+
+Before the task runs, Task Manager reads its `credential` again through the Encrypted Saved Objects plugin, which verifies it. The task runner then gets `runAs` instead of `fakeRequest` and `enrichRequest`, which are undefined. Do all work that needs credentials inside `runAs.withScopedRequest`: its request is authenticated as the service account bound to the workload, and stops working once `fn` settles.
+
+```js
+createTaskRunner({ taskInstance, runAs }: RunContext) {
+  return {
+    async run() {
+      return runAs.withScopedRequest(async (request) => {
+        const scopedClusterClient = elasticsearch.client.asScoped(request);
+        await scopedClusterClient.asCurrentUser.search({ query });
+      });
+    },
+  };
+},
+```
+
+Pass `{ expectedServiceAccountId }` as the second argument to reject the run before a token is minted if the workload is bound to another account. `null` is the same as omitting it. A task scheduled with a non-null `expectedServiceAccountId` always uses that one, and rejects a different one with a 403.
+
+`security.authc.getCurrentUser` returns `null` for this request. Use `security.authc.getPrincipal` to identify the service account.
+
+Errors thrown before `fn` is called are tagged as user errors if the workload isn't bound, is bound to another account, or its token can't be minted, and as framework errors otherwise (for example, when service accounts are disabled). They're handled like any other error from `run`. Errors thrown by `fn` are the task's own.
+
+Task Manager doesn't start the run, and tries again later (in 5 minutes for a one-time task, or on its schedule for a recurring one), if the task type doesn't define `runAs` or doesn't list the task's workload type, if the credential type isn't supported by this version of Kibana, or if the credential can't be read. If `credential` was changed outside Task Manager, or `encryptedCredential` is missing or can't be decrypted, Task Manager sets the task's status to `failed` instead of deleting it, and doesn't claim it again. Once the cause is fixed, `runSoon` runs it again.
+
 ### API Key Invalidation
 
 When a task with an API key is deleted, we mark the API key for invalidation. Because the API key could be

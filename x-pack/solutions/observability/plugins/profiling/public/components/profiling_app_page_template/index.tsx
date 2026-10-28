@@ -11,17 +11,17 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { AppHeader } from '@kbn/app-header';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useDefaultTimeRange } from '../../hooks/use_default_time_range';
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
-import { AddDataTabs } from '../../views/add_data_view/types';
 import { ProfilingSchemaContextProvider } from '../contexts/profiling_schema/profiling_schema_context';
-import { SchemaSelector } from '../schema_selector';
+import { ProfilingAppSchemaSelector } from '../schema_selector';
+import { UniversalProfilingSetupIncompleteCallout } from '../universal_profiling_setup_incomplete_callout';
 import { useSchemaQueryParam } from '../../hooks/use_schema_query_param';
 import { useProfilingStatus } from '../contexts/profiling_status/use_profiling_status';
 import { AsyncStatus } from '../../hooks/use_async';
@@ -53,10 +53,9 @@ export function ProfilingAppPageTemplate({
   children,
   tabs = [],
   hideSearchBar = false,
-  noDataConfig,
   restrictWidth = false,
   pageTitle = i18n.translate('xpack.profiling.appPageTemplate.pageTitle', {
-    defaultMessage: 'Universal Profiling',
+    defaultMessage: 'Profiling',
   }),
   showBetaBadge = false,
   customSearchBar,
@@ -66,7 +65,6 @@ export function ProfilingAppPageTemplate({
   children?: React.ReactElement;
   tabs?: AppHeaderTab[];
   hideSearchBar?: boolean;
-  noDataConfig?: NoDataPageProps;
   restrictWidth?: boolean;
   pageTitle?: AppHeaderTitle;
   showBetaBadge?: boolean;
@@ -144,9 +142,7 @@ export function ProfilingAppPageTemplate({
       label: i18n.translate('xpack.profiling.headerActionMenu.addData', {
         defaultMessage: 'Add data',
       }),
-      href: router.link('/add-data-instructions', {
-        query: { selectedTab: AddDataTabs.Kubernetes },
-      }),
+      href: router.link('/add-data-instructions', { query: {} }),
       iconType: 'plusCircle',
     },
   };
@@ -154,16 +150,13 @@ export function ProfilingAppPageTemplate({
   return (
     <>
       {/*
-        In some contexts like when using the noDataConfig prop, the page template might choose not to render it's children. 
-        When that happens, because AppHeader is nested inside the template, it won't be rendered.
-        Without an explicit AppHeader component, the Chrome Next framework would attempt to render the compatibility header with the back button derived from breadcrumbs.
-        This component is here to prevent these edge cases from rendering incorrect back buttons. 
-        When AppHeader exists, this component doesn't do anything so the explicit back buttons we do want to render (when using the back prop) won't be hidden. 
-        It's safe to render both at the same time, suppression only happens for auto-generated back targets.
+        The observability page template is lazy loaded, so AppHeader, which is nested inside it, isn't rendered until the template loads.
+        Until then, Chrome Next renders its compatibility header with a back button derived from the breadcrumbs.
+        This component prevents that back button from flashing on the first load.
+        It's safe to render it next to AppHeader: it only suppresses auto-generated back targets, so the back buttons set with the back prop still render.
       */}
       <SuppressChromeBackButton />
       <ObservabilityPageTemplate
-        noDataConfig={noDataConfig}
         restrictWidth={restrictWidth}
         pageSectionProps={{
           contentProps: {
@@ -204,6 +197,9 @@ export function ProfilingAppPageTemplate({
                   : undefined
               }
             />
+            {showSchemaSelector && schema === ProfilingSchema.ECS && (
+              <UniversalProfilingSetupIncompleteCallout />
+            )}
             {!hideSearchBar && (
               <EuiFlexItem grow={false}>
                 {customSearchBar ?? (
@@ -213,7 +209,7 @@ export function ProfilingAppPageTemplate({
             )}
             {showSchemaSelector && (
               <EuiFlexItem grow={false} css={{ alignSelf: 'flex-start' }}>
-                <SchemaSelector />
+                <ProfilingAppSchemaSelector />
               </EuiFlexItem>
             )}
             <EuiFlexItem>{children}</EuiFlexItem>

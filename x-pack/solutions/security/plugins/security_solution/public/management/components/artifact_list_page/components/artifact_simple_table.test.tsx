@@ -108,18 +108,29 @@ describe('ArtifactSimpleTable', () => {
     ]);
   });
 
-  it('renders the artifact name', () => {
+  it('renders the artifact name as a button', () => {
     render();
 
+    expect(renderResult.getByRole('button', { name: 'YARA rule one' })).toBeInTheDocument();
     expect(renderResult.getByTestId('testTable-columnName')).toHaveTextContent('YARA rule one');
+  });
+
+  it('invokes onAction when the name is clicked', () => {
+    render({ allowCardEditAction: false, allowCardDeleteAction: false });
+
+    fireEvent.click(renderResult.getByTestId('testTable-columnName'));
+
+    expect(onAction).toHaveBeenCalledWith({ type: 'view', item });
   });
 
   it('renders operating system badges with human-readable labels', () => {
     render();
 
-    expect(renderResult.getByTestId('testTable-osBadge-windows')).toHaveTextContent('Windows');
-    expect(renderResult.getByTestId('testTable-osBadge-linux')).toHaveTextContent('Linux');
-    expect(renderResult.getByTestId('testTable-osBadge-macos')).toHaveTextContent('Mac');
+    expect(renderResult.getByTestId('testTable-columnOs-osBadge-windows')).toHaveTextContent(
+      'Windows'
+    );
+    expect(renderResult.getByTestId('testTable-columnOs-osBadge-linux')).toHaveTextContent('Linux');
+    expect(renderResult.getByTestId('testTable-columnOs-osBadge-macos')).toHaveTextContent('Mac');
   });
 
   it('renders the updated by avatar and name', () => {
@@ -201,6 +212,14 @@ describe('ArtifactSimpleTable', () => {
     render({ items: [], pagination: { ...pagination, totalItemCount: 0 } });
 
     expect(renderResult.getByTestId('testTable-noResults')).toHaveTextContent('No items found');
+  });
+
+  it('names the row actions menu button after the artifact of that row', () => {
+    render();
+
+    expect(renderResult.getByTestId('testTable-rowActions-button')).toHaveAccessibleName(
+      `Open actions for ${item.name}`
+    );
   });
 
   it('opens the row actions menu with edit and delete', async () => {
@@ -512,14 +531,46 @@ describe('ArtifactSimpleTable', () => {
       expect(renderResult.getByTestId('policyMenuItem-2')).toHaveTextContent('Policy two');
     });
 
-    it('shows the policy id when the policy is not in the policies map', () => {
+    it('shows the policy id as not accessible when the policy is not in the policies map', async () => {
       render({
         items: [generator.generate({ ...item, tags: [buildPerPolicyTag('policy-unknown')] })],
       });
 
+      const firstPolicy = renderResult.getByTestId('testTable-columnPolicyAssignment-firstPolicy');
+      expect(firstPolicy).toHaveTextContent('policy-unknown');
+      expect(firstPolicy).not.toHaveAttribute('href');
+      expect(firstPolicy.style.color).not.toBe('');
+
+      fireEvent.mouseOver(firstPolicy);
+
+      await waitFor(() => {
+        expect(
+          renderResult.getByText('Policy is not accessible from the current space')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('does not show the policy as not accessible while policies are loading', async () => {
+      useArtifactAssignedPoliciesMock.mockReturnValue({
+        policies: {},
+        isLoading: true,
+      });
+
+      render({
+        items: [generator.generate({ ...item, tags: [buildPerPolicyTag('policy-1')] })],
+      });
+
+      const firstPolicy = renderResult.getByTestId('testTable-columnPolicyAssignment-firstPolicy');
+      expect(firstPolicy.style.color).toBe('');
+
+      fireEvent.mouseOver(firstPolicy);
+
+      await waitFor(() => {
+        expect(renderResult.getByRole('tooltip')).toHaveTextContent('policy-1');
+      });
       expect(
-        renderResult.getByTestId('testTable-columnPolicyAssignment-firstPolicy')
-      ).toHaveTextContent('policy-unknown');
+        renderResult.queryByText('Policy is not accessible from the current space')
+      ).not.toBeInTheDocument();
     });
   });
 });

@@ -9,6 +9,7 @@
 
 import type { DummyRuleMap, OxlintOverride } from 'oxlint';
 
+import { featureFlagSnapshotAllowlist } from './feature_flag_snapshot_allowlist.mts';
 import { moduleMigrationRule } from './module_migration.mts';
 
 const HOOK_FORM_LIB_DEPRECATION =
@@ -27,6 +28,12 @@ export const kibanaRules: DummyRuleMap = {
   '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
   '@kbn/eslint/no_wrapped_error_in_logger': 'error',
   '@kbn/eslint/no_npx_playwright': 'error',
+  '@kbn/eslint/no_feature_flag_snapshot': [
+    'error',
+    {
+      allow: featureFlagSnapshotAllowlist,
+    },
+  ],
   '@kbn/eslint/module_migration': moduleMigrationRule,
   '@kbn/disable/no_protected_eslint_disable': 'error',
   '@kbn/disable/no_naked_eslint_disable': 'error',
@@ -36,7 +43,8 @@ export const kibanaOverrides: OxlintOverride[] = [
   {
     files: ['**/*.{js,mjs,ts,tsx}'],
     rules: {
-      'no-restricted-imports': [
+      // A separate rule, so these stay warnings next to the error-level `no-restricted-imports`.
+      '@kbn/eslint/no_deprecated_imports': [
         'warn',
         {
           paths: [
@@ -149,6 +157,29 @@ export const kibanaOverrides: OxlintOverride[] = [
     excludeFiles: ['**/test/**'],
     rules: {
       '@kbn/eslint/no_sync_import_from_plugin': 'error',
+    },
+  },
+  {
+    files: ['**/*.{ts,tsx}'],
+    excludeFiles: [
+      '**/*.test.{ts,tsx}',
+      '**/*.mock.{ts,tsx}',
+      '**/*.stories.{ts,tsx}',
+      '**/__tests__/**',
+      '**/__mocks__/**',
+      '**/__fixtures__/**',
+      '**/__snapshots__/**',
+      '**/test/**',
+      '**/tests/**',
+      '**/scripts/**',
+      '**/cypress/**',
+      '**/e2e/**',
+      '**/ftr_e2e/**',
+      '**/.storybook/**',
+      'src/platform/packages/shared/kbn-zod/**',
+    ],
+    rules: {
+      '@kbn/eslint/require_lazy_zod_schema': 'warn',
     },
   },
   {

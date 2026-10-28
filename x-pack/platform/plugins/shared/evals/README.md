@@ -150,16 +150,17 @@ steps:
 
 The full set of `ai.evals.*` steps:
 
-| Step                          | Purpose                                                        |
-| ----------------------------- | -------------------------------------------------------------- |
-| `ai.evals.startExperiment`    | Create the experiment/execution ids that group a run's scores. |
-| `ai.evals.resolveDataset`     | Load datasets and their examples.                              |
-| `ai.evals.executeTask`        | Run the thing being evaluated against one example.             |
-| `ai.evals.evaluateTrace`      | Grade one trace with one or more evaluators.                   |
-| `ai.evals.ingestScores`       | Persist evaluator scores for one example.                      |
-| `ai.evals.evaluateExample`    | Execute, evaluate, and ingest scores for a single example.     |
-| `ai.evals.evaluateDataset`    | Resolve datasets and evaluate every example (the main step).   |
-| `ai.evals.compareExperiments` | Statistically compare two or more experiments.                 |
+| Step                           | Purpose                                                        |
+| ------------------------------ | -------------------------------------------------------------- |
+| `ai.evals.startExperiment`     | Create the experiment/execution ids that group a run's scores. |
+| `ai.evals.resolveDataset`      | Load datasets and their examples.                              |
+| `ai.evals.executeTask`         | Run the thing being evaluated against one example.             |
+| `ai.evals.evaluateTrace`       | Grade one trace with one or more evaluators.                   |
+| `ai.evals.ingestScores`        | Persist evaluator scores for one example.                      |
+| `ai.evals.persistOnlineScores` | Persist an online evaluation's scores for one trace.           |
+| `ai.evals.evaluateExample`     | Execute, evaluate, and ingest scores for a single example.     |
+| `ai.evals.evaluateDataset`     | Resolve datasets and evaluate every example (the main step).   |
+| `ai.evals.compareExperiments`  | Statistically compare two or more experiments.                 |
 
 The Workflows YAML editor autocompletes and validates these steps and their inputs as you author.
 
@@ -240,7 +241,7 @@ The endpoint requires `read_evals` and current-user read access to `traces-*` an
 
 The plugin UI is organized into five navigation tabs:
 
-- **Experiments** — paginated listing of evaluation experiments, detail view with per-evaluator stats, and a comparison view with paired t-test results. The **New experiment** flow launches or saves workflow-based runs and streams live progress on the detail page (see [Workflow-based experiment execution](#workflow-based-experiment-execution)).
+- **Experiments** — paginated listing of evaluation experiments, detail view with per-evaluator stats, and a comparison view that runs a paired hypothesis test per evaluator (McNemar for pass/fail scores, Wilcoxon signed-rank or paired t-test otherwise). The **New experiment** flow launches or saves workflow-based runs and streams live progress on the detail page (see [Workflow-based experiment execution](#workflow-based-experiment-execution)).
 - **Datasets** — manage evaluation datasets and examples (CRUD, JSON editor), tag and set the maturity of a dataset, and filter the listing by tag or maturity
 - **Evaluators** — a catalog of every evaluator in the space, searchable and filterable by kind (LLM judge or code) and origin (built-in or user-defined), showing each one's version and required inputs. Selecting a name opens a read-only view of the stored definition, including the versions saved before it. Built-ins are read-only; user-defined judges can be created, edited, and deleted here by users holding `manage_evals`. The editor collects the judge's prompts, the trace evidence it needs, and its output scores, and can run the draft against a real trace ID before saving — the connector chosen for that test is not stored on the definition.
 

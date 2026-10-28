@@ -39,17 +39,10 @@ export interface ConnectorTelemetryMetadata {
   spaceId?: string;
 }
 
-export interface ChatCompleteAnonymizationTarget {
-  targetType: 'data_view' | 'index_pattern' | 'index';
-  targetId: string;
-}
-
 /**
- * Optional anonymization metadata consumers can pass so inference can resolve
- * field-based policy for a target.
+ * Optional anonymization metadata consumers can pass to inference.
  */
 export interface ChatCompleteAnonymizationMetadata {
   profileId?: string;
   replacementsId?: string;
-  target?: ChatCompleteAnonymizationTarget;
 }

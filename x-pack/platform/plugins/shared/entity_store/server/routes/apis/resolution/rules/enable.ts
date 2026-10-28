@@ -10,7 +10,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from '../../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES, type ResolutionRuleId } from '../../../../../common';
-import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../../constants';
+import { RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS } from '../../../constants';
 import type { EntityStorePluginRouter } from '../../../../types';
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
@@ -31,7 +31,7 @@ export function registerResolutionRulesEnable(router: EntityStorePluginRouter) {
         },
       },
       security: {
-        authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,
+        authz: RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS,
       },
       enableQueryVersion: true,
     })

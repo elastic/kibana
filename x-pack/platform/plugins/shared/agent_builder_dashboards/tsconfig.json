@@ -5,6 +5,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
+    "@kbn/data-source",
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/i18n",
@@ -17,6 +18,7 @@
     "@kbn/agent-builder-server",
     "@kbn/as-code-dashboard-schema",
     "@kbn/dashboard-plugin",
+    "@kbn/embeddable-plugin",
     "@kbn/agent-builder-dashboards-common",
     "@kbn/dashboard-agent-authoring",
     "@kbn/zod",
@@ -34,7 +36,6 @@
     "@kbn/agent-builder-sml-plugin",
     "@kbn/as-code-filters-transforms",
     "@kbn/as-code-shared-transforms",
-    "@kbn/data-views-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/presentation-publishing",
     "@kbn/scout",

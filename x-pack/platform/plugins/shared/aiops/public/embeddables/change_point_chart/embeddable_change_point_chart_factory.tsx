@@ -58,10 +58,10 @@ export const getChangePointChartEmbeddableFactory = (
 
       const changePointManager = initializeChangePointControls(state);
 
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
+      const dataSources$ = new BehaviorSubject<DataView[] | undefined>([
         await pluginStart.data.dataViews.get(state.data_view_id),
       ]);
 
@@ -134,7 +134,7 @@ export const getChangePointChartEmbeddableFactory = (
         },
         dataLoading$,
         blockingError$,
-        dataViews$,
+        dataSources$,
       });
 
       const ChangePointDetectionComponent = getChangePointDetectionComponent(
@@ -210,6 +210,7 @@ export const getChangePointChartEmbeddableFactory = (
               onError={onError}
               embeddingOrigin={embeddingOrigin}
               lastReloadRequestTime={lastReloadRequestTime}
+              parentApi={parentApi}
             />
           );
         },

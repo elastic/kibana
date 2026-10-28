@@ -64,9 +64,9 @@ Every AlertZero HTTP route uses `withAlertZeroEnabled` to check the per-space se
 
 Both AlertZero attachment renderers in Agent Builder also observe availability after registration. Losing eligibility unmounts their content and stops active query observers; restoring eligibility shows the content again. Stored attachments and the authorization of their underlying shared APIs are unchanged.
 
-None of this gates the investigation and escalation details flyout. The `agenticInvestigations` plugin registers that flyout regardless of the subscription, the setting and `AccessBoundary`; its write actions follow the Agentic Investigations UI capabilities or API privileges, and its proposed actions the Proposed Actions privileges. The AlertZero feature grants those API privileges: **All** grants `read_investigations`, `manage_investigations`, `read_escalations` and `manage_escalations`, and **Read** grants `read_investigations` and `read_escalations`. So an AlertZero All user can assign, change status, close and escalate in the flyout without the Agentic Investigations feature.
+None of this gates the investigation and escalation details flyout. The `agenticInvestigations` plugin registers that flyout regardless of the subscription, the setting and `AccessBoundary`; its write actions follow the Agentic Investigations UI capabilities or API privileges, and its proposed actions the Proposed Actions privileges. AlertZero grants no investigation or escalation privileges: reading investigations, and managing them (assign, change status, close), requires the Agentic Investigations feature (Read or All with the "Manage investigations" sub-feature), and viewing or managing escalations requires its "View escalations" or "Manage escalations" sub-feature privilege. Roles that need them are granted them directly, including the service accounts of the Alert Triage, Attack Discovery, Threat Hunt, Endpoint analysis, Rule Tuning and Rule Coverage workers. Manage investigations is a common baseline on every worker role. Alert Triage, Attack Discovery and Threat Hunt attach impact, Endpoint analysis closes investigations, and a missing grant silently skips impact.
 
-AlertZero's own queue and escalations pages gate those actions on the Agentic Investigations UI capabilities and AlertZero **All** (`useAlertZeroInvestigationsCapabilities`).
+AlertZero's own queue and escalations pages gate every investigation and escalation action on the Agentic Investigations UI capabilities alone (`useAlertZeroInvestigationsCapabilities`). The queue's impact pills and entity filter need `readInvestigations`; without it the queue skips those requests and shows a callout naming the missing Agentic Investigations Read privilege.
 
 These availability checks gate **UI and API access only**. They do not stop, disable, or unschedule background work when a subscription changes.
 
@@ -76,13 +76,18 @@ Workers install when a user enables one or saves settings on one. There is no Wa
 
 Managed-workflow ownership remains registered when optional runtime dependencies are missing, so their absence does not cause installed AlertZero workflows to be deleted as orphans.
 
-Each Worker runs as its own `alertzero_<worker>` service account, with a role of the same name. AlertZero creates both from the browser, with the admin's privileges, when a Worker is turned on without an account, and reuses existing ones without changing them.
+Each Worker runs as its own `alertzero_<worker>` service account. AlertZero creates the account from the browser, with the admin's privileges, when a Worker is turned on without one, and reuses existing accounts without changing them. The account gets a built-in role, which users can't edit or delete and which updates with each release. AlertZero never creates a role: it checks that the built-in role exists, and a Worker whose role is missing fails to turn on with an error naming the role. The role's name depends on the deployment:
+
+- **Stateful (self-managed and Elastic Cloud Hosted):** the Elasticsearch reserved role `alertzero_<worker>`, named like the account.
+- **Serverless:** the predefined role `_alertzero_<worker>`. Predefined role names must start with `_`. It is defined in `elasticsearch-controller` (`internal/config/roles/security.yaml`) and mirrored in `kbn-es` (`serverless_resources/project_roles/security/roles.yml`) and Security Solution's Serverless roles.
+
+`WORKER_SERVICE_ACCOUNT_NAMES` and `getWorkerRoleName` in `@kbn/alertzero-common` give each Worker's account and role name. The roles' privileges live outside Kibana: in Elasticsearch (`KibanaOwnedReservedRoleDescriptors`) for stateful, and in elasticsearch-controller for Serverless, with its Kibana mirrors. Changing a Worker's privileges means updating both, plus the mirrors.
 
 The Worker's child workflows run as the same account. Every `workflow.execute` and `workflow.executeAsync` call in a Worker's chain sets `run-as-mode: inherit` and names the child by a literal `workflow-id`. Inheritance requires a literal id, and the step input schema ignores unknown keys, so a misspelled `run-as-mode` silently runs the child as the original caller. Action workflows are the exception: proposals start them by a templated id, so they keep the default identity. `service_account_inheritance.test.ts` enforces both rules.
 
-Inheritance needs a parent that runs as a service account. Running a child workflow such as a review or sweep by hand fails at its first child call, so run the Worker instead. The Attack Discovery pipeline that `security.attack-discovery.run` starts is a known gap: it still runs as the user who enabled the Worker.
+Inheritance needs a parent that runs as a service account. Running a child workflow such as a review or sweep by hand fails at its first child call, so run the Worker instead. The Attack Discovery pipeline that `security.attack-discovery.run` starts is a known gap: its alert retrieval, generation and validation workflows still run as the user who enabled the Worker, because the step starts them from code. The step itself runs as the Worker's account, so its generation events are attributed to that account and tagged, and every user in the space with access to Attack Discovery sees them in the generations view. The Attack discoveries it persists are attributed to the user who last enabled the Worker or saved its settings.
 
-**Known limitation (MVP):** AlertZero does not detect or repair a Worker whose role or service account was deleted. If the role is deleted, the Worker's runs fail with authorization errors until the role is re-created with the same name and privileges. If the account is deleted (Kibana only allows this with force while Workers are bound to it), the Worker's runs fail until it is re-bound to a new account through the worker API (`PATCH /internal/alertzero/workers/{workerId}` with a new `settings.serviceAccountId` and the Worker's current `settingsRevision`). Detecting and repairing both cases is planned post-MVP.
+**Known limitation (MVP):** AlertZero does not detect or repair a Worker whose service account was deleted (built-in roles can't be deleted). If the account is deleted (Kibana only allows this with force while Workers are bound to it), the Worker's runs fail until it is re-bound to a new account through the worker API (`PATCH /internal/alertzero/workers/{workerId}` with a new `settings.serviceAccountId` and the Worker's current `settingsRevision`). Detecting and repairing this is planned post-MVP.
 
 To inspect a Worker's installed managed workflow — its rendered YAML, triggers, and executions — in the Workflows UI, also set:
 
@@ -103,6 +108,9 @@ This is optional. AlertZero's own Watch pages work without it; it only affects w
 | Browser app `/app/alertzero` | Not registered (nav links to `alertzero` / `alertzero:*` are removed by chrome) |
 | Managed workflow **owner** | Not registered (`registerManagedWorkflowOwner` skipped) |
 | Managed workflow initialization | Not called |
+| Telemetry event types (`alertzero_*`, see [`server/telemetry/README.md`](server/telemetry/README.md)) | Not registered (`core.analytics.registerEventType` skipped) |
+| Browser telemetry event types (`alertzero_ui_*`, see [`public/telemetry/README.md`](public/telemetry/README.md)) | Not registered (`core.analytics.registerEventType` skipped in the browser too) |
+| Workflow step `alertzero.reportWorkerOutcome`, the only emitter of the `alertzero_ad_worker_*` run events and the Worker Investigation-close event (see [`server/step_types/report_worker_outcome/README.md`](server/step_types/report_worker_outcome/README.md)) | Not registered, server or browser (`registerStepDefinition` skipped) |
 | Leftover installed Worker documents | Global Workflows orphan cleanup removes docs whose owner is unregistered |
 
 With the kill switch on but the advanced setting off, the Kibana feature privileges *are* registered — `features.registerKibanaFeature` cannot be scoped per space — so the `alertzero` read/write privileges appear in the Roles and Spaces pickers regardless of the per-space toggle.
@@ -231,16 +239,16 @@ The current YAML files are Worker stubs rather than final Watch-team definitions
 6. A PATCH composes the next settings from the stored ones and validates the result with the same complete schema (semantics under [Worker-specific settings](#worker-specific-settings-extras)). Failures return 400 naming the field; nothing is written. Do not add per-Worker branches to the server path — extend the declaration.
 7. `toSettings` projects stored values into `WorkerSettings`: `workerId`, `autonomy`, `scheduleInterval` for schedule-driven Workers, `extras` for Workers that declare them. Read and PATCH use the same names and nesting.
 8. Add settings-module tests for defaults, patches, and that projected keys are not stripped. Add managed-definition tests for valid rendered YAML and registry tests for catalog/settings wiring. Imported YAML changes require an explicit managed-definition version decision.
-9. If the Worker only acts on records another Worker writes, so it has nothing to do while that Worker is off, add an entry to `WORKER_DEPENDENCIES` in `public/pages/watches/worker_dependencies/worker_dependencies.tsx`. The entry carries its own dialog and warning copy. Workers that merely get fewer inputs do not belong there.
+9. If the Worker loses some or all of its work while another Worker is off (it acts on records that Worker writes, or hands records to it that only it reads), add an entry to `WORKER_DEPENDENCIES` in `public/pages/watches/worker_dependencies/worker_dependencies.tsx`. The entry carries its own dialog and warning copy, which names only what is lost.
 10. Every child workflow the Worker calls with `workflow.execute` or `workflow.executeAsync`, directly or through another child, sets `run-as-mode: inherit` with a literal `workflow-id` (see [Worker lifecycle](#worker-lifecycle)). Action workflows keep the default identity.
 
 The Workers service owns per-space installation, reading persisted values, enable/disable, and upgrades. Settings responses carry a logical revision (`settingsRevision`, `null` before the per-space document exists). A settings PATCH sends the revision its draft was built from; the server returns 409 when the stored revision differs and the client keeps the draft. Compare-then-write, not an atomic guard.
 
 ### Scheduled Workers
 
-Not every Worker is schedule-driven — the rest are alert- or event-triggered — so a schedule is a per-Worker opt-in rather than part of `CommonWorkerTemplateValues`. A Worker without one carries no interval in its template values and none in its projected settings.
+Not every Worker is schedule-driven — some are event-triggered — so a schedule is a per-Worker opt-in rather than part of `CommonWorkerTemplateValues`. A Worker without one carries no interval in its template values and none in its projected settings.
 
-Scheduled Workers today: `system-security-floor-attack-discovery` (default `24h`), `system-security-detection-rule-tuning` (default `2h`) and `system-security-detection-rule-coverage` (default `1h`). The two Detection Workers also keep a `manual` trigger for on-demand sweeps.
+Scheduled Workers today: `system-security-floor-alert-triage` (default `15m`), `system-security-floor-attack-discovery` (default `24h`), `system-security-detection-rule-tuning` (default `2h`) and `system-security-detection-rule-coverage` (default `1h`). The Alert Triage and the two Detection Workers also keep a `manual` trigger for on-demand sweeps.
 
 The interval is a positive count with a unit of minutes, hours or days (`'30m'`, `'24h'`, `'7d'`). It is validated by the `WorkerScheduleInterval` OpenAPI schema at the route boundary and rendered verbatim into the trigger's `every`. Seconds are not offered: the workflow engine only accepts `s` at 60 or above. Changing an interval rewrites the workflow YAML, and the post-install `updateWorkflow` call is what re-registers the Task Manager task.
 
@@ -281,6 +289,22 @@ Tests to update:
 - `worker_settings.test.ts` — add the Worker to `SCHEDULED_WORKER_IDS` so the "rejects an interval patch" cases stop running against it.
 - `worker_settings_compat.test.ts` — regenerate the settings contract snapshot (see [Changing Worker settings safely](#changing-worker-settings-safely)).
 
+### Alert Triage sweep
+
+Alert Triage no longer runs once per rule execution, and enabling it attaches nothing to rules. It is a scheduled sweep that plans budgeted, fair batches of waiting alerts and starts one batch workflow per rule, so triage stays a bounded share of Task Manager.
+
+- **Sweep** (`system-security-floor-alert-triage`, per space, concurrency `drop`, max 1): checks Task Manager headroom, reclaims claims whose batch is gone, picks a batch per rule within the budget, claims the alerts with `az:triage_pending`, starts the batches with `workflow.executeAsync`, and records each execution id on that batch's alerts as `az:triage_exec:<id>`. If that tag cannot be stored after retries, the sweep cancels the batch it just started, so the next sweep does not plan the same alerts again while it runs. Every sweep writes `skip_reason` (`none`, `tm_behind`, `tm_unknown`, `live_batches_unreadable`, `in_flight_ceiling`, `nothing_pending`) and its planning numbers to its own execution output, including `aged_out_alerts`, the count of open alerts older than the look-back that were never triaged (`-1` if that count failed).
+- **Batch** (`system-security-floor-alert-triage-batch`, installed once, concurrency `queue`): 4 batches analyse at once per space and the rest wait without holding a Task Manager slot, up to 40 in flight. Each batch opens one Investigation, calls Alert Analysis, writes verdict tags and notes, removes the claim, and hands confident false positives to the closure review as one proposal. `server/alert_triage/batch_concurrency.test.ts` pins the YAML numbers to the planner constants.
+- **Settings:** `scheduleInterval` (default `15m`), `extras.budgetPerHour` (default `1300`), `extras.lookbackHours` (default `24`), `extras.minSeverity` (default `low`, which triages every alert; a higher value keeps lower-severity alerts from ever reaching the Worker), `extras.excludeBuildingBlocks` (default `false`; an EQL sequence's own alert is not a building block, so sequences stay covered) and `extras.excludedRuleTags` (default empty, at most 50 tags; a rule carrying any listed tag is skipped, matched exactly including case), plus the existing confidence floor and autonomy. The look-back is the search window: older alerts are never read or tagged.
+
+**What a cost unit means.** A batch costs 5 units of fixed overhead (the Investigation, the Alert Analysis hop and the review hand-off) plus 1 unit per alert. The hourly budget is scaled to the sweep interval (`floor(budgetPerHour × minutes / 60)`), so changing the interval does not change the hourly total. Units are a planning currency, not tokens or seconds. Each rule gets up to 30 alerts first, then rules are topped up round-robin to 100 until the budget runs out.
+
+**Alert Analysis settings the Worker path uses.** The batch calls `system-security-alert-analysis` with `calledByWorker: true`, `autoCloseEnabled: false` (closing is a proposal, never inline), `autoCloseConfidenceScoreMinThreshold` from this Worker's setting, the `alertzero_balanced` model feature, and the Investigation id. Its tag prefix comes from the space's Alert Analysis runtime config, so alerts Alert Analysis tagged on its own are left alone. Alert Analysis run on its own keeps reading its own space settings and is unchanged.
+
+### Attack Discovery Worker
+
+The per-space `system-security-floor-attack-discovery` Worker runs `system-security-attack-discovery-worker`, which generates attacks through `system-security-attack-discovery-batched-generation` and starts one `system-security-attack-discovery-review` per attack. Generation runs the `security.attack-discovery.run` step with `ground_truth_gate_enabled: false`, so it does no false-positive triage of its own. The review's FP/TP analysis (`system-security-attack-discovery-fp-tp-analysis`) is the only place an attack is judged a false positive, and the review applies that verdict.
+
 ### Worker-specific settings (`extras`)
 
 `enabled` sits beside `settings`; `autonomy` and `scheduleInterval` are the shared fields inside it. Anything else lives under `settings.extras`, owned by the Worker's Watch team and closed per Worker. A PATCH is the editable subset of the read body plus the revision GET returned:
@@ -300,7 +324,7 @@ Adding a field to an existing Worker touches only Watch-owned code (Rule Tuning'
 
 The shared Watch page renders the interval control from the presence of `scheduleInterval`, offers only the Worker's `allowedAutonomyLevels` (one level renders as a fixed value), and mounts the registered custom component. Every card also carries a Models row linking to Stack Management → Feature Settings, where models are picked per space for each AlertZero tier; a Worker has no model setting of its own, so don't add one to `extras`. Every edit, including Enabled, changes a draft. Save validates all dirty Workers, then writes Worker by Worker with the revision each draft started from; failed Workers keep draft and error; Discard drops unsaved edits without undoing successful writes.
 
-Hard Worker dependencies (`WORKER_DEPENDENCIES`) are judged client-side against every Worker's saved enabled state, with this page's draft on top, so they work across Watches. Turning off a Worker that an enabled Worker depends on asks for confirmation before the draft changes; turning a Worker on never asks. Each Worker header carries one warning icon listing its reasons. After Save, an acknowledge-only notice lists why a saved Worker that is on can't do its work: a missing model after every save, a disabled provider only after the save that turned the Worker on. The notice never blocks the save.
+Worker dependencies (`WORKER_DEPENDENCIES`) are judged client-side against every Worker's saved enabled state, with this page's draft on top, so they work across Watches. Turning off a Worker that an enabled Worker depends on asks for confirmation before the draft changes; turning a Worker on never asks. Each Worker header carries one warning icon listing its reasons. After Save, an acknowledge-only notice lists why a saved Worker that is on cannot do all of its work: a missing model after every save, a disabled provider only after the save that turned the Worker on. The notice never blocks the save.
 
 ### Changing Worker settings safely
 
@@ -365,7 +389,7 @@ AlertZero is not live. A new required extra or schedule key that has a default i
 - Nesting routes under `/app/security` or importing Security page wrappers
 - Pixel-perfect Throughline CSS port
 - Implementing Workflows / Activity / Performance / Guardrails data
-- No `.kibana-threat-intel-hunt-findings` index / Intelligence Hub findings queue
+- No `.kibana-threat-intel-hunt-findings` index / hunt findings queue
 - No AlertZero create or delete surface for custom watches
 
 ## Development

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { AgentStatusKueryHelper } from '@kbn/fleet-plugin/common/services';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
@@ -42,10 +41,7 @@ const createCountAccess = async () => {
   const access = await createPolicyAccessContext(
     endpointAppContextService,
     { request: httpServerMock.createKibanaRequest(), spaceId: SPACE_ID },
-    ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ,
-    jest.fn(async () => [
-      { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-    ]) as unknown as StartServicesAccessor
+    ENDPOINT_METADATA_LIST_REQUIRED_AUTHZ
   );
   return {
     access,

@@ -15,16 +15,14 @@ import {
 } from '@kbn/agent-builder-visualizations-common';
 import { toEsqlQueryState } from '@kbn/custom-content-common';
 import {
-  createPanelFailureResult,
-  EMBEDDABLE_TYPE_BY_RENDERER,
-  type InlinePanelOperationType,
   type PanelContent,
   type PanelContentAttempt,
+  getRendererEmbeddableType,
 } from '@kbn/dashboard-agent-authoring';
 
 /** Maps a stored visualization payload onto the embeddable that renders it. */
 const toPanelContent = (data: VisualizationAttachmentData): PanelContent => {
-  const type = EMBEDDABLE_TYPE_BY_RENDERER[getEffectiveRenderer(data)];
+  const type = getRendererEmbeddableType(getEffectiveRenderer(data));
 
   // Custom content stores markup rather than a chart config, so its panel config is rebuilt.
   if (isCustomContentVisualization(data)) {
@@ -51,8 +49,8 @@ export const createAttachmentPanelResolver = ({
 }: {
   attachments: AttachmentStateManager;
 }) => {
-  return (attachmentId: string, operationType: InlinePanelOperationType): PanelContentAttempt => {
-    const fail = (error: string) => createPanelFailureResult(operationType, attachmentId, error);
+  return (attachmentId: string): PanelContentAttempt => {
+    const fail = (error: string): PanelContentAttempt => ({ type: 'failure', error });
 
     const record = attachments.getAttachmentRecord(attachmentId);
     if (!record) {

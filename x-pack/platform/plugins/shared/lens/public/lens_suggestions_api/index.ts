@@ -14,6 +14,7 @@ import type {
   VisualizeEditorContext,
   DataViewsState,
   TypedLensByValueInput,
+  DefaultVisualizationOverrides,
 } from '@kbn/lens-common';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import { createSuggestionWithAttributes, selectAndApplyChartSuggestion } from './helpers';
@@ -26,6 +27,7 @@ interface SuggestionsApiProps {
   excludedVisualizations?: string[];
   preferredChartType?: ChartType;
   preferredVisAttributes?: TypedLensByValueInput['attributes'];
+  defaultVisualizationOverrides?: DefaultVisualizationOverrides;
 }
 
 export const suggestionsApi = ({
@@ -36,6 +38,7 @@ export const suggestionsApi = ({
   excludedVisualizations,
   preferredChartType,
   preferredVisAttributes,
+  defaultVisualizationOverrides,
 }: SuggestionsApiProps) => {
   const initialContext =
     'textBasedColumns' in context && context.textBasedColumns
@@ -99,6 +102,7 @@ export const suggestionsApi = ({
     subVisualizationId: isInitialSubTypeSupported ? preferredChartType?.toLowerCase() : undefined,
     dataViews,
     query,
+    defaultVisualizationOverrides,
   });
   if (!suggestions.length) return [];
 
@@ -132,6 +136,7 @@ export const suggestionsApi = ({
     visualizationState: primarySuggestion.visualizationState,
     dataViews,
     query,
+    defaultVisualizationOverrides,
   }).filter(
     (sug) =>
       // Datatables are always return as hidden suggestions

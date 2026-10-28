@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useState } from 'react';
 import {
   EuiButtonIcon,
@@ -14,6 +15,7 @@ import {
   EuiToolTip,
   useEuiI18n,
 } from '@elastic/eui';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import type { Automation } from '../../hooks/use_automations';
 import { listLabels } from '../translations';
 
@@ -57,11 +59,14 @@ export const AutomationActions = ({
             key="clone"
             icon="copy"
             onClick={(event: React.MouseEvent) => {
-              event.stopPropagation();
               setIsOpen(false);
               onClone();
             }}
             data-test-subj="cloneAutomation"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.CLONE_AUTOMATION,
+              element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+            })}
           >
             {listLabels.clone}
           </EuiContextMenuItem>,
@@ -70,11 +75,14 @@ export const AutomationActions = ({
             icon="trash"
             color="danger"
             onClick={(event: React.MouseEvent) => {
-              event.stopPropagation();
               setIsOpen(false);
               onDelete();
             }}
             data-test-subj="deleteAutomation"
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.DELETE_AUTOMATION,
+              element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+            })}
           >
             {listLabels.delete}
           </EuiContextMenuItem>,

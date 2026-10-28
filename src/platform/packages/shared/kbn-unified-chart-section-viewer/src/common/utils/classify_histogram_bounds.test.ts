@@ -28,9 +28,9 @@ describe('parseHistogramBounds', () => {
     expect(parseHistogramBounds(10, 1)).toBeUndefined();
   });
 
-  it('returns undefined when min equals max', () => {
-    expect(parseHistogramBounds(4.2, 4.2)).toBeUndefined();
-    expect(parseHistogramBounds(0, 0)).toBeUndefined();
+  it('keeps a point when min equals max', () => {
+    expect(parseHistogramBounds(4.2, 4.2)).toEqual({ min: 4.2, max: 4.2 });
+    expect(parseHistogramBounds(0, 0)).toEqual({ min: 0, max: 0 });
   });
 
   it('returns min and max when min is less than max', () => {

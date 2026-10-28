@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import type {
   CoverageOverviewFilter,
   CoverageOverviewRuleActivity,
@@ -15,6 +16,8 @@ import type { CoverageOverviewDashboard } from '../../../rule_management/model/c
 export interface CoverageOverviewDashboardState {
   showExpandedCells: boolean;
   filter: CoverageOverviewFilter;
+  framework: MitreFramework;
+  frameworkVersion: string | undefined;
   isLoading: boolean;
   isMitreError: boolean;
   data: CoverageOverviewDashboard | undefined;
@@ -25,6 +28,7 @@ export const SET_SHOW_EXPANDED_CELLS = 'setShowExpandedCells' as const;
 export const SET_RULE_ACTIVITY_FILTER = 'setRuleActivityFilter' as const;
 export const SET_RULE_SOURCE_FILTER = 'setRuleSourceFilter' as const;
 export const SET_RULE_SEARCH_FILTER = 'setRuleSearchFilter' as const;
+export const SET_FRAMEWORK = 'setFramework' as const;
 
 export type Action =
   | {
@@ -42,6 +46,10 @@ export type Action =
   | {
       type: typeof SET_RULE_SEARCH_FILTER;
       value: string;
+    }
+  | {
+      type: typeof SET_FRAMEWORK;
+      value: MitreFramework;
     };
 
 export const createCoverageOverviewDashboardReducer =
@@ -69,6 +77,10 @@ export const createCoverageOverviewDashboardReducer =
           search_term: value.length !== 0 ? value : undefined,
         };
         return { ...state, filter: updatedFilter };
+      }
+      case SET_FRAMEWORK: {
+        const { value } = action;
+        return { ...state, framework: value };
       }
       default:
         return state;

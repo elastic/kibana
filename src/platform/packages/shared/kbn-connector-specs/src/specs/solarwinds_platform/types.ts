@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 /** `Orion.AlertConfigurations.Severity` values, indexed by their numeric code. */
 export const SOLARWINDS_SEVERITIES = [
@@ -112,10 +112,8 @@ export const ListActiveAlertsInputSchema = lazySchema(() =>
       .boolean()
       .optional()
       .describe('true returns only acknowledged alerts, false only unacknowledged alerts.'),
-    triggeredAfter: z
-      .string()
+    triggeredAfter: isoDateTime({ offset: true })
       .max(64)
-      .datetime({ offset: true })
       .optional()
       .describe(
         'Only return alerts triggered after this ISO 8601 time, e.g. 2026-10-05T08:00:00Z. A time with an offset is converted to UTC.'

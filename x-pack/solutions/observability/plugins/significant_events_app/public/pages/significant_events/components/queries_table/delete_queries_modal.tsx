@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useMemo } from 'react';
 import { QUERY_TYPE_MATCH } from '@kbn/significant-events-schema';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import type { SignificantEventQueryRow } from '../../../../hooks/use_fetch_discovery_queries';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
@@ -43,6 +44,7 @@ export function DeleteQueriesModal({
   onCancel,
   isLoading = false,
 }: DeleteQueriesModalProps) {
+  const { getSourceTitle } = useSourcesById();
   const columns = useMemo<Array<EuiBasicTableColumn<SignificantEventQueryRow>>>(
     () => [
       {
@@ -67,15 +69,15 @@ export function DeleteQueriesModal({
         ),
       },
       {
-        field: 'stream_name',
+        field: 'source_id',
         name: STREAM_COLUMN_LABEL,
         width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
+          <EuiBadge color="hollow">{getSourceTitle(item.source_id)}</EuiBadge>
         ),
       },
     ],
-    []
+    [getSourceTitle]
   );
 
   return (
@@ -167,8 +169,8 @@ const SEVERITY_COLUMN_LABEL = i18n.translate(
 );
 
 const STREAM_COLUMN_LABEL = i18n.translate(
-  'xpack.significantEventsApp.deleteQueriesModal.streamColumn',
-  { defaultMessage: 'Stream' }
+  'xpack.significantEventsApp.sources.deleteQueriesModal.sourceColumn',
+  { defaultMessage: 'Source' }
 );
 
 const TYPE_COLUMN_LABEL = i18n.translate(

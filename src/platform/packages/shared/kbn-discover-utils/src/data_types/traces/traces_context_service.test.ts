@@ -18,6 +18,20 @@ describe('traces_context_service', () => {
       expect(service.isTracesIndexPattern('trace-*')).toBe(true);
       expect(service.isTracesIndexPattern('logs-*')).toBe(false);
     });
+
+    it('only matches index names that start with trace/traces', () => {
+      const service = createTracesContextService({ indices: null });
+      expect(service.isTracesIndexPattern('shipping-traces')).toBe(false);
+      expect(service.isTracesIndexPattern('stack-traces')).toBe(false);
+      expect(service.isTracesIndexPattern('apm.traces')).toBe(false);
+    });
+
+    it('still resolves remote clusters, data stream backing indices and the data selector', () => {
+      const service = createTracesContextService({ indices: null });
+      expect(service.isTracesIndexPattern('cluster1:traces-*')).toBe(true);
+      expect(service.isTracesIndexPattern('.ds-traces-apm-default-2026.10.14-000001')).toBe(true);
+      expect(service.isTracesIndexPattern('traces-*::data')).toBe(true);
+    });
   });
 
   describe('when APM indices are available', () => {

@@ -36,6 +36,7 @@ import {
   INVALID_CONFIGURATION_ERROR,
 } from '../../routes/monitor_cruds/monitor_validation';
 import { normalizeProjectMonitor } from './normalizers';
+import { isSecretConnectionsEnabled } from '../../config';
 
 type FailedError = Array<{ id?: string; reason: string; details: string; payload?: object }>;
 
@@ -118,7 +119,7 @@ export class ProjectMonitorFormatter {
       (monitor) => (monitor.maintenanceWindows?.length ?? 0) > 0
     );
     const maintenanceWindowsPromise = needsMaintenanceWindows
-      ? this.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(this.spaceId)
+      ? this.syntheticsMonitorClient.getMaintenanceWindows(this.spaceId)
       : Promise.resolve([]);
 
     const [locations, existingMonitors, maintenanceWindows] = await Promise.all([
@@ -247,7 +248,8 @@ export class ProjectMonitorFormatter {
         validationResult: validateMonitor(
           normalizedMonitor as MonitorFields,
           this.spaceId,
-          isServerless
+          isServerless,
+          isSecretConnectionsEnabled(this.server.config)
         ),
         monitorId: monitor.id,
       });

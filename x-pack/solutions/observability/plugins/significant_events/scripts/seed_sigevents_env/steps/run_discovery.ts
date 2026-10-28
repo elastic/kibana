@@ -258,7 +258,7 @@ export async function runDiscovery(
   await runManagedWorkflow(DISCOVERY_WORKFLOW_ID, 'discovery', {}, ctx, config, log);
 
   const params = new URLSearchParams({
-    stream: ctx.streamName,
+    source_id: ctx.sourceId,
     from: ctx.generatedAt,
     perPage: '100',
   });

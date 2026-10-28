@@ -14,7 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { TimeRange } from '@kbn/es-query';
-import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { EsqlSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -38,7 +38,7 @@ export const getMockedSearchApi = ({
     api: {
       uuid: 'testEmbeddable',
       savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
-      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+      dataSources$: new BehaviorSubject<DataView[] | undefined>([
         searchSource.getField('index') ?? dataViewMock,
       ]),
       title$: new BehaviorSubject<string | undefined>(undefined),
@@ -71,7 +71,7 @@ export const getMockedSearchApi = ({
       grid: new BehaviorSubject<DiscoverGridSettings | undefined>(savedSearch.grid),
       rows: new BehaviorSubject<DataTableRecord[]>([]),
       totalHitCount: new BehaviorSubject<number | undefined>(0),
-      columnsMeta: new BehaviorSubject<Record<string, DatatableColumnMeta> | undefined>(undefined),
+      resultDataSource: new BehaviorSubject<EsqlSource | undefined>(undefined),
       inspectorAdapters: new BehaviorSubject<Adapters>({}),
     },
     setters: {

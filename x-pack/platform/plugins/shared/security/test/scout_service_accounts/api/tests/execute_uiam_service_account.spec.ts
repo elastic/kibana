@@ -7,15 +7,9 @@
 
 import { randomUUID } from 'crypto';
 
-import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { deleteUiamServiceAccount } from '../fixtures/uiam_service_account_cleanup';
-import {
-  createUiamServiceAccount,
-  HEADERS,
-  ORG_ADMIN_HEADERS,
-} from '../fixtures/uiam_service_account_create';
+import { apiTest, HEADERS, ORG_ADMIN_HEADERS } from '../fixtures';
 
 const uniqueName = () => `sa-uiam-execution-${randomUUID()}`;
 
@@ -24,15 +18,12 @@ apiTest.describe(
   'Execute UIAM service account workloads',
   { tag: ['@local-serverless-search'] },
   () => {
-    const accountIds: string[] = [];
     const roleName = uniqueName();
     const spaceId = uniqueName();
     let accountId: string;
     let endpoint: string;
 
-    apiTest.beforeAll(async ({ esClient, apiServices, samlAuth }) => {
-      // Interactive login seeds the local UIAM organization key used by this suite.
-      await samlAuth.asInteractiveUser('admin');
+    apiTest.beforeAll(async ({ esClient, apiServices }) => {
       await esClient.security.putRole({
         name: roleName,
         cluster: ['monitor'],
@@ -41,13 +32,12 @@ apiTest.describe(
       await apiServices.spaces.create({ id: spaceId, name: 'UIAM service account execution' });
     });
 
-    apiTest.beforeEach(async ({ apiClient }) => {
+    apiTest.beforeEach(async ({ apiClient, uiamServiceAccounts }) => {
       endpoint = `internal/service_accounts_test/${uniqueName()}`;
-      accountId = await createUiamServiceAccount(apiClient, {
+      ({ id: accountId } = await uiamServiceAccounts.create({
         name: uniqueName(),
         roles: [roleName],
-      });
-      accountIds.push(accountId);
+      }));
       const bound = await apiClient.post(endpoint, {
         headers: ORG_ADMIN_HEADERS,
         body: { operation: 'bind', serviceAccountId: accountId },
@@ -70,7 +60,6 @@ apiTest.describe(
     apiTest.afterAll(async ({ esClient, apiServices }) => {
       const failures: Error[] = [];
       const cleanup = [
-        ...accountIds.map((id) => async () => deleteUiamServiceAccount(id)),
         async () => esClient.security.deleteRole({ name: roleName, refresh: 'wait_for' }),
         async () => apiServices.spaces.delete(spaceId),
       ];

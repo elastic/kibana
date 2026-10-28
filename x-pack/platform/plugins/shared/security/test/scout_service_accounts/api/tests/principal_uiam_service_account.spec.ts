@@ -8,12 +8,10 @@
 import { randomUUID } from 'crypto';
 
 import { MOCK_IDP_GATEWAY_SHARED_SECRET } from '@kbn/mock-idp-utils';
-import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
-import { deleteUiamServiceAccount } from '../fixtures/uiam_service_account_cleanup';
-import { createUiamServiceAccount, HEADERS } from '../fixtures/uiam_service_account_create';
+import { apiTest, HEADERS } from '../fixtures';
 import { exchangeUiamServiceAccountToken } from '../fixtures/uiam_service_account_token';
 
 const PRINCIPAL_PATH = 'internal/service_accounts_test/_principal';
@@ -25,17 +23,11 @@ apiTest.describe(
   () => {
     let accountId: string;
 
-    apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
-      // Interactive login seeds the local UIAM organization key used to create the account.
-      await samlAuth.asInteractiveUser('admin');
-      accountId = await createUiamServiceAccount(apiClient, {
+    apiTest.beforeAll(async ({ uiamServiceAccounts }) => {
+      ({ id: accountId } = await uiamServiceAccounts.create({
         name: `sa-uiam-principal-${randomUUID()}`,
         roles: ['viewer'],
-      });
-    });
-
-    apiTest.afterAll(async () => {
-      if (accountId) await deleteUiamServiceAccount(accountId);
+      }));
     });
 
     apiTest('classifies the request as that service account', async ({ apiClient }) => {

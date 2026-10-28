@@ -71,12 +71,10 @@ export function getComputedFeatureInstructions(excludedTypes: readonly string[] 
  */
 function toComputedFeature(
   generator: ComputedFeatureGenerator,
-  value: Record<string, unknown>,
-  streamName: string
+  value: Record<string, unknown>
 ): BaseFeature {
   return {
     id: generator.type,
-    stream_name: streamName,
     description: generator.description,
     type: generator.type,
     properties: value,
@@ -133,7 +131,7 @@ export async function generateAllComputedFeatures({
       options.logger.warn(`Computed feature generator "${generator.type}" failed: ${message}`);
       errors.push({ feature: generator.type, error: message });
     } else if (result.value !== undefined) {
-      features.push(toComputedFeature(generator, result.value, options.target.id));
+      features.push(toComputedFeature(generator, result.value));
     }
   }
 

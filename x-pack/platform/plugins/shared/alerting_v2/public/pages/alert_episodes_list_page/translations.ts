@@ -53,6 +53,20 @@ export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
   }
 );
 
+export const EPISODES_LIST_COLUMN_SOURCE = i18n.translate(
+  'xpack.alertingV2.episodes.columns.source',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const EPISODES_LIST_COLUMN_SUPPRESSED = i18n.translate(
+  'xpack.alertingV2.episodes.columns.suppressed',
+  {
+    defaultMessage: 'Suppressed',
+  }
+);
+
 export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
   i18n.translate('xpack.alertingV2.episodes.itemCount', {
     defaultMessage: 'Showing {count, plural, one {# alert} other {# alerts}}',
@@ -110,6 +124,37 @@ export const EPISODES_FILTER_BAR_SEARCH_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Filter alerts',
   }
 );
+
+export const EPISODES_FILTER_BAR_SEARCH_SYNTAX_ERROR = i18n.translate(
+  'xpack.alertingV2.episodes.filterBar.searchSyntaxErrorTooltip',
+  {
+    defaultMessage: 'Fix the KQL syntax before updating.',
+  }
+);
+
+export const getEpisodesFilterBarNumericValueError = (field: string) =>
+  i18n.translate('xpack.alertingV2.episodes.filterBar.numericValueErrorTooltip', {
+    defaultMessage: '{field} requires a numeric value.',
+    values: { field },
+  });
+
+export const getEpisodesFilterBarDateValueError = (field: string) =>
+  i18n.translate('xpack.alertingV2.episodes.filterBar.dateValueErrorTooltip', {
+    defaultMessage: '{field} requires an ISO date value.',
+    values: { field },
+  });
+
+export const getEpisodesFilterBarWildcardError = (field: string) =>
+  i18n.translate('xpack.alertingV2.episodes.filterBar.wildcardErrorTooltip', {
+    defaultMessage: 'Wildcards are not supported for {field}.',
+    values: { field },
+  });
+
+export const getEpisodesFilterBarRangeValueError = (field: string) =>
+  i18n.translate('xpack.alertingV2.episodes.filterBar.rangeValueErrorTooltip', {
+    defaultMessage: '{field} range comparisons require a string or number.',
+    values: { field },
+  });
 
 export const BULK_ACKNOWLEDGE = i18n.translate(
   'xpack.alertingV2.episodes.bulkActions.acknowledge',
@@ -227,7 +272,7 @@ export const EPISODES_KPIS_ERROR = i18n.translate('xpack.alertingV2.episodes.kpi
 export const CLASSIC_ALERT_DETAILS_TITLE = i18n.translate(
   'xpack.alertingV2.episodes.classicAlertDetails.title',
   {
-    defaultMessage: 'Classic alert',
+    defaultMessage: 'Classic rule alert',
   }
 );
 

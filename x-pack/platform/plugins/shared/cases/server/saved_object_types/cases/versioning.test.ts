@@ -213,4 +213,15 @@ describe('caseSavedObjectType model version transformations', () => {
       expect(migrated.attributes).toEqual(expect.objectContaining({ assignees: [{ uid: '123' }] }));
     });
   });
+
+  describe('Model version 10 to 11', () => {
+    it('does not add extract_observables_source to existing cases', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 10,
+        toVersion: 11,
+      });
+      expect(migrated.attributes).not.toHaveProperty('extract_observables_source');
+    });
+  });
 });

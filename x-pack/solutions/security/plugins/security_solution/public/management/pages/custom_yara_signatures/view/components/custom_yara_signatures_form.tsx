@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { CodeEditor, type monaco } from '@kbn/code-editor';
+import type { monaco } from '@kbn/code-editor';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useCustomYaraSignatureEditorMarkers } from '../../hooks/use_custom_yara_signature_editor_markers';
@@ -45,7 +45,9 @@ import {
   OS_PLACEHOLDER,
   SIGNATURE_EDITOR_ARIA_LABEL,
 } from './translations';
+import { POLICY_ASSIGNMENT_INFO_TOOLTIP } from '../../translations';
 import { CustomYaraSignatureValidationMessages } from './custom_yara_signature_validation_messages';
+import { YaraCodeEditor } from './yara_code_editor';
 
 interface CustomYaraSignatureEntry {
   field: typeof CUSTOM_YARA_SIGNATURE_FIELD_TYPE;
@@ -368,22 +370,13 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
                 css={signatureEditorContainerCss}
                 data-test-subj={getTestId('signature-input-container')}
               >
-                <CodeEditor
-                  languageId="plaintext"
+                <YaraCodeEditor
                   value={yaraEntry.value}
                   onChange={handleOnSignatureChange}
                   editorDidMount={handleSignatureEditorDidMount}
-                  width="100%"
                   height={signatureEditorHeight}
-                  options={{
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on',
-                    automaticLayout: true,
-                    readOnly: disabled,
-                  }}
+                  readOnly={disabled}
                   aria-label={SIGNATURE_EDITOR_ARIA_LABEL}
-                  dataTestSubj={getTestId('signature-input')}
                   data-test-subj={getTestId('signature-input')}
                 />
               </div>
@@ -448,6 +441,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
         >
           <EffectedPolicySelect
             item={item}
+            assignmentInfoTooltip={POLICY_ASSIGNMENT_INFO_TOOLTIP}
             onChange={handleEffectedPolicyOnChange}
             data-test-subj={getTestId('effectedPolicies')}
             disabled={disabled}

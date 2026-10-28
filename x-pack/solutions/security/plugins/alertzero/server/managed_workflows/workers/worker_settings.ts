@@ -14,6 +14,7 @@ import {
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
+  formatCrossFieldIssues,
   formatWorkerSettingsIssues,
   getCompleteWorkerSettingsSchema,
   getWorkerSettingsDeclaration,
@@ -119,10 +120,19 @@ export const createWorkerSettingsRegistration = (
 ): WorkerSettingsRegistration => ({
   createDefaultValues: () => toTemplateValues(workerId, createDefaultWorkerSettings(workerId)),
   applyPatch: (raw, patch) => {
+    const declaration = getWorkerSettingsDeclaration(workerId);
+    if (declaration.scheduleInterval?.readOnly && patch.scheduleInterval !== undefined) {
+      return { invalid: 'scheduleInterval: is read-only for this worker' };
+    }
     const next = applyWorkerSettingsWrite(parseWorkerValues(workerId, raw), patch);
     const result = getCompleteWorkerSettingsSchema(workerId).safeParse(next);
     if (!result.success) {
       return { invalid: formatWorkerSettingsIssues(result.error) };
+    }
+    // Checked on write only: a stored combination the rule would refuse still has to be readable.
+    const crossFieldIssues = declaration.crossFieldIssues?.(result.data) ?? [];
+    if (crossFieldIssues.length > 0) {
+      return { invalid: formatCrossFieldIssues(crossFieldIssues) };
     }
     return { values: toTemplateValues(workerId, result.data) };
   },

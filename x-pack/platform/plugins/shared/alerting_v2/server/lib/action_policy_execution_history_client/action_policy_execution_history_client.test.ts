@@ -130,6 +130,18 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       jest.useRealTimers();
     });
 
+    it('defaults startDate to 24 hours before `to` when `from` is omitted', async () => {
+      const { client, eventLogService } = createMocks();
+      const request = httpServerMock.createKibanaRequest();
+      const to = '2026-05-06T10:00:00.000Z';
+
+      await client.listExecutionHistory({ request, to });
+
+      expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ startDate: '2026-05-05T10:00:00.000Z', endDate: to })
+      );
+    });
+
     it('uses the provided `from` as the startDate lower bound', async () => {
       const { client, eventLogService } = createMocks();
       const request = httpServerMock.createKibanaRequest();
@@ -465,7 +477,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
           page: 1,
           perPage: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
           total: 0,
-          searchMatches: { policies: 0, rules: 0, is_truncated: false },
+          searchMatches: { policy_count: 0, rule_count: 0, is_truncated: false },
         });
       });
 
@@ -481,7 +493,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 823, rules: 0, is_truncated: true });
+        expect(result.searchMatches).toEqual({
+          policy_count: 823,
+          rule_count: 0,
+          is_truncated: true,
+        });
       });
 
       it('flags truncation and reports the rule total when matches exceed the cap', async () => {
@@ -496,7 +512,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 0, rules: 612, is_truncated: true });
+        expect(result.searchMatches).toEqual({
+          policy_count: 0,
+          rule_count: 612,
+          is_truncated: true,
+        });
       });
 
       it('reports counts within the cap without flagging truncation', async () => {
@@ -517,7 +537,11 @@ describe('ActionPolicyExecutionHistoryClient', () => {
 
         const result = await client.listExecutionHistory({ request, search: 'something' });
 
-        expect(result.searchMatches).toEqual({ policies: 1, rules: 500, is_truncated: false });
+        expect(result.searchMatches).toEqual({
+          policy_count: 1,
+          rule_count: 500,
+          is_truncated: false,
+        });
       });
 
       it('returns searchMatches=null when no search is provided', async () => {
@@ -585,7 +609,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         return mocks;
       };
 
-      it('falls back to null workflow names and logs error when workflows lookup rejects', async () => {
+      it('omits workflow names and logs an error when the workflows lookup rejects', async () => {
         const mocks = setup();
         mocks.workflowsManagement.getWorkflowsByIds.mockRejectedValue(new Error('wf down'));
         const request = httpServerMock.createKibanaRequest();
@@ -595,7 +619,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         expect(result.items[0]).toMatchObject({
           policy: { name: 'Policy 1' },
           rules: [{ name: 'Rule 1' }],
-          workflows: [{ id: 'w-1', name: null }],
+          workflows: [{ id: 'w-1' }],
         });
         expect(mocks.logger.warn).toHaveBeenCalledWith(
           'Execution history lookup failed',
@@ -605,14 +629,14 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         );
       });
 
-      it('falls back to null policy names when policy lookup rejects', async () => {
+      it('omits policy names when the policy lookup rejects', async () => {
         const mocks = setup();
         mocks.actionPolicyClient.getActionPolicies.mockRejectedValue(new Error('so down'));
         const request = httpServerMock.createKibanaRequest();
 
         const result = await mocks.client.listExecutionHistory({ request });
 
-        expect(result.items[0].policy).toEqual({ id: 'p-1', name: null });
+        expect(result.items[0].policy).toEqual({ id: 'p-1' });
         expect(mocks.logger.warn).toHaveBeenCalledWith(
           'Execution history lookup failed',
           expect.objectContaining({
@@ -621,14 +645,14 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         );
       });
 
-      it('falls back to null rule names when rules lookup rejects', async () => {
+      it('omits rule names when the rules lookup rejects', async () => {
         const mocks = setup();
         (mocks.rulesClient.findRules as jest.Mock).mockRejectedValue(new Error('rules down'));
         const request = httpServerMock.createKibanaRequest();
 
         const result = await mocks.client.listExecutionHistory({ request });
 
-        expect(result.items[0].rules[0]).toEqual({ id: 'r-1', name: null });
+        expect(result.items[0].rules[0]).toEqual({ id: 'r-1' });
         expect(mocks.logger.warn).toHaveBeenCalledWith(
           'Execution history lookup failed',
           expect.objectContaining({
@@ -639,7 +663,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
     });
 
     describe('missing rule ids in name resolution', () => {
-      it('uses names for found ids and falls back to null for missing ones (no rejection)', async () => {
+      it('uses names for found ids and omits them for missing ones (no rejection)', async () => {
         const { client, eventLogService, rulesClient } = createMocks();
         eventLogService.findActionPolicyExecutionEvents.mockResolvedValue({
           events: [
@@ -659,7 +683,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         const result = await client.listExecutionHistory({ request });
 
         expect(result.items[0].rules[0]).toEqual({ id: 'r-1', name: 'Rule 1' });
-        expect(result.items[1].rules[0]).toEqual({ id: 'r-2', name: null });
+        expect(result.items[1].rules[0]).toEqual({ id: 'r-2' });
         expect(result.items[2].rules[0]).toEqual({ id: 'r-3', name: 'Rule 3' });
       });
     });

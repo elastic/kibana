@@ -96,7 +96,7 @@ Contains all of the non-basic modules that are common to all {{kib}} solutions. 
 ### [x-pack/solutions](https://github.com/elastic/kibana/tree/main/x-pack/solutions)
 
 [//]: # (BOOKMARK - List of {{kib}} solutions)
-Contains all of the code that is specific to each {{kib}} solution. At the moment, we have a folder for [observability](https://github.com/elastic/kibana/tree/main/x-pack/solutions/observability), another for [security](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security), another for [search](https://github.com/elastic/kibana/tree/main/x-pack/solutions/search) and another for [workplaceai](https://github.com/elastic/kibana/tree/main/x-pack/solutions/workplaceai) (serverless only).
+Contains all of the code that is specific to each {{kib}} solution. At the moment, we have a folder for [observability](https://github.com/elastic/kibana/tree/main/x-pack/solutions/observability), another for [security](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security), another for [search](https://github.com/elastic/kibana/tree/main/x-pack/solutions/search) and another for [vectordb](https://github.com/elastic/kibana/tree/main/x-pack/solutions/vectordb) (serverless only).
 
 These folders contain the modules that belong to each solution, and these modules are also categorized as plugins or packages.
 Unlike the `src/platform` and the `x-pack/platform` code, the solution-specific modules are `private` by definition, aka they cannot be accessed from platform nor from other solutions.

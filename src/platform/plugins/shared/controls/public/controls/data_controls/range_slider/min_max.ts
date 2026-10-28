@@ -12,7 +12,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type {
   FetchContext,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
@@ -27,7 +27,7 @@ import { getControlsTimezone } from '../../utils';
 
 export function minMax$({
   controlFetch$,
-  dataViews$,
+  dataSources$,
   fieldName$,
   useGlobalFilters$,
   esqlQuery$,
@@ -35,7 +35,7 @@ export function minMax$({
   setIsLoading,
 }: {
   controlFetch$: Observable<FetchContext>;
-  dataViews$: PublishesDataViews['dataViews$'];
+  dataSources$: PublishesDataSources<DataView>['dataSources$'];
   fieldName$: PublishingSubject<string | undefined>;
   useGlobalFilters$: PublishingSubject<boolean | undefined>;
   esqlQuery$: PublishingSubject<string | undefined>;
@@ -49,7 +49,7 @@ export function minMax$({
 
   const observable = combineLatest([
     controlFetch$,
-    dataViews$,
+    dataSources$,
     fieldName$,
     useGlobalFilters$,
     esqlQuery$,

@@ -11,6 +11,7 @@ import React from 'react';
 import { act, render, screen, within, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { TabularPage } from './tabular_page';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
@@ -361,7 +362,7 @@ describe('When the tabular page is loaded', () => {
         },
         {
           groupId: 'openai',
-          label: 'OpenAI',
+          label: SERVICE_PROVIDERS[ServiceProviderKeys.openai].name,
           countLabel: '1 endpoint',
         },
       ];

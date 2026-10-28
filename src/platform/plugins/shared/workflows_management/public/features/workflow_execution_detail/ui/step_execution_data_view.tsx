@@ -17,13 +17,13 @@ import { ExecutionDataViewer } from '../../../shared/ui/execution_data_viewer';
 import { getStepFieldPathPrefix } from '../lib/get_step_field_path_prefix';
 
 const Titles = {
-  output: i18n.translate('workflowsManagement.stepExecutionDataView.outputTitle', {
+  output: i18n.translate('workflows.stepExecutionDataView.outputTitle', {
     defaultMessage: 'Output',
   }),
-  error: i18n.translate('workflowsManagement.stepExecutionDataView.errorTitle', {
+  error: i18n.translate('workflows.stepExecutionDataView.errorTitle', {
     defaultMessage: 'Error',
   }),
-  input: i18n.translate('workflowsManagement.stepExecutionDataView.inputTitle', {
+  input: i18n.translate('workflows.stepExecutionDataView.inputTitle', {
     defaultMessage: 'Input',
   }),
 };
@@ -108,7 +108,7 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
       return (
         <EuiText color="subdued" size="xs">
           <FormattedMessage
-            id="workflowsManagement.stepExecutionDataView.noData"
+            id="workflows.stepExecutionDataView.noData"
             defaultMessage="No {mode} data"
             values={{ mode: Titles[mode].toLowerCase() }}
           />

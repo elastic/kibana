@@ -10,7 +10,7 @@ import React from 'react';
 import { waitFor, within } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import type { ArtifactFormComponentProps } from './types';
+import type { ArtifactFormComponentProps, ArtifactViewModeComponentProps } from './types';
 import type { ArtifactListPageProps } from './artifact_list_page';
 import { ArtifactListPage } from './artifact_list_page';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -114,7 +114,14 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
   const renderArtifactListPage = (props: Partial<ArtifactListPageProps> = {}) => {
-    const { showAsSimpleTable, showEnabledColumn, CardDecorator, ...baseProps } = props;
+    const {
+      showAsSimpleTable,
+      showEnabledColumn,
+      ViewModeComponent,
+      policyAssignmentInfoTooltip,
+      CardDecorator,
+      ...baseProps
+    } = props;
 
     const sharedProps = {
       apiClient,
@@ -132,6 +139,13 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
           {...sharedProps}
           showAsSimpleTable
           showEnabledColumn={showEnabledColumn}
+          ViewModeComponent={
+            ViewModeComponent ??
+            (({ item }: ArtifactViewModeComponentProps) => (
+              <div data-test-subj="viewModeComponent">{item.name}</div>
+            ))
+          }
+          policyAssignmentInfoTooltip={policyAssignmentInfoTooltip}
         />
       ) : (
         <ArtifactListPage {...sharedProps} CardDecorator={CardDecorator} />

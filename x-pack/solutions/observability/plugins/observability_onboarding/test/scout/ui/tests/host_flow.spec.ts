@@ -129,26 +129,5 @@ test.describe.serial(
         timeout: 30_000,
       });
     });
-
-    test('navigating to /host/linux redirects to the V1 landing root when V2 is disabled', async ({
-      apiServices,
-      page,
-      pageObjects,
-    }) => {
-      try {
-        await apiServices.core.settings({
-          'feature_flags.overrides': { [V2_FF_ID]: false },
-        });
-        await pageObjects.host.gotoPath('/host/linux');
-        await pageObjects.onboarding.useCaseGridByTestId.waitFor({ state: 'visible' });
-        await expect(pageObjects.host.landingWrapper).toHaveCount(0);
-        await expect(pageObjects.host.layout('linux')).toHaveCount(0);
-        await expect(page).not.toHaveURL(/\/host\//);
-      } finally {
-        await apiServices.core.settings({
-          'feature_flags.overrides': { [V2_FF_ID]: true },
-        });
-      }
-    });
   }
 );

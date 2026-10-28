@@ -160,7 +160,8 @@ function computeDerivedState(ctx: ExpressionContext): ExpressionComputedMetadata
   const expressionType = getExpressionType(
     expressionRoot,
     context?.columns,
-    context?.unmappedFieldsStrategy
+    context?.unmappedFieldsStrategy,
+    context?.isTimeseriesSource === true
   );
   const isComplete = isExpressionComplete(expressionType, innerText);
   const insideFunction =

@@ -201,6 +201,7 @@ export const createAiNavigationTree = (
           breadcrumbStatus: 'hidden',
           children: [
             { link: 'management:genAiSettings' },
+            { link: 'management:aiAnonymizationSettings' },
             { link: 'management:securityAiAssistantManagement' },
           ],
         },

@@ -15,11 +15,16 @@ import type {
   GetPersistedAiSummaryResponse,
   PersistedEntityAiSummary,
 } from '@kbn/entity-store/common';
-import { AI_SUMMARY_EVENT_ACTION } from '@kbn/entity-store/common';
+import {
+  AI_SUMMARY_EVENT_ACTION,
+  AI_SUMMARY_RESOLVED_GROUP_VARIANT_ID,
+} from '@kbn/entity-store/common';
 import {
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_TYPE_LENGTH,
 } from '@kbn/entity-store/common/entity_summary';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { EntityViewMode } from '../../../../../common/api/entity_analytics/common/common.gen';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -30,8 +35,21 @@ const GetAiSummaryRequestQuery = lazySchema(() =>
     entityId: z.string().max(MAX_ENTITY_ID_LENGTH),
     // Not used server-side (the read filters by entity.id); accepted for symmetry with the write route.
     entityType: z.string().max(MAX_ENTITY_TYPE_LENGTH).optional(),
+    // Selects which persisted variant to read: single-entity (default) or resolution-group summary.
+    mode: EntityViewMode.optional().default('single'),
   })
 );
+
+const AI_SUMMARY_VARIANT_ID_FIELD = 'Ai_summary.variant_id';
+
+/**
+ * Single-entity summaries are written without a variant id; resolution-group summaries are
+ * tagged, so each mode reads only its own latest doc.
+ */
+export const buildAiSummaryVariantFilter = (mode: EntityViewMode): QueryDslQueryContainer[] =>
+  mode === 'resolved'
+    ? [{ term: { [AI_SUMMARY_VARIANT_ID_FIELD]: AI_SUMMARY_RESOLVED_GROUP_VARIANT_ID } }]
+    : [{ bool: { must_not: { exists: { field: AI_SUMMARY_VARIANT_ID_FIELD } } } }];
 
 /**
  * Maps a raw metadata datastream doc (Ai_summary.* prefixed fields) to the flat
@@ -82,7 +100,7 @@ export const entityDetailsGetAiSummaryRoute = ({
       withLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { entityId } = request.query;
+          const { entityId, mode } = request.query;
 
           const [coreStart, { entityStore }] = await getStartServices();
           const securitySolution = await context.securitySolution;
@@ -103,6 +121,7 @@ export const entityDetailsGetAiSummaryRoute = ({
             const doc = await metadataClient.getLatestByEntityId<AiSummaryMetadataDoc>({
               entityId,
               eventAction: AI_SUMMARY_EVENT_ACTION,
+              filter: buildAiSummaryVariantFilter(mode),
             });
 
             const body: GetPersistedAiSummaryResponse = {

@@ -33,7 +33,6 @@ export function FieldFinalSideHeader(): JSX.Element {
       }),
     [finalDiffableRule, fieldName, setRuleFieldResolvedValue]
   );
-  const handleSave = useCallback(() => form?.submit(), [form]);
 
   switch (rightSideMode) {
     case FieldFinalSideMode.Readonly:
@@ -61,7 +60,8 @@ export function FieldFinalSideHeader(): JSX.Element {
               iconType="checkCircleFill"
               size="s"
               disabled={!form?.isValid}
-              onClick={handleSave}
+              isLoading={form?.isSubmitting}
+              onClick={form?.submit}
               data-test-subj="prebuilt-rule-upgrade-flyout-field-save"
             >
               {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}
