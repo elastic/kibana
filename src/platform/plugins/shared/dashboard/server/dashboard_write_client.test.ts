@@ -251,11 +251,10 @@ describe('dashboard server client writes', () => {
       mockDashboardDoesNotExist();
       const client = startClient();
 
-      const { body, operation } = await client.update(request, 'new-dashboard', {
+      const body = await client.update(request, 'new-dashboard', {
         title: 'My dashboard',
       });
 
-      expect(operation).toBe('create');
       expect(body.id).toBe('new-dashboard');
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         'dashboard',
@@ -285,11 +284,10 @@ describe('dashboard server client writes', () => {
       mockExistingDashboard('Legacy ID');
       const client = startClient();
 
-      const { body, operation } = await client.update(request, 'Legacy ID', {
+      const body = await client.update(request, 'Legacy ID', {
         title: 'Renamed',
       });
 
-      expect(operation).toBe('update');
       expect(body.id).toBe('Legacy ID');
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
         'dashboard',

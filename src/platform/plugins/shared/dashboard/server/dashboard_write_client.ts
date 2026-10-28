@@ -129,19 +129,18 @@ export const createDashboardWriteClient = (
     },
     update: async (request, id, state, { isDashboardAppRequest = false } = {}) => {
       const updateBody = parseState(state, isDashboardAppRequest);
-      const result = await withPreSaveValidationErrors(() =>
+      const { body, operation } = await withPreSaveValidationErrors(() =>
         update(getRequestServices(request), getStrictSchema(), id, updateBody, {
           spaceId: spacesService?.getSpaceId(request),
           isDashboardAppRequest,
         })
       );
-      const { body, operation } = result;
       await trackBestEffort(() =>
         operation === 'create'
           ? trackCreateDashboardAction(body, request)
           : trackUpdateDashboardAction(body, request)
       );
-      return result;
+      return body;
     },
   };
 };

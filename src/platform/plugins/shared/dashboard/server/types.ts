@@ -52,7 +52,7 @@ export interface DashboardServerClient {
       /** Accepts the dashboard in the format the Dashboard app saves, including Lens panels in the app's own config format. */
       isDashboardAppRequest?: boolean;
     }
-  ): Promise<{ body: DashboardUpdateResponseBody; operation: 'create' | 'update' }>;
+  ): Promise<DashboardUpdateResponseBody>;
 }
 
 /** The setup contract for the Dashboard plugin on the server. */

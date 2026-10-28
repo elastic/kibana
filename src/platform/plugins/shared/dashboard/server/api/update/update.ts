@@ -21,7 +21,7 @@ import { create } from '../create';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
-import type { DashboardRequestServices } from '../types';
+import type { DashboardRequestServices, Operation } from '../types';
 import type { DashboardUpdateResponseBody } from './types';
 import {
   addToHistory,
@@ -64,7 +64,7 @@ export async function update(
   { serverTiming, spaceId, isDashboardAppRequest = false, restoredFrom }: UpdateOptions = {}
 ): Promise<{
   body: DashboardCreateResponseBody | DashboardUpdateResponseBody;
-  operation: 'create' | 'update';
+  operation: Operation;
 }> {
   const { access_control: accessControl, ...restOfBody } = updateBody;
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
