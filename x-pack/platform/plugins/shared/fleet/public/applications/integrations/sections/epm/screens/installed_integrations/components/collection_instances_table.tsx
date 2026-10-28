@@ -17,7 +17,6 @@ import type {
 } from '../../../../../../../../common/types';
 import { useStartServices } from '../../../../../../../hooks';
 import {
-  AWS_ONBOARDING_PACKAGE_NAME,
   ONBOARDING_APP_ID,
   ONBOARDING_AWS_PATH,
 } from '../../../../../../../services/aws_onboarding_override';
@@ -58,24 +57,6 @@ const getServicesTooltip = (method: DeploymentMethod, serviceNames: string[]): s
 
 const DEPLOYMENT_METHOD_ORDER: DeploymentMethod[] = ['managed_integration', 'ecf', 'agent_based'];
 
-/**
- * One version: the only package's, or with several packages the main `aws` package's (the first
- * package's without it). With several packages a tooltip lists every package with its version.
- */
-const VersionCell: React.FunctionComponent<{
-  packages: CloudOnboardingDeploymentListItem['packages'];
-}> = ({ packages }) => {
-  if (packages.length === 0) return <>{EMPTY_CELL}</>;
-  if (packages.length === 1) return <>{packages[0].version}</>;
-
-  const shown = packages.find((pkg) => pkg.name === AWS_ONBOARDING_PACKAGE_NAME) ?? packages[0];
-  return (
-    <EuiToolTip content={packages.map((pkg) => `${pkg.title}: ${pkg.version}`).join(', ')}>
-      <span tabIndex={0}>{shown.version}</span>
-    </EuiToolTip>
-  );
-};
-
 /** Values side by side as `a / b`, each with its own tooltip, like the agent counts of Agent policies. */
 const SlashSeparatedValues: React.FunctionComponent<{
   values: Array<{ key: string; value: React.ReactNode; tooltip: React.ReactNode }>;
@@ -97,7 +78,9 @@ const SlashSeparatedValues: React.FunctionComponent<{
 
 export const CollectionInstancesTable: React.FunctionComponent<{
   instances: CloudOnboardingDeploymentListItem[];
-}> = ({ instances }) => {
+  /** The package being viewed, whose deployed version the Version column shows. */
+  packageName: string;
+}> = ({ instances, packageName }) => {
   const { application } = useStartServices();
 
   // No `newSession` state: `deploymentId` makes the onboarding app hydrate from that session.
@@ -151,7 +134,8 @@ export const CollectionInstancesTable: React.FunctionComponent<{
         'xpack.fleet.epmInstalledIntegrations.collectionInstances.versionColumn',
         { defaultMessage: 'Version' }
       ),
-      render: (item: CloudOnboardingDeploymentListItem) => <VersionCell packages={item.packages} />,
+      render: (item: CloudOnboardingDeploymentListItem) =>
+        item.packages.find((pkg) => pkg.name === packageName)?.version ?? EMPTY_CELL,
     },
     {
       field: 'updatedBy',

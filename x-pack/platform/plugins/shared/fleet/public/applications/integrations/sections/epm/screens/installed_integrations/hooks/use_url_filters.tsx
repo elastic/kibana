@@ -55,7 +55,7 @@ export function useViewPolicies() {
       history.push({
         search: toUrlParams(
           {
-            ...omit(urlParams, 'viewPolicies', 'viewCollectionInstances'),
+            ...omit(urlParams, 'viewPolicies', 'viewInstances'),
             ...(packageName ? { viewPolicies: packageName } : {}),
           },
           {
@@ -116,18 +116,18 @@ export function useUrlFilters(): InstalledIntegrationsFilter {
   }, [urlParams]);
 }
 
-export function useViewCollectionInstances() {
+export function useViewInstances() {
   const { toUrlParams, urlParams } = useUrlParams();
   const history = useHistory();
 
   // Opening one drawer closes the other, so both params are always dropped before setting one.
-  const addViewCollectionInstances = useCallback(
+  const addViewInstances = useCallback(
     (packageName: string) => {
       history.push({
         search: toUrlParams(
           {
-            ...omit(urlParams, 'viewPolicies', 'viewCollectionInstances'),
-            ...(packageName ? { viewCollectionInstances: packageName } : {}),
+            ...omit(urlParams, 'viewPolicies', 'viewInstances'),
+            ...(packageName ? { viewInstances: packageName } : {}),
           },
           {
             skipEmptyString: true,
@@ -138,14 +138,14 @@ export function useViewCollectionInstances() {
     [urlParams, toUrlParams, history]
   );
 
-  const selectedPackageViewCollectionInstances = useMemo(() => {
-    if (typeof urlParams.viewCollectionInstances === 'string') {
-      return urlParams.viewCollectionInstances;
+  const selectedPackageViewInstances = useMemo(() => {
+    if (typeof urlParams.viewInstances === 'string') {
+      return urlParams.viewInstances;
     }
   }, [urlParams]);
 
   return {
-    addViewCollectionInstances,
-    selectedPackageViewCollectionInstances,
+    addViewInstances,
+    selectedPackageViewInstances,
   };
 }

@@ -27,8 +27,8 @@ jest.mock('../hooks/use_url_filters', () => ({
   useViewPolicies: jest.fn().mockReturnValue({
     addViewPolicies: jest.fn(),
   }),
-  useViewCollectionInstances: jest.fn().mockReturnValue({
-    addViewCollectionInstances: jest.fn(),
+  useViewInstances: jest.fn().mockReturnValue({
+    addViewInstances: jest.fn(),
   }),
 }));
 
@@ -58,7 +58,7 @@ jest.mock('../../../../../services', () => ({
 import { useAuthz, useLicense } from '../../../../../../../hooks';
 import { useRollbackAvailablePackages } from '../hooks/use_rollback_available';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
-import { useViewCollectionInstances } from '../hooks/use_url_filters';
+import { useViewInstances } from '../hooks/use_url_filters';
 
 import { InstalledIntegrationsTable } from './installed_integrations_table';
 
@@ -247,8 +247,8 @@ describe('InstalledIntegrationsTable', () => {
     });
 
     it('opens the collection instances of the package on click', async () => {
-      const addViewCollectionInstances = jest.fn();
-      (useViewCollectionInstances as jest.Mock).mockReturnValue({ addViewCollectionInstances });
+      const addViewInstances = jest.fn();
+      (useViewInstances as jest.Mock).mockReturnValue({ addViewInstances });
       renderComponent([basePackage], { collectionInstanceCounts: { 'test-package': 2 } });
 
       await act(async () => {
@@ -257,7 +257,7 @@ describe('InstalledIntegrationsTable', () => {
           .click();
       });
 
-      expect(addViewCollectionInstances).toHaveBeenCalledWith('test-package');
+      expect(addViewInstances).toHaveBeenCalledWith('test-package');
     });
   });
 });

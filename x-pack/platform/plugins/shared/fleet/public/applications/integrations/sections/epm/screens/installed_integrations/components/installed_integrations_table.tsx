@@ -25,7 +25,7 @@ import type { PackageListItem } from '../../../../../../../../common';
 import { type UrlPagination, useLink, useAuthz, useLicense } from '../../../../../../../hooks';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
-import { useViewCollectionInstances, useViewPolicies } from '../hooks/use_url_filters';
+import { useViewInstances, useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
 import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
@@ -79,7 +79,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   const { getHref } = useLink();
   const { selectedItems, setSelectedItems } = selection;
   const { addViewPolicies } = useViewPolicies();
-  const { addViewCollectionInstances } = useViewCollectionInstances();
+  const { addViewInstances } = useViewInstances();
   const hasCollectionInstances = Object.values(collectionInstanceCounts).some((count) => count > 0);
   const {
     actions: {
@@ -333,7 +333,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                     const count = collectionInstanceCounts[item.name] ?? 0;
                     return count > 0 ? (
                       <EuiLink
-                        onClick={() => addViewCollectionInstances(item.name)}
+                        onClick={() => addViewInstances(item.name)}
                         data-test-subj={`installedIntegrationsTable.collectionInstancesLink.${item.name}`}
                       >
                         {count}

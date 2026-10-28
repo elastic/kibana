@@ -11,7 +11,7 @@ import { useEuiPaddingCSS } from '@elastic/eui';
 
 import type { CloudOnboardingDeploymentListItem } from '../../../../../../../../common/types';
 import type { InstalledPackageUIPackageListItem } from '../types';
-import { useViewCollectionInstances } from '../hooks/use_url_filters';
+import { useViewInstances } from '../hooks/use_url_filters';
 
 import { CollectionInstancesTable } from './collection_instances_table';
 import { PackagePanelTitle } from './package_panel_title';
@@ -21,7 +21,7 @@ export const CollectionInstancesPanel: React.FunctionComponent<{
   installedPackage: InstalledPackageUIPackageListItem;
   instances: CloudOnboardingDeploymentListItem[];
 }> = ({ installedPackage, instances }) => {
-  const { addViewCollectionInstances } = useViewCollectionInstances();
+  const { addViewInstances } = useViewInstances();
   const paddingStyles = useEuiPaddingCSS();
 
   return (
@@ -29,10 +29,10 @@ export const CollectionInstancesPanel: React.FunctionComponent<{
       title={<PackagePanelTitle installedPackage={installedPackage} />}
       content={
         <div css={[paddingStyles.s]}>
-          <CollectionInstancesTable instances={instances} />
+          <CollectionInstancesTable instances={instances} packageName={installedPackage.name} />
         </div>
       }
-      onClose={() => addViewCollectionInstances('')}
+      onClose={() => addViewInstances('')}
     />
   );
 };

@@ -14,11 +14,7 @@ import { useUrlPagination } from '../../../../../../hooks';
 
 import { InstalledIntegrationsTable } from './components/installed_integrations_table';
 import { useInstalledIntegrations } from './hooks/use_installed_integrations';
-import {
-  useUrlFilters,
-  useViewCollectionInstances,
-  useViewPolicies,
-} from './hooks/use_url_filters';
+import { useUrlFilters, useViewInstances, useViewPolicies } from './hooks/use_url_filters';
 import { InstalledIntegrationsSearchBar } from './components/installed_integrations_search_bar';
 import type { InstalledPackageUIPackageListItem } from './types';
 import { useInstalledIntegrationsActions } from './hooks/use_installed_integrations_actions';
@@ -33,7 +29,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
   // State management
   const filters = useUrlFilters();
   const { selectedPackageViewPolicies } = useViewPolicies();
-  const { selectedPackageViewCollectionInstances } = useViewCollectionInstances();
+  const { selectedPackageViewInstances } = useViewInstances();
   const { instancesByPackage } = useCollectionInstances();
   const pagination = useUrlPagination();
   const { upgradingIntegrations, uninstallingIntegrations, rollingbackIntegrations } =
@@ -66,10 +62,10 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
 
   const collectionInstancesSelectedItem = useMemo(
     () =>
-      selectedPackageViewCollectionInstances
-        ? installedPackages.find((item) => item.name === selectedPackageViewCollectionInstances)
+      selectedPackageViewInstances
+        ? installedPackages.find((item) => item.name === selectedPackageViewInstances)
         : null,
-    [selectedPackageViewCollectionInstances, installedPackages]
+    [selectedPackageViewInstances, installedPackages]
   );
 
   const collectionInstanceCounts = useMemo(
