@@ -50,6 +50,7 @@ export const ExportRequestBody = lazySchema(() =>
       */
       agentIds: z
         .array(z.string().max(1024))
+        .max(10000)
         .nullable()
         .optional()
         .describe(

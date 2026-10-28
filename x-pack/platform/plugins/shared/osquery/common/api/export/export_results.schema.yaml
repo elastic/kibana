@@ -42,6 +42,7 @@ components:
             reported by the listed agents are included in the export.
           type: array
           nullable: true
+          maxItems: 10000
           items:
             type: string
             maxLength: 1024

@@ -103,6 +103,16 @@ describe('exportRequestBodySchema', () => {
       /maximum length of \[1024\]/
     );
   });
+
+  it('accepts agentIds with exactly 10,000 entries', () => {
+    const agentIds = Array.from({ length: 10_000 }, (_, i) => `agent-${i}`);
+    expect(() => exportRequestBodySchema.validate({ agentIds })).not.toThrow();
+  });
+
+  it('rejects agentIds with 10,001 entries', () => {
+    const agentIds = Array.from({ length: 10_001 }, (_, i) => `agent-${i}`);
+    expect(() => exportRequestBodySchema.validate({ agentIds })).toThrow(/array size is \[10001\]/);
+  });
 });
 
 describe('exportQuerySchema', () => {
