@@ -25,6 +25,7 @@ export interface RulesFileUploadStepProps {
 export const useReferencesFileUploadStep = ({
   status,
   migrationStats,
+  missingLookups,
   addUploadedLookups,
   onSkip,
 }: RulesFileUploadStepProps): EuiStepProps => {
@@ -64,6 +65,7 @@ export const useReferencesFileUploadStep = ({
         isLoading={isLoading}
         apiError={error?.message}
         migrationSource={MigrationSource.QRADAR}
+        missingLookups={missingLookups}
         onSkip={onSkip}
       />
     ),
