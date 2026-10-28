@@ -18,6 +18,61 @@ export const mcpFieldStrings = {
       defaultMessage: 'Additional settings',
     }),
   },
+  authType: {
+    label: i18n.translate('xpack.stackConnectors.components.mcp.authTypeLabel', {
+      defaultMessage: 'Authentication',
+    }),
+  },
+  authTypeNone: {
+    label: i18n.translate('xpack.stackConnectors.components.mcp.authTypeNoneLabel', {
+      defaultMessage: 'None',
+    }),
+    description: i18n.translate('xpack.stackConnectors.components.mcp.authTypeNoneDescription', {
+      defaultMessage: 'No authentication. You can still send HTTP headers.',
+    }),
+  },
+  authTypeOAuthAuthorizationCode: {
+    label: i18n.translate(
+      'xpack.stackConnectors.components.mcp.authTypeOAuthAuthorizationCodeLabel',
+      {
+        defaultMessage: 'OAuth 2.0 authorization code',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.stackConnectors.components.mcp.authTypeOAuthAuthorizationCodeDescription',
+      {
+        defaultMessage: 'Each user authorizes the connector with their own account.',
+      }
+    ),
+  },
+  authorizationUrl: {
+    label: i18n.translate('xpack.stackConnectors.components.mcp.authorizationUrlLabel', {
+      defaultMessage: 'Authorization URL',
+    }),
+  },
+  tokenUrl: {
+    label: i18n.translate('xpack.stackConnectors.components.mcp.tokenUrlLabel', {
+      defaultMessage: 'Token URL',
+    }),
+  },
+  clientId: {
+    label: i18n.translate('xpack.stackConnectors.components.mcp.clientIdLabel', {
+      defaultMessage: 'Client ID',
+    }),
+  },
+  clientSecret: {
+    label: i18n.translate('xpack.stackConnectors.components.mcp.clientSecretLabel', {
+      defaultMessage: 'Client secret',
+    }),
+  },
+  scope: {
+    label: i18n.translate('xpack.stackConnectors.components.mcp.scopeLabel', {
+      defaultMessage: 'Scope',
+    }),
+    helpText: i18n.translate('xpack.stackConnectors.components.mcp.scopeHelpText', {
+      defaultMessage: 'Optional. Space-separated scopes sent to the provider.',
+    }),
+  },
 };
 
 export const mcpErrorStrings = {

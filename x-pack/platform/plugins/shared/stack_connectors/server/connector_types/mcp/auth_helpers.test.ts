@@ -7,7 +7,11 @@
 
 import type { MCPConnectorConfig, MCPConnectorSecrets } from '@kbn/connector-schemas/mcp';
 import { MCPAuthType } from '@kbn/connector-schemas/mcp';
-import { buildHeadersFromSecrets } from './auth_helpers';
+import {
+  buildHeadersFromSecrets,
+  buildOAuthAuthCodeSecrets,
+  isOAuthAuthorizationCode,
+} from './auth_helpers';
 
 describe('buildHeadersFromSecrets', () => {
   const baseConfig: MCPConnectorConfig = {
@@ -318,5 +322,103 @@ describe('buildHeadersFromSecrets', () => {
 
       expect(headers).toEqual({});
     });
+  });
+
+  describe('oauth_authorization_code', () => {
+    const oauthConfig: MCPConnectorConfig = {
+      ...baseConfig,
+      hasAuth: true,
+      authType: MCPAuthType.OAuthAuthorizationCode,
+      authorizationUrl: 'https://idp.example.com/authorize',
+      tokenUrl: 'https://idp.example.com/token',
+      clientId: 'client-id',
+      scope: 'tools',
+    };
+
+    it('returns only secretHeaders and no Authorization header', () => {
+      const headers = buildHeadersFromSecrets(
+        { clientSecret: 'client-secret', secretHeaders: { 'X-Secret': 'value' } },
+        oauthConfig
+      );
+
+      expect(headers).toEqual({ 'X-Secret': 'value' });
+    });
+
+    it('returns empty headers when secretHeaders are absent', () => {
+      expect(buildHeadersFromSecrets({ clientSecret: 'client-secret' }, oauthConfig)).toEqual({});
+    });
+  });
+});
+
+describe('isOAuthAuthorizationCode', () => {
+  const baseConfig: MCPConnectorConfig = {
+    serverUrl: 'https://example.com',
+    hasAuth: true,
+    authType: MCPAuthType.OAuthAuthorizationCode,
+  };
+
+  it('is true for oauth_authorization_code with hasAuth', () => {
+    expect(isOAuthAuthorizationCode(baseConfig)).toBe(true);
+  });
+
+  it('is false when hasAuth is false', () => {
+    expect(isOAuthAuthorizationCode({ ...baseConfig, hasAuth: false })).toBe(false);
+  });
+
+  it('is false for other auth types', () => {
+    expect(isOAuthAuthorizationCode({ ...baseConfig, authType: MCPAuthType.Bearer })).toBe(false);
+    expect(isOAuthAuthorizationCode({ ...baseConfig, authType: MCPAuthType.None })).toBe(false);
+    expect(isOAuthAuthorizationCode({ serverUrl: 'https://example.com', hasAuth: true })).toBe(
+      false
+    );
+  });
+});
+
+describe('buildOAuthAuthCodeSecrets', () => {
+  const config: MCPConnectorConfig = {
+    serverUrl: 'https://example.com',
+    hasAuth: true,
+    authType: MCPAuthType.OAuthAuthorizationCode,
+    authorizationUrl: 'https://idp.example.com/authorize',
+    tokenUrl: 'https://idp.example.com/token',
+    clientId: 'client-id',
+    scope: 'tools',
+  };
+  const secrets: MCPConnectorSecrets = { clientSecret: 'client-secret' };
+
+  it('maps config and secrets into the auth type secret object', () => {
+    expect(buildOAuthAuthCodeSecrets(config, secrets)).toEqual({
+      authType: 'oauth_authorization_code',
+      authorizationUrl: 'https://idp.example.com/authorize',
+      tokenUrl: 'https://idp.example.com/token',
+      clientId: 'client-id',
+      clientSecret: 'client-secret',
+      scope: 'tools',
+    });
+  });
+
+  it('omits scope when it is not set', () => {
+    expect(buildOAuthAuthCodeSecrets({ ...config, scope: undefined }, secrets)).toEqual({
+      authType: 'oauth_authorization_code',
+      authorizationUrl: 'https://idp.example.com/authorize',
+      tokenUrl: 'https://idp.example.com/token',
+      clientId: 'client-id',
+      clientSecret: 'client-secret',
+    });
+  });
+
+  it.each(['authorizationUrl', 'tokenUrl', 'clientId'] as const)(
+    'throws when %s is missing',
+    (field) => {
+      expect(() => buildOAuthAuthCodeSecrets({ ...config, [field]: undefined }, secrets)).toThrow(
+        new Error(`MCP OAuth authorization code connector is missing required fields: ${field}`)
+      );
+    }
+  );
+
+  it('throws when clientSecret is missing', () => {
+    expect(() => buildOAuthAuthCodeSecrets(config, {})).toThrow(
+      new Error('MCP OAuth authorization code connector is missing required fields: clientSecret')
+    );
   });
 });

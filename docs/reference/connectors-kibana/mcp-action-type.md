@@ -29,6 +29,21 @@ Name
 Server URL
 :   The URL of the MCP server.
 
+Authentication
+:   How the connector authenticates to the MCP server.
+
+    None
+    :   No authentication. You can still send HTTP headers. This is the default.
+
+    OAuth 2.0 (authorization code)
+    :   Each user authorizes the connector with their own account.
+
+        The form asks for Client ID, Client secret, Authorization URL, Token URL, and an optional Scope.
+
+        The authorization URL and the token URL must be allowed by `xpack.actions.allowedHosts`.
+
+        After you save the connector, each user must click **Authorize** in the connectors list before they can use the connector.
+
 HTTP headers (under Additional settings)
 :   A custom set of HTTP headers that you can use to connect to an MCP server.
 

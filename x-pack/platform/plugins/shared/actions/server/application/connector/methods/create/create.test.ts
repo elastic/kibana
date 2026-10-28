@@ -724,6 +724,149 @@ describe('create()', () => {
       );
     });
 
+    test('creates a .mcp connector with authMode "per-user" when config.authType is oauth_authorization_code', async () => {
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'oauth_authorization_code',
+        authMode: 'per-user',
+      });
+
+      const config = {
+        serverUrl: 'https://mcp.example.com',
+        authType: 'oauth_authorization_code',
+        authorizationUrl: 'https://idp.example.com/authorize',
+        tokenUrl: 'https://idp.example.com/token',
+        clientId: 'client-id',
+        scope: 'tools',
+      };
+      const secrets = { clientSecret: 'client-secret' };
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: '.mcp',
+          isMissingSecrets: false,
+          config,
+          secrets,
+          authMode: 'per-user' as const,
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: '.mcp',
+          config,
+          secrets,
+        },
+      });
+
+      expect(result.authMode).toBe('per-user');
+      expect(authTypeRegistry.get).toHaveBeenCalledWith('oauth_authorization_code');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        {
+          actionTypeId: '.mcp',
+          name: 'my name',
+          isMissingSecrets: false,
+          config,
+          secrets,
+          authMode: 'per-user',
+          hasInboundEventIdentity: false,
+        },
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('creates a .mcp connector with authMode "shared" when config.authType is bearer', async () => {
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'bearer',
+      });
+
+      const config = {
+        serverUrl: 'https://mcp.example.com',
+        authType: 'bearer',
+      };
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: '.mcp',
+          isMissingSecrets: false,
+          config,
+          authMode: 'shared' as const,
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: '.mcp',
+          config,
+          secrets: { token: 'token' },
+        },
+      });
+
+      expect(authTypeRegistry.get).toHaveBeenCalledWith('bearer');
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          actionTypeId: '.mcp',
+          authMode: 'shared',
+          config,
+        }),
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('creates a .mcp connector without authMode when no authType is provided', async () => {
+      const config = { serverUrl: 'https://mcp.example.com' };
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: '.mcp',
+          isMissingSecrets: false,
+          config,
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      const result = await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: '.mcp',
+          config,
+          secrets: {},
+        },
+      });
+
+      expect(result.authMode).toBeUndefined();
+      expect(authTypeRegistry.get).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        {
+          actionTypeId: '.mcp',
+          name: 'my name',
+          isMissingSecrets: false,
+          config,
+          secrets: {},
+          hasInboundEventIdentity: false,
+        },
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
     test('creates an action without authMode when no authType is provided', async () => {
       const savedObjectCreateResult = {
         id: '1',

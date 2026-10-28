@@ -40,6 +40,8 @@ export const buildExecutor = <
     request,
     connectorUsageCollector,
     connectorVersion,
+    authMode,
+    profileUid,
   }) => {
     const subAction = params.subAction;
     const subActionParams = params.subActionParams;
@@ -53,6 +55,8 @@ export const buildExecutor = <
       services,
       request,
       connectorVersion,
+      authMode,
+      profileUid,
     });
 
     const subActions = service.getSubActions();

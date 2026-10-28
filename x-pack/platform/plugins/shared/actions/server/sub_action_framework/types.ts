@@ -12,6 +12,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { Method, AxiosRequestConfig } from 'axios';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SSLSettings } from '@kbn/actions-utils';
+import type { AuthMode } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
@@ -38,6 +39,10 @@ export interface ServiceParams<Config, Secrets> {
   request?: KibanaRequest;
   /** Saved-object version of the connector, or IN_MEMORY_CONNECTOR_REVISION for preconfigured connectors. */
   connectorVersion?: string;
+  /** Persisted connector auth mode. Forwarded so per-user connectors can guard execution. */
+  authMode?: AuthMode;
+  /** Current user profile uid. Required to resolve per-user OAuth tokens. */
+  profileUid?: string;
 }
 
 export type SubActionRequestParams<R> = {

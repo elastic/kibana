@@ -7,23 +7,28 @@
 
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import type { Config } from '@kbn/connector-schemas/mcp';
-import { isEmpty } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import { type HeaderField, HeaderFieldType, type MCPInternalConnectorForm } from '../types';
 import { toHeaderFields, toHeadersRecord } from './transform';
+
+const OAUTH_CONFIG_FIELDS = ['authorizationUrl', 'tokenUrl', 'clientId', 'scope'] as const;
 
 export const formSerializer = (formData: MCPInternalConnectorForm): ConnectorFormSchema => {
   const headers = (formData.__internal__?.headers ?? []) as HeaderField[];
   const configHeaders = toHeadersRecord(headers, HeaderFieldType.CONFIG);
   const secretHeaders = toHeadersRecord(headers, HeaderFieldType.SECRET);
+  const isOAuth = formData.config.authType === 'oauth_authorization_code';
+  const config = isOAuth ? formData.config : omit(formData.config, OAUTH_CONFIG_FIELDS);
+  const secrets = isOAuth ? formData.secrets : omit(formData.secrets, ['clientSecret']);
 
   return {
     ...formData,
     config: {
-      ...formData.config,
+      ...config,
       headers: isEmpty(configHeaders) ? undefined : configHeaders,
     },
     secrets: {
-      ...formData.secrets,
+      ...secrets,
       secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
     },
   };
@@ -37,6 +42,7 @@ export const formDeserializer = (data: ConnectorFormSchema): MCPInternalConnecto
     ...data,
     config: {
       ...config,
+      authType: config.authType ?? 'none',
       headers: !isEmpty(configHeaders) ? configHeaders : undefined,
     },
     __internal__: {

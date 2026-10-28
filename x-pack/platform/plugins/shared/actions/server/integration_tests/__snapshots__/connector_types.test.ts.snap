@@ -2095,7 +2095,16 @@ Object {
         "bearer",
         "apiKey",
         "basic",
+        "oauth_authorization_code",
       ],
+      "type": "string",
+    },
+    "authorizationUrl": Object {
+      "maxLength": 2048,
+      "type": "string",
+    },
+    "clientId": Object {
+      "maxLength": 2048,
       "type": "string",
     },
     "hasAuth": Object {
@@ -2111,7 +2120,15 @@ Object {
       },
       "type": "object",
     },
+    "scope": Object {
+      "maxLength": 2048,
+      "type": "string",
+    },
     "serverUrl": Object {
+      "type": "string",
+    },
+    "tokenUrl": Object {
+      "maxLength": 2048,
       "type": "string",
     },
   },
@@ -2126,6 +2143,10 @@ exports[`Connector type config checks detect connector type changes for: .mcp 2`
 Object {
   "properties": Object {
     "apiKey": Object {
+      "type": "string",
+    },
+    "clientSecret": Object {
+      "maxLength": 4096,
       "type": "string",
     },
     "password": Object {

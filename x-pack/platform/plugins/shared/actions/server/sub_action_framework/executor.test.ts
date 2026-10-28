@@ -345,6 +345,88 @@ describe('Executor', () => {
     );
   });
 
+  it('forwards authMode and profileUid from executor options to getService', async () => {
+    const getService = jest.fn(
+      (serviceParams: ServiceParams<TestConfig, TestSecrets>) => new TestExecutor(serviceParams)
+    );
+    const connector = {
+      id: '.test',
+      name: 'Test',
+      minimumLicenseRequired: 'basic' as const,
+      supportedFeatureIds: ['alerting'],
+      schema: {
+        config: TestConfigSchema,
+        secrets: TestSecretsSchema,
+      },
+      getService,
+    };
+
+    const executor = buildExecutor({
+      configurationUtilities: mockedActionsConfig,
+      logger,
+      connector,
+    });
+
+    await executor({
+      actionId,
+      params: { subAction: 'echo', subActionParams: { id: 'test-id' } },
+      config,
+      secrets,
+      services,
+      configurationUtilities: mockedActionsConfig,
+      logger,
+      connectorUsageCollector,
+      authMode: 'per-user',
+      profileUid: 'profile-1',
+    });
+
+    expect(getService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connector: { id: actionId, type: '.test' },
+        authMode: 'per-user',
+        profileUid: 'profile-1',
+      })
+    );
+  });
+
+  it('forwards undefined authMode and profileUid when executor options omit them', async () => {
+    const getService = jest.fn(
+      (serviceParams: ServiceParams<TestConfig, TestSecrets>) => new TestExecutor(serviceParams)
+    );
+    const connector = {
+      id: '.test',
+      name: 'Test',
+      minimumLicenseRequired: 'basic' as const,
+      supportedFeatureIds: ['alerting'],
+      schema: {
+        config: TestConfigSchema,
+        secrets: TestSecretsSchema,
+      },
+      getService,
+    };
+
+    const executor = buildExecutor({
+      configurationUtilities: mockedActionsConfig,
+      logger,
+      connector,
+    });
+
+    await executor({
+      actionId,
+      params: { subAction: 'echo', subActionParams: { id: 'test-id' } },
+      config,
+      secrets,
+      services,
+      configurationUtilities: mockedActionsConfig,
+      logger,
+      connectorUsageCollector,
+    });
+
+    const serviceParams = getService.mock.calls[0][0];
+    expect(serviceParams.authMode).toBeUndefined();
+    expect(serviceParams.profileUid).toBeUndefined();
+  });
+
   it('Passes connectorUsageCollector to the subAction method as a second param', async () => {
     let echoSpy;
 

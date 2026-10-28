@@ -17,7 +17,14 @@ export const MCPAuthType = {
   Bearer: 'bearer',
   ApiKey: 'apiKey',
   Basic: 'basic',
+  OAuthAuthorizationCode: 'oauth_authorization_code',
 } as const;
+
+/** Bound for OAuth URL, client id, and scope strings stored on the MCP connector. */
+export const MCP_OAUTH_FIELD_MAX_LENGTH = 2048;
+
+/** Bound for the OAuth client secret stored on the MCP connector. */
+export const MCP_OAUTH_CLIENT_SECRET_MAX_LENGTH = 4096;
 
 /** Placeholder in apiKeyHeaderValue template replaced by secrets.apiKey */
 export const API_KEY_PLACEHOLDER = '{{apiKey}}';
@@ -41,8 +48,34 @@ export const MCPConnectorConfigSchema = lazySchema(() =>
      * Authentication type to use when hasAuth is true.
      */
     authType: z
-      .enum([MCPAuthType.None, MCPAuthType.Bearer, MCPAuthType.ApiKey, MCPAuthType.Basic])
+      .enum([
+        MCPAuthType.None,
+        MCPAuthType.Bearer,
+        MCPAuthType.ApiKey,
+        MCPAuthType.Basic,
+        MCPAuthType.OAuthAuthorizationCode,
+      ])
       .optional(),
+    /**
+     * OAuth 2.0 authorization endpoint.
+     * Used only when authType is 'oauth_authorization_code'.
+     */
+    authorizationUrl: z.string().max(MCP_OAUTH_FIELD_MAX_LENGTH).optional(),
+    /**
+     * OAuth 2.0 token endpoint.
+     * Used only when authType is 'oauth_authorization_code'.
+     */
+    tokenUrl: z.string().max(MCP_OAUTH_FIELD_MAX_LENGTH).optional(),
+    /**
+     * OAuth client id.
+     * Used only when authType is 'oauth_authorization_code'.
+     */
+    clientId: z.string().max(MCP_OAUTH_FIELD_MAX_LENGTH).optional(),
+    /**
+     * OAuth scope sent on the authorize and token requests.
+     * Used only when authType is 'oauth_authorization_code'.
+     */
+    scope: z.string().max(MCP_OAUTH_FIELD_MAX_LENGTH).optional(),
     /**
      * Custom header name for API key authentication.
      * Defaults to 'X-API-Key' if not specified.
@@ -84,6 +117,11 @@ export const MCPConnectorSecretsSchema = lazySchema(() =>
      * Password for 'basic' auth type.
      */
     password: z.string().optional(),
+    /**
+     * OAuth client secret.
+     * Used only when authType is 'oauth_authorization_code'.
+     */
+    clientSecret: z.string().max(MCP_OAUTH_CLIENT_SECRET_MAX_LENGTH).optional(),
     /**
      * Sensitive HTTP headers to include in requests.
      */

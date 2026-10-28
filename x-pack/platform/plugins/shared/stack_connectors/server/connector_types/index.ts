@@ -94,7 +94,10 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
   actions.registerSubActionConnectorType(getXSOARConnectorType());
   actions.registerSubActionConnectorType(
-    getMcpConnectorType({ getClientLeasePool: actions.getClientLeasePool })
+    getMcpConnectorType({
+      getClientLeasePool: actions.getClientLeasePool,
+      getCredential: actions.getCredential,
+    })
   );
 
   if (experimentalFeatures.sentinelOneConnectorOn) {
