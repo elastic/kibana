@@ -20,7 +20,9 @@ import {
   getPlaceholderNamesFromElement,
   removePlaceholderByName as removePlaceholderByNameFromDom,
 } from './image_placeholder';
+import { getTextBeforeCursor } from './command_menu/utils/get_text_before_cursor';
 import {
+  ZERO_WIDTH_SPACE,
   createCommandRange,
   createTextFragment,
   ensureCaretTargetBeforeFirstBadge,
@@ -48,6 +50,8 @@ export interface MessageEditorController {
   getContent: () => string;
   setContent: (text: string) => void;
   clear: () => void;
+  /** Types text at the caret, like the user would, so command menus open. */
+  insertText: (text: string) => void;
   isEmpty: boolean;
   getPlaceholderNames: () => string[];
   removePlaceholderByName: (name: string) => void;
@@ -179,10 +183,13 @@ const useMessageEditorInstance = ({
 const useMessageEditorController = ({
   ref,
   syncIsEmpty,
+  notifyInput,
   isEmpty,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
+  /** Runs what an input event runs, for changes made by code. */
+  notifyInput: () => void;
   isEmpty: boolean;
 }): MessageEditorController => {
   const controller = useMemo(
@@ -223,6 +230,32 @@ const useMessageEditorController = ({
           syncIsEmpty();
         }
       },
+      insertText: (text: string) => {
+        const editor = ref.current;
+        const sel = window.getSelection();
+        if (!editor || !sel) {
+          return;
+        }
+        editor.focus();
+        if (sel.rangeCount === 0 || !editor.contains(sel.anchorNode)) {
+          const endRange = document.createRange();
+          endRange.selectNodeContents(editor);
+          endRange.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(endRange);
+        }
+
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        // A command only opens after whitespace, so the text must not stick to the word before it
+        const previousChar = getTextBeforeCursor(editor).slice(-1);
+        const needsSpace =
+          previousChar !== '' && previousChar !== ZERO_WIDTH_SPACE && !/\s/.test(previousChar);
+        const textNode = document.createTextNode(`${needsSpace ? ' ' : ''}${text}`);
+        range.insertNode(textNode);
+        placeCursorAfter(textNode, sel);
+        notifyInput();
+      },
       getPlaceholderNames: () => (ref.current ? getPlaceholderNamesFromElement(ref.current) : []),
       removePlaceholderByName: (name: string) => {
         if (ref.current) {
@@ -232,7 +265,7 @@ const useMessageEditorController = ({
       },
       isEmpty,
     }),
-    [ref, isEmpty, syncIsEmpty]
+    [ref, isEmpty, syncIsEmpty, notifyInput]
   );
   return controller;
 };
@@ -294,7 +327,11 @@ export const useMessageEditor = (
     onContentChange,
     excludedCommandIds,
   });
-  const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty });
+  // Read through a ref so a changing `instance` does not change the controller's identity
+  const onChangeRef = useRef(instance.onChange);
+  onChangeRef.current = instance.onChange;
+  const notifyInput = useCallback(() => onChangeRef.current(), []);
+  const controller = useMessageEditorController({ ref, syncIsEmpty, notifyInput, isEmpty });
   const messageEditor = useMemo(
     () => ({
       messageEditor: instance,

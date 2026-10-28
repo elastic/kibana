@@ -460,6 +460,11 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     };
   }, [conversationId, messageEditorController, isAwaitingPrompt, isConversationReadOnly]);
 
+  const handleMentionClick = useCallback(
+    () => messageEditorController.insertText('@'),
+    [messageEditorController]
+  );
+
   const handleSubmit = () => {
     if (isSubmitDisabled) {
       return;
@@ -558,6 +563,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
           showTriggerModeSelector={isTriggerModeSelectable}
           triggerMode={triggerMode}
           onTriggerModeChange={setTriggerMode}
+          onMentionClick={canMention ? handleMentionClick : undefined}
         />
       )}
     </InputContainer>

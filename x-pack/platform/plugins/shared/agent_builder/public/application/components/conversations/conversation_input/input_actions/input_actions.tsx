@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ConversationActionButton } from './conversation_action_button';
 import { ConnectorSelector } from './connector_selector';
 import { TriggerModeSelector } from './trigger_mode_selector';
 import { ChatTriggerMode } from '../../../../../../common/http_api/chat';
+
+const mentionButtonLabel = i18n.translate(
+  'xpack.agentBuilder.conversationInput.inputActions.mentionButtonLabel',
+  { defaultMessage: 'Mention a teammate or the agent' }
+);
 
 const connectorFlexItemStyles = css`
   flex-shrink: 1;
@@ -26,6 +32,8 @@ interface InputActionsProps {
   showTriggerModeSelector: boolean;
   triggerMode: ChatTriggerMode;
   onTriggerModeChange: (mode: ChatTriggerMode) => void;
+  /** Shows the mention button when set. */
+  onMentionClick?: () => void;
 }
 
 export const InputActions: React.FC<InputActionsProps> = ({
@@ -35,8 +43,10 @@ export const InputActions: React.FC<InputActionsProps> = ({
   showTriggerModeSelector,
   triggerMode,
   onTriggerModeChange,
+  onMentionClick,
 }) => {
   const showConnectorSelector = triggerMode !== ChatTriggerMode.Never;
+  const showStartActions = showConnectorSelector || Boolean(onMentionClick);
 
   return (
     <EuiFlexItem grow={false}>
@@ -44,11 +54,33 @@ export const InputActions: React.FC<InputActionsProps> = ({
         gutterSize="s"
         responsive={false}
         alignItems="center"
-        justifyContent={showConnectorSelector ? 'spaceBetween' : 'flexEnd'}
+        justifyContent={showStartActions ? 'spaceBetween' : 'flexEnd'}
       >
-        {showConnectorSelector && (
+        {showStartActions && (
           <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
-            <ConnectorSelector />
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              {onMentionClick && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={mentionButtonLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="at"
+                      color="text"
+                      size="s"
+                      aria-label={mentionButtonLabel}
+                      data-test-subj="agentBuilderConversationInputMentionButton"
+                      // Keeps the focus in the editor, so the menu opens under the caret
+                      onMouseDown={(event: React.MouseEvent) => event.preventDefault()}
+                      onClick={onMentionClick}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              {showConnectorSelector && (
+                <EuiFlexItem grow={false} css={connectorFlexItemStyles}>
+                  <ConnectorSelector />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>

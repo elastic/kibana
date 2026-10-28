@@ -100,21 +100,29 @@ jest.mock('./input_actions', () => ({
     showTriggerModeSelector,
     triggerMode,
     onTriggerModeChange,
+    onMentionClick,
   }: {
     showTriggerModeSelector: boolean;
     triggerMode: string;
     onTriggerModeChange: (mode: string) => void;
-  }) =>
-    showTriggerModeSelector ? (
-      <select
-        data-test-subj="mock-trigger-mode-selector"
-        value={triggerMode}
-        onChange={(event) => onTriggerModeChange(event.target.value)}
-      >
-        <option value="always">Ask agent</option>
-        <option value="never">Post to team</option>
-      </select>
-    ) : null,
+    onMentionClick?: () => void;
+  }) => (
+    <>
+      {onMentionClick && (
+        <button type="button" data-test-subj="mock-mention-button" onClick={onMentionClick} />
+      )}
+      {showTriggerModeSelector && (
+        <select
+          data-test-subj="mock-trigger-mode-selector"
+          value={triggerMode}
+          onChange={(event) => onTriggerModeChange(event.target.value)}
+        >
+          <option value="always">Ask agent</option>
+          <option value="never">Post to team</option>
+        </select>
+      )}
+    </>
+  ),
 }));
 jest.mock('./attachment_pill', () => ({
   AttachmentPill: ({
@@ -200,6 +208,7 @@ const editorController = {
   isEmpty: false,
   getPlaceholderNames: jest.fn(() => []),
   removePlaceholderByName: jest.fn(),
+  insertText: jest.fn(),
 };
 
 const renderInput = (ui: React.ReactElement) => render(ui, { wrapper: EuiProvider });
@@ -488,6 +497,33 @@ describe('ConversationInput', () => {
       expect(lastExcludedCommandIds()).toEqual([]);
     });
 
+    it('shows the mention button only in a shared chat with the experimental flag on', () => {
+      const { rerender } = renderInput(<ConversationInput />);
+      expect(screen.queryByTestId('mock-mention-button')).not.toBeInTheDocument();
+
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      rerenderInput(rerender);
+      expect(screen.queryByTestId('mock-mention-button')).not.toBeInTheDocument();
+
+      mockedUseExperimentalFeatures.mockReturnValue(true);
+      rerenderInput(rerender);
+      expect(screen.getByTestId('mock-mention-button')).toBeInTheDocument();
+
+      mockedUseIsSharedConversation.mockReturnValue(false);
+      rerenderInput(rerender);
+      expect(screen.queryByTestId('mock-mention-button')).not.toBeInTheDocument();
+    });
+
+    it('types an @ in the editor when the mention button is clicked', () => {
+      mockedUseExperimentalFeatures.mockReturnValue(true);
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      renderInput(<ConversationInput />);
+
+      fireEvent.click(screen.getByTestId('mock-mention-button'));
+
+      expect(editorController.insertText).toHaveBeenCalledWith('@');
+    });
+
     it('turns the mention menu on when the chat becomes shared, without a remount', () => {
       mockedUseExperimentalFeatures.mockReturnValue(true);
       const { rerender } = renderInput(<ConversationInput />);
@@ -654,6 +690,19 @@ describe('ConversationInput', () => {
 });
 
 describe('InputActions', () => {
+  const renderActions = (props: Partial<React.ComponentProps<typeof InputActions>> = {}) =>
+    renderInput(
+      <InputActions
+        onSubmit={jest.fn()}
+        isSubmitDisabled={false}
+        isSubmitting={false}
+        showTriggerModeSelector
+        triggerMode={ChatTriggerMode.Always}
+        onTriggerModeChange={jest.fn()}
+        {...props}
+      />
+    );
+
   beforeEach(() => {
     mockedUseConversationStream.mockReturnValue({
       canCancel: false,
@@ -694,5 +743,54 @@ describe('InputActions', () => {
     );
 
     expect(screen.queryByTestId('mockConnectorSelector')).not.toBeInTheDocument();
+  });
+
+  describe('mention button', () => {
+    it('is hidden without onMentionClick', () => {
+      renderActions();
+
+      expect(
+        screen.queryByTestId('agentBuilderConversationInputMentionButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it.each([ChatTriggerMode.Always, ChatTriggerMode.Never])(
+      'is shown with onMentionClick, and calls it on click (%s)',
+      (triggerMode) => {
+        const onMentionClick = jest.fn();
+        renderActions({ onMentionClick, triggerMode });
+
+        fireEvent.click(screen.getByTestId('agentBuilderConversationInputMentionButton'));
+
+        expect(onMentionClick).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('is named for screen readers', () => {
+      renderActions({ onMentionClick: jest.fn() });
+
+      expect(screen.getByTestId('agentBuilderConversationInputMentionButton')).toHaveAccessibleName(
+        'Mention a teammate or the agent'
+      );
+    });
+
+    it('does not take the focus from the editor on mouse down', () => {
+      renderActions({ onMentionClick: jest.fn() });
+
+      const wasNotPrevented = fireEvent.mouseDown(
+        screen.getByTestId('agentBuilderConversationInputMentionButton')
+      );
+
+      expect(wasNotPrevented).toBe(false);
+    });
+
+    it('sits before the connector selector', () => {
+      renderActions({ onMentionClick: jest.fn() });
+
+      const button = screen.getByTestId('agentBuilderConversationInputMentionButton');
+      const connector = screen.getByTestId('mockConnectorSelector');
+
+      expect(button.compareDocumentPosition(connector)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
   });
 });

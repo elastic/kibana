@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useMessageEditor } from './use_message_editor';
 import { CommandId } from './command_menu';
 import type { MessageEditorInstance } from './use_message_editor';
-import { stripZeroWidthSpaces } from './utils';
+import { ZERO_WIDTH_SPACE, stripZeroWidthSpaces } from './utils';
 
 jest.mock('../../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: () => true,
@@ -158,6 +158,116 @@ describe('useMessageEditor setContent', () => {
 
     act(() => {
       result.current.controller.setContent('hello world');
+    });
+
+    expect(result.current.controller).toBe(controller);
+  });
+});
+
+describe('useMessageEditor insertText', () => {
+  let div: HTMLDivElement;
+
+  beforeEach(() => {
+    div = document.createElement('div');
+    div.contentEditable = 'true';
+    document.body.appendChild(div);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(div);
+  });
+
+  it('types the text in an empty editor and opens the command menu', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+
+    act(() => {
+      result.current.controller.insertText('@');
+    });
+
+    expect(div.textContent).toBe('@');
+    expect(result.current.messageEditor.commandMatch.activeCommand?.command.id).toBe(
+      CommandId.Mention
+    );
+    expect(result.current.controller.isEmpty).toBe(false);
+  });
+
+  it('adds a space first when the caret follows a word', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+    div.textContent = 'hello';
+    setCursorAtEnd(div);
+
+    act(() => {
+      result.current.controller.insertText('@');
+    });
+
+    expect(div.textContent).toBe('hello @');
+    expect(result.current.messageEditor.commandMatch.isActive).toBe(true);
+  });
+
+  it.each(['hello ', 'hello ', `${ZERO_WIDTH_SPACE}`])(
+    'adds no space when the caret follows whitespace (%j)',
+    (before) => {
+      const { result } = renderHook(() => useMessageEditor());
+      attachRef(result.current.messageEditor, div);
+      div.textContent = before;
+      setCursorAtEnd(div);
+
+      act(() => {
+        result.current.controller.insertText('@');
+      });
+
+      expect(div.textContent).toBe(`${before}@`);
+    }
+  );
+
+  it('puts the text at the end when the caret is outside the editor', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+    div.textContent = 'hello world';
+    const outside = document.createElement('p');
+    outside.textContent = 'elsewhere';
+    document.body.appendChild(outside);
+    setCursorAtEnd(outside);
+
+    act(() => {
+      result.current.controller.insertText('@');
+    });
+
+    expect(div.textContent).toBe('hello world @');
+    expect(outside.textContent).toBe('elsewhere');
+    document.body.removeChild(outside);
+  });
+
+  it('inserts at the caret, not at the end, when the caret is inside the editor', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+    div.textContent = 'hello world';
+    const range = document.createRange();
+    range.setStart(div.firstChild!, 6);
+    range.collapse(true);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    act(() => {
+      result.current.controller.insertText('@');
+    });
+
+    expect(div.textContent).toBe('hello @world');
+  });
+
+  it('keeps the controller identity while the command menu state changes', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+    act(() => {
+      result.current.controller.insertText('@');
+    });
+    const { controller } = result.current;
+
+    act(() => {
+      result.current.messageEditor.dismissActionMenu();
     });
 
     expect(result.current.controller).toBe(controller);
