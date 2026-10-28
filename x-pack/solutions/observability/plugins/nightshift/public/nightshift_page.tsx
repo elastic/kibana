@@ -27,7 +27,6 @@ import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useDeveloperMode } from './hooks/use_developer_mode';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
-import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
 import { NightshiftOnboarding } from './onboarding/onboarding';
 import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
@@ -137,14 +136,7 @@ export function NightshiftPage(): React.ReactElement | null {
   const canUseAutomationsPage = canUseAutomations && pathname.startsWith('/automations');
   const isAutomationDetailRoute = pathname.startsWith('/automations/');
 
-  // The secrets API is disabled (404) unless the nightshift.enabled flag is on.
-  const canManageSandboxSecrets =
-    canManage && nightshiftInvestigations?.investigationsClient != null && nightshiftEnabled;
-  const [isSandboxSecretsFlyoutOpen, setIsSandboxSecretsFlyoutOpen] = useState(false);
-  const openSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(true), []);
-  const closeSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(false), []);
-
-  // Like the secrets API, the custom context API is disabled (404) unless the flag is on.
+  // The custom context API is disabled (404) unless the nightshift.enabled flag is on.
   const canViewCustomContext =
     canShow && nightshiftInvestigations?.investigationsClient != null && nightshiftEnabled;
   const [isCustomContextFlyoutOpen, setIsCustomContextFlyoutOpen] = useState(false);
@@ -373,7 +365,6 @@ export function NightshiftPage(): React.ReactElement | null {
             knowledgeHref={knowledgeHref}
             onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
             settingsHref={canManageAndConfigure ? settingsHref : undefined}
-            onSandboxSecretsClick={canManageSandboxSecrets ? openSandboxSecretsFlyout : undefined}
             onAutomationsClick={
               canUseAutomations && !hidesHeaderActions ? navigateToAutomations : undefined
             }
@@ -421,9 +412,6 @@ export function NightshiftPage(): React.ReactElement | null {
             )}
           </EuiPageTemplate.Section>
         </>
-      )}
-      {canManageSandboxSecrets && isSandboxSecretsFlyoutOpen && (
-        <SandboxSecretsFlyout onClose={closeSandboxSecretsFlyout} />
       )}
       {canViewCustomContext && isCustomContextFlyoutOpen && (
         <CustomContextFlyout canEdit={canManage} onClose={closeCustomContextFlyout} />
