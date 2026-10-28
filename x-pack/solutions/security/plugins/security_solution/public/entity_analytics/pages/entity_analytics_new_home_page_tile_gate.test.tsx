@@ -65,6 +65,8 @@ jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state
     entityFilters: jest.requireActual('../components/home/entities_grid/common')
       .EMPTY_ENTITY_FILTERS,
     setEntityFilters: jest.fn(),
+    groupsSelected: ['none'],
+    setGroupsSelected: jest.fn(),
     rowsMode: 'individual',
     setRowsMode: jest.fn(),
     sortField: 'entity.risk.calculated_score_norm',
