@@ -38,14 +38,15 @@ const i18nStrings = {
 };
 
 export interface RowActions {
-  onInvestigateInTimeline: (row: Row) => void;
+  /** Absent when the user lacks Timeline read privileges, which hides the item. */
+  onInvestigateInTimeline?: (row: Row) => void;
   onOpenEntityGraph: (row: Row) => void;
   /** Absent when the agent chat is unavailable, which hides the item. */
   onAddToChat?: (row: Row) => void;
 }
 
 interface RowActionsCellProps {
-  onInvestigateInTimeline: () => void;
+  onInvestigateInTimeline?: () => void;
   onOpenEntityGraph: () => void;
   onAddToChat?: () => void;
 }
@@ -70,17 +71,19 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={i18nStrings.investigateInTimeline} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="timeline"
-            aria-label={i18nStrings.investigateInTimeline}
-            color="text"
-            size="xs"
-            onClick={onInvestigateInTimeline}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+      {onInvestigateInTimeline && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={i18nStrings.investigateInTimeline} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="timeline"
+              aria-label={i18nStrings.investigateInTimeline}
+              color="text"
+              size="xs"
+              onClick={onInvestigateInTimeline}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiToolTip content={i18nStrings.openEntityGraph} disableScreenReaderOutput>
           <EuiButtonIcon

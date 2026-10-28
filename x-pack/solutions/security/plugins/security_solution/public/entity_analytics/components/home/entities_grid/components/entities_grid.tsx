@@ -77,7 +77,7 @@ const EntityGridActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) =
   const { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat } = rowActions;
   return (
     <RowActionsCell
-      onInvestigateInTimeline={() => onInvestigateInTimeline(row)}
+      onInvestigateInTimeline={onInvestigateInTimeline && (() => onInvestigateInTimeline(row))}
       onOpenEntityGraph={() => onOpenEntityGraph(row)}
       onAddToChat={onAddToChat && (() => onAddToChat(row))}
     />
