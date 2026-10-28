@@ -36,23 +36,6 @@ export class AgentChatPage {
     });
   }
 
-  /** Picks a connector by name, overriding any default or last-used connector on the stack. */
-  async selectConnector(connectorName: string) {
-    const selectorButton = this.page.testSubj.locator('agentBuilderConnectorSelectorButton');
-    await selectorButton.click();
-    const option = this.page.testSubj
-      .locator('agentBuilderConnectorSelector')
-      .getByRole('option')
-      .filter({ hasText: connectorName });
-    // Clicking the checked option in a single-selection list unchecks it and leaves the popover open.
-    if ((await option.getAttribute('aria-checked')) === 'true') {
-      await this.page.keyboard.press('Escape');
-    } else {
-      await option.click();
-    }
-    await selectorButton.filter({ hasText: connectorName }).waitFor({ state: 'visible' });
-  }
-
   async sendMessage(message: string) {
     const input = this.page.testSubj.locator('agentBuilderConversationInputEditor');
     await input.click();

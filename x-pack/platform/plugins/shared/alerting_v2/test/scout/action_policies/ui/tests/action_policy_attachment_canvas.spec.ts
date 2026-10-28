@@ -11,7 +11,6 @@ import { ACTION_POLICY_AUTHORING_SKILL_ID } from '@kbn/alerting-v2-constants';
 import { expect } from '@kbn/scout/ui';
 import {
   agentChatTest as test,
-  LLM_PROXY_CONNECTOR_NAME,
   mockFinalAnswerRenderingActionPolicyAttachment,
   mockLoadSkill,
   mockManageActionPolicy,
@@ -124,7 +123,6 @@ test.describe(
       policyNames.push(policyName);
       // Each interceptor expires 30s after it is registered, so register after the app loads.
       await pageObjects.agentChat.goto();
-      await pageObjects.agentChat.selectConnector(LLM_PROXY_CONNECTOR_NAME);
       mockTitleGeneration(llmProxy, policyName);
       mockLoadSkill(llmProxy, ACTION_POLICY_AUTHORING_SKILL_ID);
       mockManageActionPolicy(llmProxy, [
