@@ -26,6 +26,8 @@ export interface Shape {
   readonly traits?: Traits;
   /** Structures, unions, enums and intEnums. */
   readonly members?: Readonly<Record<string, MemberShape>>;
+  /** Shapes whose members this one includes; the AST doesn't repeat them in `members`. */
+  readonly mixins?: readonly ShapeRef[];
   /** Lists and sets. */
   readonly member?: MemberShape;
   /** Maps. */
@@ -143,12 +145,35 @@ export const traitRecord = (
 export const hasTrait = (traits: Traits | undefined, id: string): boolean =>
   traits !== undefined && id in traits;
 
+const MAX_MIXIN_DEPTH = 32;
+
+/** A shape's members, those of its mixins first (recursively), which its own members override. */
+export const membersOfShape = (
+  model: SmithyModel,
+  shape: Shape,
+  depth = 0
+): Array<[string, MemberShape]> => {
+  const members = new Map<string, MemberShape>();
+  for (const { target } of depth < MAX_MIXIN_DEPTH ? shape.mixins ?? [] : []) {
+    const mixin = getShape(model, target);
+    for (const [name, member] of mixin ? membersOfShape(model, mixin, depth + 1) : []) {
+      members.set(name, member);
+    }
+  }
+  for (const [name, member] of Object.entries(shape.members ?? {})) {
+    members.set(name, member);
+  }
+  return [...members];
+};
+
 /** The members of a structure, by name; none for `smithy.api#Unit`. */
 export const membersOf = (
   model: SmithyModel,
   target: string | undefined
-): Array<[string, MemberShape]> =>
-  target && target !== UNIT ? Object.entries(getShape(model, target)?.members ?? {}) : [];
+): Array<[string, MemberShape]> => {
+  const shape = target && target !== UNIT ? getShape(model, target) : undefined;
+  return shape ? membersOfShape(model, shape) : [];
+};
 
 export const documentationOf = (shape: { readonly traits?: Traits }) => {
   const documentation = shape.traits?.['smithy.api#documentation'];

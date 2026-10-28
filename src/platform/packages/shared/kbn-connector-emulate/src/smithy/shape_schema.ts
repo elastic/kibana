@@ -10,7 +10,7 @@
 import { isRecord } from '../openapi/schema_walk';
 import type { JsonSchema } from '../openapi/types';
 import type { MemberShape, Shape, SmithyModel, Traits } from './smithy_model';
-import { getShape, hasTrait, shapeName, traitRecord } from './smithy_model';
+import { getShape, hasTrait, membersOfShape, shapeName, traitRecord } from './smithy_model';
 
 /** Where a value is sent, which decides how timestamps and blobs are written. */
 export type Location = 'body' | 'payload' | 'header' | 'query' | 'label';
@@ -168,7 +168,7 @@ export const createShapeConverter = (
   };
 
   const toComponent = (shape: Shape): JsonSchema => {
-    const members = Object.entries(shape.members ?? {});
+    const members = membersOfShape(model, shape);
     switch (shape.type) {
       case 'enum':
       case 'intEnum':

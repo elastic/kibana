@@ -8,6 +8,7 @@
  */
 
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
+import { createAwsJsonService } from './aws_json';
 import type { SmithyModel } from '.';
 
 const NS = 'example.metrics';
@@ -280,5 +281,86 @@ describe('AWS JSON services from Smithy models', () => {
 
     expect(await response.json()).toEqual({ names: ['string'] });
     expect(calls[0]).toMatchObject({ operation: 'ListWidgets', status: 200 });
+  });
+});
+
+describe('AWS JSON services: mixins', () => {
+  // The JSON AST doesn't repeat a mixin's members in the shape that uses it.
+  const mixed: SmithyModel = {
+    smithy: '2.0',
+    shapes: {
+      [id('Metrics_20240101')]: {
+        type: 'service',
+        version: '2024-01-01',
+        operations: [ref('ListMetrics')],
+        traits: {
+          'aws.api#service': { sdkId: 'Metrics', endpointPrefix: 'metrics' },
+          'aws.auth#sigv4': { name: 'metrics' },
+          'aws.protocols#awsJson1_0': {},
+        },
+      },
+      [id('ListMetrics')]: {
+        type: 'operation',
+        input: ref('ListMetricsInput'),
+        output: ref('ListMetricsOutput'),
+      },
+      [id('PagingMixin')]: {
+        type: 'structure',
+        members: {
+          NextToken: { target: 'smithy.api#String', traits: required },
+          Limit: { target: 'smithy.api#Integer' },
+        },
+        traits: { 'smithy.api#mixin': {} },
+      },
+      [id('ListMetricsInput')]: {
+        type: 'structure',
+        mixins: [ref('PagingMixin')],
+        // An own member overrides the mixin's.
+        members: {
+          Filter: { target: 'smithy.api#String' },
+          Limit: { target: 'smithy.api#Long' },
+        },
+      },
+      [id('ListMetricsOutput')]: {
+        type: 'structure',
+        mixins: [ref('PagingMixin')],
+        members: {},
+      },
+    },
+  };
+
+  it('includes the members of a shape from its mixins, which its own members override', () => {
+    const { schemas } = createAwsJsonService(mixed).document.components as {
+      schemas: Record<string, { properties: Record<string, unknown>; required?: string[] }>;
+    };
+
+    expect(Object.keys(schemas.ListMetricsRequestContent.properties).sort()).toEqual([
+      'Filter',
+      'Limit',
+      'NextToken',
+    ]);
+    expect(schemas.ListMetricsRequestContent.properties.Limit).toMatchObject({ type: 'integer' });
+    expect(schemas.ListMetricsRequestContent.required).toEqual(['NextToken']);
+    expect(Object.keys(schemas.ListMetricsResponseContent.properties).sort()).toEqual([
+      'Limit',
+      'NextToken',
+    ]);
+  });
+
+  it('validates requests against the inherited required members', async () => {
+    const { fetch } = createEmulatorFetch({ specs: [mixed] });
+    const send = (body: unknown) =>
+      fetch('https://metrics.eu-west-1.amazonaws.com/', {
+        method: 'POST',
+        headers: {
+          authorization: 'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20240101/eu-west-1/metrics',
+          'content-type': 'application/x-amz-json-1.0',
+          'x-amz-target': 'Metrics_20240101.ListMetrics',
+        },
+        body: JSON.stringify(body),
+      });
+
+    expect((await send({ Filter: 'cpu' })).status).toBe(400);
+    expect((await send({ NextToken: 't' })).status).toBe(200);
   });
 });
