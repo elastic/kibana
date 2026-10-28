@@ -11,7 +11,7 @@ import type { BoostRangeError, MaxAgeError, ProfileNameError } from '../../../co
 import { MAX_AGE_MAX_DAYS, PROFILE_NAME_MAX_LENGTH } from '../../../common/validation';
 
 export const PROFILE_NAME_HELP = i18n.translate('xpack.boost.profileForm.nameHelp', {
-  defaultMessage: 'Lowercase letters, numbers, hyphens, and underscores.',
+  defaultMessage: 'Only lowercase letters, numbers, hyphens, and underscores allowed.',
 });
 
 export const PROFILE_NAME_ERROR_MESSAGES: Readonly<Record<ProfileNameError, string>> = {

@@ -154,8 +154,18 @@ const SELECT_PROFILE_FOR_PATTERN = i18n.translate('xpack.boost.ruleForm.selectPr
 
 const PROFILE_HELP_TEXT = i18n.translate('xpack.boost.ruleForm.profileDescription', {
   defaultMessage:
-    "The profile's type decides whether this rule applies to indices or data streams.",
+    'Profile selection determines whether this rule applies to indices or data streams.',
 });
+
+// The same before a profile is chosen, when the tooltip says why the targets are disabled.
+const TARGETS_HELP_TEXTS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.indicesAppliesToDescription', {
+    defaultMessage: 'Provide an index pattern or manually select indices.',
+  }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.dataStreamsAppliesToDescription', {
+    defaultMessage: 'Provide an index pattern or manually select data streams.',
+  }),
+};
 
 /** Passed to each option's renderer through EUI's `data`, which keeps it out of the page's HTML. */
 interface PickOptionData {
@@ -711,7 +721,7 @@ export const RuleFlyout = ({
             display="rowCompressed"
             label={i18n.translate('xpack.boost.ruleForm.nameLabel', { defaultMessage: 'Name' })}
             helpText={i18n.translate('xpack.boost.ruleForm.nameHelp', {
-              defaultMessage: 'Lowercase letters, numbers, hyphens, and underscores.',
+              defaultMessage: 'Only lowercase letters, numbers, hyphens, and underscores allowed.',
             })}
             isInvalid={Boolean(nameError)}
             error={nameError}
@@ -743,17 +753,7 @@ export const RuleFlyout = ({
                 label={i18n.translate('xpack.boost.ruleForm.targetsLabel', {
                   defaultMessage: 'Targets',
                 })}
-                helpText={
-                  !type
-                    ? SELECT_PROFILE_FIRST
-                    : type === 'data_streams'
-                    ? i18n.translate('xpack.boost.ruleForm.dataStreamsAppliesToDescription', {
-                        defaultMessage: 'Enter a name or pattern, or select data streams.',
-                      })
-                    : i18n.translate('xpack.boost.ruleForm.indicesAppliesToDescription', {
-                        defaultMessage: 'Enter a name or pattern, or select indices.',
-                      })
-                }
+                helpText={TARGETS_HELP_TEXTS[targetType]}
                 fullWidth
               >
                 {/* A wrapper takes the row's id, so the tooltip keeps its own. The tooltip only
