@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
+import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { MigrationRulesTable } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -477,6 +478,27 @@ describe('MigrationRulesTable', () => {
       expect(mockInstallMutate).toHaveBeenCalledWith(
         expect.objectContaining({ migrationRule: expect.objectContaining({ id: 'rule-3' }) })
       );
+    });
+
+    it('should disable the flyout install button when the user lacks Rules: All privilege', () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          siemMigrations: {
+            rules: {
+              getMissingCapabilities: jest.fn().mockReturnValue([
+                {
+                  capability: RULES_UI_EDIT_PRIVILEGE,
+                  description: 'Security > Rules: All',
+                },
+              ]),
+            },
+          },
+        },
+      });
+      renderTable();
+      openFlyoutForRule('First Rule');
+
+      expect(screen.getByTestId('installMigrationRuleFromFlyoutButton')).toBeDisabled();
     });
 
     it('should close the flyout when close button is clicked', () => {

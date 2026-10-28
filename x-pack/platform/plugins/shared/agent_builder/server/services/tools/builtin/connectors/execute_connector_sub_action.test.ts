@@ -471,12 +471,26 @@ describe('createExecuteConnectorSubActionTool', () => {
   describe('error hints by HTTP status', () => {
     const subActionHint = 'Check the connector attachment for the correct sub-action names';
 
-    const executeWithErrorMeta = async (errorMeta?: Record<string, unknown>) => {
+    const now = Date.parse('2026-10-26T12:00:00Z');
+    const inSeconds = (seconds: number) => new Date(now + seconds * 1000);
+
+    let dateNowSpy: jest.SpyInstance<number, []>;
+
+    beforeEach(() => {
+      dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(now);
+    });
+
+    afterEach(() => {
+      dateNowSpy.mockRestore();
+    });
+
+    const executeWithErrorMeta = async (errorMeta?: Record<string, unknown>, retry?: unknown) => {
       mockExecute.mockResolvedValue({
         status: 'error',
         message: 'Request failed',
         serviceMessage: 'service said no',
         ...(errorMeta ? { errorMeta } : {}),
+        ...(retry !== undefined ? { retry } : {}),
       });
       const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
       const result = await tool.handler(
@@ -487,7 +501,7 @@ describe('createExecuteConnectorSubActionTool', () => {
     };
 
     it('tells the agent to wait the Retry-After delay on a 429, without the sub-action hint', async () => {
-      const data = await executeWithErrorMeta({ statusCode: 429, retryAfterSeconds: 30 });
+      const data = await executeWithErrorMeta({ statusCode: 429 }, inSeconds(30));
 
       expect(data.message).toContain('rate limiting');
       expect(data.message).toContain('Wait 30 seconds before retrying');
@@ -510,6 +524,21 @@ describe('createExecuteConnectorSubActionTool', () => {
       expect(data.metadata).not.toHaveProperty('retryAfterSeconds');
     });
 
+    it('counts the wait from now, and never below zero', async () => {
+      const later = await executeWithErrorMeta({ statusCode: 429 }, inSeconds(29.2));
+      const past = await executeWithErrorMeta({ statusCode: 429 }, inSeconds(-10));
+
+      expect(later.metadata).toMatchObject({ retryAfterSeconds: 30 });
+      expect(past.message).toContain('Wait 0 seconds before retrying');
+    });
+
+    it('ignores a retry that is not a date', async () => {
+      const data = await executeWithErrorMeta({ statusCode: 429 }, false);
+
+      expect(data.message).toContain('Retry at most once after a short wait');
+      expect(data.metadata).not.toHaveProperty('retryAfterSeconds');
+    });
+
     it.each([401, 403])('points at the connector credentials on a %i', async (statusCode) => {
       const data = await executeWithErrorMeta({ statusCode });
 
@@ -518,12 +547,32 @@ describe('createExecuteConnectorSubActionTool', () => {
       expect(data.metadata).toMatchObject({ statusCode });
     });
 
+    it('treats a 403 with a retry delay as a rate limit, not a credentials error', async () => {
+      const data = await executeWithErrorMeta({ statusCode: 403 }, inSeconds(45));
+
+      expect(data.message).toContain('rate limiting');
+      expect(data.message).toContain('Wait 45 seconds before retrying');
+      expect(data.message).not.toContain('credentials');
+      expect(data.metadata).toMatchObject({ statusCode: 403, retryAfterSeconds: 45 });
+    });
+
     it.each([500, 502, 503])('reports a failing service on a %i', async (statusCode) => {
       const data = await executeWithErrorMeta({ statusCode });
 
       expect(data.message).toContain('The service failed to handle the request');
       expect(data.message).toContain('Retry at most once');
+      expect(data.message).not.toContain('Wait');
       expect(data.message).not.toContain(subActionHint);
+    });
+
+    it('tells the agent to wait the retry delay on a 503', async () => {
+      const data = await executeWithErrorMeta({ statusCode: 503 }, inSeconds(120));
+
+      expect(data.message).toContain('The service failed to handle the request');
+      expect(data.message).toContain(
+        'Wait 120 seconds before retrying this sub-action. Retry at most once;'
+      );
+      expect(data.metadata).toMatchObject({ statusCode: 503, retryAfterSeconds: 120 });
     });
 
     it.each([400, 404, 422])('keeps the sub-action hint on a %i', async (statusCode) => {

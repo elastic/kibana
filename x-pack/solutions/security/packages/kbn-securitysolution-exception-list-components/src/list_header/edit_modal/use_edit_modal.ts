@@ -11,9 +11,15 @@ import { useState, useCallback } from 'react';
 import * as i18n from '../../translations';
 import type { ListDetails } from '../../types';
 
+/**
+ * Persists the edited list details. Resolves once the save succeeded; rejects when it failed,
+ * in which case the modal stays open so the user can retry.
+ */
+export type EditModalOnSave = (newListDetails: ListDetails) => Promise<void>;
+
 interface UseEditModal {
   listDetails: ListDetails;
-  onSave: (newListDetails: ListDetails) => void;
+  onSave: EditModalOnSave;
 }
 
 export const useEditModal = ({ listDetails, onSave }: UseEditModal) => {
@@ -37,11 +43,17 @@ export const useEditModal = ({ listDetails, onSave }: UseEditModal) => {
     setNewListDetails({ ...newListDetails, [name]: value });
   };
 
-  const onSubmit = (e?: SyntheticEvent) => {
+  const onSubmit = async (e?: SyntheticEvent) => {
+    e?.preventDefault();
     if (error) return;
     setShowProgress(true);
-    onSave(newListDetails);
-    e?.preventDefault();
+    try {
+      await onSave(newListDetails);
+    } catch {
+      // The owner of `onSave` reports the failure; the modal only needs to stay open.
+    } finally {
+      setShowProgress(false);
+    }
   };
   return {
     error,
