@@ -3194,6 +3194,62 @@ describe('bulkEdit()', () => {
         );
       });
     });
+
+    describe('declared borrowed key on a rule with a user provided key', () => {
+      beforeEach(() => {
+        isAuthenticationTypeApiKeyMock.mockReturnValue(true);
+        rulesClientParams.cloneAPIKey.mockResolvedValue({
+          apiKeysEnabled: true,
+          result: { id: 'cloned-id', name: 'cloned', api_key: 'cloned-secret' },
+        });
+        mockCreatePointInTimeFinderAsInternalUser({
+          saved_objects: [
+            {
+              ...existingDecryptedRule,
+              attributes: {
+                ...existingDecryptedRule.attributes,
+                enabled: true,
+                apiKeyCreatedByUser: true,
+              },
+            },
+          ],
+        });
+      });
+
+      test('clones a framework-managed key instead of persisting the caller key and leaves the user key alone', async () => {
+        const borrowedKeyRulesClient = new RulesClient({
+          ...rulesClientParams,
+          cloneApiKeysOnCreate: true,
+        });
+
+        await borrowedKeyRulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [
+            {
+              field: 'tags',
+              operation: 'add',
+              value: ['test-1'],
+            },
+          ],
+        });
+
+        expect(rulesClientParams.cloneAPIKey).toHaveBeenCalledWith('Alerting: myType/my rule name');
+        expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalled();
+        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+          [
+            expect.objectContaining({
+              attributes: expect.objectContaining({
+                apiKey: Buffer.from('cloned-id:cloned-secret').toString('base64'),
+                apiKeyCreatedByUser: false,
+              }),
+            }),
+          ],
+          { overwrite: true }
+        );
+        // The replaced key was the user's, not ours to revoke.
+        expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('params validation', () => {
