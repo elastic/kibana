@@ -313,6 +313,7 @@ describe('isPageWithAppHeaderPath', () => {
     ['the rule details endpoint exceptions tab', '/rules/id/rule-id/endpoint_exceptions'],
     ['the rule details execution results tab', '/rules/id/rule-id/execution_results'],
     ['the shared exception lists page', '/exceptions'],
+    ['the exception list details page', '/exceptions/details/list-1'],
     ['a cloud security posture page', '/cloud_security_posture/findings'],
     ['the cloud security posture base path', '/cloud_security_posture'],
     ['a rules tab with a trailing slash', '/rules/management/'],
@@ -341,7 +342,7 @@ describe('isPageWithAppHeaderPath', () => {
     ['a rule details path with an empty rule id', '/rules/id//overview'],
     ['the add Elastic rules page with an extra segment', '/rules/add_rules/extra'],
     ['a path that only starts like a rules tab', '/rules/managementfoo'],
-    ['a path that only starts like the shared exception lists page', '/exceptions/extra'],
+    ['a path that only starts like the exceptions base path', '/exceptionsfoo'],
     [
       'a path that only starts like the cloud security posture base path',
       '/cloud_security_posturefoo',

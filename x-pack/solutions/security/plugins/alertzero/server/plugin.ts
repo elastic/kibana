@@ -35,16 +35,9 @@ import {
 } from '../common/constants';
 import type { AlertZeroConfig } from './config';
 
-// The investigation and escalation flyouts and AlertZero's queue use the shared
-// `agenticInvestigations` routes, which require these API privileges. Cross-plugin server imports
-// are forbidden, so they are spelled out here and pinned by the plugin tests.
-const INVESTIGATIONS_API_PRIVILEGE_READ = 'read_investigations';
-const INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations';
-const ESCALATIONS_API_PRIVILEGE_READ = 'read_escalations';
-const ESCALATIONS_API_PRIVILEGE_MANAGE = 'manage_escalations';
-
 const INVESTIGATION_SUMMARY_PLUGIN_ID = 'agentic_investigations_summary';
 const PROPOSAL_READ_CONCURRENCY = 5;
+
 import type {
   AlertZeroRequestHandlerContext,
   AlertZeroPluginSetup,
@@ -57,6 +50,7 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
+import { ensureFingerprintIndexMapping } from './context_engine/ensure_fingerprint_index';
 import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
@@ -154,9 +148,21 @@ export class AlertZeroPlugin
     this.threatIntelSupplyWorkflowInstaller = installer;
   };
 
-  private readonly alertZeroStartContract = (): AlertZeroPluginStart => ({
-    registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
-  });
+  /**
+   * False while the fingerprint template install is in flight, and after it fails.
+   * `start` cannot return a promise, so the matcher reads this as it changes.
+   */
+  private fingerprintWritesAllowed = true;
+
+  private readonly alertZeroStartContract = (): AlertZeroPluginStart => {
+    const plugin = this;
+    return {
+      registerThreatIntelSupplyWorkflowInstaller: this.registerThreatIntelSupplyWorkflowInstaller,
+      get attackFingerprintWritesAllowed() {
+        return plugin.fingerprintWritesAllowed;
+      },
+    };
+  };
 
   setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPluginStart>,
@@ -267,24 +273,13 @@ export class AlertZeroPlugin
       privileges: {
         all: {
           app: ['kibana'],
-          api: [
-            ALERTZERO_API_PRIVILEGE_READ,
-            ALERTZERO_API_PRIVILEGE_WRITE,
-            INVESTIGATIONS_API_PRIVILEGE_READ,
-            INVESTIGATIONS_API_PRIVILEGE_MANAGE,
-            ESCALATIONS_API_PRIVILEGE_READ,
-            ESCALATIONS_API_PRIVILEGE_MANAGE,
-          ],
+          api: [ALERTZERO_API_PRIVILEGE_READ, ALERTZERO_API_PRIVILEGE_WRITE],
           savedObject: { all: [], read: [] },
           ui: ['show', 'write'],
         },
         read: {
           app: ['kibana'],
-          api: [
-            ALERTZERO_API_PRIVILEGE_READ,
-            INVESTIGATIONS_API_PRIVILEGE_READ,
-            ESCALATIONS_API_PRIVILEGE_READ,
-          ],
+          api: [ALERTZERO_API_PRIVILEGE_READ],
           savedObject: { all: [], read: [] },
           ui: ['show'],
         },
@@ -342,6 +337,18 @@ export class AlertZeroPlugin
     if (!this.config.enabled) {
       return this.alertZeroStartContract();
     }
+
+    // Plugin start cannot return a promise. Writes stay refused until this settles, so a
+    // worker that runs in that gap reviews every attack and does not auto-create the index.
+    this.fingerprintWritesAllowed = false;
+    void ensureFingerprintIndexMapping(core.elasticsearch.client.asInternalUser, this.logger).then(
+      (allowed) => {
+        this.fingerprintWritesAllowed = allowed;
+      },
+      () => {
+        this.fingerprintWritesAllowed = false;
+      }
+    );
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
 
