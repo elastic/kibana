@@ -16,8 +16,7 @@ const BASE_WORKFLOW = {
   triggers: [{ type: 'manual' }],
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/271451
-describe.skip('generateYamlSchemaFromConnectors', () => {
+describe('generateYamlSchemaFromConnectors ordering', () => {
   it('generates identical JSON schemas regardless of trigger order', () => {
     const triggers = ['cases.updated', 'slack.message', 'slack.reaction'];
     const reversedTriggers = triggers.toReversed();
@@ -31,7 +30,10 @@ describe.skip('generateYamlSchemaFromConnectors', () => {
     expect(reversedSchema).toEqual(schema);
     expect(reversedTriggers).toEqual(originalOrder);
   });
+});
 
+// Failing: See https://github.com/elastic/kibana/issues/271451
+describe.skip('generateYamlSchemaFromConnectors', () => {
   describe('strict mode', () => {
     it('should generate a valid YAML schema from connectors', () => {
       const connectors: ConnectorContractUnion[] = [
