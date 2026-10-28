@@ -11,6 +11,8 @@ import { defer, distinctUntilChanged, map, of, switchMap, type Subscription } fr
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { resolveServerlessStatus } from './status/resolve_serverless';
+import { resolveSelfManagedStatus } from './status/resolve_self_managed';
 import type { SubscriptionStatus } from './status/types';
 import type { BadgeActionClickedEvent, BadgeOpenedEvent, BadgeShownEvent } from './telemetry';
 import {
@@ -111,10 +113,9 @@ export class SubscriptionStatusPlugin
   }
 
   private getCloudBadge$(cloud: CloudStart): Observable<ResolvedBadge | undefined> {
-    return defer(async () => {
-      const { resolveServerlessStatus } = await import('./status/resolve_serverless');
-      return resolveServerlessStatus({ cloud, csp: this.csp, region: this.region });
-    }).pipe(map((status) => status && { status, hasBillingAccess: status.kind === 'popover' }));
+    return defer(() => resolveServerlessStatus({ cloud, csp: this.csp, region: this.region })).pipe(
+      map((status) => status && { status, hasBillingAccess: status.kind === 'popover' })
+    );
   }
 }
 
@@ -129,8 +130,7 @@ const getSelfManagedBadge$ = (
   };
 
   return licensing.license$.pipe(
-    switchMap(async (license) => {
-      const { resolveSelfManagedStatus } = await import('./status/resolve_self_managed');
+    map((license) => {
       const status = resolveSelfManagedStatus({ license, canManageLicense, urls });
       return status && { status, hasBillingAccess: canManageLicense };
     })
