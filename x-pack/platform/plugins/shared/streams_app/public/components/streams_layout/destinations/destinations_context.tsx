@@ -25,17 +25,21 @@ import {
 } from './state_machines/destinations_table_state_machine';
 import {
   EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+  EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
   EMPTY_S3_DESTINATION_FORM,
   type DestinationCreationFormErrors,
   type DestinationStorageKind,
   type DestinationType,
   type DestinationViewModel,
   type ElasticsearchDestinationFormData,
+  type RemoteElasticsearchConnectionErrors,
+  type RemoteElasticsearchDestinationFormData,
   type S3DestinationFormData,
   type S3FieldsErrors,
 } from './types';
 
 const NO_S3_ERRORS: S3FieldsErrors = {};
+const NO_REMOTE_ELASTICSEARCH_ERRORS: RemoteElasticsearchConnectionErrors = {};
 
 export interface DestinationsController {
   destinations: DestinationViewModel[];
@@ -59,6 +63,8 @@ export interface DestinationsController {
   tracesIndexError?: DestinationCreationFormErrors['tracesIndex'];
   s3Form: S3DestinationFormData;
   s3Errors: S3FieldsErrors;
+  remoteElasticsearchForm: RemoteElasticsearchDestinationFormData;
+  remoteElasticsearchErrors: RemoteElasticsearchConnectionErrors;
   canCreateDestination: boolean;
   isUnitSaving: boolean;
   persistenceError?: string;
@@ -76,6 +82,7 @@ export interface DestinationsController {
     >
   ) => void;
   setS3Form: (changes: Partial<S3DestinationFormData>) => void;
+  setRemoteElasticsearchForm: (changes: Partial<RemoteElasticsearchDestinationFormData>) => void;
   validateCreationForm: () => void;
   deleteDestination: (destinationId: string) => void;
   setQuery: (query: string) => void;
@@ -235,6 +242,10 @@ export const useDestinations = ({
   const tracesIndexError = creationContext?.formErrors.tracesIndex;
   const s3Form = creationContext?.formData.s3 ?? EMPTY_S3_DESTINATION_FORM;
   const s3Errors: S3FieldsErrors = creationContext?.formErrors ?? NO_S3_ERRORS;
+  const remoteElasticsearchForm =
+    creationContext?.formData.remoteElasticsearch ?? EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM;
+  const remoteElasticsearchErrors: RemoteElasticsearchConnectionErrors =
+    creationContext?.formErrors ?? NO_REMOTE_ELASTICSEARCH_ERRORS;
   const apiKeyError = useSelector(destinationsActorRef, (state) => state.context.apiKeyError);
   const isCreatingDestination = useSelector(
     destinationsActorRef,
@@ -322,6 +333,11 @@ export const useDestinations = ({
       destinationsActorRef.send({ type: 's3.change', ...changes }),
     [destinationsActorRef]
   );
+  const setRemoteElasticsearchForm = useCallback(
+    (changes: Partial<RemoteElasticsearchDestinationFormData>) =>
+      destinationsActorRef.send({ type: 'remoteElasticsearch.change', ...changes }),
+    [destinationsActorRef]
+  );
   const validateCreationForm = useCallback(
     () => destinationsActorRef.send({ type: 'creationForm.blur' }),
     [destinationsActorRef]
@@ -363,6 +379,8 @@ export const useDestinations = ({
       tracesIndexError,
       s3Form,
       s3Errors,
+      remoteElasticsearchForm,
+      remoteElasticsearchErrors,
       canCreateDestination: canCreateDestination && !isUnitSaving,
       isUnitSaving,
       persistenceError,
@@ -379,6 +397,7 @@ export const useDestinations = ({
       setElasticsearchAuto,
       setElasticsearchIndexes,
       setS3Form,
+      setRemoteElasticsearchForm,
       validateCreationForm,
       deleteDestination,
       setQuery: (nextQuery: string) => {
@@ -427,6 +446,9 @@ export const useDestinations = ({
       s3Errors,
       s3Form,
       setS3Form,
+      remoteElasticsearchErrors,
+      remoteElasticsearchForm,
+      setRemoteElasticsearchForm,
       setStorageKind,
       storageKind,
       tableState,

@@ -102,6 +102,7 @@ import { CreateDestinationModal } from '../../../streams_layout/destinations/cre
 import { UnitDestinationFlyout } from '../../../streams_layout/destinations/unit_destination_flyout';
 import type { DestinationViewModel } from '../../../streams_layout/destinations/types';
 import { DESTINATION_SIGNAL_LABELS } from '../../../streams_layout/destinations/destination_type_config';
+import { REMOTE_ELASTICSEARCH_TYPE } from '../../../streams_layout/destinations/remote_elasticsearch_constants';
 import {
   getUnitDestinations,
   withUnitDestinations,
@@ -890,6 +891,14 @@ const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => {
   };
 };
 
+const getEndpointHost = (endpoint: string): string => {
+  try {
+    return new URL(endpoint).host || endpoint;
+  } catch {
+    return endpoint;
+  }
+};
+
 export const buildConfiguredDestinationNode = (
   destination: DestinationViewModel,
   hasConnectedSource: boolean,
@@ -920,6 +929,35 @@ export const buildConfiguredDestinationNode = (
         signals: destination.signals,
         title: destination.name,
         subtitle: !hasConnectedSource ? noSourceLabel : destination.bucket,
+      },
+    };
+  }
+  if (destination.type === REMOTE_ELASTICSEARCH_TYPE) {
+    return {
+      id: configuredDestinationNodeId(destination.id),
+      type: DESTINATION_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      deletable: true,
+      ariaLabel: hasConnectedSource
+        ? i18n.translate(
+            'xpack.streams.canvas.configuredDestinationNode.remoteElasticsearchAriaLabel',
+            {
+              defaultMessage: 'Destination: {name}, {signal}',
+              values: { name: destination.name, signal },
+            }
+          )
+        : i18n.translate(
+            'xpack.streams.canvas.configuredDestinationNode.remoteElasticsearchNoSourceAriaLabel',
+            {
+              defaultMessage: 'Destination: {name}, {signal}, no source',
+              values: { name: destination.name, signal },
+            }
+          ),
+      data: {
+        destinationId: destination.id,
+        signals: destination.signals,
+        title: destination.name,
+        subtitle: !hasConnectedSource ? noSourceLabel : getEndpointHost(destination.endpoint),
       },
     };
   }

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { REMOTE_ELASTICSEARCH_TYPE } from './remote_elasticsearch_constants';
 import type { DestinationSignal, DestinationType } from './types';
 
 export const LOCAL_ELASTICSEARCH_LABEL = i18n.translate(
@@ -13,12 +14,25 @@ export const LOCAL_ELASTICSEARCH_LABEL = i18n.translate(
   { defaultMessage: 'Local Elasticsearch' }
 );
 
+export const REMOTE_ELASTICSEARCH_LABEL = i18n.translate(
+  'xpack.streams.destinations.remoteElasticsearchLabel',
+  { defaultMessage: 'Remote Elasticsearch' }
+);
+
 export const AMAZON_S3_LABEL = i18n.translate('xpack.streams.destinations.s3TypeLabel', {
   defaultMessage: 'Amazon S3',
 });
 
-export const getDestinationTypeLabel = (type: DestinationType): string =>
-  type === 's3' ? AMAZON_S3_LABEL : LOCAL_ELASTICSEARCH_LABEL;
+export const getDestinationTypeLabel = (type: DestinationType): string => {
+  switch (type) {
+    case 's3':
+      return AMAZON_S3_LABEL;
+    case REMOTE_ELASTICSEARCH_TYPE:
+      return REMOTE_ELASTICSEARCH_LABEL;
+    case 'elasticsearch':
+      return LOCAL_ELASTICSEARCH_LABEL;
+  }
+};
 
 export const DESTINATION_AUTO_MODE_LABEL = i18n.translate(
   'xpack.streams.destinations.autoModeLabel',

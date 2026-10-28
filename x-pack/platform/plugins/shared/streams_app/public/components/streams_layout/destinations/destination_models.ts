@@ -13,12 +13,17 @@ import {
 import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Unit } from '../../../services/unit_repository';
 import {
+  REMOTE_ELASTICSEARCH_ENDPOINT_ENTRY,
+  REMOTE_ELASTICSEARCH_TYPE,
+} from './remote_elasticsearch_constants';
+import {
   AUTO_INDEX_PATTERNS,
   type AutoWritePatternValidationError,
   type DestinationSignal,
   type DestinationViewModel,
   type ElasticsearchDestinationFormData,
   type ElasticsearchDestinationViewModel,
+  type RemoteElasticsearchDestinationViewModel,
   type S3DestinationViewModel,
   type StaticIndexValidationError,
 } from './types';
@@ -26,6 +31,9 @@ import {
 /** streams-spec elasticsearch.schema.yaml: an index containing `{{` is a template. */
 const INDEX_TEMPLATE_PATTERN = /\{\{/;
 const MAX_INDEX_NAME_BYTES = 255;
+/** streams-transpiler#311 rejects `${` templates and Unicode whitespace or control characters. */
+const REMOTE_INDEX_VARIABLE_PATTERN = /\$\{/;
+const REMOTE_INDEX_INVALID_CHARACTERS = /[\p{White_Space}\p{Cc}]/u;
 
 export type UnitDestination = NonNullable<StreamsUnit.Configuration['destinations']>[number];
 
@@ -220,11 +228,42 @@ export const toS3DestinationViewModel = (destination: UnitDestination): S3Destin
   prefix: readConfigString(destination, 'prefix'),
 });
 
+export const toRemoteElasticsearchDestinationViewModel = (
+  destination: UnitDestination
+): RemoteElasticsearchDestinationViewModel => {
+  const signals = readDestinationSignals(destination);
+  const indexBySignal: Partial<Record<DestinationSignal, string>> = {};
+  for (const signal of signals) {
+    const index = readConfigString(destination, 'index', signal);
+    if (index) {
+      indexBySignal[signal] = index;
+    }
+  }
+  return {
+    id: destination.id,
+    name: destination.name ?? destination.id,
+    type: REMOTE_ELASTICSEARCH_TYPE,
+    signals,
+    endpoint: readConfigString(destination, REMOTE_ELASTICSEARCH_ENDPOINT_ENTRY) ?? '',
+    mode: Object.keys(indexBySignal).length > 0 ? 'static' : 'auto',
+    indexBySignal,
+  };
+};
+
+/** The destination writes to indices on this cluster, so index lookups and stats apply. */
+export const hasLocalIndices = (
+  destination: DestinationViewModel
+): destination is ElasticsearchDestinationViewModel =>
+  destination.type === LOCAL_ELASTICSEARCH_TYPE;
+
 export const toDestinationViewModel = (
   destination: UnitDestination
 ): DestinationViewModel | undefined => {
   if (destination.type === 's3') {
     return toS3DestinationViewModel(destination);
+  }
+  if (destination.type === REMOTE_ELASTICSEARCH_TYPE) {
+    return toRemoteElasticsearchDestinationViewModel(destination);
   }
   if (destination.type !== LOCAL_ELASTICSEARCH_TYPE) {
     return undefined;
@@ -328,17 +367,9 @@ export const validateAutoWritePattern = (
   return undefined;
 };
 
-export const validateStaticSignalIndex = (
-  signal: DestinationSignal,
-  index: string
-): StaticIndexValidationError | undefined => {
-  const value = index.trim();
-  if (!value) {
-    return undefined;
-  }
-  if (indexUsesTemplate(value)) {
-    return 'template';
-  }
+const getIndexNameError = (
+  value: string
+): Exclude<StaticIndexValidationError, 'template' | 'signalPattern'> | undefined => {
   if (INVALID_STREAM_NAME_CHARACTERS.some((char) => value.includes(char))) {
     return 'invalidCharacter';
   }
@@ -352,8 +383,43 @@ export const validateStaticSignalIndex = (
   ) {
     return 'invalidName';
   }
+  return undefined;
+};
+
+export const validateStaticSignalIndex = (
+  signal: DestinationSignal,
+  index: string
+): StaticIndexValidationError | undefined => {
+  const value = index.trim();
+  if (!value) {
+    return undefined;
+  }
+  if (indexUsesTemplate(value)) {
+    return 'template';
+  }
+  const nameError = getIndexNameError(value);
+  if (nameError) {
+    return nameError;
+  }
   if (!hasSignalDataStreamShape(signal, value)) {
     return 'signalPattern';
   }
   return undefined;
+};
+
+/** A remote index is a full name, so no signal prefix is required. */
+export const validateRemoteIndex = (
+  index: string
+): Exclude<StaticIndexValidationError, 'signalPattern'> | undefined => {
+  const value = index.trim();
+  if (!value) {
+    return undefined;
+  }
+  if (indexUsesTemplate(value) || REMOTE_INDEX_VARIABLE_PATTERN.test(value)) {
+    return 'template';
+  }
+  if (REMOTE_INDEX_INVALID_CHARACTERS.test(value)) {
+    return 'invalidCharacter';
+  }
+  return getIndexNameError(value);
 };

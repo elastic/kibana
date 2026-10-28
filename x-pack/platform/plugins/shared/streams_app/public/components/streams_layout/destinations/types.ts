@@ -7,16 +7,19 @@
 
 import type { StreamsV2 } from '@kbn/streams-schema';
 import type { DestinationNameValidationError } from './destination_helpers';
+import type { REMOTE_ELASTICSEARCH_TYPE } from './remote_elasticsearch_constants';
 
 /**
  * Destination storage choices shown in the create form.
- * Only `local_elasticsearch` is persisted today. Add a kind here, a fields
- * component, and a registry entry to introduce another type.
+ * Add a kind here, a fields component, and a registry entry to introduce another type.
  */
-export type DestinationStorageKind = 'local_elasticsearch' | 'external_storage';
+export type DestinationStorageKind =
+  | 'local_elasticsearch'
+  | 'remote_elasticsearch'
+  | 'external_storage';
 
 /** Unit destination types the UI can list and create. */
-export type DestinationType = 'elasticsearch' | 's3';
+export type DestinationType = 'elasticsearch' | typeof REMOTE_ELASTICSEARCH_TYPE | 's3';
 
 export type DestinationSignal = StreamsV2.OtlpSignal;
 
@@ -61,7 +64,19 @@ export interface S3DestinationViewModel extends DestinationViewModelBase {
   prefix?: string;
 }
 
-export type DestinationViewModel = ElasticsearchDestinationViewModel | S3DestinationViewModel;
+/** The API key is never read into the view model. */
+export interface RemoteElasticsearchDestinationViewModel extends DestinationViewModelBase {
+  type: typeof REMOTE_ELASTICSEARCH_TYPE;
+  endpoint: string;
+  mode: DestinationIndexMode;
+  /** Unscoped index, or the per-signal ones. Empty in auto. */
+  indexBySignal: Partial<Record<DestinationSignal, string>>;
+}
+
+export type DestinationViewModel =
+  | ElasticsearchDestinationViewModel
+  | RemoteElasticsearchDestinationViewModel
+  | S3DestinationViewModel;
 
 /** Per-type form state. Each destination type owns its own slice. */
 export interface ElasticsearchDestinationFormData {
@@ -71,6 +86,11 @@ export interface ElasticsearchDestinationFormData {
   logsIndex: string;
   metricsIndex: string;
   tracesIndex: string;
+}
+
+export interface RemoteElasticsearchDestinationFormData extends ElasticsearchDestinationFormData {
+  endpoint: string;
+  apiKey: string;
 }
 
 export interface S3DestinationFormData {
@@ -85,6 +105,7 @@ export interface DestinationCreationFormData {
   storageKind: DestinationStorageKind;
   destinationName: string;
   elasticsearch: ElasticsearchDestinationFormData;
+  remoteElasticsearch: RemoteElasticsearchDestinationFormData;
   s3: S3DestinationFormData;
 }
 
@@ -96,11 +117,18 @@ export interface DestinationCreationFormErrors {
   logsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
   metricsIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
   tracesIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
+  endpoint?: 'required' | 'invalid';
+  apiKey?: 'required';
   region?: 'required';
   bucket?: S3BucketValidationError;
   accessKeyId?: 'required';
   secretAccessKey?: 'required';
 }
+
+export type RemoteElasticsearchConnectionErrors = Pick<
+  DestinationCreationFormErrors,
+  'endpoint' | 'apiKey'
+>;
 
 export type S3FieldsErrors = Pick<
   DestinationCreationFormErrors,
@@ -112,6 +140,15 @@ export const EMPTY_ELASTICSEARCH_DESTINATION_FORM: ElasticsearchDestinationFormD
   logsIndex: '',
   metricsIndex: '',
   tracesIndex: '',
+};
+
+export const EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM: RemoteElasticsearchDestinationFormData = {
+  auto: true,
+  logsIndex: '',
+  metricsIndex: '',
+  tracesIndex: '',
+  endpoint: '',
+  apiKey: '',
 };
 
 export const EMPTY_S3_DESTINATION_FORM: S3DestinationFormData = {

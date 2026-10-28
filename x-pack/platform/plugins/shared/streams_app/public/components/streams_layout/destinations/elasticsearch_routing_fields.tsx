@@ -45,9 +45,12 @@ import type {
 } from './types';
 
 type IndexScope = 'all' | DestinationSignal;
+type RoutingVariant = 'local' | 'remote';
 type WriteTargetError = StaticIndexValidationError | AutoWritePatternValidationError | undefined;
 
-interface LocalElasticsearchFieldsProps {
+interface ElasticsearchRoutingFieldsProps {
+  /** Remote takes full index names and has no write targets. */
+  variant: RoutingVariant;
   auto: boolean;
   logsIndex: string;
   metricsIndex: string;
@@ -86,6 +89,40 @@ const INDEX_PLACEHOLDER = i18n.translate('xpack.streams.destinations.staticIndex
   defaultMessage: 'dataset-namespace',
 });
 
+const REMOTE_INDEX_PLACEHOLDER = i18n.translate(
+  'xpack.streams.destinations.remoteElasticsearch.indexPlaceholder',
+  { defaultMessage: 'my-index' }
+);
+
+const REMOTE_AUTO_ROUTING_HELP = i18n.translate(
+  'xpack.streams.destinations.remoteElasticsearch.autoRoutingHelpDescription',
+  { defaultMessage: 'Route each document by its target index or its data stream fields.' }
+);
+
+const REMOTE_ALL_SIGNALS_INDEX_HELP = i18n.translate(
+  'xpack.streams.destinations.remoteElasticsearch.allSignalsIndexHelpDescription',
+  { defaultMessage: 'The same index name is used for logs, metrics, and traces.' }
+);
+
+const remoteSignalIndexHelp = (signal: DestinationSignal): string =>
+  i18n.translate('xpack.streams.destinations.remoteElasticsearch.signalIndexHelpDescription', {
+    defaultMessage: 'Optional. Leave blank to skip the {signal} signal.',
+    values: { signal: DESTINATION_SIGNAL_LABELS[signal] },
+  });
+
+const REMOTE_INDEX_INVALID_NAME_ERROR = i18n.translate(
+  'xpack.streams.destinations.remoteElasticsearch.indexInvalidNameErrorMessage',
+  { defaultMessage: 'Enter a valid index name.' }
+);
+
+const REMOTE_INDEX_INVALID_CHARACTER_ERROR = i18n.translate(
+  'xpack.streams.destinations.remoteElasticsearch.indexInvalidCharacterErrorMessage',
+  {
+    defaultMessage:
+      'Index names cannot contain \\ / * ? " < > | , # :, whitespace, or control characters.',
+  }
+);
+
 const INDEX_FIELD_TEST_SUBJ: Record<IndexScope, string> = {
   all: 'streamsCreateDestinationIndex',
   logs: 'streamsCreateDestinationLogsIndex',
@@ -96,7 +133,8 @@ const INDEX_FIELD_TEST_SUBJ: Record<IndexScope, string> = {
 const writeTargetErrorText = (
   signal: DestinationSignal,
   error: WriteTargetError,
-  allowWildcard: boolean
+  allowWildcard: boolean,
+  variant: RoutingVariant
 ): string | undefined => {
   if (error === 'template') {
     return i18n.translate('xpack.streams.destinations.indexTemplateNotSupportedErrorMessage', {
@@ -109,6 +147,9 @@ const writeTargetErrorText = (
     });
   }
   if (error === 'invalidCharacter') {
+    if (variant === 'remote') {
+      return REMOTE_INDEX_INVALID_CHARACTER_ERROR;
+    }
     return allowWildcard
       ? i18n.translate('xpack.streams.destinations.writeTargetInvalidCharacterErrorMessage', {
           defaultMessage: 'Write targets cannot contain \\ / ? " < > | , # : or spaces.',
@@ -124,15 +165,18 @@ const writeTargetErrorText = (
     });
   }
   if (error === 'invalidName') {
-    return i18n.translate('xpack.streams.destinations.indexInvalidNameErrorMessage', {
-      defaultMessage: 'Enter a valid data stream name.',
-    });
+    return variant === 'remote'
+      ? REMOTE_INDEX_INVALID_NAME_ERROR
+      : i18n.translate('xpack.streams.destinations.indexInvalidNameErrorMessage', {
+          defaultMessage: 'Enter a valid data stream name.',
+        });
   }
   return undefined;
 };
 
-/** Fields for a local Elasticsearch destination (`elasticsearch.schema.yaml`). */
-export const LocalElasticsearchFields = ({
+/** Routing for a local or remote Elasticsearch destination (`elasticsearch.schema.yaml`). */
+export const ElasticsearchRoutingFields = ({
+  variant,
   auto,
   logsIndex,
   metricsIndex,
@@ -145,29 +189,45 @@ export const LocalElasticsearchFields = ({
   onAutoChange,
   onIndexesChange,
   onBlur,
-}: LocalElasticsearchFieldsProps) => {
-  const autoRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRoutingAuto' });
-  const staticRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRoutingStatic' });
-  const [indexScope, setIndexScope] = useState<IndexScope>(ALL_SCOPE);
-  const [showWriteTargets, setShowWriteTargets] = useState(false);
-
+}: ElasticsearchRoutingFieldsProps) => {
+  const isRemote = variant === 'remote';
   const indexesBySignal: Record<DestinationSignal, string> = {
     logs: logsIndex,
     metrics: metricsIndex,
     traces: tracesIndex,
   };
+  // Remote values are full names, so All stands only for three equal raw values
+  // and a card reopened with differing names starts on the first filled signal.
+  const isAllDisabled = isRemote
+    ? new Set(Object.values(indexesBySignal)).size > 1
+    : haveStaticIndexRemaindersDiverged({ logsIndex, metricsIndex, tracesIndex });
+
+  const autoRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRoutingAuto' });
+  const staticRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRoutingStatic' });
+  const [indexScope, setIndexScope] = useState<IndexScope>(() =>
+    isRemote && isAllDisabled
+      ? DESTINATION_SIGNALS.find((signal) => indexesBySignal[signal].trim()) ??
+        DESTINATION_SIGNALS[0]
+      : ALL_SCOPE
+  );
+  const [showWriteTargets, setShowWriteTargets] = useState(false);
+
   const errorsBySignal: Record<DestinationSignal, WriteTargetError> = {
     logs: logsIndexError,
     metrics: metricsIndexError,
     traces: tracesIndexError,
   };
 
-  const remainder =
-    indexScope === ALL_SCOPE
-      ? getStaticIndexRemainder('logs', logsIndex)
-      : getStaticIndexRemainder(indexScope, indexesBySignal[indexScope]);
   const visibleSignal: DestinationSignal = indexScope === ALL_SCOPE ? 'logs' : indexScope;
-  const fieldError = writeTargetErrorText(visibleSignal, errorsBySignal[visibleSignal], auto);
+  const fieldValue = isRemote
+    ? indexesBySignal[visibleSignal]
+    : getStaticIndexRemainder(visibleSignal, indexesBySignal[visibleSignal]);
+  const fieldError = writeTargetErrorText(
+    visibleSignal,
+    errorsBySignal[visibleSignal],
+    auto,
+    variant
+  );
   const requiredError =
     !auto && staticIndexesError === 'required'
       ? i18n.translate('xpack.streams.destinations.staticIndexRequiredErrorMessage', {
@@ -176,7 +236,8 @@ export const LocalElasticsearchFields = ({
       : undefined;
   const otherInvalidSignals = DESTINATION_SIGNALS.filter(
     (signal) =>
-      signal !== visibleSignal && writeTargetErrorText(signal, errorsBySignal[signal], auto)
+      signal !== visibleSignal &&
+      writeTargetErrorText(signal, errorsBySignal[signal], auto, variant)
   );
   const otherSignalsError =
     otherInvalidSignals.length > 0
@@ -191,11 +252,6 @@ export const LocalElasticsearchFields = ({
         })
       : undefined;
   const errorMessage = fieldError ?? requiredError ?? otherSignalsError;
-  const isAllDisabled = haveStaticIndexRemaindersDiverged({
-    logsIndex,
-    metricsIndex,
-    tracesIndex,
-  });
 
   const scopeOptions: EuiButtonGroupOptionProps[] = useMemo(
     () => [
@@ -229,13 +285,21 @@ export const LocalElasticsearchFields = ({
     onBlur();
   };
 
-  const onRemainderChange = (nextRemainder: string) => {
+  const onIndexValueChange = (nextValue: string) => {
+    if (isRemote) {
+      onIndexesChange(
+        indexScope === ALL_SCOPE
+          ? { logsIndex: nextValue, metricsIndex: nextValue, tracesIndex: nextValue }
+          : { [SIGNAL_INDEX_FIELDS[indexScope]]: nextValue }
+      );
+      return;
+    }
     if (indexScope === ALL_SCOPE) {
-      onIndexesChange(composeStaticIndexesForAll(nextRemainder));
+      onIndexesChange(composeStaticIndexesForAll(nextValue));
       return;
     }
     onIndexesChange({
-      [SIGNAL_INDEX_FIELDS[indexScope]]: composeStaticIndex(indexScope, nextRemainder),
+      [SIGNAL_INDEX_FIELDS[indexScope]]: composeStaticIndex(indexScope, nextValue),
     });
   };
 
@@ -261,7 +325,11 @@ export const LocalElasticsearchFields = ({
 
   const showIndexFields = !auto || showWriteTargets;
 
-  const indexHelpText = auto
+  const remoteIndexHelpText =
+    indexScope === ALL_SCOPE ? REMOTE_ALL_SIGNALS_INDEX_HELP : remoteSignalIndexHelp(indexScope);
+  const indexHelpText = isRemote
+    ? remoteIndexHelpText
+    : auto
     ? indexScope === ALL_SCOPE
       ? i18n.translate('xpack.streams.destinations.autoAllWriteTargetHelpDescription', {
           defaultMessage:
@@ -321,22 +389,28 @@ export const LocalElasticsearchFields = ({
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>
-              {i18n.translate('xpack.streams.destinations.autoRoutingHelpDescription', {
-                defaultMessage:
-                  "Use each document's target, or derive a data stream name from its metadata.",
-              })}
+              {isRemote
+                ? REMOTE_AUTO_ROUTING_HELP
+                : i18n.translate('xpack.streams.destinations.autoRoutingHelpDescription', {
+                    defaultMessage:
+                      "Use each document's target, or derive a data stream name from its metadata.",
+                  })}
             </p>
           </EuiText>
-          <EuiSpacer size="s" />
-          <EuiSwitch
-            label={i18n.translate('xpack.streams.destinations.setWriteTargetsSwitchLabel', {
-              defaultMessage: 'Set write targets',
-            })}
-            checked={showWriteTargets}
-            disabled={disabled}
-            onChange={(event) => onShowWriteTargetsChange(event.target.checked)}
-            data-test-subj="streamsCreateDestinationSetWriteTargets"
-          />
+          {!isRemote && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                label={i18n.translate('xpack.streams.destinations.setWriteTargetsSwitchLabel', {
+                  defaultMessage: 'Set write targets',
+                })}
+                checked={showWriteTargets}
+                disabled={disabled}
+                onChange={(event) => onShowWriteTargetsChange(event.target.checked)}
+                data-test-subj="streamsCreateDestinationSetWriteTargets"
+              />
+            </>
+          )}
         </>
       )}
       {showIndexFields && (
@@ -376,15 +450,19 @@ export const LocalElasticsearchFields = ({
           >
             <EuiFieldText
               fullWidth
-              value={remainder}
+              value={fieldValue}
               disabled={disabled}
               isInvalid={Boolean(errorMessage)}
               prepend={
-                <EuiFormPrepend label={indexScope === ALL_SCOPE ? ALL_PREPEND : `${indexScope}-`} />
+                isRemote ? undefined : (
+                  <EuiFormPrepend
+                    label={indexScope === ALL_SCOPE ? ALL_PREPEND : `${indexScope}-`}
+                  />
+                )
               }
-              onChange={(event) => onRemainderChange(event.target.value)}
+              onChange={(event) => onIndexValueChange(event.target.value)}
               onBlur={onIndexBlur}
-              placeholder={INDEX_PLACEHOLDER}
+              placeholder={isRemote ? REMOTE_INDEX_PLACEHOLDER : INDEX_PLACEHOLDER}
               data-test-subj={INDEX_FIELD_TEST_SUBJ[indexScope]}
             />
           </EuiFormRow>

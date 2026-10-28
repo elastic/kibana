@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
+import { LOCAL_ELASTICSEARCH_LABEL, REMOTE_ELASTICSEARCH_LABEL } from './destination_type_config';
+import { REMOTE_ELASTICSEARCH_TYPE } from './remote_elasticsearch_constants';
 import type { DestinationStorageKind, DestinationType } from './types';
 
 /**
@@ -30,6 +31,13 @@ export const DESTINATION_TYPE_DEFINITIONS: readonly DestinationTypeDefinition[] 
     available: true,
     label: LOCAL_ELASTICSEARCH_LABEL,
     testSubject: 'streamsCreateDestinationLocalElasticsearch',
+  },
+  {
+    storageKind: 'remote_elasticsearch',
+    unitType: REMOTE_ELASTICSEARCH_TYPE,
+    available: true,
+    label: REMOTE_ELASTICSEARCH_LABEL,
+    testSubject: 'streamsCreateDestinationRemoteElasticsearch',
   },
   {
     storageKind: 'external_storage',

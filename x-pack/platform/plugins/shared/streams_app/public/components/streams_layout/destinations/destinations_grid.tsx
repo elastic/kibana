@@ -34,6 +34,8 @@ import {
   getTargetedIndexCount,
 } from './destination_grid_cell';
 import { DestinationIndicesTable } from './destination_indices_table';
+import { hasLocalIndices } from './destination_models';
+import { RemoteElasticsearchDestinationDetails } from './remote_elasticsearch_destination_details';
 import { S3DestinationDetails } from './s3_destination_details';
 import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
 import type { DestinationViewModel } from './types';
@@ -95,8 +97,9 @@ interface DestinationsGridProps {
   onRequestDelete: (destination: DestinationViewModel) => void;
 }
 
-const getExpandAriaLabel = ({ name, type }: DestinationViewModel, isExpanded: boolean) => {
-  if (type === 's3') {
+const getExpandAriaLabel = (destination: DestinationViewModel, isExpanded: boolean) => {
+  const { name } = destination;
+  if (!hasLocalIndices(destination)) {
     return isExpanded
       ? i18n.translate('xpack.streams.destinations.table.collapseDetailsAriaLabel', {
           defaultMessage: 'Collapse details for {name}',
@@ -237,7 +240,7 @@ const DestinationsGridTable = ({
   });
 
   const toggleExpanded = useCallback((destination: DestinationViewModel) => {
-    if (destination.type !== 's3') {
+    if (hasLocalIndices(destination)) {
       setStatsRequested(true);
     }
     setExpandedDestinationIds((current) => {
@@ -366,7 +369,14 @@ const DestinationsGridTable = ({
                   min-width: 100%;
                 `}
               >
-                {destination.type === 's3' ? (
+                {hasLocalIndices(destination) ? (
+                  <DestinationIndicesTable
+                    indices={resolvedIndicesByDestination[destination.id] ?? []}
+                    status={resolvedIndicesStatus}
+                    error={resolvedIndicesError}
+                    stats={destinationIndexStats}
+                  />
+                ) : (
                   <div
                     css={css`
                       padding: ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.m}
@@ -374,15 +384,12 @@ const DestinationsGridTable = ({
                       background-color: ${euiTheme.colors.backgroundBasePlain};
                     `}
                   >
-                    <S3DestinationDetails destination={destination} />
+                    {destination.type === 's3' ? (
+                      <S3DestinationDetails destination={destination} />
+                    ) : (
+                      <RemoteElasticsearchDestinationDetails destination={destination} />
+                    )}
                   </div>
-                ) : (
-                  <DestinationIndicesTable
-                    indices={resolvedIndicesByDestination[destination.id] ?? []}
-                    status={resolvedIndicesStatus}
-                    error={resolvedIndicesError}
-                    stats={destinationIndexStats}
-                  />
                 )}
               </div>
             )}
