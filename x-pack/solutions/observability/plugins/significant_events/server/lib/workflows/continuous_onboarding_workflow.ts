@@ -8,20 +8,25 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { getNightshiftBoundKiContinuousOnboardingWorkflowId } from '@kbn/workflows/managed';
+import {
+  getNightshiftBoundKiContinuousOnboardingWorkflowId,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import type { SignificantEventsServer } from '../../types';
 import type { SignificantEventsKIsOnboardingClient } from './onboarding_workflow_client';
 import { pollUntil } from './poll_until';
-import { createNotSetUpError } from '../service_accounts/detection_engine_account';
+import { requireDetectionEngineAccountId } from '../service_accounts/detection_engine_account';
+import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './managed_workflow_owner';
 
 export interface ContinuousOnboardingWorkflowService {
   /**
    * Reconciles the continuous onboarding workflow of a space when the user
    * toggles the feature on or off there. The workflow is bound to the space's
-   * service account and installed by the space's setup, so changing it needs
-   * `manage_security`.
+   * detection engine service account, so changing it needs `manage_security`.
    *
-   * - Enabling enables the installed document (which schedules its trigger).
-   *   A space that is not set up has none, and is refused.
+   * - Enabling installs the `<id>-<spaceId>` document bound to the account and
+   *   enables it (which schedules its trigger). A space that is not set up has no
+   *   account, and is refused.
    * - Disabling disables the document and cancels any in-flight executions. The
    *   document is kept so its execution history survives, and the next enable
    *   reuses it.
@@ -39,10 +44,12 @@ export const createContinuousOnboardingWorkflowService = ({
   logger,
   managementApi,
   streamsKIsOnboardingClient,
+  server,
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
+  server: Pick<SignificantEventsServer, 'core' | 'workflowsExtensions'>;
 }): ContinuousOnboardingWorkflowService => {
   const log = logger.get('continuous-ki-onboarding-workflow');
 
@@ -107,7 +114,9 @@ export const createContinuousOnboardingWorkflowService = ({
 
     if (!existing) {
       if (enabled) {
-        throw createNotSetUpError();
+        throw new Error(
+          `Managed continuous onboarding workflow ${workflowId} is not installed yet`
+        );
       }
       return;
     }
@@ -124,6 +133,20 @@ export const createContinuousOnboardingWorkflowService = ({
       const workflowId = getNightshiftBoundKiContinuousOnboardingWorkflowId(spaceId);
 
       if (enabled) {
+        const serviceAccountId = await requireDetectionEngineAccountId({
+          core: server.core,
+          spaceId,
+        });
+        if (!server.workflowsExtensions) {
+          throw new Error('Workflows are not available');
+        }
+        // Installed with the caller's request: binding a workflow to the account needs it.
+        const client = await server.workflowsExtensions.getClient(request);
+        await client.managedWorkflows.install(
+          SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+          NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+          { spaceId, workflowIdSuffix: spaceId, values: { serviceAccountId } }
+        );
         await setManagedEnabled({ enabled: true, workflowId, spaceId, request });
         log.info(`Enabled continuous KI onboarding workflow in space ${spaceId}`);
         return;

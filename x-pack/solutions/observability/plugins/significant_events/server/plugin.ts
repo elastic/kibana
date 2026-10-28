@@ -497,6 +497,7 @@ export class SignificantEventsPlugin
           logger: this.logger,
           managementApi,
           streamsKIsOnboardingClient,
+          server: this.server,
         });
       }
 

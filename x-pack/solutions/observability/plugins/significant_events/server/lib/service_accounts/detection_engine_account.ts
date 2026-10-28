@@ -33,7 +33,7 @@ export const createNotSetUpError = (): StatusError =>
   new StatusError('Nightshift is not set up in this space', 503);
 
 /** The id of the account the space's detection engine runs as, or `undefined` when not set up. */
-const getDetectionEngineAccountId = async ({
+export const getDetectionEngineAccountId = async ({
   core,
   spaceId,
 }: {
@@ -49,6 +49,21 @@ const getDetectionEngineAccountId = async ({
     spaceId,
   });
   return binding?.serviceAccountId;
+};
+
+/** The id of the account the space's detection engine runs as, refused when not set up. */
+export const requireDetectionEngineAccountId = async ({
+  core,
+  spaceId,
+}: {
+  core: CoreStart;
+  spaceId: string;
+}): Promise<string> => {
+  const accountId = await getDetectionEngineAccountId({ core, spaceId });
+  if (accountId === undefined) {
+    throw createNotSetUpError();
+  }
+  return accountId;
 };
 
 /** Whether the space's detection engine has an account to run as. */
