@@ -94,6 +94,62 @@ describe('getResponseActionStatusTool', () => {
     expect(mockGetActionDetailsById).not.toHaveBeenCalled();
   });
 
+  it('reports license_tier_required when Platinum is what withholds canAccessEndpointActionsLogManagement', async () => {
+    // `calculateEndpointAuthz` conjunctions the actions-log privilege with
+    // `isPlatinumPlusLicense`, so below Platinum the license is the blocker.
+    service.getEndpointAuthz = jest.fn().mockResolvedValue(
+      getEndpointAuthzInitialStateMock({
+        canAccessEndpointActionsLogManagement: false,
+      })
+    );
+    service.getLicenseService = jest.fn(
+      () =>
+        ({
+          isPlatinumPlus: () => false,
+          isEnterprise: () => false,
+          getLicenseInformation: () => ({ isAvailable: true, isActive: true }),
+        } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
+    ) as unknown as EndpointAppContextService['getLicenseService'];
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results[0].type).toBe(ToolResultType.error);
+    const denialData = results[0].data as Record<string, unknown>;
+    expect(denialData.error).toBe('license_tier_required');
+    expect(denialData.privilege).toBe('canAccessEndpointActionsLogManagement');
+    expect(denialData.requiredLicenseTier).toBe('platinum');
+    expect(mockGetActionDetailsById).not.toHaveBeenCalled();
+  });
+
+  it('reports product_feature_disabled when the deployment omits the response-actions feature (serverless Essentials)', async () => {
+    // Essentials-shaped: host isolation on, response actions off. The actions
+    // log registers only under `endpointResponseActions` (see PRIVILEGE_PRODUCT_FEATURES).
+    service.getEndpointAuthz = jest.fn().mockResolvedValue(
+      getEndpointAuthzInitialStateMock({
+        canAccessEndpointActionsLogManagement: false,
+      })
+    );
+    service.getProductFeaturesService = jest.fn(
+      () =>
+        ({
+          isEnabled: (key: string) => key === 'endpoint_host_isolation',
+        } as unknown as ReturnType<EndpointAppContextService['getProductFeaturesService']>)
+    ) as unknown as EndpointAppContextService['getProductFeaturesService'];
+
+    const tool = getResponseActionStatusTool(service);
+    const result = await tool.handler({ actionId: ACTION_ID }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results[0].type).toBe(ToolResultType.error);
+    const denialData = results[0].data as Record<string, unknown>;
+    expect(denialData.error).toBe('product_feature_disabled');
+    expect(denialData.privilege).toBe('canAccessEndpointActionsLogManagement');
+    expect(denialData.productFeature).toBe('endpoint_response_actions');
+    expect(mockGetActionDetailsById).not.toHaveBeenCalled();
+  });
+
   it('returns insufficient_privileges for an actions-log-only caller without canReadSecuritySolution', async () => {
     // The details route requires the `securitySolution` feature privilege on
     // top of the actions-log check; the actions-log sub-feature does not grant it.

@@ -7,9 +7,15 @@
 
 import {
   endpointNotFoundData,
+  formatForConfirmationCard,
   insufficientPrivilegesResult,
+  licenseLimitOf,
+  licenseTierRequiredResult,
+  licenseUnavailableResult,
+  productFeatureDisabledResult,
   resolveAgentTypeFromPackages,
   responseActionErrorResult,
+  responseActionsProductFeatureEnabled,
   summarizeActionHosts,
   summarizeActionOutputs,
   summarizeAgentState,
@@ -38,6 +44,19 @@ jest.mock('../../../../endpoint/services/actions', () => ({
 
 const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
 
+/**
+ * A license service stand-in that only answers the questions
+ * `licenseLimitOf` asks: the tier checks and the license information.
+ */
+const licenseServiceWith = (
+  license: { isAvailable: boolean; isActive: boolean } | null
+): Parameters<typeof licenseLimitOf>[0] =>
+  ({
+    isPlatinumPlus: () => false,
+    isEnterprise: () => false,
+    getLicenseInformation: () => license,
+  } as unknown as Parameters<typeof licenseLimitOf>[0]);
+
 describe('response action error helpers', () => {
   it('responseActionErrorResult returns a typed error envelope', () => {
     const result = responseActionErrorResult('unknown_error', 'Action missing');
@@ -57,6 +76,141 @@ describe('response action error helpers', () => {
         error: 'insufficient_privileges',
         privilege: 'canIsolateHost',
       })
+    );
+  });
+
+  it('licenseTierRequiredResult reports the tier, not a grant, as the fix', () => {
+    const result = licenseTierRequiredResult('canWriteScanOperations', 'enterprise');
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'license_tier_required',
+        privilege: 'canWriteScanOperations',
+        requiredLicenseTier: 'enterprise',
+      })
+    );
+    // The whole point of the split: a privilege grant cannot satisfy a license
+    // gate, so the message must not send the analyst looking for one.
+    const message = (result.results[0].data as { message: string }).message;
+    expect(message).not.toContain('Ask an administrator to grant');
+    expect(message).not.toContain('Security UI');
+  });
+
+  it('licenseLimitOf attributes an active-but-low license to the tier', () => {
+    const limit = licenseLimitOf(
+      licenseServiceWith({ isAvailable: true, isActive: true }),
+      'platinum'
+    );
+
+    expect(limit).toEqual({ kind: 'tier', tier: 'platinum' });
+  });
+
+  it('licenseLimitOf attributes an expired license to its state, not the tier', () => {
+    // An expired Enterprise license fails `isEnterprise()` exactly like a
+    // Gold one; the license information is what separates the two causes.
+    const limit = licenseLimitOf(
+      licenseServiceWith({ isAvailable: true, isActive: false }),
+      'enterprise'
+    );
+
+    expect(limit).toEqual({ kind: 'state', expired: true });
+  });
+
+  it('licenseLimitOf reports an unreadable license as unavailable, not expired', () => {
+    const limit = licenseLimitOf(licenseServiceWith(null), 'platinum');
+
+    expect(limit).toEqual({ kind: 'state', expired: false });
+  });
+
+  it('licenseLimitOf raises no limit when the license already satisfies the tier', () => {
+    expect(
+      licenseLimitOf(
+        {
+          isPlatinumPlus: () => true,
+          isEnterprise: () => true,
+          getLicenseInformation: () => null,
+        } as unknown as Parameters<typeof licenseLimitOf>[0],
+        'platinum'
+      )
+    ).toBeUndefined();
+  });
+
+  it('licenseUnavailableResult names renewal for an expired license, not a tier upgrade', () => {
+    const result = licenseUnavailableResult('canIsolateHost', true);
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'license_unavailable',
+        privilege: 'canIsolateHost',
+        licenseState: 'expired',
+      })
+    );
+    const message = (result.results[0].data as { message: string }).message;
+    expect(message).toContain('expired');
+    expect(message).toContain('Renewing');
+    // The point of the split: an expired license is renewed, not upgraded.
+    expect(message).not.toContain('need to upgrade');
+    expect(message).not.toContain('Ask an administrator to grant');
+  });
+
+  it('licenseUnavailableResult distinguishes an unreadable license from an expired one', () => {
+    const result = licenseUnavailableResult('canGetRunningProcesses', false);
+
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'license_unavailable',
+        licenseState: 'unavailable',
+      })
+    );
+    expect((result.results[0].data as { message: string }).message).toContain('could not be read');
+  });
+
+  it('productFeatureDisabledResult names the product tier, not a grant or license, as the fix', () => {
+    const result = productFeatureDisabledResult('canIsolateHost');
+
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data).toEqual(
+      expect.objectContaining({
+        error: 'product_feature_disabled',
+        privilege: 'canIsolateHost',
+        productFeature: 'endpoint_response_actions',
+      })
+    );
+    // The point of the split: neither a role grant nor a license change can
+    // satisfy a product-configuration gate.
+    const message = (result.results[0].data as { message: string }).message;
+    expect(message).not.toContain('Ask an administrator to grant');
+    expect(message).not.toContain('upgrade the Elastic license');
+    expect(message).not.toContain('Security UI');
+  });
+
+  it('responseActionsProductFeatureEnabled reports the feature and tolerates an unconfigured service', () => {
+    expect(responseActionsProductFeatureEnabled({ isEnabled: () => true }, 'canIsolateHost')).toBe(
+      true
+    );
+    expect(responseActionsProductFeatureEnabled({ isEnabled: () => false }, 'canIsolateHost')).toBe(
+      false
+    );
+    // `isEnabled` throws before `setProductFeaturesConfigurator` has run; the
+    // helper must surface "unknown", not crash the gate it feeds.
+    const unconfigured = {
+      isEnabled: () => {
+        throw new Error('not configured');
+      },
+    };
+    expect(responseActionsProductFeatureEnabled(unconfigured, 'canIsolateHost')).toBeUndefined();
+  });
+
+  it('responseActionsProductFeatureEnabled is privilege-specific: release registers under host isolation too', () => {
+    const essentialsFeatures = {
+      isEnabled: (key: string) => key === 'endpoint_host_isolation',
+    };
+    expect(responseActionsProductFeatureEnabled(essentialsFeatures, 'canUnIsolateHost')).toBe(true);
+    expect(responseActionsProductFeatureEnabled(essentialsFeatures, 'canIsolateHost')).toBe(false);
+    expect(responseActionsProductFeatureEnabled(essentialsFeatures, 'canWriteScanOperations')).toBe(
+      false
     );
   });
 
@@ -83,6 +237,40 @@ describe('response action error helpers', () => {
       reason: 'endpoint_not_found',
       message: "No endpoint found with agent ID 'agent-404'.",
     });
+  });
+});
+
+describe('formatForConfirmationCard', () => {
+  it('escapes newline, tab, NUL and DEL as visible escapes', () => {
+    expect(formatForConfirmationCard('/tmp/a\nb')).toBe('"/tmp/a\\nb"');
+    expect(formatForConfirmationCard('/tmp/a\tb')).toBe('"/tmp/a\\tb"');
+    expect(formatForConfirmationCard('/tmp/a\u0000b')).toBe('"/tmp/a\\u{0000}b"');
+    expect(formatForConfirmationCard('/tmp/a\u007fb')).toBe('"/tmp/a\\u{007F}b"');
+  });
+
+  it('escapes bidi controls including RTLO and zero-width characters', () => {
+    expect(formatForConfirmationCard('/tmp/a\u202eb.exe')).toBe('"/tmp/a\\u{202E}b.exe"');
+    expect(formatForConfirmationCard('/tmp/a\u200bb')).toBe('"/tmp/a\\u{200B}b"');
+    expect(formatForConfirmationCard('/tmp/a\ufeffb')).toBe('"/tmp/a\\u{FEFF}b"');
+  });
+
+  it('keeps Windows backslashes as single, literal backslashes', () => {
+    expect(formatForConfirmationCard('C:\\Users\\x\\evil.exe')).toBe('"C:\\Users\\x\\evil.exe"');
+  });
+
+  it('keeps ordinary text and padding whitespace exactly as typed inside quotes', () => {
+    expect(formatForConfirmationCard('/tmp/payload ')).toBe('"/tmp/payload "');
+    expect(formatForConfirmationCard('  /tmp/x')).toBe('"  /tmp/x"');
+  });
+
+  it('escapes a backtick so the confirmation code span cannot be broken', () => {
+    expect(formatForConfirmationCard('/tmp/a`b')).toBe('"/tmp/a\\u{0060}b"');
+  });
+
+  it('renders a forged multi-line comment as one escaped line', () => {
+    expect(formatForConfirmationCard('x"\n\n---\n\n**Correction:** stale label')).toBe(
+      '"x"\\n\\n---\\n\\n**Correction:** stale label"'
+    );
   });
 });
 
