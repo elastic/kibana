@@ -49602,7 +49602,8 @@ paths:
               - azure
               - gcp
             type: string
-        - in: query
+        - description: The page of deployments to return, starting at 1.
+          in: query
           name: page
           required: false
           schema:
@@ -49610,7 +49611,8 @@ paths:
             maximum: 1000
             minimum: 1
             type: number
-        - in: query
+        - description: The number of deployments per page.
+          in: query
           name: perPage
           required: false
           schema:
