@@ -73,6 +73,11 @@ export const PAYLOAD_ALERT_FIELDS: readonly PayloadVariable[] = [
     documentation: 'Unique identifier for this alert.',
   },
   {
+    path: 'alert_url',
+    detail: 'string',
+    documentation: 'Absolute URL of the alert details page in Kibana.',
+  },
+  {
     path: 'alert_status',
     detail: "'inactive' | 'pending' | 'active' | 'recovering'",
     documentation: 'Current lifecycle status of the alert.',

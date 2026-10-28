@@ -21,6 +21,7 @@ describe('ESQL_GENERATION_INSTRUCTIONS', () => {
     'generic process-name, path, or message',
     'QSTR',
     'KQL',
+    'ADJUDICATED OUT',
   ])('contains the gate-critical fragment %j', (fragment) => {
     expect(ESQL_GENERATION_INSTRUCTIONS).toContain(fragment);
   });

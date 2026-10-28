@@ -7,34 +7,43 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type {
+  EnableOnboardingResponse,
   GetOnboardingResponse,
   OnboardingSuggestionsExecution,
   OnboardingSuggestionsStatus,
   StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
+import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
+import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { OnboardingUnavailableError } from './errors';
-import { OnboardingValidationError } from './validation_error';
 import { parseSuggestions } from './parse_suggestions';
 
-export { OnboardingUnavailableError, OnboardingValidationError };
+export { OnboardingUnavailableError };
 
 export interface OnboardingClientDeps {
   workflowsManagement?: WorkflowsServerPluginSetup;
   spaces?: SpacesPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  agentAvailability?: AgentAvailabilityConfig;
 }
 
 /**
- * Onboarding state lives entirely in the executions of the onboarding suggestions workflow: the
- * latest execution's output holds the suggested first investigations.
+ * Per-space onboarding state. The first step, enabling Nightshift, is the investigation agent
+ * being installed in the space. The rest lives in the executions of the onboarding suggestions
+ * workflow: the latest execution's output holds the suggested first investigations.
  */
 export interface OnboardingClient {
   get: (request: KibanaRequest) => Promise<GetOnboardingResponse>;
-  /** Starts an exploration run of the investigation agent; needs at least one sandbox secret. */
+  /** Enables Nightshift in the space: installs the investigation agent there. */
+  enable: (request: KibanaRequest) => Promise<EnableOnboardingResponse>;
+  /** Starts an exploration run of the investigation agent. */
   start: (request: KibanaRequest) => Promise<StartOnboardingSuggestionsResponse>;
 }
 
@@ -68,12 +77,9 @@ const toExecutionResponse = (execution: WorkflowExecutionDto): OnboardingSuggest
 /** Creates the client for the per-space Nightshift onboarding state. */
 export const createOnboardingClient = ({
   getDeps,
-  listSandboxSecretKeys,
   logger,
 }: {
   getDeps: () => OnboardingClientDeps;
-  /** The sandbox secret names the caller's sandbox commands may request in the space. */
-  listSandboxSecretKeys: (request: KibanaRequest) => Promise<string[]>;
   logger: Logger;
 }): OnboardingClient => {
   const getSpaceId = (request: KibanaRequest): string =>
@@ -87,8 +93,22 @@ export const createOnboardingClient = ({
     return workflowsManagement;
   };
 
+  const isAgentInstalled = async (request: KibanaRequest): Promise<boolean> => {
+    const { agentBuilder } = getDeps();
+    if (!agentBuilder) return false;
+    try {
+      const registry = await agentBuilder.agents.getRegistry({ request });
+      return await registry.has(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+    } catch (error) {
+      // Onboarding must still render; the step then asks to enable again.
+      logger.warn(`Could not check the investigation agent: ${(error as Error).message}`);
+      return false;
+    }
+  };
+
   return {
     get: async (request) => {
+      const agentInstalled = await isAgentInstalled(request);
       const { management } = getWorkflowsManagement();
       const spaceId = getSpaceId(request);
       const { results } = await management.getWorkflowExecutions(
@@ -103,22 +123,34 @@ export const createOnboardingClient = ({
         spaceId
       );
       const [latest] = results;
-      if (!latest) return {};
+      if (!latest) return { agent_installed: agentInstalled };
       const execution = await management.getWorkflowExecution(latest.id, spaceId, {
         includeOutput: true,
         omitStepExecutions: true,
         request,
       });
-      return execution ? { execution: toExecutionResponse(execution) } : {};
+      return {
+        agent_installed: agentInstalled,
+        ...(execution ? { execution: toExecutionResponse(execution) } : {}),
+      };
+    },
+
+    enable: async (request) => {
+      const { agentBuilder, agentAvailability } = getDeps();
+      if (!agentBuilder || !agentAvailability) {
+        throw new OnboardingUnavailableError('Agent Builder is not available');
+      }
+      const spaceId = getSpaceId(request);
+      await installInvestigationAgent({
+        agentBuilder,
+        spaceId,
+        availability: agentAvailability,
+      });
+      logger.info(`Enabled Nightshift in space "${spaceId}": investigation agent installed`);
+      return { agent_installed: true };
     },
 
     start: async (request) => {
-      // The secrets are what the investigation agent explores beyond the cluster's telemetry.
-      if ((await listSandboxSecretKeys(request)).length === 0) {
-        throw new OnboardingValidationError(
-          'Add at least one sandbox secret (credential) before looking for first investigations'
-        );
-      }
       const { management } = getWorkflowsManagement();
       const spaceId = getSpaceId(request);
       const workflow = await management.getWorkflow(

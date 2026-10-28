@@ -52,7 +52,10 @@ describe('getSignificantEventsTuningConfig', () => {
   });
 
   it('merges valid stored values over defaults for missing keys', async () => {
-    const stored: Partial<SignificantEventsTuningConfig> = { sample_size: 50, max_iterations: 10 };
+    const stored: Partial<SignificantEventsTuningConfig> = {
+      rrf_rank_constant: 10,
+      feature_ttl_days: 60,
+    };
     const result = await getSignificantEventsTuningConfig(
       makeUiSettingsClient(stored),
       makeLogger()
@@ -60,14 +63,14 @@ describe('getSignificantEventsTuningConfig', () => {
 
     expect(result).toEqual({
       ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
-      sample_size: 50,
-      max_iterations: 10,
+      rrf_rank_constant: 10,
+      feature_ttl_days: 60,
     });
   });
 
   it('falls back to full defaults when an out-of-bounds field is stored', async () => {
-    // sample_size max is 100; 500 is out of bounds
-    const stored = { sample_size: 500 };
+    // rrf_rank_constant max is 100; 999 is out of bounds
+    const stored = { rrf_rank_constant: 999 };
     const logger = makeLogger();
 
     const result = await getSignificantEventsTuningConfig(makeUiSettingsClient(stored), logger);
