@@ -52,6 +52,15 @@ export const WriteHuntEvidenceRequestBody = lazySchema(() =>
         .describe(
           "Technique ids this run could not search but a later run still should, from the coordinator's `pending_technique_ids`. Replaces the report's recorded list for the space, so the next run keeps them as pending even if its own extraction no longer returns them. Omit when Tier 2 did not run, which leaves the recorded list as it is."
         ),
+      /**
+       * From the coordinator's `replayed_whole_report`. True lets this run's result replace an earlier finding the report still carries while its coverage is pending. Omit when Tier 2 did not run.
+       */
+      replayedWholeReport: z
+        .boolean()
+        .optional()
+        .describe(
+          "From the coordinator's `replayed_whole_report`. True lets this run's result replace an earlier finding the report still carries while its coverage is pending. Omit when Tier 2 did not run."
+        ),
     })
     .strict()
 );

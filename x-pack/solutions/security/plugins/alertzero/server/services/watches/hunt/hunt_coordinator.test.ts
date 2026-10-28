@@ -1285,6 +1285,49 @@ describe('huntCoordinator', () => {
       expect(result.pending_technique_ids).toEqual([]);
     });
 
+    it("says a manual run of the report's own text replayed the whole report", async () => {
+      const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
+      mockLoad.mockResolvedValueOnce({
+        iocs: [{ type: 'ip', value: '192.0.2.30' }],
+        techniques: ['T1078.004'],
+        text: 'report body text',
+      });
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        allTiers({} as ScopedModel),
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'manual',
+          run_id: 'run-replay',
+          report_id: 'rpt-1',
+        }
+      );
+
+      expect(result.replayed_whole_report).toBe(true);
+    });
+
+    it('does not call a scheduled run, or one over caller-supplied text, a replay', async () => {
+      const scheduled = await run('run-not-replay');
+      const callerText = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        allTiers({} as ScopedModel),
+        logger,
+        {
+          spaceId: 'default',
+          indexPatterns: INDEX_PATTERNS,
+          trigger: 'manual',
+          run_id: 'run-caller-text',
+          text: 'report text',
+        }
+      );
+
+      expect(scheduled.replayed_whole_report).toBe(false);
+      expect(callerText.replayed_whole_report).toBe(false);
+    });
+
     it('omits the list when Tier 2 did not run', async () => {
       const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
         spaceId: 'default',
@@ -1297,6 +1340,7 @@ describe('huntCoordinator', () => {
 
       expect(result.searched_technique_ids).toBeUndefined();
       expect(result.pending_technique_ids).toBeUndefined();
+      expect(result.replayed_whole_report).toBeUndefined();
     });
   });
 

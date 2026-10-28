@@ -71,6 +71,13 @@ paths:
                     type: string
                     minLength: 1
                     maxLength: 32
+                replayedWholeReport:
+                  type: boolean
+                  description: >-
+                    From the coordinator's `replayed_whole_report`. True lets
+                    this run's result replace an earlier finding the report
+                    still carries while its coverage is pending. Omit when
+                    Tier 2 did not run.
             examples:
               WriteHuntEvidenceRequestExample:
                 summary: Stamp a clean run as hunted.
