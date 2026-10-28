@@ -50,6 +50,7 @@ const enableServiceAccountsRoute = createServerRoute({
     getSpaceId,
     workflowClients,
     maintenanceService,
+    significantEventsScheduledWorkflowsService,
   }): Promise<{
     spaceId: string;
     serviceAccountIds: DetectionEngineServiceAccountIds;
@@ -66,6 +67,7 @@ const enableServiceAccountsRoute = createServerRoute({
       onboardingClient: workflowClients.streamsKIsOnboardingClient,
       getScopedClients,
       maintenanceService,
+      scheduledWorkflowsService: significantEventsScheduledWorkflowsService,
     }).enable({
       request,
       spaceId: await getSpaceId(request),
@@ -89,6 +91,7 @@ const disableServiceAccountsRoute = createServerRoute({
     getSpaceId,
     workflowClients,
     maintenanceService,
+    significantEventsScheduledWorkflowsService,
   }): Promise<{ spaceId: string; pause: SignificantEventsMaintenanceSummary }> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
@@ -101,6 +104,7 @@ const disableServiceAccountsRoute = createServerRoute({
       onboardingClient: workflowClients.streamsKIsOnboardingClient,
       getScopedClients,
       maintenanceService,
+      scheduledWorkflowsService: significantEventsScheduledWorkflowsService,
     }).disable({ request, spaceId: await getSpaceId(request) });
   },
 });

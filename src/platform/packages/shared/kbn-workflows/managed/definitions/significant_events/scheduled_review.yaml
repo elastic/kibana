@@ -9,6 +9,8 @@ tags:
   - scheduled
   - review
 settings:
+  # Rendered with the detection engine service account of the space.
+  run_as: __SERVICE_ACCOUNT_ID__
   concurrency:
     key: "significant-events-scheduled-review"
     strategy: drop
@@ -38,6 +40,8 @@ steps:
         type: workflow.execute
         with:
           workflow-id: "system-significant-events-discovery"
+          # Discovery runs as the service account this workflow is bound to.
+          run-as-mode: inherit
           inputs:
             detectionBatchMax: __DISCOVERY_BATCH_SIZE__
             flakyRuleDetectionThreshold: __FLAKY_RULE_DETECTION_THRESHOLD__

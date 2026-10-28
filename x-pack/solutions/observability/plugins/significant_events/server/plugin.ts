@@ -519,7 +519,7 @@ export class SignificantEventsPlugin
         {
           logger: this.logger,
           managementApi: plugins.workflowsManagement.management,
-          getManagedWorkflowsClient,
+          server: this.server,
         }
       );
     }

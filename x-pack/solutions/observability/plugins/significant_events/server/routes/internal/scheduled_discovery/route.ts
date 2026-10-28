@@ -26,6 +26,7 @@ import { assertNotPaused } from '../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
 import { StatusError } from '../../../lib/errors/status_error';
 import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
+import type { SignificantEventsScheduledWorkflowsConfig } from '../../../lib/workflows/significant_events_scheduled_workflows';
 import {
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
   DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
@@ -154,6 +155,29 @@ const SCHEDULED_DISCOVERY_NUMERIC_SETTINGS = {
 } as const;
 
 type ScheduledDiscoveryNumericField = keyof typeof SCHEDULED_DISCOVERY_NUMERIC_SETTINGS;
+
+/** The scheduled workflows config from a space's stored settings, with defaults for unset ones. */
+export const resolveStoredScheduledConfig = (
+  stored: Record<string, unknown>
+): SignificantEventsScheduledWorkflowsConfig => {
+  const resolve = (field: ScheduledDiscoveryNumericField): number => {
+    const { settingId, defaultValue } = SCHEDULED_DISCOVERY_NUMERIC_SETTINGS[field];
+    const value = stored[settingId];
+    return typeof value === 'number' ? value : defaultValue;
+  };
+  return {
+    detectionIntervalMinutes: resolve('detectionIntervalMinutes'),
+    detectionBucketIntervalMinutes: resolve('detectionBucketIntervalMinutes'),
+    detectionLookbackMinutes: resolve('detectionLookbackMinutes'),
+    targetCoverageMinutes: resolve('targetCoverageMinutes'),
+    reviewIntervalMinutes: resolve('reviewIntervalMinutes'),
+    discoveryBatchSize: resolve('discoveryBatchSize'),
+    maxReviewPasses: resolve('maxReviewPasses'),
+    flakyRuleDetectionThreshold: resolve('flakyRuleDetectionThreshold'),
+    flakyRuleProbeAfterMinutes: resolve('flakyRuleProbeAfterMinutes'),
+    flakyRuleExemptSeverityScore: resolve('flakyRuleExemptSeverityScore'),
+  };
+};
 
 const putScheduledDiscoverySettingsRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/_significant_events/scheduled_discovery/settings',

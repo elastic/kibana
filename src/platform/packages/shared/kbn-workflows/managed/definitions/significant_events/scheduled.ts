@@ -10,22 +10,35 @@
 import SCHEDULED_DETECTION_YAML from './scheduled_detection.yaml';
 import SCHEDULED_REVIEW_YAML from './scheduled_review.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
+import { renderRunAs } from '../nightshift_investigations/render_bound_yaml';
 
-export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID =
-  'system-significant-events-scheduled-detection';
-export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID =
-  'system-significant-events-scheduled-review';
+export const NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID =
+  'system-nightshift-scheduled-detection-bound';
+export const NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID =
+  'system-nightshift-scheduled-review-bound';
 
-export interface SignificantEventsScheduledDetectionWorkflowTemplateValues
+/** Document id of the scheduled detection installed in a space (with `workflowIdSuffix`). */
+export const getNightshiftBoundScheduledDetectionWorkflowId = (spaceId: string): string =>
+  `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-${spaceId}`;
+
+/** Document id of the scheduled review installed in a space (with `workflowIdSuffix`). */
+export const getNightshiftBoundScheduledReviewWorkflowId = (spaceId: string): string =>
+  `${NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID}-${spaceId}`;
+
+export interface NightshiftBoundScheduledDetectionTemplateValues
   extends ManagedWorkflowTemplateValues {
+  /** The service account the detection engine runs as in the space. */
+  serviceAccountId: string;
   detectionIntervalMinutes: number;
   detectionBucketIntervalMinutes: number;
   detectionLookbackMinutes: number;
   targetCoverageMinutes: number;
 }
 
-export interface SignificantEventsScheduledReviewWorkflowTemplateValues
+export interface NightshiftBoundScheduledReviewTemplateValues
   extends ManagedWorkflowTemplateValues {
+  /** The service account the detection engine runs as in the space. */
+  serviceAccountId: string;
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
   maxReviewPasses: number;
@@ -34,7 +47,9 @@ export interface SignificantEventsScheduledReviewWorkflowTemplateValues
   flakyRuleExemptSeverityScore: number;
 }
 
-const SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT = {
+// Installed per space by the scheduled discovery setting, bound to the space's detection engine
+// service account. The detection and discovery runs they start inherit that account.
+const NIGHTSHIFT_BOUND_SCHEDULED_WORKFLOW_MANAGEMENT = {
   lifecycle: 'dynamic',
   versionStrategy: 'auto',
   enablement: 'restorable',
@@ -50,55 +65,57 @@ const renderTemplate = (template: string, values: Record<string, string | number
     template
   );
 
-export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
-  id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+export const NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW = {
+  id: NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 3,
+  version: 1,
   billable: false,
   // The change_point agg needs >= 22 buckets, so detectionLookbackMinutes must be an exact
   // multiple of detectionBucketIntervalMinutes with a quotient in [22, 1000] — the scheduled
   // discovery settings route validates the pair before installing.
-  //
-  // Defaults below only matter on a Kibana restart with an install from before these fields
-  // existed: this workflow re-renders from old persisted values on boot, which won't have them.
   yamlTemplate: ({
+    serviceAccountId,
     detectionIntervalMinutes,
-    detectionBucketIntervalMinutes = 1,
-    detectionLookbackMinutes = 40,
-    targetCoverageMinutes = 30,
+    detectionBucketIntervalMinutes,
+    detectionLookbackMinutes,
+    targetCoverageMinutes,
   }) =>
-    renderTemplate(SCHEDULED_DETECTION_YAML, {
-      __DETECTION_INTERVAL_MINUTES__: detectionIntervalMinutes,
-      __DETECTION_BUCKET_INTERVAL_MINUTES__: detectionBucketIntervalMinutes,
-      __DETECTION_LOOKBACK_MINUTES__: detectionLookbackMinutes,
-      __TARGET_COVERAGE_MINUTES__: targetCoverageMinutes,
-    }),
-  management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledDetectionWorkflowTemplateValues>;
+    renderRunAs(
+      renderTemplate(SCHEDULED_DETECTION_YAML, {
+        __DETECTION_INTERVAL_MINUTES__: detectionIntervalMinutes,
+        __DETECTION_BUCKET_INTERVAL_MINUTES__: detectionBucketIntervalMinutes,
+        __DETECTION_LOOKBACK_MINUTES__: detectionLookbackMinutes,
+        __TARGET_COVERAGE_MINUTES__: targetCoverageMinutes,
+      }),
+      serviceAccountId
+    ),
+  management: NIGHTSHIFT_BOUND_SCHEDULED_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<NightshiftBoundScheduledDetectionTemplateValues>;
 
-export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
-  id: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+export const NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW = {
+  id: NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 6,
+  version: 1,
   billable: false,
-  // Defaults on the 3 flaky-rule fields only matter on a Kibana restart with a pre-upgrade
-  // install: this workflow re-renders from old persisted values on boot, and without a
-  // default the missing fields would render as the literal string "undefined".
   yamlTemplate: ({
+    serviceAccountId,
     reviewIntervalMinutes,
     discoveryBatchSize,
     maxReviewPasses,
-    flakyRuleDetectionThreshold = 10,
-    flakyRuleProbeAfterMinutes = 360,
-    flakyRuleExemptSeverityScore = 80,
+    flakyRuleDetectionThreshold,
+    flakyRuleProbeAfterMinutes,
+    flakyRuleExemptSeverityScore,
   }) =>
-    renderTemplate(SCHEDULED_REVIEW_YAML, {
-      __REVIEW_INTERVAL_MINUTES__: reviewIntervalMinutes,
-      __MAX_REVIEW_PASSES__: maxReviewPasses,
-      __DISCOVERY_BATCH_SIZE__: discoveryBatchSize,
-      __FLAKY_RULE_DETECTION_THRESHOLD__: flakyRuleDetectionThreshold,
-      __FLAKY_RULE_PROBE_AFTER_MINUTES__: flakyRuleProbeAfterMinutes,
-      __FLAKY_RULE_EXEMPT_SEVERITY_SCORE__: flakyRuleExemptSeverityScore,
-    }),
-  management: SCHEDULED_SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition<SignificantEventsScheduledReviewWorkflowTemplateValues>;
+    renderRunAs(
+      renderTemplate(SCHEDULED_REVIEW_YAML, {
+        __REVIEW_INTERVAL_MINUTES__: reviewIntervalMinutes,
+        __MAX_REVIEW_PASSES__: maxReviewPasses,
+        __DISCOVERY_BATCH_SIZE__: discoveryBatchSize,
+        __FLAKY_RULE_DETECTION_THRESHOLD__: flakyRuleDetectionThreshold,
+        __FLAKY_RULE_PROBE_AFTER_MINUTES__: flakyRuleProbeAfterMinutes,
+        __FLAKY_RULE_EXEMPT_SEVERITY_SCORE__: flakyRuleExemptSeverityScore,
+      }),
+      serviceAccountId
+    ),
+  management: NIGHTSHIFT_BOUND_SCHEDULED_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<NightshiftBoundScheduledReviewTemplateValues>;

@@ -8,12 +8,14 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import {
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SignificantEventsServer } from '../../types';
 import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from '../maintenance/managed_workflow_targets';
+import { requireDetectionEngineAccountId } from '../service_accounts/detection_engine_account';
+import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from './managed_workflow_owner';
 import { pollUntil } from './poll_until';
 
 const RUNNING_EXECUTIONS_PAGE_SIZE = 1000;
@@ -35,8 +37,10 @@ export interface SignificantEventsScheduledWorkflowsService {
   /**
    * Reconciles scheduled Significant Events workflows for one Kibana space.
    *
-   * - Enabling installs or updates the two per-space managed workflows, then
-   *   enables them so Task Manager schedules their triggers.
+   * - Enabling installs or updates the two per-space managed workflows, bound
+   *   to the space's detection engine service account (refused when the space is
+   *   not set up), then enables them so Task Manager schedules their triggers.
+   *   Binding needs the caller to hold `manage_security`.
    * - Updating while enabled re-renders the managed workflow templates with the
    *   new cadence and batch values, preserving enablement.
    * - Disabling disables both workflows, cancels non-terminal scheduled
@@ -49,16 +53,26 @@ export interface SignificantEventsScheduledWorkflowsService {
     spaceId: string;
     config: SignificantEventsScheduledWorkflowsConfig;
   }): Promise<void>;
+  /**
+   * Renders the installed scheduled workflows of a space again with the space's
+   * current detection engine account, keeping whether they are enabled. A space
+   * without them is left alone.
+   */
+  rebind(params: {
+    request: KibanaRequest;
+    spaceId: string;
+    config: SignificantEventsScheduledWorkflowsConfig;
+  }): Promise<void>;
 }
 
 export const createSignificantEventsScheduledWorkflowsService = ({
   logger,
   managementApi,
-  getManagedWorkflowsClient,
+  server,
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
-  getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
+  server: Pick<SignificantEventsServer, 'core' | 'workflowsExtensions'>;
 }): SignificantEventsScheduledWorkflowsService => {
   const log = logger.get('significant-events-scheduled-workflows');
 
@@ -121,38 +135,58 @@ export const createSignificantEventsScheduledWorkflowsService = ({
     );
   };
 
+  // Installed and removed with the caller's request: binding a workflow to the account needs it.
+  const getManagedWorkflows = async (request: KibanaRequest) => {
+    if (!server.workflowsExtensions) {
+      throw new Error('Workflows are not available');
+    }
+    return (await server.workflowsExtensions.getClient(request)).managedWorkflows;
+  };
+
   const installOrUpdate = async ({
-    client,
+    request,
     spaceId,
     config,
   }: {
-    client: PluginScopedManagedWorkflowsApi;
+    request: KibanaRequest;
     spaceId: string;
     config: SignificantEventsScheduledWorkflowsConfig;
   }) => {
+    const serviceAccountId = await requireDetectionEngineAccountId({ core: server.core, spaceId });
+    const client = await getManagedWorkflows(request);
     await Promise.all([
-      client.install(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-        values: {
-          detectionIntervalMinutes: config.detectionIntervalMinutes,
-          detectionBucketIntervalMinutes: config.detectionBucketIntervalMinutes,
-          detectionLookbackMinutes: config.detectionLookbackMinutes,
-          targetCoverageMinutes: config.targetCoverageMinutes,
-        },
-      }),
-      client.install(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-        values: {
-          reviewIntervalMinutes: config.reviewIntervalMinutes,
-          discoveryBatchSize: config.discoveryBatchSize,
-          maxReviewPasses: config.maxReviewPasses,
-          flakyRuleDetectionThreshold: config.flakyRuleDetectionThreshold,
-          flakyRuleProbeAfterMinutes: config.flakyRuleProbeAfterMinutes,
-          flakyRuleExemptSeverityScore: config.flakyRuleExemptSeverityScore,
-        },
-      }),
+      client.install(
+        SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+        NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+        {
+          spaceId,
+          workflowIdSuffix: spaceId,
+          values: {
+            serviceAccountId,
+            detectionIntervalMinutes: config.detectionIntervalMinutes,
+            detectionBucketIntervalMinutes: config.detectionBucketIntervalMinutes,
+            detectionLookbackMinutes: config.detectionLookbackMinutes,
+            targetCoverageMinutes: config.targetCoverageMinutes,
+          },
+        }
+      ),
+      client.install(
+        SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+        NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
+        {
+          spaceId,
+          workflowIdSuffix: spaceId,
+          values: {
+            serviceAccountId,
+            reviewIntervalMinutes: config.reviewIntervalMinutes,
+            discoveryBatchSize: config.discoveryBatchSize,
+            maxReviewPasses: config.maxReviewPasses,
+            flakyRuleDetectionThreshold: config.flakyRuleDetectionThreshold,
+            flakyRuleProbeAfterMinutes: config.flakyRuleProbeAfterMinutes,
+            flakyRuleExemptSeverityScore: config.flakyRuleExemptSeverityScore,
+          },
+        }
+      ),
     ]);
   };
 
@@ -225,30 +259,27 @@ export const createSignificantEventsScheduledWorkflowsService = ({
   };
 
   const uninstallScheduledWorkflows = async ({
-    client,
+    request,
     spaceId,
   }: {
-    client: PluginScopedManagedWorkflowsApi;
+    request: KibanaRequest;
     spaceId: string;
   }) => {
-    await Promise.all([
-      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      }),
-      client.uninstall(SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      }),
-    ]);
+    const client = await getManagedWorkflows(request);
+    await Promise.all(
+      SCHEDULED_DISCOVERY_WORKFLOW_IDS.map((id) =>
+        client.uninstall(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER, id, {
+          spaceId,
+          workflowIdSuffix: spaceId,
+        })
+      )
+    );
   };
 
   return {
     async ensureWorkflow({ enabled, request, spaceId, config }) {
-      const client = await getManagedWorkflowsClient();
-
       if (enabled) {
-        await installOrUpdate({ client, spaceId, config });
+        await installOrUpdate({ request, spaceId, config });
         await setAllEnabled({ enabled: true, request, spaceId });
         log.info(`Enabled scheduled Significant Events discovery workflows in space ${spaceId}`);
         return;
@@ -256,10 +287,22 @@ export const createSignificantEventsScheduledWorkflowsService = ({
 
       await setAllEnabled({ enabled: false, request, spaceId });
       await cancelRunningScheduledExecutions({ request, spaceId });
-      await uninstallScheduledWorkflows({ client, spaceId });
+      await uninstallScheduledWorkflows({ request, spaceId });
       log.info(
         `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId}`
       );
+    },
+
+    async rebind({ request, spaceId, config }) {
+      const installed = await managementApi
+        .getClient(request)
+        .getWorkflow(
+          getWorkflowDocumentId(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID, spaceId),
+          spaceId
+        );
+      if (installed) {
+        await installOrUpdate({ request, spaceId, config });
+      }
     },
   };
 };

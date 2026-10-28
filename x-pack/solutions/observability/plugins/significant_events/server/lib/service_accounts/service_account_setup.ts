@@ -17,6 +17,8 @@ import {
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   getNightshiftBoundKiOnboardingWorkflowId,
+  getNightshiftBoundScheduledDetectionWorkflowId,
+  getNightshiftBoundScheduledReviewWorkflowId,
   getNightshiftBoundSourceReconciliationWorkflowId,
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -32,6 +34,8 @@ import {
 } from './detection_engine_account';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from '../workflows/managed_workflow_owner';
 import { pollUntil } from '../workflows/poll_until';
+import type { SignificantEventsScheduledWorkflowsService } from '../workflows/significant_events_scheduled_workflows';
+import { resolveStoredScheduledConfig } from '../../routes/internal/scheduled_discovery/route';
 import type { SignificantEventsMaintenanceService } from '../maintenance/maintenance_service';
 import type { SignificantEventsMaintenanceSummary } from '../../../common/maintenance/types';
 
@@ -91,6 +95,7 @@ export const createServiceAccountSetupService = ({
   onboardingClient,
   getScopedClients,
   maintenanceService,
+  scheduledWorkflowsService,
 }: {
   core: CoreStart;
   spaces: SpacesPluginStart | undefined;
@@ -99,6 +104,7 @@ export const createServiceAccountSetupService = ({
   onboardingClient: SignificantEventsKIsOnboardingClient | undefined;
   getScopedClients: GetScopedClients;
   maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState' | 'pause'>;
+  scheduledWorkflowsService: Pick<SignificantEventsScheduledWorkflowsService, 'rebind'> | undefined;
 }) => {
   /** Refuses before anything is written: 400 when service accounts are off, 403, then 404. */
   const assertCanSetUp = async (request: KibanaRequest, spaceId: string): Promise<void> => {
@@ -175,6 +181,14 @@ export const createServiceAccountSetupService = ({
     if (!workflowsExtensions || !workflowsManagement) {
       throw new StatusError('Workflows are not available', 400);
     }
+    // What the detection engine does outside workflow runs, such as turning rules on, runs as the
+    // account too. Bound first: the workflows a setting installs read the account from it. Binding
+    // again with another account rebinds it.
+    await core.security.serviceAccounts.bindWorkload(request, {
+      serviceAccountId: serviceAccountIds.detectionEngine,
+      workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+      workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+    });
     // The space's bound workflows, installed with the caller's request: binding a workflow to the
     // account needs it. Installing again with another account rebinds them.
     const client = await workflowsExtensions.getClient(request);
@@ -195,6 +209,13 @@ export const createServiceAccountSetupService = ({
         values: { serviceAccountId: serviceAccountIds.detectionEngine },
       });
     }
+    // The scheduled discovery workflows are installed by their setting, with its intervals.
+    const { uiSettingsClient } = await getScopedClients({ request });
+    await scheduledWorkflowsService?.rebind({
+      request,
+      spaceId,
+      config: resolveStoredScheduledConfig(await uiSettingsClient.getAll()),
+    });
     // An installed workflow keeps its state, so the ones `_disable` switched off are switched back
     // on here. The manually started ones are always on in a set-up space: the routes that start
     // onboarding are blocked while the space is paused.
@@ -221,7 +242,6 @@ export const createServiceAccountSetupService = ({
         workflowId: getNightshiftBoundKiSyncWorkflowId(spaceId),
         enabled: true,
       });
-      const { uiSettingsClient } = await getScopedClients({ request });
       if (
         await uiSettingsClient.get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
       ) {
@@ -234,13 +254,6 @@ export const createServiceAccountSetupService = ({
         });
       }
     }
-    // What the detection engine does outside workflow runs, such as turning rules on, runs as the
-    // account too. Binding again with another account rebinds it.
-    await core.security.serviceAccounts.bindWorkload(request, {
-      serviceAccountId: serviceAccountIds.detectionEngine,
-      workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
-      workloadId: DETECTION_ENGINE_WORKLOAD_ID,
-    });
     // Rules created before the setup, or under another account, keep their old keys until they are
     // enabled again as this account.
     const rules = await reassignRulesToAccount({ core, spaceId, getScopedClients });
@@ -289,6 +302,8 @@ export const createServiceAccountSetupService = ({
       getNightshiftBoundKiSyncWorkflowId(spaceId),
       getNightshiftBoundKiContinuousOnboardingWorkflowId(spaceId),
       getNightshiftBoundSourceReconciliationWorkflowId(spaceId),
+      getNightshiftBoundScheduledDetectionWorkflowId(spaceId),
+      getNightshiftBoundScheduledReviewWorkflowId(spaceId),
     ]) {
       await waitForNoRuns({ management: workflowsManagement, request, spaceId, workflowId });
     }

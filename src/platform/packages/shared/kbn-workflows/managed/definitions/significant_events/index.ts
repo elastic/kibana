@@ -14,10 +14,14 @@ import DISCOVERY_YAML from './significant_events/discovery.yaml';
 import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 export {
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  getNightshiftBoundScheduledDetectionWorkflowId,
+  getNightshiftBoundScheduledReviewWorkflowId,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
+  type NightshiftBoundScheduledDetectionTemplateValues,
+  type NightshiftBoundScheduledReviewTemplateValues,
 } from './scheduled';
 
 export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID = 'system-significant-events-detection';

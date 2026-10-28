@@ -9,6 +9,8 @@ tags:
   - scheduled
   - detection
 settings:
+  # Rendered with the detection engine service account of the space.
+  run_as: __SERVICE_ACCOUNT_ID__
   timeout: "10m"
   concurrency:
     key: "significant-events-scheduled-detection"
@@ -24,6 +26,8 @@ steps:
     type: workflow.execute
     with:
       workflow-id: "system-significant-events-detection"
+      # Detection runs as the service account this workflow is bound to.
+      run-as-mode: inherit
       inputs:
         lookback: "now-__DETECTION_LOOKBACK_MINUTES__m"
         bucketInterval: "__DETECTION_BUCKET_INTERVAL_MINUTES__m"
