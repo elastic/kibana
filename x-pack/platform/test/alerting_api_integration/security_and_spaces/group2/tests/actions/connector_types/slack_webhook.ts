@@ -8,7 +8,7 @@
 import type httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
 import type http from 'http';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
@@ -31,7 +31,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
     // need to wait for kibanaServer to settle ...
     before(async () => {
       slackServer = await getSlackServer();
-      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      const availablePort = await getPort({ port: portNumbers(9000, 9100) });
       if (!slackServer.listening) {
         slackServer.listen(availablePort);
       }

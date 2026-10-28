@@ -6,7 +6,7 @@
  */
 
 import path from 'path';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { findTestPluginPaths } from '@kbn/test';
@@ -252,7 +252,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     const proxyPort =
-      process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: getPort.makeRange(6200, 6299) }));
+      process.env.ALERTING_PROXY_PORT ?? (await getPort({ port: portNumbers(6200, 6299) }));
 
     // Create URLs of identical simple webhook servers using TLS, but we'll
     // create custom host settings for them below.

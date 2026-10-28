@@ -13,7 +13,7 @@
  */
 
 import type http from 'http';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import axios from 'axios';
 
 import expect from '@kbn/expect';
@@ -49,7 +49,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       webhookConnector = await createWebhookConnector(webhookSimulatorURL);
 
       slackServer = await getSlackServer();
-      availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      availablePort = await getPort({ port: portNumbers(9000, 9100) });
       if (!slackServer.listening) {
         slackServer.listen(availablePort);
       }

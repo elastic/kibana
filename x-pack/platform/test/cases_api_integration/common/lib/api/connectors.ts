@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import type http from 'http';
 
 import type SuperTest from 'supertest';
@@ -175,7 +175,7 @@ export const getRecordingServiceNowSimulatorServer = async (): Promise<{
 };
 
 const startServiceNowSimulatorListening = async (server: http.Server) => {
-  const port = await getPort({ port: getPort.makeRange(9000, 9100) });
+  const port = await getPort({ port: portNumbers(9000, 9100) });
   if (!server.listening) {
     server.listen(port);
   }

@@ -9,7 +9,7 @@
 
 import { resolve } from 'path';
 import { format } from 'url';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import supertest from 'supertest';
 import { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -36,7 +36,7 @@ export class HealthGatewayService extends FtrService {
       throw new Error('Health gateway is already running');
     }
 
-    this.port = await getPort({ port: getPort.makeRange(1024, 65536) });
+    this.port = await getPort({ port: portNumbers(1024, 65536) });
 
     await this.runner.run(`health-gateway-${this.port}`, {
       cmd: 'node',

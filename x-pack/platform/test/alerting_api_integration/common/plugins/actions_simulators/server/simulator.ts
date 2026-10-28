@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import http from 'http';
 import httpProxy from 'http-proxy';
 import { getProxyPort } from '@kbn/alerting-api-integration-helpers';
@@ -67,7 +67,7 @@ export abstract class Simulator {
   ): Promise<void>;
 
   public async start() {
-    const port = await getPort({ port: getPort.makeRange(9000, 9100) });
+    const port = await getPort({ port: portNumbers(9000, 9100) });
     if (!this.server.listening) {
       this.server.listen(port);
     }
