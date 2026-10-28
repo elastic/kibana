@@ -13,15 +13,36 @@ export const CUSTOM_CONTENT_EDIT_APPLIED_EVALUATOR_NAME = 'Custom Content Data E
 
 const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-export const templateReadsColumn = (template: string, column: string): boolean =>
-  new RegExp(`\\[\\s*["']${escapeRegExp(column)}["']\\s*\\]`).test(template);
+const IDENTIFIER = /^[A-Za-z_]\w*$/;
 
-const readColumnNames = async (runQuery: EsqlQueryRunner, query: string): Promise<string[]> =>
-  ((await runQuery(query)).columns ?? []).map(({ name }) => name);
+/** Whether the template reads the column, as `row["name"]` or, for a plain name, `row.name`. */
+export const templateReadsColumn = (template: string, column: string): boolean =>
+  new RegExp(`\\[\\s*["']${escapeRegExp(column)}["']\\s*\\]`).test(template) ||
+  (IDENTIFIER.test(column) && new RegExp(`\\w\\.${escapeRegExp(column)}(?!\\w)`).test(template));
+
+const withoutQuoting = (query: string): string => query.replace(/`/g, '').replace(/\s+/g, ' ');
 
 /**
- * A data edit that adds a column is only applied when the template shows it. Catches a panel whose
- * query gained the new measure while the template still draws the old content.
+ * The names a query gives to the measure written as `expression`, such as `avg_bytes` for
+ * `avg_bytes = AVG(bytes)`. Found from the expression, so a column the edit renamed is not mistaken
+ * for the measure it added.
+ */
+export const findMeasureAliases = (query: string, expression: string): string[] => {
+  const measure = escapeRegExp(withoutQuoting(expression).trim())
+    .replace(/\\\(\s*/g, '\\(\\s*')
+    .replace(/\s*\\\)/g, '\\s*\\)');
+  const assignment = new RegExp(
+    `(?:^|[,|]|\\b(?:STATS|EVAL)\\b)\\s*([^,|=]+?)\\s*=\\s*[^,|]*?${measure}`,
+    'gi'
+  );
+  return [...withoutQuoting(query).matchAll(assignment)].map((match) =>
+    match[1].trim().replace(/^(?:STATS|EVAL)\s+/i, '')
+  );
+};
+
+/**
+ * A data edit that adds a measure is only applied when the template shows it. Catches a panel
+ * whose query gained the new measure while the template still draws the old content.
  */
 export const createDataEditAppliedEvaluator = ({
   runQuery,
@@ -32,49 +53,44 @@ export const createDataEditAppliedEvaluator = ({
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    if (expected?.edit !== 'data' || !expected.addsColumn) {
-      return skippedResult('This example is not a data edit that adds a column.');
+    const measure = expected?.addsMeasure;
+    if (expected?.edit !== 'data' || !measure) {
+      return skippedResult('This example is not a data edit that adds a measure.');
     }
 
-    const { template, esql: afterQuery } = output.after ?? {};
-    if (!template || !afterQuery) {
+    const { template, esql: query } = output.after ?? {};
+    if (!template || !query) {
       return skippedResult('The panel has no template and query to compare.');
     }
 
-    let afterColumns: string[];
-    let beforeColumns: string[] = [];
+    let columns: string[];
     try {
-      afterColumns = await readColumnNames(runQuery, afterQuery);
-      const beforeQuery = output.baseline?.content?.esql;
-      if (beforeQuery) {
-        beforeColumns = await readColumnNames(runQuery, beforeQuery);
-      }
+      columns = ((await runQuery(query)).columns ?? []).map(({ name }) => name);
     } catch {
-      return skippedResult('A query did not run; the execution evaluator reports that.');
+      return skippedResult('The query did not run; the execution evaluator reports that.');
     }
 
-    const added = afterColumns.filter((column) => !beforeColumns.includes(column));
-    if (added.length === 0) {
-      return {
-        score: 0,
-        label: 'no-new-column',
-        explanation: 'The edit changed the query but it returns no column the original did not.',
-        metadata: { afterColumns, beforeColumns },
-      };
+    const aliases = findMeasureAliases(query, measure).filter((alias) => columns.includes(alias));
+    if (aliases.length === 0) {
+      return skippedResult(
+        `The query has no returned column for ${measure}; the query contents evaluator reports that.`
+      );
     }
 
-    const shown = added.filter((column) => templateReadsColumn(template, column));
+    const shown = aliases.filter((alias) => templateReadsColumn(template, alias));
     return shown.length > 0
       ? {
           score: 1,
-          label: 'new-column-shown',
-          explanation: `The template shows the added column: ${shown.join(', ')}.`,
+          label: 'new-measure-shown',
+          explanation: `The template shows ${measure} as ${shown.join(', ')}.`,
         }
       : {
           score: 0,
-          label: 'new-column-not-shown',
-          explanation: `The query gained ${added.join(', ')} but the template does not read it.`,
-          metadata: { added },
+          label: 'new-measure-not-shown',
+          explanation: `The query returns ${measure} as ${aliases.join(
+            ', '
+          )} but the template does not read it.`,
+          metadata: { aliases, columns },
         };
   },
 });

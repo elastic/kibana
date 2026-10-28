@@ -13,7 +13,11 @@ import { createQueryContentsEvaluator } from './query_contents';
 import { createRowLimitEvaluator, readLimit } from './row_limit';
 import { createRowOrderEvaluator, labelsInOrder } from './row_order';
 import { createTemplateColumnsEvaluator, readColumnReferences } from './template_columns';
-import { createDataEditAppliedEvaluator, templateReadsColumn } from './edit_applied';
+import {
+  createDataEditAppliedEvaluator,
+  findMeasureAliases,
+  templateReadsColumn,
+} from './edit_applied';
 import { createStyleEditJudge } from './style_edit_judge';
 import { createTemplateValidityEvaluator } from './template_validity';
 
@@ -520,77 +524,94 @@ describe('Custom Content Edit', () => {
 
 describe('Custom Content Data Edit Applied', () => {
   const columnsByQuery: Record<string, string[]> = {
-    'FROM logs | STATS count = COUNT(*) BY host': ['count', 'host'],
-    'FROM logs | STATS count = COUNT(*), avg_bytes = AVG(bytes) BY host': [
-      'count',
+    'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host': [
+      'requests',
       'avg_bytes',
       'host',
     ],
     'FROM logs | STATS total = COUNT(*)': ['total'],
+    'FROM logs | STATS `Avg Bytes` = AVG( `bytes` ) BY host': ['Avg Bytes', 'host'],
   };
   const runQuery = jest.fn(async (query: string) => {
     if (!(query in columnsByQuery)) throw new Error('unknown query');
     return { columns: columnsByQuery[query].map((name) => ({ name, type: 'long' })), values: [] };
   });
   const evaluator = createDataEditAppliedEvaluator({ runQuery: runQuery as never });
-  const gold = { data: 'query' as const, edit: 'data' as const, addsColumn: true };
-  const before = { esql: 'FROM logs | STATS count = COUNT(*) BY host', template: '<p/>' };
-  const after = (
-    template: string,
-    esql = 'FROM logs | STATS count = COUNT(*), avg_bytes = AVG(bytes) BY host'
-  ) =>
-    outputWith(
-      { esql, template },
-      { baseline: { attachmentId: 'att-1', content: before, versionCount: 1 } }
-    );
+  const gold = { data: 'query' as const, edit: 'data' as const, addsMeasure: 'AVG(bytes)' };
+  const AFTER = 'FROM logs | STATS requests = COUNT(*), avg_bytes = AVG(bytes) BY host';
+  const after = (template: string, esql = AFTER) => outputWith({ esql, template });
 
-  it('reads a column through bracket access with either quote', () => {
+  it('reads a column through bracket access with either quote, or dot access for a plain name', () => {
     expect(templateReadsColumn('{{ row["avg_bytes"].value }}', 'avg_bytes')).toBe(true);
     expect(templateReadsColumn("{{ r['avg_bytes'].value }}", 'avg_bytes')).toBe(true);
-    expect(templateReadsColumn('{{ row["count"].value }}', 'avg_bytes')).toBe(false);
+    expect(templateReadsColumn('{{ row.avg_bytes.value }}', 'avg_bytes')).toBe(true);
+    expect(templateReadsColumn('{{ row.avg_bytes_total.value }}', 'avg_bytes')).toBe(false);
+    expect(templateReadsColumn('{{ row.value }}', 'avg_bytes')).toBe(false);
+    expect(templateReadsColumn('{{ row["Avg Bytes"].value }}', 'Avg Bytes')).toBe(true);
   });
 
-  it('skips examples that are not a data edit that adds a column', async () => {
+  it('finds the alias of a measure however the query spells it', () => {
+    expect(findMeasureAliases(AFTER, 'AVG(bytes)')).toEqual(['avg_bytes']);
+    expect(
+      findMeasureAliases('FROM logs | STATS `Avg Bytes` = AVG( `bytes` ) BY host', 'AVG(bytes)')
+    ).toEqual(['Avg Bytes']);
+    expect(findMeasureAliases('FROM logs | STATS total = COUNT(*)', 'COUNT(')).toEqual(['total']);
+    expect(findMeasureAliases(AFTER, 'MAX(bytes)')).toEqual([]);
+  });
+
+  it('skips examples that are not a data edit that names a measure', async () => {
     expect((await run(evaluator, after('<p/>'), { data: 'query', edit: 'data' })).score).toBeNull();
     expect(
-      (await run(evaluator, after('<p/>'), { data: 'query', edit: 'style' })).score
+      (await run(evaluator, after('<p/>'), { ...gold, edit: 'style' as const })).score
     ).toBeNull();
   });
 
-  it('passes when the template shows the added column', async () => {
+  it('passes when the template shows the added measure', async () => {
     const result = await run(evaluator, after('<b>{{ row["avg_bytes"].value }}</b>'), gold);
-    expect(result).toMatchObject({ score: 1, label: 'new-column-shown' });
+    expect(result).toMatchObject({ score: 1, label: 'new-measure-shown' });
   });
 
-  it('fails when the query gained a column the template does not read', async () => {
-    const result = await run(evaluator, after('<b>{{ row["count"].value }}</b>'), gold);
-    expect(result).toMatchObject({ score: 0, label: 'new-column-not-shown' });
+  it('passes when the template reads the measure with dot access', async () => {
+    const result = await run(evaluator, after('<b>{{ row.avg_bytes.value }}</b>'), gold);
+    expect(result.score).toBe(1);
   });
 
-  it('fails when the edited query returns no new column', async () => {
+  it('fails when the template still shows only the measure the query already had', async () => {
+    const result = await run(evaluator, after('<b>{{ row["requests"].value }}</b>'), gold);
+    expect(result).toMatchObject({ score: 0, label: 'new-measure-not-shown' });
+  });
+
+  it('is not fooled by a column the edit renamed', async () => {
     const result = await run(
       evaluator,
-      after('<b>{{ row["count"].value }}</b>', 'FROM logs | STATS count = COUNT(*) BY host'),
+      after('<b>{{ row["requests"].value }} {{ row["host"].value }}</b>'),
       gold
     );
-    expect(result).toMatchObject({ score: 0, label: 'no-new-column' });
+    expect(result.score).toBe(0);
   });
 
-  it('treats every column as new when the panel was static', async () => {
+  it('finds a measure whose name has spaces and backticks', async () => {
+    const query = 'FROM logs | STATS `Avg Bytes` = AVG( `bytes` ) BY host';
+    expect((await run(evaluator, after('{{ row["Avg Bytes"].value }}', query), gold)).score).toBe(
+      1
+    );
+    expect((await run(evaluator, after('{{ row["host"].value }}', query), gold)).score).toBe(0);
+  });
+
+  it('works on a panel that was static before the edit', async () => {
     const result = await run(
       evaluator,
-      outputWith(
-        { esql: 'FROM logs | STATS total = COUNT(*)', template: '<b>{{ row["total"].value }}</b>' },
-        { baseline: { attachmentId: 'att-1', content: { template: '<p/>' }, versionCount: 1 } }
-      ),
-      gold
+      after('<b>{{ row["total"].value }}</b>', 'FROM logs | STATS total = COUNT(*)'),
+      { data: 'query', edit: 'data', addsMeasure: 'COUNT(' }
     );
     expect(result.score).toBe(1);
   });
 
-  it('skips when a query does not run', async () => {
-    const result = await run(evaluator, after('<p/>', 'FROM nowhere'), gold);
-    expect(result.score).toBeNull();
+  it('skips when the query does not run or does not return the measure', async () => {
+    expect((await run(evaluator, after('<p/>', 'FROM nowhere'), gold)).score).toBeNull();
+    expect(
+      (await run(evaluator, after('<p/>', 'FROM logs | STATS total = COUNT(*)'), gold)).score
+    ).toBeNull();
   });
 });
 
