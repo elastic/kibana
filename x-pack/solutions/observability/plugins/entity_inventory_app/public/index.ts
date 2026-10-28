@@ -12,14 +12,9 @@ import type {
   EntityInventoryAppPublicStart,
   EntityInventoryAppSetupDependencies,
   EntityInventoryAppStartDependencies,
-  EntityInventoryEntityType,
 } from './types';
 
-export type {
-  EntityInventoryAppPublicSetup,
-  EntityInventoryAppPublicStart,
-  EntityInventoryEntityType,
-};
+export type { EntityInventoryAppPublicSetup, EntityInventoryAppPublicStart };
 
 export const plugin: PluginInitializer<
   EntityInventoryAppPublicSetup,
