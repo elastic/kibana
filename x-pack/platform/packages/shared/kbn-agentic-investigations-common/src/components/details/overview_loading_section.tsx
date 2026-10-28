@@ -22,7 +22,12 @@ export const OverviewLoadingSection = memo(() => (
     aria-label={OVERVIEW_SECTION_LABELS.loading}
   >
     <EuiFlexItem grow={false}>
-      <EuiSkeletonTitle size="xs" css={{ inlineSize: '40%' }} isLoading announceLoadedStatus={false} />
+      <EuiSkeletonTitle
+        size="xs"
+        css={{ inlineSize: '40%' }}
+        isLoading
+        announceLoadedStatus={false}
+      />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiSkeletonText
