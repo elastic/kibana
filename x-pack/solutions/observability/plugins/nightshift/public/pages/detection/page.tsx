@@ -48,6 +48,7 @@ import { DETECTION_TAB_LABELS, getVisibleDetectionTabs } from './detection_tabs'
 import { DetectionOverview } from './overview/detection_overview';
 import { EntitiesPanel } from './entities/entities_panel';
 import { PAGE_QUERY_PARAM } from './constants';
+import { RunLimitsBanner } from './run_limits_banner';
 import { useEntitySelection } from './use_entity_selection';
 import {
   RANGE_FROM_QUERY_PARAM,
@@ -75,9 +76,6 @@ export type DetectionPageHeaderProps = Pick<
   | 'knowledgeHref'
   | 'onSettingsClick'
   | 'settingsHref'
-  | 'onSandboxSecretsClick'
-  | 'onAutomationsClick'
-  | 'automationsHref'
 >;
 
 export const DetectionPage = ({
@@ -192,6 +190,7 @@ export const DetectionPage = ({
           `,
         }}
       >
+        <RunLimitsBanner />
         <div
           ref={fullOverviewSlotRef}
           css={overviewSlotStyles(!isOverviewCompact)}

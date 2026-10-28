@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -13,6 +13,10 @@ import { i18n } from '@kbn/i18n';
 import type { InvestigationStatus } from '@kbn/investigation-output';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import {
+  INVESTIGATION_VIEW_SOURCES,
+  reportNightshiftInvestigationViewed,
+} from '../../../common/ebt_events';
 import { getInvestigationState } from '../../../data/significant_events/investigation_state';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -31,7 +35,7 @@ export const EventInvestigationCard = ({
   investigation,
   status,
 }: EventInvestigationCardProps): React.ReactElement => {
-  const { agentBuilder } = useKibana().services;
+  const { agentBuilder, analytics } = useKibana().services;
   const conversationId = investigation?.id;
   const title =
     investigation?.title && !investigation.title_pending
@@ -40,6 +44,19 @@ export const EventInvestigationCard = ({
           defaultMessage: 'Investigation',
         });
   const canOpen = agentBuilder != null && conversationId != null;
+  // This path opens the flyout without `?investigationId=`, so the landing page's view reporter
+  // never sees it: report the view here so the click joins to the investigation it opened.
+  const handleOpen = useCallback(() => {
+    if (agentBuilder == null || conversationId == null) {
+      return;
+    }
+    reportNightshiftInvestigationViewed(analytics, {
+      investigationId: conversationId,
+      source: INVESTIGATION_VIEW_SOURCES.CLICK,
+      investigation,
+    });
+    void agentBuilder.openConversationDetails({ conversationId });
+  }, [agentBuilder, analytics, conversationId, investigation]);
   const latestInvestigation = getLatestInvestigation(event);
   const investigationState = getInvestigationState({
     investigations: latestInvestigation ? [latestInvestigation] : [],
@@ -54,9 +71,7 @@ export const EventInvestigationCard = ({
   return (
     <EuiPanel
       hasBorder
-      onClick={
-        canOpen ? () => void agentBuilder.openConversationDetails({ conversationId }) : undefined
-      }
+      onClick={canOpen ? handleOpen : undefined}
       data-test-subj="nightshiftEventInvestigationCard"
       {...(canOpen
         ? getEbtProps({
