@@ -1,0 +1,34 @@
+{
+  "components": {
+    "securitySchemes": {
+      "OAuth2Auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "https://api.loganalytics.io/.default": ""
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Monitor Query Logs"
+  },
+  "openapi": "3.0.3",
+  "paths": {},
+  "security": [
+    {
+      "OAuth2Auth": [
+        "https://api.loganalytics.io/.default"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "/"
+    }
+  ]
+}

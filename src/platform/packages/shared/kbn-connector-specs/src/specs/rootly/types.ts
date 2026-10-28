@@ -228,10 +228,11 @@ export const RootlyCreateActionItemInputSchema = lazySchema(() =>
       .optional()
       .describe('Action item status. Defaults to "open".'),
     assignedToUserId: z
-      .string()
-      .max(MAX_ID_LENGTH)
+      .number()
+      .int()
+      .positive()
       .optional()
-      .describe('User ID to assign the action item to.'),
+      .describe('Numeric Rootly user ID to assign the action item to.'),
     dueDate: z.string().max(64).optional().describe('ISO 8601 due date.'),
   })
 );
