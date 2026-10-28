@@ -57,18 +57,8 @@ export const getMenu = ({
       testId: 'case-refresh',
       order: 100,
     },
-    ...(runWorkflow?.canRunWorkflow
-      ? [
-          {
-            id: 'runWorkflow',
-            label: workflowI18n.RUN_WORKFLOW,
-            iconType: 'play' as const,
-            run: () => runWorkflow.onOpen(),
-            testId: 'case-run-workflow-button',
-            order: 150,
-          },
-        ]
-      : []),
+    // Ordered ahead of "Run workflow" so it keeps an inline slot: its popover is anchored to the
+    // trigger element, which unmounts when the item is rendered inside the "More" popover.
     ...(permissions.update && hasCaseSettings
       ? [
           {
@@ -82,6 +72,18 @@ export const getMenu = ({
             },
             testId: 'case-settings-button',
             order: 200,
+          },
+        ]
+      : []),
+    ...(runWorkflow?.canRunWorkflow
+      ? [
+          {
+            id: 'runWorkflow',
+            label: workflowI18n.RUN_WORKFLOW,
+            iconType: 'play' as const,
+            run: () => runWorkflow.onOpen(),
+            testId: 'case-run-workflow-button',
+            order: 250,
           },
         ]
       : []),
