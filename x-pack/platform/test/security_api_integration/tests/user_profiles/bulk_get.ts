@@ -39,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         ['one', 'two', 'three'].map(async (userPrefix) => {
           const response = await supertestWithoutAuth
             .post('/internal/security/login')
+            .set('x-elastic-internal-origin', 'kibana')
             .set('kbn-xsrf', 'xxx')
             .send({
               providerType: 'basic',

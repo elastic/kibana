@@ -36,6 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('accepts valid JWT (with secret) via authorization Bearer header', async () => {
       const { body: user } = await supertest
         .get('/internal/security/me')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('authorization', `Bearer ${jsonWebTokenRequiresSecret}`)
         .set('ES-Client-Authentication', 'SharedSecret my_super_secret')
         .expect(200);
@@ -46,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('accepts valid JWT (without secret) via authorization Bearer header', async () => {
       const { body: user } = await supertest
         .get('/internal/security/me')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('authorization', `Bearer ${jsonWebToken}`)
         .expect(200);
 
@@ -55,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('accepts valid JWT and non-JWT tokens that do not require secret but the secret was supplied', async () => {
       const { body: user } = await supertest
         .get('/internal/security/me')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('authorization', `Bearer ${jsonWebToken}`)
         .set('ES-Client-Authentication', 'SharedSecret my_super_secret')
         .expect(200);

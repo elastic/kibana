@@ -65,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('does not prevent basic login', async () => {
       const response = await supertest
         .post('/internal/security/login')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('kbn-xsrf', 'xxx')
         .send({
           providerType: 'basic',
@@ -100,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body: user } = await supertest
           .get('/internal/security/me')
+          .set('x-elastic-internal-origin', 'kibana')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -138,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should not extend cookie for system AND non-system API calls', async () => {
         const apiResponseOne = await supertest
           .get('/internal/security/me')
+          .set('x-elastic-internal-origin', 'kibana')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -275,6 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       const defaultResponse = await supertest
         .get('/internal/security/me')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('Cookie', sessionCookie.cookieString())
         .expect(200);
 

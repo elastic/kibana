@@ -33,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('accepts valid session cookie', async () => {
       const response = await supertest
         .post('/internal/security/login')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('kbn-xsrf', 'xxx')
         .send({
           providerType: 'basic',

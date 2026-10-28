@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: user, headers } = await supertest
         .get('/internal/security/me')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', `Basic ${credentials}`)
         .expect(200);

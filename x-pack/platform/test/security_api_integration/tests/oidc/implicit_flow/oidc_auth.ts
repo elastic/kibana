@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       beforeEach(async () => {
         const handshakeResponse = await supertest
           .post('/internal/security/login')
+          .set('x-elastic-internal-origin', 'kibana')
           .set('kbn-xsrf', 'xxx')
           .send({
             providerType: 'oidc',

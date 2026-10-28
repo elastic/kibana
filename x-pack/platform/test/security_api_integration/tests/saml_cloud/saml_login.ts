@@ -73,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Same user, same provider - session ID hasn't changed and cookie should still be valid.
       await supertest
         .get('/internal/security/me')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
         .expect(200);

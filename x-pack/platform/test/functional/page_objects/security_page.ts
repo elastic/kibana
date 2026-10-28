@@ -322,6 +322,7 @@ export class SecurityPageObject extends FtrService {
 
     const { body: user } = await this.supertest
       .get('/internal/security/me')
+      .set('x-elastic-internal-origin', 'kibana')
       .set('kbn-xsrf', 'xxx')
       .set('Cookie', `sid=${sidCookie.value}`)
       .expect(200);

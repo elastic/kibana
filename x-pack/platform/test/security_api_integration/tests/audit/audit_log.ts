@@ -76,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('logs audit events when logging in successfully', async () => {
       await supertest
         .post('/internal/security/login')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('kbn-xsrf', 'xxx')
         .set('X-Forwarded-For', '1.1.1.1, 2.2.2.2')
         .send({
@@ -101,6 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('logs audit events when failing to log in', async () => {
       await supertest
         .post('/internal/security/login')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('kbn-xsrf', 'xxx')
         .set('X-Forwarded-For', '1.1.1.1, 2.2.2.2')
         .send({

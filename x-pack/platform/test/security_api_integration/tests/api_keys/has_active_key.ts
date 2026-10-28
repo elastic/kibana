@@ -37,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('detects when user has no API Keys', async () => {
       await supertest
         .get('/internal/security/api_key/_has_active')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('kbn-xsrf', 'xxx')
         .expect(200, { hasApiKeys: false });
     });

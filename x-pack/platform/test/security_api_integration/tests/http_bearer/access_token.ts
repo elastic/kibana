@@ -41,6 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const response = await supertest
         .get('/internal/security/me')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('kbn-xsrf', 'true')
         .set('authorization', `Bearer ${accessToken}`)
         .expect(200);
@@ -57,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
       // try it once
       const responseOne = await supertest
         .get('/internal/security/me')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('kbn-xsrf', 'true')
         .set('authorization', `Bearer ${accessToken}`)
         .expect(200);

@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   async function getAnonymousCapabilities(spaceId?: string) {
     const apiResponse = await supertest
       .get(`${spaceId ? `/s/${spaceId}` : ''}/internal/security/anonymous_access/capabilities`)
+      .set('x-elastic-internal-origin', 'kibana')
       .expect(200);
 
     return Object.fromEntries(

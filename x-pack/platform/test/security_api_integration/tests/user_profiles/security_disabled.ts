@@ -14,12 +14,16 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags('skipFIPS');
 
     it('returns 404 for unauthenticated requests', async () => {
-      await supertestWithoutAuth.get('/internal/security/user_profile').expect(404);
+      await supertestWithoutAuth
+        .get('/internal/security/user_profile')
+        .set('x-elastic-internal-origin', 'kibana')
+        .expect(404);
     });
 
     it('returns 404 for basic auth requests', async () => {
       await supertestWithoutAuth
         .get('/internal/security/user_profile')
+        .set('x-elastic-internal-origin', 'kibana')
         .set('Authorization', `Basic ${Buffer.from('elastic:changeme').toString('base64')}`)
         .expect(404);
     });
