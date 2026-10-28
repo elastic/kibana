@@ -91,9 +91,13 @@ Do **not** use this skill for:
 ## Rule Discovery
 
 When a user asks about existing rules, read them with the Kibana API tools:
-- To list or search, call ${internalTools.describeApi} for \`${ALERTING_API_IDS.listRules}\` to confirm its params, then call ${internalTools.executeApi} with \`target: "kibana"\`.
+- To list or search, call ${internalTools.describeApi} for \`${
+      ALERTING_API_IDS.listRules
+    }\` to confirm its params, then call ${internalTools.executeApi} with \`target: "kibana"\`.
 - Use \`search\` with keywords from the user's request. For a broad listing, omit \`search\`. Page with \`page\` and \`per_page\`.
-- To read a single rule, call ${internalTools.executeApi} for \`${ALERTING_API_IDS.getRule}\` with the rule \`id\`.
+- To read a single rule, call ${internalTools.executeApi} for \`${
+      ALERTING_API_IDS.getRule
+    }\` with the rule \`id\`.
 - Summarize matches in plain language: name, kind, schedule, and query snippet.
 - Do **not** attach rules by default when only listing or comparing.
 - To inspect or edit a saved rule, attach it with ${
