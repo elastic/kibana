@@ -160,6 +160,10 @@ steps:
     with:
       event: alert_triage_decisions_matched
       candidates: "${{ steps.match_fp_decisions.output.candidates }}"
+      closed: "${{ steps.match_fp_decisions.output.closed }}"
+      skipped: "${{ steps.match_fp_decisions.output.skipped }}"
+      capped: "${{ steps.match_fp_decisions.output.capped }}"
+      close_failures: "${{ steps.match_fp_decisions.output.close_failures }}"
       decisions_matched: "${{ steps.match_fp_decisions.output.decisions_matched }}"
       would_close: "${{ steps.match_fp_decisions.output.would_close }}"
       would_skip: "${{ steps.match_fp_decisions.output.would_skip }}"
