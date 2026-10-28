@@ -315,6 +315,7 @@ export class AlertZeroPlugin
       router,
       logger: this.logger,
       getSpaceId: (request) => this.getSpaceId(request),
+      getClusterClient: () => this.requireCoreStart().elasticsearch.client,
       getWatchesService: () => this.requireWatchesService(),
       getWorkersService: () => this.requireWorkersService(),
       getConversationProposalsService: () => this.requireConversationProposalsService(),

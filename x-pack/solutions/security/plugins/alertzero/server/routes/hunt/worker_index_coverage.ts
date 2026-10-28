@@ -20,6 +20,7 @@ import {
 import { resolveWorkerIndexCoverage } from '../../services/watches/hunt/common/resolve_worker_index_coverage';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
+import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 
 /**
@@ -30,6 +31,7 @@ export const registerHuntWorkerIndexCoverageRoute = ({
   router,
   logger,
   getSpaceId,
+  getClusterClient,
   getWorkersService,
   getWorkflowsManagement,
   isServerless,
@@ -55,7 +57,7 @@ export const registerHuntWorkerIndexCoverageRoute = ({
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const spaceId = getSpaceId(request);
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const esClient = huntEsClient({ getClusterClient, request });
           const indexPatterns = await resolveHuntUniverse(context, logger);
           const { workflowId, serviceAccountId } = await getWorkersService().getHuntCoverageInputs(
             spaceId,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
@@ -53,15 +54,17 @@ const makeDeps = ({
   const addVersion = jest.fn();
   const router = { versioned: { get: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
+  const clusterClient = elasticsearchServiceMock.createClusterClient();
+  const scoped = elasticsearchServiceMock.createScopedClusterClient();
+  clusterClient.asScoped.mockReturnValue(scoped);
 
   registerHuntIndexScopeRoute({
     router: router as unknown as RouteDependencies['router'],
     logger,
     getSpaceId: () => spaceId,
+    getClusterClient: () => clusterClient,
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { search: jest.fn() };
-  const asInternalUser = { search: jest.fn() };
   const uiSettingsGet = jest.fn().mockResolvedValue(indexPatterns);
   const context = {
     alertzero: Promise.resolve({
@@ -70,7 +73,6 @@ const makeDeps = ({
       isSpaceSupported: true,
     }),
     core: Promise.resolve({
-      elasticsearch: { client: { asCurrentUser, asInternalUser } },
       uiSettings: { client: { get: uiSettingsGet } },
     }),
   };
@@ -83,8 +85,8 @@ const makeDeps = ({
       response: ReturnType<typeof httpServerMock.createResponseFactory>
     ) => Promise<unknown>,
     context,
-    asCurrentUser,
-    asInternalUser,
+    clusterClient,
+    scoped,
     logger,
     uiSettingsGet,
   };
@@ -140,17 +142,26 @@ describe('registerHuntIndexScopeRoute', () => {
   });
 
   it('reads as the current user so the caller index privileges apply', async () => {
-    const { handler, context, asCurrentUser, asInternalUser } = makeDeps();
+    const { handler, context, scoped } = makeDeps();
     const response = httpServerMock.createResponseFactory();
 
     await handler(context, httpServerMock.createKibanaRequest(), response);
 
     expect(resolveHuntScopeMock).toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: asCurrentUser })
+      expect.objectContaining({ esClient: scoped.asCurrentUser })
     );
     expect(resolveHuntScopeMock).not.toHaveBeenCalledWith(
-      expect.objectContaining({ esClient: asInternalUser })
+      expect.objectContaining({ esClient: scoped.asInternalUser })
     );
+  });
+
+  it('scopes the client to the request with the space project routing', async () => {
+    const { handler, context, clusterClient } = makeDeps();
+    const request = httpServerMock.createKibanaRequest();
+
+    await handler(context, request, httpServerMock.createResponseFactory());
+
+    expect(clusterClient.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
   });
 
   it('warns once with the missing patterns for blocked:empty_universe', async () => {

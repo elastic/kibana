@@ -14,6 +14,7 @@ import { resolveHuntScope } from '../../services/watches/hunt/common/resolve_ind
 import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
+import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 
 export const HUNT_FOR_THREAT_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_for_threat` as const;
@@ -23,7 +24,12 @@ export const HUNT_FOR_THREAT_URL = `${HUNT_INTERNAL_ROUTE_BASE}/hunt_for_threat`
  * view. A `blocked` scope is refused outright (409) so an empty universe never reads as
  * a clean zero-hit search.
  */
-export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: RouteDependencies) => {
+export const registerHuntForThreatRoute = ({
+  router,
+  logger,
+  getSpaceId,
+  getClusterClient,
+}: RouteDependencies) => {
   router.versioned
     .post({
       path: HUNT_FOR_THREAT_URL,
@@ -48,7 +54,7 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
         try {
           const { iocs, techniques, time_range, size } = request.body;
           const spaceId = getSpaceId(request);
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const esClient = huntEsClient({ getClusterClient, request });
           const indexPatterns = await resolveHuntUniverse(context, logger);
 
           // `discovered` is the datasets stage 1 parsed for the report matcher; the wire

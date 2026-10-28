@@ -34,6 +34,7 @@ import { buildSseData } from '../../services/watches/hunt/common/sse_mapper';
 import { buildImpactEntities } from '../../services/watches/hunt/common/build_impact_entities';
 import { resolveHuntModels } from './lib/hunt_models';
 import { envelopeBase, writeRunning, writeTerminal } from './lib/hunt_coordinator_result_store';
+import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
@@ -156,6 +157,7 @@ export const registerHuntCoordinatorRoute = ({
   router,
   logger,
   getSpaceId,
+  getClusterClient,
   getHuntServices,
   getAgentBuilderAttachments,
 }: RouteDependencies): void => {
@@ -184,11 +186,12 @@ export const registerHuntCoordinatorRoute = ({
         try {
           const core = await context.core;
           const spaceId = getSpaceId(request);
-          // Telemetry, alerts, and ES|QL run as the calling user so their index
-          // privileges apply. The reports index is plugin-owned and hidden, and Kibana
-          // feature privileges grant no Elasticsearch privileges on it, so it is read
-          // with the internal user and scoped by the explicit space filter.
-          const esClient = core.elasticsearch.client.asCurrentUser;
+          // Telemetry, alerts, and ES|QL run as the calling user, with the space's
+          // project routing, so their index privileges apply. The reports index is
+          // plugin-owned and hidden, and Kibana feature privileges grant no
+          // Elasticsearch privileges on it, so it is read with the internal user and
+          // scoped by the explicit space filter.
+          const esClient = huntEsClient({ getClusterClient, request });
           const reportsEsClient = core.elasticsearch.client.asInternalUser;
           const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 

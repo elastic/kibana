@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { IClusterClient, Logger } from '@kbn/core/server';
 import type { AttachmentsStart, ConversationsStart } from '@kbn/agent-builder-server';
 import type { AlertZeroRouter, AlertZeroSpaceIdResolver } from '../types';
 import type { WatchWorkflowsManagementClient } from '../services/watches/watch_workflows_management_client';
@@ -32,6 +32,8 @@ export interface RouteDependencies {
   router: AlertZeroRouter;
   logger: Logger;
   getSpaceId: AlertZeroSpaceIdResolver;
+  /** The deployment cluster client from core start; routes scope it per request. */
+  getClusterClient: () => IClusterClient;
   getWatchesService: () => WatchesService;
   getWorkersService: () => WorkersService;
   getConversationProposalsService: () => ConversationProposalsService;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RouteDependencies } from '../register_routes';
@@ -43,17 +44,20 @@ const makeDeps = ({
     .fn()
     .mockResolvedValue({ workflowId: 'wf-1', serviceAccountId: 'kibana/alertzero_threat_hunt' });
   const workersService = { getHuntCoverageInputs, get: jest.fn() };
+  const clusterClient = elasticsearchServiceMock.createClusterClient();
+  const scoped = elasticsearchServiceMock.createScopedClusterClient();
+  clusterClient.asScoped.mockReturnValue(scoped);
 
   registerHuntWorkerIndexCoverageRoute({
     router: router as unknown as RouteDependencies['router'],
     logger,
     getSpaceId: () => 'space-a',
+    getClusterClient: () => clusterClient,
     getWorkersService: () => workersService,
     getWorkflowsManagement: () => management ?? undefined,
     isServerless,
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { indices: {} };
   const context = {
     alertzero: Promise.resolve({
       subscription: 'available',
@@ -61,7 +65,6 @@ const makeDeps = ({
       isSpaceSupported: true,
     }),
     core: Promise.resolve({
-      elasticsearch: { client: { asCurrentUser } },
       uiSettings: { client: { get: jest.fn().mockResolvedValue(['logs-*']) } },
     }),
   };
@@ -75,7 +78,8 @@ const makeDeps = ({
     context,
     workersService,
     getHuntCoverageInputs,
-    asCurrentUser,
+    clusterClient,
+    scoped,
   };
 };
 
@@ -89,8 +93,17 @@ describe('registerHuntWorkerIndexCoverageRoute', () => {
     expect(routeConfig.security.authz.requiredPrivileges).toEqual(['alertzero_read']);
   });
 
+  it('scopes the client to the request with the space project routing', async () => {
+    const { handler, context, clusterClient } = makeDeps();
+    const request = httpServerMock.createKibanaRequest();
+
+    await handler(context, request, httpServerMock.createResponseFactory());
+
+    expect(clusterClient.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+  });
+
   it('passes the workflow and account the service read, as the current user', async () => {
-    const { handler, context, asCurrentUser } = makeDeps();
+    const { handler, context, scoped } = makeDeps();
 
     await handler(
       context,
@@ -100,7 +113,7 @@ describe('registerHuntWorkerIndexCoverageRoute', () => {
 
     expect(resolveMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        esClient: asCurrentUser,
+        esClient: scoped.asCurrentUser,
         spaceId: 'space-a',
         workflowId: 'wf-1',
         serviceAccountId: 'kibana/alertzero_threat_hunt',

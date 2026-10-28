@@ -17,6 +17,7 @@ import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../.
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import { TIER2_MODEL_TIERS } from '../../services/watches/hunt/common/hunt_model_tiers';
 import { mostSevereFailure, resolveHuntModels } from './lib/hunt_models';
+import { huntEsClient } from './hunt_es_client';
 import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
@@ -32,6 +33,7 @@ export const registerHuntBehaviorRoute = ({
   router,
   logger,
   getHuntServices,
+  getClusterClient,
 }: RouteDependencies): void => {
   router.versioned
     .post({
@@ -100,7 +102,7 @@ export const registerHuntBehaviorRoute = ({
             excluded_iocs,
             article_context,
           } = request.body;
-          const esClient = core.elasticsearch.client.asCurrentUser;
+          const esClient = huntEsClient({ getClusterClient, request });
           // What the generated query may read: the same default data view Tier 1 searches.
           const indexPatterns = await resolveHuntUniverse(context, logger);
 

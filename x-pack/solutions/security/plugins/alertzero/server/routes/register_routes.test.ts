@@ -19,6 +19,7 @@ const setup = () => {
     router,
     logger: loggerMock.create(),
     getSpaceId: service,
+    getClusterClient: service,
     getWatchesService: service,
     getWorkersService: service,
     getConversationProposalsService: service,

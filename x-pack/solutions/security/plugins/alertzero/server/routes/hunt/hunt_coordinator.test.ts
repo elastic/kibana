@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ScopedModel } from '@kbn/agent-builder-server';
@@ -78,11 +79,15 @@ const makeDeps = ({
   };
   const attachments = agentBuilderMocks.createStart().attachments;
   attachments.getScopedClient.mockResolvedValue(attachmentsClient as never);
+  const clusterClient = elasticsearchServiceMock.createClusterClient();
+  const scoped = elasticsearchServiceMock.createScopedClusterClient();
+  clusterClient.asScoped.mockReturnValue(scoped);
 
   registerHuntCoordinatorRoute({
     router: router as unknown as RouteDependencies['router'],
     logger,
     getSpaceId: () => spaceId,
+    getClusterClient: () => clusterClient,
     getHuntServices: () =>
       ({
         getInference: () => ({}),
@@ -98,7 +103,6 @@ const makeDeps = ({
     },
   } as unknown as RouteDependencies);
 
-  const asCurrentUser = { search: jest.fn() };
   const asInternalUser = { search: jest.fn() };
   const uiSettingsGet = jest.fn().mockResolvedValue(indexPatterns);
   const context = {
@@ -108,7 +112,7 @@ const makeDeps = ({
       isSpaceSupported: true,
     }),
     core: Promise.resolve({
-      elasticsearch: { client: { asCurrentUser, asInternalUser } },
+      elasticsearch: { client: { asInternalUser } },
       uiSettings: { client: { get: uiSettingsGet } },
     }),
   };
@@ -121,7 +125,8 @@ const makeDeps = ({
       response: ReturnType<typeof httpServerMock.createResponseFactory>
     ) => Promise<unknown>,
     context,
-    asCurrentUser,
+    clusterClient,
+    scoped,
     asInternalUser,
     logger,
     uiSettingsGet,
@@ -225,14 +230,23 @@ describe('registerHuntCoordinatorRoute', () => {
   });
 
   it('reads reports as the internal user and searches as the current user', async () => {
-    const { handler, context, asCurrentUser, asInternalUser } = makeDeps();
+    const { handler, context, scoped, asInternalUser } = makeDeps();
 
     await handler(context, requestFor(), httpServerMock.createResponseFactory());
 
     expect(clientsOf()).toEqual({
-      esClient: asCurrentUser,
+      esClient: scoped.asCurrentUser,
       reportsEsClient: asInternalUser,
     });
+  });
+
+  it('scopes the search client to the request with the space project routing', async () => {
+    const { handler, context, clusterClient } = makeDeps();
+    const request = requestFor();
+
+    await handler(context, request, httpServerMock.createResponseFactory());
+
+    expect(clusterClient.asScoped).toHaveBeenCalledWith(request, { projectRouting: 'space' });
   });
 
   it('still resolves the model when Tier 2 is never going to run, so scope resolution can use it', async () => {
