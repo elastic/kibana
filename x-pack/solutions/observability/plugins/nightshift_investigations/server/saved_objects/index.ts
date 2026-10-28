@@ -23,6 +23,10 @@ export {
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './automation_saved_object';
 export {
+  nightshiftInvestigationLimitSavedObjectType,
+  NIGHTSHIFT_INVESTIGATION_LIMIT_SO_TYPE,
+} from './investigation_limit_saved_object';
+export {
   nightshiftAutomationBudgetSavedObjectType,
   NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
 } from './automation_budget_saved_object';

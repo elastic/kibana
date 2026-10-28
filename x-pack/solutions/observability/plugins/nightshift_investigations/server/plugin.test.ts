@@ -11,7 +11,7 @@ import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_INVESTIGATION_LOCATOR_ID } from '../common/locators';
-import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
+import type { NightshiftInvestigationsSetupDeps } from './types';
 import { NightshiftInvestigationsPlugin } from './plugin';
 
 const createPlugin = (memoryEnabled = false) =>
@@ -63,24 +63,6 @@ describe('NightshiftInvestigationsPlugin setup', () => {
 
     flag$.next(false);
     expect(await isEnabled(request)).toBe(false);
-  });
-
-  it('accepts one investigation quota callback', () => {
-    const setup = createPlugin().setup(coreMock.createSetup(), createSetupDeps());
-    const callback: InvestigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
-
-    expect(() => setup.registerInvestigationQuota(callback)).not.toThrow();
-  });
-
-  it('rejects a second investigation quota callback registration', () => {
-    const setup = createPlugin().setup(coreMock.createSetup(), createSetupDeps());
-    const callback: InvestigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
-
-    setup.registerInvestigationQuota(callback);
-
-    expect(() => setup.registerInvestigationQuota(callback)).toThrow(
-      'Investigation quota callback is already registered'
-    );
   });
 
   it('registers investigation steps when Cortex, memory, and decision trees are disabled', () => {

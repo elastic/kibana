@@ -40,7 +40,7 @@ import {
 import { investigationNotificationDestinationsSchema } from '../../common/schemas';
 import type { InvestigationNotificationDestination } from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
-import type { AutomationBudget, InvestigationQuotaCallback } from '../types';
+import type { AutomationBudget } from '../types';
 import type {
   AlertInvestigationContext,
   InvestigationAlertSnapshot,
@@ -62,11 +62,9 @@ import {
 } from './build_investigation_message';
 import {
   InvestigationNotFoundError,
-  InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
   InvestigationUnavailableError,
 } from './errors';
-import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 import {
   findInvestigationConversation,
   findInvestigationConversations,
@@ -323,7 +321,7 @@ export interface NightshiftInvestigationsClientDeps {
   agentAvailability: AgentAvailabilityConfig;
   /** Installs the assistant agent wherever the investigation agent is installed. */
   assistantEnabled?: boolean;
-  investigationQuotaCallback?: InvestigationQuotaCallback;
+  getGlobalInvestigationBudget?: (spaceId: string) => Promise<AutomationBudget>;
   inference?: InferenceServerStart;
   savedObjects?: CoreStart['savedObjects'];
   uiSettings?: CoreStart['uiSettings'];
@@ -341,7 +339,7 @@ export class NightshiftInvestigationsClient {
   private readonly agenticInvestigations?: AgenticInvestigationsPluginStart;
   private readonly agentAvailability: AgentAvailabilityConfig;
   private readonly assistantEnabled: boolean;
-  private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
+  private readonly getGlobalInvestigationBudget?: (spaceId: string) => Promise<AutomationBudget>;
   private readonly inference?: InferenceServerStart;
   private readonly savedObjects?: CoreStart['savedObjects'];
   private readonly uiSettings?: CoreStart['uiSettings'];
@@ -358,7 +356,7 @@ export class NightshiftInvestigationsClient {
     this.agenticInvestigations = deps.agenticInvestigations;
     this.agentAvailability = deps.agentAvailability;
     this.assistantEnabled = deps.assistantEnabled ?? false;
-    this.investigationQuotaCallback = deps.investigationQuotaCallback;
+    this.getGlobalInvestigationBudget = deps.getGlobalInvestigationBudget;
     this.inference = deps.inference;
     this.savedObjects = deps.savedObjects;
     this.uiSettings = deps.uiSettings;
@@ -489,6 +487,8 @@ export class NightshiftInvestigationsClient {
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
+    const globalBudget =
+      trigger_type === 'automatic' ? await this.getGlobalInvestigationBudget?.(spaceId) : undefined;
     const { id: investigationId, recorded } = await this.resolveInvestigation({
       conversations,
       agenticInvestigations,
@@ -496,11 +496,13 @@ export class NightshiftInvestigationsClient {
       newInvestigationId,
       // Only a start that opens a new investigation counts against the daily automatic quota:
       // a follow-up adds a round to an investigation that was already paid for.
-      assertCanOpenNew: () => this.assertQuotaForNewInvestigation(trigger_type, automationBudget),
+      assertCanOpenNew: () =>
+        this.assertQuotaForNewInvestigation(trigger_type, automationBudget, globalBudget),
     });
     const isFollowUp = investigationId !== newInvestigationId;
     if (isFollowUp) {
-      await this.releaseAutomationBudget(automationBudget);
+      await this.releaseBudget(globalBudget);
+      await this.releaseBudget(automationBudget);
     }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
@@ -596,12 +598,12 @@ export class NightshiftInvestigationsClient {
     }
   }
 
-  private async releaseAutomationBudget(automationBudget?: AutomationBudget): Promise<void> {
+  private async releaseBudget(budget?: AutomationBudget): Promise<void> {
     try {
-      await automationBudget?.release();
+      await budget?.release();
     } catch (error) {
       this.logger.warn(
-        `Could not release the automation budget: ${
+        `Could not release the investigation budget: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
@@ -651,25 +653,24 @@ export class NightshiftInvestigationsClient {
   }
 
   /**
-   * Charges the automation budget, then the global quota. A global denial releases the automation
+   * Charges the automation budget, then the global budget. A global denial releases the automation
    * budget, so a denied start never uses up the automation limit.
    */
   private async assertQuotaForNewInvestigation(
     triggerType: StartInvestigationRequest['trigger_type'],
-    automationBudget?: AutomationBudget
+    automationBudget?: AutomationBudget,
+    globalBudget?: AutomationBudget
   ): Promise<void> {
     switch (triggerType) {
       case 'manual':
         return;
       case 'automatic': {
         await automationBudget?.consume();
-        const { allowed } = await evaluateInvestigationQuota({
-          callback: this.investigationQuotaCallback,
-          logger: this.logger,
-        });
-        if (!allowed) {
-          await this.releaseAutomationBudget(automationBudget);
-          throw new InvestigationQuotaDeniedError();
+        try {
+          await globalBudget?.consume();
+        } catch (error) {
+          await this.releaseBudget(automationBudget);
+          throw error;
         }
         return;
       }
@@ -746,9 +747,8 @@ export class NightshiftInvestigationsClient {
     }
 
     // Charged before the claim, so a denied start claims nothing. A start that then loses the
-    // claim to a concurrent one becomes a follow-up and releases its automation budget, but the
-    // global quota stays charged; the quota callback has no refund, and the race needs two starts
-    // for the same new subject within moments.
+    // claim to a concurrent one becomes a follow-up and releases both budgets. A start that fails
+    // after claiming keeps its slot.
     await assertCanOpenNew();
     const claim = await subjectsClient.claimSubjects({
       conversationId: newInvestigationId,

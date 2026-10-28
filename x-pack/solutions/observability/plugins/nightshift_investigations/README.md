@@ -15,18 +15,18 @@ Saturday). Hourly presets optionally use `hourWindow: { start, end }` with inclu
 All presets accept an IANA `timezone`, defaulting to UTC.
 
 Scheduled automations require nonempty instructions (at most 5,000 characters). Each tick starts a
-fresh investigation using a `manual` question subject with an `automatic` trigger type, so normal
-automatic-investigation quotas apply. An assessment that finds no issues still creates a conversation.
+fresh investigation using a `manual` question subject with an `automatic` trigger type, so the
+global investigation limit applies. An assessment that finds no issues still creates a conversation.
 The Investigate/Ask selector does not select a different execution path.
 
 `runtime.dailyDispatchLimit` caps the new investigations an automation opens, per space and UTC day.
 Attempts that continue an open investigation and starts with the `manual` trigger type do not count
 and are never blocked, even when the limit is reached. For an automatic attempt that would open a new
 investigation, the investigation client charges the automation budget, then the global
-automatic-investigation quota. Each charge is the check: the budget slot is reserved atomically, so
+investigation budget. Each charge is the check: the budget slot is reserved atomically, so
 overlapping runs across Kibana instances cannot exceed the limit. An attempt denied by either limit
 creates no investigation and appears as skipped in automation history: with reason `daily_limit`
-when the automation limit denies it, and with reason `investigation_limit` when the global quota
+when the automation limit denies it, and with reason `investigation_limit` when the global limit
 denies it. The automation limit is checked first, so `daily_limit` wins when both are reached. When
 the global quota denies an attempt, the client gives back the automation slot. The client also gives
 it back when the attempt loses the subject claim to a concurrent start and continues that
@@ -212,9 +212,18 @@ Each execution, destination, and phase is claimed as `unconfirmed` before connec
 
 The `nightshift.sendNotifications` step validates the persisted workflow execution and its investigation binding, and reads the investigation (title, severity, summary, impact, first pending proposed action) through the shared query API. Until Agent Builder titles the investigation, messages use the run's `title` input. Investigation and execution IDs may differ for explicit continuation. It returns persisted `sent`, `failed`, and `unconfirmed` counts for the requested execution and phase; full diagnostics are available through authorized attachment reads. Notification-step failures continue the investigation workflow, while persistence failures stop further posts within that step. There is no automatic claim expiry, resend, or routing-document cleanup on investigation or space deletion. A confirmed root post from the Elastic Slack app claims its thread as a `slack_thread` subject using the thread key the Relay returns, so a mention or reply in it continues the investigation. Posts through a custom Slack connector and replies under a caller-named message register nothing here; a thread another investigation holds stays with it.
 
+### Global investigation limit
+
+The global limit caps the new investigations that automatic starts open, per space and UTC day. It
+works without Significant Events. The limit is an integer of at least 1, and an unset limit allows
+unlimited investigations. `GET /internal/nightshift_investigations/investigation_limit` returns
+`{ limit, used }` and requires `read_nightshift`. `PUT` on the same path sets the limit, or removes
+it with `{ "limit": null }`, and requires `manage_nightshift`. Starts with the `manual` trigger type
+and starts that continue an open investigation are never counted.
+
 ### Investigation quota notice
 
-When the global investigation quota denies an automatic start from a Slack trigger,
+When the global investigation limit denies an automatic start from a Slack trigger,
 `nightshift.triggerInvestigation` skips the start with `investigation_limit` and replies in the
 triggering Slack thread, once per Slack channel and UTC day. The reply says the limit was reached
 and links the Nightshift settings in the workflow's space for an admin to raise it, or omits the
