@@ -591,7 +591,6 @@ export type TimelineEventInput =
  */
 export interface ActiveExecution {
   execution_id: string;
-  started_at: string;
 }
 
 /**

@@ -15,6 +15,7 @@ import {
   ConversationParentRelation,
   ConversationRoundStatus,
   EventActorType,
+  ExecutionStatus,
   TimelineEventType,
   TimelineTriggerType,
   createAgentNotFoundError,
@@ -45,6 +46,7 @@ import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 import type { ActiveExecutionUpdate } from './types';
+import type { AgentExecutionClient } from '../../execution/persistence';
 import { roundToEvents } from './rounds_to_events';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 import { describeConversationWrite } from '../../../workflows/triggers/describe_conversation_write';
@@ -81,6 +83,8 @@ interface MockRawEsClient {
   delete: jest.Mock;
   search: jest.Mock;
 }
+
+const mockExecutionClient = { peek: jest.fn() };
 
 const mockRawEsClient: MockRawEsClient = {
   get: jest.fn(),
@@ -292,6 +296,7 @@ describe('ConversationClient', () => {
     mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
     mockRawEsClient.index.mockResolvedValue({});
     mockRawEsClient.delete.mockResolvedValue({});
+    mockExecutionClient.peek.mockReset();
     mockRawEsClient.search.mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
     });
@@ -307,6 +312,7 @@ describe('ConversationClient', () => {
       space: testSpace,
       logger: loggerMock.create(),
       esClient: mockRawEsClient as unknown as ElasticsearchClient,
+      executionClient: mockExecutionClient as unknown as AgentExecutionClient,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
       conversationEvents: mockConversationEvents,
       user: {
@@ -1134,6 +1140,7 @@ describe('ConversationClient', () => {
         space: testSpace,
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         conversationEvents: mockConversationEvents,
         user: { ...user, isAdmin: false },
@@ -1210,6 +1217,7 @@ describe('ConversationClient', () => {
         space,
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         conversationEvents: mockConversationEvents,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
@@ -1752,6 +1760,7 @@ describe('ConversationClient', () => {
         space: testSpace,
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         conversationEvents: mockConversationEvents,
         user: { username: 'no-profile-user', isAdmin: false },
@@ -1830,6 +1839,7 @@ describe('ConversationClient', () => {
         space: testSpace,
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         conversationEvents: mockConversationEvents,
         user: { username: 'no-profile-user', isAdmin: false },
@@ -2576,6 +2586,7 @@ describe('ConversationClient', () => {
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          executionClient: mockExecutionClient as unknown as AgentExecutionClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
@@ -2609,6 +2620,7 @@ describe('ConversationClient', () => {
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          executionClient: mockExecutionClient as unknown as AgentExecutionClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
@@ -2644,6 +2656,7 @@ describe('ConversationClient', () => {
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          executionClient: mockExecutionClient as unknown as AgentExecutionClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
@@ -2686,6 +2699,7 @@ describe('ConversationClient', () => {
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          executionClient: mockExecutionClient as unknown as AgentExecutionClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
@@ -2715,6 +2729,7 @@ describe('ConversationClient', () => {
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          executionClient: mockExecutionClient as unknown as AgentExecutionClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
@@ -2745,6 +2760,7 @@ describe('ConversationClient', () => {
           space: testSpace,
           logger,
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          executionClient: mockExecutionClient as unknown as AgentExecutionClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           conversationEvents: mockConversationEvents,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
@@ -2800,6 +2816,7 @@ describe('ConversationClient', () => {
         space: testSpace,
         logger,
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         conversationEvents: mockConversationEvents,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
@@ -3856,6 +3873,7 @@ describe('ConversationClient', () => {
         space: testSpace,
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         conversationEvents: mockConversationEvents,
         user: {
@@ -3962,6 +3980,7 @@ describe('ConversationClient', () => {
         space: testSpace,
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
         conversationEvents: mockConversationEvents,
@@ -4153,6 +4172,7 @@ describe('ConversationClient', () => {
         space: testSpace,
         logger,
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
         conversationEvents: mockConversationEvents,
@@ -4198,7 +4218,7 @@ describe('ConversationClient', () => {
         {
           source: 'execution',
           access: 'converse',
-          activeExecution: { executionId: 'e1' },
+          activeExecution: { action: 'acquire', executionId: 'e1' },
         }
       );
 
@@ -4214,7 +4234,7 @@ describe('ConversationClient', () => {
         {
           source: 'http_api',
           access: 'converse',
-          activeExecution: { executionId: 'e1' },
+          activeExecution: { action: 'acquire', executionId: 'e1' },
         }
       );
 
@@ -4905,6 +4925,7 @@ describe('ConversationClient', () => {
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          executionClient: mockExecutionClient as unknown as AgentExecutionClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           user: { id: 'user-1', username: 'test-user', isAdmin: false },
           conversationEvents: mockConversationEvents,
@@ -5263,6 +5284,7 @@ describe('ConversationClient', () => {
         space: testSpace,
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         conversationEvents: mockConversationEvents,
         user: {
@@ -5307,6 +5329,7 @@ describe('ConversationClient', () => {
         space: testSpace,
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         conversationEvents: mockConversationEvents,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
@@ -5337,6 +5360,7 @@ describe('ConversationClient', () => {
         space: testSpace,
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         conversationEvents: mockConversationEvents,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
@@ -5536,6 +5560,7 @@ describe('ConversationClient', () => {
           space: testSpace,
           logger: loggerMock.create(),
           esClient: mockRawEsClient as unknown as ElasticsearchClient,
+          executionClient: mockExecutionClient as unknown as AgentExecutionClient,
           agentRegistry: agentRegistry as unknown as AgentRegistry,
           conversationEvents: mockConversationEvents,
           user: {
@@ -6006,19 +6031,11 @@ describe('ConversationClient', () => {
       data: { message: 'hello' },
     } as ConversationEvent;
 
-    const STALE_STARTED_AT = '2026-10-26T09:00:00.000Z';
-
-    const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString();
-
-    const activeExecution = (executionId: string, startedAt = STALE_STARTED_AT) => ({
-      execution_id: executionId,
-      started_at: startedAt,
-    });
+    const activeExecution = (executionId: string) => ({ execution_id: executionId });
 
     const documentWithHolder = (
       executionId?: string,
-      overrides: Parameters<typeof createConversationDocument>[0] = {},
-      startedAt?: string
+      overrides: Parameters<typeof createConversationDocument>[0] = {}
     ): Document => {
       const document = createConversationDocument({
         schemaVersion: CONVERSATION_SCHEMA_VERSION,
@@ -6032,15 +6049,31 @@ describe('ConversationClient', () => {
             ...document,
             _source: {
               ...document._source,
-              active_execution: activeExecution(executionId, startedAt),
+              active_execution: activeExecution(executionId),
             },
           };
     };
 
-    const setActiveExecution = (executionId: string) => ({ executionId });
+    const setActiveExecution = (executionId: string) => ({
+      action: 'acquire' as const,
+      executionId,
+    });
 
     const indexedSource = (call = 0) =>
       (mockEsClient.index.mock.calls[call][0] as { document: Document['_source'] }).document;
+
+    const secondsAgo = (seconds: number) => new Date(Date.now() - seconds * 1000).toISOString();
+
+    const holderHeartbeat = (lastHeartbeat: string) =>
+      mockExecutionClient.peek.mockResolvedValue({
+        status: ExecutionStatus.running,
+        eventCount: 0,
+        lastHeartbeat,
+      });
+
+    const liveHolder = () => holderHeartbeat(secondsAgo(0));
+
+    const staleHolder = () => holderHeartbeat(secondsAgo(120));
 
     const appendSettingActiveExecution = (update: ReturnType<typeof setActiveExecution>) =>
       client.appendEvents(
@@ -6054,12 +6087,12 @@ describe('ConversationClient', () => {
 
       expect(indexedSource().active_execution).toEqual({
         execution_id: 'e2',
-        started_at: expect.any(String),
       });
     });
 
-    it('appendEvents setting the active execution throws conversationBusy while another one is within the TTL', async () => {
-      mockGetDocumentResponse(documentWithHolder('e1', {}, minutesAgo(4)));
+    it('appendEvents setting the active execution throws conversationBusy while a live one holds it', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1'));
+      liveHolder();
 
       const error = await appendSettingActiveExecution(setActiveExecution('e2')).catch(
         (caught: unknown) => caught
@@ -6067,23 +6100,35 @@ describe('ConversationClient', () => {
 
       expect(isConversationBusyError(error)).toBe(true);
       expect((error as { meta: { activeExecutionId: string } }).meta.activeExecutionId).toBe('e1');
+      expect(mockExecutionClient.peek).toHaveBeenCalledWith('e1');
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('appendEvents setting the active execution takes over one older than the TTL', async () => {
-      mockGetDocumentResponse(documentWithHolder('e1', {}, minutesAgo(6)));
+    it('appendEvents setting the active execution takes over one whose heartbeat went stale', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1'));
+      staleHolder();
+
+      const result = await appendSettingActiveExecution(setActiveExecution('e2'));
+
+      expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
+      expect(indexedSource()).not.toHaveProperty('execution');
+      expect(result).not.toHaveProperty('execution');
+    });
+
+    it('appendEvents setting the active execution takes over one whose record is gone', async () => {
+      mockGetDocumentResponse(documentWithHolder('e1'));
+      mockExecutionClient.peek.mockResolvedValue(undefined);
 
       await appendSettingActiveExecution(setActiveExecution('e2'));
 
-      expect(indexedSource().active_execution).toMatchObject({
-        execution_id: 'e2',
-      });
+      expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
     });
 
     it('appendEvents setting the active execution refuses when a concurrent one wins the version conflict', async () => {
-      mockGetDocumentResponse(documentWithHolder('e3', {}, minutesAgo(0)));
+      mockGetDocumentResponse(documentWithHolder('e3'));
       mockGetDocumentResponseOnce(documentWithHolder());
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
+      liveHolder();
 
       const error = await appendSettingActiveExecution(setActiveExecution('e2')).catch(
         (caught: unknown) => caught
@@ -6095,11 +6140,12 @@ describe('ConversationClient', () => {
     });
 
     it('appendEvents setting the active execution keeps its own', async () => {
-      mockGetDocumentResponse(documentWithHolder('e2', {}, minutesAgo(1)));
+      mockGetDocumentResponse(documentWithHolder('e2'));
 
       await appendSettingActiveExecution(setActiveExecution('e2'));
 
       expect(indexedSource().active_execution).toMatchObject({ execution_id: 'e2' });
+      expect(mockExecutionClient.peek).not.toHaveBeenCalled();
     });
 
     it('create with an active execution stores active_execution', async () => {
@@ -6121,7 +6167,6 @@ describe('ConversationClient', () => {
       const indexed = indexedSource();
       expect(indexed.active_execution).toEqual({
         execution_id: 'e2',
-        started_at: expect.any(String),
       });
       expect(indexed).not.toHaveProperty('activeExecution');
       expect(result.active_execution).toMatchObject({ execution_id: 'e2' });
@@ -6151,28 +6196,29 @@ describe('ConversationClient', () => {
       const stored = documentWithHolder('e1', { readBy: [{ userId: 'user-1' }] });
       mockGetDocumentResponse(stored);
 
-      await updateWithoutFields({ releaseExecutionId: 'e1' });
+      await updateWithoutFields({ action: 'release', executionId: 'e1' });
 
       const indexed = indexedSource();
       expect(indexed.active_execution).toBeUndefined();
       expect(indexed.events).toEqual(stored._source.events);
       expect(indexed.read_by).toEqual([{ userId: 'user-1' }]);
+      expect(mockExecutionClient.peek).not.toHaveBeenCalled();
     });
 
-    it('an update without fields and with releaseExecutionId leaves a newer holder without writing', async () => {
+    it('an update without fields that releases leaves a newer holder without writing', async () => {
       mockGetDocumentResponse(documentWithHolder('e2'));
 
-      await updateWithoutFields({ releaseExecutionId: 'e1' });
+      await updateWithoutFields({ action: 'release', executionId: 'e1' });
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('an update with fields and releaseExecutionId releases in the same write', async () => {
+    it('an update with fields releases in the same write', async () => {
       mockGetDocumentResponse(documentWithHolder('e1'));
 
       await client.update(
         { id: 'conversation-1', title: 'Renamed' },
-        { source: 'http_api', activeExecution: { releaseExecutionId: 'e1' } }
+        { source: 'http_api', activeExecution: { action: 'release', executionId: 'e1' } }
       );
 
       const indexed = indexedSource();
@@ -6188,7 +6234,7 @@ describe('ConversationClient', () => {
           id: 'conversation-1',
           roundId: 'round-1',
           events: [],
-          activeExecution: { releaseExecutionId: 'e1' },
+          activeExecution: { action: 'release', executionId: 'e1' },
         },
         { source: 'execution' }
       );
@@ -6196,7 +6242,7 @@ describe('ConversationClient', () => {
       expect(indexedSource().active_execution).toBeUndefined();
     });
 
-    it('replaceRoundEvents with releaseExecutionId leaves a newer holder', async () => {
+    it('replaceRoundEvents releasing leaves a newer holder', async () => {
       mockGetDocumentResponse(documentWithHolder('e2'));
 
       await client.replaceRoundEvents(
@@ -6204,7 +6250,7 @@ describe('ConversationClient', () => {
           id: 'conversation-1',
           roundId: 'round-1',
           events: [],
-          activeExecution: { releaseExecutionId: 'e1' },
+          activeExecution: { action: 'release', executionId: 'e1' },
         },
         { source: 'execution' }
       );
@@ -6216,7 +6262,11 @@ describe('ConversationClient', () => {
       mockGetDocumentResponse(documentWithHolder('e1'));
 
       await client.appendEvents(
-        { id: 'conversation-1', events: [], activeExecution: { releaseExecutionId: 'e1' } },
+        {
+          id: 'conversation-1',
+          events: [],
+          activeExecution: { action: 'release', executionId: 'e1' },
+        },
         { source: 'execution' }
       );
 

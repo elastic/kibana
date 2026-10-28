@@ -36,6 +36,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
+import type { ExecutionPeek } from '../../execution/persistence';
 import type {
   ConversationPermissions,
   ConversationWithPermissions,
@@ -240,7 +241,11 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
   return undefined;
 };
 
-export const fromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
+export const fromEs = (
+  document: Document,
+  user: CurrentUser,
+  execution?: ExecutionPeek
+): NormalizedConversation => {
   const base = fromEsWithoutRounds(document, user);
   const perUserFlags = {
     read_by: migrateReadBy(document._source),
@@ -279,6 +284,7 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
     ...(document._source!.state ? { state: document._source!.state } : {}),
     ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
     active_execution: document._source!.active_execution,
+    ...(execution ? { execution } : {}),
   };
 
   const events =
@@ -334,6 +340,7 @@ const stripInternalFields = (conversation: NormalizedConversation): Conversation
   const {
     read_by: _readBy,
     pinned_by: _pinnedBy,
+    execution: _execution,
     ...conversationWithoutInternalFields
   } = conversation;
 

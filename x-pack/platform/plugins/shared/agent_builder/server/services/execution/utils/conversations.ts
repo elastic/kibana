@@ -48,7 +48,7 @@ import {
   roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
 import type { ActivityContext, ConversationClient } from '../../conversation';
-import type { SetActiveExecution } from '../../conversation/client/types';
+import type { AcquireActiveExecution } from '../../conversation/client/types';
 import {
   roundToEvents,
   userMessageEvent,
@@ -162,7 +162,7 @@ export const persistUserMessage = async ({
    */
   appendRefresh?: Refresh;
   /** Makes the execution this message opens the conversation's active execution. */
-  activeExecution?: SetActiveExecution;
+  activeExecution?: AcquireActiveExecution;
 }): Promise<string> => {
   const event = userMessageEvent(
     {
@@ -279,7 +279,7 @@ export const appendRoundTerminated$ = ({
                   }
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
-              activeExecution: { releaseExecutionId },
+              activeExecution: { action: 'release', executionId: releaseExecutionId },
             },
             { access: 'converse', source: 'execution' }
           );
@@ -412,7 +412,7 @@ export const appendResumeExecution$ = ({
                   }
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
-              activeExecution: { releaseExecutionId },
+              activeExecution: { action: 'release', executionId: releaseExecutionId },
             },
             { access: 'converse', source: 'execution' }
           );
@@ -606,7 +606,7 @@ export const persistExecutionInterruption = async (
           events: interleaveAttachmentEvents([userMessage, ...executionEvents], attachmentEvents),
           status: ConversationRoundStatus.completed,
           skipIfTerminalExistsFor: executionId,
-          activeExecution: { releaseExecutionId },
+          activeExecution: { action: 'release', executionId: releaseExecutionId },
           ...attachmentsUpdate,
           ...workspaceUpdate,
           ...stateUpdate,
@@ -655,7 +655,7 @@ export const persistExecutionInterruption = async (
         ),
         status: ConversationRoundStatus.completed,
         skipIfTerminalExistsFor: executionId,
-        activeExecution: { releaseExecutionId },
+        activeExecution: { action: 'release', executionId: releaseExecutionId },
         ...attachmentsUpdate,
         ...workspaceUpdate,
         ...stateUpdate,

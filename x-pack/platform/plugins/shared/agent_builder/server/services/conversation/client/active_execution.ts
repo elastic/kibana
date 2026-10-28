@@ -6,15 +6,20 @@
  */
 
 import type { ActiveExecution } from '@kbn/agent-builder-common';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
+import type { AgentExecutionClient, ExecutionPeek } from '../../execution/persistence';
+import {
+  FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS,
+  FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS,
+} from '../../execution/constants';
+import type { Document } from './converters';
 import type {
+  AcquireActiveExecution,
   ActiveExecutionUpdate,
   ConversationUpdatableFields,
   NormalizedConversation,
-  SetActiveExecution,
+  ReleaseActiveExecution,
 } from './types';
-
-/** How long an execution stays active before another execution may take over. */
-const ACTIVE_EXECUTION_TTL_MS = 5 * 60 * 1000;
 
 /**
  * Thrown from inside an OCC `fields` callback when another execution is active. The busy error
@@ -24,10 +29,16 @@ export class ConversationBusySignal {
   constructor(public readonly activeExecutionId: string) {}
 }
 
-/** The `active_execution` stored for `update`, stamped with the current time. */
-export const toActiveExecution = ({ executionId }: SetActiveExecution): ActiveExecution => ({
+export const isAcquireActiveExecution = (
+  update?: ActiveExecutionUpdate
+): update is AcquireActiveExecution => update?.action === 'acquire';
+
+export const isReleaseActiveExecution = (
+  update?: ActiveExecutionUpdate
+): update is ReleaseActiveExecution => update?.action === 'release';
+
+export const toActiveExecution = ({ executionId }: AcquireActiveExecution): ActiveExecution => ({
   execution_id: executionId,
-  started_at: new Date().toISOString(),
 });
 
 /** True when `update` would leave the stored active execution as it is, including no update. */
@@ -36,28 +47,66 @@ export const isActiveExecutionUpdateNoop = (
   update?: ActiveExecutionUpdate
 ): boolean =>
   !update ||
-  ('releaseExecutionId' in update &&
-    current.active_execution?.execution_id !== update.releaseExecutionId);
+  (isReleaseActiveExecution(update) &&
+    current.active_execution?.execution_id !== update.executionId);
+
+export const readHeldExecution = async ({
+  document,
+  update,
+  executionClient,
+}: {
+  document: Document;
+  update?: ActiveExecutionUpdate;
+  executionClient: AgentExecutionClient;
+}): Promise<ExecutionPeek | undefined> => {
+  const heldExecutionId = document._source?.active_execution?.execution_id;
+
+  if (
+    !isAcquireActiveExecution(update) ||
+    !heldExecutionId ||
+    heldExecutionId === update.executionId
+  ) {
+    return undefined;
+  }
+
+  return executionClient.peek(heldExecutionId);
+};
+
+/** True when an execution's record is gone, it finished, or its heartbeat went quiet. */
+export const isExecutionStale = (execution?: ExecutionPeek, now = Date.now()): boolean => {
+  if (!execution) {
+    return true;
+  }
+
+  const { status, lastHeartbeat } = execution;
+
+  if (status !== ExecutionStatus.scheduled && status !== ExecutionStatus.running) {
+    return true;
+  }
+
+  const timeoutMs =
+    status === ExecutionStatus.scheduled
+      ? FOLLOW_EXECUTION_SCHEDULED_TIMEOUT_MS
+      : FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS;
+
+  return !lastHeartbeat || now - Date.parse(lastHeartbeat) > timeoutMs;
+};
 
 /**
- * Sets or releases the active execution. Setting refuses while another execution became active
- * within the TTL; releasing leaves a newer active execution alone.
+ * Acquires or releases the active execution. Acquiring refuses while another live execution holds
+ * the conversation; releasing leaves a newer active execution alone.
  */
 export const applyActiveExecutionUpdate = (
   current: NormalizedConversation,
   update: ActiveExecutionUpdate
 ): Pick<ConversationUpdatableFields, 'active_execution'> => {
-  if ('releaseExecutionId' in update) {
+  if (isReleaseActiveExecution(update)) {
     return isActiveExecutionUpdateNoop(current, update) ? {} : { active_execution: undefined };
   }
 
-  const { active_execution: held } = current;
+  const { active_execution: held, execution } = current;
 
-  if (
-    held &&
-    held.execution_id !== update.executionId &&
-    Date.now() - Date.parse(held.started_at) < ACTIVE_EXECUTION_TTL_MS
-  ) {
+  if (held && held.execution_id !== update.executionId && !isExecutionStale(execution)) {
     throw new ConversationBusySignal(held.execution_id);
   }
 

@@ -204,7 +204,7 @@ class TaskHandlerImpl implements TaskHandler {
           source: 'execution',
           access: 'converse',
           retryOnConflict: true,
-          activeExecution: { releaseExecutionId: executionId },
+          activeExecution: { action: 'release', executionId },
         }
       );
     } catch (error) {

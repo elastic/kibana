@@ -70,7 +70,7 @@ import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
 import type { ConversationClient } from '../conversation';
-import type { SetActiveExecution } from '../conversation/client/types';
+import type { AcquireActiveExecution } from '../conversation/client/types';
 import type { CallbackDeliveryService } from './callback';
 import {
   getConversation,
@@ -238,7 +238,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     if (conversationParams && conversation && conversationParams.storeConversation !== false) {
       const pendingResumeRound = getPendingResumeRound(conversation);
-      const activeExecution: SetActiveExecution = { executionId };
+      const activeExecution: AcquireActiveExecution = { action: 'acquire', executionId };
 
       try {
         if (pendingResumeRound) {
@@ -334,7 +334,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
               source: 'execution',
               access: 'converse',
               retryOnConflict: true,
-              activeExecution: { releaseExecutionId: executionId },
+              activeExecution: { action: 'release', executionId },
             }
           );
         } catch (releaseErr) {
@@ -957,7 +957,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     mergeAttachments: boolean;
     parentExecution?: ParentExecution;
     appendRefresh?: Refresh;
-    activeExecution?: SetActiveExecution;
+    activeExecution?: AcquireActiveExecution;
   }): Promise<string> {
     const { nextInput, origin: requestOrigin, author: requestAuthor } = params;
     const author = conversationClient.getAuthor(requestOrigin?.author, requestAuthor);

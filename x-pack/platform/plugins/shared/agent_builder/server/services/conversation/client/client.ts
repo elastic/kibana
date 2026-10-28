@@ -91,8 +91,10 @@ import {
   ConversationBusySignal,
   applyActiveExecutionUpdate,
   isActiveExecutionUpdateNoop,
+  readHeldExecution,
   toActiveExecution,
 } from './active_execution';
+import type { AgentExecutionClient } from '../../execution/persistence';
 import {
   MAX_CONVERSATIONS_PER_PAGE,
   MAX_CONVERSATION_SEARCH_PER_PAGE,
@@ -307,6 +309,7 @@ export const createClient = ({
   space,
   logger,
   esClient,
+  executionClient,
   user,
   agentRegistry,
   conversationEvents,
@@ -317,6 +320,7 @@ export const createClient = ({
   space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
+  executionClient: AgentExecutionClient;
   user: CurrentUser;
   agentRegistry: AgentRegistry;
   conversationEvents: ConversationEventsServiceStart;
@@ -328,6 +332,7 @@ export const createClient = ({
   return new ConversationClientImpl({
     storage,
     esClient,
+    executionClient,
     user,
     space,
     agentRegistry,
@@ -399,6 +404,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
   private readonly esClient: ElasticsearchClient;
+  private readonly executionClient: AgentExecutionClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly conversationEvents: ConversationEventsServiceStart;
@@ -410,6 +416,7 @@ class ConversationClientImpl implements ConversationClient {
   constructor({
     storage,
     esClient,
+    executionClient,
     user,
     space,
     agentRegistry,
@@ -421,6 +428,7 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
+    executionClient: AgentExecutionClient;
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
@@ -432,6 +440,7 @@ class ConversationClientImpl implements ConversationClient {
   }) {
     this.storage = storage;
     this.esClient = esClient;
+    this.executionClient = executionClient;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
@@ -1785,7 +1794,7 @@ class ConversationClientImpl implements ConversationClient {
     refresh?: Refresh;
     activeExecution?: ActiveExecutionUpdate;
   } & ConversationWriteEmission): Promise<Conversation> {
-    const writer = this.createWriter({ access, maxRetries, refresh });
+    const writer = this.createWriter({ access, maxRetries, refresh, activeExecution });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
     // Typed through `as` so the assignment inside the closure does not narrow it to `undefined`.
     let before = undefined as NormalizedConversation | undefined;
@@ -1853,18 +1862,25 @@ class ConversationClientImpl implements ConversationClient {
     access,
     maxRetries,
     refresh,
+    activeExecution,
   }: {
     access: ConversationAccess;
     maxRetries: number;
     refresh?: Refresh;
+    activeExecution?: ActiveExecutionUpdate;
   }): OccWriter<NormalizedConversation> {
     return new OccWriter<NormalizedConversation>({
       get: async (id) => {
         const document = await this.getDocumentWithAccess({ conversationId: id, access });
+        const execution = await readHeldExecution({
+          document,
+          update: activeExecution,
+          executionClient: this.executionClient,
+        });
 
         return {
           id,
-          source: fromEs(document, this.getUser()),
+          source: fromEs(document, this.getUser(), execution),
           occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
         };
       },

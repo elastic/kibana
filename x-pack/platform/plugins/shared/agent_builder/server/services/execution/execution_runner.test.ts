@@ -1628,7 +1628,8 @@ describe('handleAgentExecution — interrupted executions', () => {
     );
     // the terminal write releases this execution as the active execution
     expect(conversationClient.replaceRoundEvents.mock.calls[0][0].activeExecution).toEqual({
-      releaseExecutionId: 'execution-1',
+      action: 'release',
+      executionId: 'execution-1',
     });
     expect(seen.map((event) => event.type)).toContain(TimelineEventType.executionTerminated);
     expect(seen.map((event) => event.type)).not.toContain(TimelineEventType.executionAborted);

@@ -360,7 +360,7 @@ describe('TaskHandler event streaming and finalization', () => {
           source: 'execution',
           access: 'converse',
           retryOnConflict: true,
-          activeExecution: { releaseExecutionId: 'execution-1' },
+          activeExecution: { action: 'release', executionId: 'execution-1' },
         }
       );
     });

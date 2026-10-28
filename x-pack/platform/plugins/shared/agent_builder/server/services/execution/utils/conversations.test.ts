@@ -42,7 +42,7 @@ import {
   createConversationClientMock,
 } from '../../../test_utils';
 import { nextResumeIndex } from '../../conversation/client/rounds_to_events';
-import type { SetActiveExecution } from '../../conversation/client/types';
+import type { AcquireActiveExecution } from '../../conversation/client/types';
 import type { ConversationWithOperation } from './conversations';
 import {
   appendResumeExecution$,
@@ -302,7 +302,7 @@ describe('conversations utils', () => {
       author?: ConversationRoundAuthor;
       additionalEvents?: TimelineEvent[];
       attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
-      activeExecution?: SetActiveExecution;
+      activeExecution?: AcquireActiveExecution;
     }) => {
       conversationClient.appendEvents.mockResolvedValue(conversation);
       return persistUserMessage({
@@ -318,7 +318,8 @@ describe('conversations utils', () => {
       });
     };
 
-    const activeExecution: SetActiveExecution = {
+    const activeExecution: AcquireActiveExecution = {
+      action: 'acquire',
       executionId: 'exec-1',
     };
 
@@ -573,7 +574,7 @@ describe('conversations utils', () => {
       });
 
       const [args] = conversationClient.replaceRoundEvents.mock.calls[0];
-      expect(args.activeExecution).toEqual({ releaseExecutionId: 'exec-1' });
+      expect(args.activeExecution).toEqual({ action: 'release', executionId: 'exec-1' });
     });
 
     it('writes attachment_events where they happened among the projected round events', async () => {
@@ -965,7 +966,7 @@ describe('conversations utils', () => {
       });
 
       const [args] = conversationClient.appendEvents.mock.calls[0];
-      expect(args.activeExecution).toEqual({ releaseExecutionId: 'exec-1' });
+      expect(args.activeExecution).toEqual({ action: 'release', executionId: 'exec-1' });
     });
 
     it('writes attachment_events re-stamped with the resume execution id, inputs after the prompt_response', async () => {
@@ -1336,7 +1337,7 @@ describe('conversations utils', () => {
       });
 
       const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
-      expect(call.activeExecution).toEqual({ releaseExecutionId: 'exec-1' });
+      expect(call.activeExecution).toEqual({ action: 'release', executionId: 'exec-1' });
     });
 
     it('fresh round, aborted: writes execution_aborted without an error payload', async () => {
@@ -1552,7 +1553,7 @@ describe('conversations utils', () => {
       expect(call.status).toBe(ConversationRoundStatus.completed);
       expect(call).not.toHaveProperty('state');
       expect(written.map((e) => e.id)).toEqual(['r1::execution::1::execution_failed']);
-      expect(call.activeExecution).toEqual({ releaseExecutionId: 'exec-1' });
+      expect(call.activeExecution).toEqual({ action: 'release', executionId: 'exec-1' });
     });
 
     it('an interrupted resume consumed the prompt: the next interruption is a fresh round write', async () => {

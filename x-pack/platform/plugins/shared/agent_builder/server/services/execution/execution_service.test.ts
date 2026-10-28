@@ -1973,7 +1973,7 @@ describe('AgentExecutionService', () => {
           source: 'execution',
           access: 'converse',
           retryOnConflict: true,
-          activeExecution: { releaseExecutionId: executionId },
+          activeExecution: { action: 'release', executionId },
         }
       );
     });
@@ -2105,7 +2105,7 @@ describe('AgentExecutionService', () => {
       await converse();
 
       const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
-      expect(appendedActiveExecution()).toEqual({ executionId });
+      expect(appendedActiveExecution()).toEqual({ action: 'acquire', executionId });
     });
 
     it('sets the active execution with an update without fields on a HITL resume', async () => {
@@ -2123,7 +2123,7 @@ describe('AgentExecutionService', () => {
           source: 'execution',
           access: 'converse',
           retryOnConflict: true,
-          activeExecution: { executionId },
+          activeExecution: { action: 'acquire', executionId },
         }
       );
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
