@@ -1,0 +1,3912 @@
+{
+  "id": "vendor_l_firewall",
+  "title": "Vendor L firewall",
+  "description": "Palo Alto Networks PAN-OS firewall logs over syslog, in comma-separated format. The log type (traffic, threat, system, config, audit, and others) determines the meaning of the remaining fields.",
+  "cohort": "control",
+  "format": "text",
+  "samples": [
+    {
+      "line": "Apr 11 20:06:15 192.168.0.1 01111111111,2024/04/11 20:06:15,audit,2561,gui-op,suser,\"<debug><dataplane><packet-diag><show><setting/></show></packet-diag></dataplane></debug>\",success",
+      "expected": {
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "observer": {
+          "hostname": "192.168.0.1",
+          "product": "PAN-OS",
+          "serial_number": "01111111111",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "192.168.0.1"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "suser"
+        },
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-04:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Apr 18 18:35:20 10.1.1.1 003001000000,2024/04/18 18:35:20,audit,2561,gui-op,Mustang,\"<show><config-locks><vsys>all</vsys></config-locks></show>\",success",
+      "expected": {
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "observer": {
+          "hostname": "10.1.1.1",
+          "product": "PAN-OS",
+          "serial_number": "003001000000",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "10.1.1.1"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "Mustang"
+        },
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-04:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Apr 18 18:36:20 test-hostname 003001000000,2024/04/18 18:36:20,audit,2561,gui-op,Mustang,\"<show><config-locks><vsys>all</vsys></config-locks></show>\",success",
+      "expected": {
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "observer": {
+          "hostname": "test-hostname",
+          "product": "PAN-OS",
+          "serial_number": "003001000000",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "test-hostname"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "Mustang"
+        },
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-04:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Apr 18 18:37:20 test-hostname.test.intra 003001000000,2024/04/18 18:37:20,audit,2561,gui-op,Mustang,\"<show><config-locks><vsys>all</vsys></config-locks></show>\",success",
+      "expected": {
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "observer": {
+          "hostname": "test-hostname.test.intra",
+          "product": "PAN-OS",
+          "serial_number": "003001000000",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "test-hostname.test.intra"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "Mustang"
+        },
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-04:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "1,2019/11/23 00:44:44,01234567890,AUTHENTICATION,login,2561,2019/11/23 00:44:44,vsys1,fe80::4e7:1ab2:f6aa:82fa,user,normalize-user,object,auth-policy,12345,auth-id,vendor,log-action,server-profile,description,client-type,event-type,10,20,action-flag,0,0,0,0,vsys-name,device-name,vsys-id,auth-protocol,uuid,2021-11-23T01:03:05.498-08:00,src-category,src-profile,src-model,src-vendor,src-os-family,src-os-version,src-hostname,aa:aa:aa:aa:aa:aa,region,,\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36\",session-id",
+      "expected": {
+        "@timestamp": "2021-11-23T04:33:05.498-04:30",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "type": "ipv6"
+        },
+        "observer": {
+          "hostname": "device-name",
+          "product": "PAN-OS",
+          "serial_number": "01234567890",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "device-name",
+            "src-hostname"
+          ],
+          "ip": [
+            "fe80::4e7:1ab2:f6aa:82fa"
+          ],
+          "user": [
+            "user",
+            "normalize-user"
+          ]
+        },
+        "rule": {
+          "uuid": "uuid"
+        },
+        "source": {
+          "ip": "fe80::4e7:1ab2:f6aa:82fa",
+          "user": {
+            "name": [
+              "user",
+              "normalize-user"
+            ]
+          }
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "name": [
+            "user",
+            "normalize-user"
+          ]
+        },
+        "user_agent": {
+          "device": {
+            "name": "Mac"
+          },
+          "name": "Chrome",
+          "original": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36",
+          "os": {
+            "full": "Mac OS X 10.10.5",
+            "name": "Mac OS X",
+            "version": "10.10.5"
+          },
+          "version": "51.0.2704.103"
+        },
+        "event": {
+          "category": [
+            "authentication"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-04:30"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "1,2024/08/27 11:03:10,123456789012,AUTH,Unknown,2816,2024/08/27 11:03:10,vsys1,10.20.30.40,,,AD-LDAP-MFA,MFA-Policy,1,123456789,,log-action,,No user activity after prompted for credentials from AUTH-PORTAL.,Authentication Portal,Authentication Timeout,1,9876543210,action-flag,1,0,0,0,,PA-850,1,,rule-uuid,2024-08-27T11:03:10.861+02:00,,,,,,,,,,,,0,",
+      "expected": {
+        "@timestamp": "2024-08-27T04:33:10.861-04:30",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "hostname": "PA-850",
+          "product": "PAN-OS",
+          "serial_number": "123456789012",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-850"
+          ],
+          "ip": [
+            "10.20.30.40"
+          ]
+        },
+        "rule": {
+          "uuid": "rule-uuid"
+        },
+        "source": {
+          "ip": "10.20.30.40"
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "category": [
+            "authentication"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-04:30"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "1,2021/10/25 20:25:39,,CONFIG,0,2561,2021/10/25 20:25:39,81.2.69.193,,set,admin,Web,Succeeded, config shared log-settings iptag match-list  ip-tag,,\"iptag { match-list { ip-tag  { send-syslog [ SYSLOG-1 ]; filter \"\"All Logs\"\"; } } } \",1234567890,0x0,0,0,0,0,,PA-VM,0,",
+      "expected": {
+        "@timestamp": "2021-10-25T20:25:39.000-04:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "ip": [
+            "81.2.69.193"
+          ]
+        },
+        "observer": {
+          "hostname": "PA-VM",
+          "product": "PAN-OS",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-VM"
+          ],
+          "ip": [
+            "81.2.69.193"
+          ],
+          "user": [
+            "admin"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "cmd-set",
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-04:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "1,2021/10/25 20:25:19,,CONFIG,0,2561,2021/10/25 20:25:19,81.2.69.193,,set,admin,Web,Succeeded, config shared log-settings globalprotect match-list  globalProtect,,\"globalprotect { match-list { globalProtect  { send-syslog [ SYSLOG-1 ]; filter \"\"All Logs\"\"; } } } \",1234567890,0x0,0,0,0,0,,PA-VM,0,",
+      "expected": {
+        "@timestamp": "2021-10-25T20:25:19.000-04:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "ip": [
+            "81.2.69.193"
+          ]
+        },
+        "observer": {
+          "hostname": "PA-VM",
+          "product": "PAN-OS",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-VM"
+          ],
+          "ip": [
+            "81.2.69.193"
+          ],
+          "user": [
+            "admin"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "cmd-set",
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-04:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "1,2023/10/04 08:52:10,007058000248010,CONFIG,0,2816,2023/10/04 08:52:10,81.2.69.193,,set,admin,Web,Succeeded, vsys  vsys1 rulebase security rules  reset-adult,,reset-adult 73a06abf-75ca-436f-9319-1a15b27fa692 { to [ public ]; from [ private ]; source [ any ]; destination [ any ]; source-user [ any ]; category [ adult ]; application [ any ]; service [ application-default ]; source-hip [ any ]; destination-hip [ any ]; action reset-client; icmp-unreachable yes; log-start yes; rule-type interzone; } ,7286123782408765488,0x0,0,0,0,0,,PA-VM,0,",
+      "expected": {
+        "@timestamp": "2023-10-04T08:52:10.000-04:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "ip": [
+            "81.2.69.193"
+          ]
+        },
+        "observer": {
+          "hostname": "PA-VM",
+          "product": "PAN-OS",
+          "serial_number": "007058000248010",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-VM"
+          ],
+          "ip": [
+            "81.2.69.193"
+          ],
+          "user": [
+            "admin"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "cmd-set",
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-04:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "1,2023/10/04 08:50:28,007058000248010,CONFIG,0,2816,2023/10/04 08:50:28,81.2.69.193,,move,admin,Web,Succeeded, vsys  vsys1 rulebase security rules  block-1.1.1.1,,,7286123782408765487,0x0,0,0,0,0,,PA-VM,0,",
+      "expected": {
+        "@timestamp": "2023-10-04T08:50:28.000-04:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "ip": [
+            "81.2.69.193"
+          ]
+        },
+        "observer": {
+          "hostname": "PA-VM",
+          "product": "PAN-OS",
+          "serial_number": "007058000248010",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-VM"
+          ],
+          "ip": [
+            "81.2.69.193"
+          ],
+          "user": [
+            "admin"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "cmd-move",
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-04:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2019/10/09 10:20:15,001234567890002,CORRELATION,0,2304,2019/10/09 10:20:15,81.2.69.142,src-user,vsys,cat,4,0,0,0,0,vsys-name,d-name,vsys-id,o-name,o-id,evidence",
+      "expected": {
+        "@timestamp": "2019-10-09T10:20:15.000-02:30",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "4"
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "hostname": "d-name",
+          "product": "PAN-OS",
+          "serial_number": "001234567890002",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "d-name"
+          ],
+          "ip": [
+            "81.2.69.142"
+          ],
+          "user": [
+            "src-user"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.142",
+          "user": {
+            "name": "src-user"
+          }
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "name": "src-user"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-02:30"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "<14>Nov 30 16:09:33 PA-220 1,2021/11/11 15:42:44,007051000184334,DECRYPTION,0,2561,2021/11/11 15:42:44,81.2.69.145,81.2.69.144,81.2.69.145,81.2.69.144,intrazone-default,,,incomplete,vsys1,LAN,LAN,ethernet1/2,ethernet1/2,,2021/11/11 15:42:44,33288,1,49908,443,49908,20077,0x1400000,tcp,allow,N/A,,,,,731a6a1a-9a62-4a92-a49a-0876025a9436,Server_Hello,Client_Hello,TLS1.2,ECDHE,AES_256_GCM,SHA384,,,Certificate,trusted,Trusted,GlobalProtect,ba67e84495b59512,a6a13e87221733b712ddbd0978da1ffdd69503dfd1f0a86f73d86bf90b743b85,2021/11/11 15:21:28,2022/11/11 15:21:28,V3,2048,9,9,0,0,:::::RSA,com.example.com,com.example.com,,,Received fatal alert CertificateUnknown from client,,,,,,,,2021-11-11T15:42:44.845-08:00,,,,,,,,,,,,,,,,,7028724914890736000,0x0,0,0,0,0,,PA-VM,1,unknown,unknown,unknown,1,,,incomplete,no",
+      "expected": {
+        "@timestamp": "2021-11-11T15:42:44.845-08:00",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "nat": {
+            "ip": "81.2.69.144",
+            "port": 20077
+          },
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "incomplete",
+          "community_id": [
+            "1:25YeIgDPUoi6wutrn+CXsDJ9eSY=",
+            "1:GHUcG5su+mGMG9YjB+a66WtuBk0="
+          ],
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "LAN"
+          },
+          "hostname": "PA-VM",
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "LAN"
+          },
+          "product": "PAN-OS",
+          "serial_number": "007051000184334",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hash": [
+            "a6a13e87221733b712ddbd0978da1ffdd69503dfd1f0a86f73d86bf90b743b85"
+          ],
+          "hosts": [
+            "PA-VM"
+          ],
+          "ip": [
+            "81.2.69.145",
+            "81.2.69.144"
+          ]
+        },
+        "rule": {
+          "name": "intrazone-default",
+          "uuid": "731a6a1a-9a62-4a92-a49a-0876025a9436"
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.145",
+          "nat": {
+            "ip": "81.2.69.145",
+            "port": 49908
+          },
+          "port": 49908
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "tls": {
+          "cipher": "AES_256_GCM",
+          "client": {
+            "hash": {
+              "sha256": "a6a13e87221733b712ddbd0978da1ffdd69503dfd1f0a86f73d86bf90b743b85"
+            },
+            "not_after": "2022-11-11T15:21:28.000-08:00",
+            "not_before": "2021-11-11T15:21:28.000-08:00",
+            "x509": {
+              "issuer": {
+                "common_name": [
+                  "com.example.com"
+                ]
+              },
+              "public_key_size": 2048,
+              "serial_number": "ba67e84495b59512",
+              "subject": {
+                "common_name": [
+                  "com.example.com"
+                ]
+              },
+              "version_number": "V3"
+            }
+          },
+          "version": "1.2",
+          "version_protocol": "tls"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "kind": "event",
+          "outcome": "failure",
+          "timezone": "-08:00",
+          "type": [
+            "allowed"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "<134>1 2022-11-03T13:40:34+01:00 PA-220 1,2021/11/11 15:42:44,007051000184334,DECRYPTION,0,2561,2021/11/11 15:42:44,81.2.69.145,81.2.69.144,81.2.69.145,81.2.69.144,intrazone-default,,,incomplete,vsys1,LAN,LAN,ethernet1/2,ethernet1/2,,2021/11/11 15:42:44,33288,1,49908,443,49908,20077,0x1400000,tcp,allow,N/A,,,,,731a6a1a-9a62-4a92-a49a-0876025a9436,Server_Hello,Client_Hello,TLS1.2,ECDHE,AES_256_GCM,SHA384,,,Certificate,trusted,Trusted,GlobalProtect,ba67e84495b59512,a6a13e87221733b712ddbd0978da1ffdd69503dfd1f0a86f73d86bf90b743b85,2021/11/11 15:21:28,2022/11/11 15:21:28,V3,Unknown,9,9,0,0,:::::RSA,com.example.com,com.example.com,,,Received fatal alert CertificateUnknown from client,,,,,,,,2021-11-11T15:42:44.845-08:00,,,,,,,,,,,,,,,,,7028724914890736000,0x0,0,0,0,0,,PA-VM,1,unknown,unknown,unknown,1,,,incomplete,no",
+      "expected": {
+        "@timestamp": "2021-11-11T15:42:44.845-08:00",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "nat": {
+            "ip": "81.2.69.144",
+            "port": 20077
+          },
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "incomplete",
+          "community_id": [
+            "1:25YeIgDPUoi6wutrn+CXsDJ9eSY=",
+            "1:GHUcG5su+mGMG9YjB+a66WtuBk0="
+          ],
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "LAN"
+          },
+          "hostname": "PA-VM",
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "LAN"
+          },
+          "product": "PAN-OS",
+          "serial_number": "007051000184334",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hash": [
+            "a6a13e87221733b712ddbd0978da1ffdd69503dfd1f0a86f73d86bf90b743b85"
+          ],
+          "hosts": [
+            "PA-VM"
+          ],
+          "ip": [
+            "81.2.69.145",
+            "81.2.69.144"
+          ]
+        },
+        "rule": {
+          "name": "intrazone-default",
+          "uuid": "731a6a1a-9a62-4a92-a49a-0876025a9436"
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.145",
+          "nat": {
+            "ip": "81.2.69.145",
+            "port": 49908
+          },
+          "port": 49908
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "tls": {
+          "cipher": "AES_256_GCM",
+          "client": {
+            "hash": {
+              "sha256": "a6a13e87221733b712ddbd0978da1ffdd69503dfd1f0a86f73d86bf90b743b85"
+            },
+            "not_after": "2022-11-11T15:21:28.000-08:00",
+            "not_before": "2021-11-11T15:21:28.000-08:00",
+            "x509": {
+              "issuer": {
+                "common_name": [
+                  "com.example.com"
+                ]
+              },
+              "serial_number": "ba67e84495b59512",
+              "subject": {
+                "common_name": [
+                  "com.example.com"
+                ]
+              },
+              "version_number": "V3"
+            }
+          },
+          "version": "1.2",
+          "version_protocol": "tls"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "kind": "event",
+          "outcome": "failure",
+          "timezone": "-08:00",
+          "type": [
+            "allowed"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "<14>Nov 30 16:09:33 PA-220 1,2024/05/30 15:42:44,007051000184334,DECRYPTION,0,2561,2024/05/30 15:42:44,81.2.69.145,81.2.69.144,81.2.69.145,81.2.69.144,intrazone-default,,,ssl,vsys1,LAN,PROXY,ae1,ethernet1/5,TEST-Log,2024/05/30 15:46:50,35508943,1,60312,9400,0,0,0x400,tcp,allow,N/A,,,,,731a6a1a-9a62-4a92-a49a-0876025a9436,Unknown,Unknown,TLS1.3,ECDHE,AES_256_GCM,SHA384,SSL Exception Destination Hosts,,None,uninspected,Uninspected,No Decrypt,,,,,V1,0,0,0,0,0,:::::NONE,,,,,,,,,,,,,2024-05-27T15:46:51.539+02:00,,,,,,,,,,,,,,,,,7335860982980205586,0x8000000000000000,12,0,0,0,,TESTFW01,1,encrypted-tunnel,networking,browser-based,4,\\\"used-by-malware,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use\\\",,ssl,no,no",
+      "expected": {
+        "@timestamp": "2024-05-27T05:46:51.539-08:00",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "nat": {
+            "ip": "81.2.69.144",
+            "port": 0
+          },
+          "port": 9400
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "ssl",
+          "community_id": "1:qCIgD9m/NwEUSR7fxRwieKZtcc8=",
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/5"
+            },
+            "zone": "PROXY"
+          },
+          "hostname": "TESTFW01",
+          "ingress": {
+            "interface": {
+              "name": "ae1"
+            },
+            "zone": "LAN"
+          },
+          "product": "PAN-OS",
+          "serial_number": "007051000184334",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "TESTFW01"
+          ],
+          "ip": [
+            "81.2.69.145",
+            "81.2.69.144"
+          ]
+        },
+        "rule": {
+          "name": "intrazone-default",
+          "uuid": "731a6a1a-9a62-4a92-a49a-0876025a9436"
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.145",
+          "nat": {
+            "ip": "81.2.69.145",
+            "port": 0
+          },
+          "port": 60312
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "tls": {
+          "cipher": "AES_256_GCM",
+          "client": {
+            "x509": {
+              "public_key_size": 0,
+              "version_number": "V1"
+            }
+          },
+          "version": "1.3",
+          "version_protocol": "tls"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "kind": "event",
+          "outcome": "failure",
+          "timezone": "-08:00",
+          "type": [
+            "allowed"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "<14>Aug 19 13:58:18 fw1034.example.io 1,2024/08/19 13:58:18,007951000353454,DECRYPTION,0,2562,2024/08/19 13:58:18,10.46.249.76,10.68.15.198,0.0.0.0,0.0.0.0,SectorProxy Browsing lko-user,,,incomplete,vsys1,interconnect,proxy,ethernet1/2,ethernet1/3,HOST-LOGCOLLECTOR,2024/08/19 13:58:18,886968,1,14620,8098,0,0,0x1000000,tcp,allow,N/A,,,,,89bec869-072f-4d78-9691-ed67ebc08749,Unknown,Unknown,TLS1.3,,,,Decrypt - SOC - my-user,,Protocol,uninspected,Uninspected,Forward,,,,,V1,0,0,0,0,13,:::::NONE,,,,www2.example.com,TLS Handshake Failure. Received fatal alert HandshakeFailure from server,,,,,,,,2024-08-19T13:58:18.289+00:00,,,,,,,,,,,,,,,,,7395705320301543310,0x8000000000000000,850,852,0,0,,fw1034,1,unknown,unknown,unknown,1,,,incomplete,no,no",
+      "expected": {
+        "@timestamp": "2024-08-19T05:58:18.289-08:00",
+        "destination": {
+          "ip": "10.68.15.198",
+          "port": 8098
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "incomplete",
+          "community_id": "1:v6CpC7JhBowT3JTASj/bcaOVqw0=",
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/3"
+            },
+            "zone": "proxy"
+          },
+          "hostname": "fw1034",
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "interconnect"
+          },
+          "product": "PAN-OS",
+          "serial_number": "007951000353454",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "fw1034"
+          ],
+          "ip": [
+            "10.46.249.76",
+            "10.68.15.198"
+          ]
+        },
+        "rule": {
+          "name": "SectorProxy Browsing lko-user",
+          "uuid": "89bec869-072f-4d78-9691-ed67ebc08749"
+        },
+        "source": {
+          "ip": "10.46.249.76",
+          "port": 14620
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "tls": {
+          "client": {
+            "server_name": "www2.example.com",
+            "x509": {
+              "public_key_size": 0,
+              "version_number": "V1"
+            }
+          },
+          "version": "1.3",
+          "version_protocol": "tls"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "kind": "event",
+          "outcome": "failure",
+          "timezone": "-08:00",
+          "type": [
+            "allowed"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2021/03/24 11:30:00,013101001305,GLOBALPROTECT,0,2305,2021/03/24 11:30:00,vsys1,portal-prelogin,before-login,,,,BE,,216.160.83.57,0.0.0.0,81.2.69.193,0.0.0.0,09300aaa-23-4900-8aa9-32695452aa,,5.2.4,OS,\"OS 10 Pro , 64-bit\",1,,,\"\",success,,0,,0,GlobalProtect Portal,69200719497738,0x0",
+      "expected": {
+        "@timestamp": "2021-03-24T11:30:00.000-05:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "id": "09300aaa-23-4900-8aa9-32695452aa",
+          "ip": [
+            "81.2.69.193"
+          ],
+          "os": {
+            "family": "OS",
+            "full": "OS 10 Pro , 64-bit"
+          }
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "product": "PAN-OS",
+          "serial_number": "013101001305",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.193",
+            "216.160.83.57"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 209
+          },
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "name": "BE",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.193",
+          "nat": {
+            "ip": "216.160.83.57"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network"
+          ],
+          "code": "portal-prelogin",
+          "duration": 0,
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-05:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2021/03/24 11:29:49,013101001308,GLOBALPROTECT,0,2305,2021/03/24 11:29:49,vsys1,gateway-config-release,configuration,,,domain\\user,BE,CP935,89.160.20.112,0.0.0.0,10.20.13.217,0.0.0.0,e0957c11-93-437a-9e23-9f0c24059898,5J9VN53,5.2.4,OS,\"OS 10 Pro , 64-bit\",1,,,\"\",success,,0,,0,GlobalProtect_GW,6919501582016786,0x0",
+      "expected": {
+        "@timestamp": "2021-03-24T11:29:49.000-05:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "id": "e0957c11-93-437a-9e23-9f0c24059898",
+          "ip": [
+            "10.20.13.217"
+          ],
+          "name": "cp935",
+          "os": {
+            "family": "OS",
+            "full": "OS 10 Pro , 64-bit"
+          }
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "product": "PAN-OS",
+          "serial_number": "013101001308",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "cp935"
+          ],
+          "ip": [
+            "10.20.13.217",
+            "89.160.20.112"
+          ],
+          "user": [
+            "user"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 29518,
+            "organization": {
+              "name": "Bredband2 AB"
+            }
+          },
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "name": "BE",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "10.20.13.217",
+          "nat": {
+            "ip": "89.160.20.112"
+          },
+          "user": {
+            "domain": "domain",
+            "name": "user"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "domain",
+          "name": "user"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "code": "gateway-config-release",
+          "duration": 0,
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-05:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2021/04/07 17:41:30,013101305,GLOBALPROTECT,0,2305,2021/04/07 17:41:30,vsys1,gateway-hip-check,host-info,,,domain\\user1,,HOST82878,1.128.3.4,0.0.0.0,67.43.156.14,0.0.0.0,523e8b-7efa-4397-a4d5-824dfa4d8a,F1SM2,5.2.4,,\"\",1,,,\"HIP report is not needed\",success,,0,,0,GlobalProtect_GW,6920071768563516860,0x0",
+      "expected": {
+        "@timestamp": "2021-04-07T17:41:30.000-05:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "id": "523e8b-7efa-4397-a4d5-824dfa4d8a",
+          "ip": [
+            "67.43.156.14"
+          ],
+          "name": "host82878"
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "product": "PAN-OS",
+          "serial_number": "013101305",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "host82878"
+          ],
+          "ip": [
+            "67.43.156.14",
+            "1.128.3.4"
+          ],
+          "user": [
+            "user1"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 35908
+          },
+          "geo": {
+            "continent_name": "Asia",
+            "country_iso_code": "BT",
+            "country_name": "Bhutan"
+          },
+          "ip": "67.43.156.14",
+          "nat": {
+            "ip": "1.128.3.4"
+          },
+          "user": {
+            "domain": "domain",
+            "name": "user1"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "domain",
+          "name": "user1"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "code": "gateway-hip-check",
+          "duration": 0,
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-05:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2021/04/07 17:41:29,013101308,GLOBALPROTECT,0,2305,2021/04/07 17:41:29,vsys1,gateway-getconfig,configuration,,IPSec,pre-logon,BE,HOST73486,81.2.69.193,0.0.0.0,89.160.20.112,0.0.0.0,7d01b5-f538-4fa3-a2a2-83980d1325,5C261FNR,5.2.4,OS,\"OS 10 Pro , 64-bit\",1,,,\"Config name: , Client region: BE.\",success,,0,,0,GlobalProtect_GW,6944137135219737,0x0",
+      "expected": {
+        "@timestamp": "2021-04-07T17:41:29.000-05:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "id": "7d01b5-f538-4fa3-a2a2-83980d1325",
+          "ip": [
+            "89.160.20.112"
+          ],
+          "name": "host73486",
+          "os": {
+            "family": "OS",
+            "full": "OS 10 Pro , 64-bit"
+          }
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "product": "PAN-OS",
+          "serial_number": "013101308",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "host73486"
+          ],
+          "ip": [
+            "89.160.20.112",
+            "81.2.69.193"
+          ],
+          "user": [
+            "pre-logon"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 29518,
+            "organization": {
+              "name": "Bredband2 AB"
+            }
+          },
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "name": "BE",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.112",
+          "nat": {
+            "ip": "81.2.69.193"
+          },
+          "user": {
+            "name": "pre-logon"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "pre-logon"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "code": "gateway-getconfig",
+          "duration": 0,
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "-05:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2019/10/09 10:20:15,001234567890002,GTP,0,2304,2019/10/09 10:20:15,81.2.69.142,81.2.69.144,,,rule-name,,,app,v-system,s-zone,d-zone,inbound-int,outbound-int,log-action,,1212121,,9550,9551,,,,tcp,action,gtp-event,msisdn,apn,rat,gtp-msg-type,81.2.69.142,TE-Ide-1,TE-Ide-2,GTP-interface,GTP-cause,4,mcc,mnc,1010,100,GTP-event-code,,,src-loc,dst-loc,,,,,,,,imsi,imei,,,,,,,,,,,,,,,,,2021/10/26 15:35:42,9999,TI-Rule,81.2.69.142,remote-user-id,uuid,pcap-id,1970-01-01T01:00:00.000+01:00,ASST,ASD,app-sub-cat,app-cat,app-tech,4,app-char,app-container,no,no",
+      "expected": {
+        "@timestamp": "2019-10-09T10:20:15.000+07:00",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "name": "dst-loc",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "port": 9551
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "4"
+        },
+        "network": {
+          "application": "app",
+          "community_id": "1:Lg7reiz4N7t4w/tC1zo+4I0ysCs=",
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "outbound-int"
+            },
+            "zone": "d-zone"
+          },
+          "ingress": {
+            "interface": {
+              "name": "inbound-int"
+            },
+            "zone": "s-zone"
+          },
+          "product": "PAN-OS",
+          "serial_number": "001234567890002",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.142",
+            "81.2.69.144"
+          ]
+        },
+        "rule": {
+          "name": "TI-Rule",
+          "uuid": "uuid"
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "name": "src-loc",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.142",
+          "port": 9550
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "category": [
+            "network",
+            "malware"
+          ],
+          "duration": 9999000000000,
+          "end": "2021-10-26T18:22:21.000+07:00",
+          "kind": "event",
+          "start": "2021-10-26T15:35:42.000+07:00",
+          "timezone": "+07:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp",
+        "event.start",
+        "event.end"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2021/03/02 10:06:31,12345678999,HIPMATCH,0,2305,2021/03/02 10:06:25,domain\\mustermanm,vsys1,PC12345,,10.20.30.40,GlobalProtect 5.1.1,1,object,0,0,6894571641485024543,0x8000000000000000,267,24,19,0,,de-firewall,1,0.0.0.0,d275bcbe-3a07-4e69-85c5-3ad9192c212e,F0S48Y2,,1970-01-01T01:00:00.000+01:00",
+      "expected": {
+        "@timestamp": "2021-03-02T10:06:31.000-06:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "id": "d275bcbe-3a07-4e69-85c5-3ad9192c212e",
+          "name": "pc12345"
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "hostname": "de-firewall",
+          "product": "PAN-OS",
+          "serial_number": "12345678999",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "de-firewall",
+            "pc12345"
+          ],
+          "ip": [
+            "10.20.30.40"
+          ],
+          "user": [
+            "mustermanm"
+          ]
+        },
+        "source": {
+          "ip": "10.20.30.40",
+          "user": {
+            "domain": "domain",
+            "name": "mustermanm"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "domain": "domain",
+          "name": "mustermanm"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "kind": "event",
+          "timezone": "-06:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2019/10/09 10:20:15,001234567890002,HIPMATCH,0,2304,2019/10/09 10:20:15,ira,vsys1,oh-C02ABCDEFGH4,Mac,89.160.20.112,GP-HIP-PROFILE,1,profile,0,0,0123456789,0x0,0,0,0,0,,SumoRedfw01a,1,0.0.0.0,gh:85:90:99:5a:40,C02ABCDEFGH",
+      "expected": {
+        "@timestamp": "2019-10-09T10:20:15.000-06:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "id": "gh:85:90:99:5a:40",
+          "name": "oh-c02abcdefgh4",
+          "os": {
+            "full": "Mac"
+          }
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "hostname": "SumoRedfw01a",
+          "product": "PAN-OS",
+          "serial_number": "001234567890002",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "SumoRedfw01a",
+            "oh-c02abcdefgh4"
+          ],
+          "ip": [
+            "89.160.20.112"
+          ],
+          "user": [
+            "ira"
+          ]
+        },
+        "source": {
+          "as": {
+            "number": 29518,
+            "organization": {
+              "name": "Bredband2 AB"
+            }
+          },
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.112",
+          "user": {
+            "name": "ira"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "ira"
+        },
+        "event": {
+          "category": [
+            "network"
+          ],
+          "kind": "event",
+          "timezone": "-06:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Mar 25 23:58:57 1,2013/03/25 23:58:57,1606001116,CONFIG,0,0,2012/02/25 00:51:50,192.168.0.2,,set,admin,Web,Succeeded, config shared local-user-database user  badguy,0,0x0",
+      "expected": {
+        "@timestamp": "2013-03-25T23:58:57.000+05:45",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "ip": [
+            "192.168.0.2"
+          ]
+        },
+        "observer": {
+          "product": "PAN-OS",
+          "serial_number": "1606001116",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "192.168.0.2"
+          ],
+          "user": [
+            "admin"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "cmd-set",
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "+05:45"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Mar 25 23:59:02 1,2013/03/25 23:59:02,1606001116,CONFIG,0,0,2012/02/25 00:53:22,192.168.0.2,,set,admin,Web,Succeeded, config mgt-config users  badguy,0,0x0",
+      "expected": {
+        "@timestamp": "2013-03-25T23:59:02.000+05:45",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "ip": [
+            "192.168.0.2"
+          ]
+        },
+        "observer": {
+          "product": "PAN-OS",
+          "serial_number": "1606001116",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "192.168.0.2"
+          ],
+          "user": [
+            "admin"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "cmd-set",
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "outcome": "success",
+          "timezone": "+05:45"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Mar 25 23:59:02 1,2013/03/25 23:59:02,1606001116,CONFIG,0,0,2012/02/25 00:53:40,192.168.0.2,,commit,admin,Web,Submitted,,0,0x0",
+      "expected": {
+        "@timestamp": "2013-03-25T23:59:02.000+05:45",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "host": {
+          "ip": [
+            "192.168.0.2"
+          ]
+        },
+        "observer": {
+          "product": "PAN-OS",
+          "serial_number": "1606001116",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "192.168.0.2"
+          ],
+          "user": [
+            "admin"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "cmd-commit",
+          "category": [
+            "configuration"
+          ],
+          "kind": "event",
+          "outcome": "unknown",
+          "timezone": "+05:45"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Mar 25 23:59:02 1,2013/03/25 23:59:02,1606001116,SYSTEM,routing,0,2012/02/25 00:53:53,,routed-config-p1-success,,0,0,general,informational,Route daemon configuration load phase-1 succeeded.,0,0x0",
+      "expected": {
+        "@timestamp": "2013-03-25T23:59:02.000+05:45",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "product": "PAN-OS",
+          "serial_number": "1606001116",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "code": "routed-config-p1-success",
+          "kind": "event",
+          "severity": 5,
+          "timezone": "+05:45"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Oct 30 09:46:12 1,2012/10/30 09:46:12,01606001116,THREAT,url,1,2012/04/10 04:39:56,192.168.0.2,175.16.199.1,0.0.0.0,0.0.0.0,rule1,crusher,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,forwardAll,2012/04/10 04:39:58,25149,1,59309,80,0,0,0x208000,tcp,alert,\"lorexx.cn/loader.exe\",(9999),not-resolved,informational,client-to-server,0,0x0,192.168.0.0-192.168.255.255,United States,0,text/html",
+      "expected": {
+        "@timestamp": "2012-10-30T09:46:12.000+10:00",
+        "destination": {
+          "domain": "lorexx.cn",
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "application": "web-browsing",
+          "community_id": "1:CpnxxiYk2GolQXL1AiyOIq2jeIE=",
+          "direction": "inbound",
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "01606001116",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "192.168.0.2",
+            "175.16.199.1"
+          ],
+          "user": [
+            "crusher"
+          ]
+        },
+        "rule": {
+          "name": "rule1"
+        },
+        "source": {
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.0.2",
+          "port": 59309,
+          "user": {
+            "name": "crusher"
+          }
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "url": {
+          "domain": "lorexx.cn",
+          "extension": "exe",
+          "original": "lorexx.cn/loader.exe",
+          "path": "/loader.exe"
+        },
+        "user": {
+          "name": "crusher"
+        },
+        "event": {
+          "action": "url_filtering",
+          "category": [
+            "intrusion_detection",
+            "threat",
+            "network"
+          ],
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 5,
+          "timezone": "+10:00",
+          "type": [
+            "allowed"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Oct 30 09:46:12 1,2012/10/30 09:46:12,01606001116,THREAT,url,1,2012/04/10 04:39:56,192.168.0.2,175.16.199.1,0.0.0.0,0.0.0.0,rule1,crusher,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,forwardAll,2012/04/10 04:39:58,26067,1,59313,80,0,0,0x208000,tcp,alert,\"lsiu.info/evo/count.php?o=2\",(9999),not-resolved,informational,client-to-server,0,0x0,192.168.0.0-192.168.255.255,United States,0,text/html",
+      "expected": {
+        "@timestamp": "2012-10-30T09:46:12.000+10:00",
+        "destination": {
+          "domain": "lsiu.info",
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "application": "web-browsing",
+          "community_id": "1:lB9VWdNEHqna/swiak+4X1dqv1k=",
+          "direction": "inbound",
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "01606001116",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "192.168.0.2",
+            "175.16.199.1"
+          ],
+          "user": [
+            "crusher"
+          ]
+        },
+        "rule": {
+          "name": "rule1"
+        },
+        "source": {
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.0.2",
+          "port": 59313,
+          "user": {
+            "name": "crusher"
+          }
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "url": {
+          "domain": "lsiu.info",
+          "extension": "php",
+          "original": "lsiu.info/evo/count.php?o=2",
+          "path": "/evo/count.php",
+          "query": "o=2"
+        },
+        "user": {
+          "name": "crusher"
+        },
+        "event": {
+          "action": "url_filtering",
+          "category": [
+            "intrusion_detection",
+            "threat",
+            "network"
+          ],
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 5,
+          "timezone": "+10:00",
+          "type": [
+            "allowed"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Oct 30 09:46:12 1,2012/10/30 09:46:12,01606001116,THREAT,url,1,2012/04/10 04:39:56,192.168.0.2,175.16.199.1,0.0.0.0,0.0.0.0,rule1,crusher,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,forwardAll,2012/04/10 04:39:58,26522,1,59314,80,0,0,0x208000,tcp,alert,\"lsiu.info/evo/count.php?o=5\",(9999),not-resolved,informational,client-to-server,0,0x0,192.168.0.0-192.168.255.255,United States,0,text/html",
+      "expected": {
+        "@timestamp": "2012-10-30T09:46:12.000+10:00",
+        "destination": {
+          "domain": "lsiu.info",
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "application": "web-browsing",
+          "community_id": "1:3be4rO6jMOmXDKYhNViDYESR4pg=",
+          "direction": "inbound",
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "01606001116",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "192.168.0.2",
+            "175.16.199.1"
+          ],
+          "user": [
+            "crusher"
+          ]
+        },
+        "rule": {
+          "name": "rule1"
+        },
+        "source": {
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.0.2",
+          "port": 59314,
+          "user": {
+            "name": "crusher"
+          }
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "url": {
+          "domain": "lsiu.info",
+          "extension": "php",
+          "original": "lsiu.info/evo/count.php?o=5",
+          "path": "/evo/count.php",
+          "query": "o=5"
+        },
+        "user": {
+          "name": "crusher"
+        },
+        "event": {
+          "action": "url_filtering",
+          "category": [
+            "intrusion_detection",
+            "threat",
+            "network"
+          ],
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 5,
+          "timezone": "+10:00",
+          "type": [
+            "allowed"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Oct 30 09:46:12 1,2012/10/30 09:46:12,01606001116,THREAT,url,1,2012/04/10 04:39:57,192.168.0.2,175.16.199.1,0.0.0.0,0.0.0.0,rule1,crusher,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,forwardAll,2012/04/10 04:39:58,25112,1,59315,80,0,0,0x208000,tcp,alert,\"lsiu.info/evo/count.php?o=7\",(9999),not-resolved,informational,client-to-server,0,0x0,192.168.0.0-192.168.255.255,United States,0,text/html",
+      "expected": {
+        "@timestamp": "2012-10-30T09:46:12.000+10:00",
+        "destination": {
+          "domain": "lsiu.info",
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "application": "web-browsing",
+          "community_id": "1:CvgumdBliLFimUvrE/1C91M3lrQ=",
+          "direction": "inbound",
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "01606001116",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "192.168.0.2",
+            "175.16.199.1"
+          ],
+          "user": [
+            "crusher"
+          ]
+        },
+        "rule": {
+          "name": "rule1"
+        },
+        "source": {
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.0.2",
+          "port": 59315,
+          "user": {
+            "name": "crusher"
+          }
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "url": {
+          "domain": "lsiu.info",
+          "extension": "php",
+          "original": "lsiu.info/evo/count.php?o=7",
+          "path": "/evo/count.php",
+          "query": "o=7"
+        },
+        "user": {
+          "name": "crusher"
+        },
+        "event": {
+          "action": "url_filtering",
+          "category": [
+            "intrusion_detection",
+            "threat",
+            "network"
+          ],
+          "kind": "alert",
+          "outcome": "success",
+          "severity": 5,
+          "timezone": "+10:00",
+          "type": [
+            "allowed"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Oct 30 09:46:12 1,2012/10/30 09:46:12,01606001116,TRAFFIC,start,1,2012/04/10 04:39:58,192.168.0.2,175.16.199.1,0.0.0.0,0.0.0.0,rule1,crusher,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,forwardAll,2012/04/10 04:39:59,11449,1,59324,80,0,0,0x200000,tcp,allow,78,78,0,1,2012/04/10 04:39:59,0,any,0,0,0x0,192.168.0.0-192.168.255.255,United States,0,1,0",
+      "expected": {
+        "@timestamp": "2012-10-30T09:46:12.000Z",
+        "destination": {
+          "bytes": 0,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "packets": 0,
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "web-browsing",
+          "bytes": 78,
+          "community_id": "1:yr/t+D7vuUqVI0fdtRb/nP4gu7g=",
+          "packets": 1,
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "01606001116",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "192.168.0.2",
+            "175.16.199.1"
+          ],
+          "user": [
+            "crusher"
+          ]
+        },
+        "rule": {
+          "name": "rule1"
+        },
+        "source": {
+          "bytes": 78,
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.0.2",
+          "packets": 1,
+          "port": 59324,
+          "user": {
+            "name": "crusher"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "crusher"
+        },
+        "event": {
+          "action": "flow_started",
+          "category": [
+            "network"
+          ],
+          "duration": 0,
+          "end": "2012-04-10T04:39:59.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2012-04-10T04:39:59.000Z",
+          "type": [
+            "allowed",
+            "start",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Oct 30 09:46:12 1,2012/10/30 09:46:12,01606001116,TRAFFIC,start,1,2012/04/10 04:39:58,192.168.0.2,175.16.199.1,0.0.0.0,0.0.0.0,rule1,crusher,,dns,vsys1,trust,untrust,ethernet1/2,ethernet1/1,forwardAll,2012/04/10 04:39:59,25572,1,54448,53,0,0,0x200000,udp,allow,76,76,0,1,2012/04/10 04:39:58,0,any,0,0,0x0,192.168.0.0-192.168.255.255,United States,0,1,0",
+      "expected": {
+        "@timestamp": "2012-10-30T09:46:12.000Z",
+        "destination": {
+          "bytes": 0,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "packets": 0,
+          "port": 53
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "dns",
+          "bytes": 76,
+          "community_id": "1:IFiloquB8SJwpj0MxaRT5g/kI7A=",
+          "packets": 1,
+          "transport": "udp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "01606001116",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "192.168.0.2",
+            "175.16.199.1"
+          ],
+          "user": [
+            "crusher"
+          ]
+        },
+        "rule": {
+          "name": "rule1"
+        },
+        "source": {
+          "bytes": 76,
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.0.2",
+          "packets": 1,
+          "port": 54448,
+          "user": {
+            "name": "crusher"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "crusher"
+        },
+        "event": {
+          "action": "flow_started",
+          "category": [
+            "network"
+          ],
+          "duration": 0,
+          "end": "2012-04-10T04:39:58.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2012-04-10T04:39:58.000Z",
+          "type": [
+            "allowed",
+            "start",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Oct 30 09:46:12 1,2012/10/30 09:46:12,01606001116,TRAFFIC,start,1,2012/04/10 04:39:58,192.168.0.2,175.16.199.1,0.0.0.0,0.0.0.0,rule1,crusher,,dns,vsys1,trust,untrust,ethernet1/2,ethernet1/1,forwardAll,2012/04/10 04:39:59,26208,1,53121,53,0,0,0x200000,udp,allow,76,76,0,1,2012/04/10 04:39:58,0,any,0,0,0x0,192.168.0.0-192.168.255.255,United States,0,1,0",
+      "expected": {
+        "@timestamp": "2012-10-30T09:46:12.000Z",
+        "destination": {
+          "bytes": 0,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "packets": 0,
+          "port": 53
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "dns",
+          "bytes": 76,
+          "community_id": "1:aQJiHujA4LNWL+ALWtBZUSyJxCQ=",
+          "packets": 1,
+          "transport": "udp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "01606001116",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "192.168.0.2",
+            "175.16.199.1"
+          ],
+          "user": [
+            "crusher"
+          ]
+        },
+        "rule": {
+          "name": "rule1"
+        },
+        "source": {
+          "bytes": 76,
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.0.2",
+          "packets": 1,
+          "port": 53121,
+          "user": {
+            "name": "crusher"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "user": {
+          "name": "crusher"
+        },
+        "event": {
+          "action": "flow_started",
+          "category": [
+            "network"
+          ],
+          "duration": 0,
+          "end": "2012-04-10T04:39:58.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2012-04-10T04:39:58.000Z",
+          "type": [
+            "allowed",
+            "start",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "1,2019/11/23 00:44:44,01234567890,IPTAG,login,2561,2019/11/23 00:44:44,vsys,81.2.69.142,tag-name,1000,1000,100,Data Source Name, Data Source Type,Data Source Subtype,1000,0x0,0,0,0,0,vsys-name,d-name,vsys-id,1970-01-01T01:00:00.000+01:00",
+      "expected": {
+        "@timestamp": "2019-11-23T00:44:44.000+01:00",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "hostname": "d-name",
+          "product": "PAN-OS",
+          "serial_number": "01234567890",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "d-name"
+          ],
+          "ip": [
+            "81.2.69.142"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.142"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "network"
+          ],
+          "code": "1000",
+          "kind": "event",
+          "timezone": "+01:00"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2019/10/09 10:20:15,001234567890002,SCTP,0,2304,2019/10/09 10:20:15,81.2.69.142,81.2.69.144,,,rule-name,,,,vsys,src-zone,dst-zone,inbound-int,outbound-int,log-action,,1000,1000,9550,9551,,,,,tcp,action,0,0,0,0,vsys-name,device-name,1000,,2000,payload-protocol-id,4,chunk-type,,tag-1,tag-2,100,dia-app-id,dia-cmd-code,dia-avp-code,sctp-stream-id,end-reason,100,SSN,SGT,filter,1,2,3,11,12,13,3000,1970-01-01T01:00:00.000+01:00",
+      "expected": {
+        "@timestamp": "2019-10-09T10:20:15.000+05:30",
+        "destination": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.144",
+          "packets": 13,
+          "port": 9551
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "4"
+        },
+        "network": {
+          "community_id": "1:Lg7reiz4N7t4w/tC1zo+4I0ysCs=",
+          "packets": 11,
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "outbound-int"
+            },
+            "zone": "dst-zone"
+          },
+          "hostname": "device-name",
+          "ingress": {
+            "interface": {
+              "name": "inbound-int"
+            },
+            "zone": "src-zone"
+          },
+          "product": "PAN-OS",
+          "serial_number": "001234567890002",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "device-name"
+          ],
+          "ip": [
+            "81.2.69.142",
+            "81.2.69.144"
+          ]
+        },
+        "rule": {
+          "name": "rule-name",
+          "uuid": "3000"
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.142",
+          "packets": 12,
+          "port": 9550
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "category": [
+            "network"
+          ],
+          "kind": "event",
+          "timezone": "+05:30"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "1,2021/10/26 15:05:03,,SYSTEM,general,2561,2021/10/26 15:05:03,,general,,0,0,general,informational,\"Connection to Update server closed: updates.paloaltonetworks.com, source: 81.2.69.193\",1234567890,0x0,0,0,0,0,,PA-VM,0,0,2021-10-26T15:05:03.440-07:00",
+      "expected": {
+        "@timestamp": "2021-10-26T22:05:03.440Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "hostname": "PA-VM",
+          "product": "PAN-OS",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-VM"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "code": "general",
+          "kind": "event",
+          "severity": 5,
+          "timezone": "UTC"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "1,2021/10/26 14:49:02,,SYSTEM,general,2561,2021/10/26 14:49:02,,general,,0,0,general,informational,\"Connection to Update server closed: updates.paloaltonetworks.com, source: 81.2.69.193\",1234567890,0x0,0,0,0,0,,PA-VM,0,0,2021-10-26T14:49:03.776-07:00",
+      "expected": {
+        "@timestamp": "2021-10-26T21:49:03.776Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "hostname": "PA-VM",
+          "product": "PAN-OS",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-VM"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "code": "general",
+          "kind": "event",
+          "severity": 5,
+          "timezone": "UTC"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "1,2023/10/04 09:51:20,007058000248010,SYSTEM,general,2816,2023/10/04 09:51:21,,general,,0,0,general,informational,\"Connection to Update server: updates.paloaltonetworks.com completed successfully, initiated by 192.168.0.15\",7286123782408765862,0x0,0,0,0,0,,PA-VM,0,0,2023-10-04T09:51:21.211-07:00",
+      "expected": {
+        "@timestamp": "2023-10-04T16:51:21.211Z",
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "observer": {
+          "hostname": "PA-VM",
+          "product": "PAN-OS",
+          "serial_number": "007058000248010",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-VM"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "configuration"
+          ],
+          "code": "general",
+          "kind": "event",
+          "severity": 5,
+          "timezone": "UTC"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Nov 30 16:44:36 PA-220 1,2018/11/30 16:44:36,012801096514,THREAT,url,2049,2018/11/30 16:44:36,192.168.15.224,175.16.199.1,192.168.1.63,175.16.199.1,new_outbound_from_trust,,,ssl,vsys1,trust,untrust,ethernet1/2,ethernet1/1,send_to_mac,2018/11/30 16:44:36,28191,1,52984,443,37679,443,0x403000,tcp,block-url,\"consent.cmp.oath.com/\",(9999),business-and-economy,informational,client-to-server,7726,0x2000000000000000,192.168.0.0-192.168.255.255,United States,0,,0,,,0,,,,,,,,0,0,0,0,0,,PA-220,,,,,0,,0,,N/A,unknown,AppThreat-0-0,0x0,0,4294967295,",
+      "expected": {
+        "@timestamp": "2018-11-30T16:44:36.000+09:30",
+        "destination": {
+          "domain": "consent.cmp.oath.com",
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "nat": {
+            "ip": "175.16.199.1",
+            "port": 443
+          },
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "application": "ssl",
+          "community_id": [
+            "1:uw+iNVMmjYN9VAmQZQDw4+dyarA=",
+            "1:JXH5QeRl6+F+lTj/JOTAPn5Yegk="
+          ],
+          "direction": "inbound",
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "hostname": "PA-220",
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "012801096514",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-220"
+          ],
+          "ip": [
+            "192.168.15.224",
+            "175.16.199.1",
+            "192.168.1.63"
+          ]
+        },
+        "rule": {
+          "name": "new_outbound_from_trust"
+        },
+        "source": {
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.15.224",
+          "nat": {
+            "ip": "192.168.1.63",
+            "port": 37679
+          },
+          "port": 52984
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "consent.cmp.oath.com",
+          "original": "consent.cmp.oath.com/",
+          "path": "/"
+        },
+        "event": {
+          "action": "url_filtering",
+          "category": [
+            "intrusion_detection",
+            "threat",
+            "network"
+          ],
+          "kind": "alert",
+          "outcome": "failure",
+          "severity": 5,
+          "timezone": "+09:30",
+          "type": [
+            "denied"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Nov 30 16:44:36 PA-220 1,2018/11/30 16:44:36,012801096514,THREAT,url,2049,2018/11/30 16:44:36,192.168.15.224,175.16.199.1,192.168.1.63,175.16.199.1,new_outbound_from_trust,,,ssl,vsys1,trust,untrust,ethernet1/2,ethernet1/1,send_to_mac,2018/11/30 16:44:36,28219,1,52983,443,28249,443,0x403000,tcp,block-url,\"consent.cmp.oath.com/\",(9999),business-and-economy,informational,client-to-server,7727,0x2000000000000000,192.168.0.0-192.168.255.255,United States,0,,0,,,0,,,,,,,,0,0,0,0,0,,PA-220,,,,,0,,0,,N/A,unknown,AppThreat-0-0,0x0,0,4294967295,",
+      "expected": {
+        "@timestamp": "2018-11-30T16:44:36.000+09:30",
+        "destination": {
+          "domain": "consent.cmp.oath.com",
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "nat": {
+            "ip": "175.16.199.1",
+            "port": 443
+          },
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "application": "ssl",
+          "community_id": [
+            "1:yRQhf+DxJ0lORwS6v0rca3ifDxU=",
+            "1:k1x5UnaWY0lsTQok3Dy7GeOoceQ="
+          ],
+          "direction": "inbound",
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "hostname": "PA-220",
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "012801096514",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-220"
+          ],
+          "ip": [
+            "192.168.15.224",
+            "175.16.199.1",
+            "192.168.1.63"
+          ]
+        },
+        "rule": {
+          "name": "new_outbound_from_trust"
+        },
+        "source": {
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.15.224",
+          "nat": {
+            "ip": "192.168.1.63",
+            "port": 28249
+          },
+          "port": 52983
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "consent.cmp.oath.com",
+          "original": "consent.cmp.oath.com/",
+          "path": "/"
+        },
+        "event": {
+          "action": "url_filtering",
+          "category": [
+            "intrusion_detection",
+            "threat",
+            "network"
+          ],
+          "kind": "alert",
+          "outcome": "failure",
+          "severity": 5,
+          "timezone": "+09:30",
+          "type": [
+            "denied"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "Nov 30 16:44:36 PA-220 1,2018/11/30 16:44:36,012801096514,THREAT,url,2049,2018/11/30 16:44:36,192.168.15.224,175.16.199.1,192.168.1.63,175.16.199.1,new_outbound_from_trust,,,ssl,vsys1,trust,untrust,ethernet1/2,ethernet1/1,send_to_mac,2018/11/30 16:44:36,27723,1,52986,443,63898,443,0x403000,tcp,block-url,\"consent.cmp.oath.com/\",(9999),business-and-economy,informational,client-to-server,7728,0x2000000000000000,192.168.0.0-192.168.255.255,United States,0,,0,,,0,,,,,,,,0,0,0,0,0,,PA-220,,,,,0,,0,,N/A,unknown,AppThreat-0-0,0x0,0,4294967295,",
+      "expected": {
+        "@timestamp": "2018-11-30T16:44:36.000+09:30",
+        "destination": {
+          "domain": "consent.cmp.oath.com",
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "nat": {
+            "ip": "175.16.199.1",
+            "port": 443
+          },
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "informational"
+        },
+        "network": {
+          "application": "ssl",
+          "community_id": [
+            "1:VzBhECk0ydTWchIzZpKC75545WM=",
+            "1:0uWo9yvlQoQKNnEvuve6Og1LTxk="
+          ],
+          "direction": "inbound",
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "hostname": "PA-220",
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "012801096514",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-220"
+          ],
+          "ip": [
+            "192.168.15.224",
+            "175.16.199.1",
+            "192.168.1.63"
+          ]
+        },
+        "rule": {
+          "name": "new_outbound_from_trust"
+        },
+        "source": {
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.15.224",
+          "nat": {
+            "ip": "192.168.1.63",
+            "port": 63898
+          },
+          "port": 52986
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "url": {
+          "domain": "consent.cmp.oath.com",
+          "original": "consent.cmp.oath.com/",
+          "path": "/"
+        },
+        "event": {
+          "action": "url_filtering",
+          "category": [
+            "intrusion_detection",
+            "threat",
+            "network"
+          ],
+          "kind": "alert",
+          "outcome": "failure",
+          "severity": 5,
+          "timezone": "+09:30",
+          "type": [
+            "denied"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product",
+        "@timestamp"
+      ]
+    },
+    {
+      "line": "1,2021/11/23 00:44:44,1234567890,START,start,2561,2021/11/23 00:44:44,10.0.0.10,175.16.199.1,10.0.0.20,10.0.0.30,rule,,d-user,app,vsys,s-zone,d-zone,inbound,outbound,log,,id,100,9000,9550,9200,9300,0,tcp,action,4,1000,user,src-loc,dst-loc,0,0,0,0,vsys-name,d-name,imsi,imei,1000,1000,1000,10,10,10,10,10,10,20,200,75,50,1000,1000,end,action,2021-11-23T00:44:44.930-08:00,1234567890,rule1,81.2.69.192,100,100,pcap,dug,100,100,2021-11-23T00:44:44.930-08:00,asd,ast,100,app-sc,cat,tech,4,char,con,no,no",
+      "expected": {
+        "@timestamp": "2021-11-23T00:44:44.930-08:00",
+        "destination": {
+          "bytes": 10,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "dst-loc",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "nat": {
+            "ip": "10.0.0.30",
+            "port": 9300
+          },
+          "packets": 10,
+          "port": 9550,
+          "user": {
+            "name": "d-user"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "4"
+        },
+        "network": {
+          "application": "app",
+          "bytes": 10,
+          "community_id": [
+            "1:VVrOTiQYWZY/bBSeyzr0N8fs6F8=",
+            "1:5KHZW10jHj42Rb2i7FFfq4lDEWs="
+          ],
+          "packets": 10,
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "outbound"
+            },
+            "zone": "d-zone"
+          },
+          "hostname": "d-name",
+          "ingress": {
+            "interface": {
+              "name": "inbound"
+            },
+            "zone": "s-zone"
+          },
+          "product": "PAN-OS",
+          "serial_number": "1234567890",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "d-name"
+          ],
+          "ip": [
+            "10.0.0.10",
+            "175.16.199.1",
+            "10.0.0.20",
+            "10.0.0.30",
+            "81.2.69.192"
+          ],
+          "user": [
+            "d-user"
+          ]
+        },
+        "rule": {
+          "name": "rule1",
+          "uuid": "100"
+        },
+        "source": {
+          "bytes": 10,
+          "geo": {
+            "name": "src-loc"
+          },
+          "ip": "10.0.0.10",
+          "nat": {
+            "ip": "10.0.0.20",
+            "port": 9200
+          },
+          "packets": 10,
+          "port": 9000
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "flow_started",
+          "category": [
+            "network"
+          ],
+          "duration": 1234567890000000000,
+          "end": "2061-01-06T00:16:14.930-08:00",
+          "kind": "event",
+          "outcome": "failure",
+          "start": "2021-11-23T00:44:44.930-08:00",
+          "timezone": "-08:00",
+          "type": [
+            "start",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "1,2021/11/23 00:44:44,1234567890,START,start,2561,2021/11/23 00:44:44,10.0.0.10,175.16.199.1,10.0.0.20,10.0.0.30,rule,,d-user,app,vsys,s-zone,d-zone,inbound,outbound,log,,id,100,9000,9550,9200,9300,0,tcp,action,4,1000,user,src-loc,dst-loc,0,0,0,0,vsys-name,d-name,imsi,imei,1000,1000,1000,10,10,10,10,10,10,20,200,75,50,1000,1000,end,action,2021-11-23T00:44:44.930-08:00,1234567890,rule1,81.2.69.192,100,100,pcap,dug,100,100,1969-12-31T16:00:00.000-08:00,asd,ast,100,app-sc,cat,tech,4,char,con,no,no",
+      "expected": {
+        "@timestamp": "2021-11-23T00:44:44.000-08:00",
+        "destination": {
+          "bytes": 10,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "dst-loc",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "nat": {
+            "ip": "10.0.0.30",
+            "port": 9300
+          },
+          "packets": 10,
+          "port": 9550,
+          "user": {
+            "name": "d-user"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "4"
+        },
+        "network": {
+          "application": "app",
+          "bytes": 10,
+          "community_id": [
+            "1:VVrOTiQYWZY/bBSeyzr0N8fs6F8=",
+            "1:5KHZW10jHj42Rb2i7FFfq4lDEWs="
+          ],
+          "packets": 10,
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "outbound"
+            },
+            "zone": "d-zone"
+          },
+          "hostname": "d-name",
+          "ingress": {
+            "interface": {
+              "name": "inbound"
+            },
+            "zone": "s-zone"
+          },
+          "product": "PAN-OS",
+          "serial_number": "1234567890",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "d-name"
+          ],
+          "ip": [
+            "10.0.0.10",
+            "175.16.199.1",
+            "10.0.0.20",
+            "10.0.0.30",
+            "81.2.69.192"
+          ],
+          "user": [
+            "d-user"
+          ]
+        },
+        "rule": {
+          "name": "rule1",
+          "uuid": "100"
+        },
+        "source": {
+          "bytes": 10,
+          "geo": {
+            "name": "src-loc"
+          },
+          "ip": "10.0.0.10",
+          "nat": {
+            "ip": "10.0.0.20",
+            "port": 9200
+          },
+          "packets": 10,
+          "port": 9000
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "flow_started",
+          "category": [
+            "network"
+          ],
+          "duration": 1234567890000000000,
+          "end": "2061-01-06T00:16:14.930-08:00",
+          "kind": "event",
+          "outcome": "failure",
+          "start": "2021-11-23T00:44:44.930-08:00",
+          "timezone": "-08:00",
+          "type": [
+            "start",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 PA-220 1,2018/11/30 16:09:07,012801096514,TRAFFIC,end,2049,2018/11/30 16:09:07,192.168.15.207,175.16.199.1,192.168.1.63,175.16.199.1,new_outbound_from_trust,,,apple-maps,vsys1,trust,untrust,ethernet1/2,ethernet1/1,send_to_mac,2018/11/30 16:09:07,22751,1,55113,443,16418,443,0x400053,tcp,allow,7734,1758,5976,36,2018/11/30 15:59:04,586,computer-and-internet-info,0,32091112,0x0,192.168.0.0-192.168.255.255,United States,0,16,20,tcp-fin,0,0,0,0,,PA-220,from-policy,,,0,,0,,N/A,0,0,0,0",
+      "expected": {
+        "@timestamp": "2018-11-30T16:09:07.000Z",
+        "destination": {
+          "bytes": 5976,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "nat": {
+            "ip": "175.16.199.1",
+            "port": 443
+          },
+          "packets": 20,
+          "port": 443
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "apple-maps",
+          "bytes": 7734,
+          "community_id": [
+            "1:La5Jgm/PJBlaHF8BtgJSyZEmW9E=",
+            "1:sKYRL+yp3SWr5aT5SC1cvyWNnnM="
+          ],
+          "packets": 36,
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "hostname": "PA-220",
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "012801096514",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-220"
+          ],
+          "ip": [
+            "192.168.15.207",
+            "175.16.199.1",
+            "192.168.1.63"
+          ]
+        },
+        "rule": {
+          "name": "new_outbound_from_trust"
+        },
+        "source": {
+          "bytes": 1758,
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.15.207",
+          "nat": {
+            "ip": "192.168.1.63",
+            "port": 16418
+          },
+          "packets": 16,
+          "port": 55113
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "flow_terminated",
+          "category": [
+            "network"
+          ],
+          "duration": 586000000000,
+          "end": "2018-11-30T16:08:50.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2018-11-30T15:59:04.000Z",
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "end",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:10 PA-220 1,2018/11/30 16:09:09,012801096514,TRAFFIC,end,2049,2018/11/30 16:09:09,192.168.15.224,175.16.199.1,192.168.1.63,175.16.199.1,new_outbound_from_trust,,,ping,vsys1,trust,untrust,ethernet1/2,ethernet1/1,send_to_mac,2018/11/30 16:09:09,24223,6,0,0,0,0,0x500019,icmp,allow,1176,588,588,12,2018/11/30 16:08:55,0,any,0,32091113,0x0,192.168.0.0-192.168.255.255,United States,0,6,6,aged-out,0,0,0,0,,PA-220,from-policy,,,0,,0,,N/A,0,0,0,0",
+      "expected": {
+        "@timestamp": "2018-11-30T16:09:09.000Z",
+        "destination": {
+          "bytes": 588,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "nat": {
+            "ip": "175.16.199.1",
+            "port": 0
+          },
+          "packets": 6,
+          "port": 0
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "ping",
+          "bytes": 1176,
+          "packets": 12,
+          "transport": "icmp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "hostname": "PA-220",
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "012801096514",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-220"
+          ],
+          "ip": [
+            "192.168.15.224",
+            "175.16.199.1",
+            "192.168.1.63"
+          ]
+        },
+        "rule": {
+          "name": "new_outbound_from_trust"
+        },
+        "source": {
+          "bytes": 588,
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.15.224",
+          "nat": {
+            "ip": "192.168.1.63",
+            "port": 0
+          },
+          "packets": 6,
+          "port": 0
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "flow_terminated",
+          "category": [
+            "network"
+          ],
+          "duration": 0,
+          "end": "2018-11-30T16:08:55.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2018-11-30T16:08:55.000Z",
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "end",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:10 PA-220 1,2018/11/30 16:09:09,012801096514,TRAFFIC,end,2049,2018/11/30 16:09:09,192.168.15.207,175.16.199.1,192.168.1.63,175.16.199.1,new_outbound_from_trust,,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,send_to_mac,2018/11/30 16:09:09,24138,1,55114,80,51990,80,0x40001c,tcp,allow,1574,539,1035,11,2018/11/30 16:08:51,1,computer-and-internet-info,0,32091114,0x0,192.168.0.0-192.168.255.255,United States,0,6,5,tcp-fin,0,0,0,0,,PA-220,from-policy,,,0,,0,,N/A,0,0,0,0",
+      "expected": {
+        "@timestamp": "2018-11-30T16:09:09.000Z",
+        "destination": {
+          "bytes": 1035,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "United States",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "nat": {
+            "ip": "175.16.199.1",
+            "port": 80
+          },
+          "packets": 5,
+          "port": 80
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "application": "web-browsing",
+          "bytes": 1574,
+          "community_id": [
+            "1:YZ7d7dfaV17GR6zb5Ykfbi10bg8=",
+            "1:JSXHhU7ufIJpIpsd+sxEq1u12as="
+          ],
+          "packets": 11,
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "ethernet1/1"
+            },
+            "zone": "untrust"
+          },
+          "hostname": "PA-220",
+          "ingress": {
+            "interface": {
+              "name": "ethernet1/2"
+            },
+            "zone": "trust"
+          },
+          "product": "PAN-OS",
+          "serial_number": "012801096514",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "PA-220"
+          ],
+          "ip": [
+            "192.168.15.207",
+            "175.16.199.1",
+            "192.168.1.63"
+          ]
+        },
+        "rule": {
+          "name": "new_outbound_from_trust"
+        },
+        "source": {
+          "bytes": 539,
+          "geo": {
+            "name": "192.168.0.0-192.168.255.255"
+          },
+          "ip": "192.168.15.207",
+          "nat": {
+            "ip": "192.168.1.63",
+            "port": 51990
+          },
+          "packets": 6,
+          "port": 55114
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "event": {
+          "action": "flow_terminated",
+          "category": [
+            "network"
+          ],
+          "duration": 1000000000,
+          "end": "2018-11-30T16:08:52.000Z",
+          "kind": "event",
+          "outcome": "success",
+          "start": "2018-11-30T16:08:51.000Z",
+          "timezone": "UTC",
+          "type": [
+            "allowed",
+            "end",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "1,2021/11/23 00:44:44,1234567890,START,start,2561,2021/11/23 00:44:44,10.0.0.10,175.16.199.1,10.0.0.20,10.0.0.30,rule,,d-user,app,vsys,s-zone,d-zone,inbound,outbound,log,,id,100,9000,9550,9200,9300,0,tcp,action,4,1000,user,src-loc,dst-loc,0,0,0,0,vsys-name,d-name,imsi,imei,1000,1000,1000,10,10,10,10,10,10,20,200,75,50,1000,1000,end,action,2021-11-23T00:44:44.930-08:00,1234567890,rule1,81.2.69.192,100,100,pcap,dug,100,100,2021-11-23T00:44:44.930-08:00,asd,ast,100,app-sc,cat,tech,4,char,con,no,no",
+      "expected": {
+        "@timestamp": "2021-11-23T08:44:44.930Z",
+        "destination": {
+          "bytes": 10,
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "name": "dst-loc",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1",
+          "nat": {
+            "ip": "10.0.0.30",
+            "port": 9300
+          },
+          "packets": 10,
+          "port": 9550,
+          "user": {
+            "name": "d-user"
+          }
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "log": {
+          "level": "4"
+        },
+        "network": {
+          "application": "app",
+          "bytes": 10,
+          "community_id": [
+            "1:VVrOTiQYWZY/bBSeyzr0N8fs6F8=",
+            "1:5KHZW10jHj42Rb2i7FFfq4lDEWs="
+          ],
+          "packets": 10,
+          "transport": "tcp",
+          "type": "ipv4"
+        },
+        "observer": {
+          "egress": {
+            "interface": {
+              "name": "outbound"
+            },
+            "zone": "d-zone"
+          },
+          "hostname": "d-name",
+          "ingress": {
+            "interface": {
+              "name": "inbound"
+            },
+            "zone": "s-zone"
+          },
+          "product": "PAN-OS",
+          "serial_number": "1234567890",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "d-name"
+          ],
+          "ip": [
+            "10.0.0.10",
+            "175.16.199.1",
+            "10.0.0.20",
+            "10.0.0.30",
+            "81.2.69.192"
+          ],
+          "user": [
+            "d-user"
+          ]
+        },
+        "rule": {
+          "name": "rule1",
+          "uuid": "100"
+        },
+        "source": {
+          "bytes": 10,
+          "geo": {
+            "name": "src-loc"
+          },
+          "ip": "10.0.0.10",
+          "nat": {
+            "ip": "10.0.0.20",
+            "port": 9200
+          },
+          "packets": 10,
+          "port": 9000
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "action": "flow_started",
+          "category": [
+            "network"
+          ],
+          "duration": 1234567890000000000,
+          "end": "2061-01-06T08:16:14.930Z",
+          "kind": "event",
+          "outcome": "failure",
+          "start": "2021-11-23T08:44:44.930Z",
+          "type": [
+            "start",
+            "connection"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2021/03/24 11:00:49,013101001305,USERID,login,2305,2021/03/24 11:00:49,vsys1,81.2.69.193,domain\\name,,0,1,10800,0,0,<data-source-collected>,<data-source-type>,1252774,0x0,0,0,0,0,,FW01,1,,2021/03/24 11:00:49,1,0x80000000,name",
+      "expected": {
+        "@timestamp": "2021-03-24T11:00:49.000Z",
+        "destination": {
+          "port": 0
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "hostname": "FW01",
+          "product": "PAN-OS",
+          "serial_number": "013101001305",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "FW01"
+          ],
+          "ip": [
+            "81.2.69.193"
+          ],
+          "user": [
+            "name"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.193",
+          "port": 0,
+          "user": {
+            "domain": "domain",
+            "name": "name"
+          }
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "domain": "domain",
+          "name": "name"
+        },
+        "event": {
+          "category": [
+            "network",
+            "iam"
+          ],
+          "code": "0",
+          "kind": "event"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2021/03/24 10:59:45,013101001305,USERID,logout,2305,2021/03/24 10:59:45,vsys1,10.55.18.7,domain\\name,,0,1,0,0,0,<data-source-collected>,<data-source-type>,1252765,0x0,0,0,0,0,,FW01,1,,2021/03/24 10:59:45,1,0x80000000,name",
+      "expected": {
+        "@timestamp": "2021-03-24T10:59:45.000Z",
+        "destination": {
+          "port": 0
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "hostname": "FW01",
+          "product": "PAN-OS",
+          "serial_number": "013101001305",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "hosts": [
+            "FW01"
+          ],
+          "ip": [
+            "10.55.18.7"
+          ],
+          "user": [
+            "name"
+          ]
+        },
+        "source": {
+          "ip": "10.55.18.7",
+          "port": 0,
+          "user": {
+            "domain": "domain",
+            "name": "name"
+          }
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "domain": "domain",
+          "name": "name"
+        },
+        "event": {
+          "category": [
+            "network",
+            "iam"
+          ],
+          "code": "0",
+          "kind": "event"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "Nov 30 16:09:08 1,2013/03/28 12:53:05,001701000225,USERID,login,12,2013/03/28 12:53:05,vsys1,172.17.128.92,plano2008r2\\administrator,test,0,1,2700,0,0,active-directory,unknown,1,0x0",
+      "expected": {
+        "@timestamp": "2013-03-28T12:53:05.000Z",
+        "destination": {
+          "port": 0
+        },
+        "ecs": {
+          "version": "8.17.0"
+        },
+        "network": {
+          "type": "ipv4"
+        },
+        "observer": {
+          "product": "PAN-OS",
+          "serial_number": "001701000225",
+          "type": "firewall",
+          "vendor": "Palo Alto Networks"
+        },
+        "related": {
+          "ip": [
+            "172.17.128.92"
+          ],
+          "user": [
+            "administrator"
+          ]
+        },
+        "source": {
+          "ip": "172.17.128.92",
+          "port": 0,
+          "user": {
+            "domain": "plano2008r2",
+            "name": "administrator"
+          }
+        },
+        "tags": [
+          "preserve_original_event",
+          "preserve_duplicate_custom_fields"
+        ],
+        "user": {
+          "domain": "plano2008r2",
+          "name": "administrator"
+        },
+        "event": {
+          "category": [
+            "network",
+            "iam"
+          ],
+          "code": "0",
+          "kind": "event"
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    }
+  ]
+}

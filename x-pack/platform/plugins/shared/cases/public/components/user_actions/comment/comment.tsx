@@ -19,6 +19,7 @@ import * as i18n from './translations';
 import type { AddedReferences } from './unified_attachment';
 import { createUnifiedAttachmentUserActionBuilder } from './unified_attachment';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
+import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import {
   getReferenceAttachmentId,
   isLegacyAttachmentRequest,
@@ -29,25 +30,52 @@ import {
   toUnifiedAttachmentType,
 } from '../../../../common/utils/attachments';
 
-const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
-
-interface DeleteLabelTitle {
+interface ActivityLabelArgs {
   userAction: SnakeToCamelCase<CommentUserAction>;
   caseData: UserActionBuilderArgs['caseData'];
   unifiedAttachmentTypeRegistry: UserActionBuilderArgs['unifiedAttachmentTypeRegistry'];
 }
 
+const getAttachmentTypeId = ({
+  userAction,
+  caseData,
+}: Pick<ActivityLabelArgs, 'userAction' | 'caseData'>): string => {
+  const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
+  return resolveUnifiedAttachmentType(userAction.payload.comment, owner);
+};
+
+const getUpdateLabelTitle = ({
+  userAction,
+  caseData,
+  unifiedAttachmentTypeRegistry,
+}: ActivityLabelArgs): string => {
+  const { comment } = userAction.payload;
+  const attachmentTypeId = getAttachmentTypeId({ userAction, caseData });
+
+  if (attachmentTypeId === COMMENT_ATTACHMENT_TYPE) {
+    return i18n.EDITED_COMMENT;
+  }
+
+  if (!unifiedAttachmentTypeRegistry.has(attachmentTypeId)) {
+    return i18n.EDITED_ATTACHMENT;
+  }
+
+  const count = Math.max(toStringArray(getReferenceAttachmentId(comment)).length, 1);
+  const countLabel = unifiedAttachmentTypeRegistry.get(attachmentTypeId).getCountLabel?.({ count });
+
+  return countLabel != null ? i18n.EDITED_ATTACHMENTS(countLabel) : i18n.EDITED_ATTACHMENT;
+};
+
 const getDeleteLabelTitle = ({
   userAction,
   caseData,
   unifiedAttachmentTypeRegistry,
-}: DeleteLabelTitle) => {
+}: ActivityLabelArgs) => {
   const { comment } = userAction.payload;
-  const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
   return getDeleteLabelFromRegistry({
     caseData,
     registry: unifiedAttachmentTypeRegistry,
-    getId: () => resolveUnifiedAttachmentType(comment, owner),
+    getId: () => getAttachmentTypeId({ userAction, caseData }),
     getAttachmentProps: () => ({
       savedObjectId: userAction.commentId ?? userAction.id,
       attachmentId: getReferenceAttachmentId(comment),
@@ -272,7 +300,11 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       });
     }
 
-    const label = getUpdateLabelTitle();
+    const label = getUpdateLabelTitle({
+      userAction: attachmentUserAction,
+      caseData,
+      unifiedAttachmentTypeRegistry,
+    });
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       userProfiles,
