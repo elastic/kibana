@@ -7,6 +7,7 @@
 
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { PAGE_SIZE_ESQL_VARIABLE } from './constants';
+import { EPISODE_SOURCE_FILTER_CLASSIC, EPISODE_SOURCE_FILTER_UNIVERSAL } from './episode_source';
 import { buildEpisodesBaseQuery, buildEpisodesQuery } from './episodes_query';
 import { SERIES_ID_EVAL } from './series_id_eval';
 
@@ -424,6 +425,61 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).not.toContain('severity IN');
   });
 
+  const universalSourceWhere = 'source IS NULL OR source == "" OR source == "internal"';
+
+  it('should keep Universal rows when v2 is selected', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { sources: [EPISODE_SOURCE_FILTER_UNIVERSAL] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain(`| WHERE ${universalSourceWhere}`);
+    expect(queryString.indexOf(`| WHERE ${universalSourceWhere}`)).toBeGreaterThan(
+      queryString.indexOf('WHERE @timestamp == last_timestamp')
+    );
+  });
+
+  it('should match connector slugs with source IN', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { sources: ['zabbix', 'datadog'] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('| WHERE source IN ("zabbix", "datadog")');
+    expect(queryString).not.toContain(`| WHERE ${universalSourceWhere}`);
+  });
+
+  it('should exclude all v2 rows when only Classic is selected', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      { sources: [EPISODE_SOURCE_FILTER_CLASSIC] }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain('WHERE FALSE');
+    expect(queryString).not.toContain('| WHERE source IN');
+    expect(queryString).not.toContain(`| WHERE ${universalSourceWhere}`);
+  });
+
+  it('should OR Universal with connectors and ignore Classic on the v2 query', () => {
+    const query = buildEpisodesQuery(
+      SPACE_ID,
+      { sortField: '@timestamp', sortDirection: 'desc' },
+      {
+        sources: [EPISODE_SOURCE_FILTER_CLASSIC, EPISODE_SOURCE_FILTER_UNIVERSAL, 'zabbix'],
+      }
+    );
+    const queryString = query.print('basic');
+
+    expect(queryString).toContain(`| WHERE ${universalSourceWhere} OR (source IN ("zabbix"))`);
+    expect(queryString).not.toContain('WHERE FALSE');
+  });
+
   it('should trim queryString before applying', () => {
     const query = buildEpisodesQuery(
       SPACE_ID,
@@ -446,6 +502,7 @@ describe('buildEpisodesQuery', () => {
         groupHash: null,
         tags: null,
         severity: null,
+        sources: null,
       }
     );
     const queryString = query.print('basic');
@@ -455,6 +512,8 @@ describe('buildEpisodesQuery', () => {
     expect(queryString).not.toContain('WHERE rule.id ==');
     expect(queryString).not.toContain('WHERE group_hash ==');
     expect(queryString).not.toContain('MV_CONTAINS(last_tags');
+    expect(queryString).not.toMatch(/\| WHERE source/);
+    expect(queryString).not.toContain('WHERE FALSE');
   });
 
   it('should not apply queryString filter when it is empty or whitespace', () => {

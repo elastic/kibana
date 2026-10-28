@@ -22,6 +22,11 @@ import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
 } from './episode_severity';
+import {
+  EPISODE_SOURCE_FILTER_UNIVERSAL,
+  NATIVE_EPISODE_SOURCE,
+  isConnectorEpisodeSource,
+} from './episode_source';
 import { convertKqlToEsqlExpression } from './kql_to_esql';
 import { SERIES_ID_EVAL } from './series_id_eval';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
@@ -206,11 +211,36 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
   query.pipe(`WHERE ${parts.join(' OR ')}`);
 };
 
+/** Native Universal rows: no connector `source` on the latest episode event. */
+const UNIVERSAL_SOURCE_PREDICATE = `source IS NULL OR source == "" OR source == ${escapeStringValue(
+  NATIVE_EPISODE_SOURCE
+)}`;
+
+const addSourceFilter = (query: ComposerQuery, sources: string[]) => {
+  const parts: string[] = [];
+  if (sources.includes(EPISODE_SOURCE_FILTER_UNIVERSAL)) {
+    parts.push(UNIVERSAL_SOURCE_PREDICATE);
+  }
+  const connectors = [...new Set(sources.filter(isConnectorEpisodeSource))];
+  if (connectors.length) {
+    const inList = connectors.map((source) => escapeStringValue(source)).join(', ');
+    parts.push(`source IN (${inList})`);
+  }
+  if (!parts.length) {
+    // Classic-only, or no value the v2 documents can match — exclude all v2 rows
+    query.pipe('WHERE false');
+    return;
+  }
+  query.pipe(`WHERE ${parts.join(' OR ')}`);
+};
+
 /**
  * Applies the filters that must run after the aggregations: they either read
  * columns the aggregations compute (tags, severity, assignee) or must only
- * narrow the aggregated rows (status and queryString). `ruleId` and `groupHash`
- * are applied before the aggregations by `buildEpisodesBaseQuery` instead.
+ * narrow the aggregated rows (status, source, and queryString). `source` is read
+ * from the latest episode row, which survives `WHERE @timestamp == last_timestamp`.
+ * `ruleId` and `groupHash` are applied before the aggregations by
+ * `buildEpisodesBaseQuery` instead.
  */
 export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
   const trimmedSearch = filterState.queryString?.trim();
@@ -228,6 +258,9 @@ export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilt
   }
   if (filterState.assigneeUid) {
     query.where`last_assignee_uid == ${filterState.assigneeUid}`;
+  }
+  if (filterState.sources?.length) {
+    addSourceFilter(query, filterState.sources);
   }
 };
 
