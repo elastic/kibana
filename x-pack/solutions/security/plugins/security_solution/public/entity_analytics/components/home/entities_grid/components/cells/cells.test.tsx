@@ -38,12 +38,19 @@ describe('DefaultCell', () => {
 });
 
 describe('RiskScoreChangeCell', () => {
-  it.each([
-    ['no value', undefined],
-    ['zero', 0],
-  ])('renders a dash for %s', (_, value) => {
-    const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
+  it('renders a dash for no value', () => {
+    const { container } = renderInProviders(<RiskScoreChangeCell value={undefined} />);
     expect(container.textContent).toBe('—');
+  });
+
+  it.each([
+    ['zero', 0],
+    ['a rise that rounds to zero', 0.4],
+    ['a drop that rounds to zero', -0.4],
+  ])('renders a neutral 0 without an arrow for %s', (_, value) => {
+    const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
+    expect(container.textContent).toBe('0');
+    expect(container.querySelector('[data-euiicon-type]')).not.toBeInTheDocument();
   });
 
   it.each([
