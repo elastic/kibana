@@ -6,6 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import pLimit from 'p-limit';
 import { v4 as uuidv4 } from 'uuid';
 import type {
@@ -57,6 +58,8 @@ import {
   sourceIdsQuerySchema,
 } from '../../../utils/resolve_source_ids';
 import { listAllSources } from '../../../utils/list_all_sources';
+import { getLiveEntities } from '../../../../lib/significant_events/entities/get_live_entities';
+import { filterQueryLinksByEntity } from '../../../../lib/significant_events/entities/filter_query_links_by_entity';
 import type { PersistQueriesResult } from '../../../../lib/significant_events/persist_queries';
 import { persistQueries } from '../../../../lib/significant_events/persist_queries';
 import { queryFromLink } from '../../../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
@@ -464,6 +467,20 @@ const getDiscoveryQueriesRoute = createServerRoute({
         ])
         .optional()
         .describe('Only return queries with these ids'),
+      entityIds: z
+        .union([
+          z
+            .string()
+            .min(1)
+            .max(MAX_ID_LENGTH)
+            .transform((id) => [id]),
+          z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
+        ])
+        .optional()
+        .describe('Only return queries linked to these entity slugs'),
+      unassignedEntities: BooleanFromString.optional().describe(
+        'Also return queries linked to no live entity'
+      ),
     }),
   }),
   options: {
@@ -501,6 +518,8 @@ const getDiscoveryQueriesRoute = createServerRoute({
       status,
       searchMode,
       queryIds,
+      entityIds,
+      unassignedEntities,
     } = params.query;
     assertValidDateRange(from, to);
 
@@ -514,14 +533,18 @@ const getDiscoveryQueriesRoute = createServerRoute({
       scopedClients.getKnowledgeIndicatorClient(),
       scopedClients.getSignificantEventsAlertingContext(),
     ]);
-    const queryLinks = await fetchQueryLinks(
-      {
-        sourceIds,
-        query,
-        filters: { ruleUnbacked: toRuleUnbackedFilter(status), queryIds },
-        searchMode,
-      },
-      kiClient
+    const queryLinks = await filterQueryLinksByEntity(
+      await fetchQueryLinks(
+        {
+          sourceIds,
+          query,
+          filters: { ruleUnbacked: toRuleUnbackedFilter(status), queryIds },
+          searchMode,
+        },
+        kiClient
+      ),
+      { entityIds, unassignedEntities },
+      () => getLiveEntities(kiClient, sourceIds)
     );
 
     // Paginate links first, then fetch occurrences for the page's rules only —

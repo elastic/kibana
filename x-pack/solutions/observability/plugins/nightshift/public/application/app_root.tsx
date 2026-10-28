@@ -11,6 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
+import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { NightshiftPage } from '../nightshift_page';
 import type { NightshiftStartDependencies } from '../types';
@@ -40,7 +41,18 @@ export function AppRoot({
   return (
     <KibanaContextProvider services={services}>
       <Router history={history}>
-        <RedirectAppLinks coreStart={coreStart} data-test-subj="nightshiftMainContainer">
+        <RedirectAppLinks
+          coreStart={coreStart}
+          data-test-subj="nightshiftMainContainer"
+          css={css`
+            display: flex;
+            flex: 1 1 0;
+            flex-flow: column nowrap;
+            height: 100%;
+            min-height: 0;
+            width: 100%;
+          `}
+        >
           <PerformanceContextProvider>
             <QueryClientProvider client={queryClient}>
               <NightshiftPage />

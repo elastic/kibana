@@ -191,6 +191,32 @@ export type ChatCompleteOptions = {
 } & ToolOptions;
 
 /**
+ * Options used to call the {@link FeatureChatCompleteAPI}.
+ *
+ * The model, `temperature` and `reasoning` come from the feature's configured endpoints,
+ * so they cannot be passed.
+ */
+export type FeatureChatCompleteOptions = Omit<
+  ChatCompleteOptions,
+  'connectorId' | 'temperature' | 'reasoning'
+> & {
+  /**
+   * The ID of a `chat_completion` feature registered with the inference feature registry.
+   */
+  featureId: string;
+  connectorId?: never;
+  temperature?: never;
+  reasoning?: never;
+};
+
+/**
+ * Calls the {@link ChatCompleteAPI} with the top model and parameters configured for a feature.
+ */
+export type FeatureChatCompleteAPI = <TOptions extends FeatureChatCompleteOptions>(
+  options: TOptions
+) => ChatCompleteCompositeResponse<Overwrite<DefaultChatCompleteOptions, TOptions>>;
+
+/**
  * Cache-control directive for EIS prompt caching.
  */
 export interface ChatCompleteCacheControl {
