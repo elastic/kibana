@@ -352,7 +352,7 @@ export const AiIndexDetailPage = () => {
   ) : (
     <Routes>
       <Route path={CONTEXT_ENGINE_PATHS.detailSources} exact>
-        {aiIndex ? sourcesPanel : null}
+        {sourcesPanel}
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators} exact>
         {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}

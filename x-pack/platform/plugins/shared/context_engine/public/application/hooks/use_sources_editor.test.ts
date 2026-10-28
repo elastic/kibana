@@ -136,6 +136,57 @@ describe('useSourcesEditor', () => {
     expect(result.current.hasChanges).toBe(false);
   });
 
+  it('resyncs a pristine draft when a background refetch changes the persisted sources', () => {
+    const { result, rerender } = renderEditor();
+
+    rerender({
+      aiIndex: { ...aiIndex, sources: [{ type: 'esql', value: 'FROM elsewhere' }] },
+    });
+
+    expect(result.current.selectedSources).toEqual([
+      { type: 'esql', id: 'FROM elsewhere', label: 'FROM elsewhere', value: 'FROM elsewhere' },
+    ]);
+    expect(result.current.hasChanges).toBe(false);
+  });
+
+  it('keeps unsaved edits when a background refetch changes the persisted sources', () => {
+    const { result, rerender } = renderEditor();
+
+    act(() =>
+      result.current.setSelectedSources([
+        { type: 'esql', id: 'FROM mine', label: 'FROM mine', value: 'FROM mine' },
+      ])
+    );
+
+    rerender({
+      aiIndex: { ...aiIndex, sources: [{ type: 'esql', value: 'FROM elsewhere' }] },
+    });
+
+    expect(result.current.selectedSources).toEqual([
+      { type: 'esql', id: 'FROM mine', label: 'FROM mine', value: 'FROM mine' },
+    ]);
+    expect(result.current.hasChanges).toBe(true);
+  });
+
+  it('does not revert to stale sources on the re-render right after a successful save', async () => {
+    const { result } = renderEditor();
+
+    act(() =>
+      result.current.setSelectedSources([
+        { type: 'esql', id: 'FROM other', label: 'FROM other', value: 'FROM other' },
+      ])
+    );
+
+    await act(async () => {
+      await result.current.save();
+    });
+
+    expect(result.current.selectedSources).toEqual([
+      { type: 'esql', id: 'FROM other', label: 'FROM other', value: 'FROM other' },
+    ]);
+    expect(result.current.hasChanges).toBe(false);
+  });
+
   it('does not clear a newer draft when a stale save resolves', async () => {
     let resolveSave: (value: boolean) => void = () => {};
     mockSaveSources.mockReturnValueOnce(

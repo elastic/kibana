@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
+import type { AiIndexSource, GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import type { SelectedSource } from '../components/source_picker';
 import { areSourceSelectionsEqual, toSelectedSources } from '../utils/sources';
 import { useSaveAiIndexSources } from './use_save_ai_index_sources';
@@ -27,6 +27,8 @@ export interface SourcesEditorEditingControls {
 
 interface Draft {
   aiIndexId: string;
+  /** The `aiIndex.sources` array this draft was last synced against, compared by reference. */
+  persistedSources: AiIndexSource[];
   initialSources: SelectedSource[];
   selectedSources: SelectedSource[];
 }
@@ -46,9 +48,23 @@ export const useSourcesEditor = ({
     if (draft !== undefined) {
       setDraft(undefined);
     }
-  } else if (draft?.aiIndexId !== aiIndex.id) {
-    const initialSources = toSelectedSources(aiIndex.sources);
-    setDraft({ aiIndexId: aiIndex.id, initialSources, selectedSources: initialSources });
+  } else {
+    const isDifferentIndex = draft?.aiIndexId !== aiIndex.id;
+    // Reference check, not content: avoids reverting to stale sources on the re-render right after save.
+    const isStaleFetch = draft?.persistedSources !== aiIndex.sources;
+    const isUnedited =
+      draft !== undefined && areSourceSelectionsEqual(draft.selectedSources, draft.initialSources);
+
+    // Never resync over unsaved edits.
+    if (isDifferentIndex || (isStaleFetch && isUnedited)) {
+      const initialSources = toSelectedSources(aiIndex.sources);
+      setDraft({
+        aiIndexId: aiIndex.id,
+        persistedSources: aiIndex.sources,
+        initialSources,
+        selectedSources: initialSources,
+      });
+    }
   }
 
   const cancel = useCallback(() => {
