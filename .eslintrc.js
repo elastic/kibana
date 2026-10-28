@@ -430,12 +430,10 @@ module.exports = {
         // rely on typescript
         'no-undef': 'off',
         'react/boolean-prop-naming': 'error',
-        'react/display-name': 'error',
         'react/no-deprecated': 'error',
         'react/no-typos': 'error',
         'react/no-unused-prop-types': 'error',
         'react/sort-default-props': 'error',
-        'react/jsx-no-literals': 'error',
         'require-atomic-updates': 'error',
       },
       overrides: [
@@ -457,6 +455,8 @@ module.exports = {
     {
       files: ['x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}'],
       excludedFiles: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
+      // Stays in ESLint: with `ignoreTranspilerName`, oxlint's `react/display-name` also flags
+      // `React.memo(Component)` when `Component` already sets `displayName`.
       rules: {
         'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
@@ -487,12 +487,10 @@ module.exports = {
       },
       rules: {
         'react/boolean-prop-naming': 'error',
-        'react/display-name': 'error',
         'react/no-deprecated': 'error',
         'react/no-typos': 'error',
         'react/no-unused-prop-types': 'error',
         'react/sort-default-props': 'error',
-        'react/jsx-no-literals': 'error',
       },
     },
     {
@@ -531,8 +529,6 @@ module.exports = {
       files: ['x-pack/solutions/security/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}'],
       plugins: ['react-perf'],
       rules: {
-        'react-perf/jsx-no-new-object-as-prop': 'error',
-        'react-perf/jsx-no-new-array-as-prop': 'error',
         'react/jsx-no-bind': 'error',
       },
     },
@@ -722,7 +718,6 @@ module.exports = {
           },
         ],
         // Rules from `eslint:recommended` and `plugin:react/recommended` that don't run in oxlint.
-        'react/display-name': 'error',
         'react/no-deprecated': 'error',
       },
     },
@@ -734,8 +729,6 @@ module.exports = {
       files: ['x-pack/platform/plugins/shared/osquery/public/**/!(*.test).{js,mjs,ts,tsx}'],
       plugins: ['react', 'react-perf'],
       rules: {
-        'react-perf/jsx-no-new-object-as-prop': 'error',
-        'react-perf/jsx-no-new-array-as-prop': 'error',
         'react/jsx-no-bind': 'error',
       },
     },
@@ -840,12 +833,10 @@ module.exports = {
         // rely on typescript
         'no-undef': 'off',
         'react/boolean-prop-naming': 'error',
-        'react/display-name': 'error',
         'react/no-deprecated': 'error',
         'react/no-typos': 'error',
         'react/no-unused-prop-types': 'error',
         'react/sort-default-props': 'error',
-        'react/jsx-no-literals': 'error',
         'require-atomic-updates': 'error',
         'import/order': [
           // This rule sorts import declarations

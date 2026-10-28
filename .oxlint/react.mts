@@ -73,6 +73,8 @@ const strictReactRules: DummyRuleMap = {
   'react/jsx-no-comment-textnodes': 'error',
   'react/jsx-no-target-blank': 'error',
   'react/jsx-fragments': 'error',
+  'react/display-name': 'error',
+  'react/jsx-no-literals': 'error',
 };
 
 export const reactOverrides: OxlintOverride[] = [
@@ -133,6 +135,15 @@ export const reactOverrides: OxlintOverride[] = [
     rules: strictReactRules,
   },
   {
+    // Cases runs `display-name` with `ignoreTranspilerName` in ESLint. Oxlint's version also flags
+    // `React.memo(Component)` when `Component` already sets `displayName` (166 reports here).
+    files: ['x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}'],
+    excludeFiles: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.{ts,tsx}'],
+    rules: {
+      'react/display-name': 'off',
+    },
+  },
+  {
     files: [
       'x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}',
       'x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}',
@@ -180,6 +191,7 @@ export const reactOverrides: OxlintOverride[] = [
       'react/no-render-return-value': 'error',
       'react/no-string-refs': 'error',
       'react/require-render-return': 'error',
+      'react/display-name': 'error',
     },
   },
 ];

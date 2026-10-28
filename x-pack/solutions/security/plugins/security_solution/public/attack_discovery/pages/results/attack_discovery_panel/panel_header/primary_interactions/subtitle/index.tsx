@@ -59,7 +59,7 @@ const SubtitleComponent: React.FC<Props> = ({ attackDiscovery }) => {
       data-test-subj="subtitle"
     >
       <span data-test-subj="timestamp">{formattedTimestamp}</span>
-      &nbsp;&nbsp;
+      {'\u00a0\u00a0'}
       <span data-test-subj="createdBy">{createdBy}</span>
     </EuiText>
   ) : null;

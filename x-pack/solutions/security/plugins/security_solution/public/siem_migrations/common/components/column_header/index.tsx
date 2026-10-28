@@ -21,7 +21,7 @@ export const TableHeader: React.FC<TableHeaderProps> = React.memo(
       <EuiToolTip content={tooltipContent}>
         <div id={id} tabIndex={0}>
           {title}
-          &nbsp;
+          {'\u00a0'}
           <EuiIcon
             size="s"
             type="question"

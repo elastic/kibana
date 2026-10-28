@@ -25,11 +25,12 @@ interface RenderWithProvidersOptions extends Omit<RenderOptions, 'wrapper'> {
 
 export const renderWithProviders = (
   ui: React.ReactElement,
-  options?: RenderWithProvidersOptions
-): RenderResult => {
-  const { experimentalFeatures = allowedExperimentalValues, ...renderOptions } = options ?? {};
-
-  return render(ui, {
+  {
+    experimentalFeatures = allowedExperimentalValues,
+    ...renderOptions
+  }: RenderWithProvidersOptions = {}
+): RenderResult =>
+  render(ui, {
     wrapper: ({ children }) => (
       <EuiProvider>
         <ExperimentalFeaturesProvider value={experimentalFeatures}>
@@ -39,4 +40,3 @@ export const renderWithProviders = (
     ),
     ...renderOptions,
   });
-};

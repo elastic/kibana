@@ -67,7 +67,7 @@ export const ConnectorField = React.memo<ConnectorFieldProps>(function Connector
         dropdownDisplay: (
           <EuiTextColor color="accent">
             <EuiIcon type="plusCircle" size="s" aria-hidden={true} />
-            &nbsp;
+            {'\u00a0'}
             {createNewLabel}
           </EuiTextColor>
         ),
