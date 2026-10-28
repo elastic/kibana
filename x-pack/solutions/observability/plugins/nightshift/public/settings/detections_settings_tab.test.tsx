@@ -404,7 +404,7 @@ describe('DetectionsSettingsTab', () => {
   it('uses the defaults when the stored tuning configuration is invalid', () => {
     setup({
       isDeveloperMode: true,
-      tuningConfig: JSON.stringify({ sample_size: 999 }),
+      tuningConfig: JSON.stringify({ rrf_rank_constant: 999 }),
     });
 
     fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
@@ -419,7 +419,7 @@ describe('DetectionsSettingsTab', () => {
     fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
 
     fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
-      target: { value: 'sample_size: 99' },
+      target: { value: 'rrf_rank_constant: 10' },
     });
 
     expect(
@@ -443,7 +443,7 @@ describe('DetectionsSettingsTab', () => {
       .value;
 
     fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
-      target: { value: 'sample_size: 99' },
+      target: { value: 'rrf_rank_constant: 10' },
     });
     fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
@@ -459,7 +459,7 @@ describe('DetectionsSettingsTab', () => {
       .value;
 
     fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
-      target: { value: 'sample_size: 99' },
+      target: { value: 'rrf_rank_constant: 10' },
     });
     expect(screen.getByTestId('streams-settings-tuning-editor')).not.toHaveValue(savedYaml);
     expect(
@@ -505,7 +505,7 @@ describe('DetectionsSettingsTab', () => {
     fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
 
     fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
-      target: { value: 'sample_size: 99' },
+      target: { value: 'rrf_rank_constant: 10' },
     });
 
     mockUseDeveloperMode.mockReturnValue({
@@ -531,7 +531,9 @@ describe('DetectionsSettingsTab', () => {
     );
 
     fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
-    expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue('sample_size: 99');
+    expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue(
+      'rrf_rank_constant: 10'
+    );
   });
 
   it('keeps advanced schedule fields collapsed until requested', () => {
