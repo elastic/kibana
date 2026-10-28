@@ -3592,8 +3592,8 @@ describe('Attack Discovery worker chain', () => {
 
     describe('managed versions', () => {
       // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
-      it('bumps the runner to version 11 for the 12h generation budget', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(11);
+      it('bumps the runner to version 12 so the billable flag reconciles', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(12);
       });
 
       it('continues when fingerprint matching fails', () => {
@@ -3610,8 +3610,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the review to version 14 so a built-in account link has its own note', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(14);
+      it('bumps the review to version 15 so the billable flag reconciles', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(15);
       });
     });
 
@@ -3754,8 +3754,8 @@ describe('Attack Discovery worker chain', () => {
         );
       });
 
-      it('bumps the attach workflow to version 5 so the wait covers the in-flight window', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(5);
+      it('bumps the attach workflow to version 6 so the billable flag reconciles', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW.version).toBe(6);
       });
 
       it('acknowledges the open alerts it tags', () => {
