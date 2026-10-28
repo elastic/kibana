@@ -13,8 +13,7 @@ import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { CUSTOM_ROLES, test } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/272033
-test.describe.skip('Stack Management — ingest, security, and stack sections', () => {
+test.describe('Stack Management — ingest, security, and stack sections', () => {
   test(
     'logstash_read_user sees only the ingest section with pipelines',
     { tag: tags.stateful.classic },
