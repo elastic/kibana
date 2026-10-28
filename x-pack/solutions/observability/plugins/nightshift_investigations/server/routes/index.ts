@@ -38,6 +38,11 @@ import { getMemoryPageRoute } from './get_memory_page';
 import { archiveMemoryPageRoute } from './archive_memory_page';
 import { deleteMemoryPageRoute } from './delete_memory_page';
 import { getMemoryLineageRoute } from './get_memory_lineage';
+import {
+  disableInvestigatorServiceAccountRoute,
+  enableInvestigatorServiceAccountRoute,
+  getInvestigatorServiceAccountRoute,
+} from './investigator_service_account';
 import { previewKnowledgePurgeRoute, purgeKnowledgeRoute } from './purge_knowledge';
 
 export const nightshiftInvestigationsRouteRepository = {
@@ -73,6 +78,9 @@ export const nightshiftInvestigationsRouteRepository = {
   ...archiveMemoryPageRoute,
   ...deleteMemoryPageRoute,
   ...getMemoryLineageRoute,
+  ...getInvestigatorServiceAccountRoute,
+  ...enableInvestigatorServiceAccountRoute,
+  ...disableInvestigatorServiceAccountRoute,
   ...previewKnowledgePurgeRoute,
   ...purgeKnowledgeRoute,
 };
