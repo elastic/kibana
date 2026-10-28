@@ -21,12 +21,16 @@ import {
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
 } from '@kbn/deeplinks-observability';
+import { ES_QUERY_ID } from '@kbn/rule-data-utils';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import type { ObservabilityAlertingCases } from '../types';
 import {
   ADD_TO_CASE_EPISODE_ACTION_ID,
   closeAddToCaseModal,
 } from '@kbn/alerting-v2-episodes-ui/actions';
 import { INVESTIGATE_EPISODE_ACTION_ID } from '../actions/investigate_episode_action';
+import { getMigrateClassicRulePrompt } from '../actions/use_classic_rule_migration';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
@@ -176,7 +180,8 @@ const MockPageTemplate = ({
 const renderAt = (
   pathname: string,
   capabilities?: Capabilities,
-  cases?: ObservabilityAlertingCases
+  cases?: ObservabilityAlertingCases,
+  agentBuilder?: AgentBuilderPluginStart
 ) => {
   const coreStart = coreMock.createStart();
   if (capabilities) {
@@ -191,6 +196,7 @@ const renderAt = (
         alertingVTwo={mockAlertingVTwo}
         triggersActionsUi={mockTriggersActionsUi}
         cases={cases}
+        agentBuilder={agentBuilder}
         ObservabilityPageTemplate={MockPageTemplate}
         history={history}
         setBreadcrumbs={jest.fn()}
@@ -327,6 +333,50 @@ describe('ObservabilityAlertingApp', () => {
       expect.objectContaining({
         showClassicBadge: true,
       })
+    );
+  });
+
+  it('passes a rule migration that opens the migration skill in Agent Builder', async () => {
+    const agentBuilder = agentBuilderMocks.createStart();
+    renderAt(
+      OBSERVABILITY_ALERTING_RULES_V1_PATH,
+      { ...mixedRulesCapabilities, agentBuilder: { show: true } },
+      undefined,
+      agentBuilder
+    );
+
+    await waitFor(() => {
+      expect(mockTriggersActionsUi.getClassicRulesPage).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          ruleMigration: expect.objectContaining({ ruleTypeIds: [ES_QUERY_ID] }),
+        })
+      );
+    });
+
+    mockTriggersActionsUi.getClassicRulesPage.mock.calls
+      .at(-1)?.[0]
+      .ruleMigration?.onMigrate('rule-1');
+
+    expect(agentBuilder.openChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        newConversation: true,
+        initialMessage: getMigrateClassicRulePrompt('rule-1'),
+        autoSendInitialMessage: true,
+      })
+    );
+  });
+
+  it('omits the rule migration when the agentBuilder plugin is unavailable', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_RULES_V1_PATH, {
+      ...mixedRulesCapabilities,
+      agentBuilder: { show: true },
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('classicRulesPage')).toBeInTheDocument();
+    });
+    expect(mockTriggersActionsUi.getClassicRulesPage.mock.calls.at(-1)?.[0].ruleMigration).toBe(
+      undefined
     );
   });
 

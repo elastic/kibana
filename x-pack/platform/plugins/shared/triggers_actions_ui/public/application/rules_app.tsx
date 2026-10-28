@@ -53,6 +53,7 @@ import type { AppHeaderTab } from '@kbn/app-header';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { Section } from './constants';
+import type { ClassicRuleMigration } from './classic_rules_page';
 import { legacyRouteToRuleDetails, routeToConnectors, legacyRouteToAlerts } from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
@@ -105,6 +106,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   hideListBackButton?: boolean;
   host?: LocatorHost;
   showClassicBadge?: boolean;
+  ruleMigration?: ClassicRuleMigration;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

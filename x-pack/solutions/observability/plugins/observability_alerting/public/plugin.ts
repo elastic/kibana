@@ -87,6 +87,7 @@ export class ObservabilityAlertingPlugin
             kibanaServices: { ...coreStart, ...depsStart, storage: new Storage(localStorage) },
           },
           observabilityShared: depsStart.observabilityShared,
+          agentBuilder: depsStart.agentBuilder,
           params,
         });
       },

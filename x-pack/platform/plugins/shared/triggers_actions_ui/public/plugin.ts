@@ -116,7 +116,7 @@ import type {
   ClassicRulesPageProps,
 } from './application/classic_rules_page';
 
-export type { ClassicRulesPageProps } from './application/classic_rules_page';
+export type { ClassicRuleMigration, ClassicRulesPageProps } from './application/classic_rules_page';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;

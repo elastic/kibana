@@ -469,4 +469,50 @@ describe('CollapsedItemActions', () => {
       expect(onCloneRule).toHaveBeenCalled();
     });
   });
+
+  describe('rule migration', () => {
+    const kibanaServices = jest.mocked(useKibana)().services;
+    const onMigrate = jest.fn();
+
+    beforeAll(async () => {
+      await setup();
+    });
+
+    afterEach(() => {
+      delete kibanaServices.ruleMigration;
+      jest.clearAllMocks();
+    });
+
+    test('does not render the migrate action when the host provides no migration', async () => {
+      render(<CollapsedItemActions {...getPropsWithRule()} />);
+
+      await userEvent.click(screen.getByTestId('selectActionButton'));
+      await waitForEuiPopoverOpen();
+
+      expect(screen.queryByTestId('migrateRule')).not.toBeInTheDocument();
+    });
+
+    test('does not render the migrate action for other rule types', async () => {
+      kibanaServices.ruleMigration = { ruleTypeIds: ['.es-query'], onMigrate };
+      render(<CollapsedItemActions {...getPropsWithRule()} />);
+
+      await userEvent.click(screen.getByTestId('selectActionButton'));
+      await waitForEuiPopoverOpen();
+
+      expect(screen.queryByTestId('migrateRule')).not.toBeInTheDocument();
+    });
+
+    test('calls onMigrate with the rule id when migrate is clicked', async () => {
+      kibanaServices.ruleMigration = { ruleTypeIds: ['.es-query'], onMigrate };
+      render(<CollapsedItemActions {...getPropsWithRule({ ruleTypeId: '.es-query' })} />);
+
+      await userEvent.click(screen.getByTestId('selectActionButton'));
+      await waitForEuiPopoverOpen();
+
+      const migrateBtn = screen.getByTestId('migrateRule');
+      expect(migrateBtn).toHaveTextContent('Migrate rule');
+      await userEvent.click(migrateBtn);
+      expect(onMigrate).toHaveBeenCalledWith('1');
+    });
+  });
 });

@@ -15,6 +15,13 @@ import type { LocatorHost } from '@kbn/rule-data-utils';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { TriggersAndActionsUiServices } from './rules_app';
 
+/** Host-provided migration for classic rules, shown as a "Migrate rule" row action. */
+export interface ClassicRuleMigration {
+  /** Rule types that show the action. */
+  ruleTypeIds: readonly string[];
+  onMigrate: (ruleId: string) => void;
+}
+
 export interface ClassicRulesPageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
@@ -27,6 +34,8 @@ export interface ClassicRulesPageProps {
   tabs?: AppHeaderTab[];
   /** When true, Classic surfaces render the Classic badge. */
   showClassicBadge?: boolean;
+  /** When set, matching rules show a "Migrate rule" row action. */
+  ruleMigration?: ClassicRuleMigration;
 }
 
 export type ClassicRulesPagePluginsStart = Pick<

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -27,6 +28,7 @@ export interface ObservabilityAlertingStartDependencies {
   cases?: CasesPublicStart;
   security?: SecurityPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */

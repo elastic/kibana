@@ -34,6 +34,8 @@ dependsOn:
   - '@kbn/cases-plugin'
   - '@kbn/security-plugin'
   - '@kbn/kibana-utils-plugin'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-plugin'
 tags:
   - plugin
   - prod
