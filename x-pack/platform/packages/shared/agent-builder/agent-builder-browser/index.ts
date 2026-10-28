@@ -58,7 +58,9 @@ export type {
   ChatUiEventsContract,
   BrowserChatEvent,
   ActiveConversation,
+  ApiStateChangesOptions,
 } from './events';
+export { filterApiStateChanges } from './events';
 export { WorkflowComboBox } from './workflow_combo_box';
 export type { WorkflowComboBoxProps, WorkflowComboBoxOption } from './workflow_combo_box';
 export {

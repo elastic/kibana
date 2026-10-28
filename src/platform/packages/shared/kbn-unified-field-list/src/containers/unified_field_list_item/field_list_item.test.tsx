@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UnifiedFieldListItemProps } from './field_list_item';
+import type {
+  UnifiedFieldListItemProps,
+  UnifiedFieldListItemReorderGroup,
+} from './field_list_item';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { createStateService } from '../services/state_service';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { EuiThemeProvider } from '@elastic/eui';
+import { ReorderProvider, RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { getServicesMock } from '../../../__mocks__/services.mock';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { UnifiedFieldListItem } from './field_list_item';
 
@@ -100,6 +104,71 @@ const renderComponent = async ({
   );
 
   return { field: finalField, props, user };
+};
+
+// DataTransfer is not implemented in jsdom
+const dataTransfer = {
+  setData: jest.fn(),
+  getData: jest.fn(),
+};
+
+const createKeywordField = (name: string) =>
+  new DataViewField({
+    aggregatable: true,
+    esTypes: ['keyword'],
+    name,
+    searchable: true,
+    type: 'string',
+  });
+
+const renderReorderableItems = () => {
+  const fields = [createKeywordField('extension'), createKeywordField('machine.os')];
+  const reorderGroup: UnifiedFieldListItemReorderGroup = {
+    items: fields.map((field) => ({ id: field.name })),
+    itemGap: 2,
+    label: 'Selected fields',
+    onReorder: jest.fn(),
+  };
+
+  const dataView = stubDataView;
+  dataView.toSpec = () => ({});
+
+  const user = userEvent.setup();
+
+  renderWithKibanaRenderContext(
+    <EuiThemeProvider>
+      <RootDragDropProvider>
+        <ReorderProvider>
+          <ul>
+            {fields.map((field, itemIndex) => (
+              <li key={field.name}>
+                <UnifiedFieldListItem
+                  dataView={dataView}
+                  field={field}
+                  groupIndex={1}
+                  isEmpty={false}
+                  isSelected
+                  itemIndex={itemIndex}
+                  onAddFieldToWorkspace={jest.fn()}
+                  onAddFilter={jest.fn()}
+                  onEditField={jest.fn()}
+                  onRemoveFieldFromWorkspace={jest.fn()}
+                  searchMode="documents"
+                  services={getServicesMock()}
+                  size="xs"
+                  stateService={createStateService({ options: { originatingApp: 'test' } })}
+                  workspaceSelectedFieldNames={fields.map((item) => item.name)}
+                  reorderGroup={reorderGroup}
+                />
+              </li>
+            ))}
+          </ul>
+        </ReorderProvider>
+      </RootDragDropProvider>
+    </EuiThemeProvider>
+  );
+
+  return { user };
 };
 
 describe('UnifiedFieldListItem', () => {
@@ -278,5 +347,20 @@ describe('UnifiedFieldListItem', () => {
     expect(
       screen.queryByRole('button', { name: 'Add "extension.keyword" field' })
     ).not.toBeInTheDocument();
+  });
+
+  it('should close the popover when a reorderable field starts being dragged', async () => {
+    const { user } = renderReorderableItems();
+
+    await user.click(screen.getByText('extension'));
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'extension' })).toBeVisible();
+    });
+
+    fireEvent.dragStart(screen.getByTestId('unifiedFieldListItemDnD-extension'), { dataTransfer });
+
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: 'extension' })).not.toBeInTheDocument();
+    });
   });
 });

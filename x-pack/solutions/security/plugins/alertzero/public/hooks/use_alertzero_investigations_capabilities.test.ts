@@ -12,6 +12,7 @@ const caps = (
   overrides: {
     showEscalations?: unknown;
     manageEscalations?: unknown;
+    readInvestigations?: unknown;
     manageInvestigations?: unknown;
   } = {}
 ): Capabilities =>
@@ -21,6 +22,10 @@ const caps = (
     management: {},
     catalogue: {},
     agenticInvestigations: {
+      readInvestigations: false,
+      ...('readInvestigations' in overrides
+        ? { readInvestigations: overrides.readInvestigations }
+        : {}),
       manageInvestigations: false,
       ...('manageInvestigations' in overrides
         ? { manageInvestigations: overrides.manageInvestigations }
@@ -39,8 +44,21 @@ describe('getAlertZeroInvestigationsCapabilities', () => {
     expect(getAlertZeroInvestigationsCapabilities({} as Capabilities)).toEqual({
       showEscalations: false,
       manageEscalations: false,
+      readInvestigations: false,
       manageInvestigations: false,
+      canAccessAgentBuilder: false,
     });
+  });
+
+  it('maps canAccessAgentBuilder from the Agent Builder show capability', () => {
+    const withAgentBuilder = (show: unknown) =>
+      getAlertZeroInvestigationsCapabilities({
+        ...caps(),
+        agentBuilder: { show },
+      } as unknown as Capabilities);
+
+    expect(withAgentBuilder(true).canAccessAgentBuilder).toBe(true);
+    expect(withAgentBuilder(false).canAccessAgentBuilder).toBe(false);
   });
 
   it('maps showEscalations correctly', () => {
@@ -72,32 +90,38 @@ describe('getAlertZeroInvestigationsCapabilities', () => {
     });
   });
 
+  it('maps readInvestigations correctly', () => {
+    expect(
+      getAlertZeroInvestigationsCapabilities(caps({ readInvestigations: true }))
+    ).toMatchObject({ readInvestigations: true });
+  });
+
   it('returns all flags for a fully granted capabilities object', () => {
     expect(
       getAlertZeroInvestigationsCapabilities(
-        caps({ showEscalations: true, manageEscalations: true, manageInvestigations: true })
+        caps({
+          showEscalations: true,
+          manageEscalations: true,
+          readInvestigations: true,
+          manageInvestigations: true,
+        })
       )
     ).toEqual({
       showEscalations: true,
       manageEscalations: true,
+      readInvestigations: true,
       manageInvestigations: true,
+      canAccessAgentBuilder: false,
     });
   });
-  it('requires AlertZero write as well as the dependent feature privileges', () => {
-    const capabilities = caps({
-      showEscalations: true,
-      manageEscalations: true,
-      manageInvestigations: true,
-    });
+
+  it('does not depend on AlertZero privileges', () => {
+    const capabilities = caps({ manageEscalations: true, manageInvestigations: true });
     expect(
       getAlertZeroInvestigationsCapabilities({
         ...capabilities,
         alertzero: { show: true, write: false },
       })
-    ).toEqual({
-      showEscalations: true,
-      manageEscalations: false,
-      manageInvestigations: false,
-    });
+    ).toMatchObject({ manageEscalations: true, manageInvestigations: true });
   });
 });

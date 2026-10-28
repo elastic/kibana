@@ -7,12 +7,10 @@
 
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service/api_service';
-import type { MonitorsHealthResponse } from './models';
+import type { MonitorHealthQuery, MonitorsHealthResponse } from './models';
 
 export const fetchMonitorsHealth = async (
-  monitorIds: string[]
+  query: MonitorHealthQuery
 ): Promise<MonitorsHealthResponse> => {
-  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_HEALTH, {
-    monitorIds,
-  });
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_HEALTH, query);
 };

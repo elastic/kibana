@@ -60,9 +60,12 @@ function buildMocks() {
     badRequest: jest.fn((r) => ({ status: 400, ...r })),
     customError: jest.fn((r) => ({ status: r?.statusCode ?? 500, ...r })),
   };
-  const context = { logger: { get: () => ({ error: jest.fn() }) } };
+  const logger = { error: jest.fn(), debug: jest.fn() };
+  const context = { logger: { get: () => logger } };
 
   return {
+    logger,
+    esClient,
     router: router as unknown as IRouter,
     handler,
     requestHandlerContext,
@@ -72,7 +75,14 @@ function buildMocks() {
 }
 
 describe('registerGetTimeFieldRoute', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // a test that never reaches the service must not leave a mocked implementation for the next one
+    EsqlService.mockReset().mockImplementation(() => ({
+      getViews: jest.fn().mockResolvedValue({ views: [] }),
+      getDatasets: jest.fn().mockResolvedValue({ datasets: [] }),
+    }));
+  });
 
   it('registers a POST handler at the correct path', () => {
     const { router, context } = buildMocks();
@@ -126,7 +136,7 @@ describe('registerGetTimeFieldRoute', () => {
     );
   });
 
-  it('returns @timestamp for a dataset source without using fieldCaps', async () => {
+  it('returns @timestamp for a dataset source that fieldCaps does not know', async () => {
     const { router, handler, requestHandlerContext, response, context } = buildMocks();
     getIndexPatternFromESQLQuery.mockReturnValueOnce('my-dataset');
     Parser.parse.mockReturnValueOnce({ root: { commands: [{ name: 'from', args: [] }] } });
@@ -136,6 +146,9 @@ describe('registerGetTimeFieldRoute', () => {
     }));
 
     const core = await requestHandlerContext.core;
+    core.elasticsearch.client.asCurrentUser.fieldCaps.mockRejectedValueOnce(
+      Object.assign(new Error('no such index [my-dataset]'), { statusCode: 404 })
+    );
     core.elasticsearch.client.asCurrentUser.esql.query.mockResolvedValueOnce({
       columns: [{ name: '@timestamp' }],
     });
@@ -145,7 +158,131 @@ describe('registerGetTimeFieldRoute', () => {
     await handler(requestHandlerContext, { body: { query: 'FROM my-dataset' } }, response);
 
     expect(response.ok).toHaveBeenCalledWith({ body: { timeField: '@timestamp' } });
-    expect(core.elasticsearch.client.asCurrentUser.fieldCaps).not.toHaveBeenCalled();
+    expect(core.elasticsearch.client.asCurrentUser.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: 'FROM my-dataset | LIMIT 0' })
+    );
+  });
+
+  describe('resolving the time field of the sources', () => {
+    const setup = async ({
+      views = [],
+      datasets = [],
+    }: {
+      views?: Array<{ name: string }>;
+      datasets?: Array<{ name: string }>;
+    } = {}) => {
+      const mocks = buildMocks();
+      const getViews = jest.fn().mockResolvedValue({ views });
+      const getDatasets = jest.fn().mockResolvedValue({ datasets });
+      EsqlService.mockImplementationOnce(() => ({ getViews, getDatasets }));
+      Parser.parse.mockReturnValueOnce({ root: { commands: [{ name: 'from', args: [] }] } });
+      registerGetTimeFieldRoute(mocks.router, mocks.context);
+      const core = await mocks.requestHandlerContext.core;
+      return { ...mocks, getViews, getDatasets, client: core.elasticsearch.client.asCurrentUser };
+    };
+
+    const run = ({ handler, requestHandlerContext, response }: Awaited<ReturnType<typeof setup>>) =>
+      handler(requestHandlerContext, { body: { query: 'FROM logs-*' } }, response);
+
+    it('does not list the views and the datasets when fieldCaps finds @timestamp', async () => {
+      const mocks = await setup();
+
+      await run(mocks);
+
+      expect(mocks.response.ok).toHaveBeenCalledWith({ body: { timeField: '@timestamp' } });
+      expect(mocks.client.fieldCaps).toHaveBeenCalledTimes(1);
+      expect(mocks.getViews).not.toHaveBeenCalled();
+      expect(mocks.getDatasets).not.toHaveBeenCalled();
+      expect(mocks.client.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('returns no time field when neither fieldCaps, views nor datasets have @timestamp', async () => {
+      const mocks = await setup();
+      mocks.client.fieldCaps.mockResolvedValueOnce({ fields: {} });
+
+      await run(mocks);
+
+      expect(mocks.response.ok).toHaveBeenCalledWith({ body: { timeField: undefined } });
+      expect(mocks.getViews).toHaveBeenCalled();
+      expect(mocks.getDatasets).toHaveBeenCalled();
+    });
+
+    it('resolves a view source when fieldCaps does not find @timestamp', async () => {
+      const mocks = await setup({ views: [{ name: 'logs-*' }] });
+      getIndexPatternFromESQLQuery.mockReturnValueOnce('logs-*');
+      mocks.client.fieldCaps.mockResolvedValueOnce({ fields: {} });
+      mocks.client.esql.query.mockResolvedValueOnce({ columns: [{ name: '@timestamp' }] });
+
+      await run(mocks);
+
+      expect(mocks.response.ok).toHaveBeenCalledWith({ body: { timeField: '@timestamp' } });
+      expect(mocks.client.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'FROM logs-* | LIMIT 0' })
+      );
+    });
+
+    it('does not return @timestamp when a view source has no @timestamp column', async () => {
+      const mocks = await setup({ views: [{ name: 'logs-*' }] });
+      getIndexPatternFromESQLQuery.mockReturnValueOnce('logs-*');
+      mocks.client.fieldCaps.mockResolvedValueOnce({ fields: {} });
+      mocks.client.esql.query.mockResolvedValueOnce({ columns: [{ name: 'message' }] });
+
+      await run(mocks);
+
+      expect(mocks.response.ok).toHaveBeenCalledWith({ body: { timeField: undefined } });
+    });
+
+    it('logs an unknown index from fieldCaps at debug level and other failures as errors', async () => {
+      const mocks = await setup();
+      mocks.client.fieldCaps.mockRejectedValueOnce(
+        Object.assign(new Error('no such index'), { statusCode: 404 })
+      );
+
+      await run(mocks);
+
+      expect(mocks.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('fieldCaps check failed'),
+        expect.anything()
+      );
+      expect(mocks.logger.error).not.toHaveBeenCalled();
+
+      const failing = await setup();
+      failing.client.fieldCaps.mockRejectedValueOnce(new Error('boom'));
+
+      await run(failing);
+
+      expect(failing.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('fieldCaps check failed'),
+        expect.anything()
+      );
+    });
+  });
+
+  it('requests the views and the datasets in parallel', async () => {
+    const { router, handler, requestHandlerContext, response, context } = buildMocks();
+    let resolveViews: (value: { views: unknown[] }) => void = () => {};
+    const getViews = jest.fn(
+      () =>
+        new Promise<{ views: unknown[] }>((resolve) => {
+          resolveViews = resolve;
+        })
+    );
+    const getDatasets = jest.fn().mockResolvedValue({ datasets: [] });
+    EsqlService.mockImplementationOnce(() => ({ getViews, getDatasets }));
+    Parser.parse.mockReturnValueOnce({ root: { commands: [{ name: 'from', args: [] }] } });
+    registerGetTimeFieldRoute(router, context);
+    const core = await requestHandlerContext.core;
+    core.elasticsearch.client.asCurrentUser.fieldCaps.mockResolvedValueOnce({ fields: {} });
+
+    const pending = handler(requestHandlerContext, { body: { query: 'FROM logs-*' } }, response);
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(getDatasets).toHaveBeenCalled();
+
+    resolveViews({ views: [] });
+    await pending;
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { timeField: undefined } });
   });
 
   describe('nesting-depth guard', () => {

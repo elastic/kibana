@@ -16,6 +16,7 @@ import {
 } from '../common/escalations/constants';
 import {
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_READ,
   INVESTIGATIONS_UI_CAPABILITY_SHOW,
 } from '../common/investigations/constants';
 import {
@@ -81,17 +82,17 @@ export const registerFeatures = ({
     privileges: {
       all: {
         app: [],
-        // Reading investigations comes with both base privileges. Writes use the
-        // investigations sub-feature below, which `includeIn: 'all'` joins here.
+        // Reading investigations (the query API) comes with both base privileges. Writes use
+        // the investigations sub-feature below, which `includeIn: 'all'` joins here.
         api: [INVESTIGATIONS_API_PRIVILEGE_READ],
         savedObject: { all: [], read: [] },
-        ui: [],
+        ui: [INVESTIGATIONS_UI_CAPABILITY_READ],
       },
       read: {
         app: [],
         api: [INVESTIGATIONS_API_PRIVILEGE_READ],
         savedObject: { all: [], read: [] },
-        ui: [],
+        ui: [INVESTIGATIONS_UI_CAPABILITY_READ],
       },
     },
     subFeatures: [

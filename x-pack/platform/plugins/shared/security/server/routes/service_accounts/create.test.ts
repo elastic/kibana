@@ -27,6 +27,7 @@ import {
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
 } from '../../../common/service_accounts';
+import { auditServiceMock } from '../../audit/mocks';
 import {
   ES_SERVICE_ACCOUNT_ROLE_LIMITS,
   UIAM_SERVICE_ACCOUNT_ROLE_LIMITS,
@@ -283,6 +284,7 @@ describe('Create service account route', () => {
         license,
         uiam,
         checkPrivilegesWithRequest,
+        audit: auditServiceMock.create(),
         getCurrentUser: () => null,
         cloudProjectContext: {
           organizationId: 'organization-id',
@@ -387,6 +389,13 @@ describe('Create service account route', () => {
         issuesFor({ ...requestBody, role_assignments: { limit: { access: ['application'] } } })
       ).toEqual([
         expect.objectContaining({ code: 'unrecognized_keys', keys: ['role_assignments'] }),
+      ]);
+    });
+
+    // Platform assumers come from server-side callers only, never from a browser.
+    it('rejects `platformAssumers`, which only the server contract accepts', () => {
+      expect(issuesFor({ ...requestBody, platformAssumers: ['relay'] })).toEqual([
+        expect.objectContaining({ code: 'unrecognized_keys', keys: ['platformAssumers'] }),
       ]);
     });
 

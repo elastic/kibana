@@ -8,6 +8,7 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 import { SettingsSection } from './settings_section';
@@ -55,6 +56,27 @@ describe('SettingsSection', () => {
     mockIsContextEngineEnabled = true;
     mockAgentAiIndices = [];
     mockAgentAiIndicesIsLoading = false;
+  });
+
+  describe('Custom instructions card', () => {
+    it('makes the "Add instructions" button the only control when there are no instructions', async () => {
+      const onOpenEditFlyout = jest.fn();
+
+      renderSection({ onOpenEditFlyout });
+
+      expect(screen.queryByRole('button', { name: 'Custom instructions' })).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('agentOverviewAddInstructionsLink'));
+
+      expect(onOpenEditFlyout).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not make the card clickable when instructions are set', () => {
+      renderSection({ currentInstructions: 'Be concise.' });
+
+      expect(screen.queryByTestId('agentOverviewAddInstructionsLink')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Custom instructions' })).not.toBeInTheDocument();
+    });
   });
 
   describe('AI indices row', () => {

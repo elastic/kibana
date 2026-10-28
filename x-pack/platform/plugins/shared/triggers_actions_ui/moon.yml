@@ -112,6 +112,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/alerting-v2-utils'
   - '@kbn/user-profile-components'
+  - '@kbn/alerting-v2-constants'
 tags:
   - plugin
   - prod
@@ -126,6 +127,4 @@ fileGroups:
     - common/**/*
     - config.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

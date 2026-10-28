@@ -22,6 +22,7 @@ import type {
 import {
   ExecutionStatus,
   isTerminalStatus,
+  isWorkflowStepTriggered,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
 } from '@kbn/workflows';
@@ -59,6 +60,10 @@ import { getAuthenticatedUser } from './lib/get_user';
 import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
+  bulkScheduleRunTasksOrMarkFailed,
+  scheduleRunTaskOrMarkFailed,
+} from './lib/schedule_workflow_run_task';
+import {
   failExecutionMissingIdentity,
   markScheduledExecutionFailedAfterTaskError,
   resolveExhaustedWorkflowRunTask,
@@ -80,9 +85,12 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import {
+  ensureInheritedBindingCurrent,
   getWorkflowOriginalRequest,
+  resolveInheritedWorkflowIdentity,
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
+import { resolveWorkflowWorkloads } from './service_account_workload_resolver';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
@@ -117,8 +125,10 @@ import {
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
 import {
+  getTaskPriority,
   getWorkflowImmediateResumeTaskId,
   getWorkflowWakeTaskId,
+  WORKFLOW_PARKED_RUNNER_DELAY_MS,
   WORKFLOW_WAKE_POLL_INTERVAL_MS,
   WorkflowTaskManager,
 } from './workflow_task_manager/workflow_task_manager';
@@ -256,13 +266,25 @@ export class WorkflowsExecutionEnginePlugin
     core.security.serviceAccounts.registerWorkloadType({
       type: WORKFLOW_SERVICE_ACCOUNT_TYPE,
       name: 'Workflow',
+      resolveWorkloads: async (workloads, options) => {
+        const [coreStart] = await core.getStartServices();
+        return resolveWorkflowWorkloads(
+          new WorkflowRepository({
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+            logger,
+          }),
+          workloads,
+          options
+        );
+      },
     });
 
     initializeLogsRepositoryDataStream(core.dataStreams);
     initializeTriggerEventsDataStream(core.dataStreams);
 
     this.dataClientBundle = createDataClientBundle({
-      source: 'system_index',
+      source: config.storage.source,
+      dataRetention: config.storage.dataRetention,
       logger: this.logger,
     });
     void this.dataClientBundle.initSetup(core);
@@ -313,6 +335,7 @@ export class WorkflowsExecutionEnginePlugin
               const queueDelayMs = scheduledAt ? now - scheduledAt : null;
 
               const { default: apm } = await import('elastic-apm-node');
+
               const currentTransaction = apm.currentTransaction;
               if (currentTransaction) {
                 if (queueDelayMs !== null) {
@@ -503,6 +526,7 @@ export class WorkflowsExecutionEnginePlugin
         }),
         title: 'Resume Workflow',
         description: 'Resumes a paused workflow',
+        allowPriorityOverride: true,
         // Set high timeout for long-running workflows.
         // This is high value to allow long-running workflows.
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
@@ -574,12 +598,22 @@ export class WorkflowsExecutionEnginePlugin
 
               if (taskInstance.id !== getWorkflowImmediateResumeTaskId(workflowRunId)) {
                 const retainedWake = taskInstance.id === getWorkflowWakeTaskId(workflowRunId);
+                let isUserInteractive = false;
                 if (retainedWake) {
                   const execution = await workflowExecutionRepository.getWorkflowExecutionById(
                     workflowRunId,
                     spaceId
                   );
-                  if (!execution || isTerminalStatus(execution.status)) return;
+                  if (!execution || isTerminalStatus(execution.status)) {
+                    await new WorkflowTaskManager(pluginsStart.taskManager).removeTasksForExecution(
+                      workflowRunId,
+                      { exceptTaskId: taskInstance.id }
+                    );
+                    return;
+                  }
+                  isUserInteractive =
+                    execution.context?.pendingInteractiveResume === true &&
+                    execution.context?.resumeInput != null;
                 }
                 const accepted = await new WorkflowTaskManager(
                   pluginsStart.taskManager
@@ -587,6 +621,7 @@ export class WorkflowsExecutionEnginePlugin
                   executionId: workflowRunId,
                   spaceId,
                   fakeRequest,
+                  isUserInteractive,
                 });
                 // A request never loads workflow checkpoints or invokes steps. Busy
                 // runners keep their claim; this notification retries durably in TM.
@@ -597,6 +632,7 @@ export class WorkflowsExecutionEnginePlugin
                       Date.now() + (accepted ? WORKFLOW_WAKE_POLL_INTERVAL_MS : 1000)
                     ),
                     state: {},
+                    priority: getTaskPriority({ isUserInteractive }),
                   };
                 }
                 return accepted ? undefined : { runAt: new Date(Date.now() + 1000), state: {} };
@@ -694,6 +730,13 @@ export class WorkflowsExecutionEnginePlugin
                       outcome,
                     });
                   }
+                }
+                if (execution && !isTerminalStatus(execution.status)) {
+                  // Recreating the runner on the next wake-up would grant a new API key.
+                  return {
+                    runAt: new Date(Date.now() + WORKFLOW_PARKED_RUNNER_DELAY_MS),
+                    state: {},
+                  };
                 }
               } catch (error) {
                 const aborted = taskAbortController.signal.aborted;
@@ -1248,13 +1291,16 @@ export class WorkflowsExecutionEnginePlugin
 
     const buildExecutionDocument = async (args: {
       workflow: WorkflowExecutionEngineModel;
+      inheritedIdentity?: EsWorkflowExecution['effectiveIdentity'];
       spaceId: string;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
       authenticatedUser: string | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
-      await ensureServiceAccountBinding(args.workflow, args.spaceId);
+      if (!args.inheritedIdentity) {
+        await ensureServiceAccountBinding(args.workflow, args.spaceId);
+      }
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
@@ -1290,24 +1336,40 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
-      request: KibanaRequest,
-      options: { refresh: boolean | 'wait_for' } = { refresh: false }
+      originalRequest: KibanaRequest,
+      options: { refresh: boolean | 'wait_for'; authenticatedUser?: string } = { refresh: false }
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
     }> => {
+      const request = getWorkflowOriginalRequest(originalRequest);
       const spaceId = (context.spaceId as string | undefined) || 'default';
       await ensureExecutionAccess(workflow, spaceId, request);
       await ensureWorkflowEnabled(workflow, spaceId);
+      const inheritedIdentity = resolveInheritedWorkflowIdentity(originalRequest, workflow, {
+        inheritParentIdentity: context.inheritParentIdentity === true,
+        parentWorkflowId:
+          typeof context.parentWorkflowId === 'string' ? context.parentWorkflowId : undefined,
+        parentWorkflowExecutionId:
+          typeof context.parentWorkflowExecutionId === 'string'
+            ? context.parentWorkflowExecutionId
+            : undefined,
+        parentStepId: typeof context.parentStepId === 'string' ? context.parentStepId : undefined,
+        parentStepName:
+          typeof context.parentStepName === 'string' ? context.parentStepName : undefined,
+        spaceId,
+      });
+      if (inheritedIdentity) {
+        await ensureInheritedBindingCurrent(coreStart, inheritedIdentity, spaceId);
+      }
 
-      const authenticatedUser = await getAuthenticatedUser(
-        request,
-        coreStart.security,
-        coreStart.elasticsearch.client
-      );
+      const authenticatedUser =
+        options.authenticatedUser ??
+        (await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client));
 
       const workflowExecution = await buildExecutionDocument({
         workflow,
+        inheritedIdentity,
         spaceId,
         context,
         defaultTriggeredBy,
@@ -1326,7 +1388,7 @@ export class WorkflowsExecutionEnginePlugin
       // Bound executions must be searchable before the final admission check so
       // force deletion cannot miss an admitted run. Other runs retain the concurrency-only refresh.
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-        refresh: workflowExecution.workflowDefinition?.settings?.run_as
+        refresh: workflowExecution.effectiveIdentity
           ? options.refresh || 'wait_for'
           : workflowExecution.concurrencyGroupKey
           ? options.refresh
@@ -1346,6 +1408,7 @@ export class WorkflowsExecutionEnginePlugin
       workflowExecution: Partial<EsWorkflowExecution>,
       scope: string[]
     ) => {
+      const priority = getTaskPriority(workflowExecution.context);
       return {
         id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
         taskType: WORKFLOW_RUN_TASK_TYPE,
@@ -1360,7 +1423,14 @@ export class WorkflowsExecutionEnginePlugin
         },
         scope,
         enabled: true,
+        priority,
       };
+    };
+
+    const scheduleDeps = {
+      taskManager: plugins.taskManager,
+      workflowExecutionRepository,
+      logger: this.logger,
     };
 
     const executeWorkflow: ExecuteWorkflow = async (workflow, context, originalRequest) => {
@@ -1376,7 +1446,7 @@ export class WorkflowsExecutionEnginePlugin
       // Child executions (triggered by a workflow step) must always be scheduled in their own task,
       // never run inline in the parent's task. Otherwise the parent's runtime is blocked until the
       // child becomes idle, and cancel/timeout on the parent cannot take effect until then.
-      const isChildExecution = (context.triggeredBy as string | undefined) === 'workflow-step';
+      const isChildExecution = isWorkflowStepTriggered(context.triggeredBy as string | undefined);
 
       if (!isRunningInTaskManager && !request) {
         throw new Error('Workflows cannot be executed without the user context');
@@ -1397,7 +1467,7 @@ export class WorkflowsExecutionEnginePlugin
         workflow,
         context,
         'manual',
-        request,
+        originalRequest,
         { refresh: true }
       );
 
@@ -1468,10 +1538,7 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await plugins.taskManager.schedule(taskInstance, {
-          request: request as KibanaRequest,
-          cloneApiKey: true,
-        });
+        await scheduleRunTaskOrMarkFailed(scheduleDeps, taskInstance, request as KibanaRequest);
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
             isChildExecution ? ' (child execution)' : ''
@@ -1484,7 +1551,12 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, originalRequest) => {
+    const scheduleWorkflow: ScheduleWorkflow = async (
+      workflow,
+      context,
+      originalRequest,
+      options
+    ) => {
       const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
 
@@ -1493,7 +1565,7 @@ export class WorkflowsExecutionEnginePlugin
         context,
         'alert',
         request,
-        { refresh: 'wait_for' }
+        { refresh: 'wait_for', authenticatedUser: options?.authenticatedUser }
       );
 
       if (workflowExecution.status === ExecutionStatus.FAILED) {
@@ -1528,7 +1600,7 @@ export class WorkflowsExecutionEnginePlugin
         generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
       );
 
-      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
+      await scheduleRunTaskOrMarkFailed(scheduleDeps, taskInstance, request);
       this.logger.debug(
         `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
       );
@@ -1743,7 +1815,16 @@ export class WorkflowsExecutionEnginePlugin
             generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
           )
         );
-        await plugins.taskManager.bulkSchedule(tasks, { request, cloneApiKey: true });
+        const { failedExecutionIds, message } = await bulkScheduleRunTasksOrMarkFailed(
+          scheduleDeps,
+          tasks,
+          request
+        );
+        for (const { idx, workflowExecution } of toSchedule) {
+          if (failedExecutionIds.has(workflowExecution.id as string)) {
+            results[idx] = { status: 'error', error: { message } };
+          }
+        }
         this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
       }
 
@@ -1769,6 +1850,7 @@ export class WorkflowsExecutionEnginePlugin
       const context: Record<string, unknown> = {
         ...(executionContext ?? {}),
         contextOverride,
+        isUserInteractive: true,
       };
 
       const executedBy = await getAuthenticatedUser(
@@ -1794,21 +1876,10 @@ export class WorkflowsExecutionEnginePlugin
         };
       }
 
-      const taskInstance = {
-        id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
-        taskType: WORKFLOW_RUN_TASK_TYPE,
-        params: {
-          workflowRunId: workflowExecution.id,
-          spaceId: workflowExecution.spaceId,
-        },
-        state: {
-          lastRunAt: null,
-          lastRunStatus: null,
-          lastRunError: null,
-        },
-        scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
-        enabled: true,
-      };
+      const taskInstance = createTaskInstance(
+        workflowExecution,
+        generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
+      );
 
       // Use Task Manager's first-class API key support by passing the request.
       // Clone so org/global UIAM keys are granted as TM-managed internal keys.
@@ -1816,7 +1887,7 @@ export class WorkflowsExecutionEnginePlugin
       this.logger.debug(
         `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
       );
-      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
+      await scheduleRunTaskOrMarkFailed(scheduleDeps, taskInstance, request);
 
       return {
         workflowExecutionId: workflowExecution.id as string,
@@ -1939,9 +2010,12 @@ export class WorkflowsExecutionEnginePlugin
         resumeInput: input,
         resumedBy,
         resumedAt,
+        pendingInteractiveResume: request !== undefined,
       };
 
-      await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request);
+      await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request, {
+        isUserInteractive: true,
+      });
 
       return { resumedBy };
     };
@@ -1950,7 +2024,8 @@ export class WorkflowsExecutionEnginePlugin
       executionId,
       spaceId,
       context,
-      request
+      request,
+      options
     ) => {
       if (context) {
         await workflowExecutionRepository.updateWorkflowExecution({
@@ -1973,6 +2048,7 @@ export class WorkflowsExecutionEnginePlugin
         executionId,
         spaceId,
         fakeRequest: request,
+        isUserInteractive: options?.isUserInteractive,
       });
     };
 

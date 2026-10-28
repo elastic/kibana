@@ -20,7 +20,7 @@ spec:
     spec:
       env:
         # Set a channel and flip to 'true' once the report has an owning channel
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
         # Inputs of .buildkite/scripts/steps/report_flaky_tests.sh. Schedules may override
         # them to produce different reports (other pipelines, consistently failing tests, ...).
         FLAKY_TESTS_PIPELINES: 'kibana-on-merge,kibana-security-solution-on-merge,appex-qa-serverless-kibana-ftr-tests,appex-qa-serverless-kibana-scout-tests,appex-qa-stateful-kibana-ftr-tests,appex-qa-stateful-kibana-scout-tests'
@@ -35,6 +35,12 @@ spec:
         FLAKY_TESTS_MAX_NEW_ISSUES: '10'
         # Leave out flaky tests that were skipped since
         FLAKY_TESTS_OMIT_SKIPPED_TESTS: 'true'
+        # Refresh the suite issues of suites flaky again: a comment with the new numbers on new
+        # failures, a reopen on failures after the close; the body's text stays as filed, only its
+        # hidden metadata records the report
+        FLAKY_TESTS_UPDATE_ISSUES: 'true'
+        # Days to wait after a comment before the issue can get another; reopens always comment.
+        FLAKY_TESTS_COMMENT_COOLDOWN_DAYS: '3'
       allow_rebuilds: true
       branch_configuration: main
       cancel_intermediate_builds: true

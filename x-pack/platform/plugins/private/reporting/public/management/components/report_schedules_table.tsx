@@ -72,6 +72,7 @@ export const ReportSchedulesTable = () => {
     return capabilities.manageReporting.show === true;
   }, [capabilities]);
 
+  // Cosmetic: the server already filters non-admins to reports they own.
   const canManageSchedule = useCallback(
     (item: ScheduledReportApiJSON) => {
       if (hasManageReportingPrivilege) return true;
@@ -117,7 +118,7 @@ export const ReportSchedulesTable = () => {
         <EuiIconTip
           data-test-subj="reportObjectType"
           type={guessAppIconTypeFromObjectType(objectType)}
-          size="s"
+          size="m"
           content={getDisplayNameFromObjectType(objectType)}
         />
       ),
@@ -272,7 +273,7 @@ export const ReportSchedulesTable = () => {
             }),
           'data-test-subj': (item) => `reportOpenDashboard-${item.id}`,
           type: 'icon',
-          icon: 'dashboardApp',
+          icon: (item) => guessAppIconTypeFromObjectType(item.payload?.objectType ?? ''),
           available: (item) => Boolean((item.payload as BaseParamsV2)?.locatorParams),
           onClick: async (item) => {
             const searchParams = queryString.stringify({

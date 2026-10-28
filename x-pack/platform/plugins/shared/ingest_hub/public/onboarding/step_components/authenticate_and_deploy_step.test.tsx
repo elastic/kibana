@@ -58,6 +58,10 @@ jest.mock('../use_aws_identity_federation_enabled', () => ({
   useAwsIdentityFederationEnabled: jest.fn(),
 }));
 
+jest.mock('../use_is_self_managed', () => ({
+  useIsSelfManaged: jest.fn(() => false),
+}));
+
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
@@ -70,6 +74,7 @@ import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_ba
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useAwsIdentityFederationEnabled } from '../use_aws_identity_federation_enabled';
+import { useIsSelfManaged } from '../use_is_self_managed';
 import { AuthenticateAndDeployStep } from './authenticate_and_deploy_step';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
@@ -84,6 +89,7 @@ const MockAgentBasedSection = AgentBasedSection as unknown as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 const mockBuildIacIntegrations = buildIacIntegrations as jest.Mock;
 const mockUseAwsIdentityFederationEnabled = useAwsIdentityFederationEnabled as jest.Mock;
+const mockUseIsSelfManaged = useIsSelfManaged as jest.Mock;
 
 function getLastMiSectionProps(): { showIdentityFederation: boolean } {
   const { calls } = MockManagedIntegrationsSection.mock;
@@ -95,7 +101,6 @@ function getLastMiSectionProps(): { showIdentityFederation: boolean } {
 const miService: AwsServiceMatrixEntry = {
   id: 'guardduty',
   name: 'AWS GuardDuty',
-  category: 'security_identity_compliance',
   signalTypes: ['logs'],
   dataStreams: [],
   packageName: 'aws',
@@ -112,7 +117,6 @@ const miService: AwsServiceMatrixEntry = {
 const ecfService: AwsServiceMatrixEntry = {
   id: 'cloudtrail',
   name: 'AWS CloudTrail',
-  category: 'management_governance',
   signalTypes: ['logs'],
   dataStreams: [],
   packageName: 'aws',
@@ -148,12 +152,25 @@ function makeDeployReturn(
 }
 
 function makeEcfReturn(
-  overrides: { hasAnyEcf?: boolean; isDone?: boolean } = {}
+  overrides: {
+    hasAnyEcf?: boolean;
+    hasRemovedFamiliesWithArn?: boolean;
+    isDone?: boolean;
+    launchedFamilies?: string[];
+    stackNames?: Record<string, string>;
+    stackVersions?: Record<string, string>;
+    stackArns?: Record<string, string>;
+    isStaleByFamily?: Record<string, boolean>;
+  } = {}
 ): ReturnType<typeof useEcfDeployment> {
   return {
     hasAnyEcf: overrides.hasAnyEcf ?? false,
+    hasRemovedFamiliesWithArn: overrides.hasRemovedFamiliesWithArn ?? false,
     isDone: overrides.isDone ?? false,
     ecfServiceIds: new Set(),
+    stackArns: overrides.stackArns ?? {},
+    currentServiceIdsByFamily: { unified: [], otel: [], crowdstrike: [] },
+    advanceStaleSnapshots: jest.fn(),
     sectionProps: {
       ecfUnifiedConfigs: [],
       ecfOtelConfigs: [],
@@ -161,12 +178,24 @@ function makeEcfReturn(
       unifiedLaunchUrl: undefined,
       otelLaunchUrl: undefined,
       crowdstrikeLaunchUrl: undefined,
+      unifiedUpdateUrl: undefined,
+      otelUpdateUrl: undefined,
+      crowdstrikeUpdateUrl: undefined,
       globalRegion: 'us-east-1',
-      launchedFamilies: [],
-      stackNames: {},
-      stackVersions: {},
+      launchedFamilies: (overrides.launchedFamilies as any[]) ?? [],
+      stackNames: overrides.stackNames ?? {},
+      stackVersions: overrides.stackVersions ?? {},
+      stackArns: overrides.stackArns ?? {},
+      isStaleByFamily: overrides.isStaleByFamily ?? {
+        unified: false,
+        otel: false,
+        crowdstrike: false,
+      },
+      isUpdateOpenedByFamily: {},
       onLaunch: jest.fn(),
+      onUpdateOpened: jest.fn(),
       onStackNameChange: jest.fn(),
+      onStackArnChange: jest.fn(),
     },
   };
 }
@@ -221,6 +250,7 @@ describe('AuthenticateAndDeployStep', () => {
     ]);
     mockBuildIacIntegrations.mockReturnValue([]);
     mockUseAwsIdentityFederationEnabled.mockReturnValue(true);
+    mockUseIsSelfManaged.mockReturnValue(false);
     MockManagedIntegrationsSection.mockImplementation(
       ({ onDeploy, hasFailed }: { onDeploy: () => void; hasFailed: boolean }) => (
         <div>
@@ -693,6 +723,62 @@ describe('AuthenticateAndDeployStep', () => {
       renderStep();
       expect(screen.queryByTestId('mock-ecf-launch-btn')).not.toBeInTheDocument();
     });
+
+    it('renders EcfDeploymentSection when hasAnyEcf is false but hasRemovedFamiliesWithArn is true', () => {
+      mockUseEcfDeployment.mockReturnValue(
+        makeEcfReturn({ hasAnyEcf: false, hasRemovedFamiliesWithArn: true })
+      );
+      renderStep();
+      expect(screen.getByTestId('mock-ecf-launch-btn')).toBeInTheDocument();
+    });
+
+    it('merges newly-added services into instances passed to useEcfDeployment', () => {
+      const vpcflowService: AwsServiceMatrixEntry = {
+        ...ecfService,
+        id: 'vpcflow',
+        name: 'AWS VPC Flow',
+      };
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail', 'vpcflow'], dataFormat: 'json' },
+        awsServicesMap: new Map([
+          ['cloudtrail', ecfService],
+          ['vpcflow', vpcflowService],
+        ]),
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: jest.fn(),
+        detectAndReviewStep: {
+          serviceStatuses: {},
+          policyIdsByInstance: {},
+          onboardingDeploymentId: undefined,
+        },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+      // Session storage only recorded cloudtrail (vpcflow was added after the session snapshot)
+      mockUseSessionStorage.mockReturnValue([
+        {
+          globalRegion: 'us-east-1',
+          serviceVars: {},
+          instances: [
+            {
+              instanceId: 'cloudtrail',
+              serviceId: 'cloudtrail',
+              name: 'AWS CloudTrail',
+              isDuplicate: false,
+            },
+          ],
+        },
+        jest.fn(),
+      ]);
+      renderStep();
+      expect(mockUseEcfDeployment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          instances: expect.arrayContaining([
+            expect.objectContaining({ serviceId: 'cloudtrail' }),
+            expect.objectContaining({ serviceId: 'vpcflow' }),
+          ]),
+        })
+      );
+    });
   });
 
   describe('ECF + MI both present', () => {
@@ -734,7 +820,6 @@ describe('AuthenticateAndDeployStep', () => {
     const agentService: AwsServiceMatrixEntry = {
       id: 'awsfargate',
       name: 'AWS Fargate',
-      category: 'compute',
       signalTypes: ['logs'],
       dataStreams: [],
       packageName: 'awsfargate',
@@ -824,7 +909,6 @@ describe('AuthenticateAndDeployStep', () => {
     const agentService: AwsServiceMatrixEntry = {
       id: 'awsfargate',
       name: 'AWS Fargate',
-      category: 'compute',
       signalTypes: ['logs'],
       dataStreams: [],
       packageName: 'awsfargate',
@@ -965,6 +1049,91 @@ describe('AuthenticateAndDeployStep', () => {
       // persistDeploymentId must not fire again (URL/context already set).
       expect(mockPersist).not.toHaveBeenCalled();
       expect(onContinue).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('ECF stackArn persisted to SO on Next-click', () => {
+    it('includes stackArn in ecfStacks when a valid ARN is stored for a launched family', async () => {
+      const mockCreate = jest.fn().mockResolvedValue('new-dep-id');
+      const mockUpdate = jest.fn().mockResolvedValue(true);
+      const mockPersist = jest.fn();
+      mockUseOnboardingSO.mockReturnValue({
+        createDeployment: mockCreate,
+        updateDeployment: mockUpdate,
+        persistDeploymentId: mockPersist,
+      });
+
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'] },
+        awsServicesMap: new Map([['cloudtrail', ecfService]]),
+        detectAndReviewStep: { onboardingDeploymentId: 'existing-dep-id' },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+
+      const SAMPLE_ARN =
+        'arn:aws:cloudformation:us-east-1:123456789012:stack/edot-cloud-forwarder/abc123';
+      mockUseEcfDeployment.mockReturnValue(
+        makeEcfReturn({
+          hasAnyEcf: true,
+          isDone: true,
+          launchedFamilies: ['unified'],
+          stackVersions: { unified: '1.2.3' },
+          stackArns: { unified: SAMPLE_ARN },
+        })
+      );
+
+      const onContinue = jest.fn();
+      renderStep(onContinue);
+      fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
+
+      await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
+
+      expect(mockUpdate).toHaveBeenCalledWith(
+        'existing-dep-id',
+        expect.objectContaining({
+          ecfStacks: expect.arrayContaining([
+            expect.objectContaining({ family: 'unified', stackArn: SAMPLE_ARN }),
+          ]),
+        })
+      );
+    });
+
+    it('omits stackArn from ecfStacks when no ARN is stored for a family', async () => {
+      const mockCreate = jest.fn().mockResolvedValue('new-dep-id');
+      const mockUpdate = jest.fn().mockResolvedValue(true);
+      mockUseOnboardingSO.mockReturnValue({
+        createDeployment: mockCreate,
+        updateDeployment: mockUpdate,
+        persistDeploymentId: jest.fn(),
+      });
+
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['cloudtrail'] },
+        awsServicesMap: new Map([['cloudtrail', ecfService]]),
+        detectAndReviewStep: { onboardingDeploymentId: 'existing-dep-id' },
+        updateDetectAndReviewStep: jest.fn(),
+      });
+
+      mockUseEcfDeployment.mockReturnValue(
+        makeEcfReturn({
+          hasAnyEcf: true,
+          isDone: true,
+          launchedFamilies: ['unified'],
+          stackVersions: { unified: '1.2.3' },
+          stackArns: {},
+        })
+      );
+
+      const onContinue = jest.fn();
+      renderStep(onContinue);
+      fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
+
+      await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
+
+      const updateCall = mockUpdate.mock.calls[0];
+      const ecfStacks = updateCall[1].ecfStacks as Array<{ stackArn?: string }>;
+      expect(ecfStacks).toHaveLength(1);
+      expect(ecfStacks[0]).not.toHaveProperty('stackArn');
     });
   });
 
@@ -1294,6 +1463,98 @@ describe('AuthenticateAndDeployStep', () => {
         screen.queryByTestId('authenticateAndDeployStep-settingsChangedCallout')
       ).not.toBeInTheDocument();
       expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).not.toBeDisabled();
+    });
+  });
+  describe('self-managed', () => {
+    beforeEach(() => {
+      mockUseIsSelfManaged.mockReturnValue(true);
+      // An MI-capable service with the agentless method already pinned to agent_based by the
+      // context — the state a self-managed session actually reaches.
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty'] },
+        awsServicesMap: new Map([['guardduty', miService]]),
+        deploymentMethod: 'agent_based',
+        setDeploymentMethod: jest.fn(),
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
+      });
+      mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
+    });
+
+    it('offers agent_based as the only method and locks the card', () => {
+      renderStep();
+      expect(MockDeploymentMethodCard).toHaveBeenCalledWith(
+        expect.objectContaining({
+          locked: true,
+          availableMethods: ['agent_based'],
+          selectedMethod: 'agent_based',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('does not render the Managed Integrations section for an MI-capable service', () => {
+      renderStep();
+      expect(MockManagedIntegrationsSection).not.toHaveBeenCalled();
+    });
+
+    it('does not render the ECF section even when ECF instances are present', () => {
+      // useEcfDeployment is called with an empty instance list in agent-based mode, so a
+      // self-managed session can never surface ECF regardless of the selection.
+      renderStep();
+      expect(mockUseEcfDeployment).toHaveBeenCalledWith(expect.objectContaining({ instances: [] }));
+      expect(MockEcfDeploymentSection).not.toHaveBeenCalled();
+    });
+
+    it('resets to agent_based, not managed_integration, when the last agent-only service is deselected', () => {
+      const mockSetDeploymentMethod = jest.fn();
+      const agentOnlyService: AwsServiceMatrixEntry = {
+        ...miService,
+        id: 'awsfargate',
+        name: 'AWS Fargate',
+        packageName: 'awsfargate',
+        deploymentMethods: [{ method: 'agent_based', preferred: true }],
+        isStaticAgentBasedOnly: true,
+      };
+      const map = new Map([
+        ['awsfargate', agentOnlyService],
+        ['guardduty', miService],
+      ]);
+
+      // First render: agent-only service selected while the method reads managed_integration,
+      // so the effect auto-forces and records wasAutoForced.
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['awsfargate'] },
+        awsServicesMap: map,
+        deploymentMethod: 'managed_integration',
+        setDeploymentMethod: mockSetDeploymentMethod,
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+      });
+      const { rerender } = renderStep();
+      mockSetDeploymentMethod.mockClear();
+
+      // Second render: agent-only service removed. On cloud this resets to managed_integration;
+      // on self-managed it must stay agent_based.
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: ['guardduty'] },
+        awsServicesMap: map,
+        deploymentMethod: 'agent_based',
+        setDeploymentMethod: mockSetDeploymentMethod,
+        agentBasedDeployment: { selectedAgentPolicyIds: [] },
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
+        updateDetectAndReviewStep: jest.fn(),
+        removeDeployInstances: jest.fn(),
+      });
+      rerender(
+        <I18nProvider>
+          <AuthenticateAndDeployStep onContinue={jest.fn()} />
+        </I18nProvider>
+      );
+
+      expect(mockSetDeploymentMethod).not.toHaveBeenCalledWith('managed_integration');
+      expect(mockSetDeploymentMethod).toHaveBeenCalledWith('agent_based');
     });
   });
 });

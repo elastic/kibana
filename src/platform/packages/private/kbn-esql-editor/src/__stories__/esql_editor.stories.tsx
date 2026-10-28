@@ -87,6 +87,18 @@ export const InlineMode: Story = {
   },
 };
 
+export const InlineWithOutline: Story = {
+  name: 'Inline with outline',
+  render: (args) => <ControlledEditor {...args} />,
+  args: {
+    query: { esql: 'FROM kibana_sample_data_logs | LIMIT 10' },
+    editorIsInline: true,
+    hasOutline: true,
+    hideQueryHistory: true,
+    disableAutoFocus: true,
+  },
+};
+
 export const WithErrors: Story = {
   name: 'With errors',
   render: (args) => <ControlledEditor {...args} />,

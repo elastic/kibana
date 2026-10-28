@@ -12,13 +12,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 interface SearchPlaceholderProps {
   customPlaceholderMessage?: React.ReactNode;
+  'data-test-subj'?: string;
 }
 
-export const SearchPlaceholder = ({ customPlaceholderMessage }: SearchPlaceholderProps) => {
+export const SearchPlaceholder = ({
+  customPlaceholderMessage,
+  'data-test-subj': dataTestSubj = 'nav-search-no-results',
+}: SearchPlaceholderProps) => {
   return (
     <EuiFlexGroup
       style={{ minHeight: 300 }}
-      data-test-subj="nav-search-no-results"
+      data-test-subj={dataTestSubj}
       direction="column"
       gutterSize="xs"
       alignItems="center"

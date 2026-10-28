@@ -151,13 +151,15 @@ export type InternalResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
   context: Record<string, unknown> | undefined,
-  request?: KibanaRequest
+  request?: KibanaRequest,
+  options?: { isUserInteractive?: boolean }
 ) => Promise<void>;
 
 export type ScheduleWorkflow = (
   workflow: WorkflowExecutionEngineModel,
   context: Record<string, unknown>,
-  request: KibanaRequest
+  request: KibanaRequest,
+  options?: { authenticatedUser?: string }
 ) => Promise<ExecuteWorkflowResponse>;
 
 export type BulkScheduleWorkflow = (

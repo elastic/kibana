@@ -10,6 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
@@ -42,6 +43,7 @@ jest.mock('./repositories/workflow_execution_repository', () => ({
 }));
 
 const mockGetWorkflowExecutionStates = jest.fn();
+const mockGetWorkflowsSubscribedToTrigger = jest.fn();
 const mockIsWorkflowEnabledRealtime = jest.fn().mockResolvedValue(true);
 const mockGetWorkflow = jest.fn();
 const mockIsWorkflowEnabled = jest.fn().mockResolvedValue(true);
@@ -51,6 +53,7 @@ jest.mock('@kbn/workflows', () => {
     ...actual,
     WorkflowRepository: jest.fn().mockImplementation(() => ({
       getWorkflowExecutionStates: mockGetWorkflowExecutionStates,
+      getWorkflowsSubscribedToTrigger: mockGetWorkflowsSubscribedToTrigger,
       isWorkflowEnabled: mockIsWorkflowEnabled,
       isWorkflowEnabledRealtime: mockIsWorkflowEnabledRealtime,
       getWorkflow: mockGetWorkflow,
@@ -115,12 +118,14 @@ describe('bulkScheduleWorkflow', () => {
     mockConcurrencyCheckConcurrency.mockResolvedValue(true);
     mockEvaluateConcurrencyKey.mockReturnValue(null);
     mockGetWorkflowExecutionStates.mockResolvedValue(new Map());
+    mockGetWorkflowsSubscribedToTrigger.mockResolvedValue([]);
     mockIsWorkflowEnabled.mockResolvedValue(true);
     mockCreateWorkflowExecution.mockResolvedValue(undefined);
 
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
-      eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      eventDriven: { enabled: true, logEvents: false, maxChainDepth: 10 },
+      storage: { source: 'plain_index', dataRetention: '90d' },
     });
     plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
 
@@ -128,18 +133,31 @@ describe('bulkScheduleWorkflow', () => {
     plugin.setup(coreSetup as any, {
       taskManager: taskManagerMock.createSetup(),
       cloud: {} as any,
-      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+      workflowsExtensions: {
+        registerConnectorAdapter: jest.fn(),
+        getTriggerDefinition: jest.fn().mockReturnValue({
+          id: 'connector.test',
+          requiresConnectorId: true,
+        }),
+      } as any,
     });
 
     coreStart = coreMock.createStart();
     mockIsWorkflowEnabledRealtime.mockReset().mockResolvedValue(true);
     mockDiscardUnstartedExecution.mockReset().mockResolvedValue(undefined);
     taskManager = taskManagerMock.createStart();
+    taskManager.schedule.mockImplementation(async (task) => task as any);
+    taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as any);
     pluginStart = plugin.start(coreStart, {
       taskManager,
       actions: {} as any,
       cloud: {} as any,
-      workflowsExtensions: {} as any,
+      workflowsExtensions: {
+        getTriggerDefinition: jest.fn().mockReturnValue({
+          id: 'connector.test',
+          requiresConnectorId: true,
+        }),
+      } as any,
       licensing: licensingMock.createStart(),
     });
   });
@@ -746,6 +764,7 @@ describe('bulkScheduleWorkflow', () => {
       expect.any(Object),
       expect.objectContaining({ request, cloneApiKey: true })
     );
+    expect(taskManager.schedule.mock.calls[0][0].priority).toBe(TaskPriority.Standard);
   });
 
   it('fails a single execution without scheduling when no identity is attached', async () => {
@@ -771,6 +790,45 @@ describe('bulkScheduleWorkflow', () => {
       { refresh: false }
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  it('schedules connector-triggered workflows with the authenticated ingress principal', async () => {
+    const authenticatedUser = 'service-account-id';
+    const workflow = {
+      id: 'wf-connector-event',
+      name: 'Connector event workflow',
+      enabled: true,
+      spaceId: 'default',
+      definition: {
+        name: 'Connector event workflow',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'connector.test', 'connector-id': 'connector-1' }],
+        steps: [],
+      },
+      yaml: 'name: Connector event workflow',
+      isTestRun: false,
+      valid: true,
+    };
+    mockGetWorkflowsSubscribedToTrigger.mockResolvedValue([workflow]);
+    (getAuthenticatedUser as jest.Mock).mockResolvedValueOnce(undefined);
+
+    await pluginStart.triggerEvents.emitEvent({
+      triggerId: 'connector.test',
+      payload: { connectorId: 'connector-1' },
+      request: { headers: { authorization: 'Bearer essu_token' } } as KibanaRequest,
+      authenticatedUser,
+    });
+
+    expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: workflow.id,
+        executedBy: authenticatedUser,
+      }),
+      { refresh: false }
+    );
+    expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(getAuthenticatedUser).not.toHaveBeenCalled();
   });
 
   it('persists bulk executions as failed and does not schedule when no identity is attached', async () => {

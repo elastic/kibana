@@ -10,6 +10,7 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../../../../../common/constants';
 import { useAuthz, useGetAgentsQuery, useGetPackagePoliciesQuery } from '../../../../../hooks';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../../../common/services/version_specific_policies_utils';
 
 interface UseIsFirstTimeAgentUserResponse {
   isFirstTimeAgentUser?: boolean;
@@ -34,7 +35,10 @@ export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse 
   const policyIds = [...new Set(packagePolicies?.items.flatMap((item) => item.policy_ids) ?? [])];
 
   // now get all agents that are NOT part of a fleet server policy
-  const serverPolicyIdsQuery = policyIds.map((policyId) => `policy_id:"${policyId}"`).join(' or ');
+  // by the base policy id, so agents on `<id>#sentinel` or a version specific policy are included
+  const serverPolicyIdsQuery = policyIds.length
+    ? buildPolicyBaseIdsWithFallbackKuery(policyIds)
+    : '';
 
   // get agents that are not unenrolled and not fleet server
   const kuery =

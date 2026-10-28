@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+import type {
+  PageObjects,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+} from '@kbn/scout';
+import { test as baseTest, spaceTest as baseSpaceTest, createLazyPageObject } from '@kbn/scout';
 import { ConsolePage } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
@@ -27,6 +33,35 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
       page: ExtScoutTestFixtures['page'];
     },
     use: (pageObjects: ExtScoutTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    const extendedPageObjects = {
+      ...pageObjects,
+      console: createLazyPageObject(ConsolePage, page),
+    };
+
+    await use(extendedPageObjects);
+  },
+});
+
+export interface ExtParallelScoutTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: PageObjects & {
+    console: ConsolePage;
+  };
+}
+
+export const spaceTest = baseSpaceTest.extend<
+  ExtParallelScoutTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: ExtParallelScoutTestFixtures['pageObjects'];
+      page: ExtParallelScoutTestFixtures['page'];
+    },
+    use: (pageObjects: ExtParallelScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects = {
       ...pageObjects,

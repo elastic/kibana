@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { EscalationQueueItem } from './types';
+import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 import { EscalationCard } from './escalation_card';
 
 const openEscalation: EscalationQueueItem = {
@@ -31,19 +33,19 @@ const closedEscalation: EscalationQueueItem = {
 const renderCard = (
   escalation: EscalationQueueItem,
   {
-    hasBorder = false,
     onClickCard,
     href,
-  }: { hasBorder?: boolean; onClickCard?: jest.Mock; href?: string } = {}
+    canOpenInvestigationDetails,
+  }: { onClickCard?: jest.Mock; href?: string; canOpenInvestigationDetails?: boolean } = {}
 ) => {
   const renderAssignees = jest.fn(() => <span data-test-subj="assignees-widget" />);
   renderWithKibanaRenderContext(
     <EscalationCard
       escalation={escalation}
-      hasBorder={hasBorder}
       renderAssignees={renderAssignees}
       onClickCard={onClickCard}
       href={href}
+      canOpenInvestigationDetails={canOpenInvestigationDetails}
     />
   );
   return { renderAssignees };
@@ -53,6 +55,52 @@ describe('EscalationCard', () => {
   it('renders the escalation title', () => {
     renderCard(openEscalation);
     expect(screen.getByText(openEscalation.title)).toBeInTheDocument();
+  });
+
+  describe('when the investigation details cannot be opened', () => {
+    const renderInert = (onClickCard = jest.fn()) =>
+      renderCard(openEscalation, {
+        onClickCard,
+        href: '/agent-builder/esc-open-1',
+        canOpenInvestigationDetails: false,
+      });
+
+    it('does not call onClickCard and renders no link or chevron', () => {
+      const onClickCard = jest.fn();
+      renderInert(onClickCard);
+
+      fireEvent.click(screen.getByTestId(`escalationCard-${openEscalation.id}`));
+
+      expect(onClickCard).not.toHaveBeenCalled();
+      expect(
+        screen.queryByTestId(`escalationCardLink-${openEscalation.id}`)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId(`escalationCardChevron-${openEscalation.id}`)
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the assignees and disables the linked investigations badge', () => {
+      renderInert();
+
+      expect(screen.queryByTestId('assignees-widget')).not.toBeInTheDocument();
+      const badge = screen
+        .getByText(String(openEscalation.linkedInvestigationCount))
+        .closest('.euiBadge');
+      expect(badge?.className).toMatch(/disabled/);
+    });
+
+    it('names the missing privilege in a tooltip on the linked investigations badge', async () => {
+      renderInert();
+
+      await userEvent.hover(screen.getByText(String(openEscalation.linkedInvestigationCount)));
+
+      expect(
+        await screen.findByText(
+          ACTIONS_TRANSLATIONS.tooltips.escalationsAgentBuilderPrivilegeRequired
+        )
+      ).toBeInTheDocument();
+    });
   });
 
   describe('link mode (href provided)', () => {

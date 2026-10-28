@@ -70,5 +70,5 @@ export const getAgentShardingMode = async (server: ShardingServer): Promise<Agen
   return licenseStatus === 'licensed' ? 'active' : 'unknown';
 };
 
-export const isAgentShardingActive = async (server: ShardingServer): Promise<boolean> =>
+export const isShardingEnabled = async (server: ShardingServer): Promise<boolean> =>
   (await getAgentShardingMode(server)) === 'active';

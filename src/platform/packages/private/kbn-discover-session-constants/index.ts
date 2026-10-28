@@ -20,12 +20,12 @@ export const MAX_DISCOVER_SESSION_COLUMNS = 10_000;
 export const MAX_DISCOVER_SESSION_COLUMNS_SERVERLESS = 50;
 export const MAX_DISCOVER_SESSION_TABS = 25;
 
-export const MAX_SESSION_TITLE_LENGTH = 256;
-export const MAX_SESSION_DESCRIPTION_LENGTH = 1000;
+export const MAX_SESSION_TITLE_LENGTH = 1_000;
+export const MAX_SESSION_DESCRIPTION_LENGTH = 10_000;
 export const MAX_TAB_LABEL_LENGTH = 120;
 export const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
 export const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
-export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 100;
+export const MAX_DISCOVER_SESSION_CONTROL_PANELS = 1_000;
 export const MAX_DISCOVER_SESSION_TAGS = 1000;
 export const MAX_SEARCH_QUERY_LENGTH = 1000;
 export const MAX_METRICS_TAB_DIMENSIONS = 5;
@@ -38,6 +38,13 @@ export const MAX_METRICS_TAB_STATE_STRING_LENGTH = 1000;
 export const METRICS_GRID_SIMPLE_AGGREGATIONS = ['avg', 'sum', 'min', 'max'] as const;
 
 export const METRICS_GRID_HISTOGRAM_PERCENTILES = ['p50', 'p75', 'p90', 'p95', 'p99'] as const;
+
+/** Lens visualization types used to draw histogram metrics. */
+export const METRICS_GRID_HISTOGRAM_VISUALIZATIONS = ['lnsXY', 'lnsHeatmap'] as const;
+
+export const METRICS_GRID_SORT_FIELDS = ['alphabetically', 'recency'] as const;
+
+export const METRICS_GRID_SORT_DIRECTIONS = ['asc', 'desc'] as const;
 
 export type SavedSearchContentType = typeof SavedSearchType;
 

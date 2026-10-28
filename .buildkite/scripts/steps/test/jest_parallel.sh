@@ -41,7 +41,7 @@ echo "+++ ⚠️ WARNING ⚠️"
 echo "
   console.log(), console.warn(), and console.error() output in jest tests causes a massive amount
   of noise on CI without any perceivable benefit, so they have been disabled. If you want to log
-  output in your test temporarily, you can modify 'src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
+  output in your test temporarily, you can modify 'src/platform/packages/shared/kbn-jest/src/setup/disable_console_logs.js'
 "
 
 # Execute all configs through the combined jest_all runner.

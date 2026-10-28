@@ -61,17 +61,6 @@ describe('createHistogramBoundsQuery', () => {
     );
   });
 
-  it('returns undefined when histogram field types conflict across streams', () => {
-    expect(
-      createHistogramBoundsQuery({
-        metricItem: createMetric({
-          fieldTypes: [ES_FIELD_TYPES.HISTOGRAM, ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
-        }),
-        originalSource: 'metrics-*',
-      })
-    ).toBeUndefined();
-  });
-
   it('casts a legacy histogram with TO_TDIGEST', () => {
     const boundsQuery = createHistogramBoundsQuery({
       metricItem: createMetric({
@@ -119,6 +108,18 @@ describe('createHistogramBoundsQuery', () => {
     ['a numeric histogram instrument', createMetric({ fieldTypes: [ES_FIELD_TYPES.DOUBLE] })],
   ])('returns undefined for %s', (_label, metricItem) => {
     expect(createHistogramBoundsQuery({ metricItem, originalSource: 'metrics-*' })).toBeUndefined();
+  });
+
+  it('omits NULLIFY when WHERE cannot name an extra column', () => {
+    const boundsQuery = createHistogramBoundsQuery({
+      metricItem: createMetric({}),
+      whereStatements: ['@timestamp IS NOT NULL', '1 == 1'],
+      originalSource: 'metrics-*',
+    });
+
+    expect(boundsQuery?.esqlQuery.startsWith('SET unmapped_fields = "NULLIFY";\n')).toBe(false);
+    expect(boundsQuery?.esqlQuery).toContain('| WHERE @timestamp IS NOT NULL');
+    expect(boundsQuery?.esqlQuery).toContain('| WHERE 1 == 1');
   });
 
   it('applies the user WHERE clauses before STATS', () => {

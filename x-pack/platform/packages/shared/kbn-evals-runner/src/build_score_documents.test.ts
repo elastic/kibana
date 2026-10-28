@@ -167,6 +167,32 @@ describe('buildScoreDocuments', () => {
     ]);
   });
 
+  it("prefers a score's own direction, falling back to the evaluator's", () => {
+    const evaluatorResults: EvaluatorResult[] = [
+      {
+        evaluator: { name: 'answer-quality', kind: 'llm', direction: 'maximize' },
+        scores: [
+          { name: 'grounded', score: 0.9 },
+          { name: 'hallucination', score: 0.1, direction: 'minimize' },
+          { name: 'length', score: 0.5, direction: 'neutral' },
+        ],
+      },
+      {
+        evaluator: { name: 'legacy' },
+        scores: [{ name: 'legacy', score: 1, direction: 'minimize' }],
+      },
+    ];
+
+    const body = buildScoreDocuments({ ...baseParams, evaluatorResults });
+
+    expect(body.scores.map(({ evaluator }) => [evaluator.name, evaluator.direction])).toEqual([
+      ['answer-quality.grounded', 'maximize'],
+      ['answer-quality.hallucination', 'minimize'],
+      ['answer-quality.length', 'neutral'],
+      ['legacy', 'minimize'],
+    ]);
+  });
+
   it('omits optional fields that are not provided', () => {
     const evaluatorResults: EvaluatorResult[] = [
       { evaluator: { name: 'latency' }, scores: [{ name: 'latency', score: 12 }] },

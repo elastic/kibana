@@ -26,7 +26,7 @@ const AGENT_ID_HEADER = 'x-agent-builder-agent-id';
  * Returns [] (block all) when the header is present but the agent is not found.
  * Uses the resolved effective configuration so inherited connector restrictions are honoured.
  */
-const resolveAllowedConnectorIds = async (
+const resolveAgentConnectorIdsFromRequest = async (
   request: KibanaRequest,
   internalServices: InternalStartServices
 ): Promise<string[] | undefined> => {
@@ -72,7 +72,7 @@ export function registerInternalConnectorRoutes({
     wrapHandler(async (_ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();
       const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
-      const allowedIds = await resolveAllowedConnectorIds(request, getInternalServices());
+      const allowedIds = await resolveAgentConnectorIdsFromRequest(request, getInternalServices());
 
       const { id: connectorId } = request.query;
 

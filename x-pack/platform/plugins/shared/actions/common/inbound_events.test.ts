@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   buildInboundEventsPath,
   buildInboundEventsUrl,
@@ -45,7 +45,7 @@ describe('buildInboundEventsUrl', () => {
     expect(
       buildInboundEventsUrl({
         publicBaseUrl: 'https://kibana.example.com/kb',
-        spaceId: 'marketing',
+        spaceId: asSpaceId('marketing'),
         connectorTypeId: '.inboundWebhook',
         connectorId: 'sales-ingress',
       })
@@ -57,7 +57,7 @@ describe('buildInboundEventsUrl', () => {
   it('returns a space-aware relative path when publicBaseUrl is omitted', () => {
     expect(
       buildInboundEventsUrl({
-        spaceId: 'marketing',
+        spaceId: asSpaceId('marketing'),
         connectorTypeId: '.inboundWebhook',
         connectorId: 'sales-ingress',
       })

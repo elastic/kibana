@@ -17,6 +17,7 @@ import type {
 import { expect } from '@kbn/scout/ui';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import * as testData from './constants';
+import type { DiscoverPageObjects } from '.';
 
 export type QueryMode = 'classic' | 'esql';
 
@@ -349,7 +350,7 @@ export const waitForStoredQueryMode = async (
 
 export const switchToMode = async (
   page: ScoutPage,
-  pageObjects: ScoutTestFixtures['pageObjects'],
+  pageObjects: DiscoverPageObjects,
   mode: QueryMode
 ): Promise<void> => {
   if (mode === 'esql') {
@@ -394,7 +395,7 @@ export const getCurrentAndStoredMode = async (
  * the caller so it stays in the test body, not hidden inside a helper.
  */
 export const runCascadeQuery = async (
-  pageObjects: ScoutTestFixtures['pageObjects'],
+  pageObjects: DiscoverPageObjects,
   query: string
 ): Promise<boolean> => {
   await pageObjects.discover.writeAndSubmitEsqlQuery(query);

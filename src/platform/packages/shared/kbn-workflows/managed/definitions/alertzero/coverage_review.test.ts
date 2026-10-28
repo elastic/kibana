@@ -40,7 +40,7 @@ const CASE_STEPS = {
   covered_enabled: ['propose_confirm', 'report_unconfirmed_rule'],
 } as const;
 
-/** Every step that runs the proposal gate, in switch order. */
+/** Every step that proposes a fix through the proposal gate, in switch order. */
 const PROPOSAL_STEPS = [
   'propose_enable',
   'report_unresolved_rule',
@@ -51,6 +51,12 @@ const PROPOSAL_STEPS = [
   'report_unknown_verdict',
 ];
 
+/** The manual-autonomy gate that asks before any work on the gap. It proposes no fix. */
+const ENTRY_STEP = 'propose_entry';
+
+/** Every step that runs the proposal gate, in workflow order. */
+const GATE_STEPS = [ENTRY_STEP, ...PROPOSAL_STEPS];
+
 const REPORT_STEPS = PROPOSAL_STEPS.filter((name) => name.startsWith('report_'));
 
 const APPLIED_FLAGS = ['enable_approved_not_applied', 'install_approved_not_applied'] as const;
@@ -59,6 +65,8 @@ interface YamlStep {
   name: string;
   type: string;
   if?: string;
+  status?: string;
+  condition?: string;
   expression?: string;
   with?: Record<string, unknown>;
   steps?: YamlStep[];
@@ -251,15 +259,15 @@ describe('Detection Coverage review', () => {
       ).toBe(expected);
     });
 
-    // Failing before the investigation exists leaves nothing open behind a review
-    // the next sweep will run again.
-    it('stops on a failed lookup before an investigation is opened', () => {
+    // Failing before any proposal keeps the unverified verdict away from the analyst;
+    // the next sweep runs the review again.
+    it('stops on a failed lookup before anything is proposed', () => {
       const fail = stepByName('fail_rule_lookup');
       expect(fail?.type).toBe('workflow.fail');
       expect(fail?.if).toContain('steps.resolve_rule_outcome.output.failed == true');
       expect(stepIndex('resolve_rule')).toBeLessThan(stepIndex('resolve_rule_outcome'));
       expect(stepIndex('resolve_rule_outcome')).toBeLessThan(stepIndex('fail_rule_lookup'));
-      expect(stepIndex('fail_rule_lookup')).toBeLessThan(stepIndex('create_investigation'));
+      expect(stepIndex('fail_rule_lookup')).toBeLessThan(stepIndex('handle_verdict'));
     });
 
     it('offers the install action only with a signature id and a package version', () => {
@@ -285,15 +293,16 @@ describe('Detection Coverage review', () => {
 
     // Without an investigation there is nowhere to propose, so a failed create must
     // fail the run rather than continue into a proposal with an empty conversation id.
-    // A check without a verdict asks nobody, so it opens nothing either.
-    it('opens an investigation from the template for every verdict', () => {
+    // It opens before the check, so the manual entry gate has somewhere to ask.
+    it('opens an investigation from the template before the coverage check', () => {
       const create = stepByName('create_investigation');
       expect(create?.type).toBe('ai.conversation.create');
       expect(create?.with?.template_id).toBe('investigation');
-      expect(create?.if).not.toContain('no_coverage');
-      expect(create?.if).toContain('verdict != null');
-      expect(create?.if).toContain("verdict != ''");
+      expect(create?.if).toContain('steps.read_ki.output.hits.total.value > 0');
+      expect(create?.if).not.toContain('verdict');
       expect(create).not.toHaveProperty('on-failure');
+      expect(stepIndex('gap')).toBeLessThan(stepIndex('create_investigation'));
+      expect(stepIndex('create_investigation')).toBeLessThan(stepIndex('coverage_check'));
     });
 
     it('describes the gap from the indicator, not from raw inputs', () => {
@@ -349,8 +358,14 @@ describe('Detection Coverage review', () => {
 
       const caseSteps = (match: string) =>
         close?.cases?.find((c) => c.match === match)?.steps.map(({ name }) => name);
-      expect(caseSteps('approved')).toEqual(['close_investigation_resolved']);
-      expect(caseSteps('dismissed')).toEqual(['close_investigation_dismissed']);
+      expect(caseSteps('approved')).toEqual([
+        'close_investigation_resolved',
+        'report_investigation_closed_resolved',
+      ]);
+      expect(caseSteps('dismissed')).toEqual([
+        'close_investigation_dismissed',
+        'report_investigation_closed_dismissed',
+      ]);
 
       const resolved = stepByName('close_investigation_resolved');
       const dismissed = stepByName('close_investigation_dismissed');
@@ -454,7 +469,7 @@ describe('Detection Coverage review', () => {
           type === 'workflow.execute' &&
           input?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
       );
-      expect(proposals.map(({ name }) => name)).toEqual(PROPOSAL_STEPS);
+      expect(proposals.map(({ name }) => name)).toEqual(GATE_STEPS);
 
       for (const proposal of proposals) {
         // A gate that fails outright must fail the run rather than read as a decision.
@@ -465,10 +480,16 @@ describe('Detection Coverage review', () => {
       }
     });
 
-    it('runs the enable action against the resolved saved-object id', () => {
+    // The revision lets the action refuse a rule edited since; the investigation gets
+    // the note when the rule was enabled by hand.
+    it('runs the enable action against the resolved rule as it was at proposal time', () => {
       const enable = inputsOf(stepByName('propose_enable'));
       expect(enable.actionWorkflowId).toBe(ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID);
-      expect(enable.actionInput).toEqual({ id: '{{ steps.resolve_rule.output.id }}' });
+      expect(enable.actionInput).toEqual({
+        id: '{{ steps.resolve_rule.output.id }}',
+        expected_revision: '${{ steps.resolve_rule.output.revision }}',
+        investigation_id: '{{ steps.create_investigation.output.conversation_id }}',
+      });
       expect(enable.autoApprove).toBe(false);
     });
 
@@ -497,6 +518,27 @@ describe('Detection Coverage review', () => {
         expect(inputs.category).toBe('configure');
       }
     );
+
+    // Without an action there is no action name to fall back on, so a proposal without
+    // its own title shows in the queue as the gate's generic "Proposed action".
+    it.each([
+      ['propose_entry', 'Review detection gap'],
+      ['propose_confirm', 'Confirm rule coverage'],
+      ...REPORT_STEPS.map((name) => [name, 'Coverage check needs follow-up']),
+    ])('%s is titled "%s"', (name, title) => {
+      expect(inputsOf(stepByName(name)).title).toBe(title);
+    });
+
+    it('gives every proposal without an action a literal title', () => {
+      const untitled = GATE_STEPS.filter((name) => {
+        const { actionWorkflowId, title } = inputsOf(stepByName(name));
+        return (
+          actionWorkflowId === undefined &&
+          (typeof title !== 'string' || title.trim() === '' || title.includes('{{'))
+        );
+      });
+      expect(untitled).toEqual([]);
+    });
 
     it.each(REPORT_STEPS)('%s renders the shared report body', (name) => {
       expect(String(inputsOf(stepByName(name)).comment)).toContain(
@@ -531,13 +573,121 @@ describe('Detection Coverage review', () => {
           type === 'workflow.execute' &&
           input?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
       );
-      expect(proposals.map(({ name }) => name)).toEqual(PROPOSAL_STEPS);
+      expect(proposals.map(({ name }) => name)).toEqual(GATE_STEPS);
       for (const proposal of proposals) {
         expect(inputsOf(proposal).expiresIn).toBeUndefined();
       }
 
       expect(String(reviewDefinition.settings?.timeout)).toMatch(/^\d+h$/);
       expect(hours(reviewDefinition.settings?.timeout)).toBeGreaterThan(72);
+    });
+  });
+
+  describe('manual autonomy entry gate', () => {
+    const gate = stepByName('entry_gate');
+    const decisionSwitch = stepByName('entry_decision');
+    const entryCaseOf = (match: string) =>
+      decisionSwitch?.cases?.find((c) => c.match === match)?.steps.map(({ name }) => name);
+
+    // Manual stops once for permission before any work on the gap. Assisted takes the
+    // false branch straight to the check.
+    it.each([
+      ['manual', { conversation_id: 'c1' }, true],
+      ['assisted', { conversation_id: 'c1' }, false],
+      ['manual', undefined, false],
+    ])(
+      'at %s autonomy with investigation %j, asks before the check: %s',
+      (autonomy, investigation, expected) => {
+        expect(gate?.type).toBe('if');
+        expect(
+          evaluateExpression(String(gate?.condition), {
+            inputs: { autonomy_level: autonomy },
+            steps: { create_investigation: investigation && { output: investigation } },
+          })
+        ).toBe(expected);
+      }
+    );
+
+    // Each outcome is its own branch, so the workflow graph draws it as a lane.
+    it('asks first, then branches on the decision before the check', () => {
+      expect((gate?.steps ?? []).map(({ name }) => name)).toEqual([ENTRY_STEP, 'entry_decision']);
+      expect(gate).not.toHaveProperty('else');
+      expect(decisionSwitch?.type).toBe('switch');
+      expect(entryCaseOf('dismissed')).toEqual([
+        'mark_declined',
+        'close_investigation_declined',
+        'report_investigation_closed_declined',
+        'report_review_completed_declined',
+        'stop_declined',
+      ]);
+      expect(entryCaseOf('expired')).toEqual(['report_review_completed_undecided', 'stop_expired']);
+      // Approval has no case, so it falls through to the check.
+      expect(decisionSwitch?.default).toBeUndefined();
+      expect(stepIndex('create_investigation')).toBeLessThan(stepIndex('entry_gate'));
+      expect(stepIndex('stop_expired')).toBeLessThan(stepIndex('coverage_check'));
+    });
+
+    // Only an approval continues. An expired gate reports an empty decision and must not
+    // fall through into the check.
+    it.each([
+      ['approved', ''],
+      ['dismissed', 'dismissed'],
+      ['', 'expired'],
+    ])('routes the entry decision %j to the case %j', (decision, expected) => {
+      expect(
+        createWorkflowLiquidEngine().parseAndRenderSync(String(decisionSwitch?.expression), {
+          steps: { propose_entry: { output: { decision } } },
+        })
+      ).toBe(expected);
+    });
+
+    it.each(['stop_declined', 'stop_expired'])('%s ends the run', (name) => {
+      expect(stepByName(name)?.type).toBe('workflow.output');
+    });
+
+    it('asks on the investigation, without an action', () => {
+      const inputs = inputsOf(stepByName(ENTRY_STEP));
+      expect(inputs.conversationId).toBe('{{ steps.create_investigation.output.conversation_id }}');
+      expect(inputs).not.toHaveProperty('actionWorkflowId');
+      expect(inputs).not.toHaveProperty('actionInput');
+      // No action, so no inherited category; the queue drops an uncategorised proposal.
+      expect(inputs.category).toBe('configure');
+      expect(String(inputs.comment)).toContain('steps.gap.output.description');
+      expect(String(inputs.comment)).toContain('steps.gap.output.evidence');
+    });
+
+    // A declined gap must leave the queue, or every sweep asks about it again.
+    it('marks a declined gap processed and closes its investigation', () => {
+      const mark = stepByName('mark_declined');
+      const close = stepByName('close_investigation_declined');
+
+      expect(mark?.type).toBe('context-engine.updateKi');
+      expect(mark?.with).toEqual(stepByName('mark_processed')?.with);
+
+      expect(close?.type).toBe('ai.conversation.metadata.patch');
+      expect(close?.with?.conversation_id).toBe(
+        '{{ steps.create_investigation.output.conversation_id }}'
+      );
+      expect((close?.with?.updates as Record<string, string>).status).toBe('closed');
+    });
+
+    it('reports the entry decision from every exit', () => {
+      expect(reviewDefinition.outputs?.map(({ name }) => name)).toContain('entry_decision');
+      expect(withOf('stop_declined')?.entry_decision).toBe('dismissed');
+      expect(withOf('stop_declined')?.ki_processed).toBe(
+        '${{ steps.mark_declined.output.result != null }}'
+      );
+      expect(withOf('stop_expired')?.entry_decision).toBe('expired');
+      expect(stepByName('stop_expired')?.with?.ki_processed).toBe(false);
+      expect(withOf('emit_result')?.entry_decision).toBe(
+        '{{ steps.propose_entry.output.decision }}'
+      );
+    });
+
+    // Approving the entry gate permits the work; it does not approve a fix.
+    it('keeps the entry decision out of the fix decision', () => {
+      expect(JSON.stringify(withOf('record_decision'))).not.toContain(ENTRY_STEP);
+      expect(JSON.stringify(withOf('resolve_outcome'))).not.toContain(ENTRY_STEP);
     });
   });
 
@@ -562,6 +712,8 @@ describe('Detection Coverage review', () => {
       'attach_installed_rule',
       'close_investigation_resolved',
       'close_investigation_dismissed',
+      'mark_declined',
+      'close_investigation_declined',
       'mark_processed',
     ])('%s continues on failure so the run still reports', (name) => {
       expect(stepByName(name)?.['on-failure']?.continue).toBe(true);
@@ -625,6 +777,7 @@ describe('Detection Coverage review', () => {
 
   describe('outcome flags', () => {
     const emit = withOf('emit_result');
+    const failure = withOf('resolve_failure');
     const decision = withOf('record_decision');
     const outcome = withOf('resolve_outcome');
 
@@ -730,16 +883,18 @@ describe('Detection Coverage review', () => {
     // Two different failures need two different messages. "Not found" means the producer
     // or the index is wrong. "No verdict" means the check itself failed.
     it('tells a missing indicator apart from a check that returned no verdict', () => {
-      expect(emit?.check_error).toContain('steps.read_ki.output.hits.total.value == 0');
-      expect(emit?.check_error).toContain('knowledge indicator not found in this space');
-      expect(emit?.check_error).toContain('produced no verdict');
+      expect(failure?.check_error).toContain('steps.read_ki.output.hits.total.value == 0');
+      expect(failure?.check_error).toContain('knowledge indicator not found in this space');
+      expect(failure?.check_error).toContain('produced no verdict');
+      expect(emit?.check_error).toBe('{{ steps.resolve_failure.output.check_error }}');
     });
 
-    // A failed rule-creation child leaves the indicator pending and the run completed; without
-    // this field nothing in the run says why the indicator came back.
+    // A failed rule-creation child leaves the indicator pending; without this field nothing
+    // in the run says why the indicator came back.
     it('reports a failed rule-creation child', () => {
-      expect(emit?.creation_error).toContain('steps.run_rule_creation.error != null');
-      expect(emit?.creation_error).toContain('rule creation failed');
+      expect(failure?.creation_error).toContain('steps.run_rule_creation.error != null');
+      expect(failure?.creation_error).toContain('rule creation failed');
+      expect(emit?.creation_error).toBe('{{ steps.resolve_failure.output.creation_error }}');
     });
 
     it('propagates the creation worker outcome', () => {
@@ -776,6 +931,124 @@ describe('Detection Coverage review', () => {
           steps: { propose_creation: { output: { status: 'expired', decision: '' } } },
         })
       ).toBe(false);
+    });
+  });
+
+  // A model that is missing or fails used to leave an empty open investigation and a green
+  // run (elastic/security-team#20402).
+  describe('failed check or rule creation', () => {
+    const failure = withOf('resolve_failure');
+    const missingModel = 'No connector available for feature "alertzero_efficient".';
+    const render = (template: string | undefined, steps: Record<string, unknown>) =>
+      createWorkflowLiquidEngine().parseAndRenderSync(template ?? '', { steps });
+    const reviewSteps = (steps: Record<string, unknown>) => ({
+      read_ki: { output: { hits: { total: { value: 1 } } } },
+      create_investigation: { output: { conversation_id: 'investigation-1' } },
+      ...steps,
+    });
+
+    it.each([
+      [
+        'a check that failed on a missing model',
+        { coverage_check: { error: { message: missingModel }, output: {} } },
+        `**Coverage check failed:** ${missingModel}\n\nNothing was proposed.\n\nChoose an AI model in Stack Management > Feature Settings.`,
+      ],
+      [
+        'a check that returned no verdict',
+        { coverage_check: { output: { structured_output: {} } } },
+        '**Coverage check failed:** the check returned no verdict.\n\nNothing was proposed.',
+      ],
+      [
+        'a failed rule-creation run',
+        {
+          coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
+          run_rule_creation: { error: { message: 'boom' } },
+        },
+        '**Rule creation failed:** boom',
+      ],
+      // The child's gate can fail after it posted a proposal, so this note claims nothing about one.
+      [
+        'a rule-creation run that failed on a missing model',
+        {
+          coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
+          run_rule_creation: { error: { message: missingModel } },
+        },
+        `**Rule creation failed:** ${missingModel}\n\nChoose an AI model in Stack Management > Feature Settings.`,
+      ],
+      [
+        'a check with a verdict',
+        { coverage_check: { output: { structured_output: { verdict: 'covered_enabled' } } } },
+        '',
+      ],
+    ])('notes %s', (_scenario, steps, expected) => {
+      expect(render(failure?.note, reviewSteps(steps))).toBe(expected);
+    });
+
+    // `system-alertzero-journal-note` rejects a message over 8000 characters.
+    it.each([
+      ['check', { coverage_check: { error: { message: 'x'.repeat(10000) }, output: {} } }],
+      [
+        'rule creation',
+        {
+          coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
+          run_rule_creation: { error: { message: 'x'.repeat(10000) } },
+        },
+      ],
+    ])('keeps a note with an oversized %s error within the journal limit', (_scenario, steps) => {
+      const note = render(failure?.note, reviewSteps(steps));
+      const message = render(inputsOf(stepByName('note_failure')).message as string, {
+        resolve_failure: { output: { note } },
+      });
+      expect(note).toContain(`${'x'.repeat(1997)}...`);
+      expect(message.length).toBeLessThanOrEqual(8000);
+    });
+
+    // No investigation, nowhere to write, and a missing indicator is not a failed run.
+    it('notes nothing without an investigation', () => {
+      expect(
+        render(failure?.note, {
+          read_ki: { output: { hits: { total: { value: 0 } } } },
+          create_investigation: { output: {} },
+          coverage_check: { output: {} },
+        })
+      ).toBe('');
+    });
+
+    it('writes the note on the investigation without failing the run', () => {
+      const note = stepByName('note_failure');
+      expect(note?.if).toBe("${{ steps.resolve_failure.output.note != '' }}");
+      expect(note?.['on-failure']?.continue).toBe(true);
+      expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
+      expect(inputsOf(note).conversation_id).toBe(
+        '{{ steps.create_investigation.output.conversation_id }}'
+      );
+      expect(inputsOf(note).message).toContain('{{ steps.resolve_failure.output.note }}');
+    });
+
+    it('fails the run after the note, with the same outputs as a completed run', () => {
+      const emitFailure = stepByName('emit_failure');
+      expect(emitFailure?.status).toBe('failed');
+      expect(emitFailure?.if).toBe(stepByName('note_failure')?.if);
+      expect(stepIndex('note_failure')).toBeLessThan(stepIndex('emit_failure'));
+      expect(stepIndex('emit_failure')).toBeLessThan(stepIndex('emit_result'));
+
+      const declared = (reviewDefinition.outputs ?? []).map(({ name }) => name);
+      const emitted = Object.keys(emitFailure?.with ?? {}).filter((key) => key !== 'message');
+      expect(declared).toEqual(expect.arrayContaining(emitted));
+      for (const key of emitted) {
+        expect(emitFailure?.with?.[key]).toBe(stepByName('emit_result')?.with?.[key]);
+      }
+    });
+
+    it.each([
+      [{ check_error: 'coverage_check produced no verdict', creation_error: '' }],
+      [{ check_error: '', creation_error: 'rule creation failed: boom' }],
+    ])('fails the run with the error that happened: %o', (output) => {
+      expect(
+        render(stepByName('emit_failure')?.with?.message as string, {
+          resolve_failure: { output },
+        })
+      ).toBe(output.check_error || output.creation_error);
     });
   });
 

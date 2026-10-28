@@ -32,6 +32,7 @@ import {
   OBS_V1_LOGS_URL_RE,
   OBS_V1_NESTED_RULES_URL_RE,
   OBS_V1_RULE_NAME_HREF_RE,
+  OBS_V1_SETTINGS_URL_RE,
   STANDALONE_RULES_APP_URL_RE,
 } from '../fixtures/page_objects';
 import {
@@ -41,12 +42,11 @@ import {
 
 /*
  * Lives under the default Scout config (`test/scout/`) so
- * `alerting:v2:enabled` stays unpinned and can be flipped at runtime. Flag
+ * `alerting:v2:enabled` is not pinned by a server arg and can be flipped at runtime. Flag
  * on/off URL mounts, tab switches, and classic v1 host-aware coverage share
  * this one describe so they cannot run on parallel workers against the same
  * global setting (Scout `fullyParallel: false`). Scout allows only one
- * describe per file and forbids nesting. The dedicated `scout_alerting_v2`
- * config pins the setting on and cannot cover the flag-off case.
+ * describe per file and forbids nesting.
  *
  * One test per URL so a redirect or title mismatch is isolated to that path.
  * Assert v1 page URLs only after in-page clicks (or browser back/forward),
@@ -117,7 +117,7 @@ test.describe(
         log,
         pageObjects,
       }) => {
-        await unsetAlertingV2EnabledSetting(kbnClient);
+        await setAlertingV2EnabledSetting(kbnClient, false);
 
         const requested = pageObjects.observabilityAlerting.urlFor(surface.path);
         log.debug(`[observability-alerting] requested ${requested}`);
@@ -236,7 +236,7 @@ test.describe(
       await rules.clickRuleName(ruleName);
       await expect(rules.backLink).toBeVisible({ timeout: 30_000 });
 
-      await test.step('back href stays on the observability list, not /rules/v1/rules', async () => {
+      await test.step('back href stays on the observability list, not /rules/classic/rules', async () => {
         await expect(rules.backLink).toHaveAttribute('href', OBS_V1_LIST_HREF_RE);
         await expectObservabilityHref(rules.backLink);
       });
@@ -325,20 +325,20 @@ test.describe(
       });
     });
 
-    test('settings flyout does not leave Observability Alerting', async ({ page, pageObjects }) => {
+    test('settings page does not leave Observability Alerting', async ({ page, pageObjects }) => {
       const rules = pageObjects.observabilityClassicRules;
       await rules.goto();
       await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });
 
-      await test.step('open settings without changing the URL', async () => {
-        await rules.openSettingsFlyout();
-        await expect(rules.settingsFlyout).toBeVisible();
-        await expectObservabilityHost(page, OBS_V1_LIST_URL_RE);
+      await test.step('open settings under the observability classic host', async () => {
+        await rules.openSettingsPage();
+        await expect(rules.settingsPage).toBeVisible();
+        await expectObservabilityHost(page, OBS_V1_SETTINGS_URL_RE);
       });
 
-      await test.step('close settings and stay on the observability rules list', async () => {
-        await rules.closeSettingsFlyout();
-        await expect(rules.settingsFlyout).toBeHidden();
+      await test.step('cancel settings and return to the observability rules list', async () => {
+        await rules.cancelSettingsPage();
+        await expect(rules.settingsPage).toBeHidden();
         await expectObservabilityHost(page, OBS_V1_LIST_URL_RE);
       });
     });
@@ -406,10 +406,7 @@ test.describe(
       });
     });
 
-    test('settings from logs does not leave Observability Alerting', async ({
-      page,
-      pageObjects,
-    }) => {
+    test('settings from logs stays under Observability Alerting', async ({ page, pageObjects }) => {
       const rules = pageObjects.observabilityClassicRules;
       await rules.goto();
       await expect(rules.rulesList).toBeVisible({ timeout: 30_000 });
@@ -417,15 +414,15 @@ test.describe(
       await expect(rules.pageTitle).toHaveText('Logs', { timeout: 30_000 });
       await expectObservabilityHost(page, OBS_V1_LOGS_URL_RE);
 
-      await test.step('open settings without changing the logs URL', async () => {
-        await rules.openSettingsFlyout();
-        await expect(rules.settingsFlyout).toBeVisible();
-        await expectObservabilityHost(page, OBS_V1_LOGS_URL_RE);
+      await test.step('open settings under the observability classic host', async () => {
+        await rules.openSettingsPage();
+        await expect(rules.settingsPage).toBeVisible();
+        await expectObservabilityHost(page, OBS_V1_SETTINGS_URL_RE);
       });
 
-      await test.step('close settings and stay on observability logs', async () => {
-        await rules.closeSettingsFlyout();
-        await expect(rules.settingsFlyout).toBeHidden();
+      await test.step('cancel settings and return to observability logs', async () => {
+        await rules.cancelSettingsPage();
+        await expect(rules.settingsPage).toBeHidden();
         await expectObservabilityHost(page, OBS_V1_LOGS_URL_RE);
       });
     });

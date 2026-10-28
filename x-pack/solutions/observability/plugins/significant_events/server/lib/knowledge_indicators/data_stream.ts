@@ -9,8 +9,7 @@ import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
 import type { Condition } from '@kbn/streamlang';
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
-import type { QueryType } from '@kbn/significant-events-schema';
-import type { QueryFeature } from '@kbn/significant-events-schema';
+import type { QueryFeature, QueryType, SignificantEventType } from '@kbn/significant-events-schema';
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY, type KnowledgeIndicatorType } from './fields';
 
 export const KNOWLEDGE_INDICATORS_DATA_STREAM = '.significant_events-knowledge_indicators';
@@ -28,14 +27,15 @@ export const knowledgeIndicatorsMappings = {
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     id: mappings.keyword(),
+    revision_id: mappings.keyword(),
     type: mappings.keyword(),
     title: mappings.keyword(),
     description: mappings.text(),
     tags: mappings.keyword(),
     evidence: mappings.keyword(),
-    stream: mappings.object({
+    source: mappings.object({
       properties: {
-        name: mappings.keyword(),
+        id: mappings.keyword(),
       },
     }),
     deleted: mappings.boolean(),
@@ -59,6 +59,7 @@ export const knowledgeIndicatorsMappings = {
       properties: {
         esql: mappings.matchOnlyText(),
         query_type: mappings.keyword(),
+        category: mappings.keyword(),
         severity_score: mappings.long(),
         rule_backed: mappings.boolean(),
         rule_id: mappings.keyword(),
@@ -76,8 +77,16 @@ export const knowledgeIndicatorsMappings = {
 interface StoredKiRevisionIdentity {
   '@timestamp': string;
   id: string;
-  'stream.name': string;
+  revision_id: string;
+  'source.id': string;
 }
+
+/**
+ * Stands in for `_id`, which ES|QL cannot push down; kept short because every current revision
+ * is inlined into the ranking statement, which ES|QL caps at 1,000,000 characters.
+ */
+export const computeRevisionId = ({ id, timestamp }: { id: string; timestamp: string }): string =>
+  `${id}:${timestamp}`;
 
 export interface StoredFeature {
   type: string;
@@ -93,6 +102,7 @@ export interface StoredFeature {
 export interface StoredQuery {
   esql: string;
   query_type: QueryType;
+  category?: SignificantEventType;
   rule_backed: boolean;
   rule_id: string;
   severity_score?: number;
@@ -123,11 +133,8 @@ export interface StoredQueryKnowledgeIndicator extends StoredKiRevisionIdentity 
   query: StoredQuery;
 }
 
-export interface StoredTombstone {
-  '@timestamp': string;
-  id: string;
+export interface StoredTombstone extends StoredKiRevisionIdentity {
   type: KnowledgeIndicatorType;
-  'stream.name': string;
   deleted: true;
 }
 
@@ -165,7 +172,7 @@ export const knowledgeIndicatorsDataStream: DataStreamDefinition<
   StoredKnowledgeIndicator & Record<string, unknown>
 > = {
   name: KNOWLEDGE_INDICATORS_DATA_STREAM,
-  version: 2,
+  version: 5,
   hidden: true,
   template: {
     priority: 500,

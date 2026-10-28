@@ -20,7 +20,10 @@ import { normalizeMachineLearningJobIds } from '../../../../../common/detection_
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { DiffView } from './json_diff/diff_view';
-import { stringifyWithExpandedEmpties } from './three_way_diff/comparison_side/utils';
+import {
+  normalizeRequiredFieldsForDisplay,
+  stringifyWithExpandedEmpties,
+} from './three_way_diff/comparison_side/utils';
 
 /* Inclding these properties in diff display might be confusing to users. */
 const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
@@ -82,7 +85,7 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
   rule.note = rule.note ?? '';
 
   /*
-    Removes empty arrays (techniques, subtechniques) from the MITRE ATT&CK value.
+    Removes empty arrays (techniques, subtechniques) from the threat mappings value.
     The same processing is done in the rule editing UI before submitting the edits.
   */
   rule.threat = filterEmptyThreats(rule.threat);
@@ -139,8 +142,8 @@ export const getRuleDiffSources = (
   );
 
   return [
-    stringifyWithExpandedEmpties(visibleOldRuleProperties),
-    stringifyWithExpandedEmpties(visibleNewRuleProperties),
+    stringifyWithExpandedEmpties(normalizeRequiredFields(visibleOldRuleProperties)),
+    stringifyWithExpandedEmpties(normalizeRequiredFields(visibleNewRuleProperties)),
   ];
 };
 
@@ -198,4 +201,16 @@ export const RuleDiffTab = ({
       </EuiPanel>
     </>
   );
+};
+
+/* Order and duplicates of required fields don't matter. */
+const normalizeRequiredFields = (ruleProperties: Partial<RuleResponse>): Partial<RuleResponse> => {
+  if (!ruleProperties.required_fields) {
+    return ruleProperties;
+  }
+
+  return {
+    ...ruleProperties,
+    required_fields: normalizeRequiredFieldsForDisplay(ruleProperties.required_fields),
+  };
 };

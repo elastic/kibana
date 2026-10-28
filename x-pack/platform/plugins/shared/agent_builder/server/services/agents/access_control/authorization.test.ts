@@ -15,6 +15,7 @@ import {
 } from '@kbn/agent-builder-common';
 import {
   canChangeAgentAccessControl,
+  canConfigureAgentApprovals,
   canDeleteAgent,
   getEffectiveAgentRole,
   hasAgentReadAccess,
@@ -252,6 +253,55 @@ describe('agent access-control authorization', () => {
           currentUser: bob,
         })
       ).toBe(false);
+    });
+  });
+
+  describe('canConfigureAgentApprovals', () => {
+    const accessControlFor = (role: AgentAccessControlRole) => ({
+      access_mode: AgentAccessControlMode.Public,
+      entries: [{ type: 'user' as const, id: 'bob-id', role }],
+    });
+
+    it.each([
+      { caller: 'an admin', currentUser: adminUser, role: undefined, expected: true },
+      { caller: 'the owner', currentUser: ownerUser, role: undefined, expected: true },
+      {
+        caller: 'a Manager',
+        currentUser: bob,
+        role: AgentAccessControlRole.Manager,
+        expected: true,
+      },
+      {
+        caller: 'an Editor',
+        currentUser: bob,
+        role: AgentAccessControlRole.Editor,
+        expected: false,
+      },
+      { caller: 'a User', currentUser: bob, role: AgentAccessControlRole.User, expected: false },
+    ])('returns $expected for $caller', ({ currentUser, role, expected }) => {
+      expect(
+        canConfigureAgentApprovals({
+          agentId: 'agent-1',
+          accessControl: role ? accessControlFor(role) : undefined,
+          owner,
+          currentUser,
+        })
+      ).toBe(expected);
+    });
+
+    it.each([
+      { caller: 'an admin', currentUser: adminUser, expected: true },
+      { caller: 'the owner', currentUser: ownerUser, expected: false },
+      { caller: 'a Manager', currentUser: bob, expected: false },
+    ])('returns $expected for $caller on the default agent', ({ currentUser, expected }) => {
+      expect(
+        canConfigureAgentApprovals({
+          agentId: agentBuilderDefaultAgentId,
+          accessControl: accessControlFor(AgentAccessControlRole.Manager),
+          owner,
+          currentUser,
+        })
+      ).toBe(expected);
     });
   });
 });

@@ -8,25 +8,25 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  ExecutionType,
-  HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
-  HITL_TOKEN_HASH_INPUT_FIELD,
-  TerminalExecutionStatuses,
-} from '@kbn/workflows';
+import { ExecutionType } from '@kbn/workflows';
 import type {
   EsWorkflowStepExecution,
+  ExecutionStatus,
   WorkflowExecutionDto,
-  WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
 } from '@kbn/workflows';
 import type { ChildWorkflowExecutionItem } from '@kbn/workflows/types/v1';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server';
+import { bulkUpdaterItem, getBulkUpdaterWriteResult } from '@kbn/workflows-execution-engine/server';
 import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 
+import {
+  createMarkStepAsRespondedUpdater,
+  MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
+} from './mark_step_as_responded_updater';
 import type { WorkflowExecutionQueryDeps } from './types';
 import { WORKFLOWS_INDEX } from '../../common';
 import { buildTimeRangeFilter } from '../api/lib/build_time_range_filter';
@@ -61,20 +61,10 @@ const DEFAULT_PAGE_SIZE = 100;
 /** Max completed steps fetched per page when resolving predecessor `output.reasoning`. */
 const PREDECESSOR_REASONING_MAX_HITS = 1000;
 
-const SETTLED_STEP_STATUSES: readonly string[] = TerminalExecutionStatuses;
-
 const PROCESSED_WAIT_FOR_INPUT_SHOULD: estypes.QueryDslQueryContainer[] = [
   { exists: { field: 'finishedAt' } },
   { exists: { field: 'hitl.respondedAt' } },
 ];
-
-/**
- * Extends EsWorkflowStepExecution with the legacy `endedAt` field
- * that may exist on older documents written before the rename to `finishedAt`.
- */
-interface StepExecutionWithLegacyFields extends EsWorkflowStepExecution {
-  endedAt?: string;
-}
 
 /**
  * Filters applied to processed wait-for-input step executions. Multi-value
@@ -126,6 +116,13 @@ interface ProcessedWaitForInputFacetAggs {
   respondedBy: estypes.AggregationsStringTermsAggregate;
 }
 
+/** A workflow execution's status, read without its definition, context or steps. */
+export interface WorkflowExecutionStatusItem {
+  id: string;
+  workflowId: string;
+  status: ExecutionStatus;
+}
+
 export class WorkflowExecutionQueryService {
   constructor(private readonly deps: WorkflowExecutionQueryDeps) {}
 
@@ -144,6 +141,24 @@ export class WorkflowExecutionQueryService {
       includeOutput: options?.includeOutput,
       omitStepExecutions: options?.omitStepExecutions,
     });
+  }
+
+  /** The status of each execution found in the space; missing ids are left out of the result. */
+  async getWorkflowExecutionStatuses(
+    executionIds: string[],
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusItem[]> {
+    const ids = [...new Set(executionIds)];
+    if (ids.length === 0) {
+      return [];
+    }
+    const { items } = await this.deps.workflowExecutionsDataClient.getByIds(ids, {
+      sourceIncludes: ['spaceId', 'workflowId', 'status'],
+    });
+    return items
+      .map(({ document }) => document)
+      .filter((execution) => execution.spaceId === spaceId)
+      .map(({ id, workflowId, status }) => ({ id, workflowId, status }));
   }
 
   async getChildWorkflowExecutions(
@@ -333,40 +348,6 @@ export class WorkflowExecutionQueryService {
       size,
       page,
       collapse: params.collapse ? { field: params.collapse } : undefined,
-    });
-  }
-
-  async getWorkflowExecutionHistory(
-    executionId: string,
-    spaceId: string
-  ): Promise<WorkflowExecutionHistoryModel[]> {
-    const response = (await this.deps.stepExecutionsDataClient.search({
-      query: {
-        bool: {
-          must: [{ term: { executionId } }, { term: { spaceId } }],
-        },
-      },
-      sort: [{ timestamp: { order: 'asc' } }],
-    })) as estypes.SearchResponse<StepExecutionWithLegacyFields>;
-
-    return response.hits.hits.map((hit) => {
-      if (!hit._source) {
-        throw new Error('Missing _source in search result');
-      }
-      const source = hit._source;
-      const startedAt = source.startedAt;
-      const finishedAt = source.endedAt || source.finishedAt;
-
-      let duration = 0;
-      if (startedAt && finishedAt) {
-        duration = new Date(finishedAt).getTime() - new Date(startedAt).getTime();
-      }
-
-      return {
-        ...source,
-        finishedAt: finishedAt || '',
-        duration,
-      };
     });
   }
 
@@ -926,46 +907,40 @@ export class WorkflowExecutionQueryService {
    * Claims a `waitForInput` step by writing HITL audit metadata before resume.
    *
    * Returns `true` when this caller won the claim, or `false` when the doc is
-   * missing, belongs to another space, has already settled (terminal status
-   * or `finishedAt` set), or was already claimed. Unexpected ES failures are
-   * rethrown.
+   * missing, belongs to another space or to an execution other than
+   * `executionId`, is not a HITL wait step, has already settled (terminal
+   * status or `finishedAt` set), or was already claimed. Unexpected ES
+   * failures are rethrown.
    */
   async markStepAsResponded(
     stepExecutionId: string,
+    executionId: string,
     audit: { respondedBy: string; respondedAt: string; channel?: string },
     spaceId: string
   ): Promise<boolean> {
     try {
-      const response = await this.deps.stepExecutionsDataClient.scriptUpdate({
-        id: stepExecutionId,
-        // `respondedAt` is the first-writer-wins guard. Retrying conflicts
-        // lets simultaneous updates re-run the script against the winner's
-        // write and return `noop` instead of leaking a version conflict.
-        retryOnConflict: 3,
-        script:
-          'if (ctx._source.spaceId != params.spaceId) { ctx.op = "noop"; return; }' +
-          'if (ctx._source.finishedAt != null) { ctx.op = "noop"; return; }' +
-          'if (ctx._source.status != null && params.settledStatuses.contains(ctx._source.status)) { ctx.op = "noop"; return; }' +
-          'if (ctx._source.hitl != null && ctx._source.hitl.respondedAt != null) { ctx.op = "noop"; return; }' +
-          'if (ctx._source.hitl == null) { ctx._source.hitl = [:]; }' +
-          'ctx._source.hitl.respondedBy = params.respondedBy;' +
-          'ctx._source.hitl.respondedAt = params.respondedAt;' +
-          'if (params.channel != null) { ctx._source.hitl.channel = params.channel; }' +
-          'if (ctx._source.input != null) { ctx._source.input.remove(params.tokenHashField); ctx._source.input.remove(params.tokenExpiresAtField); }',
-        params: {
-          spaceId,
-          respondedBy: audit.respondedBy,
-          respondedAt: audit.respondedAt,
-          channel: audit.channel ?? null,
-          settledStatuses: SETTLED_STEP_STATUSES,
-          tokenHashField: HITL_TOKEN_HASH_INPUT_FIELD,
-          tokenExpiresAtField: HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
-        },
+      const { items } = await this.deps.stepExecutionsDataClient.bulk({
         refresh: 'wait_for',
+        items: [
+          bulkUpdaterItem<
+            EsWorkflowStepExecution,
+            (typeof MARK_STEP_AS_RESPONDED_SOURCE_FIELDS)[number]
+          >({
+            operation: 'update',
+            documentId: stepExecutionId,
+            sourceFields: MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
+            retryOnConflict: 3,
+            updater: createMarkStepAsRespondedUpdater(audit, spaceId, executionId),
+          }),
+        ],
       });
-      // not_found means the doc was concurrently deleted; treat as a lost claim.
-      return response.result === 'updated';
-      // scriptUpdate absorbs 404 as { result: 'not_found' }; this catch handles all other ES errors.
+
+      const writeResult = getBulkUpdaterWriteResult(items[0]);
+      if (writeResult === 'conflict') {
+        // Retries were exhausted without a write; this is not a lost claim, so surface it.
+        throw new Error(`Version conflict claiming step execution ${stepExecutionId}`);
+      }
+      return writeResult === 'updated';
     } catch (error) {
       this.deps.logger.error(
         `Failed to mark step execution ${stepExecutionId} as responded: ${error}`

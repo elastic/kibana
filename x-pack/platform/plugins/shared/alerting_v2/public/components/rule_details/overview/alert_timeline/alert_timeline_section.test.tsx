@@ -10,7 +10,10 @@ import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMockLocators, MockLocatorProvider } from '../../../../test_utils/test_providers';
 import { AlertTimelineSection } from './alert_timeline_section';
-import { AlertingV2EpisodesLocatorDefinition, createAlertingV2HostApp } from '../../../../locators';
+import {
+  AlertingV2EpisodesLocatorDefinition,
+  createAlertingV2HostApp,
+} from '../../../../../common/locators';
 
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',
@@ -33,7 +36,7 @@ jest.mock('./use_alert_timeline_url_state', () => ({
   useAlertTimelineUrlState: () => [{ from: 'now-24h', to: 'now' }, jest.fn()],
 }));
 
-jest.mock('../../../../utils/discover_href_for_episode', () => ({
+jest.mock('../../../../utils/discover_href_for_alert', () => ({
   getDiscoverHrefForRuleQuery: () => '/discover',
 }));
 

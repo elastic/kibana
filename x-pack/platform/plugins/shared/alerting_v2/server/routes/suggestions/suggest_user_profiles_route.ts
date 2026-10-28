@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { errorResponseSchema, suggestUserProfilesResponseSchema } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
@@ -20,22 +20,24 @@ import { ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH } from '../cons
 
 const ROUTE_AUTH_PRIVILEGES = [ALERTING_V2_API_PRIVILEGES.alerts.read] as const;
 
-const suggestUserProfilesBodySchema = z
-  .object({
-    name: z
-      .string()
-      .max(256)
-      .optional()
-      .describe('Name fragment to search by. Omit or leave empty to list profiles unfiltered.'),
-    size: z
-      .number()
-      .int()
-      .min(0)
-      .max(100)
-      .optional()
-      .describe('Maximum number of profiles to return. Defaults to 10'),
-  })
-  .strict();
+const suggestUserProfilesBodySchema = lazySchema(() =>
+  z
+    .object({
+      name: z
+        .string()
+        .max(256)
+        .optional()
+        .describe('Name fragment to search by. Omit or leave empty to list profiles unfiltered.'),
+      size: z
+        .number()
+        .int()
+        .min(0)
+        .max(100)
+        .optional()
+        .describe('Maximum number of profiles to return. Defaults to 10'),
+    })
+    .strict()
+);
 
 type SuggestUserProfilesBody = z.infer<typeof suggestUserProfilesBodySchema>;
 

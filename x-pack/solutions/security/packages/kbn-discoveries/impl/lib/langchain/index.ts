@@ -15,4 +15,9 @@ export {
   getRefineOrEndEdge,
   getRetrieveAnonymizedDocsOrGenerateEdge,
 } from './output_chunking';
+export {
+  extractJson,
+  getFormatInstructionsFromZodV4Schema,
+  getStructuredGenerationPrompt,
+} from './output_chunking/nodes/helpers';
 export { NodeType } from './constants';

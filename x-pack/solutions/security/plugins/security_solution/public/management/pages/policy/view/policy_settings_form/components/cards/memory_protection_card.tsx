@@ -28,6 +28,7 @@ import {
   clearCustomYaraSignaturesIfEnabled,
   setCustomYaraSignatures,
 } from '../../../../../../../../common/endpoint/models/policy_config_helpers';
+import { POLICY_PROTECTION_FAMILY_TITLES } from '../../../../../../../../common/endpoint/models/policy_settings_ui_labels';
 import type { MemoryProtectionOSes } from '../../../../types';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
@@ -115,9 +116,7 @@ export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
 
     return (
       <SettingCard
-        type={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory_protection', {
-          defaultMessage: 'Memory threat',
-        })}
+        type={POLICY_PROTECTION_FAMILY_TITLES.memory_protection}
         supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
         dataTestSubj={getTestId()}
         selected={selected}

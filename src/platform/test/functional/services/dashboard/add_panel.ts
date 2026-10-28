@@ -51,11 +51,6 @@ export class DashboardAddPanelService extends FtrService {
     await this.openAddPanelFlyout();
     await this.clickAddNewPanelFromUIActionLink('Vega');
   }
-  async clickAddMarkdownPanel() {
-    this.log.debug('DashboardAddPanel.clickAddMarkdownPanel');
-    await this.openAddPanelFlyout();
-    await this.clickAddNewPanelFromUIActionLink('Markdown text');
-  }
 
   async clickAddMapPanel() {
     this.log.debug('DashboardAddPanel.clickAddMapPanel');

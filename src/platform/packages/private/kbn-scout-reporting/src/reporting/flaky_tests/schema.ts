@@ -113,8 +113,9 @@ export const FlakyTestBranchStatsSchema = z.object({
 export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;
 
 /**
- * Build counts of one test on one Scout test target, any branch. Only Scout (Playwright) runs
- * record a target; Jest, FTR and Cypress runs report the mode `unknown`.
+ * Build counts of one test on one Scout test target, any branch. Scout (Playwright) and FTR runs
+ * record a target; Jest and Cypress runs, and FTR runs whose target can't be resolved, report
+ * the mode `unknown`.
  */
 export const FlakyTestTargetStatsSchema = z.object({
   /** `<arch>-<domain>`, e.g. `stateful-classic` or `serverless-security_complete`. */

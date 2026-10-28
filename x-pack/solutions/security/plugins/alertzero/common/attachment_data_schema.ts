@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * AlertZero's equivalent of security_solution's `securityAttachmentDataSchema`: every
  * Hunt Watch attachment type accepts an optional `attachmentLabel` that survives validation
  * and drives `getLabel` overrides on the client.
  */
-export const alertZeroAttachmentDataSchema = z.object({
-  // `.trim().min(1)` so a whitespace-only label cannot reach `getLabel`, where
-  // `?? DEFAULT_LABEL` would keep it and render a blank attachment header title.
-  attachmentLabel: z.string().trim().min(1).max(256).optional(),
-});
+export const alertZeroAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    // `.trim().min(1)` so a whitespace-only label cannot reach `getLabel`, where
+    // `?? DEFAULT_LABEL` would keep it and render a blank attachment header title.
+    attachmentLabel: z.string().trim().min(1).max(256).optional(),
+  })
+);

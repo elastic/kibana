@@ -6,6 +6,8 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { sourceWithSlug } from '../../utils/test_helpers';
+import { validateEsqlQueryForSourceOrThrow } from '../../../lib/significant_events/validate_esql_query';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 
 jest.mock('uuid', () => ({
@@ -14,20 +16,12 @@ jest.mock('uuid', () => ({
 
 jest.mock('../../../lib/significant_events/validate_esql_query', () => ({
   ...jest.requireActual('../../../lib/significant_events/validate_esql_query'),
-  validateEsqlQueryForStreamOrThrow: jest.fn(),
+  validateEsqlQueryForSourceOrThrow: jest.fn(),
 }));
 
 describe('createQueryKnowledgeIndicatorToolHandler', () => {
   const logger = loggingSystemMock.createLogger();
-  const definition = {
-    name: 'logs.test',
-    ingest: {
-      classic: { field_overrides: {} },
-      processing: [],
-      lifecycle: { inherit: {} },
-      failure_store: { inherit: {} },
-    },
-  };
+  const source = sourceWithSlug('logs.test', { view_name: 'logs.test' });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -40,7 +34,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
 
     const result = await createQueryKnowledgeIndicatorToolHandler({
       kiClient: kiClient as never,
-      definition: definition as never,
+      source,
       queryInput: {
         id: 'provided-id',
         title: 'Suspicious query',
@@ -52,8 +46,12 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     });
 
     expect(result).toEqual({ id: 'provided-id' });
+    expect(validateEsqlQueryForSourceOrThrow).toHaveBeenCalledWith({
+      esqlQuery: 'FROM logs.test, logs.test.* | stats c = count()',
+      viewName: source.view_name,
+    });
     expect(kiClient.upsertQuery).toHaveBeenCalledWith(
-      definition,
+      source.id,
       expect.objectContaining({
         id: 'provided-id',
         type: 'stats',
@@ -72,7 +70,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
 
     const result = await createQueryKnowledgeIndicatorToolHandler({
       kiClient: kiClient as never,
-      definition: definition as never,
+      source,
       queryInput: {
         title: 'Suspicious query',
         description: 'Find suspicious events',
@@ -83,7 +81,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
 
     expect(result).toEqual({ id: 'generated-query-id' });
     expect(kiClient.upsertQuery).toHaveBeenCalledWith(
-      definition,
+      source.id,
       expect.objectContaining({
         id: 'generated-query-id',
       })
@@ -98,7 +96,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     await expect(
       createQueryKnowledgeIndicatorToolHandler({
         kiClient: kiClient as never,
-        definition: definition as never,
+        source,
         queryInput: {
           title: 'Over-broad',
           description: 'ORed terms',
@@ -111,6 +109,30 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     expect(kiClient.upsertQuery).not.toHaveBeenCalled();
   });
 
+  it('rejects a cast inside a full-text predicate', async () => {
+    const kiClient = {
+      upsertQuery: jest.fn().mockResolvedValue(undefined),
+    };
+
+    await expect(
+      createQueryKnowledgeIndicatorToolHandler({
+        kiClient: kiClient as never,
+        source,
+        queryInput: {
+          title: 'Cast in MATCH_PHRASE',
+          description: 'Union-typed field',
+          esql: {
+            query:
+              'FROM logs.test, logs.test.* | WHERE MATCH_PHRASE(exception.message::keyword, "i/o timeout")',
+          },
+        },
+        logger,
+      })
+    ).rejects.toThrow('not a field from an index mapping');
+
+    expect(kiClient.upsertQuery).not.toHaveBeenCalled();
+  });
+
   it('throws when query upsert fails', async () => {
     const kiClient = {
       upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')),
@@ -119,7 +141,7 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     await expect(
       createQueryKnowledgeIndicatorToolHandler({
         kiClient: kiClient as never,
-        definition: definition as never,
+        source,
         queryInput: {
           title: 'Suspicious query',
           description: 'Find suspicious events',

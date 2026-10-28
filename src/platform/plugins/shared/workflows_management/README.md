@@ -244,7 +244,7 @@ These routes use `access: internal` and are **not** included in the public OpenA
 | GET | `/internal/workflows/config` | Execution engine feature flags for the plugin. |
 | POST | `/internal/workflows/disable` | Disable all workflows (administrative). |
 | POST | `/api/workflows/validate` | Validate a workflow YAML definition without saving. |
-| GET | `/internal/workflows/library/templates` | List Workflow Template Library catalog rows (optional `solution` / `category` / `search` filters). Gated by the `workflowsManagement:library:enabled` global uiSetting; returns `503` when off. |
+| GET | `/internal/workflows/library/templates` | List Workflow Template library catalog rows (optional `solution` / `category` / `search` filters). Gated by the `workflowsManagement:library:enabled` global uiSetting; returns `503` when off. |
 | GET | `/internal/workflows/library/templates/{slug}` | Get the parsed template body (metadata + workflow body + raw YAML) for a catalog slug. `404` when the slug is missing, `503` when the library is disabled. |
 | GET | `/internal/workflows/library/health` | Diagnostic — returns the cache's `sourceMode`, `lastRefreshAt`, and `lastError`. Not gated by the library toggle so admins can reach it while the feature is off. |
 
@@ -365,7 +365,7 @@ Workflows are space-aware and respect Kibana Spaces boundaries.
 
 ### Queryable execution data
 
-The managed data views for `.workflows-executions*` and `.workflows-step-executions*` use the Workflows feature privileges to provide space-scoped access with DLS and FLS.
+The managed data views for `.workflows-executions*` and `.workflows-step-executions*` (plain indexes and the `.workflows-executions-data-stream` / `.workflows-step-executions-data-stream` hidden data streams) use the Workflows feature privileges to provide space-scoped access with DLS and FLS.
 
 Elasticsearch index privileges are additive. A role or API key with unrestricted `read` or `all` on `*` or either execution index pattern is not limited by the Workflows DLS and FLS grant:
 
@@ -395,7 +395,9 @@ in a future release and is not covered by the support SLA.
 Workflow ACLs apply to the Workflows UI and APIs. They do not restrict direct
 Elasticsearch queries of `.workflows-executions*` or `.workflows-step-executions*`
 when those indices are available as queryable hidden indices. This includes
-queries from Discover, Lens, ES|QL, and the Elasticsearch API.
+the plain indexes, the `.workflows-executions-data-stream` /
+`.workflows-step-executions-data-stream` hidden data streams, and queries
+from Discover, Lens, ES|QL, and the Elasticsearch API.
 
 The Read Workflow Execution privilege, included in Workflows Read, can grant
 access to this data within a space. Those Elasticsearch grants filter by space,

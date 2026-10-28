@@ -32,7 +32,6 @@ describe('memoryOptimizeStepDefinition', () => {
   const esClient = { search: jest.fn() };
   const request = { headers: {} };
   const getScopedEsClient = jest.fn().mockReturnValue(esClient);
-  const getMemoryEsClient = jest.fn().mockResolvedValue(esClient);
   const getFakeRequest = jest.fn().mockReturnValue(request);
   const getAgentBuilder = jest.fn();
   const getInference = jest.fn();
@@ -46,7 +45,6 @@ describe('memoryOptimizeStepDefinition', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getScopedEsClient.mockReturnValue(esClient);
-    getMemoryEsClient.mockResolvedValue(esClient);
     getFakeRequest.mockReturnValue(request);
   });
 
@@ -83,13 +81,12 @@ describe('memoryOptimizeStepDefinition', () => {
       stepType: 'nightshift.memoryOptimize',
     } as never);
 
-  it('optimizes with the injected internal client and never the scoped client', async () => {
+  it('optimizes with the workflow-scoped client', async () => {
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
       getInference,
       getSavedObjects,
       getUiSettings,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -146,8 +143,7 @@ describe('memoryOptimizeStepDefinition', () => {
       roundConnectorId: undefined,
       interactionId: 'workflow-exec-1',
     });
-    expect(getMemoryEsClient).toHaveBeenCalledTimes(1);
-    expect(getScopedEsClient).not.toHaveBeenCalled();
+    expect(getScopedEsClient).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ output: { status: 'ok' } });
     expect(telemetry.reportSemanticMemoryOptimized).toHaveBeenCalledWith({
       agent_id: 'nightshift.investigation',
@@ -176,7 +172,6 @@ describe('memoryOptimizeStepDefinition', () => {
       getInference,
       getSavedObjects,
       getUiSettings,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -210,7 +205,6 @@ describe('memoryOptimizeStepDefinition', () => {
       getInference,
       getSavedObjects,
       getUiSettings,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -240,7 +234,6 @@ describe('memoryOptimizeStepDefinition', () => {
       getInference,
       getSavedObjects,
       getUiSettings,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       isEnabled: () => false,
       telemetry: telemetry as never,
@@ -265,7 +258,6 @@ describe('memoryOptimizeStepDefinition', () => {
       getInference,
       getSavedObjects,
       getUiSettings,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -292,7 +284,6 @@ describe('memoryOptimizeStepDefinition', () => {
       getInference,
       getSavedObjects,
       getUiSettings,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -326,7 +317,6 @@ describe('memoryOptimizeStepDefinition', () => {
         getInference,
         getSavedObjects,
         getUiSettings,
-        getMemoryEsClient,
         logger: loggerMock.create(),
         telemetry: telemetry as never,
       });
@@ -337,7 +327,7 @@ describe('memoryOptimizeStepDefinition', () => {
 
       expect(result).toEqual({ output: { status: 'ok', skipped: true } });
       expect(runMemoryOptimize).not.toHaveBeenCalled();
-      expect(getMemoryEsClient).not.toHaveBeenCalled();
+      expect(getScopedEsClient).not.toHaveBeenCalled();
     }
   );
 
@@ -348,7 +338,6 @@ describe('memoryOptimizeStepDefinition', () => {
       getInference,
       getSavedObjects,
       getUiSettings,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -392,7 +381,6 @@ describe('memoryOptimizeStepDefinition', () => {
       getInference,
       getSavedObjects,
       getUiSettings,
-      getMemoryEsClient,
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -419,15 +407,15 @@ describe('memoryOptimizeStepDefinition', () => {
     });
   });
 
-  it('fails clearly when the internal Memory client is unavailable', async () => {
+  it('propagates a scoped client failure', async () => {
+    getScopedEsClient.mockImplementationOnce(() => {
+      throw new Error('scoped client unavailable');
+    });
     const definition = memoryOptimizeStepDefinition({
       getAgentBuilder,
       getInference,
       getSavedObjects,
       getUiSettings,
-      getMemoryEsClient: async () => {
-        throw new Error('Semantic Memory internal Elasticsearch client is unavailable');
-      },
       logger: loggerMock.create(),
       telemetry: telemetry as never,
     });
@@ -440,7 +428,6 @@ describe('memoryOptimizeStepDefinition', () => {
           agent_id: 'nightshift.investigation',
         })
       )
-    ).rejects.toThrow('Semantic Memory internal Elasticsearch client is unavailable');
-    expect(getScopedEsClient).not.toHaveBeenCalled();
+    ).rejects.toThrow('scoped client unavailable');
   });
 });

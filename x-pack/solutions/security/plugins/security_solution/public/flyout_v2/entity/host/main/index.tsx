@@ -17,7 +17,7 @@ import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/ap
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { buildHostNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE, type FlyoutOrigin } from '../../../../common/lib/telemetry';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -34,8 +34,10 @@ import { useObservedHost } from './hooks/use_observed_host';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
-  getRiskFromEntityRecord,
+  getHeaderRiskLevel,
 } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
+import { isEntityGroupView } from '../../../../flyout/entity_details/shared/entity_store_group_utils';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
@@ -54,6 +56,7 @@ import {
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface HostProps {
   /**
@@ -71,6 +74,12 @@ export interface HostProps {
    * Used directly when `hit` is not provided, or as a fallback when EUID resolution from `hit` yields no value.
    */
   entityId?: string;
+  /**
+   * `single` (default) shows the `entityId` record only. `resolved` also loads every record that
+   * resolves to `entityId`; when aliases exist the flyout renders the group view: summary fields
+   * are aggregated across the group and asset criticality is read-only.
+   */
+  mode?: EntityViewMode;
   /**
    * Scope id (timeline id, table id, etc.) — used for downstream containers and queries.
    */
@@ -97,12 +106,17 @@ export const Host: FC<HostProps> = memo(function Host({
   hostName,
   hit,
   entityId: entityIdProp,
+  mode: requestedMode = 'single',
   scopeId = '',
   contextID,
 }) {
   const { services } = useKibana();
   const { uiSettings } = services;
   const euidApi = useEntityStoreEuidApi();
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+  // Resolution-group view is only available on the new Entity Analytics page; otherwise fall back
+  // to the single-entity view so the header, summary grid and copy link stay consistent.
+  const mode: EntityViewMode = isNewEntityAnalyticsPage ? requestedMode : 'single';
   const {
     openHostFlyoutAsChild,
     openEntityDetailsAsChild,
@@ -117,7 +131,13 @@ export const Host: FC<HostProps> = memo(function Host({
 
   // Compute entityId from hit when provided, otherwise use the prop
   const entityId = useMemo(
-    () => (hit ? euidApi?.euid?.getEuidFromObject('host', hit.flattened) : entityIdProp),
+    () =>
+      hit
+        ? euidApi?.euid?.getEuidFromObject(
+            euidApi.getBuiltInEntityDefinition('host'),
+            hit.flattened
+          )
+        : entityIdProp,
     [hit, euidApi, entityIdProp]
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
@@ -133,10 +153,13 @@ export const Host: FC<HostProps> = memo(function Host({
 
   const entityFromStoreResult = useEntityFromStore({
     entityId,
+    mode,
     identityFields: hostStoreIdentityFields,
     entityType: 'host',
     skip: !entityStoreV2Enabled || isInitializing,
   });
+  const { aliasRecords, aliasCount } = entityFromStoreResult;
+  const isGroupView = isEntityGroupView(aliasRecords);
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
     const legacyFields =
@@ -144,13 +167,13 @@ export const Host: FC<HostProps> = memo(function Host({
     if (entityStoreV2Enabled) {
       const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
-          'host',
+          euidApi.getBuiltInEntityDefinition('host'),
           entityFromStoreResult.entityRecord
         ) ?? {};
       return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
     }
     return legacyFields;
-  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, hostName]);
+  }, [entityStoreV2Enabled, euidApi, entityFromStoreResult.entityRecord, hostName]);
 
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -181,6 +204,7 @@ export const Host: FC<HostProps> = memo(function Host({
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
+      isGroupView,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
@@ -226,7 +250,9 @@ export const Host: FC<HostProps> = memo(function Host({
 
   const effectiveRiskScoreState = riskScoreStateFromStore ?? riskScoreState;
 
+  // Group view is read-only: a single criticality edit can't target every member.
   const onCriticalitySave =
+    !isGroupView &&
     !!assetCriticalityPrivileges.data?.has_write_permissions &&
     entityFromStoreResult.entityRecord &&
     observedHost.entityRecord
@@ -257,11 +283,12 @@ export const Host: FC<HostProps> = memo(function Host({
     openHostFlyoutAsChild({
       hostName,
       entityId,
+      mode,
       scopeId,
       title: hostName,
       origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
     });
-  }, [openHostFlyoutAsChild, hostName, entityId, scopeId]);
+  }, [openHostFlyoutAsChild, hostName, entityId, mode, scopeId]);
 
   const onShowRelatedEntity = useCallback(
     (
@@ -321,6 +348,8 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: EntityType.host,
             value: hostName,
             entityId: entityStoreEntityId,
+            mode,
+            scopeId,
             onOpenEntity: onShowHost,
             title: hostName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -331,6 +360,7 @@ export const Host: FC<HostProps> = memo(function Host({
               return openEntityVulnerabilityInsights({
                 value: hostName,
                 entityId: panelDisplayEntityId,
+                mode,
                 onShowHost,
                 title: hostName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_VULNERABILITY,
@@ -340,6 +370,8 @@ export const Host: FC<HostProps> = memo(function Host({
                 entityType: EntityType.host,
                 value: hostName,
                 entityId: panelDisplayEntityId,
+                mode,
+                scopeId,
                 onShowEntity: onShowHost,
                 title: hostName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
@@ -349,6 +381,7 @@ export const Host: FC<HostProps> = memo(function Host({
                 entityType: EntityType.host,
                 value: hostName,
                 entityId: panelDisplayEntityId,
+                mode,
                 onShowEntity: onShowHost,
                 title: hostName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_MISCONFIGURATION,
@@ -374,6 +407,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: 'host',
             entityName: hostName,
             scopeId,
+            mode,
             onShowEntity: onShowHost,
             onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: hostName,
@@ -393,16 +427,15 @@ export const Host: FC<HostProps> = memo(function Host({
       scopeId,
       panelDisplayEntityId,
       entityStoreEntityId,
+      mode,
       onShowHost,
       onShowRelatedEntityFromGraph,
       onShowRelatedEntityFromResolution,
     ]
   );
 
-  const riskLevel = observedHost.entityRecord
-    ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
-        'Unknown') as RiskSeverity)
-    : undefined;
+  // Group view shows the resolution-group risk level; a lone target shows its own.
+  const riskLevel = getHeaderRiskLevel(observedHost.entityRecord, isGroupView);
 
   return (
     <>
@@ -411,15 +444,21 @@ export const Host: FC<HostProps> = memo(function Host({
           hostName={hostName}
           lastSeen={observedHost.lastSeen}
           entityId={panelDisplayEntityId}
+          aliasRecords={aliasRecords}
+          aliasCount={aliasCount}
+          mode={mode}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedHost.entityRecord}
           riskLevel={riskLevel}
+          scopeId={scopeId}
+          showEntityAnalyticsCopyLink
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {observedHost.entityRecord && (
           <EntitySummaryGrid
             entityRecord={observedHost.entityRecord}
+            aliasRecords={aliasRecords}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
           />
@@ -441,12 +480,16 @@ export const Host: FC<HostProps> = memo(function Host({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
+            aliasRecords={aliasRecords}
             noEntityInStore={noEntityInStore}
+            isEntityRecordLoading={entityStoreV2Enabled && entityFromStoreResult.isLoading}
             entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
+            mode={mode}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
             riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
+            isGroupView={isGroupView}
           />
         )}
       </EuiFlyoutBody>

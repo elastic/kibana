@@ -6,7 +6,10 @@
  */
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+// Imported from the id module (not the `actions` barrel) to keep the React action code out of the Node-side Playwright load.
+import { ADD_TO_CASE_EPISODE_ACTION_ID } from '@kbn/alerting-v2-episodes-ui/actions/add_to_case_action_id';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { OBSERVABILITY_ALERTING_BASE_PATH } from '@kbn/deeplinks-observability';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
@@ -18,7 +21,7 @@ import {
 } from '../../../../../public/constants';
 
 export const OBSERVABILITY_ALERTING_SURFACES = [
-  { name: 'Alerts', path: OBSERVABILITY_ALERTING_ALERTS_PATH, title: 'Alert episodes' },
+  { name: 'Alerts', path: OBSERVABILITY_ALERTING_ALERTS_PATH, title: 'Alerts' },
   { name: 'Rules (V1)', path: OBSERVABILITY_ALERTING_RULES_V1_PATH, title: 'Rules' },
   { name: 'Rules', path: OBSERVABILITY_ALERTING_RULES_V2_PATH, title: 'Rules' },
   { name: 'Rule library', path: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH, title: 'Rule library' },
@@ -35,13 +38,13 @@ export const OBSERVABILITY_ALERTING_SURFACES = [
 ] as const;
 
 export const OBSERVABILITY_ALERTING_RULES_V1_URL_RE =
-  /\/app\/observability\/alerting\/rules\/v1(\/|$|\?|#)/;
+  /\/app\/observability\/alerting\/rules\/classic(\/|$|\?|#)/;
 export const OBSERVABILITY_ALERTING_RULES_V2_URL_RE =
-  /\/app\/observability\/alerting\/rules\/v2(\/|$|\?|#)/;
+  /\/app\/observability\/alerting\/rules\/universal(\/|$|\?|#)/;
 export const OBSERVABILITY_ALERTING_ALERTS_EPISODE_URL_RE =
   /\/app\/observability\/alerting\/alerts\/[^/?#]+/;
 export const OBSERVABILITY_ALERTING_RULE_DETAILS_URL_RE =
-  /\/app\/observability\/alerting\/rules\/v2\/[^/?#]+/;
+  /\/app\/observability\/alerting\/rules\/universal\/[^/?#]+/;
 export const MANAGEMENT_ALERTING_V2_EPISODES_URL_RE = /\/app\/management\/alertingV2\/episodes/;
 export const MANAGEMENT_ALERTING_V2_RULES_URL_RE = /\/app\/management\/alertingV2\/rules/;
 export const MANAGEMENT_ALERTING_V2_URL_RE = /\/app\/management\/alertingV2(\/|$|\?|#)/;
@@ -76,8 +79,16 @@ export class ObservabilityAlertingPage {
   public readonly viewDetailsLink: Locator;
   public readonly viewRuleDetailsLink: Locator;
   public readonly episodeDetailsPage: Locator;
+  public readonly detailsInvestigateButton: Locator;
+  public readonly detailsViewInvestigationButton: Locator;
   public readonly ruleDetailLayout: Locator;
   public readonly toasts: Locator;
+  public readonly addToCaseRowControl: Locator;
+  public readonly addToCaseRowMenuItem: Locator;
+  public readonly rowActionsMenuButton: Locator;
+  public readonly selectAllRowsToggle: Locator;
+  public readonly bulkActionsMenuButton: Locator;
+  public readonly addToCaseBulkAction: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.pageTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
@@ -108,8 +119,26 @@ export class ObservabilityAlertingPage {
       'alertingV2EpisodeDetailsViewRuleDetailsButton'
     );
     this.episodeDetailsPage = this.page.testSubj.locator('alertingV2AlertDetailsPage');
+    this.detailsInvestigateButton = this.page.testSubj.locator('episodeDetailsInvestigate');
+    this.detailsViewInvestigationButton = this.page.testSubj.locator(
+      'episodeDetailsViewInvestigation'
+    );
     this.ruleDetailLayout = this.page.testSubj.locator('ruleDetailLayout');
     this.toasts = this.page.components.toast().toasts;
+    this.addToCaseRowControl = this.page.testSubj.locator(
+      `unifiedDataTable_rowControl_${ADD_TO_CASE_EPISODE_ACTION_ID}`
+    );
+    this.addToCaseRowMenuItem = this.page.testSubj.locator(
+      `unifiedDataTable_rowMenu_${ADD_TO_CASE_EPISODE_ACTION_ID}`
+    );
+    this.rowActionsMenuButton = this.page.testSubj.locator(
+      'unifiedDataTable_additionalRowControl_actionsMenu'
+    );
+    this.selectAllRowsToggle = this.page.testSubj.locator('selectAllDocsOnPageToggle');
+    this.bulkActionsMenuButton = this.page.testSubj.locator('unifiedDataTableSelectionBtn');
+    this.addToCaseBulkAction = this.page.testSubj.locator(
+      `episodesBulkAction-${ADD_TO_CASE_EPISODE_ACTION_ID}`
+    );
   }
 
   urlFor(path: string): string {
@@ -171,6 +200,22 @@ export class ObservabilityAlertingPage {
     await this.episodeDetailsPage.waitFor({ state: 'visible' });
   }
 
+  async investigateFromDetails(): Promise<void> {
+    await this.detailsInvestigateButton.click();
+  }
+
+  async viewInvestigationFromDetails(): Promise<void> {
+    await this.detailsViewInvestigationButton.click();
+  }
+
+  async viewInvestigationFromDetailsInNewTab(): Promise<void> {
+    await this.detailsViewInvestigationButton.click({ modifiers: ['ControlOrMeta'] });
+  }
+
+  async openDetailsOverflow(): Promise<void> {
+    await this.episodeDetailsPage.getByRole('button', { name: 'More' }).click();
+  }
+
   async clickViewRuleDetails(): Promise<void> {
     await this.viewRuleDetailsLink.click();
   }
@@ -182,6 +227,46 @@ export class ObservabilityAlertingPage {
 
   async searchTagsFilter(query: string): Promise<void> {
     await this.tagsFilterSearch.fill(query);
+  }
+
+  episodeRows(ruleName: string): Locator {
+    return this.page.getByRole('row').filter({ hasText: ruleName });
+  }
+
+  /** Clicks the row's "Add to case" action, whether it renders inline or in the overflow menu. */
+  async clickAddToCaseRowAction(ruleName: string): Promise<void> {
+    const [row] = await this.episodeRows(ruleName).all();
+    const inlineControl = row.locator(this.addToCaseRowControl);
+    const overflowButton = row.locator(this.rowActionsMenuButton);
+
+    // The table re-renders its row controls while the rule and alert queries settle, which detaches
+    // the button mid-click; retrying the whole interaction rides that out.
+    await expect(async () => {
+      await expect(inlineControl.or(overflowButton)).toBeVisible({ timeout: 2_000 });
+      if (await inlineControl.isVisible()) {
+        await inlineControl.click({ timeout: 2_000 });
+        return;
+      }
+      await overflowButton.click({ timeout: 2_000 });
+      await this.addToCaseRowMenuItem.click({ timeout: 2_000 });
+    }).toPass();
+  }
+
+  /** Selects every row on the page and waits until the selection toolbar reports the expected count. */
+  async selectAllRows(expectedCount: number): Promise<void> {
+    await expect(async () => {
+      await this.selectAllRowsToggle.check({ timeout: 2_000 });
+      await expect(this.bulkActionsMenuButton).toHaveAttribute(
+        'data-selected-documents',
+        String(expectedCount),
+        { timeout: 2_000 }
+      );
+    }).toPass();
+  }
+
+  async clickAddToCaseBulkAction(): Promise<void> {
+    await this.bulkActionsMenuButton.click();
+    await this.addToCaseBulkAction.click();
   }
 
   tagFilterOption(tag: string): Locator {

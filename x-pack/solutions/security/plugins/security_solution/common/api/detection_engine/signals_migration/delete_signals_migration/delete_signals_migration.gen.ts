@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 export const MigrationCleanupResult = lazySchema(() =>
   z.object({
@@ -23,7 +23,7 @@ export const MigrationCleanupResult = lazySchema(() =>
     status: z.enum(['success', 'failure', 'pending']),
     sourceIndex: z.string(),
     version: z.string(),
-    updated: z.string().datetime(),
+    updated: isoDateTime(),
     error: z
       .object({
         message: z.string(),

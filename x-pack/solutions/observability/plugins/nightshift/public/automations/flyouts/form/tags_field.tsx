@@ -28,10 +28,12 @@ export const AutomationTagsField = ({
   tags,
   suggestions,
   onChange,
+  disabled = false,
 }: {
   tags: string[];
   suggestions: string[];
   onChange: (tags: string[]) => void;
+  disabled?: boolean;
 }) => {
   const addTag = (tag: string) => {
     const trimmed = tag.trim().slice(0, MAX_TAG_LENGTH);
@@ -44,6 +46,7 @@ export const AutomationTagsField = ({
     <EuiComboBox
       fullWidth
       compressed
+      isDisabled={disabled}
       aria-label={tagLabels.tags}
       placeholder={tagLabels.addTags}
       customOptionText={tagLabels.addTagOption}

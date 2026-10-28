@@ -27,7 +27,29 @@ const registerHttpRequestMockHelpers = (
       }
     });
   };
+
+  /**
+   * Makes every field preview request stay pending until the test resolves it manually,
+   * which allows to exercise a response that arrives after the form values have changed.
+   */
+  const deferFieldPreviewResponses = () => {
+    const pendingResolvers: Array<(body: HttpResponse) => void> = [];
+
+    httpSetup.post.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          pendingResolvers.push((body) => resolve({ data: body }));
+        })
+    );
+
+    return {
+      getRequestCount: () => pendingResolvers.length,
+      resolveRequest: (index: number, body: HttpResponse) => pendingResolvers[index](body),
+    };
+  };
+
   return {
+    deferFieldPreviewResponses,
     setFieldPreviewResponse,
   };
 };

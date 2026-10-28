@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiLink, EuiPanel, EuiSkeletonTitle, EuiToolTip } from '@elastic/eui';
+import React, { Suspense, useMemo, useState } from 'react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiLink,
+  EuiPanel,
+  EuiSkeletonTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { FlyoutTemplate } from '@kbn/flyout-template';
@@ -14,14 +21,15 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 // and defaults it on, whereas we render subpanels ourselves.
 import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { EDIT_EPISODE_ASSIGNEE_ACTION_ID } from '../../actions/edit_assignee';
 import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
 import { useEpisodeDetailsHeaderData } from '../../hooks/use_episode_details_header_data';
 import { isRuleLoaded } from '../../types/rule_state';
 import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import { isSupportedEpisodeSeverity, normalizeEpisodeSeverity } from '../severity/severity_utils';
-import { AlertEpisodeSeverityHealth } from '../severity/episode_severity_health';
-import { EPISODE_STATUS_BADGE_COLORS, getEpisodeStatusBadgeLabel } from '../status/status_badge';
+import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
+import { AlertEpisodeStatusHealth } from '../status/status_badge';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
 import { UserProfileDisplay } from '../user_profile_display';
 import { CopyableShortId } from '../copyable_short_id';
@@ -34,8 +42,9 @@ import { AlertEpisodeRunbookSection } from './runbook_section';
 import { AlertEpisodeTimelineSection } from './timeline_section';
 import { AlertEpisodeMetadataSection } from './metadata_section';
 import { DOC_VIEWER_FLEX_HEIGHT_SENTINEL } from './metadata_layout';
-import { EpisodeFooterActionMenu } from './footer_action_menu';
+import { buildEpisodeMenuPanels } from './build_episode_menu_panels';
 import { EMPTY_VALUE } from '../../constants';
+import { getConnectorSource, useEpisodeSource } from '../../source_labels';
 import { formatDateTime } from '../../utils/format_date_time';
 import { formatMetadataListDuration } from './translations';
 import { useAlertDetailsFlyoutWidth } from './use_alert_details_flyout_width';
@@ -141,6 +150,7 @@ const SnoozedBadgeLabel = ({
 export interface AlertEpisodeDetailsFlyoutProps {
   episodeId: string;
   groupHash: string | undefined;
+  sourceId?: string;
   onClose: () => void;
   services: AlertEpisodeDetailsServices;
   actions?: EpisodeAction[];
@@ -151,6 +161,7 @@ export interface AlertEpisodeDetailsFlyoutProps {
 export const AlertEpisodeDetailsFlyout = ({
   episodeId,
   groupHash,
+  sourceId,
   onClose,
   services,
   actions,
@@ -168,28 +179,57 @@ export const AlertEpisodeDetailsFlyout = ({
     severity,
     episodeAction,
     groupAction,
+    isActionStateLoaded,
     isFlapping,
   } = useEpisodeDetailsHeaderData({ episodeId, groupHash, services });
+  const { label: systemLabel, icon: systemIcon } = useEpisodeSource(sourceId);
+  // Alerts ingested from an external connector show that connector (e.g. "zabbix");
+  // everything else shows the alerting system (Universal or Classic).
+  const connectorSource = getConnectorSource(episode?.source);
+  const sourceLabel = connectorSource ?? systemLabel;
+  const sourceIcon = connectorSource ? ConnectorIconsMap.get(`.${connectorSource}`) : systemIcon;
 
   const showRuleDependentTabs = isRuleLoaded(ruleState);
-  const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
+  // Related episodes are matched by rule or external source. Until the episode loads the
+  // section renders its own loading or error state, so the panel stays.
+  const showRelated = !episode || Boolean(episode['rule.id']) || connectorSource !== undefined;
+  // The actions depend on the action state, so they wait for it to load.
+  const episodes = useMemo(
+    () => (episode && isActionStateLoaded ? [episode] : []),
+    [episode, isActionStateLoaded]
+  );
   const compatibleActions = useMemo(
     () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
+    [actions, episodes]
+  );
+  const menuActions = useMemo(
+    () =>
+      actions && episodes.length
+        ? actions.filter(
+            (action) =>
+              action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
+          )
+        : [],
     [actions, episodes]
   );
 
   const initialWidth = useAlertDetailsFlyoutWidth();
 
-  // Footer "Take action" popover anchor, captured from the PrimaryAction button's onClick.
-  const menuAnchorRef = useRef<HTMLButtonElement | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const viewDetailsHref = getEpisodeDetailsHref(episodeId);
+  const takeActionPanels = useMemo(
+    () =>
+      buildEpisodeMenuPanels({
+        actions: menuActions,
+        episodes,
+        viewDetailsHref,
+        onSuccess: invalidateEpisodeQueries,
+      }),
+    [menuActions, episodes, viewDetailsHref, invalidateEpisodeQueries]
+  );
   const [isRunbookOpen, setIsRunbookOpen] = useState(false);
 
   const handleTabChange = (tabId: string) => {
     setTab(tabId as TabId);
-    // Close the action menu when switching tabs so its anchor cannot
-    // be removed while the popover is still open.
-    setIsMenuOpen(false);
   };
 
   // Metadata tab is only available when the rule is loaded.
@@ -222,7 +262,7 @@ export const AlertEpisodeDetailsFlyout = ({
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
-  const tags = groupAction?.tags ?? [];
+  const tags = episodeAction?.tags ?? [];
 
   // Header title: show skeleton while loading, fall back to generic label if rule not found.
   const ruleName = isRuleLoaded(ruleState) ? ruleState.rule.metadata.name : undefined;
@@ -239,7 +279,7 @@ export const AlertEpisodeDetailsFlyout = ({
 
   // Info block values
   const durationMs = episode?.duration;
-  const assigneeUid = episode?.last_assignee_uid ?? undefined;
+  const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;
   const episodeData = parseEpisodeDataJson(episode?.episode_data);
   const rawAlertUrl =
     typeof episodeData.alert_url === 'string' && episodeData.alert_url.length > 0
@@ -284,10 +324,9 @@ export const AlertEpisodeDetailsFlyout = ({
         onTabChange={handleTabChange}
       >
         <FlyoutTemplate.Header title={titleNode} description={descriptionNode}>
-          {/* Status badge */}
           {status && (
-            <FlyoutTemplate.Header.Badge color={EPISODE_STATUS_BADGE_COLORS[status]}>
-              {getEpisodeStatusBadgeLabel(status)}
+            <FlyoutTemplate.Header.Badge color="hollow">
+              <AlertEpisodeStatusHealth status={status} />
             </FlyoutTemplate.Header.Badge>
           )}
 
@@ -329,13 +368,24 @@ export const AlertEpisodeDetailsFlyout = ({
             />
           </FlyoutTemplate.Header.InfoBlock>
 
-          {/* Severity. The dot carries the color, so the value text stays default. */}
+          {/* Source: which alerting system the alert came from. */}
+          <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_SOURCE}>
+            <Suspense fallback={null}>
+              <EuiBadge
+                color="hollow"
+                iconType={sourceIcon}
+                data-test-subj="alertingV2EpisodeFlyoutSourceBadge"
+              >
+                {sourceLabel}
+              </EuiBadge>
+            </Suspense>
+          </FlyoutTemplate.Header.InfoBlock>
+
           {normalizedSeverity && (
             <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_SEVERITY}>
-              <AlertEpisodeSeverityHealth
-                severity={normalizedSeverity}
-                data-test-subj="alertingV2EpisodeFlyoutSeverity"
-              />
+              <span data-test-subj="alertingV2EpisodeFlyoutSeverity">
+                <AlertEpisodeSeverityBadge severity={normalizedSeverity} />
+              </span>
             </FlyoutTemplate.Header.InfoBlock>
           )}
 
@@ -429,36 +479,41 @@ export const AlertEpisodeDetailsFlyout = ({
                 </EuiFlexGroup>
               </FlyoutAccordion>
 
-              <FlyoutAccordion
-                title={i18n.FLYOUT_ACCORDION_INVESTIGATION}
-                initialIsOpen
-                hasBorder={false}
-                data-test-subj="alertingV2EpisodeFlyoutAccordionInvestigation"
-              >
-                <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-                  {/* No rule means no runbook, so the panel goes too. */}
-                  {showRuleDependentTabs && (
-                    <EuiPanel hasBorder paddingSize="m">
-                      <AlertEpisodeRunbookSection
-                        episodeId={episodeId}
-                        services={services}
-                        compressed
-                        showTitle
-                        onShowFullGuide={() => setIsRunbookOpen(true)}
-                      />
-                    </EuiPanel>
-                  )}
-                  <EuiPanel hasBorder paddingSize="m">
-                    <AlertEpisodesRelatedSection
-                      episodeId={episodeId}
-                      services={services}
-                      getEpisodeDetailsHref={getEpisodeDetailsHref}
-                      showHeading
-                      compressed
-                    />
-                  </EuiPanel>
-                </EuiFlexGroup>
-              </FlyoutAccordion>
+              {(showRuleDependentTabs || showRelated) && (
+                <FlyoutAccordion
+                  title={i18n.FLYOUT_ACCORDION_INVESTIGATION}
+                  initialIsOpen
+                  hasBorder={false}
+                  data-test-subj="alertingV2EpisodeFlyoutAccordionInvestigation"
+                >
+                  <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+                    {/* No rule means no runbook, so the panel goes too. */}
+                    {showRuleDependentTabs && (
+                      <EuiPanel hasBorder paddingSize="m">
+                        <AlertEpisodeRunbookSection
+                          episodeId={episodeId}
+                          services={services}
+                          compressed
+                          showTitle
+                          onShowFullGuide={() => setIsRunbookOpen(true)}
+                        />
+                      </EuiPanel>
+                    )}
+                    {/* No rule or source means nothing to relate by, so the panel goes too. */}
+                    {showRelated && (
+                      <EuiPanel hasBorder paddingSize="m">
+                        <AlertEpisodesRelatedSection
+                          episodeId={episodeId}
+                          services={services}
+                          getEpisodeDetailsHref={getEpisodeDetailsHref}
+                          showHeading
+                          compressed
+                        />
+                      </EuiPanel>
+                    )}
+                  </EuiFlexGroup>
+                </FlyoutAccordion>
+              )}
 
               <FlyoutAccordion
                 title={i18n.FLYOUT_ACCORDION_RULE}
@@ -482,7 +537,8 @@ export const AlertEpisodeDetailsFlyout = ({
           <FlyoutTemplate.Body.TabPanel tabId="timeline">
             <AlertEpisodeTimelineSection
               episodeId={episodeId}
-              groupHash={groupHash}
+              seriesId={episode ? episode.series_id ?? null : undefined}
+              groupHash={episode?.group_hash}
               services={services}
             />
           </FlyoutTemplate.Body.TabPanel>
@@ -517,15 +573,11 @@ export const AlertEpisodeDetailsFlyout = ({
             onClick={onClose}
             data-test-subj="alertingV2EpisodeFlyoutCloseButton"
           />
-          <FlyoutTemplate.Footer.PrimaryAction
+          <FlyoutTemplate.Footer.PrimaryActionMenu
             label={i18n.FLYOUT_TAKE_ACTION}
-            iconType={isMenuOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
-            iconSide="right"
+            aria-label={i18n.FLYOUT_TAKE_ACTION}
+            panels={takeActionPanels}
             data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
-            onClick={(event) => {
-              menuAnchorRef.current = event.currentTarget as HTMLButtonElement;
-              setIsMenuOpen((prev) => !prev);
-            }}
           />
         </FlyoutTemplate.Footer>
       </FlyoutTemplate>
@@ -552,20 +604,6 @@ export const AlertEpisodeDetailsFlyout = ({
             <AlertEpisodeRunbookSection episodeId={episodeId} services={services} />
           </FlyoutTemplate.Body>
         </FlyoutTemplate>
-      )}
-
-      {/* The menu is rendered as a sibling of FlyoutTemplate so EuiWrappingPopover portals
-          outside the flyout's stacking context (preventing it rendering behind the flyout). */}
-      {menuAnchorRef.current && (
-        <EpisodeFooterActionMenu
-          anchor={menuAnchorRef.current}
-          isOpen={isMenuOpen}
-          onClose={() => setIsMenuOpen(false)}
-          actions={compatibleActions}
-          episodes={episodes}
-          viewDetailsHref={getEpisodeDetailsHref(episodeId)}
-          onSuccess={invalidateEpisodeQueries}
-        />
       )}
     </>
   );

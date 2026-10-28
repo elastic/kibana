@@ -67,6 +67,7 @@ export function PalettePicker({
   setPalette,
   showCustomPalette,
   showDynamicColorOnly,
+  defaultBandCount,
   ...rest
 }: {
   palettes: PaletteRegistry;
@@ -74,6 +75,7 @@ export function PalettePicker({
   setPalette: (palette: PaletteOutput) => void;
   showCustomPalette?: boolean;
   showDynamicColorOnly?: boolean;
+  defaultBandCount?: number;
 }) {
   const palettesToShow: EuiColorPalettePickerPaletteProps[] = palettes
     .getAll()
@@ -81,10 +83,11 @@ export function PalettePicker({
       return showDynamicColorOnly ? canDynamicColoring && !internal : !internal;
     })
     .map(({ id, title, getCategoricalColors }) => {
-      const colors = getCategoricalColors(
-        activePalette?.params?.steps || DEFAULT_COLOR_STEPS,
-        id === activePalette?.name ? activePalette?.params : undefined
-      );
+      const isActive = id === activePalette?.name;
+      // non-active previews show the band count that selecting them would apply
+      const steps =
+        (!isActive && defaultBandCount) || activePalette?.params?.steps || DEFAULT_COLOR_STEPS;
+      const colors = getCategoricalColors(steps, isActive ? activePalette?.params : undefined);
       return {
         value: id,
         title,

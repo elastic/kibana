@@ -5,106 +5,116 @@
  * 2.0.
  */
 
-import { either } from 'fp-ts/Either';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 
-import { ALL_VALUE, SLO_GROUPINGS_PREFIX, SLO_STATUS } from '../constants';
+import { ALL_VALUE, SLO_STATUS } from '../constants';
+import { MAX_DATE_STRING_LENGTH } from './limits';
 
-const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
+const allOrAnyString = z.union([z.literal(ALL_VALUE), z.string()]);
 
-const allOrAnyStringOrArray = t.union([
-  t.literal(ALL_VALUE),
-  t.string,
-  t.array(t.union([t.literal(ALL_VALUE), t.string])),
-]);
+const allOrAnyStringOrArray = z.union([allOrAnyString, z.array(allOrAnyString)]);
 
-const dateType = new t.Type<Date, string, unknown>(
-  'DateType',
-  (input: unknown): input is Date => input instanceof Date,
-  (input: unknown, context: t.Context) =>
-    either.chain(t.string.validate(input, context), (value: string) => {
+/**
+ * Codec between a wire-form date string and a `Date` instance.
+ *
+ * Decoding accepts any string `new Date()` can parse, not only strict
+ * ISO 8601. Encoding always produces the ISO string form.
+ */
+const dateType = z.codec(
+  z
+    .string()
+    .max(MAX_DATE_STRING_LENGTH)
+    .describe('A date string, for example 2023-01-12T10:03:19.000Z'),
+  z.instanceof(Date),
+  {
+    decode: (value, payload) => {
       const decoded = new Date(value);
-      return isNaN(decoded.getTime()) ? t.failure(input, context) : t.success(decoded);
-    }),
-  (date: Date): string => date.toISOString()
+      if (isNaN(decoded.getTime())) {
+        payload.issues.push({
+          code: 'custom',
+          message: `Invalid date: ${value}`,
+          input: value,
+        });
+        return z.NEVER;
+      }
+      return decoded;
+    },
+    encode: (date) => date.toISOString(),
+  }
 );
 
-const errorBudgetSchema = t.type({
-  initial: t.number,
-  consumed: t.number,
-  remaining: t.number,
-  isEstimated: t.boolean,
-});
+const errorBudgetSchema = z
+  .object({
+    initial: z.number().describe('The initial error budget, as 1 - objective'),
+    consumed: z
+      .number()
+      .describe('The error budget consummed, as a percentage of the initial value.'),
+    remaining: z
+      .number()
+      .describe('The error budget remaining, as a percentage of the initial value.'),
+    isEstimated: z
+      .boolean()
+      .describe(
+        'Only for SLO defined with occurrences budgeting method and calendar aligned time window.'
+      ),
+  })
+  .meta({ id: 'SLOErrorBudget' });
 
-const statusSchema = t.union([
-  t.literal(SLO_STATUS.NO_DATA),
-  t.literal(SLO_STATUS.HEALTHY),
-  t.literal(SLO_STATUS.DEGRADING),
-  t.literal(SLO_STATUS.VIOLATED),
-]);
+const statusSchema = z.enum(SLO_STATUS).meta({ id: 'SLOSummaryStatus' });
 
-const summarySchema = t.intersection([
-  t.type({
+const summarySchema = z
+  .object({
     status: statusSchema,
-    sliValue: t.number,
+    sliValue: z.number(),
     errorBudget: errorBudgetSchema,
-    fiveMinuteBurnRate: t.number,
-    oneHourBurnRate: t.number,
-    oneDayBurnRate: t.number,
-  }),
-  t.partial({
-    summaryUpdatedAt: t.union([t.string, t.null]),
-  }),
-]);
+    fiveMinuteBurnRate: z.number(),
+    oneHourBurnRate: z.number(),
+    oneDayBurnRate: z.number(),
+    summaryUpdatedAt: z.string().nullable().optional(),
+  })
+  .meta({ id: 'SLOSummary', description: 'The SLO computed data' });
 
-const groupingsSchema = t.record(t.string, t.union([t.string, t.number]));
+const groupingsSchema = z.record(z.string(), z.union([z.string(), z.number()]));
 
-const metaSchema = t.partial({
-  synthetics: t.type({
-    monitorId: t.string,
-    locationId: t.string,
-    configId: t.string,
-  }),
+const metaSchema = z.object({
+  synthetics: z
+    .object({
+      monitorId: z.string(),
+      locationId: z.string(),
+      configId: z.string(),
+    })
+    .optional(),
 });
 
-const remoteSchema = t.type({
-  remoteName: t.string,
-  kibanaUrl: t.string,
+const remoteSchema = z.object({
+  remoteName: z.string(),
+  kibanaUrl: z.string(),
 });
 
-const groupSummarySchema = t.type({
-  total: t.number,
-  worst: t.type({
-    sliValue: t.number,
-    status: t.string,
-    slo: t.intersection([
-      t.type({
-        id: t.string,
-        instanceId: t.string,
-        name: t.string,
-      }),
-      t.partial({
-        groupings: t.record(t.string, t.unknown),
-      }),
-    ]),
+const groupSummarySchema = z.object({
+  total: z.number(),
+  worst: z.object({
+    sliValue: z.number(),
+    status: z.string(),
+    slo: z.object({
+      id: z.string(),
+      instanceId: z.string(),
+      name: z.string(),
+      groupings: z.record(z.string(), z.unknown()).optional(),
+    }),
   }),
-  violated: t.number,
-  healthy: t.number,
-  degrading: t.number,
-  noData: t.number,
+  violated: z.number(),
+  healthy: z.number(),
+  degrading: z.number(),
+  noData: z.number(),
 });
 
-const dateRangeSchema = t.type({
+const dateRangeSchema = z.object({
   from: dateType,
   to: dateType,
 });
 
-export type SLOStatus = t.TypeOf<typeof statusSchema>;
-
 export {
-  ALL_VALUE,
-  SLO_GROUPINGS_PREFIX,
-  SLO_STATUS,
   allOrAnyString,
   allOrAnyStringOrArray,
   dateRangeSchema,
@@ -117,3 +127,5 @@ export {
   groupSummarySchema,
   remoteSchema,
 };
+
+export type SLOStatus = z.output<typeof statusSchema>;

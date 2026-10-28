@@ -170,7 +170,7 @@ const response: DiscoverSessionApiResponse = {
       esqlApiTab,
     ],
   },
-  meta: { managed: true },
+  meta: { managed: true, version: 'saved-version' },
 };
 
 describe('Discover session conversion and UI preparation', () => {
@@ -228,6 +228,7 @@ describe('Discover session conversion and UI preparation', () => {
         description: 'Operational logs',
         tags: ['tag-1'],
         managed: true,
+        version: 'saved-version',
       })
     );
     expect(session.tabs).toHaveLength(3);
@@ -449,6 +450,9 @@ describe('Discover session conversion and UI preparation', () => {
       counter_aggregation: 'max',
       gauge_aggregation: 'min',
       histogram_percentile: 'p99',
+      histogram_visualization: 'lnsHeatmap',
+      grid_sort_field: 'recency',
+      grid_sort_direction: 'desc',
     };
     const metricsResponse: DiscoverSessionApiResponse = {
       ...response,
@@ -464,6 +468,9 @@ describe('Discover session conversion and UI preparation', () => {
       counterAggregation: 'max',
       gaugeAggregation: 'min',
       histogramPercentile: 'p99',
+      histogramVisualization: 'lnsHeatmap',
+      gridSortField: 'recency',
+      gridSortDirection: 'desc',
     });
     expect(toDiscoverSessionApiData(session)).toStrictEqual(metricsResponse.data);
   });
@@ -737,6 +744,17 @@ describe('Discover session conversion and UI preparation', () => {
     expect(session.tabs[0].chartInterval).toBe('5m');
   });
 
+  it('raises a Classic sample size below the API minimum to 10 before saving', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    session.tabs[0].sampleSize = 1;
+
+    const data = toDiscoverSessionApiData(session);
+
+    expect(data.tabs[0]).toHaveProperty('sample_size', 10);
+    expect(discoverSessionInternalDataSchema.safeParse(data).success).toBe(true);
+    expect(session.tabs[0].sampleSize).toBe(1);
+  });
+
   it('omits the fields that ES|QL tabs do not use before saving', () => {
     const session = fromDiscoverSessionApiResponse(response);
     session.tabs[2].sampleSize = 500;
@@ -818,9 +836,7 @@ describe('Discover session conversion and UI preparation', () => {
       'missing-type-control': { order: 0 },
     });
 
-    expect(() => toDiscoverSessionApiData(session)).toThrow(
-      'controlGroupJson panels must have a type'
-    );
+    expect(() => toDiscoverSessionApiData(session)).toThrow('Control type is missing or invalid.');
   });
 
   it('uses zero for missing control order, matching the server transform', () => {
@@ -846,7 +862,7 @@ describe('Discover session conversion and UI preparation', () => {
     session.tabs[2].controlGroupJson = JSON.stringify({ 'broken-control': null });
 
     expect(() => toDiscoverSessionApiData(session)).toThrow(
-      'controlGroupJson panels must be JSON objects'
+      'Control configuration must be a JSON object.'
     );
   });
 });

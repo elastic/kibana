@@ -11,8 +11,13 @@ import {
   type CreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
 import type { ActionHandler, HandlerItem, PreparedAction } from '../handler';
+import { ackHandler, unackHandler } from './ack';
 import { activateHandler } from './activate';
+import { assignHandler } from './assign';
 import { deactivateHandler } from './deactivate';
+import { snoozeHandler } from './snooze';
+import { tagHandler } from './tag';
+import { unsnoozeHandler } from './unsnooze';
 
 /**
  * Exhaustive map from `action_type` to its handler. The mapped type
@@ -25,17 +30,6 @@ export type ActionHandlersRegistry = {
 };
 
 /**
- * The audit-only handler: returns the orchestrator-built audit doc
- * verbatim, applies no preconditions. Most non-lifecycle action types
- * (ack/unack/assign/tag/snooze/unsnooze) are behaviourally identical to
- * one another, so the registry points every one of those slots at this
- * single shared singleton instead of paying for a per-action file.
- */
-const auditOnlyHandler: ActionHandler = {
-  prepare: ({ alertActionDoc }) => ({ alertActionDoc }),
-};
-
-/**
  * Canonical handler registry. Typed as the **exhaustive**
  * {@link ActionHandlersRegistry}: adding a new `AlertEpisodeActionType`
  * value without a matching slot is a TS compile error here. `Readonly`
@@ -43,15 +37,29 @@ const auditOnlyHandler: ActionHandler = {
  * they cannot swap or replace slots at runtime.
  */
 export const ACTION_HANDLERS: Readonly<ActionHandlersRegistry> = {
-  [ALERT_EPISODE_ACTION_TYPE.ACK]: auditOnlyHandler,
-  [ALERT_EPISODE_ACTION_TYPE.UNACK]: auditOnlyHandler,
-  [ALERT_EPISODE_ACTION_TYPE.ASSIGN]: auditOnlyHandler,
-  [ALERT_EPISODE_ACTION_TYPE.TAG]: auditOnlyHandler,
-  [ALERT_EPISODE_ACTION_TYPE.SNOOZE]: auditOnlyHandler,
-  [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: auditOnlyHandler,
+  [ALERT_EPISODE_ACTION_TYPE.ACK]: ackHandler,
+  [ALERT_EPISODE_ACTION_TYPE.UNACK]: unackHandler,
+  [ALERT_EPISODE_ACTION_TYPE.ASSIGN]: assignHandler,
+  [ALERT_EPISODE_ACTION_TYPE.TAG]: tagHandler,
+  [ALERT_EPISODE_ACTION_TYPE.SNOOZE]: snoozeHandler,
+  [ALERT_EPISODE_ACTION_TYPE.UNSNOOZE]: unsnoozeHandler,
   [ALERT_EPISODE_ACTION_TYPE.DEACTIVATE]: deactivateHandler,
   [ALERT_EPISODE_ACTION_TYPE.ACTIVATE]: activateHandler,
 };
+
+/**
+ * Whether an action's handler reads the alert's ack / assignee / tags, i.e.
+ * whether the orchestrator has to load that state before preparing it.
+ */
+export const requiresActionState = (actionType: AlertEpisodeActionType): boolean =>
+  ACTION_HANDLERS[actionType].requiresActionState === true;
+
+/**
+ * Whether an action's handler reads the series' snooze, i.e. whether the
+ * orchestrator has to load that state before preparing it.
+ */
+export const requiresSeriesActionState = (actionType: AlertEpisodeActionType): boolean =>
+  ACTION_HANDLERS[actionType].requiresSeriesActionState === true;
 
 /**
  * Calls the handler that `handlers` registers for

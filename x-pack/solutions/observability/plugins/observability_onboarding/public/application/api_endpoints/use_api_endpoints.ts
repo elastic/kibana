@@ -40,6 +40,7 @@ export function useApiEndpoints(): {
   popoverEndpoints: ResolvedVendorEndpoint[];
   isLoading: boolean;
   isError: boolean;
+  isForbidden: boolean;
 } {
   const {
     services: {
@@ -54,11 +55,12 @@ export function useApiEndpoints(): {
   );
   const vendorEndpointsEnabled = featureFlags.useBooleanValue(IS_VENDOR_ENDPOINTS_ENABLED, false);
 
-  const { data, status } = useFetcher(
+  const { data, status, error } = useFetcher(
     (callApi) => callApi('GET /internal/observability_onboarding/api_endpoints'),
     [],
     { showToastOnError: false }
   );
+  const isForbidden = error?.response?.status === 403;
 
   const { endpoints, popoverEndpoints } = useMemo(() => {
     const endpointContext: ApiEndpointContext = {
@@ -95,6 +97,7 @@ export function useApiEndpoints(): {
     endpoints,
     popoverEndpoints,
     isLoading: isPending(status),
-    isError: status === FETCH_STATUS.FAILURE,
+    isError: status === FETCH_STATUS.FAILURE && !isForbidden,
+    isForbidden,
   };
 }

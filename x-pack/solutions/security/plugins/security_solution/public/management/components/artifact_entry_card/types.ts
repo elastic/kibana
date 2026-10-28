@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import type { EffectScope, TrustedApp } from '../../../../common/endpoint/types';
 import type { ContextMenuItemNavByRouterProps } from '../context_menu_with_router_support/context_menu_item_nav_by_router';
 
@@ -24,10 +24,17 @@ type ArtifactInfoEntries = ArtifactInfoEntry & { entries?: ArtifactInfoEntry[] }
 export interface ArtifactInfo
   extends Pick<
     ExceptionListItemSchema,
-    'name' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by' | 'description' | 'comments'
+    | 'name'
+    | 'created_at'
+    | 'updated_at'
+    | 'created_by'
+    | 'updated_by'
+    | 'description'
+    | 'comments'
+    | 'tags'
   > {
   effectScope: EffectScope;
-  os: string[];
+  os: OsTypeArray;
   entries: ArtifactInfoEntries[];
 }
 

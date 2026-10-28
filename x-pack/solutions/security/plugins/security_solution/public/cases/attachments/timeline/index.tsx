@@ -42,6 +42,7 @@ export const getTimelineAttachment = () =>
     id: SECURITY_TIMELINE_ATTACHMENT_TYPE,
     getIcon: () => 'timeline',
     getLabel: () => i18n.TIMELINE_DISPLAY_NAME,
+    getCountLabel: ({ count }) => i18n.TIMELINES_COUNT(count),
     schema: TimelineAttachmentPayloadSchema,
     getCreationActivity: (props) => {
       const { savedObjectId, attachmentId, metadata } = props;
@@ -61,8 +62,19 @@ export const getTimelineAttachment = () =>
         deleteSuccessToast: i18n.DELETE_TIMELINE_SUCCESS_TOAST,
       };
     },
-    getRemovalActivity: () => ({
-      event: i18n.REMOVED_TIMELINE_LABEL,
+    getRemovalActivity: ({ savedObjectId, attachmentId, metadata }) => ({
+      event: metadata?.title ? (
+        <Suspense fallback={null}>
+          <LazyTimelineLink
+            savedObjectId={savedObjectId}
+            timelineId={attachmentId}
+            title={metadata.title}
+            isDeleted
+          />
+        </Suspense>
+      ) : (
+        i18n.REMOVED_TIMELINE_LABEL
+      ),
     }),
     getAttachmentList: () => ({ children: CaseViewTimelinesTab }),
   });

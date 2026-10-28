@@ -34,6 +34,8 @@ export interface AlertTimelineSegment {
    * its real start.
    */
   trueStartMs: number;
+  /** Explicit tail state when the source can distinguish a closed boundary from the visible window edge. */
+  isOngoing?: boolean;
 }
 
 /** A point marker inside a lane at a status-change timestamp. */
@@ -68,20 +70,21 @@ export interface AlertTimelineData {
   summary: AlertTimelineSummary;
 }
 
-/**
- * One status phase of an episode (a pre-aggregated span) — the row shape accepted
- * by deriveAlertTimelineData. Each row is `MIN`/`MAX` of `@timestamp` for a
- * contiguous run of one `episode.status`, so an episode is described by ≤4 rows
- * instead of thousands of raw heartbeat events.
- */
+/** One pre-aggregated status phase used by the rule-details timeline. */
 export interface AlertTimelinePhaseRow {
   'episode.id': string;
   'episode.status': AlertEpisodeStatus;
   group_hash: string;
-  /** ISO timestamp — MIN(@timestamp) for this (episode, status) phase. */
   seg_start: string;
-  /** ISO timestamp — MAX(@timestamp) for this (episode, status) phase. */
   seg_end: string;
+}
+
+/** One raw event used to reconstruct an episode-details timeline. */
+export interface AlertTimelineEventRow {
+  '@timestamp': string;
+  'episode.id': string;
+  'episode.status': AlertEpisodeStatus;
+  group_hash: string;
 }
 
 /** Grouping values keyed by group hash. */

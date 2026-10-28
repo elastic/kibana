@@ -12,11 +12,12 @@ import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { extractErrorMessage, extractErrorProperties } from '@kbn/ml-error-utils';
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 import type { DocumentCountStats } from '@kbn/aiops-log-rate-analysis/types';
 
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import { getEsqlDocumentCountStats } from '../get_esql_document_stats';
 import { getDocumentCountStatsRequest, processDocumentCountStats } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -26,6 +27,8 @@ export interface DocumentStats {
   totalCount: number;
   documentCountStats?: DocumentCountStats;
   documentCountStatsCompare?: DocumentCountStats;
+  /** Set when loading the document counts failed. */
+  errorMessage?: string;
 }
 
 function displayError(toastNotifications: ToastsStart, index: string, err: any) {
@@ -59,7 +62,8 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   searchParamsCompare: TParams | undefined,
   lastRefresh: number,
   changePointsByDefault = true,
-  projectRoutingOverride?: string
+  projectRoutingOverride?: string,
+  esqlQuery?: string
 ): DocumentStats {
   const {
     data,
@@ -77,7 +81,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   const [documentStatsCache, setDocumentStatsCache] = useState<Record<string, DocumentStats>>({});
 
   const cacheKey = stringHash(
-    `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
+    `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}_${esqlQuery ?? ''}`
   );
 
   const fetchDocumentCountData = useCallback(async () => {
@@ -90,6 +94,30 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
     try {
       abortCtrl.current = new AbortController();
+
+      if (
+        esqlQuery !== undefined &&
+        searchParams.timeFieldName !== undefined &&
+        searchParams.earliest !== undefined &&
+        searchParams.latest !== undefined &&
+        searchParams.intervalMs !== undefined &&
+        searchParams.intervalMs > 0
+      ) {
+        const { totalCount, documentCountStats } = await getEsqlDocumentCountStats({
+          esql: esqlQuery,
+          search: data.search.search,
+          timeFieldName: searchParams.timeFieldName,
+          earliest: searchParams.earliest,
+          latest: searchParams.latest,
+          intervalMs: searchParams.intervalMs,
+          searchQuery: searchParams.searchQuery,
+          signal: abortCtrl.current.signal,
+        });
+        const esqlStats: DocumentStats = { sampleProbability: 1, documentCountStats, totalCount };
+        setDocumentStats(esqlStats);
+        setDocumentStatsCache({ ...documentStatsCache, [cacheKey]: esqlStats });
+        return;
+      }
 
       const projectRouting = projectRoutingOverride ?? cps?.cpsManager?.getDefaultProjectRouting();
       if (projectRouting) {
@@ -181,6 +209,10 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       // An `AbortError` gets triggered when a user cancels a request by navigating away, we need to ignore these errors.
       if (error.name !== 'AbortError') {
         displayError(toasts, searchParams!.index, extractErrorProperties(error));
+        setDocumentStats((previous) => ({
+          ...previous,
+          errorMessage: extractErrorMessage(error),
+        }));
       }
     }
     // custom comparison
