@@ -47,7 +47,7 @@ const sseAttachment = ({
   tier1TotalHits?: number;
   /** Tier 1 `per_index` hit indices, each carrying `tier1TotalHits` hits. */
   tier1Indices?: string[];
-  entities?: Array<{ field: string; value: string }>;
+  entities?: Array<{ field: string; value: string; local?: boolean; remote_clusters?: string[] }>;
   severity?: 'low' | 'medium' | 'high' | 'critical';
   tier2Behaviors?: Array<{
     technique_id: string;
@@ -319,6 +319,160 @@ describe('readCurrentRunState', () => {
 
       expect(resolve).toHaveBeenCalledWith('host-a');
       expect(state?.hosts[0]?.enrolled).toBe(true);
+    });
+
+    it('resolves no host in an all-remote run even when its entity claims a local origin', async () => {
+      // `local` is writable by whoever writes the SSE, so it may narrow the run-wide cut but
+      // must never widen it.
+      const resolve = jest.fn(resolveHostEnrollment);
+      const state = await readCurrentRunState({
+        attachments: [
+          sseAttachment({
+            tier1Indices: [remoteIndex],
+            events: [{ event_id: 'evt-remote', source_index: remoteIndex }],
+            entities: [{ field: 'host.name', value: 'ubuntu', local: true, remote_clusters: [] }],
+          }),
+        ],
+        reportId,
+        runId,
+        resolveHostEnrollment: resolve,
+        rehydrateProcessSelectors,
+      });
+
+      expect(resolve).not.toHaveBeenCalled();
+      expect(state?.hosts).toEqual([{ name: 'ubuntu', enrolled: false, capabilities: [] }]);
+    });
+
+    describe('in a mixed local/remote run', () => {
+      const readMixedRun = async (
+        entities: Array<{
+          field: string;
+          value: string;
+          local?: boolean;
+          remote_clusters?: string[];
+        }>
+      ) => {
+        const resolve = jest.fn(resolveHostEnrollment);
+        const state = await readCurrentRunState({
+          attachments: [sseAttachment({ tier1Indices: [remoteIndex, localIndex], entities })],
+          reportId,
+          runId,
+          resolveHostEnrollment: resolve,
+          rehydrateProcessSelectors,
+        });
+        return { resolve, hosts: state?.hosts ?? [] };
+      };
+
+      it('resolves the local host and skips the remote-only one, naming its cluster', async () => {
+        const { resolve, hosts } = await readMixedRun([
+          { field: 'host.name', value: 'web-1', local: true, remote_clusters: [] },
+          {
+            field: 'host.name',
+            value: 'ubuntu',
+            local: false,
+            remote_clusters: ['infosec_zocalo'],
+          },
+        ]);
+
+        expect(resolve).toHaveBeenCalledTimes(1);
+        expect(resolve).toHaveBeenCalledWith('web-1');
+        expect(hosts).toEqual([
+          expect.objectContaining({ name: 'web-1', enrolled: true, agentId: 'agent-1' }),
+          { name: 'ubuntu', enrolled: false, capabilities: [], remoteClusters: ['infosec_zocalo'] },
+        ]);
+      });
+
+      it('resolves a host seen on both the local and a remote cluster', async () => {
+        const { resolve } = await readMixedRun([
+          { field: 'host.name', value: 'web-1', local: true, remote_clusters: ['infosec_zocalo'] },
+        ]);
+
+        expect(resolve).toHaveBeenCalledWith('web-1');
+      });
+
+      it('resolves a host whose origin is unknown on the run-wide local evidence', async () => {
+        // An SSE written before entities carried an origin keeps today's behavior.
+        const { resolve } = await readMixedRun([{ field: 'host.name', value: 'web-1' }]);
+
+        expect(resolve).toHaveBeenCalledWith('web-1');
+      });
+
+      it('merges a host origin across current-run SSEs', async () => {
+        const resolve = jest.fn(resolveHostEnrollment);
+        await readCurrentRunState({
+          attachments: [
+            sseAttachment({
+              attachmentId: 'sse-1',
+              tier1Indices: [remoteIndex, localIndex],
+              entities: [
+                { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['b'] },
+              ],
+            }),
+            sseAttachment({
+              attachmentId: 'sse-2',
+              tier1Indices: [localIndex],
+              entities: [{ field: 'host.name', value: 'ubuntu', local: true, remote_clusters: [] }],
+            }),
+          ],
+          reportId,
+          runId,
+          resolveHostEnrollment: resolve,
+          rehydrateProcessSelectors,
+        });
+
+        expect(resolve).toHaveBeenCalledWith('ubuntu');
+      });
+
+      it('lists every cluster of a host seen remote-only on several SSEs', async () => {
+        const resolve = jest.fn(resolveHostEnrollment);
+        const state = await readCurrentRunState({
+          attachments: [
+            sseAttachment({
+              attachmentId: 'sse-1',
+              tier1Indices: [remoteIndex, localIndex],
+              entities: [
+                { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['c'] },
+              ],
+            }),
+            sseAttachment({
+              attachmentId: 'sse-2',
+              entities: [
+                { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['b'] },
+              ],
+            }),
+          ],
+          reportId,
+          runId,
+          resolveHostEnrollment: resolve,
+          rehydrateProcessSelectors,
+        });
+
+        expect(resolve).not.toHaveBeenCalled();
+        expect(state?.hosts).toEqual([
+          { name: 'ubuntu', enrolled: false, capabilities: [], remoteClusters: ['b', 'c'] },
+        ]);
+      });
+
+      it('reads a remote origin naming no cluster as unknown, following the run-wide rule', async () => {
+        const { resolve, hosts } = await readMixedRun([
+          { field: 'host.name', value: 'web-1', local: false, remote_clusters: [] },
+        ]);
+
+        expect(resolve).toHaveBeenCalledWith('web-1');
+        expect(hosts[0]).not.toHaveProperty('remoteClusters');
+      });
+
+      it('keeps a remote-only host unresolved when a host.hostname entity names it too', async () => {
+        const { resolve, hosts } = await readMixedRun([
+          { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['r'] },
+          { field: 'host.hostname', value: 'ubuntu' },
+        ]);
+
+        expect(resolve).not.toHaveBeenCalled();
+        expect(hosts).toEqual([
+          { name: 'ubuntu', enrolled: false, capabilities: [], remoteClusters: ['r'] },
+        ]);
+      });
     });
   });
 

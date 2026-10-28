@@ -811,6 +811,124 @@ describe('huntBehavior', () => {
     expect(result.behaviors[0].affected_hosts_truncated).toBe(true);
   });
 
+  describe('host origins', () => {
+    const ccsParams = { ...executeParams, allowed_indices: ['logs-aws.*', 'cluster_b:logs-aws.*'] };
+
+    it('records where each affected host was seen, from the rows that named it', async () => {
+      executeEsqlMock.mockResolvedValue({
+        columns: [col('_index'), col('host.name')],
+        values: [
+          ['logs-aws.cloudtrail-default', 'web-1'],
+          ['cluster_b:logs-aws.cloudtrail-default', 'web-1'],
+          ['cluster_b:logs-aws.cloudtrail-default', 'ubuntu'],
+        ],
+      });
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        ccsParams,
+        esClient
+      );
+
+      expect(result.behaviors[0].affected_hosts).toEqual(['web-1', 'ubuntu']);
+      expect(result.behaviors[0].affected_host_origins).toEqual([
+        { name: 'web-1', local: true, remote_clusters: ['cluster_b'] },
+        { name: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+      ]);
+    });
+
+    it('ignores rows outside the required scope when deciding a host origin', async () => {
+      executeEsqlMock.mockResolvedValue({
+        columns: [col('_index'), col('host.name')],
+        values: [
+          ['cluster_b:logs-aws.cloudtrail-default', 'ubuntu'],
+          ['.alerts-security.alerts-default', 'ubuntu'],
+        ],
+      });
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        ccsParams,
+        esClient
+      );
+
+      expect(result.behaviors[0].affected_host_origins).toEqual([
+        { name: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+      ]);
+    });
+
+    describe('when the rows hit the query cap', () => {
+      const remoteAndLocalRows = {
+        columns: [col('_index'), col('host.name')],
+        values: [
+          ['cluster_b:logs-aws.cloudtrail-default', 'ubuntu'],
+          ['logs-aws.cloudtrail-default', 'web-1'],
+        ],
+      };
+
+      it('keeps local origins and leaves remote-only ones unknown at row_limit', async () => {
+        // The host's local rows may be past the cap, so "remote only" is not proven.
+        executeEsqlMock.mockResolvedValue(remoteAndLocalRows);
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          { ...ccsParams, row_limit: 2 },
+          esClient
+        );
+
+        expect(result.behaviors[0].affected_hosts).toEqual(['ubuntu', 'web-1']);
+        expect(result.behaviors[0].affected_host_origins).toEqual([
+          { name: 'web-1', local: true, remote_clusters: [] },
+        ]);
+      });
+
+      it('treats a generated LIMIT below row_limit as the cap', async () => {
+        generateByTechnique({ 'T1078.004': GROUNDED_ESQL.replace('LIMIT 100', 'LIMIT 2') });
+        executeEsqlMock.mockResolvedValue(remoteAndLocalRows);
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          ccsParams,
+          esClient
+        );
+
+        expect(result.behaviors[0].affected_host_origins).toEqual([
+          { name: 'web-1', local: true, remote_clusters: [] },
+        ]);
+      });
+
+      it('keeps a remote-only origin when the rows stopped short of the cap', async () => {
+        executeEsqlMock.mockResolvedValue(remoteAndLocalRows);
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          { ...ccsParams, row_limit: 3 },
+          esClient
+        );
+
+        expect(result.behaviors[0].affected_host_origins).toEqual([
+          { name: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+          { name: 'web-1', local: true, remote_clusters: [] },
+        ]);
+      });
+    });
+
+    it('omits host origins when no host was affected', async () => {
+      executeEsqlMock.mockResolvedValue({
+        columns: [col('_index')],
+        values: [['logs-aws.cloudtrail-default']],
+      });
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        ccsParams,
+        esClient
+      );
+
+      expect(result.behaviors[0].affected_host_origins).toBeUndefined();
+    });
+  });
+
   describe('a generated query that reads outside the hunt scope', () => {
     const OUT_OF_SCOPE_ESQL = 'FROM .kibana-secrets\n| LIMIT 10';
 

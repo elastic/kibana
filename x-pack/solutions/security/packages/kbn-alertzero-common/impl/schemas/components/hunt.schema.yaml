@@ -193,6 +193,39 @@ components:
           type: string
         hit_count:
           type: integer
+        local:
+          type: boolean
+          description: >-
+            Whether any hit for this asset came from a local index. Absent when
+            the source indices are unknown (for example, the per-asset index
+            breakdown was cut off before any local index was seen).
+        remote_clusters:
+          type: array
+          maxItems: 20
+          description: >-
+            Remote cluster aliases (`<cluster>:` prefix of a hit's `_index`)
+            this asset was seen on. Present whenever `local` is.
+          items:
+            type: string
+            maxLength: 255
+
+    # Where a Tier 2 host was seen: on the local cluster, on remote clusters, or both.
+    # Packaging never resolves a host seen only remotely against local Fleet.
+    HostOrigin:
+      type: object
+      required: [name, local, remote_clusters]
+      properties:
+        name:
+          type: string
+          maxLength: 512
+        local:
+          type: boolean
+        remote_clusters:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            maxLength: 255
 
     # Shared Discover ref for Tier 1 `hits[]` and Tier 2 behavior `hits[]`.
     # Full `_source` is not returned; consumers refetch by id + index when needed.

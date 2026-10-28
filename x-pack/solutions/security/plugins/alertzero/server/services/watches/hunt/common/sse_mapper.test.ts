@@ -1340,3 +1340,75 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     expect(alertIds).not.toContain('t2-remote-alert');
   });
 });
+
+describe('buildSseData host entity origins', () => {
+  const withHosts = (hosts: HuntCoordinatorCoreResult['tier1']['affected_assets']['hosts']) =>
+    tier1Result({
+      affected_assets: { hosts, users: [], services: [] },
+      counts: { total_hits: 1, returned_hits: 1, affected_hosts: hosts.length, affected_users: 0 },
+    });
+
+  const hostEntities = (result: HuntCoordinatorCoreResult) => {
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+    return entry.data.entities.filter((entity) => entity.field === 'host.name');
+  };
+
+  it('carries the Tier 1 origin onto each host entity, and parses', () => {
+    const result = withHosts([
+      { name: 'web-1', hit_count: 1, local: true, remote_clusters: [] },
+      { name: 'ubuntu', hit_count: 1, local: false, remote_clusters: ['cluster_b'] },
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'web-1', local: true, remote_clusters: [] },
+      { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('leaves a host entity without origin when Tier 1 could not tell', () => {
+    expect(hostEntities(withHosts([{ name: 'web-1', hit_count: 1 }]))).toEqual([
+      { field: 'host.name', value: 'web-1' },
+    ]);
+  });
+
+  it('carries the Tier 2 origin onto a host only a behavior named', () => {
+    const result = withBehaviors(withHosts([]), [
+      behaviorFixture({
+        affected_hosts: ['ubuntu'],
+        affected_host_origins: [{ name: 'ubuntu', local: false, remote_clusters: ['cluster_b'] }],
+      }),
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('merges the origins of a host both tiers named instead of keeping only the Tier 1 copy', () => {
+    const result = withBehaviors(
+      withHosts([{ name: 'web-1', hit_count: 1, local: false, remote_clusters: ['cluster_b'] }]),
+      [
+        behaviorFixture({
+          affected_hosts: ['web-1'],
+          affected_host_origins: [{ name: 'web-1', local: true, remote_clusters: [] }],
+        }),
+      ]
+    );
+
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'web-1', local: true, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('leaves a remote host unknown when another tier named it without an origin', () => {
+    // The unknown sighting could have been local, so "remote only" is no longer proven.
+    const result = withBehaviors(
+      withHosts([{ name: 'ubuntu', hit_count: 1, local: false, remote_clusters: ['cluster_b'] }]),
+      [behaviorFixture({ affected_hosts: ['ubuntu'] })]
+    );
+
+    expect(hostEntities(result)).toEqual([{ field: 'host.name', value: 'ubuntu' }]);
+  });
+});

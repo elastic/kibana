@@ -25,6 +25,11 @@ export interface CurrentRunHost {
    * `capabilities` means nothing is known rather than that the endpoint reports none.
    */
   capabilitiesSource?: CapabilitiesSource;
+  /**
+   * The remote cluster aliases (never empty), set when the hunt saw this host only on remote
+   * clusters. Such a host is never resolved against local Fleet.
+   */
+  remoteClusters?: string[];
 }
 
 /** Process selector fillable into kill/suspend `parameters`. */
