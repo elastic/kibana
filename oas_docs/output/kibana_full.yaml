@@ -21515,7 +21515,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_unified_attachment_response'
           description: |
-            Indicates a successful call. Returns the new attachment, or the existing one if the alert or event was already attached.
+            Indicates a successful call. Returns the new attachment. If some of the alert or event IDs are already attached to the case, they are skipped and the new attachment holds only the remaining IDs.
         '400':
           content:
             application/json:
@@ -21557,6 +21557,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: The case was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                response409:
+                  $ref: '#/components/examples/Cases_response_409_attachment_already_attached'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Every alert or event ID in the request is already attached to the case.
       summary: Create a case attachment
       tags:
         - cases
@@ -149071,6 +149080,12 @@ components:
       value:
         error: Conflict
         message: Template name "Security incident" already exists for owner "cases"
+        statusCode: 409
+    Cases_response_409_attachment_already_attached:
+      summary: Every alert or event in the request is already attached to the case.
+      value:
+        error: Conflict
+        message: Every id in the request is already attached to case 293f1bfe-c4ab-4a0b-9a36-9fd4a1d7d2b1.
         statusCode: 409
     Cases_response_409_attachment_version_conflict:
       summary: The attachment version is out of date.
