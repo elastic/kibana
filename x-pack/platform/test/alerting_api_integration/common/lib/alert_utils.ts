@@ -9,6 +9,7 @@ import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import type { AlertsFilter } from '@kbn/alerting-plugin/common/rule';
 import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
 import type { SnoozeBody } from '@kbn/alerting-plugin/common/routes/rule/apis/snooze';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { Space, User } from '../types';
 import type { ObjectRemover } from './object_remover';
 import { getUrlPrefix } from './space_test_utils';
@@ -566,7 +567,7 @@ export class AlertUtils {
     let request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
       .set('kbn-xsrf', 'foo')
-      .set('x-elastic-internal-origin', 'kibana');
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
