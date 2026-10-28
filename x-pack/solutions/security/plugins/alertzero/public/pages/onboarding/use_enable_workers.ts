@@ -113,10 +113,14 @@ export const useEnableWorkers = (
 
     let hadFailure = accountFailures.length > 0;
     let hadSuccess = false;
-    results.forEach((result) => {
+    results.forEach((result, index) => {
       if (result.status === 'rejected') {
         hadFailure = true;
-        notifyWorkerUpdateError(services.notifications!.toasts, result.reason, reportShown);
+        const id = idsToPatch[index];
+        notifyWorkerUpdateError(services.notifications!.toasts, result.reason, {
+          workerName: workerName(id, workerById.get(id)?.name),
+          reportShown,
+        });
       } else {
         hadSuccess = true;
       }

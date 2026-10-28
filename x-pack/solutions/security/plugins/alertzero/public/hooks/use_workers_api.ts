@@ -17,6 +17,7 @@ import type {
   UpdateWorkerResponse,
   Worker,
 } from '@kbn/alertzero-common';
+import { workerName } from '../../common/worker_names';
 import { retryOnTransientError } from './retry_on_transient_error';
 import { invalidateHuntThreatIntelSupplyStatus } from './hunt/use_hunt_threat_intel_supply';
 import { queryKeys } from '../query_keys';
@@ -42,38 +43,82 @@ const WORKER_SETTINGS_CONFLICT_MESSAGE = i18n.translate(
   { defaultMessage: 'Worker settings changed; reload and try again' }
 );
 
+const workerSettingsConflictMessage = (name: string) =>
+  i18n.translate('xpack.alertzero.workerSettingsConflictNamedErrorMessage', {
+    defaultMessage: '{workerName} settings changed; reload and try again',
+    values: { workerName: name },
+  });
+
 const WORKER_SETTINGS_FORBIDDEN_MESSAGE = i18n.translate(
   'xpack.alertzero.workerSettingsForbiddenErrorMessage',
   { defaultMessage: 'You do not have permission to update this worker' }
 );
 
+const workerSettingsForbiddenMessage = (name: string) =>
+  i18n.translate('xpack.alertzero.workerSettingsForbiddenNamedErrorMessage', {
+    defaultMessage: 'You do not have permission to update {workerName}',
+    values: { workerName: name },
+  });
+
 const WORKER_UPDATE_ERROR_TITLE = i18n.translate('xpack.alertzero.workerUpdateErrorMessage', {
   defaultMessage: 'Unable to update the worker',
 });
 
-/** Shows the toast for a failed Worker update, and reports it when given `reportShown`. */
+const workerUpdateErrorTitle = (name: string) =>
+  i18n.translate('xpack.alertzero.workerUpdateNamedErrorTitle', {
+    defaultMessage: "Couldn't update {workerName}",
+    values: { workerName: name },
+  });
+
+/**
+ * The reason to show for a failed HTTP request: the server's message, else "{status} {statusText}".
+ * HTTP/2 responses have an empty statusText, so the status code may be all there is.
+ */
+const httpErrorReason = (error: unknown): string | undefined => {
+  if (!isHttpFetchError(error)) {
+    return undefined;
+  }
+  const body = error.body as { message?: unknown } | undefined;
+  if (typeof body?.message === 'string' && body.message.trim() !== '') {
+    return body.message;
+  }
+  const { status, statusText } = error.response ?? {};
+  const fallback = `${status ?? ''} ${statusText ?? ''}`.trim();
+  return fallback === '' ? undefined : fallback;
+};
+
+interface NotifyWorkerUpdateErrorOptions {
+  /** Names the Worker in the toast; without it the toast uses the generic wording. */
+  workerName?: string;
+  /** Reports the toast as shown, for telemetry. */
+  reportShown?: ReportToastError;
+}
+
+/** Shows the toast for a failed Worker update. */
 export const notifyWorkerUpdateError = (
   toasts: IToasts,
   error: unknown,
-  reportShown?: ReportToastError
+  { workerName: name, reportShown }: NotifyWorkerUpdateErrorOptions = {}
 ): void => {
   reportShown?.(classifyError(error));
   const status = isHttpFetchError(error) ? error.response?.status : undefined;
   if (status === 409) {
-    toasts.addWarning(WORKER_SETTINGS_CONFLICT_MESSAGE);
+    toasts.addWarning(
+      name ? workerSettingsConflictMessage(name) : WORKER_SETTINGS_CONFLICT_MESSAGE
+    );
     return;
   }
   if (status === 403) {
-    toasts.addDanger(WORKER_SETTINGS_FORBIDDEN_MESSAGE);
+    toasts.addDanger(
+      name ? workerSettingsForbiddenMessage(name) : WORKER_SETTINGS_FORBIDDEN_MESSAGE
+    );
     return;
   }
   const cause = error instanceof Error ? error : new Error(String(error));
-  const body = isHttpFetchError(error)
-    ? (error.body as { message?: unknown } | undefined)
-    : undefined;
+  const reason = httpErrorReason(error);
   toasts.addError(cause, {
-    title: WORKER_UPDATE_ERROR_TITLE,
-    ...(typeof body?.message === 'string' ? { toastMessage: body.message } : {}),
+    title: name ? workerUpdateErrorTitle(name) : WORKER_UPDATE_ERROR_TITLE,
+    ...(reason ? { toastMessage: reason } : {}),
   });
 };
 
@@ -120,8 +165,14 @@ export const useUpdateWorker = () => {
     onSuccess: (data) => {
       replaceWorkerInList(queryClient, queryKey, data.worker);
     },
-    onError: (error) => {
-      notifyWorkerUpdateError(services.notifications!.toasts, error, reportShown);
+    onError: (error, { workerId }) => {
+      const cachedName = queryClient
+        .getQueryData<ListWorkersResponse>(queryKey)
+        ?.workers.find((worker) => worker.id === workerId)?.name;
+      notifyWorkerUpdateError(services.notifications!.toasts, error, {
+        workerName: workerName(workerId, cachedName),
+        reportShown,
+      });
     },
     // Awaited so mutateAsync resolves after the reload attempt. A failed reload surfaces as the
     // workers query error, which the Watch page uses to block Save.
