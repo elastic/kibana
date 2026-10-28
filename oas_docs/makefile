@@ -16,7 +16,7 @@
 export PATH := $(abspath $(CURDIR)/../node_modules/.bin):$(PATH)
 
 .PHONY: api-docs
-api-docs: ## Generate Serverless and ESS Kibana OpenAPI bundles
+api-docs: ## Generate Serverless and ESS Kibana OpenAPI bundles (slim for Bump.sh, full for docs-builder)
 	$(MAKE) merge-api-docs
 	$(MAKE) api-docs-overlay
 	$(MAKE) space-aware-api-docs
@@ -25,6 +25,8 @@ api-docs: ## Generate Serverless and ESS Kibana OpenAPI bundles
 space-aware-api-docs: ## Add special space aware description entries
 	@node scripts/promote_space_awareness.js oas_docs/output/kibana.yaml
 	@node scripts/promote_space_awareness.js oas_docs/output/kibana.serverless.yaml
+	@node scripts/promote_space_awareness.js oas_docs/output/kibana_full.yaml --full
+	@node scripts/promote_space_awareness.js oas_docs/output/kibana_full.serverless.yaml --full
 
 .PHONY: merge-api-docs
 merge-api-docs: ## Merge Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler
@@ -52,7 +54,7 @@ api-docs-lint-serverless: ## Run redocly API docs linter on kibana.serverless.ya
 	@redocly lint "output/kibana.serverless.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
 .PHONY: api-docs-overlay
-api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Dashboards & Visualizations)
+api-docs-overlay: ## Apply all overlays; kibana_full*.yaml skips bump-slim (full Dashboards & Visualizations), kibana*.yaml includes it
 	@bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
 	@bump overlay "output/kibana.serverless.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.serverless.tmp2.yaml"
 	@bump overlay "output/kibana.serverless.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.serverless.tmp3.yaml"
@@ -71,6 +73,19 @@ api-docs-overlay: ## Apply all overlays (including bump-slim placeholder for Das
 	@bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
 	@bump overlay "output/kibana.tmp7.yaml" "overlays/discover_sessions.overlays.yaml" > "output/kibana.tmp8.yaml"
 	@bump overlay "output/kibana.tmp8.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.tmp9.yaml"
+	@bump overlay "output/kibana.serverless.tmp8.yaml" "overlays/kibana.overlays.full.yaml" > "output/kibana.serverless.tmp8f.yaml"
+	@bump overlay "output/kibana.tmp8.yaml" "overlays/kibana.overlays.full.yaml" > "output/kibana.tmp8f.yaml"
+	@# The overlays link to the external Dashboards & Visualizations site (used by Bump.sh and the external
+	@# pipeline). docs-builder needs relative operation links, so rewrite them in the full bundles only.
+	@perl -pi \
+		-e 's|https://elastic\.github\.io/dashboards-api-spec/dashboards#tag/Dashboards/operation/create-dashboard|../operation/operation-create-dashboard|g;' \
+		-e 's|\(dashboards#tag/Dashboards/operation/create-dashboard\)|(../operation/operation-create-dashboard)|g;' \
+		-e 's|\(visualizations#tag/Visualizations/operation/create-visualization\)|(../operation/operation-create-visualization)|g;' \
+		-e 's|\(#operation/create-dashboard\)|(../operation/operation-create-dashboard)|g;' \
+		-e 's|\(#operation/create-visualization\)|(../operation/operation-create-visualization)|g;' \
+		output/kibana.tmp8f.yaml output/kibana.serverless.tmp8f.yaml
+	@redocly bundle output/kibana.serverless.tmp8f.yaml --ext yaml -o output/kibana_full.serverless.yaml
+	@redocly bundle output/kibana.tmp8f.yaml --ext yaml -o output/kibana_full.yaml
 	@redocly bundle output/kibana.serverless.tmp9.yaml --ext yaml -o output/kibana.serverless.yaml
 	@redocly bundle output/kibana.tmp9.yaml --ext yaml -o output/kibana.yaml
 	rm -f output/kibana.tmp*.yaml

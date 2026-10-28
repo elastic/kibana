@@ -12,13 +12,16 @@ import type {
   PluginInitializerContext,
   Plugin as PluginType,
 } from '@kbn/core/server';
+import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { registerRoutes } from '@kbn/server-route-repository';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
+import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
 import { registerSessionsRoutes } from './routes/sessions_routes';
 import {
   registerSessionsHealthTask,
@@ -27,6 +30,10 @@ import {
 
 interface DigitalExperienceSetupDeps {
   features: FeaturesPluginSetup;
+  /** Optional: only the Classic RUM source (stateful) needs it. */
+  apmDataAccess?: ApmDataAccessPluginSetup;
+  /** Optional: only its presence is read, as the Classic RUM source needs it. */
+  ux?: unknown;
   taskManager?: TaskManagerSetupContract;
 }
 
@@ -40,13 +47,27 @@ export class Plugin
   private readonly logger: Logger;
   private readonly config: DigitalExperienceConfig;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<DigitalExperienceConfig>();
   }
 
   public setup(core: CoreSetup, plugins: DigitalExperienceSetupDeps) {
     registerDigitalExperienceFeature(plugins.features);
+
+    const { buildFlavor } = this.initializerContext.env.packageInfo;
+    registerRoutes({
+      core,
+      logger: this.logger,
+      repository: getGlobalDigitalExperienceServerRouteRepository(),
+      dependencies: {
+        plugins: { apmDataAccess: plugins.apmDataAccess },
+        isServerless: buildFlavor === 'serverless',
+        isUxEnabled: plugins.ux !== undefined,
+      },
+      runDevModeChecks: this.initializerContext.env.mode.dev,
+    });
+
     const settings = this.config.sessions;
     registerSessionsRoutes({ router: core.http.createRouter(), logger: this.logger, settings });
     if (plugins.taskManager) {

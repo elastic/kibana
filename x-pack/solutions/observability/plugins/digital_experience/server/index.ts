@@ -13,3 +13,5 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
 };
 
 export { config } from './config';
+
+export type { DigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';

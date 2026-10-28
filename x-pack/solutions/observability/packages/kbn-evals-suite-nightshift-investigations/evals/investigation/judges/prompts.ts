@@ -235,6 +235,8 @@ shortcut depending on what it actually touched — judge by the trajectory, not 
   incident.
 - \`nightshift_sandbox_view_file\` reading a path under \`cortex/\` is a CORTEX RECALL: knowledge a past
   investigation wrote down, not evidence gathered now.
+- \`nightshift_sandbox_view_file\` reading a path under \`memories/\` is a SEMANTIC-MEMORY RECALL:
+  knowledge a past investigation wrote down, not evidence gathered now.
 - \`nightshift_sandbox_view_file\` reading a path under \`decision-trees/\` is a DECISION-TREE RECALL: a
   curated playbook, not evidence gathered now.
 - \`nightshift_sandbox_view_file\` reading an actual source file, or a file the agent itself wrote from
