@@ -67,9 +67,10 @@ describe('AttachmentActions', () => {
     expect(save.handler).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a menu-only button when there is no primary action', async () => {
+  it('renders a menu-only button when there is no primary action and several actions', async () => {
     const copy = createButton({ label: 'Copy' });
-    render(<AttachmentActions buttons={[copy]} />);
+    const remove = createButton({ label: 'Delete', type: ActionButtonType.OVERFLOW });
+    render(<AttachmentActions buttons={[copy, remove]} />);
 
     expect(screen.queryByRole('button', { name: 'Copy' })).not.toBeInTheDocument();
 
@@ -77,6 +78,16 @@ describe('AttachmentActions', () => {
     fireEvent.click(await screen.findByText('Copy'));
 
     expect(copy.handler).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a lone non-primary action as a regular button', () => {
+    const preview = createButton({ label: 'Preview' });
+    render(<AttachmentActions buttons={[preview]} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+
+    expect(preview.handler).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('agentBuilderAttachmentMoreActions')).not.toBeInTheDocument();
   });
 
   it('does not run a disabled main button', () => {

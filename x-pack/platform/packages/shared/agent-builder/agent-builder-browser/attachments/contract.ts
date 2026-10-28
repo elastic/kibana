@@ -106,7 +106,11 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
-  /** Optional EUI button color override (defaults to 'text') */
+  /**
+   * Optional EUI button color override (defaults to 'text').
+   * Only applies when the action is the main button of the header; actions shown in the
+   * menu of the split button ignore it.
+   */
   color?: EuiButtonColor;
   /** Whether the action is currently unavailable */
   disabled?: boolean;

@@ -252,6 +252,22 @@ export const MenuOnlyWithoutPrimary: Story = {
   },
 };
 
+export const SingleSecondaryAction: Story = {
+  args: {
+    icon: 'document',
+    title: 'skill.md (older version)',
+    actionButtons: [
+      {
+        label: 'Preview',
+        icon: 'eye',
+        type: ActionButtonType.SECONDARY,
+        handler: action('preview'),
+      },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
 export const DisabledPrimary: Story = {
   args: {
     icon: 'document',

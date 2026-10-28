@@ -50,7 +50,9 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-  const mainButton = buttons.find(({ type }) => type === ActionButtonType.PRIMARY);
+  const mainButton =
+    buttons.find(({ type }) => type === ActionButtonType.PRIMARY) ??
+    (buttons.length === 1 ? buttons[0] : undefined);
   const menuButtons = buttons.filter((button) => button !== mainButton);
 
   const menu = useMemo(

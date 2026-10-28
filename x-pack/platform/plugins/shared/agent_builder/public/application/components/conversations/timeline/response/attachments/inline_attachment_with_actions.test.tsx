@@ -210,11 +210,10 @@ describe('InlineAttachmentWithActions', () => {
       });
     });
 
-    it('invokes openSidebarConversationInternal when triggered from an action button', async () => {
+    it('invokes openSidebarConversationInternal when triggered from an action button', () => {
       renderWithFakeContent({ isSidebar: false });
 
-      fireEvent.click(screen.getByTestId('agentBuilderAttachmentMoreActions'));
-      fireEvent.click(await screen.findByText(ACTION_TRIGGER));
+      fireEvent.click(screen.getByRole('button', { name: ACTION_TRIGGER }));
 
       expect(mockOpenSidebarConversation).toHaveBeenCalledTimes(1);
       expect(mockOpenSidebarConversation).toHaveBeenCalledWith({
@@ -233,11 +232,10 @@ describe('InlineAttachmentWithActions', () => {
       });
     });
 
-    it('invokes openSidebarConversationInternal when triggered from an action button inside the sidebar', async () => {
+    it('invokes openSidebarConversationInternal when triggered from an action button inside the sidebar', () => {
       renderWithFakeContent({ isSidebar: true });
 
-      fireEvent.click(screen.getByTestId('agentBuilderAttachmentMoreActions'));
-      fireEvent.click(await screen.findByText(ACTION_TRIGGER));
+      fireEvent.click(screen.getByRole('button', { name: ACTION_TRIGGER }));
 
       expect(mockOpenSidebarConversation).toHaveBeenCalledTimes(1);
       expect(mockOpenSidebarConversation).toHaveBeenCalledWith({
