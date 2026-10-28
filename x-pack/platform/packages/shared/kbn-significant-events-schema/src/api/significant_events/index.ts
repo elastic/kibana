@@ -20,7 +20,7 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../significant_events/constants';
 import type { ChangePointType, DetectionSkip } from '../../significant_events/detections';
-import type { SignificantEventResponse } from '../../significant_events/events';
+import type { EventDeactivation, SignificantEventResponse } from '../../significant_events/events';
 
 type ChangePointsValue = Partial<{
   p_value: number;
@@ -100,4 +100,5 @@ export type {
   SignificantEventsQueriesGenerationResult,
   LifecycleDetection,
   EventLifecycleResponse,
+  EventDeactivation,
 };

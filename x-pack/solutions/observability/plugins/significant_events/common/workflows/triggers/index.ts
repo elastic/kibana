@@ -112,7 +112,7 @@ export const eventStatusChangedTriggerCommonDefinition: CommonTriggerDefinition 
       'xpack.significantEvents.workflowTriggers.eventStatusChanged.documentation.details',
       {
         defaultMessage:
-          'Emitted when a significant event moves between statuses. The payload includes event.status and event.previous_status. event.status: "inactive" fires when an event recovers. An operator deactivating a significant event goes through Alerting v2 and does not emit this trigger.',
+          'Emitted when a significant event moves between statuses. The payload includes event.status and event.previous_status. event.status: "inactive" fires when an event recovers.',
       }
     ),
     examples: [

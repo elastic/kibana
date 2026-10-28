@@ -25,6 +25,7 @@ export const MAX_DEACTIVATION_REASON_LENGTH = 1024;
  * How long a closed series stays reusable by an exact-identity batch. The server reads it as its
  * default lookback; the operator UI quotes it, so the two cannot drift.
  */
+// TODO: Move this to detection settings when the recurrence lookback becomes configurable.
 export const INACTIVE_SERIES_LOOKBACK_HOURS = 48;
 
 /** Note recorded when an operator changes status without giving a reason. */
