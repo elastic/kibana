@@ -43,11 +43,13 @@ interface AttackAlertIdsSource {
 }
 
 // Stored attributes carry more than the attach payload, so this does not reuse the strict schema.
-const StoredAttackAttachmentSchema = lazySchema(() => z.object({
-  type: z.literal(SECURITY_ATTACK_ATTACHMENT_TYPE),
-  attachmentId: z.string(),
-  metadata: z.object({ index: z.string() }),
-}));
+const StoredAttackAttachmentSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(SECURITY_ATTACK_ATTACHMENT_TYPE),
+    attachmentId: z.string(),
+    metadata: z.object({ index: z.string() }),
+  })
+);
 
 /**
  * Stands in for the payload schema while `attackAttachments` is off, refusing every

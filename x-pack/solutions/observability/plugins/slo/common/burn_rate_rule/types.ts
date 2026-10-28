@@ -6,9 +6,11 @@
  */
 import { z, lazySchema } from '@kbn/zod';
 
-export const dependencySchema = lazySchema(() => z.object({
-  ruleId: z.string(),
-  actionGroupsToSuppressOn: z.array(z.string()),
-}));
+export const dependencySchema = lazySchema(() =>
+  z.object({
+    ruleId: z.string(),
+    actionGroupsToSuppressOn: z.array(z.string()),
+  })
+);
 
 export type Dependency = z.input<typeof dependencySchema>;

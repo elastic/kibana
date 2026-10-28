@@ -10,7 +10,9 @@ import { UserActionTypes } from '../action/v1';
 
 export const TitleUserActionPayloadSchema = lazySchema(() => z.object({ title: z.string() }));
 
-export const TitleUserActionSchema = lazySchema(() => z.object({
-  type: z.literal(UserActionTypes.title),
-  payload: TitleUserActionPayloadSchema,
-}));
+export const TitleUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.title),
+    payload: TitleUserActionPayloadSchema,
+  })
+);

@@ -16,15 +16,21 @@ import { lensResponseItemSchema } from './common';
 // TODO See if these should be in body or params?
 export const lensSearchRequestQuerySchema = lensCMSearchOptionsSchema
   .extend({
-    query: lazySchema(() => z.string().optional().meta({
-      description: 'The text to search for visualizations',
-    })),
-    page: lazySchema(() => z.coerce.number().min(1).optional().default(1).meta({
-      description: 'Specifies the current page number of the paginated result.',
-    })),
-    perPage: lazySchema(() => z.coerce.number().min(1).max(1000).optional().default(20).meta({
-      description: 'Maximum number of visualizations included in a single response',
-    })),
+    query: lazySchema(() =>
+      z.string().optional().meta({
+        description: 'The text to search for visualizations',
+      })
+    ),
+    page: lazySchema(() =>
+      z.coerce.number().min(1).optional().default(1).meta({
+        description: 'Specifies the current page number of the paginated result.',
+      })
+    ),
+    perPage: lazySchema(() =>
+      z.coerce.number().min(1).max(1000).optional().default(20).meta({
+        description: 'Maximum number of visualizations included in a single response',
+      })
+    ),
   })
   .strict();
 
@@ -38,10 +44,12 @@ const lensSearchResponseMetaSchema = searchOptionsSchema
   })
   .strict();
 
-export const lensSearchResponseBodySchema = lazySchema(() => z
-  .object({
-    data: z.array(lensResponseItemSchema).max(100),
-    meta: lensSearchResponseMetaSchema,
-  })
-  .strict()
-  .meta({ id: 'visualizationListResponse' }));
+export const lensSearchResponseBodySchema = lazySchema(() =>
+  z
+    .object({
+      data: z.array(lensResponseItemSchema).max(100),
+      meta: lensSearchResponseMetaSchema,
+    })
+    .strict()
+    .meta({ id: 'visualizationListResponse' })
+);

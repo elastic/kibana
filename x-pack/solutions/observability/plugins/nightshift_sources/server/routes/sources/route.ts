@@ -21,9 +21,11 @@ import {
 } from '@kbn/nightshift-shared';
 import { createNightshiftSourcesServerRoute } from '../create_server_route';
 
-const sourceIdPathSchema = lazySchema(() => z.object({
-  sourceId: z.uuid(),
-}));
+const sourceIdPathSchema = lazySchema(() =>
+  z.object({
+    sourceId: z.uuid(),
+  })
+);
 
 const listSourcesRoute = createNightshiftSourcesServerRoute({
   endpoint: 'GET /internal/nightshift/sources',
@@ -37,9 +39,11 @@ const listSourcesRoute = createNightshiftSourcesServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    query: listSourcesQuerySchema,
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: listSourcesQuerySchema,
+    })
+  ),
   handler: async ({ params, request, getSourcesClient }): Promise<ListSourcesResponse> => {
     const client = await getSourcesClient({ request });
     const { page, per_page: perPage, search, enabled, ids } = params.query;
@@ -60,9 +64,11 @@ const createSourceRoute = createNightshiftSourcesServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    body: createSourceRequestSchema,
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: createSourceRequestSchema,
+    })
+  ),
   handler: async ({ params, request, getSourcesClient }): Promise<SourceMutationResponse> => {
     const client = await getSourcesClient({ request });
     const source = await client.create(params.body);
@@ -115,9 +121,11 @@ const getSourceRoute = createNightshiftSourcesServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    path: sourceIdPathSchema,
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: sourceIdPathSchema,
+    })
+  ),
   handler: async ({ params, request, getSourcesClient }): Promise<SourceWithHealth> => {
     const client = await getSourcesClient({ request });
     return client.get(params.path.sourceId);
@@ -137,10 +145,12 @@ const updateSourceRoute = createNightshiftSourcesServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: sourceIdPathSchema,
-    body: updateSourceRequestSchema,
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: sourceIdPathSchema,
+      body: updateSourceRequestSchema,
+    })
+  ),
   handler: async ({ params, request, getSourcesClient }): Promise<SourceMutationResponse> => {
     const client = await getSourcesClient({ request });
     const source = await client.update(params.path.sourceId, params.body);
@@ -161,9 +171,11 @@ const deleteSourceRoute = createNightshiftSourcesServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: sourceIdPathSchema,
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: sourceIdPathSchema,
+    })
+  ),
   handler: async ({ params, request, getSourcesClient }): Promise<DeleteSourceResponse> => {
     const client = await getSourcesClient({ request });
     await client.delete(params.path.sourceId);
@@ -183,9 +195,11 @@ const enableSourceRoute = createNightshiftSourcesServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: sourceIdPathSchema,
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: sourceIdPathSchema,
+    })
+  ),
   handler: async ({ params, request, getSourcesClient }): Promise<SourceMutationResponse> => {
     const client = await getSourcesClient({ request });
     const source = await client.setEnabled(params.path.sourceId, true);
@@ -205,9 +219,11 @@ const disableSourceRoute = createNightshiftSourcesServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: sourceIdPathSchema,
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: sourceIdPathSchema,
+    })
+  ),
   handler: async ({ params, request, getSourcesClient }): Promise<SourceMutationResponse> => {
     const client = await getSourcesClient({ request });
     const source = await client.setEnabled(params.path.sourceId, false);

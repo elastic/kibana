@@ -14,23 +14,27 @@ const commonDashboardSchema = {
   tags: lazySchema(() => z.array(z.string()).optional()),
 };
 
-export const linkedDashboardSchema = lazySchema(() => z.object({
-  ...commonDashboardSchema,
-  matchedBy: z.object({
-    fields: z.array(z.string()).optional(),
-    index: z.array(z.string()).optional(),
-    linked: z.boolean().optional(),
-  }),
-}));
+export const linkedDashboardSchema = lazySchema(() =>
+  z.object({
+    ...commonDashboardSchema,
+    matchedBy: z.object({
+      fields: z.array(z.string()).optional(),
+      index: z.array(z.string()).optional(),
+      linked: z.boolean().optional(),
+    }),
+  })
+);
 
-export const suggestedDashboardSchema = lazySchema(() => z.object({
-  ...commonDashboardSchema,
-  matchedBy: z.object({
-    fields: z.array(z.string()).optional(),
-    index: z.array(z.string()).optional(),
-  }),
-  score: z.number(),
-}));
+export const suggestedDashboardSchema = lazySchema(() =>
+  z.object({
+    ...commonDashboardSchema,
+    matchedBy: z.object({
+      fields: z.array(z.string()).optional(),
+      index: z.array(z.string()).optional(),
+    }),
+    score: z.number(),
+  })
+);
 
 export type LinkedDashboard = z.output<typeof linkedDashboardSchema>;
 export type SuggestedDashboard = z.output<typeof suggestedDashboardSchema>;

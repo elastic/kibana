@@ -9,17 +9,21 @@ import { allOrAnyString } from '../../schema/common';
 import { sloIdSchema } from '../../schema/slo';
 import { sloWithDataResponseSchema } from '../slo';
 
-const getSLOQuerySchema = lazySchema(() => z.object({
-  instanceId: allOrAnyString.optional(),
-  remoteName: z.string().optional(),
-}));
+const getSLOQuerySchema = lazySchema(() =>
+  z.object({
+    instanceId: allOrAnyString.optional(),
+    remoteName: z.string().optional(),
+  })
+);
 
-const getSLOParamsSchema = lazySchema(() => z.object({
-  path: z.object({
-    id: sloIdSchema,
-  }),
-  query: getSLOQuerySchema.optional(),
-}));
+const getSLOParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: sloIdSchema,
+    }),
+    query: getSLOQuerySchema.optional(),
+  })
+);
 
 const getSLOResponseSchema = sloWithDataResponseSchema;
 

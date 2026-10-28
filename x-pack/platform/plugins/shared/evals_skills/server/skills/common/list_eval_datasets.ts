@@ -19,33 +19,35 @@ export interface ListEvalDatasetsToolDeps {
   getStartDependencies: () => Promise<EvalsSkillsStartDependencies>;
 }
 
-const schema = lazySchema(() => z.object({
-  search: z
-    .string()
-    .max(MAX_NAME_LENGTH)
-    .optional()
-    .describe('Optional case-insensitive substring to filter datasets by name or description.'),
-  tags: z
-    .array(z.string().min(1).max(MAX_TAG_LENGTH))
-    .max(MAX_TAGS_PER_DATASET)
-    .optional()
-    .describe(
-      'Only return datasets carrying every one of these tags. Tags label what a dataset is about, for example "esql" or "bank-of-anthos".'
-    ),
-  maturity: z
-    .array(DatasetMaturity)
-    .optional()
-    .describe(
-      'Only return datasets at one of these curation levels: "raw", "cleaned" or "golden".'
-    ),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe('Maximum number of datasets to return. Defaults to 50.'),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    search: z
+      .string()
+      .max(MAX_NAME_LENGTH)
+      .optional()
+      .describe('Optional case-insensitive substring to filter datasets by name or description.'),
+    tags: z
+      .array(z.string().min(1).max(MAX_TAG_LENGTH))
+      .max(MAX_TAGS_PER_DATASET)
+      .optional()
+      .describe(
+        'Only return datasets carrying every one of these tags. Tags label what a dataset is about, for example "esql" or "bank-of-anthos".'
+      ),
+    maturity: z
+      .array(DatasetMaturity)
+      .optional()
+      .describe(
+        'Only return datasets at one of these curation levels: "raw", "cleaned" or "golden".'
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe('Maximum number of datasets to return. Defaults to 50.'),
+  })
+);
 
 /**
  * Lists evaluation datasets visible in the active space. Each skill passes its

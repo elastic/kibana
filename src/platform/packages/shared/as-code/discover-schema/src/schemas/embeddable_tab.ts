@@ -26,11 +26,15 @@ const embeddableMetricsTabSchema = discoverSessionApiEsqlTabBaseSchema
  * Inline tab configuration for a by-value Discover panel. Unlike the session API tab schemas, it
  * omits session-only fields such as id, label, and presentation state.
  */
-export const discoverSessionApiEmbeddableTabSchema = lazySchema(() => z.union([
-  discoverSessionApiClassicTabBaseSchema.extend(discoverSessionApiDefaultTabTypeStateSchema.shape),
-  discoverSessionApiEsqlTabBaseSchema
-    .extend(discoverSessionApiDefaultTabTypeStateSchema.shape)
-    // extend() does not preserve object-level metadata.
-    .meta({ ...discoverSessionApiEsqlTabBaseSchema.meta() }),
-  embeddableMetricsTabSchema,
-]));
+export const discoverSessionApiEmbeddableTabSchema = lazySchema(() =>
+  z.union([
+    discoverSessionApiClassicTabBaseSchema.extend(
+      discoverSessionApiDefaultTabTypeStateSchema.shape
+    ),
+    discoverSessionApiEsqlTabBaseSchema
+      .extend(discoverSessionApiDefaultTabTypeStateSchema.shape)
+      // extend() does not preserve object-level metadata.
+      .meta({ ...discoverSessionApiEsqlTabBaseSchema.meta() }),
+    embeddableMetricsTabSchema,
+  ])
+);

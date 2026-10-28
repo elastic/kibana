@@ -7,10 +7,12 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const CaseIdIncrementerAttributesSchema = lazySchema(() => z.object({
-  '@timestamp': z.number(),
-  updated_at: z.number(),
-  last_id: z.number(),
-}));
+export const CaseIdIncrementerAttributesSchema = lazySchema(() =>
+  z.object({
+    '@timestamp': z.number(),
+    updated_at: z.number(),
+    last_id: z.number(),
+  })
+);
 
 export type CaseIdIncrementerAttributes = z.infer<typeof CaseIdIncrementerAttributesSchema>;

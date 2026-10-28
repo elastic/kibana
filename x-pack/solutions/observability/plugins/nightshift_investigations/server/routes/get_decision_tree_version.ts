@@ -27,12 +27,14 @@ export const getDecisionTreeVersionRoute = createNightshiftInvestigationsServerR
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      symptom: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-      version: z.coerce.number().int().positive(),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        symptom: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+        version: z.coerce.number().int().positive(),
+      }),
+    })
+  ),
   handler: async ({ request, params, getDecisionTreeStore, isDecisionTreesEnabled }) => {
     if (!isDecisionTreesEnabled()) throw notFound('Decision trees are not enabled');
 

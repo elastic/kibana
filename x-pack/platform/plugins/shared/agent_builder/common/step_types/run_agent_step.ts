@@ -49,194 +49,200 @@ const apiSelectorArraySchema = (target: ApiTarget, exampleApi: string) => {
 /**
  * Input schema for the run agent step.
  */
-export const InputSchema = lazySchema(() => z.object({
-  /**
-   * output schema for the run agent step, if provided agent will return structured output
-   */
-  schema: JsonModelSchema.optional().describe('The schema for the output of the agent.'),
-  /**
-   * The user input message to send to the agent.
-   */
-  message: z.string().describe('The user input message to send to the agent.'),
-  /**
-   * EIS prompt template id. Used only when the resolved connector's
-   * `capabilities.templates.policy` is `required`. Otherwise the step ignores
-   * these fields and runs the agent with `message`. The id starts with a dot.
-   */
-  template_id: z
-    .string()
-    .max(128)
-    .optional()
-    .describe(
-      'Pinned EIS prompt template id, including the leading dot. Sent instead of the message when the connector requires templates.'
-    ),
-  template_version: z
-    .number()
-    .int()
-    .positive()
-    .max(1_000_000)
-    .optional()
-    .describe(
-      'Pinned EIS prompt template version. Required with template_id when the connector requires templates.'
-    ),
-  template_variables: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe('Variables for template_id. Ignored when the connector does not require a template.'),
-  /**
-   * Optional attachments to provide to the agent.
-   */
-  attachments: z
-    .array(
-      z
-        .object({
-          /**
-           * Optional unique identifier for the attachment.
-           */
-          id: z.string().optional(),
-          /**
-           * Type of the attachment (e.g., "security.alert").
-           */
-          type: z.string(),
-          /**
-           * Data payload of the attachment, specific to the attachment type.
-           * Required unless `origin` is provided.
-           */
-          data: z.record(z.string(), z.any()).optional(),
-          /**
-           * Origin string (e.g. saved object ID) for by-reference attachments; resolved at send time when `data` is omitted.
-           */
-          origin: z.string().optional(),
-          /**
-           * When true, the attachment will not be displayed in the UI.
-           */
-          hidden: z.boolean().optional(),
-        })
-        .refine((a) => a.data !== undefined || a.origin !== undefined, {
-          message: 'Each attachment must include either data or origin',
-        })
-    )
-    .optional()
-    .describe('Optional attachments to provide to the agent.'),
-  /**
-   * Optional existing conversation id to continue a previous conversation.
-   */
-  conversation_id: z
-    .string()
-    .optional()
-    .describe('Optional existing conversation ID to continue a previous conversation.'),
-  author_name: authorNameSchema,
-  /**
-   * Optional arbitrary key-value tags stored with the underlying agent execution, searchable
-   * via the execution service's findExecutions. Lets a caller that doesn't yet know the
-   * execution's (auto-generated) id look it up by a tag it does know — e.g. the workflow
-   * execution id — to follow the agent's live event stream (tool calls, reasoning, custom UI
-   * events) while this step is still running, instead of waiting for the step to complete.
-   */
-  metadata: z
-    .record(z.string().max(512), z.string().max(1024))
-    .optional()
-    .describe(
-      'Optional key-value tags stored with the underlying agent execution and searchable via findExecutions. Callers that need to discover the execution id before this step completes (e.g. to follow it live) can tag it with a value they already know and look it up by that tag.'
-    ),
-  /**
-   * Optional pre-approvals for actions the agent would otherwise refuse for want of a live user
-   * to confirm them. A workflow has no live user, so anything requiring confirmation is refused
-   * unless it is granted here.
-   */
-  approvals: z
-    .object({
-      auto_approved_apis: z
-        .strictObject({
-          elasticsearch: apiSelectorArraySchema('elasticsearch', 'indices.create'),
-          kibana: apiSelectorArraySchema('kibana', 'alerting.delete-alerting-rule-id'),
-        })
-        .optional()
-        .describe(
-          'Destructive APIs pre-approved for this step, keyed by backend, which the agent may then call without a user confirmation.'
-        ),
-    })
-    .optional()
-    .describe(
-      "Actions pre-approved for this step, which the agent may then take without a user confirmation. The grant covers this step execution and the sub-agents it spawns, and adds to any defaults stored in the agent's configuration."
-    ),
-  /**
-   * Optional runtime overrides for the agent configuration. These replace the corresponding
-   * fields in the stored agent configuration for this step execution only.
-   */
-  configuration_overrides: z
-    .object({
-      instructions: z
-        .string()
-        .max(2048)
-        .optional()
-        .describe('Custom instructions for the agent, replacing the stored instructions.'),
-      tools: z
-        .array(
-          z.object({
-            tool_ids: z.array(z.string().max(100)).describe('Tool IDs to enable.'),
+export const InputSchema = lazySchema(() =>
+  z.object({
+    /**
+     * output schema for the run agent step, if provided agent will return structured output
+     */
+    schema: JsonModelSchema.optional().describe('The schema for the output of the agent.'),
+    /**
+     * The user input message to send to the agent.
+     */
+    message: z.string().describe('The user input message to send to the agent.'),
+    /**
+     * EIS prompt template id. Used only when the resolved connector's
+     * `capabilities.templates.policy` is `required`. Otherwise the step ignores
+     * these fields and runs the agent with `message`. The id starts with a dot.
+     */
+    template_id: z
+      .string()
+      .max(128)
+      .optional()
+      .describe(
+        'Pinned EIS prompt template id, including the leading dot. Sent instead of the message when the connector requires templates.'
+      ),
+    template_version: z
+      .number()
+      .int()
+      .positive()
+      .max(1_000_000)
+      .optional()
+      .describe(
+        'Pinned EIS prompt template version. Required with template_id when the connector requires templates.'
+      ),
+    template_variables: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+        'Variables for template_id. Ignored when the connector does not require a template.'
+      ),
+    /**
+     * Optional attachments to provide to the agent.
+     */
+    attachments: z
+      .array(
+        z
+          .object({
+            /**
+             * Optional unique identifier for the attachment.
+             */
+            id: z.string().optional(),
+            /**
+             * Type of the attachment (e.g., "security.alert").
+             */
+            type: z.string(),
+            /**
+             * Data payload of the attachment, specific to the attachment type.
+             * Required unless `origin` is provided.
+             */
+            data: z.record(z.string(), z.any()).optional(),
+            /**
+             * Origin string (e.g. saved object ID) for by-reference attachments; resolved at send time when `data` is omitted.
+             */
+            origin: z.string().optional(),
+            /**
+             * When true, the attachment will not be displayed in the UI.
+             */
+            hidden: z.boolean().optional(),
           })
-        )
-        .max(50)
-        .optional()
-        .describe('Tool selection to enable for this execution, replacing the stored tool list.'),
-      skill_ids: z
-        .array(z.string().max(100))
-        .max(50)
-        .optional()
-        .describe(
-          'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
-        ),
-      enable_elastic_capabilities: z
-        .boolean()
-        .optional()
-        .describe('Whether to enable built-in Elastic skills for this execution.'),
-    })
-    .optional()
-    .describe(
-      'Runtime configuration overrides applied to this step execution only. Each provided field replaces the corresponding field in the stored agent configuration.'
-    ),
-}));
+          .refine((a) => a.data !== undefined || a.origin !== undefined, {
+            message: 'Each attachment must include either data or origin',
+          })
+      )
+      .optional()
+      .describe('Optional attachments to provide to the agent.'),
+    /**
+     * Optional existing conversation id to continue a previous conversation.
+     */
+    conversation_id: z
+      .string()
+      .optional()
+      .describe('Optional existing conversation ID to continue a previous conversation.'),
+    author_name: authorNameSchema,
+    /**
+     * Optional arbitrary key-value tags stored with the underlying agent execution, searchable
+     * via the execution service's findExecutions. Lets a caller that doesn't yet know the
+     * execution's (auto-generated) id look it up by a tag it does know — e.g. the workflow
+     * execution id — to follow the agent's live event stream (tool calls, reasoning, custom UI
+     * events) while this step is still running, instead of waiting for the step to complete.
+     */
+    metadata: z
+      .record(z.string().max(512), z.string().max(1024))
+      .optional()
+      .describe(
+        'Optional key-value tags stored with the underlying agent execution and searchable via findExecutions. Callers that need to discover the execution id before this step completes (e.g. to follow it live) can tag it with a value they already know and look it up by that tag.'
+      ),
+    /**
+     * Optional pre-approvals for actions the agent would otherwise refuse for want of a live user
+     * to confirm them. A workflow has no live user, so anything requiring confirmation is refused
+     * unless it is granted here.
+     */
+    approvals: z
+      .object({
+        auto_approved_apis: z
+          .strictObject({
+            elasticsearch: apiSelectorArraySchema('elasticsearch', 'indices.create'),
+            kibana: apiSelectorArraySchema('kibana', 'alerting.delete-alerting-rule-id'),
+          })
+          .optional()
+          .describe(
+            'Destructive APIs pre-approved for this step, keyed by backend, which the agent may then call without a user confirmation.'
+          ),
+      })
+      .optional()
+      .describe(
+        "Actions pre-approved for this step, which the agent may then take without a user confirmation. The grant covers this step execution and the sub-agents it spawns, and adds to any defaults stored in the agent's configuration."
+      ),
+    /**
+     * Optional runtime overrides for the agent configuration. These replace the corresponding
+     * fields in the stored agent configuration for this step execution only.
+     */
+    configuration_overrides: z
+      .object({
+        instructions: z
+          .string()
+          .max(2048)
+          .optional()
+          .describe('Custom instructions for the agent, replacing the stored instructions.'),
+        tools: z
+          .array(
+            z.object({
+              tool_ids: z.array(z.string().max(100)).describe('Tool IDs to enable.'),
+            })
+          )
+          .max(50)
+          .optional()
+          .describe('Tool selection to enable for this execution, replacing the stored tool list.'),
+        skill_ids: z
+          .array(z.string().max(100))
+          .max(50)
+          .optional()
+          .describe(
+            'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+          ),
+        enable_elastic_capabilities: z
+          .boolean()
+          .optional()
+          .describe('Whether to enable built-in Elastic skills for this execution.'),
+      })
+      .optional()
+      .describe(
+        'Runtime configuration overrides applied to this step execution only. Each provided field replaces the corresponding field in the stored agent configuration.'
+      ),
+  })
+);
 
 /**
  * Output schema for the run agent step.
  */
-export const OutputSchema = lazySchema(() => z.object({
-  message: z
-    .string()
-    .describe(
-      'The text response from the agent. When schema is provided, contains a string version of the structured output'
-    ),
-  structured_output: z
-    .any()
-    .optional()
-    .describe('The structured output from the agent. Only here when schema was provided'),
-  conversation_id: z
-    .string()
-    .optional()
-    .describe(
-      'Conversation ID associated with this step execution. Present when the step created or updated a conversation.'
-    ),
-  metadata: z
-    .object({
-      usage: z.object({
-        connectorId: z
-          .string()
-          .max(512)
-          .optional()
-          .describe('Id of the LLM connector used for this step, when reported by the model.'),
-        inputTokens: z.number().describe('Total input tokens consumed across all LLM rounds.'),
-        outputTokens: z.number().describe('Total output tokens produced across all LLM rounds.'),
-        cachedTokens: z
-          .number()
-          .optional()
-          .describe('Cached input tokens reused across all LLM rounds. Subset of inputTokens.'),
-        totalTokens: z.number().describe('Sum of input and output tokens across all LLM rounds.'),
-      }),
-    })
-    .describe('Step execution metadata, including token usage across all LLM rounds.')
-    .optional(),
-}));
+export const OutputSchema = lazySchema(() =>
+  z.object({
+    message: z
+      .string()
+      .describe(
+        'The text response from the agent. When schema is provided, contains a string version of the structured output'
+      ),
+    structured_output: z
+      .any()
+      .optional()
+      .describe('The structured output from the agent. Only here when schema was provided'),
+    conversation_id: z
+      .string()
+      .optional()
+      .describe(
+        'Conversation ID associated with this step execution. Present when the step created or updated a conversation.'
+      ),
+    metadata: z
+      .object({
+        usage: z.object({
+          connectorId: z
+            .string()
+            .max(512)
+            .optional()
+            .describe('Id of the LLM connector used for this step, when reported by the model.'),
+          inputTokens: z.number().describe('Total input tokens consumed across all LLM rounds.'),
+          outputTokens: z.number().describe('Total output tokens produced across all LLM rounds.'),
+          cachedTokens: z
+            .number()
+            .optional()
+            .describe('Cached input tokens reused across all LLM rounds. Subset of inputTokens.'),
+          totalTokens: z.number().describe('Sum of input and output tokens across all LLM rounds.'),
+        }),
+      })
+      .describe('Step execution metadata, including token usage across all LLM rounds.')
+      .optional(),
+  })
+);
 
 /**
  * Validation message shown when `aggregate-by` is set without a `plugin-id`. The parent
@@ -255,170 +261,175 @@ export const EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE =
 /**
  * Config schema for the run agent step.
  */
-export const ConfigSchema = lazySchema(() => z
-  .object({
-    /**
-     * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
-     */
-    'agent-id': z
-      .string()
-      .optional()
-      .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
-    /**
-     * The ID of the connector to use for model routing. Mutually exclusive with `inference-id`.
-     */
-    'connector-id': z
-      .string()
-      .optional()
-      .describe(
-        'The ID of the connector to use. Defaults to the default GenAI connector. Mutually exclusive with `inference-id`.'
-      ),
-    /**
-     * Inference endpoint ID for model routing (alias for the same internal id as connector-id).
-     */
-    'inference-id': z
-      .string()
-      .optional()
-      .describe(
-        'The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted.'
-      ),
-    /**
-     * Model Management feature id, or a priority list of them.
-     * A single id is mutually exclusive with `connector-id` and `inference-id`.
-     * In a list, an unregistered id is skipped. A listed feature conflicts with
-     * an explicit connector only when it resolves one.
-     */
-    'connector-id-by-feature': z
-      .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
-      .optional()
-      .describe(
-        'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. Each id contributes a connector only when one is configured for it; otherwise the next id is tried. A configured connector is mutually exclusive with `connector-id` and `inference-id`. A list where every id misses is not a conflict.'
-      ),
-    /**
-     * When true, create/persist a conversation and associate it with the executing user.
-     * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
-     */
-    'create-conversation': z
-      .boolean()
-      .optional()
-      .describe('When true, creates a conversation for the step.'),
-    /**
-     * When true, newly created conversations are public so other users who can use the
-     * underlying agent can list, view, and continue them. Ignored when continuing an
-     * existing conversation. Defaults to private.
-     */
-    'public-conversation': z
-      .boolean()
-      .optional()
-      .describe(
-        'When true, newly created conversations are public to users who can use the agent. Defaults to private. Ignored when continuing an existing conversation.'
-      ),
-    /**
-     * When true, the run writes nothing to a conversation. With `conversation_id`, the conversation
-     * is loaded as context but not modified.
-     */
-    ephemeral: z
-      .boolean()
-      .optional()
-      .describe(
-        'When true, the run writes nothing to a conversation: no conversation is created and, with conversation_id, the conversation is loaded as context but not modified (no message, round, metadata or workspace change). Defaults to false.'
-      ),
-    /**
-     * Connector telemetry feature id used to attribute this step's LLM calls for billing
-     * (sets `metadata.connectorTelemetry.pluginId`). When omitted, the default Agent Builder
-     * attribution is used.
-     */
-    'plugin-id': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        "The feature id to attribute this step's LLM calls to for billing (connector telemetry pluginId)."
-      ),
-    'product-solution': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        'The product solution to attribute this step to. Ignored when `plugin-id` is not set.'
-      ),
-    'product-feature': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        'The product feature to attribute this step to. Ignored when `plugin-id` is not set.'
-      ),
-    /**
-     * Parent feature id used to roll up this step's LLM token usage under a parent feature
-     * (sets `metadata.connectorTelemetry.aggregateBy`). Only used when `plugin-id` is set.
-     */
-    'aggregate-by': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        "The parent feature id to group this step's LLM token usage under (connector telemetry aggregateBy)."
-      ),
-    /**
-     * Maximum response size for this workflow step. Also used as the connector
-     * response content length limit (`maxContentLength`) for the step's LLM
-     * calls, including streamed completions.
-     */
-    'max-step-size': z
-      .string()
-      .max(32)
-      .optional()
-      .describe('Maximum response size for this workflow step.'),
-    /**
-     * Reasoning level the model should use.
-     */
-    'reasoning-level': z
-      .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
-      .optional()
-      .describe(
-        "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Support depends on the underlying model and provider."
-      ),
-  })
-  .superRefine((cfg, ctx) => {
-    const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
-    const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
-    // A list may sit beside connector-id. Whether an id conflicts is decided at
-    // runtime, and only when that feature actually resolves a connector.
-    const connectorByFeatureRaw = cfg['connector-id-by-feature'];
-    const connectorByFeature =
-      typeof connectorByFeatureRaw === 'string'
-        ? normalizeOptionalStringParam(connectorByFeatureRaw)
-        : undefined;
-    if (connector !== undefined && inference !== undefined) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
-        path: ['connector-id'],
-      });
-    }
-    if (connectorByFeature !== undefined && (connector !== undefined || inference !== undefined)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
-        path: ['connector-id-by-feature'],
-      });
-    }
-    if (cfg['aggregate-by'] !== undefined && cfg['plugin-id'] === undefined) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
-        path: ['aggregate-by'],
-      });
-    }
-    if (cfg.ephemeral === true && cfg['create-conversation'] === true) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE,
-        path: ['ephemeral'],
-      });
-    }
-  }));
+export const ConfigSchema = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
+       */
+      'agent-id': z
+        .string()
+        .optional()
+        .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
+      /**
+       * The ID of the connector to use for model routing. Mutually exclusive with `inference-id`.
+       */
+      'connector-id': z
+        .string()
+        .optional()
+        .describe(
+          'The ID of the connector to use. Defaults to the default GenAI connector. Mutually exclusive with `inference-id`.'
+        ),
+      /**
+       * Inference endpoint ID for model routing (alias for the same internal id as connector-id).
+       */
+      'inference-id': z
+        .string()
+        .optional()
+        .describe(
+          'The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted.'
+        ),
+      /**
+       * Model Management feature id, or a priority list of them.
+       * A single id is mutually exclusive with `connector-id` and `inference-id`.
+       * In a list, an unregistered id is skipped. A listed feature conflicts with
+       * an explicit connector only when it resolves one.
+       */
+      'connector-id-by-feature': z
+        .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
+        .optional()
+        .describe(
+          'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. Each id contributes a connector only when one is configured for it; otherwise the next id is tried. A configured connector is mutually exclusive with `connector-id` and `inference-id`. A list where every id misses is not a conflict.'
+        ),
+      /**
+       * When true, create/persist a conversation and associate it with the executing user.
+       * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
+       */
+      'create-conversation': z
+        .boolean()
+        .optional()
+        .describe('When true, creates a conversation for the step.'),
+      /**
+       * When true, newly created conversations are public so other users who can use the
+       * underlying agent can list, view, and continue them. Ignored when continuing an
+       * existing conversation. Defaults to private.
+       */
+      'public-conversation': z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, newly created conversations are public to users who can use the agent. Defaults to private. Ignored when continuing an existing conversation.'
+        ),
+      /**
+       * When true, the run writes nothing to a conversation. With `conversation_id`, the conversation
+       * is loaded as context but not modified.
+       */
+      ephemeral: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, the run writes nothing to a conversation: no conversation is created and, with conversation_id, the conversation is loaded as context but not modified (no message, round, metadata or workspace change). Defaults to false.'
+        ),
+      /**
+       * Connector telemetry feature id used to attribute this step's LLM calls for billing
+       * (sets `metadata.connectorTelemetry.pluginId`). When omitted, the default Agent Builder
+       * attribution is used.
+       */
+      'plugin-id': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          "The feature id to attribute this step's LLM calls to for billing (connector telemetry pluginId)."
+        ),
+      'product-solution': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          'The product solution to attribute this step to. Ignored when `plugin-id` is not set.'
+        ),
+      'product-feature': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          'The product feature to attribute this step to. Ignored when `plugin-id` is not set.'
+        ),
+      /**
+       * Parent feature id used to roll up this step's LLM token usage under a parent feature
+       * (sets `metadata.connectorTelemetry.aggregateBy`). Only used when `plugin-id` is set.
+       */
+      'aggregate-by': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          "The parent feature id to group this step's LLM token usage under (connector telemetry aggregateBy)."
+        ),
+      /**
+       * Maximum response size for this workflow step. Also used as the connector
+       * response content length limit (`maxContentLength`) for the step's LLM
+       * calls, including streamed completions.
+       */
+      'max-step-size': z
+        .string()
+        .max(32)
+        .optional()
+        .describe('Maximum response size for this workflow step.'),
+      /**
+       * Reasoning level the model should use.
+       */
+      'reasoning-level': z
+        .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
+        .optional()
+        .describe(
+          "[tech preview] Reasoning effort level forwarded to the LLM for this step's calls. Support depends on the underlying model and provider."
+        ),
+    })
+    .superRefine((cfg, ctx) => {
+      const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
+      const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
+      // A list may sit beside connector-id. Whether an id conflicts is decided at
+      // runtime, and only when that feature actually resolves a connector.
+      const connectorByFeatureRaw = cfg['connector-id-by-feature'];
+      const connectorByFeature =
+        typeof connectorByFeatureRaw === 'string'
+          ? normalizeOptionalStringParam(connectorByFeatureRaw)
+          : undefined;
+      if (connector !== undefined && inference !== undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+          path: ['connector-id'],
+        });
+      }
+      if (
+        connectorByFeature !== undefined &&
+        (connector !== undefined || inference !== undefined)
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
+          path: ['connector-id-by-feature'],
+        });
+      }
+      if (cfg['aggregate-by'] !== undefined && cfg['plugin-id'] === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
+          path: ['aggregate-by'],
+        });
+      }
+      if (cfg.ephemeral === true && cfg['create-conversation'] === true) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE,
+          path: ['ephemeral'],
+        });
+      }
+    })
+);
 
 export type RunAgentStepInputSchema = typeof InputSchema;
 export type RunAgentStepOutputSchema = typeof OutputSchema;

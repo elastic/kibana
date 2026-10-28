@@ -86,10 +86,12 @@ const reconcileSourceRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/_reconcile_source',
   options: { access: 'internal', summary: 'Apply a source query or enablement change' },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
-  params: lazySchema(() => z.object({
-    path: z.object({ sourceId: z.string().min(1).max(255) }),
-    body: z.object({ sourceSlug: z.string().min(1).max(255) }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().min(1).max(255) }),
+      body: z.object({ sourceSlug: z.string().min(1).max(255) }),
+    })
+  ),
   handler: async ({
     params,
     request,

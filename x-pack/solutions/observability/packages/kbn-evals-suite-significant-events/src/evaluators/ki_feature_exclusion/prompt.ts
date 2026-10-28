@@ -14,10 +14,12 @@ export const ExcludeCompliancePrompt = createPrompt({
   name: 'exclude_compliance_analysis',
   description:
     'Evaluate whether excluded features were incorrectly regenerated in follow-up identification runs',
-  input: lazySchema(() => z.object({
-    excluded_features: z.string(),
-    follow_up_runs: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      excluded_features: z.string(),
+      follow_up_runs: z.string(),
+    })
+  ),
 })
   .version({
     system: {

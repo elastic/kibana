@@ -17,38 +17,44 @@ import {
   statusSchema,
 } from '../../schema/common';
 
-const fetchHistoricalSummaryParamsSchema = lazySchema(() => z.object({
-  body: z.object({
-    list: z.array(
-      z.object({
-        sloId: sloIdSchema,
-        instanceId: z.string(),
-        timeWindow: timeWindowSchema,
-        budgetingMethod: budgetingMethodSchema,
-        objective: objectiveSchema,
-        groupBy: allOrAnyStringOrArray,
-        revision: z.number(),
-        remoteName: z.string().optional(),
-        range: dateRangeSchema.optional(),
-      })
-    ),
-  }),
-}));
-
-const historicalSummarySchema = lazySchema(() => z.object({
-  date: dateType,
-  status: statusSchema,
-  sliValue: z.number(),
-  errorBudget: errorBudgetSchema,
-}));
-
-const fetchHistoricalSummaryResponseSchema = lazySchema(() => z.array(
+const fetchHistoricalSummaryParamsSchema = lazySchema(() =>
   z.object({
-    sloId: sloIdSchema,
-    instanceId: allOrAnyString,
-    data: z.array(historicalSummarySchema),
+    body: z.object({
+      list: z.array(
+        z.object({
+          sloId: sloIdSchema,
+          instanceId: z.string(),
+          timeWindow: timeWindowSchema,
+          budgetingMethod: budgetingMethodSchema,
+          objective: objectiveSchema,
+          groupBy: allOrAnyStringOrArray,
+          revision: z.number(),
+          remoteName: z.string().optional(),
+          range: dateRangeSchema.optional(),
+        })
+      ),
+    }),
   })
-));
+);
+
+const historicalSummarySchema = lazySchema(() =>
+  z.object({
+    date: dateType,
+    status: statusSchema,
+    sliValue: z.number(),
+    errorBudget: errorBudgetSchema,
+  })
+);
+
+const fetchHistoricalSummaryResponseSchema = lazySchema(() =>
+  z.array(
+    z.object({
+      sloId: sloIdSchema,
+      instanceId: allOrAnyString,
+      data: z.array(historicalSummarySchema),
+    })
+  )
+);
 
 type FetchHistoricalSummaryParams = z.output<typeof fetchHistoricalSummaryParamsSchema.shape.body>;
 type FetchHistoricalSummaryResponse = z.input<typeof fetchHistoricalSummaryResponseSchema>;

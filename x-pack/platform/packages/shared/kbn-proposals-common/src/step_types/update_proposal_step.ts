@@ -14,34 +14,40 @@ import { optionalStepInput } from './optional_step_input';
 
 export const UpdateProposalStepId = 'proposals.updateProposal' as const;
 
-export const updateProposalStepInputSchema = lazySchema(() => z.object({
-  proposalId: z.string().describe('Proposal to update.'),
-  // Both vocabularies are extracted from the stored schemas so they cannot
-  // drift. `pending` is absent because nothing ever moves a proposal back to
-  // awaiting.
-  status: optionalStepInput(
-    proposalStatusSchema.extract(['executing', 'succeeded', 'failed', 'expired', 'no_action'])
-  ).describe('Terminal or in-flight outcome to record against the proposal.'),
-  decision: optionalStepInput(proposalDecisionSchema).describe(
-    'What the human concluded. Write-once: a proposal that already carries a decision rejects another.'
-  ),
-  decidedBy: optionalStepInput(z.string()).describe(
-    'Username of the approver, used only when the execution itself yields no identity.'
-  ),
-  dismissReason: optionalStepInput(dismissReasonSchema).describe(
-    'Structured reason, when the decision is a dismissal.'
-  ),
-  rationale: optionalStepInput(z.string()).describe('Free-text explanation of the decision.'),
-  executionError: optionalStepInput(z.string()).describe('Failure detail, when the action failed.'),
-}));
+export const updateProposalStepInputSchema = lazySchema(() =>
+  z.object({
+    proposalId: z.string().describe('Proposal to update.'),
+    // Both vocabularies are extracted from the stored schemas so they cannot
+    // drift. `pending` is absent because nothing ever moves a proposal back to
+    // awaiting.
+    status: optionalStepInput(
+      proposalStatusSchema.extract(['executing', 'succeeded', 'failed', 'expired', 'no_action'])
+    ).describe('Terminal or in-flight outcome to record against the proposal.'),
+    decision: optionalStepInput(proposalDecisionSchema).describe(
+      'What the human concluded. Write-once: a proposal that already carries a decision rejects another.'
+    ),
+    decidedBy: optionalStepInput(z.string()).describe(
+      'Username of the approver, used only when the execution itself yields no identity.'
+    ),
+    dismissReason: optionalStepInput(dismissReasonSchema).describe(
+      'Structured reason, when the decision is a dismissal.'
+    ),
+    rationale: optionalStepInput(z.string()).describe('Free-text explanation of the decision.'),
+    executionError: optionalStepInput(z.string()).describe(
+      'Failure detail, when the action failed.'
+    ),
+  })
+);
 
-export const updateProposalStepOutputSchema = lazySchema(() => z.object({
-  proposalId: z.string(),
-  // Extracted from the stored schemas for the same reason the inputs are: a
-  // bare string would let the two vocabularies drift.
-  status: proposalStatusSchema,
-  decision: proposalDecisionSchema.optional(),
-}));
+export const updateProposalStepOutputSchema = lazySchema(() =>
+  z.object({
+    proposalId: z.string(),
+    // Extracted from the stored schemas for the same reason the inputs are: a
+    // bare string would let the two vocabularies drift.
+    status: proposalStatusSchema,
+    decision: proposalDecisionSchema.optional(),
+  })
+);
 
 export const updateProposalStepCommonDefinition: BaseStepDefinition<
   typeof updateProposalStepInputSchema,

@@ -46,20 +46,22 @@ export const forkStreamsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      name: z
-        .string()
-        .max(MAX_STREAM_NAME_LENGTH)
-        .describe('The name of the parent stream to fork from.'),
-    }),
-    body: z.object({
-      stream: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-      where: boundedConditionSchema,
-      status: routingStatus.optional(),
-      draft: z.boolean().optional(),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z
+          .string()
+          .max(MAX_STREAM_NAME_LENGTH)
+          .describe('The name of the parent stream to fork from.'),
+      }),
+      body: z.object({
+        stream: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+        where: boundedConditionSchema,
+        status: routingStatus.optional(),
+        draft: z.boolean().optional(),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
     const { streamsClient } = await getScopedClients({
       request,

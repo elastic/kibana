@@ -8,9 +8,11 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { SEARCH_MODES } from '../../../common/queries';
 
-export const searchModeSchema = lazySchema(() => z
-  .enum(SEARCH_MODES)
-  .optional()
-  .describe(
-    'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). When omitted, defaults to hybrid with a silent keyword fallback on failure. When set explicitly, failures propagate as errors.'
-  ));
+export const searchModeSchema = lazySchema(() =>
+  z
+    .enum(SEARCH_MODES)
+    .optional()
+    .describe(
+      'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). When omitted, defaults to hybrid with a silent keyword fallback on failure. When set explicitly, failures propagate as errors.'
+    )
+);

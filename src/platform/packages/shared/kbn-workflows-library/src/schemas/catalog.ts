@@ -18,7 +18,9 @@ import { TemplateMetadataSchema } from './template';
 export const TemplateSchema = TemplateMetadataSchema.omit({ install: true })
   .extend({
     definitionUrl: lazySchema(() => z.string().min(1).max(2048)),
-    contentHash: lazySchema(() => z.string().regex(/^sha256:[a-f0-9]{64}$/i, 'Must be `sha256:<hex>`.')),
+    contentHash: lazySchema(() =>
+      z.string().regex(/^sha256:[a-f0-9]{64}$/i, 'Must be `sha256:<hex>`.')
+    ),
     // Full `type` strings for every step (recursively, including nested steps)
     // and every trigger in the template, derived by the catalog generator. The
     // Library UI maps these to icons. Either array may be empty.

@@ -202,11 +202,13 @@ const repository = {
   }),
   ...createServerRoute({
     endpoint: 'GET /internal/endpoint_with_params_zod',
-    params: lazySchema(() => z.object({
-      path: z.object({
-        serviceName: z.string(),
-      }),
-    })),
+    params: lazySchema(() =>
+      z.object({
+        path: z.object({
+          serviceName: z.string(),
+        }),
+      })
+    ),
     handler: async () => {
       return {
         yesParamsForMe: true,

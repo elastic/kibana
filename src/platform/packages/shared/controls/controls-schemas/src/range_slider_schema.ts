@@ -15,16 +15,20 @@ import {
   withFieldValuesSourceDefault,
 } from './control_schema';
 
-export const rangeValueSchema = lazySchema(() => z.array(z.string()).length(2).meta({
-  description:
-    'The selected range as a two-element array of strings representing the lower and upper bound values, for example `["10", "50"]`.',
-}));
+export const rangeValueSchema = lazySchema(() =>
+  z.array(z.string()).length(2).meta({
+    description:
+      'The selected range as a two-element array of strings representing the lower and upper bound values, for example `["10", "50"]`.',
+  })
+);
 
 const rangeSliderExtras = {
   value: lazySchema(() => rangeValueSchema.optional()),
-  step: lazySchema(() => z.number().min(0).default(DEFAULT_RANGE_SLIDER_STATE.step).meta({
-    description: 'The step size between selectable range values.',
-  })),
+  step: lazySchema(() =>
+    z.number().min(0).default(DEFAULT_RANGE_SLIDER_STATE.step).meta({
+      description: 'The step size between selectable range values.',
+    })
+  ),
 };
 
 export const rangeSliderControlSchema = z.preprocess(

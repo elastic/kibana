@@ -102,12 +102,14 @@ const countAlertsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z.object({
-      lookback: z.string().max(64),
-      ruleUuid: z.string().max(256).optional(),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        lookback: z.string().max(64),
+        ruleUuid: z.string().max(256).optional(),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, getSpaceId, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing } = scopedClients;
@@ -148,12 +150,14 @@ const changePointScanRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z.object({
-      lookback: z.string().max(64),
-      bucketInterval: z.string().max(64),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        lookback: z.string().max(64),
+        bucketInterval: z.string().max(64),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, getSpaceId, telemetry, logger }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, licensing } = scopedClients;

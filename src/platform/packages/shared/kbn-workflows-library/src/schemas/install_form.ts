@@ -9,17 +9,19 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const InstallFormFieldTypeSchema = lazySchema(() => z.enum([
-  // Standard types (no type-specific properties):
-  'text',
-  'textarea',
-  'select',
-  'boolean',
-  'number',
-  // Special types:
-  'connector', // Connector autocomplete
-  'esIndex', // Elasticsearch index autocomplete
-]));
+export const InstallFormFieldTypeSchema = lazySchema(() =>
+  z.enum([
+    // Standard types (no type-specific properties):
+    'text',
+    'textarea',
+    'select',
+    'boolean',
+    'number',
+    // Special types:
+    'connector', // Connector autocomplete
+    'esIndex', // Elasticsearch index autocomplete
+  ])
+);
 
 export const InstallFormFieldOptionSchema = z
   .object({
@@ -72,11 +74,13 @@ const StandardInstallFormFieldSchema = z
  *   - `select`    → `options` is required; `connectorType` is not allowed.
  *   - all others  → neither `connectorType` nor `options` is allowed.
  */
-export const InstallFormFieldSchema = lazySchema(() => z.discriminatedUnion('inputType', [
-  ConnectorInstallFormFieldSchema,
-  SelectInstallFormFieldSchema,
-  StandardInstallFormFieldSchema,
-]));
+export const InstallFormFieldSchema = lazySchema(() =>
+  z.discriminatedUnion('inputType', [
+    ConnectorInstallFormFieldSchema,
+    SelectInstallFormFieldSchema,
+    StandardInstallFormFieldSchema,
+  ])
+);
 
 export const InstallFormSchema = z
   .object({
@@ -94,14 +98,18 @@ export const InstallFormSchema = z
  * per-`inputType` requirements above) are preserved: authoring / CI validates
  * with the strict schema, so published content already satisfies them.
  */
-const InstallFormFieldLenientSchema = lazySchema(() => z.discriminatedUnion('inputType', [
-  ConnectorInstallFormFieldSchema.strip(),
-  SelectInstallFormFieldSchema.strip().extend({
-    options: z.array(InstallFormFieldOptionSchema.strip()).max(100),
-  }),
-  StandardInstallFormFieldSchema.strip(),
-]));
+const InstallFormFieldLenientSchema = lazySchema(() =>
+  z.discriminatedUnion('inputType', [
+    ConnectorInstallFormFieldSchema.strip(),
+    SelectInstallFormFieldSchema.strip().extend({
+      options: z.array(InstallFormFieldOptionSchema.strip()).max(100),
+    }),
+    StandardInstallFormFieldSchema.strip(),
+  ])
+);
 
-export const InstallFormLenientSchema = lazySchema(() => InstallFormSchema.strip().extend({
-  form: z.array(InstallFormFieldLenientSchema).max(100),
-}));
+export const InstallFormLenientSchema = lazySchema(() =>
+  InstallFormSchema.strip().extend({
+    form: z.array(InstallFormFieldLenientSchema).max(100),
+  })
+);

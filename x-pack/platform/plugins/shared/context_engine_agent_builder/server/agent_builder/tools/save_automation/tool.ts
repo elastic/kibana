@@ -53,76 +53,78 @@ export const normalizeSaveAutomationParams = (
   aiIndexId: blankToUndefined(params.aiIndexId),
 });
 
-const saveAutomationSchema = lazySchema(() => z
-  .object({
-    workflowAttachmentId: z
-      .string()
-      .max(MAX_ATTACHMENT_ID_LENGTH)
-      .optional()
-      .describe(
-        'Conversation attachment id of the generated workflow (from generate_workflow attachment_id). Saves the YAML and attaches it to the AI index.'
-      ),
-    workflowYaml: z
-      .string()
-      .max(MAX_WORKFLOW_YAML_LENGTH)
-      .optional()
-      .describe(
-        'Complete workflow YAML to save. Use when the definition did not come from generate_workflow — for example when a subagent authored and tested it and returned the YAML.'
-      ),
-    workflowId: z
-      .string()
-      .max(MAX_AI_INDEX_AUTOMATION_LENGTH)
-      .optional()
-      .describe(
-        "Existing saved workflow id. On its own, registers that already-saved workflow as an automation on the AI index. Together with workflowYaml or workflowAttachmentId, overwrites that workflow's definition with the one supplied — the confirmation says so, and the replaced definition cannot be recovered. Omit it to save a new workflow."
-      ),
-    aiIndexId: z
-      .string()
-      .max(MAX_AI_INDEX_ID_LENGTH)
-      .optional()
-      .describe(
-        'Context Engine AI index id. Defaults to the id from the ai_index attachment in this conversation.'
-      ),
-  })
-  .superRefine((raw, ctx) => {
-    const value = normalizeSaveAutomationParams(raw);
+const saveAutomationSchema = lazySchema(() =>
+  z
+    .object({
+      workflowAttachmentId: z
+        .string()
+        .max(MAX_ATTACHMENT_ID_LENGTH)
+        .optional()
+        .describe(
+          'Conversation attachment id of the generated workflow (from generate_workflow attachment_id). Saves the YAML and attaches it to the AI index.'
+        ),
+      workflowYaml: z
+        .string()
+        .max(MAX_WORKFLOW_YAML_LENGTH)
+        .optional()
+        .describe(
+          'Complete workflow YAML to save. Use when the definition did not come from generate_workflow — for example when a subagent authored and tested it and returned the YAML.'
+        ),
+      workflowId: z
+        .string()
+        .max(MAX_AI_INDEX_AUTOMATION_LENGTH)
+        .optional()
+        .describe(
+          "Existing saved workflow id. On its own, registers that already-saved workflow as an automation on the AI index. Together with workflowYaml or workflowAttachmentId, overwrites that workflow's definition with the one supplied — the confirmation says so, and the replaced definition cannot be recovered. Omit it to save a new workflow."
+        ),
+      aiIndexId: z
+        .string()
+        .max(MAX_AI_INDEX_ID_LENGTH)
+        .optional()
+        .describe(
+          'Context Engine AI index id. Defaults to the id from the ai_index attachment in this conversation.'
+        ),
+    })
+    .superRefine((raw, ctx) => {
+      const value = normalizeSaveAutomationParams(raw);
 
-    // At most one definition, since two would be ambiguous about which gets saved. `workflowId` is
-    // not a third alternative: it either stands alone as an attach, or names the target of the
-    // definition supplied alongside it.
-    if (value.workflowAttachmentId !== undefined && value.workflowYaml !== undefined) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Provide either workflowAttachmentId or workflowYaml, not both.',
-        path: ['workflowAttachmentId'],
-      });
-    }
+      // At most one definition, since two would be ambiguous about which gets saved. `workflowId` is
+      // not a third alternative: it either stands alone as an attach, or names the target of the
+      // definition supplied alongside it.
+      if (value.workflowAttachmentId !== undefined && value.workflowYaml !== undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Provide either workflowAttachmentId or workflowYaml, not both.',
+          path: ['workflowAttachmentId'],
+        });
+      }
 
-    if (
-      value.workflowAttachmentId === undefined &&
-      value.workflowYaml === undefined &&
-      value.workflowId === undefined
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Provide workflowAttachmentId, workflowYaml or workflowId.',
-        path: ['workflowAttachmentId'],
-      });
-    }
+      if (
+        value.workflowAttachmentId === undefined &&
+        value.workflowYaml === undefined &&
+        value.workflowId === undefined
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Provide workflowAttachmentId, workflowYaml or workflowId.',
+          path: ['workflowAttachmentId'],
+        });
+      }
 
-    if (value.aiIndexId === undefined) {
-      return;
-    }
+      if (value.aiIndexId === undefined) {
+        return;
+      }
 
-    const validationError = validateAiIndexId(value.aiIndexId);
-    if (validationError) {
-      ctx.addIssue({
-        code: 'custom',
-        message: validationError,
-        path: ['aiIndexId'],
-      });
-    }
-  }));
+      const validationError = validateAiIndexId(value.aiIndexId);
+      if (validationError) {
+        ctx.addIssue({
+          code: 'custom',
+          message: validationError,
+          path: ['aiIndexId'],
+        });
+      }
+    })
+);
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 

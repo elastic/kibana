@@ -8,9 +8,13 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const DescriptionUserActionPayloadSchema = lazySchema(() => z.object({ description: z.string() }));
+export const DescriptionUserActionPayloadSchema = lazySchema(() =>
+  z.object({ description: z.string() })
+);
 
-export const DescriptionUserActionSchema = lazySchema(() => z.object({
-  type: z.literal(UserActionTypes.description),
-  payload: DescriptionUserActionPayloadSchema,
-}));
+export const DescriptionUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.description),
+    payload: DescriptionUserActionPayloadSchema,
+  })
+);

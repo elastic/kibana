@@ -16,6 +16,6 @@ export enum ClusterPrivilegeType {
   MANAGE_OWN_API_KEY = 'manage_own_api_key',
 }
 
-export const privilegesTypeSchema = lazySchema(() => z.array(
-  z.union([z.literal(PrivilegeType.EVENT), z.literal(PrivilegeType.AGENT_CONFIG)])
-));
+export const privilegesTypeSchema = lazySchema(() =>
+  z.array(z.union([z.literal(PrivilegeType.EVENT), z.literal(PrivilegeType.AGENT_CONFIG)]))
+);

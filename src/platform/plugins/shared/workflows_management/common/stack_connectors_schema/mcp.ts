@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 /**
  * These schemas were copied from Zod v3 schemas in src/platform/packages/shared/kbn-connector-schemas/mcp/schemas/v1.ts
@@ -17,13 +17,17 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 // Input/Params Schemas
 export const McpTestParamsSchema = z.object({}).strict();
-export const McpListToolsParamsSchema = lazySchema(() => z.object({
-  forceRefresh: z.boolean().optional(),
-}));
-export const McpCallToolParamsSchema = lazySchema(() => z.object({
-  name: z.string(),
-  arguments: z.record(z.string(), z.any()).optional(),
-}));
+export const McpListToolsParamsSchema = lazySchema(() =>
+  z.object({
+    forceRefresh: z.boolean().optional(),
+  })
+);
+export const McpCallToolParamsSchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    arguments: z.record(z.string(), z.any()).optional(),
+  })
+);
 
 // Response/Output Schemas
 
@@ -31,26 +35,30 @@ export const McpCallToolParamsSchema = lazySchema(() => z.object({
  * Metadata about the provider of a tool.
  * Used for attribution, audit trails, and UI display.
  */
-export const ToolProviderMetadataSchema = lazySchema(() => z.object({
-  /** Provider identifier (e.g., 'mcp.github') */
-  id: z.string(),
-  /** Human-readable provider name (e.g., 'GitHub MCP Server') */
-  name: z.string(),
-  /** Provider type constant */
-  type: z.literal('mcp'),
-  /** Unique ID of the MCP connector (from config.uniqueId) */
-  uniqueId: z.string(),
-  /** Optional description of when to use this MCP server (for LLM context) */
-  description: z.string().optional(),
-}));
+export const ToolProviderMetadataSchema = lazySchema(() =>
+  z.object({
+    /** Provider identifier (e.g., 'mcp.github') */
+    id: z.string(),
+    /** Human-readable provider name (e.g., 'GitHub MCP Server') */
+    name: z.string(),
+    /** Provider type constant */
+    type: z.literal('mcp'),
+    /** Unique ID of the MCP connector (from config.uniqueId) */
+    uniqueId: z.string(),
+    /** Optional description of when to use this MCP server (for LLM context) */
+    description: z.string().optional(),
+  })
+);
 
 /**
  * A text content as part of a tool call response.
  */
-export const TextPartSchema = lazySchema(() => z.object({
-  type: z.literal('text'),
-  text: z.string(),
-}));
+export const TextPartSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('text'),
+    text: z.string(),
+  })
+);
 
 /**
  * Non-text content as part of a tool call response.
@@ -69,41 +77,49 @@ export const ContentPartSchema = lazySchema(() => z.union([TextPartSchema, NonTe
 /**
  * Response from calling a tool on the MCP client.
  */
-export const McpCallToolResponseSchema = lazySchema(() => z.object({
-  content: z.array(ContentPartSchema),
-  /**
-   * Optional provider metadata for attribution and audit trails.
-   * Included in tool execution results for tracking and logging.
-   */
-  provider: ToolProviderMetadataSchema.optional(),
-}));
+export const McpCallToolResponseSchema = lazySchema(() =>
+  z.object({
+    content: z.array(ContentPartSchema),
+    /**
+     * Optional provider metadata for attribution and audit trails.
+     * Included in tool execution results for tracking and logging.
+     */
+    provider: ToolProviderMetadataSchema.optional(),
+  })
+);
 
 /**
  * A tool available on the MCP client.
  */
-export const ToolSchema = lazySchema(() => z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  inputSchema: z.record(z.string(), z.any()),
-  /**
-   * Optional provider metadata for attribution and audit trails.
-   * When present, indicates the source of the tool (e.g., which MCP connector).
-   */
-  provider: ToolProviderMetadataSchema.optional(),
-}));
+export const ToolSchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    description: z.string().optional(),
+    inputSchema: z.record(z.string(), z.any()),
+    /**
+     * Optional provider metadata for attribution and audit trails.
+     * When present, indicates the source of the tool (e.g., which MCP connector).
+     */
+    provider: ToolProviderMetadataSchema.optional(),
+  })
+);
 
 /**
  * Response from listing the tools available on the MCP client.
  */
-export const McpListToolsResponseSchema = lazySchema(() => z.object({
-  /** The tools available on the MCP client. */
-  tools: z.array(ToolSchema),
-}));
+export const McpListToolsResponseSchema = lazySchema(() =>
+  z.object({
+    /** The tools available on the MCP client. */
+    tools: z.array(ToolSchema),
+  })
+);
 
 /**
  * Response from testing the MCP connection.
  */
-export const McpTestResponseSchema = lazySchema(() => z.object({
-  connected: z.boolean(),
-  capabilities: z.record(z.string(), z.any()).optional(),
-}));
+export const McpTestResponseSchema = lazySchema(() =>
+  z.object({
+    connected: z.boolean(),
+    capabilities: z.record(z.string(), z.any()).optional(),
+  })
+);

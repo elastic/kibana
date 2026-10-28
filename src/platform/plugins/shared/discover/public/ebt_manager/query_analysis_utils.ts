@@ -182,6 +182,8 @@ export function mergeMultiMatchAnalyses(analyses: MultiMatchAnalysis[]): MultiMa
   );
 }
 
-const RequestWithQuery = lazySchema(() => z.object({
-  query: z.record(z.string(), z.unknown()),
-}));
+const RequestWithQuery = lazySchema(() =>
+  z.object({
+    query: z.record(z.string(), z.unknown()),
+  })
+);

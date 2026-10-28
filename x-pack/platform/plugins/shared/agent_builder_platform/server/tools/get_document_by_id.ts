@@ -12,10 +12,12 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
-const getDocumentByIdSchema = lazySchema(() => z.object({
-  id: z.string().describe('ID of the document to retrieve'),
-  index: z.string().describe('Name of the index to retrieve the document from'),
-}));
+const getDocumentByIdSchema = lazySchema(() =>
+  z.object({
+    id: z.string().describe('ID of the document to retrieve'),
+    index: z.string().describe('Name of the index to retrieve the document from'),
+  })
+);
 
 export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentByIdSchema> => {
   return {

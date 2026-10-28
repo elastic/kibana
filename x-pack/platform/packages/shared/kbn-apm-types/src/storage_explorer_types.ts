@@ -8,12 +8,14 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { IndexLifecyclePhaseSelectOption } from './ilm_types';
 
-export const indexLifecyclePhaseSchema = lazySchema(() => z.object({
-  indexLifecyclePhase: z.union([
-    z.literal(IndexLifecyclePhaseSelectOption.All),
-    z.literal(IndexLifecyclePhaseSelectOption.Hot),
-    z.literal(IndexLifecyclePhaseSelectOption.Warm),
-    z.literal(IndexLifecyclePhaseSelectOption.Cold),
-    z.literal(IndexLifecyclePhaseSelectOption.Frozen),
-  ]),
-}));
+export const indexLifecyclePhaseSchema = lazySchema(() =>
+  z.object({
+    indexLifecyclePhase: z.union([
+      z.literal(IndexLifecyclePhaseSelectOption.All),
+      z.literal(IndexLifecyclePhaseSelectOption.Hot),
+      z.literal(IndexLifecyclePhaseSelectOption.Warm),
+      z.literal(IndexLifecyclePhaseSelectOption.Cold),
+      z.literal(IndexLifecyclePhaseSelectOption.Frozen),
+    ]),
+  })
+);

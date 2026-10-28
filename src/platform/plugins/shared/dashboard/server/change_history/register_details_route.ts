@@ -14,17 +14,19 @@ import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
 import { DASHBOARD_CHANGE_HISTORY_API_PATH } from '../../common/constants';
 import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './utils';
 
-const detailsResponseSchema = lazySchema(() => z.object({
-  id: z.string(),
-  timestamp: z.string(),
-  actor: z.object({
-    name: z.string(),
-    profileId: z.string().optional(),
-  }),
-  action: z.string(),
-  snapshot: getDashboardStateSchema(true),
-  isCurrent: z.boolean(),
-}));
+const detailsResponseSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    timestamp: z.string(),
+    actor: z.object({
+      name: z.string(),
+      profileId: z.string().optional(),
+    }),
+    action: z.string(),
+    snapshot: getDashboardStateSchema(true),
+    isCurrent: z.boolean(),
+  })
+);
 export type ChangeDetailsResponse = z.infer<typeof detailsResponseSchema>;
 
 export const registerChangeDetailsRoute = (router: IRouter<RequestHandlerContext>) => {

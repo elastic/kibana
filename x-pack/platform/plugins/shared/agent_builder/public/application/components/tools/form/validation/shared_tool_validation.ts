@@ -77,7 +77,9 @@ export const sharedValidationSchemas = {
       }
     }),
 
-  description: lazySchema(() => z.string().min(1, { message: sharedI18nMessages.description.requiredError })),
+  description: lazySchema(() =>
+    z.string().min(1, { message: sharedI18nMessages.description.requiredError })
+  ),
 
   labels: lazySchema(() => z.array(z.string())),
 

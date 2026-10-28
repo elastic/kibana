@@ -18,14 +18,16 @@ export const CaseCustomFieldNumberWithValidationValueSchema = ({
   fieldName: string;
 }) => limitedNumberAsIntegerSchema({ fieldName });
 
-export const CustomFieldPutRequestSchema = lazySchema(() => z.object({
-  value: z.union([
-    z.boolean(),
-    z.null(),
-    CaseCustomFieldTextWithValidationValueSchema('value'),
-    CaseCustomFieldNumberWithValidationValueSchema({ fieldName: 'value' }),
-  ]),
-  caseVersion: z.string().max(512),
-}));
+export const CustomFieldPutRequestSchema = lazySchema(() =>
+  z.object({
+    value: z.union([
+      z.boolean(),
+      z.null(),
+      CaseCustomFieldTextWithValidationValueSchema('value'),
+      CaseCustomFieldNumberWithValidationValueSchema({ fieldName: 'value' }),
+    ]),
+    caseVersion: z.string().max(512),
+  })
+);
 
 export type CustomFieldPutRequest = z.infer<typeof CustomFieldPutRequestSchema>;

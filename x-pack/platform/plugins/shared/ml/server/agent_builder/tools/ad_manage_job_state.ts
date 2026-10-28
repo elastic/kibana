@@ -51,59 +51,61 @@ const computeProgressPct = (
   return Math.max(0, Math.min(100, Math.round(raw * 100)));
 };
 
-const schema = lazySchema(() => z.object({
-  operation: z.enum([
-    'open_job',
-    'close_job',
-    'start_datafeed',
-    'stop_datafeed',
-    'revert_model_snapshot',
-    'preview_datafeed',
-    'delete_job',
-    'await_batch_completion',
-  ]),
-  job_id: z.string().describe('The anomaly detection job ID.'),
-  snapshot_id: z
-    .string()
-    .optional()
-    .describe('Model snapshot ID. Required for revert_model_snapshot.'),
-  start: z
-    .string()
-    .optional()
-    .describe('Start time for start_datafeed (ISO 8601). Omit for real-time datafeed.'),
-  end: z
-    .string()
-    .optional()
-    .describe('End time for start_datafeed (ISO 8601). Omit for open-ended.'),
-  allow_non_scratch: z
-    .boolean()
-    .optional()
-    .describe(
-      'For delete_job: allow deleting a job not in the ml-agent-scratch group. Default false.'
-    ),
-  delete_user_annotations: z
-    .boolean()
-    .optional()
-    .describe('For delete_job: also delete user annotations. Default true.'),
-  max_wait_seconds: z
-    .number()
-    .optional()
-    .describe(
-      'For await_batch_completion: maximum seconds to block. Default 120, hard cap 600. Returns timed_out if the datafeed has not stopped by then. Call again to extend the wait.'
-    ),
-  datafeed_start_ms: z
-    .number()
-    .optional()
-    .describe(
-      'For await_batch_completion: epoch ms the datafeed was started from — used to compute progress_pct.'
-    ),
-  datafeed_end_ms: z
-    .number()
-    .optional()
-    .describe(
-      'For await_batch_completion: epoch ms the datafeed was started to — used to compute progress_pct.'
-    ),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    operation: z.enum([
+      'open_job',
+      'close_job',
+      'start_datafeed',
+      'stop_datafeed',
+      'revert_model_snapshot',
+      'preview_datafeed',
+      'delete_job',
+      'await_batch_completion',
+    ]),
+    job_id: z.string().describe('The anomaly detection job ID.'),
+    snapshot_id: z
+      .string()
+      .optional()
+      .describe('Model snapshot ID. Required for revert_model_snapshot.'),
+    start: z
+      .string()
+      .optional()
+      .describe('Start time for start_datafeed (ISO 8601). Omit for real-time datafeed.'),
+    end: z
+      .string()
+      .optional()
+      .describe('End time for start_datafeed (ISO 8601). Omit for open-ended.'),
+    allow_non_scratch: z
+      .boolean()
+      .optional()
+      .describe(
+        'For delete_job: allow deleting a job not in the ml-agent-scratch group. Default false.'
+      ),
+    delete_user_annotations: z
+      .boolean()
+      .optional()
+      .describe('For delete_job: also delete user annotations. Default true.'),
+    max_wait_seconds: z
+      .number()
+      .optional()
+      .describe(
+        'For await_batch_completion: maximum seconds to block. Default 120, hard cap 600. Returns timed_out if the datafeed has not stopped by then. Call again to extend the wait.'
+      ),
+    datafeed_start_ms: z
+      .number()
+      .optional()
+      .describe(
+        'For await_batch_completion: epoch ms the datafeed was started from — used to compute progress_pct.'
+      ),
+    datafeed_end_ms: z
+      .number()
+      .optional()
+      .describe(
+        'For await_batch_completion: epoch ms the datafeed was started to — used to compute progress_pct.'
+      ),
+  })
+);
 
 export const createAdManageJobStateTool = (
   resolveMlCapabilities: ResolveMlCapabilities,

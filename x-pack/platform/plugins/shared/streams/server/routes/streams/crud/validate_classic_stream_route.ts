@@ -28,12 +28,14 @@ export const validateClassicStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH),
-      selectedTemplateName: z.string().max(256),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH),
+        selectedTemplateName: z.string().max(256),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, logger }) => {
     const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
     const { name, selectedTemplateName } = params.body;

@@ -9,9 +9,13 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseAssigneesSchema } from '../../user/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const AssigneesUserActionPayloadSchema = lazySchema(() => z.object({ assignees: CaseAssigneesSchema }));
+export const AssigneesUserActionPayloadSchema = lazySchema(() =>
+  z.object({ assignees: CaseAssigneesSchema })
+);
 
-export const AssigneesUserActionSchema = lazySchema(() => z.object({
-  type: z.literal(UserActionTypes.assignees),
-  payload: AssigneesUserActionPayloadSchema,
-}));
+export const AssigneesUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.assignees),
+    payload: AssigneesUserActionPayloadSchema,
+  })
+);

@@ -19,11 +19,13 @@ const OverwritesSchema = UpdateCaseRequestSchema.shape.cases.element.omit({
   version: true,
 });
 
-const InputSchema = lazySchema(() => z.object({
-  owner: Owner,
-  case_template_id: z.string().min(1, 'case_template_id is required'),
-  overwrites: OverwritesSchema.optional(),
-}));
+const InputSchema = lazySchema(() =>
+  z.object({
+    owner: Owner,
+    case_template_id: z.string().min(1, 'case_template_id is required'),
+    overwrites: OverwritesSchema.optional(),
+  })
+);
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;
 

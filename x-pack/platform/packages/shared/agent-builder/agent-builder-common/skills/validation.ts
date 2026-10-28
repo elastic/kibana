@@ -27,35 +27,44 @@ export const skillNameRegexp = /^[a-zA-Z0-9](?:[a-zA-Z0-9 _-]*[a-zA-Z0-9])?$/;
 /** Maximum number of tools a skill can reference. */
 export const maxToolsPerSkill = 5;
 
-const skillNameSchema = lazySchema(() => z
-  .string()
-  .min(1, 'Name must be non-empty')
-  .max(skillNameMaxLength, `Name must be at most ${skillNameMaxLength} characters`)
-  .regex(
-    skillNameRegexp,
-    'Name must start and end with a letter or number, and contain only letters, numbers, spaces, hyphens, and underscores'
-  ));
+const skillNameSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1, 'Name must be non-empty')
+    .max(skillNameMaxLength, `Name must be at most ${skillNameMaxLength} characters`)
+    .regex(
+      skillNameRegexp,
+      'Name must start and end with a letter or number, and contain only letters, numbers, spaces, hyphens, and underscores'
+    )
+);
 
-const skillDescriptionSchema = lazySchema(() => z
-  .string()
-  .min(1, 'Description must be non-empty')
-  .max(1024, 'Description must be at most 1024 characters'));
+const skillDescriptionSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1, 'Description must be non-empty')
+    .max(1024, 'Description must be at most 1024 characters')
+);
 
 const skillContentSchema = lazySchema(() => z.string().min(1, 'Content must be non-empty'));
 
-const referencedContentItemSchema = lazySchema(() => z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, 'Reference file name must be non-empty')
-    .max(skillNameMaxLength, `Reference file name must be at most ${skillNameMaxLength} characters`)
-    .regex(
-      skillNameRegexp,
-      'Reference file name must start and end with a letter or number, and contain only letters, numbers, spaces, hyphens, and underscores'
-    ),
-  relativePath: z.string().trim().min(1, 'Relative path must be non-empty'),
-  content: z.string(),
-}));
+const referencedContentItemSchema = lazySchema(() =>
+  z.object({
+    name: z
+      .string()
+      .trim()
+      .min(1, 'Reference file name must be non-empty')
+      .max(
+        skillNameMaxLength,
+        `Reference file name must be at most ${skillNameMaxLength} characters`
+      )
+      .regex(
+        skillNameRegexp,
+        'Reference file name must start and end with a letter or number, and contain only letters, numbers, spaces, hyphens, and underscores'
+      ),
+    relativePath: z.string().trim().min(1, 'Relative path must be non-empty'),
+    content: z.string(),
+  })
+);
 
 const referencedContentSuperRefineMessages: Record<ReferencedContentRefineIssueCode, string> = {
   [REFERENCED_CONTENT_REFINE_ISSUE_CODE.PATH_PROTOCOL]: 'Folder path must start with ./.',
@@ -79,63 +88,73 @@ const superRefineReferencedContent = (
   }
 };
 
-const toolIdsSchema = lazySchema(() => z
-  .array(z.string().min(1, 'Tool ID must be non-empty'))
-  .max(maxToolsPerSkill, `A skill can reference at most ${maxToolsPerSkill} tools`));
+const toolIdsSchema = lazySchema(() =>
+  z
+    .array(z.string().min(1, 'Tool ID must be non-empty'))
+    .max(maxToolsPerSkill, `A skill can reference at most ${maxToolsPerSkill} tools`)
+);
 
-export const skillCreateRequestObjectSchema = lazySchema(() => z.object({
-  id: z
-    .string()
-    .min(1, 'ID must be non-empty')
-    .max(skillIdMaxLength, `ID must be at most ${skillIdMaxLength} characters`)
-    .regex(
-      skillIdRegexp,
-      'ID must start and end with a letter or number, and contain only lowercase letters, numbers, hyphens, and underscores'
-    ),
-  name: skillNameSchema,
-  description: skillDescriptionSchema,
-  content: skillContentSchema,
-  referenced_content: z
-    .array(referencedContentItemSchema)
-    .max(
-      maxReferencedContentItems,
-      `A maximum of ${maxReferencedContentItems} additional files can be stored.`
-    )
-    .optional(),
-  tool_ids: toolIdsSchema,
-}));
+export const skillCreateRequestObjectSchema = lazySchema(() =>
+  z.object({
+    id: z
+      .string()
+      .min(1, 'ID must be non-empty')
+      .max(skillIdMaxLength, `ID must be at most ${skillIdMaxLength} characters`)
+      .regex(
+        skillIdRegexp,
+        'ID must start and end with a letter or number, and contain only lowercase letters, numbers, hyphens, and underscores'
+      ),
+    name: skillNameSchema,
+    description: skillDescriptionSchema,
+    content: skillContentSchema,
+    referenced_content: z
+      .array(referencedContentItemSchema)
+      .max(
+        maxReferencedContentItems,
+        `A maximum of ${maxReferencedContentItems} additional files can be stored.`
+      )
+      .optional(),
+    tool_ids: toolIdsSchema,
+  })
+);
 
 /**
  * Zod schema for validating skill create request bodies.
  */
-export const skillCreateRequestSchema = lazySchema(() => skillCreateRequestObjectSchema.superRefine((data, ctx) => {
-  if (data.referenced_content?.length) {
-    superRefineReferencedContent(data.referenced_content, ctx);
-  }
-}));
+export const skillCreateRequestSchema = lazySchema(() =>
+  skillCreateRequestObjectSchema.superRefine((data, ctx) => {
+    if (data.referenced_content?.length) {
+      superRefineReferencedContent(data.referenced_content, ctx);
+    }
+  })
+);
 
-const skillUpdateRequestObjectSchema = lazySchema(() => z.object({
-  name: skillNameSchema.optional(),
-  description: skillDescriptionSchema.optional(),
-  content: skillContentSchema.optional(),
-  referenced_content: z
-    .array(referencedContentItemSchema)
-    .max(
-      maxReferencedContentItems,
-      `A maximum of ${maxReferencedContentItems} additional files can be stored.`
-    )
-    .optional(),
-  tool_ids: toolIdsSchema.optional(),
-}));
+const skillUpdateRequestObjectSchema = lazySchema(() =>
+  z.object({
+    name: skillNameSchema.optional(),
+    description: skillDescriptionSchema.optional(),
+    content: skillContentSchema.optional(),
+    referenced_content: z
+      .array(referencedContentItemSchema)
+      .max(
+        maxReferencedContentItems,
+        `A maximum of ${maxReferencedContentItems} additional files can be stored.`
+      )
+      .optional(),
+    tool_ids: toolIdsSchema.optional(),
+  })
+);
 
 /**
  * Zod schema for validating skill update request bodies.
  */
-export const skillUpdateRequestSchema = lazySchema(() => skillUpdateRequestObjectSchema.superRefine((data, ctx) => {
-  if (data.referenced_content?.length !== undefined) {
-    superRefineReferencedContent(data.referenced_content, ctx);
-  }
-}));
+export const skillUpdateRequestSchema = lazySchema(() =>
+  skillUpdateRequestObjectSchema.superRefine((data, ctx) => {
+    if (data.referenced_content?.length !== undefined) {
+      superRefineReferencedContent(data.referenced_content, ctx);
+    }
+  })
+);
 
 /**
  * Validates a skill ID has the right format.

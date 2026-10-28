@@ -22,16 +22,18 @@ import { optionsListDSLControlSchema, optionsListESQLControlSchema } from './opt
 import { rangeSliderControlSchema } from './range_slider_schema';
 import { timeSliderControlSchema } from './time_slider_schema';
 
-export const controlWidthSchema = lazySchema(() => z
-  .union([
-    z.literal(CONTROL_WIDTH_SMALL),
-    z.literal(CONTROL_WIDTH_MEDIUM),
-    z.literal(CONTROL_WIDTH_LARGE),
-  ])
-  .default(DEFAULT_PINNED_CONTROL_STATE.width)
-  .meta({
-    description: 'Minimum width of the control panel.',
-  }));
+export const controlWidthSchema = lazySchema(() =>
+  z
+    .union([
+      z.literal(CONTROL_WIDTH_SMALL),
+      z.literal(CONTROL_WIDTH_MEDIUM),
+      z.literal(CONTROL_WIDTH_LARGE),
+    ])
+    .default(DEFAULT_PINNED_CONTROL_STATE.width)
+    .meta({
+      description: 'Minimum width of the control panel.',
+    })
+);
 
 export const pinnedControlSchema = z
   .object({

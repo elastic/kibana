@@ -55,16 +55,18 @@ export const ParamsSchemaProps = {
   messageHTML: lazySchema(() => z.string().nullable().default(null)),
   // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
   // provide a more contextual URL in the footer (ex: URL to the alert details page)
-  kibanaFooterLink: lazySchema(() => z
-    .object({
-      path: z.string().default('/'),
-      text: z.string().default(defaultFooterText),
-    })
-    .strict()
-    .default({
-      path: '/',
-      text: defaultFooterText,
-    })),
+  kibanaFooterLink: lazySchema(() =>
+    z
+      .object({
+        path: z.string().default('/'),
+        text: z.string().default(defaultFooterText),
+      })
+      .strict()
+      .default({
+        path: '/',
+        text: defaultFooterText,
+      })
+  ),
   attachments: lazySchema(() => z.array(AttachmentSchema).optional()),
 };
 

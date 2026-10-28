@@ -61,45 +61,50 @@ const onboardingExecuteRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('schedule').describe('Schedule a new onboarding workflow run'),
-        from: timestampFromString,
-        to: timestampFromString,
-        steps: z
-          .array(z.enum(KIsOnboardingStep))
-          .optional()
-          .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
-          .describe(
-            'Optional list of steps to perform as part of source onboarding in the specified sequence. By default it will execute all steps.'
-          ),
-        connectors: z
-          .object({
-            features: z
-              .string()
-              .max(MAX_ID_LENGTH)
-              .optional()
-              .describe(
-                'Chat model connector or inference endpoint ID for feature identification.'
-              ),
-            queries: z
-              .string()
-              .max(MAX_ID_LENGTH)
-              .optional()
-              .describe('Chat model connector or inference endpoint ID for query generation.'),
-          })
-          .optional()
-          .describe(
-            'Optional per-step model overrides. When omitted the Significant Events defaults are used.'
-          ),
-      }),
-      z.object({
-        action: z.literal('cancel').describe('Cancel an in-progress onboarding workflow'),
-      }),
-    ]),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.discriminatedUnion('action', [
+        z.object({
+          action: z.literal('schedule').describe('Schedule a new onboarding workflow run'),
+          from: timestampFromString,
+          to: timestampFromString,
+          steps: z
+            .array(z.enum(KIsOnboardingStep))
+            .optional()
+            .default([
+              KIsOnboardingStep.FeaturesIdentification,
+              KIsOnboardingStep.QueriesGeneration,
+            ])
+            .describe(
+              'Optional list of steps to perform as part of source onboarding in the specified sequence. By default it will execute all steps.'
+            ),
+          connectors: z
+            .object({
+              features: z
+                .string()
+                .max(MAX_ID_LENGTH)
+                .optional()
+                .describe(
+                  'Chat model connector or inference endpoint ID for feature identification.'
+                ),
+              queries: z
+                .string()
+                .max(MAX_ID_LENGTH)
+                .optional()
+                .describe('Chat model connector or inference endpoint ID for query generation.'),
+            })
+            .optional()
+            .describe(
+              'Optional per-step model overrides. When omitted the Significant Events defaults are used.'
+            ),
+        }),
+        z.object({
+          action: z.literal('cancel').describe('Cancel an in-progress onboarding workflow'),
+        }),
+      ]),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -207,9 +212,11 @@ const onboardingStatusRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -255,11 +262,13 @@ const onboardingBulkStatusRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z.object({
-      sourceIds: sourceIdsArraySchema({ min: 1, max: MAX_SOURCES_PER_QUERY }),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        sourceIds: sourceIdsArraySchema({ min: 1, max: MAX_SOURCES_PER_QUERY }),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,

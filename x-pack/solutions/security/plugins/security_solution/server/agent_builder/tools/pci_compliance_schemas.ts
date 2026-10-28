@@ -20,28 +20,32 @@ import { PCI_REQUIREMENTS } from './pci_compliance_requirements';
  */
 const INDEX_PATTERN_REGEX = /^[a-z0-9][a-z0-9._+\-*:]{0,254}$/i;
 
-export const pciIndexPatternSchema = lazySchema(() => z
-  .string()
-  .min(1)
-  .max(255)
-  .regex(
-    INDEX_PATTERN_REGEX,
-    'Index pattern may only contain letters, digits, and the characters . _ + - * : and must start with a letter or digit.'
-  ));
+export const pciIndexPatternSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(255)
+    .regex(
+      INDEX_PATTERN_REGEX,
+      'Index pattern may only contain letters, digits, and the characters . _ + - * : and must start with a letter or digit.'
+    )
+);
 
 /**
  * Strict ISO-8601 time-range validation. ES|QL ingests these via parameter binding
  * (?_tstart / ?_tend), but tightening here still gives the LLM clear, early feedback
  * when it fabricates a time range.
  */
-export const pciTimeRangeSchema = lazySchema(() => z
-  .object({
-    from: isoDateTime({ offset: true }),
-    to: isoDateTime({ offset: true }),
-  })
-  .refine((value) => new Date(value.from) <= new Date(value.to), {
-    message: '`from` must be earlier than or equal to `to`.',
-  }));
+export const pciTimeRangeSchema = lazySchema(() =>
+  z
+    .object({
+      from: isoDateTime({ offset: true }),
+      to: isoDateTime({ offset: true }),
+    })
+    .refine((value) => new Date(value.from) <= new Date(value.to), {
+      message: '`from` must be earlier than or equal to `to`.',
+    })
+);
 
 /**
  * Closed union of PCI DSS requirement identifiers — derived from {@link PCI_REQUIREMENTS}
@@ -52,9 +56,9 @@ const requirementLiterals = [
   ...(Object.keys(PCI_REQUIREMENTS) as Array<keyof typeof PCI_REQUIREMENTS>),
 ] as const;
 
-export const pciRequirementIdSchema = lazySchema(() => z.enum(
-  requirementLiterals as unknown as readonly [string, ...string[]]
-));
+export const pciRequirementIdSchema = lazySchema(() =>
+  z.enum(requirementLiterals as unknown as readonly [string, ...string[]])
+);
 
 export type PciRequirementIdInput = z.infer<typeof pciRequirementIdSchema>;
 

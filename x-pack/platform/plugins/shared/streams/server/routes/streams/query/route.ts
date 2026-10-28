@@ -19,9 +19,11 @@ import { upsertQueryStream } from '../../../lib/streams/helpers/query_upsert';
  * Schema for API request body - accepts esql for UX simplicity.
  * This is different from the stored Query schema which uses { view: string }.
  */
-const queryRequestBodySchema = lazySchema(() => z.object({
-  esql: z.string().max(65535),
-}));
+const queryRequestBodySchema = lazySchema(() =>
+  z.object({
+    esql: z.string().max(65535),
+  })
+);
 
 export interface QueryStreamObjectGetResponse {
   /** The view reference stored in the definition */
@@ -60,11 +62,13 @@ const readQueryStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the query stream.'),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the query stream.'),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -133,27 +137,29 @@ const upsertQueryStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the query stream.'),
-    }),
-    body: z.object({
-      // API accepts esql for UX simplicity, not the stored query format
-      query: queryRequestBodySchema,
-      // Optional field descriptions map
-      field_descriptions: z
-        .record(z.string().max(1000), z.string().max(1000))
-        .superRefine((val, ctx) => {
-          if (Object.keys(val).length > 1000) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: 'At most 1000 field descriptions allowed',
-            });
-          }
-        })
-        .optional(),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the query stream.'),
+      }),
+      body: z.object({
+        // API accepts esql for UX simplicity, not the stored query format
+        query: queryRequestBodySchema,
+        // Optional field descriptions map
+        field_descriptions: z
+          .record(z.string().max(1000), z.string().max(1000))
+          .superRefine((val, ctx) => {
+            if (Object.keys(val).length > 1000) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'At most 1000 field descriptions allowed',
+              });
+            }
+          })
+          .optional(),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, context }) => {
     const { streamsClient, attachmentClient } = await getScopedClients({
       request,

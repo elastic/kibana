@@ -29,21 +29,23 @@ import {
 import { groupIsNotCollapsed } from '../../utils';
 
 const mosaicConfigSharedShape = {
-  legend: lazySchema(() => z
-    .object({
-      nested: legendNestedSchema,
-      truncate_after_lines: legendTruncateAfterLinesSchema,
-      visibility: legendVisibilitySchemaWithAuto,
-      size: legendSizeSchema,
-      position: legendPositionSchema,
-    })
-    .strict()
-    .optional()
-    .meta({
-      id: 'visMosaicLegend',
-      title: 'Legend',
-      description: 'Legend configuration for mosaic chart appearance and behavior',
-    })),
+  legend: lazySchema(() =>
+    z
+      .object({
+        nested: legendNestedSchema,
+        truncate_after_lines: legendTruncateAfterLinesSchema,
+        visibility: legendVisibilitySchemaWithAuto,
+        size: legendSizeSchema,
+        position: legendPositionSchema,
+      })
+      .strict()
+      .optional()
+      .meta({
+        id: 'visMosaicLegend',
+        title: 'Legend',
+        description: 'Legend configuration for mosaic chart appearance and behavior',
+      })
+  ),
 };
 
 const mosaicStylingSchema = lazySchema(() =>

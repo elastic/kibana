@@ -11,12 +11,14 @@ import { createPollServerStepDefinition } from '@kbn/workflows-extensions/server
 import { z, lazySchema } from '@kbn/zod/v4';
 import { durablePollStepCommonDefinition } from '../../common/step_types/durable_poll_step';
 
-const authorStateSchema = lazySchema(() => z.object({
-  requestId: z.string(),
-  queryWindow: z.string(),
-  submittedAt: z.string(),
-  phase: z.enum(['queued', 'rendering', 'finalizing']),
-}));
+const authorStateSchema = lazySchema(() =>
+  z.object({
+    requestId: z.string(),
+    queryWindow: z.string(),
+    submittedAt: z.string(),
+    phase: z.enum(['queued', 'rendering', 'finalizing']),
+  })
+);
 
 export const durablePollStepDefinition = createPollServerStepDefinition({
   ...durablePollStepCommonDefinition,

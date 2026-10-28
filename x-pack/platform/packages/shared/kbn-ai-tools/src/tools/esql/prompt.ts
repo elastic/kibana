@@ -13,10 +13,12 @@ import contentPromptTemplate from './content_prompt_template.text';
 export const EsqlPrompt = createPrompt({
   name: 'esql_prompt',
   description: 'Answer ES|QL related questions',
-  input: lazySchema(() => z.object({
-    prompt: z.string(),
-    esql_system_prompt: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      prompt: z.string(),
+      esql_system_prompt: z.string(),
+    })
+  ),
 })
   .version({
     system: {

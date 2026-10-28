@@ -90,11 +90,13 @@ const ChartIntentPrompt = createPrompt({
   name: 'chart_type_vs_intent',
   description:
     'Judges whether the produced chart type / series type / Vega mark satisfies the user request, using the gold chart form as a reference for intent.',
-  input: lazySchema(() => z.object({
-    question: z.string(),
-    gold: z.string(),
-    actual: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      gold: z.string(),
+      actual: z.string(),
+    })
+  ),
 })
   .version({
     system: { mustache: { template: SYSTEM_PROMPT } },

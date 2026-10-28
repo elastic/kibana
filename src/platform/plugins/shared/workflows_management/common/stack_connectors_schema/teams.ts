@@ -12,31 +12,35 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // Microsoft Teams connector parameter schema
-export const TeamsParamsSchema = lazySchema(() => z.object({
-  message: z.string(),
-}));
+export const TeamsParamsSchema = lazySchema(() =>
+  z.object({
+    message: z.string(),
+  })
+);
 
 // Microsoft Teams connector response schema
-export const TeamsResponseSchema = lazySchema(() => z.object({
-  type: z.string(),
-  id: z.string(),
-  timestamp: z.string(),
-  serviceUrl: z.string(),
-  channelId: z.string(),
-  from: z.object({
+export const TeamsResponseSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
     id: z.string(),
-    name: z.string().optional(),
-  }),
-  conversation: z.object({
-    id: z.string(),
-  }),
-  recipient: z.object({
-    id: z.string(),
-    name: z.string().optional(),
-  }),
-  text: z.string(),
-  replyToId: z.string().optional(),
-}));
+    timestamp: z.string(),
+    serviceUrl: z.string(),
+    channelId: z.string(),
+    from: z.object({
+      id: z.string(),
+      name: z.string().optional(),
+    }),
+    conversation: z.object({
+      id: z.string(),
+    }),
+    recipient: z.object({
+      id: z.string(),
+      name: z.string().optional(),
+    }),
+    text: z.string(),
+    replyToId: z.string().optional(),
+  })
+);

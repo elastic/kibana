@@ -13,18 +13,24 @@ import { aiIndexIdSchema, kiIdSchema } from './ki';
 
 export const DELETE_KI_STEP_ID = 'context-engine.deleteKi' as const;
 
-export const deleteKiInputSchema = lazySchema(() => z.object({
-  ai_index_id: aiIndexIdSchema,
-  ki_id: kiIdSchema,
-  refresh: z
-    .boolean()
-    .optional()
-    .describe('Wait for the write to become searchable before the step completes (default false)'),
-}));
+export const deleteKiInputSchema = lazySchema(() =>
+  z.object({
+    ai_index_id: aiIndexIdSchema,
+    ki_id: kiIdSchema,
+    refresh: z
+      .boolean()
+      .optional()
+      .describe(
+        'Wait for the write to become searchable before the step completes (default false)'
+      ),
+  })
+);
 
-export const deleteKiOutputSchema = lazySchema(() => z.object({
-  id: z.string().describe('The document id of the deleted knowledge indicator'),
-}));
+export const deleteKiOutputSchema = lazySchema(() =>
+  z.object({
+    id: z.string().describe('The document id of the deleted knowledge indicator'),
+  })
+);
 
 export const deleteKiStepCommonDefinition: CommonStepDefinition<
   typeof deleteKiInputSchema,

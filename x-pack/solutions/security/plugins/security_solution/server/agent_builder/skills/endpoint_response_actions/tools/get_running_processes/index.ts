@@ -25,17 +25,19 @@ import {
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
 import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
 
-const getRunningProcessesSchema = lazySchema(() => z
-  .object({
-    ...hostTargetFields('The hostname of the endpoint to list running processes for.'),
-    comment: z
-      .string()
-      .min(1)
-      .max(MAX_ACTION_COMMENT_LENGTH)
-      .optional()
-      .describe('An optional comment explaining why the process list is being retrieved.'),
-  })
-  .refine(requireHostTarget.check, { message: requireHostTarget.message }));
+const getRunningProcessesSchema = lazySchema(() =>
+  z
+    .object({
+      ...hostTargetFields('The hostname of the endpoint to list running processes for.'),
+      comment: z
+        .string()
+        .min(1)
+        .max(MAX_ACTION_COMMENT_LENGTH)
+        .optional()
+        .describe('An optional comment explaining why the process list is being retrieved.'),
+    })
+    .refine(requireHostTarget.check, { message: requireHostTarget.message })
+);
 
 /**
  * Inspection action: retrieves the list of running processes from an enrolled

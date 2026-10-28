@@ -15,10 +15,12 @@ export const filterOptionsSchema = z
   })
   .partial();
 
-const filterKeySchema = lazySchema(() => z.union([
-  z.literal(''),
-  z.enum(['service.name', 'service.environment', 'transaction.name', 'transaction.type']),
-]));
+const filterKeySchema = lazySchema(() =>
+  z.union([
+    z.literal(''),
+    z.enum(['service.name', 'service.environment', 'transaction.name', 'transaction.type']),
+  ])
+);
 
 export const payloadSchema = z
   .object({

@@ -26,47 +26,53 @@ const legacyMetricConfigMetricOptionsShape = {
   /**
    * Font scale for the legacy metric label and value.
    */
-  size: lazySchema(() => z
-    .union([
-      z.literal('xs'),
-      z.literal('s'),
-      z.literal('m'),
-      z.literal('l'),
-      z.literal('xl'),
-      z.literal('xxl'),
-    ])
-    .default('m')
-    .optional()
-    .meta({ description: 'Font size for the label and value' })),
-  labels: lazySchema(() => z
-    .object({
-      /**
-       * Alignment for labels. Possible values:
-       * - 'top': Align label to the top of the value (default)
-       * - 'bottom': Align label to the bottom of the value
-       */
-      alignment: verticalAlignmentSchema.default('top').optional().meta({
-        description: 'Label alignment',
-      }),
-    })
-    .strict()
-    .optional()
-    .meta({ description: 'Labels configuration' })),
-  values: lazySchema(() => z
-    .object({
-      /**
-       * Alignment for values. Possible values:
-       * - 'left': Align value to the left (default)
-       * - 'center': Align value to the center
-       * - 'right': Align value to the right
-       */
-      alignment: horizontalAlignmentSchema.default('left').optional().meta({
-        description: 'Value alignment',
-      }),
-    })
-    .strict()
-    .optional()
-    .meta({ description: 'Values configuration' })),
+  size: lazySchema(() =>
+    z
+      .union([
+        z.literal('xs'),
+        z.literal('s'),
+        z.literal('m'),
+        z.literal('l'),
+        z.literal('xl'),
+        z.literal('xxl'),
+      ])
+      .default('m')
+      .optional()
+      .meta({ description: 'Font size for the label and value' })
+  ),
+  labels: lazySchema(() =>
+    z
+      .object({
+        /**
+         * Alignment for labels. Possible values:
+         * - 'top': Align label to the top of the value (default)
+         * - 'bottom': Align label to the bottom of the value
+         */
+        alignment: verticalAlignmentSchema.default('top').optional().meta({
+          description: 'Label alignment',
+        }),
+      })
+      .strict()
+      .optional()
+      .meta({ description: 'Labels configuration' })
+  ),
+  values: lazySchema(() =>
+    z
+      .object({
+        /**
+         * Alignment for values. Possible values:
+         * - 'left': Align value to the left (default)
+         * - 'center': Align value to the center
+         * - 'right': Align value to the right
+         */
+        alignment: horizontalAlignmentSchema.default('left').optional().meta({
+          description: 'Value alignment',
+        }),
+      })
+      .strict()
+      .optional()
+      .meta({ description: 'Values configuration' })
+  ),
   /**
    * Where to apply the color (background or value)
    */
@@ -74,16 +80,18 @@ const legacyMetricConfigMetricOptionsShape = {
   /**
    * Color configuration
    */
-  color: lazySchema(() => z
-    .union([
-      colorByValueAbsoluteSchema,
-      colorByValuePaletteSchema,
-      legacyColorByValueAbsoluteSchema,
-      autoColorSchema,
-    ])
-    .default(AUTO_COLOR)
-    .optional()
-    .meta({ description: 'Color configuration based on the metric value.' })),
+  color: lazySchema(() =>
+    z
+      .union([
+        colorByValueAbsoluteSchema,
+        colorByValuePaletteSchema,
+        legacyColorByValueAbsoluteSchema,
+        autoColorSchema,
+      ])
+      .default(AUTO_COLOR)
+      .optional()
+      .meta({ description: 'Color configuration based on the metric value.' })
+  ),
 };
 
 export const legacyMetricConfigSchemaNoESQL = lazySchema(() =>

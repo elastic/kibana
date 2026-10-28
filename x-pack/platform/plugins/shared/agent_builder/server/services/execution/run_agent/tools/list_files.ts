@@ -15,18 +15,20 @@ import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
 
 const MAX_DEPTH = 5;
 
-const schema = lazySchema(() => z.object({
-  path: z.string().describe('Absolute path of the directory to list'),
-  depth: z
-    .number()
-    .min(1)
-    .max(MAX_DEPTH)
-    .optional()
-    .default(1)
-    .describe(
-      `Level of depth to include (1 = immediate children only, 2 = include children of subdirectories, etc.). Capped at ${MAX_DEPTH}.`
-    ),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    path: z.string().describe('Absolute path of the directory to list'),
+    depth: z
+      .number()
+      .min(1)
+      .max(MAX_DEPTH)
+      .optional()
+      .default(1)
+      .describe(
+        `Level of depth to include (1 = immediate children only, 2 = include children of subdirectories, etc.). Capped at ${MAX_DEPTH}.`
+      ),
+  })
+);
 
 export const createListFilesTool = ({
   filesystemService,

@@ -23,28 +23,30 @@ const boundedId = lazySchema(() => z.string().trim().min(1).max(256));
  * Investigation that may or may not be this one's. Only another Investigation's is reported: a
  * rerun landing on its own Proposal is not news.
  */
-export const convergedProposalSchema = lazySchema(() => z.object({
-  title: z.string().optional(),
-  /** The live revision of the Proposal this run converged onto. */
-  proposalId: z.string(),
-  /** The Investigation that raised it. */
-  ownerConversationId: z.string(),
-  /**
-   * What happened to that Proposal's comment: `revised` when this Investigation was added to it,
-   * otherwise why it was not (already named, already decided, too long, already revised as
-   * often as packaging will, refused).
-   */
-  outcome: z.enum([
-    'revised',
-    'already_mentioned',
-    'not_revisable',
-    'too_long',
-    'revision_limit',
-    'failed',
-  ]),
-  /** The journal line for this Investigation, saying where its finding went. */
-  note: z.string().max(2000),
-}));
+export const convergedProposalSchema = lazySchema(() =>
+  z.object({
+    title: z.string().optional(),
+    /** The live revision of the Proposal this run converged onto. */
+    proposalId: z.string(),
+    /** The Investigation that raised it. */
+    ownerConversationId: z.string(),
+    /**
+     * What happened to that Proposal's comment: `revised` when this Investigation was added to it,
+     * otherwise why it was not (already named, already decided, too long, already revised as
+     * often as packaging will, refused).
+     */
+    outcome: z.enum([
+      'revised',
+      'already_mentioned',
+      'not_revisable',
+      'too_long',
+      'revision_limit',
+      'failed',
+    ]),
+    /** The journal line for this Investigation, saying where its finding went. */
+    note: z.string().max(2000),
+  })
+);
 
 export type ConvergedProposal = z.infer<typeof convergedProposalSchema>;
 
@@ -58,50 +60,58 @@ export const mintSuppressionSchema = lazySchema(() => z.enum(['none', 'check_fai
 export type MintSuppression = z.infer<typeof mintSuppressionSchema>;
 
 /** What a worker wants to propose: a catalog action and the input it would run with. */
-export const candidateProposalSchema = lazySchema(() => z.object({
-  actionWorkflowId: boundedId.describe('Catalog action workflow id.'),
-  actionInput: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe('Action input; its target fields decide which live Proposals count as the same.'),
-  title: z.string().max(MAX_TITLE_LENGTH).optional(),
-  comment: z.string().max(MAX_COMMENT_LENGTH).optional(),
-  confidence: z.enum(['low', 'medium', 'high']).optional(),
-}));
+export const candidateProposalSchema = lazySchema(() =>
+  z.object({
+    actionWorkflowId: boundedId.describe('Catalog action workflow id.'),
+    actionInput: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe('Action input; its target fields decide which live Proposals count as the same.'),
+    title: z.string().max(MAX_TITLE_LENGTH).optional(),
+    comment: z.string().max(MAX_COMMENT_LENGTH).optional(),
+    confidence: z.enum(['low', 'medium', 'high']).optional(),
+  })
+);
 
 export type CandidateProposal = z.infer<typeof candidateProposalSchema>;
 
 /** A candidate proposal nothing live holds, with the id to create it under. */
-export const resolvedProposalSchema = lazySchema(() => candidateProposalSchema.extend({
-  subjectKey: z.string(),
-  proposalId: z.uuid(),
-}));
+export const resolvedProposalSchema = lazySchema(() =>
+  candidateProposalSchema.extend({
+    subjectKey: z.string(),
+    proposalId: z.uuid(),
+  })
+);
 
 export type ResolvedProposal = z.infer<typeof resolvedProposalSchema>;
 
-export const resolveProposalsInputSchema = lazySchema(() => z.object({
-  investigationConversationId: boundedId.describe(
-    'The Investigation this run would raise its Proposals on.'
-  ),
-  proposals: z
-    .array(candidateProposalSchema)
-    .max(MAX_PROPOSALS_PER_RESOLVE)
-    .describe('What this run wants to propose.'),
-}));
+export const resolveProposalsInputSchema = lazySchema(() =>
+  z.object({
+    investigationConversationId: boundedId.describe(
+      'The Investigation this run would raise its Proposals on.'
+    ),
+    proposals: z
+      .array(candidateProposalSchema)
+      .max(MAX_PROPOSALS_PER_RESOLVE)
+      .describe('What this run wants to propose.'),
+  })
+);
 
-export const resolveProposalsOutputSchema = lazySchema(() => z.object({
-  /** What to create, each under its own `proposalId`. Pass the id through to the create step. */
-  proposals: z.array(resolvedProposalSchema),
-  /** What a live Proposal from another Investigation already holds; nothing is created for these. */
-  converged: z.array(convergedProposalSchema),
-  /** Findings a live Proposal this Investigation already holds covers. Counted, not reported. */
-  alreadyOpenCount: z.number().int().min(0),
-  /** Proposals the Investigation already carried, in any status, before this run. */
-  existingProposalCount: z.number().int().min(0),
-  /** The settlement barrier for this run's gates: existing plus what this run mints. */
-  expectedProposalCount: z.number().int().min(0),
-  mintSuppression: mintSuppressionSchema,
-}));
+export const resolveProposalsOutputSchema = lazySchema(() =>
+  z.object({
+    /** What to create, each under its own `proposalId`. Pass the id through to the create step. */
+    proposals: z.array(resolvedProposalSchema),
+    /** What a live Proposal from another Investigation already holds; nothing is created for these. */
+    converged: z.array(convergedProposalSchema),
+    /** Findings a live Proposal this Investigation already holds covers. Counted, not reported. */
+    alreadyOpenCount: z.number().int().min(0),
+    /** Proposals the Investigation already carried, in any status, before this run. */
+    existingProposalCount: z.number().int().min(0),
+    /** The settlement barrier for this run's gates: existing plus what this run mints. */
+    expectedProposalCount: z.number().int().min(0),
+    mintSuppression: mintSuppressionSchema,
+  })
+);
 
 export type ResolveProposalsInput = z.infer<typeof resolveProposalsInputSchema>;
 export type ResolveProposalsOutput = z.infer<typeof resolveProposalsOutputSchema>;

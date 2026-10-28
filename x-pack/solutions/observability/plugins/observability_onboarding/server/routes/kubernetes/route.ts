@@ -121,11 +121,13 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
 
 const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/kubernetes/{onboardingId}/has-data',
-  params: lazySchema(() => z.object({
-    path: z.object({
-      onboardingId: z.string().max(36),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        onboardingId: z.string().max(36),
+      }),
+    })
+  ),
   security: {
     authz: {
       enabled: false,

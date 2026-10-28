@@ -33,9 +33,11 @@ const getConnectorByIdRoute = createGenAiSettingsServerRoute({
       reason: 'The route is protected by the actions plugin',
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({ connectorId: z.string() }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ connectorId: z.string() }),
+    })
+  ),
   handler: async (resources): Promise<InferenceConnector> => {
     const { request, params, plugins } = resources;
 

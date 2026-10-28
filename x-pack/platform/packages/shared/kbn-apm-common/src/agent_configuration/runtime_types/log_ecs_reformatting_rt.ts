@@ -7,4 +7,6 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const logEcsReformattingSchema = lazySchema(() => z.enum(['off', 'shade', 'replace', 'override']));
+export const logEcsReformattingSchema = lazySchema(() =>
+  z.enum(['off', 'shade', 'replace', 'override'])
+);

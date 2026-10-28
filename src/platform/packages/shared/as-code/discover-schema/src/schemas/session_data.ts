@@ -103,58 +103,62 @@ export const discoverSessionApiEsqlTabSchema = z
   })
   .strict();
 
-export const discoverSessionApiMetricsTabSchema = lazySchema(() => discoverSessionApiEsqlTabSchema
-  .extend(discoverSessionApiMetricsTabTypeStateSchema.shape)
-  .meta({
+export const discoverSessionApiMetricsTabSchema = lazySchema(() =>
+  discoverSessionApiEsqlTabSchema.extend(discoverSessionApiMetricsTabTypeStateSchema.shape).meta({
     title: 'Metrics tab',
     description: 'An ES|QL tab with saved metrics grid settings.',
-  }));
-
-export const discoverSessionApiTabSchema = lazySchema(() => z
-  .union([
-    discoverSessionApiClassicTabSchema,
-    discoverSessionApiEsqlTabSchema,
-    discoverSessionApiMetricsTabSchema,
-  ])
-  .meta({
-    description:
-      'A Discover tab definition. `data_source.type` identifies the data source; `type` identifies the tab type. ' +
-      'The tab type describes the saved settings and does not change how Discover displays the tab. ' +
-      'Default tabs support data views and ES|QL; metrics tabs support only ES|QL.',
-  }));
-
-export const discoverSessionApiDataSchema = lazySchema(() => z
-  .object({
-    title: z
-      .string()
-      .min(1)
-      .max(MAX_SESSION_TITLE_LENGTH)
-      .meta({ description: 'The title of the Discover session.' }),
-    description: z
-      .string()
-      .max(MAX_SESSION_DESCRIPTION_LENGTH)
-      .default('')
-      .meta({ description: 'A short description of the Discover session.' }),
-    tags: getAsCodeTagsSchema(
-      'Tag IDs to associate with this Discover session.',
-      MAX_DISCOVER_SESSION_TAGS
-    ).optional(),
-    tabs: z
-      .array(discoverSessionApiTabSchema)
-      .min(1)
-      .max(MAX_DISCOVER_SESSION_TABS)
-      .refine(
-        (tabs) => new Set(tabs.map((t) => t.id)).size === tabs.length,
-        'tabs must have unique ids'
-      )
-      .meta({
-        description:
-          'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID, which other saved objects and links can reference.',
-      }),
   })
-  .strict()
-  .meta({
-    id: 'kbn-discover-session-data',
-    title: 'Discover session data',
-    description: 'Configuration data for a Discover session.',
-  }));
+);
+
+export const discoverSessionApiTabSchema = lazySchema(() =>
+  z
+    .union([
+      discoverSessionApiClassicTabSchema,
+      discoverSessionApiEsqlTabSchema,
+      discoverSessionApiMetricsTabSchema,
+    ])
+    .meta({
+      description:
+        'A Discover tab definition. `data_source.type` identifies the data source; `type` identifies the tab type. ' +
+        'The tab type describes the saved settings and does not change how Discover displays the tab. ' +
+        'Default tabs support data views and ES|QL; metrics tabs support only ES|QL.',
+    })
+);
+
+export const discoverSessionApiDataSchema = lazySchema(() =>
+  z
+    .object({
+      title: z
+        .string()
+        .min(1)
+        .max(MAX_SESSION_TITLE_LENGTH)
+        .meta({ description: 'The title of the Discover session.' }),
+      description: z
+        .string()
+        .max(MAX_SESSION_DESCRIPTION_LENGTH)
+        .default('')
+        .meta({ description: 'A short description of the Discover session.' }),
+      tags: getAsCodeTagsSchema(
+        'Tag IDs to associate with this Discover session.',
+        MAX_DISCOVER_SESSION_TAGS
+      ).optional(),
+      tabs: z
+        .array(discoverSessionApiTabSchema)
+        .min(1)
+        .max(MAX_DISCOVER_SESSION_TABS)
+        .refine(
+          (tabs) => new Set(tabs.map((t) => t.id)).size === tabs.length,
+          'tabs must have unique ids'
+        )
+        .meta({
+          description:
+            'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID, which other saved objects and links can reference.',
+        }),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-discover-session-data',
+      title: 'Discover session data',
+      description: 'Configuration data for a Discover session.',
+    })
+);

@@ -12,14 +12,18 @@ import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from './environment_filter_v
 // environment names.
 const MAX_ENVIRONMENT_LENGTH = 1_024;
 
-export const environmentStringSchema = lazySchema(() => z.union([
-  z.literal(ENVIRONMENT_NOT_DEFINED.value),
-  z.literal(ENVIRONMENT_ALL.value),
-  z.string().max(MAX_ENVIRONMENT_LENGTH),
-]));
+export const environmentStringSchema = lazySchema(() =>
+  z.union([
+    z.literal(ENVIRONMENT_NOT_DEFINED.value),
+    z.literal(ENVIRONMENT_ALL.value),
+    z.string().max(MAX_ENVIRONMENT_LENGTH),
+  ])
+);
 
-export const environmentSchema = lazySchema(() => z.object({
-  environment: environmentStringSchema,
-}));
+export const environmentSchema = lazySchema(() =>
+  z.object({
+    environment: environmentStringSchema,
+  })
+);
 
 export type Environment = z.infer<typeof environmentSchema>['environment'];

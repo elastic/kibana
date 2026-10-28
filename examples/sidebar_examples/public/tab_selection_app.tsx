@@ -17,9 +17,11 @@ export const tabSelectionAppId = 'sidebarExampleTabs';
 
 /** Store for tab selection sidebar app */
 export const tabSelectionStore = createSidebarStore({
-  schema: lazySchema(() => z.object({
-    selectedTab: z.string().default('overview'),
-  })),
+  schema: lazySchema(() =>
+    z.object({
+      selectedTab: z.string().default('overview'),
+    })
+  ),
   actions: (set, get, sidebar) => ({
     selectTab: (tabId: string) => set({ selectedTab: tabId }),
   }),

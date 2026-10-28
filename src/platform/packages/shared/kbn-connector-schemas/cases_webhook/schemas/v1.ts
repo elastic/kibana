@@ -13,26 +13,32 @@ const HeadersSchema = lazySchema(() => z.record(z.string(), z.string()));
 
 export const ExternalIncidentServiceConfiguration = {
   createIncidentUrl: lazySchema(() => z.string()),
-  createIncidentMethod: lazySchema(() => z
-    .enum([WebhookMethods.POST, WebhookMethods.PUT])
-    .default(WebhookMethods.POST)),
+  createIncidentMethod: lazySchema(() =>
+    z.enum([WebhookMethods.POST, WebhookMethods.PUT]).default(WebhookMethods.POST)
+  ),
   createIncidentJson: lazySchema(() => z.string()), // stringified object
   createIncidentResponseKey: lazySchema(() => z.string()),
-  getIncidentMethod: lazySchema(() => z.enum([WebhookMethods.GET, WebhookMethods.POST]).default(WebhookMethods.GET)),
+  getIncidentMethod: lazySchema(() =>
+    z.enum([WebhookMethods.GET, WebhookMethods.POST]).default(WebhookMethods.GET)
+  ),
   getIncidentUrl: lazySchema(() => z.string()),
   getIncidentJson: lazySchema(() => z.string().nullable().default(null)),
   getIncidentResponseExternalTitleKey: lazySchema(() => z.string()),
   viewIncidentUrl: lazySchema(() => z.string()),
   updateIncidentUrl: lazySchema(() => z.string()),
-  updateIncidentMethod: lazySchema(() => z
-    .enum([WebhookMethods.POST, WebhookMethods.PATCH, WebhookMethods.PUT])
-    .default(WebhookMethods.PUT)),
+  updateIncidentMethod: lazySchema(() =>
+    z
+      .enum([WebhookMethods.POST, WebhookMethods.PATCH, WebhookMethods.PUT])
+      .default(WebhookMethods.PUT)
+  ),
   updateIncidentJson: lazySchema(() => z.string()),
   createCommentUrl: lazySchema(() => z.string().nullable().default(null)),
-  createCommentMethod: lazySchema(() => z
-    .enum([WebhookMethods.POST, WebhookMethods.PUT, WebhookMethods.PATCH])
-    .default(WebhookMethods.PUT)
-    .nullable()),
+  createCommentMethod: lazySchema(() =>
+    z
+      .enum([WebhookMethods.POST, WebhookMethods.PUT, WebhookMethods.PATCH])
+      .default(WebhookMethods.PUT)
+      .nullable()
+  ),
   createCommentJson: lazySchema(() => z.string().nullable().default(null)),
   headers: lazySchema(() => HeadersSchema.nullable().default(null)),
   hasAuth: AuthConfiguration.hasAuth,

@@ -14,15 +14,17 @@ import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlToolsOptions } from './types';
 
-const smlAttachSchema = lazySchema(() => z.object({
-  entry_ids: z
-    .array(z.string())
-    .min(1)
-    .max(50)
-    .describe(
-      'One or more entry_id values exactly as returned by sml_search, or the path after sml:// in a user # reference link.'
-    ),
-}));
+const smlAttachSchema = lazySchema(() =>
+  z.object({
+    entry_ids: z
+      .array(z.string())
+      .min(1)
+      .max(50)
+      .describe(
+        'One or more entry_id values exactly as returned by sml_search, or the path after sml:// in a user # reference link.'
+      ),
+  })
+);
 
 /**
  * Creates the sml_attach tool.

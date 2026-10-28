@@ -173,60 +173,68 @@ export interface AttachmentInput<
 
 // Zod schemas for validation
 
-export const attachmentRefOperationSchema = lazySchema(() => z.enum([
-  ATTACHMENT_REF_OPERATION.read,
-  ATTACHMENT_REF_OPERATION.created,
-  ATTACHMENT_REF_OPERATION.updated,
-  ATTACHMENT_REF_OPERATION.deleted,
-  ATTACHMENT_REF_OPERATION.restored,
-]));
+export const attachmentRefOperationSchema = lazySchema(() =>
+  z.enum([
+    ATTACHMENT_REF_OPERATION.read,
+    ATTACHMENT_REF_OPERATION.created,
+    ATTACHMENT_REF_OPERATION.updated,
+    ATTACHMENT_REF_OPERATION.deleted,
+    ATTACHMENT_REF_OPERATION.restored,
+  ])
+);
 
-export const attachmentRefActorSchema = lazySchema(() => z.enum([
-  ATTACHMENT_REF_ACTOR.user,
-  ATTACHMENT_REF_ACTOR.agent,
-  ATTACHMENT_REF_ACTOR.system,
-]));
+export const attachmentRefActorSchema = lazySchema(() =>
+  z.enum([ATTACHMENT_REF_ACTOR.user, ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system])
+);
 
-export const attachmentVersionRefSchema = lazySchema(() => z.object({
-  attachment_id: z.string(),
-  version: z.number().int().positive(),
-  operation: attachmentRefOperationSchema.optional(),
-  actor: attachmentRefActorSchema.optional(),
-}));
+export const attachmentVersionRefSchema = lazySchema(() =>
+  z.object({
+    attachment_id: z.string(),
+    version: z.number().int().positive(),
+    operation: attachmentRefOperationSchema.optional(),
+    actor: attachmentRefActorSchema.optional(),
+  })
+);
 
-export const attachmentVersionSchema = lazySchema(() => z.object({
-  version: z.number().int().positive(),
-  data: z.unknown(),
-  created_at: z.string(),
-  content_hash: z.string(),
-  estimated_tokens: z.number().int().optional(),
-}));
+export const attachmentVersionSchema = lazySchema(() =>
+  z.object({
+    version: z.number().int().positive(),
+    data: z.unknown(),
+    created_at: z.string(),
+    content_hash: z.string(),
+    estimated_tokens: z.number().int().optional(),
+  })
+);
 
-export const versionedAttachmentSchema = lazySchema(() => z.object({
-  id: z.string(),
-  type: z.string(),
-  versions: z.array(attachmentVersionSchema),
-  current_version: z.number().int().positive(),
-  description: z.string().optional(),
-  active: z.boolean().optional(),
-  hidden: z.boolean().optional(),
-  readonly: z.boolean().optional(),
-  client_id: z.string().optional(),
-  origin: z.string().optional(),
-  origin_snapshot_at: z.string().optional(),
-  group_id: z.string().max(256).optional(),
-}));
+export const versionedAttachmentSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    type: z.string(),
+    versions: z.array(attachmentVersionSchema),
+    current_version: z.number().int().positive(),
+    description: z.string().optional(),
+    active: z.boolean().optional(),
+    hidden: z.boolean().optional(),
+    readonly: z.boolean().optional(),
+    client_id: z.string().optional(),
+    origin: z.string().optional(),
+    origin_snapshot_at: z.string().optional(),
+    group_id: z.string().max(256).optional(),
+  })
+);
 
-export const attachmentInputSchema = lazySchema(() => z.object({
-  id: z.string().optional(),
-  type: z.string(),
-  data: z.unknown().optional(),
-  origin: z.string().optional(),
-  description: z.string().optional(),
-  hidden: z.boolean().optional(),
-  readonly: z.boolean().optional(),
-  group_id: z.string().max(256).optional(),
-}));
+export const attachmentInputSchema = lazySchema(() =>
+  z.object({
+    id: z.string().optional(),
+    type: z.string(),
+    data: z.unknown().optional(),
+    origin: z.string().optional(),
+    description: z.string().optional(),
+    hidden: z.boolean().optional(),
+    readonly: z.boolean().optional(),
+    group_id: z.string().max(256).optional(),
+  })
+);
 
 /**
  * A named group of attachments that appears as a single chip in the UI.
@@ -243,23 +251,27 @@ export interface AttachmentGroup {
   items: AttachmentInput[];
 }
 
-export const attachmentGroupSchema = lazySchema(() => z.object({
-  type: z.literal('group'),
-  id: z.string().max(256),
-  label: z.string().max(1024),
-  items: z.array(attachmentInputSchema),
-}));
+export const attachmentGroupSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('group'),
+    id: z.string().max(256),
+    label: z.string().max(1024),
+    items: z.array(attachmentInputSchema),
+  })
+);
 
 export const isAttachmentGroup = (a: ConversationAttachment): a is AttachmentGroup =>
   a.type === 'group';
 
 export type ConversationAttachment = AttachmentInput | AttachmentGroup;
 
-export const attachmentDiffSchema = lazySchema(() => z.object({
-  change_type: z.enum(['create', 'update', 'delete', 'restore']),
-  summary: z.string(),
-  changed_fields: z.array(z.string()).optional(),
-}));
+export const attachmentDiffSchema = lazySchema(() =>
+  z.object({
+    change_type: z.enum(['create', 'update', 'delete', 'restore']),
+    summary: z.string(),
+    changed_fields: z.array(z.string()).optional(),
+  })
+);
 
 // Utility functions
 

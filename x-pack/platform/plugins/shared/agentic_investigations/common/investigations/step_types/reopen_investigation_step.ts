@@ -14,22 +14,26 @@ const MAX_CONVERSATION_ID_LENGTH = 256;
 
 export const ReopenInvestigationStepId = 'investigations.reopen' as const;
 
-export const reopenInvestigationStepInputSchema = lazySchema(() => z.object({
-  conversationId: z
-    .string()
-    .min(1)
-    .max(MAX_CONVERSATION_ID_LENGTH)
-    .describe('Investigation to reopen.'),
-}));
+export const reopenInvestigationStepInputSchema = lazySchema(() =>
+  z.object({
+    conversationId: z
+      .string()
+      .min(1)
+      .max(MAX_CONVERSATION_ID_LENGTH)
+      .describe('Investigation to reopen.'),
+  })
+);
 
-export const reopenInvestigationStepOutputSchema = lazySchema(() => z.object({
-  reopened: z
-    .boolean()
-    .describe(
-      'True when the investigation was closed and has been reopened; false when it was already open.'
-    ),
-  title: z.string().describe('Current title of the investigation after the step ran.'),
-}));
+export const reopenInvestigationStepOutputSchema = lazySchema(() =>
+  z.object({
+    reopened: z
+      .boolean()
+      .describe(
+        'True when the investigation was closed and has been reopened; false when it was already open.'
+      ),
+    title: z.string().describe('Current title of the investigation after the step ran.'),
+  })
+);
 
 export const reopenInvestigationStepCommonDefinition: BaseStepDefinition<
   typeof reopenInvestigationStepInputSchema,

@@ -14,30 +14,38 @@ import { MAX_CASES_PER_PAGE } from '../../constants';
 
 export const FindSimilarCasesStepTypeId = 'cases.findSimilarCases';
 
-const SimilaritySchema = lazySchema(() => z.object({
-  typeKey: z.string(),
-  typeLabel: z.string(),
-  value: z.string(),
-}));
+const SimilaritySchema = lazySchema(() =>
+  z.object({
+    typeKey: z.string(),
+    typeLabel: z.string(),
+    value: z.string(),
+  })
+);
 
 const SimilarCaseSchema = CaseResponsePropertiesSchema.extend({
-  similarities: lazySchema(() => z.object({
-    observables: z.array(SimilaritySchema),
-  })),
+  similarities: lazySchema(() =>
+    z.object({
+      observables: z.array(SimilaritySchema),
+    })
+  ),
 });
 
-const InputSchema = lazySchema(() => z.object({
-  case_id: z.string().min(1, 'case_id is required'),
-  page: z.number().int().positive().optional().default(1),
-  perPage: z.number().int().positive().max(MAX_CASES_PER_PAGE).optional().default(20),
-}));
+const InputSchema = lazySchema(() =>
+  z.object({
+    case_id: z.string().min(1, 'case_id is required'),
+    page: z.number().int().positive().optional().default(1),
+    perPage: z.number().int().positive().max(MAX_CASES_PER_PAGE).optional().default(20),
+  })
+);
 
-const OutputSchema = lazySchema(() => z.object({
-  cases: z.array(SimilarCaseSchema).max(MAX_CASES_PER_PAGE),
-  page: z.number().int(),
-  per_page: z.number().int(),
-  total: z.number().int(),
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(SimilarCaseSchema).max(MAX_CASES_PER_PAGE),
+    page: z.number().int(),
+    per_page: z.number().int(),
+    total: z.number().int(),
+  })
+);
 
 type FindSimilarCasesStepInputSchema = typeof InputSchema;
 type FindSimilarCasesStepOutputSchema = typeof OutputSchema;

@@ -31,17 +31,21 @@ import {
   paginationSchema,
 } from '../../../schema';
 
-export const UnifiedAttachmentPutRequestSchema = lazySchema(() => z.union([
-  UnifiedReferenceAttachmentPayloadSchema.extend({ version: z.string().max(512) }),
-  UnifiedValueAttachmentPayloadSchema.extend({ version: z.string().max(512) }),
-]));
+export const UnifiedAttachmentPutRequestSchema = lazySchema(() =>
+  z.union([
+    UnifiedReferenceAttachmentPayloadSchema.extend({ version: z.string().max(512) }),
+    UnifiedValueAttachmentPayloadSchema.extend({ version: z.string().max(512) }),
+  ])
+);
 
 const attachmentTypeSchema = lazySchema(() => z.string().max(MAX_ATTACHMENT_TYPE_LENGTH));
 const attachmentOwnerSchema = lazySchema(() => z.string().max(MAX_OWNER_LENGTH));
-const attachmentIdSchema = lazySchema(() => z.union([
-  z.string().max(MAX_ATTACHMENT_ID_LENGTH),
-  z.array(z.string().max(MAX_ATTACHMENT_ID_LENGTH)).max(MAX_IDS_PER_ATTACHMENT),
-]));
+const attachmentIdSchema = lazySchema(() =>
+  z.union([
+    z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+    z.array(z.string().max(MAX_ATTACHMENT_ID_LENGTH)).max(MAX_IDS_PER_ATTACHMENT),
+  ])
+);
 const attachmentDataSchema = limitedJsonObjectSchema({
   fieldName: 'data',
   max: MAX_ATTACHMENT_JSON_LENGTH,
@@ -54,13 +58,15 @@ const attachmentMetadataSchema = limitedJsonObjectSchema({
 /**
  * Type-agnostic bounds checked on every unified attachment write, before its registered schema.
  */
-export const UnifiedAttachmentBoundsSchema = lazySchema(() => z.object({
-  type: attachmentTypeSchema,
-  owner: attachmentOwnerSchema,
-  attachmentId: attachmentIdSchema.optional(),
-  data: attachmentDataSchema.nullable().optional(),
-  metadata: attachmentMetadataSchema.nullable().optional(),
-}));
+export const UnifiedAttachmentBoundsSchema = lazySchema(() =>
+  z.object({
+    type: attachmentTypeSchema,
+    owner: attachmentOwnerSchema,
+    attachmentId: attachmentIdSchema.optional(),
+    data: attachmentDataSchema.nullable().optional(),
+    metadata: attachmentMetadataSchema.nullable().optional(),
+  })
+);
 
 const unifiedReferenceAttachmentRouteRequestShape = {
   type: attachmentTypeSchema,
@@ -82,35 +88,41 @@ const versionShape = { version: lazySchema(() => z.string().max(MAX_SAVED_OBJECT
 /**
  * Bounded body for `POST /api/cases/{case_id}/attachments`.
  */
-export const UnifiedAttachmentRouteRequestSchema = lazySchema(() => z.union([
-  z.object(unifiedReferenceAttachmentRouteRequestShape).strict(),
-  z.object(unifiedValueAttachmentRouteRequestShape).strict(),
-]));
+export const UnifiedAttachmentRouteRequestSchema = lazySchema(() =>
+  z.union([
+    z.object(unifiedReferenceAttachmentRouteRequestShape).strict(),
+    z.object(unifiedValueAttachmentRouteRequestShape).strict(),
+  ])
+);
 
 /**
  * Bounded body for `PUT /api/cases/{case_id}/attachments/{id}`.
  */
-export const UnifiedAttachmentPutRouteRequestSchema = lazySchema(() => z.union([
-  z.object({ ...unifiedReferenceAttachmentRouteRequestShape, ...versionShape }).strict(),
-  z.object({ ...unifiedValueAttachmentRouteRequestShape, ...versionShape }).strict(),
-]));
+export const UnifiedAttachmentPutRouteRequestSchema = lazySchema(() =>
+  z.union([
+    z.object({ ...unifiedReferenceAttachmentRouteRequestShape, ...versionShape }).strict(),
+    z.object({ ...unifiedValueAttachmentRouteRequestShape, ...versionShape }).strict(),
+  ])
+);
 
-export const UnifiedAttachmentPatchRouteRequestSchema = lazySchema(() => z.union([
-  z
-    .object({
-      ...unifiedReferenceAttachmentRouteRequestShape,
-      ...versionShape,
-      id: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
-    })
-    .strict(),
-  z
-    .object({
-      ...unifiedValueAttachmentRouteRequestShape,
-      ...versionShape,
-      id: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
-    })
-    .strict(),
-]));
+export const UnifiedAttachmentPatchRouteRequestSchema = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        ...unifiedReferenceAttachmentRouteRequestShape,
+        ...versionShape,
+        id: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+      })
+      .strict(),
+    z
+      .object({
+        ...unifiedValueAttachmentRouteRequestShape,
+        ...versionShape,
+        id: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+      })
+      .strict(),
+  ])
+);
 
 export const BulkCreateUnifiedAttachmentsRequestSchema = limitedArraySchema({
   codec: UnifiedAttachmentPayloadSchema,
@@ -129,43 +141,51 @@ export const BulkCreateUnifiedAttachmentsRouteRequestSchema = limitedArraySchema
   fieldName: 'attachments',
 });
 
-export const BulkGetUnifiedAttachmentsRequestSchema = lazySchema(() => z.object({
-  ids: limitedArraySchema({
-    codec: z.string().max(512),
-    min: 1,
-    max: MAX_BULK_GET_ATTACHMENTS,
-    fieldName: 'ids',
-  }),
-}));
-
-export const BulkGetAttachmentErrorsSchema = lazySchema(() => z.array(
+export const BulkGetUnifiedAttachmentsRequestSchema = lazySchema(() =>
   z.object({
-    error: z.string().max(32000),
-    message: z.string().max(32000),
-    status: z.number().optional(),
-    savedObjectId: z.string().max(512),
+    ids: limitedArraySchema({
+      codec: z.string().max(512),
+      min: 1,
+      max: MAX_BULK_GET_ATTACHMENTS,
+      fieldName: 'ids',
+    }),
   })
-));
+);
 
-export const BulkGetUnifiedAttachmentsResponseSchema = lazySchema(() => z.object({
-  attachments: z.array(UnifiedAttachmentSchema),
-  errors: BulkGetAttachmentErrorsSchema,
-}));
+export const BulkGetAttachmentErrorsSchema = lazySchema(() =>
+  z.array(
+    z.object({
+      error: z.string().max(32000),
+      message: z.string().max(32000),
+      status: z.number().optional(),
+      savedObjectId: z.string().max(512),
+    })
+  )
+);
+
+export const BulkGetUnifiedAttachmentsResponseSchema = lazySchema(() =>
+  z.object({
+    attachments: z.array(UnifiedAttachmentSchema),
+    errors: BulkGetAttachmentErrorsSchema,
+  })
+);
 
 const AttachmentTypeStringSchema = limitedStringSchema({
   fieldName: 'type',
   min: 1,
   max: MAX_ATTACHMENT_TYPE_LENGTH,
 });
-const AttachmentTypeQueryParamSchema = lazySchema(() => z.union([
-  AttachmentTypeStringSchema,
-  limitedArraySchema({
-    codec: AttachmentTypeStringSchema,
-    min: 1,
-    max: MAX_ATTACHMENT_TYPES_PER_QUERY,
-    fieldName: 'type',
-  }),
-]));
+const AttachmentTypeQueryParamSchema = lazySchema(() =>
+  z.union([
+    AttachmentTypeStringSchema,
+    limitedArraySchema({
+      codec: AttachmentTypeStringSchema,
+      min: 1,
+      max: MAX_ATTACHMENT_TYPES_PER_QUERY,
+      fieldName: 'type',
+    }),
+  ])
+);
 
 export const UnifiedAttachmentsFindQueryParamsSchema = paginationSchema({
   maxPerPage: MAX_COMMENTS_PER_PAGE,
@@ -174,12 +194,14 @@ export const UnifiedAttachmentsFindQueryParamsSchema = paginationSchema({
   type: lazySchema(() => AttachmentTypeQueryParamSchema.optional()),
 });
 
-export const UnifiedAttachmentsFindResponseSchema = lazySchema(() => z.object({
-  data: z.array(UnifiedAttachmentSchema),
-  page: z.number(),
-  per_page: z.number(),
-  total: z.number(),
-}));
+export const UnifiedAttachmentsFindResponseSchema = lazySchema(() =>
+  z.object({
+    data: z.array(UnifiedAttachmentSchema),
+    page: z.number(),
+    per_page: z.number(),
+    total: z.number(),
+  })
+);
 
 export type UnifiedAttachmentRouteRequest = z.infer<typeof UnifiedAttachmentRouteRequestSchema>;
 export type UnifiedAttachmentPutRouteRequest = z.infer<

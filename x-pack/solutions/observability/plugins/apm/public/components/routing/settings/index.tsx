@@ -80,19 +80,21 @@ export const settingsRoute = {
           tab: 'agent-configuration',
           element: <CreateAgentConfigurationRouteView />,
         }),
-        params: lazySchema(() => z.object({
-          query: z
-            .object({
-              pageStep: z
-                .union([
-                  z.literal(AgentConfigurationPageStep.ChooseService),
-                  z.literal(AgentConfigurationPageStep.ChooseSettings),
-                  z.literal(AgentConfigurationPageStep.Review),
-                ])
-                .optional(),
-            })
-            .optional(),
-        })),
+        params: lazySchema(() =>
+          z.object({
+            query: z
+              .object({
+                pageStep: z
+                  .union([
+                    z.literal(AgentConfigurationPageStep.ChooseService),
+                    z.literal(AgentConfigurationPageStep.ChooseSettings),
+                    z.literal(AgentConfigurationPageStep.Review),
+                  ])
+                  .optional(),
+              })
+              .optional(),
+          })
+        ),
       },
       '/settings/agent-configuration/edit': {
         ...page({
@@ -102,21 +104,23 @@ export const settingsRoute = {
           tab: 'agent-configuration',
           element: <EditAgentConfigurationRouteView />,
         }),
-        params: lazySchema(() => z.object({
-          query: z
-            .object({
-              environment: z.string().optional(),
-              name: z.string().optional(),
-              pageStep: z
-                .union([
-                  z.literal(AgentConfigurationPageStep.ChooseService),
-                  z.literal(AgentConfigurationPageStep.ChooseSettings),
-                  z.literal(AgentConfigurationPageStep.Review),
-                ])
-                .optional(),
-            })
-            .optional(),
-        })),
+        params: lazySchema(() =>
+          z.object({
+            query: z
+              .object({
+                environment: z.string().optional(),
+                name: z.string().optional(),
+                pageStep: z
+                  .union([
+                    z.literal(AgentConfigurationPageStep.ChooseService),
+                    z.literal(AgentConfigurationPageStep.ChooseSettings),
+                    z.literal(AgentConfigurationPageStep.Review),
+                  ])
+                  .optional(),
+              })
+              .optional(),
+          })
+        ),
       },
       '/settings/apm-indices': page({
         title: i18n.translate('xpack.apm.views.settings.indices.title', {
@@ -161,15 +165,17 @@ export const settingsRoute = {
           element: <AgentExplorer />,
           tab: 'agent-explorer',
         }),
-        params: lazySchema(() => z.object({
-          query: environmentSchema.merge(
-            z.object({
-              kuery: z.string(),
-              agentLanguage: z.string(),
-              serviceName: z.string(),
-            })
-          ),
-        })),
+        params: lazySchema(() =>
+          z.object({
+            query: environmentSchema.merge(
+              z.object({
+                kuery: z.string(),
+                agentLanguage: z.string(),
+                serviceName: z.string(),
+              })
+            ),
+          })
+        ),
       },
       '/settings': {
         element: <Redirect to="/settings/general-settings" />,

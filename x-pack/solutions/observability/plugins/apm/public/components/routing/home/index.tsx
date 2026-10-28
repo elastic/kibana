@@ -41,9 +41,11 @@ const TraceOverview = dynamic(() =>
   import('../../app/trace_overview').then((mod) => ({ default: mod.TraceOverview }))
 );
 
-const serviceGroupPageParamsSchema = lazySchema(() => z.object({
-  query: z.object({ serviceGroup: z.string() }),
-}));
+const serviceGroupPageParamsSchema = lazySchema(() =>
+  z.object({
+    query: z.object({ serviceGroup: z.string() }),
+  })
+);
 
 function serviceGroupPage<TPath extends string>({
   path,
@@ -114,28 +116,30 @@ export const homeRoute = {
         <Outlet />
       </ApmTimeRangeMetadataContextProvider>
     ),
-    params: lazySchema(() => z.object({
-      query: environmentSchema
-        .merge(
-          z.object({
-            rangeFrom: z.string(),
-            rangeTo: z.string(),
-            kuery: z.string(),
-            comparisonEnabled: toBooleanFromString,
-          })
-        )
-        .merge(
-          z.object({
-            refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
-            refreshInterval: z.string().optional(),
-            page: z.coerce.number().optional(),
-            pageSize: z.coerce.number().optional(),
-            sortField: z.string().optional(),
-            sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
-          })
-        )
-        .merge(offsetSchema),
-    })),
+    params: lazySchema(() =>
+      z.object({
+        query: environmentSchema
+          .merge(
+            z.object({
+              rangeFrom: z.string(),
+              rangeTo: z.string(),
+              kuery: z.string(),
+              comparisonEnabled: toBooleanFromString,
+            })
+          )
+          .merge(
+            z.object({
+              refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
+              refreshInterval: z.string().optional(),
+              page: z.coerce.number().optional(),
+              pageSize: z.coerce.number().optional(),
+              sortField: z.string().optional(),
+              sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+            })
+          )
+          .merge(offsetSchema),
+      })
+    ),
     defaults: {
       query: {
         environment: ENVIRONMENT_ALL.value,

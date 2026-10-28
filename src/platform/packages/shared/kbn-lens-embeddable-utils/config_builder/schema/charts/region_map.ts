@@ -18,13 +18,15 @@ import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } fr
 import { getBucketsWithChartDimensionSchema } from './shared';
 
 const regionMapConfigRegionOptionsShape = {
-  ems: lazySchema(() => z
-    .object({
-      boundaries: z.string().meta({ description: 'EMS boundaries' }),
-      join: z.string().meta({ description: 'EMS join field' }),
-    })
-    .strict()
-    .optional()),
+  ems: lazySchema(() =>
+    z
+      .object({
+        boundaries: z.string().meta({ description: 'EMS boundaries' }),
+        join: z.string().meta({ description: 'EMS join field' }),
+      })
+      .strict()
+      .optional()
+  ),
 };
 
 export const regionMapConfigSchemaNoESQL = lazySchema(() =>

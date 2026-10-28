@@ -8,15 +8,19 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { linkedDashboardSchema, suggestedDashboardSchema } from '../../schema/related_dashboard/v1';
 
-export const getRelatedDashboardsParamsSchema = lazySchema(() => z.object({
-  query: z.object({
-    alertId: z.string().max(256),
-  }),
-}));
+export const getRelatedDashboardsParamsSchema = lazySchema(() =>
+  z.object({
+    query: z.object({
+      alertId: z.string().max(256),
+    }),
+  })
+);
 
-export const getRelatedDashboardsResponseSchema = lazySchema(() => z.object({
-  suggestedDashboards: z.array(suggestedDashboardSchema),
-  linkedDashboards: z.array(linkedDashboardSchema),
-}));
+export const getRelatedDashboardsResponseSchema = lazySchema(() =>
+  z.object({
+    suggestedDashboards: z.array(suggestedDashboardSchema),
+    linkedDashboards: z.array(linkedDashboardSchema),
+  })
+);
 
 export type GetRelatedDashboardsResponse = z.output<typeof getRelatedDashboardsResponseSchema>;

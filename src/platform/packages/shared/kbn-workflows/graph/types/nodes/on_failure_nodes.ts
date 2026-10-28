@@ -7,16 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { GraphNodeSchema } from './base';
 import { WorkflowRetrySchema } from '../../../spec/schema';
 
 export const EnterContinueNodeSchema = GraphNodeSchema.extend({
   id: lazySchema(() => z.string()),
   type: lazySchema(() => z.literal('enter-continue')),
-  configuration: lazySchema(() => z.object({
-    condition: z.union([z.string(), z.boolean()]),
-  })),
+  configuration: lazySchema(() =>
+    z.object({
+      condition: z.union([z.string(), z.boolean()]),
+    })
+  ),
   exitNodeId: lazySchema(() => z.string()),
 });
 export type EnterContinueNode = z.infer<typeof EnterContinueNodeSchema>;
@@ -109,13 +111,17 @@ export const EnterTimeoutZoneNodeSchema = GraphNodeSchema.extend({
   id: lazySchema(() => z.string()),
   type: lazySchema(() => z.literal('enter-timeout-zone')),
   timeout: lazySchema(() => z.string()),
-  stepType: lazySchema(() => z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')])),
+  stepType: lazySchema(() =>
+    z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')])
+  ),
 });
 export type EnterTimeoutZoneNode = z.infer<typeof EnterTimeoutZoneNodeSchema>;
 
 export const ExitTimeoutZoneNodeSchema = GraphNodeSchema.extend({
   id: lazySchema(() => z.string()),
   type: lazySchema(() => z.literal('exit-timeout-zone')),
-  stepType: lazySchema(() => z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')])),
+  stepType: lazySchema(() =>
+    z.union([z.literal('workflow_level_timeout'), z.literal('step_level_timeout')])
+  ),
 });
 export type ExitTimeoutZoneNode = z.infer<typeof ExitTimeoutZoneNodeSchema>;

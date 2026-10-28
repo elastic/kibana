@@ -13,32 +13,36 @@ import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
 
 export const UpdateAttachmentStepTypeId = 'ai.attachment.update';
 
-const InputSchema = lazySchema(() => z.object({
-  conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
-    description: 'The ID of the conversation the attachment belongs to.',
-  }),
-  attachment_id: z.string().min(1).max(256).meta({
-    description: 'The ID of the attachment to update.',
-  }),
-  data: z.unknown().optional().meta({
-    description: 'The new attachment data/content. Creates a new version when content changes.',
-  }),
-  description: z.string().max(1024).optional().meta({
-    description: 'Optional new description for the attachment.',
-  }),
-  render_inline: z.boolean().optional().meta({
-    description:
-      'When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it. Defaults to false.',
-  }),
-}));
+const InputSchema = lazySchema(() =>
+  z.object({
+    conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
+      description: 'The ID of the conversation the attachment belongs to.',
+    }),
+    attachment_id: z.string().min(1).max(256).meta({
+      description: 'The ID of the attachment to update.',
+    }),
+    data: z.unknown().optional().meta({
+      description: 'The new attachment data/content. Creates a new version when content changes.',
+    }),
+    description: z.string().max(1024).optional().meta({
+      description: 'Optional new description for the attachment.',
+    }),
+    render_inline: z.boolean().optional().meta({
+      description:
+        'When true, the attachment is rendered inline in the UI when the conversation is opened, without the agent referencing it. Defaults to false.',
+    }),
+  })
+);
 
-const OutputSchema = lazySchema(() => z.object({
-  attachment_id: z.string().meta({ description: 'The ID of the updated attachment.' }),
-  current_version: z.number().meta({
-    description:
-      'The current version number after update. Reflects the new version when `data` changed.',
-  }),
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    attachment_id: z.string().meta({ description: 'The ID of the updated attachment.' }),
+    current_version: z.number().meta({
+      description:
+        'The current version number after update. Reflects the new version when `data` changed.',
+    }),
+  })
+);
 
 type UpdateAttachmentInputSchema = typeof InputSchema;
 type UpdateAttachmentOutputSchema = typeof OutputSchema;

@@ -22,14 +22,18 @@ import {
 
 export const AddObservablesStepTypeId = 'cases.addObservables';
 
-const ObservableInputSchema = lazySchema(() => z.object({
-  typeKey: z.enum(OBSERVABLE_TYPES_BUILTIN_KEYS),
-  value: z.string().min(1, 'value is required'),
-  description: z.string().nullable().optional(),
-}));
+const ObservableInputSchema = lazySchema(() =>
+  z.object({
+    typeKey: z.enum(OBSERVABLE_TYPES_BUILTIN_KEYS),
+    value: z.string().min(1, 'value is required'),
+    description: z.string().nullable().optional(),
+  })
+);
 
 const InputSchema = CasesStepCaseIdSchema.extend({
-  observables: lazySchema(() => z.array(ObservableInputSchema).min(1).max(MAX_OBSERVABLES_PER_CASE)),
+  observables: lazySchema(() =>
+    z.array(ObservableInputSchema).min(1).max(MAX_OBSERVABLES_PER_CASE)
+  ),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;

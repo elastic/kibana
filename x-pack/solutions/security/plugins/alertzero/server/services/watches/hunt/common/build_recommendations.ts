@@ -20,14 +20,18 @@ interface RecommendationLine {
   entities_referenced: string[];
 }
 
-const recommendationLineSchema = lazySchema(() => z.object({
-  text: z.string().min(1).max(MAX_RECOMMENDATION_LINE_CHARS),
-  entities_referenced: z.array(z.string().min(1).max(256)).max(20).default([]),
-}));
+const recommendationLineSchema = lazySchema(() =>
+  z.object({
+    text: z.string().min(1).max(MAX_RECOMMENDATION_LINE_CHARS),
+    entities_referenced: z.array(z.string().min(1).max(256)).max(20).default([]),
+  })
+);
 
-const recommendationsExtractionSchema = lazySchema(() => z.object({
-  recommendations: z.array(recommendationLineSchema).max(MAX_RECOMMENDATIONS).default([]),
-}));
+const recommendationsExtractionSchema = lazySchema(() =>
+  z.object({
+    recommendations: z.array(recommendationLineSchema).max(MAX_RECOMMENDATIONS).default([]),
+  })
+);
 
 export const RECOMMENDATIONS_PROMPT = `You are a security analyst writing next-step recommendations
 for another analyst who is reviewing a confirmed hunt hit. Write up to ${MAX_RECOMMENDATIONS} short,

@@ -18,10 +18,12 @@ import { MAX_BULK_CREATE_ATTACHMENTS } from '../../constants';
 
 export const AddEventsStepTypeId = 'cases.addEvents';
 
-const EventInputSchema = lazySchema(() => z.object({
-  eventId: z.string().min(1, 'eventId is required'),
-  index: z.string().min(1, 'index is required'),
-}));
+const EventInputSchema = lazySchema(() =>
+  z.object({
+    eventId: z.string().min(1, 'eventId is required'),
+    index: z.string().min(1, 'index is required'),
+  })
+);
 
 const InputSchema = CasesStepCaseIdSchema.extend({
   events: lazySchema(() => z.array(EventInputSchema).min(1).max(MAX_BULK_CREATE_ATTACHMENTS)),

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 /**
  * The contract an **action workflow** satisfies. Lives here rather than in a
@@ -50,7 +50,9 @@ export type ActionImpact = z.infer<typeof actionImpactSchema>;
  * autonomy policy resolves to. Required, so an action is only auto-approved
  * when its author declared `autonomy-dependent`.
  */
-export const actionApprovalPolicySchema = lazySchema(() => z.enum(['always-gate', 'autonomy-dependent']));
+export const actionApprovalPolicySchema = lazySchema(() =>
+  z.enum(['always-gate', 'autonomy-dependent'])
+);
 export type ActionApprovalPolicy = z.infer<typeof actionApprovalPolicySchema>;
 
 /**
@@ -63,16 +65,18 @@ export const actionSubjectKindSchema = lazySchema(() => z.enum(['host', 'process
 export type ActionSubjectKind = z.infer<typeof actionSubjectKindSchema>;
 
 /** Self-description an action workflow declares under `consts.actionMetadata`. */
-export const actionMetadataSchema = lazySchema(() => z.object({
-  name: z.string().min(1).max(256),
-  description: z.string().max(2048).optional(),
-  category: actionCategorySchema.optional(),
-  impact: actionImpactSchema.optional(),
-  reversible: z.boolean().optional(),
-  approvalPolicy: actionApprovalPolicySchema,
-  /** A single kind or a list of kinds; the catalog normalizes to a list. */
-  subject: z
-    .union([actionSubjectKindSchema, z.array(actionSubjectKindSchema).min(1).max(2)])
-    .optional(),
-}));
+export const actionMetadataSchema = lazySchema(() =>
+  z.object({
+    name: z.string().min(1).max(256),
+    description: z.string().max(2048).optional(),
+    category: actionCategorySchema.optional(),
+    impact: actionImpactSchema.optional(),
+    reversible: z.boolean().optional(),
+    approvalPolicy: actionApprovalPolicySchema,
+    /** A single kind or a list of kinds; the catalog normalizes to a list. */
+    subject: z
+      .union([actionSubjectKindSchema, z.array(actionSubjectKindSchema).min(1).max(2)])
+      .optional(),
+  })
+);
 export type ActionMetadata = z.infer<typeof actionMetadataSchema>;

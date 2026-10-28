@@ -28,16 +28,17 @@ export const primitiveRuntimeFieldSchema = runtimeFieldBaseSchema
   })
   .meta({ id: 'kbn-runtime-field-schema', title: 'Runtime field' });
 
-export const compositeRuntimeFieldSchema = lazySchema(() => z
-  .object({
-    type: z.literal(RUNTIME_FIELD_COMPOSITE_TYPE),
-    fields: z.record(z.string().min(1).max(MAX_NAME_LENGTH), runtimeFieldBaseSchema),
-    script: scriptSchema,
-  })
-  .strict()
-  .meta({ id: 'kbn-composite-runtime-field-schema', title: 'Composite runtime field' }));
+export const compositeRuntimeFieldSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal(RUNTIME_FIELD_COMPOSITE_TYPE),
+      fields: z.record(z.string().min(1).max(MAX_NAME_LENGTH), runtimeFieldBaseSchema),
+      script: scriptSchema,
+    })
+    .strict()
+    .meta({ id: 'kbn-composite-runtime-field-schema', title: 'Composite runtime field' })
+);
 
-export const runtimeFieldSchema = lazySchema(() => z.discriminatedUnion('type', [
-  primitiveRuntimeFieldSchema,
-  compositeRuntimeFieldSchema,
-]));
+export const runtimeFieldSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [primitiveRuntimeFieldSchema, compositeRuntimeFieldSchema])
+);

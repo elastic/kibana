@@ -29,133 +29,165 @@ export enum SwimlaneConnectorType {
 export type ActionConnector = ActionResult;
 export type ActionTypeConnector = ConnectorActionType;
 
-const ConnectorCasesWebhookTypeFieldsSchema = lazySchema(() => z.object({
-  type: z.literal(ConnectorTypes.casesWebhook),
-  fields: z.null(),
-}));
+const ConnectorCasesWebhookTypeFieldsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(ConnectorTypes.casesWebhook),
+    fields: z.null(),
+  })
+);
 
 /**
  * Jira
  */
-export const JiraFieldsSchema = lazySchema(() => z.object({
-  issueType: z.string().nullable(),
-  priority: z.string().nullable(),
-  parent: z.string().nullable(),
-  otherFields: z.string().nullable().optional(),
-}));
+export const JiraFieldsSchema = lazySchema(() =>
+  z.object({
+    issueType: z.string().nullable(),
+    priority: z.string().nullable(),
+    parent: z.string().nullable(),
+    otherFields: z.string().nullable().optional(),
+  })
+);
 
-const ConnectorJiraTypeFieldsSchema = lazySchema(() => z.object({
-  type: z.literal(ConnectorTypes.jira),
-  fields: JiraFieldsSchema.nullable(),
-}));
+const ConnectorJiraTypeFieldsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(ConnectorTypes.jira),
+    fields: JiraFieldsSchema.nullable(),
+  })
+);
 
 /**
  * Resilient
  */
-export const ResilientFieldsSchema = lazySchema(() => z.object({
-  incidentTypes: z.array(z.string()).nullable(),
-  severityCode: z.string().nullable(),
-  additionalFields: z.string().nullable().optional(),
-}));
+export const ResilientFieldsSchema = lazySchema(() =>
+  z.object({
+    incidentTypes: z.array(z.string()).nullable(),
+    severityCode: z.string().nullable(),
+    additionalFields: z.string().nullable().optional(),
+  })
+);
 
-const ConnectorResilientTypeFieldsSchema = lazySchema(() => z.object({
-  type: z.literal(ConnectorTypes.resilient),
-  fields: ResilientFieldsSchema.nullable(),
-  // io-ts parity: the Resilient connector also accepted `additionalFields` at the top level
-  additionalFields: z.string().nullable().optional(),
-}));
+const ConnectorResilientTypeFieldsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(ConnectorTypes.resilient),
+    fields: ResilientFieldsSchema.nullable(),
+    // io-ts parity: the Resilient connector also accepted `additionalFields` at the top level
+    additionalFields: z.string().nullable().optional(),
+  })
+);
 
 /**
  * ServiceNow ITSM
  */
-export const ServiceNowITSMFieldsSchema = lazySchema(() => z.object({
-  impact: z.string().nullable(),
-  severity: z.string().nullable(),
-  urgency: z.string().nullable(),
-  category: z.string().nullable(),
-  subcategory: z.string().nullable(),
-  additionalFields: z.string().nullable().optional(),
-}));
+export const ServiceNowITSMFieldsSchema = lazySchema(() =>
+  z.object({
+    impact: z.string().nullable(),
+    severity: z.string().nullable(),
+    urgency: z.string().nullable(),
+    category: z.string().nullable(),
+    subcategory: z.string().nullable(),
+    additionalFields: z.string().nullable().optional(),
+  })
+);
 
-const ConnectorServiceNowITSMTypeFieldsSchema = lazySchema(() => z.object({
-  type: z.literal(ConnectorTypes.serviceNowITSM),
-  fields: ServiceNowITSMFieldsSchema.nullable(),
-}));
+const ConnectorServiceNowITSMTypeFieldsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(ConnectorTypes.serviceNowITSM),
+    fields: ServiceNowITSMFieldsSchema.nullable(),
+  })
+);
 
 /**
  * ServiceNow SIR
  */
-export const ServiceNowSIRFieldsSchema = lazySchema(() => z.object({
-  category: z.string().nullable(),
-  destIp: z.boolean().nullable(),
-  malwareHash: z.boolean().nullable(),
-  malwareUrl: z.boolean().nullable(),
-  priority: z.string().nullable(),
-  sourceIp: z.boolean().nullable(),
-  subcategory: z.string().nullable(),
-  additionalFields: z.string().nullable().optional(),
-}));
+export const ServiceNowSIRFieldsSchema = lazySchema(() =>
+  z.object({
+    category: z.string().nullable(),
+    destIp: z.boolean().nullable(),
+    malwareHash: z.boolean().nullable(),
+    malwareUrl: z.boolean().nullable(),
+    priority: z.string().nullable(),
+    sourceIp: z.boolean().nullable(),
+    subcategory: z.string().nullable(),
+    additionalFields: z.string().nullable().optional(),
+  })
+);
 
-const ConnectorServiceNowSIRTypeFieldsSchema = lazySchema(() => z.object({
-  type: z.literal(ConnectorTypes.serviceNowSIR),
-  fields: ServiceNowSIRFieldsSchema.nullable(),
-}));
+const ConnectorServiceNowSIRTypeFieldsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(ConnectorTypes.serviceNowSIR),
+    fields: ServiceNowSIRFieldsSchema.nullable(),
+  })
+);
 
 /**
  * Swimlane
  */
-export const SwimlaneFieldsSchema = lazySchema(() => z.object({
-  caseId: z.string().nullable(),
-}));
+export const SwimlaneFieldsSchema = lazySchema(() =>
+  z.object({
+    caseId: z.string().nullable(),
+  })
+);
 
-const ConnectorSwimlaneTypeFieldsSchema = lazySchema(() => z.object({
-  type: z.literal(ConnectorTypes.swimlane),
-  fields: SwimlaneFieldsSchema.nullable(),
-}));
+const ConnectorSwimlaneTypeFieldsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(ConnectorTypes.swimlane),
+    fields: SwimlaneFieldsSchema.nullable(),
+  })
+);
 
 /**
  * TheHive
  */
-export const TheHiveFieldsSchema = lazySchema(() => z.object({
-  tlp: z.number().nullable(),
-}));
+export const TheHiveFieldsSchema = lazySchema(() =>
+  z.object({
+    tlp: z.number().nullable(),
+  })
+);
 
-const ConnectorTheHiveTypeFieldsSchema = lazySchema(() => z.object({
-  type: z.literal(ConnectorTypes.theHive),
-  fields: TheHiveFieldsSchema.nullable(),
-}));
+const ConnectorTheHiveTypeFieldsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(ConnectorTypes.theHive),
+    fields: TheHiveFieldsSchema.nullable(),
+  })
+);
 
 /**
  * None connector
  */
-const ConnectorNoneTypeFieldsSchema = lazySchema(() => z.object({
-  type: z.literal(ConnectorTypes.none),
-  fields: z.null(),
-}));
+const ConnectorNoneTypeFieldsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(ConnectorTypes.none),
+    fields: z.null(),
+  })
+);
 
-export const ConnectorTypeFieldsSchema = lazySchema(() => z.discriminatedUnion('type', [
-  ConnectorCasesWebhookTypeFieldsSchema,
-  ConnectorJiraTypeFieldsSchema,
-  ConnectorNoneTypeFieldsSchema,
-  ConnectorResilientTypeFieldsSchema,
-  ConnectorServiceNowITSMTypeFieldsSchema,
-  ConnectorServiceNowSIRTypeFieldsSchema,
-  ConnectorSwimlaneTypeFieldsSchema,
-  ConnectorTheHiveTypeFieldsSchema,
-]));
+export const ConnectorTypeFieldsSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    ConnectorCasesWebhookTypeFieldsSchema,
+    ConnectorJiraTypeFieldsSchema,
+    ConnectorNoneTypeFieldsSchema,
+    ConnectorResilientTypeFieldsSchema,
+    ConnectorServiceNowITSMTypeFieldsSchema,
+    ConnectorServiceNowSIRTypeFieldsSchema,
+    ConnectorSwimlaneTypeFieldsSchema,
+    ConnectorTheHiveTypeFieldsSchema,
+  ])
+);
 
 const NameSchema = lazySchema(() => z.object({ name: z.string() }));
 
-export const CaseUserActionConnectorSchema = lazySchema(() => z.discriminatedUnion('type', [
-  ConnectorCasesWebhookTypeFieldsSchema.merge(NameSchema),
-  ConnectorJiraTypeFieldsSchema.merge(NameSchema),
-  ConnectorNoneTypeFieldsSchema.merge(NameSchema),
-  ConnectorResilientTypeFieldsSchema.merge(NameSchema),
-  ConnectorServiceNowITSMTypeFieldsSchema.merge(NameSchema),
-  ConnectorServiceNowSIRTypeFieldsSchema.merge(NameSchema),
-  ConnectorSwimlaneTypeFieldsSchema.merge(NameSchema),
-  ConnectorTheHiveTypeFieldsSchema.merge(NameSchema),
-]));
+export const CaseUserActionConnectorSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    ConnectorCasesWebhookTypeFieldsSchema.merge(NameSchema),
+    ConnectorJiraTypeFieldsSchema.merge(NameSchema),
+    ConnectorNoneTypeFieldsSchema.merge(NameSchema),
+    ConnectorResilientTypeFieldsSchema.merge(NameSchema),
+    ConnectorServiceNowITSMTypeFieldsSchema.merge(NameSchema),
+    ConnectorServiceNowSIRTypeFieldsSchema.merge(NameSchema),
+    ConnectorSwimlaneTypeFieldsSchema.merge(NameSchema),
+    ConnectorTheHiveTypeFieldsSchema.merge(NameSchema),
+  ])
+);
 
 const IdSchema = lazySchema(() => z.object({ id: z.string() }));
 
@@ -164,58 +196,63 @@ const IdSchema = lazySchema(() => z.object({ id: z.string() }));
  * (resolved from `id` at create time). Reuses the per-type field blocks so connector shape has a
  * single source of truth.
  */
-export const CaseConnectorWithoutNameSchema = lazySchema(() => z.discriminatedUnion('type', [
-  ConnectorCasesWebhookTypeFieldsSchema.extend(IdSchema.shape),
-  ConnectorJiraTypeFieldsSchema.extend(IdSchema.shape),
-  ConnectorNoneTypeFieldsSchema.extend(IdSchema.shape),
-  ConnectorResilientTypeFieldsSchema.extend(IdSchema.shape),
-  ConnectorServiceNowITSMTypeFieldsSchema.extend(IdSchema.shape),
-  ConnectorServiceNowSIRTypeFieldsSchema.extend(IdSchema.shape),
-  ConnectorSwimlaneTypeFieldsSchema.extend(IdSchema.shape),
-  ConnectorTheHiveTypeFieldsSchema.extend(IdSchema.shape),
-]));
+export const CaseConnectorWithoutNameSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    ConnectorCasesWebhookTypeFieldsSchema.extend(IdSchema.shape),
+    ConnectorJiraTypeFieldsSchema.extend(IdSchema.shape),
+    ConnectorNoneTypeFieldsSchema.extend(IdSchema.shape),
+    ConnectorResilientTypeFieldsSchema.extend(IdSchema.shape),
+    ConnectorServiceNowITSMTypeFieldsSchema.extend(IdSchema.shape),
+    ConnectorServiceNowSIRTypeFieldsSchema.extend(IdSchema.shape),
+    ConnectorSwimlaneTypeFieldsSchema.extend(IdSchema.shape),
+    ConnectorTheHiveTypeFieldsSchema.extend(IdSchema.shape),
+  ])
+);
 
-export const CaseConnectorSchema = lazySchema(() => z.discriminatedUnion('type', [
-  ConnectorCasesWebhookTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
-  ConnectorJiraTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
-  ConnectorNoneTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
-  ConnectorResilientTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
-  ConnectorServiceNowITSMTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
-  ConnectorServiceNowSIRTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
-  ConnectorSwimlaneTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
-  ConnectorTheHiveTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
-]));
+export const CaseConnectorSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    ConnectorCasesWebhookTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+    ConnectorJiraTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+    ConnectorNoneTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+    ConnectorResilientTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+    ConnectorServiceNowITSMTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+    ConnectorServiceNowSIRTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+    ConnectorSwimlaneTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+    ConnectorTheHiveTypeFieldsSchema.merge(NameSchema).merge(IdSchema),
+  ])
+);
 
 /**
  * Mappings
  */
-const ConnectorMappingActionTypeSchema = lazySchema(() => z.union([
-  z.literal('append'),
-  z.literal('nothing'),
-  z.literal('overwrite'),
-]));
+const ConnectorMappingActionTypeSchema = lazySchema(() =>
+  z.union([z.literal('append'), z.literal('nothing'), z.literal('overwrite')])
+);
 
-const ConnectorMappingSourceSchema = lazySchema(() => z.union([
-  z.literal('title'),
-  z.literal('description'),
-  z.literal('comments'),
-  z.literal('tags'),
-]));
+const ConnectorMappingSourceSchema = lazySchema(() =>
+  z.union([z.literal('title'), z.literal('description'), z.literal('comments'), z.literal('tags')])
+);
 
-const ConnectorMappingTargetSchema = lazySchema(() => z.union([z.string(), z.literal('not_mapped')]));
+const ConnectorMappingTargetSchema = lazySchema(() =>
+  z.union([z.string(), z.literal('not_mapped')])
+);
 
-const ConnectorMappingSchema = lazySchema(() => z.object({
-  action_type: ConnectorMappingActionTypeSchema,
-  source: ConnectorMappingSourceSchema,
-  target: ConnectorMappingTargetSchema,
-}));
+const ConnectorMappingSchema = lazySchema(() =>
+  z.object({
+    action_type: ConnectorMappingActionTypeSchema,
+    source: ConnectorMappingSourceSchema,
+    target: ConnectorMappingTargetSchema,
+  })
+);
 
 export const ConnectorMappingsSchema = lazySchema(() => z.array(ConnectorMappingSchema));
 
-export const ConnectorMappingsAttributesSchema = lazySchema(() => z.object({
-  mappings: ConnectorMappingsSchema,
-  owner: z.string(),
-}));
+export const ConnectorMappingsAttributesSchema = lazySchema(() =>
+  z.object({
+    mappings: ConnectorMappingsSchema,
+    owner: z.string(),
+  })
+);
 
 export type ConnectorMappingsAttributes = z.infer<typeof ConnectorMappingsAttributesSchema>;
 export type ConnectorMappings = z.infer<typeof ConnectorMappingsSchema>;

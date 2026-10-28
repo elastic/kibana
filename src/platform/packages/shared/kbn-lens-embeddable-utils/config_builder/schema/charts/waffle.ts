@@ -28,29 +28,31 @@ import {
 } from './shared';
 
 const waffleConfigSharedShape = {
-  legend: lazySchema(() => z
-    .object({
-      values: z
-        .array(
-          z.literal('absolute').meta({
-            description: 'Legend value display mode: absolute (show raw metric values in legend)',
-          })
-        )
-        .min(1)
-        .max(1)
-        .optional(),
-      truncate_after_lines: legendTruncateAfterLinesSchema,
-      visibility: legendVisibilitySchemaWithAuto,
-      size: legendSizeSchema,
-      position: legendPositionSchema,
-    })
-    .strict()
-    .optional()
-    .meta({
-      id: 'visWaffleLegend',
-      title: 'Legend',
-      description: 'Legend configuration for waffle chart',
-    })),
+  legend: lazySchema(() =>
+    z
+      .object({
+        values: z
+          .array(
+            z.literal('absolute').meta({
+              description: 'Legend value display mode: absolute (show raw metric values in legend)',
+            })
+          )
+          .min(1)
+          .max(1)
+          .optional(),
+        truncate_after_lines: legendTruncateAfterLinesSchema,
+        visibility: legendVisibilitySchemaWithAuto,
+        size: legendSizeSchema,
+        position: legendPositionSchema,
+      })
+      .strict()
+      .optional()
+      .meta({
+        id: 'visWaffleLegend',
+        title: 'Legend',
+        description: 'Legend configuration for waffle chart',
+      })
+  ),
 };
 
 const waffleStylingSchema = lazySchema(() =>
@@ -74,7 +76,9 @@ const partitionConfigPrimaryMetricOptionsShape = {
   /**
    * Color configuration
    */
-  color: lazySchema(() => z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional()),
+  color: lazySchema(() =>
+    z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional()
+  ),
 };
 
 /**

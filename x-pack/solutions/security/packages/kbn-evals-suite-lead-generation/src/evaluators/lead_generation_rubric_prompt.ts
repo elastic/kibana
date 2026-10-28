@@ -11,11 +11,13 @@ import { z, lazySchema } from '@kbn/zod/v4';
 export const LeadGenerationRubricPrompt = createPrompt({
   name: 'lead_generation_rubric_judge',
   description: 'Judge lead generation output quality using a structured rubric',
-  input: lazySchema(() => z.object({
-    submission: z.string(),
-    reference: z.string().optional(),
-    criteria: z.string().optional(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      submission: z.string(),
+      reference: z.string().optional(),
+      criteria: z.string().optional(),
+    })
+  ),
 })
   .version({
     system: {

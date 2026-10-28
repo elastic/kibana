@@ -30,13 +30,15 @@ import {
  * - metadata: optional - additional metadata about the reference
  * - data: optional - some reference attachments may also have data
  */
-export const UnifiedReferenceAttachmentPayloadSchema = lazySchema(() => z.object({
-  type: z.string(),
-  attachmentId: z.union([z.string(), z.array(z.string())]),
-  owner: z.string(),
-  data: z.record(z.string(), jsonValueSchema).nullable().optional(),
-  metadata: z.record(z.string(), jsonValueSchema).nullable().optional(),
-}));
+export const UnifiedReferenceAttachmentPayloadSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    attachmentId: z.union([z.string(), z.array(z.string())]),
+    owner: z.string(),
+    data: z.record(z.string(), jsonValueSchema).nullable().optional(),
+    metadata: z.record(z.string(), jsonValueSchema).nullable().optional(),
+  })
+);
 
 /**
  * Payload for Value-based Attachments
@@ -44,17 +46,18 @@ export const UnifiedReferenceAttachmentPayloadSchema = lazySchema(() => z.object
  * - data: required - contains content/state (user comments, persistable state, visualizations)
  * - metadata: optional - additional metadata
  */
-export const UnifiedValueAttachmentPayloadSchema = lazySchema(() => z.object({
-  type: z.string(),
-  data: z.record(z.string(), jsonValueSchema),
-  owner: z.string(),
-  metadata: z.record(z.string(), jsonValueSchema).nullable().optional(),
-}));
+export const UnifiedValueAttachmentPayloadSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    data: z.record(z.string(), jsonValueSchema),
+    owner: z.string(),
+    metadata: z.record(z.string(), jsonValueSchema).nullable().optional(),
+  })
+);
 
-export const UnifiedAttachmentPayloadSchema = lazySchema(() => z.union([
-  UnifiedReferenceAttachmentPayloadSchema,
-  UnifiedValueAttachmentPayloadSchema,
-]));
+export const UnifiedAttachmentPayloadSchema = lazySchema(() =>
+  z.union([UnifiedReferenceAttachmentPayloadSchema, UnifiedValueAttachmentPayloadSchema])
+);
 
 /**
  * Saved Object attributes for Unified Attachments
@@ -101,34 +104,36 @@ export type UnifiedAttachment = z.infer<typeof UnifiedAttachmentSchema>;
 /**
  * Combined v1 legacy and v2 unified attachment types
  */
-export const AttachmentSchemaV2 = lazySchema(() => z.union([AttachmentSchema, UnifiedAttachmentSchema]));
+export const AttachmentSchemaV2 = lazySchema(() =>
+  z.union([AttachmentSchema, UnifiedAttachmentSchema])
+);
 export const AttachmentsSchemaV2 = lazySchema(() => z.array(AttachmentSchemaV2));
-export const AttachmentAttributesSchemaV2 = lazySchema(() => z.union([
-  AttachmentAttributesSchema,
-  UnifiedAttachmentAttributesSchema,
-]));
-export const AttachmentPatchAttributesSchemaV2 = lazySchema(() => z.union([
-  AttachmentPatchAttributesSchema,
-  UnifiedAttachmentPatchAttributesSchema,
-]));
+export const AttachmentAttributesSchemaV2 = lazySchema(() =>
+  z.union([AttachmentAttributesSchema, UnifiedAttachmentAttributesSchema])
+);
+export const AttachmentPatchAttributesSchemaV2 = lazySchema(() =>
+  z.union([AttachmentPatchAttributesSchema, UnifiedAttachmentPatchAttributesSchema])
+);
 
-const UnifiedDocumentAttachmentMetadataSchema = lazySchema(() => z
-  .union([
-    z.null(),
-    z
-      .object({
-        index: z.union([z.string(), z.array(z.string())]),
-        rule: z.union([
-          z.null(),
-          z.object({
-            id: z.union([z.string(), z.null()]),
-            name: z.union([z.string(), z.null()]),
-          }),
-        ]),
-      })
-      .partial(),
-  ])
-  .optional());
+const UnifiedDocumentAttachmentMetadataSchema = lazySchema(() =>
+  z
+    .union([
+      z.null(),
+      z
+        .object({
+          index: z.union([z.string(), z.array(z.string())]),
+          rule: z.union([
+            z.null(),
+            z.object({
+              id: z.union([z.string(), z.null()]),
+              name: z.union([z.string(), z.null()]),
+            }),
+          ]),
+        })
+        .partial(),
+    ])
+    .optional()
+);
 
 const UnifiedDocumentAttachmentPayloadSchema = z
   .object({
@@ -154,11 +159,13 @@ const UnifiedDocumentAttachmentAttributesSchema = UnifiedDocumentAttachmentPaylo
   AttachmentAttributesBasicSchema
 );
 
-export const DocumentAttachmentAttributesSchemaV2 = lazySchema(() => z.union([
-  AlertAttachmentAttributesSchema,
-  EventAttachmentAttributesSchema,
-  UnifiedDocumentAttachmentAttributesSchema,
-]));
+export const DocumentAttachmentAttributesSchemaV2 = lazySchema(() =>
+  z.union([
+    AlertAttachmentAttributesSchema,
+    EventAttachmentAttributesSchema,
+    UnifiedDocumentAttachmentAttributesSchema,
+  ])
+);
 
 export type AttachmentV2 = z.infer<typeof AttachmentSchemaV2>;
 export type AttachmentsV2 = z.infer<typeof AttachmentsSchemaV2>;

@@ -50,11 +50,13 @@ export interface ContentPackManifest {
   version: string;
 }
 
-export const contentPackManifestSchema: z.Schema<ContentPackManifest> = lazySchema(() => z.object({
-  name: z.string(),
-  description: z.string(),
-  version: z.string(),
-}));
+export const contentPackManifestSchema: z.Schema<ContentPackManifest> = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    description: z.string(),
+    version: z.string(),
+  })
+);
 
 export type ContentPackEntry = ContentPackSavedObject | ContentPackStream;
 

@@ -8,7 +8,9 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const DeleteCaseUserActionSchema = lazySchema(() => z.object({
-  type: z.literal(UserActionTypes.delete_case),
-  payload: z.object({}),
-}));
+export const DeleteCaseUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.delete_case),
+    payload: z.object({}),
+  })
+);

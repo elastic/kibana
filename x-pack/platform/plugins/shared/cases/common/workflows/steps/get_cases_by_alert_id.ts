@@ -14,14 +14,18 @@ import { MAX_DOCS_PER_PAGE } from '../../constants';
 
 export const GetCasesByAlertIdStepTypeId = 'cases.getCasesByAlertId';
 
-const InputSchema = lazySchema(() => z.object({
-  alert_id: z.string().min(1, 'alert_id is required'),
-  owner: z.union([Owner, Owners]).optional(),
-}));
+const InputSchema = lazySchema(() =>
+  z.object({
+    alert_id: z.string().min(1, 'alert_id is required'),
+    owner: z.union([Owner, Owners]).optional(),
+  })
+);
 
-const OutputSchema = lazySchema(() => z.object({
-  cases: z.array(RelatedCase).max(MAX_DOCS_PER_PAGE),
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(RelatedCase).max(MAX_DOCS_PER_PAGE),
+  })
+);
 
 type GetCasesByAlertIdStepInputSchema = typeof InputSchema;
 type GetCasesByAlertIdStepOutputSchema = typeof OutputSchema;

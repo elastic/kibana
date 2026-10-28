@@ -15,33 +15,37 @@ import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { hasWorkflowExecutionReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
 
-const executionStatusSchema = lazySchema(() => z.enum(ExecutionStatusValues as [string, ...string[]]));
+const executionStatusSchema = lazySchema(() =>
+  z.enum(ExecutionStatusValues as [string, ...string[]])
+);
 
-const listWorkflowExecutionsSchema = lazySchema(() => z.object({
-  workflowId: z
-    .string()
-    .optional()
-    .describe('Optional workflow ID to filter executions to a specific workflow.'),
-  statuses: z
-    .array(executionStatusSchema)
-    .optional()
-    .describe(
-      'Optional list of statuses to filter by, e.g. ["failed", "running"]. Omit for all statuses.'
-    ),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .optional()
-    .describe('Maximum number of executions to return. Defaults to 10, maximum 50.'),
-  page: z
-    .number()
-    .int()
-    .min(1)
-    .optional()
-    .describe('Page number for pagination, starting at 1. Defaults to 1.'),
-}));
+const listWorkflowExecutionsSchema = lazySchema(() =>
+  z.object({
+    workflowId: z
+      .string()
+      .optional()
+      .describe('Optional workflow ID to filter executions to a specific workflow.'),
+    statuses: z
+      .array(executionStatusSchema)
+      .optional()
+      .describe(
+        'Optional list of statuses to filter by, e.g. ["failed", "running"]. Omit for all statuses.'
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(50)
+      .optional()
+      .describe('Maximum number of executions to return. Defaults to 10, maximum 50.'),
+    page: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe('Page number for pagination, starting at 1. Defaults to 1.'),
+  })
+);
 
 export const listWorkflowExecutionsTool = ({
   workflowsManagement,

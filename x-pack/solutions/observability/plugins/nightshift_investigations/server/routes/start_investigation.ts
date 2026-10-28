@@ -37,40 +37,42 @@ const titleSchema = lazySchema(() => z.string().min(1).max(MAX_TITLE_LENGTH));
 // the alert server-side (through the RAC alerts client, which enforces alert-index
 // authorization) and builds the snapshot itself. zod's discriminatedUnion needs the
 // discriminator at the top level, and ours is nested under `subject`, hence a plain union.
-const startInvestigationBodySchema = lazySchema(() => z.union([
-  z.object({
-    subject: z.object({
-      type: z.literal('alert'),
-      ids: z
-        .array(z.string().min(1).max(MAX_KEYWORD_LENGTH))
-        .min(1)
-        .max(MAX_ALERTS_PER_INVESTIGATION),
-      summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+const startInvestigationBodySchema = lazySchema(() =>
+  z.union([
+    z.object({
+      subject: z.object({
+        type: z.literal('alert'),
+        ids: z
+          .array(z.string().min(1).max(MAX_KEYWORD_LENGTH))
+          .min(1)
+          .max(MAX_ALERTS_PER_INVESTIGATION),
+        summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+      }),
+      title: titleSchema.optional(),
+      ...startInvestigationMessage,
+      ...startInvestigationModel,
+      notificationDestinations: investigationNotificationDestinationsSchema.optional(),
     }),
-    title: titleSchema.optional(),
-    ...startInvestigationMessage,
-    ...startInvestigationModel,
-    notificationDestinations: investigationNotificationDestinationsSchema.optional(),
-  }),
-  // A manual investigation is defined by its question, so `message` is required and the
-  // subject id is optional: there is no entity to point at, only the prompt.
-  z.object({
-    subject: z.object({
-      type: z.literal('manual'),
-      id: z
-        .string()
-        .min(1)
-        .max(MAX_KEYWORD_LENGTH)
-        .default(DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID),
-      summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+    // A manual investigation is defined by its question, so `message` is required and the
+    // subject id is optional: there is no entity to point at, only the prompt.
+    z.object({
+      subject: z.object({
+        type: z.literal('manual'),
+        id: z
+          .string()
+          .min(1)
+          .max(MAX_KEYWORD_LENGTH)
+          .default(DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID),
+        summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+      }),
+      title: titleSchema.optional(),
+      context: freeFormContextSchema.optional(),
+      message: z.string().min(1).max(MAX_TEXT_LENGTH),
+      ...startInvestigationModel,
+      notificationDestinations: investigationNotificationDestinationsSchema.optional(),
     }),
-    title: titleSchema.optional(),
-    context: freeFormContextSchema.optional(),
-    message: z.string().min(1).max(MAX_TEXT_LENGTH),
-    ...startInvestigationModel,
-    notificationDestinations: investigationNotificationDestinationsSchema.optional(),
-  }),
-]));
+  ])
+);
 
 type StartInvestigationBody = z.infer<typeof startInvestigationBodySchema>;
 type AlertInvestigationBody = Extract<StartInvestigationBody, { subject: { type: 'alert' } }>;
@@ -97,9 +99,11 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
       requiredPrivileges: ['agentBuilder:write'],
     },
   },
-  params: lazySchema(() => z.object({
-    body: startInvestigationBodySchema,
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: startInvestigationBodySchema,
+    })
+  ),
   handler: async ({
     request,
     params,

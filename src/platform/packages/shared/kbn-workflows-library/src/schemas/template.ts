@@ -11,17 +11,17 @@ import semver from 'semver';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { InstallFormLenientSchema, InstallFormSchema } from './install_form';
 
-const semverString = lazySchema(() => z
-  .string()
-  .refine((value) => value.length <= 256 && semver.valid(value) !== null, {
+const semverString = lazySchema(() =>
+  z.string().refine((value) => value.length <= 256 && semver.valid(value) !== null, {
     message: 'Must be a valid semver string (e.g. 1.0.0).',
-  }));
+  })
+);
 
-const semverRangeString = lazySchema(() => z
-  .string()
-  .refine((value) => value.length <= 256 && semver.validRange(value) !== null, {
+const semverRangeString = lazySchema(() =>
+  z.string().refine((value) => value.length <= 256 && semver.validRange(value) !== null, {
     message: 'Must be a valid semver range (e.g. ">=9.5.0 <9.6.0").',
-  }));
+  })
+);
 
 /**
  * Schema for the `template-metadata` block parsed out of a template YAML file.

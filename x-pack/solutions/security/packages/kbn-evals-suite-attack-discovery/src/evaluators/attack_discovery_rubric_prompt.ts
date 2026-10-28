@@ -11,10 +11,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 export const AttackDiscoveryRubricPrompt = createPrompt({
   name: 'attack_discovery_rubric_judge',
   description: 'Judge attack discoveries using legacy rubric',
-  input: lazySchema(() => z.object({
-    submission: z.string(),
-    reference: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      submission: z.string(),
+      reference: z.string(),
+    })
+  ),
 })
   .version({
     system: {

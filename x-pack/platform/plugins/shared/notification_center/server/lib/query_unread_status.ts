@@ -12,10 +12,12 @@ import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stre
 import type { NotificationQueryDeps } from './query_notifications';
 import { isReadAt, type NotificationReadState } from './read_state';
 
-const unreadStatusSourceSchema = lazySchema(() => z.object({
-  notification_id: notificationIdSchema,
-  '@timestamp': isoDateTime(),
-}));
+const unreadStatusSourceSchema = lazySchema(() =>
+  z.object({
+    notification_id: notificationIdSchema,
+    '@timestamp': isoDateTime(),
+  })
+);
 
 type UnreadStatusSource = z.infer<typeof unreadStatusSourceSchema>;
 

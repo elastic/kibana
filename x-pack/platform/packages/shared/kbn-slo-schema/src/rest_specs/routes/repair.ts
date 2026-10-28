@@ -8,11 +8,13 @@ import { z, lazySchema } from '@kbn/zod';
 
 import { sloIdSchema } from '../../schema/slo';
 
-const repairParamsSchema = lazySchema(() => z.object({
-  body: z.object({
-    list: z.array(sloIdSchema),
-  }),
-}));
+const repairParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z.array(sloIdSchema),
+    }),
+  })
+);
 
 type RepairParams = z.output<typeof repairParamsSchema.shape.body>;
 

@@ -7,4 +7,6 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const traceContinuationStrategySchema = lazySchema(() => z.enum(['continue', 'restart', 'restart_external']));
+export const traceContinuationStrategySchema = lazySchema(() =>
+  z.enum(['continue', 'restart', 'restart_external'])
+);

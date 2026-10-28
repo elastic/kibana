@@ -50,10 +50,12 @@ const MERGE_CORRECTNESS_OUTPUT_SCHEMA = {
 export const MergeCorrectnessPrompt = createPrompt({
   name: 'merge_correctness_analysis',
   description: 'Evaluate whether feature merges based on shared id are semantically correct',
-  input: lazySchema(() => z.object({
-    source_id: z.string(),
-    merge_events: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      source_id: z.string(),
+      merge_events: z.string(),
+    })
+  ),
 })
   .version({
     system: {

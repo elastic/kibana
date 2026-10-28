@@ -14,19 +14,23 @@ import { storedImpactEntitiesSchema } from '../impact';
 
 export const GetImpactStepId = 'investigations.getImpact' as const;
 
-export const getImpactStepInputSchema = lazySchema(() => z.object({
-  conversationId: z
-    .string()
-    .min(1)
-    .max(MAX_IMPACT_ID_LENGTH)
-    .describe('Conversation whose impact to read.'),
-}));
+export const getImpactStepInputSchema = lazySchema(() =>
+  z.object({
+    conversationId: z
+      .string()
+      .min(1)
+      .max(MAX_IMPACT_ID_LENGTH)
+      .describe('Conversation whose impact to read.'),
+  })
+);
 
-export const getImpactStepOutputSchema = lazySchema(() => z.object({
-  id: z.string(),
-  /** Empty when the impact was recorded as a summary and evidence only. */
-  entities: storedImpactEntitiesSchema,
-}));
+export const getImpactStepOutputSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    /** Empty when the impact was recorded as a summary and evidence only. */
+    entities: storedImpactEntitiesSchema,
+  })
+);
 
 export const getImpactStepCommonDefinition: BaseStepDefinition<
   typeof getImpactStepInputSchema,

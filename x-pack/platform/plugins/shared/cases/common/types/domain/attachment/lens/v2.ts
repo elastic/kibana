@@ -17,9 +17,11 @@ import { buildSavedObjectMetadataSchema, TimeRangeSchema } from '../saved_object
 
 // --- Persistable shape from legacy lens attachment ---
 /** `state` shape is owned by the lens plugin; kept permissive to round-trip what lens persists. */
-export const LensPersistableAttachmentDataSchema = lazySchema(() => z.object({
-  state: z.record(z.string().max(MAX_TITLE_LENGTH), z.unknown()),
-}));
+export const LensPersistableAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    state: z.record(z.string().max(MAX_TITLE_LENGTH), z.unknown()),
+  })
+);
 export type LensPersistableAttachmentData = z.infer<typeof LensPersistableAttachmentDataSchema>;
 
 export const LensPersistableAttachmentPayloadSchema = z
@@ -63,10 +65,9 @@ export type LensSavedObjectAttachmentPayload = z.infer<
   typeof LensSavedObjectAttachmentPayloadSchema
 >;
 
-export const LensAttachmentPayloadSchema = lazySchema(() => z.union([
-  LensPersistableAttachmentPayloadSchema,
-  LensSavedObjectAttachmentPayloadSchema,
-]));
+export const LensAttachmentPayloadSchema = lazySchema(() =>
+  z.union([LensPersistableAttachmentPayloadSchema, LensSavedObjectAttachmentPayloadSchema])
+);
 
 export type LensAttachmentPayload = z.infer<typeof LensAttachmentPayloadSchema>;
 

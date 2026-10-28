@@ -26,7 +26,9 @@ import type {
 } from '../../../common/experiments/run_experiment';
 import type { RouteDependencies } from '../register_routes';
 
-const executionParamsSchema = lazySchema(() => z.object({ workflowExecutionId: z.string().max(MAX_ID_LENGTH) }));
+const executionParamsSchema = lazySchema(() =>
+  z.object({ workflowExecutionId: z.string().max(MAX_ID_LENGTH) })
+);
 
 const WORKFLOWS_UNAVAILABLE = {
   statusCode: 501 as const,

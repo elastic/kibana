@@ -11,12 +11,12 @@ import { z, lazySchema } from '@kbn/zod';
 import type { Serializable } from '@kbn/utility-types';
 import { FilterStateStore } from '@kbn/es-query-constants';
 
-export const filterStateStoreSchema = lazySchema(() => z
-  .union([z.literal(FilterStateStore.APP_STATE), z.literal(FilterStateStore.GLOBAL_STATE)])
-  .meta({
+export const filterStateStoreSchema = lazySchema(() =>
+  z.union([z.literal(FilterStateStore.APP_STATE), z.literal(FilterStateStore.GLOBAL_STATE)]).meta({
     description:
       "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-  }));
+  })
+);
 
 export const storedFilterMetaSchema = z
   .object({
@@ -48,16 +48,18 @@ type StoredFilterMeta = z.output<typeof storedFilterMetaSchema> & {
   [key: string]: Serializable;
 };
 
-export const storedFilterSchema = lazySchema(() => z
-  .object({
-    meta: storedFilterMetaSchema as z.ZodType<StoredFilterMeta>,
-    query: z.record(z.string(), z.any()).optional(),
-    $state: z
-      .object({
-        store: filterStateStoreSchema,
-      })
-      .strict()
-      .optional(),
-  })
-  .strict()
-  .meta({ id: 'kbn-es-query-server-storedFilterSchema' }));
+export const storedFilterSchema = lazySchema(() =>
+  z
+    .object({
+      meta: storedFilterMetaSchema as z.ZodType<StoredFilterMeta>,
+      query: z.record(z.string(), z.any()).optional(),
+      $state: z
+        .object({
+          store: filterStateStoreSchema,
+        })
+        .strict()
+        .optional(),
+    })
+    .strict()
+    .meta({ id: 'kbn-es-query-server-storedFilterSchema' })
+);

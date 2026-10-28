@@ -19,9 +19,11 @@ import {
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 
-const getAttachmentsSchema = lazySchema(() => z.object({
-  case_id: z.string().min(1).describe('The case ID to retrieve attachments for.'),
-}));
+const getAttachmentsSchema = lazySchema(() =>
+  z.object({
+    case_id: z.string().min(1).describe('The case ID to retrieve attachments for.'),
+  })
+);
 
 export const getAttachmentsTool = (
   getCasesClientFn: GetCasesClientFn

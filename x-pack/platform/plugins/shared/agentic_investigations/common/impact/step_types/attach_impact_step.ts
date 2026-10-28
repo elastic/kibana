@@ -14,21 +14,25 @@ import { impactEntitiesSchema } from '../impact';
 
 export const AttachImpactStepId = 'investigations.attachImpact' as const;
 
-export const attachImpactStepInputSchema = lazySchema(() => z.object({
-  conversationId: z
-    .string()
-    .min(1)
-    .max(MAX_IMPACT_ID_LENGTH)
-    .describe('Conversation this impact belongs to.'),
-  entities: impactEntitiesSchema.describe(
-    'Entities this investigation is about. Merged by id onto any existing impact for the conversation. Each entity needs an id; name, type, featureId, and streamName are optional.'
-  ),
-}));
+export const attachImpactStepInputSchema = lazySchema(() =>
+  z.object({
+    conversationId: z
+      .string()
+      .min(1)
+      .max(MAX_IMPACT_ID_LENGTH)
+      .describe('Conversation this impact belongs to.'),
+    entities: impactEntitiesSchema.describe(
+      'Entities this investigation is about. Merged by id onto any existing impact for the conversation. Each entity needs an id; name, type, featureId, and streamName are optional.'
+    ),
+  })
+);
 
-export const attachImpactStepOutputSchema = lazySchema(() => z.object({
-  id: z.string(),
-  entities: impactEntitiesSchema,
-}));
+export const attachImpactStepOutputSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    entities: impactEntitiesSchema,
+  })
+);
 
 export const attachImpactStepCommonDefinition: BaseStepDefinition<
   typeof attachImpactStepInputSchema,

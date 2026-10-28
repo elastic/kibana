@@ -35,21 +35,23 @@ import {
 import { groupIsNotCollapsed } from '../../utils';
 
 const treemapSharedConfigShape = {
-  legend: lazySchema(() => z
-    .object({
-      nested: legendNestedSchema,
-      truncate_after_lines: legendTruncateAfterLinesSchema,
-      visibility: legendVisibilitySchemaWithAuto,
-      size: legendSizeSchema,
-      position: legendPositionSchema,
-    })
-    .strict()
-    .optional()
-    .meta({
-      id: 'visTreemapLegend',
-      title: 'Legend',
-      description: 'Configuration for the treemap chart legend appearance and behavior',
-    })),
+  legend: lazySchema(() =>
+    z
+      .object({
+        nested: legendNestedSchema,
+        truncate_after_lines: legendTruncateAfterLinesSchema,
+        visibility: legendVisibilitySchemaWithAuto,
+        size: legendSizeSchema,
+        position: legendPositionSchema,
+      })
+      .strict()
+      .optional()
+      .meta({
+        id: 'visTreemapLegend',
+        title: 'Legend',
+        description: 'Configuration for the treemap chart legend appearance and behavior',
+      })
+  ),
 };
 
 const treemapStylingSchema = lazySchema(() =>
@@ -79,7 +81,9 @@ const partitionConfigPrimaryMetricOptionsShape = {
   /**
    * Color configuration
    */
-  color: lazySchema(() => z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional()),
+  color: lazySchema(() =>
+    z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional()
+  ),
 };
 
 const partitionConfigBreakdownByOptionsShape = {

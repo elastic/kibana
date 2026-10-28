@@ -10,10 +10,12 @@ import { QUERY_STATUSES } from '../../../common/queries';
 import type { QueryStatus } from '../../../common/queries';
 import type { RuleUnbackedFilter } from '../../lib/knowledge_indicators';
 
-export const queryStatusSchema = lazySchema(() => z
-  .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.enum(QUERY_STATUSES)))
-  .optional()
-  .describe('Filter queries by status: active (promoted) or draft (unbacked)'));
+export const queryStatusSchema = lazySchema(() =>
+  z
+    .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.enum(QUERY_STATUSES)))
+    .optional()
+    .describe('Filter queries by status: active (promoted) or draft (unbacked)')
+);
 
 export function toRuleUnbackedFilter(statuses: QueryStatus[] = []): RuleUnbackedFilter {
   const hasActive = statuses.includes('active');

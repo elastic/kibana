@@ -9,13 +9,15 @@ import { z, lazySchema } from '@kbn/zod';
 
 import { sloHealthSchema } from '../../schema/health';
 
-const postHealthScanParamsSchema = lazySchema(() => z.object({
-  body: z
-    .object({
-      force: BooleanFromString.optional(),
-    })
-    .optional(),
-}));
+const postHealthScanParamsSchema = lazySchema(() =>
+  z.object({
+    body: z
+      .object({
+        force: BooleanFromString.optional(),
+      })
+      .optional(),
+  })
+);
 
 interface PostHealthScanResponse {
   scanId: string;
@@ -26,27 +28,31 @@ interface PostHealthScanResponse {
   error?: string;
 }
 
-const getHealthScanParamsSchema = lazySchema(() => z.object({
-  path: z.object({
-    scanId: z.string(),
-  }),
-  query: z
-    .object({
-      size: z.coerce.number().optional(),
-      searchAfter: z.string().optional(),
-      problematic: BooleanFromString.optional(),
-      allSpaces: BooleanFromString.optional(),
-    })
-    .optional(),
-}));
+const getHealthScanParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      scanId: z.string(),
+    }),
+    query: z
+      .object({
+        size: z.coerce.number().optional(),
+        searchAfter: z.string().optional(),
+        problematic: BooleanFromString.optional(),
+        allSpaces: BooleanFromString.optional(),
+      })
+      .optional(),
+  })
+);
 
-const listHealthScanParamsSchema = lazySchema(() => z.object({
-  query: z
-    .object({
-      size: z.coerce.number().optional(),
-    })
-    .optional(),
-}));
+const listHealthScanParamsSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .object({
+        size: z.coerce.number().optional(),
+      })
+      .optional(),
+  })
+);
 
 interface HealthScanSummary {
   scanId: string;
@@ -60,18 +66,20 @@ interface ListHealthScanResponse {
   scans: HealthScanSummary[];
 }
 
-const healthScanResultResponseSchema = lazySchema(() => z.object({
-  '@timestamp': z.string(),
-  scanId: z.string(),
-  spaceId: z.string(),
-  slo: z.object({
-    id: z.string(),
-    name: z.string(),
-    revision: z.number(),
-    enabled: z.boolean(),
-  }),
-  health: sloHealthSchema,
-}));
+const healthScanResultResponseSchema = lazySchema(() =>
+  z.object({
+    '@timestamp': z.string(),
+    scanId: z.string(),
+    spaceId: z.string(),
+    slo: z.object({
+      id: z.string(),
+      name: z.string(),
+      revision: z.number(),
+      enabled: z.boolean(),
+    }),
+    health: sloHealthSchema,
+  })
+);
 
 type HealthScanResultResponse = z.input<typeof healthScanResultResponseSchema>;
 

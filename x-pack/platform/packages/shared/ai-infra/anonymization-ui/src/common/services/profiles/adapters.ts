@@ -15,12 +15,14 @@ import { anonymizationProfileSchema as profileSchema } from '@kbn/anonymization-
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ProfilesListQuery, UpdateProfileInput } from '../../types/profiles';
 
-const findProfilesResponseSchema = lazySchema(() => z.object({
-  data: z.array(profileSchema),
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-}));
+const findProfilesResponseSchema = lazySchema(() =>
+  z.object({
+    data: z.array(profileSchema),
+    page: z.number(),
+    perPage: z.number(),
+    total: z.number(),
+  })
+);
 
 export const toProfile = (profile: unknown): AnonymizationProfile => {
   const parsed = profileSchema.safeParse(profile);

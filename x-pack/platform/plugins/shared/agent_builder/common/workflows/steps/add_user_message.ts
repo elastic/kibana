@@ -14,22 +14,26 @@ import { authorNameSchema } from '../author_name_schema';
 
 export const AddUserMessageStepTypeId = 'ai.conversation.add_user_message';
 
-const InputSchema = lazySchema(() => z.object({
-  conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
-    description: 'The unique identifier of the conversation to add the user message to.',
-  }),
-  message: z
-    .string()
-    .refine((value) => value.trim().length > 0, { message: 'message must not be blank' })
-    .meta({ description: 'The user message text.' }),
-  author_name: authorNameSchema,
-}));
+const InputSchema = lazySchema(() =>
+  z.object({
+    conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
+      description: 'The unique identifier of the conversation to add the user message to.',
+    }),
+    message: z
+      .string()
+      .refine((value) => value.trim().length > 0, { message: 'message must not be blank' })
+      .meta({ description: 'The user message text.' }),
+    author_name: authorNameSchema,
+  })
+);
 
-const OutputSchema = lazySchema(() => z.object({
-  conversation_id: z
-    .string()
-    .meta({ description: 'The ID of the conversation the user message was added to.' }),
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    conversation_id: z
+      .string()
+      .meta({ description: 'The ID of the conversation the user message was added to.' }),
+  })
+);
 
 export type AddUserMessageInputSchema = typeof InputSchema;
 type AddUserMessageOutputSchema = typeof OutputSchema;

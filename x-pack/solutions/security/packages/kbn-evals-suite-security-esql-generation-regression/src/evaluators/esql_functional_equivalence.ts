@@ -118,10 +118,12 @@ const CalibratedEsqlEquivalencePrompt = createPrompt({
   name: 'security_esql_equivalence_v2',
   description:
     'Three-point calibrated rubric judging ES|QL functional equivalence with explicit allow/deny lists for common transformations.',
-  input: lazySchema(() => z.object({
-    ground_truth: z.string(),
-    prediction: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      ground_truth: z.string(),
+      prediction: z.string(),
+    })
+  ),
 })
   .version({
     system: {

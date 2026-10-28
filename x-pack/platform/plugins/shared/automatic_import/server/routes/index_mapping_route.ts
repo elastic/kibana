@@ -17,9 +17,11 @@ import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
 
 export const INDEX_MAPPINGS_PATH = '/api/automatic_import/index_mappings/{index_name}';
 
-const GetIndexMappingsRequestParams = lazySchema(() => z.object({
-  index_name: z.string().min(1).max(255),
-}));
+const GetIndexMappingsRequestParams = lazySchema(() =>
+  z.object({
+    index_name: z.string().min(1).max(255),
+  })
+);
 
 /**
  * Extracts the mappings from an `indices.getMapping` response.

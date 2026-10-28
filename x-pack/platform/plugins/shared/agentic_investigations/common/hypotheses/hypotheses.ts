@@ -17,29 +17,33 @@ export const hypothesisStatusSchema = lazySchema(() => z.enum(HYPOTHESIS_STATUSE
 export type HypothesisStatus = z.infer<typeof hypothesisStatusSchema>;
 
 /** One candidate cause and where the investigation stands on it. */
-export const hypothesisSchema = lazySchema(() => z.object({
-  /** The candidate cause under consideration. */
-  candidate: z.string().min(1).max(MAX_EVIDENCE_TEXT_LENGTH),
-  /** Current confidence in this hypothesis, 0 to 1. */
-  confidence: z.number().min(0).max(1),
-  status: hypothesisStatusSchema,
-  /** Why it was dismissed or confirmed, or the current reasoning while investigating. Markdown. */
-  reason: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
-  /** What the status rests on. */
-  evidence: z.array(investigationEvidenceSchema).max(MAX_HYPOTHESIS_EVIDENCE).optional(),
-}));
+export const hypothesisSchema = lazySchema(() =>
+  z.object({
+    /** The candidate cause under consideration. */
+    candidate: z.string().min(1).max(MAX_EVIDENCE_TEXT_LENGTH),
+    /** Current confidence in this hypothesis, 0 to 1. */
+    confidence: z.number().min(0).max(1),
+    status: hypothesisStatusSchema,
+    /** Why it was dismissed or confirmed, or the current reasoning while investigating. Markdown. */
+    reason: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
+    /** What the status rests on. */
+    evidence: z.array(investigationEvidenceSchema).max(MAX_HYPOTHESIS_EVIDENCE).optional(),
+  })
+);
 export type Hypothesis = z.infer<typeof hypothesisSchema>;
 
 export const hypothesesListSchema = lazySchema(() => z.array(hypothesisSchema).max(MAX_HYPOTHESES));
 
 /** Stored hypotheses document: the full current list, replaced on every write. */
-export const investigationHypothesesSchema = lazySchema(() => z.object({
-  id: z.string().max(MAX_ID_LENGTH),
-  spaceId: z.string().max(MAX_ID_LENGTH),
-  conversationId: z.string().max(MAX_ID_LENGTH),
-  hypotheses: hypothesesListSchema,
-  createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
-  createdBy: userSchema.optional(),
-  updatedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
-}));
+export const investigationHypothesesSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_ID_LENGTH),
+    spaceId: z.string().max(MAX_ID_LENGTH),
+    conversationId: z.string().max(MAX_ID_LENGTH),
+    hypotheses: hypothesesListSchema,
+    createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
+    createdBy: userSchema.optional(),
+    updatedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+  })
+);
 export type InvestigationHypotheses = z.infer<typeof investigationHypothesesSchema>;

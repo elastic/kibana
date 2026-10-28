@@ -17,11 +17,13 @@ const InputSchema = CasesStepCaseIdSchema.extend({
   // Deprecated. Behavior is unchanged (comments are still returned when true) so existing
   // workflows keep working; the flag only marks the field deprecated in docs and the editor.
   // Prefer the `cases.getAllAttachments` step. Hard removal deferred to v10, gated on telemetry.
-  include_comments: lazySchema(() => z.boolean().optional().default(false).meta({
-    deprecated: true,
-    description:
-      'Deprecated: use the `cases.getAllAttachments` step to retrieve case attachments. Include case comments in the response. Default: false.',
-  })),
+  include_comments: lazySchema(() =>
+    z.boolean().optional().default(false).meta({
+      deprecated: true,
+      description:
+        'Deprecated: use the `cases.getAllAttachments` step to retrieve case attachments. Include case comments in the response. Default: false.',
+    })
+  ),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;

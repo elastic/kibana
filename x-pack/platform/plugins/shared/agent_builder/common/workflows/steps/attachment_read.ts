@@ -13,22 +13,26 @@ import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
 
 export const ReadAttachmentStepTypeId = 'ai.attachment.read';
 
-const InputSchema = lazySchema(() => z.object({
-  conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
-    description: 'The ID of the conversation the attachment belongs to.',
-  }),
-  attachment_id: z.string().min(1).max(256).meta({
-    description: 'The ID of the attachment to read.',
-  }),
-  version: z.number().int().positive().optional().meta({
-    description: 'Optional version number to read. Defaults to the current version.',
-  }),
-}));
+const InputSchema = lazySchema(() =>
+  z.object({
+    conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
+      description: 'The ID of the conversation the attachment belongs to.',
+    }),
+    attachment_id: z.string().min(1).max(256).meta({
+      description: 'The ID of the attachment to read.',
+    }),
+    version: z.number().int().positive().optional().meta({
+      description: 'Optional version number to read. Defaults to the current version.',
+    }),
+  })
+);
 
-const OutputSchema = lazySchema(() => z.object({
-  data: z.unknown().meta({ description: 'The raw attachment data at the requested version.' }),
-  version: z.number().meta({ description: 'The version number that was read.' }),
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    data: z.unknown().meta({ description: 'The raw attachment data at the requested version.' }),
+    version: z.number().meta({ description: 'The version number that was read.' }),
+  })
+);
 
 type ReadAttachmentInputSchema = typeof InputSchema;
 type ReadAttachmentOutputSchema = typeof OutputSchema;

@@ -24,21 +24,25 @@ export const settleIncompleteProposalStatusSchema = proposalStatusSchema.extract
   'expired',
 ]);
 
-export const settleIncompleteProposalStepInputSchema = lazySchema(() => z.object({
-  proposalId: z.string().describe('Any proposal in the chain — the live head is resolved first.'),
-  status: optionalStepInput(settleIncompleteProposalStatusSchema).describe(
-    'Terminal status to write. Omit to choose from the record: failed when already decided, expired when not.'
-  ),
-  executionError: optionalStepInput(z.string()).describe(
-    'Why the proposal is being settled without a completed decision loop.'
-  ),
-}));
+export const settleIncompleteProposalStepInputSchema = lazySchema(() =>
+  z.object({
+    proposalId: z.string().describe('Any proposal in the chain — the live head is resolved first.'),
+    status: optionalStepInput(settleIncompleteProposalStatusSchema).describe(
+      'Terminal status to write. Omit to choose from the record: failed when already decided, expired when not.'
+    ),
+    executionError: optionalStepInput(z.string()).describe(
+      'Why the proposal is being settled without a completed decision loop.'
+    ),
+  })
+);
 
-export const settleIncompleteProposalStepOutputSchema = lazySchema(() => z.object({
-  proposalId: z.string().describe('The live revision that was settled.'),
-  status: settleIncompleteProposalStatusSchema,
-  decision: proposalDecisionSchema.optional(),
-}));
+export const settleIncompleteProposalStepOutputSchema = lazySchema(() =>
+  z.object({
+    proposalId: z.string().describe('The live revision that was settled.'),
+    status: settleIncompleteProposalStatusSchema,
+    decision: proposalDecisionSchema.optional(),
+  })
+);
 
 export const settleIncompleteProposalStepCommonDefinition: BaseStepDefinition<
   typeof settleIncompleteProposalStepInputSchema,

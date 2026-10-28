@@ -9,9 +9,13 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseSeveritySchema } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const SeverityUserActionPayloadSchema = lazySchema(() => z.object({ severity: CaseSeveritySchema }));
+export const SeverityUserActionPayloadSchema = lazySchema(() =>
+  z.object({ severity: CaseSeveritySchema })
+);
 
-export const SeverityUserActionSchema = lazySchema(() => z.object({
-  type: z.literal(UserActionTypes.severity),
-  payload: SeverityUserActionPayloadSchema,
-}));
+export const SeverityUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.severity),
+    payload: SeverityUserActionPayloadSchema,
+  })
+);

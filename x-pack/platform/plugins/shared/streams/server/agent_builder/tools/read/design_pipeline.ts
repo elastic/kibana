@@ -17,39 +17,43 @@ import { STREAMS_DESIGN_PIPELINE_TOOL_ID as DESIGN_PIPELINE } from '../tool_ids'
 import { classifyError } from '../../utils/error_utils';
 import { nlToStreamlang } from './nl_to_streamlang';
 
-const samplesSchema = lazySchema(() => z
-  .union([
-    z.object({
-      source: z.literal('stream'),
-      size: z.number().int().min(1).max(500).optional(),
-    }),
-    z.object({
-      source: z.literal('inline'),
-      documents: z.array(z.record(z.string(), z.unknown())),
-      status: z.enum(['processed', 'unprocessed']),
-    }),
-  ])
-  .optional()
-  .describe(
-    'How to obtain sample documents for simulation. ' +
-      'Omit to auto-fetch 100 recent documents from the stream (recommended). ' +
-      'Use { source: "stream", size: N } to control the sample size. ' +
-      'Use { source: "inline", documents: [...], status: "processed"|"unprocessed" } to provide your own.'
-  ));
-
-const designPipelineSchema = lazySchema(() => z.object({
-  stream_name: z.string().describe('Exact stream name, e.g. "logs.otel.linux"'),
-  instruction: z
-    .string()
+const samplesSchema = lazySchema(() =>
+  z
+    .union([
+      z.object({
+        source: z.literal('stream'),
+        size: z.number().int().min(1).max(500).optional(),
+      }),
+      z.object({
+        source: z.literal('inline'),
+        documents: z.array(z.record(z.string(), z.unknown())),
+        status: z.enum(['processed', 'unprocessed']),
+      }),
+    ])
+    .optional()
     .describe(
-      'Natural language instruction describing what to change in the processing pipeline. ' +
-        'Examples: "parse syslog from body.text using grok", ' +
-        '"add a date parser for the timestamp field", ' +
-        '"remove the convert step for status", ' +
-        '"rename attributes.src_ip to source.ip"'
-    ),
-  samples: samplesSchema,
-}));
+      'How to obtain sample documents for simulation. ' +
+        'Omit to auto-fetch 100 recent documents from the stream (recommended). ' +
+        'Use { source: "stream", size: N } to control the sample size. ' +
+        'Use { source: "inline", documents: [...], status: "processed"|"unprocessed" } to provide your own.'
+    )
+);
+
+const designPipelineSchema = lazySchema(() =>
+  z.object({
+    stream_name: z.string().describe('Exact stream name, e.g. "logs.otel.linux"'),
+    instruction: z
+      .string()
+      .describe(
+        'Natural language instruction describing what to change in the processing pipeline. ' +
+          'Examples: "parse syslog from body.text using grok", ' +
+          '"add a date parser for the timestamp field", ' +
+          '"remove the convert step for status", ' +
+          '"rename attributes.src_ip to source.ip"'
+      ),
+    samples: samplesSchema,
+  })
+);
 
 export const createDesignPipelineTool = ({
   getScopedClients,

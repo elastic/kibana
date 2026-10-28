@@ -9,15 +9,17 @@ import { z, lazySchema } from '@kbn/zod';
 import { sloWithDataResponseSchema } from '../slo';
 
 const sortDirectionSchema = lazySchema(() => z.union([z.literal('asc'), z.literal('desc')]));
-const sortBySchema = lazySchema(() => z.union([
-  z.literal('error_budget_consumed'),
-  z.literal('error_budget_remaining'),
-  z.literal('sli_value'),
-  z.literal('status'),
-  z.literal('burn_rate_5m'),
-  z.literal('burn_rate_1h'),
-  z.literal('burn_rate_1d'),
-]));
+const sortBySchema = lazySchema(() =>
+  z.union([
+    z.literal('error_budget_consumed'),
+    z.literal('error_budget_remaining'),
+    z.literal('sli_value'),
+    z.literal('status'),
+    z.literal('burn_rate_5m'),
+    z.literal('burn_rate_1h'),
+    z.literal('burn_rate_1d'),
+  ])
+);
 
 const searchAfterArraySchema = lazySchema(() => z.array(z.union([z.string(), z.number()])));
 
@@ -48,32 +50,38 @@ const searchAfterSchema = z.codec(
   }
 );
 
-const findSLOQuerySchema = lazySchema(() => z.object({
-  filters: z.string().optional(),
-  kqlQuery: z.string().optional(),
-  // Used for page-based pagination; kept as strings to preserve backward compatibility
-  page: z.string().optional(),
-  perPage: z.string().optional(),
-  sortBy: sortBySchema.optional(),
-  sortDirection: sortDirectionSchema.optional(),
-  hideStale: BooleanFromString.optional(),
-  // Used for cursor-based pagination; searchAfter is a JSON-encoded array
-  searchAfter: searchAfterSchema.optional(),
-  size: z.string().optional(),
-}));
+const findSLOQuerySchema = lazySchema(() =>
+  z.object({
+    filters: z.string().optional(),
+    kqlQuery: z.string().optional(),
+    // Used for page-based pagination; kept as strings to preserve backward compatibility
+    page: z.string().optional(),
+    perPage: z.string().optional(),
+    sortBy: sortBySchema.optional(),
+    sortDirection: sortDirectionSchema.optional(),
+    hideStale: BooleanFromString.optional(),
+    // Used for cursor-based pagination; searchAfter is a JSON-encoded array
+    searchAfter: searchAfterSchema.optional(),
+    size: z.string().optional(),
+  })
+);
 
-const findSLOParamsSchema = lazySchema(() => z.object({
-  query: findSLOQuerySchema.optional(),
-}));
+const findSLOParamsSchema = lazySchema(() =>
+  z.object({
+    query: findSLOQuerySchema.optional(),
+  })
+);
 
-const findSLOResponseSchema = lazySchema(() => z.object({
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-  results: z.array(sloWithDataResponseSchema),
-  searchAfter: searchAfterArraySchema.optional(),
-  size: z.number().optional(),
-}));
+const findSLOResponseSchema = lazySchema(() =>
+  z.object({
+    page: z.number(),
+    perPage: z.number(),
+    total: z.number(),
+    results: z.array(sloWithDataResponseSchema),
+    searchAfter: searchAfterArraySchema.optional(),
+    size: z.number().optional(),
+  })
+);
 
 type FindSLOParams = z.output<typeof findSLOQuerySchema>;
 type FindSLOResponse = z.input<typeof findSLOResponseSchema>;

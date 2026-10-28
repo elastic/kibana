@@ -18,23 +18,25 @@ import {
 } from '../../schema/slo';
 import { timeWindowSchema } from '../../schema/time_window';
 
-const updateSLOParamsSchema = lazySchema(() => z.object({
-  path: z.object({
-    id: sloIdSchema,
-  }),
-  body: z.object({
-    name: z.string().optional(),
-    description: z.string().optional(),
-    indicator: indicatorSchema.optional(),
-    timeWindow: timeWindowSchema.optional(),
-    budgetingMethod: budgetingMethodSchema.optional(),
-    objective: objectiveSchema.optional(),
-    settings: optionalSettingsSchema.optional(),
-    tags: tagsSchema.optional(),
-    groupBy: allOrAnyStringOrArray.optional(),
-    artifacts: dashboardsWithIdSchema.optional(),
-  }),
-}));
+const updateSLOParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: sloIdSchema,
+    }),
+    body: z.object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      indicator: indicatorSchema.optional(),
+      timeWindow: timeWindowSchema.optional(),
+      budgetingMethod: budgetingMethodSchema.optional(),
+      objective: objectiveSchema.optional(),
+      settings: optionalSettingsSchema.optional(),
+      tags: tagsSchema.optional(),
+      groupBy: allOrAnyStringOrArray.optional(),
+      artifacts: dashboardsWithIdSchema.optional(),
+    }),
+  })
+);
 
 const updateSLOResponseSchema = sloDefinitionSchema;
 

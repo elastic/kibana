@@ -25,15 +25,17 @@ import type {
 import { getUiSettings } from './ui_settings';
 import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../common/constants';
 
-const navCustomizationSchema = lazySchema(() => z.object({
-  moves: z.array(
-    z.object({
-      id: z.string().max(100),
-      afterId: z.string().max(100).nullable(),
-    })
-  ),
-  hidden: z.array(z.string().max(100)),
-}));
+const navCustomizationSchema = lazySchema(() =>
+  z.object({
+    moves: z.array(
+      z.object({
+        id: z.string().max(100),
+        afterId: z.string().max(100).nullable(),
+      })
+    ),
+    hidden: z.array(z.string().max(100)),
+  })
+);
 
 export class NavigationServerPlugin
   implements

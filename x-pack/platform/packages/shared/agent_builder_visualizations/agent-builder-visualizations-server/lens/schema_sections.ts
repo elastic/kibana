@@ -42,9 +42,11 @@ const toSectionsSchema = ({ shape }: z.ZodObject): z.ZodObject =>
  * `data_source` into every layer, which reference line and annotation layers reject.
  */
 const [xyDataLayerSchema] = xyConfigSchemaESQL.shape.layers.element.options;
-const xySectionsSchema = lazySchema(() => toSectionsSchema(xyConfigSchemaESQL).extend({
-  layers: z.array(xyDataLayerSchema.omit({ data_source: true })).min(1),
-}));
+const xySectionsSchema = lazySchema(() =>
+  toSectionsSchema(xyConfigSchemaESQL).extend({
+    layers: z.array(xyDataLayerSchema.omit({ data_source: true })).min(1),
+  })
+);
 
 /** The top-level config keys the model can load for a chart type. */
 const getSectionsSchema = memoize(

@@ -38,15 +38,17 @@ const MAX_DEGRADED_FIELDS = 25;
 const MAX_SAMPLE_DOC_FIELDS = 30;
 const MAX_SAMPLE_DOC_STRING_LENGTH = 200;
 
-const diagnoseStreamSchema = lazySchema(() => z.object({
-  name: z.string().describe('Exact stream name to diagnose, e.g. "logs.ecs.nginx"'),
-  time_range: z
-    .string()
-    .optional()
-    .describe(
-      'Lookback period for failed doc counts and error samples. Uses date math: "1h", "6h", "24h", "7d". Default: "24h". Use shorter ranges to check if issues are still active.'
-    ),
-}));
+const diagnoseStreamSchema = lazySchema(() =>
+  z.object({
+    name: z.string().describe('Exact stream name to diagnose, e.g. "logs.ecs.nginx"'),
+    time_range: z
+      .string()
+      .optional()
+      .describe(
+        'Lookback period for failed doc counts and error samples. Uses date math: "1h", "6h", "24h", "7d". Default: "24h". Use shorter ranges to check if issues are still active.'
+      ),
+  })
+);
 
 export const createDiagnoseStreamTool = ({
   getScopedClients,

@@ -64,19 +64,21 @@ const putCustomContextRoute = createNightshiftInvestigationsServerRoute({
       'Replaces the custom context snippets of the current space. Snippets without an id are added; existing snippets not listed are removed.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
-  params: lazySchema(() => z.object({
-    body: z.object({
-      snippets: z
-        .array(
-          z.object({
-            id: z.string().max(MAX_CUSTOM_CONTEXT_SNIPPET_ID_LENGTH).optional(),
-            text: z.string().max(MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH),
-          })
-        )
-        .max(MAX_CUSTOM_CONTEXT_SNIPPETS),
-      version: z.string().max(MAX_CUSTOM_CONTEXT_VERSION_LENGTH).optional(),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        snippets: z
+          .array(
+            z.object({
+              id: z.string().max(MAX_CUSTOM_CONTEXT_SNIPPET_ID_LENGTH).optional(),
+              text: z.string().max(MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH),
+            })
+          )
+          .max(MAX_CUSTOM_CONTEXT_SNIPPETS),
+        version: z.string().max(MAX_CUSTOM_CONTEXT_VERSION_LENGTH).optional(),
+      }),
+    })
+  ),
   handler: async ({ request, params, customContextClient }): Promise<PutCustomContextResponse> => {
     try {
       return await customContextClient.replace(request, params.body);

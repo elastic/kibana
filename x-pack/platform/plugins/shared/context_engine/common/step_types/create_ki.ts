@@ -15,33 +15,37 @@ import { VerifyKiOutputSchema, kiVerifiersSchema } from './verify_ki_step';
 
 export const CREATE_KI_STEP_ID = 'context-engine.createKi' as const;
 
-export const createKiInputSchema = lazySchema(() => z.object({
-  ai_index_id: aiIndexIdSchema,
-  ki_id: kiIdSchema
-    .optional()
-    .describe(
-      'Optional stable id for the knowledge indicator. On an index re-runs with the same id replace it; on a data stream they append a new revision. Generated when omitted.'
-    ),
-  ki: kiFieldsSchema.describe('The knowledge indicator document to create'),
-  verifiers: kiVerifiersSchema
-    .optional()
-    .describe(
-      'Optional verifiers to run before writing, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). When any fails, the KI is written with lifecycle status `verification_failed` and excluded from search.'
-    ),
-  refresh: z
-    .boolean()
-    .optional()
-    .describe(
-      'Wait for the write to become searchable before the step completes (default false). Set when a later step in the same run updates or deletes this KI.'
-    ),
-}));
+export const createKiInputSchema = lazySchema(() =>
+  z.object({
+    ai_index_id: aiIndexIdSchema,
+    ki_id: kiIdSchema
+      .optional()
+      .describe(
+        'Optional stable id for the knowledge indicator. On an index re-runs with the same id replace it; on a data stream they append a new revision. Generated when omitted.'
+      ),
+    ki: kiFieldsSchema.describe('The knowledge indicator document to create'),
+    verifiers: kiVerifiersSchema
+      .optional()
+      .describe(
+        'Optional verifiers to run before writing, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). When any fails, the KI is written with lifecycle status `verification_failed` and excluded from search.'
+      ),
+    refresh: z
+      .boolean()
+      .optional()
+      .describe(
+        'Wait for the write to become searchable before the step completes (default false). Set when a later step in the same run updates or deletes this KI.'
+      ),
+  })
+);
 
-export const createKiOutputSchema = lazySchema(() => z.object({
-  id: z.string().describe('The id of the created knowledge indicator'),
-  verification: VerifyKiOutputSchema.optional().describe(
-    'Verifier results; present when `verifiers` was given'
-  ),
-}));
+export const createKiOutputSchema = lazySchema(() =>
+  z.object({
+    id: z.string().describe('The id of the created knowledge indicator'),
+    verification: VerifyKiOutputSchema.optional().describe(
+      'Verifier results; present when `verifiers` was given'
+    ),
+  })
+);
 
 export type CreateKiOutput = z.infer<typeof createKiOutputSchema>;
 

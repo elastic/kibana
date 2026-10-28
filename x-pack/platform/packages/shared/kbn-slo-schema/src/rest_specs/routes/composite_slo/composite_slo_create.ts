@@ -15,22 +15,26 @@ import {
   compositeMethodSchema,
 } from '../../../schema/composite_slo';
 
-const createCompositeSLOBodySchema = lazySchema(() => z.object({
-  name: z.string(),
-  description: z.string(),
-  members: compositeSloMembersSchema,
-  compositeMethod: compositeMethodSchema,
-  timeWindow: compositeRollingTimeWindowSchema,
-  budgetingMethod: compositeOccurrencesBudgetingMethodSchema,
-  objective: compositeTargetSchema,
-  id: compositeSloIdSchema.optional(),
-  tags: compositeTagsSchema.optional(),
-  enabled: z.boolean().optional(),
-}));
+const createCompositeSLOBodySchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    description: z.string(),
+    members: compositeSloMembersSchema,
+    compositeMethod: compositeMethodSchema,
+    timeWindow: compositeRollingTimeWindowSchema,
+    budgetingMethod: compositeOccurrencesBudgetingMethodSchema,
+    objective: compositeTargetSchema,
+    id: compositeSloIdSchema.optional(),
+    tags: compositeTagsSchema.optional(),
+    enabled: z.boolean().optional(),
+  })
+);
 
-const createCompositeSLOParamsSchema = lazySchema(() => z.object({
-  body: createCompositeSLOBodySchema,
-}));
+const createCompositeSLOParamsSchema = lazySchema(() =>
+  z.object({
+    body: createCompositeSLOBodySchema,
+  })
+);
 
 type CreateCompositeSLOInput = z.input<typeof createCompositeSLOBodySchema>;
 

@@ -9,9 +9,11 @@
 
 import { z, lazySchema } from '@kbn/zod';
 
-export const asCodeEsqlApproximationSchema = lazySchema(() => z.object({
-  esql_approximation: z.boolean().optional().meta({
-    description:
-      'When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.',
-  }),
-}));
+export const asCodeEsqlApproximationSchema = lazySchema(() =>
+  z.object({
+    esql_approximation: z.boolean().optional().meta({
+      description:
+        'When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.',
+    }),
+  })
+);

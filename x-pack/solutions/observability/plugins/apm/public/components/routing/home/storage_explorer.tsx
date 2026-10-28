@@ -42,9 +42,11 @@ export const storageExplorer = {
         </ApmMainTemplate>
       </Breadcrumb>
     ),
-    params: lazySchema(() => z.object({
-      query: indexLifecyclePhaseSchema,
-    })),
+    params: lazySchema(() =>
+      z.object({
+        query: indexLifecyclePhaseSchema,
+      })
+    ),
     defaults: {
       query: {
         indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,

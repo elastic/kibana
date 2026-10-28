@@ -16,33 +16,41 @@ import { mapAttributesSchema } from './map_attributes_schema/map_attributes_sche
 
 export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
 
-export const searchOptionsSchema = lazySchema(() => z
-  .object({
-    onlyTitle: z.boolean().optional(),
-  })
-  .strict()
-  .optional());
+export const searchOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      onlyTitle: z.boolean().optional(),
+    })
+    .strict()
+    .optional()
+);
 
-export const mapsSearchOptionsSchema = lazySchema(() => z
-  .object({
-    onlyTitle: z.boolean().optional(),
-  })
-  .strict()
-  .optional());
+export const mapsSearchOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      onlyTitle: z.boolean().optional(),
+    })
+    .strict()
+    .optional()
+);
 
-export const mapsCreateOptionsSchema = lazySchema(() => z
-  .object({
-    references: referencesSchema.optional(),
-  })
-  .strict()
-  .optional());
+export const mapsCreateOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      references: referencesSchema.optional(),
+    })
+    .strict()
+    .optional()
+);
 
-export const mapsUpdateOptionsSchema = lazySchema(() => z
-  .object({
-    references: referencesSchema.optional(),
-  })
-  .strict()
-  .optional());
+export const mapsUpdateOptionsSchema = lazySchema(() =>
+  z
+    .object({
+      references: referencesSchema.optional(),
+    })
+    .strict()
+    .optional()
+);
 
 export const mapsGetResultSchema = objectTypeToGetResultSchema(mapSavedObjectSchema);
 

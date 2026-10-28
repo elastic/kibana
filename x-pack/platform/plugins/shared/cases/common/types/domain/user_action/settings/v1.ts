@@ -8,14 +8,18 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const SettingsUserActionPayloadSchema = lazySchema(() => z.object({
-  settings: z.object({
-    syncAlerts: z.boolean().optional(),
-    extractObservables: z.boolean().optional(),
-  }),
-}));
+export const SettingsUserActionPayloadSchema = lazySchema(() =>
+  z.object({
+    settings: z.object({
+      syncAlerts: z.boolean().optional(),
+      extractObservables: z.boolean().optional(),
+    }),
+  })
+);
 
-export const SettingsUserActionSchema = lazySchema(() => z.object({
-  type: z.literal(UserActionTypes.settings),
-  payload: SettingsUserActionPayloadSchema,
-}));
+export const SettingsUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.settings),
+    payload: SettingsUserActionPayloadSchema,
+  })
+);

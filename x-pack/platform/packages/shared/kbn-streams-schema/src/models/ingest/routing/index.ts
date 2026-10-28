@@ -20,14 +20,17 @@ export interface RoutingDefinition {
   draft?: boolean;
 }
 
-export const routingDefinitionSchema: z.Schema<RoutingDefinition> = lazySchema(() => z.object({
-  destination: NonEmptyString,
-  where: conditionSchema,
-  status: routingStatus.optional(),
-  draft: z.boolean().optional(),
-}));
+export const routingDefinitionSchema: z.Schema<RoutingDefinition> = lazySchema(() =>
+  z.object({
+    destination: NonEmptyString,
+    where: conditionSchema,
+    status: routingStatus.optional(),
+    draft: z.boolean().optional(),
+  })
+);
 
-export const routingDefinitionListSchema: z.Schema<RoutingDefinition[]> =
-  lazySchema(() => z.array(routingDefinitionSchema));
+export const routingDefinitionListSchema: z.Schema<RoutingDefinition[]> = lazySchema(() =>
+  z.array(routingDefinitionSchema)
+);
 
 export const isRoutingEnabled = createIsNarrowSchema(routingStatus, z.literal('enabled'));

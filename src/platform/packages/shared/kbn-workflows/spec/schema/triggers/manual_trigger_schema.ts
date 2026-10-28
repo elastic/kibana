@@ -7,70 +7,90 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 import { BaseEventSchema } from '../common/base_event';
 import { JsonModelSchema } from '../common/json_model_schema';
 
-export const WorkflowInputTypeEnum = lazySchema(() => z.enum(['string', 'number', 'boolean', 'choice', 'array']));
+export const WorkflowInputTypeEnum = lazySchema(() =>
+  z.enum(['string', 'number', 'boolean', 'choice', 'array'])
+);
 
-const WorkflowInputBaseSchema = lazySchema(() => z.object({
-  name: z.string(),
-  description: z.string().optional(),
-  default: z.any().optional(),
-  required: z.boolean().optional(),
-}));
+const WorkflowInputBaseSchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    description: z.string().optional(),
+    default: z.any().optional(),
+    required: z.boolean().optional(),
+  })
+);
 
-export const WorkflowInputStringSchema = lazySchema(() => WorkflowInputBaseSchema.extend({
-  type: z.literal('string'),
-  default: z.string().optional(),
-}));
+export const WorkflowInputStringSchema = lazySchema(() =>
+  WorkflowInputBaseSchema.extend({
+    type: z.literal('string'),
+    default: z.string().optional(),
+  })
+);
 
-export const WorkflowInputNumberSchema = lazySchema(() => WorkflowInputBaseSchema.extend({
-  type: z.literal('number'),
-  default: z.number().optional(),
-}));
+export const WorkflowInputNumberSchema = lazySchema(() =>
+  WorkflowInputBaseSchema.extend({
+    type: z.literal('number'),
+    default: z.number().optional(),
+  })
+);
 
-export const WorkflowInputBooleanSchema = lazySchema(() => WorkflowInputBaseSchema.extend({
-  type: z.literal('boolean'),
-  default: z.boolean().optional(),
-}));
+export const WorkflowInputBooleanSchema = lazySchema(() =>
+  WorkflowInputBaseSchema.extend({
+    type: z.literal('boolean'),
+    default: z.boolean().optional(),
+  })
+);
 
-export const WorkflowInputChoiceSchema = lazySchema(() => WorkflowInputBaseSchema.extend({
-  type: z.literal('choice'),
-  default: z.string().optional(),
-  options: z.array(z.string()),
-}));
+export const WorkflowInputChoiceSchema = lazySchema(() =>
+  WorkflowInputBaseSchema.extend({
+    type: z.literal('choice'),
+    default: z.string().optional(),
+    options: z.array(z.string()),
+  })
+);
 
-export const WorkflowInputArraySchema = lazySchema(() => WorkflowInputBaseSchema.extend({
-  type: z.literal('array'),
-  minItems: z.number().int().nonnegative().optional(),
-  maxItems: z.number().int().nonnegative().optional(),
-  default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
-}));
+export const WorkflowInputArraySchema = lazySchema(() =>
+  WorkflowInputBaseSchema.extend({
+    type: z.literal('array'),
+    minItems: z.number().int().nonnegative().optional(),
+    maxItems: z.number().int().nonnegative().optional(),
+    default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
+  })
+);
 
-export const LegacyWorkflowInputSchema = lazySchema(() => z.union([
-  WorkflowInputStringSchema,
-  WorkflowInputNumberSchema,
-  WorkflowInputBooleanSchema,
-  WorkflowInputChoiceSchema,
-  WorkflowInputArraySchema,
-]));
+export const LegacyWorkflowInputSchema = lazySchema(() =>
+  z.union([
+    WorkflowInputStringSchema,
+    WorkflowInputNumberSchema,
+    WorkflowInputBooleanSchema,
+    WorkflowInputChoiceSchema,
+    WorkflowInputArraySchema,
+  ])
+);
 export type LegacyWorkflowInput = z.infer<typeof LegacyWorkflowInputSchema>;
 
-export const WorkflowInputSchema = lazySchema(() => z.union([
-  // New JSON Schema format
-  JsonModelSchema,
-  // TODO(https://github.com/elastic/security-team/issues/16526): Remove legacy array format once all workflows are migrated to JSON Schema inputs.
-  // Legacy array format (for backward compatibility)
-  z.array(LegacyWorkflowInputSchema),
-]));
+export const WorkflowInputSchema = lazySchema(() =>
+  z.union([
+    // New JSON Schema format
+    JsonModelSchema,
+    // TODO(https://github.com/elastic/security-team/issues/16526): Remove legacy array format once all workflows are migrated to JSON Schema inputs.
+    // Legacy array format (for backward compatibility)
+    z.array(LegacyWorkflowInputSchema),
+  ])
+);
 export type WorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
-export const ManualTriggerSchema = lazySchema(() => z.object({
-  type: z.literal('manual'),
-  inputs: WorkflowInputSchema.optional(),
-}));
+export const ManualTriggerSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('manual'),
+    inputs: WorkflowInputSchema.optional(),
+  })
+);
 export type ManualTrigger = z.infer<typeof ManualTriggerSchema>;
 
 export const ManualTriggerEventSchema = BaseEventSchema.extend({

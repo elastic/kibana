@@ -14,10 +14,12 @@ export enum LatencyDistributionChartType {
   dependencyLatency = 'dependencyLatency',
 }
 
-export const latencyDistributionChartTypeSchema = lazySchema(() => z.union([
-  z.literal(LatencyDistributionChartType.transactionLatency),
-  z.literal(LatencyDistributionChartType.spanLatency),
-  z.literal(LatencyDistributionChartType.latencyCorrelations),
-  z.literal(LatencyDistributionChartType.failedTransactionsCorrelations),
-  z.literal(LatencyDistributionChartType.dependencyLatency),
-]));
+export const latencyDistributionChartTypeSchema = lazySchema(() =>
+  z.union([
+    z.literal(LatencyDistributionChartType.transactionLatency),
+    z.literal(LatencyDistributionChartType.spanLatency),
+    z.literal(LatencyDistributionChartType.latencyCorrelations),
+    z.literal(LatencyDistributionChartType.failedTransactionsCorrelations),
+    z.literal(LatencyDistributionChartType.dependencyLatency),
+  ])
+);

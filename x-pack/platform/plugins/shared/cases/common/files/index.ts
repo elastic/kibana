@@ -14,9 +14,11 @@ import type { HttpApiPrivilegeOperation, Owner } from '../constants/types';
  * This type is only used to validate for deletion, it does not check all the fields that should exist in the file
  * metadata.
  */
-export const CaseFileMetadataForDeletionSchema = lazySchema(() => z.object({
-  caseIds: z.array(z.string().max(512)),
-}));
+export const CaseFileMetadataForDeletionSchema = lazySchema(() =>
+  z.object({
+    caseIds: z.array(z.string().max(512)),
+  })
+);
 
 export type CaseFileMetadataForDeletion = z.infer<typeof CaseFileMetadataForDeletionSchema>;
 

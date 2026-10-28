@@ -21,17 +21,21 @@ export const SetVarStepTypeId = 'example.setVariable';
  * Input schema for the setvar step.
  * Uses variables structure with key->value pairs.
  */
-export const InputSchema = lazySchema(() => z.object({
-  variables: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
-}));
+export const InputSchema = lazySchema(() =>
+  z.object({
+    variables: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+  })
+);
 
 /**
  * Output schema for the setvar step.
  * Uses variables structure with key->value pairs.
  */
-export const OutputSchema = lazySchema(() => z.object({
-  variables: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
-}));
+export const OutputSchema = lazySchema(() =>
+  z.object({
+    variables: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
+  })
+);
 
 export type SetVarStepInputSchema = typeof InputSchema;
 export type SetVarStepOutputSchema = typeof OutputSchema;

@@ -27,12 +27,14 @@ export const ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE = 'escalation_attachments_
  * Payload shared by the created and linked escalation timeline events. The title and agent id are snapshots taken
  * when the event is written, so rendering needs no extra fetch and survives later changes.
  */
-export const escalationInvestigationEventSchema = lazySchema(() => z.object({
-  investigation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH),
-  // Bounded by the conversation title limit, since it is a snapshot of an investigation's title.
-  title: z.string().max(CONVERSATION_TITLE_MAX_LENGTH),
-  agent_id: z.string().min(1).max(agentIdMaxLength).optional(),
-}));
+export const escalationInvestigationEventSchema = lazySchema(() =>
+  z.object({
+    investigation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH),
+    // Bounded by the conversation title limit, since it is a snapshot of an investigation's title.
+    title: z.string().max(CONVERSATION_TITLE_MAX_LENGTH),
+    agent_id: z.string().min(1).max(agentIdMaxLength).optional(),
+  })
+);
 
 export type EscalationInvestigationEventData = z.infer<typeof escalationInvestigationEventSchema>;
 
@@ -43,9 +45,11 @@ export const MAX_SYNCED_ATTACHMENT_IDS = 1000;
  * Payload of the sync event: the investigation snapshot plus the ids, as stored in the
  * escalation, of the attachments that sync copied from it.
  */
-export const escalationAttachmentsSyncedEventSchema = lazySchema(() => escalationInvestigationEventSchema.extend({
-  attachment_ids: z.array(z.string().min(1)).min(1).max(MAX_SYNCED_ATTACHMENT_IDS),
-}));
+export const escalationAttachmentsSyncedEventSchema = lazySchema(() =>
+  escalationInvestigationEventSchema.extend({
+    attachment_ids: z.array(z.string().min(1)).min(1).max(MAX_SYNCED_ATTACHMENT_IDS),
+  })
+);
 
 export type EscalationAttachmentsSyncedEventData = z.infer<
   typeof escalationAttachmentsSyncedEventSchema

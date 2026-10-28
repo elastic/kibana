@@ -31,32 +31,36 @@ export const tagIdParamSchema = z
   })
   .strict();
 
-export const tagAttributesSchema = lazySchema(() => z
-  .object({
-    name: z.string().min(1).max(256).meta({
-      description: 'The display name of the tag.',
-    }),
-    description: z.string().max(2048).optional().meta({
-      description: 'Optional description of the tag.',
-    }),
-    color: z.string().min(1).max(256).meta({
-      description:
-        'The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.',
-    }),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-tags-attributes',
-  }));
+export const tagAttributesSchema = lazySchema(() =>
+  z
+    .object({
+      name: z.string().min(1).max(256).meta({
+        description: 'The display name of the tag.',
+      }),
+      description: z.string().max(2048).optional().meta({
+        description: 'Optional description of the tag.',
+      }),
+      color: z.string().min(1).max(256).meta({
+        description:
+          'The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.',
+      }),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-tags-attributes',
+    })
+);
 
-export const tagRequestAttributesSchema = lazySchema(() => tagAttributesSchema
-  .extend({
-    color: tagAttributesSchema.shape.color.optional(),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-tags-request-attributes',
-  }));
+export const tagRequestAttributesSchema = lazySchema(() =>
+  tagAttributesSchema
+    .extend({
+      color: tagAttributesSchema.shape.color.optional(),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-tags-request-attributes',
+    })
+);
 
 export const tagResponseItemSchema = z
   .object({

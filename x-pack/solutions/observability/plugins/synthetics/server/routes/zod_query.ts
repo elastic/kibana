@@ -56,7 +56,9 @@ export const queryBoolean = z.preprocess(
 );
 export const routeId = lazySchema(() => z.string().min(1).max(MAX_ROUTE_ID_LENGTH));
 export const optionalRouteId = lazySchema(() => z.string().max(MAX_ROUTE_ID_LENGTH).optional());
-export const optionalQueryString = lazySchema(() => z.string().max(MAX_ROUTE_STRING_LENGTH).optional());
+export const optionalQueryString = lazySchema(() =>
+  z.string().max(MAX_ROUTE_STRING_LENGTH).optional()
+);
 
 /** Match config-schema `schema.string({ minLength })` 400 copy. */
 export const minLengthMessage = (minLength: number) => (issue: { input?: unknown }) => {

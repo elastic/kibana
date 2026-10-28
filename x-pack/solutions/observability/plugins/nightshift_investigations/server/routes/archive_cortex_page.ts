@@ -22,12 +22,14 @@ export const archiveCortexPageRoute = createNightshiftInvestigationsServerRoute(
   security: {
     authz: { requiredPrivileges: cortexWritePrivileges },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
-    query: z.object({ version: cortexPageVersion }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      }),
+      query: z.object({ version: cortexPageVersion }),
+    })
+  ),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
 

@@ -31,11 +31,13 @@ export const lensItemMetaSchema = lensCommonSavedObjectSchemaV3
 /**
  * The Lens response item returned from the server
  */
-export const lensResponseItemSchema = lazySchema(() => z
-  .object({
-    id: lensSavedObjectSchemaV3.shape.id,
-    data: z.union([lensApiConfigLibItemSchemaNoESQL, lensItemDataSchemaV3]),
-    meta: lensItemMetaSchema,
-  })
-  .strict()
-  .meta({ id: 'visualizationResponse' }));
+export const lensResponseItemSchema = lazySchema(() =>
+  z
+    .object({
+      id: lensSavedObjectSchemaV3.shape.id,
+      data: z.union([lensApiConfigLibItemSchemaNoESQL, lensItemDataSchemaV3]),
+      meta: lensItemMetaSchema,
+    })
+    .strict()
+    .meta({ id: 'visualizationResponse' })
+);

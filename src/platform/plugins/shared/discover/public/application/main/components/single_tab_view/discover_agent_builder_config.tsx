@@ -38,13 +38,15 @@ const MAX_SAMPLE_ROWS = 10;
 const MAX_COLUMNS = 100;
 const MAX_VALUE_LENGTH = 100;
 
-const updateQuerySchema = lazySchema(() => z.object({
-  query: z.string().min(1).describe('The query string to apply to the current Discover tab.'),
-  language: z
-    .enum(['kuery', 'lucene'])
-    .optional()
-    .describe('For non-ES|QL tabs, the query language to use if it should change.'),
-}));
+const updateQuerySchema = lazySchema(() =>
+  z.object({
+    query: z.string().min(1).describe('The query string to apply to the current Discover tab.'),
+    language: z
+      .enum(['kuery', 'lucene'])
+      .optional()
+      .describe('For non-ES|QL tabs, the query language to use if it should change.'),
+  })
+);
 
 export const toDiscoverQuery = (
   currentQuery: AggregateQuery | Query | undefined,

@@ -37,42 +37,44 @@ const DEFAULT_TIME_RANGE = {
 
 export const OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID = 'observability.get_log_groups';
 
-const getLogsSchema = lazySchema(() => z.object({
-  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe(indexDescription).optional(),
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .optional()
-    .describe(
-      dedent`A KQL query to filter logs and exceptions. Examples:
+const getLogsSchema = lazySchema(() =>
+  z.object({
+    ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
+    index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe(indexDescription).optional(),
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .optional()
+      .describe(
+        dedent`A KQL query to filter logs and exceptions. Examples:
         - 'service.name: "payment"'
         - 'service.name: "payment" AND log.level: error'
         - 'error.exception.type: "NullPointerException"'
         - 'service.environment: "production" AND error.exception.handled: false'`
-    ),
-  fields: z
-    .array(z.string().max(MAX_SHORT_STRING_LENGTH))
-    .default([])
-    .describe(
-      'Additional fields to return for each log group sample. Common fields like @timestamp, message, service.name, trace.id, and error fields are included by default.'
-    ),
-  includeStackTrace: z
-    .boolean()
-    .optional()
-    .default(false)
-    .describe(
-      dedent`Include stack traces. Stack traces can be large, so only enable when needed for debugging.`
-    ),
-  includeFirstSeen: z
-    .boolean()
-    .optional()
-    .default(false)
-    .describe(
-      dedent`Include firstSeen timestamp for application exception groups. Useful for detecting new exceptions.`
-    ),
-  limit: z.number().optional().default(20).describe('Maximum number of log groups to return.'),
-}));
+      ),
+    fields: z
+      .array(z.string().max(MAX_SHORT_STRING_LENGTH))
+      .default([])
+      .describe(
+        'Additional fields to return for each log group sample. Common fields like @timestamp, message, service.name, trace.id, and error fields are included by default.'
+      ),
+    includeStackTrace: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe(
+        dedent`Include stack traces. Stack traces can be large, so only enable when needed for debugging.`
+      ),
+    includeFirstSeen: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe(
+        dedent`Include firstSeen timestamp for application exception groups. Useful for detecting new exceptions.`
+      ),
+    limit: z.number().optional().default(20).describe('Maximum number of log groups to return.'),
+  })
+);
 
 export function createGetLogGroupsTool({
   core,

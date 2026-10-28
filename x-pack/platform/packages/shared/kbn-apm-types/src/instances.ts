@@ -6,13 +6,8 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const instancesSortFieldSchema = lazySchema(() => z.enum([
-  'serviceNodeName',
-  'latency',
-  'throughput',
-  'errorRate',
-  'cpuUsage',
-  'memoryUsage',
-]));
+export const instancesSortFieldSchema = lazySchema(() =>
+  z.enum(['serviceNodeName', 'latency', 'throughput', 'errorRate', 'cpuUsage', 'memoryUsage'])
+);
 
 export type InstancesSortField = z.infer<typeof instancesSortFieldSchema>;

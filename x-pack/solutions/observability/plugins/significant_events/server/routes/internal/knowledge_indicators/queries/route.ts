@@ -79,27 +79,31 @@ const MAX_DISCOVERY_QUERY_IDS = 100;
 
 const dateFromString = makeIsoDateFromString('ISO 8601 datetime');
 
-const baseRequestParamsSchema = lazySchema(() => z.object({
-  from: dateFromString.describe('Start of the time range'),
-  to: dateFromString.describe('End of the time range'),
-  bucketSize: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .regex(BUCKET_SIZE_PATTERN)
-    .describe('Size of time buckets for aggregation'),
-  query: z
-    .string()
-    .max(MAX_TEXT_LENGTH)
-    .optional()
-    .describe('Query string to filter significant events queries'),
-  sourceIds: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
-    'Source ids to filter queries'
-  ),
-}));
+const baseRequestParamsSchema = lazySchema(() =>
+  z.object({
+    from: dateFromString.describe('Start of the time range'),
+    to: dateFromString.describe('End of the time range'),
+    bucketSize: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .regex(BUCKET_SIZE_PATTERN)
+      .describe('Size of time buckets for aggregation'),
+    query: z
+      .string()
+      .max(MAX_TEXT_LENGTH)
+      .optional()
+      .describe('Query string to filter significant events queries'),
+    sourceIds: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+      'Source ids to filter queries'
+    ),
+  })
+);
 
-const requestParamsSchema = lazySchema(() => baseRequestParamsSchema.extend({
-  searchMode: searchModeSchema,
-}));
+const requestParamsSchema = lazySchema(() =>
+  baseRequestParamsSchema.extend({
+    searchMode: searchModeSchema,
+  })
+);
 
 /**
  * Promotes unbacked queries to rule-backed status. Ineligible queries are
@@ -120,14 +124,16 @@ const promoteUnbackedQueriesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z
-      .object({
-        queryIds: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
-        minSeverityScore: z.number().int().min(0).max(100).optional(),
-      })
-      .nullish(),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z
+        .object({
+          queryIds: z.array(z.string().max(MAX_ID_LENGTH)).optional(),
+          minSeverityScore: z.number().int().min(0).max(100).optional(),
+        })
+        .nullish(),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -166,11 +172,13 @@ const demoteBackedQueriesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z.object({
-      queryIds: z.array(z.string().max(MAX_ID_LENGTH)).min(1),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        queryIds: z.array(z.string().max(MAX_ID_LENGTH)).min(1),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -235,11 +243,13 @@ const bulkDeleteQueriesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z.object({
-      queryIds: z.array(z.string().max(MAX_ID_LENGTH)).min(1),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        queryIds: z.array(z.string().max(MAX_ID_LENGTH)).min(1),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -363,11 +373,13 @@ const reconcileQueriesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z.object({
-      sourceIds: sourceIdsArraySchema({ min: 1, max: RECONCILE_MAX_SOURCES }),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        sourceIds: sourceIdsArraySchema({ min: 1, max: RECONCILE_MAX_SOURCES }),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -446,43 +458,45 @@ const reconcileQueriesRoute = createServerRoute({
 
 const getDiscoveryQueriesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries',
-  params: lazySchema(() => z.object({
-    query: requestParamsSchema.extend({
-      page: z.coerce.number().int().min(1).optional().describe('Page number (1-based)'),
-      perPage: z.coerce
-        .number()
-        .int()
-        .min(1)
-        .max(1000)
-        .optional()
-        .describe('Number of items per page'),
-      status: queryStatusSchema,
-      queryIds: z
-        .union([
-          z
-            .string()
-            .max(MAX_ID_LENGTH)
-            .transform((id) => [id]),
-          z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
-        ])
-        .optional()
-        .describe('Only return queries with these ids'),
-      entityIds: z
-        .union([
-          z
-            .string()
-            .min(1)
-            .max(MAX_ID_LENGTH)
-            .transform((id) => [id]),
-          z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
-        ])
-        .optional()
-        .describe('Only return queries linked to these entity slugs'),
-      unassignedEntities: BooleanFromString.optional().describe(
-        'Also return queries linked to no live entity'
-      ),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: requestParamsSchema.extend({
+        page: z.coerce.number().int().min(1).optional().describe('Page number (1-based)'),
+        perPage: z.coerce
+          .number()
+          .int()
+          .min(1)
+          .max(1000)
+          .optional()
+          .describe('Number of items per page'),
+        status: queryStatusSchema,
+        queryIds: z
+          .union([
+            z
+              .string()
+              .max(MAX_ID_LENGTH)
+              .transform((id) => [id]),
+            z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
+          ])
+          .optional()
+          .describe('Only return queries with these ids'),
+        entityIds: z
+          .union([
+            z
+              .string()
+              .min(1)
+              .max(MAX_ID_LENGTH)
+              .transform((id) => [id]),
+            z.array(z.string().min(1).max(MAX_ID_LENGTH)).max(MAX_DISCOVERY_QUERY_IDS),
+          ])
+          .optional()
+          .describe('Only return queries linked to these entity slugs'),
+        unassignedEntities: BooleanFromString.optional().describe(
+          'Also return queries linked to no live entity'
+        ),
+      }),
+    })
+  ),
   options: {
     access: 'internal',
     summary: 'Read paginated significant-event queries for the discovery table',
@@ -586,9 +600,11 @@ const getDiscoveryQueriesRoute = createServerRoute({
 // always default-ranked, not a list of individual queries.
 const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_queries/_occurrences',
-  params: lazySchema(() => z.object({
-    query: baseRequestParamsSchema,
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: baseRequestParamsSchema,
+    })
+  ),
   options: {
     access: 'internal',
     summary: 'Read aggregated occurrences for the discovery histogram',
@@ -659,29 +675,31 @@ const getDiscoveryQueriesOccurrencesRoute = createServerRoute({
 
 const generateQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/queries/_generate',
-  params: lazySchema(() => z.object({
-    path: z.object({
-      sourceId: z.string().max(MAX_ID_LENGTH).describe('The source id'),
-    }),
-    body: z
-      .object({
-        connectorId: z
-          .string()
-          .max(MAX_ID_LENGTH)
-          .optional()
-          .describe(
-            'Optional chat model connector or inference endpoint ID. When omitted the Significant Events default is used.'
-          ),
-        runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
-        maxExistingQueriesForContext: z
-          .number()
-          .int()
-          .min(0)
-          .max(MAX_EXISTING_QUERIES_FOR_CONTEXT)
-          .default(MAX_EXISTING_QUERIES_FOR_CONTEXT),
-      })
-      .nullish(),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        sourceId: z.string().max(MAX_ID_LENGTH).describe('The source id'),
+      }),
+      body: z
+        .object({
+          connectorId: z
+            .string()
+            .max(MAX_ID_LENGTH)
+            .optional()
+            .describe(
+              'Optional chat model connector or inference endpoint ID. When omitted the Significant Events default is used.'
+            ),
+          runId: z.string().trim().min(1).max(MAX_ID_LENGTH).optional(),
+          maxExistingQueriesForContext: z
+            .number()
+            .int()
+            .min(0)
+            .max(MAX_EXISTING_QUERIES_FOR_CONTEXT)
+            .default(MAX_EXISTING_QUERIES_FOR_CONTEXT),
+        })
+        .nullish(),
+    })
+  ),
   options: {
     access: 'internal',
     summary: 'Generate significant events queries',
@@ -769,14 +787,16 @@ const generateQueriesRoute = createServerRoute({
 
 const persistQueriesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/queries/_persist',
-  params: lazySchema(() => z.object({
-    path: z.object({
-      sourceId: z.string().max(MAX_ID_LENGTH).describe('The source id'),
-    }),
-    body: z.object({
-      queries: z.array(generatedSignificantEventQuerySchema),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        sourceId: z.string().max(MAX_ID_LENGTH).describe('The source id'),
+      }),
+      body: z.object({
+        queries: z.array(generatedSignificantEventQuerySchema),
+      }),
+    })
+  ),
   options: {
     access: 'internal',
     summary: 'Persist generated queries with deduplication',
@@ -830,23 +850,25 @@ const upsertQueryRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      queryId: z.string().max(MAX_ID_LENGTH).describe('The identifier of the query.'),
-    }),
-    body: lazySchema(() =>
-      upsertStreamQueryRequestSchema.extend({
-        source_id: z
-          .string()
-          .min(1)
-          .max(MAX_ID_LENGTH)
-          .optional()
-          .describe(
-            'Source id the query belongs to. Required when creating a query; omitted on update to keep the existing source.'
-          ),
-      })
-    ),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        queryId: z.string().max(MAX_ID_LENGTH).describe('The identifier of the query.'),
+      }),
+      body: lazySchema(() =>
+        upsertStreamQueryRequestSchema.extend({
+          source_id: z
+            .string()
+            .min(1)
+            .max(MAX_ID_LENGTH)
+            .optional()
+            .describe(
+              'Source id the query belongs to. Required when creating a query; omitted on update to keep the existing source.'
+            ),
+        })
+      ),
+    })
+  ),
   handler: async ({
     params,
     request,

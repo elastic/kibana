@@ -22,18 +22,22 @@ import {
   NonPriorityLogExtractionTypeOverride,
 } from '../../domain/saved_objects';
 
-const paramsSchema = lazySchema(() => z.object({
-  entityType: EntityType,
-}));
+const paramsSchema = lazySchema(() =>
+  z.object({
+    entityType: EntityType,
+  })
+);
 
-const bodySchema = lazySchema(() => z.object({
-  /** Layer 5: reaches both processes, minus the fields only the non-priority layer may set. */
-  logExtraction: LogExtractionTypeOverride.superRefine(validateLogExtractionParams).optional(),
-  /** Layer 6: non-priority process only. */
-  nonPriorityOverride: NonPriorityLogExtractionTypeOverride.superRefine(
-    validateLogExtractionParams
-  ).optional(),
-}));
+const bodySchema = lazySchema(() =>
+  z.object({
+    /** Layer 5: reaches both processes, minus the fields only the non-priority layer may set. */
+    logExtraction: LogExtractionTypeOverride.superRefine(validateLogExtractionParams).optional(),
+    /** Layer 6: non-priority process only. */
+    nonPriorityOverride: NonPriorityLogExtractionTypeOverride.superRefine(
+      validateLogExtractionParams
+    ).optional(),
+  })
+);
 
 type EngineConfigRequestParams = z.infer<typeof paramsSchema>;
 type EngineConfigRequestBody = z.infer<typeof bodySchema>;

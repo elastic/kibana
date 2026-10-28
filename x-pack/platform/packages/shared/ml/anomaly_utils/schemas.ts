@@ -33,10 +33,9 @@ export const criteriaFieldSchema = z
   })
   .strict();
 
-export const mlEntityFieldValueSchema = lazySchema(() => z.union([
-  z.string().max(MAX_ENTITY_FIELD_VALUE_LENGTH),
-  z.number(),
-]));
+export const mlEntityFieldValueSchema = lazySchema(() =>
+  z.union([z.string().max(MAX_ENTITY_FIELD_VALUE_LENGTH), z.number()])
+);
 
 export const mlEntityFieldSchema = z
   .object({

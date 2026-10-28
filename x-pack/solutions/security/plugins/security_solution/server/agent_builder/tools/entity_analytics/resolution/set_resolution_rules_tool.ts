@@ -25,22 +25,24 @@ const RULE_ID_VALUES = Object.values(RESOLUTION_RULE_IDS) as [
   ...ResolutionRuleId[]
 ];
 
-const schema = lazySchema(() => z.object({
-  rules: z
-    .array(
-      z.object({
-        ruleId: z
-          .enum(RULE_ID_VALUES)
-          .describe(
-            'The stable id of the entity resolution rule. Use `security.list_resolution_rules` if needed to see the available ids and their current state.'
-          ),
-        enabled: z.boolean().describe('true to enable the rule, false to disable it.'),
-      })
-    )
-    .min(1)
-    .max(RULE_ID_VALUES.length)
-    .describe('One or more resolution rules to enable or disable.'),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    rules: z
+      .array(
+        z.object({
+          ruleId: z
+            .enum(RULE_ID_VALUES)
+            .describe(
+              'The stable id of the entity resolution rule. Use `security.list_resolution_rules` if needed to see the available ids and their current state.'
+            ),
+          enabled: z.boolean().describe('true to enable the rule, false to disable it.'),
+        })
+      )
+      .min(1)
+      .max(RULE_ID_VALUES.length)
+      .describe('One or more resolution rules to enable or disable.'),
+  })
+);
 
 export const SECURITY_SET_RESOLUTION_RULES_TOOL_ID = securityTool('set_resolution_rules');
 

@@ -22,9 +22,11 @@ export const restoreDataStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+    })
+  ),
   handler: async ({
     params,
     request,

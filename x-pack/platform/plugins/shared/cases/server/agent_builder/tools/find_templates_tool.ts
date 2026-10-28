@@ -23,35 +23,37 @@ type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 const MAX_PER_PAGE = 50;
 const DEFAULT_PER_PAGE = 20;
 
-const findTemplatesSchema = lazySchema(() => z.object({
-  owner: Owner.describe('The solution the templates belong to. Required.'),
-  search: z
-    .string()
-    .max(1000)
-    .optional()
-    .describe(
-      'Free-text search matched against the template name (substring, case-insensitive), description, and field names/labels. Omit to list all templates for `owner`.'
-    ),
-  tags: z
-    .array(z.string().max(256))
-    .max(100)
-    .optional()
-    .describe('Filter to templates having ANY of these tags.'),
-  isEnabled: z
-    .boolean()
-    .optional()
-    .describe(
-      'Templates are enabled by default (disabled templates cannot be used to create a case). Pass `false` explicitly to look up disabled templates instead.'
-    ),
-  page: z.number().int().min(1).optional().describe('Page number (1-indexed). Default 1.'),
-  perPage: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_PER_PAGE)
-    .optional()
-    .describe(`Results per page, max ${MAX_PER_PAGE}. Default ${DEFAULT_PER_PAGE}.`),
-}));
+const findTemplatesSchema = lazySchema(() =>
+  z.object({
+    owner: Owner.describe('The solution the templates belong to. Required.'),
+    search: z
+      .string()
+      .max(1000)
+      .optional()
+      .describe(
+        'Free-text search matched against the template name (substring, case-insensitive), description, and field names/labels. Omit to list all templates for `owner`.'
+      ),
+    tags: z
+      .array(z.string().max(256))
+      .max(100)
+      .optional()
+      .describe('Filter to templates having ANY of these tags.'),
+    isEnabled: z
+      .boolean()
+      .optional()
+      .describe(
+        'Templates are enabled by default (disabled templates cannot be used to create a case). Pass `false` explicitly to look up disabled templates instead.'
+      ),
+    page: z.number().int().min(1).optional().describe('Page number (1-indexed). Default 1.'),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_PER_PAGE)
+      .optional()
+      .describe(`Results per page, max ${MAX_PER_PAGE}. Default ${DEFAULT_PER_PAGE}.`),
+  })
+);
 
 export const findTemplatesTool = (
   getCasesClientFn: GetCasesClientFn

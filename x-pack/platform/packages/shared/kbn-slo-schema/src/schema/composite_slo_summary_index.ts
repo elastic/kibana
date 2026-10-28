@@ -17,26 +17,28 @@ import {
  * truth for both writing the document (see `buildCompositeSummaryDoc`) and decoding it on read,
  * so the persisted and decoded shapes can never drift apart.
  */
-const compositeSloSummaryDocumentSchema = lazySchema(() => z.object({
-  spaceId: z.string(),
-  summaryUpdatedAt: z.string(),
-  compositeSlo: compositeSloBaseDefinitionSchema.pick({
-    id: true,
-    name: true,
-    description: true,
-    tags: true,
-    objective: true,
-    timeWindow: true,
-    budgetingMethod: true,
-    createdAt: true,
-    updatedAt: true,
-  }),
-  summary: compositeSloSummarySchema,
-  unresolvedMemberIds: z.array(z.string()),
-  // Optional so documents that predate per-member summaries keep decoding; the reader's consumers
-  // fall back to computing members live when absent.
-  members: z.array(compositeSloMemberWithSummarySchema).optional(),
-}));
+const compositeSloSummaryDocumentSchema = lazySchema(() =>
+  z.object({
+    spaceId: z.string(),
+    summaryUpdatedAt: z.string(),
+    compositeSlo: compositeSloBaseDefinitionSchema.pick({
+      id: true,
+      name: true,
+      description: true,
+      tags: true,
+      objective: true,
+      timeWindow: true,
+      budgetingMethod: true,
+      createdAt: true,
+      updatedAt: true,
+    }),
+    summary: compositeSloSummarySchema,
+    unresolvedMemberIds: z.array(z.string()),
+    // Optional so documents that predate per-member summaries keep decoding; the reader's consumers
+    // fall back to computing members live when absent.
+    members: z.array(compositeSloMemberWithSummarySchema).optional(),
+  })
+);
 
 type CompositeSLOSummaryDocument = z.infer<typeof compositeSloSummaryDocumentSchema>;
 

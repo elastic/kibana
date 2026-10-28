@@ -37,48 +37,50 @@ const DEFAULT_TIME_RANGE = {
   end: 'now',
 };
 
-const getLogsSchema = lazySchema(() => z.object({
-  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe('Log index pattern').optional(),
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .optional()
-    .describe(
-      dedent(`KQL filter to narrow results. Build this iteratively by adding NOT clauses to exclude noise.
+const getLogsSchema = lazySchema(() =>
+  z.object({
+    ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
+    index: z.string().max(MAX_INDEX_PATTERN_LENGTH).describe('Log index pattern').optional(),
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .optional()
+      .describe(
+        dedent(`KQL filter to narrow results. Build this iteratively by adding NOT clauses to exclude noise.
         Examples:
          - "service.name: checkout",
          - "NOT message: \\"GET /health\\" AND NOT kubernetes.namespace: \\"kube-system\\"",
          - "error.message: * AND NOT message: \\"Known benign warning\\"".`)
-    ),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .default(10)
-    .describe('Maximum number of log samples to return. Defaults to 10.'),
-  bucketSize: z
-    .string()
-    .max(MAX_SHORT_STRING_LENGTH)
-    .optional()
-    .describe(
-      `Histogram bucket size for the time-series trend. Examples: "30s", "1m", "5m", "1h". If not provided, automatically calculated from the time range to produce ~30 buckets.`
-    ),
-  groupBy: z
-    .string()
-    .max(MAX_SHORT_STRING_LENGTH)
-    .optional()
-    .describe(
-      `Field to group the histogram by. Examples: "log.level", "service.name", "kubernetes.namespace". Adds a second dimension to the trend for richer analysis.`
-    ),
-  fields: z
-    .array(z.string().max(MAX_SHORT_STRING_LENGTH))
-    .default(DEFAULT_SAMPLE_FIELDS)
-    .describe(
-      'Fields to include in log samples and category samples. Overrides the default fields when provided.'
-    ),
-}));
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(10)
+      .describe('Maximum number of log samples to return. Defaults to 10.'),
+    bucketSize: z
+      .string()
+      .max(MAX_SHORT_STRING_LENGTH)
+      .optional()
+      .describe(
+        `Histogram bucket size for the time-series trend. Examples: "30s", "1m", "5m", "1h". If not provided, automatically calculated from the time range to produce ~30 buckets.`
+      ),
+    groupBy: z
+      .string()
+      .max(MAX_SHORT_STRING_LENGTH)
+      .optional()
+      .describe(
+        `Field to group the histogram by. Examples: "log.level", "service.name", "kubernetes.namespace". Adds a second dimension to the trend for richer analysis.`
+      ),
+    fields: z
+      .array(z.string().max(MAX_SHORT_STRING_LENGTH))
+      .default(DEFAULT_SAMPLE_FIELDS)
+      .describe(
+        'Fields to include in log samples and category samples. Overrides the default fields when provided.'
+      ),
+  })
+);
 
 export function createGetLogsTool({
   core,

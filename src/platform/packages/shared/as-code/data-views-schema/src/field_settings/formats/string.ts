@@ -9,50 +9,52 @@
 
 import { z, lazySchema } from '@kbn/zod';
 
-export const stringFormatSchema = lazySchema(() => z
-  .object({
-    type: z.literal('string'),
-    params: z
-      .object({
-        transform: z
-          .union([
-            z.literal('lower').meta({
-              title: 'Lower case',
-              description:
-                'Converts the field value to lowercase. For example: "Some Text" -> "some text".',
-            }),
-            z.literal('upper').meta({
-              title: 'Upper case',
-              description:
-                'Converts the field value to uppercase. For example: "Some Text" -> "SOME TEXT".',
-            }),
-            z.literal('title').meta({
-              title: 'Title',
-              description:
-                'Converts the field value to title case. For example: "some text" -> "Some Text".',
-            }),
-            z.literal('short').meta({
-              title: 'Short dots',
-              description:
-                'Shortens each dot-separated segment of the field value to its first character, except for the last segment. For example: "dot.notated.string" -> "d.n.string".',
-            }),
-            z.literal('base64').meta({
-              title: 'Base64 decode',
-              description:
-                'Decodes the field value from base64. For example: "U29tZSBUZXh0" -> "Some Text".',
-            }),
-            z.literal('urlparam').meta({
-              title: 'URL parameter decode',
-              description:
-                'Decodes the field value from URL parameter. For example: "Some%20Text" -> "Some Text".',
-            }),
-          ])
-          .optional(),
-      })
-      .optional(),
-  })
-  .meta({
-    id: 'kbn-field-format-string',
-    title: 'String field format',
-    description: 'Formats a field into a string value.',
-  }));
+export const stringFormatSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('string'),
+      params: z
+        .object({
+          transform: z
+            .union([
+              z.literal('lower').meta({
+                title: 'Lower case',
+                description:
+                  'Converts the field value to lowercase. For example: "Some Text" -> "some text".',
+              }),
+              z.literal('upper').meta({
+                title: 'Upper case',
+                description:
+                  'Converts the field value to uppercase. For example: "Some Text" -> "SOME TEXT".',
+              }),
+              z.literal('title').meta({
+                title: 'Title',
+                description:
+                  'Converts the field value to title case. For example: "some text" -> "Some Text".',
+              }),
+              z.literal('short').meta({
+                title: 'Short dots',
+                description:
+                  'Shortens each dot-separated segment of the field value to its first character, except for the last segment. For example: "dot.notated.string" -> "d.n.string".',
+              }),
+              z.literal('base64').meta({
+                title: 'Base64 decode',
+                description:
+                  'Decodes the field value from base64. For example: "U29tZSBUZXh0" -> "Some Text".',
+              }),
+              z.literal('urlparam').meta({
+                title: 'URL parameter decode',
+                description:
+                  'Decodes the field value from URL parameter. For example: "Some%20Text" -> "Some Text".',
+              }),
+            ])
+            .optional(),
+        })
+        .optional(),
+    })
+    .meta({
+      id: 'kbn-field-format-string',
+      title: 'String field format',
+      description: 'Formats a field into a string value.',
+    })
+);

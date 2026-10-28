@@ -19,9 +19,11 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 import { findParamVaultReferenceError } from '../secret_connection/connection_utils';
 
-const RequestParamsSchema = lazySchema(() => z.strictObject({
-  id: routeId.describe('The unique identifier for the parameter.'),
-}));
+const RequestParamsSchema = lazySchema(() =>
+  z.strictObject({
+    id: routeId.describe('The unique identifier for the parameter.'),
+  })
+);
 
 type RequestParams = z.infer<typeof RequestParamsSchema>;
 

@@ -38,9 +38,11 @@ export const DeanonymizeWithReplacementsResponse = DeanonymizeResponse;
 export type GetAnonymizationReplacementsRequestParams = z.infer<
   typeof GetAnonymizationReplacementsRequestParams
 >;
-export const GetAnonymizationReplacementsRequestParams = lazySchema(() => z.object({
-  id: z.string(),
-}));
+export const GetAnonymizationReplacementsRequestParams = lazySchema(() =>
+  z.object({
+    id: z.string(),
+  })
+);
 export type GetAnonymizationReplacementsRequestParamsInput = z.input<
   typeof GetAnonymizationReplacementsRequestParams
 >;

@@ -11,19 +11,21 @@ import { queryPings } from '../../queries/query_pings';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
-export const getPingsRouteQuerySchema = lazySchema(() => z.strictObject({
-  from: z.string().max(MAX_DATE_RANGE_LENGTH),
-  to: z.string().max(MAX_DATE_RANGE_LENGTH),
-  locations: optionalQueryString,
-  excludedLocations: optionalQueryString,
-  monitorId: optionalQueryString,
-  index: queryNumber.optional(),
-  size: queryNumber.optional(),
-  pageIndex: queryNumber.optional(),
-  sort: optionalQueryString,
-  status: optionalQueryString,
-  remoteName: z.string().max(256).optional(),
-}));
+export const getPingsRouteQuerySchema = lazySchema(() =>
+  z.strictObject({
+    from: z.string().max(MAX_DATE_RANGE_LENGTH),
+    to: z.string().max(MAX_DATE_RANGE_LENGTH),
+    locations: optionalQueryString,
+    excludedLocations: optionalQueryString,
+    monitorId: optionalQueryString,
+    index: queryNumber.optional(),
+    size: queryNumber.optional(),
+    pageIndex: queryNumber.optional(),
+    sort: optionalQueryString,
+    status: optionalQueryString,
+    remoteName: z.string().max(256).optional(),
+  })
+);
 
 type GetPingsRouteRequest = z.infer<typeof getPingsRouteQuerySchema>;
 

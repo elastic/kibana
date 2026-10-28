@@ -33,13 +33,15 @@ export const createClassicStreamRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH),
-      description: z.string().max(1000).optional(),
-      ingest: z.any(),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH),
+        description: z.string().max(1000).optional(),
+        ingest: z.any(),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, logger }): Promise<UpsertStreamResponse> => {
     const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
     const {

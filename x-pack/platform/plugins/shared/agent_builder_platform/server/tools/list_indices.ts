@@ -11,17 +11,19 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { listSearchSources } from '@kbn/agent-builder-genai-utils';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
-const listIndicesSchema = lazySchema(() => z.object({
-  pattern: z
-    .string()
-    .default('*')
-    .describe(
-      `Index pattern to match Elasticsearch indices, aliases, datastreams, and ES|QL view names.
+const listIndicesSchema = lazySchema(() =>
+  z.object({
+    pattern: z
+      .string()
+      .default('*')
+      .describe(
+        `Index pattern to match Elasticsearch indices, aliases, datastreams, and ES|QL view names.
       - Correct examples: '.logs-*', '*data*', 'metrics-prod-*', 'my-specific-index', '*'
       - Should only be used if you are certain of a specific index pattern to filter on. *Do not try to guess*.
       - Defaults to '*' to match all indices.`
-    ),
-}));
+      ),
+  })
+);
 
 export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchema> => {
   return {

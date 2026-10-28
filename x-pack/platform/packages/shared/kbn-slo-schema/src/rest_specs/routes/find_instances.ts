@@ -6,17 +6,19 @@
  */
 import { z, lazySchema } from '@kbn/zod';
 
-const findSLOInstancesParamsSchema = lazySchema(() => z.object({
-  path: z.object({ id: z.string() }),
-  query: z
-    .object({
-      search: z.string().optional(),
-      size: z.coerce.number().optional(),
-      searchAfter: z.string().optional(),
-      remoteName: z.string().optional(),
-    })
-    .optional(),
-}));
+const findSLOInstancesParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({ id: z.string() }),
+    query: z
+      .object({
+        search: z.string().optional(),
+        size: z.coerce.number().optional(),
+        searchAfter: z.string().optional(),
+        remoteName: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 
 interface FindSLOInstancesResponse {
   results: Array<{ instanceId: string; groupings: Record<string, string | number> }>;

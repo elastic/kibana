@@ -15,30 +15,36 @@ import {
   compositeMethodSchema,
 } from '../../../schema/composite_slo';
 
-const updateCompositeSLOBodySchema = lazySchema(() => z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  members: compositeSloMembersSchema.optional(),
-  compositeMethod: compositeMethodSchema.optional(),
-  timeWindow: compositeRollingTimeWindowSchema.optional(),
-  budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
-  objective: compositeTargetSchema.optional(),
-  tags: compositeTagsSchema.optional(),
-  enabled: z.boolean().optional(),
-}));
+const updateCompositeSLOBodySchema = lazySchema(() =>
+  z.object({
+    name: z.string().optional(),
+    description: z.string().optional(),
+    members: compositeSloMembersSchema.optional(),
+    compositeMethod: compositeMethodSchema.optional(),
+    timeWindow: compositeRollingTimeWindowSchema.optional(),
+    budgetingMethod: compositeOccurrencesBudgetingMethodSchema.optional(),
+    objective: compositeTargetSchema.optional(),
+    tags: compositeTagsSchema.optional(),
+    enabled: z.boolean().optional(),
+  })
+);
 
-const updateCompositeSLOParamsSchema = lazySchema(() => z.object({
-  path: z.object({
+const updateCompositeSLOParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: compositeSloIdSchema,
+    }),
+    body: updateCompositeSLOBodySchema,
+  })
+);
+
+const updateCompositeSLOInputSchema = lazySchema(() =>
+  updateCompositeSLOBodySchema.extend({
     id: compositeSloIdSchema,
-  }),
-  body: updateCompositeSLOBodySchema,
-}));
-
-const updateCompositeSLOInputSchema = lazySchema(() => updateCompositeSLOBodySchema.extend({
-  id: compositeSloIdSchema,
-  spaceId: z.string(),
-  userId: z.string(),
-}));
+    spaceId: z.string(),
+    userId: z.string(),
+  })
+);
 
 type UpdateCompositeSLOInput = z.input<typeof updateCompositeSLOInputSchema>;
 

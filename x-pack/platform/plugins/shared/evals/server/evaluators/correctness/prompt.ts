@@ -15,11 +15,13 @@ import userPromptText from './user_prompt.text';
 export const LlmCorrectnessEvaluationPrompt = createPrompt({
   name: 'llm_correctness_evaluation',
   description: 'Prompt for evaluating the correctness of LLM responses',
-  input: lazySchema(() => z.object({
-    user_query: z.string().max(131072),
-    agent_response: z.string().max(131072),
-    ground_truth_response: z.string().max(131072).optional(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      user_query: z.string().max(131072),
+      agent_response: z.string().max(131072),
+      ground_truth_response: z.string().max(131072).optional(),
+    })
+  ),
 })
   .version({
     system: {

@@ -18,18 +18,20 @@ import {
 } from '@kbn/agent-builder-tools-base/workflows';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 
-const resumeWorkflowExecutionSchema = lazySchema(() => z.object({
-  executionId: z
-    .string()
-    .describe(
-      'The executionId of the workflow execution that is waiting for input. Use the executionId value returned by the status tool.'
-    ),
-  input: z
-    .record(z.string(), z.unknown())
-    .describe(
-      'Key-value input to provide to the paused workflow step. Must conform to the schema described in the waiting_input.schema field returned when the workflow paused.'
-    ),
-}));
+const resumeWorkflowExecutionSchema = lazySchema(() =>
+  z.object({
+    executionId: z
+      .string()
+      .describe(
+        'The executionId of the workflow execution that is waiting for input. Use the executionId value returned by the status tool.'
+      ),
+    input: z
+      .record(z.string(), z.unknown())
+      .describe(
+        'Key-value input to provide to the paused workflow step. Must conform to the schema described in the waiting_input.schema field returned when the workflow paused.'
+      ),
+  })
+);
 
 export const resumeWorkflowExecutionTool = ({
   workflowsManagement,

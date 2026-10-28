@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { GraphNodeSchema } from './base';
 import { ParallelStepObjectSchema } from '../../../spec/schema';
 
@@ -24,10 +24,12 @@ export type EnterParallelNodeConfiguration = z.infer<typeof EnterParallelNodeCon
 
 // Descriptor for one static branch, carried on the enter node so the executor
 // can advance each named branch through its own subgraph start node.
-export const ParallelBranchDescriptorSchema = lazySchema(() => z.object({
-  name: z.string().max(GRAPH_STRING_MAX_LENGTH),
-  startNodeId: z.string().max(GRAPH_STRING_MAX_LENGTH),
-}));
+export const ParallelBranchDescriptorSchema = lazySchema(() =>
+  z.object({
+    name: z.string().max(GRAPH_STRING_MAX_LENGTH),
+    startNodeId: z.string().max(GRAPH_STRING_MAX_LENGTH),
+  })
+);
 
 export const EnterParallelNodeSchema = GraphNodeSchema.extend({
   id: lazySchema(() => z.string().max(GRAPH_STRING_MAX_LENGTH)),

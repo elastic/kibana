@@ -19,22 +19,24 @@ import {
 } from '@kbn/product-doc-common';
 import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../types';
 
-const productDocumentationSchema = lazySchema(() => z.object({
-  query: z
-    .string()
-    .describe(
-      'Search query to retrieve documentation about Elastic products. Rewritten in English to best match the documentation content.'
-    ),
-  product: z
-    .enum(['kibana', 'elasticsearch', 'observability', 'security'])
-    .optional()
-    .describe('Product to filter by: "kibana", "elasticsearch", "observability", or "security"'),
-  max: z
-    .number()
-    .optional()
-    .default(3)
-    .describe('Maximum number of documents to return. Defaults to 3.'),
-}));
+const productDocumentationSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .describe(
+        'Search query to retrieve documentation about Elastic products. Rewritten in English to best match the documentation content.'
+      ),
+    product: z
+      .enum(['kibana', 'elasticsearch', 'observability', 'security'])
+      .optional()
+      .describe('Product to filter by: "kibana", "elasticsearch", "observability", or "security"'),
+    max: z
+      .number()
+      .optional()
+      .default(3)
+      .describe('Maximum number of documents to return. Defaults to 3.'),
+  })
+);
 
 // Path to GenAI Settings within the management app
 const GENAI_SETTINGS_APP_PATH = '/app/management/ai/genAiSettings';

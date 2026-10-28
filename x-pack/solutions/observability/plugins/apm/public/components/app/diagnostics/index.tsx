@@ -32,20 +32,22 @@ import { getIsIndicesTabOk } from './summary_tab/indicies_status';
 import { DiagnosticsApmDocuments } from './apm_documents_tab';
 import { isPending } from '../../../hooks/use_fetcher';
 
-const params = lazySchema(() => z.object({
-  query: z
-    .object({
-      rangeFrom: z.string(),
-      rangeTo: z.string(),
-    })
-    .merge(
-      z.object({
-        refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
-        refreshInterval: z.string().optional(),
-        kuery: z.string().optional(),
+const params = lazySchema(() =>
+  z.object({
+    query: z
+      .object({
+        rangeFrom: z.string(),
+        rangeTo: z.string(),
       })
-    ),
-}));
+      .merge(
+        z.object({
+          refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
+          refreshInterval: z.string().optional(),
+          kuery: z.string().optional(),
+        })
+      ),
+  })
+);
 
 export const diagnosticsRoute = {
   '/diagnostics': {

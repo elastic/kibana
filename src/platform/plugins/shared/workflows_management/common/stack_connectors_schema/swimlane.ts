@@ -12,48 +12,54 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // Swimlane connector parameter schemas for different sub-actions
-export const SwimlaneCreateRecordParamsSchema = lazySchema(() => z.object({
-  incident: z.object({
-    ruleName: z.string(),
-    alertId: z.string(),
-    severity: z.string().optional(),
-    description: z.string().optional(),
-  }),
-  comments: z
-    .array(
-      z.object({
-        comment: z.string(),
-        commentId: z.string(),
-      })
-    )
-    .optional(),
-}));
+export const SwimlaneCreateRecordParamsSchema = lazySchema(() =>
+  z.object({
+    incident: z.object({
+      ruleName: z.string(),
+      alertId: z.string(),
+      severity: z.string().optional(),
+      description: z.string().optional(),
+    }),
+    comments: z
+      .array(
+        z.object({
+          comment: z.string(),
+          commentId: z.string(),
+        })
+      )
+      .optional(),
+  })
+);
 
-export const SwimlaneUpdateRecordParamsSchema = lazySchema(() => z.object({
-  incident: z.object({
-    ruleName: z.string(),
-    alertId: z.string(),
-    severity: z.string().optional(),
-    description: z.string().optional(),
-  }),
-  incidentId: z.string(),
-  comments: z
-    .array(
-      z.object({
-        comment: z.string(),
-        commentId: z.string(),
-      })
-    )
-    .optional(),
-}));
+export const SwimlaneUpdateRecordParamsSchema = lazySchema(() =>
+  z.object({
+    incident: z.object({
+      ruleName: z.string(),
+      alertId: z.string(),
+      severity: z.string().optional(),
+      description: z.string().optional(),
+    }),
+    incidentId: z.string(),
+    comments: z
+      .array(
+        z.object({
+          comment: z.string(),
+          commentId: z.string(),
+        })
+      )
+      .optional(),
+  })
+);
 
 // Swimlane connector response schema
-export const SwimlaneResponseSchema = lazySchema(() => z.object({
-  id: z.string(),
-  title: z.string(),
-  url: z.string(),
-  pushedDate: z.string(),
-}));
+export const SwimlaneResponseSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    title: z.string(),
+    url: z.string(),
+    pushedDate: z.string(),
+  })
+);

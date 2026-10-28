@@ -22,16 +22,18 @@ const MARKDOWN_EXTENSION = '.md';
 const REFERENCE_SEGMENT_REGEX = /^[a-zA-Z0-9](?:[a-zA-Z0-9_-]*[a-zA-Z0-9])?$/;
 const RESERVED_ROOT_REFERENCE_NAME = 'skill';
 
-const frontmatterSchema = lazySchema(() => z.object({
-  name: z.string({ error: 'frontmatter "name" is required and must be a string' }),
-  description: z.string({ error: 'frontmatter "description" is required and must be a string' }),
-  id: z.string().optional(),
-  experimental: z.boolean().optional(),
-  uiSettingRequired: z
-    .string({ error: 'frontmatter "uiSettingRequired" must be a string' })
-    .min(1, 'frontmatter "uiSettingRequired" must be non-empty')
-    .optional(),
-}));
+const frontmatterSchema = lazySchema(() =>
+  z.object({
+    name: z.string({ error: 'frontmatter "name" is required and must be a string' }),
+    description: z.string({ error: 'frontmatter "description" is required and must be a string' }),
+    id: z.string().optional(),
+    experimental: z.boolean().optional(),
+    uiSettingRequired: z
+      .string({ error: 'frontmatter "uiSettingRequired" must be a string' })
+      .min(1, 'frontmatter "uiSettingRequired" must be non-empty')
+      .optional(),
+  })
+);
 
 type SkillReferencedContent = NonNullable<SkillDefinition['referencedContent']>[number];
 

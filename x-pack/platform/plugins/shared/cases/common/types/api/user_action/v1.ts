@@ -53,16 +53,18 @@ const UserActionFindRequestSourcesValues = [
 /**
  * User actions stats API
  */
-export const CaseUserActionStatsSchema = lazySchema(() => z.object({
-  total: z.number(),
-  total_deletions: z.number(),
-  total_comments: z.number(),
-  total_comment_deletions: z.number(),
-  total_comment_creations: z.number(),
-  total_hidden_comment_updates: z.number(),
-  total_other_actions: z.number(),
-  total_other_action_deletions: z.number(),
-}));
+export const CaseUserActionStatsSchema = lazySchema(() =>
+  z.object({
+    total: z.number(),
+    total_deletions: z.number(),
+    total_comments: z.number(),
+    total_comment_deletions: z.number(),
+    total_comment_creations: z.number(),
+    total_hidden_comment_updates: z.number(),
+    total_other_actions: z.number(),
+    total_other_action_deletions: z.number(),
+  })
+);
 
 export const CaseUserActionStatsResponseSchema = CaseUserActionStatsSchema;
 
@@ -72,9 +74,9 @@ export const CaseUserActionStatsResponseSchema = CaseUserActionStatsSchema;
 export const CaseUserActionDeprecatedResponseSchema = CaseUserActionBasicSchema.and(
   CaseUserActionInjectedDeprecatedIdsSchema
 );
-export const CaseUserActionsDeprecatedResponseSchema = lazySchema(() => z.array(
-  CaseUserActionDeprecatedResponseSchema
-));
+export const CaseUserActionsDeprecatedResponseSchema = lazySchema(() =>
+  z.array(CaseUserActionDeprecatedResponseSchema)
+);
 
 /**
  * Find User Actions API
@@ -86,12 +88,14 @@ export const UserActionFindRequestSchema = paginationSchema({
   sortOrder: lazySchema(() => z.enum(['desc', 'asc']).optional()),
 });
 
-export const UserActionFindResponseSchema = lazySchema(() => z.object({
-  userActions: UserActionsSchema,
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-}));
+export const UserActionFindResponseSchema = lazySchema(() =>
+  z.object({
+    userActions: UserActionsSchema,
+    page: z.number(),
+    perPage: z.number(),
+    total: z.number(),
+  })
+);
 
 export type CaseUserActionStats = z.infer<typeof CaseUserActionStatsSchema>;
 export type CaseUserActionStatsResponse = z.infer<typeof CaseUserActionStatsResponseSchema>;

@@ -15,32 +15,28 @@ import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_
 import { securityTool } from './constants';
 import { pciIndexPatternSchema, buildScopeClaim } from './pci_compliance_schemas';
 
-const pciScopeType = lazySchema(() => z.enum([
-  'all',
-  'network',
-  'identity',
-  'endpoint',
-  'cloud',
-  'application',
-  'vulnerability',
-]));
+const pciScopeType = lazySchema(() =>
+  z.enum(['all', 'network', 'identity', 'endpoint', 'cloud', 'application', 'vulnerability'])
+);
 
-const pciScopeDiscoverySchema = lazySchema(() => z.object({
-  scopeType: pciScopeType
-    .optional()
-    .default('all')
-    .describe(
-      'Scope focus area for discovery: all, network, identity, endpoint, cloud, or application'
-    ),
-  customIndices: z
-    .array(pciIndexPatternSchema)
-    .min(1)
-    .max(50)
-    .optional()
-    .describe(
-      'Optional custom index patterns to include for environments with non-native ingestion.'
-    ),
-}));
+const pciScopeDiscoverySchema = lazySchema(() =>
+  z.object({
+    scopeType: pciScopeType
+      .optional()
+      .default('all')
+      .describe(
+        'Scope focus area for discovery: all, network, identity, endpoint, cloud, or application'
+      ),
+    customIndices: z
+      .array(pciIndexPatternSchema)
+      .min(1)
+      .max(50)
+      .optional()
+      .describe(
+        'Optional custom index patterns to include for environments with non-native ingestion.'
+      ),
+  })
+);
 
 export const PCI_SCOPE_DISCOVERY_TOOL_ID = securityTool('pci_scope_discovery');
 

@@ -106,22 +106,24 @@ Object.assign(Streams, {
  * a `discriminator` extension so code generators can produce properly typed
  * sealed-class / tagged-union structs.
  */
-export const streamDefinitionSchema = lazySchema(() => z
-  .union([
-    nWiredStream.Definition.right,
-    nClassicStream.Definition.right,
-    nQueryStream.Definition.right,
-  ])
-  .meta({
-    id: 'StreamDefinition',
-    openapi: {
-      discriminator: {
-        propertyName: 'type',
-        mapping: {
-          wired: '#/components/schemas/WiredStreamDefinition',
-          classic: '#/components/schemas/ClassicStreamDefinition',
-          query: '#/components/schemas/QueryStreamDefinition',
+export const streamDefinitionSchema = lazySchema(() =>
+  z
+    .union([
+      nWiredStream.Definition.right,
+      nClassicStream.Definition.right,
+      nQueryStream.Definition.right,
+    ])
+    .meta({
+      id: 'StreamDefinition',
+      openapi: {
+        discriminator: {
+          propertyName: 'type',
+          mapping: {
+            wired: '#/components/schemas/WiredStreamDefinition',
+            classic: '#/components/schemas/ClassicStreamDefinition',
+            query: '#/components/schemas/QueryStreamDefinition',
+          },
         },
       },
-    },
-  }));
+    })
+);

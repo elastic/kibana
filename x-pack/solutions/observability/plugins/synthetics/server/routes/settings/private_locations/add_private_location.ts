@@ -21,39 +21,41 @@ import { toClientContract, toSavedObjectContract } from './helpers';
 import { MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 
-export const PrivateLocationSchema = lazySchema(() => z.strictObject({
-  label: z
-    .string()
-    .min(1)
-    .max(MAX_ROUTE_ID_LENGTH)
-    .describe('A label for the private location. Must be unique.'),
-  agentPolicyId: z
-    .string()
-    .min(1)
-    .max(MAX_ROUTE_ID_LENGTH)
-    .describe(
-      'The ID of the agent policy associated with the private location. Each agent policy can back only one private location.'
-    ),
-  tags: z
-    .array(z.string().max(256))
-    .max(100)
-    .optional()
-    .describe('An array of tags to categorize the private location.'),
-  geo: z
-    .strictObject({
-      lat: z.number().describe('The latitude of the location.'),
-      lon: z.number().describe('The longitude of the location.'),
-    })
-    .optional()
-    .describe('Geographic coordinates (WGS84) for the location.'),
-  spaces: z
-    .array(z.string().max(256))
-    .max(100)
-    .optional()
-    .describe(
-      'An array of space IDs where the private location is available. If it is not provided, the private location is available in all spaces.'
-    ),
-}));
+export const PrivateLocationSchema = lazySchema(() =>
+  z.strictObject({
+    label: z
+      .string()
+      .min(1)
+      .max(MAX_ROUTE_ID_LENGTH)
+      .describe('A label for the private location. Must be unique.'),
+    agentPolicyId: z
+      .string()
+      .min(1)
+      .max(MAX_ROUTE_ID_LENGTH)
+      .describe(
+        'The ID of the agent policy associated with the private location. Each agent policy can back only one private location.'
+      ),
+    tags: z
+      .array(z.string().max(256))
+      .max(100)
+      .optional()
+      .describe('An array of tags to categorize the private location.'),
+    geo: z
+      .strictObject({
+        lat: z.number().describe('The latitude of the location.'),
+        lon: z.number().describe('The longitude of the location.'),
+      })
+      .optional()
+      .describe('Geographic coordinates (WGS84) for the location.'),
+    spaces: z
+      .array(z.string().max(256))
+      .max(100)
+      .optional()
+      .describe(
+        'An array of space IDs where the private location is available. If it is not provided, the private location is available in all spaces.'
+      ),
+  })
+);
 
 export type PrivateLocationObject = z.infer<typeof PrivateLocationSchema>;
 

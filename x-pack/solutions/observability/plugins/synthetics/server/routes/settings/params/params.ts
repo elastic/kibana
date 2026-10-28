@@ -72,9 +72,11 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<ParamRespon
   handler: getParamListHandler,
 });
 
-const RequestParamsSchema = lazySchema(() => z.strictObject({
-  id: routeId.describe('The unique identifier for the parameter.'),
-}));
+const RequestParamsSchema = lazySchema(() =>
+  z.strictObject({
+    id: routeId.describe('The unique identifier for the parameter.'),
+  })
+);
 
 export const getSyntheticsParamRoute: SyntheticsRestApiRouteFactory<
   ParamResponse,

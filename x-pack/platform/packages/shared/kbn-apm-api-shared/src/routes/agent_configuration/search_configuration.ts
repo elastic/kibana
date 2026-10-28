@@ -10,11 +10,13 @@ import type { AgentConfiguration } from '@kbn/apm-common';
 import { serviceSchema } from '@kbn/apm-common';
 import { defineRoute } from '../types';
 
-const searchParamsSchema = lazySchema(() => z.object({ service: serviceSchema }).extend({
-  etag: z.string().optional(),
-  mark_as_applied_by_agent: z.boolean().optional(),
-  error: z.string().optional(),
-}));
+const searchParamsSchema = lazySchema(() =>
+  z.object({ service: serviceSchema }).extend({
+    etag: z.string().optional(),
+    mark_as_applied_by_agent: z.boolean().optional(),
+    error: z.string().optional(),
+  })
+);
 
 export type AgentConfigSearchParams = z.infer<typeof searchParamsSchema>;
 

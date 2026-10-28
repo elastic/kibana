@@ -12,34 +12,38 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // OpenAI connector parameter schema
-export const OpenAIParamsSchema = lazySchema(() => z.object({
-  body: z.string(),
-  model: z.string().optional(),
-  n: z.number().optional(),
-  stop: z.array(z.string()).optional(),
-  temperature: z.number().optional(),
-  max_tokens: z.number().optional(),
-}));
+export const OpenAIParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.string(),
+    model: z.string().optional(),
+    n: z.number().optional(),
+    stop: z.array(z.string()).optional(),
+    temperature: z.number().optional(),
+    max_tokens: z.number().optional(),
+  })
+);
 
 // OpenAI connector response schema
-export const OpenAIResponseSchema = lazySchema(() => z.object({
-  choices: z.array(
-    z.object({
-      message: z.object({
-        role: z.string(),
-        content: z.string(),
-      }),
-      finish_reason: z.string().optional(),
-    })
-  ),
-  usage: z
-    .object({
-      prompt_tokens: z.number(),
-      completion_tokens: z.number(),
-      total_tokens: z.number(),
-    })
-    .optional(),
-}));
+export const OpenAIResponseSchema = lazySchema(() =>
+  z.object({
+    choices: z.array(
+      z.object({
+        message: z.object({
+          role: z.string(),
+          content: z.string(),
+        }),
+        finish_reason: z.string().optional(),
+      })
+    ),
+    usage: z
+      .object({
+        prompt_tokens: z.number(),
+        completion_tokens: z.number(),
+        total_tokens: z.number(),
+      })
+      .optional(),
+  })
+);

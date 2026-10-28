@@ -8,25 +8,29 @@ import { z, lazySchema } from '@kbn/zod';
 
 import type { sloTemplateSchema } from '../../schema/slo_template';
 
-const getSLOTemplateParamsSchema = lazySchema(() => z.object({
-  path: z.object({
-    templateId: z.string(),
-  }),
-}));
+const getSLOTemplateParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      templateId: z.string(),
+    }),
+  })
+);
 
-const findSLOTemplatesParamsSchema = lazySchema(() => z.object({
-  query: z
-    .object({
-      search: z.string().optional(),
-      tags: z
-        .string()
-        .transform((value) => value.split(','))
-        .optional(),
-      page: z.coerce.number().optional(),
-      perPage: z.coerce.number().optional(),
-    })
-    .optional(),
-}));
+const findSLOTemplatesParamsSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .object({
+        search: z.string().optional(),
+        tags: z
+          .string()
+          .transform((value) => value.split(','))
+          .optional(),
+        page: z.coerce.number().optional(),
+        perPage: z.coerce.number().optional(),
+      })
+      .optional(),
+  })
+);
 
 type SLOTemplateResponse = z.input<typeof sloTemplateSchema>;
 type GetSLOTemplateResponse = SLOTemplateResponse;

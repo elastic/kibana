@@ -29,14 +29,16 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       requiredPrivileges: ['agentBuilder:write'],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
-    body: z.object({
-      status: z.enum(EMITTED_INVESTIGATION_STATUSES),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      }),
+      body: z.object({
+        status: z.enum(EMITTED_INVESTIGATION_STATUSES),
+      }),
+    })
+  ),
   handler: async ({ request, params, getInvestigationsClient, getTriggerEmitter }) => {
     const emitter = getTriggerEmitter(request);
     if (!emitter) {

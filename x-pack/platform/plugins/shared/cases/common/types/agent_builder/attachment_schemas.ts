@@ -36,9 +36,11 @@ export type CaseAttachmentData = z.infer<typeof caseAttachmentDataSchema>;
 
 export const CASES_ATTACHMENT_MAX = 20;
 
-export const casesAttachmentDataSchema = lazySchema(() => z.object({
-  cases: z.array(caseAttachmentDataSchema).max(CASES_ATTACHMENT_MAX),
-  total: z.number().int(),
-  url: z.string().max(1000).nullable().optional(),
-}));
+export const casesAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(caseAttachmentDataSchema).max(CASES_ATTACHMENT_MAX),
+    total: z.number().int(),
+    url: z.string().max(1000).nullable().optional(),
+  })
+);
 export type CasesAttachmentData = z.infer<typeof casesAttachmentDataSchema>;

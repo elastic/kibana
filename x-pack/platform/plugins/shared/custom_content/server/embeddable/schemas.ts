@@ -12,10 +12,12 @@ import {
 } from '@kbn/presentation-publishing-schemas';
 import { customContentStateSchema } from '@kbn/custom-content-common';
 
-export const customContentEmbeddableSchema = lazySchema(() => z.object({
-  ...customContentStateSchema.shape,
-  ...serializedTitlesSchema.shape,
-  ...serializedTimeRangeSchema.shape,
-}));
+export const customContentEmbeddableSchema = lazySchema(() =>
+  z.object({
+    ...customContentStateSchema.shape,
+    ...serializedTitlesSchema.shape,
+    ...serializedTimeRangeSchema.shape,
+  })
+);
 
 export type CustomContentEmbeddableState = z.output<typeof customContentEmbeddableSchema>;

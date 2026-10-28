@@ -9,6 +9,8 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { ProfilingSchema } from '@kbn/profiling-utils';
 
 /** Profiling schema to query, Universal Profiling (ECS) when not sent */
-export const profilingSchemaQuerySchema = lazySchema(() => z.object({
-  schema: z.enum(ProfilingSchema).optional(),
-}));
+export const profilingSchemaQuerySchema = lazySchema(() =>
+  z.object({
+    schema: z.enum(ProfilingSchema).optional(),
+  })
+);

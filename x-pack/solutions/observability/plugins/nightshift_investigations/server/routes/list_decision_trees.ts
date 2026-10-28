@@ -39,14 +39,16 @@ export const listDecisionTreesRoute = createNightshiftInvestigationsServerRoute(
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
-  params: lazySchema(() => z.object({
-    query: z
-      .object({
-        status: z.enum(CORTEX_PAGE_STATUSES).optional(),
-      })
-      .optional()
-      .default({}),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          status: z.enum(CORTEX_PAGE_STATUSES).optional(),
+        })
+        .optional()
+        .default({}),
+    })
+  ),
   handler: async ({ request, params, getDecisionTreeStore, isDecisionTreesEnabled }) => {
     if (!isDecisionTreesEnabled()) throw notFound('Decision trees are not enabled');
 

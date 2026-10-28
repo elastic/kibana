@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 /**
  * Torq connector parameter schema
  * Based on x-pack/platform/plugins/shared/stack_connectors/server/connector_types/torq/index.ts
  */
-export const TorqParamsSchema = lazySchema(() => z.object({
-  body: z.string().describe('JSON payload to send to Torq'),
-}));
+export const TorqParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.string().describe('JSON payload to send to Torq'),
+  })
+);
 
 /**
  * Torq connector response schema

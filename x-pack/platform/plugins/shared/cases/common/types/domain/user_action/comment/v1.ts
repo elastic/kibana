@@ -14,20 +14,28 @@ import { UnifiedAttachmentPayloadSchema } from '../../attachment/v2';
  * Stored user actions are decoded on read, so they use the shape-only payload schemas.
  * Request bounds are enforced at ingress by the api schemas.
  */
-export const CommentUserActionPayloadSchema = lazySchema(() => z.object({
-  comment: z.union([AttachmentPayloadSchema, UnifiedAttachmentPayloadSchema]),
-}));
+export const CommentUserActionPayloadSchema = lazySchema(() =>
+  z.object({
+    comment: z.union([AttachmentPayloadSchema, UnifiedAttachmentPayloadSchema]),
+  })
+);
 
-export const CommentUserActionPayloadWithoutIdsSchema = lazySchema(() => z.object({
-  comment: z.union([AttachmentPayloadWithoutRefsSchema, UnifiedAttachmentPayloadSchema]),
-}));
+export const CommentUserActionPayloadWithoutIdsSchema = lazySchema(() =>
+  z.object({
+    comment: z.union([AttachmentPayloadWithoutRefsSchema, UnifiedAttachmentPayloadSchema]),
+  })
+);
 
-export const CommentUserActionSchema = lazySchema(() => z.object({
-  type: z.literal(UserActionTypes.comment),
-  payload: CommentUserActionPayloadSchema,
-}));
+export const CommentUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.comment),
+    payload: CommentUserActionPayloadSchema,
+  })
+);
 
-export const CommentUserActionWithoutIdsSchema = lazySchema(() => z.object({
-  type: z.literal(UserActionTypes.comment),
-  payload: CommentUserActionPayloadWithoutIdsSchema,
-}));
+export const CommentUserActionWithoutIdsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.comment),
+    payload: CommentUserActionPayloadWithoutIdsSchema,
+  })
+);

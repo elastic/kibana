@@ -28,23 +28,25 @@ import {
  */
 export const MAX_LIST_ENDPOINTS_PAGE = 199;
 
-const listEndpointsSchema = lazySchema(() => z.object({
-  hostNameFilter: z
-    .string()
-    .max(MAX_HOSTNAME_FILTER_LENGTH)
-    .optional()
-    .describe(
-      'Optional hostname substring to filter results. Only endpoints whose hostname contains this value (case-sensitive) will be returned.'
-    ),
-  page: z
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .describe(
-      `Zero-based page of results to fetch (default 0). Each page holds up to ${LIST_ENDPOINTS_PAGE_SIZE} endpoints; when the response reports \`hasMore: true\`, request the next page to continue.`
-    ),
-}));
+const listEndpointsSchema = lazySchema(() =>
+  z.object({
+    hostNameFilter: z
+      .string()
+      .max(MAX_HOSTNAME_FILTER_LENGTH)
+      .optional()
+      .describe(
+        'Optional hostname substring to filter results. Only endpoints whose hostname contains this value (case-sensitive) will be returned.'
+      ),
+    page: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        `Zero-based page of results to fetch (default 0). Each page holds up to ${LIST_ENDPOINTS_PAGE_SIZE} endpoints; when the response reports \`hasMore: true\`, request the next page to continue.`
+      ),
+  })
+);
 
 export const listEndpointsTool = (
   endpointAppContextService: EndpointAppContextService

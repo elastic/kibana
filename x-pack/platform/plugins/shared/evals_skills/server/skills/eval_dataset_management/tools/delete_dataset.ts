@@ -22,9 +22,11 @@ import {
 } from './tool_utils';
 import type { DatasetDocument } from './tool_utils';
 
-const schema = lazySchema(() => z.object({
-  dataset_id: datasetIdSchema,
-}));
+const schema = lazySchema(() =>
+  z.object({
+    dataset_id: datasetIdSchema,
+  })
+);
 
 const countOtherSpaces = ({ space_ids: spaceIds }: DatasetDocument, spaceId: string): number =>
   spaceIds.filter((id) => id !== spaceId).length;

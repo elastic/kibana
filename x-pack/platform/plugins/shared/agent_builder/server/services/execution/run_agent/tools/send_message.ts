@@ -23,20 +23,22 @@ import type { SubagentTracker } from '../subagent_tracker';
 import { filterReachableSubagents } from '../utils/filter_reachable_subagents';
 import { selectSubagentConnectorId } from '../utils/select_subagent_connector_id';
 
-const schema = lazySchema(() => z.object({
-  to: z.string().describe('Name of the persistent sub-agent to talk to.'),
-  prompt: z.string().describe('The message to send.'),
-  run_in_background: z
-    .boolean()
-    .optional()
-    .describe(
-      'Set to true to fire this message off and continue with other work; you will be notified when the sub-agent finishes replying.'
-    ),
-  effort: z
-    .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
-    .optional()
-    .describe('The effort level of this exchange.'),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    to: z.string().describe('Name of the persistent sub-agent to talk to.'),
+    prompt: z.string().describe('The message to send.'),
+    run_in_background: z
+      .boolean()
+      .optional()
+      .describe(
+        'Set to true to fire this message off and continue with other work; you will be notified when the sub-agent finishes replying.'
+      ),
+    effort: z
+      .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
+      .optional()
+      .describe('The effort level of this exchange.'),
+  })
+);
 
 const toolDescription = `Send a message to an existing persistent sub-agent.
 

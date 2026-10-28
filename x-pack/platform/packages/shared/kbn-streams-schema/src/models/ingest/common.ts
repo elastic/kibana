@@ -14,9 +14,11 @@ export interface ElasticsearchAssets {
   dataStream: string;
 }
 
-export const elasticsearchAssetsSchema: z.Schema<ElasticsearchAssets> = lazySchema(() => z.object({
-  ingestPipeline: z.string().optional(),
-  componentTemplates: z.array(z.string()),
-  indexTemplate: z.string(),
-  dataStream: z.string(),
-}));
+export const elasticsearchAssetsSchema: z.Schema<ElasticsearchAssets> = lazySchema(() =>
+  z.object({
+    ingestPipeline: z.string().optional(),
+    componentTemplates: z.array(z.string()),
+    indexTemplate: z.string(),
+    dataStream: z.string(),
+  })
+);

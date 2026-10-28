@@ -23,15 +23,17 @@ import {
   toErrorResult,
 } from './tool_utils';
 
-const schema = lazySchema(() => z.object({
-  name: datasetNameSchema,
-  description: datasetDescriptionSchema,
-  tags: datasetTagsSchema.optional(),
-  maturity: datasetMaturitySchema.optional(),
-  examples: datasetExamplesSchema
-    .optional()
-    .describe('Examples to create the dataset with. Omit to create an empty dataset.'),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    name: datasetNameSchema,
+    description: datasetDescriptionSchema,
+    tags: datasetTagsSchema.optional(),
+    maturity: datasetMaturitySchema.optional(),
+    examples: datasetExamplesSchema
+      .optional()
+      .describe('Examples to create the dataset with. Omit to create an empty dataset.'),
+  })
+);
 
 /**
  * Creates a dataset in the current space. A taken name is reported back so the

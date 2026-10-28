@@ -55,6 +55,6 @@ export const UserActionActions = {
  */
 export type UserActionAction = (typeof UserActionActions)[keyof typeof UserActionActions];
 
-export const UserActionActionsSchema = lazySchema(() => z.enum(
-  Object.values(UserActionActions) as [UserActionAction, ...UserActionAction[]]
-));
+export const UserActionActionsSchema = lazySchema(() =>
+  z.enum(Object.values(UserActionActions) as [UserActionAction, ...UserActionAction[]])
+);

@@ -41,22 +41,24 @@ export interface ServicesItemsResponse {
 
 export const servicesListRoute = defineRoute<ServicesItemsResponse>()({
   endpoint: 'GET /internal/apm/services',
-  params: lazySchema(() => z.object({
-    query: z
-      .object({
-        searchQuery: z.string(),
-        serviceGroup: z.string(),
-      })
-      .partial()
-      .merge(probabilitySchema)
-      .merge(serviceTransactionDataSourceSchema)
-      .merge(
-        z.object({
-          useDurationSummary: BooleanFromString.default(false),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          searchQuery: z.string(),
+          serviceGroup: z.string(),
         })
-      )
-      .merge(environmentSchema)
-      .merge(kuerySchema)
-      .merge(rangeSchema),
-  })),
+        .partial()
+        .merge(probabilitySchema)
+        .merge(serviceTransactionDataSourceSchema)
+        .merge(
+          z.object({
+            useDurationSummary: BooleanFromString.default(false),
+          })
+        )
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema),
+    })
+  ),
 });

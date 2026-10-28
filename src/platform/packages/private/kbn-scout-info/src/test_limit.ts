@@ -21,13 +21,17 @@ export const ScoutTargetAttributeSchema = lazySchema(() => z.enum(SCOUT_TARGET_A
 export type ScoutTargetAttribute = z.infer<typeof ScoutTargetAttributeSchema>;
 
 export const SCOUT_LIMIT_SELECTION_METHOD_VALUES = ['only', 'except'] as const;
-export const ScoutLimitSelectionMethodSchema = lazySchema(() => z.enum(SCOUT_LIMIT_SELECTION_METHOD_VALUES));
+export const ScoutLimitSelectionMethodSchema = lazySchema(() =>
+  z.enum(SCOUT_LIMIT_SELECTION_METHOD_VALUES)
+);
 export type ScoutLimitSelectionMethod = z.infer<typeof ScoutLimitSelectionMethodSchema>;
 
-export const ScoutTestLimitSchema = lazySchema(() => z.object({
-  selectionMethod: ScoutLimitSelectionMethodSchema,
-  targetAttribute: ScoutTargetAttributeSchema,
-}));
+export const ScoutTestLimitSchema = lazySchema(() =>
+  z.object({
+    selectionMethod: ScoutLimitSelectionMethodSchema,
+    targetAttribute: ScoutTargetAttributeSchema,
+  })
+);
 
 /**
  * A constraint that narrows the test targets a test may run on, based on whether a

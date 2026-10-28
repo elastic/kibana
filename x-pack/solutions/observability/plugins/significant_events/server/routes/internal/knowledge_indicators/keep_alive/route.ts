@@ -22,10 +22,12 @@ const keepAlivePersistentIndicatorsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z.object({ lastRefreshedBefore: isoDateTime() }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.object({ lastRefreshedBefore: isoDateTime() }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getKnowledgeIndicatorClient, licensing, sourcesClient } = await getScopedClients({
       request,

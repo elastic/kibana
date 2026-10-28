@@ -17,9 +17,11 @@ export const textInputAppId = 'sidebarExampleText';
 
 /** Store for text input sidebar app */
 export const textInputStore = createSidebarStore({
-  schema: lazySchema(() => z.object({
-    userName: z.string().default(''),
-  })),
+  schema: lazySchema(() =>
+    z.object({
+      userName: z.string().default(''),
+    })
+  ),
   actions: (set, get, { close }) => ({
     setUserName: (userName: string) => set({ userName }),
     clear: () => set({ userName: '' }),

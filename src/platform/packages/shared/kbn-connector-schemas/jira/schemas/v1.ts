@@ -34,20 +34,22 @@ const incidentSchemaObject = {
   externalId: lazySchema(() => z.string().nullable().default(null)),
   issueType: lazySchema(() => z.string().nullable().default(null)),
   priority: lazySchema(() => z.string().nullable().default(null)),
-  labels: lazySchema(() => z
-    .array(
-      z.string().check((ctx) => {
-        if ((ctx.value as string).match(/\s/g)) {
-          ctx.issues.push({
-            code: 'custom',
-            message: `The label ${ctx.value} cannot contain spaces`,
-            input: ctx.value,
-          });
-        }
-      })
-    )
-    .nullable()
-    .default(null)),
+  labels: lazySchema(() =>
+    z
+      .array(
+        z.string().check((ctx) => {
+          if ((ctx.value as string).match(/\s/g)) {
+            ctx.issues.push({
+              code: 'custom',
+              message: `The label ${ctx.value} cannot contain spaces`,
+              input: ctx.value,
+            });
+          }
+        })
+      )
+      .nullable()
+      .default(null)
+  ),
   parent: lazySchema(() => z.string().nullable().default(null)),
   otherFields: Coerced(
     z

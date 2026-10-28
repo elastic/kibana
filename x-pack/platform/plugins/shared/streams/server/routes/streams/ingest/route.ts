@@ -51,11 +51,13 @@ const readIngestRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -109,14 +111,16 @@ const upsertIngestRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
-    }),
-    body: z.object({
-      ingest: IngestUpsertRequest.right,
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+      }),
+      body: z.object({
+        ingest: IngestUpsertRequest.right,
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }) => {
     const { streamsClient, attachmentClient } = await getScopedClients({
       request,

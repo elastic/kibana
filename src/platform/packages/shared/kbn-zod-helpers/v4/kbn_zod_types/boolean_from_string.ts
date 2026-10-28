@@ -17,9 +17,11 @@ import { KbnZodTypes } from './kbn_zod_type';
  *
  * Accepts "true" or "false" as strings, or a boolean.
  */
-const _BooleanFromString = lazySchema(() => z
-  .union([z.enum(['true', 'false']).transform((val) => val === 'true'), z.boolean()])
-  .describe("A boolean value, which can be 'true' or 'false' as string or a native boolean."));
+const _BooleanFromString = lazySchema(() =>
+  z
+    .union([z.enum(['true', 'false']).transform((val) => val === 'true'), z.boolean()])
+    .describe("A boolean value, which can be 'true' or 'false' as string or a native boolean.")
+);
 
 // Add custom type marker for identification
 Object.defineProperty(_BooleanFromString, 'kbnTypeName', {

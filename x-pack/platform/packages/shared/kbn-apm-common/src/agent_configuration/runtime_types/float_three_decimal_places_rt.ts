@@ -7,11 +7,13 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const floatThreeDecimalPlacesSchema = lazySchema(() => z.string().refine(
-  (inputAsString) => {
-    const inputAsFloat = parseFloat(inputAsString);
-    const maxThreeDecimals = parseFloat(inputAsFloat.toFixed(3)) === inputAsFloat;
-    return inputAsFloat >= 0 && inputAsFloat <= 1 && maxThreeDecimals;
-  },
-  { message: 'Must be a number between 0.000 and 1' }
-));
+export const floatThreeDecimalPlacesSchema = lazySchema(() =>
+  z.string().refine(
+    (inputAsString) => {
+      const inputAsFloat = parseFloat(inputAsString);
+      const maxThreeDecimals = parseFloat(inputAsFloat.toFixed(3)) === inputAsFloat;
+      return inputAsFloat >= 0 && inputAsFloat <= 1 && maxThreeDecimals;
+    },
+    { message: 'Must be a number between 0.000 and 1' }
+  )
+);

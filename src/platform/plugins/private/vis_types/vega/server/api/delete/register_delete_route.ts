@@ -23,9 +23,11 @@ import {
 import { isVegaApiEnabled } from '../is_vega_api_enabled';
 import { deleteItem } from './delete';
 
-const deleteRequestParamsSchema = lazySchema(() => z.object({
-  id: z.string().meta({ description: VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION }),
-}));
+const deleteRequestParamsSchema = lazySchema(() =>
+  z.object({
+    id: z.string().meta({ description: VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION }),
+  })
+);
 
 export const registerDeleteRoute = (
   router: VersionedRouter<RequestHandlerContext>,

@@ -18,8 +18,10 @@ export interface ServiceIngestionTypeResponse {
 
 export const serviceIngestionTypeRoute = defineRoute<ServiceIngestionTypeResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/ingestion_type',
-  params: lazySchema(() => z.object({
-    path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
-    query: environmentSchema.merge(rangeSchema),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
+      query: environmentSchema.merge(rangeSchema),
+    })
+  ),
 });

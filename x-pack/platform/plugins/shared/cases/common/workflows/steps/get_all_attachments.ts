@@ -21,17 +21,21 @@ export const GetAllAttachmentsStepTypeId = 'cases.getAllAttachments';
 
 // The workflow step parses this schema with a safeParse fallback
 // so unsupported variants flow through untouched instead of throwing.
-const AttachmentSchema = lazySchema(() => z.discriminatedUnion('type', [
-  AlertCommentResponseProperties,
-  EventCommentResponseProperties,
-  UserCommentResponseProperties,
-]));
+const AttachmentSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    AlertCommentResponseProperties,
+    EventCommentResponseProperties,
+    UserCommentResponseProperties,
+  ])
+);
 
 const InputSchema = CasesStepCaseIdSchema;
 
-const OutputSchema = lazySchema(() => z.object({
-  attachments: z.array(AttachmentSchema).max(MAX_DOCS_PER_PAGE),
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    attachments: z.array(AttachmentSchema).max(MAX_DOCS_PER_PAGE),
+  })
+);
 
 type GetAllAttachmentsStepInputSchema = typeof InputSchema;
 type GetAllAttachmentsStepOutputSchema = typeof OutputSchema;

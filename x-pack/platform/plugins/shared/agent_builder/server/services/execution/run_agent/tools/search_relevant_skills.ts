@@ -14,9 +14,11 @@ import type { ModelProvider } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { selectRelevantSkills } from '../utils/relevant_skills/select_relevant_skills';
 
-const schema = lazySchema(() => z.object({
-  query: z.string().describe('A short description of the sub-task you need a skill for'),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    query: z.string().describe('A short description of the sub-task you need a skill for'),
+  })
+);
 
 /**
  * On-demand counterpart to the implicit `<relevant_skills>` selection: lets the agent search the

@@ -13,12 +13,14 @@ import userPromptText from './user_prompt.text';
 export const LlmCriteriaEvaluationPrompt = createPrompt({
   name: 'llm_criteria_evaluation',
   description: 'Prompt for evaluating the LLM with a set of criteria',
-  input: lazySchema(() => z.object({
-    input: z.string(),
-    output: z.string(),
-    metadata: z.string().optional(),
-    criteria: z.array(z.string()),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      input: z.string(),
+      output: z.string(),
+      metadata: z.string().optional(),
+      criteria: z.array(z.string()),
+    })
+  ),
 })
   .version({
     system: {

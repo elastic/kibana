@@ -7,9 +7,11 @@
 import { z, lazySchema } from '@kbn/zod';
 import { sloIdSchema } from '../../schema/slo';
 
-const manageSLOParamsSchema = lazySchema(() => z.object({
-  path: z.object({ id: sloIdSchema }),
-}));
+const manageSLOParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({ id: sloIdSchema }),
+  })
+);
 
 type ManageSLOParams = z.output<typeof manageSLOParamsSchema.shape.path>;
 

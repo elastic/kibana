@@ -10,12 +10,14 @@ import { z as z4, lazySchema } from '@kbn/zod/v4';
 
 import type { ActionTypeParams, ValidatorType } from '../../types';
 
-const fetchOptionsSchema = lazySchema(() => z4
-  .object({
-    max_content_length: z4.number().positive().optional(),
-  })
-  .strict()
-  .optional());
+const fetchOptionsSchema = lazySchema(() =>
+  z4
+    .object({
+      max_content_length: z4.number().positive().optional(),
+    })
+    .strict()
+    .optional()
+);
 
 export const generateParamsSchema = (
   actions: ConnectorSpec['actions']

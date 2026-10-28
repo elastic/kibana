@@ -12,23 +12,29 @@ import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 
-const optionSchema = lazySchema(() => z.object({
-  label: z.string().describe('Short label for the option'),
-  description: z.string().optional().describe('Optional longer description'),
-}));
+const optionSchema = lazySchema(() =>
+  z.object({
+    label: z.string().describe('Short label for the option'),
+    description: z.string().optional().describe('Optional longer description'),
+  })
+);
 
-const questionSchema = lazySchema(() => z.object({
-  question: z.string().describe('The question text shown to the user'),
-  options: z.array(optionSchema).describe('The list of selectable options'),
-  multi_select: z
-    .boolean()
-    .default(false)
-    .describe('When true the user can pick more than one option'),
-}));
+const questionSchema = lazySchema(() =>
+  z.object({
+    question: z.string().describe('The question text shown to the user'),
+    options: z.array(optionSchema).describe('The list of selectable options'),
+    multi_select: z
+      .boolean()
+      .default(false)
+      .describe('When true the user can pick more than one option'),
+  })
+);
 
-const schema = lazySchema(() => z.object({
-  questions: z.array(questionSchema).describe('List of questions to ask the user'),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    questions: z.array(questionSchema).describe('List of questions to ask the user'),
+  })
+);
 
 const description = `Ask the user multiple-choice questions.
 

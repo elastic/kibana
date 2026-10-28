@@ -61,17 +61,19 @@ const toNonEmpty = <T>([first, ...rest]: readonly T[]): [T, ...T[]] => [first, .
  * Panel content of an upsert item: creates a panel of any kind, or edits an existing panel of the
  * same kind.
  */
-export const upsertPanelContentSchema = lazySchema(() => z.discriminatedUnion('source', [
-  z.discriminatedUnion(
-    'type',
-    toNonEmpty(CONFIG_PANEL_KINDS.map(({ contentSchema }) => contentSchema))
-  ),
-  z.discriminatedUnion(
-    'renderer',
-    toNonEmpty(REQUEST_PANEL_KINDS.map(({ contentSchema }) => contentSchema))
-  ),
-  attachmentPanelInputSchema,
-]));
+export const upsertPanelContentSchema = lazySchema(() =>
+  z.discriminatedUnion('source', [
+    z.discriminatedUnion(
+      'type',
+      toNonEmpty(CONFIG_PANEL_KINDS.map(({ contentSchema }) => contentSchema))
+    ),
+    z.discriminatedUnion(
+      'renderer',
+      toNonEmpty(REQUEST_PANEL_KINDS.map(({ contentSchema }) => contentSchema))
+    ),
+    attachmentPanelInputSchema,
+  ])
+);
 
 export type UpsertPanelContent = z.infer<typeof upsertPanelContentSchema>;
 

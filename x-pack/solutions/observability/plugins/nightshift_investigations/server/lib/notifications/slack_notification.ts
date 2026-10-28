@@ -11,14 +11,16 @@ import { InvalidNotificationDestinationError } from '../../client/errors';
 import type { NotificationHandler } from './notification_delivery';
 import { renderInvestigationSlackMessage } from './format_investigation_slack_message';
 
-const slackNotificationParamsSchema = lazySchema(() => z.strictObject({
-  channel: z.string().min(1).max(500),
-  thread_ts: z
-    .string()
-    .max(100)
-    .optional()
-    .describe('Parent message ID identifying the reply thread'),
-}));
+const slackNotificationParamsSchema = lazySchema(() =>
+  z.strictObject({
+    channel: z.string().min(1).max(500),
+    thread_ts: z
+      .string()
+      .max(100)
+      .optional()
+      .describe('Parent message ID identifying the reply thread'),
+  })
+);
 
 const parseSlackNotificationParams = (params: JsonObject) => {
   const parsed = slackNotificationParamsSchema.safeParse(params);

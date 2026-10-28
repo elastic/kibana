@@ -26,12 +26,14 @@ export const getStreamsUnitStatsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      id: streamsUnitIdentifierSchema.describe('The unit id.'),
-    }),
-    body: streamsUnitStatsRequestSchema.optional(),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: streamsUnitIdentifierSchema.describe('The unit id.'),
+      }),
+      body: streamsUnitStatsRequestSchema.optional(),
+    })
+  ),
   handler: async ({
     params,
     request,

@@ -40,29 +40,35 @@ export const CreateAnonymizationProfileResponse = AnonymizationProfile;
 export type DeleteAnonymizationProfileRequestParams = z.infer<
   typeof DeleteAnonymizationProfileRequestParams
 >;
-export const DeleteAnonymizationProfileRequestParams = lazySchema(() => z.object({
-  id: z.string(),
-}));
+export const DeleteAnonymizationProfileRequestParams = lazySchema(() =>
+  z.object({
+    id: z.string(),
+  })
+);
 export type DeleteAnonymizationProfileRequestParamsInput = z.input<
   typeof DeleteAnonymizationProfileRequestParams
 >;
 
 export type DeleteAnonymizationProfileResponse = z.infer<typeof DeleteAnonymizationProfileResponse>;
-export const DeleteAnonymizationProfileResponse = lazySchema(() => z.object({
-  deleted: z.boolean(),
-}));
+export const DeleteAnonymizationProfileResponse = lazySchema(() =>
+  z.object({
+    deleted: z.boolean(),
+  })
+);
 export type FindAnonymizationProfilesRequestQuery = z.infer<
   typeof FindAnonymizationProfilesRequestQuery
 >;
-export const FindAnonymizationProfilesRequestQuery = lazySchema(() => z.object({
-  filter: z.string().optional(),
-  target_type: AnonymizationTargetType.optional(),
-  target_id: z.string().optional(),
-  sort_field: ProfileSortField.optional(),
-  sort_order: SortOrder.optional(),
-  page: z.coerce.number().int().min(1).optional(),
-  per_page: z.coerce.number().int().min(1).max(1000).optional(),
-}));
+export const FindAnonymizationProfilesRequestQuery = lazySchema(() =>
+  z.object({
+    filter: z.string().optional(),
+    target_type: AnonymizationTargetType.optional(),
+    target_id: z.string().optional(),
+    sort_field: ProfileSortField.optional(),
+    sort_order: SortOrder.optional(),
+    page: z.coerce.number().int().min(1).optional(),
+    per_page: z.coerce.number().int().min(1).max(1000).optional(),
+  })
+);
 export type FindAnonymizationProfilesRequestQueryInput = z.input<
   typeof FindAnonymizationProfilesRequestQuery
 >;
@@ -73,9 +79,11 @@ export const FindAnonymizationProfilesResponse = FindProfilesResponse;
 export type GetAnonymizationProfileRequestParams = z.infer<
   typeof GetAnonymizationProfileRequestParams
 >;
-export const GetAnonymizationProfileRequestParams = lazySchema(() => z.object({
-  id: z.string(),
-}));
+export const GetAnonymizationProfileRequestParams = lazySchema(() =>
+  z.object({
+    id: z.string(),
+  })
+);
 export type GetAnonymizationProfileRequestParamsInput = z.input<
   typeof GetAnonymizationProfileRequestParams
 >;
@@ -86,9 +94,11 @@ export const GetAnonymizationProfileResponse = AnonymizationProfile;
 export type UpdateAnonymizationProfileRequestParams = z.infer<
   typeof UpdateAnonymizationProfileRequestParams
 >;
-export const UpdateAnonymizationProfileRequestParams = lazySchema(() => z.object({
-  id: z.string(),
-}));
+export const UpdateAnonymizationProfileRequestParams = lazySchema(() =>
+  z.object({
+    id: z.string(),
+  })
+);
 export type UpdateAnonymizationProfileRequestParamsInput = z.input<
   typeof UpdateAnonymizationProfileRequestParams
 >;

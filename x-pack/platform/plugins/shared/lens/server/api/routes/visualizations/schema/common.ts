@@ -99,11 +99,13 @@ export const lensApiConfigLibItemSchemaNoESQL: ZodType<LensApiConfigLibItemNoESQ
 /**
  * The Lens response item returned from the server
  */
-export const lensResponseItemSchema = lazySchema(() => z
-  .object({
-    id: lensCommonSavedObjectSchemaV3.shape.id,
-    data: lensApiConfigLibItemSchemaNoESQL,
-    meta: asCodeMetaSchema,
-  })
-  .strict()
-  .meta({ id: 'visResponseItem', title: 'Visualization Response' }));
+export const lensResponseItemSchema = lazySchema(() =>
+  z
+    .object({
+      id: lensCommonSavedObjectSchemaV3.shape.id,
+      data: lensApiConfigLibItemSchemaNoESQL,
+      meta: asCodeMetaSchema,
+    })
+    .strict()
+    .meta({ id: 'visResponseItem', title: 'Visualization Response' })
+);

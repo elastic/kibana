@@ -36,39 +36,43 @@ const isUnknownColumnError = (error: unknown, column: string): boolean => {
   return text.includes('Unknown column') && text.includes(column);
 };
 
-export const ScoutTestConfigStatsEntrySchema = lazySchema(() => z.object({
-  path: z.string(),
-  test_target: ScoutTestTargetSchema.transform(
-    (data) => new ScoutTestTarget(data.location, data.arch, data.domain)
-  ),
-  // Defaulted so stats files written before attributes were recorded stay readable.
-  target_attributes: z.array(ScoutTargetAttributeSchema).default([]),
-  runCount: z.int(),
-  runtime: z.object({
-    avg: z.int(),
-    median: z.int(),
-    pc95th: z.int(),
-    pc99th: z.int(),
-    max: z.int(),
-    estimate: z.int(),
-  }),
-}));
+export const ScoutTestConfigStatsEntrySchema = lazySchema(() =>
+  z.object({
+    path: z.string(),
+    test_target: ScoutTestTargetSchema.transform(
+      (data) => new ScoutTestTarget(data.location, data.arch, data.domain)
+    ),
+    // Defaulted so stats files written before attributes were recorded stay readable.
+    target_attributes: z.array(ScoutTargetAttributeSchema).default([]),
+    runCount: z.int(),
+    runtime: z.object({
+      avg: z.int(),
+      median: z.int(),
+      pc95th: z.int(),
+      pc99th: z.int(),
+      max: z.int(),
+      estimate: z.int(),
+    }),
+  })
+);
 
 export type ScoutTestConfigStatsEntry = z.infer<typeof ScoutTestConfigStatsEntrySchema>;
 
-export const ScoutTestConfigStatsDataSchema = lazySchema(() => z.object({
-  lastUpdated: z.coerce.date(),
-  lookbackDays: z.int().min(1).max(7),
-  buildkite: z.object({
-    branch: z.optional(z.string()),
-    pipeline: z.optional(
-      z.object({
-        slug: z.optional(z.string()),
-      })
-    ),
-  }),
-  configs: z.array(ScoutTestConfigStatsEntrySchema),
-}));
+export const ScoutTestConfigStatsDataSchema = lazySchema(() =>
+  z.object({
+    lastUpdated: z.coerce.date(),
+    lookbackDays: z.int().min(1).max(7),
+    buildkite: z.object({
+      branch: z.optional(z.string()),
+      pipeline: z.optional(
+        z.object({
+          slug: z.optional(z.string()),
+        })
+      ),
+    }),
+    configs: z.array(ScoutTestConfigStatsEntrySchema),
+  })
+);
 
 export type ScoutTestConfigStatsData = z.infer<typeof ScoutTestConfigStatsDataSchema>;
 

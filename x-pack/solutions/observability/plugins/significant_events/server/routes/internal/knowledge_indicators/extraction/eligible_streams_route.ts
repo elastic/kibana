@@ -72,15 +72,17 @@ const eligibleStreamsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    query: z
-      .object({
-        maxScheduledStreams: NumberFromString.pipe(z.number().positive().optional()),
-        extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
-        lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
-      })
-      .optional(),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          maxScheduledStreams: NumberFromString.pipe(z.number().positive().optional()),
+          extractionIntervalHours: NumberFromString.pipe(z.number().min(0).optional()),
+          lookbackHours: NumberFromString.pipe(z.number().positive().optional()),
+        })
+        .optional(),
+    })
+  ),
   handler: async ({
     params,
     request,

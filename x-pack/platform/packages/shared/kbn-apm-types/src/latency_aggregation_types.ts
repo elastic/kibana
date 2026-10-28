@@ -13,8 +13,10 @@ export enum LatencyAggregationType {
   p95 = 'p95',
 }
 
-export const latencyAggregationTypeSchema = lazySchema(() => z.union([
-  z.literal(LatencyAggregationType.avg),
-  z.literal(LatencyAggregationType.p95),
-  z.literal(LatencyAggregationType.p99),
-]));
+export const latencyAggregationTypeSchema = lazySchema(() =>
+  z.union([
+    z.literal(LatencyAggregationType.avg),
+    z.literal(LatencyAggregationType.p95),
+    z.literal(LatencyAggregationType.p99),
+  ])
+);

@@ -13,7 +13,7 @@ import {
   resolveEntityAccess,
 } from '@kbn/entity-access-control';
 import type { AccessControl, EntityAccessDecision } from '@kbn/entity-access-control';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 export const WORKFLOW_ACCESS_CONTROL_ROLES = ['viewer', 'executor', 'editor'] as const;
 export type WorkflowAccessControlRole = (typeof WORKFLOW_ACCESS_CONTROL_ROLES)[number];

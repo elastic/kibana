@@ -61,20 +61,22 @@ const ASPECT_VALUES = [
 ] as const;
 type Aspect = (typeof ASPECT_VALUES)[number];
 
-const inspectStreamsSchema = lazySchema(() => z.object({
-  names: z
-    .array(z.string())
-    .describe(
-      'Stream names to inspect. Use ["*"] for all streams. Examples: ["logs.ecs.nginx"], ["logs.ecs.nginx", "logs.otel.apache"], ["*"]'
-    ),
-  aspects: z
-    .array(z.enum(ASPECT_VALUES))
-    .optional()
-    .default(['overview'])
-    .describe(
-      'What information to return. Default: ["overview"]. Options: overview, schema, quality, lifecycle, processing, routing. Use multiple aspects for a deep dive on specific streams.'
-    ),
-}));
+const inspectStreamsSchema = lazySchema(() =>
+  z.object({
+    names: z
+      .array(z.string())
+      .describe(
+        'Stream names to inspect. Use ["*"] for all streams. Examples: ["logs.ecs.nginx"], ["logs.ecs.nginx", "logs.otel.apache"], ["*"]'
+      ),
+    aspects: z
+      .array(z.enum(ASPECT_VALUES))
+      .optional()
+      .default(['overview'])
+      .describe(
+        'What information to return. Default: ["overview"]. Options: overview, schema, quality, lifecycle, processing, routing. Use multiple aspects for a deep dive on specific streams.'
+      ),
+  })
+);
 
 export const createInspectStreamsTool = ({
   getScopedClients,

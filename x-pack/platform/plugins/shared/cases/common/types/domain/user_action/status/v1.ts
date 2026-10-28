@@ -9,13 +9,17 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseCloseReasonSchema, CaseStatusSchema } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const StatusUserActionPayloadSchema = lazySchema(() => z.object({
-  status: CaseStatusSchema,
-  closeReason: CaseCloseReasonSchema.optional(),
-  syncedAlertCount: z.number().optional(),
-}));
+export const StatusUserActionPayloadSchema = lazySchema(() =>
+  z.object({
+    status: CaseStatusSchema,
+    closeReason: CaseCloseReasonSchema.optional(),
+    syncedAlertCount: z.number().optional(),
+  })
+);
 
-export const StatusUserActionSchema = lazySchema(() => z.object({
-  type: z.literal(UserActionTypes.status),
-  payload: StatusUserActionPayloadSchema,
-}));
+export const StatusUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.status),
+    payload: StatusUserActionPayloadSchema,
+  })
+);

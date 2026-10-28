@@ -9,13 +9,15 @@ import { z, lazySchema } from '@kbn/zod';
 import { durationType } from '../../schema/duration';
 import { sloIdSchema } from '../../schema/slo';
 
-const purgeInstancesParamsSchema = lazySchema(() => z.object({
-  body: z.object({
-    list: z.array(sloIdSchema).optional(),
-    staleDuration: durationType.optional(),
-    force: z.boolean().optional(),
-  }),
-}));
+const purgeInstancesParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z.array(sloIdSchema).optional(),
+      staleDuration: durationType.optional(),
+      force: z.boolean().optional(),
+    }),
+  })
+);
 
 interface PurgeInstancesResponse {
   taskId?: string;
@@ -24,11 +26,13 @@ interface PurgeInstancesResponse {
 type PurgeInstancesInput = z.input<typeof purgeInstancesParamsSchema.shape.body>;
 type PurgeInstancesParams = z.output<typeof purgeInstancesParamsSchema.shape.body>;
 
-const purgeInstancesStatusParamsSchema = lazySchema(() => z.object({
-  path: z.object({
-    taskId: z.string(),
-  }),
-}));
+const purgeInstancesStatusParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      taskId: z.string(),
+    }),
+  })
+);
 
 interface PurgeInstancesStatusResponse {
   completed: boolean;

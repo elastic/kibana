@@ -20,11 +20,13 @@ export const getCortexPageRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      }),
+    })
+  ),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
 

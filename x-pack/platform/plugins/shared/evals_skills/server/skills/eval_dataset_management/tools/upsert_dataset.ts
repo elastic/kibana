@@ -27,15 +27,17 @@ import {
   withDatasetLookup,
 } from './tool_utils';
 
-const schema = lazySchema(() => z.object({
-  name: datasetNameSchema,
-  description: datasetDescriptionSchema,
-  tags: datasetTagsSchema.optional(),
-  maturity: datasetMaturitySchema.optional(),
-  examples: datasetExamplesSchema.describe(
-    'The complete example set. Matched by name: an existing dataset with this name has its examples replaced, and any example missing from this list is removed.'
-  ),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    name: datasetNameSchema,
+    description: datasetDescriptionSchema,
+    tags: datasetTagsSchema.optional(),
+    maturity: datasetMaturitySchema.optional(),
+    examples: datasetExamplesSchema.describe(
+      'The complete example set. Matched by name: an existing dataset with this name has its examples replaced, and any example missing from this list is removed.'
+    ),
+  })
+);
 
 type UpsertParams = z.infer<typeof schema>;
 

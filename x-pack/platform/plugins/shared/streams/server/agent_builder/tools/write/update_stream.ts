@@ -37,99 +37,111 @@ import { getConfirmationMessage } from './confirmation_helpers';
 import { validateProcessingJson } from '../../utils/format_validation_errors';
 import { type StreamsWriteQueue, abortSignalFromRequest } from '../../utils/write_queue';
 
-const stepSchema = lazySchema(() => z
-  .record(z.string(), z.unknown())
-  .describe(
-    'A Streamlang step object from the design pipeline or inspect streams tool. Pass through as-is — do not construct manually.'
-  ));
+const stepSchema = lazySchema(() =>
+  z
+    .record(z.string(), z.unknown())
+    .describe(
+      'A Streamlang step object from the design pipeline or inspect streams tool. Pass through as-is — do not construct manually.'
+    )
+);
 
-const lifecycleSchema = lazySchema(() => z.object({
-  type: z
-    .enum(['inherit', 'dsl', 'ilm'])
-    .describe(
-      '"inherit" from parent (wired only), "dsl" for data retention period, "ilm" for ILM policy'
-    ),
-  data_retention: z
-    .string()
-    .optional()
-    .describe('For "dsl" only: retention period, e.g. "30d", "90d", "1y". Omit for unlimited.'),
-  ilm_policy: z
-    .string()
-    .optional()
-    .describe(
-      'For "ilm" only: ILM policy name. Use list_ilm_policies to discover available policies.'
-    ),
-}));
+const lifecycleSchema = lazySchema(() =>
+  z.object({
+    type: z
+      .enum(['inherit', 'dsl', 'ilm'])
+      .describe(
+        '"inherit" from parent (wired only), "dsl" for data retention period, "ilm" for ILM policy'
+      ),
+    data_retention: z
+      .string()
+      .optional()
+      .describe('For "dsl" only: retention period, e.g. "30d", "90d", "1y". Omit for unlimited.'),
+    ilm_policy: z
+      .string()
+      .optional()
+      .describe(
+        'For "ilm" only: ILM policy name. Use list_ilm_policies to discover available policies.'
+      ),
+  })
+);
 
-const fieldsSchema = lazySchema(() => z
-  .record(
-    z.string(),
-    z.object({
-      type: z
-        .string()
-        .describe(
-          'Field type: keyword, match_only_text, long, double, date, boolean, ip, geo_point, system'
-        ),
-    })
-  )
-  .describe('Map of field names to definitions. Example: {"response_time":{"type":"long"}}'));
+const fieldsSchema = lazySchema(() =>
+  z
+    .record(
+      z.string(),
+      z.object({
+        type: z
+          .string()
+          .describe(
+            'Field type: keyword, match_only_text, long, double, date, boolean, ip, geo_point, system'
+          ),
+      })
+    )
+    .describe('Map of field names to definitions. Example: {"response_time":{"type":"long"}}')
+);
 
-const failureStoreSchema = lazySchema(() => z.object({
-  type: z
-    .enum(['inherit', 'disabled', 'enabled', 'enabled_no_lifecycle'])
-    .describe(
-      '"inherit" from parent, "disabled", "enabled" with retention, or "enabled_no_lifecycle"'
-    ),
-  data_retention: z
-    .string()
-    .optional()
-    .describe('For "enabled" only: retention period for failed documents, e.g. "30d".'),
-}));
+const failureStoreSchema = lazySchema(() =>
+  z.object({
+    type: z
+      .enum(['inherit', 'disabled', 'enabled', 'enabled_no_lifecycle'])
+      .describe(
+        '"inherit" from parent, "disabled", "enabled" with retention, or "enabled_no_lifecycle"'
+      ),
+    data_retention: z
+      .string()
+      .optional()
+      .describe('For "enabled" only: retention period for failed documents, e.g. "30d".'),
+  })
+);
 
-const queryStreamSchema = lazySchema(() => z.object({
-  esql: z
-    .string()
-    .describe(
-      'The ES|QL query that defines this query stream. Must include a FROM clause. For a child query stream (e.g. "logs.ecs.errors"), the FROM clause must reference the parent stream or its ES|QL view. Example: \'FROM logs.ecs | WHERE log.level == "error"\''
-    ),
-  field_descriptions: z
-    .record(z.string(), z.string())
-    .optional()
-    .describe(
-      'Optional map of field name -> human-readable description for fields the query produces. Example: {"error.message":"The human-readable error text"}'
-    ),
-}));
+const queryStreamSchema = lazySchema(() =>
+  z.object({
+    esql: z
+      .string()
+      .describe(
+        'The ES|QL query that defines this query stream. Must include a FROM clause. For a child query stream (e.g. "logs.ecs.errors"), the FROM clause must reference the parent stream or its ES|QL view. Example: \'FROM logs.ecs | WHERE log.level == "error"\''
+      ),
+    field_descriptions: z
+      .record(z.string(), z.string())
+      .optional()
+      .describe(
+        'Optional map of field name -> human-readable description for fields the query produces. Example: {"error.message":"The human-readable error text"}'
+      ),
+  })
+);
 
-const updateStreamSchema = lazySchema(() => z.object({
-  name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
-  changes: z
-    .object({
-      processing: z
-        .array(stepSchema)
-        .optional()
-        .describe(
-          'The complete processing pipeline as an array of step objects. Replaces the entire pipeline. Use the design pipeline tool to construct new steps. To remove a step, omit it. To reorder, change the array order.'
-        ),
-      description: z.string().optional().describe('Updated stream description'),
-      lifecycle: lifecycleSchema.optional(),
-      fields: fieldsSchema.optional(),
-      failure_store: failureStoreSchema.optional(),
-      query: queryStreamSchema
-        .optional()
-        .describe(
-          'Create or update a query stream (a read-only ES|QL view). If the named stream does not exist it is created as a query stream; if it already exists as a query stream its ES|QL is updated. Mutually exclusive with processing, lifecycle, fields, and failure_store — query streams have no ingest configuration. May be combined with changes.description.'
-        ),
-    })
-    .describe(
-      'All modifications go INSIDE this object. For processing changes, set changes.processing = [steps]. For lifecycle changes, set changes.lifecycle = {...}. To create or update a query stream, set changes.query = {esql, ...}. Never put processing or other change keys at the top level — they will be ignored.'
-    ),
-  confirmation_body: z
-    .string()
-    .optional()
-    .describe(
-      "Narrative summary of what will change and why. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the change. The actual changes go in the `changes` object."
-    ),
-}));
+const updateStreamSchema = lazySchema(() =>
+  z.object({
+    name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
+    changes: z
+      .object({
+        processing: z
+          .array(stepSchema)
+          .optional()
+          .describe(
+            'The complete processing pipeline as an array of step objects. Replaces the entire pipeline. Use the design pipeline tool to construct new steps. To remove a step, omit it. To reorder, change the array order.'
+          ),
+        description: z.string().optional().describe('Updated stream description'),
+        lifecycle: lifecycleSchema.optional(),
+        fields: fieldsSchema.optional(),
+        failure_store: failureStoreSchema.optional(),
+        query: queryStreamSchema
+          .optional()
+          .describe(
+            'Create or update a query stream (a read-only ES|QL view). If the named stream does not exist it is created as a query stream; if it already exists as a query stream its ES|QL is updated. Mutually exclusive with processing, lifecycle, fields, and failure_store — query streams have no ingest configuration. May be combined with changes.description.'
+          ),
+      })
+      .describe(
+        'All modifications go INSIDE this object. For processing changes, set changes.processing = [steps]. For lifecycle changes, set changes.lifecycle = {...}. To create or update a query stream, set changes.query = {esql, ...}. Never put processing or other change keys at the top level — they will be ignored.'
+      ),
+    confirmation_body: z
+      .string()
+      .optional()
+      .describe(
+        "Narrative summary of what will change and why. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the change. The actual changes go in the `changes` object."
+      ),
+  })
+);
 
 export const createUpdateStreamTool = ({
   getScopedClients,

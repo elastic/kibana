@@ -26,14 +26,16 @@ const SingleOverviewCustomSchema = z
   })
   .strict();
 
-const groupBySchema = lazySchema(() => z
-  .union([
-    z.literal('slo.tags'),
-    z.literal('status'),
-    z.literal('slo.indicator.type'),
-    z.literal('_index'), // remote cluster
-  ])
-  .default('status'));
+const groupBySchema = lazySchema(() =>
+  z
+    .union([
+      z.literal('slo.tags'),
+      z.literal('status'),
+      z.literal('slo.indicator.type'),
+      z.literal('_index'), // remote cluster
+    ])
+    .default('status')
+);
 
 const GroupOverviewCustomSchema = z
   .object({

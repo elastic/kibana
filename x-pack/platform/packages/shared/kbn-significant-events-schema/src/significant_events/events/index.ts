@@ -45,11 +45,13 @@ export const SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS = [
 
 export type SignificantEventManualStatus = (typeof SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)[number];
 
-export const significantEventManualStatusSchema = lazySchema(() => z
-  .enum(SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)
-  .describe(
-    `"${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure is confirmed or remains plausibly unverified; "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active (record the rationale in "assessment_note").`
-  ));
+export const significantEventManualStatusSchema = lazySchema(() =>
+  z
+    .enum(SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS)
+    .describe(
+      `"${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure is confirmed or remains plausibly unverified; "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active (record the rationale in "assessment_note").`
+    )
+);
 
 /**
  * Statuses that represent an unresolved / ongoing event. Deduplication uses this set to find a

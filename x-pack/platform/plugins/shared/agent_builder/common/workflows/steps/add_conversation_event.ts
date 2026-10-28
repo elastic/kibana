@@ -14,30 +14,34 @@ import { CONVERSATION_EVENT_TYPE_MAX_LENGTH } from '../../constants';
 
 export const AddConversationEventStepTypeId = 'ai.conversation.add_event';
 
-const InputSchema = lazySchema(() => z.object({
-  conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
-    description: 'The unique identifier of the conversation to append the event to.',
-  }),
-  type: z.string().min(1).max(CONVERSATION_EVENT_TYPE_MAX_LENGTH).meta({
-    description:
-      'The event type to append. Must be a custom event type registered by a plugin; built-in timeline event types are rejected.',
-  }),
-  data: z.record(z.string(), z.unknown()).default({}).meta({
-    description:
-      'The event payload. Its shape is defined by the registered event type and is validated against that type before the event is appended.',
-  }),
-}));
+const InputSchema = lazySchema(() =>
+  z.object({
+    conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
+      description: 'The unique identifier of the conversation to append the event to.',
+    }),
+    type: z.string().min(1).max(CONVERSATION_EVENT_TYPE_MAX_LENGTH).meta({
+      description:
+        'The event type to append. Must be a custom event type registered by a plugin; built-in timeline event types are rejected.',
+    }),
+    data: z.record(z.string(), z.unknown()).default({}).meta({
+      description:
+        'The event payload. Its shape is defined by the registered event type and is validated against that type before the event is appended.',
+    }),
+  })
+);
 
-const OutputSchema = lazySchema(() => z.object({
-  conversation_id: z
-    .string()
-    .meta({ description: 'The ID of the conversation the event was appended to.' }),
-  event_id: z.string().meta({ description: 'The server-assigned ID of the appended event.' }),
-  type: z.string().meta({ description: 'The type of the appended event.' }),
-  created_at: z
-    .string()
-    .meta({ description: 'The ISO timestamp assigned to the event by the server.' }),
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    conversation_id: z
+      .string()
+      .meta({ description: 'The ID of the conversation the event was appended to.' }),
+    event_id: z.string().meta({ description: 'The server-assigned ID of the appended event.' }),
+    type: z.string().meta({ description: 'The type of the appended event.' }),
+    created_at: z
+      .string()
+      .meta({ description: 'The ISO timestamp assigned to the event by the server.' }),
+  })
+);
 
 export type AddConversationEventInputSchema = typeof InputSchema;
 export type AddConversationEventOutputSchema = typeof OutputSchema;

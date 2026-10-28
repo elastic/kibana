@@ -10,13 +10,17 @@ import {
   compositeSloWithSummaryResponseSchema,
 } from '../../../schema/composite_slo';
 
-const batchGetCompositeSLOParamsSchema = lazySchema(() => z.object({
-  body: z.object({
-    ids: z.array(compositeSloIdSchema).min(1).max(100),
-  }),
-}));
+const batchGetCompositeSLOParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      ids: z.array(compositeSloIdSchema).min(1).max(100),
+    }),
+  })
+);
 
-const batchGetCompositeSLOResponseSchema = lazySchema(() => z.array(compositeSloWithSummaryResponseSchema));
+const batchGetCompositeSLOResponseSchema = lazySchema(() =>
+  z.array(compositeSloWithSummaryResponseSchema)
+);
 
 type BatchGetCompositeSLOParams = z.infer<typeof batchGetCompositeSLOParamsSchema.shape.body>;
 type BatchGetCompositeSLOResponse = z.output<typeof batchGetCompositeSLOResponseSchema>;

@@ -8,13 +8,17 @@ import { z, lazySchema } from '@kbn/zod';
 
 import { serverlessSloSettingsSchema, sloSettingsSchema } from '../../schema/settings';
 
-const putSLOSettingsParamsSchema = lazySchema(() => z.object({
-  body: sloSettingsSchema,
-}));
+const putSLOSettingsParamsSchema = lazySchema(() =>
+  z.object({
+    body: sloSettingsSchema,
+  })
+);
 
-const putSLOServerlessSettingsParamsSchema = lazySchema(() => z.object({
-  body: serverlessSloSettingsSchema,
-}));
+const putSLOServerlessSettingsParamsSchema = lazySchema(() =>
+  z.object({
+    body: serverlessSloSettingsSchema,
+  })
+);
 
 const putSLOSettingsResponseSchema = sloSettingsSchema;
 

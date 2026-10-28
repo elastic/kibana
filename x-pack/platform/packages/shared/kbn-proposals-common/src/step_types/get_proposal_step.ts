@@ -19,24 +19,28 @@ import {
 
 export const GetProposalStepId = 'proposals.getProposal' as const;
 
-export const getProposalStepInputSchema = lazySchema(() => z.object({
-  proposalId: z.string().describe('Proposal to read.'),
-}));
+export const getProposalStepInputSchema = lazySchema(() =>
+  z.object({
+    proposalId: z.string().describe('Proposal to read.'),
+  })
+);
 
 /** Only the fields a gating workflow branches on; not the whole record. */
-export const getProposalStepOutputSchema = lazySchema(() => z.object({
-  // Extracted from the stored schemas so the two vocabularies cannot drift.
-  status: proposalStatusSchema,
-  decision: proposalDecisionSchema.optional(),
-  decidedBy: proposalUserSchema.optional(),
-  supersededBy: z.string().optional(),
-  expiresAt: z.string().optional(),
-  actionWorkflowId: z.string().optional(),
-  /** Set only when the proposal was dismissed; absent on approved proposals. */
-  dismissReason: dismissReasonSchema.optional(),
-  /** Analyst-supplied rationale for the dismiss decision. */
-  rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
-}));
+export const getProposalStepOutputSchema = lazySchema(() =>
+  z.object({
+    // Extracted from the stored schemas so the two vocabularies cannot drift.
+    status: proposalStatusSchema,
+    decision: proposalDecisionSchema.optional(),
+    decidedBy: proposalUserSchema.optional(),
+    supersededBy: z.string().optional(),
+    expiresAt: z.string().optional(),
+    actionWorkflowId: z.string().optional(),
+    /** Set only when the proposal was dismissed; absent on approved proposals. */
+    dismissReason: dismissReasonSchema.optional(),
+    /** Analyst-supplied rationale for the dismiss decision. */
+    rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
+  })
+);
 
 export const getProposalStepCommonDefinition: BaseStepDefinition<
   typeof getProposalStepInputSchema,

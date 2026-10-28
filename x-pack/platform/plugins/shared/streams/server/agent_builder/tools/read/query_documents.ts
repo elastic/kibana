@@ -29,27 +29,29 @@ const MAX_STRING_LENGTH = 200;
 const MAX_FIELDS_FOR_PROMPT = 1000;
 const MAX_FIELDS_PROMPT_CHARS = 20_000;
 
-const queryDocumentsSchema = lazySchema(() => z.object({
-  name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
-  query: z.string().describe(
-    dedent(`Natural language description of what to search or aggregate. Include field names when known. Examples:
+const queryDocumentsSchema = lazySchema(() =>
+  z.object({
+    name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
+    query: z.string().describe(
+      dedent(`Natural language description of what to search or aggregate. Include field names when known. Examples:
       - "show me 10 recent documents"
       - "top 5 values of host.name"
       - "count documents by log.level"
       - "errors from the last hour"
       - "average event.duration where http.response.status_code >= 500"`)
-  ),
-  source: z
-    .enum(['data', 'failures'])
-    .optional()
-    .default('data')
-    .describe(
-      'Which store to query. "data" (default) queries successfully indexed documents. ' +
-        '"failures" queries the failure store — rejected documents wrapped with error metadata ' +
-        '(error.type, error.message, error.stack_trace, and the original document under document.source). ' +
-        'Use "failures" after diagnose_stream flags processing errors to see raw rejected documents.'
     ),
-}));
+    source: z
+      .enum(['data', 'failures'])
+      .optional()
+      .default('data')
+      .describe(
+        'Which store to query. "data" (default) queries successfully indexed documents. ' +
+          '"failures" queries the failure store — rejected documents wrapped with error metadata ' +
+          '(error.type, error.message, error.stack_trace, and the original document under document.source). ' +
+          'Use "failures" after diagnose_stream flags processing errors to see raw rejected documents.'
+      ),
+  })
+);
 
 const DISALLOWED_DSL_KEYS = new Set([
   'script',

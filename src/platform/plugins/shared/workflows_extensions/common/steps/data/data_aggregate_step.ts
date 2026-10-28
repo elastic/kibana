@@ -8,40 +8,50 @@
  */
 
 import { StepCategory } from '@kbn/workflows';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataAggregateStepTypeId = 'data.aggregate' as const;
 
-const MetricSchema = lazySchema(() => z.object({
-  name: z.string(),
-  operation: z.enum(['count', 'sum', 'avg', 'min', 'max']),
-  field: z.string().optional(),
-}));
+const MetricSchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    operation: z.enum(['count', 'sum', 'avg', 'min', 'max']),
+    field: z.string().optional(),
+  })
+);
 
-const BucketRangeSchema = lazySchema(() => z.object({
-  from: z.number().optional(),
-  to: z.number().optional(),
-  label: z.string().optional(),
-}));
+const BucketRangeSchema = lazySchema(() =>
+  z.object({
+    from: z.number().optional(),
+    to: z.number().optional(),
+    label: z.string().optional(),
+  })
+);
 
-const BucketConfigSchema = lazySchema(() => z.object({
-  field: z.string(),
-  ranges: z.array(BucketRangeSchema).min(1),
-}));
+const BucketConfigSchema = lazySchema(() =>
+  z.object({
+    field: z.string(),
+    ranges: z.array(BucketRangeSchema).min(1),
+  })
+);
 
-export const ConfigSchema = lazySchema(() => z.object({
-  items: z.unknown(),
-}));
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    items: z.unknown(),
+  })
+);
 
-export const InputSchema = lazySchema(() => z.object({
-  group_by: z.array(z.string()).min(1),
-  metrics: z.array(MetricSchema).min(1),
-  buckets: BucketConfigSchema.optional(),
-  order_by: z.string().optional(),
-  order: z.enum(['asc', 'desc']).optional().default('asc'),
-  limit: z.number().positive().optional(),
-}));
+export const InputSchema = lazySchema(() =>
+  z.object({
+    group_by: z.array(z.string()).min(1),
+    metrics: z.array(MetricSchema).min(1),
+    buckets: BucketConfigSchema.optional(),
+    order_by: z.string().optional(),
+    order: z.enum(['asc', 'desc']).optional().default('asc'),
+    limit: z.number().positive().optional(),
+  })
+);
 
 export const OutputSchema = lazySchema(() => z.array(z.record(z.string(), z.unknown())));
 

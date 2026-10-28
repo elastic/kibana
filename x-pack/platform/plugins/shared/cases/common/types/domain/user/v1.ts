@@ -7,36 +7,44 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-const UserWithoutProfileUidSchema = lazySchema(() => z.object({
-  email: z.union([z.string(), z.null(), z.undefined()]),
-  full_name: z.union([z.string(), z.null(), z.undefined()]),
-  username: z.union([z.string(), z.null(), z.undefined()]),
-}));
+const UserWithoutProfileUidSchema = lazySchema(() =>
+  z.object({
+    email: z.union([z.string(), z.null(), z.undefined()]),
+    full_name: z.union([z.string(), z.null(), z.undefined()]),
+    username: z.union([z.string(), z.null(), z.undefined()]),
+  })
+);
 
-export const UserSchema = lazySchema(() => UserWithoutProfileUidSchema.extend({
-  profile_uid: z.string().optional(),
-}));
+export const UserSchema = lazySchema(() =>
+  UserWithoutProfileUidSchema.extend({
+    profile_uid: z.string().optional(),
+  })
+);
 
-export const UserWithProfileInfoSchema = lazySchema(() => z.object({
-  user: UserWithoutProfileUidSchema,
-  uid: z.string().optional(),
-  avatar: z
-    .object({
-      initials: z.string().nullable().optional(),
-      color: z.string().nullable().optional(),
-      imageUrl: z.string().nullable().optional(),
-    })
-    .optional(),
-}));
+export const UserWithProfileInfoSchema = lazySchema(() =>
+  z.object({
+    user: UserWithoutProfileUidSchema,
+    uid: z.string().optional(),
+    avatar: z
+      .object({
+        initials: z.string().nullable().optional(),
+        color: z.string().nullable().optional(),
+        imageUrl: z.string().nullable().optional(),
+      })
+      .optional(),
+  })
+);
 
 export const UsersSchema = lazySchema(() => z.array(UserSchema));
 
 export type User = z.infer<typeof UserSchema>;
 export type UserWithProfileInfo = z.infer<typeof UserWithProfileInfoSchema>;
 
-export const CaseUserProfileSchema = lazySchema(() => z.object({
-  uid: z.string(),
-}));
+export const CaseUserProfileSchema = lazySchema(() =>
+  z.object({
+    uid: z.string(),
+  })
+);
 
 export type CaseUserProfile = z.infer<typeof CaseUserProfileSchema>;
 
@@ -47,12 +55,14 @@ export type CaseUserProfile = z.infer<typeof CaseUserProfileSchema>;
 export const CaseUserProfilesSchema = lazySchema(() => z.array(CaseUserProfileSchema));
 export type CaseUserProfiles = z.infer<typeof CaseUserProfilesSchema>;
 
-export const CaseAssigneeSchema = lazySchema(() => z.object({
-  uid: z.string(),
-  username: z.string().nullable().optional(),
-  full_name: z.string().nullable().optional(),
-  email: z.string().nullable().optional(),
-}));
+export const CaseAssigneeSchema = lazySchema(() =>
+  z.object({
+    uid: z.string(),
+    username: z.string().nullable().optional(),
+    full_name: z.string().nullable().optional(),
+    email: z.string().nullable().optional(),
+  })
+);
 
 export type CaseAssignee = z.infer<typeof CaseAssigneeSchema>;
 

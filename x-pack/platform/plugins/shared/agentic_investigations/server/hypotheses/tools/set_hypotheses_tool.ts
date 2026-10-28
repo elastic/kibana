@@ -20,42 +20,46 @@ import { createInvestigationTool } from '../../investigation_attachments';
 import type { ResolveUser } from '../../services/resolve_user';
 import type { HypothesesService } from '../services/hypotheses_service';
 
-const setHypothesisSchema = lazySchema(() => z.object({
-  candidate: z
-    .string()
-    .min(1)
-    .max(MAX_EVIDENCE_TEXT_LENGTH)
-    .describe('The candidate cause under consideration, stated concretely.'),
-  confidence: z
-    .number()
-    .min(0)
-    .max(1)
-    .describe('Current confidence in this hypothesis, from 0 to 1.'),
-  status: hypothesisStatusSchema.describe(
-    '"investigating" while open, "dismissed" once ruled out, "confirmed" for the root cause.'
-  ),
-  reason: z
-    .string()
-    .max(MAX_EVIDENCE_TEXT_LENGTH)
-    .optional()
-    .describe(
-      'Why it was dismissed or confirmed, or the current reasoning while investigating. Markdown.'
+const setHypothesisSchema = lazySchema(() =>
+  z.object({
+    candidate: z
+      .string()
+      .min(1)
+      .max(MAX_EVIDENCE_TEXT_LENGTH)
+      .describe('The candidate cause under consideration, stated concretely.'),
+    confidence: z
+      .number()
+      .min(0)
+      .max(1)
+      .describe('Current confidence in this hypothesis, from 0 to 1.'),
+    status: hypothesisStatusSchema.describe(
+      '"investigating" while open, "dismissed" once ruled out, "confirmed" for the root cause.'
     ),
-  evidence: z
-    .array(investigationEvidenceSchema)
-    .max(MAX_HYPOTHESIS_EVIDENCE)
-    .optional()
-    .describe('What the status rests on, ideally a chart of the signal that supports it.'),
-}));
+    reason: z
+      .string()
+      .max(MAX_EVIDENCE_TEXT_LENGTH)
+      .optional()
+      .describe(
+        'Why it was dismissed or confirmed, or the current reasoning while investigating. Markdown.'
+      ),
+    evidence: z
+      .array(investigationEvidenceSchema)
+      .max(MAX_HYPOTHESIS_EVIDENCE)
+      .optional()
+      .describe('What the status rests on, ideally a chart of the signal that supports it.'),
+  })
+);
 
-export const setHypothesesToolSchema = lazySchema(() => z.object({
-  hypotheses: z
-    .array(setHypothesisSchema)
-    .max(MAX_HYPOTHESES)
-    .describe(
-      'Every hypothesis considered so far, each with its own confidence and status, not only those that changed.'
-    ),
-}));
+export const setHypothesesToolSchema = lazySchema(() =>
+  z.object({
+    hypotheses: z
+      .array(setHypothesisSchema)
+      .max(MAX_HYPOTHESES)
+      .describe(
+        'Every hypothesis considered so far, each with its own confidence and status, not only those that changed.'
+      ),
+  })
+);
 
 export type SetHypothesesToolParams = z.infer<typeof setHypothesesToolSchema>;
 

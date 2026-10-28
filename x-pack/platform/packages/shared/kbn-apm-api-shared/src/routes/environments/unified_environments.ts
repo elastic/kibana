@@ -13,8 +13,10 @@ import { MAX_SERVICE_NAME_LENGTH } from '../../constants';
 
 export const unifiedEnvironmentsRoute = defineRoute<EnvironmentsResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/unified_environments',
-  params: lazySchema(() => z.object({
-    path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
-    query: rangeSchema,
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
+      query: rangeSchema,
+    })
+  ),
 });

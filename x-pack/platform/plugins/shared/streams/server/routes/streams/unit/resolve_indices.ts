@@ -30,11 +30,13 @@ import { getDataStreamLifecycle, getFailureStore } from '../../../lib/streams/st
 import { processAsyncInChunks } from '../../../utils/process_async_in_chunks';
 import { createServerRoute } from '../../create_server_route';
 
-const unitPathSchema = lazySchema(() => z.object({
-  path: z.object({
-    id: streamsUnitIdentifierSchema.describe('The unit id.'),
-  }),
-}));
+const unitPathSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: streamsUnitIdentifierSchema.describe('The unit id.'),
+    }),
+  })
+);
 
 const assertStreamsCanvasEnabled = async (uiSettingsClient: {
   get: (key: string) => Promise<unknown>;

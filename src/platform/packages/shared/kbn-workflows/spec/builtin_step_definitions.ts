@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import {
   ConsoleStepInputSchema,
   DataSetStepInputSchema,
@@ -291,10 +291,12 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     category: StepCategory.FlowControl,
     stability: 'tech_preview',
     inputSchema: WaitForInputStepInputSchema,
-    outputSchema: lazySchema(() => z.object({
-      response: z.record(z.string().max(MAX_HITL_RESPONSE_FIELD_KEY_LENGTH), z.unknown()),
-      ...hitlAuditOutputFields,
-    })),
+    outputSchema: lazySchema(() =>
+      z.object({
+        response: z.record(z.string().max(MAX_HITL_RESPONSE_FIELD_KEY_LENGTH), z.unknown()),
+        ...hitlAuditOutputFields,
+      })
+    ),
     documentation: {
       examples: [
         `- name: wait_for_approval
@@ -377,10 +379,12 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     category: StepCategory.FlowControl,
     stability: 'tech_preview',
     inputSchema: WaitForApprovalStepInputSchema,
-    outputSchema: lazySchema(() => z.object({
-      response: z.object({ approved: z.boolean() }),
-      ...hitlAuditOutputFields,
-    })),
+    outputSchema: lazySchema(() =>
+      z.object({
+        response: z.object({ approved: z.boolean() }),
+        ...hitlAuditOutputFields,
+      })
+    ),
     documentation: {
       examples: [
         `- name: request-approval

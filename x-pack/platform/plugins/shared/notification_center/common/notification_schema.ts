@@ -103,15 +103,17 @@ const notificationObject = z
  * The assembled write payload, validated before append.
  * The `(namespace, type)` pair must be registered in the NOTIFICATION_REGISTRY.
  */
-export const notificationWriteSchema = lazySchema(() => notificationObject.superRefine((value, ctx) => {
-  if (!isRegisteredNotificationRef(value.namespace, value.type)) {
-    ctx.addIssue({
-      code: 'custom',
-      path: ['type'],
-      message: `type "${value.type}" is not registered under namespace "${value.namespace}"`,
-    });
-  }
-}));
+export const notificationWriteSchema = lazySchema(() =>
+  notificationObject.superRefine((value, ctx) => {
+    if (!isRegisteredNotificationRef(value.namespace, value.type)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['type'],
+        message: `type "${value.type}" is not registered under namespace "${value.namespace}"`,
+      });
+    }
+  })
+);
 
 /**
  * Shape of a notification stored in the NC data stream.

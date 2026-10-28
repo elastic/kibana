@@ -81,29 +81,31 @@ const listAttachmentsRoute = createServerRoute({
       },
     }),
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
-    }),
-    query: z
-      .object({
-        query: z
-          .optional(z.string().max(1000))
-          .describe('Search query to filter attachments by title'),
-        attachmentTypes: z
-          .optional(
-            z.union([
-              attachmentTypeSchema,
-              z.array(attachmentTypeSchema).max(ATTACHMENT_TYPES.length),
-            ])
-          )
-          .describe('Filter by attachment types (single value or array)'),
-        tags: z
-          .optional(z.union([z.string().max(256), z.array(z.string().max(256)).max(100)]))
-          .describe('Filter by tags (single value or array)'),
-      })
-      .optional(),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
+      }),
+      query: z
+        .object({
+          query: z
+            .optional(z.string().max(1000))
+            .describe('Search query to filter attachments by title'),
+          attachmentTypes: z
+            .optional(
+              z.union([
+                attachmentTypeSchema,
+                z.array(attachmentTypeSchema).max(ATTACHMENT_TYPES.length),
+              ])
+            )
+            .describe('Filter by attachment types (single value or array)'),
+          tags: z
+            .optional(z.union([z.string().max(256), z.array(z.string().max(256)).max(100)]))
+            .describe('Filter by tags (single value or array)'),
+        })
+        .optional(),
+    })
+  ),
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
@@ -185,13 +187,15 @@ const linkAttachmentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
-      attachmentType: attachmentTypeSchema.describe('The type of the attachment'),
-      attachmentId: z.string().max(256).describe('The ID of the attachment'),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
+        attachmentType: attachmentTypeSchema.describe('The type of the attachment'),
+        attachmentId: z.string().max(256).describe('The ID of the attachment'),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }): Promise<LinkAttachmentResponse> => {
     const { attachmentClient, streamsClient } = await getScopedClients({
       request,
@@ -261,13 +265,15 @@ const unlinkAttachmentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
-      attachmentType: attachmentTypeSchema.describe('The type of the attachment'),
-      attachmentId: z.string().max(256).describe('The ID of the attachment'),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
+        attachmentType: attachmentTypeSchema.describe('The type of the attachment'),
+        attachmentId: z.string().max(256).describe('The ID of the attachment'),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }): Promise<UnlinkAttachmentResponse> => {
     const { attachmentClient, streamsClient } = await getScopedClients({
       request,
@@ -290,10 +296,12 @@ const unlinkAttachmentRoute = createServerRoute({
   },
 });
 
-const attachmentSchema = lazySchema(() => z.object({
-  id: z.string().max(256),
-  type: attachmentTypeSchema,
-}));
+const attachmentSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(256),
+    type: attachmentTypeSchema,
+  })
+);
 
 const bulkAttachmentsRoute = createServerRoute({
   endpoint: `POST /api/streams/{streamName}/attachments/_bulk 2023-10-31`,
@@ -356,25 +364,27 @@ const bulkAttachmentsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
-    }),
-    body: z.object({
-      operations: z
-        .array(
-          z.union([
-            z.object({
-              index: attachmentSchema,
-            }),
-            z.object({
-              delete: attachmentSchema,
-            }),
-          ])
-        )
-        .max(1000),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        streamName: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream'),
+      }),
+      body: z.object({
+        operations: z
+          .array(
+            z.union([
+              z.object({
+                index: attachmentSchema,
+              }),
+              z.object({
+                delete: attachmentSchema,
+              }),
+            ])
+          )
+          .max(1000),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,

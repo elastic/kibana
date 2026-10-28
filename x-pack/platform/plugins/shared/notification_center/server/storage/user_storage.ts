@@ -42,11 +42,13 @@ export const readAllBeforeSchema = isoDateTime();
  */
 export const readOverrideSchema = z.object({ read: z.boolean(), markedAt: isoDateTime() }).strict();
 
-export const overridesSchema = lazySchema(() => z
-  .record(notificationIdSchema, readOverrideSchema)
-  .refine((overrides) => Object.keys(overrides).length <= MAX_OVERRIDES, {
-    message: `Cannot exceed ${MAX_OVERRIDES} read overrides`,
-  }));
+export const overridesSchema = lazySchema(() =>
+  z
+    .record(notificationIdSchema, readOverrideSchema)
+    .refine((overrides) => Object.keys(overrides).length <= MAX_OVERRIDES, {
+      message: `Cannot exceed ${MAX_OVERRIDES} read overrides`,
+    })
+);
 
 export type ReadOverride = z.infer<typeof readOverrideSchema>;
 export type ReadOverrides = z.infer<typeof overridesSchema>;

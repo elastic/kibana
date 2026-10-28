@@ -32,56 +32,60 @@ export const MAX_ENTITIES = 100;
 export const MAX_ALERT_ENTITY_ID_LENGTH = 256;
 export const MAX_ALERT_ENTITY_NAME_LENGTH = 512;
 
-export const getAlertEntitiesInputSchema = lazySchema(() => z.object({
-  alert_ids: z
-    .array(z.string().min(1).max(MAX_ALERT_ID_LENGTH))
-    .min(1)
-    .max(MAX_ALERT_IDS)
-    .describe('IDs of the detection alerts, in the current space, to resolve entities from'),
-  entity_types: z
-    .array(z.enum(ALERT_ENTITY_TYPES))
-    .min(1)
-    .max(ALERT_ENTITY_TYPES.length)
-    // A repeated type would return each of its entities twice and double count the total.
-    .refine((entityTypes) => new Set(entityTypes).size === entityTypes.length, {
-      message: 'entity_types must not repeat a type',
-    })
-    .optional()
-    .default(DEFAULT_ALERT_ENTITY_TYPES)
-    .describe('Entity types to resolve (default: host, user)'),
-  max_entities: z.coerce
-    .number()
-    .finite()
-    .int()
-    .min(1)
-    .max(MAX_ENTITIES)
-    .optional()
-    .default(DEFAULT_MAX_ENTITIES)
-    .describe(
-      `The most entities to return, most-alerted first (default: ${DEFAULT_MAX_ENTITIES}, max: ${MAX_ENTITIES})`
-    ),
-}));
-
-export const getAlertEntitiesOutputSchema = lazySchema(() => z.object({
-  entities: z
-    .array(
-      z.object({
-        id: z.string().min(1).max(MAX_ALERT_ENTITY_ID_LENGTH).describe('Entity Store entity id'),
-        type: z.enum(ALERT_ENTITY_TYPES),
-        name: z
-          .string()
-          .min(1)
-          .max(MAX_ALERT_ENTITY_NAME_LENGTH)
-          .optional()
-          .describe(
-            'Display name, taken from the entity’s most recent alert; absent if it has none'
-          ),
+export const getAlertEntitiesInputSchema = lazySchema(() =>
+  z.object({
+    alert_ids: z
+      .array(z.string().min(1).max(MAX_ALERT_ID_LENGTH))
+      .min(1)
+      .max(MAX_ALERT_IDS)
+      .describe('IDs of the detection alerts, in the current space, to resolve entities from'),
+    entity_types: z
+      .array(z.enum(ALERT_ENTITY_TYPES))
+      .min(1)
+      .max(ALERT_ENTITY_TYPES.length)
+      // A repeated type would return each of its entities twice and double count the total.
+      .refine((entityTypes) => new Set(entityTypes).size === entityTypes.length, {
+        message: 'entity_types must not repeat a type',
       })
-    )
-    .describe('The entities, most-alerted first, ties broken by id'),
-  total: z.number().int().describe('How many distinct entities the alerts reference'),
-  truncated: z.boolean().describe('Whether `entities` holds fewer than `total`'),
-}));
+      .optional()
+      .default(DEFAULT_ALERT_ENTITY_TYPES)
+      .describe('Entity types to resolve (default: host, user)'),
+    max_entities: z.coerce
+      .number()
+      .finite()
+      .int()
+      .min(1)
+      .max(MAX_ENTITIES)
+      .optional()
+      .default(DEFAULT_MAX_ENTITIES)
+      .describe(
+        `The most entities to return, most-alerted first (default: ${DEFAULT_MAX_ENTITIES}, max: ${MAX_ENTITIES})`
+      ),
+  })
+);
+
+export const getAlertEntitiesOutputSchema = lazySchema(() =>
+  z.object({
+    entities: z
+      .array(
+        z.object({
+          id: z.string().min(1).max(MAX_ALERT_ENTITY_ID_LENGTH).describe('Entity Store entity id'),
+          type: z.enum(ALERT_ENTITY_TYPES),
+          name: z
+            .string()
+            .min(1)
+            .max(MAX_ALERT_ENTITY_NAME_LENGTH)
+            .optional()
+            .describe(
+              'Display name, taken from the entity’s most recent alert; absent if it has none'
+            ),
+        })
+      )
+      .describe('The entities, most-alerted first, ties broken by id'),
+    total: z.number().int().describe('How many distinct entities the alerts reference'),
+    truncated: z.boolean().describe('Whether `entities` holds fewer than `total`'),
+  })
+);
 
 export const getAlertEntitiesStepCommonDefinition: BaseStepDefinition<
   typeof getAlertEntitiesInputSchema,

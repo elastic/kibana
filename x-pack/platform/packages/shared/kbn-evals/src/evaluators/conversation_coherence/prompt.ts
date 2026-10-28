@@ -13,9 +13,11 @@ import userPromptText from './user_prompt.text';
 export const LlmCoherenceEvaluationPrompt = createPrompt({
   name: 'llm_coherence_evaluation',
   description: 'Prompt for evaluating the coherence of multi-turn conversations',
-  input: lazySchema(() => z.object({
-    conversation: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      conversation: z.string(),
+    })
+  ),
 })
   .version({
     system: {

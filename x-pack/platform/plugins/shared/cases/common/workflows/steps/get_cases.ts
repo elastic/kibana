@@ -14,24 +14,30 @@ import { MAX_BULK_GET_CASES } from '../../constants';
 
 export const GetCasesStepTypeId = 'cases.getCases';
 
-const InputSchema = lazySchema(() => z.object({
-  case_ids: z
-    .array(z.string().min(1))
-    .min(1, 'at least one case_id is required')
-    .max(MAX_BULK_GET_CASES),
-}));
+const InputSchema = lazySchema(() =>
+  z.object({
+    case_ids: z
+      .array(z.string().min(1))
+      .min(1, 'at least one case_id is required')
+      .max(MAX_BULK_GET_CASES),
+  })
+);
 
-const BulkGetErrorSchema = lazySchema(() => z.object({
-  error: z.string(),
-  message: z.string(),
-  status: z.number().int().optional(),
-  caseId: z.string(),
-}));
+const BulkGetErrorSchema = lazySchema(() =>
+  z.object({
+    error: z.string(),
+    message: z.string(),
+    status: z.number().int().optional(),
+    caseId: z.string(),
+  })
+);
 
-const OutputSchema = lazySchema(() => z.object({
-  cases: z.array(CaseResponsePropertiesSchema).max(MAX_BULK_GET_CASES),
-  errors: z.array(BulkGetErrorSchema),
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(CaseResponsePropertiesSchema).max(MAX_BULK_GET_CASES),
+    errors: z.array(BulkGetErrorSchema),
+  })
+);
 
 type GetCasesStepInputSchema = typeof InputSchema;
 type GetCasesStepOutputSchema = typeof OutputSchema;

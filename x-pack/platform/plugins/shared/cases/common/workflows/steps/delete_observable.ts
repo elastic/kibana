@@ -17,10 +17,12 @@ const InputSchema = CasesStepCaseIdSchema.extend({
   observable_id: lazySchema(() => z.string().min(1, 'observable_id is required')),
 });
 
-const OutputSchema = lazySchema(() => z.object({
-  case_id: z.string(),
-  observable_id: z.string(),
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    case_id: z.string(),
+    observable_id: z.string(),
+  })
+);
 
 type DeleteObservableStepInputSchema = typeof InputSchema;
 type DeleteObservableStepOutputSchema = typeof OutputSchema;

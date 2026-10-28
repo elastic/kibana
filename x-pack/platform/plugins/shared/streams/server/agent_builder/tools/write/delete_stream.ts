@@ -17,15 +17,17 @@ import { classifyError } from '../../utils/error_utils';
 import { getConfirmationMessage } from './confirmation_helpers';
 import { type StreamsWriteQueue, abortSignalFromRequest } from '../../utils/write_queue';
 
-const deleteStreamSchema = lazySchema(() => z.object({
-  name: z.string().describe('Stream name to delete, e.g. "logs.ecs.nginx"'),
-  confirmation_body: z
-    .string()
-    .optional()
-    .describe(
-      "Narrative summary of what will be deleted and why. Include child streams, approximate document count, retention policy, and any warnings. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the operation."
-    ),
-}));
+const deleteStreamSchema = lazySchema(() =>
+  z.object({
+    name: z.string().describe('Stream name to delete, e.g. "logs.ecs.nginx"'),
+    confirmation_body: z
+      .string()
+      .optional()
+      .describe(
+        "Narrative summary of what will be deleted and why. Include child streams, approximate document count, retention policy, and any warnings. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the operation."
+      ),
+  })
+);
 
 export const createDeleteStreamTool = ({
   getScopedClients,

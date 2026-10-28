@@ -11,25 +11,31 @@ import {
   compositeStatusSchema,
 } from '../../../schema/composite_slo';
 
-const compositeHistoricalSummarySchema = lazySchema(() => z.object({
-  date: z.string(),
-  status: compositeStatusSchema,
-  sliValue: z.number(),
-  errorBudget: compositeErrorBudgetSchema,
-}));
-
-const fetchCompositeHistoricalSummaryParamsSchema = lazySchema(() => z.object({
-  body: z.object({
-    list: z.array(compositeSloIdSchema),
-  }),
-}));
-
-const fetchCompositeHistoricalSummaryResponseSchema = lazySchema(() => z.array(
+const compositeHistoricalSummarySchema = lazySchema(() =>
   z.object({
-    compositeId: compositeSloIdSchema,
-    data: z.array(compositeHistoricalSummarySchema),
+    date: z.string(),
+    status: compositeStatusSchema,
+    sliValue: z.number(),
+    errorBudget: compositeErrorBudgetSchema,
   })
-));
+);
+
+const fetchCompositeHistoricalSummaryParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z.array(compositeSloIdSchema),
+    }),
+  })
+);
+
+const fetchCompositeHistoricalSummaryResponseSchema = lazySchema(() =>
+  z.array(
+    z.object({
+      compositeId: compositeSloIdSchema,
+      data: z.array(compositeHistoricalSummarySchema),
+    })
+  )
+);
 
 type FetchCompositeHistoricalSummaryParams = z.infer<
   typeof fetchCompositeHistoricalSummaryParamsSchema.shape.body

@@ -28,17 +28,19 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
       requiredPrivileges: ['agentBuilder:write'],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
-    body: z
-      .object({
-        /** The calling run's own execution; it differs from the ID when the run continues one. */
-        execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
-      })
-      .nullish(),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      }),
+      body: z
+        .object({
+          /** The calling run's own execution; it differs from the ID when the run continues one. */
+          execution_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+        })
+        .nullish(),
+    })
+  ),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
     try {

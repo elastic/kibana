@@ -16,12 +16,14 @@ import { z, lazySchema } from '@kbn/zod/v4';
  * Grid dimensions (in dashboard grid units) for layout.
  * Dashboard grid is 48 columns wide; height is in same units.
  */
-export const panelGridSchema = lazySchema(() => z.object({
-  x: z.number(),
-  y: z.number(),
-  w: z.number().int().min(1).max(48),
-  h: z.number().int().min(1),
-}));
+export const panelGridSchema = lazySchema(() =>
+  z.object({
+    x: z.number(),
+    y: z.number(),
+    w: z.number().int().min(1).max(48),
+    h: z.number().int().min(1),
+  })
+);
 
 // ============================================================================
 // Panel Schema
@@ -31,12 +33,14 @@ export const panelGridSchema = lazySchema(() => z.object({
  * Zod schema for dashboard panel entries.
  * The `type` field contains the actual embeddable type.
  */
-const attachmentPanelSchema = lazySchema(() => z.object({
-  type: z.string(),
-  id: z.string(),
-  config: z.record(z.string(), z.unknown()),
-  grid: panelGridSchema,
-}));
+const attachmentPanelSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    id: z.string(),
+    config: z.record(z.string(), z.unknown()),
+    grid: panelGridSchema,
+  })
+);
 
 export type AttachmentPanel = z.infer<typeof attachmentPanelSchema>;
 
@@ -44,17 +48,21 @@ export type AttachmentPanel = z.infer<typeof attachmentPanelSchema>;
 // Section Schema
 // ============================================================================
 
-export const sectionGridSchema = lazySchema(() => z.object({
-  y: z.number().int().min(0).describe('Section position in outer dashboard grid coordinates.'),
-}));
+export const sectionGridSchema = lazySchema(() =>
+  z.object({
+    y: z.number().int().min(0).describe('Section position in outer dashboard grid coordinates.'),
+  })
+);
 
-const dashboardSectionSchema = lazySchema(() => z.object({
-  id: z.string(),
-  title: z.string(),
-  collapsed: z.boolean(),
-  grid: sectionGridSchema,
-  panels: z.array(attachmentPanelSchema),
-}));
+const dashboardSectionSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    title: z.string(),
+    collapsed: z.boolean(),
+    grid: sectionGridSchema,
+    panels: z.array(attachmentPanelSchema),
+  })
+);
 
 export type DashboardSection = z.infer<typeof dashboardSectionSchema>;
 
@@ -68,68 +76,78 @@ export const isSection = (
 // Query Schema
 // ============================================================================
 
-const querySchema = lazySchema(() => z.object({
-  expression: z.union([z.string(), z.record(z.string(), z.unknown())]),
-  language: z.string(),
-}));
+const querySchema = lazySchema(() =>
+  z.object({
+    expression: z.union([z.string(), z.record(z.string(), z.unknown())]),
+    language: z.string(),
+  })
+);
 
 // ============================================================================
 // Time Range Schema
 // ============================================================================
 
-export const timeRangeSchema = lazySchema(() => z.object({
-  from: z
-    .string()
-    .max(100)
-    .describe(
-      'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-90d") or ISO 8601 strings for absolute dates (e.g. "2024-05-20T00:00:00.000Z").'
-    ),
-  to: z
-    .string()
-    .max(100)
-    .describe(
-      'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end date (e.g. "2024-05-24T23:59:59.999Z").'
-    ),
-  mode: z
-    .union([z.literal('absolute'), z.literal('relative')])
-    .optional()
-    .describe(
-      'Optional mode hint. Use "relative" when from/to use date math expressions, "absolute" when using exact ISO 8601 timestamps.'
-    ),
-}));
+export const timeRangeSchema = lazySchema(() =>
+  z.object({
+    from: z
+      .string()
+      .max(100)
+      .describe(
+        'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-90d") or ISO 8601 strings for absolute dates (e.g. "2024-05-20T00:00:00.000Z").'
+      ),
+    to: z
+      .string()
+      .max(100)
+      .describe(
+        'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end date (e.g. "2024-05-24T23:59:59.999Z").'
+      ),
+    mode: z
+      .union([z.literal('absolute'), z.literal('relative')])
+      .optional()
+      .describe(
+        'Optional mode hint. Use "relative" when from/to use date math expressions, "absolute" when using exact ISO 8601 timestamps.'
+      ),
+  })
+);
 
 // ============================================================================
 // Refresh Interval Schema
 // ============================================================================
 
-const refreshIntervalSchema = lazySchema(() => z.object({
-  pause: z.boolean(),
-  value: z.number(),
-}));
+const refreshIntervalSchema = lazySchema(() =>
+  z.object({
+    pause: z.boolean(),
+    value: z.number(),
+  })
+);
 
 // ============================================================================
 // Dashboard Options Schema
 // ============================================================================
 
-const optionsSchema = lazySchema(() => z.object({
-  auto_apply_filters: z.boolean().optional(),
-  hide_panel_titles: z.boolean().optional(),
-  hide_panel_borders: z.boolean().optional(),
-  use_margins: z.boolean().optional(),
-  sync_colors: z.boolean().optional(),
-  sync_tooltips: z.boolean().optional(),
-  sync_cursor: z.boolean().optional(),
-}));
+const optionsSchema = lazySchema(() =>
+  z.object({
+    auto_apply_filters: z.boolean().optional(),
+    hide_panel_titles: z.boolean().optional(),
+    hide_panel_borders: z.boolean().optional(),
+    use_margins: z.boolean().optional(),
+    sync_colors: z.boolean().optional(),
+    sync_tooltips: z.boolean().optional(),
+    sync_cursor: z.boolean().optional(),
+  })
+);
 
 // ============================================================================
 // Access Control Schema
 // ============================================================================
 
-const accessControlSchema = lazySchema(() => z
-  .object({
-    access_mode: z.union([z.literal('write_restricted'), z.literal('default')]).optional(),
-  })
-  .optional());
+const accessControlSchema = lazySchema(() =>
+  z
+    .object({
+      access_mode: z.union([z.literal('write_restricted'), z.literal('default')]).optional(),
+    })
+    .optional()
+);
 
 // ============================================================================
 // Filter Schema
@@ -154,20 +172,22 @@ const pinnedPanelsSchema = lazySchema(() => z.array(pinnedControlSchema));
  * Zod schema for dashboard attachment data.
  * This schema matches the structure of DashboardState from @kbn/dashboard-plugin.
  */
-export const dashboardAttachmentDataSchema = lazySchema(() => z.object({
-  title: z.string(),
-  description: z.string().optional(),
-  panels: z.array(z.union([attachmentPanelSchema, dashboardSectionSchema])),
-  query: querySchema.optional(),
-  time_range: timeRangeSchema.optional(),
-  refresh_interval: refreshIntervalSchema.optional(),
-  filters: z.array(filterSchema).optional(),
-  options: optionsSchema.optional(),
-  tags: z.array(z.string()).optional(),
-  pinned_panels: pinnedPanelsSchema.optional(),
-  access_control: accessControlSchema.optional(),
-  project_routing: z.string().optional(),
-  esql_approximation: z.boolean().optional(),
-}));
+export const dashboardAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    panels: z.array(z.union([attachmentPanelSchema, dashboardSectionSchema])),
+    query: querySchema.optional(),
+    time_range: timeRangeSchema.optional(),
+    refresh_interval: refreshIntervalSchema.optional(),
+    filters: z.array(filterSchema).optional(),
+    options: optionsSchema.optional(),
+    tags: z.array(z.string()).optional(),
+    pinned_panels: pinnedPanelsSchema.optional(),
+    access_control: accessControlSchema.optional(),
+    project_routing: z.string().optional(),
+    esql_approximation: z.boolean().optional(),
+  })
+);
 
 export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSchema>;

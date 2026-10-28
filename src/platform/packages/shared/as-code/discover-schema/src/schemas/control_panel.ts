@@ -18,42 +18,48 @@ import {
 } from '@kbn/controls-constants';
 import { MAX_DISCOVER_SESSION_CONTROL_PANELS } from '@kbn/discover-session-constants';
 
-const discoverSessionControlWidthSchema = lazySchema(() => z
-  .enum([CONTROL_WIDTH_SMALL, CONTROL_WIDTH_MEDIUM, CONTROL_WIDTH_LARGE])
-  .default(DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM)
-  .meta({
-    description: 'The minimum width of the control.',
-  }));
+const discoverSessionControlWidthSchema = lazySchema(() =>
+  z
+    .enum([CONTROL_WIDTH_SMALL, CONTROL_WIDTH_MEDIUM, CONTROL_WIDTH_LARGE])
+    .default(DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM)
+    .meta({
+      description: 'The minimum width of the control.',
+    })
+);
 
-export const discoverSessionApiControlPanelSchema = lazySchema(() => z
-  .object({
-    id: z.string().min(1).meta({ description: 'The unique ID of the control.' }),
-    type: z.literal(ESQL_CONTROL),
-    width: discoverSessionControlWidthSchema,
-    grow: z.boolean().default(DEFAULT_PINNED_CONTROL_STATE.grow).meta({
-      description: 'When `true`, the control expands to fill any available horizontal space.',
-    }),
-    config: optionsListESQLControlSchema.meta({
+export const discoverSessionApiControlPanelSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().min(1).meta({ description: 'The unique ID of the control.' }),
+      type: z.literal(ESQL_CONTROL),
+      width: discoverSessionControlWidthSchema,
+      grow: z.boolean().default(DEFAULT_PINNED_CONTROL_STATE.grow).meta({
+        description: 'When `true`, the control expands to fill any available horizontal space.',
+      }),
+      config: optionsListESQLControlSchema.meta({
+        description:
+          'The ES|QL control settings, including its variable, available options, and selected values.',
+      }),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-discover-session-api-esql-control-panel',
+      title: ESQL_CONTROL,
       description:
-        'The ES|QL control settings, including its variable, available options, and selected values.',
-    }),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-discover-session-api-esql-control-panel',
-    title: ESQL_CONTROL,
-    description:
-      'An ES|QL variable control whose selected value is injected into Discover ES|QL ' +
-      'queries using the `?variable_name` syntax.',
-  }));
+        'An ES|QL variable control whose selected value is injected into Discover ES|QL ' +
+        'queries using the `?variable_name` syntax.',
+    })
+);
 
-export const discoverSessionApiControlPanelsSchema = lazySchema(() => z
-  .array(discoverSessionApiControlPanelSchema)
-  .max(MAX_DISCOVER_SESSION_CONTROL_PANELS)
-  .refine(
-    (panels) => new Set(panels.map((p) => p.id)).size === panels.length,
-    'control_panels must have unique ids'
-  )
-  .meta({
-    description: 'The ES|QL controls of the tab.',
-  }));
+export const discoverSessionApiControlPanelsSchema = lazySchema(() =>
+  z
+    .array(discoverSessionApiControlPanelSchema)
+    .max(MAX_DISCOVER_SESSION_CONTROL_PANELS)
+    .refine(
+      (panels) => new Set(panels.map((p) => p.id)).size === panels.length,
+      'control_panels must have unique ids'
+    )
+    .meta({
+      description: 'The ES|QL controls of the tab.',
+    })
+);

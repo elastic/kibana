@@ -38,53 +38,63 @@ import {
   CaseCustomFieldNumberWithValidationValueSchema,
 } from '../custom_field/v1';
 
-export const CustomFieldConfigurationWithoutTypeSchema = lazySchema(() => z.object({
-  /**
-   * key of custom field
-   */
-  key: regexStringSchema({
-    codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_CUSTOM_FIELD_KEY_LENGTH }),
-    pattern: '^[a-z0-9_-]+$',
-    message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
-  }),
-  /**
-   * label of custom field
-   */
-  label: limitedStringSchema({ fieldName: 'label', min: 1, max: MAX_CUSTOM_FIELD_LABEL_LENGTH }),
-  /**
-   * custom field options - required
-   */
-  required: z.boolean(),
-}));
+export const CustomFieldConfigurationWithoutTypeSchema = lazySchema(() =>
+  z.object({
+    /**
+     * key of custom field
+     */
+    key: regexStringSchema({
+      codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_CUSTOM_FIELD_KEY_LENGTH }),
+      pattern: '^[a-z0-9_-]+$',
+      message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
+    }),
+    /**
+     * label of custom field
+     */
+    label: limitedStringSchema({ fieldName: 'label', min: 1, max: MAX_CUSTOM_FIELD_LABEL_LENGTH }),
+    /**
+     * custom field options - required
+     */
+    required: z.boolean(),
+  })
+);
 
-export const TextCustomFieldConfigurationSchema = lazySchema(() => CustomFieldConfigurationWithoutTypeSchema.extend({
-  type: CustomFieldTextTypeSchema,
-  defaultValue: CaseCustomFieldTextWithValidationValueSchema('defaultValue').nullable().optional(),
-}));
+export const TextCustomFieldConfigurationSchema = lazySchema(() =>
+  CustomFieldConfigurationWithoutTypeSchema.extend({
+    type: CustomFieldTextTypeSchema,
+    defaultValue: CaseCustomFieldTextWithValidationValueSchema('defaultValue')
+      .nullable()
+      .optional(),
+  })
+);
 
-export const ToggleCustomFieldConfigurationSchema =
-  lazySchema(() => CustomFieldConfigurationWithoutTypeSchema.extend({
+export const ToggleCustomFieldConfigurationSchema = lazySchema(() =>
+  CustomFieldConfigurationWithoutTypeSchema.extend({
     type: CustomFieldToggleTypeSchema,
     defaultValue: z.boolean().nullable().optional(),
-  }));
+  })
+);
 
-export const NumberCustomFieldConfigurationSchema =
-  lazySchema(() => CustomFieldConfigurationWithoutTypeSchema.extend({
+export const NumberCustomFieldConfigurationSchema = lazySchema(() =>
+  CustomFieldConfigurationWithoutTypeSchema.extend({
     type: CustomFieldNumberTypeSchema,
     defaultValue: CaseCustomFieldNumberWithValidationValueSchema({ fieldName: 'defaultValue' })
       .nullable()
       .optional(),
-  }));
+  })
+);
 
 /**
  * @deprecated Custom fields are superseded by the field library and the case `extended_fields`.
  */
 export const CustomFieldsConfigurationSchema = limitedArraySchema({
-  codec: lazySchema(() => z.union([
-    TextCustomFieldConfigurationSchema,
-    ToggleCustomFieldConfigurationSchema,
-    NumberCustomFieldConfigurationSchema,
-  ])),
+  codec: lazySchema(() =>
+    z.union([
+      TextCustomFieldConfigurationSchema,
+      ToggleCustomFieldConfigurationSchema,
+      NumberCustomFieldConfigurationSchema,
+    ])
+  ),
   min: 0,
   max: MAX_CUSTOM_FIELDS_PER_CASE,
   fieldName: 'customFields',
@@ -94,22 +104,24 @@ export const ObservableTypesConfigurationSchema = limitedArraySchema({
   min: 0,
   max: MAX_CUSTOM_OBSERVABLE_TYPES,
   fieldName: 'observableTypes',
-  codec: lazySchema(() => z.object({
-    key: regexStringSchema({
-      codec: limitedStringSchema({
-        fieldName: 'key',
-        min: 1,
-        max: MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+  codec: lazySchema(() =>
+    z.object({
+      key: regexStringSchema({
+        codec: limitedStringSchema({
+          fieldName: 'key',
+          min: 1,
+          max: MAX_OBSERVABLE_TYPE_KEY_LENGTH,
+        }),
+        pattern: '^[a-z0-9_-]+$',
+        message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
       }),
-      pattern: '^[a-z0-9_-]+$',
-      message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
-    }),
-    label: limitedStringSchema({
-      fieldName: 'label',
-      min: 1,
-      max: MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
-    }),
-  })),
+      label: limitedStringSchema({
+        fieldName: 'label',
+        min: 1,
+        max: MAX_OBSERVABLE_TYPE_LABEL_LENGTH,
+      }),
+    })
+  ),
 });
 
 export const WorkflowTagsConfigurationSchema = limitedArraySchema({
@@ -123,45 +135,47 @@ export const WorkflowTagsConfigurationSchema = limitedArraySchema({
   fieldName: 'workflow tags',
 });
 
-export const TemplateConfigurationSchema = lazySchema(() => z.object({
-  /**
-   * key of template
-   */
-  key: regexStringSchema({
-    codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_TEMPLATE_KEY_LENGTH }),
-    pattern: '^[a-z0-9_-]+$',
-    message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
-  }),
-  /**
-   * name of template
-   */
-  name: limitedStringSchema({ fieldName: 'name', min: 1, max: MAX_TEMPLATE_NAME_LENGTH }),
-  /**
-   * case fields
-   */
-  caseFields: CaseBaseOptionalFieldsRequestSchema.nullable(),
-  /**
-   * description of templates
-   */
-  description: limitedStringSchema({
-    fieldName: 'description',
-    min: 0,
-    max: MAX_TEMPLATE_DESCRIPTION_LENGTH,
-  }).optional(),
-  /**
-   * tags of templates
-   */
-  tags: limitedArraySchema({
-    codec: limitedStringSchema({
-      fieldName: `template's tag`,
-      min: 1,
-      max: MAX_TEMPLATE_TAG_LENGTH,
+export const TemplateConfigurationSchema = lazySchema(() =>
+  z.object({
+    /**
+     * key of template
+     */
+    key: regexStringSchema({
+      codec: limitedStringSchema({ fieldName: 'key', min: 1, max: MAX_TEMPLATE_KEY_LENGTH }),
+      pattern: '^[a-z0-9_-]+$',
+      message: `Key must be lower case, a-z, 0-9, '_', and '-' are allowed`,
     }),
-    min: 0,
-    max: MAX_TAGS_PER_TEMPLATE,
-    fieldName: `template's tags`,
-  }).optional(),
-}));
+    /**
+     * name of template
+     */
+    name: limitedStringSchema({ fieldName: 'name', min: 1, max: MAX_TEMPLATE_NAME_LENGTH }),
+    /**
+     * case fields
+     */
+    caseFields: CaseBaseOptionalFieldsRequestSchema.nullable(),
+    /**
+     * description of templates
+     */
+    description: limitedStringSchema({
+      fieldName: 'description',
+      min: 0,
+      max: MAX_TEMPLATE_DESCRIPTION_LENGTH,
+    }).optional(),
+    /**
+     * tags of templates
+     */
+    tags: limitedArraySchema({
+      codec: limitedStringSchema({
+        fieldName: `template's tag`,
+        min: 1,
+        max: MAX_TEMPLATE_TAG_LENGTH,
+      }),
+      min: 0,
+      max: MAX_TAGS_PER_TEMPLATE,
+      fieldName: `template's tags`,
+    }).optional(),
+  })
+);
 
 /**
  * @deprecated Configuration-embedded templates are superseded by the case templates system
@@ -174,50 +188,58 @@ export const TemplatesConfigurationSchema = limitedArraySchema({
   fieldName: 'templates',
 });
 
-export const ConfigurationRequestSchema = lazySchema(() => z.object({
-  /**
-   * The external connector
-   */
-  connector: CaseConnectorSchema,
-  /**
-   * Whether to close the case after it has been synced with the external system
-   */
-  closure_type: ClosureTypeSchema,
-  /**
-   * The plugin owner that manages this configuration
-   */
-  owner: z.string().max(MAX_TITLE_LENGTH),
-  customFields: CustomFieldsConfigurationSchema.optional(),
-  templates: TemplatesConfigurationSchema.optional(),
-  observableTypes: ObservableTypesConfigurationSchema.optional(),
-  extractObservables: z.boolean().optional(),
-  workflowTags: WorkflowTagsConfigurationSchema.optional(),
-}));
+export const ConfigurationRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The external connector
+     */
+    connector: CaseConnectorSchema,
+    /**
+     * Whether to close the case after it has been synced with the external system
+     */
+    closure_type: ClosureTypeSchema,
+    /**
+     * The plugin owner that manages this configuration
+     */
+    owner: z.string().max(MAX_TITLE_LENGTH),
+    customFields: CustomFieldsConfigurationSchema.optional(),
+    templates: TemplatesConfigurationSchema.optional(),
+    observableTypes: ObservableTypesConfigurationSchema.optional(),
+    extractObservables: z.boolean().optional(),
+    workflowTags: WorkflowTagsConfigurationSchema.optional(),
+  })
+);
 
-export const GetConfigurationFindRequestSchema = lazySchema(() => z.object({
-  /**
-   * The configuration plugin owner to filter the search by. If this is left empty the results will include all configurations
-   * that the user has permissions to access
-   */
-  owner: z
-    .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
-    .optional(),
-}));
+export const GetConfigurationFindRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The configuration plugin owner to filter the search by. If this is left empty the results will include all configurations
+     * that the user has permissions to access
+     */
+    owner: z
+      .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
+      .optional(),
+  })
+);
 
-export const CaseConfigureRequestParamsSchema = lazySchema(() => z.object({
-  configuration_id: z.string().max(512),
-}));
+export const CaseConfigureRequestParamsSchema = lazySchema(() =>
+  z.object({
+    configuration_id: z.string().max(512),
+  })
+);
 
-export const ConfigurationPatchRequestSchema = lazySchema(() => z.object({
-  closure_type: ClosureTypeSchema.optional(),
-  connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
-  customFields: CustomFieldsConfigurationSchema.optional(),
-  templates: TemplatesConfigurationSchema.optional(),
-  observableTypes: ObservableTypesConfigurationSchema.optional(),
-  extractObservables: z.boolean().optional(),
-  workflowTags: WorkflowTagsConfigurationSchema.optional(),
-  version: z.string().max(512),
-}));
+export const ConfigurationPatchRequestSchema = lazySchema(() =>
+  z.object({
+    closure_type: ClosureTypeSchema.optional(),
+    connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
+    customFields: CustomFieldsConfigurationSchema.optional(),
+    templates: TemplatesConfigurationSchema.optional(),
+    observableTypes: ObservableTypesConfigurationSchema.optional(),
+    extractObservables: z.boolean().optional(),
+    workflowTags: WorkflowTagsConfigurationSchema.optional(),
+    version: z.string().max(512),
+  })
+);
 
 export type ConfigurationRequest = z.infer<typeof ConfigurationRequestSchema>;
 export type ConfigurationPatchRequest = z.infer<typeof ConfigurationPatchRequestSchema>;

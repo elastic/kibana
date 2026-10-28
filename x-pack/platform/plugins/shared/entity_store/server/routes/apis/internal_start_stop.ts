@@ -23,16 +23,18 @@ import { pairedQualifies } from './utils/process_status';
 /** `both` reproduces the public start/stop behaviour; the other two toggle a single task. */
 const ProcessParam = lazySchema(() => z.enum(['priority', 'nonPriority', 'both']).default('both'));
 
-const bodySchema = lazySchema(() => z.object({
-  entityTypes: z
-    .array(EntityType)
-    .max(ALL_ENTITY_TYPES.length)
-    .optional()
-    .describe('Entity types to act on. Defaults to every type the process applies to.'),
-  process: ProcessParam.describe(
-    'Which extraction process to act on. Defaults to both, matching the public start/stop APIs.'
-  ),
-}));
+const bodySchema = lazySchema(() =>
+  z.object({
+    entityTypes: z
+      .array(EntityType)
+      .max(ALL_ENTITY_TYPES.length)
+      .optional()
+      .describe('Entity types to act on. Defaults to every type the process applies to.'),
+    process: ProcessParam.describe(
+      'Which extraction process to act on. Defaults to both, matching the public start/stop APIs.'
+    ),
+  })
+);
 
 type StartStopRequestBody = z.infer<typeof bodySchema>;
 type Process = z.infer<typeof ProcessParam>;

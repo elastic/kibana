@@ -33,17 +33,19 @@ export const deleteMemoryPageRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: memoryDeletePrivileges },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
-    body: z.object({
-      version: z.object({
-        seq_no: z.number().int().min(0),
-        primary_term: z.number().int().min(1),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
       }),
-    }),
-  })),
+      body: z.object({
+        version: z.object({
+          seq_no: z.number().int().min(0),
+          primary_term: z.number().int().min(1),
+        }),
+      }),
+    })
+  ),
   handler: async ({ request, params, context, getMemoryPageStore, isMemoryEnabled }) => {
     if (!isMemoryEnabled()) throw notFound('Semantic Memory is not enabled');
 

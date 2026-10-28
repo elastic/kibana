@@ -75,9 +75,11 @@ interface RestorableStateDocViewState {
 /**
  * Marks the doc view's `clickCount` as URL-shareable, so a shared document link restores the counter.
  */
-export const restorableStateDocViewShareableStateSchema = lazySchema(() => z.object({
-  clickCount: z.number().int().nonnegative().max(1_000_000),
-}));
+export const restorableStateDocViewShareableStateSchema = lazySchema(() =>
+  z.object({
+    clickCount: z.number().int().nonnegative().max(1_000_000),
+  })
+);
 
 const { withRestorableState, useRestorableState } =
   createRestorableStateProvider<RestorableStateDocViewState>();

@@ -7,9 +7,11 @@
 import { z, lazySchema } from '@kbn/zod';
 import { sloDefinitionSchema, sloIdSchema } from '../../schema/slo';
 
-const resetSLOParamsSchema = lazySchema(() => z.object({
-  path: z.object({ id: sloIdSchema }),
-}));
+const resetSLOParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({ id: sloIdSchema }),
+  })
+);
 
 const resetSLOResponseSchema = sloDefinitionSchema;
 

@@ -19,11 +19,13 @@ import { MAX_BULK_CREATE_ATTACHMENTS } from '../../constants';
 
 export const AddAlertsStepTypeId = 'cases.addAlerts';
 
-const AlertInputSchema = lazySchema(() => z.object({
-  alertId: z.string().min(1, 'alertId is required'),
-  index: z.string().min(1, 'index is required'),
-  rule: Rule.optional(),
-}));
+const AlertInputSchema = lazySchema(() =>
+  z.object({
+    alertId: z.string().min(1, 'alertId is required'),
+    index: z.string().min(1, 'index is required'),
+    rule: Rule.optional(),
+  })
+);
 
 const InputSchema = CasesStepCaseIdSchema.extend({
   alerts: lazySchema(() => z.array(AlertInputSchema).min(1).max(MAX_BULK_CREATE_ATTACHMENTS)),

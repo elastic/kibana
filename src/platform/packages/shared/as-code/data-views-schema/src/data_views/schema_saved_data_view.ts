@@ -22,44 +22,48 @@ import {
 } from '../runtime_fields/schema_saved_runtime_fields';
 import { fieldSettingsWithPopularitySchema } from '../field_settings/schema_field_settings';
 
-export const savedFieldSettingsSchema = lazySchema(() => z
-  .union([
-    savedCompositeRuntimeFieldSchema,
-    savedPrimitiveRuntimeFieldSchema,
-    fieldSettingsWithPopularitySchema,
-  ])
-  .meta({
-    id: 'kbn-saved-field-settings-entry',
-    title: 'Field settings or runtime field',
-    description:
-      'Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.',
-  }));
-
-export const savedDataViewSpecSchema = lazySchema(() => z
-  .object({
-    id: z.string().min(1).max(256).optional().meta({
-      title: 'Data view ID',
+export const savedFieldSettingsSchema = lazySchema(() =>
+  z
+    .union([
+      savedCompositeRuntimeFieldSchema,
+      savedPrimitiveRuntimeFieldSchema,
+      fieldSettingsWithPopularitySchema,
+    ])
+    .meta({
+      id: 'kbn-saved-field-settings-entry',
+      title: 'Field settings or runtime field',
       description:
-        'Kibana provides a unique identifier for each data view, or you can create your own.',
-    }),
-    name: nameSchema,
-    allow_hidden_indices: allowHiddenIndicesSchema,
-    field_filters: fieldFiltersSchema,
-    index_pattern: indexPatternSchema,
-    time_field: timeFieldSchema,
-    field_settings: z
-      .record(fieldSettingsFieldNameSchema, savedFieldSettingsSchema)
-      .optional()
-      .meta({
-        title: 'Field settings',
+        'Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.',
+    })
+);
+
+export const savedDataViewSpecSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().min(1).max(256).optional().meta({
+        title: 'Data view ID',
         description:
-          'Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.',
+          'Kibana provides a unique identifier for each data view, or you can create your own.',
       }),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-saved-data-view-spec-schema',
-    title: 'Saved data view spec',
-    description:
-      'Defines an stored data source with a mandatory index pattern and optional settings like id, name, show hidden indices and field settings.',
-  }));
+      name: nameSchema,
+      allow_hidden_indices: allowHiddenIndicesSchema,
+      field_filters: fieldFiltersSchema,
+      index_pattern: indexPatternSchema,
+      time_field: timeFieldSchema,
+      field_settings: z
+        .record(fieldSettingsFieldNameSchema, savedFieldSettingsSchema)
+        .optional()
+        .meta({
+          title: 'Field settings',
+          description:
+            'Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.',
+        }),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-saved-data-view-spec-schema',
+      title: 'Saved data view spec',
+      description:
+        'Defines an stored data source with a mandatory index pattern and optional settings like id, name, show hidden indices and field settings.',
+    })
+);

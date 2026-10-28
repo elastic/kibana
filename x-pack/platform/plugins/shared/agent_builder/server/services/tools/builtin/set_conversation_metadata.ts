@@ -17,21 +17,23 @@ const MAX_STRING_VALUE = 10_000;
 const MAX_ARRAY_ITEMS = 100;
 const MAX_ARRAY_ITEM_LENGTH = 2_000;
 
-const setConversationMetadataSchema = lazySchema(() => z.object({
-  metadata: z
-    .record(
-      z.string(),
-      z.union([
-        z.string().max(MAX_STRING_VALUE),
-        z.number(),
-        z.boolean(),
-        z.array(z.string().max(MAX_ARRAY_ITEM_LENGTH)).max(MAX_ARRAY_ITEMS),
-      ])
-    )
-    .describe(
-      `Key/value pairs to merge into the conversation metadata. Use a string for TEXT, SELECT, DATE, and USER fields. Use a number for NUMBER fields. Use a boolean (true or false) for TOGGLE fields. Use an array of strings for TEXT_ARRAY fields. Existing keys not included here are left unchanged. Pass an empty string as the value to clear a specific string key.`
-    ),
-}));
+const setConversationMetadataSchema = lazySchema(() =>
+  z.object({
+    metadata: z
+      .record(
+        z.string(),
+        z.union([
+          z.string().max(MAX_STRING_VALUE),
+          z.number(),
+          z.boolean(),
+          z.array(z.string().max(MAX_ARRAY_ITEM_LENGTH)).max(MAX_ARRAY_ITEMS),
+        ])
+      )
+      .describe(
+        `Key/value pairs to merge into the conversation metadata. Use a string for TEXT, SELECT, DATE, and USER fields. Use a number for NUMBER fields. Use a boolean (true or false) for TOGGLE fields. Use an array of strings for TEXT_ARRAY fields. Existing keys not included here are left unchanged. Pass an empty string as the value to clear a specific string key.`
+      ),
+  })
+);
 
 const toolDescription = `Update conversation metadata fields defined by the active template.
 

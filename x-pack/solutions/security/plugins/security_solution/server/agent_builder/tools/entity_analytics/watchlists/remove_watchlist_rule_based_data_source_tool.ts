@@ -32,19 +32,21 @@ import {
   type ConfirmedDataSourceState,
 } from './data_source_utils';
 
-const schema = lazySchema(() => z.object({
-  watchlistId: z
-    .string()
-    .min(1)
-    .describe(
-      'The id of the watchlist to remove the rule-based data source from. Use `security.get_watchlist_id` to resolve a watchlist name to its id first when the user named the watchlist.'
-    ),
-  type: z
-    .enum(RULE_BASED_SOURCE_TYPES)
-    .describe(
-      'Which rule-based data source to remove — `store` (entity-store query) or `index` (index correlation). A watchlist may have one of each; pass the one the user means. Use `security.list_watchlist_data_sources` first if unsure which exist.'
-    ),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    watchlistId: z
+      .string()
+      .min(1)
+      .describe(
+        'The id of the watchlist to remove the rule-based data source from. Use `security.get_watchlist_id` to resolve a watchlist name to its id first when the user named the watchlist.'
+      ),
+    type: z
+      .enum(RULE_BASED_SOURCE_TYPES)
+      .describe(
+        'Which rule-based data source to remove — `store` (entity-store query) or `index` (index correlation). A watchlist may have one of each; pass the one the user means. Use `security.list_watchlist_data_sources` first if unsure which exist.'
+      ),
+  })
+);
 
 export const SECURITY_REMOVE_WATCHLIST_RULE_BASED_DATA_SOURCE_TOOL_ID = securityTool(
   'remove_watchlist_rule_based_data_source'

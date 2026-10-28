@@ -13,18 +13,21 @@ import { MAX_DELETE_IDS_LENGTH } from '../../constants';
 
 export const DeleteCasesStepTypeId = 'cases.deleteCases';
 
-const CaseIdsSchema = lazySchema(() => z
-  .array(z.string().min(1, 'case_ids values are required'))
-  .min(1)
-  .max(MAX_DELETE_IDS_LENGTH));
+const CaseIdsSchema = lazySchema(() =>
+  z.array(z.string().min(1, 'case_ids values are required')).min(1).max(MAX_DELETE_IDS_LENGTH)
+);
 
-const InputSchema = lazySchema(() => z.object({
-  case_ids: CaseIdsSchema,
-}));
+const InputSchema = lazySchema(() =>
+  z.object({
+    case_ids: CaseIdsSchema,
+  })
+);
 
-const OutputSchema = lazySchema(() => z.object({
-  case_ids: CaseIdsSchema,
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    case_ids: CaseIdsSchema,
+  })
+);
 
 type DeleteCasesStepInputSchema = typeof InputSchema;
 type DeleteCasesStepOutputSchema = typeof OutputSchema;

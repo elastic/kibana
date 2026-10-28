@@ -17,29 +17,33 @@ export const CustomFieldTextTypeSchema = lazySchema(() => z.literal(CustomFieldT
 export const CustomFieldToggleTypeSchema = lazySchema(() => z.literal(CustomFieldTypes.TOGGLE));
 export const CustomFieldNumberTypeSchema = lazySchema(() => z.literal(CustomFieldTypes.NUMBER));
 
-const CaseCustomFieldTextSchema = lazySchema(() => z.object({
-  key: z.string(),
-  type: CustomFieldTextTypeSchema,
-  value: z.string().nullable(),
-}));
+const CaseCustomFieldTextSchema = lazySchema(() =>
+  z.object({
+    key: z.string(),
+    type: CustomFieldTextTypeSchema,
+    value: z.string().nullable(),
+  })
+);
 
-export const CaseCustomFieldToggleSchema = lazySchema(() => z.object({
-  key: z.string(),
-  type: CustomFieldToggleTypeSchema,
-  value: z.boolean().nullable(),
-}));
+export const CaseCustomFieldToggleSchema = lazySchema(() =>
+  z.object({
+    key: z.string(),
+    type: CustomFieldToggleTypeSchema,
+    value: z.boolean().nullable(),
+  })
+);
 
-export const CaseCustomFieldNumberSchema = lazySchema(() => z.object({
-  key: z.string(),
-  type: CustomFieldNumberTypeSchema,
-  value: z.number().nullable(),
-}));
+export const CaseCustomFieldNumberSchema = lazySchema(() =>
+  z.object({
+    key: z.string(),
+    type: CustomFieldNumberTypeSchema,
+    value: z.number().nullable(),
+  })
+);
 
-export const CaseCustomFieldSchema = lazySchema(() => z.union([
-  CaseCustomFieldTextSchema,
-  CaseCustomFieldToggleSchema,
-  CaseCustomFieldNumberSchema,
-]));
+export const CaseCustomFieldSchema = lazySchema(() =>
+  z.union([CaseCustomFieldTextSchema, CaseCustomFieldToggleSchema, CaseCustomFieldNumberSchema])
+);
 
 export const CaseCustomFieldsSchema = lazySchema(() => z.array(CaseCustomFieldSchema));
 

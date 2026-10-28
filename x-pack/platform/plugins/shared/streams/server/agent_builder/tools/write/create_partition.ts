@@ -20,28 +20,30 @@ import { validateConditionJson } from '../../utils/format_validation_errors';
 import { getConfirmationMessage } from './confirmation_helpers';
 import { type StreamsWriteQueue, abortSignalFromRequest } from '../../utils/write_queue';
 
-const createPartitionSchema = lazySchema(() => z.object({
-  parent: z.string().describe('Parent stream name, e.g. "logs.ecs"'),
-  child_name: z
-    .string()
-    .describe(
-      'Full child stream name. MUST start with the parent name followed by a dot. For parent "logs.ecs" use "logs.ecs.nginx", for parent "logs.otel" use "logs.otel.nginx", etc.'
-    ),
-  condition_json: z
-    .string()
-    .describe(
-      'JSON string of the routing condition object. Examples: \'{"field":"service.name","eq":"nginx"}\' for equality, \'{"and":[{"field":"log.level","eq":"error"},{"field":"service.name","eq":"api"}]}\' for AND, \'{"never":{}}\' for never-match.'
-    ),
-  status: z
-    .enum(['enabled', 'disabled'])
-    .describe('Routing status. Use "enabled" unless the condition is a never-match.'),
-  confirmation_body: z
-    .string()
-    .optional()
-    .describe(
-      "Narrative summary of what will be created and why. Include parent hierarchy, existing children, the new child name, and the routing condition. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the operation."
-    ),
-}));
+const createPartitionSchema = lazySchema(() =>
+  z.object({
+    parent: z.string().describe('Parent stream name, e.g. "logs.ecs"'),
+    child_name: z
+      .string()
+      .describe(
+        'Full child stream name. MUST start with the parent name followed by a dot. For parent "logs.ecs" use "logs.ecs.nginx", for parent "logs.otel" use "logs.otel.nginx", etc.'
+      ),
+    condition_json: z
+      .string()
+      .describe(
+        'JSON string of the routing condition object. Examples: \'{"field":"service.name","eq":"nginx"}\' for equality, \'{"and":[{"field":"log.level","eq":"error"},{"field":"service.name","eq":"api"}]}\' for AND, \'{"never":{}}\' for never-match.'
+      ),
+    status: z
+      .enum(['enabled', 'disabled'])
+      .describe('Routing status. Use "enabled" unless the condition is a never-match.'),
+    confirmation_body: z
+      .string()
+      .optional()
+      .describe(
+        "Narrative summary of what will be created and why. Include parent hierarchy, existing children, the new child name, and the routing condition. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the operation."
+      ),
+  })
+);
 
 export const createCreatePartitionTool = ({
   getScopedClients,

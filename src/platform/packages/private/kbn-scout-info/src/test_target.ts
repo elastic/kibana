@@ -16,21 +16,25 @@ export const SCOUT_TARGET_DOMAIN: string = process.env.SCOUT_TARGET_DOMAIN || 'u
 
 export const ScoutTargetLocationSchema = lazySchema(() => z.enum(['local', 'cloud']));
 export const ScoutTargetArchSchema = lazySchema(() => z.enum(['stateful', 'serverless']));
-export const ScoutTargetDomainSchema = lazySchema(() => z.enum([
-  'classic',
-  'search',
-  'observability_complete',
-  'observability_logs_essentials',
-  'security_complete',
-  'security_essentials',
-  'security_ease',
-  'vectordb',
-]));
-export const ScoutTestTargetSchema = lazySchema(() => z.object({
-  location: ScoutTargetLocationSchema,
-  arch: ScoutTargetArchSchema,
-  domain: ScoutTargetDomainSchema,
-}));
+export const ScoutTargetDomainSchema = lazySchema(() =>
+  z.enum([
+    'classic',
+    'search',
+    'observability_complete',
+    'observability_logs_essentials',
+    'security_complete',
+    'security_essentials',
+    'security_ease',
+    'vectordb',
+  ])
+);
+export const ScoutTestTargetSchema = lazySchema(() =>
+  z.object({
+    location: ScoutTargetLocationSchema,
+    arch: ScoutTargetArchSchema,
+    domain: ScoutTargetDomainSchema,
+  })
+);
 
 export type ScoutTargetLocation = z.infer<typeof ScoutTargetLocationSchema>;
 export type ScoutTargetArch = z.infer<typeof ScoutTargetArchSchema>;

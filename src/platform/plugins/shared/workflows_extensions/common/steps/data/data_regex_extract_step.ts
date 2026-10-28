@@ -9,27 +9,33 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataRegexExtractStepTypeId = 'data.regexExtract' as const;
 
-export const ConfigSchema = lazySchema(() => z.object({
-  source: z.unknown(),
-  errorIfNoMatch: z.boolean().optional().default(false),
-}));
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    source: z.unknown(),
+    errorIfNoMatch: z.boolean().optional().default(false),
+  })
+);
 
-export const InputSchema = lazySchema(() => z.object({
-  pattern: z.string().max(10000, 'Pattern exceeds maximum allowed length of 10,000 characters'),
-  fields: z.record(z.string(), z.string()),
-  flags: z.string().optional(),
-}));
+export const InputSchema = lazySchema(() =>
+  z.object({
+    pattern: z.string().max(10000, 'Pattern exceeds maximum allowed length of 10,000 characters'),
+    fields: z.record(z.string(), z.string()),
+    flags: z.string().optional(),
+  })
+);
 
-export const OutputSchema = lazySchema(() => z.union([
-  z.record(z.string(), z.unknown()),
-  z.array(z.union([z.record(z.string(), z.unknown()), z.null()])),
-  z.null(),
-]));
+export const OutputSchema = lazySchema(() =>
+  z.union([
+    z.record(z.string(), z.unknown()),
+    z.array(z.union([z.record(z.string(), z.unknown()), z.null()])),
+    z.null(),
+  ])
+);
 
 export type DataRegexExtractStepConfigSchema = typeof ConfigSchema;
 export type DataRegexExtractStepInputSchema = typeof InputSchema;

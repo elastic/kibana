@@ -10,21 +10,25 @@ import { sloIdSchema } from '../../schema/slo';
 import { sloHealthSchema } from '../../schema/health';
 import { allOrAnyString } from '../../schema/common';
 
-const fetchSLOHealthResponseSchema = lazySchema(() => z.array(
-  z.object({
-    id: sloIdSchema,
-    instanceId: allOrAnyString,
-    revision: z.number(),
-    name: z.string(),
-    health: sloHealthSchema,
-  })
-));
+const fetchSLOHealthResponseSchema = lazySchema(() =>
+  z.array(
+    z.object({
+      id: sloIdSchema,
+      instanceId: allOrAnyString,
+      revision: z.number(),
+      name: z.string(),
+      health: sloHealthSchema,
+    })
+  )
+);
 
-const fetchSLOHealthParamsSchema = lazySchema(() => z.object({
-  body: z.object({
-    list: z.array(z.object({ id: sloIdSchema, instanceId: allOrAnyString })),
-  }),
-}));
+const fetchSLOHealthParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z.array(z.object({ id: sloIdSchema, instanceId: allOrAnyString })),
+    }),
+  })
+);
 
 type FetchSLOHealthResponse = z.input<typeof fetchSLOHealthResponseSchema>;
 type FetchSLOHealthParams = z.output<typeof fetchSLOHealthParamsSchema.shape.body>;

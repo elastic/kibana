@@ -12,11 +12,13 @@ import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { vegaLibraryItemSchema } from '../schema';
 import { VEGA_LIBRARY_ITEM_ID_DESCRIPTION } from '../constants';
 
-export const updateRequestParamsSchema = lazySchema(() => z.object({
-  id: z.string().meta({
-    description: 'The unique ID of the Vega library item to be created or updated.',
-  }),
-}));
+export const updateRequestParamsSchema = lazySchema(() =>
+  z.object({
+    id: z.string().meta({
+      description: 'The unique ID of the Vega library item to be created or updated.',
+    }),
+  })
+);
 
 export const updateRequestBodySchema = vegaLibraryItemSchema;
 

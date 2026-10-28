@@ -12,16 +12,20 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // Bedrock connector parameter schema
-export const BedrockParamsSchema = lazySchema(() => z.object({
-  body: z.string(),
-  model: z.string().optional(),
-}));
+export const BedrockParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.string(),
+    model: z.string().optional(),
+  })
+);
 
 // Bedrock connector response schema
-export const BedrockResponseSchema = lazySchema(() => z.object({
-  completion: z.string(),
-  stop_reason: z.string().optional(),
-}));
+export const BedrockResponseSchema = lazySchema(() =>
+  z.object({
+    completion: z.string(),
+    stop_reason: z.string().optional(),
+  })
+);

@@ -47,9 +47,11 @@ export interface IngestClassic {
 }
 
 const ingestClassicShape = {
-  classic: lazySchema(() => z.object({
-    field_overrides: z.optional(classicFieldDefinitionSchema),
-  })),
+  classic: lazySchema(() =>
+    z.object({
+      field_overrides: z.optional(classicFieldDefinitionSchema),
+    })
+  ),
 };
 
 export type ClassicIngest = Omit<IngestBase, 'processing'> &
@@ -57,11 +59,13 @@ export type ClassicIngest = Omit<IngestBase, 'processing'> &
     processing: ClassicIngestStreamProcessing;
   };
 
-const classicIngestSchemaObject = lazySchema(() => z.object({
-  ...ingestBaseSchemaFields,
-  processing: classicIngestStreamProcessingSchema,
-  ...ingestClassicShape,
-}));
+const classicIngestSchemaObject = lazySchema(() =>
+  z.object({
+    ...ingestBaseSchemaFields,
+    processing: classicIngestStreamProcessingSchema,
+    ...ingestClassicShape,
+  })
+);
 
 export const ClassicIngest: Validation<IngestBase, ClassicIngest> = validation(
   IngestBase.right,
@@ -70,11 +74,13 @@ export const ClassicIngest: Validation<IngestBase, ClassicIngest> = validation(
 
 export type ClassicIngestUpsertRequest = IngestBaseUpsertRequest & IngestClassic;
 
-const classicIngestUpsertSchemaObject = lazySchema(() => z.object({
-  ...ingestBaseUpsertSchemaFields,
-  processing: classicIngestStreamProcessingUpsertSchema,
-  ...ingestClassicShape,
-}));
+const classicIngestUpsertSchemaObject = lazySchema(() =>
+  z.object({
+    ...ingestBaseUpsertSchemaFields,
+    processing: classicIngestStreamProcessingUpsertSchema,
+    ...ingestClassicShape,
+  })
+);
 
 export const ClassicIngestUpsertRequest: Validation<
   IngestBaseUpsertRequest,

@@ -23,14 +23,16 @@ import { checkWatchlistAccess } from './check_watchlist_access';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 import { toDataSourceSummary } from './data_source_utils';
 
-const schema = lazySchema(() => z.object({
-  watchlistId: z
-    .string()
-    .min(1)
-    .describe(
-      'The id of the watchlist to inspect. Use `security.get_watchlist_id` to resolve a watchlist name to its id first when the user named the watchlist.'
-    ),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    watchlistId: z
+      .string()
+      .min(1)
+      .describe(
+        'The id of the watchlist to inspect. Use `security.get_watchlist_id` to resolve a watchlist name to its id first when the user named the watchlist.'
+      ),
+  })
+);
 
 export const SECURITY_LIST_WATCHLIST_DATA_SOURCES_TOOL_ID = securityTool(
   'list_watchlist_data_sources'

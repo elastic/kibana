@@ -7,12 +7,6 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const loggingLevelSchema = lazySchema(() => z.enum([
-  'trace',
-  'debug',
-  'info',
-  'warn',
-  'error',
-  'fatal',
-  'off',
-]));
+export const loggingLevelSchema = lazySchema(() =>
+  z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'off'])
+);

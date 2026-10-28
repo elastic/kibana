@@ -26,9 +26,11 @@ import type {
 
 declare const mockApi: PromptAPI;
 
-const MinimalPromptInputSchema = lazySchema(() => z.object({
-  query: z.string(),
-}));
+const MinimalPromptInputSchema = lazySchema(() =>
+  z.object({
+    query: z.string(),
+  })
+);
 type MinimalPromptInput = z.input<typeof MinimalPromptInputSchema>;
 const minimalInput: MinimalPromptInput = { query: 'test' };
 

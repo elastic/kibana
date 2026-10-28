@@ -14,13 +14,15 @@ import contentPromptTemplate from './content_prompt.text';
 export const SuggestStreamPartitionsPrompt = createPrompt({
   name: 'suggest_stream_partitions_prompt',
   description: 'Suggest stream partitions based on sample data',
-  input: lazySchema(() => z.object({
-    stream: Streams.all.Definition.right,
-    condition_schema: z.string(),
-    initial_clustering: z.string(),
-    user_prompt: z.string().optional(),
-    existing_partitions: z.string().optional(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      stream: Streams.all.Definition.right,
+      condition_schema: z.string(),
+      initial_clustering: z.string(),
+      user_prompt: z.string().optional(),
+      existing_partitions: z.string().optional(),
+    })
+  ),
 })
   .version({
     system: {

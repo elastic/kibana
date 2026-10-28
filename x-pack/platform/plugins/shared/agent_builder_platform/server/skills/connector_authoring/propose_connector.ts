@@ -18,25 +18,27 @@ import {
 } from '../../../common/attachments';
 import { getConnectorTypeDisplayName, isConnectorTypeAvailable } from './utils';
 
-const proposeConnectorSchema = lazySchema(() => z.object({
-  connector_type: z
-    .string()
-    .describe(
-      'The connector type id to set up, e.g. `.github` or `.slack`. Must be a value returned by `list_connector_types` — call that first and copy the id verbatim.'
-    ),
-  suggested_name: z
-    .string()
-    .optional()
-    .describe(
-      'Optional human-readable name to pre-fill in the connector form, e.g. "Acme GitHub". The user can change it.'
-    ),
-  reason: z
-    .string()
-    .optional()
-    .describe(
-      'Optional one-line explanation, shown on the card, of why this connector helps with the task at hand.'
-    ),
-}));
+const proposeConnectorSchema = lazySchema(() =>
+  z.object({
+    connector_type: z
+      .string()
+      .describe(
+        'The connector type id to set up, e.g. `.github` or `.slack`. Must be a value returned by `list_connector_types` — call that first and copy the id verbatim.'
+      ),
+    suggested_name: z
+      .string()
+      .optional()
+      .describe(
+        'Optional human-readable name to pre-fill in the connector form, e.g. "Acme GitHub". The user can change it.'
+      ),
+    reason: z
+      .string()
+      .optional()
+      .describe(
+        'Optional one-line explanation, shown on the card, of why this connector helps with the task at hand.'
+      ),
+  })
+);
 
 export type ProposeConnectorInput = z.infer<typeof proposeConnectorSchema>;
 

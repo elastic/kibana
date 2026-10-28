@@ -8,19 +8,23 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
 
-export const TemplateUserActionPayloadSchema = lazySchema(() => z.object({
-  template: z
-    .object({
-      id: z.string(),
-      version: z.number(),
-      // Optional point-in-time snapshot of the applied template's name so the activity log can read
-      // "applied <name> template" without a lookup. Older user actions predate it.
-      name: z.string().optional(),
-    })
-    .nullable(),
-}));
+export const TemplateUserActionPayloadSchema = lazySchema(() =>
+  z.object({
+    template: z
+      .object({
+        id: z.string(),
+        version: z.number(),
+        // Optional point-in-time snapshot of the applied template's name so the activity log can read
+        // "applied <name> template" without a lookup. Older user actions predate it.
+        name: z.string().optional(),
+      })
+      .nullable(),
+  })
+);
 
-export const TemplateUserActionSchema = lazySchema(() => z.object({
-  type: z.literal(UserActionTypes.template),
-  payload: TemplateUserActionPayloadSchema,
-}));
+export const TemplateUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.template),
+    payload: TemplateUserActionPayloadSchema,
+  })
+);

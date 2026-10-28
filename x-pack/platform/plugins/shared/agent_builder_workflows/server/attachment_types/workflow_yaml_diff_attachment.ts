@@ -12,16 +12,18 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 
 const workflowYamlDiffStatusSchema = lazySchema(() => z.enum(['pending', 'accepted', 'declined']));
 
-const workflowYamlDiffDataSchema = lazySchema(() => z.object({
-  beforeYaml: z.string().describe('Original workflow YAML content before the proposed change'),
-  afterYaml: z.string().describe('Proposed workflow YAML content after the change'),
-  proposalId: z
-    .string()
-    .describe('Stable proposal identifier linking chat diff and Monaco proposal'),
-  status: workflowYamlDiffStatusSchema.default('pending'),
-  workflowId: z.string().optional().describe('The workflow ID'),
-  name: z.string().optional().describe('The workflow name'),
-}));
+const workflowYamlDiffDataSchema = lazySchema(() =>
+  z.object({
+    beforeYaml: z.string().describe('Original workflow YAML content before the proposed change'),
+    afterYaml: z.string().describe('Proposed workflow YAML content after the change'),
+    proposalId: z
+      .string()
+      .describe('Stable proposal identifier linking chat diff and Monaco proposal'),
+    status: workflowYamlDiffStatusSchema.default('pending'),
+    workflowId: z.string().optional().describe('The workflow ID'),
+    name: z.string().optional().describe('The workflow name'),
+  })
+);
 
 type WorkflowYamlDiffData = z.infer<typeof workflowYamlDiffDataSchema>;
 

@@ -24,13 +24,15 @@ import { hasManageEvalsPrivilege } from '../../common/check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const saveSchema = evalExperimentConfigSchema.extend({
-  workflow_id: lazySchema(() => z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .optional()
-    .describe(
-      'Existing saved workflow id to update in place. Omit to create a new workflow (pass it to avoid duplicates when re-saving).'
-    )),
+  workflow_id: lazySchema(() =>
+    z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .optional()
+      .describe(
+        'Existing saved workflow id to update in place. Omit to create a new workflow (pass it to avoid duplicates when re-saving).'
+      )
+  ),
 });
 
 /**

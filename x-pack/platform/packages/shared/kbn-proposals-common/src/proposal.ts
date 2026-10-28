@@ -26,16 +26,18 @@ export type ProposalDecision = z.infer<typeof proposalDecisionSchema>;
  * answered in time, so `dismissed` no longer does double duty for "declined"
  * and "deadline passed".
  */
-export const proposalStatusSchema = lazySchema(() => z.enum([
-  'pending',
-  'executing',
-  'succeeded',
-  'failed',
-  'expired',
-  'no_action',
-  /** Replaced by a revision, not rejected — distinct from `dismissed`/`no_action`. */
-  'superseded',
-]));
+export const proposalStatusSchema = lazySchema(() =>
+  z.enum([
+    'pending',
+    'executing',
+    'succeeded',
+    'failed',
+    'expired',
+    'no_action',
+    /** Replaced by a revision, not rejected — distinct from `dismissed`/`no_action`. */
+    'superseded',
+  ])
+);
 export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
 
 /** Same vocabulary an action declares about itself, so the two cannot drift. */
@@ -64,13 +66,15 @@ export type ProposalConfidence = z.infer<typeof proposalConfidenceSchema>;
  * Required, and fixed for the whole revision chain: `revise()` and `clone()`
  * inherit it, and no update path can move it.
  */
-export const proposalOriginSchema = lazySchema(() => z.enum([
-  'alertzero',
-  'nightshift',
-  'context_engine',
-  /** The standalone chat surface, owned by no solution feature. */
-  'agent_builder',
-]));
+export const proposalOriginSchema = lazySchema(() =>
+  z.enum([
+    'alertzero',
+    'nightshift',
+    'context_engine',
+    /** The standalone chat surface, owned by no solution feature. */
+    'agent_builder',
+  ])
+);
 export type ProposalOrigin = z.infer<typeof proposalOriginSchema>;
 
 /**
@@ -81,16 +85,18 @@ export type ProposalOrigin = z.infer<typeof proposalOriginSchema>;
 export const proposalCategorySchema = actionCategorySchema;
 export type ProposalCategory = z.infer<typeof proposalCategorySchema>;
 
-export const dismissReasonSchema = lazySchema(() => z.enum([
-  /** The default: an analyst can decline without picking a specific reason at all. */
-  'no_reason',
-  'duplicate',
-  'false_positive',
-  /** Covers what were previously two separate reasons: `out_of_scope` and `already_handled`. */
-  'handled_elsewhere',
-  'risk_accepted',
-  'other',
-]));
+export const dismissReasonSchema = lazySchema(() =>
+  z.enum([
+    /** The default: an analyst can decline without picking a specific reason at all. */
+    'no_reason',
+    'duplicate',
+    'false_positive',
+    /** Covers what were previously two separate reasons: `out_of_scope` and `already_handled`. */
+    'handled_elsewhere',
+    'risk_accepted',
+    'other',
+  ])
+);
 export type DismissReason = z.infer<typeof dismissReasonSchema>;
 
 /**
@@ -119,11 +125,13 @@ const MAX_TIMESTAMP_LENGTH = 64;
 /** An action's input is opaque to us, so cap its breadth rather than its shape. */
 const MAX_ACTION_INPUT_KEYS = 100;
 
-export const boundedActionInput = lazySchema(() => z
-  .record(z.string().max(MAX_NAME_LENGTH), z.unknown())
-  .refine((value) => Object.keys(value).length <= MAX_ACTION_INPUT_KEYS, {
-    message: `actionInput may not exceed ${MAX_ACTION_INPUT_KEYS} keys`,
-  }));
+export const boundedActionInput = lazySchema(() =>
+  z
+    .record(z.string().max(MAX_NAME_LENGTH), z.unknown())
+    .refine((value) => Object.keys(value).length <= MAX_ACTION_INPUT_KEYS, {
+      message: `actionInput may not exceed ${MAX_ACTION_INPUT_KEYS} keys`,
+    })
+);
 
 /**
  * Who did something, in the shape Cases established. The profile uid is the
@@ -136,101 +144,105 @@ export const boundedActionInput = lazySchema(() => z
  * Field names are camelCase to match the rest of this plugin's contract; Cases
  * uses snake_case because that is its own API convention.
  */
-export const proposalUserSchema = lazySchema(() => z.object({
-  username: z.string().max(MAX_ID_LENGTH).nullable(),
-  fullName: z.string().max(MAX_NAME_LENGTH).nullable(),
-  email: z.string().max(MAX_NAME_LENGTH).nullable(),
-  profileUid: z.string().max(MAX_ID_LENGTH).optional(),
-}));
+export const proposalUserSchema = lazySchema(() =>
+  z.object({
+    username: z.string().max(MAX_ID_LENGTH).nullable(),
+    fullName: z.string().max(MAX_NAME_LENGTH).nullable(),
+    email: z.string().max(MAX_NAME_LENGTH).nullable(),
+    profileUid: z.string().max(MAX_ID_LENGTH).optional(),
+  })
+);
 export type ProposalUser = z.infer<typeof proposalUserSchema>;
 
-export const proposalSchema = lazySchema(() => z.object({
-  id: z.string().max(MAX_ID_LENGTH),
-  spaceId: z.string().max(MAX_ID_LENGTH),
-  /** Conversation this proposal belongs to. The reverse link lives on the conversation. */
-  conversationId: z.string().max(MAX_ID_LENGTH),
-  /**
-   * Short label naming what is proposed. Plain text, not markdown: `comment` is
-   * already the body. Required like `comment`, and resolved on write — the
-   * caller's own title, else the action's name, else `DEFAULT_PROPOSAL_TITLE` —
-   * so every reader renders this field instead of re-deriving a fallback chain.
-   */
-  title: z.string().max(MAX_TITLE_LENGTH),
-  /** Markdown explaining what is being proposed. Every proposal carries one. */
-  comment: z.string().max(MAX_COMMENT_LENGTH),
+export const proposalSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_ID_LENGTH),
+    spaceId: z.string().max(MAX_ID_LENGTH),
+    /** Conversation this proposal belongs to. The reverse link lives on the conversation. */
+    conversationId: z.string().max(MAX_ID_LENGTH),
+    /**
+     * Short label naming what is proposed. Plain text, not markdown: `comment` is
+     * already the body. Required like `comment`, and resolved on write — the
+     * caller's own title, else the action's name, else `DEFAULT_PROPOSAL_TITLE` —
+     * so every reader renders this field instead of re-deriving a fallback chain.
+     */
+    title: z.string().max(MAX_TITLE_LENGTH),
+    /** Markdown explaining what is being proposed. Every proposal carries one. */
+    comment: z.string().max(MAX_COMMENT_LENGTH),
 
-  /**
-   * Managed action workflow this proposal would execute. Absent for
-   * non-action proposals. Immutable: a different action is a different
-   * proposal.
-   */
-  actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
-  /** Inputs for the action workflow. Frozen once the proposal is decided. */
-  actionInput: boundedActionInput.optional(),
+    /**
+     * Managed action workflow this proposal would execute. Absent for
+     * non-action proposals. Immutable: a different action is a different
+     * proposal.
+     */
+    actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
+    /** Inputs for the action workflow. Frozen once the proposal is decided. */
+    actionInput: boundedActionInput.optional(),
 
-  status: proposalStatusSchema,
-  /** Absent while the proposal is still awaiting a human. */
-  decision: proposalDecisionSchema.optional(),
-  /**
-   * Set when this proposal was replaced — by a retry after a failed action, or
-   * by an analyst-requested revision. Points at the successor so the queue can
-   * show one live proposal per subject rather than every attempt.
-   */
-  supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
-  /** First proposal in the chain; equal to `id` on the root and never rewritten. */
-  rootProposalId: z.string().max(MAX_ID_LENGTH).optional(),
-  /** Exactly one hop back, where `rootProposalId` is the first hop. Absent on the root. */
-  supersedes: z.string().max(MAX_ID_LENGTH).optional(),
-  /** 1-based position in the chain. Not incremented by `clone()`: a retry is not a revision. */
-  revision: z.number().int().min(1).optional(),
-  /** Snapshotted from the triggering context at creation; never re-scored. */
-  impact: proposalImpactSchema,
-  confidence: proposalConfidenceSchema,
-  /**
-   * Resolved from the action workflow's metadata at creation, so it is absent
-   * on a proposal that carries no action.
-   */
-  category: proposalCategorySchema.optional(),
-  origin: proposalOriginSchema,
-  /** Decision deadline, evaluated on read rather than swept into a status. */
-  expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    status: proposalStatusSchema,
+    /** Absent while the proposal is still awaiting a human. */
+    decision: proposalDecisionSchema.optional(),
+    /**
+     * Set when this proposal was replaced — by a retry after a failed action, or
+     * by an analyst-requested revision. Points at the successor so the queue can
+     * show one live proposal per subject rather than every attempt.
+     */
+    supersededBy: z.string().max(MAX_ID_LENGTH).optional(),
+    /** First proposal in the chain; equal to `id` on the root and never rewritten. */
+    rootProposalId: z.string().max(MAX_ID_LENGTH).optional(),
+    /** Exactly one hop back, where `rootProposalId` is the first hop. Absent on the root. */
+    supersedes: z.string().max(MAX_ID_LENGTH).optional(),
+    /** 1-based position in the chain. Not incremented by `clone()`: a retry is not a revision. */
+    revision: z.number().int().min(1).optional(),
+    /** Snapshotted from the triggering context at creation; never re-scored. */
+    impact: proposalImpactSchema,
+    confidence: proposalConfidenceSchema,
+    /**
+     * Resolved from the action workflow's metadata at creation, so it is absent
+     * on a proposal that carries no action.
+     */
+    category: proposalCategorySchema.optional(),
+    origin: proposalOriginSchema,
+    /** Decision deadline, evaluated on read rather than swept into a status. */
+    expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
 
-  decidedBy: proposalUserSchema.optional(),
-  decidedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
-  dismissReason: dismissReasonSchema.optional(),
-  rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
-  executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
-  /**
-   * The `executionError` of the attempt this proposal re-offers: copied from
-   * the predecessor when a failed proposal is cloned, then carried through
-   * revisions untouched, since revising runs nothing. It therefore names the
-   * last attempt that actually ran and failed, which sits further back than
-   * `supersedes` once a clone has been revised. Absent while nothing in the
-   * chain has run and failed — a consumer must not read absence as "the
-   * previous attempt succeeded".
-   *
-   * A deliberate denormalisation of something the chain can already derive.
-   * The queue answers "did the last attempt fail, and how" on every row it
-   * renders, and deriving it would cost one extra fetch per row. It holds one
-   * failure only: "failed three times" is `revision` plus a chain query.
-   */
-  previousExecutionError: z.string().max(MAX_ERROR_LENGTH).optional(),
+    decidedBy: proposalUserSchema.optional(),
+    decidedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    dismissReason: dismissReasonSchema.optional(),
+    rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
+    executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
+    /**
+     * The `executionError` of the attempt this proposal re-offers: copied from
+     * the predecessor when a failed proposal is cloned, then carried through
+     * revisions untouched, since revising runs nothing. It therefore names the
+     * last attempt that actually ran and failed, which sits further back than
+     * `supersedes` once a clone has been revised. Absent while nothing in the
+     * chain has run and failed — a consumer must not read absence as "the
+     * previous attempt succeeded".
+     *
+     * A deliberate denormalisation of something the chain can already derive.
+     * The queue answers "did the last attempt fail, and how" on every row it
+     * renders, and deriving it would cost one extra fetch per row. It holds one
+     * failure only: "failed three times" is `revision` plus a chain query.
+     */
+    previousExecutionError: z.string().max(MAX_ERROR_LENGTH).optional(),
 
-  /** Gating execution to resume. Absent when no workflow is waiting. */
-  workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
-  /**
-   * Stamped by `releaseGate` — the approve and dismiss routes — before it
-   * resumes the gate, and refused by `revise()` from then on: the gate adopts
-   * the chain head before it writes the decision, so a revision landing in
-   * between would be what the approval executes. Absent on a gate resumed
-   * through any other surface and on every auto-approval, so it says nothing
-   * about who decided or how.
-   */
-  gateReleasedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    /** Gating execution to resume. Absent when no workflow is waiting. */
+    workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+    /**
+     * Stamped by `releaseGate` — the approve and dismiss routes — before it
+     * resumes the gate, and refused by `revise()` from then on: the gate adopts
+     * the chain head before it writes the decision, so a revision landing in
+     * between would be what the approval executes. Absent on a gate resumed
+     * through any other surface and on every auto-approval, so it says nothing
+     * about who decided or how.
+     */
+    gateReleasedAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
 
-  createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
-  createdBy: proposalUserSchema.optional(),
-}));
+    createdAt: z.string().max(MAX_TIMESTAMP_LENGTH),
+    createdBy: proposalUserSchema.optional(),
+  })
+);
 export type Proposal = z.infer<typeof proposalSchema>;
 
 /** Catalog metadata resolved on read. */
@@ -238,73 +250,79 @@ export interface ProposalWithMetadata extends Proposal {
   action?: ActionMetadata;
 }
 
-export const createProposalRequestSchema = lazySchema(() => z.object({
-  conversationId: z.string().max(MAX_ID_LENGTH),
-  /**
-   * Short plain-text label. Same precedence as `category` — the caller wins,
-   * because it knows the situation the proposal came out of, which the action's
-   * own metadata cannot. Optional here only: omitting it stores the action's
-   * name, or `DEFAULT_PROPOSAL_TITLE` when the action has none either.
-   */
-  title: z.string().max(MAX_TITLE_LENGTH).optional(),
-  comment: z.string().max(MAX_COMMENT_LENGTH),
-  actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
-  actionInput: boundedActionInput.optional(),
-  /**
-   * Optional rather than defaulted so "the caller omitted it" stays
-   * distinguishable from "the caller said low": a supplied impact takes
-   * precedence over the action's own, and only a genuine omission falls back.
-   */
-  impact: proposalImpactSchema.optional(),
-  /**
-   * Overrides the action's own declared category, and is the only way a
-   * proposal carrying no action gets one at all — consumers group the queue by
-   * category, so without it a non-action proposal has nowhere to appear.
-   */
-  category: proposalCategorySchema.optional(),
-  confidence: proposalConfidenceSchema.default('medium'),
-  /**
-   * Required, and undefaulted on purpose: a default would attribute every
-   * caller that forgot it to whichever system the default named, and the queue
-   * filtering on it would show another solution's proposals as its own.
-   */
-  origin: proposalOriginSchema,
-  expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
-  workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
-  /**
-   * The id to create the proposal under, instead of a random one. For a caller
-   * that derives the id from what it is proposing, so that two calls for the same
-   * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
-   * check-then-create in application code — decides which one creates it.
-   *
-   * An id that already exists is refused with `ProposalAlreadyExistsError`; the
-   * service reads and returns nothing. What a duplicate means, and whether a
-   * settled proposal should be followed by a new one under another id, is the
-   * caller's to decide.
-   *
-   * The index is shared across spaces and the service does not scope the id, so
-   * the caller must put the space (and its own producer) into whatever the id is
-   * derived from. Omitting `id` mints a random one, exactly as before.
-   */
-  id: z.uuid().optional(),
-}));
+export const createProposalRequestSchema = lazySchema(() =>
+  z.object({
+    conversationId: z.string().max(MAX_ID_LENGTH),
+    /**
+     * Short plain-text label. Same precedence as `category` — the caller wins,
+     * because it knows the situation the proposal came out of, which the action's
+     * own metadata cannot. Optional here only: omitting it stores the action's
+     * name, or `DEFAULT_PROPOSAL_TITLE` when the action has none either.
+     */
+    title: z.string().max(MAX_TITLE_LENGTH).optional(),
+    comment: z.string().max(MAX_COMMENT_LENGTH),
+    actionWorkflowId: z.string().max(MAX_ID_LENGTH).optional(),
+    actionInput: boundedActionInput.optional(),
+    /**
+     * Optional rather than defaulted so "the caller omitted it" stays
+     * distinguishable from "the caller said low": a supplied impact takes
+     * precedence over the action's own, and only a genuine omission falls back.
+     */
+    impact: proposalImpactSchema.optional(),
+    /**
+     * Overrides the action's own declared category, and is the only way a
+     * proposal carrying no action gets one at all — consumers group the queue by
+     * category, so without it a non-action proposal has nowhere to appear.
+     */
+    category: proposalCategorySchema.optional(),
+    confidence: proposalConfidenceSchema.default('medium'),
+    /**
+     * Required, and undefaulted on purpose: a default would attribute every
+     * caller that forgot it to whichever system the default named, and the queue
+     * filtering on it would show another solution's proposals as its own.
+     */
+    origin: proposalOriginSchema,
+    expiresAt: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+    workflowExecutionId: z.string().max(MAX_ID_LENGTH).optional(),
+    /**
+     * The id to create the proposal under, instead of a random one. For a caller
+     * that derives the id from what it is proposing, so that two calls for the same
+     * thing meet at the same id and Elasticsearch's `op_type: 'create'` — not a
+     * check-then-create in application code — decides which one creates it.
+     *
+     * An id that already exists is refused with `ProposalAlreadyExistsError`; the
+     * service reads and returns nothing. What a duplicate means, and whether a
+     * settled proposal should be followed by a new one under another id, is the
+     * caller's to decide.
+     *
+     * The index is shared across spaces and the service does not scope the id, so
+     * the caller must put the space (and its own producer) into whatever the id is
+     * derived from. Omitting `id` mints a random one, exactly as before.
+     */
+    id: z.uuid().optional(),
+  })
+);
 export type CreateProposalRequest = z.infer<typeof createProposalRequestSchema>;
 
-export const approveProposalRequestSchema = lazySchema(() => z.object({
-  /**
-   * The action input the approver was shown. Rejected with a conflict when it
-   * no longer matches the record, so an approval can never apply to values the
-   * decider never saw.
-   */
-  actionInput: boundedActionInput.optional(),
-  rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
-}));
+export const approveProposalRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The action input the approver was shown. Rejected with a conflict when it
+     * no longer matches the record, so an approval can never apply to values the
+     * decider never saw.
+     */
+    actionInput: boundedActionInput.optional(),
+    rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
+  })
+);
 export type ApproveProposalRequest = z.infer<typeof approveProposalRequestSchema>;
 
-export const dismissProposalRequestSchema = lazySchema(() => z.object({
-  dismissReason: dismissReasonSchema,
-  rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
-}));
+export const dismissProposalRequestSchema = lazySchema(() =>
+  z.object({
+    dismissReason: dismissReasonSchema,
+    rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
+  })
+);
 export type DismissProposalRequest = z.infer<typeof dismissProposalRequestSchema>;
 
 /**
@@ -325,43 +343,47 @@ export const MAX_PROPOSALS_PAGE_OFFSET = 10_000 - MAX_PROPOSALS_PAGE_SIZE;
  * The complementary query — "no human ever answered", which also takes in
  * `expired` — is not expressible here, because nothing needs it yet.
  */
-export const proposalFiltersSchema = lazySchema(() => z.object({
-  status: proposalStatusSchema.optional(),
-  decision: proposalDecisionSchema.optional(),
-  conversationId: z.string().max(MAX_ID_LENGTH).optional(),
-  /**
-   * Restricts the read to one producing system. A queue that serves a single
-   * solution passes its own constant, so another solution's proposals — which
-   * share the index — do not appear in it.
-   */
-  origin: proposalOriginSchema.optional(),
-  /** Drops proposals that were replaced, so a chain shows only its live head. */
-  excludeSuperseded: z.stringbool().default(false),
-  /**
-   * Drops proposals whose deadline has passed, by date rather than by status.
-   * Distinct from `status: 'expired'`: between the deadline passing and the
-   * gate workflow settling the record there is task lag during which it still
-   * reads `pending`, and a queue wants it gone for that whole interval. Off by
-   * default so the list stays a faithful view of the index.
-   */
-  excludeExpired: z.stringbool().default(false),
-}));
+export const proposalFiltersSchema = lazySchema(() =>
+  z.object({
+    status: proposalStatusSchema.optional(),
+    decision: proposalDecisionSchema.optional(),
+    conversationId: z.string().max(MAX_ID_LENGTH).optional(),
+    /**
+     * Restricts the read to one producing system. A queue that serves a single
+     * solution passes its own constant, so another solution's proposals — which
+     * share the index — do not appear in it.
+     */
+    origin: proposalOriginSchema.optional(),
+    /** Drops proposals that were replaced, so a chain shows only its live head. */
+    excludeSuperseded: z.stringbool().default(false),
+    /**
+     * Drops proposals whose deadline has passed, by date rather than by status.
+     * Distinct from `status: 'expired'`: between the deadline passing and the
+     * gate workflow settling the record there is task lag during which it still
+     * reads `pending`, and a queue wants it gone for that whole interval. Off by
+     * default so the list stays a faithful view of the index.
+     */
+    excludeExpired: z.stringbool().default(false),
+  })
+);
 export type ProposalFilters = z.infer<typeof proposalFiltersSchema>;
 
-export const listProposalsQuerySchema = lazySchema(() => proposalFiltersSchema.extend({
-  /** Filters to proposals in the given action category. */
-  category: proposalCategorySchema.optional(),
-  /** Bounds the closed queue to a recency window rather than all decided history. */
-  decidedWithinHours: z.coerce.number().int().min(1).max(168).optional(),
-  /**
-   * `priority` (the default) ranks by impact, confidence and deadline, for a queue of open
-   * proposals. `newest` orders a conversation's history by when each proposal was decided, with
-   * an undecided one first, so paging stays consistent with the order shown.
-   */
-  order: z.enum(['priority', 'newest']).optional(),
-  size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
-  from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
-}));
+export const listProposalsQuerySchema = lazySchema(() =>
+  proposalFiltersSchema.extend({
+    /** Filters to proposals in the given action category. */
+    category: proposalCategorySchema.optional(),
+    /** Bounds the closed queue to a recency window rather than all decided history. */
+    decidedWithinHours: z.coerce.number().int().min(1).max(168).optional(),
+    /**
+     * `priority` (the default) ranks by impact, confidence and deadline, for a queue of open
+     * proposals. `newest` orders a conversation's history by when each proposal was decided, with
+     * an undecided one first, so paging stays consistent with the order shown.
+     */
+    order: z.enum(['priority', 'newest']).optional(),
+    size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
+    from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
+  })
+);
 export type ListProposalsQuery = z.infer<typeof listProposalsQuerySchema>;
 
 export interface ListProposalsResponse {
@@ -369,34 +391,36 @@ export interface ListProposalsResponse {
   total: number;
 }
 
-export const proposalChartsSummaryQuerySchema = lazySchema(() => z
-  .object({
-    /** The 168h ceiling keeps the ES|QL queries cheap. */
-    windowHours: z.coerce.number().int().min(1).max(168).default(24),
-    /** The 5 minute floor bounds the response size. */
-    bucketMinutes: z.coerce.number().int().min(5).max(1440).default(30),
+export const proposalChartsSummaryQuerySchema = lazySchema(() =>
+  z
+    .object({
+      /** The 168h ceiling keeps the ES|QL queries cheap. */
+      windowHours: z.coerce.number().int().min(1).max(168).default(24),
+      /** The 5 minute floor bounds the response size. */
+      bucketMinutes: z.coerce.number().int().min(5).max(1440).default(30),
+      /**
+       * Scopes the counts to one producing feature, matching what its queues
+       * already filter on. Absent counts every producer in the space, which is
+       * only right for a consumer that shows them all.
+       */
+      origin: proposalOriginSchema.optional(),
+    })
     /**
-     * Scopes the counts to one producing feature, matching what its queues
-     * already filter on. Absent counts every producer in the space, which is
-     * only right for a consumer that shows them all.
+     * The two bounds are independently valid but not jointly: 168h at 5-minute
+     * granularity is ~2 000 buckets, and one row per (bucket, category) crosses
+     * the ES|QL result ceiling. Rejecting is the honest answer — a truncated
+     * result silently drops the newest buckets rather than erroring.
      */
-    origin: proposalOriginSchema.optional(),
-  })
-  /**
-   * The two bounds are independently valid but not jointly: 168h at 5-minute
-   * granularity is ~2 000 buckets, and one row per (bucket, category) crosses
-   * the ES|QL result ceiling. Rejecting is the honest answer — a truncated
-   * result silently drops the newest buckets rather than erroring.
-   */
-  .refine(
-    ({ windowHours, bucketMinutes }) =>
-      Math.ceil((windowHours * 60) / bucketMinutes) <= MAX_CHARTS_SUMMARY_BUCKETS,
-    {
-      message:
-        `windowHours and bucketMinutes must not resolve to more than ` +
-        `${MAX_CHARTS_SUMMARY_BUCKETS} buckets`,
-    }
-  ));
+    .refine(
+      ({ windowHours, bucketMinutes }) =>
+        Math.ceil((windowHours * 60) / bucketMinutes) <= MAX_CHARTS_SUMMARY_BUCKETS,
+      {
+        message:
+          `windowHours and bucketMinutes must not resolve to more than ` +
+          `${MAX_CHARTS_SUMMARY_BUCKETS} buckets`,
+      }
+    )
+);
 export type ProposalChartsSummaryQuery = z.infer<typeof proposalChartsSummaryQuerySchema>;
 
 export interface ProposalChartsSummaryBucket {

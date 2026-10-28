@@ -13,11 +13,13 @@ import userPromptText from './user_prompt.text';
 export const LlmGroundednessEvaluationPrompt = createPrompt({
   name: 'llm_groundedness_evaluation',
   description: 'Prompt for evaluating the groundedness of LLM responses',
-  input: lazySchema(() => z.object({
-    user_query: z.string(),
-    agent_response: z.string(),
-    tool_call_history: z.string().optional(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      user_query: z.string(),
+      agent_response: z.string(),
+      tool_call_history: z.string().optional(),
+    })
+  ),
 })
   .version({
     system: {

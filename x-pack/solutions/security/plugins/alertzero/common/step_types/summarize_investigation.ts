@@ -12,23 +12,27 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const SUMMARIZE_INVESTIGATION_STEP_ID = 'alertzero.investigation.summarize' as const;
 
-const inputSchema = lazySchema(() => z.object({
-  conversation_id: z
-    .string()
-    .trim()
-    .min(1)
-    .max(256)
-    .describe('Investigation or escalation conversation to read and summarize.'),
-}));
+const inputSchema = lazySchema(() =>
+  z.object({
+    conversation_id: z
+      .string()
+      .trim()
+      .min(1)
+      .max(256)
+      .describe('Investigation or escalation conversation to read and summarize.'),
+  })
+);
 
-const outputSchema = lazySchema(() => z.object({
-  skipped: z.boolean().describe('True when no summary was written.'),
-  reason: z
-    .enum(['template', 'no_proposal', 'empty', 'no_connector', 'incomplete', 'cancelled'])
-    .optional()
-    .describe('Why the step wrote nothing.'),
-  summary: z.string().optional().describe('Reading written to metadata.summary.'),
-}));
+const outputSchema = lazySchema(() =>
+  z.object({
+    skipped: z.boolean().describe('True when no summary was written.'),
+    reason: z
+      .enum(['template', 'no_proposal', 'empty', 'no_connector', 'incomplete', 'cancelled'])
+      .optional()
+      .describe('Why the step wrote nothing.'),
+    summary: z.string().optional().describe('Reading written to metadata.summary.'),
+  })
+);
 
 export const summarizeInvestigationStepCommonDefinition: CommonStepDefinition<
   typeof inputSchema,

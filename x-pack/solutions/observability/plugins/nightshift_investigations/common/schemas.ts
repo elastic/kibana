@@ -30,11 +30,13 @@ const MAX_V2_ALERT_DATA_LENGTH = 32_000;
 
 export const investigationSubjectTypeSchema = lazySchema(() => z.enum(INVESTIGATION_SUBJECT_TYPES));
 
-export const investigationSubjectSchema = lazySchema(() => z.object({
-  type: investigationSubjectTypeSchema,
-  id: z.string().min(1).max(500),
-  summary: z.string().max(MAX_TEXT_LENGTH).optional(),
-}));
+export const investigationSubjectSchema = lazySchema(() =>
+  z.object({
+    type: investigationSubjectTypeSchema,
+    id: z.string().min(1).max(500),
+    summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+  })
+);
 
 /** Bound on notification destinations one investigation fans out to; one per automation is the norm. */
 export const MAX_INVESTIGATION_NOTIFICATIONS = 5;
@@ -67,51 +69,57 @@ const notificationParamValueSchema = (remainingDepth: number): z.ZodType<JsonVal
 };
 
 /** Generic destination envelope; notification handlers validate connector-specific params at runtime. */
-export const investigationNotificationDestinationSchema = lazySchema(() => z.strictObject({
-  type: z.string().min(1).max(100),
-  connector_id: z.string().min(1).max(500),
-  params: z
-    .record(z.string().max(128), notificationParamValueSchema(MAX_NOTIFICATION_PARAM_DEPTH - 1))
-    .refine((value) => Object.keys(value).length <= MAX_NOTIFICATION_PARAM_ENTRIES, {
-      message: 'notification params exceed the 20-key limit',
-    })
-    .refine((value) => JSON.stringify(value).length <= MAX_NOTIFICATION_PARAM_LENGTH, {
-      message: 'notification params exceed the 4096-character JSON limit',
-    }),
-  automation_id: z.string().max(500).optional(),
-  automation_name: z.string().max(500).optional(),
-}));
+export const investigationNotificationDestinationSchema = lazySchema(() =>
+  z.strictObject({
+    type: z.string().min(1).max(100),
+    connector_id: z.string().min(1).max(500),
+    params: z
+      .record(z.string().max(128), notificationParamValueSchema(MAX_NOTIFICATION_PARAM_DEPTH - 1))
+      .refine((value) => Object.keys(value).length <= MAX_NOTIFICATION_PARAM_ENTRIES, {
+        message: 'notification params exceed the 20-key limit',
+      })
+      .refine((value) => JSON.stringify(value).length <= MAX_NOTIFICATION_PARAM_LENGTH, {
+        message: 'notification params exceed the 4096-character JSON limit',
+      }),
+    automation_id: z.string().max(500).optional(),
+    automation_name: z.string().max(500).optional(),
+  })
+);
 
-export const investigationNotificationDestinationsSchema = lazySchema(() => z
-  .array(investigationNotificationDestinationSchema)
-  .max(MAX_INVESTIGATION_NOTIFICATIONS));
+export const investigationNotificationDestinationsSchema = lazySchema(() =>
+  z.array(investigationNotificationDestinationSchema).max(MAX_INVESTIGATION_NOTIFICATIONS)
+);
 
-export const alertSnapshotGroupSchema = lazySchema(() => z.object({
-  field: z.string().max(500),
-  value: z.string().max(1000),
-}));
+export const alertSnapshotGroupSchema = lazySchema(() =>
+  z.object({
+    field: z.string().max(500),
+    value: z.string().max(1000),
+  })
+);
 
-export const alertSnapshotEvaluationSchema = lazySchema(() => z.object({
-  /**
-   * The observed value, from `kibana.alert.evaluation.value` or, when the rule type writes the
-   * plural field instead, `kibana.alert.evaluation.values`. Every shape here is real:
-   * `scaled_float` in the legacy experimental field map, a `keyword` holding a stringified number
-   * for `.es-query`, and an array for the custom-threshold rule type, which writes one entry per
-   * configured metric.
-   */
-  value: z
-    .union([
-      z.number(),
-      z.string().max(500),
-      z.array(z.union([z.number(), z.string().max(500), z.null()])).max(MAX_EVALUATION_ENTRIES),
-    ])
-    .optional(),
-  /**
-   * `kibana.alert.evaluation.threshold`. Scalar for most rule types, but an array for the
-   * custom-threshold rule type, which writes one entry per criterion.
-   */
-  threshold: z.union([z.number(), z.array(z.number()).max(MAX_EVALUATION_ENTRIES)]).optional(),
-}));
+export const alertSnapshotEvaluationSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The observed value, from `kibana.alert.evaluation.value` or, when the rule type writes the
+     * plural field instead, `kibana.alert.evaluation.values`. Every shape here is real:
+     * `scaled_float` in the legacy experimental field map, a `keyword` holding a stringified number
+     * for `.es-query`, and an array for the custom-threshold rule type, which writes one entry per
+     * configured metric.
+     */
+    value: z
+      .union([
+        z.number(),
+        z.string().max(500),
+        z.array(z.union([z.number(), z.string().max(500), z.null()])).max(MAX_EVALUATION_ENTRIES),
+      ])
+      .optional(),
+    /**
+     * `kibana.alert.evaluation.threshold`. Scalar for most rule types, but an array for the
+     * custom-threshold rule type, which writes one entry per criterion.
+     */
+    threshold: z.union([z.number(), z.array(z.number()).max(MAX_EVALUATION_ENTRIES)]).optional(),
+  })
+);
 
 /**
  * A point-in-time copy of the alert fields an investigation needs, taken by the caller at trigger
@@ -121,85 +129,91 @@ export const alertSnapshotEvaluationSchema = lazySchema(() => z.object({
  * Field sources are `kibana.alert.*`. Everything optional here is optional because the source
  * field is not guaranteed, not merely for convenience — see the notes on each.
  */
-export const alertSnapshotSchema = lazySchema(() => z.object({
-  /** `kibana.alert.uuid` */
-  id: z.string().min(1).max(500),
-  /** `kibana.alert.rule.uuid` */
-  rule_id: z.string().min(1).max(500),
-  /** `kibana.alert.rule.name` */
-  rule_name: z.string().min(1).max(500),
-  /** `kibana.alert.rule.rule_type_id`, e.g. `apm.transaction_duration`. */
-  rule_type_id: z.string().min(1).max(500),
-  /** `kibana.alert.rule.category` — the rule type's display name, e.g. "Latency threshold". */
-  rule_category: z.string().min(1).max(500),
-  /** `kibana.alert.reason` — human-readable statement of why the alert fired. */
-  reason: z.string().min(1).max(5000).optional(),
-  /** `kibana.alert.status` */
-  status: z.string().min(1).max(100),
-  /** `kibana.alert.start` */
-  start: isoDateTime({ offset: true }).max(100),
-  timestamp: isoDateTime({ offset: true }).max(100).optional(),
-  /** `kibana.alert.flapping` — written by the alerting framework for every alert. */
-  flapping: z.boolean().optional(),
-  /**
-   * `kibana.alert.url`. Optional: the framework does not write this — individual rule types do,
-   * and many observability rule types never set it.
-   */
-  url: z.string().max(2000).optional(),
-  /** `kibana.alert.rule.tags` */
-  rule_tags: z.array(z.string().max(500)).max(50).optional(),
-  /**
-   * `kibana.alert.grouping` — nested entity grouping, e.g. `{ service: { name: 'checkout' } }`.
-   * Optional: lives in the legacy experimental field map, which rule types opt into.
-   */
-  grouping: z.record(z.string().max(128), z.unknown()).optional(),
-  /**
-   * `kibana.alert.group` — the same grouping in flat form. Optional for the same reason as
-   * `grouping`.
-   */
-  group: z.array(alertSnapshotGroupSchema).max(50).optional(),
-  /** The rule condition that fired. Optional for the same reason as `grouping`. */
-  evaluation: alertSnapshotEvaluationSchema.optional(),
-  /** `kibana.alert.rule.parameters` — raw, un-formatted rule params. */
-  rule_parameters: z.record(z.string().max(128), z.unknown()).optional(),
-  /**
-   * `kibana.alert.index_pattern` — a starting point for ES|QL queries. Optional and usually
-   * absent: only the infra metric-threshold, inventory-threshold and log-threshold rule types
-   * populate it. Deriving it per rule type from `rule_parameters` is separate work.
-   */
-  index_pattern: z.string().max(1000).optional(),
-}));
+export const alertSnapshotSchema = lazySchema(() =>
+  z.object({
+    /** `kibana.alert.uuid` */
+    id: z.string().min(1).max(500),
+    /** `kibana.alert.rule.uuid` */
+    rule_id: z.string().min(1).max(500),
+    /** `kibana.alert.rule.name` */
+    rule_name: z.string().min(1).max(500),
+    /** `kibana.alert.rule.rule_type_id`, e.g. `apm.transaction_duration`. */
+    rule_type_id: z.string().min(1).max(500),
+    /** `kibana.alert.rule.category` — the rule type's display name, e.g. "Latency threshold". */
+    rule_category: z.string().min(1).max(500),
+    /** `kibana.alert.reason` — human-readable statement of why the alert fired. */
+    reason: z.string().min(1).max(5000).optional(),
+    /** `kibana.alert.status` */
+    status: z.string().min(1).max(100),
+    /** `kibana.alert.start` */
+    start: isoDateTime({ offset: true }).max(100),
+    timestamp: isoDateTime({ offset: true }).max(100).optional(),
+    /** `kibana.alert.flapping` — written by the alerting framework for every alert. */
+    flapping: z.boolean().optional(),
+    /**
+     * `kibana.alert.url`. Optional: the framework does not write this — individual rule types do,
+     * and many observability rule types never set it.
+     */
+    url: z.string().max(2000).optional(),
+    /** `kibana.alert.rule.tags` */
+    rule_tags: z.array(z.string().max(500)).max(50).optional(),
+    /**
+     * `kibana.alert.grouping` — nested entity grouping, e.g. `{ service: { name: 'checkout' } }`.
+     * Optional: lives in the legacy experimental field map, which rule types opt into.
+     */
+    grouping: z.record(z.string().max(128), z.unknown()).optional(),
+    /**
+     * `kibana.alert.group` — the same grouping in flat form. Optional for the same reason as
+     * `grouping`.
+     */
+    group: z.array(alertSnapshotGroupSchema).max(50).optional(),
+    /** The rule condition that fired. Optional for the same reason as `grouping`. */
+    evaluation: alertSnapshotEvaluationSchema.optional(),
+    /** `kibana.alert.rule.parameters` — raw, un-formatted rule params. */
+    rule_parameters: z.record(z.string().max(128), z.unknown()).optional(),
+    /**
+     * `kibana.alert.index_pattern` — a starting point for ES|QL queries. Optional and usually
+     * absent: only the infra metric-threshold, inventory-threshold and log-threshold rule types
+     * populate it. Deriving it per rule type from `rule_parameters` is separate work.
+     */
+    index_pattern: z.string().max(1000).optional(),
+  })
+);
 
 /**
  * A point-in-time copy of an alerting v2 episode, resolved server-side from its id. Unlike a
  * classic alert it has no rule type, category or reason, and the alert's own fields live in
  * `data`.
  */
-export const v2AlertSnapshotSchema = lazySchema(() => z.object({
-  alert_version: z.literal('v2'),
-  /** `episode.id` */
-  id: z.string().min(1).max(500),
-  rule_id: z.string().min(1).max(500),
-  rule_name: z.string().min(1).max(500).optional(),
-  group_hash: z.string().min(1).max(500),
-  /** `episode.status` */
-  status: z.string().min(1).max(100),
-  /** Timestamp of the episode's first event. */
-  start: isoDateTime({ offset: true }).max(100),
-  last_event_timestamp: isoDateTime({ offset: true }).max(100).optional(),
-  severity: z.string().min(1).max(100).optional(),
-  source: z.string().min(1).max(500).optional(),
-  /** The `data` of the latest event that carried any. */
-  data: z
-    .record(z.string().max(128), z.unknown())
-    .refine((data) => JSON.stringify(data).length <= MAX_V2_ALERT_DATA_LENGTH)
-    .optional(),
-}));
+export const v2AlertSnapshotSchema = lazySchema(() =>
+  z.object({
+    alert_version: z.literal('v2'),
+    /** `episode.id` */
+    id: z.string().min(1).max(500),
+    rule_id: z.string().min(1).max(500),
+    rule_name: z.string().min(1).max(500).optional(),
+    group_hash: z.string().min(1).max(500),
+    /** `episode.status` */
+    status: z.string().min(1).max(100),
+    /** Timestamp of the episode's first event. */
+    start: isoDateTime({ offset: true }).max(100),
+    last_event_timestamp: isoDateTime({ offset: true }).max(100).optional(),
+    severity: z.string().min(1).max(100).optional(),
+    source: z.string().min(1).max(500).optional(),
+    /** The `data` of the latest event that carried any. */
+    data: z
+      .record(z.string().max(128), z.unknown())
+      .refine((data) => JSON.stringify(data).length <= MAX_V2_ALERT_DATA_LENGTH)
+      .optional(),
+  })
+);
 
-export const investigationAlertSnapshotSchema = lazySchema(() => z.discriminatedUnion('alert_version', [
-  alertSnapshotSchema.extend({ alert_version: z.literal('v1').optional() }),
-  v2AlertSnapshotSchema,
-]));
+export const investigationAlertSnapshotSchema = lazySchema(() =>
+  z.discriminatedUnion('alert_version', [
+    alertSnapshotSchema.extend({ alert_version: z.literal('v1').optional() }),
+    v2AlertSnapshotSchema,
+  ])
+);
 
 /**
  * Strict, so that an alert investigation carries alert data and nothing else. In particular a
@@ -220,11 +234,13 @@ export const alertInvestigationContextSchema = z
  * (significant events now send `context.event_id`), but an id-shaped allowlist costs a legitimate
  * caller nothing and still rejects values carrying `/`, `?` or `..` from older callers.
  */
-const significantEventUuidSchema = lazySchema(() => z
-  .string()
-  .min(1)
-  .max(500)
-  .regex(/^[A-Za-z0-9_-]+$/, 'event_uuid must be an id: letters, digits, underscore or hyphen'));
+const significantEventUuidSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(500)
+    .regex(/^[A-Za-z0-9_-]+$/, 'event_uuid must be an id: letters, digits, underscore or hyphen')
+);
 
 /**
  * Deliberately open apart from `event_uuid`. The significant events plugin owns the payload it
@@ -233,12 +249,14 @@ const significantEventUuidSchema = lazySchema(() => z
  * add a field. Only the key with a hazard attached is constrained; the bounds on key count and key
  * length stay, so an open context is still not an unbounded one.
  */
-export const freeFormContextSchema = lazySchema(() => z
-  .looseObject({ event_uuid: significantEventUuidSchema.optional() })
-  .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' })
-  .refine((value) => Object.keys(value).every((key) => key.length <= 128), {
-    message: 'context has a key longer than 128 characters',
-  }));
+export const freeFormContextSchema = lazySchema(() =>
+  z
+    .looseObject({ event_uuid: significantEventUuidSchema.optional() })
+    .refine((value) => Object.keys(value).length <= 50, { message: 'context exceeds 50 key limit' })
+    .refine((value) => Object.keys(value).every((key) => key.length <= 128), {
+      message: 'context has a key longer than 128 characters',
+    })
+);
 
 export type InvestigationSubject = z.infer<typeof investigationSubjectSchema>;
 export type InvestigationNotificationDestination = z.infer<

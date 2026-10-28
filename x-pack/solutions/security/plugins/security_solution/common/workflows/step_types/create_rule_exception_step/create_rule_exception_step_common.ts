@@ -18,22 +18,24 @@ import {
 
 export const CreateRuleExceptionStepId = 'security.createRuleException' as const;
 
-export const createRuleExceptionInputSchema = lazySchema(() => z
-  .object({
-    rule_id: z.string().min(1).max(36),
-    item_id: ExceptionListItemHumanId.optional(),
-    overwrite: z.boolean().optional().default(false),
-    ...exceptionItemBaseSchema.shape,
-  })
-  .superRefine((input, ctx) => {
-    if (input.overwrite && input.item_id === undefined) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['overwrite'],
-        message: OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
-      });
-    }
-  }));
+export const createRuleExceptionInputSchema = lazySchema(() =>
+  z
+    .object({
+      rule_id: z.string().min(1).max(36),
+      item_id: ExceptionListItemHumanId.optional(),
+      overwrite: z.boolean().optional().default(false),
+      ...exceptionItemBaseSchema.shape,
+    })
+    .superRefine((input, ctx) => {
+      if (input.overwrite && input.item_id === undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['overwrite'],
+          message: OVERWRITE_REQUIRES_ITEM_ID_MESSAGE,
+        });
+      }
+    })
+);
 
 export const createRuleExceptionOutputSchema = exceptionItemOutputSchema;
 

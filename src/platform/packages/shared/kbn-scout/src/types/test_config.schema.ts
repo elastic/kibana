@@ -13,30 +13,40 @@ import { serverlessProjectTypes, serverlessProductTiers } from '@kbn/es';
 
 const PROJECT_TYPES_WITH_TIER: ReadonlySet<string> = new Set(['security', 'oblt']);
 
-const ServerlessProjectTypeSchema = lazySchema(() => z.enum(serverlessProjectTypes, {
-  error: `must be one of: ${serverlessProjectTypes.join(' | ')}`,
-}));
+const ServerlessProjectTypeSchema = lazySchema(() =>
+  z.enum(serverlessProjectTypes, {
+    error: `must be one of: ${serverlessProjectTypes.join(' | ')}`,
+  })
+);
 
-const ServerlessProductTierSchema = lazySchema(() => z.enum(serverlessProductTiers, {
-  error: `must be one of: ${serverlessProductTiers.join(' | ')}`,
-}));
+const ServerlessProductTierSchema = lazySchema(() =>
+  z.enum(serverlessProductTiers, {
+    error: `must be one of: ${serverlessProductTiers.join(' | ')}`,
+  })
+);
 
-const HostsSchema = lazySchema(() => z.object({
-  kibana: z.url({ error: "must be a valid URL (e.g. 'https://my.kibana.co')" }),
-  elasticsearch: z.url({ error: "must be a valid URL (e.g. 'https://my.elasticsearch.co')" }),
-}));
+const HostsSchema = lazySchema(() =>
+  z.object({
+    kibana: z.url({ error: "must be a valid URL (e.g. 'https://my.kibana.co')" }),
+    elasticsearch: z.url({ error: "must be a valid URL (e.g. 'https://my.elasticsearch.co')" }),
+  })
+);
 
-const AuthSchema = lazySchema(() => z.object({
-  username: z.string({ error: 'is required' }).min(1, { error: 'must be a non-empty string' }),
-  password: z.string({ error: 'is required' }).min(1, { error: 'must be a non-empty string' }),
-}));
+const AuthSchema = lazySchema(() =>
+  z.object({
+    username: z.string({ error: 'is required' }).min(1, { error: 'must be a non-empty string' }),
+    password: z.string({ error: 'is required' }).min(1, { error: 'must be a non-empty string' }),
+  })
+);
 
-const LinkedProjectSchema = lazySchema(() => z.object({
-  hosts: z.object({
-    elasticsearch: z.url({ error: 'must be a valid URL' }),
-  }),
-  auth: AuthSchema,
-}));
+const LinkedProjectSchema = lazySchema(() =>
+  z.object({
+    hosts: z.object({
+      elasticsearch: z.url({ error: 'must be a valid URL' }),
+    }),
+    auth: AuthSchema,
+  })
+);
 
 /**
  * Schema for the JSON config files consumed by Scout (`local.json`,

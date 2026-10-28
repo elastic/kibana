@@ -19,42 +19,46 @@ const UNSUPPORTED_OPERATORS: readonly string[] = ['is_in_list', 'is_not_in_list'
 // unions in step input schemas break workflow validation for template-string
 // inputs, see bulk_action_schemas.ts). Value-list operators are rejected: this
 // step builds the filter itself and cannot resolve a value list.
-export const buildExceptionEntriesFilterInputSchema = lazySchema(() => z.object({
-  entries: z
-    .array(exceptionEntrySchema)
-    .min(1)
-    .max(100)
-    .superRefine((entries, ctx) => {
-      entries.forEach((entry, index) => {
-        if (UNSUPPORTED_OPERATORS.includes(entry.operator)) {
-          ctx.addIssue({
-            code: 'custom',
-            path: [index, 'operator'],
-            message: i18n.translate(
-              'xpack.securitySolution.workflows.steps.buildExceptionEntriesFilter.listOperatorUnsupported',
-              {
-                defaultMessage:
-                  'Value-list conditions (`is_in_list` / `is_not_in_list`) are not supported when building an exception filter',
-              }
-            ),
-          });
-        }
-      });
-    })
-    .describe('Proposed exception entries, ANDed together as one exception item would be'),
-  existing_filters: z
-    .array(z.record(z.string(), z.unknown()))
-    .default([])
-    .describe("The rule's own current filters, to preserve alongside the new one"),
-}));
+export const buildExceptionEntriesFilterInputSchema = lazySchema(() =>
+  z.object({
+    entries: z
+      .array(exceptionEntrySchema)
+      .min(1)
+      .max(100)
+      .superRefine((entries, ctx) => {
+        entries.forEach((entry, index) => {
+          if (UNSUPPORTED_OPERATORS.includes(entry.operator)) {
+            ctx.addIssue({
+              code: 'custom',
+              path: [index, 'operator'],
+              message: i18n.translate(
+                'xpack.securitySolution.workflows.steps.buildExceptionEntriesFilter.listOperatorUnsupported',
+                {
+                  defaultMessage:
+                    'Value-list conditions (`is_in_list` / `is_not_in_list`) are not supported when building an exception filter',
+                }
+              ),
+            });
+          }
+        });
+      })
+      .describe('Proposed exception entries, ANDed together as one exception item would be'),
+    existing_filters: z
+      .array(z.record(z.string(), z.unknown()))
+      .default([])
+      .describe("The rule's own current filters, to preserve alongside the new one"),
+  })
+);
 
-export const buildExceptionEntriesFilterOutputSchema = lazySchema(() => z.object({
-  filters: z
-    .array(z.record(z.string(), z.unknown()))
-    .describe(
-      "existing_filters plus one filter excluding alerts the proposed exception would suppress — use in place of the rule's own filters when previewing the exception"
-    ),
-}));
+export const buildExceptionEntriesFilterOutputSchema = lazySchema(() =>
+  z.object({
+    filters: z
+      .array(z.record(z.string(), z.unknown()))
+      .describe(
+        "existing_filters plus one filter excluding alerts the proposed exception would suppress — use in place of the rule's own filters when previewing the exception"
+      ),
+  })
+);
 
 export const buildExceptionEntriesFilterStepCommonDefinition: BaseStepDefinition<
   typeof buildExceptionEntriesFilterInputSchema,

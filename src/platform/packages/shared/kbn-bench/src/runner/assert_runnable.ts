@@ -10,13 +10,15 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { BenchmarkRunnable } from './types';
 
-const runnableSchema = lazySchema(() => z.object({
-  run: z.instanceof(Function),
-  beforeAll: z.instanceof(Function).optional(),
-  afterAll: z.instanceof(Function).optional(),
-  before: z.instanceof(Function).optional(),
-  after: z.instanceof(Function).optional(),
-}));
+const runnableSchema = lazySchema(() =>
+  z.object({
+    run: z.instanceof(Function),
+    beforeAll: z.instanceof(Function).optional(),
+    afterAll: z.instanceof(Function).optional(),
+    before: z.instanceof(Function).optional(),
+    after: z.instanceof(Function).optional(),
+  })
+);
 
 export function assertRunnable(runnable: unknown): asserts runnable is BenchmarkRunnable {
   runnableSchema.parse(runnable);

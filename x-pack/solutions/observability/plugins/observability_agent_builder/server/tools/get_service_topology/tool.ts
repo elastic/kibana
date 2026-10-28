@@ -26,50 +26,52 @@ export const OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID = 'observability.get_ser
 
 const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
-const getServiceTopologyToolSchema = lazySchema(() => z.object({
-  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  serviceName: z
-    .string()
-    .min(1)
-    .max(MAX_SHORT_STRING_LENGTH)
-    .describe('The name of the service to get the topology for'),
-  direction: z
-    .enum(['downstream', 'upstream', 'both'])
-    .default('downstream')
-    .describe(
-      'Direction of dependencies to retrieve. ' +
-        '"downstream" shows what this service calls (dependencies). ' +
-        '"upstream" shows what calls this service (callers). ' +
-        '"both" shows both directions. Defaults to "downstream".'
-    ),
-  depth: z
-    .number()
-    .int()
-    .min(1)
-    .optional()
-    .describe(
-      'Maximum number of hops to traverse. ' +
-        'depth=1 returns only immediate (single-hop) dependencies. ' +
-        'Omit for unlimited traversal (full multi-hop topology).'
-    ),
-  environment: z
-    .string()
-    .max(MAX_SHORT_STRING_LENGTH)
-    .optional()
-    .describe(
-      'Service environment (e.g. "production") used to scope the returned `nodeMetadata` badges. ' +
-        'Pass it whenever the user is looking at a single environment — otherwise alert, SLO and ' +
-        'anomaly counts are aggregated across every environment. Omit for all environments.'
-    ),
-  kuery: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .optional()
-    .describe(
-      'KQL filter applied when computing the `nodeMetadata` alert and SLO badges, ' +
-        'e.g. \'service.name: "frontend"\'. Omit when no filter applies.'
-    ),
-}));
+const getServiceTopologyToolSchema = lazySchema(() =>
+  z.object({
+    ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
+    serviceName: z
+      .string()
+      .min(1)
+      .max(MAX_SHORT_STRING_LENGTH)
+      .describe('The name of the service to get the topology for'),
+    direction: z
+      .enum(['downstream', 'upstream', 'both'])
+      .default('downstream')
+      .describe(
+        'Direction of dependencies to retrieve. ' +
+          '"downstream" shows what this service calls (dependencies). ' +
+          '"upstream" shows what calls this service (callers). ' +
+          '"both" shows both directions. Defaults to "downstream".'
+      ),
+    depth: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe(
+        'Maximum number of hops to traverse. ' +
+          'depth=1 returns only immediate (single-hop) dependencies. ' +
+          'Omit for unlimited traversal (full multi-hop topology).'
+      ),
+    environment: z
+      .string()
+      .max(MAX_SHORT_STRING_LENGTH)
+      .optional()
+      .describe(
+        'Service environment (e.g. "production") used to scope the returned `nodeMetadata` badges. ' +
+          'Pass it whenever the user is looking at a single environment — otherwise alert, SLO and ' +
+          'anomaly counts are aggregated across every environment. Omit for all environments.'
+      ),
+    kuery: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .optional()
+      .describe(
+        'KQL filter applied when computing the `nodeMetadata` alert and SLO badges, ' +
+          'e.g. \'service.name: "frontend"\'. Omit when no filter applies.'
+      ),
+  })
+);
 
 export function createGetServiceTopologyTool({
   core,

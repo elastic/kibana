@@ -6,16 +6,18 @@
  */
 import { z, lazySchema } from '@kbn/zod';
 
-const searchSLODefinitionsParamsSchema = lazySchema(() => z.object({
-  query: z
-    .object({
-      search: z.string().optional(),
-      size: z.coerce.number().optional(),
-      searchAfter: z.string().optional(),
-      remoteName: z.string().optional(),
-    })
-    .optional(),
-}));
+const searchSLODefinitionsParamsSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .object({
+        search: z.string().optional(),
+        size: z.coerce.number().optional(),
+        searchAfter: z.string().optional(),
+        remoteName: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 
 type SearchSLODefinitionsParams = NonNullable<
   z.output<typeof searchSLODefinitionsParamsSchema.shape.query>

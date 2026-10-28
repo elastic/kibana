@@ -18,19 +18,21 @@ import { assertNotPaused } from '../../utils/assert_not_paused';
 
 const discoveryExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/discovery/_execute',
-  params: lazySchema(() => z.object({
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('trigger'),
-        connector_id: z
-          .string()
-          .max(MAX_ID_LENGTH)
-          .optional()
-          .describe('Optional chat model connector or inference endpoint ID for this run.'),
-      }),
-      z.object({ action: z.literal('cancel') }),
-    ]),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.discriminatedUnion('action', [
+        z.object({
+          action: z.literal('trigger'),
+          connector_id: z
+            .string()
+            .max(MAX_ID_LENGTH)
+            .optional()
+            .describe('Optional chat model connector or inference endpoint ID for this run.'),
+        }),
+        z.object({ action: z.literal('cancel') }),
+      ]),
+    })
+  ),
   options: {
     access: 'internal',
     summary: 'Manually trigger the Significant Events pipeline',

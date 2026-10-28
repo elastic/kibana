@@ -9,17 +9,19 @@ import { z, lazySchema } from '@kbn/zod';
 
 import { sloIdSchema } from '../../schema/slo';
 
-const deleteSLOInstancesParamsSchema = lazySchema(() => z.object({
-  body: z.object({
-    list: z.array(
-      z.object({
-        sloId: sloIdSchema,
-        instanceId: z.string(),
-        excludeRollup: z.boolean().optional(),
-      })
-    ),
-  }),
-}));
+const deleteSLOInstancesParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z.array(
+        z.object({
+          sloId: sloIdSchema,
+          instanceId: z.string(),
+          excludeRollup: z.boolean().optional(),
+        })
+      ),
+    }),
+  })
+);
 
 type DeleteSLOInstancesInput = z.input<typeof deleteSLOInstancesParamsSchema.shape.body>;
 type DeleteSLOInstancesParams = z.output<typeof deleteSLOInstancesParamsSchema.shape.body>;

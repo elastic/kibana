@@ -9,18 +9,22 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataStringifyJsonStepTypeId = 'data.stringifyJson' as const;
 
-export const ConfigSchema = lazySchema(() => z.object({
-  source: z.unknown(),
-}));
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    source: z.unknown(),
+  })
+);
 
-export const InputSchema = lazySchema(() => z.object({
-  pretty: z.boolean().optional().default(false),
-}));
+export const InputSchema = lazySchema(() =>
+  z.object({
+    pretty: z.boolean().optional().default(false),
+  })
+);
 
 export const OutputSchema = lazySchema(() => z.string());
 

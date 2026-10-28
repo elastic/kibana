@@ -47,27 +47,31 @@ export { AttachmentType };
 
 const MIN_DELETE_IDS = 1;
 
-export const BulkDeleteFileAttachmentsRequestSchema = lazySchema(() => z.object({
-  ids: limitedArraySchema({
-    codec: NonEmptyString,
-    min: MIN_DELETE_IDS,
-    max: MAX_DELETE_FILES,
-    fieldName: 'ids',
-  }),
-}));
+export const BulkDeleteFileAttachmentsRequestSchema = lazySchema(() =>
+  z.object({
+    ids: limitedArraySchema({
+      codec: NonEmptyString,
+      min: MIN_DELETE_IDS,
+      max: MAX_DELETE_FILES,
+      fieldName: 'ids',
+    }),
+  })
+);
 
 /**
  * Attachments bulk delete
  */
 
-export const BulkDeleteAttachmentsBySavedObjectIdRequestSchema = lazySchema(() => z.object({
-  ids: limitedArraySchema({
-    codec: NonEmptyString,
-    min: MIN_DELETE_IDS,
-    max: MAX_BULK_DELETE_ATTACHMENTS,
-    fieldName: 'ids',
-  }),
-}));
+export const BulkDeleteAttachmentsBySavedObjectIdRequestSchema = lazySchema(() =>
+  z.object({
+    ids: limitedArraySchema({
+      codec: NonEmptyString,
+      min: MIN_DELETE_IDS,
+      max: MAX_BULK_DELETE_ATTACHMENTS,
+      fieldName: 'ids',
+    }),
+  })
+);
 
 /** Bulk delete by the ids that attachments of one type reference (alert ids, event ids, ...). */
 export const BulkDeleteAttachmentsByAttachmentIdRequestSchema = lazySchema(() =>
@@ -82,14 +86,16 @@ export const BulkDeleteAttachmentsByAttachmentIdRequestSchema = lazySchema(() =>
   })
 );
 
-export const PostFileAttachmentRequestSchema = lazySchema(() => z.object({
-  file: z.unknown(),
-  filename: limitedStringSchema({
-    fieldName: 'filename',
-    min: 1,
-    max: MAX_FILENAME_LENGTH,
-  }).optional(),
-}));
+export const PostFileAttachmentRequestSchema = lazySchema(() =>
+  z.object({
+    file: z.unknown(),
+    filename: limitedStringSchema({
+      fieldName: 'filename',
+      min: 1,
+      max: MAX_FILENAME_LENGTH,
+    }).optional(),
+  })
+);
 
 /**
  * Attachments
@@ -111,24 +117,28 @@ const BoundedEventRequestSchema = EventAttachmentPayloadSchema.extend({
 const BoundedAlertRequestSchema = AlertAttachmentPayloadSchema.extend({
   alertId: lazySchema(() => stringOrArray(MAX_ATTACHMENT_ID_LENGTH)),
   index: lazySchema(() => stringOrArray(MAX_INDEX_NAME_LENGTH)),
-  rule: lazySchema(() => z.object({
-    id: z.string().max(MAX_TITLE_LENGTH).nullable(),
-    name: z.string().max(MAX_COMMENT_LENGTH).nullable(),
-  })),
+  rule: lazySchema(() =>
+    z.object({
+      id: z.string().max(MAX_TITLE_LENGTH).nullable(),
+      name: z.string().max(MAX_COMMENT_LENGTH).nullable(),
+    })
+  ),
   owner: lazySchema(() => z.string().max(MAX_TITLE_LENGTH)),
 });
 
 const BoundedActionsRequestSchema = ActionsAttachmentPayloadSchema.extend({
   comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
-  actions: lazySchema(() => z.object({
-    targets: z.array(
-      z.object({
-        hostname: z.string().max(255),
-        endpointId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
-      })
-    ),
-    type: z.string().max(256),
-  })),
+  actions: lazySchema(() =>
+    z.object({
+      targets: z.array(
+        z.object({
+          hostname: z.string().max(255),
+          endpointId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+        })
+      ),
+      type: z.string().max(256),
+    })
+  ),
   owner: lazySchema(() => z.string().max(MAX_TITLE_LENGTH)),
 });
 
@@ -147,10 +157,12 @@ const BoundedExternalReferenceNoSORequestSchema =
     externalReferenceId: lazySchema(() => z.string().max(MAX_ATTACHMENT_ID_LENGTH)),
   });
 
-const boundedStorageSO = lazySchema(() => z.object({
-  type: z.literal(ExternalReferenceStorageType.savedObject),
-  soType: z.string().max(MAX_TITLE_LENGTH),
-}));
+const boundedStorageSO = lazySchema(() =>
+  z.object({
+    type: z.literal(ExternalReferenceStorageType.savedObject),
+    soType: z.string().max(MAX_TITLE_LENGTH),
+  })
+);
 
 const BoundedExternalReferenceSORequestSchema = ExternalReferenceSOAttachmentPayloadSchema.extend({
   ...boundedExternalReferenceShape,
@@ -173,25 +185,29 @@ const BoundedPersistableStateRequestSchema = PersistableStateAttachmentPayloadSc
   }),
 });
 
-export const AttachmentRequestSchema = lazySchema(() => z.union([
-  BoundedUserCommentRequestSchema,
-  BoundedEventRequestSchema,
-  BoundedAlertRequestSchema,
-  BoundedActionsRequestSchema,
-  BoundedExternalReferenceNoSORequestSchema,
-  BoundedExternalReferenceSORequestSchema,
-  BoundedPersistableStateRequestSchema,
-]));
+export const AttachmentRequestSchema = lazySchema(() =>
+  z.union([
+    BoundedUserCommentRequestSchema,
+    BoundedEventRequestSchema,
+    BoundedAlertRequestSchema,
+    BoundedActionsRequestSchema,
+    BoundedExternalReferenceNoSORequestSchema,
+    BoundedExternalReferenceSORequestSchema,
+    BoundedPersistableStateRequestSchema,
+  ])
+);
 
-export const AttachmentRequestWithoutRefsSchema = lazySchema(() => z.union([
-  BoundedUserCommentRequestSchema,
-  BoundedAlertRequestSchema,
-  BoundedEventRequestSchema,
-  BoundedActionsRequestSchema,
-  BoundedExternalReferenceNoSORequestSchema,
-  BoundedExternalReferenceSOWithoutRefsRequestSchema,
-  BoundedPersistableStateRequestSchema,
-]));
+export const AttachmentRequestWithoutRefsSchema = lazySchema(() =>
+  z.union([
+    BoundedUserCommentRequestSchema,
+    BoundedAlertRequestSchema,
+    BoundedEventRequestSchema,
+    BoundedActionsRequestSchema,
+    BoundedExternalReferenceNoSORequestSchema,
+    BoundedExternalReferenceSOWithoutRefsRequestSchema,
+    BoundedPersistableStateRequestSchema,
+  ])
+);
 
 /**
  * Partial updates are not allowed.
@@ -204,12 +220,14 @@ export const AttachmentPatchRequestSchema = AttachmentRequestSchema.and(
   z.object({ id: z.string().max(512), version: z.string().max(512) })
 );
 
-export const AttachmentsFindResponseSchema = lazySchema(() => z.object({
-  comments: AttachmentsSchema,
-  page: z.number(),
-  per_page: z.number(),
-  total: z.number(),
-}));
+export const AttachmentsFindResponseSchema = lazySchema(() =>
+  z.object({
+    comments: AttachmentsSchema,
+    page: z.number(),
+    per_page: z.number(),
+    total: z.number(),
+  })
+);
 
 export const FindAttachmentsQueryParamsSchema = paginationSchema({
   maxPerPage: MAX_COMMENTS_PER_PAGE,

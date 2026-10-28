@@ -21,9 +21,11 @@ export const getConnectorByIdRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({ connectorId: z.string().max(256) }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ connectorId: z.string().max(256) }),
+    })
+  ),
   handler: async ({ request, params, server }) => {
     return server.inference.getConnectorById(params.path.connectorId, request);
   },

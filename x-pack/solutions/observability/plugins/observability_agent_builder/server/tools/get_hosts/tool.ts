@@ -38,17 +38,25 @@ export type GetHostsToolResult = OtherResult<{
   }>;
 }>;
 
-const getHostsSchema = lazySchema(() => z.object({
-  ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  limit: z.number().int().min(1).max(100).default(20).describe(`Maximum number of hosts to return`),
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .optional()
-    .describe(
-      'KQL filter to narrow down results. Examples: "service.name: frontend", "host.name: web-*", "cloud.provider: aws".'
-    ),
-}));
+const getHostsSchema = lazySchema(() =>
+  z.object({
+    ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .default(20)
+      .describe(`Maximum number of hosts to return`),
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .optional()
+      .describe(
+        'KQL filter to narrow down results. Examples: "service.name: frontend", "host.name: web-*", "cloud.provider: aws".'
+      ),
+  })
+);
 
 export function createGetHostsTool({
   core,

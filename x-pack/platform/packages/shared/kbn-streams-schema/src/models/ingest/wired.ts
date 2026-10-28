@@ -49,11 +49,13 @@ interface IngestWired {
 }
 
 const ingestWiredShape = {
-  wired: lazySchema(() => z.object({
-    fields: fieldDefinitionSchema,
-    routing: routingDefinitionListSchema,
-    draft: z.boolean().optional(),
-  })),
+  wired: lazySchema(() =>
+    z.object({
+      fields: fieldDefinitionSchema,
+      routing: routingDefinitionListSchema,
+      draft: z.boolean().optional(),
+    })
+  ),
 };
 
 export type WiredIngest = Omit<IngestBase, 'processing'> &
@@ -61,11 +63,13 @@ export type WiredIngest = Omit<IngestBase, 'processing'> &
     processing: StreamlangIngestStreamProcessing;
   };
 
-const wiredIngestSchemaObject = lazySchema(() => z.object({
-  ...ingestBaseSchemaFields,
-  processing: streamlangIngestStreamProcessingSchema,
-  ...ingestWiredShape,
-}));
+const wiredIngestSchemaObject = lazySchema(() =>
+  z.object({
+    ...ingestBaseSchemaFields,
+    processing: streamlangIngestStreamProcessingSchema,
+    ...ingestWiredShape,
+  })
+);
 
 export const WiredIngest: Validation<IngestBase, WiredIngest> = validation(
   IngestBase.right,
@@ -77,11 +81,13 @@ export type WiredIngestUpsertRequest = Omit<IngestBaseUpsertRequest, 'processing
     processing: StreamlangIngestStreamProcessingUpsert;
   };
 
-const wiredIngestUpsertSchemaObject = lazySchema(() => z.object({
-  ...ingestBaseUpsertSchemaFields,
-  processing: streamlangIngestStreamProcessingUpsertSchema,
-  ...ingestWiredShape,
-}));
+const wiredIngestUpsertSchemaObject = lazySchema(() =>
+  z.object({
+    ...ingestBaseUpsertSchemaFields,
+    processing: streamlangIngestStreamProcessingUpsertSchema,
+    ...ingestWiredShape,
+  })
+);
 
 export const WiredIngestUpsertRequest: Validation<
   IngestBaseUpsertRequest,

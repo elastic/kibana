@@ -155,13 +155,15 @@ export const streamDetailRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
-    query: z.object({
-      start: z.string().max(64),
-      end: z.string().max(64),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+      query: z.object({
+        start: z.string().max(64),
+        end: z.string().max(64),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }): Promise<StreamDetailsResponse> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const streamEntity = await streamsClient.getStream(params.path.name);
@@ -202,11 +204,13 @@ export const resolveIndexRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    query: z.object({
-      index: z.string().max(255),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: z.object({
+        index: z.string().max(255),
+      }),
+    })
+  ),
   handler: async ({
     request,
     params,
@@ -235,14 +239,16 @@ export const resolveIndexPatternsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z.object({
-      patterns: z
-        .array(z.string().min(1).max(MAX_RESOLVE_INDEX_PATTERN_LENGTH))
-        .min(1)
-        .max(MAX_RESOLVE_INDEX_PATTERNS),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        patterns: z
+          .array(z.string().min(1).max(MAX_RESOLVE_INDEX_PATTERN_LENGTH))
+          .min(1)
+          .max(MAX_RESOLVE_INDEX_PATTERNS),
+      }),
+    })
+  ),
   handler: async ({ request, params, getScopedClients }): Promise<{ indices: string[] }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const resolved = await scopedClusterClient.asCurrentUser.indices.resolveIndex({
@@ -267,11 +273,13 @@ export const bulkGetStreamSummariesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z.object({
-      names: z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).max(BULK_GET_SUMMARIES_MAX_NAMES),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        names: z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).max(BULK_GET_SUMMARIES_MAX_NAMES),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,

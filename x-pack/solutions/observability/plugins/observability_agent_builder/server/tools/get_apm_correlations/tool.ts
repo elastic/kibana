@@ -38,49 +38,51 @@ const INVALID_LICENSE = i18n.translate(
 const isActivePlatinumLicense = (license?: ILicense) =>
   Boolean(license && license.isActive && license.hasAtLeast('platinum'));
 
-const getApmCorrelationsSchema = lazySchema(() => z.object({
-  ...timeRangeSchemaRequired,
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .optional()
-    .describe(
-      'KQL filter to scope transactions to a specific service, endpoint, environment, host, or trace. Examples: \'service.name: "frontend"\', \'service.name: "checkout" AND transaction.name: "POST /api/cart"\', \'trace.id: "abc123"\'.'
-    ),
-  metric: z
-    .enum(['latency', 'failure_rate', 'throughput', 'infra_metrics'])
-    .default('latency')
-    .describe(
-      'Metric to correlate on. "latency" finds dimensions over-represented among slow transactions. "failure_rate" finds dimensions over-represented among failed transactions. "throughput" finds dimensions whose presence correlates with changes in transaction rate (RPM) — useful for finding which attributes are associated with traffic spikes or drops. "infra_metrics" finds infrastructure entities (hosts, pods, containers, cloud regions) over-represented among slow transactions.'
-    ),
-  percentileThreshold: z
-    .number()
-    .min(50)
-    .max(99.9)
-    .optional()
-    .default(95)
-    .describe(
-      'For metric="latency" and metric="infra_metrics": defines what "slow" means using a percentile of transaction duration. Example: 95 means "slow transactions are those at or above the p95 duration". Ignored for metric="failure_rate" and metric="throughput".'
-    ),
-  fieldCandidates: z
-    .array(z.string().max(MAX_SHORT_STRING_LENGTH))
-    .min(1)
-    .max(MAX_FIELD_CANDIDATES)
-    .optional()
-    .describe(
-      `Fields to test for correlations (keyword fields recommended). If omitted, defaults to common APM dimensions for latency/failure_rate/throughput, or infrastructure fields (host.name, container.id, kubernetes.*, cloud.*) for infra_metrics. Hard limit: ${MAX_FIELD_CANDIDATES}. Use ${OBSERVABILITY_GET_INDEX_INFO_TOOL_ID} to discover valid fields and values before expanding this list.`
-    ),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_RESULTS_PER_FIELD)
-    .optional()
-    .default(10)
-    .describe(
-      `Maximum number of correlated values to return per field. Defaults to 10. Hard limit: ${MAX_RESULTS_PER_FIELD}.`
-    ),
-}));
+const getApmCorrelationsSchema = lazySchema(() =>
+  z.object({
+    ...timeRangeSchemaRequired,
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .optional()
+      .describe(
+        'KQL filter to scope transactions to a specific service, endpoint, environment, host, or trace. Examples: \'service.name: "frontend"\', \'service.name: "checkout" AND transaction.name: "POST /api/cart"\', \'trace.id: "abc123"\'.'
+      ),
+    metric: z
+      .enum(['latency', 'failure_rate', 'throughput', 'infra_metrics'])
+      .default('latency')
+      .describe(
+        'Metric to correlate on. "latency" finds dimensions over-represented among slow transactions. "failure_rate" finds dimensions over-represented among failed transactions. "throughput" finds dimensions whose presence correlates with changes in transaction rate (RPM) — useful for finding which attributes are associated with traffic spikes or drops. "infra_metrics" finds infrastructure entities (hosts, pods, containers, cloud regions) over-represented among slow transactions.'
+      ),
+    percentileThreshold: z
+      .number()
+      .min(50)
+      .max(99.9)
+      .optional()
+      .default(95)
+      .describe(
+        'For metric="latency" and metric="infra_metrics": defines what "slow" means using a percentile of transaction duration. Example: 95 means "slow transactions are those at or above the p95 duration". Ignored for metric="failure_rate" and metric="throughput".'
+      ),
+    fieldCandidates: z
+      .array(z.string().max(MAX_SHORT_STRING_LENGTH))
+      .min(1)
+      .max(MAX_FIELD_CANDIDATES)
+      .optional()
+      .describe(
+        `Fields to test for correlations (keyword fields recommended). If omitted, defaults to common APM dimensions for latency/failure_rate/throughput, or infrastructure fields (host.name, container.id, kubernetes.*, cloud.*) for infra_metrics. Hard limit: ${MAX_FIELD_CANDIDATES}. Use ${OBSERVABILITY_GET_INDEX_INFO_TOOL_ID} to discover valid fields and values before expanding this list.`
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_RESULTS_PER_FIELD)
+      .optional()
+      .default(10)
+      .describe(
+        `Maximum number of correlated values to return per field. Defaults to 10. Hard limit: ${MAX_RESULTS_PER_FIELD}.`
+      ),
+  })
+);
 
 export function createGetApmCorrelationsTool({
   core,

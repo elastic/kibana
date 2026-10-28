@@ -26,15 +26,17 @@ export const FEATURE_SIMILARITY_TOOL_DESCRIPTION =
   'matches in semantic relevance order. A match may come from another source: `sources` lists the ' +
   'slug of every source holding it, and `properties` is the identity to compare against the candidate.';
 
-export const featureCandidateSchema = lazySchema(() => z.object({
-  candidate_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .describe('Stable ID intended for the candidate feature.'),
-  title: z.string().max(MAX_TEXT_LENGTH).describe('Candidate feature title.'),
-  description: z.string().max(MAX_TEXT_LENGTH).describe('Candidate feature description.'),
-  type: z.enum(INFERRED_FEATURE_TYPES).describe('Candidate feature type.'),
-}));
+export const featureCandidateSchema = lazySchema(() =>
+  z.object({
+    candidate_id: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe('Stable ID intended for the candidate feature.'),
+    title: z.string().max(MAX_TEXT_LENGTH).describe('Candidate feature title.'),
+    description: z.string().max(MAX_TEXT_LENGTH).describe('Candidate feature description.'),
+    type: z.enum(INFERRED_FEATURE_TYPES).describe('Candidate feature type.'),
+  })
+);
 
 export type FeatureCandidate = z.infer<typeof featureCandidateSchema>;
 

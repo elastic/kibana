@@ -28,25 +28,27 @@ import {
 
 const MAX_REMOVED_EXAMPLES = 100;
 
-const schema = lazySchema(() => z
-  .object({
-    dataset_id: datasetIdSchema,
-    add: datasetExamplesSchema
-      .optional()
-      .describe(
-        'Examples to add. Existing examples are kept; an example identical to one already in the dataset is skipped.'
-      ),
-    remove_ids: z
-      .array(z.string().min(1).max(MAX_ID_LENGTH))
-      .max(MAX_REMOVED_EXAMPLES)
-      .optional()
-      .describe(
-        `Ids of examples to remove, as returned by ${evalsDatasetTools.getDataset}. Removed before anything is added.`
-      ),
-  })
-  .refine(({ add, remove_ids: removeIds }) => (add?.length ?? 0) + (removeIds?.length ?? 0) > 0, {
-    message: 'Pass at least one example to add or one example id to remove.',
-  }));
+const schema = lazySchema(() =>
+  z
+    .object({
+      dataset_id: datasetIdSchema,
+      add: datasetExamplesSchema
+        .optional()
+        .describe(
+          'Examples to add. Existing examples are kept; an example identical to one already in the dataset is skipped.'
+        ),
+      remove_ids: z
+        .array(z.string().min(1).max(MAX_ID_LENGTH))
+        .max(MAX_REMOVED_EXAMPLES)
+        .optional()
+        .describe(
+          `Ids of examples to remove, as returned by ${evalsDatasetTools.getDataset}. Removed before anything is added.`
+        ),
+    })
+    .refine(({ add, remove_ids: removeIds }) => (add?.length ?? 0) + (removeIds?.length ?? 0) > 0, {
+      message: 'Pass at least one example to add or one example id to remove.',
+    })
+);
 
 type EditParams = z.infer<typeof schema>;
 

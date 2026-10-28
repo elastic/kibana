@@ -9,24 +9,28 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataConcatStepTypeId = 'data.concat' as const;
 
 const MAX_ARRAYS = 50;
 
-export const ConfigSchema = lazySchema(() => z.object({
-  arrays: z.array(z.unknown()).min(1).max(MAX_ARRAYS),
-}));
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    arrays: z.array(z.unknown()).min(1).max(MAX_ARRAYS),
+  })
+);
 
-export const InputSchema = lazySchema(() => z.object({
-  dedupe: z.boolean().optional().default(false),
-  flatten: z
-    .union([z.boolean(), z.number().int().min(1).max(10)])
-    .optional()
-    .default(false),
-}));
+export const InputSchema = lazySchema(() =>
+  z.object({
+    dedupe: z.boolean().optional().default(false),
+    flatten: z
+      .union([z.boolean(), z.number().int().min(1).max(10)])
+      .optional()
+      .default(false),
+  })
+);
 
 export const OutputSchema = lazySchema(() => z.array(z.unknown()));
 

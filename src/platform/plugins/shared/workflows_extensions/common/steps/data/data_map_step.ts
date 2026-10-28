@@ -9,14 +9,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataMapStepTypeId = 'data.map';
 
-export const ConfigSchema = lazySchema(() => z.object({
-  items: z.unknown(),
-}));
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    items: z.unknown(),
+  })
+);
 
 /** Reserved key that triggers array iteration in a nested field spec. */
 export const MAP_DIRECTIVE = '$map';
@@ -89,12 +91,13 @@ const FieldsNodeSchema: z.ZodType<FieldsNode> = z.lazy(() =>
   ])
 );
 
-export const InputSchema = lazySchema(() => z.object({ fields: z.record(z.string(), FieldsNodeSchema) }));
+export const InputSchema = lazySchema(() =>
+  z.object({ fields: z.record(z.string(), FieldsNodeSchema) })
+);
 
-export const OutputSchema = lazySchema(() => z.union([
-  z.array(z.record(z.string(), z.unknown())),
-  z.record(z.string(), z.unknown()),
-]));
+export const OutputSchema = lazySchema(() =>
+  z.union([z.array(z.record(z.string(), z.unknown())), z.record(z.string(), z.unknown())])
+);
 
 export type DataMapStepConfigSchema = typeof ConfigSchema;
 export type DataMapStepInputSchema = typeof InputSchema;

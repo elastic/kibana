@@ -26,13 +26,15 @@ import { getServiceAnnotations } from '../../services/annotations';
 import { getServiceMetadataDetails } from '../../services/get_service_metadata_details';
 import { getAnomalies } from './get_anomalies';
 
-export const serviceSummaryRouteRt = lazySchema(() => z.object({
-  'service.name': z.string(),
-  start: z.string(),
-  end: z.string(),
-  'service.environment': z.string().optional(),
-  'transaction.type': z.string().optional(),
-}));
+export const serviceSummaryRouteRt = lazySchema(() =>
+  z.object({
+    'service.name': z.string(),
+    start: z.string(),
+    end: z.string(),
+    'service.environment': z.string().optional(),
+    'transaction.type': z.string().optional(),
+  })
+);
 
 export interface ServiceSummary {
   'service.name': string;

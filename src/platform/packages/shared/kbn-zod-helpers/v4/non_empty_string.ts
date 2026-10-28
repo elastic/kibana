@@ -19,11 +19,9 @@ export function isNonEmptyString(input: string, ctx: RefinementCtx): void {
   }
 }
 
-export const NonEmptyString = lazySchema(() => z
-  .string()
-  .min(1)
-  .superRefine(isNonEmptyString)
-  .describe('A non-empty string.'));
+export const NonEmptyString = lazySchema(() =>
+  z.string().min(1).superRefine(isNonEmptyString).describe('A non-empty string.')
+);
 
 /**
  * Checks that the input is a string that is not empty while allowing whitespace.
@@ -37,8 +35,10 @@ export function isNonEmptyOrWhitespace(input: string, ctx: RefinementCtx): void 
   }
 }
 
-export const NonEmptyOrWhitespaceString = lazySchema(() => z
-  .string()
-  .min(1)
-  .superRefine(isNonEmptyOrWhitespace)
-  .describe('A non-empty string or string with whitespace.'));
+export const NonEmptyOrWhitespaceString = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .superRefine(isNonEmptyOrWhitespace)
+    .describe('A non-empty string or string with whitespace.')
+);

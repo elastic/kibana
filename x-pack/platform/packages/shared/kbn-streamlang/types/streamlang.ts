@@ -46,12 +46,14 @@ export interface StreamlangConditionBlock {
 /**
  * Zod schema for a condition block
  */
-export const streamlangConditionBlockSchema: z.ZodType<StreamlangConditionBlock> = lazySchema(() => z
-  .object({
-    customIdentifier: z.string().optional(),
-    condition: conditionWithStepsSchema,
-  })
-  .meta({ id: 'StreamlangConditionBlock' }));
+export const streamlangConditionBlockSchema: z.ZodType<StreamlangConditionBlock> = lazySchema(() =>
+  z
+    .object({
+      customIdentifier: z.string().optional(),
+      condition: conditionWithStepsSchema,
+    })
+    .meta({ id: 'StreamlangConditionBlock' })
+);
 
 export const isConditionBlockSchema = (obj: unknown): obj is StreamlangConditionBlock => {
   return isSchema(streamlangConditionBlockSchema, obj);
@@ -107,9 +109,11 @@ export type StreamlangDSLWithUpdatedAt = StreamlangDSL & {
 /**
  * Zod schema for the Streamlang DSL root
  */
-export const streamlangDSLSchema = lazySchema(() => z.object({
-  steps: z.array(streamlangStepSchema),
-}));
+export const streamlangDSLSchema = lazySchema(() =>
+  z.object({
+    steps: z.array(streamlangStepSchema),
+  })
+);
 
 /**
  * Strict version of streamlangDSLSchema that rejects excess/unknown keys.

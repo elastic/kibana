@@ -31,13 +31,15 @@ const PROPOSALS_API_PRIVILEGE_READ = ApiPrivileges.read('proposals');
 
 // `size: 0` is a count-only read: a collapsed accordion needs the group total
 // without paying for its rows.
-const GetClosedProposalsQuery = lazySchema(() => z
-  .object({
-    size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(25),
-    from: z.coerce.number().int().min(0).max(MAX_QUEUE_REACH).default(0),
-    entity: z.string().min(1).max(MAX_ENTITY_FILTER_LENGTH).optional(),
-  })
-  .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` }));
+const GetClosedProposalsQuery = lazySchema(() =>
+  z
+    .object({
+      size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(25),
+      from: z.coerce.number().int().min(0).max(MAX_QUEUE_REACH).default(0),
+      entity: z.string().min(1).max(MAX_ENTITY_FILTER_LENGTH).optional(),
+    })
+    .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` })
+);
 
 export const registerGetClosedProposalsRoute = ({
   router,

@@ -63,13 +63,15 @@ import {
  * template on update is an explicit versioned action; the server does not resolve a latest version
  * here. `version` must be a positive integer (≥ 1).
  */
-export const CaseUpdateRequestTemplateSchema = lazySchema(() => z.object({
-  id: z.string().max(MAX_TEMPLATE_KEY_LENGTH),
-  version: z
-    .number()
-    .int({ message: 'The template version must be a positive integer.' })
-    .min(1, { message: 'The template version must be a positive integer.' }),
-}));
+export const CaseUpdateRequestTemplateSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_TEMPLATE_KEY_LENGTH),
+    version: z
+      .number()
+      .int({ message: 'The template version must be a positive integer.' })
+      .min(1, { message: 'The template version must be a positive integer.' }),
+  })
+);
 
 /**
  * Template reference accepted on case CREATION. Unlike `CaseUpdateRequestTemplateSchema` (and the
@@ -77,35 +79,43 @@ export const CaseUpdateRequestTemplateSchema = lazySchema(() => z.object({
  * template's latest version and pins it on the case.
  * `version` must be a positive integer (matches the `integer, minimum: 1` OpenAPI contract).
  */
-export const CaseRequestTemplateSchema = lazySchema(() => z.object({
-  id: z.string().max(MAX_TITLE_LENGTH),
-  version: z
-    .number()
-    .int({ message: 'The template version must be a positive integer.' })
-    .min(1, { message: 'The template version must be a positive integer.' })
-    .optional(),
-}));
+export const CaseRequestTemplateSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(MAX_TITLE_LENGTH),
+    version: z
+      .number()
+      .int({ message: 'The template version must be a positive integer.' })
+      .min(1, { message: 'The template version must be a positive integer.' })
+      .optional(),
+  })
+);
 
-const CaseCustomFieldTextWithValidationSchema = lazySchema(() => z.object({
-  key: z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
-  type: CustomFieldTextTypeSchema,
-  value: z.union([CaseCustomFieldTextWithValidationValueSchema('value'), z.null()]),
-}));
+const CaseCustomFieldTextWithValidationSchema = lazySchema(() =>
+  z.object({
+    key: z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
+    type: CustomFieldTextTypeSchema,
+    value: z.union([CaseCustomFieldTextWithValidationValueSchema('value'), z.null()]),
+  })
+);
 
-const CaseCustomFieldNumberWithValidationSchema = lazySchema(() => z.object({
-  key: z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
-  type: CustomFieldNumberTypeSchema,
-  value: z.union([
-    CaseCustomFieldNumberWithValidationValueSchema({ fieldName: 'value' }),
-    z.null(),
-  ]),
-}));
+const CaseCustomFieldNumberWithValidationSchema = lazySchema(() =>
+  z.object({
+    key: z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
+    type: CustomFieldNumberTypeSchema,
+    value: z.union([
+      CaseCustomFieldNumberWithValidationValueSchema({ fieldName: 'value' }),
+      z.null(),
+    ]),
+  })
+);
 
-const CustomFieldForRequestSchema = lazySchema(() => z.union([
-  CaseCustomFieldTextWithValidationSchema,
-  CaseCustomFieldToggleSchema,
-  CaseCustomFieldNumberWithValidationSchema,
-]));
+const CustomFieldForRequestSchema = lazySchema(() =>
+  z.union([
+    CaseCustomFieldTextWithValidationSchema,
+    CaseCustomFieldToggleSchema,
+    CaseCustomFieldNumberWithValidationSchema,
+  ])
+);
 
 /**
  * @deprecated Use `extended_fields` (CASE_EXTENDED_FIELDS) instead. Values written here still work
@@ -118,169 +128,181 @@ export const CaseRequestCustomFieldsSchema = limitedArraySchema({
   max: MAX_CUSTOM_FIELDS_PER_CASE,
 });
 
-export const CaseBaseOptionalFieldsRequestSchema = lazySchema(() => z.object({
-  /**
-   * The description of the case
-   */
-  description: limitedStringSchema({
-    fieldName: 'description',
-    min: 1,
-    max: MAX_DESCRIPTION_LENGTH,
-  }).optional(),
-  /**
-   * The identifying strings for filter a case
-   */
-  tags: limitedArraySchema({
-    codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
-    min: 0,
-    max: MAX_TAGS_PER_CASE,
-    fieldName: 'tags',
-  }).optional(),
-  /**
-   * The title of a case
-   */
-  title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }).optional(),
-  /**
-   * The external system that the case can be synced with
-   */
-  connector: CaseConnectorSchema.optional(),
-  /**
-   * The severity of the case
-   */
-  severity: CaseSeveritySchema.optional(),
-  /**
-   * The users assigned to this case
-   */
-  assignees: limitedArraySchema({
-    codec: CaseUserProfileSchema,
-    fieldName: 'assignees',
-    min: 0,
-    max: MAX_ASSIGNEES_PER_CASE,
-  }).optional(),
-  /**
-   * The category of the case.
-   */
-  category: z
-    .union([
-      limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
-      z.null(),
-    ])
-    .optional(),
-  /**
-   * Custom fields of the case
-   */
-  customFields: CaseRequestCustomFieldsSchema.optional(),
-  /**
-   * The alert sync settings
-   */
-  settings: CaseSettingsSchema.optional(),
-  template: CaseUpdateRequestTemplateSchema.nullable().optional(),
-  [CASE_EXTENDED_FIELDS]: z
-    .record(z.string().max(1000), z.string().max(MAX_DESCRIPTION_LENGTH))
-    .optional(),
-  /**
-   * The close reason to sync to attached alerts
-   */
-  closeReason: CaseCloseReasonSchema.optional(),
-}));
+export const CaseBaseOptionalFieldsRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The description of the case
+     */
+    description: limitedStringSchema({
+      fieldName: 'description',
+      min: 1,
+      max: MAX_DESCRIPTION_LENGTH,
+    }).optional(),
+    /**
+     * The identifying strings for filter a case
+     */
+    tags: limitedArraySchema({
+      codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
+      min: 0,
+      max: MAX_TAGS_PER_CASE,
+      fieldName: 'tags',
+    }).optional(),
+    /**
+     * The title of a case
+     */
+    title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }).optional(),
+    /**
+     * The external system that the case can be synced with
+     */
+    connector: CaseConnectorSchema.optional(),
+    /**
+     * The severity of the case
+     */
+    severity: CaseSeveritySchema.optional(),
+    /**
+     * The users assigned to this case
+     */
+    assignees: limitedArraySchema({
+      codec: CaseUserProfileSchema,
+      fieldName: 'assignees',
+      min: 0,
+      max: MAX_ASSIGNEES_PER_CASE,
+    }).optional(),
+    /**
+     * The category of the case.
+     */
+    category: z
+      .union([
+        limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
+        z.null(),
+      ])
+      .optional(),
+    /**
+     * Custom fields of the case
+     */
+    customFields: CaseRequestCustomFieldsSchema.optional(),
+    /**
+     * The alert sync settings
+     */
+    settings: CaseSettingsSchema.optional(),
+    template: CaseUpdateRequestTemplateSchema.nullable().optional(),
+    [CASE_EXTENDED_FIELDS]: z
+      .record(z.string().max(1000), z.string().max(MAX_DESCRIPTION_LENGTH))
+      .optional(),
+    /**
+     * The close reason to sync to attached alerts
+     */
+    closeReason: CaseCloseReasonSchema.optional(),
+  })
+);
 
-export const CaseRequestFieldsSchema = lazySchema(() => CaseBaseOptionalFieldsRequestSchema.extend({
-  /**
-   * The current status of the case (open, closed, in-progress)
-   */
-  status: CaseStatusSchema.optional(),
-  /**
-   * The plugin owner of the case
-   */
-  owner: z.string().max(MAX_TITLE_LENGTH).optional(),
-}));
+export const CaseRequestFieldsSchema = lazySchema(() =>
+  CaseBaseOptionalFieldsRequestSchema.extend({
+    /**
+     * The current status of the case (open, closed, in-progress)
+     */
+    status: CaseStatusSchema.optional(),
+    /**
+     * The plugin owner of the case
+     */
+    owner: z.string().max(MAX_TITLE_LENGTH).optional(),
+  })
+);
 
 /**
  * Create case
  */
-export const CasePostRequestSchema = lazySchema(() => z.object({
-  /**
-   * Description of the case
-   */
-  description: limitedStringSchema({
-    fieldName: 'description',
-    min: 1,
-    max: MAX_DESCRIPTION_LENGTH,
-  }),
-  /**
-   * Identifiers for the case.
-   */
-  tags: limitedArraySchema({
-    codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
-    fieldName: 'tags',
-    min: 0,
-    max: MAX_TAGS_PER_CASE,
-  }),
-  /**
-   * Title of the case
-   */
-  title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }),
-  /**
-   * The external configuration for the case
-   */
-  connector: CaseConnectorSchema,
-  /**
-   * Sync settings for alerts
-   */
-  settings: CaseSettingsSchema,
-  /**
-   * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
-   * creating this case must also be granted access to that plugin's feature.
-   */
-  owner: z.string().max(MAX_TITLE_LENGTH),
-  /**
-   * The users assigned to the case
-   */
-  assignees: limitedArraySchema({
-    codec: CaseUserProfileSchema,
-    fieldName: 'assignees',
-    min: 0,
-    max: MAX_ASSIGNEES_PER_CASE,
-  }).optional(),
-  /**
-   * The severity of the case. The severity is
-   * default it to "low" if not provided.
-   */
-  severity: CaseSeveritySchema.optional(),
-  /**
-   * The category of the case.
-   */
-  category: z
-    .union([
-      limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
-      z.null(),
-    ])
-    .optional(),
-  /**
-   * The list of custom field values of the case.
-   */
-  customFields: CaseRequestCustomFieldsSchema.optional(),
-  template: CaseRequestTemplateSchema.nullable().optional(),
-  [CASE_EXTENDED_FIELDS]: z
-    .record(z.string().max(1000), z.string().max(MAX_DESCRIPTION_LENGTH))
-    .optional(),
-}));
+export const CasePostRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * Description of the case
+     */
+    description: limitedStringSchema({
+      fieldName: 'description',
+      min: 1,
+      max: MAX_DESCRIPTION_LENGTH,
+    }),
+    /**
+     * Identifiers for the case.
+     */
+    tags: limitedArraySchema({
+      codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
+      fieldName: 'tags',
+      min: 0,
+      max: MAX_TAGS_PER_CASE,
+    }),
+    /**
+     * Title of the case
+     */
+    title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }),
+    /**
+     * The external configuration for the case
+     */
+    connector: CaseConnectorSchema,
+    /**
+     * Sync settings for alerts
+     */
+    settings: CaseSettingsSchema,
+    /**
+     * The owner here must match the string used when a plugin registers a feature with access to the cases plugin. The user
+     * creating this case must also be granted access to that plugin's feature.
+     */
+    owner: z.string().max(MAX_TITLE_LENGTH),
+    /**
+     * The users assigned to the case
+     */
+    assignees: limitedArraySchema({
+      codec: CaseUserProfileSchema,
+      fieldName: 'assignees',
+      min: 0,
+      max: MAX_ASSIGNEES_PER_CASE,
+    }).optional(),
+    /**
+     * The severity of the case. The severity is
+     * default it to "low" if not provided.
+     */
+    severity: CaseSeveritySchema.optional(),
+    /**
+     * The category of the case.
+     */
+    category: z
+      .union([
+        limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
+        z.null(),
+      ])
+      .optional(),
+    /**
+     * The list of custom field values of the case.
+     */
+    customFields: CaseRequestCustomFieldsSchema.optional(),
+    template: CaseRequestTemplateSchema.nullable().optional(),
+    [CASE_EXTENDED_FIELDS]: z
+      .record(z.string().max(1000), z.string().max(MAX_DESCRIPTION_LENGTH))
+      .optional(),
+  })
+);
 
 /**
  * Bulk create cases
  */
 
-const CaseCreateRequestWithOptionalIdSchema = lazySchema(() => CasePostRequestSchema.extend({
-  id: z.string().max(512).optional(),
-}));
+const CaseCreateRequestWithOptionalIdSchema = lazySchema(() =>
+  CasePostRequestSchema.extend({
+    id: z.string().max(512).optional(),
+  })
+);
 
-export const BulkCreateCasesRequestSchema = lazySchema(() => z.object({
-  cases: z.array(CaseCreateRequestWithOptionalIdSchema),
-}));
+export const BulkCreateCasesRequestSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(CaseCreateRequestWithOptionalIdSchema),
+  })
+);
 
-export const BulkCreateCasesResponseSchema = lazySchema(() => z.object({
-  cases: z.array(CaseSchema),
-}));
+export const BulkCreateCasesResponseSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(CaseSchema),
+  })
+);
 
 /**
  * Find cases
@@ -297,8 +319,12 @@ const CasesFindRequestSortFieldsValues = [
   'severity',
 ] as const;
 
-export const CasesFindRequestSearchFieldsSchema = lazySchema(() => z.enum(CasesFindRequestSearchFieldsValues));
-export const CasesFindRequestSortFieldsSchema = lazySchema(() => z.enum(CasesFindRequestSortFieldsValues));
+export const CasesFindRequestSearchFieldsSchema = lazySchema(() =>
+  z.enum(CasesFindRequestSearchFieldsValues)
+);
+export const CasesFindRequestSortFieldsSchema = lazySchema(() =>
+  z.enum(CasesFindRequestSortFieldsValues)
+);
 
 const CasesFindRequestBaseFieldsSchema = paginationSchema({
   maxPerPage: MAX_CASES_PER_PAGE,
@@ -306,17 +332,19 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
   /**
    * Tags to filter by
    */
-  tags: lazySchema(() => z
-    .union([
-      limitedArraySchema({
-        codec: z.string().max(MAX_LENGTH_PER_TAG),
-        fieldName: 'tags',
-        min: 0,
-        max: MAX_TAGS_FILTER_LENGTH,
-      }),
-      z.string().max(MAX_LENGTH_PER_TAG),
-    ])
-    .optional()),
+  tags: lazySchema(() =>
+    z
+      .union([
+        limitedArraySchema({
+          codec: z.string().max(MAX_LENGTH_PER_TAG),
+          fieldName: 'tags',
+          min: 0,
+          max: MAX_TAGS_FILTER_LENGTH,
+        }),
+        z.string().max(MAX_LENGTH_PER_TAG),
+      ])
+      .optional()
+  ),
   /**
    * The status of the case (open, closed, in-progress)
    */
@@ -328,31 +356,35 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
   /**
    * The uids of the user profiles to filter by
    */
-  assignees: lazySchema(() => z
-    .union([
-      limitedArraySchema({
-        codec: z.string().max(512),
-        fieldName: 'assignees',
-        min: 0,
-        max: MAX_ASSIGNEES_FILTER_LENGTH,
-      }),
-      z.string().max(512),
-    ])
-    .optional()),
+  assignees: lazySchema(() =>
+    z
+      .union([
+        limitedArraySchema({
+          codec: z.string().max(512),
+          fieldName: 'assignees',
+          min: 0,
+          max: MAX_ASSIGNEES_FILTER_LENGTH,
+        }),
+        z.string().max(512),
+      ])
+      .optional()
+  ),
   /**
    * The reporters to filter by
    */
-  reporters: lazySchema(() => z
-    .union([
-      limitedArraySchema({
-        codec: z.string().max(512),
-        fieldName: 'reporters',
-        min: 0,
-        max: MAX_REPORTERS_FILTER_LENGTH,
-      }),
-      z.string().max(512),
-    ])
-    .optional()),
+  reporters: lazySchema(() =>
+    z
+      .union([
+        limitedArraySchema({
+          codec: z.string().max(512),
+          fieldName: 'reporters',
+          min: 0,
+          max: MAX_REPORTERS_FILTER_LENGTH,
+        }),
+        z.string().max(512),
+      ])
+      .optional()
+  ),
   /**
    * Operator to use for the `search` field
    */
@@ -383,32 +415,38 @@ const CasesFindRequestBaseFieldsSchema = paginationSchema({
    * ownership or they will be ignored. If no owner is included, then all ownership types will be included in the response
    * that the user has access to.
    */
-  owner: lazySchema(() => z
-    .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
-    .optional()),
+  owner: lazySchema(() =>
+    z
+      .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
+      .optional()
+  ),
   /**
    * The category of the case.
    */
-  category: lazySchema(() => z
-    .union([
-      limitedArraySchema({
-        codec: z.string().max(MAX_CATEGORY_LENGTH),
-        fieldName: 'category',
-        min: 0,
-        max: MAX_CATEGORY_FILTER_LENGTH,
-      }),
-      z.string().max(MAX_CATEGORY_LENGTH),
-    ])
-    .optional()),
+  category: lazySchema(() =>
+    z
+      .union([
+        limitedArraySchema({
+          codec: z.string().max(MAX_CATEGORY_LENGTH),
+          fieldName: 'category',
+          min: 0,
+          max: MAX_CATEGORY_FILTER_LENGTH,
+        }),
+        z.string().max(MAX_CATEGORY_LENGTH),
+      ])
+      .optional()
+  ),
 });
 
 export const CasesFindRequestSchema = CasesFindRequestBaseFieldsSchema.extend({
   /**
    * The fields to perform the simple_query_string parsed query against
    */
-  searchFields: lazySchema(() => z
-    .union([z.array(CasesFindRequestSearchFieldsSchema), CasesFindRequestSearchFieldsSchema])
-    .optional()),
+  searchFields: lazySchema(() =>
+    z
+      .union([z.array(CasesFindRequestSearchFieldsSchema), CasesFindRequestSearchFieldsSchema])
+      .optional()
+  ),
 });
 
 /**
@@ -427,37 +465,47 @@ const CasesSearchRequestSearchFieldsValues = [
   'cases.ef_all_values',
 ] as const;
 
-export const CasesSearchRequestSearchFieldsSchema = lazySchema(() => z.enum(CasesSearchRequestSearchFieldsValues));
+export const CasesSearchRequestSearchFieldsSchema = lazySchema(() =>
+  z.enum(CasesSearchRequestSearchFieldsValues)
+);
 
-const ExtendedFieldFilterSchema = lazySchema(() => z.object({
-  label: limitedStringSchema({
-    fieldName: 'extendedFieldFilters.label',
-    min: 1,
-    max: MAX_TEMPLATE_DEFINITION_LENGTH,
-  }),
-  value: limitedStringSchema({
-    fieldName: 'extendedFieldFilters.value',
-    min: 1,
-    max: MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
-  }),
-}));
+const ExtendedFieldFilterSchema = lazySchema(() =>
+  z.object({
+    label: limitedStringSchema({
+      fieldName: 'extendedFieldFilters.label',
+      min: 1,
+      max: MAX_TEMPLATE_DEFINITION_LENGTH,
+    }),
+    value: limitedStringSchema({
+      fieldName: 'extendedFieldFilters.value',
+      min: 1,
+      max: MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+    }),
+  })
+);
 
 export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend({
   /**
    * custom fields of the case
    */
-  customFields: lazySchema(() => z
-    .record(
-      z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
-      z.array(z.union([z.string().max(MAX_DESCRIPTION_LENGTH), z.boolean(), z.number(), z.null()]))
-    )
-    .optional()),
+  customFields: lazySchema(() =>
+    z
+      .record(
+        z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
+        z.array(
+          z.union([z.string().max(MAX_DESCRIPTION_LENGTH), z.boolean(), z.number(), z.null()])
+        )
+      )
+      .optional()
+  ),
   /**
    * The fields to perform the simple_query_string parsed query against.
    */
-  searchFields: lazySchema(() => z
-    .union([z.array(CasesSearchRequestSearchFieldsSchema), CasesSearchRequestSearchFieldsSchema])
-    .optional()),
+  searchFields: lazySchema(() =>
+    z
+      .union([z.array(CasesSearchRequestSearchFieldsSchema), CasesSearchRequestSearchFieldsSchema])
+      .optional()
+  ),
   /**
    * Extended field filters parsed from label:value syntax in the search bar.
    * Same-label values are OR'd; distinct labels are AND'd.
@@ -474,12 +522,16 @@ export const CasesFindRequestWithCustomFieldsSchema = CasesFindRequestSchema.ext
   /**
    * custom fields of the case
    */
-  customFields: lazySchema(() => z
-    .record(
-      z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
-      z.array(z.union([z.string().max(MAX_DESCRIPTION_LENGTH), z.boolean(), z.number(), z.null()]))
-    )
-    .optional()),
+  customFields: lazySchema(() =>
+    z
+      .record(
+        z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH),
+        z.array(
+          z.union([z.string().max(MAX_DESCRIPTION_LENGTH), z.boolean(), z.number(), z.null()])
+        )
+      )
+      .optional()
+  ),
 });
 
 export const CasesFindResponseSchema = CasesStatusResponseSchema.extend({
@@ -503,12 +555,14 @@ export const CasesSearchResponseSchema = CasesFindResponseSchema.extend({
   mttr: lazySchema(() => z.number().nullable().optional()),
 });
 
-export const CasesSimilarResponseSchema = lazySchema(() => z.object({
-  cases: z.array(SimilarCaseSchema),
-  page: z.number(),
-  per_page: z.number(),
-  total: z.number(),
-}));
+export const CasesSimilarResponseSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(SimilarCaseSchema),
+    page: z.number(),
+    per_page: z.number(),
+    total: z.number(),
+  })
+);
 
 /**
  * Delete cases
@@ -525,37 +579,43 @@ export const CasesDeleteRequestSchema = limitedArraySchema({
  * Resolve case
  */
 
-export const CaseResolveResponseSchema = lazySchema(() => z.object({
-  case: CaseSchema,
-  outcome: z.enum(['exactMatch', 'aliasMatch', 'conflict']),
-  alias_target_id: z.string().max(512).optional(),
-  alias_purpose: z.enum(['savedObjectConversion', 'savedObjectImport']).optional(),
-}));
+export const CaseResolveResponseSchema = lazySchema(() =>
+  z.object({
+    case: CaseSchema,
+    outcome: z.enum(['exactMatch', 'aliasMatch', 'conflict']),
+    alias_target_id: z.string().max(512).optional(),
+    alias_purpose: z.enum(['savedObjectConversion', 'savedObjectImport']).optional(),
+  })
+);
 
 /**
  * Get cases
  */
 
-export const CasesBulkGetRequestSchema = lazySchema(() => z.object({
-  ids: limitedArraySchema({
-    codec: z.string().max(512),
-    min: 1,
-    max: MAX_BULK_GET_CASES,
-    fieldName: 'ids',
-  }),
-}));
+export const CasesBulkGetRequestSchema = lazySchema(() =>
+  z.object({
+    ids: limitedArraySchema({
+      codec: z.string().max(512),
+      min: 1,
+      max: MAX_BULK_GET_CASES,
+      fieldName: 'ids',
+    }),
+  })
+);
 
-export const CasesBulkGetResponseSchema = lazySchema(() => z.object({
-  cases: CasesSchema,
-  errors: z.array(
-    z.object({
-      error: z.string().max(32000),
-      message: z.string().max(32000),
-      status: z.number().optional(),
-      caseId: z.string().max(512),
-    })
-  ),
-}));
+export const CasesBulkGetResponseSchema = lazySchema(() =>
+  z.object({
+    cases: CasesSchema,
+    errors: z.array(
+      z.object({
+        error: z.string().max(32000),
+        message: z.string().max(32000),
+        status: z.number().optional(),
+        caseId: z.string().max(512),
+      })
+    ),
+  })
+);
 
 /**
  * Update cases
@@ -564,23 +624,29 @@ export const CasesBulkGetResponseSchema = lazySchema(() => z.object({
 /**
  * The saved object ID and version
  */
-export const CasePatchRequestSchema = lazySchema(() => CaseRequestFieldsSchema.extend({
-  id: z.string().max(512),
-  version: z.string().max(512),
-}));
+export const CasePatchRequestSchema = lazySchema(() =>
+  CaseRequestFieldsSchema.extend({
+    id: z.string().max(512),
+    version: z.string().max(512),
+  })
+);
 
-export const CasesPatchRequestSchema = lazySchema(() => z.object({
-  cases: limitedArraySchema({
-    codec: CasePatchRequestSchema,
-    min: 1,
-    max: MAX_CASES_TO_UPDATE,
-    fieldName: 'cases',
-  }),
-}));
+export const CasesPatchRequestSchema = lazySchema(() =>
+  z.object({
+    cases: limitedArraySchema({
+      codec: CasePatchRequestSchema,
+      min: 1,
+      max: MAX_CASES_TO_UPDATE,
+      fieldName: 'cases',
+    }),
+  })
+);
 
-export const UpdateSummarySchema = lazySchema(() => z.object({
-  syncedAlertCount: z.number(),
-}));
+export const UpdateSummarySchema = lazySchema(() =>
+  z.object({
+    syncedAlertCount: z.number(),
+  })
+);
 
 export const CaseWithUpdateSummarySchema = CaseSchema.extend({
   updateSummary: lazySchema(() => UpdateSummarySchema.optional()),
@@ -592,45 +658,53 @@ export const PatchCasesResponseSchema = lazySchema(() => z.array(CaseWithUpdateS
  * Push case
  */
 
-export const CasePushRequestParamsSchema = lazySchema(() => z.object({
-  case_id: z.string().max(512),
-  connector_id: z.string().max(512),
-}));
+export const CasePushRequestParamsSchema = lazySchema(() =>
+  z.object({
+    case_id: z.string().max(512),
+    connector_id: z.string().max(512),
+  })
+);
 
 /**
  * Taxonomies
  */
 
-export const AllTagsFindRequestSchema = lazySchema(() => z.object({
-  /**
-   * The owner of the cases to retrieve the tags from. If no owner is provided the tags from all cases
-   * that the user has access to will be returned.
-   */
-  owner: z
-    .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
-    .optional(),
-}));
+export const AllTagsFindRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The owner of the cases to retrieve the tags from. If no owner is provided the tags from all cases
+     * that the user has access to will be returned.
+     */
+    owner: z
+      .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
+      .optional(),
+  })
+);
 
 export const AllCategoriesFindRequestSchema = AllTagsFindRequestSchema;
 export const AllReportersFindRequestSchema = AllTagsFindRequestSchema;
 
 export const GetTagsResponseSchema = lazySchema(() => z.array(z.string().max(MAX_LENGTH_PER_TAG)));
-export const GetCategoriesResponseSchema = lazySchema(() => z.array(z.string().max(MAX_CATEGORY_LENGTH)));
+export const GetCategoriesResponseSchema = lazySchema(() =>
+  z.array(z.string().max(MAX_CATEGORY_LENGTH))
+);
 export const GetReportersResponseSchema = lazySchema(() => z.array(UserSchema));
 
 /**
  * Alerts
  */
 
-export const CasesByAlertIDRequestSchema = lazySchema(() => z.object({
-  /**
-   * The type of cases to retrieve given an alert ID. If no owner is provided, all cases
-   * that the user has access to will be returned.
-   */
-  owner: z
-    .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
-    .optional(),
-}));
+export const CasesByAlertIDRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The type of cases to retrieve given an alert ID. If no owner is provided, all cases
+     * that the user has access to will be returned.
+     */
+    owner: z
+      .union([z.array(z.string().max(MAX_TITLE_LENGTH)), z.string().max(MAX_TITLE_LENGTH)])
+      .optional(),
+  })
+);
 
 export const GetRelatedCasesByAlertResponseSchema = lazySchema(() => z.array(RelatedCaseSchema));
 
@@ -647,22 +721,26 @@ export const SimilarCasesSearchRequestSchema = paginationSchema({
   sortOrder: lazySchema(() => z.enum(['desc', 'asc']).optional()),
 });
 
-export const FindCasesContainingAllDocumentsRequestSchema = lazySchema(() => z.object({
-  /**
-   * The IDs of the documents to find cases for.
-   */
-  documentIds: z.array(z.string().max(512)).optional(),
-  /**
-   * The IDs of the alerts to find cases for. TODO: remove this in the next serverless release cycle https://github.com/elastic/security-team/issues/14718
-   */
-  alertIds: z.array(z.string().max(512)).optional(),
-  // The IDs of the cases to find alerts for.
-  caseIds: z.array(z.string().max(512)),
-}));
+export const FindCasesContainingAllDocumentsRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The IDs of the documents to find cases for.
+     */
+    documentIds: z.array(z.string().max(512)).optional(),
+    /**
+     * The IDs of the alerts to find cases for. TODO: remove this in the next serverless release cycle https://github.com/elastic/security-team/issues/14718
+     */
+    alertIds: z.array(z.string().max(512)).optional(),
+    // The IDs of the cases to find alerts for.
+    caseIds: z.array(z.string().max(512)),
+  })
+);
 
-export const FindCasesContainingAllAlertsResponseSchema = lazySchema(() => z.object({
-  casesWithAllAttachments: z.array(z.string().max(512)),
-}));
+export const FindCasesContainingAllAlertsResponseSchema = lazySchema(() =>
+  z.object({
+    casesWithAllAttachments: z.array(z.string().max(512)),
+  })
+);
 
 export type CasePostRequest = z.infer<typeof CasePostRequestSchema>;
 export type CaseResolveResponse = z.infer<typeof CaseResolveResponseSchema>;

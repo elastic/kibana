@@ -223,20 +223,22 @@ export type XAxisSchemaType = z.output<typeof xAxisSchema>;
  * Chart types available for data layers in XY visualizations
  */
 export const xyDataLayerSharedShape = {
-  type: lazySchema(() => z
-    .union([
-      z.literal('area'),
-      z.literal('area_percentage'),
-      z.literal('area_stacked'),
-      z.literal('bar'),
-      z.literal('bar_horizontal'),
-      z.literal('bar_horizontal_stacked'),
-      z.literal('bar_horizontal_percentage'),
-      z.literal('bar_percentage'),
-      z.literal('bar_stacked'),
-      z.literal('line'),
-    ])
-    .meta({ description: 'Chart type for the data layer' })),
+  type: lazySchema(() =>
+    z
+      .union([
+        z.literal('area'),
+        z.literal('area_percentage'),
+        z.literal('area_stacked'),
+        z.literal('bar'),
+        z.literal('bar_horizontal'),
+        z.literal('bar_horizontal_stacked'),
+        z.literal('bar_horizontal_percentage'),
+        z.literal('bar_percentage'),
+        z.literal('bar_stacked'),
+        z.literal('line'),
+      ])
+      .meta({ description: 'Chart type for the data layer' })
+  ),
 };
 
 const legendSeriesHeaderSchema = lazySchema(() =>
@@ -542,29 +544,33 @@ const xyLegendInsideSchema = lazySchema(() =>
  * Shared settings that apply to the entire XY chart visualization
  */
 const xySharedSettings = {
-  legend: lazySchema(() => z
-    .union([xyLegendOutsideHorizontalSchema, xyLegendOutsideVerticalSchema, xyLegendInsideSchema])
-    .optional()
-    .meta({
-      id: 'visXyLegend',
-      title: 'Legend',
-      description: 'Legend configuration for XY chart',
-    })),
+  legend: lazySchema(() =>
+    z
+      .union([xyLegendOutsideHorizontalSchema, xyLegendOutsideVerticalSchema, xyLegendInsideSchema])
+      .optional()
+      .meta({
+        id: 'visXyLegend',
+        title: 'Legend',
+        description: 'Legend configuration for XY chart',
+      })
+  ),
 
-  axis: lazySchema(() => z
-    .object({
-      x: xAxisSchema.optional(),
-      y: yAxisSchema.optional(),
-      y2: yAxisSchema.optional(),
-    })
-    .strict()
-    .optional()
-    .meta({
-      id: 'visApiXyAxisConfig',
-      title: 'Axis',
-      description:
-        'Axis configuration for X, Y, and Y2 axes. The Y axis is on the start (leading) side, the Y2 axis is on the end (trailing) side.',
-    })),
+  axis: lazySchema(() =>
+    z
+      .object({
+        x: xAxisSchema.optional(),
+        y: yAxisSchema.optional(),
+        y2: yAxisSchema.optional(),
+      })
+      .strict()
+      .optional()
+      .meta({
+        id: 'visApiXyAxisConfig',
+        title: 'Axis',
+        description:
+          'Axis configuration for X, Y, and Y2 axes. The Y axis is on the start (leading) side, the Y2 axis is on the end (trailing) side.',
+      })
+  ),
   styling: lazySchema(() => xyStylingSchema.optional()),
 };
 
@@ -686,41 +692,57 @@ const STROKE_WIDTH_MAX = 10;
  * Common visual configuration for reference lines
  */
 const referenceLineLayerSharedShape = {
-  fill: lazySchema(() => z
-    .union([z.literal('above'), z.literal('below')])
-    .optional()
-    .meta({ description: 'Fill direction for reference line' })),
-  text: lazySchema(() => z
-    .object({
-      visible: z.boolean().meta({ description: 'Show text label on the reference line' }),
-    })
-    .strict()
-    .optional()
-    .meta({ description: 'Reference line text label configuration' })),
-  icon: lazySchema(() => getListOfAvailableIcons('Icon to display on the reference line').optional()),
-  stroke_width: lazySchema(() => z
-    .number()
-    .min(STROKE_WIDTH_MIN)
-    .max(STROKE_WIDTH_MAX)
-    .optional()
-    .meta({ description: 'Line width in pixels' })),
-  stroke_dash: lazySchema(() => z
-    .union([z.literal('solid'), z.literal('dashed'), z.literal('dotted')])
-    .optional()
-    .meta({ description: 'Line style' })),
-  color: lazySchema(() => z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional()),
-  position: lazySchema(() => z
-    .union([z.literal('auto'), z.literal('left'), z.literal('right')])
-    .optional()
-    .meta({ description: 'Position of the icon and label relative to the reference line' })),
-  axis: lazySchema(() => z
-    .union([z.literal('x'), z.literal('y'), z.literal('y2')])
-    .default('y')
-    .optional()
-    .meta({
-      description:
-        'The axis this reference line is drawn on. Values match the root axis configuration keys. If omitted, defaults to the primary Y axis.',
-    })),
+  fill: lazySchema(() =>
+    z
+      .union([z.literal('above'), z.literal('below')])
+      .optional()
+      .meta({ description: 'Fill direction for reference line' })
+  ),
+  text: lazySchema(() =>
+    z
+      .object({
+        visible: z.boolean().meta({ description: 'Show text label on the reference line' }),
+      })
+      .strict()
+      .optional()
+      .meta({ description: 'Reference line text label configuration' })
+  ),
+  icon: lazySchema(() =>
+    getListOfAvailableIcons('Icon to display on the reference line').optional()
+  ),
+  stroke_width: lazySchema(() =>
+    z
+      .number()
+      .min(STROKE_WIDTH_MIN)
+      .max(STROKE_WIDTH_MAX)
+      .optional()
+      .meta({ description: 'Line width in pixels' })
+  ),
+  stroke_dash: lazySchema(() =>
+    z
+      .union([z.literal('solid'), z.literal('dashed'), z.literal('dotted')])
+      .optional()
+      .meta({ description: 'Line style' })
+  ),
+  color: lazySchema(() =>
+    z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional()
+  ),
+  position: lazySchema(() =>
+    z
+      .union([z.literal('auto'), z.literal('left'), z.literal('right')])
+      .optional()
+      .meta({ description: 'Position of the icon and label relative to the reference line' })
+  ),
+  axis: lazySchema(() =>
+    z
+      .union([z.literal('x'), z.literal('y'), z.literal('y2')])
+      .default('y')
+      .optional()
+      .meta({
+        description:
+          'The axis this reference line is drawn on. Values match the root axis configuration keys. If omitted, defaults to the primary Y axis.',
+      })
+  ),
 };
 
 /**
@@ -777,7 +799,9 @@ const referenceLineLayerSchemaESQL = lazySchema(() =>
  * Common properties for all annotation types
  */
 const annotationEventShared = {
-  color: lazySchema(() => z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional()),
+  color: lazySchema(() =>
+    z.union([staticColorSchema, autoColorSchema]).default(AUTO_COLOR).optional()
+  ),
   visible: lazySchema(() => z.boolean().optional().meta({ description: 'Show the annotation' })),
 };
 
@@ -786,21 +810,25 @@ const annotationEventShared = {
  */
 const annotationPointShared = {
   ...annotationEventShared,
-  icon: lazySchema(() => getListOfAvailableIcons('Icon to display at the annotation point').optional()),
-  line: lazySchema(() => z
-    .object({
-      stroke_width: z
-        .number()
-        .min(STROKE_WIDTH_MIN)
-        .max(STROKE_WIDTH_MAX)
-        .meta({ description: 'Vertical line width in pixels' }),
-      stroke_dash: z
-        .union([z.literal('solid'), z.literal('dashed'), z.literal('dotted')])
-        .meta({ description: 'Vertical line style' }),
-    })
-    .strict()
-    .optional()
-    .meta({ description: 'Vertical line configuration for point annotation' })),
+  icon: lazySchema(() =>
+    getListOfAvailableIcons('Icon to display at the annotation point').optional()
+  ),
+  line: lazySchema(() =>
+    z
+      .object({
+        stroke_width: z
+          .number()
+          .min(STROKE_WIDTH_MIN)
+          .max(STROKE_WIDTH_MAX)
+          .meta({ description: 'Vertical line width in pixels' }),
+        stroke_dash: z
+          .union([z.literal('solid'), z.literal('dashed'), z.literal('dotted')])
+          .meta({ description: 'Vertical line style' }),
+      })
+      .strict()
+      .optional()
+      .meta({ description: 'Vertical line configuration for point annotation' })
+  ),
 };
 
 /**

@@ -13,31 +13,37 @@ import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
 
 export const ListAttachmentsStepTypeId = 'ai.attachment.list';
 
-const InputSchema = lazySchema(() => z.object({
-  conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
-    description: 'The ID of the conversation whose attachments should be listed.',
-  }),
-  include_deleted: z.boolean().optional().meta({
-    description: 'When true, includes soft-deleted attachments. Defaults to false.',
-  }),
-}));
+const InputSchema = lazySchema(() =>
+  z.object({
+    conversation_id: z.string().min(1).max(CONVERSATION_ID_MAX_LENGTH).meta({
+      description: 'The ID of the conversation whose attachments should be listed.',
+    }),
+    include_deleted: z.boolean().optional().meta({
+      description: 'When true, includes soft-deleted attachments. Defaults to false.',
+    }),
+  })
+);
 
-const AttachmentSummarySchema = lazySchema(() => z.object({
-  id: z.string(),
-  type: z.string(),
-  current_version: z.number(),
-  description: z.string().optional(),
-  active: z.boolean(),
-}));
+const AttachmentSummarySchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    type: z.string(),
+    current_version: z.number(),
+    description: z.string().optional(),
+    active: z.boolean(),
+  })
+);
 
-const OutputSchema = lazySchema(() => z.object({
-  attachments: z.array(AttachmentSummarySchema).meta({
-    description: 'Summary of each attachment: id, type, current_version, description, active.',
-  }),
-  total_token_estimate: z.number().meta({
-    description: 'Aggregate estimated token count across the returned attachments.',
-  }),
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    attachments: z.array(AttachmentSummarySchema).meta({
+      description: 'Summary of each attachment: id, type, current_version, description, active.',
+    }),
+    total_token_estimate: z.number().meta({
+      description: 'Aggregate estimated token count across the returned attachments.',
+    }),
+  })
+);
 
 type ListAttachmentsInputSchema = typeof InputSchema;
 type ListAttachmentsOutputSchema = typeof OutputSchema;

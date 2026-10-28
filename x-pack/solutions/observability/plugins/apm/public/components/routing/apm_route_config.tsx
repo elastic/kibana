@@ -41,15 +41,17 @@ const ServiceInventoryTitle = i18n.translate('xpack.apm.views.serviceInventory.t
 const apmRoutes = {
   '/link-to/transaction': {
     element: <TransactionDetailsByNameLink />,
-    params: lazySchema(() => z.object({
-      query: z.object({ transactionName: z.string(), serviceName: z.string() }).merge(
-        z.object({
-          rangeFrom: z.string().optional(),
-          rangeTo: z.string().optional(),
-          environment: z.string().optional(),
-        })
-      ),
-    })),
+    params: lazySchema(() =>
+      z.object({
+        query: z.object({ transactionName: z.string(), serviceName: z.string() }).merge(
+          z.object({
+            rangeFrom: z.string().optional(),
+            rangeTo: z.string().optional(),
+            environment: z.string().optional(),
+          })
+        ),
+      })
+    ),
   },
   '/link-to/transaction/{transactionId}': {
     element: <TransactionLink />,
@@ -123,29 +125,31 @@ const apmRoutes = {
             </ServiceGroupTemplate>
           </Breadcrumb>
         ),
-        params: lazySchema(() => z.object({
-          query: environmentSchema
-            .merge(
-              z.object({
-                rangeFrom: z.string(),
-                rangeTo: z.string(),
-                kuery: z.string(),
-                comparisonEnabled: toBooleanFromString,
-              })
-            )
-            .merge(
-              z.object({
-                serviceGroup: z.string(),
-              })
-            )
-            .merge(
-              z.object({
-                refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
-                refreshInterval: z.string().optional(),
-              })
-            )
-            .merge(offsetSchema),
-        })),
+        params: lazySchema(() =>
+          z.object({
+            query: environmentSchema
+              .merge(
+                z.object({
+                  rangeFrom: z.string(),
+                  rangeTo: z.string(),
+                  kuery: z.string(),
+                  comparisonEnabled: toBooleanFromString,
+                })
+              )
+              .merge(
+                z.object({
+                  serviceGroup: z.string(),
+                })
+              )
+              .merge(
+                z.object({
+                  refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
+                  refreshInterval: z.string().optional(),
+                })
+              )
+              .merge(offsetSchema),
+          })
+        ),
         defaults: {
           query: {
             environment: ENVIRONMENT_ALL.value,

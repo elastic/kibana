@@ -13,10 +13,12 @@ import { ConfigKey } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { MONITOR_SEARCH_FIELDS } from '../../common';
 
-const querySchema = lazySchema(() => z.strictObject({
-  search_after: z.string().max(4096).optional(),
-  per_page: queryNumber.optional(),
-}));
+const querySchema = lazySchema(() =>
+  z.strictObject({
+    search_after: z.string().max(4096).optional(),
+    per_page: queryNumber.optional(),
+  })
+);
 
 export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

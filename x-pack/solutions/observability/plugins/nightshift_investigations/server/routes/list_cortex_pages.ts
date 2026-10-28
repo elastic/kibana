@@ -20,15 +20,17 @@ export const listCortexPagesRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
-  params: lazySchema(() => z.object({
-    query: z
-      .object({
-        status: z.enum(CORTEX_PAGE_STATUSES).optional(),
-        entity_type: z.enum(CORTEX_ENTITY_TYPES).optional(),
-      })
-      .optional()
-      .default({}),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          status: z.enum(CORTEX_PAGE_STATUSES).optional(),
+          entity_type: z.enum(CORTEX_ENTITY_TYPES).optional(),
+        })
+        .optional()
+        .default({}),
+    })
+  ),
   handler: async ({ request, params, getCortexPageStore, isCortexEnabled }) => {
     if (!isCortexEnabled()) throw notFound('Cortex is not enabled');
 

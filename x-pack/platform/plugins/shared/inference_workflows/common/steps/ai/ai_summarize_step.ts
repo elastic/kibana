@@ -15,27 +15,33 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
  */
 export const AiSummarizeStepTypeId = 'ai.summarize';
 
-export const ConfigSchema = lazySchema(() => z.object({
-  'connector-id': z.string().optional(),
-}));
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    'connector-id': z.string().optional(),
+  })
+);
 
 /**
  * Input schema for the AI summarize step.
  */
-export const InputSchema = lazySchema(() => z.object({
-  input: z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())]),
-  instructions: z.string().optional(),
-  maxLength: z.number().int().positive().optional(),
-  temperature: z.number().min(0).max(1).optional(),
-}));
+export const InputSchema = lazySchema(() =>
+  z.object({
+    input: z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())]),
+    instructions: z.string().optional(),
+    maxLength: z.number().int().positive().optional(),
+    temperature: z.number().min(0).max(1).optional(),
+  })
+);
 
 /**
  * Output schema for the AI summarize step.
  */
-export const OutputSchema = lazySchema(() => z.object({
-  content: z.string(),
-  metadata: z.record(z.string(), z.any()).optional(),
-}));
+export const OutputSchema = lazySchema(() =>
+  z.object({
+    content: z.string(),
+    metadata: z.record(z.string(), z.any()).optional(),
+  })
+);
 
 export type AiSummarizeStepConfigSchema = typeof ConfigSchema;
 export type AiSummarizeStepInputSchema = typeof InputSchema;

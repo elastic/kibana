@@ -42,34 +42,40 @@ export const optionsListDisplaySettingsSchema = z
   })
   .strict();
 
-export const optionsListSearchTechniqueSchema = lazySchema(() => z
-  .union([z.literal('prefix'), z.literal('wildcard'), z.literal('exact')])
-  .default(DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique)
-  .meta({
-    description:
-      'The matching technique used when searching available options. `prefix` matches values starting with the search term, `wildcard` matches values containing the search term, and `exact` requires a complete match. Only applies to string and IP fields. Defaults to `wildcard`.',
-  }));
-
-export const optionsListSortSchema = lazySchema(() => z
-  .object({
-    by: z.enum(['_count', '_key']).meta({
+export const optionsListSearchTechniqueSchema = lazySchema(() =>
+  z
+    .union([z.literal('prefix'), z.literal('wildcard'), z.literal('exact')])
+    .default(DEFAULT_DSL_OPTIONS_LIST_STATE.search_technique)
+    .meta({
       description:
-        'The field used to sort the available options list. `_count` sorts by document count and `_key` sorts alphabetically by option value.',
-    }),
-    direction: z.enum(['asc', 'desc']).meta({
-      description: 'The sort direction. `asc` sorts ascending and `desc` sorts descending.',
-    }),
-  })
-  .strict()
-  .default(DEFAULT_DSL_OPTIONS_LIST_STATE.sort)
-  .meta({
-    description:
-      'Defines how the available options are sorted in the control popover. Defaults to `{ by: "_count", direction: "desc" }`.',
-  }));
+        'The matching technique used when searching available options. `prefix` matches values starting with the search term, `wildcard` matches values containing the search term, and `exact` requires a complete match. Only applies to string and IP fields. Defaults to `wildcard`.',
+    })
+);
 
-export const optionsListSelectionSchema = lazySchema(() => z.union([z.string(), z.number()]).meta({
-  description: 'A selected option value. Accepts a string or a number.',
-}));
+export const optionsListSortSchema = lazySchema(() =>
+  z
+    .object({
+      by: z.enum(['_count', '_key']).meta({
+        description:
+          'The field used to sort the available options list. `_count` sorts by document count and `_key` sorts alphabetically by option value.',
+      }),
+      direction: z.enum(['asc', 'desc']).meta({
+        description: 'The sort direction. `asc` sorts ascending and `desc` sorts descending.',
+      }),
+    })
+    .strict()
+    .default(DEFAULT_DSL_OPTIONS_LIST_STATE.sort)
+    .meta({
+      description:
+        'Defines how the available options are sorted in the control popover. Defaults to `{ by: "_count", direction: "desc" }`.',
+    })
+);
+
+export const optionsListSelectionSchema = lazySchema(() =>
+  z.union([z.string(), z.number()]).meta({
+    description: 'A selected option value. Accepts a string or a number.',
+  })
+);
 
 const optionsListControlBaseParameters = z
   .object({
@@ -79,30 +85,40 @@ const optionsListControlBaseParameters = z
 
 const optionsListDSLExtras = {
   ...optionsListControlBaseParameters.shape,
-  exclude: lazySchema(() => z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.exclude).meta({
-    description:
-      'When `true`, the control filters to documents that do NOT match the selected options. Defaults to `false`.',
-  })),
-  exists_selected: lazySchema(() => z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.exists_selected).meta({
-    description:
-      "When `true`, the control filters to documents where the field exists, regardless of the field's value. Defaults to `false`.",
-  })),
-  run_past_timeout: lazySchema(() => z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.run_past_timeout).meta({
-    description:
-      'When `true`, the options list query continues running even if it exceeds the configured timeout threshold. Defaults to `false`.',
-  })),
+  exclude: lazySchema(() =>
+    z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.exclude).meta({
+      description:
+        'When `true`, the control filters to documents that do NOT match the selected options. Defaults to `false`.',
+    })
+  ),
+  exists_selected: lazySchema(() =>
+    z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.exists_selected).meta({
+      description:
+        "When `true`, the control filters to documents where the field exists, regardless of the field's value. Defaults to `false`.",
+    })
+  ),
+  run_past_timeout: lazySchema(() =>
+    z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.run_past_timeout).meta({
+      description:
+        'When `true`, the options list query continues running even if it exceeds the configured timeout threshold. Defaults to `false`.',
+    })
+  ),
   search_technique: optionsListSearchTechniqueSchema,
-  selected_options: lazySchema(() => z
-    .array(optionsListSelectionSchema)
-    .max(SELECTIONS_MAX)
-    .default(DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options)
-    .meta({
-      description: 'The list of currently selected option values.',
-    })),
-  single_select: lazySchema(() => z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.single_select).meta({
-    description:
-      'When `true`, only one option can be selected at a time. Selecting a new option deselects any previously selected option. Defaults to `false`.',
-  })),
+  selected_options: lazySchema(() =>
+    z
+      .array(optionsListSelectionSchema)
+      .max(SELECTIONS_MAX)
+      .default(DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options)
+      .meta({
+        description: 'The list of currently selected option values.',
+      })
+  ),
+  single_select: lazySchema(() =>
+    z.boolean().default(DEFAULT_DSL_OPTIONS_LIST_STATE.single_select).meta({
+      description:
+        'When `true`, only one option can be selected at a time. Selecting a new option deselects any previously selected option. Defaults to `false`.',
+    })
+  ),
   sort: optionsListSortSchema,
 };
 
@@ -153,34 +169,36 @@ const baseEsqlControlSchema = z
   })
   .strip();
 
-export const optionsListESQLControlSchema = lazySchema(() => z.discriminatedUnion('control_type', [
-  baseEsqlControlSchema
-    .extend({
-      control_type: z.literal('STATIC_VALUES'),
-      available_options: z.array(z.string()).max(MAX_OPTIONS_LIST_REQUEST_SIZE).meta({
-        description: 'A fixed list of option strings displayed in the control.',
-      }),
-    })
-    .strip()
-    .meta({
-      id: 'kbn-controls-schemas-options-list-esql-control-schema-static-values',
-      title: 'STATIC_VALUES',
-      description:
-        'An ES|QL variable control with a fixed list of selectable options defined directly in `available_options`.',
-    }),
-  baseEsqlControlSchema
-    .extend({
-      control_type: z.literal('VALUES_FROM_QUERY'),
-      esql_query: z.string().meta({
+export const optionsListESQLControlSchema = lazySchema(() =>
+  z.discriminatedUnion('control_type', [
+    baseEsqlControlSchema
+      .extend({
+        control_type: z.literal('STATIC_VALUES'),
+        available_options: z.array(z.string()).max(MAX_OPTIONS_LIST_REQUEST_SIZE).meta({
+          description: 'A fixed list of option strings displayed in the control.',
+        }),
+      })
+      .strip()
+      .meta({
+        id: 'kbn-controls-schemas-options-list-esql-control-schema-static-values',
+        title: 'STATIC_VALUES',
         description:
-          'An ES|QL query whose results populate the list of available options in the control popover.',
+          'An ES|QL variable control with a fixed list of selectable options defined directly in `available_options`.',
       }),
-    })
-    .strip()
-    .meta({
-      id: 'kbn-controls-schemas-options-list-esql-control-schema-values-from-query',
-      title: 'VALUES_FROM_QUERY',
-      description:
-        'An ES|QL variable control whose selectable options are dynamically retrieved by running an ES|QL query.',
-    }),
-]));
+    baseEsqlControlSchema
+      .extend({
+        control_type: z.literal('VALUES_FROM_QUERY'),
+        esql_query: z.string().meta({
+          description:
+            'An ES|QL query whose results populate the list of available options in the control popover.',
+        }),
+      })
+      .strip()
+      .meta({
+        id: 'kbn-controls-schemas-options-list-esql-control-schema-values-from-query',
+        title: 'VALUES_FROM_QUERY',
+        description:
+          'An ES|QL variable control whose selectable options are dynamically retrieved by running an ES|QL query.',
+      }),
+  ])
+);

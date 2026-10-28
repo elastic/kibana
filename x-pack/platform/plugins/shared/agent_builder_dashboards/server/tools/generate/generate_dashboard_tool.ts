@@ -51,24 +51,26 @@ const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAtta
   panels.every((widget) => isSection(widget) && widget.panels.length === 0) &&
   (pinnedPanels ?? []).length === 0;
 
-const generateDashboardSchema = lazySchema(() => z.object({
-  dashboardAttachmentId: z
-    .string()
-    .max(256)
-    .optional()
-    .describe(
-      '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
-    ),
-  ...upsertDashboardSchema.shape,
-  layout: z
-    .string()
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe(
-      'The user\'s own arrangement or size request, in plain words, e.g. "make the table full width". Omit it otherwise: new, moved, and removed panels and sections are placed and sized automatically, so do not describe where your changes go. It arranges panels only within their section or the top level: to move a panel into or out of a section, set its `section` in `panels`.'
-    ),
-}));
+const generateDashboardSchema = lazySchema(() =>
+  z.object({
+    dashboardAttachmentId: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
+      ),
+    ...upsertDashboardSchema.shape,
+    layout: z
+      .string()
+      .min(1)
+      .max(1000)
+      .optional()
+      .describe(
+        'The user\'s own arrangement or size request, in plain words, e.g. "make the table full width". Omit it otherwise: new, moved, and removed panels and sections are placed and sized automatically, so do not describe where your changes go. It arranges panels only within their section or the top level: to move a panel into or out of a section, set its `section` in `panels`.'
+      ),
+  })
+);
 
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' ? value : undefined;

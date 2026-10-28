@@ -19,10 +19,12 @@ const MAX_NAME_LENGTH = 256;
  * security disabled, a `run-as` proxy, a session without a profile, or an API
  * key whose creator has no activated profile.
  */
-export const userSchema = lazySchema(() => z.object({
-  username: z.string().max(MAX_ID_LENGTH).nullable(),
-  fullName: z.string().max(MAX_NAME_LENGTH).nullable(),
-  email: z.string().max(MAX_NAME_LENGTH).nullable(),
-  profileUid: z.string().max(MAX_ID_LENGTH).optional(),
-}));
+export const userSchema = lazySchema(() =>
+  z.object({
+    username: z.string().max(MAX_ID_LENGTH).nullable(),
+    fullName: z.string().max(MAX_NAME_LENGTH).nullable(),
+    email: z.string().max(MAX_NAME_LENGTH).nullable(),
+    profileUid: z.string().max(MAX_ID_LENGTH).optional(),
+  })
+);
 export type User = z.infer<typeof userSchema>;

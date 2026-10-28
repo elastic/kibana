@@ -7,10 +7,12 @@
 import { z, lazySchema } from '@kbn/zod';
 import { compositeSloIdSchema } from '../../../schema/composite_slo';
 
-const deleteCompositeSLOParamsSchema = lazySchema(() => z.object({
-  path: z.object({
-    id: compositeSloIdSchema,
-  }),
-}));
+const deleteCompositeSLOParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: compositeSloIdSchema,
+    }),
+  })
+);
 
 export { deleteCompositeSLOParamsSchema };

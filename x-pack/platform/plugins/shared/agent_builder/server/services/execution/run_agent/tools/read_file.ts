@@ -16,9 +16,11 @@ import {
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
 
-const schema = lazySchema(() => z.object({
-  path: z.string().describe('Absolute path of the file to read'),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    path: z.string().describe('Absolute path of the file to read'),
+  })
+);
 
 const SAFEGUARD_TOKEN_COUNT = 10_000;
 

@@ -17,11 +17,13 @@ export const MAX_REPLACEMENT_VALUE_LENGTH = 1024;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** The replacements an Attack Discovery attachment carries: anonymized UUID to original value. */
-export const attachmentReplacementsSchema = lazySchema(() => z
-  .record(z.string().regex(UUID), z.string().max(MAX_REPLACEMENT_VALUE_LENGTH))
-  .refine((replacements) => Object.keys(replacements).length <= MAX_REPLACEMENTS, {
-    message: `Too many replacements; at most ${MAX_REPLACEMENTS} are allowed`,
-  }));
+export const attachmentReplacementsSchema = lazySchema(() =>
+  z
+    .record(z.string().regex(UUID), z.string().max(MAX_REPLACEMENT_VALUE_LENGTH))
+    .refine((replacements) => Object.keys(replacements).length <= MAX_REPLACEMENTS, {
+      message: `Too many replacements; at most ${MAX_REPLACEMENTS} are allowed`,
+    })
+);
 
 /**
  * Returns the persisted replacements an attachment can carry: only the entries `texts` use, that

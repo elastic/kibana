@@ -14,27 +14,31 @@ import { z, lazySchema } from '@kbn/zod';
  * If types need to diverge, they should be split into separate files.
  */
 
-const transformHealthSchema = lazySchema(() => z.object({
-  isProblematic: z.boolean(),
-  missing: z.boolean(),
-  status: z.union([z.literal('healthy'), z.literal('unhealthy'), z.literal('unavailable')]),
-  state: z.union([
-    z.literal('stopped'),
-    z.literal('started'),
-    z.literal('stopping'),
-    z.literal('aborting'),
-    z.literal('failed'),
-    z.literal('indexing'),
-    z.literal('unavailable'),
-  ]),
-  stateMatches: z.boolean().optional(),
-}));
+const transformHealthSchema = lazySchema(() =>
+  z.object({
+    isProblematic: z.boolean(),
+    missing: z.boolean(),
+    status: z.union([z.literal('healthy'), z.literal('unhealthy'), z.literal('unavailable')]),
+    state: z.union([
+      z.literal('stopped'),
+      z.literal('started'),
+      z.literal('stopping'),
+      z.literal('aborting'),
+      z.literal('failed'),
+      z.literal('indexing'),
+      z.literal('unavailable'),
+    ]),
+    stateMatches: z.boolean().optional(),
+  })
+);
 
-const sloHealthSchema = lazySchema(() => z.object({
-  isProblematic: z.boolean(),
-  rollup: transformHealthSchema,
-  summary: transformHealthSchema,
-}));
+const sloHealthSchema = lazySchema(() =>
+  z.object({
+    isProblematic: z.boolean(),
+    rollup: transformHealthSchema,
+    summary: transformHealthSchema,
+  })
+);
 
 export { sloHealthSchema, transformHealthSchema };
 

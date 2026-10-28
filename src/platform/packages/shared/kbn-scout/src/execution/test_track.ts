@@ -14,57 +14,61 @@ export class TestTrackError extends Error {
   // Base exception for test track errors
 }
 
-export const TestTrackSpecSchema = lazySchema(() => z.object({
-  stats: z.object({
-    lane: z.object({
-      count: z.int(),
-      saturationPercent: z.number(),
-      longestEstimate: z.number(),
-      shortestEstimate: z.number(),
+export const TestTrackSpecSchema = lazySchema(() =>
+  z.object({
+    stats: z.object({
+      lane: z.object({
+        count: z.int(),
+        saturationPercent: z.number(),
+        longestEstimate: z.number(),
+        shortestEstimate: z.number(),
+      }),
+      combinedRuntime: z.object({
+        target: z.int(),
+        expected: z.int(),
+        unused: z.int(),
+        overflow: z.int(),
+      }),
     }),
-    combinedRuntime: z.object({
-      target: z.int(),
-      expected: z.int(),
-      unused: z.int(),
-      overflow: z.int(),
-    }),
-  }),
-  lanes: z.array(
-    z.object({
-      number: z.int(),
-      estimatedSetupDuration: z.number(),
-      runtimeTarget: z.int(),
-      runtimeEstimate: z.number(),
-      availableCapacity: z.number(),
-      status: z.enum(['open', 'closed']),
-      isCongested: z.boolean(),
-      loads: z.array(z.string()),
-      metadata: z.record(z.string(), z.any()),
-    })
-  ),
-  metadata: z.record(z.string(), z.any()),
-}));
+    lanes: z.array(
+      z.object({
+        number: z.int(),
+        estimatedSetupDuration: z.number(),
+        runtimeTarget: z.int(),
+        runtimeEstimate: z.number(),
+        availableCapacity: z.number(),
+        status: z.enum(['open', 'closed']),
+        isCongested: z.boolean(),
+        loads: z.array(z.string()),
+        metadata: z.record(z.string(), z.any()),
+      })
+    ),
+    metadata: z.record(z.string(), z.any()),
+  })
+);
 
 export type TestTrackSpec = z.infer<typeof TestTrackSpecSchema>;
 export type TestTrackLaneStatus = z.infer<
   typeof TestTrackSpecSchema.shape.lanes.element.shape.status
 >;
 
-export const TestTrackLoadSchema = lazySchema(() => z.object({
-  id: z.string(),
-  stats: z.object({
-    runCount: z.int(),
-    runtime: z.object({
-      avg: z.int(),
-      median: z.int(),
-      pc95th: z.int(),
-      pc99th: z.int(),
-      max: z.int(),
-      estimate: z.int(),
+export const TestTrackLoadSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    stats: z.object({
+      runCount: z.int(),
+      runtime: z.object({
+        avg: z.int(),
+        median: z.int(),
+        pc95th: z.int(),
+        pc99th: z.int(),
+        max: z.int(),
+        estimate: z.int(),
+      }),
     }),
-  }),
-  metadata: z.record(z.string(), z.any()),
-}));
+    metadata: z.record(z.string(), z.any()),
+  })
+);
 
 export type TestTrackLoad = z.infer<typeof TestTrackLoadSchema>;
 

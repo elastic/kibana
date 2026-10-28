@@ -7,37 +7,41 @@
 import { z, lazySchema } from '@kbn/zod';
 import { ConfigKey } from '../../constants/monitor_management';
 
-export const MonitorSortFieldSchema = lazySchema(() => z
-  .enum([
-    'enabled',
-    'status',
-    'updated_at',
-    'created_at',
-    'urls',
-    ConfigKey.NAME,
-    ConfigKey.TAGS,
-    ConfigKey.PROJECT_ID,
-    ConfigKey.MONITOR_TYPE,
-    ConfigKey.SCHEDULE,
-    `${ConfigKey.NAME}.keyword` as 'name.keyword',
-    `${ConfigKey.TAGS}.keyword` as 'tags.keyword',
-    `${ConfigKey.PROJECT_ID}.keyword` as 'project_id.keyword',
-    `${ConfigKey.MONITOR_TYPE}.keyword` as 'type.keyword',
-    `${ConfigKey.SCHEDULE}.keyword` as 'schedule.keyword',
-    ConfigKey.JOURNEY_ID,
-  ])
-  .optional());
+export const MonitorSortFieldSchema = lazySchema(() =>
+  z
+    .enum([
+      'enabled',
+      'status',
+      'updated_at',
+      'created_at',
+      'urls',
+      ConfigKey.NAME,
+      ConfigKey.TAGS,
+      ConfigKey.PROJECT_ID,
+      ConfigKey.MONITOR_TYPE,
+      ConfigKey.SCHEDULE,
+      `${ConfigKey.NAME}.keyword` as 'name.keyword',
+      `${ConfigKey.TAGS}.keyword` as 'tags.keyword',
+      `${ConfigKey.PROJECT_ID}.keyword` as 'project_id.keyword',
+      `${ConfigKey.MONITOR_TYPE}.keyword` as 'type.keyword',
+      `${ConfigKey.SCHEDULE}.keyword` as 'schedule.keyword',
+      ConfigKey.JOURNEY_ID,
+    ])
+    .optional()
+);
 
 export type MonitorListSortField = z.infer<typeof MonitorSortFieldSchema>;
 
 /** Sort fields the overview status route actually applies in `sortConfigs`. */
-export const OverviewStatusSortFieldSchema = lazySchema(() => z
-  .enum([
-    'status',
-    'updated_at',
-    'created_at',
-    'urls',
-    `${ConfigKey.NAME}.keyword` as 'name.keyword',
-    `${ConfigKey.MONITOR_TYPE}.keyword` as 'type.keyword',
-  ])
-  .optional());
+export const OverviewStatusSortFieldSchema = lazySchema(() =>
+  z
+    .enum([
+      'status',
+      'updated_at',
+      'created_at',
+      'urls',
+      `${ConfigKey.NAME}.keyword` as 'name.keyword',
+      `${ConfigKey.MONITOR_TYPE}.keyword` as 'type.keyword',
+    ])
+    .optional()
+);

@@ -7,22 +7,28 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const CaseObservableBaseSchema = lazySchema(() => z.object({
-  typeKey: z.string(),
-  value: z.string(),
-  description: z.string().nullable(),
-}));
+export const CaseObservableBaseSchema = lazySchema(() =>
+  z.object({
+    typeKey: z.string(),
+    value: z.string(),
+    description: z.string().nullable(),
+  })
+);
 
-export const CaseObservableSchema = lazySchema(() => CaseObservableBaseSchema.extend({
-  id: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string().nullable(),
-}));
+export const CaseObservableSchema = lazySchema(() =>
+  CaseObservableBaseSchema.extend({
+    id: z.string(),
+    createdAt: z.string(),
+    updatedAt: z.string().nullable(),
+  })
+);
 
-export const CaseObservableTypeSchema = lazySchema(() => z.object({
-  key: z.string(),
-  label: z.string(),
-}));
+export const CaseObservableTypeSchema = lazySchema(() =>
+  z.object({
+    key: z.string(),
+    label: z.string(),
+  })
+);
 
 export type Observable = z.infer<typeof CaseObservableSchema>;
 export type ObservableType = z.infer<typeof CaseObservableTypeSchema>;

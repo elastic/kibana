@@ -12,11 +12,13 @@ import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/t
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 
-const attachmentDiffSchema = lazySchema(() => z.object({
-  attachment_id: z.string().describe('ID of the attachment to compare versions'),
-  from_version: z.number().min(1).describe('Starting version number'),
-  to_version: z.number().min(1).describe('Ending version number'),
-}));
+const attachmentDiffSchema = lazySchema(() =>
+  z.object({
+    attachment_id: z.string().describe('ID of the attachment to compare versions'),
+    from_version: z.number().min(1).describe('Starting version number'),
+    to_version: z.number().min(1).describe('Ending version number'),
+  })
+);
 
 /**
  * Creates the attachment_diff tool.

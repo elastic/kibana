@@ -90,10 +90,12 @@ export const resolveKiVerifierChain = async ({
   return [...lineage, ...readKiVerifierChain(metadata), workflowId];
 };
 
-const workflowVerifierOutputSchema = lazySchema(() => z.object({
-  passed: z.boolean(),
-  reason: z.string().optional(),
-}));
+const workflowVerifierOutputSchema = lazySchema(() =>
+  z.object({
+    passed: z.boolean(),
+    reason: z.string().optional(),
+  })
+);
 
 /** Defined here instead of importing from the workflows plugin to avoid a circular dependency. */
 export interface KiVerifierWorkflowRunner {

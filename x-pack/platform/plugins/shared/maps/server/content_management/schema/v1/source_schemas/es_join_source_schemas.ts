@@ -27,13 +27,15 @@ export const ESTermSourceSchema = ESJoinSourceSchema.extend({
   type: lazySchema(() => z.literal(SOURCE_TYPES.ES_TERM_SOURCE)),
 });
 
-export const joinSourceSchema = lazySchema(() => z.union([
-  z
-    .object({
-      id: z.string(),
-      type: z.string(),
-    })
-    .loose(),
-  ESDistanceSourceSchema,
-  ESTermSourceSchema,
-]));
+export const joinSourceSchema = lazySchema(() =>
+  z.union([
+    z
+      .object({
+        id: z.string(),
+        type: z.string(),
+      })
+      .loose(),
+    ESDistanceSourceSchema,
+    ESTermSourceSchema,
+  ])
+);

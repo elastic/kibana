@@ -22,17 +22,19 @@ import {
 import { hostTargetFields, requireHostTarget } from '../services/resolve_target';
 import { buildDispatchConfirmation, prepareDispatch } from '../services/dispatch_action';
 
-const isolateHostSchema = lazySchema(() => z
-  .object({
-    ...hostTargetFields('The hostname of the endpoint to isolate.'),
-    comment: z
-      .string()
-      .min(1)
-      .max(MAX_ACTION_COMMENT_LENGTH)
-      .optional()
-      .describe('An optional comment explaining why the host is being isolated.'),
-  })
-  .refine(requireHostTarget.check, { message: requireHostTarget.message }));
+const isolateHostSchema = lazySchema(() =>
+  z
+    .object({
+      ...hostTargetFields('The hostname of the endpoint to isolate.'),
+      comment: z
+        .string()
+        .min(1)
+        .max(MAX_ACTION_COMMENT_LENGTH)
+        .optional()
+        .describe('An optional comment explaining why the host is being isolated.'),
+    })
+    .refine(requireHostTarget.check, { message: requireHostTarget.message })
+);
 
 export const isolateHostTool = (
   endpointAppContextService: EndpointAppContextService

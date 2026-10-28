@@ -15,7 +15,9 @@ import { KbnZodTypes } from './kbn_zod_type';
  * This is a helper schema to pass through any value without validation.
  * KbnZodTypes.PassThroughAny helps identify that it is a deliberate pass through of any value without validation.
  */
-const _PassThroughAny = lazySchema(() => z.any().describe('Pass through any value without validation.'));
+const _PassThroughAny = lazySchema(() =>
+  z.any().describe('Pass through any value without validation.')
+);
 
 // Add custom type marker for identification
 Object.defineProperty(_PassThroughAny, 'kbnTypeName', {

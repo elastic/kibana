@@ -12,14 +12,16 @@ import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachmentData } from '../../../common/attachments';
 
-const loadSkillForEditingSchema = lazySchema(() => z.object({
-  skill_id: z
-    .string()
-    .min(1)
-    .describe(
-      'ID of the existing user-created skill to load for editing. Must match the id of a persisted, non-readonly skill.'
-    ),
-}));
+const loadSkillForEditingSchema = lazySchema(() =>
+  z.object({
+    skill_id: z
+      .string()
+      .min(1)
+      .describe(
+        'ID of the existing user-created skill to load for editing. Must match the id of a persisted, non-readonly skill.'
+      ),
+  })
+);
 
 /**
  * Inline tool that fetches an existing user-created skill and captures it as a

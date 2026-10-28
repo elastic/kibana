@@ -61,9 +61,11 @@ export function validateTimezone(timezone: string) {
   return 'string is not a valid timezone: ' + timezone;
 }
 
-const timezoneSchema = lazySchema(() => z.string().refine((val) => validateTimezone(val) === undefined, {
-  message: 'Invalid timezone',
-}));
+const timezoneSchema = lazySchema(() =>
+  z.string().refine((val) => validateTimezone(val) === undefined, {
+    message: 'Invalid timezone',
+  })
+);
 
 const dimensionsSchema = z
   .object({
@@ -127,11 +129,13 @@ const forceNowSchema = z
 
 export const pagingStrategySchema = lazySchema(() => z.enum(['pit', 'scroll']));
 
-const locatorObjectSchema = lazySchema(() => z.object({
-  id: z.string().max(1024).optional(),
-  version: z.string().max(32).optional(),
-  params: z.record(z.any(), z.any()).optional(),
-}));
+const locatorObjectSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(1024).optional(),
+    version: z.string().max(32).optional(),
+    params: z.record(z.any(), z.any()).optional(),
+  })
+);
 
 const locatorParamsSchema = z.array(locatorObjectSchema).max(100).or(locatorObjectSchema);
 

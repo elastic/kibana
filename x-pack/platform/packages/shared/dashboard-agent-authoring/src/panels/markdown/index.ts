@@ -26,13 +26,15 @@ const markdownPanelConfigSchema = markdownStateSchema.extend({
  * The markdown variant of `config`-source panel content, discriminated by
  * `type: 'markdown'`.
  */
-const markdownPanelContentSchema = lazySchema(() => z.object({
-  source: z.literal('config'),
-  type: z.literal('markdown'),
-  config: markdownPanelConfigSchema.describe(
-    'Markdown panel config (e.g. { content }). On an existing panel, fully replaces its config.'
-  ),
-}));
+const markdownPanelContentSchema = lazySchema(() =>
+  z.object({
+    source: z.literal('config'),
+    type: z.literal('markdown'),
+    config: markdownPanelConfigSchema.describe(
+      'Markdown panel config (e.g. { content }). On an existing panel, fully replaces its config.'
+    ),
+  })
+);
 
 export const markdownPanelKind = defineConfigPanelKind({
   type: 'markdown',

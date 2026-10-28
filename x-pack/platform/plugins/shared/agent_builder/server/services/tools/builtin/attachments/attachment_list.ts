@@ -11,12 +11,14 @@ import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/t
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 
-const attachmentListSchema = lazySchema(() => z.object({
-  include_deleted: z
-    .boolean()
-    .optional()
-    .describe('Whether to include deleted attachments in the list (default: false)'),
-}));
+const attachmentListSchema = lazySchema(() =>
+  z.object({
+    include_deleted: z
+      .boolean()
+      .optional()
+      .describe('Whether to include deleted attachments in the list (default: false)'),
+  })
+);
 
 /**
  * Creates the attachment_list tool.

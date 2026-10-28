@@ -12,31 +12,35 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // Slack connector parameter schema
-export const SlackParamsSchema = lazySchema(() => z.object({
-  message: z.string(),
-  channel: z.string().optional(),
-  username: z.string().optional(),
-  icon_emoji: z.string().optional(),
-  icon_url: z.string().optional(),
-}));
+export const SlackParamsSchema = lazySchema(() =>
+  z.object({
+    message: z.string(),
+    channel: z.string().optional(),
+    username: z.string().optional(),
+    icon_emoji: z.string().optional(),
+    icon_url: z.string().optional(),
+  })
+);
 
 // Slack connector response schema
-export const SlackResponseSchema = lazySchema(() => z.object({
-  ok: z.boolean(),
-  channel: z.string().optional(),
-  ts: z.string().optional(),
-  message: z
-    .object({
-      text: z.string(),
-      username: z.string().optional(),
-      bot_id: z.string().optional(),
-      type: z.string().optional(),
-      subtype: z.string().optional(),
-      ts: z.string().optional(),
-    })
-    .optional(),
-  error: z.string().optional(),
-}));
+export const SlackResponseSchema = lazySchema(() =>
+  z.object({
+    ok: z.boolean(),
+    channel: z.string().optional(),
+    ts: z.string().optional(),
+    message: z
+      .object({
+        text: z.string(),
+        username: z.string().optional(),
+        bot_id: z.string().optional(),
+        type: z.string().optional(),
+        subtype: z.string().optional(),
+        ts: z.string().optional(),
+      })
+      .optional(),
+    error: z.string().optional(),
+  })
+);

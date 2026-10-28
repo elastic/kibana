@@ -23,11 +23,13 @@ export const getMemoryLineageRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      }),
+    })
+  ),
   handler: async ({ request, params, getMemoryPageStore, isMemoryEnabled }) => {
     if (!isMemoryEnabled()) throw notFound('Semantic Memory is not enabled');
 

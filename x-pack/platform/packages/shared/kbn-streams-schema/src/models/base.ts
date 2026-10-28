@@ -57,30 +57,38 @@ export namespace BaseStream {
   }
 }
 
-export const baseStreamDefinitionSchema = lazySchema(() => z.object({
-  name: z.string(),
-  description: z.string(),
-  updated_at: isoDateTime(),
-  query_streams: z
-    .array(
-      z.object({
-        name: z.string(),
-      })
-    )
-    .optional(),
-}));
+export const baseStreamDefinitionSchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    description: z.string(),
+    updated_at: isoDateTime(),
+    query_streams: z
+      .array(
+        z.object({
+          name: z.string(),
+        })
+      )
+      .optional(),
+  })
+);
 
-export const baseStreamGetResponseSchema = lazySchema(() => z.object({
-  dashboards: z.array(z.string()),
-  rules: z.array(z.string()),
-}));
+export const baseStreamGetResponseSchema = lazySchema(() =>
+  z.object({
+    dashboards: z.array(z.string()),
+    rules: z.array(z.string()),
+  })
+);
 
-export const baseStreamUpsertRequestSchema = lazySchema(() => z.object({
-  dashboards: z.array(z.string()),
-  rules: z.array(z.string()),
-}));
+export const baseStreamUpsertRequestSchema = lazySchema(() =>
+  z.object({
+    dashboards: z.array(z.string()),
+    rules: z.array(z.string()),
+  })
+);
 
-export const baseStreamUpsertDefinitionSchema = lazySchema(() => baseStreamDefinitionSchema.omit({
-  name: true,
-  updated_at: true,
-}));
+export const baseStreamUpsertDefinitionSchema = lazySchema(() =>
+  baseStreamDefinitionSchema.omit({
+    name: true,
+    updated_at: true,
+  })
+);

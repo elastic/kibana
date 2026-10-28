@@ -15,9 +15,11 @@ const tracingDashboardRoute = createGenAiSettingsServerRoute({
       requiredPrivileges: ['manage_advanced_settings'],
     },
   },
-  params: lazySchema(() => z.object({
-    body: z.object({ enabled: z.boolean() }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({ enabled: z.boolean() }),
+    })
+  ),
   handler: async (resources): Promise<{ success: boolean }> => {
     const { request, params, plugins } = resources;
 

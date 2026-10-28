@@ -9,12 +9,14 @@
 
 import { z, lazySchema } from '@kbn/zod';
 
-export const ipFormatSchema = lazySchema(() => z
-  .object({
-    type: z.literal('ip'),
-  })
-  .meta({
-    id: 'kbn-field-format-ip',
-    title: 'IP field format',
-    description: 'Formats a field into an IP address.',
-  }));
+export const ipFormatSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('ip'),
+    })
+    .meta({
+      id: 'kbn-field-format-ip',
+      title: 'IP field format',
+      description: 'Formats a field into an IP address.',
+    })
+);

@@ -6,15 +6,17 @@
  */
 import { z, lazySchema } from '@kbn/zod';
 
-const getSLOSuggestionsResponseSchema = lazySchema(() => z.object({
-  tags: z.array(
-    z.object({
-      label: z.string(),
-      value: z.string(),
-      count: z.number(),
-    })
-  ),
-}));
+const getSLOSuggestionsResponseSchema = lazySchema(() =>
+  z.object({
+    tags: z.array(
+      z.object({
+        label: z.string(),
+        value: z.string(),
+        count: z.number(),
+      })
+    ),
+  })
+);
 
 type GetSLOSuggestionsResponse = z.input<typeof getSLOSuggestionsResponseSchema>;
 

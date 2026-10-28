@@ -29,9 +29,11 @@ const mcpI18nMessages = {
   },
 };
 
-export const mcpToolFormValidationSchema = lazySchema(() => z.object({
-  ...sharedValidationSchemas,
-  connectorId: z.string().min(1, { message: mcpI18nMessages.connector.requiredError }),
-  mcpToolName: z.string().min(1, { message: mcpI18nMessages.mcpTool.requiredError }),
-  type: z.literal(ToolType.mcp),
-}));
+export const mcpToolFormValidationSchema = lazySchema(() =>
+  z.object({
+    ...sharedValidationSchemas,
+    connectorId: z.string().min(1, { message: mcpI18nMessages.connector.requiredError }),
+    mcpToolName: z.string().min(1, { message: mcpI18nMessages.mcpTool.requiredError }),
+    type: z.literal(ToolType.mcp),
+  })
+);

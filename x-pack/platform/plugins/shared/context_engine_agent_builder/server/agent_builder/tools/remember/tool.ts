@@ -48,52 +48,54 @@ import {
 const memoryTypeSchema = lazySchema(() => z.enum(MEMORY_KI_TYPES));
 const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 
-const rememberSchema = lazySchema(() => z.object({
-  aiIndexId: aiIndexIdFieldSchema.describe(
-    'The Context Engine AI-index registry ID where the memory will be stored. Use the ID from the agent AI INDICES configuration, not the backing Elasticsearch index or data stream name.'
-  ),
-  id: z
-    .string()
-    .min(1)
-    .max(MAX_KI_ID_LENGTH)
-    .optional()
-    .describe('The id of an existing memory to revise. Omit when creating a new memory.'),
-  sessionId: z
-    .string()
-    .min(1)
-    .max(MAX_KI_ID_LENGTH)
-    .optional()
-    .describe(
-      'For MCP calls only: omit unless continuing a memory session using the sessionId returned by an earlier remember call. Do not invent a value. Agent Builder calls ignore this input and use the current conversation ID.'
+const rememberSchema = lazySchema(() =>
+  z.object({
+    aiIndexId: aiIndexIdFieldSchema.describe(
+      'The Context Engine AI-index registry ID where the memory will be stored. Use the ID from the agent AI INDICES configuration, not the backing Elasticsearch index or data stream name.'
     ),
-  type: memoryTypeSchema.describe(
-    'Use memory.session_fact for a granular fact discovered during a session, or memory.session for a session synthesis. When revising a memory, use its existing type.'
-  ),
-  title: z.string().min(1).max(MAX_KI_TITLE_LENGTH).describe('A short label for the memory'),
-  description: z
-    .string()
-    .min(1)
-    .max(MAX_KI_DESCRIPTION_LENGTH)
-    .describe('A concise description of the memory and its immediate consequence'),
-  content: z
-    .string()
-    .min(1)
-    .max(MAX_KI_CONTENT_LENGTH)
-    .describe('Enough context to use the memory without re-deriving it'),
-  tags: z
-    .array(z.string().min(1).max(MAX_KI_TAG_LENGTH))
-    .max(MAX_KI_TAGS)
-    .optional()
-    .describe(
-      'Optional lowercase index names, feature areas, or tools associated with the memory. When revising, omit to preserve existing tags or pass an empty array to clear them.'
+    id: z
+      .string()
+      .min(1)
+      .max(MAX_KI_ID_LENGTH)
+      .optional()
+      .describe('The id of an existing memory to revise. Omit when creating a new memory.'),
+    sessionId: z
+      .string()
+      .min(1)
+      .max(MAX_KI_ID_LENGTH)
+      .optional()
+      .describe(
+        'For MCP calls only: omit unless continuing a memory session using the sessionId returned by an earlier remember call. Do not invent a value. Agent Builder calls ignore this input and use the current conversation ID.'
+      ),
+    type: memoryTypeSchema.describe(
+      'Use memory.session_fact for a granular fact discovered during a session, or memory.session for a session synthesis. When revising a memory, use its existing type.'
     ),
-  expires_at: isoDateTime({ offset: true })
-    .nullable()
-    .optional()
-    .describe(
-      'ISO 8601 timestamp after which the memory must not be recalled. UTC (Z) and numeric timezone offsets are accepted. If omitted, this call sets the expiry to 90 days from now, including when revising an existing memory. Set to null to make the memory non-expiring.'
-    ),
-}));
+    title: z.string().min(1).max(MAX_KI_TITLE_LENGTH).describe('A short label for the memory'),
+    description: z
+      .string()
+      .min(1)
+      .max(MAX_KI_DESCRIPTION_LENGTH)
+      .describe('A concise description of the memory and its immediate consequence'),
+    content: z
+      .string()
+      .min(1)
+      .max(MAX_KI_CONTENT_LENGTH)
+      .describe('Enough context to use the memory without re-deriving it'),
+    tags: z
+      .array(z.string().min(1).max(MAX_KI_TAG_LENGTH))
+      .max(MAX_KI_TAGS)
+      .optional()
+      .describe(
+        'Optional lowercase index names, feature areas, or tools associated with the memory. When revising, omit to preserve existing tags or pass an empty array to clear them.'
+      ),
+    expires_at: isoDateTime({ offset: true })
+      .nullable()
+      .optional()
+      .describe(
+        'ISO 8601 timestamp after which the memory must not be recalled. UTC (Z) and numeric timezone offsets are accepted. If omitted, this call sets the expiry to 90 days from now, including when revising an existing memory. Set to null to make the memory non-expiring.'
+      ),
+  })
+);
 
 export const createRememberTool = ({
   getAiIndexService,

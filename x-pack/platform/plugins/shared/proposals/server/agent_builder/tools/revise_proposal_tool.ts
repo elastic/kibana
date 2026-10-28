@@ -25,34 +25,36 @@ interface ReviseProposalToolDependencies {
   privileges: Pick<ProposalPrivilegesChecker, 'assertCanManage'>;
 }
 
-const reviseProposalSchema = lazySchema(() => z.object({
-  proposalId: z
-    .string()
-    .min(1)
-    .max(256)
-    .describe(
-      'The id of the proposal being replaced. Any id in a revision chain works, not only the root — the live head is resolved before the revision is appended.'
-    ),
-  title: z
-    .string()
-    .max(MAX_TITLE_LENGTH)
-    .optional()
-    .describe("Override for the proposal's short plain-text title. Omit to keep the original."),
-  comment: z
-    .string()
-    .max(8192)
-    .optional()
-    .describe(
-      'Complete replacement Markdown for the analyst-facing proposal, not a change summary. Read the current revision first and make only localized edits required by the request. Copy unaffected text and Markdown verbatim, preserving title styling, heading levels, section order, lists, tables, and existing rationale and warnings. Do not reformat, rewrite, or add sections such as Rationale or Safety notes unless explicitly requested. All revisions remain visible in chat and should read as the same proposal with small adjustments. Pass the entire updated comment. Omit only if the existing comment remains accurate.'
-    ),
-  actionInput: boundedActionInput
-    .optional()
-    .describe(
-      "Read the current revision's actionInput, preserve unchanged fields, and send the complete updated object. Keep the comment consistent with it. The server shallow-merges these top-level keys over the original; nested objects and arrays are replaced, not deep-merged, and omitted keys are retained. Omit actionInput to keep it unchanged. The merged input is validated against the action workflow."
-    ),
-  impact: proposalImpactSchema.optional().describe('Override for the impact rating.'),
-  confidence: proposalConfidenceSchema.optional().describe('Override for the confidence rating.'),
-}));
+const reviseProposalSchema = lazySchema(() =>
+  z.object({
+    proposalId: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe(
+        'The id of the proposal being replaced. Any id in a revision chain works, not only the root — the live head is resolved before the revision is appended.'
+      ),
+    title: z
+      .string()
+      .max(MAX_TITLE_LENGTH)
+      .optional()
+      .describe("Override for the proposal's short plain-text title. Omit to keep the original."),
+    comment: z
+      .string()
+      .max(8192)
+      .optional()
+      .describe(
+        'Complete replacement Markdown for the analyst-facing proposal, not a change summary. Read the current revision first and make only localized edits required by the request. Copy unaffected text and Markdown verbatim, preserving title styling, heading levels, section order, lists, tables, and existing rationale and warnings. Do not reformat, rewrite, or add sections such as Rationale or Safety notes unless explicitly requested. All revisions remain visible in chat and should read as the same proposal with small adjustments. Pass the entire updated comment. Omit only if the existing comment remains accurate.'
+      ),
+    actionInput: boundedActionInput
+      .optional()
+      .describe(
+        "Read the current revision's actionInput, preserve unchanged fields, and send the complete updated object. Keep the comment consistent with it. The server shallow-merges these top-level keys over the original; nested objects and arrays are replaced, not deep-merged, and omitted keys are retained. Omit actionInput to keep it unchanged. The merged input is validated against the action workflow."
+      ),
+    impact: proposalImpactSchema.optional().describe('Override for the impact rating.'),
+    confidence: proposalConfidenceSchema.optional().describe('Override for the confidence rating.'),
+  })
+);
 
 /**
  * Replaces a pending proposal with a modified copy at an analyst's request.

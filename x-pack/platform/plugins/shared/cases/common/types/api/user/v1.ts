@@ -10,18 +10,26 @@ import { MAX_SUGGESTED_PROFILES } from '../../../constants';
 import { limitedNumberSchema } from '../../../schema';
 import { UserWithProfileInfoSchema } from '../../domain/user/v1';
 
-export const GetCaseUsersResponseSchema = lazySchema(() => z.object({
-  assignees: z.array(UserWithProfileInfoSchema),
-  unassignedUsers: z.array(UserWithProfileInfoSchema),
-  participants: z.array(UserWithProfileInfoSchema),
-  reporter: UserWithProfileInfoSchema,
-}));
+export const GetCaseUsersResponseSchema = lazySchema(() =>
+  z.object({
+    assignees: z.array(UserWithProfileInfoSchema),
+    unassignedUsers: z.array(UserWithProfileInfoSchema),
+    participants: z.array(UserWithProfileInfoSchema),
+    reporter: UserWithProfileInfoSchema,
+  })
+);
 
-export const SuggestUserProfilesRequestSchema = lazySchema(() => z.object({
-  name: z.string(),
-  owners: z.array(z.string()),
-  size: limitedNumberSchema({ fieldName: 'size', min: 1, max: MAX_SUGGESTED_PROFILES }).optional(),
-}));
+export const SuggestUserProfilesRequestSchema = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    owners: z.array(z.string()),
+    size: limitedNumberSchema({
+      fieldName: 'size',
+      min: 1,
+      max: MAX_SUGGESTED_PROFILES,
+    }).optional(),
+  })
+);
 
 export type GetCaseUsersResponse = z.infer<typeof GetCaseUsersResponseSchema>;
 export type SuggestUserProfilesRequest = z.infer<typeof SuggestUserProfilesRequestSchema>;

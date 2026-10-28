@@ -13,17 +13,21 @@ import { optionalStepInput } from './optional_step_input';
 
 export const CloneProposalStepId = 'proposals.cloneProposal' as const;
 
-export const cloneProposalStepInputSchema = lazySchema(() => z.object({
-  proposalId: z.string().describe('Proposal to supersede.'),
-  executionError: optionalStepInput(z.string()).describe(
-    'Why the original failed, recorded on it alongside the supersession.'
-  ),
-}));
+export const cloneProposalStepInputSchema = lazySchema(() =>
+  z.object({
+    proposalId: z.string().describe('Proposal to supersede.'),
+    executionError: optionalStepInput(z.string()).describe(
+      'Why the original failed, recorded on it alongside the supersession.'
+    ),
+  })
+);
 
-export const cloneProposalStepOutputSchema = lazySchema(() => z.object({
-  /** The new proposal. The original now points at it via `supersededBy`. */
-  proposalId: z.string(),
-}));
+export const cloneProposalStepOutputSchema = lazySchema(() =>
+  z.object({
+    /** The new proposal. The original now points at it via `supersededBy`. */
+    proposalId: z.string(),
+  })
+);
 
 export const cloneProposalStepCommonDefinition: BaseStepDefinition<
   typeof cloneProposalStepInputSchema,

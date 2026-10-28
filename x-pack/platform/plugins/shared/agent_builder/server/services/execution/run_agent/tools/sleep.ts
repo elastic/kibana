@@ -14,9 +14,11 @@ export const SleepToolName = internalTools.sleep;
 
 const MAX_SLEEP_SECONDS = 120;
 
-const schema = lazySchema(() => z.object({
-  duration: z.number().describe('Duration to sleep for, in seconds'),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    duration: z.number().describe('Duration to sleep for, in seconds'),
+  })
+);
 
 const description = `Wait for a specified duration.
 

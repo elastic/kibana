@@ -10,11 +10,15 @@ import { UserActionTypes } from '../action/v1';
 
 export const ExtendedFieldsSchema = lazySchema(() => z.record(z.string(), z.string()));
 
-export const ExtendedFieldsUserActionPayloadSchema = lazySchema(() => z.object({
-  extended_fields: ExtendedFieldsSchema,
-}));
+export const ExtendedFieldsUserActionPayloadSchema = lazySchema(() =>
+  z.object({
+    extended_fields: ExtendedFieldsSchema,
+  })
+);
 
-export const ExtendedFieldsUserActionSchema = lazySchema(() => z.object({
-  type: z.literal(UserActionTypes.extended_fields),
-  payload: ExtendedFieldsUserActionPayloadSchema,
-}));
+export const ExtendedFieldsUserActionSchema = lazySchema(() =>
+  z.object({
+    type: z.literal(UserActionTypes.extended_fields),
+    payload: ExtendedFieldsUserActionPayloadSchema,
+  })
+);

@@ -15,18 +15,24 @@ import { MAX_STRING_LENGTH } from '../constants';
 const baseProps = {
   ...serializedTitlesSchema.shape,
   ...serializedTimeRangeSchema.shape,
-  job_ids: lazySchema(() => z.array(z.string().min(1).max(MAX_STRING_LENGTH)).min(1).max(10000).meta({
-    description:
-      'IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.',
-  })),
-  per_page: lazySchema(() => z.number().min(1).optional().meta({
-    description:
-      'Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.',
-  })),
-  severity_threshold: lazySchema(() => z.number().min(0).max(100).optional().meta({
-    description:
-      'Minimum anomaly score (0–100) to show in the swim lane. Anomalies with scores at or above this value are displayed.',
-  })),
+  job_ids: lazySchema(() =>
+    z.array(z.string().min(1).max(MAX_STRING_LENGTH)).min(1).max(10000).meta({
+      description:
+        'IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.',
+    })
+  ),
+  per_page: lazySchema(() =>
+    z.number().min(1).optional().meta({
+      description:
+        'Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.',
+    })
+  ),
+  severity_threshold: lazySchema(() =>
+    z.number().min(0).max(100).optional().meta({
+      description:
+        'Minimum anomaly score (0–100) to show in the swim lane. Anomalies with scores at or above this value are displayed.',
+    })
+  ),
 };
 
 export const anomalySwimLaneOverallSchema = z
@@ -46,12 +52,12 @@ export const anomalySwimLaneViewBySchema = z
   })
   .strip();
 
-export const anomalySwimLaneEmbeddableStateSchema = lazySchema(() => z
-  .union([anomalySwimLaneOverallSchema, anomalySwimLaneViewBySchema])
-  .meta({
+export const anomalySwimLaneEmbeddableStateSchema = lazySchema(() =>
+  z.union([anomalySwimLaneOverallSchema, anomalySwimLaneViewBySchema]).meta({
     id: 'ml_anomaly_swimlane',
     description: 'Anomaly Swim Lane embeddable',
-  }));
+  })
+);
 
 export type AnomalySwimLaneEmbeddableState = z.output<typeof anomalySwimLaneEmbeddableStateSchema>;
 

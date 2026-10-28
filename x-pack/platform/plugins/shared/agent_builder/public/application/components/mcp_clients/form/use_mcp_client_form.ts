@@ -49,21 +49,25 @@ const mcpClientI18nMessages = {
   },
 };
 
-const localRedirectUriSchema = lazySchema(() => z.object({
-  value: z
-    .url({ error: mcpClientI18nMessages.redirectUri.invalidUrlError })
-    .max(OAUTH_MAX_URI_LENGTH, {
-      error: mcpClientI18nMessages.redirectUri.tooLongError(OAUTH_MAX_URI_LENGTH),
-    }),
-}));
+const localRedirectUriSchema = lazySchema(() =>
+  z.object({
+    value: z
+      .url({ error: mcpClientI18nMessages.redirectUri.invalidUrlError })
+      .max(OAUTH_MAX_URI_LENGTH, {
+        error: mcpClientI18nMessages.redirectUri.tooLongError(OAUTH_MAX_URI_LENGTH),
+      }),
+  })
+);
 
-const remoteRedirectUriSchema = lazySchema(() => z.object({
-  value: z
-    .url({ protocol: /^https/, error: mcpClientI18nMessages.redirectUri.invalidUrlError })
-    .max(OAUTH_MAX_URI_LENGTH, {
-      error: mcpClientI18nMessages.redirectUri.tooLongError(OAUTH_MAX_URI_LENGTH),
-    }),
-}));
+const remoteRedirectUriSchema = lazySchema(() =>
+  z.object({
+    value: z
+      .url({ protocol: /^https/, error: mcpClientI18nMessages.redirectUri.invalidUrlError })
+      .max(OAUTH_MAX_URI_LENGTH, {
+        error: mcpClientI18nMessages.redirectUri.tooLongError(OAUTH_MAX_URI_LENGTH),
+      }),
+  })
+);
 
 const redirectUrisSchema = <TUri extends z.ZodType>(uriSchema: TUri) =>
   z
@@ -73,42 +77,48 @@ const redirectUrisSchema = <TUri extends z.ZodType>(uriSchema: TUri) =>
       error: mcpClientI18nMessages.redirectUri.tooManyError(OAUTH_REDIRECT_URIS_MAX_SIZE),
     });
 
-const redirectSchema = lazySchema(() => z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal(RedirectUriType.LOCAL),
-    uris: redirectUrisSchema(localRedirectUriSchema),
-  }),
-  z.object({
-    type: z.literal(RedirectUriType.REMOTE),
-    uris: redirectUrisSchema(remoteRedirectUriSchema),
-  }),
-]));
-
-const clientLogoSchema = lazySchema(() => z.discriminatedUnion('type', [
-  z.object({ type: z.literal('none') }),
-  z.object({
-    type: z.literal('select'),
-    id: z.string().min(1),
-    dataUrl: z.string().min(1),
-  }),
-  z.object({
-    type: z.literal('upload'),
-    file: z.instanceof(File),
-    dataUrl: z.string().min(1),
-  }),
-]));
-
-const mcpClientFormSchema = lazySchema(() => z.object({
-  clientName: z
-    .string()
-    .min(1, mcpClientI18nMessages.clientName.requiredError)
-    .max(OAUTH_CLIENT_NAME_MAX_LENGTH, {
-      error: mcpClientI18nMessages.clientName.tooLongError(OAUTH_CLIENT_NAME_MAX_LENGTH),
+const redirectSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    z.object({
+      type: z.literal(RedirectUriType.LOCAL),
+      uris: redirectUrisSchema(localRedirectUriSchema),
     }),
-  clientLogo: clientLogoSchema,
-  redirect: redirectSchema,
-  isConfidential: z.boolean(),
-}));
+    z.object({
+      type: z.literal(RedirectUriType.REMOTE),
+      uris: redirectUrisSchema(remoteRedirectUriSchema),
+    }),
+  ])
+);
+
+const clientLogoSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    z.object({ type: z.literal('none') }),
+    z.object({
+      type: z.literal('select'),
+      id: z.string().min(1),
+      dataUrl: z.string().min(1),
+    }),
+    z.object({
+      type: z.literal('upload'),
+      file: z.instanceof(File),
+      dataUrl: z.string().min(1),
+    }),
+  ])
+);
+
+const mcpClientFormSchema = lazySchema(() =>
+  z.object({
+    clientName: z
+      .string()
+      .min(1, mcpClientI18nMessages.clientName.requiredError)
+      .max(OAUTH_CLIENT_NAME_MAX_LENGTH, {
+        error: mcpClientI18nMessages.clientName.tooLongError(OAUTH_CLIENT_NAME_MAX_LENGTH),
+      }),
+    clientLogo: clientLogoSchema,
+    redirect: redirectSchema,
+    isConfidential: z.boolean(),
+  })
+);
 
 export const DEFAULT_MCP_CLIENT_FORM_VALUES: McpClientFormData = {
   clientName: '',

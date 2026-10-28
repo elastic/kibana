@@ -26,40 +26,42 @@ import { getToolHandler } from './handler';
 export const OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID =
   'observability.get_metric_change_points';
 
-const getMetricChangePointsSchema = lazySchema(() => z.object({
-  ...timeRangeSchemaRequired,
-  index: z
-    .string()
-    .max(MAX_INDEX_PATTERN_LENGTH)
-    .describe('The index or index pattern to find the metrics')
-    .optional(),
-  kqlFilter: z
-    .string()
-    .max(MAX_KQL_FILTER_LENGTH)
-    .describe(
-      "A KQL filter to filter the metric documents. Examples: 'service.name: \"my-service\"', 'my_field: foo'."
-    )
-    .optional(),
-  aggregation: z
-    .object({
-      field: z
-        .string()
-        .max(MAX_SHORT_STRING_LENGTH)
-        .describe(
-          `Numeric field to aggregate and observe for changes. Example: "transaction.duration.us".`
-        ),
-      type: z
-        .enum(['avg', 'sum', 'min', 'max', 'p95', 'p99'])
-        .describe('Aggregation to apply to the specified field.'),
-    })
-    .optional(),
-  groupBy: z
-    .array(z.string().max(MAX_SHORT_STRING_LENGTH))
-    .default([])
-    .describe(
-      `Fields to break down metrics by. Use low-cardinality fields. Examples: ['service.name', 'service.version'], ['service.name', 'host.name'], ['cloud.availability_zone'].`
-    ),
-}));
+const getMetricChangePointsSchema = lazySchema(() =>
+  z.object({
+    ...timeRangeSchemaRequired,
+    index: z
+      .string()
+      .max(MAX_INDEX_PATTERN_LENGTH)
+      .describe('The index or index pattern to find the metrics')
+      .optional(),
+    kqlFilter: z
+      .string()
+      .max(MAX_KQL_FILTER_LENGTH)
+      .describe(
+        "A KQL filter to filter the metric documents. Examples: 'service.name: \"my-service\"', 'my_field: foo'."
+      )
+      .optional(),
+    aggregation: z
+      .object({
+        field: z
+          .string()
+          .max(MAX_SHORT_STRING_LENGTH)
+          .describe(
+            `Numeric field to aggregate and observe for changes. Example: "transaction.duration.us".`
+          ),
+        type: z
+          .enum(['avg', 'sum', 'min', 'max', 'p95', 'p99'])
+          .describe('Aggregation to apply to the specified field.'),
+      })
+      .optional(),
+    groupBy: z
+      .array(z.string().max(MAX_SHORT_STRING_LENGTH))
+      .default([])
+      .describe(
+        `Fields to break down metrics by. Use low-cardinality fields. Examples: ['service.name', 'service.version'], ['service.name', 'host.name'], ['cloud.availability_zone'].`
+      ),
+  })
+);
 
 export function createGetMetricChangePointsTool({
   core,

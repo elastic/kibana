@@ -14,16 +14,20 @@ import { MAX_CASES_TO_UPDATE } from '../../constants';
 
 export const PushCasesStepTypeId = 'cases.pushCases';
 
-const InputSchema = lazySchema(() => z.object({
-  case_ids: z
-    .array(z.string().min(1, 'case_ids values are required').max(1000))
-    .min(1)
-    .max(MAX_CASES_TO_UPDATE),
-}));
+const InputSchema = lazySchema(() =>
+  z.object({
+    case_ids: z
+      .array(z.string().min(1, 'case_ids values are required').max(1000))
+      .min(1)
+      .max(MAX_CASES_TO_UPDATE),
+  })
+);
 
-const OutputSchema = lazySchema(() => z.object({
-  cases: z.array(CaseResponsePropertiesSchema),
-}));
+const OutputSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(CaseResponsePropertiesSchema),
+  })
+);
 
 type PushCasesStepInputSchema = typeof InputSchema;
 type PushCasesStepOutputSchema = typeof OutputSchema;

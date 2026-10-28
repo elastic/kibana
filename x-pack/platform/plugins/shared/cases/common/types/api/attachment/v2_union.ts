@@ -14,27 +14,26 @@ import {
 import { AttachmentSchemaV2, UnifiedAttachmentPayloadSchema } from '../../domain/attachment/v2';
 import { UnifiedAttachmentPatchRouteRequestSchema } from './v2';
 
-export const AttachmentRequestSchemaV2 = lazySchema(() => z.union([
-  AttachmentRequestSchema,
-  UnifiedAttachmentPayloadSchema,
-]));
+export const AttachmentRequestSchemaV2 = lazySchema(() =>
+  z.union([AttachmentRequestSchema, UnifiedAttachmentPayloadSchema])
+);
 
-export const AttachmentRequestWithoutRefsSchemaV2 = lazySchema(() => z.union([
-  AttachmentRequestWithoutRefsSchema,
-  UnifiedAttachmentPayloadSchema,
-]));
+export const AttachmentRequestWithoutRefsSchemaV2 = lazySchema(() =>
+  z.union([AttachmentRequestWithoutRefsSchema, UnifiedAttachmentPayloadSchema])
+);
 
-export const AttachmentPatchRequestSchemaV2 = lazySchema(() => z.union([
-  AttachmentPatchRequestSchema,
-  UnifiedAttachmentPatchRouteRequestSchema,
-]));
+export const AttachmentPatchRequestSchemaV2 = lazySchema(() =>
+  z.union([AttachmentPatchRequestSchema, UnifiedAttachmentPatchRouteRequestSchema])
+);
 
-export const AttachmentsFindResponseSchemaV2 = lazySchema(() => z.object({
-  comments: z.array(AttachmentSchemaV2),
-  page: z.number(),
-  per_page: z.number(),
-  total: z.number(),
-}));
+export const AttachmentsFindResponseSchemaV2 = lazySchema(() =>
+  z.object({
+    comments: z.array(AttachmentSchemaV2),
+    page: z.number(),
+    per_page: z.number(),
+    total: z.number(),
+  })
+);
 
 export type AttachmentRequestV2 = z.infer<typeof AttachmentRequestSchemaV2>;
 export type AttachmentPatchRequestV2 = z.infer<typeof AttachmentPatchRequestSchemaV2>;

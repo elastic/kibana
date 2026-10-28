@@ -177,15 +177,17 @@ export function mapBlockScalarSourceToValueOffset(
 }
 
 /** LiquidJS forloop object schema (index, index0, rindex, rindex0, first, last, length) */
-const FORLOOP_SCHEMA = lazySchema(() => z.object({
-  index: z.number(),
-  index0: z.number(),
-  rindex: z.number(),
-  rindex0: z.number(),
-  first: z.boolean(),
-  last: z.boolean(),
-  length: z.number(),
-}));
+const FORLOOP_SCHEMA = lazySchema(() =>
+  z.object({
+    index: z.number(),
+    index0: z.number(),
+    rindex: z.number(),
+    rindex0: z.number(),
+    first: z.boolean(),
+    last: z.boolean(),
+    length: z.number(),
+  })
+);
 
 /** Matches a Liquid variable path (e.g. steps.x.outputs.value). */
 const VARIABLE_PATH_REGEX = /^[\w.]+$/;

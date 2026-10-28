@@ -9,33 +9,41 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { TinesStoryObjectSchema } from '@kbn/connector-schemas/tines';
 
 // Tines response base schema
-export const TinesBaseApiResponseSchema = lazySchema(() => z.object({
-  meta: z.object({
-    pages: z.coerce.number(),
-  }),
-}));
+export const TinesBaseApiResponseSchema = lazySchema(() =>
+  z.object({
+    meta: z.object({
+      pages: z.coerce.number(),
+    }),
+  })
+);
 
 // Stories action schema
-export const TinesStoriesApiResponseSchema = lazySchema(() => TinesBaseApiResponseSchema.extend({
-  stories: z.array(TinesStoryObjectSchema.extend({}).strip()),
-}));
+export const TinesStoriesApiResponseSchema = lazySchema(() =>
+  TinesBaseApiResponseSchema.extend({
+    stories: z.array(TinesStoryObjectSchema.extend({}).strip()),
+  })
+);
 
 // Single Webhook action schema
-export const TinesWebhookApiResponseSchema = lazySchema(() => z.object({
-  id: z.coerce.number(),
-  name: z.string(),
-  type: z.string(),
-  story_id: z.coerce.number(),
-  options: z.object({
-    path: z.string().optional(),
-    secret: z.string().optional(),
-  }),
-}));
+export const TinesWebhookApiResponseSchema = lazySchema(() =>
+  z.object({
+    id: z.coerce.number(),
+    name: z.string(),
+    type: z.string(),
+    story_id: z.coerce.number(),
+    options: z.object({
+      path: z.string().optional(),
+      secret: z.string().optional(),
+    }),
+  })
+);
 
 // Webhooks action schema
-export const TinesWebhooksApiResponseSchema = lazySchema(() => TinesBaseApiResponseSchema.extend({
-  agents: z.array(TinesWebhookApiResponseSchema),
-}));
+export const TinesWebhooksApiResponseSchema = lazySchema(() =>
+  TinesBaseApiResponseSchema.extend({
+    agents: z.array(TinesWebhookApiResponseSchema),
+  })
+);
 
 export const TinesRunApiResponseSchema = lazySchema(() => z.object({}));
 

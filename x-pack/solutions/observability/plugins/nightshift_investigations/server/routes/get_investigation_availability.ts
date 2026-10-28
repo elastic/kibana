@@ -16,13 +16,15 @@ export const getInvestigationAvailabilityRoute = createNightshiftInvestigationsS
     summary: 'Get investigation availability',
   },
   security: { authz: { requiredPrivileges: ['agentBuilder:write'] } },
-  params: lazySchema(() => z.object({
-    query: z
-      .object({
-        connector_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
-      })
-      .optional(),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          connector_id: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+        })
+        .optional(),
+    })
+  ),
   handler: async ({ request, params, getInvestigationsClient }) => ({
     available: await getInvestigationsClient(request).isAvailable(params?.query?.connector_id),
   }),

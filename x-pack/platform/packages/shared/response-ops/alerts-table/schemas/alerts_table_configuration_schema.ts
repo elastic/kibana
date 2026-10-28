@@ -12,17 +12,19 @@ import { z, lazySchema } from '@kbn/zod/v4';
  * This should include only the serializable properties that are user-configurable, all other props
  * will be removed by parsing to avoid saving unnecessary or non-serializable objects.
  */
-export const alertsTableConfigurationSchema = lazySchema(() => z.object({
-  columns: z
-    .array(
-      z.object({
-        id: z.string(),
-        initialWidth: z.number().optional(),
-      })
-    )
-    .optional(),
-  visibleColumns: z.array(z.string()).optional(),
-  sort: z.array(z.record(z.string(), z.object({ order: z.enum(['asc', 'desc']) }))).optional(),
-}));
+export const alertsTableConfigurationSchema = lazySchema(() =>
+  z.object({
+    columns: z
+      .array(
+        z.object({
+          id: z.string(),
+          initialWidth: z.number().optional(),
+        })
+      )
+      .optional(),
+    visibleColumns: z.array(z.string()).optional(),
+    sort: z.array(z.record(z.string(), z.object({ order: z.enum(['asc', 'desc']) }))).optional(),
+  })
+);
 
 export type AlertsTableConfiguration = z.infer<typeof alertsTableConfigurationSchema>;

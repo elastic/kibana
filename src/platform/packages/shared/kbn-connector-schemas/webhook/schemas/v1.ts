@@ -13,15 +13,17 @@ export const HeadersSchema = lazySchema(() => z.record(z.string(), z.string()));
 
 const configSchemaProps = {
   url: lazySchema(() => z.string()),
-  method: lazySchema(() => z
-    .enum([
-      WebhookMethods.POST,
-      WebhookMethods.PUT,
-      WebhookMethods.PATCH,
-      WebhookMethods.GET,
-      WebhookMethods.DELETE,
-    ])
-    .default(WebhookMethods.POST)),
+  method: lazySchema(() =>
+    z
+      .enum([
+        WebhookMethods.POST,
+        WebhookMethods.PUT,
+        WebhookMethods.PATCH,
+        WebhookMethods.GET,
+        WebhookMethods.DELETE,
+      ])
+      .default(WebhookMethods.POST)
+  ),
   headers: lazySchema(() => HeadersSchema.nullable().default(null)),
   hasAuth: AuthConfiguration.hasAuth,
   authType: AuthConfiguration.authType,

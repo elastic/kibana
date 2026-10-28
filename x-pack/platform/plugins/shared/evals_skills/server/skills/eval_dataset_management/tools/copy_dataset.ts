@@ -27,13 +27,15 @@ import {
   withDatasetLookup,
 } from './tool_utils';
 
-const schema = lazySchema(() => z.object({
-  dataset_id: datasetIdSchema.describe('Id of the dataset to copy.'),
-  name: datasetNameSchema.describe('Name for the new dataset. Must be unused in this space.'),
-  description: datasetDescriptionSchema
-    .optional()
-    .describe('Description for the copy. Defaults to the source dataset description.'),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    dataset_id: datasetIdSchema.describe('Id of the dataset to copy.'),
+    name: datasetNameSchema.describe('Name for the new dataset. Must be unused in this space.'),
+    description: datasetDescriptionSchema
+      .optional()
+      .describe('Description for the copy. Defaults to the source dataset description.'),
+  })
+);
 
 /**
  * Copies a dataset, including its examples, under a new name in the current space.

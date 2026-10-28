@@ -13,11 +13,13 @@ import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 export const LOOP_TRIGGER_ID = 'example.loopTrigger' as const;
 
-export const loopTriggerEventSchema = lazySchema(() => z.object({
-  iteration: z
-    .number()
-    .describe('Current iteration in the event chain (for depth guardrail demo).'),
-}));
+export const loopTriggerEventSchema = lazySchema(() =>
+  z.object({
+    iteration: z
+      .number()
+      .describe('Current iteration in the event chain (for depth guardrail demo).'),
+  })
+);
 
 export type LoopTriggerEvent = z.infer<typeof loopTriggerEventSchema>;
 

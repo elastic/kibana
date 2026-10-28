@@ -27,53 +27,63 @@ import { Direction } from '@kbn/evals-common';
 
 const recordSchema = lazySchema(() => z.record(z.string(), z.unknown()));
 
-export const modelSchema = lazySchema(() => z.object({
-  id: z.string(),
-  family: z.string().optional(),
-  provider: z.string().optional(),
-}));
+export const modelSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    family: z.string().optional(),
+    provider: z.string().optional(),
+  })
+);
 
-export const exampleSchema = lazySchema(() => z.object({
-  id: z.string(),
-  index: z.number().int().optional(),
-  input: recordSchema.optional(),
-  output: z.unknown().optional(),
-  metadata: recordSchema.nullable().optional(),
-}));
+export const exampleSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    index: z.number().int().optional(),
+    input: recordSchema.optional(),
+    output: z.unknown().optional(),
+    metadata: recordSchema.nullable().optional(),
+  })
+);
 
-export const datasetSchema = lazySchema(() => z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  examples: z.array(exampleSchema),
-}));
+export const datasetSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().optional(),
+    examples: z.array(exampleSchema),
+  })
+);
 
-export const evaluatorConfigSchema = lazySchema(() => z.object({
-  name: z.string(),
-  version: z.string().optional(),
-  connector_id: z.string().optional(),
-}));
-
-export const evaluatorResultSchema = lazySchema(() => z.object({
-  evaluator: z.object({
+export const evaluatorConfigSchema = lazySchema(() =>
+  z.object({
     name: z.string(),
     version: z.string().optional(),
-    kind: z.enum(['llm', 'code']).optional(),
-    model: modelSchema.optional(),
-    direction: Direction.optional(),
-  }),
-  scores: z.array(
-    z.object({
+    connector_id: z.string().optional(),
+  })
+);
+
+export const evaluatorResultSchema = lazySchema(() =>
+  z.object({
+    evaluator: z.object({
       name: z.string(),
-      score: z.number().nullable().optional(),
-      label: z.string().nullable().optional(),
-      explanation: z.string().nullable().optional(),
-      metadata: recordSchema.optional(),
-      trace_id: z.string().nullable().optional(),
+      version: z.string().optional(),
+      kind: z.enum(['llm', 'code']).optional(),
+      model: modelSchema.optional(),
       direction: Direction.optional(),
-    })
-  ),
-}));
+    }),
+    scores: z.array(
+      z.object({
+        name: z.string(),
+        score: z.number().nullable().optional(),
+        label: z.string().nullable().optional(),
+        explanation: z.string().nullable().optional(),
+        metadata: recordSchema.optional(),
+        trace_id: z.string().nullable().optional(),
+        direction: Direction.optional(),
+      })
+    ),
+  })
+);
 
 /**
  * Spaces the ingested scores are assigned to. When omitted, the ingest step
@@ -103,13 +113,17 @@ const description = (id: string, defaultMessage: string) =>
 
 export const ResolveDatasetStepId = 'ai.evals.resolveDataset' as const;
 
-export const resolveDatasetInputSchema = lazySchema(() => z.object({
-  dataset_ids: z.array(z.string()).min(1),
-}));
+export const resolveDatasetInputSchema = lazySchema(() =>
+  z.object({
+    dataset_ids: z.array(z.string()).min(1),
+  })
+);
 
-export const resolveDatasetOutputSchema = lazySchema(() => z.object({
-  datasets: z.array(datasetSchema),
-}));
+export const resolveDatasetOutputSchema = lazySchema(() =>
+  z.object({
+    datasets: z.array(datasetSchema),
+  })
+);
 
 export const resolveDatasetCommonDefinition: CommonStepDefinition<
   typeof resolveDatasetInputSchema,
@@ -129,15 +143,19 @@ export const resolveDatasetCommonDefinition: CommonStepDefinition<
 
 export const ExecuteTaskStepId = 'ai.evals.executeTask' as const;
 
-export const executeTaskInputSchema = lazySchema(() => z.object({
-  ...taskTargetShape,
-  example: exampleSchema,
-}));
+export const executeTaskInputSchema = lazySchema(() =>
+  z.object({
+    ...taskTargetShape,
+    example: exampleSchema,
+  })
+);
 
-export const executeTaskOutputSchema = lazySchema(() => z.object({
-  output: recordSchema,
-  trace_id: z.string().optional(),
-}));
+export const executeTaskOutputSchema = lazySchema(() =>
+  z.object({
+    output: recordSchema,
+    trace_id: z.string().optional(),
+  })
+);
 
 export const executeTaskCommonDefinition: CommonStepDefinition<
   typeof executeTaskInputSchema,
@@ -157,16 +175,20 @@ export const executeTaskCommonDefinition: CommonStepDefinition<
 
 export const EvaluateTraceStepId = 'ai.evals.evaluateTrace' as const;
 
-export const evaluateTraceInputSchema = lazySchema(() => z.object({
-  trace_id: z.string(),
-  reference_data: recordSchema.optional(),
-  evaluators: z.array(evaluatorConfigSchema).min(1),
-}));
+export const evaluateTraceInputSchema = lazySchema(() =>
+  z.object({
+    trace_id: z.string(),
+    reference_data: recordSchema.optional(),
+    evaluators: z.array(evaluatorConfigSchema).min(1),
+  })
+);
 
-export const evaluateTraceOutputSchema = lazySchema(() => z.object({
-  results: z.array(evaluatorResultSchema),
-  errors: z.array(z.string()).optional(),
-}));
+export const evaluateTraceOutputSchema = lazySchema(() =>
+  z.object({
+    results: z.array(evaluatorResultSchema),
+    errors: z.array(z.string()).optional(),
+  })
+);
 
 export const evaluateTraceCommonDefinition: CommonStepDefinition<
   typeof evaluateTraceInputSchema,
@@ -186,34 +208,38 @@ export const evaluateTraceCommonDefinition: CommonStepDefinition<
 
 export const IngestScoresStepId = 'ai.evals.ingestScores' as const;
 
-export const ingestScoresInputSchema = lazySchema(() => z.object({
-  experiment_id: z.string(),
-  experiment_name: z.string().optional(),
-  execution_id: z.string().optional(),
-  suite_id: z.string().optional(),
-  task_model: modelSchema,
-  evaluator_model: modelSchema.optional(),
-  total_repetitions: z.number().int().optional(),
-  example: z.object({
-    id: z.string(),
-    index: z.number().int(),
-    input: recordSchema.optional(),
-    dataset: z.object({ id: z.string(), name: z.string() }),
-  }),
-  task: z.object({
-    trace_id: z.string().optional(),
-    repetition_index: z.number().int(),
-    output: recordSchema.optional(),
-  }),
-  evaluator_results: z.array(evaluatorResultSchema),
-  space_ids: spaceIdsSchema,
-}));
+export const ingestScoresInputSchema = lazySchema(() =>
+  z.object({
+    experiment_id: z.string(),
+    experiment_name: z.string().optional(),
+    execution_id: z.string().optional(),
+    suite_id: z.string().optional(),
+    task_model: modelSchema,
+    evaluator_model: modelSchema.optional(),
+    total_repetitions: z.number().int().optional(),
+    example: z.object({
+      id: z.string(),
+      index: z.number().int(),
+      input: recordSchema.optional(),
+      dataset: z.object({ id: z.string(), name: z.string() }),
+    }),
+    task: z.object({
+      trace_id: z.string().optional(),
+      repetition_index: z.number().int(),
+      output: recordSchema.optional(),
+    }),
+    evaluator_results: z.array(evaluatorResultSchema),
+    space_ids: spaceIdsSchema,
+  })
+);
 
-export const ingestScoresOutputSchema = lazySchema(() => z.object({
-  ingested: z.number().int(),
-  conflicted: z.number().int(),
-  failed: z.number().int(),
-}));
+export const ingestScoresOutputSchema = lazySchema(() =>
+  z.object({
+    ingested: z.number().int(),
+    conflicted: z.number().int(),
+    failed: z.number().int(),
+  })
+);
 
 export const ingestScoresCommonDefinition: CommonStepDefinition<
   typeof ingestScoresInputSchema,
@@ -233,27 +259,31 @@ export const ingestScoresCommonDefinition: CommonStepDefinition<
 
 export const PersistOnlineScoresStepId = 'ai.evals.persistOnlineScores' as const;
 
-export const persistOnlineScoresInputSchema = lazySchema(() => z.object({
-  monitor: z.object({ id: z.string(), name: z.string() }),
-  trace_id: z.string(),
-  connector_id: z.string().optional(),
-  results: z.array(
-    evaluatorResultSchema.extend({
-      evaluator: evaluatorResultSchema.shape.evaluator.extend({
-        version: z.string(),
-        kind: z.enum(['llm', 'code']),
-      }),
-    })
-  ),
-  /** Evaluator failures reported by `ai.evals.evaluateTrace`, counted but not persisted. */
-  errors: z.array(z.string()).optional(),
-}));
+export const persistOnlineScoresInputSchema = lazySchema(() =>
+  z.object({
+    monitor: z.object({ id: z.string(), name: z.string() }),
+    trace_id: z.string(),
+    connector_id: z.string().optional(),
+    results: z.array(
+      evaluatorResultSchema.extend({
+        evaluator: evaluatorResultSchema.shape.evaluator.extend({
+          version: z.string(),
+          kind: z.enum(['llm', 'code']),
+        }),
+      })
+    ),
+    /** Evaluator failures reported by `ai.evals.evaluateTrace`, counted but not persisted. */
+    errors: z.array(z.string()).optional(),
+  })
+);
 
-export const persistOnlineScoresOutputSchema = lazySchema(() => z.object({
-  created: z.number().int(),
-  skipped: z.number().int(),
-  failed_evaluators: z.number().int(),
-}));
+export const persistOnlineScoresOutputSchema = lazySchema(() =>
+  z.object({
+    created: z.number().int(),
+    skipped: z.number().int(),
+    failed_evaluators: z.number().int(),
+  })
+);
 
 export const persistOnlineScoresCommonDefinition: CommonStepDefinition<
   typeof persistOnlineScoresInputSchema,
@@ -277,27 +307,31 @@ export const persistOnlineScoresCommonDefinition: CommonStepDefinition<
 
 export const EvaluateExampleStepId = 'ai.evals.evaluateExample' as const;
 
-export const evaluateExampleInputSchema = lazySchema(() => z.object({
-  ...taskTargetShape,
-  experiment_id: z.string(),
-  experiment_name: z.string().optional(),
-  execution_id: z.string().optional(),
-  suite_id: z.string().optional(),
-  task_model: modelSchema.optional(),
-  dataset: z.object({ id: z.string(), name: z.string() }),
-  example: exampleSchema,
-  evaluators: z.array(evaluatorConfigSchema).min(1),
-  reference_data: recordSchema.optional(),
-  repetitions: z.number().int().min(1).optional(),
-  space_ids: spaceIdsSchema,
-}));
+export const evaluateExampleInputSchema = lazySchema(() =>
+  z.object({
+    ...taskTargetShape,
+    experiment_id: z.string(),
+    experiment_name: z.string().optional(),
+    execution_id: z.string().optional(),
+    suite_id: z.string().optional(),
+    task_model: modelSchema.optional(),
+    dataset: z.object({ id: z.string(), name: z.string() }),
+    example: exampleSchema,
+    evaluators: z.array(evaluatorConfigSchema).min(1),
+    reference_data: recordSchema.optional(),
+    repetitions: z.number().int().min(1).optional(),
+    space_ids: spaceIdsSchema,
+  })
+);
 
-export const evaluateExampleOutputSchema = lazySchema(() => z.object({
-  scores_ingested: z.number().int(),
-  failed: z.number().int(),
-  repetitions: z.number().int(),
-  errors: z.array(z.string()).optional(),
-}));
+export const evaluateExampleOutputSchema = lazySchema(() =>
+  z.object({
+    scores_ingested: z.number().int(),
+    failed: z.number().int(),
+    repetitions: z.number().int(),
+    errors: z.array(z.string()).optional(),
+  })
+);
 
 export const evaluateExampleCommonDefinition: CommonStepDefinition<
   typeof evaluateExampleInputSchema,
@@ -317,29 +351,33 @@ export const evaluateExampleCommonDefinition: CommonStepDefinition<
 
 export const EvaluateDatasetStepId = 'ai.evals.evaluateDataset' as const;
 
-export const evaluateDatasetInputSchema = lazySchema(() => z.object({
-  ...taskTargetShape,
-  experiment_id: z.string(),
-  experiment_name: z.string().optional(),
-  execution_id: z.string().optional(),
-  suite_id: z.string().optional(),
-  task_model: modelSchema.optional(),
-  dataset_ids: z.array(z.string()).min(1),
-  evaluators: z.array(evaluatorConfigSchema).min(1),
-  repetitions: z.number().int().min(1).optional(),
-  /** Max examples evaluated in parallel within this step. */
-  concurrency: z.number().int().min(1).optional(),
-  space_ids: spaceIdsSchema,
-}));
+export const evaluateDatasetInputSchema = lazySchema(() =>
+  z.object({
+    ...taskTargetShape,
+    experiment_id: z.string(),
+    experiment_name: z.string().optional(),
+    execution_id: z.string().optional(),
+    suite_id: z.string().optional(),
+    task_model: modelSchema.optional(),
+    dataset_ids: z.array(z.string()).min(1),
+    evaluators: z.array(evaluatorConfigSchema).min(1),
+    repetitions: z.number().int().min(1).optional(),
+    /** Max examples evaluated in parallel within this step. */
+    concurrency: z.number().int().min(1).optional(),
+    space_ids: spaceIdsSchema,
+  })
+);
 
-export const evaluateDatasetOutputSchema = lazySchema(() => z.object({
-  experiment_id: z.string(),
-  example_count: z.number().int(),
-  completed: z.number().int(),
-  failed: z.number().int(),
-  scores_ingested: z.number().int(),
-  errors: z.array(z.string()).optional(),
-}));
+export const evaluateDatasetOutputSchema = lazySchema(() =>
+  z.object({
+    experiment_id: z.string(),
+    example_count: z.number().int(),
+    completed: z.number().int(),
+    failed: z.number().int(),
+    scores_ingested: z.number().int(),
+    errors: z.array(z.string()).optional(),
+  })
+);
 
 export const evaluateDatasetCommonDefinition: CommonStepDefinition<
   typeof evaluateDatasetInputSchema,
@@ -362,17 +400,21 @@ export const evaluateDatasetCommonDefinition: CommonStepDefinition<
 // ---------------------------------------------------------------------------
 
 export const StartExperimentStepId = 'ai.evals.startExperiment' as const;
-export const startExperimentInputSchema = lazySchema(() => z.object({
-  task_model: modelSchema,
-  suite_id: z.string().optional(),
-  experiment_id: z.string().optional(),
-  execution_id: z.string().optional(),
-}));
+export const startExperimentInputSchema = lazySchema(() =>
+  z.object({
+    task_model: modelSchema,
+    suite_id: z.string().optional(),
+    experiment_id: z.string().optional(),
+    execution_id: z.string().optional(),
+  })
+);
 
-export const startExperimentOutputSchema = lazySchema(() => z.object({
-  experiment_id: z.string(),
-  execution_id: z.string(),
-}));
+export const startExperimentOutputSchema = lazySchema(() =>
+  z.object({
+    experiment_id: z.string(),
+    execution_id: z.string(),
+  })
+);
 
 export const startExperimentCommonDefinition: CommonStepDefinition<
   typeof startExperimentInputSchema,
@@ -392,13 +434,17 @@ export const startExperimentCommonDefinition: CommonStepDefinition<
 
 export const CompareExperimentsStepId = 'ai.evals.compareExperiments' as const;
 
-export const compareExperimentsInputSchema = lazySchema(() => z.object({
-  experiment_ids: z.array(z.string()).min(2),
-}));
+export const compareExperimentsInputSchema = lazySchema(() =>
+  z.object({
+    experiment_ids: z.array(z.string()).min(2),
+  })
+);
 
-export const compareExperimentsOutputSchema = lazySchema(() => z.object({
-  comparison: z.unknown(),
-}));
+export const compareExperimentsOutputSchema = lazySchema(() =>
+  z.object({
+    comparison: z.unknown(),
+  })
+);
 
 export const compareExperimentsCommonDefinition: CommonStepDefinition<
   typeof compareExperimentsInputSchema,

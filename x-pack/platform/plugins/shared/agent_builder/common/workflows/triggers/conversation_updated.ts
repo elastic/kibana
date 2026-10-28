@@ -14,113 +14,115 @@ import {
   conversationWriteSources,
 } from '@kbn/agent-builder-common';
 
-const conversationUpdatedEventSchema = lazySchema(() => z.object({
-  conversationId: z.string().meta({
-    description: i18n.translate(
-      'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.conversationId',
-      {
-        defaultMessage: 'The ID of the conversation that was updated.',
-      }
-    ),
-  }),
-  templateId: z
-    .string()
-    .optional()
-    .meta({
+const conversationUpdatedEventSchema = lazySchema(() =>
+  z.object({
+    conversationId: z.string().meta({
       description: i18n.translate(
-        'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.templateId',
+        'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.conversationId',
         {
-          defaultMessage: 'The template of the conversation, when it has one.',
+          defaultMessage: 'The ID of the conversation that was updated.',
         }
       ),
     }),
-  parentId: z
-    .string()
-    .optional()
-    .meta({
+    templateId: z
+      .string()
+      .optional()
+      .meta({
+        description: i18n.translate(
+          'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.templateId',
+          {
+            defaultMessage: 'The template of the conversation, when it has one.',
+          }
+        ),
+      }),
+    parentId: z
+      .string()
+      .optional()
+      .meta({
+        description: i18n.translate(
+          'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.parentId',
+          {
+            defaultMessage:
+              'The ID of the parent conversation, when this conversation is a child (e.g. a persistent sub-agent).',
+          }
+        ),
+      }),
+    source: z.enum(conversationWriteSources).meta({
       description: i18n.translate(
-        'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.parentId',
-        {
-          defaultMessage:
-            'The ID of the parent conversation, when this conversation is a child (e.g. a persistent sub-agent).',
-        }
-      ),
-    }),
-  source: z.enum(conversationWriteSources).meta({
-    description: i18n.translate(
-      'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.source',
-      {
-        defaultMessage:
-          'The code path that performed the write: `execution` (an agent execution, including the user message stored when it arrives and the generated title), `http_api` (Agent Builder HTTP APIs), `workflow` (Agent Builder workflow steps), or `server_api` (another Kibana plugin using the Agent Builder server-side contract). Use `actorTypes` to know who made the change.',
-      }
-    ),
-  }),
-  changeKinds: z.array(z.enum(conversationChangeKinds)).meta({
-    description: i18n.translate(
-      'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.changeKinds',
-      {
-        defaultMessage:
-          'What this write changed: `created` (the write created the conversation, and also reports everything set at creation, such as template defaults in `changedFields`), `events`, `attachments`, `metadata`, `title`, `template` and/or `access`. Never empty.',
-      }
-    ),
-  }),
-  eventTypes: z.array(z.string()).meta({
-    description: i18n.translate(
-      'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.eventTypes',
-      {
-        defaultMessage:
-          'Types of the events this write added, de-duplicated (for example `user_message`, `execution_terminated`, `attachment_added`, or a custom event type). Empty when no event was added.',
-      }
-    ),
-  }),
-  actorTypes: z.array(z.string()).meta({
-    description: i18n.translate(
-      'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.actorTypes',
-      {
-        defaultMessage:
-          'Actor types of the events this write added, de-duplicated: `user`, `agent`, `external` or `system`.',
-      }
-    ),
-  }),
-  executionId: z
-    .string()
-    .optional()
-    .meta({
-      description: i18n.translate(
-        'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.executionId',
+        'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.source',
         {
           defaultMessage:
-            'The agent execution this write persisted, whether it terminated, failed or was aborted. Absent for writes that persisted no execution.',
+            'The code path that performed the write: `execution` (an agent execution, including the user message stored when it arrives and the generated title), `http_api` (Agent Builder HTTP APIs), `workflow` (Agent Builder workflow steps), or `server_api` (another Kibana plugin using the Agent Builder server-side contract). Use `actorTypes` to know who made the change.',
         }
       ),
     }),
-  attachmentTypes: z.array(z.string()).meta({
-    description: i18n.translate(
-      'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.attachmentTypes',
-      {
-        defaultMessage:
-          'Types of the attachments this write added, versioned, deleted, restored or edited, de-duplicated.',
-      }
-    ),
-  }),
-  attachmentIds: z.array(z.string()).meta({
-    description: i18n.translate(
-      'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.attachmentIds',
-      {
-        defaultMessage: 'IDs of the attachments this write changed.',
-      }
-    ),
-  }),
-  changedFields: z.array(z.string()).meta({
-    description: i18n.translate(
-      'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.changedFields',
-      {
-        defaultMessage:
-          'Names of the metadata fields whose stored value changed. Values are never included.',
-      }
-    ),
-  }),
-}));
+    changeKinds: z.array(z.enum(conversationChangeKinds)).meta({
+      description: i18n.translate(
+        'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.changeKinds',
+        {
+          defaultMessage:
+            'What this write changed: `created` (the write created the conversation, and also reports everything set at creation, such as template defaults in `changedFields`), `events`, `attachments`, `metadata`, `title`, `template` and/or `access`. Never empty.',
+        }
+      ),
+    }),
+    eventTypes: z.array(z.string()).meta({
+      description: i18n.translate(
+        'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.eventTypes',
+        {
+          defaultMessage:
+            'Types of the events this write added, de-duplicated (for example `user_message`, `execution_terminated`, `attachment_added`, or a custom event type). Empty when no event was added.',
+        }
+      ),
+    }),
+    actorTypes: z.array(z.string()).meta({
+      description: i18n.translate(
+        'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.actorTypes',
+        {
+          defaultMessage:
+            'Actor types of the events this write added, de-duplicated: `user`, `agent`, `external` or `system`.',
+        }
+      ),
+    }),
+    executionId: z
+      .string()
+      .optional()
+      .meta({
+        description: i18n.translate(
+          'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.executionId',
+          {
+            defaultMessage:
+              'The agent execution this write persisted, whether it terminated, failed or was aborted. Absent for writes that persisted no execution.',
+          }
+        ),
+      }),
+    attachmentTypes: z.array(z.string()).meta({
+      description: i18n.translate(
+        'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.attachmentTypes',
+        {
+          defaultMessage:
+            'Types of the attachments this write added, versioned, deleted, restored or edited, de-duplicated.',
+        }
+      ),
+    }),
+    attachmentIds: z.array(z.string()).meta({
+      description: i18n.translate(
+        'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.attachmentIds',
+        {
+          defaultMessage: 'IDs of the attachments this write changed.',
+        }
+      ),
+    }),
+    changedFields: z.array(z.string()).meta({
+      description: i18n.translate(
+        'xpack.agentBuilder.workflowTriggers.conversationUpdated.eventSchema.changedFields',
+        {
+          defaultMessage:
+            'Names of the metadata fields whose stored value changed. Values are never included.',
+        }
+      ),
+    }),
+  })
+);
 
 export const conversationUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: ConversationUpdatedTriggerId,

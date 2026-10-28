@@ -16,23 +16,27 @@ import {
 } from './scoring';
 import type { CorrectnessAnalysis } from './types';
 
-const referenceDataSchema = lazySchema(() => z.object({
-  expected: z
-    .string()
-    .trim()
-    .min(1)
-    .max(131072)
-    .describe('The expected ground truth response to compare against.'),
-}));
+const referenceDataSchema = lazySchema(() =>
+  z.object({
+    expected: z
+      .string()
+      .trim()
+      .min(1)
+      .max(131072)
+      .describe('The expected ground truth response to compare against.'),
+  })
+);
 
-const correctnessEvidenceSchema = lazySchema(() => z.object({
-  input: z.object({
-    message: z.string().trim().min(1),
-  }),
-  response: z.object({
-    message: z.string().trim().min(1),
-  }),
-}));
+const correctnessEvidenceSchema = lazySchema(() =>
+  z.object({
+    input: z.object({
+      message: z.string().trim().min(1),
+    }),
+    response: z.object({
+      message: z.string().trim().min(1),
+    }),
+  })
+);
 
 export const correctnessEvaluator: EvaluatorDefinition<z.infer<typeof referenceDataSchema>> = {
   name: 'correctness',

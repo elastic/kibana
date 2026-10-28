@@ -16,17 +16,19 @@ import type {
   ScriptBenchmark,
 } from './types';
 
-const benchmarkSchemaBase = lazySchema(() => z.object({
-  // Restrict benchmark name to filename-safe characters we allow for generated artifacts
-  // (alphanumeric, underscore, dash, dot). Avoid spaces and path separators.
-  name: z
-    .string()
-    .regex(/^[A-Za-z0-9._-]+$/u, 'name must contain only letters, numbers, ".", "_", or "-"'),
-  tags: z.array(z.string()).optional(),
-  description: z.string().optional(),
-  runs: z.number().optional(),
-  timeout: z.number().optional(),
-}));
+const benchmarkSchemaBase = lazySchema(() =>
+  z.object({
+    // Restrict benchmark name to filename-safe characters we allow for generated artifacts
+    // (alphanumeric, underscore, dash, dot). Avoid spaces and path separators.
+    name: z
+      .string()
+      .regex(/^[A-Za-z0-9._-]+$/u, 'name must contain only letters, numbers, ".", "_", or "-"'),
+    tags: z.array(z.string()).optional(),
+    description: z.string().optional(),
+    runs: z.number().optional(),
+    timeout: z.number().optional(),
+  })
+);
 
 const moduleBenchmarkSchema = benchmarkSchemaBase.extend({
   kind: z.literal('module'),

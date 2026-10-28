@@ -24,14 +24,16 @@ export const archiveMemoryPageRoute = createNightshiftInvestigationsServerRoute(
   security: {
     authz: { requiredPrivileges: memoryWritePrivileges },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-    }),
-    body: z.object({
-      archived: z.boolean(),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+      }),
+      body: z.object({
+        archived: z.boolean(),
+      }),
+    })
+  ),
   handler: async ({ request, params, context, getMemoryPageStore, isMemoryEnabled }) => {
     if (!isMemoryEnabled()) throw notFound('Semantic Memory is not enabled');
 

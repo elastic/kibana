@@ -19,23 +19,25 @@ import {
   hasWorkflowExecutePrivilege,
 } from '@kbn/agent-builder-tools-base/workflows';
 
-const executeWorkflowSchema = lazySchema(() => z.object({
-  workflowId: workflowIdSchema.optional().describe('ID of a persisted workflow to execute.'),
-  yaml: z.string().optional().describe('Inline workflow YAML definition to execute.'),
-  attachmentId: z.string().optional().describe('ID of a workflow attachment to execute.'),
-  inputs: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe(
-      'Workflow inputs object. Must conform to the inputs schema declared by the workflow. When uncertain, inspect the workflow YAML before calling.'
-    ),
-  waitForCompletion: z
-    .boolean()
-    .optional()
-    .describe(
-      '(Optional, default true) When true, wait for the execution to complete synchronously. When false, return immediately with an executionId (fire and forget)'
-    ),
-}));
+const executeWorkflowSchema = lazySchema(() =>
+  z.object({
+    workflowId: workflowIdSchema.optional().describe('ID of a persisted workflow to execute.'),
+    yaml: z.string().optional().describe('Inline workflow YAML definition to execute.'),
+    attachmentId: z.string().optional().describe('ID of a workflow attachment to execute.'),
+    inputs: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(
+        'Workflow inputs object. Must conform to the inputs schema declared by the workflow. When uncertain, inspect the workflow YAML before calling.'
+      ),
+    waitForCompletion: z
+      .boolean()
+      .optional()
+      .describe(
+        '(Optional, default true) When true, wait for the execution to complete synchronously. When false, return immediately with an executionId (fire and forget)'
+      ),
+  })
+);
 
 export const executeWorkflowTool = ({
   workflowsManagement,

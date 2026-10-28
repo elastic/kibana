@@ -8,4 +8,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const entityTypeSchema = lazySchema(() => z.enum(['transaction', 'exit_span']));
 
-export const metricSchema = lazySchema(() => z.enum(['latency', 'failure_rate', 'throughput', 'infra_metrics']));
+export const metricSchema = lazySchema(() =>
+  z.enum(['latency', 'failure_rate', 'throughput', 'infra_metrics'])
+);

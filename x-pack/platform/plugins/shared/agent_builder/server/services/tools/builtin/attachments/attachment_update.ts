@@ -13,13 +13,15 @@ import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
 
-const attachmentUpdateSchema = lazySchema(() => z.object({
-  attachment_id: z.string().describe('ID of the attachment to update'),
-  data: z
-    .record(z.string(), z.any())
-    .describe('New data/content for the attachment as a JSON object'),
-  description: z.string().optional().describe('Optional new description for the attachment'),
-}));
+const attachmentUpdateSchema = lazySchema(() =>
+  z.object({
+    attachment_id: z.string().describe('ID of the attachment to update'),
+    data: z
+      .record(z.string(), z.any())
+      .describe('New data/content for the attachment as a JSON object'),
+    description: z.string().optional().describe('Optional new description for the attachment'),
+  })
+);
 
 /**
  * Creates the attachment_update tool.

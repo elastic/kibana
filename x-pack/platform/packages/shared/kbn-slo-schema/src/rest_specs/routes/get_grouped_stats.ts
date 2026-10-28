@@ -6,19 +6,23 @@
  */
 import { z, lazySchema } from '@kbn/zod';
 
-const apmBodyParamsSchema = lazySchema(() => z.object({
-  type: z.literal('apm'),
-  // Number of buckets to return; Elasticsearch defaults to 10 when omitted.
-  size: z.number().optional(),
-  serviceNames: z.array(z.string()).optional(),
-  environment: z.string().optional(),
-  kqlQuery: z.string().optional(),
-  statusFilters: z.array(z.string()).optional(),
-}));
+const apmBodyParamsSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('apm'),
+    // Number of buckets to return; Elasticsearch defaults to 10 when omitted.
+    size: z.number().optional(),
+    serviceNames: z.array(z.string()).optional(),
+    environment: z.string().optional(),
+    kqlQuery: z.string().optional(),
+    statusFilters: z.array(z.string()).optional(),
+  })
+);
 
-const getSLOGroupedStatsParamsSchema = lazySchema(() => z.object({
-  body: apmBodyParamsSchema,
-}));
+const getSLOGroupedStatsParamsSchema = lazySchema(() =>
+  z.object({
+    body: apmBodyParamsSchema,
+  })
+);
 
 interface GroupedStatsResult {
   entity: string;

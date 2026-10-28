@@ -21,9 +21,11 @@ import {
   getSkillReferencedContentAbsolutePath,
 } from '../../runner/store/volumes/skills/utils';
 
-const schema = lazySchema(() => z.object({
-  skill: z.string().describe('The skill name or path'),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    skill: z.string().describe('The skill name or path'),
+  })
+);
 
 /**
  * Identity transform. Returning the original results unchanged causes the

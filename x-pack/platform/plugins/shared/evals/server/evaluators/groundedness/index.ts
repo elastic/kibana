@@ -12,15 +12,17 @@ import { LlmGroundednessEvaluationPrompt } from './prompt';
 import { calculateGroundednessScore } from './scoring';
 import type { GroundednessAnalysis } from './types';
 
-const groundednessEvidenceSchema = lazySchema(() => z.object({
-  input: z.object({
-    message: z.string().trim().min(1),
-  }),
-  response: z.object({
-    message: z.string().trim().min(1),
-  }),
-  steps: z.array(z.object({}).catchall(z.unknown())),
-}));
+const groundednessEvidenceSchema = lazySchema(() =>
+  z.object({
+    input: z.object({
+      message: z.string().trim().min(1),
+    }),
+    response: z.object({
+      message: z.string().trim().min(1),
+    }),
+    steps: z.array(z.object({}).catchall(z.unknown())),
+  })
+);
 
 export const groundednessEvaluator: EvaluatorDefinition = {
   name: 'groundedness',

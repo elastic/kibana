@@ -16,12 +16,14 @@ export const UpdateObservableStepTypeId = 'cases.updateObservable';
 const InputSchema = CasesStepCaseIdSchema.extend({
   observable_id: lazySchema(() => z.string().min(1, 'observable_id is required').max(500)),
   value: lazySchema(() => z.string().min(1, 'value is required').max(500)),
-  description: lazySchema(() => z
-    .string()
-    .max(500)
-    .nullable()
-    .optional()
-    .describe('Observable description. Pass null to clear.')),
+  description: lazySchema(() =>
+    z
+      .string()
+      .max(500)
+      .nullable()
+      .optional()
+      .describe('Observable description. Pass null to clear.')
+  ),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;

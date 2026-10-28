@@ -29,12 +29,14 @@ export const lensUpdateRequestQuerySchema = lensCMUpdateOptionsSchema
   .omit({ references: true })
   .strict();
 
-export const lensUpdateRequestBodySchema = lazySchema(() => z.union([
-  lensApiConfigLibItemSchemaNoESQL,
-  lensItemDataSchemaV3,
-  lensItemDataSchemaV2,
-  lensItemDataSchemaV1,
-  lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
-]));
+export const lensUpdateRequestBodySchema = lazySchema(() =>
+  z.union([
+    lensApiConfigLibItemSchemaNoESQL,
+    lensItemDataSchemaV3,
+    lensItemDataSchemaV2,
+    lensItemDataSchemaV1,
+    lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
+  ])
+);
 
 export const lensUpdateResponseBodySchema = lensResponseItemSchema;

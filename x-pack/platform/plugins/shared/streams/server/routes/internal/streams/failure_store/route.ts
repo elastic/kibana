@@ -34,11 +34,13 @@ export const getFailureStoreStatsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
       request,
@@ -78,11 +80,13 @@ const inheritedFailureStoreRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      name: z.string().max(MAX_STREAM_NAME_LENGTH),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        name: z.string().max(MAX_STREAM_NAME_LENGTH),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, logger }) => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const { name } = params.path;

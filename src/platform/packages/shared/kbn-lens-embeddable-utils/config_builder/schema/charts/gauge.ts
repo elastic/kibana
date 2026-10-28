@@ -99,53 +99,61 @@ const gaugeConfigMetricOptionsShape = {
   /**
    * Title configuration
    */
-  title: lazySchema(() => z
-    .object({
-      visible: z
-        .boolean()
-        .default(true)
-        .optional()
-        .meta({ description: 'When `true`, displays the title.' }),
-      text: z.string().optional().meta({ description: 'Title text.' }),
-    })
-    .strict()
-    .optional()
-    .meta({ description: 'Title configuration' })),
+  title: lazySchema(() =>
+    z
+      .object({
+        visible: z
+          .boolean()
+          .default(true)
+          .optional()
+          .meta({ description: 'When `true`, displays the title.' }),
+        text: z.string().optional().meta({ description: 'Title text.' }),
+      })
+      .strict()
+      .optional()
+      .meta({ description: 'Title configuration' })
+  ),
   /**
    * Subtitle
    */
-  subtitle: lazySchema(() => z.string().optional().meta({ description: 'Subtitle below the gauge value.' })),
+  subtitle: lazySchema(() =>
+    z.string().optional().meta({ description: 'Subtitle below the gauge value.' })
+  ),
   /**
    * Color configuration
    */
-  color: lazySchema(() => z
-    .union([colorByValueSchema, noColorSchema, autoColorSchema])
+  color: lazySchema(() =>
+    z
+      .union([colorByValueSchema, noColorSchema, autoColorSchema])
 
-    .default(AUTO_COLOR)
-    .optional()
-    .meta({ description: 'Color configuration for the gauge fill.' })),
+      .default(AUTO_COLOR)
+      .optional()
+      .meta({ description: 'Color configuration for the gauge fill.' })
+  ),
   /**
    * Tick marks configuration
    */
-  ticks: lazySchema(() => z
-    .object({
-      visible: z
-        .boolean()
+  ticks: lazySchema(() =>
+    z
+      .object({
+        visible: z
+          .boolean()
 
-        .default(true)
-        .optional()
-        .meta({ description: 'When `true`, displays tick marks on the gauge.' }),
-      mode: z
-        .union([z.literal('auto'), z.literal('bands')])
+          .default(true)
+          .optional()
+          .meta({ description: 'When `true`, displays tick marks on the gauge.' }),
+        mode: z
+          .union([z.literal('auto'), z.literal('bands')])
 
-        .default('bands')
-        .optional()
-        .meta({ description: 'Tick placement mode.' }),
-    })
-    .strict()
+          .default('bands')
+          .optional()
+          .meta({ description: 'Tick placement mode.' }),
+      })
+      .strict()
 
-    .optional()
-    .meta({ description: 'Ticks configuration' })),
+      .optional()
+      .meta({ description: 'Ticks configuration' })
+  ),
 };
 
 export const gaugeConfigSchemaNoESQL = lazySchema(() =>

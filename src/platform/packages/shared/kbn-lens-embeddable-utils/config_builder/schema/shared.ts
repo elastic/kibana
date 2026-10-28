@@ -33,10 +33,12 @@ export const labelSharedSchema = lazySchema(() =>
 
 // Kept outside the lazySchema factory so the `visPanelFilters` id maps to a single schema
 // instance; a factory re-run after GC would otherwise create a duplicate id.
-const panelFiltersSchema = lazySchema(() => z.array(asCodeFilterSchema).max(100).optional().meta({
-  id: 'visPanelFilters',
-  description: 'Filters applied to the panel',
-}));
+const panelFiltersSchema = lazySchema(() =>
+  z.array(asCodeFilterSchema).max(100).optional().meta({
+    id: 'visPanelFilters',
+    description: 'Filters applied to the panel',
+  })
+);
 
 export const sharedPanelInfoSchema = lazySchema(() =>
   z
@@ -86,10 +88,12 @@ const ignoringGlobalFiltersShape = {
    * Default: false
    * Possible values: boolean (true or false)
    */
-  ignore_global_filters: lazySchema(() => z.boolean().default(LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE).meta({
-    description:
-      'When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.',
-  })),
+  ignore_global_filters: lazySchema(() =>
+    z.boolean().default(LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE).meta({
+      description:
+        'When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.',
+    })
+  ),
 };
 
 export const ignoringGlobalFiltersSchema = lazySchema(() =>

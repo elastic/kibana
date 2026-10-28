@@ -74,41 +74,45 @@ import type {
 } from '../../common/types/case';
 import { CaseSchema, CaseStatusSchema } from '../../../common/types/domain';
 
-export const CasesByAttachmentIDsRequestSchema = lazySchema(() => z.object({
-  /**
-   * Only the cases of this owner. One owner per call, as a user may read one solution's cases
-   * and not another's.
-   */
-  owner: limitedStringSchema({ fieldName: 'owner', min: 1, max: MAX_OWNER_LENGTH }),
-  /**
-   * The attachment type, e.g. `security.entity`.
-   */
-  type: limitedStringSchema({ fieldName: 'type', min: 1, max: MAX_ATTACHMENT_TYPE_LENGTH }),
-  /**
-   * The ids the attachments point at (their `attachmentId`), not the attachment saved object ids.
-   */
-  attachmentIds: limitedArraySchema({
-    codec: limitedStringSchema({
-      fieldName: 'attachmentIds',
-      min: 1,
-      max: MAX_ATTACHMENT_ID_LENGTH,
-    }),
-    min: 1,
-    max: MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
-    fieldName: 'attachmentIds',
-  }),
-  /**
-   * Only the cases with one of these statuses.
-   */
-  status: z.union([CaseStatusSchema, z.array(CaseStatusSchema)]).optional(),
-}));
-
-export const GetCaseIDsByAttachmentIDsResponseSchema = lazySchema(() => z.array(
+export const CasesByAttachmentIDsRequestSchema = lazySchema(() =>
   z.object({
-    attachmentId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
-    caseIds: z.array(z.string().max(MAX_ATTACHMENT_ID_LENGTH)),
+    /**
+     * Only the cases of this owner. One owner per call, as a user may read one solution's cases
+     * and not another's.
+     */
+    owner: limitedStringSchema({ fieldName: 'owner', min: 1, max: MAX_OWNER_LENGTH }),
+    /**
+     * The attachment type, e.g. `security.entity`.
+     */
+    type: limitedStringSchema({ fieldName: 'type', min: 1, max: MAX_ATTACHMENT_TYPE_LENGTH }),
+    /**
+     * The ids the attachments point at (their `attachmentId`), not the attachment saved object ids.
+     */
+    attachmentIds: limitedArraySchema({
+      codec: limitedStringSchema({
+        fieldName: 'attachmentIds',
+        min: 1,
+        max: MAX_ATTACHMENT_ID_LENGTH,
+      }),
+      min: 1,
+      max: MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
+      fieldName: 'attachmentIds',
+    }),
+    /**
+     * Only the cases with one of these statuses.
+     */
+    status: z.union([CaseStatusSchema, z.array(CaseStatusSchema)]).optional(),
   })
-));
+);
+
+export const GetCaseIDsByAttachmentIDsResponseSchema = lazySchema(() =>
+  z.array(
+    z.object({
+      attachmentId: z.string().max(MAX_ATTACHMENT_ID_LENGTH),
+      caseIds: z.array(z.string().max(MAX_ATTACHMENT_ID_LENGTH)),
+    })
+  )
+);
 
 export type CasesByAttachmentIDsRequest = z.infer<typeof CasesByAttachmentIDsRequestSchema>;
 export type GetCaseIDsByAttachmentIDsResponse = z.infer<

@@ -27,13 +27,15 @@ const degradedDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    query: z
-      .object({
-        stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
-      })
-      .optional(),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
+        })
+        .optional(),
+    })
+  ),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
@@ -56,13 +58,15 @@ const totalDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    query: z
-      .object({
-        stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
-      })
-      .optional(),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
+        })
+        .optional(),
+    })
+  ),
   handler: async ({ getScopedClients, request, server, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const streamName = params?.query?.stream;
@@ -88,13 +92,15 @@ const failedDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    query: z.object({
-      start: z.coerce.number(),
-      end: z.coerce.number(),
-      stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: z.object({
+        start: z.coerce.number(),
+        end: z.coerce.number(),
+        stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
+      }),
+    })
+  ),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;
@@ -119,13 +125,15 @@ const ingestionDocCountsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: lazySchema(() => z.object({
-    query: z.object({
-      start: z.coerce.number(),
-      end: z.coerce.number(),
-      stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: z.object({
+        start: z.coerce.number(),
+        end: z.coerce.number(),
+        stream: z.string().max(MAX_STREAM_NAME_LENGTH).optional(),
+      }),
+    })
+  ),
   handler: async ({ getScopedClients, request, params }): Promise<StreamDocsStat[]> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const esClient = scopedClusterClient.asCurrentUser;

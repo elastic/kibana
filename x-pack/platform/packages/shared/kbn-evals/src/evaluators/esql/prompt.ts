@@ -13,10 +13,12 @@ import userPromptText from './user_prompt.text';
 export const EsqlEquivalencePrompt = createPrompt({
   name: 'esql_equivalence_evaluation',
   description: 'Evaluate ES|QL query equivalence between gold and generated queries',
-  input: lazySchema(() => z.object({
-    ground_truth: z.string(),
-    prediction: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      ground_truth: z.string(),
+      prediction: z.string(),
+    })
+  ),
 })
   .version({
     system: {

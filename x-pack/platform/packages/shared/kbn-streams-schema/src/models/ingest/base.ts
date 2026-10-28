@@ -44,17 +44,19 @@ interface IngestStreamPrivileges {
   create_snapshot_repository: boolean;
 }
 
-const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = lazySchema(() => z.object({
-  manage: z.boolean(),
-  monitor: z.boolean(),
-  view_index_metadata: z.boolean(),
-  lifecycle: z.boolean(),
-  simulate: z.boolean(),
-  text_structure: z.boolean(),
-  read_failure_store: z.boolean(),
-  manage_failure_store: z.boolean(),
-  create_snapshot_repository: z.boolean(),
-}));
+const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = lazySchema(() =>
+  z.object({
+    manage: z.boolean(),
+    monitor: z.boolean(),
+    view_index_metadata: z.boolean(),
+    lifecycle: z.boolean(),
+    simulate: z.boolean(),
+    text_structure: z.boolean(),
+    read_failure_store: z.boolean(),
+    manage_failure_store: z.boolean(),
+    create_snapshot_repository: z.boolean(),
+  })
+);
 
 export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
@@ -91,12 +93,9 @@ export const IngestBaseUpsertRequest: Validation<unknown, IngestBaseUpsertReques
 
 export type IngestStreamIndexMode = 'standard' | 'time_series' | 'logsdb' | 'lookup';
 
-const ingestStreamIndexModeSchema: z.Schema<IngestStreamIndexMode> = lazySchema(() => z.enum([
-  'standard',
-  'time_series',
-  'logsdb',
-  'lookup',
-]));
+const ingestStreamIndexModeSchema: z.Schema<IngestStreamIndexMode> = lazySchema(() =>
+  z.enum(['standard', 'time_series', 'logsdb', 'lookup'])
+);
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestBaseStream {

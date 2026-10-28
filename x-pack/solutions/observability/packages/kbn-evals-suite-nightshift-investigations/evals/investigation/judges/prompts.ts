@@ -72,11 +72,13 @@ export const GoalPassJudgePrompt = createPrompt({
   name: 'nightshift_goal_pass_judge',
   description:
     'Deductive golden goal (goal_pass) judge, 1-5 reward against the reference mechanism.',
-  input: lazySchema(() => z.object({
-    question: z.string(),
-    reference: z.string(),
-    answer: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      reference: z.string(),
+      answer: z.string(),
+    })
+  ),
 })
   .version({
     system: { mustache: { template: GOAL_PASS_SYSTEM } },
@@ -161,12 +163,14 @@ export const CauseCompletenessJudgePrompt = createPrompt({
   name: 'nightshift_rca_cause_completeness_judge',
   description:
     'Deductive rca_cause_completeness judge: fraction of reference sub-causes identified.',
-  input: lazySchema(() => z.object({
-    question: z.string(),
-    reference: z.string(),
-    answer: z.string(),
-    evidence: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      reference: z.string(),
+      answer: z.string(),
+      evidence: z.string(),
+    })
+  ),
 })
   .version({
     system: { mustache: { template: CAUSE_COMPLETENESS_SYSTEM } },
@@ -305,12 +309,14 @@ export const TruthfulnessJudgePrompt = createPrompt({
   name: 'nightshift_truthfulness_judge',
   description:
     'Reference-free truthfulness judge: did the investigation do real evidence-gathering work (logs/metrics/code) to ground its stated root cause, versus recall or leakage.',
-  input: lazySchema(() => z.object({
-    question: z.string(),
-    answer: z.string(),
-    evidence: z.string(),
-    trajectory: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      answer: z.string(),
+      evidence: z.string(),
+      trajectory: z.string(),
+    })
+  ),
 })
   .version({
     system: { mustache: { template: TRUTHFULNESS_SYSTEM } },
@@ -412,12 +418,14 @@ export const DecisionTreeHelpfulnessJudgePrompt = createPrompt({
   name: 'nightshift_decision_tree_helpfulness_judge',
   description:
     'decision_tree_helpfulness judge: did the decision tree(s) the agent opened help the investigation, and how.',
-  input: lazySchema(() => z.object({
-    question: z.string(),
-    decisionTrees: z.string(),
-    answer: z.string(),
-    trajectory: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      decisionTrees: z.string(),
+      answer: z.string(),
+      trajectory: z.string(),
+    })
+  ),
 })
   .version({
     system: { mustache: { template: DECISION_TREE_HELPFULNESS_SYSTEM } },
@@ -486,10 +494,12 @@ export const AntiLeakageJudgePrompt = createPrompt({
   name: 'nightshift_rca_anti_leakage_judge',
   description:
     'rca_anti_leakage judge: did the agent access a source that leaks the incident root cause.',
-  input: lazySchema(() => z.object({
-    question: z.string(),
-    trajectory: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      question: z.string(),
+      trajectory: z.string(),
+    })
+  ),
 })
   .version({
     system: { mustache: { template: ANTI_LEAKAGE_SYSTEM } },

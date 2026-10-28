@@ -369,15 +369,19 @@ const metricConfigPrimaryMetricOptionsShape = {
   /**
    * Subtitle
    */
-  subtitle: lazySchema(() => z.string().optional().meta({ description: 'Subtitle below the primary metric value.' })),
+  subtitle: lazySchema(() =>
+    z.string().optional().meta({ description: 'Subtitle below the primary metric value.' })
+  ),
   /**
    * Color configuration
    */
-  color: lazySchema(() => z
-    .union([colorByValueSchema, staticColorSchema, autoColorSchema])
-    .default(AUTO_COLOR)
-    .optional()
-    .meta({ description: 'Color configuration for the primary metric value or background.' })),
+  color: lazySchema(() =>
+    z
+      .union([colorByValueSchema, staticColorSchema, autoColorSchema])
+      .default(AUTO_COLOR)
+      .optional()
+      .meta({ description: 'Color configuration for the primary metric value or background.' })
+  ),
   /**
    * Where to apply the color (background or value)
    */
@@ -392,24 +396,26 @@ const metricConfigSecondaryMetricOptionsShape = {
   /**
    * Compare to
    */
-  compare: lazySchema(() => z
-    .union([
-      compareToSchemaShared
-        .extend({
-          to: z.literal('baseline'),
-          baseline: z.number().default(0).meta({ description: 'Baseline value.' }),
-        })
-        .meta({ id: 'visMetricCompareToBaseline', title: 'Compare To Baseline' }),
-      compareToSchemaShared
-        .extend({
-          to: z.literal('primary'),
-        })
-        .meta({ id: 'visMetricCompareToPrimary', title: 'Compare To Primary' }),
-    ])
-    .optional()
-    .meta({
-      description: 'Compare the secondary metric to a baseline value or to the primary metric.',
-    })),
+  compare: lazySchema(() =>
+    z
+      .union([
+        compareToSchemaShared
+          .extend({
+            to: z.literal('baseline'),
+            baseline: z.number().default(0).meta({ description: 'Baseline value.' }),
+          })
+          .meta({ id: 'visMetricCompareToBaseline', title: 'Compare To Baseline' }),
+        compareToSchemaShared
+          .extend({
+            to: z.literal('primary'),
+          })
+          .meta({ id: 'visMetricCompareToPrimary', title: 'Compare To Primary' }),
+      ])
+      .optional()
+      .meta({
+        description: 'Compare the secondary metric to a baseline value or to the primary metric.',
+      })
+  ),
   /**
    * Color configuration
    */
@@ -420,10 +426,12 @@ const metricConfigBreakdownByOptionsShape = {
   /**
    * Number of columns
    */
-  columns: lazySchema(() => z
-    .number()
-    .default(LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS)
-    .meta({ description: 'Number of columns.' })),
+  columns: lazySchema(() =>
+    z
+      .number()
+      .default(LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS)
+      .meta({ description: 'Number of columns.' })
+  ),
   /**
    * Collapse by function. This parameter is used to collapse the
    * metric chart when the number of columns is bigger than the

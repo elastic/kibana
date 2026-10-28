@@ -19,14 +19,16 @@ import { buildAgentBuilderTracesIndexPattern } from '@kbn/agent-builder-plugin/c
 
 export const AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID = 'agent-builder-traces.generate_esql';
 
-const tracesEsqlSchema = lazySchema(() => z.object({
-  prompt: z
-    .string()
-    .max(1024)
-    .describe(
-      'Natural language question about Agent Builder OTel traces (token usage, latency, tool calls, errors, or captured message content).'
-    ),
-}));
+const tracesEsqlSchema = lazySchema(() =>
+  z.object({
+    prompt: z
+      .string()
+      .max(1024)
+      .describe(
+        'Natural language question about Agent Builder OTel traces (token usage, latency, tool calls, errors, or captured message content).'
+      ),
+  })
+);
 
 const buildTracesQueryRules = (tracesIndex: string) =>
   `

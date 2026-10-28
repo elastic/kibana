@@ -23,9 +23,11 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, maintenanceService }) => {
     const { getKnowledgeIndicatorClient, licensing, sourcesClient } = await getScopedClients({
       request,

@@ -14,17 +14,19 @@ import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manage
 import { MAX_STRING_LENGTH } from '../../../common';
 import { FIELD_MAPPING_TYPES } from '../state';
 
-const fieldMappingSchema = lazySchema(() => z.object({
-  name: z
-    .string()
-    .max(MAX_STRING_LENGTH.body)
-    .describe('Flattened dot-notation path to the field (e.g. "myintegration.myds.src_port")'),
-  type: z
-    .enum(FIELD_MAPPING_TYPES)
-    .describe(
-      'Elasticsearch field type: "keyword" for strings, "long" for numbers, "ip" for IP addresses, "date" for date values'
-    ),
-}));
+const fieldMappingSchema = lazySchema(() =>
+  z.object({
+    name: z
+      .string()
+      .max(MAX_STRING_LENGTH.body)
+      .describe('Flattened dot-notation path to the field (e.g. "myintegration.myds.src_port")'),
+    type: z
+      .enum(FIELD_MAPPING_TYPES)
+      .describe(
+        'Elasticsearch field type: "keyword" for strings, "long" for numbers, "ip" for IP addresses, "date" for date values'
+      ),
+  })
+);
 
 export const submitReviewTool = (): DynamicStructuredTool => {
   const schema = z.object({

@@ -146,11 +146,13 @@ export const vectorLayerSchema = layerSchema
   })
   .strict();
 
-export const layersSchema = lazySchema(() => z.union([
-  EMSVectorTileLayerSchema,
-  heatmapLayerSchema,
-  layerGroupSchema,
-  rasterLayerSchema,
-  vectorLayerSchema,
-  z.object({}).loose(),
-]));
+export const layersSchema = lazySchema(() =>
+  z.union([
+    EMSVectorTileLayerSchema,
+    heatmapLayerSchema,
+    layerGroupSchema,
+    rasterLayerSchema,
+    vectorLayerSchema,
+    z.object({}).loose(),
+  ])
+);

@@ -15,11 +15,13 @@ import type { GetInvestigationsClient } from '../routes/types';
 import { notificationPhaseSchema } from '../lib/notifications/notification_routing';
 import { renderInvestigationSlackMessage } from '../lib/notifications/format_investigation_slack_message';
 
-const inputSchema = lazySchema(() => z.object({
-  investigation_id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-  phase: notificationPhaseSchema,
-  reason: z.string().max(MAX_TEXT_LENGTH).optional(),
-}));
+const inputSchema = lazySchema(() =>
+  z.object({
+    investigation_id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
+    phase: notificationPhaseSchema,
+    reason: z.string().max(MAX_TEXT_LENGTH).optional(),
+  })
+);
 
 /**
  * Renders an investigation's lifecycle message for Slack the way Nightshift notifications do, for

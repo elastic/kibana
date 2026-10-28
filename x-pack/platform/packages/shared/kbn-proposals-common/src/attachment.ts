@@ -15,15 +15,17 @@ export const PROPOSAL_ATTACHMENT_TYPE = 'platform.proposal' as const;
  * card and the agent read it at display time — anything snapshotted here would
  * still say "pending" after the analyst had decided.
  */
-export const proposalAttachmentDataSchema = lazySchema(() => z.object({
-  // Same bound as `proposalSchema.id`, which is what this always holds.
-  proposalId: z.string().max(256),
-  /**
-   * Titles the card, and the one thing that has to be stored rather than read:
-   * the label is rendered synchronously, so it cannot wait on the proposal.
-   * Carries the proposal's own title, which `create()` always resolves.
-   */
-  title: z.string().max(256),
-}));
+export const proposalAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    // Same bound as `proposalSchema.id`, which is what this always holds.
+    proposalId: z.string().max(256),
+    /**
+     * Titles the card, and the one thing that has to be stored rather than read:
+     * the label is rendered synchronously, so it cannot wait on the proposal.
+     * Carries the proposal's own title, which `create()` always resolves.
+     */
+    title: z.string().max(256),
+  })
+);
 
 export type ProposalAttachmentData = z.infer<typeof proposalAttachmentDataSchema>;

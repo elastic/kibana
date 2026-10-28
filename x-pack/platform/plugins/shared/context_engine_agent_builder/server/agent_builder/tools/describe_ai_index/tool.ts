@@ -20,18 +20,20 @@ import { describeAiIndexHandler } from './handler';
 // Enough for MAX_AI_INDEX_DESCRIBE_FIELDS fields plus the counts and example queries.
 const MAX_DESCRIBE_RESULT_TOKENS = 16_000;
 
-const describeAiIndexSchema = lazySchema(() => z.object({
-  ai_index_id: z
-    .string()
-    .min(1)
-    .max(MAX_AI_INDEX_ID_LENGTH)
-    .refine((value) => validateAiIndexId(value) === undefined, {
-      message: 'Invalid AI index id.',
-    })
-    .describe(
-      'The AI-index registry ID, as shown in the agent AI INDICES configuration or returned by the list AI Indices tool. Do not use the backing Elasticsearch index or data stream name.'
-    ),
-}));
+const describeAiIndexSchema = lazySchema(() =>
+  z.object({
+    ai_index_id: z
+      .string()
+      .min(1)
+      .max(MAX_AI_INDEX_ID_LENGTH)
+      .refine((value) => validateAiIndexId(value) === undefined, {
+        message: 'Invalid AI index id.',
+      })
+      .describe(
+        'The AI-index registry ID, as shown in the agent AI INDICES configuration or returned by the list AI Indices tool. Do not use the backing Elasticsearch index or data stream name.'
+      ),
+  })
+);
 
 export const createDescribeAiIndexTool = (
   deps: AiIndexToolDeps

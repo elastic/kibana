@@ -6,12 +6,14 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const downstreamDependenciesRouteRt = lazySchema(() => z.object({
-  serviceName: z.string(),
-  start: z.string(),
-  end: z.string(),
-  serviceEnvironment: z.string().optional(),
-}));
+export const downstreamDependenciesRouteRt = lazySchema(() =>
+  z.object({
+    serviceName: z.string(),
+    start: z.string(),
+    end: z.string(),
+    serviceEnvironment: z.string().optional(),
+  })
+);
 
 export interface APMDownstreamDependency {
   'service.name'?: string;

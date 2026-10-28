@@ -16,11 +16,13 @@ import {
 } from '@kbn/as-code-shared-schemas';
 
 const dataViewsMetaSchema = asCodeMetaSchema.extend({
-  spaces: lazySchema(() => z
-    .array(z.string().max(1000))
-    .max(100)
-    .optional()
-    .meta({ description: 'The IDs of the spaces where the data view is available.' })),
+  spaces: lazySchema(() =>
+    z
+      .array(z.string().max(1000))
+      .max(100)
+      .optional()
+      .meta({ description: 'The IDs of the spaces where the data view is available.' })
+  ),
 });
 
 export const asCodeResponseSchema = z
@@ -31,19 +33,23 @@ export const asCodeResponseSchema = z
   })
   .strict();
 
-export const asCodeMinimalResponseSchema = lazySchema(() => z.object({
-  id: z.string().max(1000).meta({ description: 'The ID of the data view.' }),
-  data: savedDataViewSpecSchema.pick({
-    name: true,
-    index_pattern: true,
-    time_field: true,
-  }),
-  meta: dataViewsMetaSchema,
-}));
+export const asCodeMinimalResponseSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(1000).meta({ description: 'The ID of the data view.' }),
+    data: savedDataViewSpecSchema.pick({
+      name: true,
+      index_pattern: true,
+      time_field: true,
+    }),
+    meta: dataViewsMetaSchema,
+  })
+);
 
-export const asCodePaginatedResponseSchema = lazySchema(() => z.object({
-  data: z.array(asCodeMinimalResponseSchema).max(PAGINATION_MAX_SIZE),
-  meta: asCodePaginationResponseMetaSchema,
-}));
+export const asCodePaginatedResponseSchema = lazySchema(() =>
+  z.object({
+    data: z.array(asCodeMinimalResponseSchema).max(PAGINATION_MAX_SIZE),
+    meta: asCodePaginationResponseMetaSchema,
+  })
+);
 
 export const savedDataViewSpecSchemaWithoutId = savedDataViewSpecSchema.omit({ id: true });

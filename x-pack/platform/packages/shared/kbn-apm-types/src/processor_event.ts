@@ -7,12 +7,14 @@
 import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const processorEventSchema = lazySchema(() => z.union([
-  z.literal(ProcessorEvent.transaction),
-  z.literal(ProcessorEvent.error),
-  z.literal(ProcessorEvent.metric),
-  z.literal(ProcessorEvent.span),
-]));
+export const processorEventSchema = lazySchema(() =>
+  z.union([
+    z.literal(ProcessorEvent.transaction),
+    z.literal(ProcessorEvent.error),
+    z.literal(ProcessorEvent.metric),
+    z.literal(ProcessorEvent.span),
+  ])
+);
 
 /**
  * Processor events that are searchable in the UI via the query bar.

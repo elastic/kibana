@@ -36,44 +36,46 @@ import {
   getUpdatePrebuiltRulePatch,
 } from './utils/update_translated_rule';
 
-const schema = lazySchema(() => z.object({
-  migration_id: MigrationId,
-  rule_id: z
-    .string()
-    .min(1)
-    .max(256)
-    .describe('The id of the specific rule migration item to update.'),
-  esql_query: z
-    .string()
-    .min(1)
-    .max(10_000)
-    .optional()
-    .describe(
-      `The corrected ES|QL query. Provide ONLY when the translated query needs to be updated. Must be supplied together with integration_ids (the integrations whose index the query uses, or [] if none). Mutually exclusive with prebuilt_rule_id — if both are supplied, prebuilt_rule_id takes precedence. When supplied for a rule that currently has a prebuilt rule match, the match is cleared and the rule title and description revert to the original rule values. Cannot be used on rules that are already installed (elastic_rule.id is set).`
-    ),
-  prebuilt_rule_id: z
-    .string()
-    .min(1)
-    .max(256)
-    .optional()
-    .describe(
-      `The correct prebuilt rule id (rule_id UUID). Provide ONLY when the matched prebuilt rule needs to be updated. Title, description, severity, risk score and integrations are derived from the prebuilt rule, and any previous ES|QL query is cleared. Cannot be combined with integration_ids. Mutually exclusive with esql_query — if both are supplied, prebuilt_rule_id takes precedence. Cannot be used on rules that are already installed (elastic_rule.id is set).`
-    ),
-  integration_ids: z
-    .array(z.string().min(1).max(256))
-    .max(10)
-    .optional()
-    .describe(
-      `The integration id(s) whose index pattern the esql_query uses. Required with esql_query — resend the rule's current integration_ids if they are unchanged, or pass [] if the query uses no integration. Cannot be updated on its own or combined with prebuilt_rule_id. Up to 10 ids.`
-    ),
-  comment: z
-    .string()
-    .min(1)
-    .max(10_000)
-    .describe(
-      `REQUIRED. A markdown explanation of what you changed and why, covering every aspect you are updating in this call. It is appended to the rule's comment history and shown to the user in the rule details flyout, so write it for that reader. Follow the examples in the skill instructions for the expected shape.`
-    ),
-}));
+const schema = lazySchema(() =>
+  z.object({
+    migration_id: MigrationId,
+    rule_id: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe('The id of the specific rule migration item to update.'),
+    esql_query: z
+      .string()
+      .min(1)
+      .max(10_000)
+      .optional()
+      .describe(
+        `The corrected ES|QL query. Provide ONLY when the translated query needs to be updated. Must be supplied together with integration_ids (the integrations whose index the query uses, or [] if none). Mutually exclusive with prebuilt_rule_id — if both are supplied, prebuilt_rule_id takes precedence. When supplied for a rule that currently has a prebuilt rule match, the match is cleared and the rule title and description revert to the original rule values. Cannot be used on rules that are already installed (elastic_rule.id is set).`
+      ),
+    prebuilt_rule_id: z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe(
+        `The correct prebuilt rule id (rule_id UUID). Provide ONLY when the matched prebuilt rule needs to be updated. Title, description, severity, risk score and integrations are derived from the prebuilt rule, and any previous ES|QL query is cleared. Cannot be combined with integration_ids. Mutually exclusive with esql_query — if both are supplied, prebuilt_rule_id takes precedence. Cannot be used on rules that are already installed (elastic_rule.id is set).`
+      ),
+    integration_ids: z
+      .array(z.string().min(1).max(256))
+      .max(10)
+      .optional()
+      .describe(
+        `The integration id(s) whose index pattern the esql_query uses. Required with esql_query — resend the rule's current integration_ids if they are unchanged, or pass [] if the query uses no integration. Cannot be updated on its own or combined with prebuilt_rule_id. Up to 10 ids.`
+      ),
+    comment: z
+      .string()
+      .min(1)
+      .max(10_000)
+      .describe(
+        `REQUIRED. A markdown explanation of what you changed and why, covering every aspect you are updating in this call. It is appended to the rule's comment history and shown to the user in the rule details flyout, so write it for that reader. Follow the examples in the skill instructions for the expected shape.`
+      ),
+  })
+);
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_RULES_PATH.replace('{migration_id}', encodeURIComponent(migrationId));

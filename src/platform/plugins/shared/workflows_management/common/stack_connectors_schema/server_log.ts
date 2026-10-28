@@ -12,15 +12,19 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 // Server Log connector parameter schema
-export const ServerLogParamsSchema = lazySchema(() => z.object({
-  message: z.string(),
-  level: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).optional(),
-}));
+export const ServerLogParamsSchema = lazySchema(() =>
+  z.object({
+    message: z.string(),
+    level: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).optional(),
+  })
+);
 
 // Server Log connector response schema
-export const ServerLogResponseSchema = lazySchema(() => z.object({
-  actionId: z.string(),
-}));
+export const ServerLogResponseSchema = lazySchema(() =>
+  z.object({
+    actionId: z.string(),
+  })
+);

@@ -97,14 +97,16 @@ const getCostRoute = createServerRoute({
       requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     },
   },
-  params: lazySchema(() => z.object({
-    query: z
-      .object({
-        refresh: optionalBooleanQuery,
-      })
-      .strict()
-      .optional(),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          refresh: optionalBooleanQuery,
+        })
+        .strict()
+        .optional(),
+    })
+  ),
   handler: async ({
     params,
     request,

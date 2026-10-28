@@ -44,27 +44,29 @@ const MAX_SLACK_PERMALINK_LENGTH = 2048;
  * creation of the conversation, so subjects are only ever recorded there. Agentic investigations
  * validates these again when it stores them.
  */
-export const workflowSubjectInputSchema = lazySchema(() => z.object({
-  type: z.enum(INVESTIGATION_SUBJECT_TYPES),
-  id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
-  summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
-  triggerType: z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES).optional(),
-  snapshot: investigationAlertSnapshotSchema.optional(),
-  slack: z
-    .object({
-      channel: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
-      thread_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
-      status_message_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH).optional(),
-      permalink: z.string().max(MAX_SLACK_PERMALINK_LENGTH).optional(),
-    })
-    .optional(),
-}));
+export const workflowSubjectInputSchema = lazySchema(() =>
+  z.object({
+    type: z.enum(INVESTIGATION_SUBJECT_TYPES),
+    id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
+    summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
+    triggerType: z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES).optional(),
+    snapshot: investigationAlertSnapshotSchema.optional(),
+    slack: z
+      .object({
+        channel: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
+        thread_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH),
+        status_message_ts: z.string().min(1).max(MAX_SLACK_FIELD_LENGTH).optional(),
+        permalink: z.string().max(MAX_SLACK_PERMALINK_LENGTH).optional(),
+      })
+      .optional(),
+  })
+);
 
 export type WorkflowSubjectInput = z.infer<typeof workflowSubjectInputSchema>;
 
-export const workflowSubjectInputsSchema = lazySchema(() => z
-  .array(workflowSubjectInputSchema)
-  .max(MAX_SUBJECTS_PER_REQUEST));
+export const workflowSubjectInputsSchema = lazySchema(() =>
+  z.array(workflowSubjectInputSchema).max(MAX_SUBJECTS_PER_REQUEST)
+);
 
 const truncateSummary = (summary: string | undefined): string | undefined =>
   summary ? summary.slice(0, MAX_EVIDENCE_TEXT_LENGTH) : undefined;

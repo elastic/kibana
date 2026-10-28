@@ -69,34 +69,40 @@ export function isNegatedOperator(operator: FilterOperatorLiteral | undefined): 
   return operator !== undefined && NEGATED_OPERATORS.has(operator);
 }
 
-const filterBase = lazySchema(() => z.object({
-  tagName: z.string(),
-}));
+const filterBase = lazySchema(() =>
+  z.object({
+    tagName: z.string(),
+  })
+);
 
 // operators that compare against a single value, e.g. `is:env:prod`
-const SingleValueFilterExpression = lazySchema(() => filterBase.extend({
-  operator: z.enum([FilterOperator.EQUALS, FilterOperator.NOT_EQUALS]),
-  tagValue: z.string(),
-}));
+const SingleValueFilterExpression = lazySchema(() =>
+  filterBase.extend({
+    operator: z.enum([FilterOperator.EQUALS, FilterOperator.NOT_EQUALS]),
+    tagValue: z.string(),
+  })
+);
 
 // operators that compare against a list of values, e.g. `oneOf:env:prod,staging`
-const MultiValueFilterExpression = lazySchema(() => filterBase.extend({
-  operator: z.enum([FilterOperator.ONE_OF, FilterOperator.NOT_ONE_OF]),
-  tagValue: z.array(z.string()),
-}));
+const MultiValueFilterExpression = lazySchema(() =>
+  filterBase.extend({
+    operator: z.enum([FilterOperator.ONE_OF, FilterOperator.NOT_ONE_OF]),
+    tagValue: z.array(z.string()),
+  })
+);
 
 // operators that don't carry a value at all, e.g. `exists:env:`
-const NoValueFilterExpression = lazySchema(() => filterBase.extend({
-  operator: z.enum([FilterOperator.EXISTS, FilterOperator.NOT_EXISTS]),
-  // present (always undefined) so `tagValue` is a valid key to read across every union member
-  tagValue: z.undefined(),
-}));
+const NoValueFilterExpression = lazySchema(() =>
+  filterBase.extend({
+    operator: z.enum([FilterOperator.EXISTS, FilterOperator.NOT_EXISTS]),
+    // present (always undefined) so `tagValue` is a valid key to read across every union member
+    tagValue: z.undefined(),
+  })
+);
 
-export const FilterExpressionSchema = lazySchema(() => z.union([
-  SingleValueFilterExpression,
-  MultiValueFilterExpression,
-  NoValueFilterExpression,
-]));
+export const FilterExpressionSchema = lazySchema(() =>
+  z.union([SingleValueFilterExpression, MultiValueFilterExpression, NoValueFilterExpression])
+);
 
 export type FilterExpressionValue = z.output<typeof FilterExpressionSchema>;
 

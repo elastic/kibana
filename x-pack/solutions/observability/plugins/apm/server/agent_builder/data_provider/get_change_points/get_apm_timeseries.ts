@@ -33,52 +33,56 @@ export enum ApmTimeseriesType {
   errorEventRate = 'error_event_rate',
 }
 
-const timeseriesSchema = lazySchema(() => z.union([
-  z.object({
-    name: z.union([
-      z.literal(ApmTimeseriesType.transactionThroughput),
-      z.literal(ApmTimeseriesType.transactionFailureRate),
-    ]),
-    'transaction.type': z.string().optional(),
-    'transaction.name': z.string().optional(),
-  }),
-  z.object({
-    name: z.union([
-      z.literal(ApmTimeseriesType.exitSpanThroughput),
-      z.literal(ApmTimeseriesType.exitSpanFailureRate),
-      z.literal(ApmTimeseriesType.exitSpanLatency),
-    ]),
-    'span.destination.service.resource': z.string().optional(),
-  }),
-  z.object({
-    name: z.literal(ApmTimeseriesType.transactionLatency),
-    function: z.union([
-      z.literal(LatencyAggregationType.avg),
-      z.literal(LatencyAggregationType.p95),
-      z.literal(LatencyAggregationType.p99),
-    ]),
-    'transaction.type': z.string().optional(),
-    'transaction.name': z.string().optional(),
-  }),
-  z.object({
-    name: z.literal(ApmTimeseriesType.errorEventRate),
-  }),
-]));
-
-export const getApmTimeseriesRt = lazySchema(() => z.object({
-  stats: z.array(
+const timeseriesSchema = lazySchema(() =>
+  z.union([
     z.object({
-      'service.name': z.string(),
-      title: z.string(),
-      timeseries: timeseriesSchema,
-      filter: z.string().optional(),
-      offset: z.string().optional(),
-      'service.environment': z.string().optional(),
-    })
-  ),
-  start: z.string(),
-  end: z.string(),
-}));
+      name: z.union([
+        z.literal(ApmTimeseriesType.transactionThroughput),
+        z.literal(ApmTimeseriesType.transactionFailureRate),
+      ]),
+      'transaction.type': z.string().optional(),
+      'transaction.name': z.string().optional(),
+    }),
+    z.object({
+      name: z.union([
+        z.literal(ApmTimeseriesType.exitSpanThroughput),
+        z.literal(ApmTimeseriesType.exitSpanFailureRate),
+        z.literal(ApmTimeseriesType.exitSpanLatency),
+      ]),
+      'span.destination.service.resource': z.string().optional(),
+    }),
+    z.object({
+      name: z.literal(ApmTimeseriesType.transactionLatency),
+      function: z.union([
+        z.literal(LatencyAggregationType.avg),
+        z.literal(LatencyAggregationType.p95),
+        z.literal(LatencyAggregationType.p99),
+      ]),
+      'transaction.type': z.string().optional(),
+      'transaction.name': z.string().optional(),
+    }),
+    z.object({
+      name: z.literal(ApmTimeseriesType.errorEventRate),
+    }),
+  ])
+);
+
+export const getApmTimeseriesRt = lazySchema(() =>
+  z.object({
+    stats: z.array(
+      z.object({
+        'service.name': z.string(),
+        title: z.string(),
+        timeseries: timeseriesSchema,
+        filter: z.string().optional(),
+        offset: z.string().optional(),
+        'service.environment': z.string().optional(),
+      })
+    ),
+    start: z.string(),
+    end: z.string(),
+  })
+);
 
 type ApmTimeseriesArgs = z.infer<typeof getApmTimeseriesRt>;
 

@@ -7,8 +7,10 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const streamObjectNameSchema = lazySchema(() => z
-  .string()
-  .min(1)
-  .refine((val) => !val.startsWith('_'), { message: `Cannot start with "_"` })
-  .refine((val) => !val.startsWith('.'), { message: `Cannot start with "."` }));
+export const streamObjectNameSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .refine((val) => !val.startsWith('_'), { message: `Cannot start with "_"` })
+    .refine((val) => !val.startsWith('.'), { message: `Cannot start with "."` })
+);

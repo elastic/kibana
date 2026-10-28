@@ -27,23 +27,25 @@ const suggestAttachmentsRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({
-      streamName: z.string().max(MAX_STREAM_NAME_LENGTH),
-    }),
-    query: z
-      .object({
-        query: z.optional(z.string().max(1000)),
-        attachmentTypes: z.optional(
-          z.union([
-            attachmentTypeSchema,
-            z.array(attachmentTypeSchema).max(ATTACHMENT_TYPES.length),
-          ])
-        ),
-        tags: z.optional(z.union([z.string().max(256), z.array(z.string().max(256)).max(100)])),
-      })
-      .optional(),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        streamName: z.string().max(MAX_STREAM_NAME_LENGTH),
+      }),
+      query: z
+        .object({
+          query: z.optional(z.string().max(1000)),
+          attachmentTypes: z.optional(
+            z.union([
+              attachmentTypeSchema,
+              z.array(attachmentTypeSchema).max(ATTACHMENT_TYPES.length),
+            ])
+          ),
+          tags: z.optional(z.union([z.string().max(256), z.array(z.string().max(256)).max(100)])),
+        })
+        .optional(),
+    })
+  ),
   handler: async ({ params, request, getScopedClients }): Promise<SuggestAttachmentsResponse> => {
     const { attachmentClient, streamsClient } = await getScopedClients({
       request,

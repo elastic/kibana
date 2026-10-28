@@ -17,9 +17,11 @@ import type { ToolTypeDefinition } from '../definitions';
 import { validateConfig } from './validate_configuration';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 
-const searchSchema = lazySchema(() => z.object({
-  nlQuery: z.string().describe('A natural language query expressing the search request'),
-}));
+const searchSchema = lazySchema(() =>
+  z.object({
+    nlQuery: z.string().describe('A natural language query expressing the search request'),
+  })
+);
 
 type SearchSchemaType = typeof searchSchema;
 

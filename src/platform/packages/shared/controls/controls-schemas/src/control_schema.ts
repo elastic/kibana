@@ -18,26 +18,32 @@ export const controlTitleSchema = z
 
 const sharedDataControlProps = {
   ...controlTitleSchema.shape,
-  use_global_filters: lazySchema(() => z.boolean().default(DEFAULT_DATA_CONTROL_STATE.use_global_filters).meta({
-    description:
-      "When `true`, the control's available options are narrowed by the page's active filters.",
-  })),
-  ignore_validations: lazySchema(() => z.boolean().default(DEFAULT_DATA_CONTROL_STATE.ignore_validations).meta({
-    description:
-      'When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results.',
-  })),
+  use_global_filters: lazySchema(() =>
+    z.boolean().default(DEFAULT_DATA_CONTROL_STATE.use_global_filters).meta({
+      description:
+        "When `true`, the control's available options are narrowed by the page's active filters.",
+    })
+  ),
+  ignore_validations: lazySchema(() =>
+    z.boolean().default(DEFAULT_DATA_CONTROL_STATE.ignore_validations).meta({
+      description:
+        'When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results.',
+    })
+  ),
 };
 
 /**
  * This uses a union with only one option so we can provide a default value for backwards compat
  */
-export const dataControlFieldValuesSourceSchema = lazySchema(() => z
-  .union([z.literal(ControlValuesSource.FIELD)])
-  .default(ControlValuesSource.FIELD)
-  .meta({
-    description:
-      'The source of the field options for this control. Defaults to `field` for legacy controls.',
-  }));
+export const dataControlFieldValuesSourceSchema = lazySchema(() =>
+  z
+    .union([z.literal(ControlValuesSource.FIELD)])
+    .default(ControlValuesSource.FIELD)
+    .meta({
+      description:
+        'The source of the field options for this control. Defaults to `field` for legacy controls.',
+    })
+);
 
 /**
  * Injects a default `values_source: 'field'` when the field is absent from the input.

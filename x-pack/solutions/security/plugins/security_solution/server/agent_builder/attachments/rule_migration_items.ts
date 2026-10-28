@@ -20,11 +20,13 @@ import {
 import { RULE_MIGRATION_SKILLS } from '../skills/siem_migration/rules/skill_catalog';
 import { RULE_MIGRATION_SKILL_LIST } from '../skills/siem_migration/rules/content';
 
-const ruleMigrationItemsDataSchema = lazySchema(() => z.object({
-  migration_id: MigrationId,
-  rule_ids: z.array(z.string().min(1).max(256)).max(200).default([]),
-  attachmentLabel: z.string().max(500).optional(),
-}));
+const ruleMigrationItemsDataSchema = lazySchema(() =>
+  z.object({
+    migration_id: MigrationId,
+    rule_ids: z.array(z.string().min(1).max(256)).max(200).default([]),
+    attachmentLabel: z.string().max(500).optional(),
+  })
+);
 
 type RuleMigrationItemsAttachmentData = z.infer<typeof ruleMigrationItemsDataSchema>;
 

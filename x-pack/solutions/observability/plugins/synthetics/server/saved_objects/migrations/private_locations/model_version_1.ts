@@ -11,24 +11,28 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
 
-export const PrivateLocationAttributesCodecLegacy = lazySchema(() => z.looseObject({
-  label: z.string(),
-  id: z.string(),
-  agentPolicyId: z.string(),
-  concurrentMonitors: z.number(),
-  tags: z.array(z.string()).optional(),
-  /* Empty Lat lon was accidentally saved as an empty string instead of undefined or null
-   * Need a migration to fix */
-  geo: z
-    .looseObject({
-      lat: z.union([z.string(), z.number()]),
-      lon: z.union([z.string(), z.number()]),
-    })
-    .optional(),
-}));
-export const SyntheticsPrivateLocationsAttributesCodecLegacy = lazySchema(() => z.looseObject({
-  locations: z.array(PrivateLocationAttributesCodecLegacy),
-}));
+export const PrivateLocationAttributesCodecLegacy = lazySchema(() =>
+  z.looseObject({
+    label: z.string(),
+    id: z.string(),
+    agentPolicyId: z.string(),
+    concurrentMonitors: z.number(),
+    tags: z.array(z.string()).optional(),
+    /* Empty Lat lon was accidentally saved as an empty string instead of undefined or null
+     * Need a migration to fix */
+    geo: z
+      .looseObject({
+        lat: z.union([z.string(), z.number()]),
+        lon: z.union([z.string(), z.number()]),
+      })
+      .optional(),
+  })
+);
+export const SyntheticsPrivateLocationsAttributesCodecLegacy = lazySchema(() =>
+  z.looseObject({
+    locations: z.array(PrivateLocationAttributesCodecLegacy),
+  })
+);
 export type SyntheticsPrivateLocationsAttributesLegacy = z.infer<
   typeof SyntheticsPrivateLocationsAttributesCodecLegacy
 >;

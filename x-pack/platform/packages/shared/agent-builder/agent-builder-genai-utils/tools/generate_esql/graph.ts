@@ -46,15 +46,20 @@ import type { EsqlLoadedDocumentation } from './documentation';
 import { hasRejectedJoinTarget } from './join_errors';
 import { withPromqlKeyword } from './promql_keyword';
 
-export const requestDocumentationSchema = lazySchema(() => z
-  .object({
-    commands: z
-      .array(z.string())
-      .optional()
-      .describe('ES|QL source and processing commands to get documentation for.'),
-    functions: z.array(z.string()).optional().describe('ES|QL functions to get documentation for.'),
-  })
-  .describe('Tool to use to request ES|QL documentation'));
+export const requestDocumentationSchema = lazySchema(() =>
+  z
+    .object({
+      commands: z
+        .array(z.string())
+        .optional()
+        .describe('ES|QL source and processing commands to get documentation for.'),
+      functions: z
+        .array(z.string())
+        .optional()
+        .describe('ES|QL functions to get documentation for.'),
+    })
+    .describe('Tool to use to request ES|QL documentation')
+);
 
 const StateAnnotation = Annotation.Root({
   // inputs

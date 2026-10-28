@@ -37,33 +37,35 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: ['manage_nightshift'] },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({ id: z.string().min(1).max(512) }),
-    body: z.object({
-      name: z.string().min(1).max(500).optional(),
-      description: z.string().max(5000).nullable().optional(),
-      tags: z.array(z.string().max(32)).max(50).optional(),
-      isEnabled: z.boolean().optional(),
-      trigger: z.object({ rows: z.array(triggerRowSchema).min(1).max(100) }).optional(),
-      execution: z
-        .object({
-          promptTemplate: promptTemplateSchema.nullable().optional(),
-          reasoningMode: z.enum(['investigate', 'observe']).optional(),
-          agentId: z.string().max(512).optional(),
-          connectorId: z.string().max(512).optional(),
-        })
-        .optional(),
-      completions: z.array(automationCompletionSchema).max(10).optional(),
-      runtime: z
-        .object({
-          dailyDispatchLimit: z.number().int().min(1).nullable().optional(),
-          timeoutSeconds: z.number().int().min(1).optional(),
-          dedupeWindowSeconds: z.number().int().min(0).optional(),
-          overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
-        })
-        .optional(),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ id: z.string().min(1).max(512) }),
+      body: z.object({
+        name: z.string().min(1).max(500).optional(),
+        description: z.string().max(5000).nullable().optional(),
+        tags: z.array(z.string().max(32)).max(50).optional(),
+        isEnabled: z.boolean().optional(),
+        trigger: z.object({ rows: z.array(triggerRowSchema).min(1).max(100) }).optional(),
+        execution: z
+          .object({
+            promptTemplate: promptTemplateSchema.nullable().optional(),
+            reasoningMode: z.enum(['investigate', 'observe']).optional(),
+            agentId: z.string().max(512).optional(),
+            connectorId: z.string().max(512).optional(),
+          })
+          .optional(),
+        completions: z.array(automationCompletionSchema).max(10).optional(),
+        runtime: z
+          .object({
+            dailyDispatchLimit: z.number().int().min(1).nullable().optional(),
+            timeoutSeconds: z.number().int().min(1).optional(),
+            dedupeWindowSeconds: z.number().int().min(0).optional(),
+            overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
+          })
+          .optional(),
+      }),
+    })
+  ),
   handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {

@@ -10,25 +10,33 @@ import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types
 import { dateType } from '../../schema/common';
 import { durationType } from '../../schema/duration';
 
-const fixedAgePurge = lazySchema(() => z.object({
-  purgeType: z.literal('fixed_age'),
-  age: durationType,
-}));
+const fixedAgePurge = lazySchema(() =>
+  z.object({
+    purgeType: z.literal('fixed_age'),
+    age: durationType,
+  })
+);
 
-const fixedTimePurge = lazySchema(() => z.object({
-  purgeType: z.literal('fixed_time'),
-  timestamp: dateType,
-}));
+const fixedTimePurge = lazySchema(() =>
+  z.object({
+    purgeType: z.literal('fixed_time'),
+    timestamp: dateType,
+  })
+);
 
-const bulkPurgePolicy = lazySchema(() => z.discriminatedUnion('purgeType', [fixedAgePurge, fixedTimePurge]));
+const bulkPurgePolicy = lazySchema(() =>
+  z.discriminatedUnion('purgeType', [fixedAgePurge, fixedTimePurge])
+);
 
-const bulkPurgeRollupSchema = lazySchema(() => z.object({
-  body: z.object({
-    list: z.array(z.string()),
-    purgePolicy: bulkPurgePolicy,
-    force: z.boolean().optional(),
-  }),
-}));
+const bulkPurgeRollupSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z.array(z.string()),
+      purgePolicy: bulkPurgePolicy,
+      force: z.boolean().optional(),
+    }),
+  })
+);
 
 interface BulkPurgeRollupResponse {
   taskId?: DeleteByQueryResponse['task'];

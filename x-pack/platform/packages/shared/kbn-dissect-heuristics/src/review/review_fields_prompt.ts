@@ -12,33 +12,35 @@ import reviewFieldsPromptTemplate from './review_fields_prompt_template.text';
 export const ReviewDissectFieldsPrompt = createPrompt({
   name: 'review_dissect_fields_prompt',
   description: 'Review and map dissect-extracted fields to ECS-compliant fields',
-  input: lazySchema(() => z.object({
-    /**
-     * Raw log messages to pass to LLM
-     */
-    sample_messages: z.array(z.string()),
-    /**
-     * Fields to review (as JSON string)
-     *
-     * ```json
-     * {
-     *     "field_1": {
-     *         "example_values": ["192.168.1.1", "10.0.0.1", "172.16.0.1"],
-     *         "position": 0
-     *     },
-     *     "field_2": {
-     *         "example_values": ["GET", "POST", "PUT"],
-     *         "position": 1
-     *     },
-     *     "field_3": {
-     *         "example_values": ["/index.html", "/api/data", "/update"],
-     *         "position": 2
-     *     }
-     * }
-     * ```
-     */
-    review_fields: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      /**
+       * Raw log messages to pass to LLM
+       */
+      sample_messages: z.array(z.string()),
+      /**
+       * Fields to review (as JSON string)
+       *
+       * ```json
+       * {
+       *     "field_1": {
+       *         "example_values": ["192.168.1.1", "10.0.0.1", "172.16.0.1"],
+       *         "position": 0
+       *     },
+       *     "field_2": {
+       *         "example_values": ["GET", "POST", "PUT"],
+       *         "position": 1
+       *     },
+       *     "field_3": {
+       *         "example_values": ["/index.html", "/api/data", "/update"],
+       *         "position": 2
+       *     }
+       * }
+       * ```
+       */
+      review_fields: z.string(),
+    })
+  ),
 })
   .version({
     template: {

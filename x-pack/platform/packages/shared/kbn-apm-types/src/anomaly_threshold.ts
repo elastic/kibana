@@ -8,13 +8,15 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
-export const anomalyThresholdSchema = lazySchema(() => z.union([
-  z.literal(ML_ANOMALY_SEVERITY.CRITICAL),
-  z.literal(ML_ANOMALY_SEVERITY.MAJOR),
-  z.literal(ML_ANOMALY_SEVERITY.MINOR),
-  z.literal(ML_ANOMALY_SEVERITY.WARNING),
-  z.literal(ML_ANOMALY_SEVERITY.LOW),
-  z.literal('none'),
-]));
+export const anomalyThresholdSchema = lazySchema(() =>
+  z.union([
+    z.literal(ML_ANOMALY_SEVERITY.CRITICAL),
+    z.literal(ML_ANOMALY_SEVERITY.MAJOR),
+    z.literal(ML_ANOMALY_SEVERITY.MINOR),
+    z.literal(ML_ANOMALY_SEVERITY.WARNING),
+    z.literal(ML_ANOMALY_SEVERITY.LOW),
+    z.literal('none'),
+  ])
+);
 
 export type AnomalyThreshold = z.infer<typeof anomalyThresholdSchema>;

@@ -29,13 +29,17 @@ const CaseUpdateSchema = CasesStepCaseIdVersionSchema.extend({
   }),
 });
 
-export const InputSchema = lazySchema(() => z.object({
-  cases: z.array(CaseUpdateSchema).min(1).max(MAX_CASES_TO_UPDATE),
-}));
+export const InputSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(CaseUpdateSchema).min(1).max(MAX_CASES_TO_UPDATE),
+  })
+);
 
-export const OutputSchema = lazySchema(() => z.object({
-  cases: z.array(CaseResponsePropertiesSchema).max(MAX_CASES_TO_UPDATE),
-}));
+export const OutputSchema = lazySchema(() =>
+  z.object({
+    cases: z.array(CaseResponsePropertiesSchema).max(MAX_CASES_TO_UPDATE),
+  })
+);
 
 type UpdateCasesStepInputSchema = typeof InputSchema;
 type UpdateCasesStepOutputSchema = typeof OutputSchema;

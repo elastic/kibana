@@ -50,11 +50,13 @@ const SEMANTIC_UNIQUENESS_OUTPUT_SCHEMA = {
 export const SemanticUniquenessPrompt = createPrompt({
   name: 'semantic_uniqueness_analysis',
   description: 'Evaluate semantic uniqueness of extracted KIs',
-  input: lazySchema(() => z.object({
-    source_id: z.string(),
-    totals: z.string(),
-    unique_kis_by_id: z.string(),
-  })),
+  input: lazySchema(() =>
+    z.object({
+      source_id: z.string(),
+      totals: z.string(),
+      unique_kis_by_id: z.string(),
+    })
+  ),
 })
   .version({
     system: {

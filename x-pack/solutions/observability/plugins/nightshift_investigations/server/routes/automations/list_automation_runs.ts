@@ -43,15 +43,17 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
   security: {
     authz: { requiredPrivileges: ['read_nightshift'] },
   },
-  params: lazySchema(() => z.object({
-    path: z.object({ id: z.string().min(1).max(512) }),
-    query: z.object({
-      page: z.coerce.number().int().min(1).optional().default(1),
-      size: z.coerce.number().int().min(1).max(100).optional().default(20),
-      startedAfter: z.string().max(64).optional(),
-      startedBefore: z.string().max(64).optional(),
-    }),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ id: z.string().min(1).max(512) }),
+      query: z.object({
+        page: z.coerce.number().int().min(1).optional().default(1),
+        size: z.coerce.number().int().min(1).max(100).optional().default(20),
+        startedAfter: z.string().max(64).optional(),
+        startedBefore: z.string().max(64).optional(),
+      }),
+    })
+  ),
   handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {

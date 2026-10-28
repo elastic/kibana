@@ -10,24 +10,30 @@ import { sloIdSchema } from '../../schema/slo';
 import { allOrAnyString, dateType, statusSchema } from '../../schema/common';
 import { MAX_DATE_STRING_LENGTH } from '../../schema/limits';
 
-const bulkSnapshotRequestItemSchema = lazySchema(() => z.object({
-  id: sloIdSchema,
-  instanceId: allOrAnyString.optional(),
-}));
+const bulkSnapshotRequestItemSchema = lazySchema(() =>
+  z.object({
+    id: sloIdSchema,
+    instanceId: allOrAnyString.optional(),
+  })
+);
 
-const snapshotErrorBudgetSchema = lazySchema(() => z.object({
-  initial: z.number(),
-  consumed: z.number().nullable(),
-  remaining: z.number().nullable(),
-}));
+const snapshotErrorBudgetSchema = lazySchema(() =>
+  z.object({
+    initial: z.number(),
+    consumed: z.number().nullable(),
+    remaining: z.number().nullable(),
+  })
+);
 
-const snapshotSummarySchema = lazySchema(() => z.object({
-  status: statusSchema,
-  sliValue: z.number().nullable(),
-  errorBudget: snapshotErrorBudgetSchema,
-  good: z.number(),
-  total: z.number(),
-}));
+const snapshotSummarySchema = lazySchema(() =>
+  z.object({
+    status: statusSchema,
+    sliValue: z.number().nullable(),
+    errorBudget: snapshotErrorBudgetSchema,
+    good: z.number(),
+    total: z.number(),
+  })
+);
 
 const snapshotResultSchema = z.intersection(
   z.object({
@@ -40,35 +46,43 @@ const snapshotResultSchema = z.intersection(
   ])
 );
 
-const bulkSnapshotParamsSchema = lazySchema(() => z.object({
-  body: z.object({
-    at: dateType,
-    requests: z.array(bulkSnapshotRequestItemSchema),
-  }),
-}));
+const bulkSnapshotParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      at: dateType,
+      requests: z.array(bulkSnapshotRequestItemSchema),
+    }),
+  })
+);
 
-const snapshotResponseSchema = lazySchema(() => z.object({
-  at: z.string(),
-  results: z.array(snapshotResultSchema),
-}));
+const snapshotResponseSchema = lazySchema(() =>
+  z.object({
+    at: z.string(),
+    results: z.array(snapshotResultSchema),
+  })
+);
 
 // Query params cannot use the `dateType` codec: the OAS query converter rejects
 // codecs whose output is a class instance. The handler converts it to a Date.
-const dateStringQuerySchema = lazySchema(() => z
-  .string()
-  .max(MAX_DATE_STRING_LENGTH)
-  .refine((value) => !isNaN(new Date(value).getTime()), { message: 'Invalid date' })
-  .describe('A date string, for example 2023-01-12T10:03:19.000Z'));
+const dateStringQuerySchema = lazySchema(() =>
+  z
+    .string()
+    .max(MAX_DATE_STRING_LENGTH)
+    .refine((value) => !isNaN(new Date(value).getTime()), { message: 'Invalid date' })
+    .describe('A date string, for example 2023-01-12T10:03:19.000Z')
+);
 
-const getSnapshotParamsSchema = lazySchema(() => z.object({
-  path: z.object({
-    id: sloIdSchema,
-  }),
-  query: z.object({
-    at: dateStringQuerySchema,
-    instanceId: allOrAnyString.optional(),
-  }),
-}));
+const getSnapshotParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: sloIdSchema,
+    }),
+    query: z.object({
+      at: dateStringQuerySchema,
+      instanceId: allOrAnyString.optional(),
+    }),
+  })
+);
 
 type BulkSnapshotRequestItem = z.output<typeof bulkSnapshotRequestItemSchema>;
 type SnapshotSummary = z.output<typeof snapshotSummarySchema>;

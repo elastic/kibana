@@ -14,11 +14,13 @@ import type {
   InvestigationSeverity,
 } from '@kbn/agentic-investigations-plugin/common';
 
-export const investigationExampleSchema = lazySchema(() => z.object({
-  input: z.object({ question: z.string().trim().min(1).max(MAX_TEXT_LENGTH) }).catchall(z.json()),
-  output: z.record(z.string(), z.json()).optional(),
-  metadata: z.object({ case_id: z.string().trim().min(1).max(500) }).catchall(z.json()),
-}));
+export const investigationExampleSchema = lazySchema(() =>
+  z.object({
+    input: z.object({ question: z.string().trim().min(1).max(MAX_TEXT_LENGTH) }).catchall(z.json()),
+    output: z.record(z.string(), z.json()).optional(),
+    metadata: z.object({ case_id: z.string().trim().min(1).max(500) }).catchall(z.json()),
+  })
+);
 
 export type InvestigationExample = z.infer<typeof investigationExampleSchema>;
 

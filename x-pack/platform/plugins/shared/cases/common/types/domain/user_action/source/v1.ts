@@ -18,14 +18,16 @@ export const ActionSourceTypes = {
   user: 'user',
 } as const;
 
-export const ActionSourceTypeSchema = lazySchema(() => z.enum([
-  ActionSourceTypes.agent,
-  ActionSourceTypes.workflow,
-  ActionSourceTypes.rule,
-  ActionSourceTypes.attack,
-  ActionSourceTypes.api,
-  ActionSourceTypes.user,
-]));
+export const ActionSourceTypeSchema = lazySchema(() =>
+  z.enum([
+    ActionSourceTypes.agent,
+    ActionSourceTypes.workflow,
+    ActionSourceTypes.rule,
+    ActionSourceTypes.attack,
+    ActionSourceTypes.api,
+    ActionSourceTypes.user,
+  ])
+);
 export type ActionSourceType = z.infer<typeof ActionSourceTypeSchema>;
 
 /** Source types shown as "via …" on the activity header. `user` is filter-only. */
@@ -37,12 +39,14 @@ export const ACTION_SOURCE_HEADER_TYPES: ReadonlySet<ActionSourceType> = new Set
   ActionSourceTypes.api,
 ]);
 
-export const ActionSourceSchema = lazySchema(() => z.object({
-  type: ActionSourceTypeSchema,
-  id: z.string(),
-  name: z.string().optional(),
-  run_id: z.string().optional(),
-}));
+export const ActionSourceSchema = lazySchema(() =>
+  z.object({
+    type: ActionSourceTypeSchema,
+    id: z.string(),
+    name: z.string().optional(),
+    run_id: z.string().optional(),
+  })
+);
 
 export type ActionSource = z.infer<typeof ActionSourceSchema>;
 

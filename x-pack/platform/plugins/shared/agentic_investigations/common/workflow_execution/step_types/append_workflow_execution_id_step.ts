@@ -14,18 +14,22 @@ const MAX_ID_LENGTH = 256;
 
 export const AppendWorkflowExecutionIdStepId = 'investigations.appendWorkflowExecutionId' as const;
 
-export const appendWorkflowExecutionIdStepInputSchema = lazySchema(() => z.object({
-  conversationId: z.string().min(1).max(MAX_ID_LENGTH).describe('Investigation conversation ID.'),
-  workflowExecutionId: z
-    .string()
-    .min(1)
-    .max(MAX_ID_LENGTH)
-    .describe('Workflow execution to append.'),
-}));
+export const appendWorkflowExecutionIdStepInputSchema = lazySchema(() =>
+  z.object({
+    conversationId: z.string().min(1).max(MAX_ID_LENGTH).describe('Investigation conversation ID.'),
+    workflowExecutionId: z
+      .string()
+      .min(1)
+      .max(MAX_ID_LENGTH)
+      .describe('Workflow execution to append.'),
+  })
+);
 
-export const appendWorkflowExecutionIdStepOutputSchema = lazySchema(() => z.object({
-  workflowExecutionId: z.string(),
-}));
+export const appendWorkflowExecutionIdStepOutputSchema = lazySchema(() =>
+  z.object({
+    workflowExecutionId: z.string(),
+  })
+);
 
 export const appendWorkflowExecutionIdStepCommonDefinition: BaseStepDefinition<
   typeof appendWorkflowExecutionIdStepInputSchema,

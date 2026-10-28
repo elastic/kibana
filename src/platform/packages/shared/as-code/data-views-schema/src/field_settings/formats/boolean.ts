@@ -9,12 +9,14 @@
 
 import { z, lazySchema } from '@kbn/zod';
 
-export const booleanFormatSchema = lazySchema(() => z
-  .object({
-    type: z.literal('boolean'),
-  })
-  .meta({
-    id: 'kbn-field-format-boolean',
-    title: 'Boolean field format',
-    description: 'Formats a field into a true/false value.',
-  }));
+export const booleanFormatSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('boolean'),
+    })
+    .meta({
+      id: 'kbn-field-format-boolean',
+      title: 'Boolean field format',
+      description: 'Formats a field into a true/false value.',
+    })
+);

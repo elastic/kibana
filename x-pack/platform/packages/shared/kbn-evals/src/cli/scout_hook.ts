@@ -12,9 +12,11 @@ import { z, lazySchema } from '@kbn/zod/v4';
 const HOOK_TIMEOUT_MS = 60_000;
 
 // The whole output must be an object: `[]`, `5` or `"ok"` must not pass as "no env".
-const scoutHookOutputSchema = lazySchema(() => z.strictObject({
-  env: z.record(z.string(), z.string()).optional(),
-}));
+const scoutHookOutputSchema = lazySchema(() =>
+  z.strictObject({
+    env: z.record(z.string(), z.string()).optional(),
+  })
+);
 
 /**
  * Runs a suite's `scoutHook` (a bash script) with the evals config JSON on stdin and returns the

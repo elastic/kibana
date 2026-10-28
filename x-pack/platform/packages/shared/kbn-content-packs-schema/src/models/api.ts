@@ -20,9 +20,11 @@ export type ContentPackIncludedObjects =
       };
     };
 
-const includeAllSchema = lazySchema(() => z.object({
-  objects: z.object({ all: z.strictObject({}) }),
-}));
+const includeAllSchema = lazySchema(() =>
+  z.object({
+    objects: z.object({ all: z.strictObject({}) }),
+  })
+);
 
 export const isIncludeAll = (value: ContentPackIncludedObjects): value is ContentPackIncludeAll => {
   return includeAllSchema.safeParse(value).success;

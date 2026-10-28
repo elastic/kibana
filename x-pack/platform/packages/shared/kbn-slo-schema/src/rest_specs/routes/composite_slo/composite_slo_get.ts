@@ -11,11 +11,13 @@ import {
   compositeSloWithSummaryResponseSchema,
 } from '../../../schema/composite_slo';
 
-const getCompositeSLODefinitionParamsSchema = lazySchema(() => z.object({
-  path: z.object({
-    id: compositeSloIdSchema,
-  }),
-}));
+const getCompositeSLODefinitionParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: compositeSloIdSchema,
+    }),
+  })
+);
 
 const getCompositeSLOResponseSchema = compositeSloWithSummaryResponseSchema;
 

@@ -11,7 +11,9 @@ import { MAX_KEYWORD_LENGTH, MAX_MEMORY_TAG_LENGTH, MEMORY_FILTERS } from '../..
 import { MAX_PAGE_SIZE, MAX_TAG_FILTER_KEYWORDS } from '../memory/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
-const tagTerms = lazySchema(() => z.array(z.string().min(1).max(MAX_MEMORY_TAG_LENGTH)).max(MAX_TAG_FILTER_KEYWORDS));
+const tagTerms = lazySchema(() =>
+  z.array(z.string().min(1).max(MAX_MEMORY_TAG_LENGTH)).max(MAX_TAG_FILTER_KEYWORDS)
+);
 
 export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'GET /internal/nightshift/memory/pages',
@@ -27,20 +29,22 @@ export const listMemoryPagesRoute = createNightshiftInvestigationsServerRoute({
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
-  params: lazySchema(() => z.object({
-    query: z
-      .object({
-        filter: z.enum(MEMORY_FILTERS).optional(),
-        cursor: z.string().min(1).max(4096).optional(),
-        size: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
-        search: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
-        tags: z
-          .preprocess((value) => (typeof value === 'string' ? [value] : value), tagTerms)
-          .optional(),
-      })
-      .optional()
-      .default({}),
-  })),
+  params: lazySchema(() =>
+    z.object({
+      query: z
+        .object({
+          filter: z.enum(MEMORY_FILTERS).optional(),
+          cursor: z.string().min(1).max(4096).optional(),
+          size: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
+          search: z.string().min(1).max(MAX_KEYWORD_LENGTH).optional(),
+          tags: z
+            .preprocess((value) => (typeof value === 'string' ? [value] : value), tagTerms)
+            .optional(),
+        })
+        .optional()
+        .default({}),
+    })
+  ),
   handler: async ({ request, params, getMemoryPageStore, isMemoryEnabled }) => {
     if (!isMemoryEnabled()) throw notFound('Semantic Memory is not enabled');
 

@@ -17,11 +17,13 @@ import {
 } from '@kbn/agent-builder-tools-base/workflows';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 
-const getWorkflowExecutionStatusSchema = lazySchema(() => z.object({
-  executionId: z
-    .string()
-    .describe(`ID of the workflow execution (execution_id) to retrieve the status for.`),
-}));
+const getWorkflowExecutionStatusSchema = lazySchema(() =>
+  z.object({
+    executionId: z
+      .string()
+      .describe(`ID of the workflow execution (execution_id) to retrieve the status for.`),
+  })
+);
 
 export const getWorkflowExecutionStatusTool = ({
   workflowsManagement,

@@ -9,9 +9,11 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { INVESTIGATION_SEVERITIES } from './constants';
 import type { InvestigationSeverity } from './investigation';
 
-export const setInvestigationSeverityRequestSchema = lazySchema(() => z.object({
-  severity: z.enum(INVESTIGATION_SEVERITIES),
-}));
+export const setInvestigationSeverityRequestSchema = lazySchema(() =>
+  z.object({
+    severity: z.enum(INVESTIGATION_SEVERITIES),
+  })
+);
 
 export type SetInvestigationSeverityRequest = z.infer<typeof setInvestigationSeverityRequestSchema>;
 
@@ -29,10 +31,12 @@ export interface SetInvestigationSeverityResponse {
  */
 export const INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE = 'investigation_severity_changed' as const;
 
-export const investigationSeverityChangedEventSchema = lazySchema(() => z.object({
-  severity: z.enum(INVESTIGATION_SEVERITIES),
-  previous_severity: z.enum(INVESTIGATION_SEVERITIES).optional(),
-}));
+export const investigationSeverityChangedEventSchema = lazySchema(() =>
+  z.object({
+    severity: z.enum(INVESTIGATION_SEVERITIES),
+    previous_severity: z.enum(INVESTIGATION_SEVERITIES).optional(),
+  })
+);
 
 export type InvestigationSeverityChangedEventData = z.infer<
   typeof investigationSeverityChangedEventSchema

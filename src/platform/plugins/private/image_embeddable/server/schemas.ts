@@ -12,25 +12,29 @@ import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { DEFAULT_OBJECT_FIT, IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
 
-const imageFileSrcSchema = lazySchema(() => z
-  .object({
-    type: z.literal('file'),
-    file_id: z.string(),
-  })
-  .strict()
-  .meta({
-    title: 'file',
-  }));
+const imageFileSrcSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('file'),
+      file_id: z.string(),
+    })
+    .strict()
+    .meta({
+      title: 'file',
+    })
+);
 
-const imageUrlSrcSchema = lazySchema(() => z
-  .object({
-    type: z.literal('url'),
-    url: z.string().meta({ description: 'URL of the image' }),
-  })
-  .strict()
-  .meta({
-    title: 'url',
-  }));
+const imageUrlSrcSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('url'),
+      url: z.string().meta({ description: 'URL of the image' }),
+    })
+    .strict()
+    .meta({
+      title: 'url',
+    })
+);
 
 const imageConfigSchema = z
   .object({

@@ -15,9 +15,11 @@ import {
   VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION,
 } from '../constants';
 
-export const readRequestParamsSchema = lazySchema(() => z.object({
-  id: z.string().meta({ description: VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION }),
-}));
+export const readRequestParamsSchema = lazySchema(() =>
+  z.object({
+    id: z.string().meta({ description: VEGA_LIBRARY_ITEM_PARAMS_ID_DESCRIPTION }),
+  })
+);
 
 export const readResponseBodySchema = z
   .object({

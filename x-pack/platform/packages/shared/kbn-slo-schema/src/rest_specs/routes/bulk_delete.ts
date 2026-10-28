@@ -8,17 +8,21 @@ import { z, lazySchema } from '@kbn/zod';
 
 import { sloIdSchema } from '../../schema/slo';
 
-const bulkDeleteParamsSchema = lazySchema(() => z.object({
-  body: z.object({
-    list: z.array(sloIdSchema),
-  }),
-}));
+const bulkDeleteParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z.array(sloIdSchema),
+    }),
+  })
+);
 
-const bulkDeleteStatusParamsSchema = lazySchema(() => z.object({
-  path: z.object({
-    taskId: z.string(),
-  }),
-}));
+const bulkDeleteStatusParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      taskId: z.string(),
+    }),
+  })
+);
 
 type BulkDeleteInput = z.input<typeof bulkDeleteParamsSchema.shape.body>;
 type BulkDeleteParams = z.output<typeof bulkDeleteParamsSchema.shape.body>;
