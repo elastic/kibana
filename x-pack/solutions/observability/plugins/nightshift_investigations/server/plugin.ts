@@ -80,6 +80,7 @@ import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/reg
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerFindingsRecorder } from './findings_recorder';
+import { createRecorderProposals } from './findings_recorder/proposals_adapter';
 import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
@@ -302,41 +303,20 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             getAgenticInvestigations: () => this.agenticInvestigations,
+            // The final pass proposes actions for a person to decide, as the investigator's
+            // `proposals.create` tool did, and sees which ones the conversation already has.
+            getProposals: () =>
+              this.proposals
+                ? createRecorderProposals({
+                    proposals: this.proposals,
+                    getSpaceId: (request) =>
+                      this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+                  })
+                : undefined,
             // The final pass reads the investigation's own workspace (read-only), through the
             // same gate and output redaction as the investigator's tools.
             // The final pass proposes actions for a person to decide, as the investigator's
             // `proposals.create` tool did, and sees which ones the conversation already has.
-            getProposals: () => {
-              const proposals = this.proposals;
-              if (!proposals) return undefined;
-              const spaceOf = (request: KibanaRequest) =>
-                this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-              return {
-                listTitles: async ({ request, conversationId }) => {
-                  const { proposals: found } = await proposals.getProposalsService().list(
-                    {
-                      conversationId,
-                      origin: 'nightshift',
-                      excludeSuperseded: true,
-                      excludeExpired: false,
-                      size: 50,
-                      from: 0,
-                    },
-                    spaceOf(request),
-                    request
-                  );
-                  return found.map(({ title }) => title);
-                },
-                propose: async ({ request, conversationId, proposal }) => {
-                  await proposals.createProposal({
-                    request,
-                    spaceId: spaceOf(request),
-                    conversationId,
-                    proposal: { ...proposal, origin: 'nightshift' },
-                  });
-                },
-              };
-            },
             getWorkspace: async ({ request, conversationId, allowedConnectorIds }) => {
               const sandboxStart = getGatedSandboxStart();
               if (!sandboxStart) return undefined;
