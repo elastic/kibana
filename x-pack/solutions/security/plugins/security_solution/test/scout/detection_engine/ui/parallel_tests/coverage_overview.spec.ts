@@ -101,7 +101,7 @@ spaceTest.describe(
         );
 
         const { violations } = await page.checkA11y({
-          include: ['[data-test-subj="coverageOverviewFrameworkTabs"]'],
+          include: ['[data-test-subj="appHeaderTabs"]'],
         });
         expect(violations).toHaveLength(0);
 
