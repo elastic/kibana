@@ -13,13 +13,17 @@ import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
 import type { CortexPageStore } from '../cortex/page_store';
-import type { SandboxSecretsClient } from '../sandbox_secrets';
+import type {
+  ListSandboxConnectors,
+  ListSandboxConnectorTypes,
+} from '../lib/list_sandbox_connectors';
 import type { CustomContextClient } from '../custom_context';
 import type { OnboardingClient } from '../onboarding/onboarding_client';
 import type { DecisionTreeStore } from '../decision_trees/store';
 import type { MemoryPageStore } from '../memory/page_store';
 import type { KnowledgePurgeClient } from '../purge/purge_client';
 import type { GetTriggerEmitter } from '../types';
+import type { InvestigatorServiceAccountService } from '../lib/service_account/investigator_service_account';
 
 export type GetInvestigationsClient = (
   request: KibanaRequest,
@@ -63,12 +67,15 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getWorkflowsManagement: GetWorkflowsManagement;
   getCortexPageStore: GetCortexPageStore;
   isCortexEnabled: () => boolean;
-  sandboxSecretsClient: SandboxSecretsClient;
+  listSandboxConnectors: ListSandboxConnectors;
+  listSandboxConnectorTypes: ListSandboxConnectorTypes;
   customContextClient: CustomContextClient;
   onboardingClient: OnboardingClient;
   getDecisionTreeStore: GetDecisionTreeStore;
   isDecisionTreesEnabled: () => boolean;
   getMemoryPageStore: GetMemoryPageStore;
   isMemoryEnabled: () => boolean;
+  getInvestigatorServiceAccountService: () => InvestigatorServiceAccountService;
+  getSpaceId: (request: KibanaRequest) => string;
   getKnowledgePurgeClient: GetKnowledgePurgeClient;
 }

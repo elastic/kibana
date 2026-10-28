@@ -27,6 +27,12 @@ const ReprocessFailedRulesButton = WithMissingPrivilegesTooltip(
   'all'
 );
 
+const InstallTranslatedRulesButton = WithMissingPrivilegesTooltip(
+  InstallTranslatedButton,
+  'rule',
+  'all'
+);
+
 export interface BulkActionsProps {
   isTableLoading: boolean;
   migrationStats: RuleMigrationStats;
@@ -108,7 +114,7 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
         )}
         {showInstallSelectedRulesButton && (
           <EuiFlexItem grow={false}>
-            <InstallTranslatedButton
+            <InstallTranslatedRulesButton
               disableInstallTranslatedItemsButton={isTableLoading}
               installSelectedItem={installSelectedRulesCallback}
               installTranslatedItems={installTranslatedRulesCallback}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildAlertEuidPipeline, evalGuardedTypedEuids } from './euid_pipeline';
+import { buildAlertEuidPipeline, buildEuidStages, evalGuardedTypedEuids } from './euid_pipeline';
 
 describe('evalGuardedTypedEuids', () => {
   it('writes an MV_DEDUPE+MV_APPEND EVAL of null-safe COALESCEs into the given column', () => {
@@ -18,6 +18,15 @@ describe('evalGuardedTypedEuids', () => {
 
   it('does not use CASE, which ES|QL evaluates one row at a time', () => {
     expect(evalGuardedTypedEuids('derived_euids')).not.toContain('CASE(');
+  });
+});
+
+describe('buildEuidStages', () => {
+  it('expands a document into a row per entity it names, rather than keeping only the first id', () => {
+    const stages = buildEuidStages().join('\n');
+    expect(stages).toContain('| MV_EXPAND derived_euids');
+    expect(stages).toContain('| RENAME derived_euids AS `entity.id`');
+    expect(stages).not.toContain('EVAL `entity.id`');
   });
 });
 

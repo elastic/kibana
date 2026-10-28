@@ -65,7 +65,6 @@ enabled:
   - src/platform/test/functional/apps/bundles/config.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/common/config.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/options_list/config.ts
-  - src/platform/test/functional/apps/dashboard_elements/input_control_vis/config.ts
   - src/platform/test/functional/apps/dashboard/group1/config.ts
   - src/platform/test/functional/apps/dashboard/group2/config.ts
   - src/platform/test/functional/apps/dashboard/group3/config.ts
@@ -90,6 +89,8 @@ enabled:
   - src/platform/test/functional/apps/visualize/group11/config.ts:
       testChannels: ['ci-batch-3h']
   - src/platform/test/functional/apps/visualize/group6/config.ts:
+      testChannels: ['ci-batch-3h']
+  - src/platform/test/functional/apps/visualize/input_control_vis/config.ts:
       testChannels: ['ci-batch-3h']
   # Legacy agg-based Visualize XY / Timelion (post-vislib), vislib heatmap, gauge, metric and
   # experimental vis notification. Low churn vs Lens; run every 3h.
@@ -191,6 +192,7 @@ enabled:
   - x-pack/platform/test/functional_execution_context/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/cases/group1/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/cases/group2/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/cases/group3/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/cases/basic/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts

@@ -492,6 +492,108 @@ export default function (providerContext: FtrProviderContext) {
           // not found
         }
       });
+
+      describe('updating a host that keeps credentials as secrets', () => {
+        const expectSecretDeleted = async (id: string) => {
+          // the error is read outside of any `try`, so that a secret that still exists fails the test
+          const error = await getSecretById(id).then(
+            () => undefined,
+            (e) => e
+          );
+          expect(error?.meta?.statusCode).to.be(404);
+        };
+
+        const createHostWithSecrets = async () => {
+          await clearAgents();
+          await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.3.0');
+          const res = await supertest
+            .post(`/api/fleet/fleet_server_hosts`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Host with secrets ${Date.now()}`,
+              host_urls: ['https://test.fr:8080'],
+              ssl: { certificate: 'path/to/cert', es_certificate: 'path/to/EScert' },
+              secrets: { ssl: { key: 'KEY1', es_key: 'KEY2' } },
+            })
+            .expect(200);
+
+          return {
+            id: res.body.item.id,
+            keyId: res.body.item.secrets.ssl.key.id,
+            esKeyId: res.body.item.secrets.ssl.es_key.id,
+          };
+        };
+
+        it('keeps the secrets when only the name is updated', async function () {
+          const { id, keyId, esKeyId } = await createHostWithSecrets();
+
+          await supertest
+            .put(`/api/fleet/fleet_server_hosts/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Host renamed ${Date.now()}` })
+            .expect(200);
+
+          const { body } = await supertest.get(`/api/fleet/fleet_server_hosts/${id}`).expect(200);
+          expect(body.item.secrets.ssl.key.id).to.equal(keyId);
+          expect(body.item.secrets.ssl.es_key.id).to.equal(esKeyId);
+          expect(body.item.ssl.certificate).to.equal('path/to/cert');
+
+          const secret = await getSecretById(keyId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('KEY1');
+        });
+
+        it('stores a plain text key as a secret and removes the previous one', async function () {
+          const { id, keyId, esKeyId } = await createHostWithSecrets();
+
+          await supertest
+            .put(`/api/fleet/fleet_server_hosts/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ ssl: { certificate: 'path/to/cert', key: 'PLAIN_KEY' } })
+            .expect(200);
+
+          const { body } = await supertest.get(`/api/fleet/fleet_server_hosts/${id}`).expect(200);
+          const newKeyId = body.item.secrets.ssl.key.id;
+          expect(newKeyId).not.to.equal(keyId);
+          // the plain text value is not stored next to the secret
+          expect(body.item.ssl.key).to.equal(undefined);
+          expect(body.item.ssl.certificate).to.equal('path/to/cert');
+          expect(body.item.secrets.ssl.es_key.id).to.equal(esKeyId);
+
+          const secret = await getSecretById(newKeyId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('PLAIN_KEY');
+          await expectSecretDeleted(keyId);
+        });
+
+        it('removes only the secret cleared with an explicit null', async function () {
+          const { id, keyId, esKeyId } = await createHostWithSecrets();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/fleet_server_hosts/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ secrets: { ssl: { key: null } } })
+            .expect(200);
+          expect(updateRes.body.item.secrets.ssl.key).to.equal(undefined);
+
+          const { body } = await supertest.get(`/api/fleet/fleet_server_hosts/${id}`).expect(200);
+          expect(body.item.secrets.ssl.key).to.equal(undefined);
+          expect(body.item.secrets.ssl.es_key.id).to.equal(esKeyId);
+          await expectSecretDeleted(keyId);
+        });
+
+        it('rejects an update that sends both a plain text key and a secret', async function () {
+          const { id } = await createHostWithSecrets();
+
+          const res = await supertest
+            .put(`/api/fleet/fleet_server_hosts/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ ssl: { key: 'PLAIN_KEY' }, secrets: { ssl: { key: 'SECRET_KEY' } } })
+            .expect(400);
+
+          expect(res.body.message).to.equal('Cannot specify both ssl.key and secrets.ssl.key');
+        });
+      });
     });
 
     describe('DELETE /fleet_server_hosts/{itemId}', () => {
