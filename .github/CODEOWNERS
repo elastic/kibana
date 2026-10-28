@@ -1950,11 +1950,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams_app/public/hooks/use_streams_doc_counts_fetch.ts @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams/server/routes/streams/doc_counts @elastic/kibana-management
 
-# Streams — sig events overrides (nightshift-sre-agent-team owns these subtrees)
-# schemas
-x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts @elastic/nightshift-sre-agent-team
-x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/default_index_patterns.ts @elastic/nightshift-sre-agent-team
-x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_matches_index_patterns.ts @elastic/nightshift-sre-agent-team
 # server
 x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events @elastic/nightshift
 
@@ -2054,17 +2049,17 @@ x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/s
 # Observability settings
 
 # Streams
-/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/nightshift-sre-agent-team  @elastic/streams-ui
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/nightshift-sre-agent-team @elastic/streams-ui
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/nightshift-sre-agent-team @elastic/streams-ui
-/x-pack/platform/test/api_integration/apis/streams @elastic/nightshift-sre-agent-team @elastic/streams-ui
-/x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/nightshift-sre-agent-team @elastic/streams-ui
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/streams-ui
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/streams-ui
+/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/streams-ui
+/x-pack/platform/test/api_integration/apis/streams @elastic/streams-ui
+/x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/streams-ui
 /x-pack/platform/plugins/shared/streams_app/test/scout @elastic/streams-ui
 /x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle @elastic/kibana-management
 /x-pack/platform/plugins/shared/streams_app/test/scout/data_quality @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/doc_counts.ts @elastic/kibana-management
-/x-pack/performance/configs/streams_* @elastic/nightshift-sre-agent-team @elastic/streams-ui
-/x-pack/performance/journeys_e2e/streams_* @elastic/nightshift-sre-agent-team @elastic/streams-ui
+/x-pack/performance/configs/streams_* @elastic/streams-ui
+/x-pack/performance/journeys_e2e/streams_* @elastic/streams-ui
 
 # Alerting alerting_v2
 
