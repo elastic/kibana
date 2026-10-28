@@ -332,7 +332,7 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
       source_id: 'logs',
       verdict: 'confirms',
       description:
-        'Found: read timeouts (read timeout=4) calling balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+        'Found: read timeouts (read timeout=4) calling balancereader:8080 on /balances. Impact: users cannot view account balances.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -379,7 +379,7 @@ const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
       source_id: 'logs',
       verdict: 'confirms',
       description:
-        'Found: read timeouts (read timeout=4) calling balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+        'Found: read timeouts (read timeout=4) calling balancereader:8080 on /balances. Impact: users cannot view account balances.',
       evidence: BALANCE_READER_ISOLATED_EVENT.signals?.[0]?.evidence,
       metadata: {
         detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det-weak',
@@ -509,7 +509,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'weak-detection-narrative-alignment',
-          text: 'Title, symptom_hypothesis, and summary state the confirmed connection failure and blocked balance lookups without hedging the event down to medium solely because detection metadata looks weak.',
+          text: 'Title, symptom_hypothesis, and summary state the confirmed read timeouts and blocked balance lookups without hedging the event down to medium solely because detection metadata looks weak.',
           score: 2,
         },
       ],
