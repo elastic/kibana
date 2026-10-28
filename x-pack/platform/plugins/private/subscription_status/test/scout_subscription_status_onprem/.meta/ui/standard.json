@@ -5,14 +5,14 @@
   ],
   "tests": [
     {
-      "id": "34190bc1e8f2c58-260487b7abd1689",
+      "id": "ce4d6d2b5cb1326-260487b7abd1689",
       "title": "Subscription status badge on a self-managed trial shows the days left and links to the feature comparison",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/private/subscription_status/test/scout/ui/tests/self_managed_trial.spec.ts",
+        "file": "x-pack/platform/plugins/private/subscription_status/test/scout_subscription_status_onprem/ui/tests/self_managed_trial.spec.ts",
         "line": 17,
         "column": 54
       }
