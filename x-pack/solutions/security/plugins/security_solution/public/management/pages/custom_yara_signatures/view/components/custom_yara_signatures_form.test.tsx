@@ -34,6 +34,7 @@ import {
   OPTIONAL_LABEL,
   OS_ERROR,
 } from './translations';
+import { POLICY_ASSIGNMENT_INFO_TOOLTIP } from '../../translations';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -207,6 +208,16 @@ describe('Custom YARA signatures form', () => {
         .getByTestId('customYaraSignatures-form-effectedPolicies-global')
         .classList.contains('euiButtonGroupButton-isSelected')
     ).toBe(true);
+  });
+
+  it('should show the policy assignment info tooltip', async () => {
+    render();
+
+    await user.hover(
+      screen.getByTestId('customYaraSignatures-form-effectedPolicies-assignmentInfoTooltip')
+    );
+
+    expect(await screen.findByText(POLICY_ASSIGNMENT_INFO_TOOLTIP)).toBeInTheDocument();
   });
 
   describe('operating system selector', () => {
