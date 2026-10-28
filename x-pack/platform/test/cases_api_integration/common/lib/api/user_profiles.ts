@@ -17,6 +17,7 @@ import type {
   UserProfileWithAvatar,
 } from '@kbn/user-profile-components';
 import type { SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/types/api';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { superUser } from '../authentication/users';
 import type { User } from '../authentication/types';
 import { getSpaceUrlPrefix } from './helpers';
@@ -51,7 +52,7 @@ export const bulkGetUserProfiles = async <T extends string>({
     .post(`${getSpaceUrlPrefix(auth.space)}/internal/security/user_profile/_bulk_get`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
-    .set('x-elastic-internal-origin', 'kibana')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send({ uids: uniqueIDs, ...restParams })
     .expect(expectedHttpCode);
 
@@ -73,7 +74,7 @@ export const suggestUserProfiles = async ({
     .post(`${getSpaceUrlPrefix(auth.space)}${INTERNAL_SUGGEST_USER_PROFILES_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
-    .set('x-elastic-internal-origin', 'kibana')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send(req)
     .expect(expectedHttpCode);
 
@@ -100,7 +101,7 @@ export const updateUserProfileAvatar = async ({
   await supertest
     .post('/internal/security/user_profile/_data')
     .set('kbn-xsrf', 'true')
-    .set('x-elastic-internal-origin', 'kibana')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .set(headers)
     .send({ avatar: req })
     .expect(expectedHttpCode);
@@ -119,7 +120,7 @@ export const loginUsers = async ({
     const response = await supertest
       .post('/internal/security/login')
       .set('kbn-xsrf', 'xxx')
-      .set('x-elastic-internal-origin', 'kibana')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({
         providerType: 'basic',
         providerName: 'basic',
@@ -162,7 +163,7 @@ export const setupSuperUserProfile = async (getService: CommonFtrProviderContext
   const { body: userWithProfileId } = await supertestWithoutAuth
     .get('/internal/security/me')
     .set('kbn-xsrf', 'true')
-    .set('x-elastic-internal-origin', 'kibana')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .set(headers)
     .expect(200);
 
