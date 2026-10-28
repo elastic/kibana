@@ -38,7 +38,9 @@ const setup = ({
   enabled = true,
   mgetError,
   searchError,
-  tagError,
+  closedToday = 0,
+  countError,
+  closeError,
 }: {
   alerts: Array<[string, Record<string, unknown>]>;
   /** Stored decisions by document id. */
@@ -47,16 +49,27 @@ const setup = ({
   enabled?: boolean;
   mgetError?: Error & { statusCode?: number };
   searchError?: Error;
-  tagError?: Error;
+  closedToday?: number;
+  countError?: Error;
+  closeError?: Error;
 }) => {
-  const callKibanaApi = jest.fn(async ({ path }: { path: string; body?: Record<string, any> }) => {
-    if (path.endsWith('/signals/search')) {
-      if (searchError) throw searchError;
-      return { body: { hits: { hits: alerts.map(([_id, _source]) => ({ _id, _source })) } } };
+  const callKibanaApi = jest.fn(
+    async ({ path, body }: { path: string; body?: Record<string, any> }) => {
+      if (path.endsWith('/signals/search')) {
+        if (body?.size === 0) {
+          if (countError) throw countError;
+          return { body: { hits: { total: { value: closedToday } } } };
+        }
+        if (searchError) throw searchError;
+        return { body: { hits: { hits: alerts.map(([_id, _source]) => ({ _id, _source })) } } };
+      }
+      if (path.endsWith('/signals/status')) {
+        if (closeError) throw closeError;
+        return { body: { updated: body?.signal_ids.length, failures: [] } };
+      }
+      return { body: { updated: 1, timed_out: false, failures: [] } };
     }
-    if (tagError) throw tagError;
-    return { body: { updated: 1, timed_out: false, failures: [] } };
-  });
+  );
   const mget = jest.fn(async ({ ids }: { ids: string[] }) => {
     if (mgetError) throw mgetError;
     return {
@@ -87,11 +100,15 @@ const setup = ({
       },
       logger: { warn: jest.fn() },
     } as unknown as StepHandlerContext<unknown, unknown>);
+  const closes = () =>
+    callKibanaApi.mock.calls
+      .filter(([{ path }]) => path.endsWith('/signals/status'))
+      .map(([{ body }]) => body as { signal_ids: string[]; status: string; reason: string });
   const tags = () =>
     callKibanaApi.mock.calls
       .filter(([{ path }]) => path.endsWith('/signals/tags'))
       .map(([{ body }]) => body as { ids: string[]; tags: { tags_to_add: string[] } });
-  return { run, callKibanaApi, mget, tags };
+  return { run, callKibanaApi, mget, tags, closes };
 };
 
 describe('triage match decisions step', () => {
@@ -324,5 +341,153 @@ describe('triage match decisions step', () => {
     expect(mustNot).toContain('az:would_skip:');
     expect(mustNot).toContain('az:true_positive');
     expect(JSON.stringify(body.query.bool.filter)).toContain('"gte":"2026-10-26T12:00:00.000Z"');
+  });
+});
+
+describe('triage match decisions step in on mode', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(NOW);
+  });
+  afterEach(() => jest.useRealTimers());
+
+  const approved = (executable: string) => ({
+    [decisionId('false_positive', hashOf(executable))]: stored('false_positive'),
+  });
+  const idOf = (executable: string) => decisionId('false_positive', hashOf(executable));
+
+  it('tags the alerts of an approved decision, then closes them as false positives, with no model', async () => {
+    const { run, tags, closes, callKibanaApi } = setup({
+      mode: 'on',
+      alerts: [
+        ['a', source('C:\\x.exe')],
+        ['b', source('C:\\x.exe')],
+        ['c', source('C:\\y.exe')],
+      ],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(
+      expect.objectContaining({ status: 'ok', would_close: 2, closed: 2, capped: 0 })
+    );
+    expect(tags()).toEqual([
+      {
+        ids: ['a', 'b'],
+        tags: { tags_to_add: [`az:closed_by_decision:${idOf('C:\\x.exe')}`], tags_to_remove: [] },
+      },
+    ]);
+    expect(closes()).toEqual([
+      { signal_ids: ['a', 'b'], status: 'closed', reason: 'false_positive' },
+    ]);
+    const paths = callKibanaApi.mock.calls.map(([{ path }]) => path.split('/').pop());
+    expect(paths.indexOf('tags')).toBeLessThan(paths.indexOf('status'));
+  });
+
+  it('still matches the alerts that shadow tagged earlier', async () => {
+    const { run, callKibanaApi } = setup({ mode: 'on', alerts: [] });
+
+    await run();
+
+    const search = callKibanaApi.mock.calls.find(([{ body }]) => body?.size !== 0)![0];
+    expect(JSON.stringify(search.body!.query)).not.toContain('az:would_close:');
+  });
+
+  it('never closes high, critical or unknown severity alerts', async () => {
+    const { 'kibana.alert.severity': _unknown, ...noSeverity } = source('C:\\x.exe');
+    const { run, closes } = setup({
+      mode: 'on',
+      alerts: [
+        ['a', source('C:\\x.exe', 'high')],
+        ['b', source('C:\\x.exe', 'critical')],
+        ['c', noSeverity],
+      ],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ closed: 0, excluded_by_severity: 3 }));
+    expect(closes()).toEqual([]);
+  });
+
+  it('closes only what is left of the daily cap and leaves the rest to the normal path', async () => {
+    const { run, closes } = setup({
+      mode: 'on',
+      closedToday: 498,
+      alerts: [
+        ['a', source('C:\\x.exe')],
+        ['b', source('C:\\x.exe')],
+        ['c', source('C:\\x.exe')],
+      ],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ closed: 2, capped: 1 }));
+    expect(closes()[0].signal_ids).toEqual(['a', 'b']);
+  });
+
+  it('closes nothing for a decision whose daily count cannot be read', async () => {
+    const { run, closes, tags } = setup({
+      mode: 'on',
+      countError: new Error('es down'),
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ status: 'ok', closed: 0, close_failures: 1 }));
+    expect(closes()).toEqual([]);
+    expect(tags()).toEqual([]);
+  });
+
+  it('counts a close that fails and does not report those alerts as closed', async () => {
+    const { run } = setup({
+      mode: 'on',
+      closeError: new Error('conflict'),
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ status: 'ok', closed: 0, close_failures: 1 }));
+  });
+
+  it('keeps the alerts of a dismissed pattern out of analysis and closes none', async () => {
+    const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
+    const { run, tags, closes } = setup({
+      mode: 'on',
+      alerts: [['a', source('C:\\x.exe', 'high')]],
+      decisions: { [id]: stored('do_not_propose') },
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ would_skip: 1, skipped: 1, closed: 0 }));
+    expect(tags()[0]).toEqual({
+      ids: ['a'],
+      tags: {
+        tags_to_add: ['az:inconclusive', `az:skipped_by_decision:${id}`],
+        tags_to_remove: [],
+      },
+    });
+    expect(closes()).toEqual([]);
+  });
+
+  it('closes nothing in shadow mode', async () => {
+    const { run, closes } = setup({
+      mode: 'shadow',
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    const { output } = await run();
+
+    expect(output).toEqual(expect.objectContaining({ would_close: 1, closed: 0 }));
+    expect(closes()).toEqual([]);
   });
 });

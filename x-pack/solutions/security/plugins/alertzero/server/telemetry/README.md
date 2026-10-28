@@ -240,8 +240,12 @@ Emitted by the Alert Triage sweep once each time it matched the open backlog aga
 | envelope | | | See above |
 | `candidates` | long | yes | Open, untriaged alerts the sweep checked, up to 100,000 a sweep |
 | `decisions_matched` | long | yes | Distinct decisions that matched at least one alert |
-| `would_close` | long | yes | Alerts an approved decision matched. In shadow mode they are only tagged `az:would_close:<id>` |
+| `would_close` | long | yes | Alerts an approved decision matched. In shadow mode they are only tagged `az:would_close:<id>`; in `on` mode they are closed, up to the daily cap |
 | `would_skip` | long | yes | Alerts a dismissed pattern matched. In shadow mode they are only tagged `az:would_skip:<id>` |
+| `closed` | long | yes | Alerts closed by a decision. `0` unless the deployment runs in `on` mode |
+| `skipped` | long | yes | Alerts a dismissed pattern kept out of analysis (`az:inconclusive`). `0` unless `on` |
+| `capped` | long | yes | Matches left for the normal path because a decision reached its cap of 500 closes in 24 hours |
+| `close_failures` | long | yes | Decisions whose alerts could not all be closed |
 | `excluded_by_severity` | long | yes | Alerts of an approved pattern that their severity keeps with a human: high, critical, or unknown |
 | `tag_failures` | long | yes | Decisions whose alerts could not be tagged |
 | `match_failed` | boolean | yes | Whether the match failed. A failed match leaves every alert for analysis |
