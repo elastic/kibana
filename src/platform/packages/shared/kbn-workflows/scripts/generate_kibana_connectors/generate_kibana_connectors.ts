@@ -33,7 +33,6 @@ import {
   generateOutputSchemaString,
   generateParameterTypes,
   generateParamsSchemaString,
-  getEslintrcForGeneratedCode,
   getLicenseHeader,
   getRequestSchemaName,
   getResponseSchemaName,
@@ -94,11 +93,6 @@ function saveKibanaConnectors(contracts: ContractMeta[]) {
         'utf8'
       );
     }
-    fs.writeFileSync(
-      Path.resolve(KIBANA_GENERATED_OUTPUT_FOLDER_PATH, '.eslintrc.json'),
-      JSON.stringify(getEslintrcForGeneratedCode(), null, 2),
-      'utf8'
-    );
     console.log(
       `✅ ${contracts.length} Kibana connectors generated in ${formatDuration(
         startedAt,

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function getEslintrcForGeneratedCode() {
-  return {
-    rules: {
-      '@typescript-eslint/naming-convention': 0,
-    },
-  };
-}
+const { rules } = require('@typescript-eslint/eslint-plugin');
+
+// @typescript-eslint rules that oxlint doesn't implement. They run without type information, as
+// in ESLint, so options that need it (`naming-convention`'s `types`) aren't supported.
+module.exports = {
+  'typescript-member-ordering': rules['member-ordering'],
+  'typescript-naming-convention': rules['naming-convention'],
+};

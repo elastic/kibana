@@ -612,7 +612,6 @@ module.exports = {
           },
         ],
         'react-hooks/exhaustive-deps': 'off',
-        '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
       },
     },
 

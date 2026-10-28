@@ -212,7 +212,7 @@ const FIXTURES = {
     metadata: { actionType: 'isolate' },
   } as unknown as Partial<UnifiedAttachmentAttributes>),
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   externalReference_legacy: makeLegacySO('extref-legacy', {
     type: AttachmentType.externalReference,
     externalReferenceAttachmentTypeId: '.files',
@@ -222,14 +222,14 @@ const FIXTURES = {
   } as unknown as Partial<AttachmentPersistedAttributes>),
   // Distinct unified subtype from `actions_unified` so neither fixture
   // shares a `type` value — keeps each Layer 2 assertion unambiguous.
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   externalReference_unified: makeUnifiedSO('extref-unified', {
     type: 'files',
     attachmentId: 'file-1',
     metadata: { filename: 'evidence.pdf', mimeType: 'application/pdf' },
   } as unknown as Partial<UnifiedAttachmentAttributes>),
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   persistableState_legacy: makeLegacySO('ps-legacy', {
     type: AttachmentType.persistableState,
     persistableStateAttachmentTypeId: '.lens',
@@ -238,7 +238,7 @@ const FIXTURES = {
       state: { datasourceStates: {} },
     },
   } as unknown as Partial<AttachmentPersistedAttributes>),
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   persistableState_unified: makeUnifiedSO('ps-unified', {
     type: 'lens',
     data: { visualizationType: 'lnsXY', state: { datasourceStates: {} } },
@@ -273,7 +273,7 @@ const FIXTURES = {
     attachmentId: 'dashboard-1',
     metadata: { title: 'Ops overview' },
   } as unknown as Partial<UnifiedAttachmentAttributes>),
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   discoverSession_unified: makeUnifiedSO('discover-unified', {
     type: 'discoverSession',
     attachmentId: 'search-1',

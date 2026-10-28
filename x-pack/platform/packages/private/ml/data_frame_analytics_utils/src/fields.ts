@@ -80,13 +80,13 @@ export const EXTENDED_NUMERICAL_TYPES = new Set([
 /**
  * ES field name for copy of the doc _id
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line @kbn/compat/typescript-naming-convention
 export const ML__ID_COPY = 'ml__id_copy';
 
 /**
  * ES field name for ML's incremental id
  */
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line @kbn/compat/typescript-naming-convention
 export const ML__INCREMENTAL_ID = 'ml__incremental_id';
 
 /**

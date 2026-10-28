@@ -15,7 +15,7 @@ import { TransformType } from '../types';
 import { DocumentUpgradePipeline } from './upgrade_pipeline';
 
 // snake case is way better for migration function names in this very specific scenario.
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 describe('DocumentMigratorPipeline', () => {
   const defaultKibanaVersion = '8.8.0';
