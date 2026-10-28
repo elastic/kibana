@@ -21,8 +21,6 @@ export const significantEventsTuningConfigSchema = lazySchema(() =>
   z.object({
     max_iterations: z.number(),
     feature_ttl_days: z.number(),
-    entity_filtered_ratio: z.number(),
-    diverse_ratio: z.number(),
     max_excluded_features_in_prompt: z.number(),
     max_entity_filters: z.number(),
     semantic_min_score: z.number(),
@@ -41,8 +39,6 @@ export const SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS: Record<
 > = {
   max_iterations: { min: 1, max: 20, integer: true },
   feature_ttl_days: { min: 1, integer: true },
-  entity_filtered_ratio: { min: 0, max: 1 },
-  diverse_ratio: { min: 0, max: 1 },
   max_excluded_features_in_prompt: { min: 0, max: 50, integer: true },
   max_entity_filters: { min: 1, max: 50, integer: true },
   semantic_min_score: { min: 0, max: 1 },
@@ -55,8 +51,6 @@ export const SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS: Record<
 export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningConfig = {
   max_iterations: 5,
   feature_ttl_days: 30,
-  entity_filtered_ratio: 0.4,
-  diverse_ratio: 0.4,
   max_excluded_features_in_prompt: 10,
   max_entity_filters: 10,
   semantic_min_score: 0.15,
@@ -102,21 +96,6 @@ export function validateSignificantEventsTuningConfig(parsed: Record<string, unk
         errors.push(`"${key}" must be at least ${bounds.min}`);
       }
     }
-  }
-
-  const entityRatio =
-    typeof parsed.entity_filtered_ratio === 'number'
-      ? parsed.entity_filtered_ratio
-      : DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.entity_filtered_ratio;
-  const diverseRatio =
-    typeof parsed.diverse_ratio === 'number'
-      ? parsed.diverse_ratio
-      : DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.diverse_ratio;
-  if (entityRatio + diverseRatio > 1.0) {
-    errors.push(
-      `entity_filtered_ratio (${entityRatio}) + diverse_ratio (${diverseRatio}) must be <= 1.0 ` +
-        `(remainder ${(1 - entityRatio - diverseRatio).toFixed(2)} is used for random sampling)`
-    );
   }
 
   return errors;
