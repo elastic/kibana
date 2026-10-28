@@ -238,22 +238,92 @@ describe('buildPatternKeys', () => {
     });
   });
 
-  describe('an alert with no identifying field (cloud, identity, network)', () => {
-    const cloud = (rule: string, user: string) => ({
+  describe('an alert with no path (cloud, identity, SaaS)', () => {
+    const cloud = (
+      rule: string,
+      fields: { action?: string; account?: string; user?: string; ip?: string }
+    ) => ({
       'kibana.alert.rule.uuid': rule,
       'kibana.alert.rule.revision': 1,
-      user: { name: user },
+      ...(fields.action ? { event: { action: fields.action } } : {}),
+      ...(fields.account ? { cloud: { account: { id: fields.account } } } : {}),
+      ...(fields.user ? { user: { name: fields.user } } : {}),
+      ...(fields.ip ? { source: { ip: fields.ip } } : {}),
     });
 
-    // A Decision matches the strict key. If this alert had one, it would be "the whole rule", and
-    // one approved decision would close every later alert of that rule.
-    it('has no strict key', () => {
-      expect(strictOf(cloud('r', 'a'))).toBeUndefined();
+    // A Decision matches the strict key. With the action alone it would be "the whole rule", and one
+    // approved decision would close every later alert of that rule.
+    it.each([
+      ['no action', { user: 'a', account: '1' }],
+      ['an action and no account or user', { action: 'GetSecretValue', ip: '1.2.3.4' }],
+      ['nothing', {}],
+    ])('has no strict key with %s', (_name, fields) => {
+      expect(strictOf(cloud('r', fields))).toBeUndefined();
     });
 
-    it('is grouped by rule and detection, whoever the user is', () => {
-      expect(wideOf(cloud('r', 'a'))).toBe(wideOf(cloud('r', 'b')));
-      expect(wideOf(cloud('r', 'a'))).not.toBe(wideOf(cloud('r2', 'a')));
+    it('is identified by the action and the cloud account', () => {
+      const key = (account: string, action = 'RunInstances') =>
+        strictOf(cloud('r', { action, account }))!;
+
+      expect(key('1')).toBe(key('1'));
+      expect(key('1')).not.toBe(key('2'));
+      expect(key('1')).not.toBe(key('1', 'TerminateInstances'));
+    });
+
+    it('is identified by the action and the user when it has no account', () => {
+      const key = (user: string) => strictOf(cloud('r', { action: 'login', user }))!;
+
+      expect(key('a')).toBe(key('a'));
+      expect(key('a')).not.toBe(key('b'));
+    });
+
+    it('prefers the account over the user, so a person changing does not change the key', () => {
+      const key = (user: string) => strictOf(cloud('r', { action: 'x', account: '1', user }))!;
+
+      expect(key('a')).toBe(key('b'));
+    });
+
+    it('does not use the source IP, which would give almost every alert a key of its own', () => {
+      const key = (ip: string) => strictOf(cloud('r', { action: 'x', account: '1', ip }))!;
+
+      expect(key('1.1.1.1')).toBe(key('2.2.2.2'));
+    });
+
+    it('does not share a key with another rule or rule revision', () => {
+      const fields = { action: 'x', account: '1' };
+
+      expect(strictOf(cloud('r', fields))).not.toBe(strictOf(cloud('r2', fields)));
+      expect(strictOf(cloud('r', fields))).not.toBe(
+        strictOf({ ...cloud('r', fields), 'kibana.alert.rule.revision': 2 })
+      );
+    });
+
+    it('is still grouped by rule and detection, whoever the user is', () => {
+      const alert = (user: string) => cloud('r', { action: 'x', user });
+
+      expect(wideOf(alert('a'))).toBe(wideOf(alert('b')));
+      expect(wideOf(alert('a'))).not.toBe(wideOf(cloud('r2', { action: 'x', user: 'a' })));
+    });
+
+    it('describes its condition as a cloud kind', () => {
+      expect(describePatternKey(strictOf(cloud('r', { action: 'Run', account: '7' }))!)).toEqual(
+        expect.objectContaining({
+          kind: 'cloud',
+          values: [
+            ['cloud.account.id', '7'],
+            ['event.action', 'Run'],
+          ],
+        })
+      );
+    });
+
+    it('leaves a path alert on its own kind, whatever cloud fields it has', () => {
+      const withPath = {
+        ...cloud('r', { action: 'x', account: '1' }),
+        process: { executable: 'C:\\a.exe' },
+      };
+
+      expect(describePatternKey(strictOf(withPath)!).kind).toBe('process');
     });
   });
 });
