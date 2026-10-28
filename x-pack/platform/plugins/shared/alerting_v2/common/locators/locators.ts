@@ -21,7 +21,7 @@ export { createAlertingV2HostApp } from './locator_host';
 
 export interface AlertingV2RulesLocatorParams extends SerializableRecord {
   ruleId?: string;
-  page?: 'list' | 'details' | 'sequence_create';
+  page?: 'list' | 'details' | 'sequence_create' | 'sequence_edit' | 'sequence_clone';
   /** Opens the list filtered to the rules that were created from this rule template. */
   derivedFromTemplateId?: string;
   host: LocatorHost;
@@ -56,6 +56,8 @@ export interface AlertingV2EpisodesLocatorParams extends SerializableRecord {
     groupHash?: string;
     status?: string;
     groupingValues?: Record<string, string | null>;
+    /** KQL for the list's search bar, in the episode field vocabulary (`alert.id`, `rule.id`, …). */
+    queryString?: string;
   };
   timeRange?: { from: string; to: string };
   host: LocatorHost;
