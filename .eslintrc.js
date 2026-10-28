@@ -104,24 +104,12 @@ module.exports = {
       },
     },
     /**
-     * FormatJS linter for i18n code.
-     * https://formatjs.io/docs/tooling/linter
+     * `formatjs/*` rules run in oxlint (.oxlint/formatjs.mts). The plugin stays registered so
+     * `eslint-disable` directives naming its rules resolve.
      */
     {
-      files: [
-        'src/**/*.{js,mjs,ts,tsx}',
-        'x-pack/**/*.{js,mjs,ts,tsx}',
-        'packages/**/*.{js,mjs,ts,tsx}',
-        'src/platform/packages/**/*.{js,mjs,ts,tsx}',
-        'src/core/packages/**/*.{js,mjs,ts,tsx}',
-        'x-pack/platform/packages/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/*/packages/**/*.{js,mjs,ts,tsx}',
-      ],
+      files: ['{src,x-pack,packages}/**/*.{js,mjs,ts,tsx}'],
       plugins: ['formatjs'],
-      rules: {
-        'formatjs/enforce-default-message': ['error', 'anything'],
-        'formatjs/enforce-description': 'off',
-      },
     },
 
     /**
@@ -232,15 +220,6 @@ module.exports = {
     /**
      * Harden specific rules
      */
-    {
-      files: [
-        'src/platform/test/harden/*.js',
-        'src/platform/packages/shared/kbn-safer-lodash-set/test/*.js',
-      ],
-      rules: {
-        'mocha/handle-done-callback': 'off',
-      },
-    },
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
@@ -503,17 +482,9 @@ module.exports = {
         'x-pack/platform/test/*api_integration*/**/*.{js,ts}',
         'x-pack/platform/test/*functional/tests/**/*.{js,ts}',
       ],
-      extends: ['plugin:mocha/recommended'],
-      plugins: ['mocha'],
+      // `mocha/*` rules run in oxlint (.oxlint/mocha.mts). The mocha env stays for `no-undef`.
       env: {
         mocha: true,
-      },
-      rules: {
-        'mocha/no-mocha-arrows': 'off',
-        'mocha/no-exports': 'off',
-        'mocha/no-setup-in-describe': 'off',
-        'mocha/no-nested-tests': 'off',
-        'mocha/no-skipped-tests': 'off',
       },
     },
     {

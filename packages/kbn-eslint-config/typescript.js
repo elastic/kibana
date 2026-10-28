@@ -175,7 +175,6 @@ module.exports = {
             },
           ],
           'no-undef-init': 'error',
-          'no-unsanitized/property': 'error',
           'no-unused-expressions': 'off',
           'spaced-comment': [
             'error',
