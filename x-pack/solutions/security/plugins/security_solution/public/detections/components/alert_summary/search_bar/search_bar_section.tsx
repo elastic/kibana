@@ -44,6 +44,7 @@ export const SearchBarSection = memo(({ dataView, packages }: SearchBarSectionPr
         <SiemSearchBar
           dataTestSubj={SEARCH_BAR_TEST_ID}
           dataView={dataView}
+          displayStyle="inPage"
           hideFilterBar
           hideQueryMenu
           id={InputsModelId.global}

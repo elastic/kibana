@@ -415,6 +415,7 @@ describe('huntForThreat', () => {
   it.each([
     ['an empty list', []],
     ['exclusions only', ['-*elastic-cloud-logs-*', '-logs-elastic_agent*']],
+    ['remote exclusions only', ['remote:-logs-elastic_agent*', '-other:*']],
   ])('returns scope_blocked without searching for %s', async (_label, search_patterns) => {
     const esClient = buildEsClient(emptySearchResponse);
 

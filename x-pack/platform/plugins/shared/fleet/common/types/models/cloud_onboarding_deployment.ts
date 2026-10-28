@@ -39,6 +39,19 @@ export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeed
 
 export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
 
+/**
+ * One row of the Service settings step as of the last deploy: an original service
+ * (`instanceId === serviceId`) or a duplicate of one (`<serviceId>__dup-<n>`).
+ */
+export interface CloudOnboardingInstance {
+  instanceId: string;
+  /** The service this instance belongs to. Policy-template key; unchanged for duplicates. */
+  serviceId: string;
+  /** Display name. */
+  name: string;
+  isDuplicate: boolean;
+}
+
 export interface CloudOnboardingDeployment {
   id: string;
   provider: CloudProvider;
@@ -60,6 +73,8 @@ export interface CloudOnboardingDeployment {
   description?: string;
   /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
   namespace?: string;
+  /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. Absent on onboardings saved before this field existed. */
+  instances?: CloudOnboardingInstance[];
   /** Data format selected in the Services step. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';
   packagePolicyIds?: string[];
