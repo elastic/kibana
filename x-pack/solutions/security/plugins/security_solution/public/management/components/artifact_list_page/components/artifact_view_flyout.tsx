@@ -17,6 +17,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiIconTip,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
@@ -127,6 +128,8 @@ interface ArtifactViewFlyoutBaseProps {
   labels?: Partial<ArtifactViewFlyoutLabels>;
   /** Renders the artifact-specific definition. Receives the full artifact item. */
   ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
+  /** When set, an info icon next to the policy assignment title shows this text in a tooltip. */
+  policyAssignmentInfoTooltip?: string;
   /** When false, no edit actions can be taken. Defaults to true. */
   allowCardEditAction?: boolean;
   /** When false, the footer omits Delete. Defaults to true. */
@@ -163,6 +166,7 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
     size,
     labels: _labels,
     ViewModeComponent,
+    policyAssignmentInfoTooltip,
     showEnabledSwitch = false,
     allowCardEditAction = true,
     allowCardDeleteAction = true,
@@ -244,6 +248,7 @@ export const ArtifactViewFlyout = memo<ArtifactViewFlyoutProps>(
               allowCardEditAction={allowCardEditAction}
               onEnabledChangeRefresh={handleEnabledChangeRefresh}
               ViewModeComponent={ViewModeComponent}
+              policyAssignmentInfoTooltip={policyAssignmentInfoTooltip}
               data-test-subj={dataTestSubj}
             />
           )}
@@ -317,6 +322,7 @@ const ArtifactViewFlyoutBody = memo<{
   allowCardEditAction: boolean;
   onEnabledChangeRefresh?: () => Promise<void>;
   ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
+  policyAssignmentInfoTooltip?: string;
   'data-test-subj'?: string;
 }>(
   ({
@@ -328,6 +334,7 @@ const ArtifactViewFlyoutBody = memo<{
     allowCardEditAction,
     onEnabledChangeRefresh,
     ViewModeComponent,
+    policyAssignmentInfoTooltip,
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -414,11 +421,24 @@ const ArtifactViewFlyoutBody = memo<{
         <ViewModeComponent item={item} />
 
         <EuiSpacer size="l" />
-        <EuiTitle size="xs">
-          <h3 data-test-subj={getTestId('policyAssignmentTitle')}>
-            {labels.viewFlyoutPolicyAssignmentTitle}
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3 data-test-subj={getTestId('policyAssignmentTitle')}>
+                {labels.viewFlyoutPolicyAssignmentTitle}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          {policyAssignmentInfoTooltip && (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="info"
+                content={policyAssignmentInfoTooltip}
+                iconProps={{ 'data-test-subj': getTestId('policyAssignmentInfoTooltip') }}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <ArtifactViewPolicyAssignment
           item={item}

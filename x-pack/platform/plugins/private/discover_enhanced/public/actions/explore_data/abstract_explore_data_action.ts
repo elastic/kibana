@@ -14,14 +14,14 @@ import type {
   CanAccessViewMode,
   EmbeddableApiContext,
   HasType,
-  PublishesDataViews,
+  PublishesDataSources,
 } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasType,
   apiIsOfType,
-  apiPublishesDataViews,
+  apiPublishesDataSources,
   apiPublishesPartialUnifiedSearch,
   getInheritedViewMode,
 } from '@kbn/presentation-publishing';
@@ -42,10 +42,10 @@ export interface Params {
   start: StartServicesGetter<PluginDeps, unknown, CoreDeps>;
 }
 
-type AbstractExploreDataActionApi = CanAccessViewMode & HasType & PublishesDataViews;
+type AbstractExploreDataActionApi = CanAccessViewMode & HasType & PublishesDataSources;
 
 const isApiCompatible = (api: unknown | null): api is AbstractExploreDataActionApi =>
-  apiCanAccessViewMode(api) && apiHasType(api) && apiPublishesDataViews(api);
+  apiCanAccessViewMode(api) && apiHasType(api) && apiPublishesDataSources(api);
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   return (

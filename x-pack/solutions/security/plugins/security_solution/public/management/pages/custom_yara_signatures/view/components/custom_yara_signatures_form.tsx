@@ -49,6 +49,7 @@ import {
   OS_PLACEHOLDER,
   SIGNATURE_EDITOR_ARIA_LABEL,
 } from './translations';
+import { POLICY_ASSIGNMENT_INFO_TOOLTIP } from '../../translations';
 import { CustomYaraSignatureValidationMessages } from './custom_yara_signature_validation_messages';
 import { YaraCodeEditor } from './yara_code_editor';
 
@@ -452,6 +453,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
         >
           <EffectedPolicySelect
             item={item}
+            assignmentInfoTooltip={POLICY_ASSIGNMENT_INFO_TOOLTIP}
             onChange={handleEffectedPolicyOnChange}
             data-test-subj={getTestId('effectedPolicies')}
             disabled={disabled}
