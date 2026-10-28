@@ -18,10 +18,10 @@ export const ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID =
   'system-alertzero-action-suspend-process';
 
 export const ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 5,
   yaml: ACTION_SUSPEND_PROCESS_YAML,
 } as const satisfies ManagedWorkflowDefinition;

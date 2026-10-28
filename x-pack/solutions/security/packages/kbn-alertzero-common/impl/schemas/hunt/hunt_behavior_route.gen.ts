@@ -69,6 +69,14 @@ export const HuntBehaviorRequestBody = lazySchema(() =>
       report_id: z.string().min(1).max(512).optional(),
       llm_confidence_threshold: z.number().min(0).max(1).optional(),
       iocs: z.array(HuntBehaviorIoc).max(100).optional(),
+      /**
+       * Adjudicated-out IOCs the run must not search.
+       */
+      excluded_iocs: z
+        .array(HuntBehaviorIoc)
+        .max(100)
+        .optional()
+        .describe('Adjudicated-out IOCs the run must not search.'),
       article_context: HuntBehaviorArticleContext.optional(),
     })
     .strict()

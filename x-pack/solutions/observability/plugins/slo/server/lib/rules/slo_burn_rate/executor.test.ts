@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
 import apm from 'elastic-apm-node';
 import type { Rule, SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
@@ -18,6 +19,8 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
@@ -36,7 +39,7 @@ import {
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
-import { storedSloDefinitionSchemaZod } from '@kbn/slo-schema';
+import { storedSloDefinitionSchema } from '@kbn/slo-schema';
 import {
   getErrorSource,
   TaskErrorSource,
@@ -112,7 +115,7 @@ function createFindResponse(
     saved_objects: sloList.map((slo) => {
       return {
         id: slo.id,
-        attributes: storedSloDefinitionSchemaZod.encode(omit(slo, 'artifacts')),
+        attributes: storedSloDefinitionSchema.encode(omit(slo, 'artifacts')),
         type: SO_SLO_TYPE,
         references: [],
         score: 1,
@@ -242,22 +245,12 @@ describe('BurnRateRuleExecutor', () => {
       }
     });
 
-    it('keeps the failure that stopped the lookup as `cause`', async () => {
-      const authError = Object.assign(new Error('security_exception'), {
-        statusCode: 401,
-        body: {
-          error: {
-            type: 'security_exception',
-            reason: 'failed to authenticate cloud API key: [0x28D520]',
-            caused_by: { authentication_error_code: '0x28D520' },
-          },
-        },
-      });
-      soClientMock.find.mockRejectedValue(authError);
-      const executor = getRuleExecutor(basePathMock);
+    describe('when the slo lookup fails', () => {
+      const executeWithLookupFailure = async (lookupError: Error) => {
+        soClientMock.find.mockRejectedValue(lookupError);
+        const executor = getRuleExecutor(basePathMock);
 
-      await expect(
-        executor({
+        return executor({
           params: someRuleParamsWithWindows({ sloId: 'some-slo' }),
           startedAt: new Date(),
           startedAtOverridden: false,
@@ -271,8 +264,77 @@ describe('BurnRateRuleExecutor', () => {
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           getTimeRange,
           isServerless: false,
-        })
-      ).rejects.toMatchObject({ cause: authError });
+        }).then(
+          () => {
+            throw new Error('the executor ran successfully, but should not have');
+          },
+          (err) => err
+        );
+      };
+
+      const createSecurityException = (statusCode: number) =>
+        new EsErrors.ResponseError(
+          elasticsearchClientMock.createApiResponse({
+            statusCode,
+            body: {
+              error: {
+                type: 'security_exception',
+                reason:
+                  'unable to authenticate with provided credentials and anonymous access is not allowed for this request',
+              },
+            },
+          })
+        );
+
+      const rejectedKeyMessage = `Rule "an slo rule" 123-456 could not load SLO "some-slo" because the rule's API key was rejected (401 security_exception). Re-save or re-enable the rule to regenerate its API key.`;
+
+      it.each([
+        [
+          'a rejected API key',
+          Object.assign(new Error('security_exception'), {
+            statusCode: 401,
+            body: {
+              error: {
+                type: 'security_exception',
+                reason: 'failed to authenticate cloud API key: [0x28D520]',
+                caused_by: { authentication_error_code: '0x28D520' },
+              },
+            },
+          }),
+          rejectedKeyMessage,
+          TaskErrorSource.USER,
+        ],
+        [
+          'a rejected API key wrapped by the saved objects security extension',
+          SavedObjectsErrorHelpers.decorateGeneralError(createSecurityException(401)),
+          rejectedKeyMessage,
+          TaskErrorSource.USER,
+        ],
+        [
+          'an API key that is not authorized to read SLOs',
+          createSecurityException(403),
+          `Rule "an slo rule" 123-456 could not load SLO "some-slo" because the rule's API key is not authorized to read SLOs (403 security_exception). Re-save the rule as a user with SLO read privileges.`,
+          TaskErrorSource.USER,
+        ],
+        [
+          'Elasticsearch being unavailable',
+          SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('no living connections')),
+          'Rule "an slo rule" 123-456 could not load SLO "some-slo": no living connections',
+          TaskErrorSource.FRAMEWORK,
+        ],
+        [
+          'any other failure',
+          new Error('Invalid stored SLO'),
+          'Rule "an slo rule" 123-456 could not load SLO "some-slo": Invalid stored SLO',
+          TaskErrorSource.USER,
+        ],
+      ])('reports %s and keeps the failure as `cause`', async (_, lookupError, message, source) => {
+        const err = await executeWithLookupFailure(lookupError);
+
+        expect(err.message).toBe(message);
+        expect(getErrorSource(err)).toBe(source);
+        expect(err.cause).toBe(lookupError);
+      });
     });
 
     it('returns early when the slo is disabled', async () => {

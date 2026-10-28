@@ -32,6 +32,14 @@ export interface LoadRulesProps {
   };
 }
 
+export interface LoadRulesError {
+  message: string;
+  rule: {
+    id: string;
+    name?: string;
+  };
+}
+
 export const rewriteRulesResponseRes = (results: Array<AsApiContract<Rule>>): Rule[] => {
   return results.map((item) => transformRule(item));
 };

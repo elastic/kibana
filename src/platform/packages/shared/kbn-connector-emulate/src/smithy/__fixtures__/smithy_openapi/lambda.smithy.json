@@ -1,0 +1,5989 @@
+{
+ "smithy": "2.0",
+ "shapes": {
+  "com.amazonaws.lambda#AWSGirApiService": {
+   "type": "service",
+   "version": "2015-03-31",
+   "resources": [
+    {
+     "target": "com.amazonaws.lambda#CapacityProviderResource"
+    },
+    {
+     "target": "com.amazonaws.lambda#CodeSigningConfigResource"
+    },
+    {
+     "target": "com.amazonaws.lambda#DurableExecution"
+    },
+    {
+     "target": "com.amazonaws.lambda#EventSourceMapping"
+    },
+    {
+     "target": "com.amazonaws.lambda#Function"
+    },
+    {
+     "target": "com.amazonaws.lambda#FunctionAlias"
+    },
+    {
+     "target": "com.amazonaws.lambda#FunctionVersionResource"
+    },
+    {
+     "target": "com.amazonaws.lambda#LayerResource"
+    },
+    {
+     "target": "com.amazonaws.lambda#LayerVersion"
+    },
+    {
+     "target": "com.amazonaws.lambda#Permission"
+    },
+    {
+     "target": "com.amazonaws.lambda#ProvisionedConcurrencyConfig"
+    }
+   ],
+   "traits": {
+    "aws.api#service": {
+     "sdkId": "Lambda",
+     "arnNamespace": "lambda",
+     "cloudFormationName": "Lambda",
+     "cloudTrailEventSource": "lambda.amazonaws.com",
+     "endpointPrefix": "lambda"
+    },
+    "aws.api#tagEnabled": {
+     "disableDefaultOperations": true
+    },
+    "aws.auth#sigv4": {
+     "name": "lambda"
+    },
+    "aws.iam#defineConditionKeys": {
+     "lambda:VpcIds": {
+      "type": "String",
+      "documentation": "Filters access by the ID of the VPC configured for the AWS Lambda function",
+      "relativeDocumentation": "lambda-api-permissions-ref.html",
+      "required": false
+     },
+     "lambda:SubnetIds": {
+      "type": "ArrayOfString",
+      "documentation": "Filters access by the ID of subnets configured for the AWS Lambda function",
+      "relativeDocumentation": "lambda-api-permissions-ref.html",
+      "required": false
+     },
+     "lambda:Layer": {
+      "type": "ArrayOfString",
+      "documentation": "Filters access by the ARN of a version of an AWS Lambda layer",
+      "relativeDocumentation": "lambda-api-permissions-ref.html",
+      "required": false
+     },
+     "lambda:EventSourceToken": {
+      "type": "String",
+      "documentation": "Filters access by the ID from a non-AWS event source configured for the AWS Lambda function",
+      "relativeDocumentation": "lambda-api-permissions-ref.html",
+      "required": false
+     },
+     "lambda:FunctionUrlAuthType": {
+      "type": "String",
+      "documentation": "Filters access by authorization type specified in request. Available during CreateFunctionUrlConfig, UpdateFunctionUrlConfig, DeleteFunctionUrlConfig, GetFunctionUrlConfig, ListFunctionUrlConfig, AddPermission and RemovePermission operations",
+      "relativeDocumentation": "lambda-api-permissions-ref.html",
+      "required": false
+     },
+     "aws:RequestTag/${TagKey}": {
+      "type": "String",
+      "documentation": "Filters access by the tags that are passed in the request",
+      "externalDocumentation": "${DocHomeURL}/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-requesttag",
+      "required": false
+     },
+     "aws:ResourceTag/${TagKey}": {
+      "type": "String",
+      "documentation": "Filters access by the tags associated with the resource",
+      "externalDocumentation": "${DocHomeURL}/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-resourcetag",
+      "required": false
+     },
+     "lambda:CodeSigningConfigArn": {
+      "type": "ARN",
+      "documentation": "Filters access by the ARN of an AWS Lambda code signing config",
+      "relativeDocumentation": "lambda-api-permissions-ref.html",
+      "required": false
+     },
+     "lambda:FunctionArn": {
+      "type": "ARN",
+      "documentation": "Filters access by the ARN of an AWS Lambda function",
+      "relativeDocumentation": "lambda-api-permissions-ref.html",
+      "required": false
+     },
+     "aws:TagKeys": {
+      "type": "ArrayOfString",
+      "documentation": "Filters access by the tag keys that are passed in the request",
+      "externalDocumentation": "${DocHomeURL}/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-tagkeys",
+      "required": false
+     },
+     "lambda:SourceFunctionArn": {
+      "type": "ARN",
+      "documentation": "Filters access by the ARN of the AWS Lambda function from which the request originated",
+      "relativeDocumentation": "lambda-api-permissions-ref.html",
+      "required": false
+     },
+     "lambda:SecurityGroupIds": {
+      "type": "ArrayOfString",
+      "documentation": "Filters access by the ID of security groups configured for the AWS Lambda function",
+      "relativeDocumentation": "lambda-api-permissions-ref.html",
+      "required": false
+     },
+     "lambda:Principal": {
+      "type": "String",
+      "documentation": "Filters access by restricting the AWS service or account that can invoke a function",
+      "relativeDocumentation": "lambda-api-permissions-ref.html",
+      "required": false
+     }
+    },
+    "aws.iam#disableConditionKeyInference": {},
+    "aws.iam#supportedPrincipalTypes": [
+     "Root",
+     "IAMUser",
+     "IAMRole",
+     "FederatedUser"
+    ],
+    "aws.protocols#restJson1": {},
+    "smithy.api#paginated": {
+     "inputToken": "Marker",
+     "outputToken": "NextMarker",
+     "pageSize": "MaxItems"
+    },
+    "smithy.api#suppress": [
+     "ServiceTagging"
+    ],
+    "smithy.api#tags": [
+     "feature:public"
+    ],
+    "smithy.api#title": "AWS Lambda"
+   }
+  },
+  "com.amazonaws.lambda#Alias": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 128
+    },
+    "smithy.api#pattern": "^(?!^[0-9]+$)([a-zA-Z0-9-_]+)$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ApplicationLogLevel": {
+   "type": "enum",
+   "members": {
+    "Trace": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "TRACE",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Debug": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DEBUG",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Info": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "INFO",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Warn": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WARN",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Error": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ERROR",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Fatal": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FATAL",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Architecture": {
+   "type": "enum",
+   "members": {
+    "x86_64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "x86_64",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "arm64": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "arm64",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ArchitecturesList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.lambda#Architecture",
+    "traits": {
+     "smithy.api#tags": [
+      "feature:public"
+     ]
+    }
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 1
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Arn": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 10000
+    },
+    "smithy.api#pattern": "^arn:(aws[a-zA-Z0-9-]*):([a-zA-Z0-9\\-])+:((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1})?:(\\d{12})?:(.*)$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Blob": {
+   "type": "blob",
+   "traits": {
+    "smithy.api#sensitive": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#CapacityProviderArn": {
+   "type": "string",
+   "traits": {
+    "aws.api#arnReference": {
+     "type": "AWS::Lambda::CapacityProvider",
+     "resource": "com.amazonaws.lambda#CapacityProviderResource"
+    },
+    "smithy.api#length": {
+     "min": 1,
+     "max": 140
+    },
+    "smithy.api#pattern": "^arn:aws[a-zA-Z-]*:lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:capacity-provider:[a-zA-Z0-9-_]+$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#CapacityProviderConfig": {
+   "type": "structure",
+   "members": {
+    "LambdaManagedInstancesCapacityProviderConfig": {
+     "target": "com.amazonaws.lambda#LambdaManagedInstancesCapacityProviderConfig",
+     "traits": {
+      "smithy.api#required": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#CapacityProviderName": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 140
+    },
+    "smithy.api#pattern": "^(arn:aws[a-zA-Z-]*:lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:capacity-provider:[a-zA-Z0-9-_]+)|[a-zA-Z0-9-_]+$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#CapacityProviderResource": {
+   "type": "resource",
+   "identifiers": {
+    "CapacityProviderName": {
+     "target": "com.amazonaws.lambda#CapacityProviderName"
+    }
+   },
+   "traits": {
+    "aws.api#arn": {
+     "template": "capacity-provider:{CapacityProviderName}"
+    },
+    "aws.iam#conditionKeys": [
+     "aws:ResourceTag/${TagKey}"
+    ],
+    "aws.iam#iamResource": {
+     "disableConditionKeyInheritance": true,
+     "name": "capacityProvider",
+     "relativeDocumentation": "lambda-api-permissions-ref.html"
+    },
+    "smithy.api#suppress": [
+     "IamResourceTrait"
+    ],
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#CodeArtifactUserDeletedException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 409,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#CodeArtifactUserFailedException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 409,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#CodeArtifactUserPendingException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 409,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#CodeSigningConfigId": {
+   "type": "string",
+   "traits": {
+    "smithy.api#pattern": "^csc-[a-zA-Z0-9-_\\.]{17}$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#CodeSigningConfigResource": {
+   "type": "resource",
+   "identifiers": {
+    "CodeSigningConfigId": {
+     "target": "com.amazonaws.lambda#CodeSigningConfigId"
+    }
+   },
+   "traits": {
+    "aws.api#arn": {
+     "template": "code-signing-config:{CodeSigningConfigId}"
+    },
+    "aws.iam#conditionKeys": [
+     "aws:ResourceTag/${TagKey}"
+    ],
+    "aws.iam#iamResource": {
+     "disableConditionKeyInheritance": true,
+     "name": "code signing config",
+     "relativeDocumentation": "lambda-api-permissions-ref.html"
+    },
+    "smithy.api#suppress": [
+     "IamResourceTrait"
+    ],
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Concurrency": {
+   "type": "structure",
+   "members": {
+    "ReservedConcurrentExecutions": {
+     "target": "com.amazonaws.lambda#ReservedConcurrentExecutions",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#DeadLetterConfig": {
+   "type": "structure",
+   "members": {
+    "TargetArn": {
+     "target": "com.amazonaws.lambda#ResourceArn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Description": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 256
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#DirectS3Read": {
+   "type": "enum",
+   "members": {
+    "ENABLED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ENABLED",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DISABLED": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DISABLED",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "AUTO": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "AUTO",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#DurableConfig": {
+   "type": "structure",
+   "members": {
+    "KMSKeyArn": {
+     "target": "com.amazonaws.lambda#KMSKeyArn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "RetentionPeriodInDays": {
+     "target": "com.amazonaws.lambda#RetentionPeriodInDays",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ExecutionTimeout": {
+     "target": "com.amazonaws.lambda#ExecutionTimeout",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#DurableExecution": {
+   "type": "resource",
+   "identifiers": {
+    "DurableExecutionArn": {
+     "target": "com.amazonaws.lambda#DurableExecutionArn"
+    }
+   },
+   "traits": {
+    "aws.api#arn": {
+     "template": "durable-execution:{DurableExecutionArn}",
+     "absolute": true
+    },
+    "aws.iam#conditionKeys": [
+     "aws:ResourceTag/${TagKey}"
+    ],
+    "aws.iam#iamResource": {
+     "disableConditionKeyInheritance": true,
+     "name": "durable execution",
+     "relativeDocumentation": "lambda-api-permissions-ref.html"
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#DurableExecutionAlreadyStartedException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 409,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#DurableExecutionArn": {
+   "type": "string",
+   "traits": {
+    "aws.api#arnReference": {
+     "type": "AWS::Lambda::DurableExecution",
+     "resource": "com.amazonaws.lambda#DurableExecution"
+    },
+    "smithy.api#length": {
+     "min": 1,
+     "max": 1024
+    },
+    "smithy.api#pattern": "^arn:([a-zA-Z0-9-]+):lambda:([a-zA-Z0-9-]+):(\\d{12}):function:([a-zA-Z0-9_-]+):(\\$LATEST(?:\\.PUBLISHED)?|[0-9]+)/durable-execution/([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#DurableExecutionName": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 64
+    },
+    "smithy.api#pattern": "^[a-zA-Z0-9-_]+$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EC2AccessDeniedException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EC2ThrottledException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EC2UnexpectedException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EC2ErrorCode": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EFSIOException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 410,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EFSMountConnectivityException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 408,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EFSMountFailureException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 403,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EFSMountTimeoutException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 408,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ENILimitReachedException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ENINotReadyException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EnvironmentError": {
+   "type": "structure",
+   "members": {
+    "ErrorCode": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#SensitiveString",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EnvironmentResponse": {
+   "type": "structure",
+   "members": {
+    "Variables": {
+     "target": "com.amazonaws.lambda#EnvironmentVariables",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Error": {
+     "target": "com.amazonaws.lambda#EnvironmentError",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EnvironmentVariableName": {
+   "type": "string",
+   "traits": {
+    "smithy.api#pattern": "^[a-zA-Z]([a-zA-Z0-9_])+$",
+    "smithy.api#sensitive": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EnvironmentVariableValue": {
+   "type": "string",
+   "traits": {
+    "smithy.api#sensitive": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EnvironmentVariables": {
+   "type": "map",
+   "key": {
+    "target": "com.amazonaws.lambda#EnvironmentVariableName",
+    "traits": {
+     "smithy.api#tags": [
+      "feature:public"
+     ]
+    }
+   },
+   "value": {
+    "target": "com.amazonaws.lambda#EnvironmentVariableValue",
+    "traits": {
+     "smithy.api#tags": [
+      "feature:public"
+     ]
+    }
+   },
+   "traits": {
+    "smithy.api#sensitive": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EphemeralStorage": {
+   "type": "structure",
+   "members": {
+    "Size": {
+     "target": "com.amazonaws.lambda#EphemeralStorageSize",
+     "traits": {
+      "smithy.api#required": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EphemeralStorageSize": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 512,
+     "max": 32768
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#EventSourceMapping": {
+   "type": "resource",
+   "identifiers": {
+    "UUID": {
+     "target": "com.amazonaws.lambda#UUIDString"
+    }
+   },
+   "traits": {
+    "aws.api#arn": {
+     "template": "event-source-mapping:{UUID}"
+    },
+    "aws.iam#conditionKeys": [
+     "aws:ResourceTag/${TagKey}"
+    ],
+    "aws.iam#iamResource": {
+     "disableConditionKeyInheritance": true,
+     "name": "eventSourceMapping",
+     "relativeDocumentation": "lambda-api-permissions-ref.html"
+    },
+    "smithy.api#suppress": [
+     "IamResourceTrait"
+    ],
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ExecutionEnvironmentMemoryGiBPerVCpu": {
+   "type": "double",
+   "traits": {
+    "smithy.api#range": {
+     "min": 2,
+     "max": 8
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ExecutionTimeout": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 31622400
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FileSystemArn": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 256
+    },
+    "smithy.api#pattern": "^arn:aws[a-zA-Z-]*:elasticfilesystem:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:access-point/fsap-[a-f0-9]{17}$|^arn:aws[-a-z]*:s3files:[0-9a-z-:]+:file-system/fs-[0-9a-f]{17,40}/access-point/fsap-[0-9a-f]{17,40}$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FileSystemConfig": {
+   "type": "structure",
+   "members": {
+    "Arn": {
+     "target": "com.amazonaws.lambda#FileSystemArn",
+     "traits": {
+      "smithy.api#required": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "LocalMountPath": {
+     "target": "com.amazonaws.lambda#LocalMountPath",
+     "traits": {
+      "smithy.api#required": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "S3FilesConfig": {
+     "target": "com.amazonaws.lambda#S3FilesConfig",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FileSystemConfigList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.lambda#FileSystemConfig",
+    "traits": {
+     "smithy.api#tags": [
+      "feature:public"
+     ]
+    }
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 1
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Function": {
+   "type": "resource",
+   "identifiers": {
+    "FunctionName": {
+     "target": "com.amazonaws.lambda#FunctionName"
+    }
+   },
+   "list": {
+    "target": "com.amazonaws.lambda#ListFunctions"
+   },
+   "collectionOperations": [
+    {
+     "target": "com.amazonaws.lambda#GetFunction"
+    },
+    {
+     "target": "com.amazonaws.lambda#Invoke"
+    }
+   ],
+   "traits": {
+    "aws.api#arn": {
+     "template": "function:{FunctionName}"
+    },
+    "aws.api#taggable": {
+     "property": "Tags",
+     "disableSystemTags": false
+    },
+    "aws.iam#conditionKeys": [
+     "aws:ResourceTag/${TagKey}"
+    ],
+    "aws.iam#iamResource": {
+     "disableConditionKeyInheritance": true,
+     "name": "function",
+     "relativeDocumentation": "lambda-api-permissions-ref.html"
+    },
+    "smithy.api#suppress": [
+     "TaggableResource"
+    ],
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FunctionAlias": {
+   "type": "resource",
+   "identifiers": {
+    "FunctionName": {
+     "target": "com.amazonaws.lambda#FunctionName"
+    },
+    "Alias": {
+     "target": "com.amazonaws.lambda#Alias"
+    }
+   },
+   "traits": {
+    "aws.api#arn": {
+     "template": "function:{FunctionName}:{Alias}"
+    },
+    "aws.iam#conditionKeys": [
+     "aws:ResourceTag/${TagKey}"
+    ],
+    "aws.iam#iamResource": {
+     "disableConditionKeyInheritance": true,
+     "name": "function alias",
+     "relativeDocumentation": "lambda-api-permissions-ref.html"
+    },
+    "smithy.api#suppress": [
+     "IamResourceTrait"
+    ],
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FunctionArn": {
+   "type": "string",
+   "traits": {
+    "aws.api#arnReference": {
+     "type": "AWS::Lambda::Function",
+     "resource": "com.amazonaws.lambda#Function"
+    },
+    "smithy.api#length": {
+     "min": 0,
+     "max": 10000
+    },
+    "smithy.api#pattern": "^arn:(aws[a-zA-Z-]*)?:lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9-_]+(:(\\$LATEST|[a-zA-Z0-9-_]+))?$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FunctionCodeLocation": {
+   "type": "structure",
+   "members": {
+    "RepositoryType": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Location": {
+     "target": "com.amazonaws.lambda#SensitiveStringOnServerOnly",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ImageUri": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ResolvedImageUri": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ResolvedS3Object": {
+     "target": "com.amazonaws.lambda#ResolvedS3Object",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "SourceKMSKeyArn": {
+     "target": "com.amazonaws.lambda#KMSKeyArn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Error": {
+     "target": "com.amazonaws.lambda#FunctionCodeLocationError",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FunctionCodeLocationError": {
+   "type": "structure",
+   "members": {
+    "ErrorCode": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#SensitiveString",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FunctionConfiguration": {
+   "type": "structure",
+   "members": {
+    "FunctionName": {
+     "target": "com.amazonaws.lambda#NamespacedFunctionName",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionArn": {
+     "target": "com.amazonaws.lambda#NameSpacedFunctionArn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Runtime": {
+     "target": "com.amazonaws.lambda#Runtime",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Role": {
+     "target": "com.amazonaws.lambda#RoleArn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Handler": {
+     "target": "com.amazonaws.lambda#Handler",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "CodeSize": {
+     "target": "com.amazonaws.lambda#Long",
+     "traits": {
+      "smithy.api#default": 0,
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Description": {
+     "target": "com.amazonaws.lambda#Description",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Timeout": {
+     "target": "com.amazonaws.lambda#Timeout",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "MemorySize": {
+     "target": "com.amazonaws.lambda#MemorySize",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "LastModified": {
+     "target": "com.amazonaws.lambda#Timestamp",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "CodeSha256": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Version": {
+     "target": "com.amazonaws.lambda#Version",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "VpcConfig": {
+     "target": "com.amazonaws.lambda#VpcConfigResponse",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DeadLetterConfig": {
+     "target": "com.amazonaws.lambda#DeadLetterConfig",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Environment": {
+     "target": "com.amazonaws.lambda#EnvironmentResponse",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "KMSKeyArn": {
+     "target": "com.amazonaws.lambda#KMSKeyArn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "TracingConfig": {
+     "target": "com.amazonaws.lambda#TracingConfigResponse",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "MasterArn": {
+     "target": "com.amazonaws.lambda#FunctionArn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "RevisionId": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Layers": {
+     "target": "com.amazonaws.lambda#LayersReferenceList",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "State": {
+     "target": "com.amazonaws.lambda#State",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "StateReason": {
+     "target": "com.amazonaws.lambda#StateReason",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "StateReasonCode": {
+     "target": "com.amazonaws.lambda#StateReasonCode",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "LastUpdateStatus": {
+     "target": "com.amazonaws.lambda#LastUpdateStatus",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "LastUpdateStatusReason": {
+     "target": "com.amazonaws.lambda#LastUpdateStatusReason",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "LastUpdateStatusReasonCode": {
+     "target": "com.amazonaws.lambda#LastUpdateStatusReasonCode",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FileSystemConfigs": {
+     "target": "com.amazonaws.lambda#FileSystemConfigList",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "SigningProfileVersionArn": {
+     "target": "com.amazonaws.lambda#Arn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "SigningJobArn": {
+     "target": "com.amazonaws.lambda#Arn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "PackageType": {
+     "target": "com.amazonaws.lambda#PackageType",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ImageConfigResponse": {
+     "target": "com.amazonaws.lambda#ImageConfigResponse",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Architectures": {
+     "target": "com.amazonaws.lambda#ArchitecturesList",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EphemeralStorage": {
+     "target": "com.amazonaws.lambda#EphemeralStorage",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "SnapStart": {
+     "target": "com.amazonaws.lambda#SnapStartResponse",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "RuntimeVersionConfig": {
+     "target": "com.amazonaws.lambda#RuntimeVersionConfig",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "LoggingConfig": {
+     "target": "com.amazonaws.lambda#LoggingConfig",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "TenancyConfig": {
+     "target": "com.amazonaws.lambda#TenancyConfig",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "CapacityProviderConfig": {
+     "target": "com.amazonaws.lambda#CapacityProviderConfig",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ConfigSha256": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DurableConfig": {
+     "target": "com.amazonaws.lambda#DurableConfig",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FunctionList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.lambda#FunctionConfiguration",
+    "traits": {
+     "smithy.api#tags": [
+      "feature:public"
+     ]
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FunctionName": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 140
+    },
+    "smithy.api#pattern": "^(arn:(aws[a-zA-Z-]*)?:lambda:)?((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:)?(\\d{12}:)?(function:)?([a-zA-Z0-9-_]+)(:(\\$LATEST|[a-zA-Z0-9-_]+))?$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FunctionVersion": {
+   "type": "enum",
+   "members": {
+    "ALL": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ALL",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#FunctionVersionResource": {
+   "type": "resource",
+   "identifiers": {
+    "FunctionName": {
+     "target": "com.amazonaws.lambda#FunctionName"
+    },
+    "Version": {
+     "target": "com.amazonaws.lambda#Version"
+    }
+   },
+   "traits": {
+    "aws.api#arn": {
+     "template": "function:{FunctionName}:{Version}"
+    },
+    "aws.iam#conditionKeys": [
+     "aws:ResourceTag/${TagKey}"
+    ],
+    "aws.iam#iamResource": {
+     "disableConditionKeyInheritance": true,
+     "name": "function version",
+     "relativeDocumentation": "lambda-api-permissions-ref.html"
+    },
+    "smithy.api#suppress": [
+     "IamResourceTrait"
+    ],
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#GetFunction": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.lambda#GetFunctionRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.lambda#GetFunctionResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.lambda#InvalidParameterValueException"
+    },
+    {
+     "target": "com.amazonaws.lambda#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.lambda#ServiceException"
+    },
+    {
+     "target": "com.amazonaws.lambda#TooManyRequestsException"
+    }
+   ],
+   "traits": {
+    "aws.iam#iamAction": {
+     "documentation": "Grants permission to view details about an AWS Lambda function",
+     "relativeDocumentation": "API_GetFunction.html",
+     "resources": {
+      "required": {
+       "function": {}
+      }
+     }
+    },
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/2015-03-31/functions/{FunctionName}",
+     "code": 200
+    },
+    "smithy.api#readonly": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#GetFunctionRequest": {
+   "type": "structure",
+   "members": {
+    "FunctionName": {
+     "target": "com.amazonaws.lambda#NamespacedFunctionName",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Qualifier": {
+     "target": "com.amazonaws.lambda#NumericLatestPublishedOrAliasQualifier",
+     "traits": {
+      "smithy.api#httpQuery": "Qualifier",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#GetFunctionResponse": {
+   "type": "structure",
+   "members": {
+    "Configuration": {
+     "target": "com.amazonaws.lambda#FunctionConfiguration",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Code": {
+     "target": "com.amazonaws.lambda#FunctionCodeLocation",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Tags": {
+     "target": "com.amazonaws.lambda#Tags",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "TagsError": {
+     "target": "com.amazonaws.lambda#TagsError",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Concurrency": {
+     "target": "com.amazonaws.lambda#Concurrency",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#output": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Handler": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 128
+    },
+    "smithy.api#pattern": "^[^\\s]+$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ImageConfig": {
+   "type": "structure",
+   "members": {
+    "EntryPoint": {
+     "target": "com.amazonaws.lambda#StringList",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Command": {
+     "target": "com.amazonaws.lambda#StringList",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "WorkingDirectory": {
+     "target": "com.amazonaws.lambda#WorkingDirectory",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ImageConfigError": {
+   "type": "structure",
+   "members": {
+    "ErrorCode": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#SensitiveString",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ImageConfigResponse": {
+   "type": "structure",
+   "members": {
+    "ImageConfig": {
+     "target": "com.amazonaws.lambda#ImageConfig",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Error": {
+     "target": "com.amazonaws.lambda#ImageConfigError",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Integer": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#default": 0,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#InvalidParameterValueException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 400,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#InvalidRequestContentException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 400,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#InvalidRuntimeException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#InvalidSecurityGroupIDException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#InvalidSubnetIDException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#InvalidZipFileException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#InvocationRequest": {
+   "type": "structure",
+   "members": {
+    "FunctionName": {
+     "target": "com.amazonaws.lambda#NamespacedFunctionName",
+     "traits": {
+      "smithy.api#httpLabel": {},
+      "smithy.api#required": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvocationType": {
+     "target": "com.amazonaws.lambda#InvocationType",
+     "traits": {
+      "smithy.api#httpHeader": "X-Amz-Invocation-Type",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "LogType": {
+     "target": "com.amazonaws.lambda#LogType",
+     "traits": {
+      "smithy.api#httpHeader": "X-Amz-Log-Type",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ClientContext": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#httpHeader": "X-Amz-Client-Context",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DurableExecutionName": {
+     "target": "com.amazonaws.lambda#DurableExecutionName",
+     "traits": {
+      "smithy.api#httpHeader": "X-Amz-Durable-Execution-Name",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Payload": {
+     "target": "com.amazonaws.lambda#Blob",
+     "traits": {
+      "smithy.api#httpPayload": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Qualifier": {
+     "target": "com.amazonaws.lambda#NumericLatestPublishedOrAliasQualifier",
+     "traits": {
+      "smithy.api#httpQuery": "Qualifier",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "TenantId": {
+     "target": "com.amazonaws.lambda#TenantId",
+     "traits": {
+      "smithy.api#httpHeader": "X-Amz-Tenant-Id",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#InvocationResponse": {
+   "type": "structure",
+   "members": {
+    "StatusCode": {
+     "target": "com.amazonaws.lambda#Integer",
+     "traits": {
+      "smithy.api#default": 0,
+      "smithy.api#httpResponseCode": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionError": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#httpHeader": "X-Amz-Function-Error",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "LogResult": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#httpHeader": "X-Amz-Log-Result",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Payload": {
+     "target": "com.amazonaws.lambda#Blob",
+     "traits": {
+      "smithy.api#httpPayload": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ExecutedVersion": {
+     "target": "com.amazonaws.lambda#Version",
+     "traits": {
+      "smithy.api#httpHeader": "X-Amz-Executed-Version",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DurableExecutionArn": {
+     "target": "com.amazonaws.lambda#DurableExecutionArn",
+     "traits": {
+      "smithy.api#httpHeader": "X-Amz-Durable-Execution-Arn",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#output": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#InvocationType": {
+   "type": "enum",
+   "members": {
+    "Event": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Event",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "RequestResponse": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "RequestResponse",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DryRun": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DryRun",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Invoke": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.lambda#InvocationRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.lambda#InvocationResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.lambda#CodeArtifactUserDeletedException"
+    },
+    {
+     "target": "com.amazonaws.lambda#CodeArtifactUserFailedException"
+    },
+    {
+     "target": "com.amazonaws.lambda#CodeArtifactUserPendingException"
+    },
+    {
+     "target": "com.amazonaws.lambda#DurableExecutionAlreadyStartedException"
+    },
+    {
+     "target": "com.amazonaws.lambda#EC2AccessDeniedException"
+    },
+    {
+     "target": "com.amazonaws.lambda#EC2ThrottledException"
+    },
+    {
+     "target": "com.amazonaws.lambda#EC2UnexpectedException"
+    },
+    {
+     "target": "com.amazonaws.lambda#EFSIOException"
+    },
+    {
+     "target": "com.amazonaws.lambda#EFSMountConnectivityException"
+    },
+    {
+     "target": "com.amazonaws.lambda#EFSMountFailureException"
+    },
+    {
+     "target": "com.amazonaws.lambda#EFSMountTimeoutException"
+    },
+    {
+     "target": "com.amazonaws.lambda#ENILimitReachedException"
+    },
+    {
+     "target": "com.amazonaws.lambda#ENINotReadyException"
+    },
+    {
+     "target": "com.amazonaws.lambda#InvalidParameterValueException"
+    },
+    {
+     "target": "com.amazonaws.lambda#InvalidRequestContentException"
+    },
+    {
+     "target": "com.amazonaws.lambda#InvalidRuntimeException"
+    },
+    {
+     "target": "com.amazonaws.lambda#InvalidSecurityGroupIDException"
+    },
+    {
+     "target": "com.amazonaws.lambda#InvalidSubnetIDException"
+    },
+    {
+     "target": "com.amazonaws.lambda#InvalidZipFileException"
+    },
+    {
+     "target": "com.amazonaws.lambda#KMSAccessDeniedException"
+    },
+    {
+     "target": "com.amazonaws.lambda#KMSDisabledException"
+    },
+    {
+     "target": "com.amazonaws.lambda#KMSInvalidStateException"
+    },
+    {
+     "target": "com.amazonaws.lambda#KMSNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.lambda#ModeNotSupportedException"
+    },
+    {
+     "target": "com.amazonaws.lambda#NoPublishedVersionException"
+    },
+    {
+     "target": "com.amazonaws.lambda#RecursiveInvocationException"
+    },
+    {
+     "target": "com.amazonaws.lambda#RequestTooLargeException"
+    },
+    {
+     "target": "com.amazonaws.lambda#ResourceConflictException"
+    },
+    {
+     "target": "com.amazonaws.lambda#ResourceNotFoundException"
+    },
+    {
+     "target": "com.amazonaws.lambda#ResourceNotReadyException"
+    },
+    {
+     "target": "com.amazonaws.lambda#S3FilesMountConnectivityException"
+    },
+    {
+     "target": "com.amazonaws.lambda#S3FilesMountFailureException"
+    },
+    {
+     "target": "com.amazonaws.lambda#S3FilesMountTimeoutException"
+    },
+    {
+     "target": "com.amazonaws.lambda#SerializedRequestEntityTooLargeException"
+    },
+    {
+     "target": "com.amazonaws.lambda#ServiceException"
+    },
+    {
+     "target": "com.amazonaws.lambda#ServiceQuotaExceededException"
+    },
+    {
+     "target": "com.amazonaws.lambda#SnapStartException"
+    },
+    {
+     "target": "com.amazonaws.lambda#SnapStartNotReadyException"
+    },
+    {
+     "target": "com.amazonaws.lambda#SnapStartRegenerationFailureException"
+    },
+    {
+     "target": "com.amazonaws.lambda#SnapStartTimeoutException"
+    },
+    {
+     "target": "com.amazonaws.lambda#SubnetIPAddressLimitReachedException"
+    },
+    {
+     "target": "com.amazonaws.lambda#TooManyRequestsException"
+    },
+    {
+     "target": "com.amazonaws.lambda#UnsupportedMediaTypeException"
+    }
+   ],
+   "traits": {
+    "aws.iam#conditionKeys": [
+     "lambda:EventSourceToken"
+    ],
+    "aws.iam#iamAction": {
+     "name": "InvokeFunction",
+     "documentation": "Grants permission to invoke an AWS Lambda function",
+     "relativeDocumentation": "API_Invoke.html",
+     "resources": {
+      "required": {
+       "function": {}
+      }
+     }
+    },
+    "smithy.api#http": {
+     "method": "POST",
+     "uri": "/2015-03-31/functions/{FunctionName}/invocations",
+     "code": 200
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#KMSAccessDeniedException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public",
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public",
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public",
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#KMSDisabledException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public",
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public",
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public",
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#KMSInvalidStateException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public",
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public",
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public",
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#KMSKeyArn": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 10000
+    },
+    "smithy.api#pattern": "^(arn:(aws[a-zA-Z-]*)?:[a-z0-9-.]+:.*)|()$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#KMSNotFoundException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public",
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public",
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public",
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LambdaManagedInstancesCapacityProviderConfig": {
+   "type": "structure",
+   "members": {
+    "CapacityProviderArn": {
+     "target": "com.amazonaws.lambda#CapacityProviderArn",
+     "traits": {
+      "smithy.api#required": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "PerExecutionEnvironmentMaxConcurrency": {
+     "target": "com.amazonaws.lambda#PerExecutionEnvironmentMaxConcurrency",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ExecutionEnvironmentMemoryGiBPerVCpu": {
+     "target": "com.amazonaws.lambda#ExecutionEnvironmentMemoryGiBPerVCpu",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LastUpdateStatus": {
+   "type": "enum",
+   "members": {
+    "Successful": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Successful",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Failed": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Failed",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InProgress": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InProgress",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LastUpdateStatusReason": {
+   "type": "string",
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LastUpdateStatusReasonCode": {
+   "type": "enum",
+   "members": {
+    "EniLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EniLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InsufficientRolePermissions": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InsufficientRolePermissions",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidConfiguration": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidConfiguration",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InternalError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InternalError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "SubnetOutOfIPAddresses": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "SubnetOutOfIPAddresses",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidSubnet": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidSubnet",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidSecurityGroup": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidSecurityGroup",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ImageDeleted": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ImageDeleted",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ImageAccessDenied": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ImageAccessDenied",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidImage": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidImage",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "KMSKeyAccessDenied": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KMSKeyAccessDenied",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "KMSKeyNotFound": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KMSKeyNotFound",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidStateKMSKey": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidStateKMSKey",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DisabledKMSKey": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DisabledKMSKey",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EFSIOError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EFSIOError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EFSMountConnectivityError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EFSMountConnectivityError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EFSMountFailure": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EFSMountFailure",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EFSMountTimeout": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EFSMountTimeout",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidRuntime": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidRuntime",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidZipFileException": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidZipFileException",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ServiceQuotaExceededException": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ServiceQuotaExceededException",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "VcpuLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "VcpuLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "CapacityProviderScalingLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CapacityProviderScalingLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InsufficientCapacity": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InsufficientCapacity",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EC2RequestLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EC2RequestLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorInitTimeout": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.InitTimeout",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorRuntimeInitError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.RuntimeInitError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorExtensionInitError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.ExtensionInitError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorInvalidEntryPoint": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.InvalidEntryPoint",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorInvalidWorkingDirectory": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.InvalidWorkingDirectory",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorPermissionDenied": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.PermissionDenied",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorTooManyExtensions": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.TooManyExtensions",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorInitResourceExhausted": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.InitResourceExhausted",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DisallowedByVpcEncryptionControl": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DisallowedByVpcEncryptionControl",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DependencyError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DependencyError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Layer": {
+   "type": "structure",
+   "members": {
+    "Arn": {
+     "target": "com.amazonaws.lambda#LayerVersionArn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "CodeSize": {
+     "target": "com.amazonaws.lambda#Long",
+     "traits": {
+      "smithy.api#default": 0,
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "SigningProfileVersionArn": {
+     "target": "com.amazonaws.lambda#Arn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "SigningJobArn": {
+     "target": "com.amazonaws.lambda#Arn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LayerName": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 140
+    },
+    "smithy.api#pattern": "^(arn:(aws[a-zA-Z-]*)?:lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:layer:[a-zA-Z0-9-_]+)|[a-zA-Z0-9-_]+$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LayerResource": {
+   "type": "resource",
+   "identifiers": {
+    "LayerName": {
+     "target": "com.amazonaws.lambda#LayerName"
+    }
+   },
+   "traits": {
+    "aws.api#arn": {
+     "template": "layer:{LayerName}"
+    },
+    "aws.iam#iamResource": {
+     "disableConditionKeyInheritance": true,
+     "name": "layer",
+     "relativeDocumentation": "lambda-api-permissions-ref.html"
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LayerVersion": {
+   "type": "resource",
+   "identifiers": {
+    "LayerName": {
+     "target": "com.amazonaws.lambda#LayerName"
+    },
+    "LayerVersion": {
+     "target": "com.amazonaws.lambda#String"
+    }
+   },
+   "traits": {
+    "aws.api#arn": {
+     "template": "layer:{LayerName}:{LayerVersion}"
+    },
+    "aws.iam#iamResource": {
+     "disableConditionKeyInheritance": true,
+     "name": "layerVersion",
+     "relativeDocumentation": "lambda-api-permissions-ref.html"
+    },
+    "smithy.api#suppress": [
+     "IamResourceTrait"
+    ],
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LayerVersionArn": {
+   "type": "string",
+   "traits": {
+    "aws.api#arnReference": {
+     "type": "AWS::Lambda::LayerVersion",
+     "resource": "com.amazonaws.lambda#LayerVersion"
+    },
+    "smithy.api#length": {
+     "min": 1,
+     "max": 2048
+    },
+    "smithy.api#pattern": "^((arn:(aws[a-zA-Z-]*)?:lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:layer:[a-zA-Z0-9-_]+:[0-9]+)|(arn:[a-zA-Z0-9-]+:lambda:::awslayer:[a-zA-Z0-9-_]+))$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LayersReferenceList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.lambda#Layer",
+    "traits": {
+     "smithy.api#tags": [
+      "feature:public"
+     ]
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ListFunctions": {
+   "type": "operation",
+   "input": {
+    "target": "com.amazonaws.lambda#ListFunctionsRequest"
+   },
+   "output": {
+    "target": "com.amazonaws.lambda#ListFunctionsResponse"
+   },
+   "errors": [
+    {
+     "target": "com.amazonaws.lambda#InvalidParameterValueException"
+    },
+    {
+     "target": "com.amazonaws.lambda#ServiceException"
+    },
+    {
+     "target": "com.amazonaws.lambda#TooManyRequestsException"
+    }
+   ],
+   "traits": {
+    "aws.iam#iamAction": {
+     "documentation": "Grants permission to retrieve a list of AWS Lambda functions, with the version-specific configuration of each function",
+     "relativeDocumentation": "API_ListFunctions.html"
+    },
+    "smithy.api#http": {
+     "method": "GET",
+     "uri": "/2015-03-31/functions",
+     "code": 200
+    },
+    "smithy.api#paginated": {
+     "items": "Functions"
+    },
+    "smithy.api#readonly": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ListFunctionsRequest": {
+   "type": "structure",
+   "members": {
+    "MasterRegion": {
+     "target": "com.amazonaws.lambda#MasterRegion",
+     "traits": {
+      "smithy.api#httpQuery": "MasterRegion",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionVersion": {
+     "target": "com.amazonaws.lambda#FunctionVersion",
+     "traits": {
+      "smithy.api#httpQuery": "FunctionVersion",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Marker": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#httpQuery": "Marker",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "MaxItems": {
+     "target": "com.amazonaws.lambda#MaxListItems",
+     "traits": {
+      "smithy.api#httpQuery": "MaxItems",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ListFunctionsResponse": {
+   "type": "structure",
+   "members": {
+    "NextMarker": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Functions": {
+     "target": "com.amazonaws.lambda#FunctionList",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#output": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LocalMountPath": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 160
+    },
+    "smithy.api#pattern": "^/mnt/[a-zA-Z0-9-_.]+$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LogFormat": {
+   "type": "enum",
+   "members": {
+    "Json": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "JSON",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Text": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Text",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LogGroup": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 512
+    },
+    "smithy.api#pattern": "^[\\.\\-_/#A-Za-z0-9]+$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LogType": {
+   "type": "enum",
+   "members": {
+    "None": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "None",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Tail": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Tail",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#LoggingConfig": {
+   "type": "structure",
+   "members": {
+    "LogFormat": {
+     "target": "com.amazonaws.lambda#LogFormat",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ApplicationLogLevel": {
+     "target": "com.amazonaws.lambda#ApplicationLogLevel",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "SystemLogLevel": {
+     "target": "com.amazonaws.lambda#SystemLogLevel",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "LogGroup": {
+     "target": "com.amazonaws.lambda#LogGroup",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Long": {
+   "type": "long",
+   "traits": {
+    "smithy.api#default": 0,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#MasterRegion": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 50
+    },
+    "smithy.api#pattern": "^ALL|(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#MaxListItems": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 10000
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#MemorySize": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 128,
+     "max": 32768
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ModeNotSupportedException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 400,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#NameSpacedFunctionArn": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 10000
+    },
+    "smithy.api#pattern": "^arn:(aws[a-zA-Z-]*)?:lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9-_\\.]+(:(\\$LATEST(\\.PUBLISHED)?|[a-zA-Z0-9-_]+))?$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#NamespacedFunctionName": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 256
+    },
+    "smithy.api#pattern": "^(arn:(aws[a-zA-Z-]*)?:lambda:)?((eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:)?(\\d{12}:)?(function:)?([a-zA-Z0-9-_\\.]+)(:(\\$LATEST(\\.PUBLISHED)?|[a-zA-Z0-9-_]+))?$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#NoPublishedVersionException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 400,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#NullableBoolean": {
+   "type": "boolean",
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#NumericLatestPublishedOrAliasQualifier": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 128
+    },
+    "smithy.api#pattern": "^\\$(LATEST(\\.PUBLISHED)?)|[a-zA-Z0-9-_$]+$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#PackageType": {
+   "type": "enum",
+   "members": {
+    "Zip": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Zip",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Image": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Image",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#PerExecutionEnvironmentMaxConcurrency": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 1600
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Permission": {
+   "type": "resource",
+   "identifiers": {
+    "FunctionName": {
+     "target": "com.amazonaws.lambda#FunctionName"
+    },
+    "StatementId": {
+     "target": "com.amazonaws.lambda#StatementId"
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ProvisionedConcurrencyConfig": {
+   "type": "resource",
+   "identifiers": {
+    "FunctionName": {
+     "target": "com.amazonaws.lambda#FunctionName"
+    },
+    "Qualifier": {
+     "target": "com.amazonaws.lambda#Qualifier"
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Qualifier": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 128
+    },
+    "smithy.api#pattern": "^(|[a-zA-Z0-9$_-]+)$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#RecursiveInvocationException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 400,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#RequestTooLargeException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 413,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ReservedConcurrentExecutions": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 0
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ResolvedS3Object": {
+   "type": "structure",
+   "members": {
+    "S3Bucket": {
+     "target": "com.amazonaws.lambda#S3Bucket",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "S3Key": {
+     "target": "com.amazonaws.lambda#S3Key",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "S3ObjectVersion": {
+     "target": "com.amazonaws.lambda#S3ObjectVersion",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ResourceArn": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 10000
+    },
+    "smithy.api#pattern": "^(arn:(aws[a-zA-Z-]*)?:[a-z0-9-.]+:.*)|()$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ResourceConflictException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 409,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ResourceNotFoundException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 404,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ResourceNotReadyException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#RetentionPeriodInDays": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 90
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#RoleArn": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 10000
+    },
+    "smithy.api#pattern": "^arn:(aws[a-zA-Z-]*)?:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Runtime": {
+   "type": "enum",
+   "members": {
+    "nodejs": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs43": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs4.3",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs610": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs6.10",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs810": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs8.10",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs10x": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs10.x",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs12x": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs12.x",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs14x": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs14.x",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs16x": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs16.x",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs18x": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs18.x",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs20x": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs20.x",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs22x": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs22.x",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs24x": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs24.x",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "java8": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "java8",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "java8al2": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "java8.al2",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "java11": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "java11",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "java17": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "java17",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "java21": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "java21",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "java25": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "java25",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "python27": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "python2.7",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "python36": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "python3.6",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "python37": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "python3.7",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "python38": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "python3.8",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "python39": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "python3.9",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "python310": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "python3.10",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "python311": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "python3.11",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "python312": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "python3.12",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "python313": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "python3.13",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "python314": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "python3.14",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "dotnetcore10": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "dotnetcore1.0",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "dotnetcore20": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "dotnetcore2.0",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "dotnetcore21": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "dotnetcore2.1",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "dotnetcore31": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "dotnetcore3.1",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "dotnet6": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "dotnet6",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "dotnet8": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "dotnet8",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "dotnet10": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "dotnet10",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs43edge": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs4.3-edge",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "go1x": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "go1.x",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ruby25": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ruby2.5",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ruby27": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ruby2.7",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ruby32": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ruby3.2",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ruby33": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ruby3.3",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ruby34": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ruby3.4",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ruby40": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ruby4.0",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "provided": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "provided",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "providedal2": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "provided.al2",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "providedal2023": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "provided.al2023",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "nodejs26x": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "nodejs26.x",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "python315": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "python3.15",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "java8al2023": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "java8.al2023",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "java11al2023": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "java11.al2023",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "java17al2023": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "java17.al2023",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#RuntimeVersionArn": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 26,
+     "max": 2048
+    },
+    "smithy.api#pattern": "^((arn:(aws[a-zA-Z-]*):lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}::runtime:.+)|(arn:(aws[a-zA-Z-]*):lambda:(eusc-)?[a-z]{2}((-gov)|(-iso([a-z]?)))?-[a-z]+-\\d{1}:\\d{12}:runtime/[A-Za-z0-9_.-]{1,128}/version/[A-Za-z0-9_.-]{1,128}))$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#RuntimeVersionConfig": {
+   "type": "structure",
+   "members": {
+    "RuntimeVersionArn": {
+     "target": "com.amazonaws.lambda#RuntimeVersionArn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Error": {
+     "target": "com.amazonaws.lambda#RuntimeVersionError",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#RuntimeVersionError": {
+   "type": "structure",
+   "members": {
+    "ErrorCode": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#SensitiveString",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#S3Bucket": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 3,
+     "max": 63
+    },
+    "smithy.api#pattern": "^[0-9A-Za-z\\.\\-_]*(?<!\\.)$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#S3FilesConfig": {
+   "type": "structure",
+   "members": {
+    "DirectS3Read": {
+     "target": "com.amazonaws.lambda#DirectS3Read",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#S3FilesMountConnectivityException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 408,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#S3FilesMountFailureException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 403,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#S3FilesMountTimeoutException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 408,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#S3Key": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 1024
+    },
+    "smithy.api#pattern": "^.*$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#S3ObjectVersion": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 1024
+    },
+    "smithy.api#pattern": "^.*$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SecurityGroupId": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 1024
+    },
+    "smithy.api#pattern": "^sg-[0-9a-zA-Z]*$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SecurityGroupIds": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.lambda#SecurityGroupId",
+    "traits": {
+     "smithy.api#tags": [
+      "feature:public"
+     ]
+    }
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 5
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SensitiveString": {
+   "type": "string",
+   "traits": {
+    "smithy.api#sensitive": {},
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SensitiveStringOnServerOnly": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 10000
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SerializedRequestEntityTooLargeException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 413,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ServiceException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 500,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ServiceQuotaExceededException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 402,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SnapStartApplyOn": {
+   "type": "enum",
+   "members": {
+    "PublishedVersions": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PublishedVersions",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "None": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "None",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SnapStartException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 400,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SnapStartNotReadyException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 409,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SnapStartOptimizationStatus": {
+   "type": "enum",
+   "members": {
+    "On": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "On",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Off": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Off",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SnapStartRegenerationFailureException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 409,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SnapStartResponse": {
+   "type": "structure",
+   "members": {
+    "ApplyOn": {
+     "target": "com.amazonaws.lambda#SnapStartApplyOn",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "OptimizationStatus": {
+     "target": "com.amazonaws.lambda#SnapStartOptimizationStatus",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SnapStartTimeoutException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 408,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#State": {
+   "type": "enum",
+   "members": {
+    "Pending": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Pending",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Active": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Active",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Inactive": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Inactive",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Failed": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Failed",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Deactivating": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Deactivating",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Deactivated": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Deactivated",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ActiveNonInvocable": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ActiveNonInvocable",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Deleting": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Deleting",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#StateReason": {
+   "type": "string",
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#StateReasonCode": {
+   "type": "enum",
+   "members": {
+    "Idle": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Idle",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Creating": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Creating",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Restoring": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Restoring",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EniLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EniLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InsufficientRolePermissions": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InsufficientRolePermissions",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidConfiguration": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidConfiguration",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InternalError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InternalError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "SubnetOutOfIPAddresses": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "SubnetOutOfIPAddresses",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidSubnet": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidSubnet",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidSecurityGroup": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidSecurityGroup",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ImageDeleted": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ImageDeleted",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ImageAccessDenied": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ImageAccessDenied",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidImage": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidImage",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "KMSKeyAccessDenied": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KMSKeyAccessDenied",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "KMSKeyNotFound": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "KMSKeyNotFound",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidStateKMSKey": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidStateKMSKey",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DisabledKMSKey": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DisabledKMSKey",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EFSIOError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EFSIOError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EFSMountConnectivityError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EFSMountConnectivityError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EFSMountFailure": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EFSMountFailure",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EFSMountTimeout": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EFSMountTimeout",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidRuntime": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidRuntime",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InvalidZipFileException": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InvalidZipFileException",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ServiceQuotaExceededException": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ServiceQuotaExceededException",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "VcpuLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "VcpuLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "CapacityProviderScalingLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CapacityProviderScalingLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "InsufficientCapacity": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "InsufficientCapacity",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "EC2RequestLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "EC2RequestLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorInitTimeout": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.InitTimeout",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorRuntimeInitError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.RuntimeInitError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorExtensionInitError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.ExtensionInitError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorInvalidEntryPoint": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.InvalidEntryPoint",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorInvalidWorkingDirectory": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.InvalidWorkingDirectory",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorPermissionDenied": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.PermissionDenied",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorTooManyExtensions": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.TooManyExtensions",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionErrorInitResourceExhausted": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionError.InitResourceExhausted",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DisallowedByVpcEncryptionControl": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DisallowedByVpcEncryptionControl",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DrainingDurableExecutions": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DrainingDurableExecutions",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "DependencyError": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DependencyError",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#StatementId": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 100
+    },
+    "smithy.api#pattern": "^([a-zA-Z0-9-_]+)$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#String": {
+   "type": "string",
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#StringList": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.lambda#String",
+    "traits": {
+     "smithy.api#tags": [
+      "feature:public"
+     ]
+    }
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 1500
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SubnetIPAddressLimitReachedException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#httpError": 502,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SubnetId": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 1024
+    },
+    "smithy.api#pattern": "^subnet-[0-9a-z]*$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SubnetIds": {
+   "type": "list",
+   "member": {
+    "target": "com.amazonaws.lambda#SubnetId",
+    "traits": {
+     "smithy.api#tags": [
+      "feature:public"
+     ]
+    }
+   },
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 16
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#SystemLogLevel": {
+   "type": "enum",
+   "members": {
+    "Debug": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "DEBUG",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Info": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "INFO",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Warn": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "WARN",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#TagKey": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 128
+    },
+    "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#TagValue": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 256
+    },
+    "smithy.api#pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Tags": {
+   "type": "map",
+   "key": {
+    "target": "com.amazonaws.lambda#TagKey",
+    "traits": {
+     "smithy.api#tags": [
+      "feature:public"
+     ]
+    }
+   },
+   "value": {
+    "target": "com.amazonaws.lambda#TagValue",
+    "traits": {
+     "smithy.api#tags": [
+      "feature:public"
+     ]
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#TagsError": {
+   "type": "structure",
+   "members": {
+    "ErrorCode": {
+     "target": "com.amazonaws.lambda#TagsErrorCode",
+     "traits": {
+      "smithy.api#required": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Message": {
+     "target": "com.amazonaws.lambda#TagsErrorMessage",
+     "traits": {
+      "smithy.api#required": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#TagsErrorCode": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 10,
+     "max": 21
+    },
+    "smithy.api#pattern": "^[A-Za-z]+Exception$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#TagsErrorMessage": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 84,
+     "max": 1000
+    },
+    "smithy.api#pattern": "^.*$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#TenancyConfig": {
+   "type": "structure",
+   "members": {
+    "TenantIsolationMode": {
+     "target": "com.amazonaws.lambda#TenantIsolationMode",
+     "traits": {
+      "smithy.api#required": {},
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#TenantId": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 256
+    },
+    "smithy.api#pattern": "^[a-zA-Z0-9\\._:\\/=+\\-@ ]+$",
+    "smithy.api#tags": [
+     "feature:public",
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#TenantIsolationMode": {
+   "type": "enum",
+   "members": {
+    "PER_TENANT": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PER_TENANT",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#ThrottleReason": {
+   "type": "enum",
+   "members": {
+    "ConcurrentInvocationLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ConcurrentInvocationLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "FunctionInvocationRateLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FunctionInvocationRateLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ReservedFunctionConcurrentInvocationLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ReservedFunctionConcurrentInvocationLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ReservedFunctionInvocationRateLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ReservedFunctionInvocationRateLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "CallerRateLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "CallerRateLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "ConcurrentSnapshotCreateLimitExceeded": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "ConcurrentSnapshotCreateLimitExceeded",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Timeout": {
+   "type": "integer",
+   "traits": {
+    "smithy.api#range": {
+     "min": 1,
+     "max": 5400
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Timestamp": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 100
+    },
+    "smithy.api#pattern": "^.*$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#TooManyRequestsException": {
+   "type": "structure",
+   "members": {
+    "retryAfterSeconds": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#httpHeader": "Retry-After",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Reason": {
+     "target": "com.amazonaws.lambda#ThrottleReason",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 429,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#TracingConfigResponse": {
+   "type": "structure",
+   "members": {
+    "Mode": {
+     "target": "com.amazonaws.lambda#TracingMode",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#TracingMode": {
+   "type": "enum",
+   "members": {
+    "Active": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Active",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "PassThrough": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "PassThrough",
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#UUIDString": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 36,
+     "max": 36
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#UnsupportedMediaTypeException": {
+   "type": "structure",
+   "members": {
+    "Type": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "message": {
+     "target": "com.amazonaws.lambda#String",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.api#httpError": 415,
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#Version": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 1,
+     "max": 1024
+    },
+    "smithy.api#pattern": "^(\\$LATEST|[0-9]+)$",
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#VpcConfigResponse": {
+   "type": "structure",
+   "members": {
+    "SubnetIds": {
+     "target": "com.amazonaws.lambda#SubnetIds",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "SecurityGroupIds": {
+     "target": "com.amazonaws.lambda#SecurityGroupIds",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "VpcId": {
+     "target": "com.amazonaws.lambda#VpcId",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    },
+    "Ipv6AllowedForDualStack": {
+     "target": "com.amazonaws.lambda#NullableBoolean",
+     "traits": {
+      "smithy.api#tags": [
+       "feature:public"
+      ]
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#VpcId": {
+   "type": "string",
+   "traits": {
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  },
+  "com.amazonaws.lambda#WorkingDirectory": {
+   "type": "string",
+   "traits": {
+    "smithy.api#length": {
+     "min": 0,
+     "max": 1000
+    },
+    "smithy.api#tags": [
+     "feature:public"
+    ]
+   }
+  }
+ }
+}
