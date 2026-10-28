@@ -327,7 +327,33 @@ describe('configuration', () => {
       expect(res.all.extractObservablesDefaultOff).toBe(2);
     });
 
-    it('treats old SOs without extractObservables as defaultOn', async () => {
+    it('reads both counts from the buckets when the hit total is capped at 10,000', async () => {
+      savedObjectsClient.find.mockResolvedValue({
+        // Elasticsearch stops counting hits at 10,000; the aggregation still counts every document.
+        total: 10000,
+        saved_objects: [],
+        per_page: 5,
+        page: 1,
+        aggregations: {
+          closureType: { buckets: [] },
+          extractObservables: {
+            buckets: [
+              { doc_count: 7000, key: 1 },
+              { doc_count: 12000, key: 0 },
+            ],
+          },
+        },
+      });
+
+      const res = await getConfigurationTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
+      expect(res.all.extractObservablesDefaultOn).toBe(7000);
+      expect(res.all.extractObservablesDefaultOff).toBe(12000);
+    });
+
+    it('does not count configurations without a value as defaultOn', async () => {
       savedObjectsClient.find.mockResolvedValue({
         total: 4,
         saved_objects: [],
@@ -345,7 +371,7 @@ describe('configuration', () => {
         savedObjectsClient: telemetrySavedObjectsClient,
         logger,
       });
-      expect(res.all.extractObservablesDefaultOn).toBe(3);
+      expect(res.all.extractObservablesDefaultOn).toBe(0);
       expect(res.all.extractObservablesDefaultOff).toBe(1);
     });
   });

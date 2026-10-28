@@ -44,7 +44,9 @@ export const getConfigurationTelemetryData = async ({
   const extractObservablesBuckets = res.aggregations?.extractObservables?.buckets ?? [];
 
   const extractObservablesDefaultOff = findValueInBuckets(extractObservablesBuckets, 0);
-  const extractObservablesDefaultOn = res.total - extractObservablesDefaultOff;
+  // Read both counts from the buckets. `res.total` is a search hit count that Elasticsearch caps
+  // at 10,000, so it cannot be used to derive the enabled count.
+  const extractObservablesDefaultOn = findValueInBuckets(extractObservablesBuckets, 1);
 
   const allCustomFields = res.saved_objects
     .map((sObj) => sObj.attributes.customFields)
