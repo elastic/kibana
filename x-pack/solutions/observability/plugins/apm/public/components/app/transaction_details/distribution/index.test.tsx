@@ -22,13 +22,14 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useFetcherModule from '../../../../hooks/use_fetcher';
-import { fromQuery } from '../../../shared/links/url_helpers';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 
 import type { UrlParams } from '../../../../context/url_params_context/types';
 import { TransactionDistribution } from '.';
 
 interface CapturedWaterfallProps {
   selectedSample?: { traceId: string; transactionId: string } | null;
+  selectedSampleIndex?: number;
   traceSamples?: Array<{ traceId: string; transactionId: string }>;
 }
 
@@ -48,9 +49,11 @@ const coreMock = {
 function Wrapper({
   children,
   urlParams,
+  search,
 }: {
   children?: ReactNode;
   urlParams?: Partial<UrlParams>;
+  search?: string;
 }) {
   const KibanaReactContext = createKibanaReactContext({
     ...coreMock,
@@ -66,6 +69,7 @@ function Wrapper({
   history.replace({
     pathname: '/services/the-service-name/transactions/view',
     search: fromQuery({
+      ...toQuery(search),
       transactionName: 'the-transaction-name',
       rangeFrom: 'now-15m',
       rangeTo: 'now',
@@ -265,6 +269,90 @@ describe('transaction_details/distribution', () => {
         // Passing `null` (not `undefined`) keeps WaterfallWithSummary in the
         // controlled code path that derives the index from the URL.
         expect(lastProps?.selectedSample).toBeNull();
+      });
+
+      // Regression test for #4744: paired documents (e.g. with/without
+      // `gen_ai.*` fields) share the same traceId/transactionId. Selecting by
+      // identifier alone collapses both onto the first match, so navigation to
+      // the second member of the pair must be driven by the URL `sampleIndex`.
+      describe('with samples sharing the same traceId/transactionId', () => {
+        const pairedTraceSamples = [
+          {
+            traceId: 'trace-shared',
+            transactionId: 'tx-shared',
+            score: null,
+            timestamp: '2024-01-01T00:00:00Z',
+          },
+          {
+            traceId: 'trace-shared',
+            transactionId: 'tx-shared',
+            score: null,
+            timestamp: '2024-01-01T00:00:01Z',
+          },
+        ];
+
+        it('resolves the selected sample by URL sampleIndex, not by identifier', async () => {
+          render(
+            <TransactionDistribution
+              onChartSelection={jest.fn()}
+              onClearSelection={jest.fn()}
+              traceSamplesFetchResult={{
+                data: { traceSamples: pairedTraceSamples },
+                status: useFetcherModule.FETCH_STATUS.SUCCESS,
+                error: undefined,
+              }}
+            />,
+            {
+              wrapper: ({ children }: { children?: ReactNode }) => (
+                <Wrapper
+                  urlParams={{ traceId: 'trace-shared', transactionId: 'tx-shared' }}
+                  search={fromQuery({ sampleIndex: 1 })}
+                >
+                  {children}
+                </Wrapper>
+              ),
+            }
+          );
+
+          await waitFor(() => {
+            expect(mockWaterfallWithSummarySpy).toHaveBeenCalled();
+          });
+
+          const lastProps = mockWaterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+          // Without the index the pager would resolve to the first paired sample
+          // (index 0); the URL index must point at the second one instead.
+          expect(lastProps?.selectedSampleIndex).toBe(1);
+          expect(lastProps?.selectedSample).toBe(lastProps?.traceSamples?.[1]);
+        });
+
+        it('falls back to identifier matching when no sampleIndex is in the URL', async () => {
+          render(
+            <TransactionDistribution
+              onChartSelection={jest.fn()}
+              onClearSelection={jest.fn()}
+              traceSamplesFetchResult={{
+                data: { traceSamples: pairedTraceSamples },
+                status: useFetcherModule.FETCH_STATUS.SUCCESS,
+                error: undefined,
+              }}
+            />,
+            {
+              wrapper: ({ children }: { children?: ReactNode }) => (
+                <Wrapper urlParams={{ traceId: 'trace-shared', transactionId: 'tx-shared' }}>
+                  {children}
+                </Wrapper>
+              ),
+            }
+          );
+
+          await waitFor(() => {
+            expect(mockWaterfallWithSummarySpy).toHaveBeenCalled();
+          });
+
+          const lastProps = mockWaterfallWithSummarySpy.mock.calls.at(-1)?.[0];
+          expect(lastProps?.selectedSampleIndex).toBeUndefined();
+          expect(lastProps?.selectedSample).toBe(lastProps?.traceSamples?.[0]);
+        });
       });
     });
   });

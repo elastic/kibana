@@ -62,17 +62,40 @@ export function TransactionDistribution({
 
   const traceSamples = traceSamplesFetchResult.data?.traceSamples;
 
+  // The sample's array position is carried in the URL so that samples sharing
+  // the same traceId/transactionId (e.g. paired `gen_ai.*` documents) can be
+  // navigated individually. Resolving selection by identifier alone collapses
+  // such pairs onto the first match, breaking forward pagination.
+  const selectedSampleIndex = useMemo(() => {
+    const rawSampleIndex = toQuery(history.location.search).sampleIndex;
+    if (rawSampleIndex === undefined) {
+      return undefined;
+    }
+    const parsedIndex = Number(rawSampleIndex);
+    return Number.isInteger(parsedIndex) ? parsedIndex : undefined;
+  }, [history.location.search]);
+
   // Derive the selected sample from the URL so the pagination index stays in
   // sync with browser back/forward navigation. Passing `selectedSample` (even
   // as `null`) puts `WaterfallWithSummary` into its controlled mode, where the
   // index is derived from the URL instead of from local click-only state.
-  const selectedSample = useMemo(
-    () =>
+  // Prefer the explicit index when present so paired samples are kept distinct;
+  // fall back to matching by identifier for URLs without a `sampleIndex`.
+  const selectedSample = useMemo(() => {
+    if (
+      selectedSampleIndex !== undefined &&
+      traceSamples &&
+      selectedSampleIndex >= 0 &&
+      selectedSampleIndex < traceSamples.length
+    ) {
+      return traceSamples[selectedSampleIndex];
+    }
+    return (
       traceSamples?.find(
         (sample) => sample.traceId === traceId && sample.transactionId === transactionId
-      ) ?? null,
-    [traceSamples, traceId, transactionId]
-  );
+      ) ?? null
+    );
+  }, [traceSamples, traceId, transactionId, selectedSampleIndex]);
 
   const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
     start,
@@ -112,13 +135,14 @@ export function TransactionDistribution({
   );
 
   const onSampleClick = useCallback(
-    (sample: { transactionId: string; traceId: string }) => {
+    (sample: { transactionId: string; traceId: string }, index: number) => {
       history.push({
         ...history.location,
         search: fromQuery({
           ...toQuery(history.location.search),
           transactionId: sample.transactionId,
           traceId: sample.traceId,
+          sampleIndex: index,
         }),
       });
     },
@@ -218,6 +242,7 @@ export function TransactionDistribution({
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
           traceSamples={traceSamples}
           selectedSample={selectedSample}
+          selectedSampleIndex={selectedSampleIndex}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}
           logsTableConfig={logsTableConfig}
