@@ -12,3 +12,7 @@ export { type ContextNode, context } from './context';
 export { type DividerNode, divider } from './divider';
 export { type QuoteNode, quote } from './quote';
 export { type ActionsNode, actions } from './actions';
+export { type LinkNode, link } from './link';
+export { type FieldsNode, fields } from './fields';
+export { type CodeNode, code } from './code';
+export { type TableNode, table } from './table';
