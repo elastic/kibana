@@ -52,6 +52,8 @@ export const EntityInventorySearchProvider = ({
   const submit = useCallback(
     ({ dateRange: submittedRange, query: submittedQuery }: EntityInventorySearchSubmitPayload) => {
       let queryToCommit = submittedQuery;
+      // SearchBar submits the raw query text without parsing it; reject invalid KQL here so the
+      // last valid query is kept and consumers never receive a query that fails to parse.
       if (submittedQuery?.language === 'kuery') {
         try {
           fromKueryExpression(submittedQuery.query, {
