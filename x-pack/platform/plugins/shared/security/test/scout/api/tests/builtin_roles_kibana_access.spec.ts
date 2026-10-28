@@ -118,8 +118,7 @@ function compareRoleAccessMaps(
   return { addedRoles, removedRoles, changedRoles };
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/297590
-apiTest.describe.skip(
+apiTest.describe(
   'Built-in roles Kibana access validation',
   {
     tag: tags.stateful.classic,
