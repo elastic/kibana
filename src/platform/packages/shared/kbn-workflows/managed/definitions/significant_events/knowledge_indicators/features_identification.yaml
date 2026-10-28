@@ -78,6 +78,10 @@ triggers:
       - name: maxEntityFilters
         type: number
         description: "Maximum number of entity filters applied during sampling."
+      - name: samplingTimeoutMs
+        type: number
+        default: 60000
+        description: "Deadline (ms) per ES|QL sampling query during features identification sampling."
       - name: maxPreviouslyIdentifiedFeatures
         type: number
         description: "Maximum number of previously identified features sent in the LLM prompt."
@@ -124,6 +128,7 @@ steps:
             entityFilteredRatio: "${{ inputs.entityFilteredRatio }}"
             diverseRatio: "${{ inputs.diverseRatio }}"
             maxEntityFilters: "${{ inputs.maxEntityFilters }}"
+            samplingTimeoutMs: "${{ inputs.samplingTimeoutMs }}"
 
       # 2b: If no documents were returned, stop the loop.
       - name: check_docs

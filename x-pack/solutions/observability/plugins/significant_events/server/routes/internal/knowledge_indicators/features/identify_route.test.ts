@@ -263,6 +263,12 @@ describe('feature identification route schemas', () => {
     expect(
       prepareRoute.params.safeParse({
         ...prepareParams,
+        body: { ...prepareParams.body, samplingTimeoutMs: undefined },
+      }).success
+    ).toBe(false);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
         body: { entityFilteredRatio: 0 },
       }).success
     ).toBe(false);

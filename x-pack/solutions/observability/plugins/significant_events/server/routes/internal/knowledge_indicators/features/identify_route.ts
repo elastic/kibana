@@ -117,7 +117,7 @@ const prepareInferredSamplingRoute = createServerRoute({
       entityFilteredRatio: z.number().min(0).max(1).optional(),
       diverseRatio: z.number().min(0).max(1).optional(),
       maxEntityFilters: z.number().int().min(1).max(50).optional(),
-      samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
+      samplingTimeoutMs: z.number().int().min(1_000).max(240_000),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
@@ -139,7 +139,7 @@ const prepareInferredSamplingRoute = createServerRoute({
       entityFilteredRatio = tuningConfig.entity_filtered_ratio,
       diverseRatio = tuningConfig.diverse_ratio,
       maxEntityFilters = tuningConfig.max_entity_filters,
-      samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
+      samplingTimeoutMs,
     } = params.body;
     const resolvedRunId = runId?.trim() || uuidv4();
 
