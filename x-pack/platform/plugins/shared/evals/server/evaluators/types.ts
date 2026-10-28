@@ -44,16 +44,26 @@ export interface EvaluatorResult {
  */
 export type EvaluatorOrigin = 'built_in' | 'user_defined';
 
-export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
+/**
+ * An evaluator as a plugin registers it. The registry marks it `built_in`, so it resolves in
+ * every space and its name is reserved.
+ */
+export interface RegisteredEvaluatorDefinition<ReferenceData = Record<string, unknown>> {
+  /** Follows the same rules as a user-defined evaluator's name. */
   name: string;
+  /** A semver version. */
   version: string;
   kind: 'llm' | 'code';
-  origin: EvaluatorOrigin;
   description: string;
   direction: Direction;
   referenceDataSchema?: z.ZodType<ReferenceData>;
   evidenceSchema?: z.ZodType<Partial<EvidenceRound>>;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;
+}
+
+export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>>
+  extends RegisteredEvaluatorDefinition<ReferenceData> {
+  origin: EvaluatorOrigin;
 }
 
 /**
@@ -70,4 +80,9 @@ export interface EvaluatorRegistry {
   /** Whether a name is taken by a built-in, and so cannot be defined by a user. */
   isBuiltIn(name: string): boolean;
   asScoped(options: { spaceId: string }): ScopedEvaluatorRegistry;
+  /**
+   * Adds a plugin-owned evaluator next to the ones Kibana ships. Throws for an invalid name
+   * or version, a name Kibana ships, or a name and version already registered.
+   */
+  register(definition: RegisteredEvaluatorDefinition): void;
 }
