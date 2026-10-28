@@ -54,6 +54,7 @@ export {
 export type { PresentationPanelProps } from './react_embeddable_system/panel_component/types';
 
 export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
+export { drilldownsComparators } from './drilldowns/drilldowns_comparators';
 
 import type { PresentationPanelErrorProps } from './react_embeddable_system/panel_component/presentation_panel_error';
 const LazyPanelError = React.lazy(async () => {
