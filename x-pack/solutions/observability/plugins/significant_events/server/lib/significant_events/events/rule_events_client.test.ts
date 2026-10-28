@@ -733,6 +733,16 @@ describe('RuleEventsClient', () => {
       );
     });
 
+    it('reads the newest closed series first, so the row limit can only drop old ones', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findLatestInactiveByIdentity(identity);
+
+      const q = lastQuery(query);
+      expect(q).toContain('SORT @timestamp DESC');
+      expect(q.indexOf('SORT @timestamp DESC')).toBeLessThan(q.indexOf('LIMIT'));
+    });
+
     it('bounds the read by the given inactiveSince, not a fixed window', async () => {
       const { client, query } = createClient(async () => sourceResponse([]));
 
@@ -1005,6 +1015,101 @@ describe('RuleEventsClient', () => {
       ]);
 
       expect((await client.findOperatorDeactivations({ heads })).size).toBe(0);
+    });
+  });
+
+  describe('findEventDeactivations', () => {
+    const groupResponse = (hashes: string[]): ESQLSearchResponse =>
+      ({
+        columns: [{ name: 'group_hash', type: 'keyword' }],
+        values: hashes.map((hash) => [hash]),
+      } as unknown as ESQLSearchResponse);
+    const actionResponse = (
+      rows: Array<[string, string | null, string | null]>
+    ): ESQLSearchResponse =>
+      ({
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'alert_id', type: 'keyword' },
+          { name: 'reason', type: 'text' },
+        ],
+        values: rows,
+      } as unknown as ESQLSearchResponse);
+    const setup = (actions: ESQLSearchResponse, hashes: string[] = ['group-1']) => {
+      const logger = { error: jest.fn() };
+      const query = jest.fn(async (request: EsqlRequest) =>
+        request.query.includes('.alert-actions') ? actions : groupResponse(hashes)
+      );
+      const client = new RuleEventsClient({
+        esClient: { esql: { query } } as never,
+        space: 'default',
+        logger: logger as never,
+      });
+      return { client, query, logger };
+    };
+
+    it('returns the operator deactivations of the event with episode, time and reason', async () => {
+      const { client } = setup(
+        actionResponse([
+          ['2026-10-28T12:48:35.184Z', 'episode-1', '  Known noise  '],
+          ['2026-10-28T15:00:00.000Z', 'episode-2', null],
+        ])
+      );
+
+      expect(await client.findEventDeactivations('event-1')).toEqual([
+        { episode_id: 'episode-1', reason: 'Known noise' },
+        { episode_id: 'episode-2', reason: '' },
+      ]);
+    });
+
+    it('reads only user deactivations of the event series in the space', async () => {
+      const { client, query } = setup(actionResponse([]));
+
+      await client.findEventDeactivations('event-1');
+
+      const text = lastQuery(query, (q) => q.includes('.alert-actions'));
+      expect(text).toContain('space_id == "default"');
+      expect(text).toContain('group_hash == "group-1"');
+      expect(text).toContain('action_type == "deactivate" AND actor.type == "user"');
+    });
+
+    it('logs an error when it has to read with the request credentials', async () => {
+      const { client, logger } = setup(actionResponse([]));
+
+      await client.findEventDeactivations('event-1');
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('deactivation_check_degraded')
+      );
+    });
+
+    it('returns nothing, without reading actions, for an unknown event', async () => {
+      const { client, query } = setup(actionResponse([]), []);
+
+      expect(await client.findEventDeactivations('missing')).toEqual([]);
+      expect(query.mock.calls.some(([request]) => request.query.includes('.alert-actions'))).toBe(
+        false
+      );
+    });
+
+    it('skips an action with no episode', async () => {
+      const { client } = setup(actionResponse([['2026-10-28T12:48:35.184Z', null, 'x']]));
+
+      expect(await client.findEventDeactivations('event-1')).toEqual([]);
+    });
+
+    it('returns nothing and logs a tagged error when the read fails', async () => {
+      const logger = { error: jest.fn() };
+      const client = new RuleEventsClient({
+        esClient: { esql: { query: jest.fn().mockRejectedValue(new Error('boom')) } } as never,
+        space: 'default',
+        logger: logger as never,
+      });
+
+      expect(await client.findEventDeactivations('event-1')).toEqual([]);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('deactivation_history_failed')
+      );
     });
   });
 

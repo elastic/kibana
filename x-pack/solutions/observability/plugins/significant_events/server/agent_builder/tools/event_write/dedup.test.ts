@@ -526,21 +526,25 @@ describe('reopenMatchingInactiveSeries', () => {
     expect(candidate.mode).toBe('dedup');
   });
 
-  it('does not reopen a series for a partial overlap, either way', () => {
-    const subsetOfClosed = reopen(
+  it('reopens a series that holds more rules than the batch, since a series grows while live', () => {
+    const [candidate] = reopen(
       [makeInput()],
       [makeInactiveEvent({ signals: [makeSignal('rule-abc'), makeSignal('rule-def')] })]
     );
-    const supersetOfClosed = reopen(
+
+    expect(candidate).toMatchObject({ mode: 'snapshot', eventId: 'closed-event-id' });
+  });
+
+  it('does not reopen a series that lacks one of the batch rules', () => {
+    const [candidate] = reopen(
       [makeInput({ signals: [makeSignal('rule-abc'), makeSignal('rule-def')] })],
       [makeInactiveEvent()]
     );
 
-    expect(subsetOfClosed[0].mode).toBe('dedup');
-    expect(supersetOfClosed[0].mode).toBe('dedup');
+    expect(candidate.mode).toBe('dedup');
   });
 
-  it('requires the same sources as well as the same rules', () => {
+  it('requires a shared source', () => {
     const [candidate] = reopen([makeInput()], [makeInactiveEvent({ source_ids: ['logs.cart'] })]);
 
     expect(candidate.mode).toBe('dedup');
@@ -568,6 +572,34 @@ describe('reopenMatchingInactiveSeries', () => {
       eventId: 'older',
       reopensSeries: { groupHash: 'group-older' },
     });
+  });
+
+  it('prefers the closest fit over a broader series, even a newer one', () => {
+    const exact = makeInactiveEvent({
+      event_id: 'exact',
+      '@timestamp': '2026-10-27T01:00:00.000Z',
+    });
+    const broad = makeInactiveEvent({
+      event_id: 'broad',
+      '@timestamp': '2026-10-28T01:00:00.000Z',
+      signals: [makeSignal('rule-abc'), makeSignal('rule-def'), makeSignal('rule-ghi')],
+    });
+
+    const [candidate] = reopen([makeInput()], [exact, broad]);
+
+    expect(candidate.eventId).toBe('exact');
+  });
+
+  it('prefers the closest fit over a broader series an operator deactivated', () => {
+    const exact = makeInactiveEvent({ event_id: 'exact' });
+    const broad = makeInactiveEvent({
+      event_id: 'broad',
+      signals: [makeSignal('rule-abc'), makeSignal('rule-def')],
+    });
+
+    const [candidate] = reopen([makeInput()], [exact, broad], undefined, new Set(['group-broad']));
+
+    expect(candidate.eventId).toBe('exact');
   });
 
   it('reopens the newest matching series when no match was deactivated', () => {
@@ -653,6 +685,18 @@ describe('competingInactiveHeads', () => {
     const heads = competingInactiveHeads(buildWriteCandidates([makeInput()]), {
       events: [closed('a'), closed('b')],
       heads: [head('a')],
+    });
+
+    expect(heads).toEqual([]);
+  });
+
+  it('leaves out a broader series, since only the closest fits can tie', () => {
+    const heads = competingInactiveHeads(buildWriteCandidates([makeInput()]), {
+      events: [
+        closed('a'),
+        closed('b', { signals: [makeSignal('rule-abc'), makeSignal('rule-def')] }),
+      ],
+      heads: [head('a'), head('b')],
     });
 
     expect(heads).toEqual([]);

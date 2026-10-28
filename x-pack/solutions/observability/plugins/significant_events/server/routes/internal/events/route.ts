@@ -344,6 +344,7 @@ const eventsLifecycleRoute = createServerRoute({
       return { detections: [], events: [] };
     }
 
+    const deactivationsPromise = eventClient.findEventDeactivations(params.path.id);
     const embedded = collectEmbeddedDetections(events);
     const detectionClient = await getDetectionClient();
     const { hits: allDetectionHits } = await detectionClient.findByIds(
@@ -359,8 +360,10 @@ const eventsLifecycleRoute = createServerRoute({
       return detection ? [detection] : [];
     });
 
+    const deactivations = await deactivationsPromise;
+
     if (params.query?.include_skipped !== 'true') {
-      return { detections, events };
+      return { detections, events, deactivations };
     }
 
     const skipped = await findSkippedDetections({
@@ -372,6 +375,7 @@ const eventsLifecycleRoute = createServerRoute({
     return {
       detections: [...detections, ...skipped.detections],
       events,
+      deactivations,
       ...(skipped.truncated ? { skipped_truncated: true } : {}),
     };
   },

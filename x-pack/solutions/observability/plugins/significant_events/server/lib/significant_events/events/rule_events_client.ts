@@ -22,6 +22,7 @@ import {
   SEVERITY_OPTIONS,
   type SignificantEvent,
   type SignificantEventResponse,
+  type EventDeactivation,
   type Severity,
   type SignalVerdict,
   type SignificantEventStatus,
@@ -690,7 +691,10 @@ export class RuleEventsClient {
 
     const rows = await executeEsqlQuery<RuleEventSourceRow>({
       esClient: this.clients.esClient,
-      query: withDataJsonProjection(query).keep('_source', 'data_json').limit(MAX_DEDUP_SCAN_LIMIT),
+      query: withDataJsonProjection(query)
+        .sort(['@timestamp', 'DESC'], ['_id', 'ASC'])
+        .keep('_source', 'data_json')
+        .limit(MAX_DEDUP_SCAN_LIMIT),
       fields: ['data_json'],
     });
     const hits = rows.map(decodeSignificantEvent);
@@ -732,16 +736,8 @@ export class RuleEventsClient {
         .where`action_type IN ("deactivate", "activate")`
         .sort(['@timestamp', 'DESC'])
         .keep('@timestamp', 'group_hash', 'alert_id', 'action_type', 'actor.type', 'reason');
-      if (this.clients.internalEsClient === undefined) {
-        this.clients.logger?.error(
-          `deactivation_check_degraded: reading ${ALERT_ACTIONS_DATA_STREAM} with the request's credentials because no internal client was given; a missing privilege reads as "not deactivated".`
-        );
-      }
       const rows = esqlToObjects<ActionRow>(
-        await queryEsql({
-          esClient: this.clients.internalEsClient ?? this.clients.esClient,
-          query,
-        })
+        await queryEsql({ esClient: this.actionsEsClient(), query })
       );
 
       const latest = new Map<string, ActionRow>();
@@ -860,6 +856,67 @@ export class RuleEventsClient {
       fields: ['data_json', 'created_at'],
     });
     return { hits: hits.map(decodeSignificantEventResponse) };
+  }
+
+  /**
+   * The client for Alerting v2's private `.alert-actions` index: the internal one, or the request's
+   * own when none was given, which is logged because a missing privilege then reads as "no
+   * deactivation".
+   */
+  private actionsEsClient(): ElasticsearchClient {
+    const { internalEsClient, esClient, logger } = this.clients;
+    if (internalEsClient === undefined) {
+      logger?.error(
+        `deactivation_check_degraded: reading ${ALERT_ACTIONS_DATA_STREAM} with the request's credentials because no internal client was given; a missing privilege reads as "not deactivated".`
+      );
+    }
+    return internalEsClient ?? esClient;
+  }
+
+  /**
+   * Reads every operator deactivation of an event from Alerting v2's `.alert-actions`: the episode
+   * and the operator's reason. It is history, not current state: a deactivation that an operator
+   * later activated again is still listed. The version a deactivation writes to `.rule-events`
+   * only copies the previous version's data, so the reason lives only here. Failures read as no
+   * deactivations and are logged.
+   */
+  async findEventDeactivations(eventId: string): Promise<EventDeactivation[]> {
+    try {
+      const [series] = esqlToObjects<{ group_hash: string }>(
+        await queryEsql({
+          esClient: this.clients.esClient,
+          query: buildBaseQuery(this.clients.space).where`${eventIdEquals(eventId)}`
+            .keep(GROUP_HASH_FIELD)
+            .limit(1),
+        })
+      );
+      if (series === undefined) return [];
+
+      const rows = esqlToObjects<{ alert_id: string | null; reason: string | null }>(
+        await queryEsql({
+          esClient: this.actionsEsClient(),
+          query: esql.from([ALERT_ACTIONS_DATA_STREAM], []).where`space_id == ${esql.str(
+            this.clients.space
+          )}`.where`group_hash == ${esql.str(series.group_hash)}`
+            .where`action_type == "deactivate" AND actor.type == "user"`
+            .sort(['@timestamp', 'ASC'])
+            .keep('alert_id', 'reason'),
+        })
+      );
+      // `alert_id` in `.alert-actions` is the episode id.
+      return rows.flatMap((row) =>
+        row.alert_id === null
+          ? []
+          : [{ episode_id: row.alert_id, reason: (row.reason ?? '').trim() }]
+      );
+    } catch (error) {
+      this.clients.logger?.error(
+        `deactivation_history_failed: could not read deactivations of ${eventId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return [];
+    }
   }
 
   /**

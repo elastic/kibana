@@ -164,26 +164,27 @@ export const fetchInactiveEventsForReuse = async ({
 };
 
 /**
- * Returns true when the candidate's dedup rule set is entirely contained in the corresponding
- * active-event rule set and at least one source id is shared — meaning this detection is already
- * tracked.
+ * Returns true when the candidate's dedup rule set is entirely contained in the event's rule set,
+ * the event has one of `statuses`, and at least one source id is shared — meaning this detection
+ * is already tracked (by a live event) or recurs a series that has closed (by an inactive one).
  *
  * Candidates with confirmed rules compare only confirmed rules on both sides. Candidates without
- * confirmed rules retain all-verdict subset matching. A new identity rule not present in any
- * active event still produces a new event.
+ * confirmed rules retain all-verdict subset matching. A new identity rule not present in the event
+ * still produces a new event.
  *
  * Empty-rule candidates only match empty-rule events to avoid false-matching any event on source
  * overlap alone.
  *
- * Full rule-set coverage is deliberate. A partial overlap can span multiple active events, and
- * selecting one would silently discard the candidate rules owned by the others.
+ * Full rule-set coverage is deliberate. A partial overlap can span multiple events, and selecting
+ * one would silently discard the candidate rules owned by the others. An event may hold more rules
+ * than the candidate: a series grows while it is live, and a recurrence can be one of its rules.
  */
-const isCoveredByActiveEvent = (
+const isCoveredByEvent = (
   candidate: DedupCandidate,
   ev: SignificantEvent,
-  activeStatuses: readonly string[]
+  statuses: readonly string[]
 ): boolean => {
-  if (!activeStatuses.includes(ev.status)) return false;
+  if (!statuses.includes(ev.status)) return false;
 
   const candidateSourceSet = new Set(candidate.input.source_ids);
   const sourcesOverlap = (ev.source_ids ?? []).some((s) => candidateSourceSet.has(s));
@@ -219,7 +220,7 @@ export const resolveDedupSkips = (
   for (const candidate of validCandidates) {
     if (candidate.mode === 'dedup') {
       const duplicate = sortedActiveEvents.find((ev) =>
-        isCoveredByActiveEvent(candidate, ev, SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS)
+        isCoveredByEvent(candidate, ev, SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS)
       );
       if (duplicate) {
         const existingEventId = duplicate.event_id ?? candidate.eventId;
@@ -247,35 +248,41 @@ const newestFirst = (a: SignificantEvent, b: SignificantEvent): number => {
   return timestampOrder !== 0 ? timestampOrder : (b.event_id ?? '').localeCompare(a.event_id ?? '');
 };
 
-/** The identity of an event as a dedup candidate would state it: its sources and rule set. */
-const identityOfEvent = (ev: SignificantEvent, confirmedOnly: boolean): string =>
-  makeIdentity({
-    sourceIds: ev.source_ids ?? [],
-    ruleUuids: extractRuleUuids(confirmedOnly ? confirmedSignals(ev.signals) : ev.signals),
-  });
+interface CoveringSeries {
+  event: SignificantEvent;
+  head: InactiveSeriesHead;
+  /** How many more rules the series holds than the candidate: 0 is the closest fit. */
+  extraRules: number;
+}
 
 /**
- * The closed series that exactly match a dedup candidate's identity, newest first. It expects
- * `series` already paired with their latest episode (see `seriesWithHeads`).
+ * The closed series that cover a dedup candidate, newest first: they share a source with it and
+ * hold every one of its confirmed rules (the coverage rule live dedup uses, applied to inactive
+ * series). It expects `series` already paired with their latest episode (see `seriesWithHeads`).
  */
-const exactInactiveMatches = ({
+const coveringInactiveSeries = ({
   candidate,
   series,
 }: {
   candidate: WriteCandidate;
   series: Array<{ event: SignificantEvent; head: InactiveSeriesHead }>;
-}): Array<{ event: SignificantEvent; head: InactiveSeriesHead }> => {
+}): CoveringSeries[] => {
   if (candidate.mode !== 'dedup' || candidate.ruleUuids.length === 0) return [];
 
-  const identity = makeIdentity({
-    sourceIds: candidate.input.source_ids,
-    ruleUuids: candidate.ruleUuids,
-  });
-  return series.filter(
-    ({ event }) =>
-      event.status === ALERT_EPISODE_STATUS.INACTIVE &&
-      identityOfEvent(event, candidate.confirmedOnly) === identity
-  );
+  return series
+    .filter(({ event }) => isCoveredByEvent(candidate, event, [ALERT_EPISODE_STATUS.INACTIVE]))
+    .map(({ event, head }) => {
+      const heldRules = new Set(
+        extractRuleUuids(candidate.confirmedOnly ? confirmedSignals(event.signals) : event.signals)
+      );
+      return { event, head, extraRules: heldRules.size - new Set(candidate.ruleUuids).size };
+    });
+};
+
+/** The closest-fitting covering series (fewest extra rules); several are tied when they share it. */
+const closestFits = (matches: CoveringSeries[]): CoveringSeries[] => {
+  const fewest = Math.min(...matches.map(({ extraRules }) => extraRules));
+  return matches.filter(({ extraRules }) => extraRules === fewest);
 };
 
 /**
@@ -292,8 +299,8 @@ const seriesWithHeads = ({
   });
 
 /**
- * The latest episodes of the closed series that compete for one candidate: two or more exact
- * matches. Only then does the choice between them need to know which one an operator deactivated,
+ * The latest episodes of the closed series that tie for one candidate: two or more closest-fitting
+ * series. Only then does the choice between them need to know which one an operator deactivated,
  * so this limits the deactivation lookup to those series (merged across candidates, by `event_id`).
  */
 export const competingInactiveHeads = (
@@ -302,19 +309,19 @@ export const competingInactiveHeads = (
 ): InactiveSeriesHead[] => {
   const series = seriesWithHeads(inactive);
   const competing = candidates
-    .map((candidate) => exactInactiveMatches({ candidate, series }))
-    .filter((matches) => matches.length > 1)
+    .map((candidate) => closestFits(coveringInactiveSeries({ candidate, series })))
+    .filter((tied) => tied.length > 1)
     .flat()
     .map(({ head }) => head);
   return [...new Map(competing.map((head) => [head.eventId, head])).values()];
 };
 
 /**
- * Turns each dedup candidate whose identity exactly matches a closed series into a continuation of
- * that series: it keeps the series' `event_id`, so the write opens a new episode under it. A
- * partial overlap never reopens a closed series, and a candidate that no closed series matches stays
- * a new event. When several closed series match, the one an operator deactivated is reopened, so
- * the hold applies to it; otherwise the newest one.
+ * Turns each dedup candidate that a closed series covers into a continuation of that series: it
+ * keeps the series' `event_id`, so the write opens a new episode under it. A candidate with a rule
+ * the series does not hold, or with no shared source, stays a new event. When several closed series
+ * cover it, the closest fit wins (fewest extra rules); among equals the one an operator deactivated
+ * is reopened, so the hold applies to it, otherwise the newest.
  */
 export const reopenMatchingInactiveSeries = ({
   candidates,
@@ -323,15 +330,14 @@ export const reopenMatchingInactiveSeries = ({
 }: {
   candidates: WriteCandidate[];
   inactive: InactiveSeries;
-  /** The `group_hash` of the closed series an operator deactivated; it needs to cover only the competing ones. */
+  /** The `group_hash` of the closed series an operator deactivated; only the tied ones are needed. */
   deactivatedGroupHashes?: ReadonlySet<string>;
 }): WriteCandidate[] => {
   const series = seriesWithHeads(inactive);
 
   return candidates.map((candidate): WriteCandidate => {
-    const matches = exactInactiveMatches({ candidate, series });
-    const chosen =
-      matches.find(({ head }) => deactivatedGroupHashes.has(head.groupHash)) ?? matches[0];
+    const tied = closestFits(coveringInactiveSeries({ candidate, series }));
+    const chosen = tied.find(({ head }) => deactivatedGroupHashes.has(head.groupHash)) ?? tied[0];
     // `event_id` is optional on the type; every paired series has one.
     if (chosen?.event.event_id === undefined) return candidate;
 

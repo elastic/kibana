@@ -90,7 +90,7 @@ export async function eventsWriteBulkHandler({
   source?: EventsWriteSource;
   /** Discovery-only guard for explicit IDs that have no canonical event history. */
   rejectUnknownEventIds?: boolean;
-  /** How long a closed series stays reusable by an exact-identity batch (default 48 h). */
+  /** How long a closed series stays reusable by a batch it covers (default 48 h). */
   inactiveLookbackMs?: number;
   logger?: Logger;
 }): Promise<EventsWriteBulkResult[]> {
@@ -274,7 +274,7 @@ const isReopeningCandidate = (candidate: ResolvedWriteCandidate): candidate is R
 /**
  * Sets aside the writes that would reopen a series an operator deactivated, so the agent can read the
  * operator's reason before the series reopens. A write that carries `reopen_deactivated` has read it
- * and goes through. Only a new-event batch that matched a closed series exactly can be held: an
+ * and goes through. Only a new-event batch that a closed series covers can be held: an
  * item that names a closed event itself has no series head to look a deactivation up by.
  */
 const holdDeactivatedReopens = async ({

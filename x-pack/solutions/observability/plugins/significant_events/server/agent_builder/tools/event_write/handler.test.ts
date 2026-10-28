@@ -1443,7 +1443,7 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-a']);
   });
 
-  it('opens a new event when the closed series only partly overlaps the batch', async () => {
+  it('reopens a closed series that holds more rules than the batch', async () => {
     const closed = closedSeries({
       signals: [
         makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' }),
@@ -1454,6 +1454,25 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: clientWithClosedSeries(closed),
       inputs: [breachFor('rule-a')],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, event_id: closedEventId, status: 'active' });
+    const [written] = writtenDocs();
+    expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-a']);
+  });
+
+  it('opens a new event when the batch has a rule the closed series lacks', async () => {
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: clientWithClosedSeries(),
+      inputs: [
+        {
+          ...breachFor('rule-a'),
+          signals: [
+            makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' }),
+            makeDetectionSignal({ ruleUuid: 'rule-z', verdict: 'confirms' }),
+          ],
+        },
+      ],
     });
 
     expect(results[0]).toMatchObject({ written: true, status: 'active' });

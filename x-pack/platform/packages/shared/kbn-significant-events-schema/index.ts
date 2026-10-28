@@ -36,6 +36,7 @@ export {
 
 export type {
   EventLifecycleResponse,
+  EventDeactivation,
   GeneratedSignificantEventQuery,
   LifecycleDetection,
   QueryWithOccurrences,

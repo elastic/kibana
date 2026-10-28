@@ -306,8 +306,9 @@ continuation binds the matched `event_id` to this detection's topology from grou
 - An inactive event is never a routing target: you never pass its `event_id`. `status: "active"`
   search results include recovering events: they are still live, so route to one normally. A write
   onto a recovering event records the new evidence. If a search result is inactive, discard it for
-  routing. A new-event item that matches a closed series exactly is reopened by the write itself,
-  under that series' `event_id` and a new episode; a held result is handled in Step 6.
+  routing. A new-event item is reopened by the write itself, under the closed series' `event_id`
+  and a new episode, when that series shares a source and holds all the item's confirmed rules (it
+  may hold more); a held result is handled in Step 6.
   Detections not accepted here are new-event candidates for Step 3.
 
 For events returned by `platform_sig_events_event_search`, derive:

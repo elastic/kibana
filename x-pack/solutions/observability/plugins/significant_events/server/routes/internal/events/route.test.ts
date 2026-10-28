@@ -385,6 +385,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
         licensing: {},
         getEventSearchClient: () => ({
           findByEventId: jest.fn().mockResolvedValue({ hits: [firstVersion, latestVersion] }),
+          findEventDeactivations: jest.fn().mockResolvedValue([]),
         }),
         getDetectionClient: () => ({
           findByIds: jest.fn().mockResolvedValue({ hits: [] }),
@@ -395,6 +396,53 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
     } as never);
 
     expect(response.events).toEqual([firstVersion, latestVersion]);
+  });
+});
+
+describe('GET /internal/significant_events/events/{id}/lifecycle, deactivations', () => {
+  it('returns the operator deactivations of the event with the versions', async () => {
+    const deactivations = [{ episode_id: 'episode-1', reason: 'Known noise' }];
+
+    const response = await lifecycleRoute.handler({
+      params: { path: { id: 'event-1' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({
+          findByEventId: jest.fn().mockResolvedValue({ hits: [{ event_id: 'event-1' }] }),
+          findEventDeactivations: jest.fn().mockResolvedValue(deactivations),
+        }),
+        getDetectionClient: () => ({
+          findByIds: jest.fn().mockResolvedValue({ hits: [] }),
+        }),
+      }),
+      server: {},
+    } as never);
+
+    expect(response.deactivations).toEqual(deactivations);
+  });
+
+  it('returns the deactivations together with the skipped detections', async () => {
+    const deactivations = [{ episode_id: 'episode-1', reason: 'Known noise' }];
+
+    const response = await lifecycleRoute.handler({
+      params: { path: { id: 'event-1' }, query: { include_skipped: 'true' as const } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({
+          findByEventId: jest.fn().mockResolvedValue({ hits: [{ event_id: 'event-1' }] }),
+          findEventDeactivations: jest.fn().mockResolvedValue(deactivations),
+        }),
+        getDetectionClient: () => ({
+          findByIds: jest.fn().mockResolvedValue({ hits: [] }),
+          findSkippedForEvent: jest.fn().mockResolvedValue({ hits: [], truncated: false }),
+        }),
+      }),
+      server: {},
+    } as never);
+
+    expect(response.deactivations).toEqual(deactivations);
   });
 });
 
@@ -457,6 +505,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
         licensing: {},
         getEventSearchClient: () => ({
           findByEventId: jest.fn().mockResolvedValue({ hits: [event] }),
+          findEventDeactivations: jest.fn().mockResolvedValue([]),
         }),
         getDetectionClient: () => ({
           findByIds: jest.fn().mockResolvedValue({ hits: embedded }),
