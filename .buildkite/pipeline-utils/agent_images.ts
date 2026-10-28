@@ -23,8 +23,9 @@ export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
-  // `undefined` uses the agent image default (85 GB); set a larger number to override it.
-  diskSizeGb: undefined,
+  // Boot disk (GB). Without it the agent manager provisions 100 GB. PR jobs peak at ~66 GB, so
+  // 85 GB leaves ample headroom. Steps that need more set their own `diskSizeGb`.
+  diskSizeGb: 85,
 };
 
 const getFIPSImage = () => {
@@ -42,6 +43,8 @@ const getFIPSImage = () => {
   return {
     ...DEFAULT_AGENT_IMAGE_CONFIG,
     image,
+    // FIPS image disk usage has not been measured; keep the agent manager default.
+    diskSizeGb: undefined,
   };
 };
 
