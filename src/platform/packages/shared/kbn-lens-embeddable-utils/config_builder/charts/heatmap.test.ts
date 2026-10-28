@@ -94,7 +94,6 @@ test('generates metric chart config', async () => {
             "isYAxisLabelVisible": false,
             "isYAxisTitleVisible": false,
             "type": "heatmap_grid",
-            "ySortPredicate": "desc",
           },
           "layerId": "layer_0",
           "layerType": "data",
