@@ -1291,7 +1291,7 @@ describe('detection rule workflows', () => {
           'query',
           'does not support saved query rules or machine learning rules',
         ],
-        ['esql', 'exception', 'cannot apply an exception to an ES|QL rule'],
+        ['esql', 'exception', 'an ES|QL rule has no place for one'],
         ['query', 'exception', 'could not convert the proposed exception into a preview filter'],
         ['query', 'threshold', 'does not support this change on a query rule'],
       ])(

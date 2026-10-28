@@ -1076,7 +1076,8 @@ steps:
         {% if steps.fetch_rule.output.type == 'saved_query' or steps.fetch_rule.output.type == 'machine_learning' %}
         The preview does not support saved query rules or machine learning rules.
         {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' and steps.fetch_rule.output.type == 'esql' %}
-        The preview cannot apply an exception to an ES|QL rule, which has no filters.
+        The backtest simulates an exception as a query filter, and an ES|QL rule has no place for one, so it cannot simulate this change. The rule itself still honours the exception when it runs.
+        To check the effect yourself, ask the agent in this investigation to preview the rule's query with the exception's conditions excluded.
         {% elsif steps.diagnose_rule.output.structured_output.change_type == 'exception' %}
         The agent could not convert the proposed exception into a preview filter.
         {% else %}
