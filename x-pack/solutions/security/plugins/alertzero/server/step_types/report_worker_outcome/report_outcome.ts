@@ -53,6 +53,7 @@ const EVENT_TYPE_BY_OUTCOME = {
   worker_run_completed: ALERTZERO_TELEMETRY_EVENTS.WorkerRunCompleted,
   alert_triage_batch_classified: ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified,
   alert_triage_batch_grouped: ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped,
+  alert_triage_decisions_matched: ALERTZERO_TELEMETRY_EVENTS.AlertTriageDecisionsMatched,
   alert_triage_closure_resolved: ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved,
   rule_tuning_review_completed: ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted,
   rule_coverage_review_completed: ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted,
