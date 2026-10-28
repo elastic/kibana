@@ -282,7 +282,7 @@ export const getSearchEmbeddableFactory = ({
       });
 
       const addFilter: DocViewFilterFn = async (mapping, values, operation) => {
-        const dataView = api.dataViews$.getValue()?.[0];
+        const dataView = api.dataSources$.getValue()?.[0];
         if (!dataView || !mapping) {
           return;
         }
@@ -353,7 +353,7 @@ export const getSearchEmbeddableFactory = ({
           ...timeRangeManager.api,
           defaultTitle$,
           savedSearch$: searchEmbeddable.api.savedSearch$,
-          dataViews$: searchEmbeddable.api.dataViews$,
+          dataSources$: searchEmbeddable.api.dataSources$,
           savedObjectId$,
           dataLoading$,
           fetchContext$,
@@ -385,7 +385,7 @@ export const getSearchEmbeddableFactory = ({
             disableTriggers,
           ] = useBatchedPublishingSubjects(
             api.savedSearch$,
-            api.dataViews$,
+            api.dataSources$,
             inlineEditingApi.isInlineEditing$,
             inlineEditingApi.draftSelectedTabId$,
             selectedTabId$,

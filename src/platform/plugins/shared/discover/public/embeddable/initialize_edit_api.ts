@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
   FetchContext,
   HasEditCapabilities,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesSavedObjectId,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -27,14 +28,14 @@ import type { DiscoverSessionByValueInput } from '../plugin_imports/embeddable_e
 
 type SavedSearchPartialApi = PublishesSavedSearch &
   PublishesSavedObjectId &
-  PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
+  PublishesDataSources<DataView> & { fetchContext$: PublishingSubject<FetchContext | undefined> };
 
 export async function getAppTarget(
   partialApi: SavedSearchPartialApi,
   discoverServices: DiscoverServices
 ) {
   const savedObjectId = partialApi.savedObjectId$.getValue();
-  const dataViews = partialApi.dataViews$.getValue();
+  const dataViews = partialApi.dataSources$.getValue();
   const locatorParams = getDiscoverLocatorParams(partialApi);
 
   // We need to use a redirect URL if this is a by value saved search using
@@ -69,7 +70,7 @@ export function initializeEditApi({
   partialApi: PublishesSavedSearch &
     PublishesSavedObjectId &
     PublishesSelectedTabId &
-    PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
+    PublishesDataSources<DataView> & { fetchContext$: PublishingSubject<FetchContext | undefined> };
   isEditable: () => boolean;
   getTitle: () => string | undefined;
   discoverServices: DiscoverServices;

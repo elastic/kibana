@@ -97,7 +97,7 @@ describe('SearchBarComponent', () => {
 
     render(
       <TestProviders store={store}>
-        <SearchBarComponent {...props} additionalDataViews={[panelDataView]} />
+        <SearchBarComponent {...props} additionalSources={[panelDataView]} />
       </TestProviders>
     );
 
@@ -129,7 +129,7 @@ describe('SearchBarComponent', () => {
         <SearchBarComponent
           {...props}
           dataView={pageDataView}
-          additionalDataViews={[duplicatePageDataView, panelDataView, repeatedPanelDataView]}
+          additionalSources={[duplicatePageDataView, panelDataView, repeatedPanelDataView]}
         />
       </TestProviders>
     );

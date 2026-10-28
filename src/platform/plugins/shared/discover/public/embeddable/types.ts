@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
@@ -36,7 +37,7 @@ import type {
 } from '@kbn/saved-search-plugin/common/types';
 import type { EsqlSource } from '@kbn/data-source';
 import type { BehaviorSubject } from 'rxjs';
-import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import type { PublishesWritableDataSources } from '@kbn/presentation-publishing/interfaces/publishes_data_sources';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   NonPersistedDisplayOptions,
@@ -104,7 +105,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiS
   Required<PublishesWritableTitle> &
   Required<PublishesDescription> &
   PublishesWritableSavedSearch &
-  PublishesWritableDataViews &
+  PublishesWritableDataSources<DataView> &
   PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
   PublishesEsql &
