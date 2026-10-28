@@ -10,9 +10,15 @@
 import { PNG } from 'pngjs';
 
 /**
- * Stretches a PNG to `width` x `height` with bilinear interpolation
+ * Stretches a PNG to `width` x `height` with bilinear interpolation.
+ *
+ * Limits: only a 2x2 neighbourhood is sampled, so reductions beyond 2x alias;
+ * alpha is interpolated unpremultiplied. Returns `src` as is when the size already matches.
  */
 export const resizePng = (src: PNG, width: number, height: number): PNG => {
+  if (src.width === width && src.height === height) {
+    return src;
+  }
   const dst = new PNG({ width, height });
   const scaleX = src.width / width;
   const scaleY = src.height / height;
