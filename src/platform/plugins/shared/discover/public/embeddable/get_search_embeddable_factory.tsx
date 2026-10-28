@@ -13,11 +13,13 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import { drilldownsComparators } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { FetchContext, ViewMode } from '@kbn/presentation-publishing';
+import type { FetchContext, StateComparators, ViewMode } from '@kbn/presentation-publishing';
 import {
+  areComparatorsEqual,
   initializeTimeRangeManager,
   initializeTitleManager,
   initializeStateApi,
@@ -54,6 +56,23 @@ import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 import { isTabDeleted } from './utils/is_tab_deleted';
 
+const getComparators = (
+  isByValue: boolean,
+  shouldSkipTabComparators: boolean
+): StateComparators<SearchEmbeddablePanelApiState> => ({
+  ...drilldownsComparators,
+  ...titleComparators,
+  ...timeRangeComparators,
+  ...getDiscoverSessionEmbeddableComparators(isByValue, shouldSkipTabComparators),
+  nonPersistedDisplayOptions: 'skip',
+});
+
+const isByReferenceState = (state: Partial<SearchEmbeddablePanelApiState> | undefined) =>
+  Boolean(
+    state &&
+      (('ref_id' in state && state.ref_id) || ('savedObjectId' in state && state.savedObjectId))
+  );
+
 export const getSearchEmbeddableFactory = ({
   startServices,
   discoverServices,
@@ -71,6 +90,9 @@ export const getSearchEmbeddableFactory = ({
     SearchEmbeddableApi
   > = {
     type: SEARCH_EMBEDDABLE_TYPE,
+    // Tab deletion, inline editing and the first-tab default need the loaded session, so assume none apply
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(getComparators(!isByReferenceState(current), false), baseline, current),
     buildEmbeddable: async ({
       initializeDrilldownsManager,
       initialState,
@@ -181,13 +203,7 @@ export const getSearchEmbeddableFactory = ({
           const shouldSkipTabComparators =
             isTabDeleted(selectedTabId$.getValue(), tabs) || inlineEditingApi.isEditing();
 
-          return {
-            ...drilldownsManager.comparators,
-            ...titleComparators,
-            ...timeRangeComparators,
-            ...getDiscoverSessionEmbeddableComparators(isByValue, shouldSkipTabComparators),
-            nonPersistedDisplayOptions: 'skip',
-          };
+          return getComparators(isByValue, shouldSkipTabComparators);
         },
         applySerializedState: async (nextState) => {
           drilldownsManager.reinitializeState(nextState);
