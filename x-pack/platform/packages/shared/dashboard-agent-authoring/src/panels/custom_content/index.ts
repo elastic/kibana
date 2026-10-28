@@ -92,7 +92,7 @@ const customContentPanelContentSchema = z.object({
     .boolean()
     .optional()
     .describe(
-      'Existing panel only. Set true when the edit changes what the panel shows: the server regenerates the ES|QL query from "query", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the current query. Requires "query".'
+      'Existing panel only. Set true when the edit needs different data: a new measure or field ("also show the average bytes"), a new grouping or filter, or another time window. Without it the stored query is kept and the new data can never appear. The server regenerates the ES|QL query from "query", keeping the parts the request does not change. Omit for edits that only change the look: colors, sizes, wording, layout. Requires "query".'
     ),
   index: z
     .string()

@@ -52,7 +52,7 @@ const FITS_A_CHART: RoutingExample[] = [
   },
   {
     input: {
-      question: `Show a table of the top 10 geo.src countries by request count in ${LOGS}.`,
+      question: `Create a table visualization of the top 10 geo.src countries by request count in ${LOGS}.`,
     },
     output: { renderer: 'lens' },
     metadata: { useCase: 'table' },
