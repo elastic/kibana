@@ -615,6 +615,308 @@ describe('createChatCompleteApi', () => {
     });
   });
 
+  describe('featureId', () => {
+    const createChatCompleteForFeature = (
+      resolveFeatureEndpoint?: Parameters<
+        typeof createChatCompleteCallbackApi
+      >[0]['resolveFeatureEndpoint']
+    ) => {
+      const callbackApi = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+        resolveFeatureEndpoint,
+      });
+      return createChatCompleteApi({ callbackApi });
+    };
+
+    it('calls the top endpoint of the feature with its parameters', async () => {
+      const resolveFeatureEndpoint = jest.fn().mockResolvedValue({
+        connectorId: 'feature-connector',
+        temperature: 0.3,
+        reasoning: { effort: 'low' },
+      });
+      const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
+
+      const response = await chatCompleteForFeature({
+        featureId: 'my_feature',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(resolveFeatureEndpoint).toHaveBeenCalledWith('my_feature');
+      expect(getInferenceExecutorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'feature-connector' })
+      );
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ temperature: 0.3, reasoning: { effort: 'low' } })
+      );
+      expect(response.content).toEqual('chunk-1');
+    });
+
+    it('calls the connector when featureId is undefined', async () => {
+      const resolveFeatureEndpoint = jest.fn();
+      const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
+
+      await chatCompleteForFeature({
+        connectorId: 'connectorId',
+        featureId: undefined,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(resolveFeatureEndpoint).not.toHaveBeenCalled();
+      expect(getInferenceExecutorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'connectorId' })
+      );
+    });
+
+    it('streams from the connector when featureId is undefined', async () => {
+      const resolveFeatureEndpoint = jest.fn();
+      const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
+
+      await firstValueFrom(
+        chatCompleteForFeature({
+          connectorId: 'connectorId',
+          featureId: undefined,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          stream: true,
+          maxRetries: 0,
+        }).pipe(toArray())
+      );
+
+      expect(resolveFeatureEndpoint).not.toHaveBeenCalled();
+      expect(getInferenceExecutorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'connectorId' })
+      );
+    });
+
+    it('calls the top endpoint without parameters when the feature defines none', async () => {
+      const chatCompleteForFeature = createChatCompleteForFeature(
+        jest.fn().mockResolvedValue({ connectorId: 'feature-connector' })
+      );
+
+      await chatCompleteForFeature({
+        featureId: 'my_feature',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ temperature: undefined, reasoning: undefined })
+      );
+    });
+
+    it('returns an observable in stream mode and resolves the endpoint on subscription', async () => {
+      const resolveFeatureEndpoint = jest.fn().mockResolvedValue({
+        connectorId: 'feature-connector',
+        temperature: 0.3,
+      });
+      const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
+
+      const events$ = chatCompleteForFeature({
+        featureId: 'my_feature',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        stream: true,
+        maxRetries: 0,
+      });
+
+      expect(isObservable(events$)).toBe(true);
+      expect(resolveFeatureEndpoint).not.toHaveBeenCalled();
+
+      const chunks = await firstValueFrom(
+        events$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
+
+      expect(chunks.map(({ content }) => content)).toEqual(['chunk-1']);
+      expect(resolveFeatureEndpoint).toHaveBeenCalledTimes(1);
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ temperature: 0.3 })
+      );
+    });
+
+    it('rejects with a request error when the feature has no endpoint', async () => {
+      const chatCompleteForFeature = createChatCompleteForFeature(
+        jest.fn().mockResolvedValue(undefined)
+      );
+
+      await expect(
+        chatCompleteForFeature({
+          featureId: 'my_feature',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        message: expect.stringContaining('No endpoint is available for feature "my_feature"'),
+      });
+      expect(getInferenceExecutorMock).not.toHaveBeenCalled();
+    });
+
+    it('errors the stream with a request error when the feature has no endpoint', async () => {
+      const chatCompleteForFeature = createChatCompleteForFeature(
+        jest.fn().mockResolvedValue(undefined)
+      );
+
+      await expect(
+        firstValueFrom(
+          chatCompleteForFeature({
+            featureId: 'my_feature',
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            stream: true,
+          })
+        )
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        message: expect.stringContaining('No endpoint is available for feature "my_feature"'),
+      });
+    });
+
+    it('passes the other options through to the connector call', async () => {
+      const chatCompleteForFeature = createChatCompleteForFeature(
+        jest.fn().mockResolvedValue({ connectorId: 'feature-connector' })
+      );
+
+      await chatCompleteForFeature({
+        featureId: 'my_feature',
+        system: 'system message',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          system: 'system message',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+      );
+    });
+
+    it('shares one endpoint resolution and one call between stream subscribers', async () => {
+      const resolveFeatureEndpoint = jest
+        .fn()
+        .mockResolvedValue({ connectorId: 'feature-connector' });
+      const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
+
+      const events$ = chatCompleteForFeature({
+        featureId: 'my_feature',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        stream: true,
+        maxRetries: 0,
+      });
+
+      await Promise.all([
+        firstValueFrom(events$.pipe(toArray())),
+        firstValueFrom(events$.pipe(toArray())),
+      ]);
+
+      expect(resolveFeatureEndpoint).toHaveBeenCalledTimes(1);
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects with the resolver error when endpoint resolution fails', async () => {
+      const chatCompleteForFeature = createChatCompleteForFeature(
+        jest.fn().mockRejectedValue(new Error('resolution failed'))
+      );
+
+      await expect(
+        chatCompleteForFeature({
+          featureId: 'my_feature',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+      ).rejects.toThrow('resolution failed');
+      expect(getInferenceExecutorMock).not.toHaveBeenCalled();
+    });
+
+    it('errors the stream with the resolver error when endpoint resolution fails', async () => {
+      const chatCompleteForFeature = createChatCompleteForFeature(
+        jest.fn().mockRejectedValue(new Error('resolution failed'))
+      );
+
+      await expect(
+        firstValueFrom(
+          chatCompleteForFeature({
+            featureId: 'my_feature',
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            stream: true,
+          })
+        )
+      ).rejects.toThrow('resolution failed');
+      expect(getInferenceExecutorMock).not.toHaveBeenCalled();
+    });
+
+    it('does not resolve the endpoint when the signal is already aborted', async () => {
+      const abortController = new AbortController();
+      abortController.abort();
+      const resolveFeatureEndpoint = jest.fn();
+      const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
+
+      await expect(
+        chatCompleteForFeature({
+          featureId: 'my_feature',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          abortSignal: abortController.signal,
+        })
+      ).rejects.toMatchObject({ code: InferenceTaskErrorCode.abortedError });
+      expect(resolveFeatureEndpoint).not.toHaveBeenCalled();
+    });
+
+    it('rejects with an internal error when no resolver is registered', async () => {
+      const chatCompleteForFeature = createChatCompleteForFeature();
+
+      await expect(
+        chatCompleteForFeature({
+          featureId: 'my_feature',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.internalError,
+        message: expect.stringContaining('no feature endpoint resolver is registered'),
+      });
+    });
+
+    it('rejects with an aborted error when the signal aborts during endpoint resolution', async () => {
+      const abortController = new AbortController();
+      const chatCompleteForFeature = createChatCompleteForFeature(async () => {
+        abortController.abort();
+        return { connectorId: 'feature-connector' };
+      });
+
+      await expect(
+        chatCompleteForFeature({
+          featureId: 'my_feature',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          abortSignal: abortController.signal,
+        })
+      ).rejects.toMatchObject({ code: InferenceTaskErrorCode.abortedError });
+      expect(getInferenceExecutorMock).not.toHaveBeenCalled();
+    });
+
+    it('errors the stream with an aborted error when the signal aborts during endpoint resolution', async () => {
+      const abortController = new AbortController();
+      const chatCompleteForFeature = createChatCompleteForFeature(async () => {
+        abortController.abort();
+        return { connectorId: 'feature-connector' };
+      });
+
+      await expect(
+        firstValueFrom(
+          chatCompleteForFeature({
+            featureId: 'my_feature',
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            stream: true,
+            abortSignal: abortController.signal,
+          })
+        )
+      ).rejects.toMatchObject({ code: InferenceTaskErrorCode.abortedError });
+      expect(getInferenceExecutorMock).not.toHaveBeenCalled();
+    });
+  });
+
   describe('default connector only restriction', () => {
     const createChatCompleteWithCheck = ({
       isDefaultConnectorOnly,
@@ -1410,6 +1712,45 @@ describe('createChatCompleteApi', () => {
           parentFeatureId: 'alertzero_parent',
         }),
       });
+    });
+
+    it('records the featureId of a featureId call as the token usage feature', async () => {
+      const callbackApi = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+        tokenUsageLogger: tokenUsageLogger as any,
+        isTokenUsageTrackingEnabled,
+        resolveFeatureEndpoint: jest.fn().mockResolvedValue({ connectorId: 'my-endpoint' }),
+      });
+
+      await createChatCompleteApi({ callbackApi })({
+        featureId: 'my_feature',
+        messages: [],
+        modelName: 'gpt-4o',
+        template: {
+          id: '.attack-discovery-fp-tp',
+          version: 1,
+          variables: { cited_alerts: 'no email here' },
+        },
+        maxRetries: 0,
+      });
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(tokenUsageLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: expect.objectContaining({
+            connectorId: 'my-endpoint',
+            featureId: 'my_feature',
+          }),
+        })
+      );
     });
   });
 

@@ -1,5 +1,5 @@
 {
-  "sha1": "8d8a0aa4cc94b9202f8e1424187383845d68da45",
+  "sha1": "e7d3dc1987775048c83583f9c0a675bd9273c47d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -777,6 +777,76 @@
     {
       "id": "b80703b0fc233d1-cccf62caabcc97c",
       "title": "Lens metric trendline query execution executes trendline query: TS query with aliased TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-85b0d556409b2fd",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query retaining the latest EVAL bucket alias through KEEP",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-2a2e8b72986381a",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query resolving the latest EVAL alias of a TBUCKET",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-a673c7f0930e2fc",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query retaining an EVAL bucket alias after the original is overwritten",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-5cbe836b8fba54b",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query retaining an existing BUCKET on the original source time alias",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/api/tests/trendline_query_execution.spec.ts",
+        "line": 40,
+        "column": 24
+      }
+    },
+    {
+      "id": "b80703b0fc233d1-f7a350deedf1742",
+      "title": "Lens metric trendline query execution executes trendline query: FROM query retaining an existing BUCKET through wildcard KEEP",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

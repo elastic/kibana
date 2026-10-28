@@ -80,14 +80,14 @@ describe('StackAlertTabContent', () => {
     );
   });
 
-  it('passes a new bulk actions panel on each render', () => {
+  it('keeps the same bulk actions panel across renders', () => {
     const onRemove = jest.fn();
     const { rerender } = render(<StackAlertTabContent caseData={caseData} onRemove={onRemove} />);
     const [firstPanel] = getBulkActions() ?? [];
 
     rerender(<StackAlertTabContent caseData={caseData} onRemove={onRemove} />);
 
-    expect(getBulkActions()?.[0]).not.toBe(firstPanel);
+    expect(getBulkActions()?.[0]).toBe(firstPanel);
   });
 
   it('adds no row actions without onRemove', () => {

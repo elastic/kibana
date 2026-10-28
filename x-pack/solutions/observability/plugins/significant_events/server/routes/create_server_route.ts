@@ -64,7 +64,7 @@ export const createServerRoute: CreateServerRouteFactory<
             case 404:
               throw notFound(error.message);
             case 409:
-              throw conflict(error.message);
+              throw conflict(error.message, error.data);
             case 503:
               throw serverUnavailable(error.message);
             default:
