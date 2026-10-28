@@ -556,11 +556,10 @@ describe('floor_alert_triage_batch — az: tags', () => {
   });
 
   it('chunks each list at the size the closure review re-tags with', () => {
-    // The re-tag loops, not the alert attachments, which are capped at 20 ids a call.
-    const reviewChunkSize = Number(
-      /retag_alert_ids \| chunk: (\d+)/.exec(FLOOR_ALERT_TRIAGE_REVIEW_YAML)?.[1]
-    );
-    expect(reviewChunkSize).toBeGreaterThan(0);
+    // The re-tag step of the review (`alertzero.triage.retagProposalAlerts`) chunks at
+    // TAG_CHUNK_SIZE in the alertzero plugin. Not the alert attachments, which are capped at 20 ids a call.
+    const reviewChunkSize = 500;
+    expect(FLOOR_ALERT_TRIAGE_REVIEW_YAML).toContain('alertzero.triage.retagProposalAlerts');
     AZ_TAG_STEPS.forEach((step) => expect(chunkSizeOf(step)).toBe(reviewChunkSize));
   });
 
@@ -905,17 +904,34 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
         expect(retry?.type).toBe('foreach');
         expect(retry?.foreach).toContain('variables.failed_note_verdicts');
         expect(retryStep?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-        // A note that still fails fails the run, as it did before the notes ran in parallel.
-        expect(retryStep?.['on-failure']?.continue).toBeUndefined();
+        // A note that still fails is counted, and fails the run after every review was started.
+        expect(retryStep?.['on-failure']?.continue).toBe(true);
       });
 
-      it('runs after the notes and before the review is started', () => {
+      it('counts a note that still fails and fails the run at the end', () => {
         const names = parsed.steps.map((step) => step.name);
+        expect(stepByName('init_failed_verdict_notes')?.with?.failed_note_count).toBe(0);
+        const count = retry?.steps?.find(({ name }) => name === 'count_failed_verdict_note');
+        expect(count?.if).toBe('${{ steps.retry_verdict_note.error != blank }}');
+        expect(
+          evalExpr(count?.with?.failed_note_count as string, {
+            variables: { failed_note_count: 1 },
+          })
+        ).toBe(2);
+        const abort = stepByName('abort_note_failed');
+        expect(abort?.type).toBe('workflow.fail');
+        expect(abort?.if).toBe('${{ variables.failed_note_count > 0 }}');
+        expect(names.indexOf('abort_note_failed')).toBeGreaterThan(
+          names.indexOf('abort_review_failed')
+        );
+      });
+
+      // A run that dies while writing notes must not leave tagged alerts with no proposal.
+      it('runs after the reviews are started, so a failing note cannot strand the alerts', () => {
+        const names = parsed.steps.map((step) => step.name);
+        expect(names.indexOf('add_verdict_notes')).toBeGreaterThan(names.indexOf('start_reviews'));
         expect(names.indexOf('retry_failed_verdict_notes')).toBeGreaterThan(
           names.indexOf('add_verdict_notes')
-        );
-        expect(names.indexOf('start_reviews')).toBeGreaterThan(
-          names.indexOf('retry_failed_verdict_notes')
         );
       });
 
@@ -1066,10 +1082,10 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     expect(stepByName('start_fp_review')?.type).toBe('workflow.executeAsync');
   });
 
-  it('starts the reviews after every alert has its az: tag and its note', () => {
+  it('starts the reviews after every alert has its az: tag, and before the notes', () => {
     const start = stepIndex('start_reviews');
     AZ_TAG_STEPS.forEach((name) => expect(start).toBeGreaterThan(stepIndex(name)));
-    expect(start).toBeGreaterThan(stepIndex('add_verdict_notes'));
+    expect(start).toBeLessThan(stepIndex('add_verdict_notes'));
   });
 
   it('starts one review for each new proposal, and none when there is nothing to close', () => {
@@ -1144,7 +1160,8 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     expect(abort?.type).toBe('workflow.fail');
     expect(abort?.if).toBe('${{ variables.failed_review_count > 0 }}');
     // Before the run report, which a failed run does not send, as before.
-    expect(stepIndex('abort_review_failed')).toBe(stepIndex('report_worker_run_completed') - 1);
+    expect(stepIndex('abort_review_failed')).toBe(stepIndex('abort_note_failed') - 1);
+    expect(stepIndex('abort_note_failed')).toBe(stepIndex('report_worker_run_completed') - 1);
     expect(
       evalExpr(stepByName('count_failed_review')?.with?.failed_review_count as string, {
         variables: { failed_review_count: 1 },

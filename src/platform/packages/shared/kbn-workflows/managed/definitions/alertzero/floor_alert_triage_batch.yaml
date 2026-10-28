@@ -1077,147 +1077,7 @@ steps:
       conversation_created: "${{ variables.mint_count > 0 or variables.failure_conversation_count > 0 or variables.batch_conversation_created }}"
 
   # ---------------------------------------------------------------------------
-  # 8. Write a verdict note to each alert referencing the Investigation (R4, R13).
-  #    Always written — never gated on autonomy level. The only verdict note on the
-  #    Worker path: the sub-workflow skips its own when calledByWorker is true.
-  #
-  #    The notes API takes one note per call and each call takes about a second (the write
-  #    waits for the next index refresh), so a serial loop costs about a second per alert.
-  #    Notes are written 20 at a time instead: each chunk is a `parallel` fan-out of 20
-  #    branches at concurrency 20, which finishes within one tick because the fan-out does not
-  #    exceed the concurrency. That is the schema ceiling for concurrency, and well under the
-  #    fan-out ceiling of 100.
-  #
-  #    A parallel branch cannot carry `on-failure`, so a note that fails here is not retried in
-  #    place. `settled` lets every note in the chunk run, the failed ones are collected, and
-  #    they are retried serially afterwards with the same retry as before. A note that still
-  #    fails fails the run, as it always did.
-  # ---------------------------------------------------------------------------
-  - name: init_failed_verdict_notes
-    type: data.set
-    with:
-      failed_note_verdicts: []
-
-  - name: add_verdict_notes
-    type: foreach
-    foreach: "${{ steps.classify_alerts.output.verdicts | chunk: 20 | json }}"
-    steps:
-      # Copied out of `foreach.item`: inside the parallel step below `foreach.item` is a single
-      # verdict, not the chunk.
-      - name: current_note_chunk
-        type: data.set
-        with:
-          verdicts: "${{ foreach.item }}"
-
-      - name: write_note_chunk
-        type: parallel
-        foreach: "${{ steps.current_note_chunk.output.verdicts }}"
-        mode: settled
-        concurrency:
-          max: 20
-        steps:
-          - name: add_verdict_note
-            type: kibana.request
-            with:
-              method: PATCH
-              path: "/s/{{ workflow.spaceId }}/api/note"
-              body:
-                note:
-                  eventId: "{{ foreach.item.alert_id }}"
-                  timelineId: ''
-                  note: |
-                    {%- assign note_conversation = '' -%}
-                    {%- assign note_alert = foreach.item.alert_id -%}
-                    {%- for mint in variables.group_mints -%}{%- if mint.alert_ids contains note_alert -%}{%- assign note_conversation = variables.mint_conversation_ids[forloop.index0] -%}{%- endif -%}{%- endfor -%}
-                    {%- assign note_join = variables.group_joins | where_exp: 'j', 'j.alert_ids contains note_alert' | first -%}
-                    {%- if note_join -%}{%- assign note_conversation = note_join.conversation_id -%}{%- endif -%}{%- if note_conversation == '' -%}{%- assign note_conversation = variables.home_conversation_id -%}{%- endif -%}
-                    {% if note_conversation != '' %}[Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ note_conversation }}) · {% endif %}[Workflow execution]({{ execution.url }})
-
-                    **Verdict:** {{ foreach.item.classification }}
-                    **Confidence:** {{ foreach.item.confidence_score }}
-
-                    {{ foreach.item.rationale }}
-                    {% if foreach.item.contributing_factors.size > 0 %}
-                    **Contributing factors**
-                    {% for factor in foreach.item.contributing_factors %}
-                    - {{ factor }}
-                    {%- endfor %}
-                    {% endif %}
-              headers:
-                kbn-xsrf: string
-                Content-Type: application/json
-
-      # A branch's `key` is the verdict it was given, so the verdicts of the notes that did not
-      # complete can be read straight off the results. Anything but `completed` counts, so a
-      # timed-out branch is retried as well. The cost is that each verdict is stored twice in the
-      # branch state and in `results[].key`; attack_discovery_batched_generation.yaml avoids that
-      # by fanning out over integer offsets. Here a branch needs the whole verdict to render its
-      # note and the retry needs it back, and a branch cannot look it up by index without
-      # reading shared variables other branches are writing, so the key stays the verdict.
-      # A verdict is at most about 1.5 KB under the classify schema (512-character id, 500-character
-      # rationale, three 100-character factors), so a 1000-alert batch (the input maximum) holds
-      # at most about 3 MB of duplicated state, and a 100-alert batch about 0.3 MB. That is an
-      # upper bound from the schema, not a measurement of a run.
-      #
-      # The failed verdicts are read from this step's own output, not from `variables`: the
-      # variables are a merge of every `data.set` output in run order, and an empty list does
-      # not reliably shadow the previous chunk's, which would retry a failed note twice.
-      - name: collect_chunk_failed_notes
-        type: data.set
-        with:
-          chunk_failed_verdicts: >-
-            ${{ steps.write_note_chunk.output.results
-                | where_exp: 'r', 'r.status != "completed"'
-                | map: 'key' }}
-
-      - name: record_failed_verdict_notes
-        type: data.set
-        with:
-          failed_note_verdicts: "${{ variables.failed_note_verdicts | concat: steps.collect_chunk_failed_notes.output.chunk_failed_verdicts }}"
-
-  # Empty on a clean run, so this loop does nothing. The note is the same one as above: keep the
-  # two in step.
-  - name: retry_failed_verdict_notes
-    type: foreach
-    foreach: "${{ variables.failed_note_verdicts | json }}"
-    steps:
-      - name: retry_verdict_note
-        type: kibana.request
-        on-failure:
-          retry:
-            max-attempts: 3
-            delay: 5s
-        with:
-          method: PATCH
-          path: "/s/{{ workflow.spaceId }}/api/note"
-          body:
-            note:
-              eventId: "{{ foreach.item.alert_id }}"
-              timelineId: ''
-              note: |
-                {%- assign note_conversation = '' -%}
-                {%- assign note_alert = foreach.item.alert_id -%}
-                {%- for mint in variables.group_mints -%}{%- if mint.alert_ids contains note_alert -%}{%- assign note_conversation = variables.mint_conversation_ids[forloop.index0] -%}{%- endif -%}{%- endfor -%}
-                {%- assign note_join = variables.group_joins | where_exp: 'j', 'j.alert_ids contains note_alert' | first -%}
-                {%- if note_join -%}{%- assign note_conversation = note_join.conversation_id -%}{%- endif -%}{%- if note_conversation == '' -%}{%- assign note_conversation = variables.home_conversation_id -%}{%- endif -%}
-                {% if note_conversation != '' %}[Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ note_conversation }}) · {% endif %}[Workflow execution]({{ execution.url }})
-
-                **Verdict:** {{ foreach.item.classification }}
-                **Confidence:** {{ foreach.item.confidence_score }}
-
-                {{ foreach.item.rationale }}
-                {% if foreach.item.contributing_factors.size > 0 %}
-                **Contributing factors**
-                {% for factor in foreach.item.contributing_factors %}
-                - {{ factor }}
-                {%- endfor %}
-                {% endif %}
-          headers:
-            kbn-xsrf: string
-            Content-Type: application/json
-
-  # ---------------------------------------------------------------------------
-  # 9. Hand each new closure proposal to the review workflow.
+  # 8. Hand each new closure proposal to the review workflow.
   #
   #    The proposal waits for an analyst for up to 72 h at Manual autonomy, so the proposal lives
   #    in `system-security-floor-alert-triage-review`, started with `workflow.executeAsync`,
@@ -1396,6 +1256,159 @@ steps:
         with:
           failed_review_count: "${{ variables.failed_review_count | plus: 1 }}"
 
+  # ---------------------------------------------------------------------------
+  # 9. Write a verdict note to each alert referencing the Investigation (R4, R13).
+  #    Always written — never gated on autonomy level. The only verdict note on the
+  #    Worker path: the sub-workflow skips its own when calledByWorker is true.
+  #
+  #    The notes API takes one note per call and each call takes about a second (the write
+  #    waits for the next index refresh), so a serial loop costs about a second per alert.
+  #    Notes are written 20 at a time instead: each chunk is a `parallel` fan-out of 20
+  #    branches at concurrency 20, which finishes within one tick because the fan-out does not
+  #    exceed the concurrency. That is the schema ceiling for concurrency, and well under the
+  #    fan-out ceiling of 100.
+  #
+  #    A parallel branch cannot carry `on-failure`, so a note that fails here is not retried in
+  #    place. `settled` lets every note in the chunk run, the failed ones are collected, and
+  #    they are retried serially afterwards with the same retry as before. A note that still
+  #    fails is counted and fails the run at the end.
+  #
+  #    The notes come after the proposals are started. A run that dies here (a note that keeps
+  #    failing, or the run timeout) must not leave tagged alerts with no proposal: the notes need
+  #    only the Investigation ids, which exist by now.
+  # ---------------------------------------------------------------------------
+  - name: init_failed_verdict_notes
+    type: data.set
+    with:
+      failed_note_verdicts: []
+      failed_note_count: 0
+
+  - name: add_verdict_notes
+    type: foreach
+    foreach: "${{ steps.classify_alerts.output.verdicts | chunk: 20 | json }}"
+    steps:
+      # Copied out of `foreach.item`: inside the parallel step below `foreach.item` is a single
+      # verdict, not the chunk.
+      - name: current_note_chunk
+        type: data.set
+        with:
+          verdicts: "${{ foreach.item }}"
+
+      - name: write_note_chunk
+        type: parallel
+        foreach: "${{ steps.current_note_chunk.output.verdicts }}"
+        mode: settled
+        concurrency:
+          max: 20
+        steps:
+          - name: add_verdict_note
+            type: kibana.request
+            with:
+              method: PATCH
+              path: "/s/{{ workflow.spaceId }}/api/note"
+              body:
+                note:
+                  eventId: "{{ foreach.item.alert_id }}"
+                  timelineId: ''
+                  note: |
+                    {%- assign note_conversation = '' -%}
+                    {%- assign note_alert = foreach.item.alert_id -%}
+                    {%- for mint in variables.group_mints -%}{%- if mint.alert_ids contains note_alert -%}{%- assign note_conversation = variables.mint_conversation_ids[forloop.index0] -%}{%- endif -%}{%- endfor -%}
+                    {%- assign note_join = variables.group_joins | where_exp: 'j', 'j.alert_ids contains note_alert' | first -%}
+                    {%- if note_join -%}{%- assign note_conversation = note_join.conversation_id -%}{%- endif -%}{%- if note_conversation == '' -%}{%- assign note_conversation = variables.home_conversation_id -%}{%- endif -%}
+                    {% if note_conversation != '' %}[Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ note_conversation }}) · {% endif %}[Workflow execution]({{ execution.url }})
+
+                    **Verdict:** {{ foreach.item.classification }}
+                    **Confidence:** {{ foreach.item.confidence_score }}
+
+                    {{ foreach.item.rationale }}
+                    {% if foreach.item.contributing_factors.size > 0 %}
+                    **Contributing factors**
+                    {% for factor in foreach.item.contributing_factors %}
+                    - {{ factor }}
+                    {%- endfor %}
+                    {% endif %}
+              headers:
+                kbn-xsrf: string
+                Content-Type: application/json
+
+      # A branch's `key` is the verdict it was given, so the verdicts of the notes that did not
+      # complete can be read straight off the results. Anything but `completed` counts, so a
+      # timed-out branch is retried as well. The cost is that each verdict is stored twice in the
+      # branch state and in `results[].key`; attack_discovery_batched_generation.yaml avoids that
+      # by fanning out over integer offsets. Here a branch needs the whole verdict to render its
+      # note and the retry needs it back, and a branch cannot look it up by index without
+      # reading shared variables other branches are writing, so the key stays the verdict.
+      # A verdict is at most about 1.5 KB under the classify schema (512-character id, 500-character
+      # rationale, three 100-character factors), so a 1000-alert batch (the input maximum) holds
+      # at most about 3 MB of duplicated state, and a 100-alert batch about 0.3 MB. That is an
+      # upper bound from the schema, not a measurement of a run.
+      #
+      # The failed verdicts are read from this step's own output, not from `variables`: the
+      # variables are a merge of every `data.set` output in run order, and an empty list does
+      # not reliably shadow the previous chunk's, which would retry a failed note twice.
+      - name: collect_chunk_failed_notes
+        type: data.set
+        with:
+          chunk_failed_verdicts: >-
+            ${{ steps.write_note_chunk.output.results
+                | where_exp: 'r', 'r.status != "completed"'
+                | map: 'key' }}
+
+      - name: record_failed_verdict_notes
+        type: data.set
+        with:
+          failed_note_verdicts: "${{ variables.failed_note_verdicts | concat: steps.collect_chunk_failed_notes.output.chunk_failed_verdicts }}"
+
+  # Empty on a clean run, so this loop does nothing. The note is the same one as above: keep the
+  # two in step.
+  - name: retry_failed_verdict_notes
+    type: foreach
+    foreach: "${{ variables.failed_note_verdicts | json }}"
+    steps:
+      - name: retry_verdict_note
+        type: kibana.request
+        # `continue: true` keeps the loop going, and `failed_note_count` fails the run at the end.
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
+        with:
+          method: PATCH
+          path: "/s/{{ workflow.spaceId }}/api/note"
+          body:
+            note:
+              eventId: "{{ foreach.item.alert_id }}"
+              timelineId: ''
+              note: |
+                {%- assign note_conversation = '' -%}
+                {%- assign note_alert = foreach.item.alert_id -%}
+                {%- for mint in variables.group_mints -%}{%- if mint.alert_ids contains note_alert -%}{%- assign note_conversation = variables.mint_conversation_ids[forloop.index0] -%}{%- endif -%}{%- endfor -%}
+                {%- assign note_join = variables.group_joins | where_exp: 'j', 'j.alert_ids contains note_alert' | first -%}
+                {%- if note_join -%}{%- assign note_conversation = note_join.conversation_id -%}{%- endif -%}{%- if note_conversation == '' -%}{%- assign note_conversation = variables.home_conversation_id -%}{%- endif -%}
+                {% if note_conversation != '' %}[Alert Triage Investigation](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ note_conversation }}) · {% endif %}[Workflow execution]({{ execution.url }})
+
+                **Verdict:** {{ foreach.item.classification }}
+                **Confidence:** {{ foreach.item.confidence_score }}
+
+                {{ foreach.item.rationale }}
+                {% if foreach.item.contributing_factors.size > 0 %}
+                **Contributing factors**
+                {% for factor in foreach.item.contributing_factors %}
+                - {{ factor }}
+                {%- endfor %}
+                {% endif %}
+          headers:
+            kbn-xsrf: string
+            Content-Type: application/json
+
+      - name: count_failed_verdict_note
+        type: data.set
+        if: "${{ steps.retry_verdict_note.error != blank }}"
+        with:
+          failed_note_count: "${{ variables.failed_note_count | plus: 1 }}"
+
   # What this batch did, for the execution history. The Investigation holds the verdicts too, and the
   # telemetry privacy rules do not apply here: it stays in the deployment.
   - name: log_batch_summary
@@ -1428,6 +1441,14 @@ steps:
       message: >-
         {{ variables.failed_review_count }} Alert Triage closure review{% if variables.failed_review_count != 1 %}s{% endif %} could not be started or ended
         before reaching a decision. The alerts were classified, tagged and noted.
+
+  - name: abort_note_failed
+    type: workflow.fail
+    if: "${{ variables.failed_note_count > 0 }}"
+    with:
+      message: >-
+        {{ variables.failed_note_count }} verdict note{% if variables.failed_note_count != 1 %}s{% endif %} could not be written after retries.
+        The alerts were classified, tagged and handed to a closure proposal where one applies.
 
   # Telemetry: the run's outcome, last so it sees whether the closure review started.
   - name: report_worker_run_completed
