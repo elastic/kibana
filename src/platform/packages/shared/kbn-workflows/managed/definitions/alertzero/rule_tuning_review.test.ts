@@ -243,6 +243,9 @@ describe('rule_tuning_review proposed change', () => {
     expect(comment).toContain(
       'The proposed schedule ran 2 simulated executions, running every `5m` with `1m` additional look-back time, over the same time span.'
     );
+    expect(comment).toContain(
+      'It ends at the newest false positive, October 1, 2026 at 00:00 UTC.'
+    );
     expect(comment).not.toContain('now-65m');
   });
 

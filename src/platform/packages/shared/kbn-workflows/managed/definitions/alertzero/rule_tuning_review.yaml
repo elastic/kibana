@@ -1185,7 +1185,7 @@ steps:
         **Backtest**
 
         The backtest ran {{ inputs.preview_invocation_count | default: consts.preview_invocation_count }} simulated executions, running every `{{ rule.interval }}` {% if lookbacks.size == 2 %}with `{{ lookbacks.first }}` additional look-back time{% else %}and looking back from `{{ rule.from }}`{% endif %}.
-        It ends at the newest false positive, {{ inputs.last_fp_at }}.
+        It ends at the newest false positive, {{ inputs.last_fp_at | date: "%B %-d, %Y at %H:%M UTC", "UTC" }}.
         This time span is usually much shorter than the span of the false positives.
         {% if proposal.change_type == 'schedule' %}
         The proposed schedule ran {{ steps.compute_schedule_preview_runs.output.proposed_invocation_count }} simulated executions, running every `{{ proposal.proposed_interval }}` {% if lookbacks.size == 2 %}with `{{ lookbacks.last }}` additional look-back time{% else %}and looking back from `{{ proposal.proposed_from }}`{% endif %}, over the same time span.
