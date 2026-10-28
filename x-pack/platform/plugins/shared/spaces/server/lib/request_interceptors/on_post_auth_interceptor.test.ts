@@ -237,6 +237,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
       const request = httpServerMock.createKibanaRequest({
         path: ENTER_SPACE_PATH,
         auth: { isAuthenticated: true },
+        spaceId: asSpaceId('foo'),
       });
 
       await postAuthHandler(request, response, toolkit);
@@ -262,6 +263,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
       const request = httpServerMock.createKibanaRequest({
         path: ENTER_SPACE_PATH,
         auth: { isAuthenticated: true },
+        spaceId: asSpaceId('foo'),
       });
 
       await postAuthHandler(request, response, toolkit);
@@ -537,6 +539,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
       const request = httpServerMock.createKibanaRequest({
         path,
         auth: { isAuthenticated },
+        spaceId: asSpaceId(spaceId),
       });
 
       await postAuthHandler(request, response, toolkit);

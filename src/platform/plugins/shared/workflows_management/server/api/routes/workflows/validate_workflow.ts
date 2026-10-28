@@ -15,7 +15,7 @@ import { AVAILABILITY, INTERNAL_API_VERSION, OAS_TAG } from '../utils/route_cons
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerValidateWorkflowRoute({ router, api, spaces, logger }: RouteDependencies) {
+export function registerValidateWorkflowRoute({ router, api, logger }: RouteDependencies) {
   router.versioned
     .post({
       path: '/api/workflows/validate',
@@ -48,7 +48,7 @@ export function registerValidateWorkflowRoute({ router, api, spaces, logger }: R
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const result = await api.validateWorkflow(request.body.yaml, spaceId, request);
           return response.ok({ body: result });
         } catch (error) {

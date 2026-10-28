@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, HttpServiceSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { InMemoryConnector } from '../types';
@@ -26,11 +26,6 @@ export interface SetupInboundEventsParams {
   http: HttpServiceSetup;
   getStartServices: CoreSetup['getStartServices'];
   logger: Logger;
-  spaces?: {
-    spacesService: {
-      getSpaceId: (request: KibanaRequest) => string;
-    };
-  };
   inMemoryConnectors: InMemoryConnector[];
   getConnectorEventEmitter: () => ConnectorEventEmitter | undefined;
 }
@@ -48,7 +43,6 @@ export function setupInboundEvents({
   http,
   getStartServices,
   logger,
-  spaces,
   inMemoryConnectors,
   getConnectorEventEmitter,
 }: SetupInboundEventsParams): InboundEventsSetup | undefined {
@@ -56,8 +50,7 @@ export function setupInboundEvents({
     return undefined;
   }
 
-  const getSpaceId = (request: KibanaRequest): SpaceId =>
-    brandSpaceId(spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID);
+  const getSpaceId = (request: KibanaRequest): SpaceId => brandSpaceId(request.spaceId);
 
   registerInboundEventSizeOutcome({ http, logger, getSpaceId });
 

@@ -335,7 +335,7 @@ export const registerAiIndexRoutes = ({
             agents: (await getAgentBuilder())?.agents,
             request,
           });
-          const spaceId = resolveSpaceId(await getSpaces(), request);
+          const spaceId = resolveSpaceId(request);
           await getAiIndexService().create(id, spaceId, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
           await reconcileSchedule(id, spaceId, request);
@@ -411,7 +411,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { aiIndexId } = request.params;
         try {
-          const spaceId = resolveSpaceId(await getSpaces(), request);
+          const spaceId = resolveSpaceId(request);
           const aiIndexService = getAiIndexService();
           if (
             request.body.memory_enabled === true &&
@@ -493,7 +493,7 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         try {
           const body: GetAiIndexResponse = await getAiIndexService().get(aiIndexId, spaceId);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
@@ -714,7 +714,7 @@ export const registerAiIndexRoutes = ({
         const { size, type, lifecycle_status: lifecycleStatus, query } = request.query;
         const lifecycleStatuses =
           lifecycleStatus !== undefined ? [lifecycleStatus].flat() : undefined;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
@@ -760,7 +760,7 @@ export const registerAiIndexRoutes = ({
         const { aiIndexId, kiId } = request.params;
         const { index, lifecycle_status: lifecycleStatus } = request.query;
         const lifecycleStatuses = lifecycleStatus ? [lifecycleStatus].flat() : undefined;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
           const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
@@ -820,7 +820,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
         const { index: backingIndex } = request.query;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         try {
           const { output } = await withKiWriteTelemetry({
             action: 'update',
@@ -893,7 +893,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
         const { index: backingIndex } = request.query;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         try {
           const { output } = await withKiWriteTelemetry({
             action: 'delete',
@@ -965,7 +965,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId, kiId } = request.params;
         const { index: backingIndex } = request.query;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         try {
           const { output } = await withKiWriteTelemetry({
             action: 'restore',
@@ -1027,7 +1027,7 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const auditLogger = (await ctx.core).security.audit.logger;
         const { aiIndexId } = request.params;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         try {
           const feedbackAnalysis = await getAiIndexService().setFeedbackAnalysis(
             aiIndexId,
@@ -1099,7 +1099,7 @@ export const registerAiIndexRoutes = ({
         const core = await ctx.core;
         const auditLogger = core.security.audit.logger;
         const { aiIndexId } = request.params;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         const {
           delete_knowledge_indicators: deleteKnowledgeIndicators,
           delete_automations: deleteAutomations,

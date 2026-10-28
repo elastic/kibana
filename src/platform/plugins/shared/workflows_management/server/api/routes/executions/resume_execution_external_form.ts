@@ -34,7 +34,7 @@ const externalResumeFormParamsSchema = schema.object({
 });
 
 export function registerExternalResumeFormRoute(deps: RouteDependencies) {
-  const { router, api, spaces, logger } = deps;
+  const { router, api, logger } = deps;
 
   router.versioned
     .get({
@@ -74,7 +74,7 @@ export function registerExternalResumeFormRoute(deps: RouteDependencies) {
               token,
               executionId,
               stepId,
-              spaceId: spaces.getSpaceId(request),
+              spaceId: request.spaceId,
               basePath: request.basePath,
             });
 

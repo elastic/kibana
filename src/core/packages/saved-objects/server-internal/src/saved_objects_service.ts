@@ -13,6 +13,7 @@ import { filter, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { KibanaRequest, RequestTiming } from '@kbn/core-http-server';
@@ -467,6 +468,7 @@ export class SavedObjectsService
         route: { settings: {} },
         url: { href: '/' },
         raw: { req: { url: '/' } },
+        spaceId: DEFAULT_SPACE_ID,
       } as unknown as KibanaRequest;
 
       return extensionFactory({

@@ -105,7 +105,7 @@ export class AnonymousAccessService {
 
         // We should use credentials of the anonymous service account instead of credentials of the
         // current user to get capabilities relevant to the anonymous access itself.
-        const spaceId = spaces?.getSpaceId(request);
+        const spaceId = request.spaceId;
         const fakeAnonymousRequest = this.createFakeAnonymousRequest({
           authenticateRequest: !useDefaultCapabilities,
           spaceId: spaceId ? brandSpaceId(spaceId) : undefined,

@@ -18,7 +18,7 @@ import { withAvailabilityCheck } from '../utils/with_availability_check';
 const MAX_BULK_DELETE_BATCH_SIZE = 1000;
 
 export function registerBulkDeleteWorkflowsRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, audit } = deps;
   router.versioned
     .delete({
       path: '/api/workflows',
@@ -70,7 +70,7 @@ export function registerBulkDeleteWorkflowsRoute(deps: RouteDependencies) {
         const { force, acknowledgeAclLoss } = request.query;
         try {
           const { ids } = request.body;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const result = await api.deleteWorkflows(ids, spaceId, request, {
             force,
             acknowledgeAclLoss,

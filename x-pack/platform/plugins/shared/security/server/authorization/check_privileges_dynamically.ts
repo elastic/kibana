@@ -28,7 +28,7 @@ export function checkPrivilegesDynamicallyWithRequestFactory(
     ) {
       const spacesService = getSpacesService();
       return spacesService
-        ? await checkPrivileges.atSpace(spacesService.getSpaceId(request), privileges, options)
+        ? await checkPrivileges.atSpace(request.spaceId, privileges, options)
         : await checkPrivileges.globally(privileges, options);
     };
   };

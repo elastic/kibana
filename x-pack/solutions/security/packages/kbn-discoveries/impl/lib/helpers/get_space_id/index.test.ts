@@ -6,31 +6,19 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { getSpaceId } from '.';
 
 describe('getSpaceId', () => {
-  it('returns default when spaces service is null', () => {
-    expect(
-      getSpaceId({
-        request: httpServerMock.createKibanaRequest(),
-        spaces: null,
-      })
-    ).toBe('default');
+  it('returns request.spaceId from core', () => {
+    const request = httpServerMock.createKibanaRequest({ spaceId: asSpaceId('default') });
+    expect(getSpaceId({ request })).toBe('default');
   });
 
-  it('returns default when spaces service is undefined', () => {
-    expect(
-      getSpaceId({
-        request: httpServerMock.createKibanaRequest(),
-        spaces: undefined,
-      })
-    ).toBe('default');
-  });
-
-  it('returns the space ID from the spaces service', () => {
-    const request = httpServerMock.createKibanaRequest();
-    const spaces = { getSpaceId: jest.fn().mockReturnValue('custom-space') } as never;
-
-    expect(getSpaceId({ request, spaces })).toBe('custom-space');
+  it('returns a non-default space id from the request', () => {
+    const request = httpServerMock.createKibanaRequest({
+      spaceId: asSpaceId('custom-space'),
+    });
+    expect(getSpaceId({ request })).toBe('custom-space');
   });
 });

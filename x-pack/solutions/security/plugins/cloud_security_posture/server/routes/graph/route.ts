@@ -58,7 +58,7 @@ export const defineGraphRoute = (router: CspRouter) =>
           pinnedIds,
           projectRouting,
         } = request.body.query as GraphRequest['query'];
-        const spaceId = await cspContext.spacesService?.getSpaceId(request);
+        const spaceId = await request.spaceId;
 
         const { license } = await context.licensing;
         if (!license.hasAtLeast('platinum')) {

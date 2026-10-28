@@ -230,7 +230,7 @@ export class CasePlugin
         return DEFAULT_SPACE_ID;
       }
 
-      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      return request.spaceId;
     };
     const workflowRunService =
       this.caseConfig.runWorkflows.enabled && plugins.workflowsManagement
@@ -575,7 +575,7 @@ export class CasePlugin
       // `context.core` + the space id just to reach a no-op.
       if (this.caseConfig.analyticsV2.enabled) {
         const coreContext = await context.core;
-        const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        const spaceId = request.spaceId;
         this.casesAnalyticsV2Service?.ensureDataViewForSpace({
           spaceId,
           request,

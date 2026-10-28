@@ -95,7 +95,7 @@ describe('Execution Routes', () => {
     jest.clearAllMocks();
     routeHandlers = {};
     mockLogger = loggingSystemMock.createLogger();
-    mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') };
+    mockSpaces = { getSpaceId: jest.fn() };
     mockApi = {
       getWorkflow: jest.fn(),
       runWorkflowWithAlertPreprocessing: jest.fn(),
@@ -126,6 +126,7 @@ describe('Execution Routes', () => {
           routeHandlers[`${method}:${path}`] = {
             handler: async (context, request, response) => {
               request.authzResult ??= defaultAuthzResult;
+              request.spaceId ??= 'default';
               return handler(context, request, response);
             },
           };

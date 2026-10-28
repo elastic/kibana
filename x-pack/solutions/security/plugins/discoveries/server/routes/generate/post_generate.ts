@@ -137,7 +137,7 @@ export const registerGenerateRoute = (
 
           const { pluginsStart } = await getStartServices();
           const { authz } = pluginsStart.security;
-          const spaceId = getSpaceId({ request, spaces: pluginsStart.spaces?.spacesService });
+          const spaceId = getSpaceId({ request });
 
           // Reject a client-supplied alerts index that targets another space or
           // a cross-space wildcard before dispatching the pipeline.

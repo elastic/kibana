@@ -9,6 +9,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import {
@@ -63,6 +64,9 @@ const createLicensingContext = () => ({
   }),
 });
 
+const createRequest: typeof httpServerMock.createKibanaRequest = (options = {}) =>
+  httpServerMock.createKibanaRequest({ spaceId: asSpaceId('default-space'), ...options });
+
 describe('Workflow routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
   let routeSecurity: Record<string, unknown>;
@@ -83,7 +87,7 @@ describe('Workflow routes', () => {
     jest.clearAllMocks();
     routeHandlers = {};
     routeSecurity = {};
-    mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default-space') };
+    mockSpaces = { getSpaceId: jest.fn() };
     mockLogger = loggingSystemMock.createLogger();
     mockAudit = createWorkflowManagementAuditLogMock();
     jest.spyOn(mockAudit, 'logWorkflowUpdated');
@@ -173,7 +177,7 @@ describe('Workflow routes', () => {
     it('should call api.getWorkflows with query filters and space id when license is valid', async () => {
       const list = { workflows: [], total: 0 };
       mockApi.getWorkflows.mockResolvedValue(list);
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         query: {
           size: 10,
           page: 2,
@@ -189,7 +193,6 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockSpaces.getSpaceId).toHaveBeenCalledWith(request);
       expect(mockApi.getWorkflows).toHaveBeenCalledWith(
         {
           size: 10,
@@ -208,7 +211,7 @@ describe('Workflow routes', () => {
 
     it('should pass sortField and sortOrder to api.getWorkflows', async () => {
       mockApi.getWorkflows.mockResolvedValue({ workflows: [], total: 0 });
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         query: { sortField: 'enabled', sortOrder: 'asc' },
       });
       (request as any).authzResult = { [WorkflowsManagementApiActions.read]: true };
@@ -230,7 +233,7 @@ describe('Workflow routes', () => {
     it('should include execution history when user has readExecution privilege', async () => {
       const list = { workflows: [], total: 0 };
       mockApi.getWorkflows.mockResolvedValue(list);
-      const request = httpServerMock.createKibanaRequest({ query: {} });
+      const request = createRequest({ query: {} });
       (request as any).authzResult = {
         [WorkflowsManagementApiActions.read]: true,
         [WorkflowsManagementApiActions.readExecution]: true,
@@ -249,7 +252,7 @@ describe('Workflow routes', () => {
 
     it('should normalize selector visibility context to an array for api.getWorkflows', async () => {
       mockApi.getWorkflows.mockResolvedValue({ workflows: [], total: 0 });
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         query: {
           managed: 'all',
           visibilityContext: getManagedWorkflowSelectorVisibilityContext('rule_action'),
@@ -280,7 +283,7 @@ describe('Workflow routes', () => {
         getManagedWorkflowSelectorVisibilityContext('rule_action'),
         getManagedWorkflowSolutionVisibilityContext('security'),
       ];
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         query: {
           managed: 'all',
           visibilityContext,
@@ -310,7 +313,7 @@ describe('Workflow routes', () => {
     });
 
     it('should reject managed workflow filters without managed workflow read privilege', async () => {
-      const request = httpServerMock.createKibanaRequest({ query: { managed: 'all' } });
+      const request = createRequest({ query: { managed: 'all' } });
       (request as any).authzResult = { [WorkflowsManagementApiActions.read]: true };
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -327,7 +330,7 @@ describe('Workflow routes', () => {
     it('should delegate errors to handleRouteError', async () => {
       const err = new Error('boom');
       mockApi.getWorkflows.mockRejectedValue(err);
-      const request = httpServerMock.createKibanaRequest({ query: {} });
+      const request = createRequest({ query: {} });
       (request as any).authzResult = { [WorkflowsManagementApiActions.read]: true };
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -348,7 +351,7 @@ describe('Workflow routes', () => {
     it('should call api.getWorkflow with id and space id when workflow exists', async () => {
       const workflow = { id: 'wf-1', name: 'W' };
       mockApi.getWorkflow.mockResolvedValue(workflow);
-      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+      const request = createRequest({ params: { id: 'wf-1' } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -360,7 +363,7 @@ describe('Workflow routes', () => {
 
     it('should return 404 when workflow is not found', async () => {
       mockApi.getWorkflow.mockResolvedValue(null);
-      const request = httpServerMock.createKibanaRequest({ params: { id: 'missing' } });
+      const request = createRequest({ params: { id: 'missing' } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -371,7 +374,7 @@ describe('Workflow routes', () => {
 
     it('should reject managed workflow details without managed workflow read privilege', async () => {
       mockApi.getWorkflow.mockResolvedValue({ id: 'managed-wf', managed: true });
-      const request = httpServerMock.createKibanaRequest({ params: { id: 'managed-wf' } });
+      const request = createRequest({ params: { id: 'managed-wf' } });
       (request as any).authzResult = { [WorkflowsManagementApiActions.read]: true };
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -388,7 +391,7 @@ describe('Workflow routes', () => {
     it('should delegate errors to handleRouteError', async () => {
       const err = new Error('boom');
       mockApi.getWorkflow.mockRejectedValue(err);
-      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+      const request = createRequest({ params: { id: 'wf-1' } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -409,7 +412,7 @@ describe('Workflow routes', () => {
       const created = { id: 'new', name: 'N' };
       mockApi.createWorkflow.mockResolvedValue(created);
       const body = { yaml: 'name: N' };
-      const request = httpServerMock.createKibanaRequest({ body });
+      const request = createRequest({ body });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -431,7 +434,7 @@ describe('Workflow routes', () => {
       const updated = { id: 'wf-1', name: 'U' };
       mockApi.updateWorkflow.mockResolvedValue(updated);
       const body = { name: 'U', enabled: true, tags: [], yaml: 'x' };
-      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' }, body });
+      const request = createRequest({ params: { id: 'wf-1' }, body });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -456,7 +459,7 @@ describe('Workflow routes', () => {
         version: 7,
       };
       mockApi.updateAccessControl.mockResolvedValue(result);
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         params: { id: 'wf-1' },
         body: { access_mode: 'private' },
       });
@@ -484,7 +487,7 @@ describe('Workflow routes', () => {
     it('audits a failed access update, including failure after persistence', async () => {
       const error = new Error('SML deletion failed after the ACL was saved');
       mockApi.updateAccessControl.mockRejectedValue(error);
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         params: { id: 'wf-1' },
         body: { access_mode: 'private' },
       });
@@ -508,7 +511,7 @@ describe('Workflow routes', () => {
       const updated = { id: 'wf-1', name: 'U' };
       mockApi.updateWorkflow.mockResolvedValue(updated);
       const body = { name: 'U', enabled: true, tags: [], yaml: 'x' };
-      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' }, body });
+      const request = createRequest({ params: { id: 'wf-1' }, body });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -530,7 +533,7 @@ describe('Workflow routes', () => {
 
     it('should call api.deleteWorkflows with a single id, space id, and request (soft delete)', async () => {
       mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 1, failures: [] });
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         params: { id: 'wf-1' },
         query: { force: false, acknowledgeAclLoss: false },
       });
@@ -548,7 +551,7 @@ describe('Workflow routes', () => {
 
     it('should call api.deleteWorkflows with force=true (hard delete)', async () => {
       mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 1, failures: [] });
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         params: { id: 'wf-1' },
         query: { force: true, acknowledgeAclLoss: true },
       });
@@ -567,7 +570,7 @@ describe('Workflow routes', () => {
     it('should answer a delete that matched no workflow with a not-found error', async () => {
       mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 0, failures: [] });
       jest.spyOn(mockAudit, 'logWorkflowDeleted');
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         params: { id: 'wf-1' },
         query: { force: false, acknowledgeAclLoss: false },
       });
@@ -598,7 +601,7 @@ describe('Workflow routes', () => {
       const result = { created: [], failed: [] };
       mockApi.bulkCreateWorkflows.mockResolvedValue(result);
       const workflows = [{ yaml: 'name: A' }];
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         method: 'post',
         path: '/api/workflows',
         query: { overwrite: true },
@@ -625,7 +628,7 @@ describe('Workflow routes', () => {
     it('should delegate errors to handleRouteError', async () => {
       const err = new Error('bulk failed');
       mockApi.bulkCreateWorkflows.mockRejectedValue(err);
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         method: 'post',
         path: '/api/workflows',
         query: { overwrite: false },
@@ -646,7 +649,7 @@ describe('Workflow routes', () => {
         { id: 'a', yaml: 'name: A' },
         { id: 'b', yaml: 'name: B' },
       ];
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         method: 'post',
         path: '/api/workflows',
         query: { overwrite: false, dryRun: true },
@@ -674,7 +677,7 @@ describe('Workflow routes', () => {
         { yaml: 'name: NoId' }, // no id field — server would generate one on real import
         { id: 'has-id', yaml: 'name: HasId' },
       ];
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         method: 'post',
         path: '/api/workflows',
         query: { overwrite: false, dryRun: true },
@@ -695,7 +698,7 @@ describe('Workflow routes', () => {
       const result = { created: [{ id: 'a' }], failed: [] };
       mockApi.bulkCreateWorkflows.mockResolvedValue(result);
       const workflows = [{ id: 'a', yaml: 'name: A' }];
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         method: 'post',
         path: '/api/workflows',
         query: { overwrite: false, dryRun: false },
@@ -728,7 +731,7 @@ describe('Workflow routes', () => {
         successfulIds: ['a', 'b'],
       };
       mockApi.deleteWorkflows.mockResolvedValue(apiResult);
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         body: { ids: ['a', 'b'] },
         query: { force: false, acknowledgeAclLoss: false },
       });
@@ -754,7 +757,7 @@ describe('Workflow routes', () => {
         successfulIds: ['a', 'b'],
       };
       mockApi.deleteWorkflows.mockResolvedValue(apiResult);
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         body: { ids: ['a', 'b'] },
         query: { force: true, acknowledgeAclLoss: true },
       });
@@ -784,7 +787,7 @@ describe('Workflow routes', () => {
       const workflows = [{ id: 'a', name: 'Existing' }];
       mockApi.getWorkflowsByIds.mockResolvedValue([{ id: 'a', name: 'Existing', managed: false }]);
       mockApi.getWorkflowsSourceByIds.mockResolvedValue(workflows);
-      const request = httpServerMock.createKibanaRequest({ body: { ids: ['a'] } });
+      const request = createRequest({ body: { ids: ['a'] } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -813,7 +816,7 @@ describe('Workflow routes', () => {
       const cloned = { id: 'wf-2', name: 'Orig copy' };
       mockApi.getWorkflow.mockResolvedValue(wf);
       mockApi.cloneWorkflow.mockResolvedValue(cloned);
-      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+      const request = createRequest({ params: { id: 'wf-1' } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -826,7 +829,7 @@ describe('Workflow routes', () => {
 
     it('should return 404 when source workflow is not found', async () => {
       mockApi.getWorkflow.mockResolvedValue(null);
-      const request = httpServerMock.createKibanaRequest({ params: { id: 'missing' } });
+      const request = createRequest({ params: { id: 'missing' } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -847,7 +850,7 @@ describe('Workflow routes', () => {
     it('should call api.validateWorkflow with yaml, space id, and request', async () => {
       const validation = { valid: true };
       mockApi.validateWorkflow.mockResolvedValue(validation);
-      const request = httpServerMock.createKibanaRequest({ body: { yaml: 'name: X' } });
+      const request = createRequest({ body: { yaml: 'name: X' } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -860,7 +863,7 @@ describe('Workflow routes', () => {
     it('should return customError when validation throws', async () => {
       const err = new Error('validate failed');
       mockApi.validateWorkflow.mockRejectedValue(err);
-      const request = httpServerMock.createKibanaRequest({ body: { yaml: 'bad' } });
+      const request = createRequest({ body: { yaml: 'bad' } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -885,7 +888,7 @@ describe('Workflow routes', () => {
       mockApi.getWorkflowsByIds.mockResolvedValue([
         { id: 'w1', yaml: 'name: A', definition: null },
       ]);
-      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w1'] } });
+      const request = createRequest({ body: { ids: ['w1'] } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -897,7 +900,7 @@ describe('Workflow routes', () => {
 
     it('should return notFound when no workflows match ids', async () => {
       mockApi.getWorkflowsByIds.mockResolvedValue([]);
-      const request = httpServerMock.createKibanaRequest({ body: { ids: ['missing'] } });
+      const request = createRequest({ body: { ids: ['missing'] } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -924,7 +927,7 @@ describe('Workflow routes', () => {
         },
       ]);
 
-      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-1', 'w-2'] } });
+      const request = createRequest({ body: { ids: ['w-1', 'w-2'] } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -954,7 +957,7 @@ describe('Workflow routes', () => {
         },
       ]);
 
-      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-annotated'] } });
+      const request = createRequest({ body: { ids: ['w-annotated'] } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -976,7 +979,7 @@ describe('Workflow routes', () => {
         },
       ]);
 
-      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-no-yaml'] } });
+      const request = createRequest({ body: { ids: ['w-no-yaml'] } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -993,7 +996,7 @@ describe('Workflow routes', () => {
       mockApi.getWorkflowsByIds.mockResolvedValue([
         { id: 'w-1', name: 'Found', yaml: 'name: Found', definition: null },
       ]);
-      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-missing-1'] } });
+      const request = createRequest({ body: { ids: ['w-missing-1'] } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -1016,7 +1019,7 @@ describe('Workflow routes', () => {
     it('should call api.getWorkflowStats with space id', async () => {
       const stats = { total: 3 };
       mockApi.getWorkflowStats.mockResolvedValue(stats);
-      const request = httpServerMock.createKibanaRequest();
+      const request = createRequest();
       (request as any).authzResult = { [WorkflowsManagementApiActions.read]: true };
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -1038,7 +1041,7 @@ describe('Workflow routes', () => {
     it('should include execution stats when user has readExecution privilege', async () => {
       const stats = { total: 3 };
       mockApi.getWorkflowStats.mockResolvedValue(stats);
-      const request = httpServerMock.createKibanaRequest();
+      const request = createRequest();
       (request as any).authzResult = {
         [WorkflowsManagementApiActions.read]: true,
         [WorkflowsManagementApiActions.readExecution]: true,
@@ -1058,7 +1061,7 @@ describe('Workflow routes', () => {
     it('should include managed execution stats when user has managed execution read privilege', async () => {
       const stats = { total: 3 };
       mockApi.getWorkflowStats.mockResolvedValue(stats);
-      const request = httpServerMock.createKibanaRequest();
+      const request = createRequest();
       (request as any).authzResult = {
         [WorkflowsManagementApiActions.read]: true,
         [WorkflowsManagementApiActions.readExecution]: true,
@@ -1087,7 +1090,7 @@ describe('Workflow routes', () => {
     it('should call api.getWorkflowAggs with fields from query and space id', async () => {
       const aggs = { tags: {} };
       mockApi.getWorkflowAggs.mockResolvedValue(aggs);
-      const request = httpServerMock.createKibanaRequest({ query: { fields: ['tags'] } });
+      const request = createRequest({ query: { fields: ['tags'] } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -1103,7 +1106,7 @@ describe('Workflow routes', () => {
     it('should normalize a single string field to an array', async () => {
       const aggs = { tags: {} };
       mockApi.getWorkflowAggs.mockResolvedValue(aggs);
-      const request = httpServerMock.createKibanaRequest({ query: { fields: 'tags' } });
+      const request = createRequest({ query: { fields: 'tags' } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -1119,7 +1122,7 @@ describe('Workflow routes', () => {
     it('should pass the managed filter to api.getWorkflowAggs', async () => {
       const aggs = { tags: {} };
       mockApi.getWorkflowAggs.mockResolvedValue(aggs);
-      const request = httpServerMock.createKibanaRequest({
+      const request = createRequest({
         query: { fields: ['tags'], managed: 'all' },
       });
       const response = mockResponse();
@@ -1147,7 +1150,7 @@ describe('Workflow routes', () => {
         connectorTypes: { slack: {} },
         totalConnectors: 1,
       });
-      const request = httpServerMock.createKibanaRequest();
+      const request = createRequest();
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -1162,7 +1165,7 @@ describe('Workflow routes', () => {
     it('should log and delegate errors to handleRouteError', async () => {
       const err = new Error('connector failure');
       mockApi.getAvailableConnectors.mockRejectedValue(err);
-      const request = httpServerMock.createKibanaRequest();
+      const request = createRequest();
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -1183,7 +1186,7 @@ describe('Workflow routes', () => {
     it('should call api.getWorkflowJsonSchema with loose flag, space id, and request', async () => {
       const schemaBody = { type: 'object' };
       mockApi.getWorkflowJsonSchema.mockResolvedValue(schemaBody);
-      const request = httpServerMock.createKibanaRequest({ query: { loose: true } });
+      const request = createRequest({ query: { loose: true } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 
@@ -1199,7 +1202,7 @@ describe('Workflow routes', () => {
 
     it('should return customError when schema generation returns null', async () => {
       mockApi.getWorkflowJsonSchema.mockResolvedValue(null);
-      const request = httpServerMock.createKibanaRequest({ query: { loose: false } });
+      const request = createRequest({ query: { loose: false } });
       const response = mockResponse();
       const context = createLicensingContext() as any;
 

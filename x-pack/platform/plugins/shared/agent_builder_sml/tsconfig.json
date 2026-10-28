@@ -30,6 +30,7 @@
     "@kbn/es-errors",
     "@kbn/context-engine-plugin",
     "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/core-elasticsearch-server-mocks"
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-spaces-common"
   ]
 }

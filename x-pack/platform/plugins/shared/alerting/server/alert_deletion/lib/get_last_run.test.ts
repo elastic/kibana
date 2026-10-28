@@ -17,6 +17,7 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server/spaces_servic
 
 const fakeRequest = {
   headers: {},
+  spaceId: 'default',
   getBasePath: () => '',
   path: '/',
   route: { settings: {} },
@@ -38,8 +39,7 @@ const getAlertIndicesAliasMock = jest.fn();
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const securityServiceStart = securityServiceMock.createStart();
-const getSpaceId = jest.fn();
-const spacesService = { getSpaceId } as unknown as SpacesServiceStart;
+const spacesService = {} as unknown as SpacesServiceStart;
 const taskManagerSetup = taskManagerMock.createSetup();
 const taskManagerStart = taskManagerMock.createStart();
 
@@ -67,7 +67,6 @@ describe('getLastRun', () => {
   });
 
   test('should return last run time if available', async () => {
-    getSpaceId.mockReturnValueOnce('space1');
     esClient.search.mockResolvedValueOnce({
       took: 10,
       timed_out: false,
@@ -108,7 +107,10 @@ describe('getLastRun', () => {
       },
     });
 
-    const lastRunDate = await alertDeletionClient.getLastRun(fakeRequest);
+    const lastRunDate = await alertDeletionClient.getLastRun({
+      ...fakeRequest,
+      spaceId: 'space1',
+    } as KibanaRequest);
 
     expect(esClient.search).toHaveBeenCalledWith({
       index: '.kibana-event-log*',
@@ -128,7 +130,6 @@ describe('getLastRun', () => {
   });
 
   test('should return undefined if not available', async () => {
-    getSpaceId.mockReturnValueOnce('default');
     esClient.search.mockResolvedValueOnce({
       took: 10,
       timed_out: false,
@@ -159,7 +160,6 @@ describe('getLastRun', () => {
   });
 
   test('logs and returns undefined if search errors', async () => {
-    getSpaceId.mockReturnValueOnce('default');
     esClient.search.mockImplementationOnce(() => {
       throw new Error('search failed');
     });

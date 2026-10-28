@@ -29,7 +29,7 @@ export function registerHiddenSORoutes(
     },
     async (context, request, response) => {
       const [, { encryptedSavedObjects }] = await core.getStartServices();
-      const spaceId = deps.spaces.spacesService.getSpaceId(request);
+      const spaceId = request.spaceId;
       const namespace = deps.spaces.spacesService.spaceIdToNamespace(spaceId);
       try {
         return response.ok({
@@ -62,7 +62,7 @@ export function registerHiddenSORoutes(
     },
     async (context, request, response) => {
       const [, { encryptedSavedObjects }] = await core.getStartServices();
-      const spaceId = deps.spaces.spacesService.getSpaceId(request);
+      const spaceId = request.spaceId;
       const namespace = deps.spaces.spacesService.spaceIdToNamespace(spaceId);
 
       const { type } = request.query;

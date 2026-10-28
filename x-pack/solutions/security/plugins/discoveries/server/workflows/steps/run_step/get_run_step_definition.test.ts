@@ -234,8 +234,11 @@ describe('getRunStepDefinition', () => {
             getActionsClientWithRequest: jest.fn().mockResolvedValue(mockActionsClient),
           },
           security: { authz: {} },
-          spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('finance') } },
         },
+      });
+      baseMockContext.contextManager.getFakeRequest.mockReturnValueOnce({
+        headers: {},
+        spaceId: 'finance',
       });
 
       const stepDefinition = getStepDefinition();

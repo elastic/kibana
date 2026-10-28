@@ -43,6 +43,7 @@ import type {
   StoredConversationExecutionParams,
 } from '@kbn/agent-builder-server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { UserAttributes } from '@kbn/inference-tracing';
 import { collectAndWriteEvents, handleAgentExecution, setUserAttributes } from './execution_runner';
 import {
@@ -385,7 +386,7 @@ describe('handleAgentExecution', () => {
       } as RoundCompleteEvent)
     );
 
-    const request = { headers: {} } as never;
+    const request = httpServerMock.createKibanaRequest({ spaceId: asSpaceId('marketing') });
     const soClient = { id: 'so-marketing' };
     const uiSettingsClient = { id: 'ui-marketing' };
     const privacySettings = {
@@ -409,10 +410,6 @@ describe('handleAgentExecution', () => {
       getScopedClient;
     (deps as { uiSettings: { asScopedToClient: jest.Mock } }).uiSettings.asScopedToClient =
       asScopedToClient;
-    (deps as { spaces: { spacesService: { getSpaceId: jest.Mock } } }).spaces = {
-      spacesService: { getSpaceId: jest.fn().mockReturnValue('marketing') },
-    };
-
     const events$ = await handleAgentExecution({
       execution: {
         executionId: 'execution-1',

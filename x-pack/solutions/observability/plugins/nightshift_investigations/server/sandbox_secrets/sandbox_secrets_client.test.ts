@@ -17,6 +17,7 @@ import {
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_SECRETS_SO_ID, NIGHTSHIFT_SECRETS_SO_TYPE } from '../saved_objects';
 import { createSandboxSecretsClient } from './sandbox_secrets_client';
@@ -83,9 +84,7 @@ const setup = ({
     isEncryptionError: jest.fn(() => false),
   } as unknown as jest.Mocked<EncryptedSavedObjectsPluginStart>;
 
-  const spaces = {
-    spacesService: { getSpaceId: jest.fn(() => spaceId) },
-  } as unknown as SpacesPluginStart;
+  const spaces = { spacesService: {} } as unknown as SpacesPluginStart;
 
   const checkPrivileges = jest.fn(async () => ({ hasAllRequested: hasReadPrivilege }));
   const security = {
@@ -108,7 +107,7 @@ const setup = ({
     logger: loggingSystemMock.createLogger(),
   });
 
-  const request = httpServerMock.createKibanaRequest();
+  const request = httpServerMock.createKibanaRequest({ spaceId: asSpaceId(spaceId) });
 
   return {
     client,

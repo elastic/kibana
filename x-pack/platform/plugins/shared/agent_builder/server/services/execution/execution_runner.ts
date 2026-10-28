@@ -313,7 +313,7 @@ const handleConversationExecution = async ({
     // OR when the conversation still carries the default placeholder title
     const needsTitle =
       storeConversation && conversationNeedsTitle(conversation) && !subagentCreation;
-    const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+    const spaceId = getCurrentSpaceId({ request });
     const [titleChatModel, { chatModel }, { name: agentName }, privacySettings] = await Promise.all(
       [
         needsTitle

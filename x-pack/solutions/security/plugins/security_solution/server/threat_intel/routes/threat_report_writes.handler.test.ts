@@ -12,6 +12,7 @@ import {
   loggingSystemMock,
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
+import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { registerPersistReportFieldsRoute } from './persist_report_fields';
 import { registerIngestThreatReportRoute } from './ingest_threat_report';
 import { registerAttributeAlertsEvidenceRoute } from './attribute_alerts_evidence';
@@ -23,6 +24,8 @@ import {
   persistReportFieldsBodySchema,
 } from '../../../common/threat_intel';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
+
+const SPACE_A = asSpaceId('space-a');
 
 /**
  * Handler-level tests for the three threat-report write routes. These writes run as the internal
@@ -40,9 +43,7 @@ describe('threat report write routes', () => {
     bootstrapReady = true,
   }: { spaceId?: string; bootstrapReady?: boolean } = {}) => {
     const router = httpServiceMock.createRouter();
-    const getSpacesService = jest
-      .fn()
-      .mockReturnValue(spaceId ? { getSpaceId: () => spaceId } : undefined);
+    const getSpacesService = jest.fn().mockReturnValue(spaceId ? {} : undefined);
     const getBootstrapReady = bootstrapReady
       ? jest.fn().mockResolvedValue(undefined)
       : jest.fn().mockRejectedValue(new Error('template install failed'));
@@ -156,7 +157,7 @@ describe('threat report write routes', () => {
 
       await getHandler(router, PERSIST_REPORT_FIELDS_API_PATH)(
         { core },
-        httpServerMock.createKibanaRequest({ body: validBody }),
+        httpServerMock.createKibanaRequest({ spaceId: SPACE_A, body: validBody }),
         response
       );
 
@@ -174,7 +175,7 @@ describe('threat report write routes', () => {
 
       await getHandler(router, PERSIST_REPORT_FIELDS_API_PATH)(
         { core },
-        httpServerMock.createKibanaRequest({ body: validBody }),
+        httpServerMock.createKibanaRequest({ spaceId: SPACE_A, body: validBody }),
         buildResponse()
       );
 
@@ -256,8 +257,8 @@ describe('threat report write routes', () => {
   });
 
   describe('registerIngestThreatReportRoute', () => {
-    const requestWith = (document: Record<string, unknown>) =>
-      httpServerMock.createKibanaRequest({ body: { document } });
+    const requestWith = (document: Record<string, unknown>, spaceId?: SpaceId) =>
+      httpServerMock.createKibanaRequest({ body: { document }, ...(spaceId ? { spaceId } : {}) });
 
     it('declares the write authz on the route config', () => {
       const { router, ...rest } = buildDeps();
@@ -295,7 +296,7 @@ describe('threat report write routes', () => {
 
       await getHandler(router, INGEST_THREAT_REPORT_API_PATH)(
         { core },
-        requestWith({ title: 'report' }),
+        requestWith({ title: 'report' }, SPACE_A),
         response
       );
 
@@ -336,7 +337,7 @@ describe('threat report write routes', () => {
 
       await getHandler(router, INGEST_THREAT_REPORT_API_PATH)(
         { core },
-        requestWith({ title: 'report', space_id: 'space-b' }),
+        requestWith({ title: 'report', space_id: 'space-b' }, SPACE_A),
         response
       );
 
@@ -395,7 +396,7 @@ describe('threat report write routes', () => {
 
       await getHandler(router, ATTRIBUTE_ALERTS_EVIDENCE_API_PATH)(
         { core },
-        httpServerMock.createKibanaRequest({ body }),
+        httpServerMock.createKibanaRequest({ spaceId: SPACE_A, body }),
         response
       );
 
@@ -421,7 +422,7 @@ describe('threat report write routes', () => {
 
       await getHandler(router, ATTRIBUTE_ALERTS_EVIDENCE_API_PATH)(
         { core },
-        httpServerMock.createKibanaRequest({ body }),
+        httpServerMock.createKibanaRequest({ spaceId: SPACE_A, body }),
         response
       );
 
@@ -437,7 +438,7 @@ describe('threat report write routes', () => {
 
       await getHandler(router, ATTRIBUTE_ALERTS_EVIDENCE_API_PATH)(
         { core },
-        httpServerMock.createKibanaRequest({ body }),
+        httpServerMock.createKibanaRequest({ spaceId: SPACE_A, body }),
         buildResponse()
       );
 

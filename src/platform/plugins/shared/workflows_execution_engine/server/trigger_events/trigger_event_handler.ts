@@ -10,8 +10,6 @@
 import pLimit from 'p-limit';
 import { v4 as generateUuid } from 'uuid';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type {
   EsWorkflowExecution,
   WorkflowDetailDto,
@@ -62,7 +60,6 @@ export interface TriggerEventHandlerDeps {
   coreStart: CoreStart;
   workflowRepository: WorkflowRepository;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
-  spaces: SpacesServiceStart | undefined;
   scheduleWorkflow: ScheduleWorkflow;
   config: EventTriggersConfig;
   logger: Logger;
@@ -170,7 +167,6 @@ export class TriggerEventHandler {
   private readonly workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   private readonly scheduleWorkflow: ScheduleWorkflow;
   private readonly telemetryClient: WorkflowExecutionTelemetryClient;
-  private readonly spaces: SpacesServiceStart | undefined;
   private readonly config: EventTriggersConfig;
   private readonly logger: Logger;
   private readonly triggerEventsClientPromise: Promise<TriggerEventsDataStreamClient | undefined>;
@@ -178,7 +174,6 @@ export class TriggerEventHandler {
   constructor(deps: TriggerEventHandlerDeps) {
     this.scheduleWorkflow = deps.scheduleWorkflow;
     this.workflowRepository = deps.workflowRepository;
-    this.spaces = deps.spaces;
     this.workflowsExtensions = deps.workflowsExtensions;
     this.config = deps.config;
     this.logger = deps.logger;
@@ -200,7 +195,7 @@ export class TriggerEventHandler {
     }
     const { triggerId, payload, request, authenticatedUser } = params;
 
-    const spaceId = this.spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const spaceId = request.spaceId;
 
     const timestamp = new Date().toISOString();
     const eventId = generateUuid();

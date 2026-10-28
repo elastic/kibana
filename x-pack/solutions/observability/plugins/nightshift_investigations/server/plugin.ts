@@ -356,8 +356,7 @@ export class NightshiftInvestigationsPlugin
 
         if (this.decisionTreesEnabled) {
           const decisionTreeLogger = this.logger.get('decision_trees');
-          const getSpaceId = (request: KibanaRequest) =>
-            this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+          const getSpaceId = (request: KibanaRequest) => request.spaceId;
           for (const tool of createDecisionTreeTools({
             getSandboxStart,
             connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
@@ -521,7 +520,7 @@ export class NightshiftInvestigationsPlugin
             return createCortexStore({
               esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
               logger: this.logger.get('cortex'),
-              spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+              spaceId: request.spaceId,
             });
           },
           isDecisionTreesEnabled: () => this.decisionTreesEnabled,
@@ -534,7 +533,7 @@ export class NightshiftInvestigationsPlugin
             return createDecisionTreeStore({
               esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
               logger: this.logger.get('decision_trees'),
-              spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+              spaceId: request.spaceId,
             });
           },
           isMemoryEnabled: () => this.memoryEnabled,
@@ -550,7 +549,7 @@ export class NightshiftInvestigationsPlugin
             return createMemoryPageStore({
               esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
               logger: this.logger.get('memory'),
-              spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+              spaceId: request.spaceId,
             });
           },
           getKnowledgePurgeClient: (request: KibanaRequest) => {
@@ -693,13 +692,11 @@ export class NightshiftInvestigationsPlugin
     if (!this.featureFlags) {
       throw new Error('featureFlags is not available — plugin start() has not been called');
     }
-    const resolvedSpaceId =
-      spaceId ?? this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const resolvedSpaceId = spaceId ?? request.spaceId;
 
     return new NightshiftInvestigationsClient({
       request,
       workflowsManagement: this.workflowsManagement,
-      spaces: this.spaces,
       logger: this.logger,
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,

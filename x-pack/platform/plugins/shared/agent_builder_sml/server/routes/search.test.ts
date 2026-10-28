@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   buildMockContext,
   createMockSmlService,
@@ -43,7 +44,7 @@ describe('registerSearchRoute', () => {
   });
 
   const callHandler = async (body: Record<string, unknown>, uiSettingsEnabled = true) => {
-    const request = httpServerMock.createKibanaRequest({ body });
+    const request = httpServerMock.createKibanaRequest({ body, spaceId: asSpaceId('test-space') });
     const response = httpServerMock.createResponseFactory();
     await handler(buildMockContext(uiSettingsEnabled), request, response);
     return response;
@@ -128,7 +129,7 @@ describe('registerSearchRoute', () => {
     );
   });
 
-  it('passes spaceId from spaces plugin to sml.search', async () => {
+  it('passes the request spaceId to sml.search', async () => {
     mockSmlService.search.mockResolvedValue({ results: [] });
     await callHandler({ query: 'test' });
     expect(mockSmlService.search).toHaveBeenCalledWith(

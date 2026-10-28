@@ -82,7 +82,6 @@ export class AgenticInvestigationsPlugin
   private assignmentsService?: AssignmentsService;
   private investigationStatusService?: InvestigationStatusService;
   private investigationsQueryService?: InvestigationsQueryService;
-  private spaces?: AgenticInvestigationsStartDependencies['spaces'];
   private resolveUser?: ResolveUser;
   private agentBuilder?: AgenticInvestigationsStartDependencies['agentBuilder'];
   private workflowsManagement?: WorkflowsServerPluginSetup['management'];
@@ -226,7 +225,6 @@ export class AgenticInvestigationsPlugin
     coreStart: CoreStart,
     plugins: AgenticInvestigationsStartDependencies
   ): AgenticInvestigationsPluginStart {
-    this.spaces = plugins.spaces;
     this.agentBuilder = plugins.agentBuilder;
     this.resolveUser = createUserResolver({
       userProfile: coreStart.userProfile,
@@ -451,7 +449,7 @@ export class AgenticInvestigationsPlugin
   }
 
   private getSpaceId(request: KibanaRequest): string {
-    return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
+    return request.spaceId;
   }
 
   /**

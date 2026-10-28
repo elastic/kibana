@@ -17,7 +17,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 export interface InvestigationInfrastructureAvailabilityDependencies {
   request: KibanaRequest;
@@ -67,8 +66,7 @@ export const isInvestigationInfrastructureAvailable = async ({
   }
 
   try {
-    const resolvedSpaceId =
-      spaceId ?? spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    const resolvedSpaceId = spaceId ?? request.spaceId;
     const workflow = await workflowsManagement.management
       .getClient(request)
       .getWorkflow(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, resolvedSpaceId);

@@ -139,15 +139,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
-      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
-      return spaces.spacesService.getSpaceId(request);
+      return request.spaceId;
     })
     .inRequestScope();
   bind(ActionPolicyNamespaceToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
-      const spaceId = spaces.spacesService.getSpaceId(request);
+      const spaceId = request.spaceId;
       return spaces.spacesService.spaceIdToNamespace(spaceId);
     })
     .inRequestScope();

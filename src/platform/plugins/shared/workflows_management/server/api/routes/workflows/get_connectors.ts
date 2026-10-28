@@ -14,7 +14,7 @@ import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerGetConnectorsRoute({ router, api, logger, spaces }: RouteDependencies) {
+export function registerGetConnectorsRoute({ router, api, logger }: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/connectors',
@@ -38,7 +38,7 @@ export function registerGetConnectorsRoute({ router, api, logger, spaces }: Rout
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const { connectorTypes, totalConnectors } = await api.getAvailableConnectors(
             spaceId,
             request

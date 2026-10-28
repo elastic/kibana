@@ -43,7 +43,7 @@ const registerUpdateWorkflowRouteForPath = (
     allowManagedWorkflowMutation,
   }: UpdateWorkflowRouteConfig
 ) => {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, audit } = deps;
   router.versioned
     .put({
       path: routePath,
@@ -72,7 +72,7 @@ const registerUpdateWorkflowRouteForPath = (
       withAvailabilityCheck(async (context, request, response) => {
         try {
           const { id } = request.params;
-          const spaceId = spaces.getSpaceId(request);
+          const spaceId = request.spaceId;
           const updated = await api.updateWorkflow(id, request.body, spaceId, request, {
             allowManagedWorkflowMutation,
           });

@@ -21,7 +21,6 @@ import type {
 } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import type { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { TSVBMetricModel } from '@kbn/metrics-data-access-plugin/common';
 import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
 import type { InfraConfig, InfraPluginRequestHandlerContext } from '../../../types';
@@ -356,7 +355,7 @@ export class KibanaFramework {
   }
 
   public getSpaceId(request: KibanaRequest): string {
-    return this.plugins.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    return request.spaceId;
   }
 
   public async makeTSVBRequest(

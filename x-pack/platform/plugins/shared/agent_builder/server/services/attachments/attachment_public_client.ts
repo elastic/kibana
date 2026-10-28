@@ -152,7 +152,7 @@ export const createAttachmentPublicClient = ({
         throw createAttachmentAlreadyExistsError({ attachmentId: id });
       }
 
-      const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
+      const spaceId = request.spaceId;
       const resolveContext = {
         request,
         spaceId,
@@ -278,7 +278,7 @@ export const createAttachmentPublicClient = ({
     }): Promise<BulkCreateAttachmentsResult> {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
 
-      const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
+      const spaceId = request.spaceId;
       const resolveContext = {
         request,
         spaceId,

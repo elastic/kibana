@@ -25,7 +25,7 @@ describe('createSpacesTutorialContextFactory', () => {
     const spacesService = spacesServiceMock.createStartContract(asSpaceId('my-space-id'));
     const contextFactory = createSpacesTutorialContextFactory(() => spacesService);
 
-    const request = httpServerMock.createKibanaRequest();
+    const request = httpServerMock.createKibanaRequest({ spaceId: asSpaceId('my-space-id') });
 
     expect(contextFactory(request)).toEqual({
       spaceId: 'my-space-id',

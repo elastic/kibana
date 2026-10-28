@@ -7,6 +7,7 @@
 
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { ProfilingSchemasStatus } from '@kbn/profiling-utils';
 import { getRoutePaths } from '../../../common';
 import type { RouteRegisterParameters } from '..';
@@ -40,7 +41,6 @@ function setup({
 } = {}) {
   const router = httpServiceMock.createRouter();
   const getStatus = jest.fn().mockResolvedValue(schemasStatus);
-  const getSpaceId = jest.fn().mockReturnValue('my-space');
   const security = { authz: {} };
 
   registerStatusRoute({
@@ -52,7 +52,7 @@ function setup({
         profilingDataAccess: { services: { getStatus } },
         security: withSecurity ? security : undefined,
       },
-      setup: { spaces: { spacesService: { getSpaceId } } },
+      setup: {},
       buildFlavor,
     },
   } as unknown as RouteRegisterParameters);
@@ -62,7 +62,7 @@ function setup({
 
   const coreContext = coreMock.createRequestHandlerContext();
   const context = coreMock.createCustomRequestHandlerContext({ core: coreContext });
-  const request = httpServerMock.createKibanaRequest();
+  const request = httpServerMock.createKibanaRequest({ spaceId: asSpaceId('my-space') });
   const response = httpServerMock.createResponseFactory();
 
   return {

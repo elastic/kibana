@@ -98,10 +98,7 @@ export const getRunStepDefinition = ({
         // Resolve the space from the (space-scoped) fake request the same way
         // `executeGenerationWorkflow` does for its authorization guard, so the
         // alerts index is bounded to the schedule's space rather than `-default`.
-        const spaceId = getSpaceId({
-          request,
-          spaces: pluginsStart.spaces?.spacesService,
-        });
+        const spaceId = getSpaceId({ request });
 
         const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
 

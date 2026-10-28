@@ -76,11 +76,11 @@ export const registerSecretKeysRoute = ({
       try {
         const { id } = req.params;
 
-        const [, { encryptedSavedObjects, actions, spaces }] = await getStartServices();
+        const [, { encryptedSavedObjects, actions }] = await getStartServices();
 
         const actionsClient = await actions.getActionsClientWithRequest(req);
         const connector = await actionsClient.get({ id });
-        const spaceId = spaces.spacesService.getSpaceId(req);
+        const spaceId = req.spaceId;
 
         if (!allowedConnectorTypes.includes(connector.actionTypeId)) {
           return res.badRequest({

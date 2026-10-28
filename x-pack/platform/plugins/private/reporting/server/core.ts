@@ -498,17 +498,14 @@ export class ReportingCore {
   }
 
   public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    if (spacesService) {
-      const spaceId = spacesService?.getSpaceId(request);
+    const spaceId = request.spaceId;
 
-      if (spaceId !== DEFAULT_SPACE_ID) {
-        logger.trace(`Request uses Space ID: ${spaceId}`);
-        return spaceId;
-      } else {
-        logger.trace(`Request uses default Space`);
-      }
+    if (spaceId !== DEFAULT_SPACE_ID) {
+      logger.trace(`Request uses Space ID: ${spaceId}`);
+      return spaceId;
     }
+
+    logger.trace(`Request uses default Space`);
   }
 
   public trackReport(reportId: string) {

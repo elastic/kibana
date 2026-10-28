@@ -921,6 +921,21 @@ describe('SavedObjectsService', () => {
           expect(getInternalExtensionsSpy).toHaveBeenCalledWith(excludedExtensions);
         });
 
+        it('scopes the spaces extension to the default space', async () => {
+          const coreContext = createCoreContext();
+          const soService = new SavedObjectsService(coreContext);
+          const setup = await soService.setup(createSetupDeps());
+          const spacesFactory = jest.fn().mockReturnValue({});
+          setup.setSpacesExtension(spacesFactory);
+          const { getUnsafeInternalClient } = await soService.start(createStartDeps());
+
+          getUnsafeInternalClient();
+
+          expect(spacesFactory).toHaveBeenCalledWith(
+            expect.objectContaining({ request: expect.objectContaining({ spaceId: 'default' }) })
+          );
+        });
+
         it('calls internal repository factory, not scoped repository factory', async () => {
           const coreContext = createCoreContext();
           const soService = new SavedObjectsService(coreContext);

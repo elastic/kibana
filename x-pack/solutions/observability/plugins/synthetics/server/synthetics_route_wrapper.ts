@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
 import { getProjectRoutingFromRequest } from '@kbn/observability-utils-server/es/get_project_routing_from_request';
@@ -56,7 +55,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       // specifically needed for the synthetics service api key generation
       server.authSavedObjectsClient = savedObjectsClient;
 
-      const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      const spaceId = request.spaceId;
 
       const heartbeatIndices = await resolveHeartbeatIndices({
         server,

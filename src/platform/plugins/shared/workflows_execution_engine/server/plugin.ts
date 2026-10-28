@@ -2064,7 +2064,6 @@ export class WorkflowsExecutionEnginePlugin
       coreStart,
       workflowRepository,
       workflowsExtensions: plugins.workflowsExtensions,
-      spaces: plugins.spaces?.spacesService,
       scheduleWorkflow,
       logger: this.logger,
       config: this.config.eventDriven,

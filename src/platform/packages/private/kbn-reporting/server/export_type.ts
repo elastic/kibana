@@ -24,7 +24,6 @@ import type { Logger } from '@kbn/logging';
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -36,9 +35,8 @@ import {
 import type { CreateJobFn, RunTaskFn } from './types';
 import type { ReportingConfigType } from '.';
 
-export interface BaseExportTypeSetupDeps {
-  spaces?: SpacesPluginSetup;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface -- intentionally empty after removing spaces setup dep
+export interface BaseExportTypeSetupDeps {}
 
 export interface BaseExportTypeStartDeps {
   licensing: LicensingPluginStart;
@@ -111,17 +109,14 @@ export abstract class ExportType<
   }
 
   private getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.setupDeps.spaces?.spacesService;
-    if (spacesService) {
-      const spaceId = spacesService?.getSpaceId(request);
+    const spaceId = request.spaceId;
 
-      if (spaceId !== DEFAULT_SPACE_ID) {
-        logger.trace(`Request uses Space ID: ${spaceId}`);
-        return spaceId;
-      } else {
-        logger.trace(`Request uses default Space`);
-      }
+    if (spaceId !== DEFAULT_SPACE_ID) {
+      logger.trace(`Request uses Space ID: ${spaceId}`);
+      return spaceId;
     }
+
+    logger.trace(`Request uses default Space`);
   }
 
   protected getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
@@ -131,10 +126,9 @@ export abstract class ExportType<
   }
 
   protected async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
-    const spacesService = this.setupDeps.spaces?.spacesService;
     const spaceId = this.getSpaceId(request, logger);
 
-    if (spacesService && spaceId) {
+    if (spaceId) {
       logger.info(`Creating UI Settings Client for space: ${spaceId}`);
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);

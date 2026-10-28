@@ -743,7 +743,7 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    return this.startDependencies.spacesService.getSpaceId(httpRequest);
+    return httpRequest.spaceId;
   }
 
   public getAccessibleSpaces(httpRequest: KibanaRequest): Promise<Space[]> {

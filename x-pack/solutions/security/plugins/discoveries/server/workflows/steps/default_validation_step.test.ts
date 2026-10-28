@@ -201,15 +201,12 @@ describe('getDefaultValidationStepDefinition', () => {
   });
 
   describe('space resolution', () => {
-    it('calls getSpaceId with spaces service', async () => {
+    it('calls getSpaceId with the request', async () => {
       const context = createContext();
 
       await stepDefinition.handler(context);
 
-      expect(getSpaceId).toHaveBeenCalledWith({
-        request: mockRequest,
-        spaces: null,
-      });
+      expect(getSpaceId).toHaveBeenCalledWith({ request: mockRequest });
     });
   });
 

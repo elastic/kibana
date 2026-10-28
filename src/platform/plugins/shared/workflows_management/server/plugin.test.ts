@@ -20,6 +20,7 @@ jest.mock('@kbn/workflows-execution-engine/server', () => ({
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
@@ -130,7 +131,6 @@ describe('WorkflowsPlugin', () => {
     const spaces = {
       spacesService: {
         getActiveSpace: jest.fn(),
-        getSpaceId: jest.fn().mockReturnValue('marketing'),
       },
     };
     const ensureForSpace = jest
@@ -149,7 +149,7 @@ describe('WorkflowsPlugin', () => {
     expect(contextProvider).toBeDefined();
     await contextProvider?.(
       {} as never,
-      httpServerMock.createKibanaRequest(),
+      httpServerMock.createKibanaRequest({ spaceId: asSpaceId('marketing') }),
       httpServerMock.createResponseFactory()
     );
 

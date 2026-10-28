@@ -53,7 +53,6 @@ export class ProposalsPlugin
   // read only from start() onwards; the getter asserts that ordering.
   private proposalsService?: ProposalsService;
   private proposalPrivileges?: ProposalPrivilegesChecker;
-  private spaces?: ProposalsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
   private resolveWorkerUser?: ResolveWorkerUser;
 
@@ -130,7 +129,6 @@ export class ProposalsPlugin
   }
 
   start(coreStart: CoreStart, plugins: ProposalsStartDependencies): ProposalsPluginStart {
-    this.spaces = plugins.spaces;
     this.resolveUser = createProposalUserResolver({
       userProfile: coreStart.userProfile,
       security: coreStart.security,
@@ -213,7 +211,7 @@ export class ProposalsPlugin
   }
 
   private getSpaceId(request: KibanaRequest): string {
-    return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
+    return request.spaceId;
   }
 
   /**

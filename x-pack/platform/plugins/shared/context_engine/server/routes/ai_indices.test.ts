@@ -305,19 +305,20 @@ describe('ai indices routes', () => {
     authzResult?: Record<string, boolean>
   ) => {
     const { handler } = getRoute(method, path);
-    return handler(
-      createContext(),
-      httpServerMock.createKibanaRequest({
-        ...request,
-        kibanaRequestState: {
-          requestId: '123',
-          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
-          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
-          authzResult,
-        },
-      }),
-      response
-    );
+    const { spaceId, ...rest } = request as Record<string, unknown> & {
+      spaceId?: ReturnType<typeof asSpaceId>;
+    };
+    const kibanaRequest = httpServerMock.createKibanaRequest({
+      ...rest,
+      ...(spaceId !== undefined ? { spaceId } : {}),
+      kibanaRequestState: {
+        requestId: '123',
+        requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+        startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
+        authzResult,
+      },
+    });
+    return handler(createContext(), kibanaRequest, response);
   };
 
   const withWorkflowDeletePrivilege = {
@@ -1877,12 +1878,10 @@ describe('ai indices routes', () => {
       });
 
       it('excludes the deleted entry from the request space, not always default', async () => {
-        const spaces = spacesMock.createStart();
-        spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
-        getSpaces.mockResolvedValue(spaces);
         aiIndexService.delete.mockResolvedValue(undefined);
 
         await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
+          spaceId: asSpaceId('marketing'),
           params: { aiIndexId: 'customer_support' },
           query: { delete_knowledge_indicators: true },
         });
@@ -2169,15 +2168,16 @@ describe('ai indices routes', () => {
   });
 
   describe('space scoping', () => {
-    it('resolves the space id from the spaces plugin and threads it through to the service', async () => {
-      const spaces = spacesMock.createStart();
-      spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
-      getSpaces.mockResolvedValue(spaces);
+    it('resolves the space id from the request and threads it through to the service', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
       aiIndexService.delete.mockResolvedValue(undefined);
 
-      await callRoute('GET', AI_INDEX_BY_ID_PATH, { params: { aiIndexId: 'customer_support' } });
-      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, { params: { aiIndexId: 'customer_support' } });
+      const marketingRequest = {
+        spaceId: asSpaceId('marketing'),
+        params: { aiIndexId: 'customer_support' },
+      };
+      await callRoute('GET', AI_INDEX_BY_ID_PATH, marketingRequest);
+      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, marketingRequest);
 
       expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', 'marketing');
       expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support', 'marketing');
@@ -2362,19 +2362,19 @@ describe('ai indices routes', () => {
     });
 
     it('reconciles the schedule into the request space, not always default', async () => {
-      const spaces = spacesMock.createStart();
-      spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
-      getSpaces.mockResolvedValue(spaces);
       aiIndexService.setFeedbackAnalysis.mockResolvedValue(feedbackAnalysis);
       aiIndexService.get.mockResolvedValue({ ...aiIndexItem, feedback_analysis: feedbackAnalysis });
       aiIndexService.create.mockResolvedValue(undefined);
       aiIndexService.put.mockResolvedValue('updated');
 
+      const marketingSpace = { spaceId: asSpaceId('marketing') };
       await callRoute('PUT', AI_INDEX_FEEDBACK_ANALYSIS_PATH, {
+        ...marketingSpace,
         params: { aiIndexId: 'customer_support' },
         body: feedbackAnalysis,
       });
       await callRoute('POST', AI_INDEX_PATH, {
+        ...marketingSpace,
         body: {
           id: 'customer_support',
           dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
@@ -2385,6 +2385,7 @@ describe('ai indices routes', () => {
         },
       });
       await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        ...marketingSpace,
         params: { aiIndexId: 'customer_support' },
         body: {
           dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
@@ -2405,12 +2406,12 @@ describe('ai indices routes', () => {
     });
 
     it('removes the schedule and improvements from the request space', async () => {
-      const spaces = spacesMock.createStart();
-      spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
-      getSpaces.mockResolvedValue(spaces);
       aiIndexService.delete.mockResolvedValue(undefined);
 
-      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, { params: { aiIndexId: 'customer_support' } });
+      await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
+        spaceId: asSpaceId('marketing'),
+        params: { aiIndexId: 'customer_support' },
+      });
 
       expect(scheduleService.remove).toHaveBeenCalledWith({
         aiIndexId: 'customer_support',

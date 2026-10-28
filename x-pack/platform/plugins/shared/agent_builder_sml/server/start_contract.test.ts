@@ -7,12 +7,13 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { SmlService } from './services/sml/types';
 import { buildIndexAttachment, buildDeleteAttachment } from './start_contract';
 
 // Hand-built rather than `coreMock` — these builders only touch
 // `elasticsearch.client.asInternalUser` and `savedObjects.getScopedClient`.
-const buildDeps = ({ spaceFromRequest }: { spaceFromRequest?: string } = {}) => {
+const buildDeps = () => {
   const smlService = {
     indexAttachment: jest.fn().mockResolvedValue(undefined),
     deleteAttachment: jest.fn().mockResolvedValue(undefined),
@@ -26,12 +27,17 @@ const buildDeps = ({ spaceFromRequest }: { spaceFromRequest?: string } = {}) => 
   const elasticsearch = {
     client: { asInternalUser: esInternalClient },
   } as any;
-  const spaces = spaceFromRequest
-    ? ({ spacesService: { getSpaceId: jest.fn().mockReturnValue(spaceFromRequest) } } as any)
-    : undefined;
   const logger = loggerMock.create();
 
-  return { smlService, savedObjects, soClient, elasticsearch, esInternalClient, spaces, logger };
+  return {
+    smlService,
+    savedObjects,
+    soClient,
+    elasticsearch,
+    esInternalClient,
+    spaces: undefined,
+    logger,
+  };
 };
 
 const baseParams = {
@@ -41,12 +47,17 @@ const baseParams = {
   action: 'create' as const,
 };
 
+const paramsInSpace = (spaceId: string) => ({
+  ...baseParams,
+  request: httpServerMock.createKibanaRequest({ spaceId: asSpaceId(spaceId) }),
+});
+
 describe('buildIndexAttachment', () => {
   it('forwards force to smlService.indexAttachment', async () => {
-    const deps = buildDeps({ spaceFromRequest: 'space-1' });
+    const deps = buildDeps();
     const indexAttachment = buildIndexAttachment(deps);
 
-    await indexAttachment({ ...baseParams, force: true });
+    await indexAttachment({ ...paramsInSpace('space-1'), force: true });
 
     expect(deps.smlService.indexAttachment).toHaveBeenCalledTimes(1);
     const callArgs = deps.smlService.indexAttachment.mock.calls[0][0];
@@ -57,7 +68,7 @@ describe('buildIndexAttachment', () => {
     expect(callArgs.clientHasSpacesExtension).toBe(true);
   });
 
-  it('falls back to the default space when no spaces service and no spaceId are provided', async () => {
+  it('uses the default space when the request targets it and no spaceId is provided', async () => {
     const deps = buildDeps();
     const indexAttachment = buildIndexAttachment(deps);
 
@@ -67,11 +78,11 @@ describe('buildIndexAttachment', () => {
     expect(callArgs.spaces).toEqual(['default']);
   });
 
-  it('uses the explicit spaceId over the spaces service', async () => {
-    const deps = buildDeps({ spaceFromRequest: 'auto-space' });
+  it('uses the explicit spaceId over the request space', async () => {
+    const deps = buildDeps();
     const indexAttachment = buildIndexAttachment(deps);
 
-    await indexAttachment({ ...baseParams, spaceId: 'explicit-space' });
+    await indexAttachment({ ...paramsInSpace('auto-space'), spaceId: 'explicit-space' });
 
     const callArgs = deps.smlService.indexAttachment.mock.calls[0][0];
     expect(callArgs.spaces).toEqual(['explicit-space']);
@@ -95,10 +106,10 @@ describe('buildIndexAttachment', () => {
 
 describe('buildDeleteAttachment', () => {
   it('forwards ingestionMethod and spaces when provided', async () => {
-    const deps = buildDeps({ spaceFromRequest: 'space-1' });
+    const deps = buildDeps();
     const deleteAttachment = buildDeleteAttachment(deps);
 
-    await deleteAttachment({ ...baseParams, ingestionMethod: 'all', strict: true });
+    await deleteAttachment({ ...paramsInSpace('space-1'), ingestionMethod: 'all', strict: true });
 
     expect(deps.smlService.deleteAttachment).toHaveBeenCalledWith(
       expect.objectContaining({ ingestionMethod: 'all', spaces: ['space-1'], strict: true })
@@ -115,17 +126,17 @@ describe('buildDeleteAttachment', () => {
     expect('ingestionMethod' in callArgs).toBe(false);
   });
 
-  it('derives space from spaces service and passes as spaces array', async () => {
-    const deps = buildDeps({ spaceFromRequest: 'space-1' });
+  it('derives space from the request and passes as spaces array', async () => {
+    const deps = buildDeps();
     const deleteAttachment = buildDeleteAttachment(deps);
 
-    await deleteAttachment(baseParams);
+    await deleteAttachment(paramsInSpace('space-1'));
 
     const callArgs = deps.smlService.deleteAttachment.mock.calls[0][0];
     expect(callArgs.spaces).toEqual(['space-1']);
   });
 
-  it('falls back to "default" space when no spaces service and no spaceId are provided', async () => {
+  it('uses the "default" space when the request targets it and no spaceId is provided', async () => {
     const deps = buildDeps();
     const deleteAttachment = buildDeleteAttachment(deps);
 
@@ -135,11 +146,11 @@ describe('buildDeleteAttachment', () => {
     expect(callArgs.spaces).toEqual(['default']);
   });
 
-  it('uses explicit spaceId over the spaces service', async () => {
-    const deps = buildDeps({ spaceFromRequest: 'auto-space' });
+  it('uses explicit spaceId over the request space', async () => {
+    const deps = buildDeps();
     const deleteAttachment = buildDeleteAttachment(deps);
 
-    await deleteAttachment({ ...baseParams, spaceId: 'explicit-space' });
+    await deleteAttachment({ ...paramsInSpace('auto-space'), spaceId: 'explicit-space' });
 
     const callArgs = deps.smlService.deleteAttachment.mock.calls[0][0];
     expect(callArgs.spaces).toEqual(['explicit-space']);

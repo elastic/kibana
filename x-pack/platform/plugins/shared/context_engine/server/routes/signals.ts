@@ -90,7 +90,7 @@ export const registerSignalRoutes = ({
           return response.notFound();
         }
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         const body: ListSignalGroupsResponse = await getSignalGroups(esClient, {
           spaceId,
           maxGroups: MAX_SIGNAL_GROUPS,
@@ -119,7 +119,7 @@ export const registerSignalRoutes = ({
           return response.notFound();
         }
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-        const spaceId = resolveSpaceId(await getSpaces(), request);
+        const spaceId = resolveSpaceId(request);
         const { tag, from, size } = request.query;
         const body: ListSignalsResponse = await getSignalsByTag(esClient, {
           spaceId,
