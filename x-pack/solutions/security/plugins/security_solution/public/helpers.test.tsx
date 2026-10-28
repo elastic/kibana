@@ -14,6 +14,7 @@ import {
   getField,
   getSubPluginRoutesByCapabilities,
   isDashboardViewPath,
+  isPageWithAppHeaderPath,
   isSubPluginAvailable,
   parseRoute,
 } from './helpers';
@@ -296,5 +297,56 @@ describe('isDashboardViewPath', () => {
 
   it('returns false for dashboard listing path', () => {
     expect(isDashboardViewPath('/dashboards')).toEqual(false);
+  });
+});
+
+describe('isPageWithAppHeaderPath', () => {
+  it.each([
+    ['the rule changes history page', '/rules/id/rule-id/changes-history'],
+    ['the installed rules tab', '/rules/management'],
+    ['the rule monitoring tab', '/rules/monitoring'],
+    ['the rule updates tab', '/rules/updates'],
+    ['the add Elastic rules page', '/rules/add_rules'],
+    ['the rule details overview tab', '/rules/id/rule-id/overview'],
+    ['the rule details alerts tab', '/rules/id/rule-id/alerts'],
+    ['the rule details rule exceptions tab', '/rules/id/rule-id/rule_exceptions'],
+    ['the rule details endpoint exceptions tab', '/rules/id/rule-id/endpoint_exceptions'],
+    ['the rule details execution results tab', '/rules/id/rule-id/execution_results'],
+    ['the shared exception lists page', '/exceptions'],
+    ['a cloud security posture page', '/cloud_security_posture/findings'],
+    ['the cloud security posture base path', '/cloud_security_posture'],
+    ['a rules tab with a trailing slash', '/rules/management/'],
+    ['a rule details tab with a trailing slash', '/rules/id/rule-id/overview/'],
+    ['a rule details path with an encoded rule id', '/rules/id/rule%20id/overview'],
+  ])('returns true for %s', (_name, pathname) => {
+    expect(isPageWithAppHeaderPath(pathname)).toBe(true);
+  });
+
+  it.each([
+    ['the rule editing page', '/rules/id/rule-id/edit'],
+    ['a rule details path without a tab', '/rules/id/rule-id'],
+    ['a rule details path with an unknown tab', '/rules/id/rule-id/unknown_tab'],
+    ['the rule creation page', '/rules/create'],
+    ['the alerts page', '/alerts'],
+    ['the hosts page', '/hosts'],
+    ['the dashboards page', '/dashboards'],
+    ['an empty path', ''],
+    ['the root path', '/'],
+    ['the rules page without a tab', '/rules'],
+    ['a rule details tab with an extra segment', '/rules/id/rule-id/overview/extra'],
+    [
+      'the rule changes history page with an extra segment',
+      '/rules/id/rule-id/changes-history/extra',
+    ],
+    ['a rule details path with an empty rule id', '/rules/id//overview'],
+    ['the add Elastic rules page with an extra segment', '/rules/add_rules/extra'],
+    ['a path that only starts like a rules tab', '/rules/managementfoo'],
+    ['a path that only starts like the shared exception lists page', '/exceptions/extra'],
+    [
+      'a path that only starts like the cloud security posture base path',
+      '/cloud_security_posturefoo',
+    ],
+  ])('returns false for %s', (_name, pathname) => {
+    expect(isPageWithAppHeaderPath(pathname)).toBe(false);
   });
 });
