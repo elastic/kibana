@@ -49,6 +49,7 @@ import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
 import type { TaskHandler } from './execution';
+import type { GetSmlTypeDefinition } from './execution/execution_service';
 import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 import type { CallbackDeliveryService } from './execution/callback';
@@ -133,5 +134,5 @@ export interface ServicesStartDeps {
   isomer: IsomerPluginStart;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;
-  getSmlTypeDefinition: (typeId: string) => { attachmentType?: string } | undefined;
+  getSmlTypeDefinition: GetSmlTypeDefinition;
 }

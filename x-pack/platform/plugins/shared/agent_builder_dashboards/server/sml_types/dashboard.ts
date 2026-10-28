@@ -6,7 +6,11 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { getSmlOriginId, kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import {
+  getSmlOriginId,
+  kibanaPermissions,
+  searchSavedObjectsByTitle,
+} from '@kbn/agent-builder-sml-plugin/server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
@@ -110,26 +114,8 @@ export const createDashboardSmlType = ({
 
   getPermissions: () => kibanaPermissions({ kiType: DASHBOARD_KI_TYPE }),
 
-  searchByTitle: async ({ title, size }, { savedObjectsClient }) => {
-    // Drop the operators of the `simple_query_string` search, so typed text is matched literally.
-    const term = title
-      .replace(/[+|\-"*()~\\]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    const { saved_objects: dashboards } = await savedObjectsClient.find<{ title?: string }>({
-      type: 'dashboard',
-      fields: ['title'],
-      perPage: size,
-      sort: [{ field: 'updated_at', order: 'desc' }],
-      ...(term
-        ? { search: `${term}*`, searchFields: ['title'], defaultSearchOperator: 'AND' as const }
-        : {}),
-    });
-    return dashboards.map(({ id, attributes }) => ({
-      originId: id,
-      title: attributes.title ?? id,
-    }));
-  },
+  searchByTitle: ({ title, size }, { savedObjectsClient }) =>
+    searchSavedObjectsByTitle({ type: 'dashboard', title, size, savedObjectsClient }),
 
   toAttachment: async (item, context) => {
     const originId = getSmlOriginId(item);

@@ -329,6 +329,7 @@ describe('Sml', () => {
     expect(marked('visualization/')).toContain('/');
     expect(marked('visualization')).not.toContain('/');
     expect(marked('visualization/Pacific ')).toContain('Pacific ');
+    expect(marked('visualization/Pacific\u00a0')).toContain('Pacific ');
   });
 
   describe('Tab and order', () => {

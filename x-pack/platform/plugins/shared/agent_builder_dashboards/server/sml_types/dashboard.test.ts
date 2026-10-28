@@ -383,11 +383,5 @@ describe('dashboardSmlType', () => {
         { originId: 'dash-2', title: 'dash-2' },
       ]);
     });
-
-    it('drops the operators of the saved objects search', async () => {
-      const { find } = await search('logs-* (prod)');
-
-      expect(find.mock.calls[0][0].search).toBe('logs prod*');
-    });
   });
 });

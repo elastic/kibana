@@ -59,8 +59,12 @@ describe('registerAutocompleteRoute', () => {
     handler = registeredHandler;
   });
 
-  const callHandler = async (body: Record<string, unknown>, uiSettingsEnabled = true) => {
-    const request = httpServerMock.createKibanaRequest({ body });
+  const callHandler = async (
+    body: Record<string, unknown>,
+    uiSettingsEnabled = true,
+    authzResult?: Record<string, boolean>
+  ) => {
+    const request = Object.assign(httpServerMock.createKibanaRequest({ body }), { authzResult });
     const response = httpServerMock.createResponseFactory();
     const mockUiSettings = createMockUiSettingsClient(uiSettingsEnabled);
     const ctx = {
@@ -75,16 +79,7 @@ describe('registerAutocompleteRoute', () => {
   };
 
   describe('authorization', () => {
-    const withoutSmlPrivilege = () => {
-      startDeps.security = {
-        authz: {
-          actions: { api: { get: (action: string) => `api:${action}` } },
-          checkPrivilegesWithRequest: jest.fn().mockReturnValue({
-            atSpace: jest.fn().mockResolvedValue({ hasAllRequested: false }),
-          }),
-        },
-      };
-    };
+    const agentBuilderOnly = { 'agentBuilderSml:read': false, 'agentBuilder:read': true };
 
     it('accepts the SML privilege or the Agent Builder privilege', () => {
       expect(router.post.mock.calls[0][0].security).toEqual({
@@ -95,16 +90,13 @@ describe('registerAutocompleteRoute', () => {
     });
 
     it('refuses the SML index to a user without the SML privilege', async () => {
-      withoutSmlPrivilege();
-
-      const response = await callHandler({ query: '*' });
+      const response = await callHandler({ query: '*' }, true, agentBuilderOnly);
 
       expect(response.forbidden).toHaveBeenCalled();
       expect(mockSmlService.autocomplete).not.toHaveBeenCalled();
     });
 
     it('serves the lookup through the types to a user without the SML privilege', async () => {
-      withoutSmlPrivilege();
       mockSmlService.listTypeDefinitions.mockReturnValue([
         {
           id: 'dashboard',
@@ -112,7 +104,7 @@ describe('registerAutocompleteRoute', () => {
         },
       ]);
 
-      const response = await callHandler({ query: '*' }, false);
+      const response = await callHandler({ query: '*' }, false, agentBuilderOnly);
 
       expect(response.forbidden).not.toHaveBeenCalled();
       expect(response.ok).toHaveBeenCalled();
@@ -145,7 +137,6 @@ describe('registerAutocompleteRoute', () => {
           request: expect.anything(),
           savedObjectsClient,
           spaceId: 'test-space',
-          hasApiPrivileges: expect.any(Function),
         }
       );
       expect(results).toEqual([
@@ -174,6 +165,17 @@ describe('registerAutocompleteRoute', () => {
       expect(workflow.searchByTitle.mock.calls[0][0]).toMatchObject({ title: 'sal' });
     });
 
+    it('treats a slash that names no type as part of the title, like the index', async () => {
+      const dashboard = createType('dashboard');
+      const workflow = createType('workflow');
+      mockSmlService.listTypeDefinitions.mockReturnValue([dashboard, workflow]);
+
+      await call({ query: 'sales/marketing', size: 10 });
+
+      expect(dashboard.searchByTitle.mock.calls[0][0]).toMatchObject({ title: 'sales/marketing' });
+      expect(workflow.searchByTitle.mock.calls[0][0]).toMatchObject({ title: 'sales/marketing' });
+    });
+
     it('takes turns between the types, up to the size', async () => {
       const dashboard = createType('dashboard', [
         { originId: 'd1', title: 'D1' },
@@ -187,34 +189,6 @@ describe('registerAutocompleteRoute', () => {
 
       expect(dashboard.searchByTitle.mock.calls[0][0]).toMatchObject({ size: 3 });
       expect(results.map(({ title }) => title)).toEqual(['D1', 'W1', 'D2']);
-    });
-
-    describe('the privilege check given to the lookups', () => {
-      const getHasApiPrivileges = async () => {
-        const type = createType('workflow');
-        mockSmlService.listTypeDefinitions.mockReturnValue([type]);
-        await call({ query: '*', size: 10 });
-        return type.searchByTitle.mock.calls[0][1].hasApiPrivileges as (
-          actions: string[]
-        ) => Promise<boolean>;
-      };
-
-      it('allows everything when security is disabled', async () => {
-        expect(await (await getHasApiPrivileges())(['workflow_read'])).toBe(true);
-      });
-
-      it('checks the privileges of the user in the current space', async () => {
-        const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: false });
-        startDeps.security = {
-          authz: {
-            actions: { api: { get: (action: string) => `api:${action}` } },
-            checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpace }),
-          },
-        };
-
-        expect(await (await getHasApiPrivileges())(['workflow_read'])).toBe(false);
-        expect(atSpace).toHaveBeenCalledWith('test-space', { kibana: ['api:workflow_read'] });
-      });
     });
 
     it('returns nothing for a tag filter, which the types cannot honor', async () => {

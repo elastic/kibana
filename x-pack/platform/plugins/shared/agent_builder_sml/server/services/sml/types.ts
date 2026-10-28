@@ -175,10 +175,7 @@ export interface SmlTypeDefinition {
   /** Optional: typeahead through the owning API, for when the SML index is not in use. `title` may be empty. */
   searchByTitle?: (
     params: { title: string; size: number; constraints?: SmlSearchConstraints },
-    context: SmlToAttachmentContext & {
-      /** Whether the user holds all of the API privileges in the current space. */
-      hasApiPrivileges: (actions: readonly string[]) => Promise<boolean>;
-    }
+    context: SmlToAttachmentContext
   ) => Promise<Array<{ originId: string; title: string }>>;
 
   /**

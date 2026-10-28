@@ -62,12 +62,12 @@ const createSmlDocument = (originId = 'workflow-abc'): SmlDocument => ({
 describe('workflowSmlType', () => {
   describe('id and fetchFrequency', () => {
     it('has id "workflow"', () => {
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
       expect(smlType.id).toBe('workflow');
     });
 
     it('returns 30m fetch frequency', () => {
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
       expect(smlType.fetchFrequency!()).toBe('30m');
     });
   });
@@ -87,7 +87,7 @@ describe('workflowSmlType', () => {
         },
       ]);
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const pages = [];
       for await (const page of smlType.list({
@@ -154,7 +154,7 @@ describe('workflowSmlType', () => {
           .mockResolvedValueOnce({ hits: { hits: secondPageHits } }),
       } as unknown as ElasticsearchClient;
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const pages = [];
       for await (const page of smlType.list({
@@ -177,7 +177,7 @@ describe('workflowSmlType', () => {
     it('yields empty when no workflows exist', async () => {
       const esClient = createMockEsClient([]);
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const pages = [];
       for await (const page of smlType.list({
@@ -197,7 +197,7 @@ describe('workflowSmlType', () => {
       } as unknown as ElasticsearchClient;
       const logger = createMockLogger();
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const pages = [];
       for await (const page of smlType.list({
@@ -223,7 +223,7 @@ describe('workflowSmlType', () => {
         },
       ]);
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const pages = [];
       for await (const page of smlType.list({
@@ -248,7 +248,7 @@ describe('workflowSmlType', () => {
         { _id: 'workflow-no-source', _source: null, sort: [2] },
       ]);
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const pages = [];
       for await (const page of smlType.list({
@@ -279,7 +279,7 @@ describe('workflowSmlType', () => {
         },
       ]);
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const result = await smlType.getSmlEntry('workflow-abc', {
         esClient,
@@ -305,7 +305,7 @@ describe('workflowSmlType', () => {
     it('queries ES with correct parameters', async () => {
       const esClient = createMockEsClient([]);
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       await smlType.getSmlEntry('workflow-abc', {
         esClient,
@@ -335,7 +335,7 @@ describe('workflowSmlType', () => {
     it('returns undefined when workflow is not found', async () => {
       const esClient = createMockEsClient([]);
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const result = await smlType.getSmlEntry('nonexistent', {
         esClient,
@@ -357,7 +357,7 @@ describe('workflowSmlType', () => {
         },
       ]);
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const result = await smlType.getSmlEntry('workflow-minimal', {
         esClient,
@@ -382,7 +382,7 @@ describe('workflowSmlType', () => {
         },
       ]);
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const result = await smlType.getSmlEntry('workflow-no-name', {
         esClient,
@@ -399,7 +399,7 @@ describe('workflowSmlType', () => {
       } as unknown as ElasticsearchClient;
       const logger = createMockLogger();
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const result = await smlType.getSmlEntry('workflow-abc', {
         esClient,
@@ -427,7 +427,7 @@ describe('workflowSmlType', () => {
         },
       ]);
 
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
 
       const result = await smlType.getSmlEntry('workflow-empty-arrays', {
         esClient,
@@ -444,7 +444,7 @@ describe('workflowSmlType', () => {
 
   describe('getPermissions', () => {
     it('returns the registered ai_index read action for workflows', () => {
-      const smlType = createWorkflowSmlType(createMockApi());
+      const smlType = createWorkflowSmlType(createMockApi(), () => undefined);
       const permissions = smlType.getPermissions!('workflow-abc', {
         esClient: createMockEsClient(),
         savedObjectsClient: {} as never,
@@ -466,7 +466,7 @@ describe('workflowSmlType', () => {
         }),
       });
 
-      const smlType = createWorkflowSmlType(api);
+      const smlType = createWorkflowSmlType(api, () => undefined);
 
       const result = await smlType.toAttachment(createSmlDocument(), {
         savedObjectsClient: {} as never,
@@ -487,7 +487,7 @@ describe('workflowSmlType', () => {
     it('calls api.getWorkflow with correct origin_id and spaceId', async () => {
       const api = createMockApi();
 
-      const smlType = createWorkflowSmlType(api);
+      const smlType = createWorkflowSmlType(api, () => undefined);
 
       await smlType.toAttachment(createSmlDocument('workflow-xyz'), {
         savedObjectsClient: {} as never,
@@ -503,7 +503,7 @@ describe('workflowSmlType', () => {
         getWorkflow: jest.fn().mockResolvedValue(null),
       });
 
-      const smlType = createWorkflowSmlType(api);
+      const smlType = createWorkflowSmlType(api, () => undefined);
 
       const result = await smlType.toAttachment(createSmlDocument(), {
         savedObjectsClient: {} as never,
@@ -516,8 +516,7 @@ describe('workflowSmlType', () => {
   });
 
   describe('searchByTitle', () => {
-    const buildContext = (hasApiPrivileges = jest.fn().mockResolvedValue(true)) =>
-      ({ request: {}, spaceId: 'default', savedObjectsClient: {}, hasApiPrivileges } as never);
+    const context = { request: {}, spaceId: 'default', savedObjectsClient: {} } as never;
     const createApi = () =>
       createMockApi({
         getWorkflows: jest.fn().mockResolvedValue({
@@ -531,9 +530,9 @@ describe('workflowSmlType', () => {
     it('lists matching workflows through the management API', async () => {
       const api = createApi();
 
-      const results = await createWorkflowSmlType(api).searchByTitle!(
+      const results = await createWorkflowSmlType(api, () => undefined).searchByTitle!(
         { title: 'tri', size: 5 },
-        buildContext()
+        context
       );
 
       expect(api.getWorkflows).toHaveBeenCalledWith({ page: 1, size: 5, query: 'tri' }, 'default', {
@@ -547,14 +546,22 @@ describe('workflowSmlType', () => {
 
     it('requires the workflows read privilege', async () => {
       const api = createApi();
-      const hasApiPrivileges = jest.fn().mockResolvedValue(false);
+      const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: false });
+      const security = {
+        authz: {
+          actions: { api: { get: (action: string) => `api:${action}` } },
+          checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpace }),
+        },
+      } as never;
 
-      const results = await createWorkflowSmlType(api).searchByTitle!(
+      const results = await createWorkflowSmlType(api, () => security).searchByTitle!(
         { title: '', size: 5 },
-        buildContext(hasApiPrivileges)
+        context
       );
 
-      expect(hasApiPrivileges).toHaveBeenCalledWith(WorkflowsManagementOperationPrivileges.read);
+      expect(atSpace).toHaveBeenCalledWith('default', {
+        kibana: WorkflowsManagementOperationPrivileges.read.map((action) => `api:${action}`),
+      });
       expect(results).toEqual([]);
       expect(api.getWorkflows).not.toHaveBeenCalled();
     });

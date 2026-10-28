@@ -35,6 +35,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { decodeSmlLinkId, parseSmlEntryId } from '@kbn/agent-builder-sml-plugin/server';
 import { attachmentChangesToEvents } from '@kbn/agent-builder-server/attachments';
 import type {
@@ -85,14 +86,18 @@ interface ParentExecution {
   agentId: string;
 }
 
+/** Looks up an SML type, to know the attachment type its items attach as. */
+export type GetSmlTypeDefinition = (
+  typeId: string
+) => Pick<SmlTypeDefinition, 'attachmentType'> | undefined;
+
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
-  /** Looks up an SML type, to know the attachment type its items attach as. */
-  getSmlTypeDefinition: (typeId: string) => { attachmentType?: string } | undefined;
+  getSmlTypeDefinition: GetSmlTypeDefinition;
 }
 
 // Links to the items picked from the chat input's menu: `[label](sml://<url-encoded entry id>)`.
@@ -970,13 +975,28 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     params: T,
     request: KibanaRequest
   ): Promise<T> {
-    const referenced = this.getReferencedAttachments(params.nextInput.message);
-    const validated = await this.deps.attachmentsService.validateAttachmentInputs(
-      referenced.length > 0
-        ? [...(params.nextInput.attachments ?? []), ...referenced]
-        : params.nextInput.attachments,
+    const { attachmentsService } = this.deps;
+    const attached = await attachmentsService.validateAttachmentInputs(
+      params.nextInput.attachments,
       request
     );
+
+    // Linked items are best effort: one that no longer resolves, for example a deleted dashboard,
+    // is left out so the message still sends.
+    const referenced: AttachmentInput[] = [];
+    for (const input of this.getReferencedAttachments(params.nextInput.message)) {
+      try {
+        referenced.push(
+          ...((await attachmentsService.validateAttachmentInputs([input], request)) ?? [])
+        );
+      } catch (error) {
+        this.logger.debug(
+          `Skipping linked ${input.type} '${input.origin}': ${(error as Error).message}`
+        );
+      }
+    }
+    const validated =
+      attached || referenced.length > 0 ? [...(attached ?? []), ...referenced] : undefined;
 
     // Trimmed once here so the receipt-time write and the round the completed run rewrites agree
     // on the text; `undefined` stays `undefined` for a purely attachment-driven message.

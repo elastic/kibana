@@ -458,8 +458,12 @@ describe('AgentExecutionService', () => {
           request: httpServerMock.createKibanaRequest(),
           params: { agentId: 'agent-1', nextInput: { message, attachments } as any },
         });
-      const validated = () =>
-        (attachmentsService.validateAttachmentInputs as jest.Mock).mock.calls[0][0];
+      const validated = () => {
+        const inputs = (
+          attachmentsService.validateAttachmentInputs as jest.Mock
+        ).mock.calls.flatMap(([attachments]) => attachments ?? []);
+        return inputs.length > 0 ? inputs : undefined;
+      };
 
       it('attaches them by reference', async () => {
         await execute(
@@ -504,6 +508,22 @@ describe('AgentExecutionService', () => {
 
         expect(validated()).toBeUndefined();
         expect(Date.now() - start).toBeLessThan(2000);
+      });
+
+      it('sends the message without the linked items that cannot be attached', async () => {
+        (attachmentsService.validateAttachmentInputs as jest.Mock).mockImplementation(
+          async (attachments: Array<{ origin?: string }> | undefined) => {
+            if (attachments?.some(({ origin }) => origin === 'dash-1')) {
+              throw new Error('Failed to resolve content from origin');
+            }
+            return attachments;
+          }
+        );
+
+        await execute('[a](sml://dashboard:dash-1) [b](sml://dashboard:dash-2)');
+
+        expect(mockExecutionClient.create).toHaveBeenCalled();
+        expect(validated()).toContainEqual(expect.objectContaining({ origin: 'dash-2' }));
       });
 
       it('skips types that cannot be attached and ids that are not entry ids', async () => {

@@ -20,6 +20,8 @@ import {
 } from '../../common/http_api/sml';
 import { smlAutocompletePath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
+import { interpretAutocompleteQuery } from '../services/sml/sml_service';
+import type { SmlAutocompleteIntent } from '../services/sml/sml_service';
 import type { SmlAutocompleteResult, SmlService } from '../services/sml/types';
 import { smlEntryId, smlOriginUri } from '../services/sml/sml_origin';
 import type { AgentBuilderSmlStartDependencies, AgentBuilderSmlPluginStart } from '../types';
@@ -36,15 +38,18 @@ const AUTOCOMPLETE_SECURITY: RouteSecurity = {
 
 type AutocompleteParams = Parameters<SmlService['autocomplete']>[0];
 
-/** The title to look up in a type: what follows `type/`, or the whole text if it is no type keyword. */
-const getTitleTerm = (query: string, typeId: string) => {
-  const text = query.trim();
-  const slashIndex = text.indexOf('/');
-  const isTypeKeyword = (keyword: string) => typeId.startsWith(keyword.toLowerCase());
-  if (text === '*') return '';
-  if (slashIndex === -1) return isTypeKeyword(text) ? '' : text;
-  const typePart = text.slice(0, slashIndex).trim();
-  return typePart === '' || isTypeKeyword(typePart) ? text.slice(slashIndex + 1).trim() : undefined;
+/** The title to look up in a type for what was typed, or undefined when the query rules the type out. */
+const getTitleTerm = (intent: SmlAutocompleteIntent, typeId: string): string | undefined => {
+  switch (intent.kind) {
+    case 'all':
+      return '';
+    case 'either':
+      return typeId.startsWith(intent.text.toLowerCase()) ? '' : intent.text;
+    case 'title':
+      return intent.titleTerm;
+    case 'type':
+      return intent.typeIds.includes(typeId) ? intent.titleTerm : undefined;
+  }
 };
 
 /** What the index autocomplete returns, looked up through the API of each type instead. */
@@ -55,12 +60,10 @@ const autocompleteFromTypes = async (
     spaceId,
     request,
     savedObjectsClient,
-    hasApiPrivileges,
     constraints,
     filters,
   }: Omit<AutocompleteParams, 'esClient'> & {
     savedObjectsClient: SavedObjectsClientContract;
-    hasApiPrivileges: (actions: readonly string[]) => Promise<boolean>;
   },
   sml: SmlService,
   logger: Logger
@@ -72,15 +75,21 @@ const autocompleteFromTypes = async (
     .filter(
       ({ id, searchByTitle }) => searchByTitle && (!filters?.types || filters.types.includes(id))
     );
+  const intent = interpretAutocompleteQuery(
+    query,
+    sml.listTypeDefinitions().map(({ id }) => id)
+  );
   const results = await Promise.all(
     lookups.map(async ({ id: type, searchByTitle }) => {
-      const title = getTitleTerm(query, type);
+      const title = getTitleTerm(intent, type);
       if (title === undefined) return [];
+      const startedAt = Date.now();
       try {
         const items = await searchByTitle!(
           { title, size, constraints },
-          { request, savedObjectsClient, spaceId, hasApiPrivileges }
+          { request, savedObjectsClient, spaceId }
         );
+        logger.debug(`SML autocomplete lookup for '${type}' took ${Date.now() - startedAt}ms`);
         return items.map(({ originId, title: itemTitle }) => ({
           id: smlEntryId(type, originId),
           type,
@@ -164,17 +173,7 @@ export const registerAutocompleteRoute = ({
         const isIndexEnabled = await coreContext.uiSettings.client.get<boolean>(
           AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
-        const hasApiPrivileges = async (actions: readonly string[]) => {
-          const { security } = startDeps;
-          if (!security) return true;
-          const { hasAllRequested } = await security.authz
-            .checkPrivilegesWithRequest(request)
-            .atSpace(spaceId, {
-              kibana: actions.map((action) => security.authz.actions.api.get(action)),
-            });
-          return hasAllRequested;
-        };
-        if (isIndexEnabled && !(await hasApiPrivileges([apiPrivileges.readAgentBuilderSml]))) {
+        if (isIndexEnabled && request.authzResult?.[apiPrivileges.readAgentBuilderSml] === false) {
           return response.forbidden();
         }
         const params = { query, size, spaceId, request, constraints, filters };
@@ -184,7 +183,6 @@ export const registerAutocompleteRoute = ({
               {
                 ...params,
                 savedObjectsClient: coreContext.savedObjects.client,
-                hasApiPrivileges,
               },
               sml,
               logger

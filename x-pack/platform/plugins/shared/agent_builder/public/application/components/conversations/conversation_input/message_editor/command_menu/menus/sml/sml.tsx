@@ -101,9 +101,11 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
     const results = useMemo(() => sortAlphabetically(matches), [matches]);
     const { type, title } = useMemo(() => getSmlMenuHighlightSearchStrings(query), [query]);
     const canSelectOnSpace = query.includes('/') && title.length > 0;
+    // The editor types a trailing space as a non-breaking one, which would match no title.
+    const typed = query.replace(/\u00a0/g, ' ');
     // Highlight a space typed, or completed, after the title, which `title` leaves out.
-    const titleHighlight = query.includes('/')
-      ? query.slice(query.indexOf('/') + 1).trimStart()
+    const titleHighlight = typed.includes('/')
+      ? typed.slice(typed.indexOf('/') + 1).trimStart()
       : title;
 
     // Only commit on Space once there's a confirmed exact name match
@@ -179,12 +181,12 @@ export const Sml = forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
       if (!onReplaceText || orderedResults.length <= 1) {
         return false;
       }
-      const completion = getCompletion(query, orderedResults);
+      const completion = getCompletion(typed, orderedResults);
       if (completion !== undefined) {
         onReplaceText(completion);
       }
       return true;
-    }, [query, orderedResults, onReplaceText]);
+    }, [typed, orderedResults, onReplaceText]);
 
     return (
       <CommandMenuList
