@@ -409,6 +409,36 @@ groups:
           ech: ga
           self: ga
 
+      - setting: xpack.actions.catalog.enabled
+        description: |
+          Technical preview. When `true`, Kibana fetches a signed connector catalog, stores it in Elasticsearch, and registers the latest stored definition for each connector id. When `false`, Kibana does not create the catalog index, fetch the catalog, or schedule a refresh. Nothing is published at the default URL yet, and no production signing key is embedded, so this stays off.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          ech: preview
+          self: preview
+
+      - setting: xpack.actions.catalog.url
+        description: |
+          Technical preview. Base URL of the connector catalog. Kibana fetches `catalog.json` and `catalog.json.sig` from this URL and resolves definition and icon paths on the same origin. The URL must use `https` outside development mode. Development mode also accepts `http`, which is how a local catalog mirror is served.
+        datatype: string
+        default: "https://workflows.elastic.co/connectors/v1"
+        applies_to:
+          stack: preview
+          ech: preview
+          self: preview
+
+      - setting: xpack.actions.catalog.refreshInterval
+        description: |
+          Technical preview. How often Kibana refetches the connector catalog and reloads stored definitions. The time is formatted as a number and a time unit (`ms`, `s`, `m`, `h`, `d`, `w`, `M`, or `Y`). Minimum: `10s`.
+        datatype: string
+        default: 5m
+        applies_to:
+          stack: preview
+          ech: preview
+          self: preview
+
       - setting: xpack.actions.run.maxAttempts
         description: |
           Specifies the maximum number of times an action can be attempted to run.

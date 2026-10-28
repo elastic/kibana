@@ -17,6 +17,7 @@ import {
   MAX_EMAIL_BODY_LENGTH,
 } from '../common';
 
+import { catalogConfigSchema } from './catalog/catalog_config';
 import { validateDuration } from './lib/parse_date';
 import {
   INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
@@ -395,6 +396,7 @@ export const configSchema = schema.object({
   connectorSigningKeys: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  catalog: catalogConfigSchema,
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

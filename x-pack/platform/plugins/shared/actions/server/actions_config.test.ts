@@ -59,6 +59,11 @@ const defaultActionsConfig: ActionsConfig = {
     ...defaultInboundEventsLimitConfigs,
   },
   connectorSigningKeys: { enabled: false },
+  catalog: {
+    enabled: false,
+    url: 'https://workflows.elastic.co/connectors/v1',
+    refreshInterval: moment.duration(5, 'm'),
+  },
 };
 
 describe('ensureUriAllowed', () => {

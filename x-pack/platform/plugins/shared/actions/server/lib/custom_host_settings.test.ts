@@ -96,6 +96,11 @@ describe('custom_host_settings', () => {
         ...defaultInboundEventsLimitConfigs,
       },
       connectorSigningKeys: { enabled: false },
+      catalog: {
+        enabled: false,
+        url: 'https://workflows.elastic.co/connectors/v1',
+        refreshInterval: moment.duration(5, 'm'),
+      },
     };
 
     test('ensure it copies over the config parts that it does not touch', () => {

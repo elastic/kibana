@@ -811,6 +811,11 @@ const BaseActionsConfig: ActionsConfig = {
     ...defaultInboundEventsLimitConfigs,
   },
   connectorSigningKeys: { enabled: false },
+  catalog: {
+    enabled: false,
+    url: 'https://workflows.elastic.co/connectors/v1',
+    refreshInterval: momentDuration(5, 'm'),
+  },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

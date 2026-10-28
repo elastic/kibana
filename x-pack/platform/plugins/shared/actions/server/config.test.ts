@@ -39,6 +39,11 @@ describe('config validation', () => {
             },
           },
         },
+        "catalog": Object {
+          "enabled": false,
+          "refreshInterval": "PT5M",
+          "url": "https://workflows.elastic.co/connectors/v1",
+        },
         "connectorSigningKeys": Object {
           "enabled": false,
         },
@@ -113,6 +118,11 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "catalog": Object {
+          "enabled": false,
+          "refreshInterval": "PT5M",
+          "url": "https://workflows.elastic.co/connectors/v1",
         },
         "connectorSigningKeys": Object {
           "enabled": false,
@@ -297,6 +307,11 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "catalog": Object {
+          "enabled": false,
+          "refreshInterval": "PT5M",
+          "url": "https://workflows.elastic.co/connectors/v1",
         },
         "connectorSigningKeys": Object {
           "enabled": false,
@@ -508,6 +523,11 @@ describe('config validation', () => {
               },
             },
           },
+        },
+        "catalog": Object {
+          "enabled": false,
+          "refreshInterval": "PT5M",
+          "url": "https://workflows.elastic.co/connectors/v1",
         },
         "connectorSigningKeys": Object {
           "enabled": false,
@@ -812,6 +832,37 @@ describe('config validation', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"[auth.ears.ssl]: must specify [auth.ears.ssl.certificate] when [auth.ears.ssl.key] is specified"`
+      );
+    });
+  });
+
+  describe('catalog', () => {
+    test('defaults to disabled with the documented url and interval', () => {
+      const result = configSchema.validate({});
+
+      expect(result.catalog.enabled).toBe(false);
+      expect(result.catalog.url).toBe('https://workflows.elastic.co/connectors/v1');
+      expect(result.catalog.refreshInterval.asMilliseconds()).toBe(5 * 60 * 1000);
+    });
+
+    test('rejects an http url outside development', () => {
+      expect(() =>
+        configSchema.validate({ catalog: { url: 'http://127.0.0.1:8089' } }, { dev: false })
+      ).toThrow(/https/);
+    });
+
+    test('accepts an http url in development', () => {
+      const result = configSchema.validate(
+        { catalog: { url: 'http://127.0.0.1:8089' } },
+        { dev: true }
+      );
+
+      expect(result.catalog.url).toBe('http://127.0.0.1:8089');
+    });
+
+    test('rejects a refresh interval below 10 seconds', () => {
+      expect(() => configSchema.validate({ catalog: { refreshInterval: '5s' } })).toThrow(
+        /refreshInterval/
       );
     });
   });

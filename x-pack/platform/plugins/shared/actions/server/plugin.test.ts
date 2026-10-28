@@ -8,6 +8,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
+
+jest.mock('node-fetch', () =>
+  jest.fn(async () => {
+    throw new Error('catalog fetch disabled in plugin tests');
+  })
+);
 import { ByteSizeValue } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
@@ -30,6 +36,7 @@ import type {
   PluginStartContract,
 } from './plugin';
 import { ActionsPlugin } from './plugin';
+import { CatalogService } from './catalog';
 import {
   AlertHistoryEsIndexConnectorId,
   DEFAULT_MICROSOFT_EXCHANGE_URL,
@@ -44,6 +51,7 @@ import {
 } from './constants/saved_objects';
 import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
+import { DEFAULT_CATALOG_URL } from './catalog';
 
 function getConfig(overrides = {}) {
   return {
@@ -85,6 +93,11 @@ function getConfig(overrides = {}) {
       ...defaultInboundEventsLimitConfigs,
     },
     connectorSigningKeys: { enabled: false },
+    catalog: {
+      enabled: false,
+      url: DEFAULT_CATALOG_URL,
+      refreshInterval: moment.duration(5, 'm'),
+    },
     ...overrides,
   };
 }
@@ -150,6 +163,11 @@ describe('Actions Plugin', () => {
           ...defaultInboundEventsLimitConfigs,
         },
         connectorSigningKeys: { enabled: false },
+        catalog: {
+          enabled: false,
+          url: DEFAULT_CATALOG_URL,
+          refreshInterval: moment.duration(5, 'm'),
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -597,6 +615,11 @@ describe('Actions Plugin', () => {
           ...defaultInboundEventsLimitConfigs,
         },
         connectorSigningKeys: { enabled: false },
+        catalog: {
+          enabled: false,
+          url: DEFAULT_CATALOG_URL,
+          refreshInterval: moment.duration(5, 'm'),
+        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -1236,6 +1259,113 @@ describe('Actions Plugin', () => {
           },
         });
         expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: true });
+      });
+    });
+
+    describe('catalog', () => {
+      it('does not register or schedule the refresh task when disabled', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+        plugin.start(coreStart, pluginsStart);
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(pluginsSetup.taskManager.registerTaskDefinitions).not.toHaveBeenCalledWith(
+          expect.objectContaining({
+            'actions:catalog_refresh': expect.anything(),
+          })
+        );
+        expect(pluginsStart.taskManager.ensureScheduled).not.toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'actions-catalog_refresh' })
+        );
+      });
+
+      it('registers and schedules the refresh task when enabled', async () => {
+        const enabledPlugin = new ActionsPlugin(
+          coreMock.createPluginInitializerContext<ActionsConfig>({
+            ...getConfig(),
+            catalog: {
+              enabled: true,
+              url: DEFAULT_CATALOG_URL,
+              refreshInterval: moment.duration(5, 'm'),
+            },
+          })
+        );
+        await enabledPlugin.setup(coreSetup, pluginsSetup);
+        enabledPlugin.start(coreStart, pluginsStart);
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(pluginsSetup.taskManager.registerTaskDefinitions).toHaveBeenCalledWith(
+          expect.objectContaining({
+            'actions:catalog_refresh': expect.objectContaining({ timeout: '2m' }),
+          })
+        );
+        expect(pluginsStart.taskManager.ensureScheduled).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'actions-catalog_refresh',
+            taskType: 'actions:catalog_refresh',
+            schedule: { interval: '300s' },
+          })
+        );
+      });
+
+      it('returns from start while the catalog index read rejects', async () => {
+        const enabledContext = coreMock.createPluginInitializerContext<ActionsConfig>({
+          ...getConfig(),
+          catalog: {
+            enabled: true,
+            url: DEFAULT_CATALOG_URL,
+            refreshInterval: moment.duration(5, 'm'),
+          },
+        });
+        const enabledPlugin = new ActionsPlugin(enabledContext);
+        await enabledPlugin.setup(coreSetup, pluginsSetup);
+        (coreStart.elasticsearch.client.asInternalUser.get as jest.Mock).mockRejectedValue(
+          new Error('catalog index unavailable')
+        );
+        const startContract = enabledPlugin.start(coreStart, pluginsStart);
+        expect(startContract.isActionTypeEnabled).toEqual(expect.any(Function));
+        await new Promise((resolve) => setImmediate(resolve));
+        await new Promise((resolve) => setImmediate(resolve));
+        expect(enabledContext.logger.get().warn).toHaveBeenCalledWith(
+          expect.stringContaining('catalog index')
+        );
+      });
+
+      it('registers a new catalog type once and skips an existing id', async () => {
+        const loadAtBoot = jest
+          .spyOn(CatalogService.prototype, 'loadAtBoot')
+          .mockResolvedValue(undefined);
+        const stop = jest.spyOn(CatalogService.prototype, 'stop');
+        const enabledPlugin = new ActionsPlugin(
+          coreMock.createPluginInitializerContext<ActionsConfig>({
+            ...getConfig(),
+            catalog: {
+              enabled: true,
+              url: DEFAULT_CATALOG_URL,
+              refreshInterval: moment.duration(5, 'm'),
+            },
+          })
+        );
+        const setupContract = await enabledPlugin.setup(coreSetup, pluginsSetup);
+        setupContract.registerType(serverLogConnectorType);
+        const startContract = enabledPlugin.start(coreStart, pluginsStart);
+        await new Promise((resolve) => setImmediate(resolve));
+        const deps = loadAtBoot.mock.calls[0][0];
+        const catalogType = getConnectorType({
+          id: '.catalog-test',
+          name: 'Catalog test',
+          minimumLicenseRequired: 'gold',
+        });
+        deps.registerType(catalogType);
+        deps.registerType(catalogType);
+        expect(startContract.listTypes().some((type) => type.id === '.catalog-test')).toBe(true);
+        expect(() => deps.registerType(serverLogConnectorType)).not.toThrow();
+        expect(startContract.listTypes().filter((type) => type.id === '.server-log')).toHaveLength(
+          1
+        );
+        enabledPlugin.stop();
+        expect(stop).toHaveBeenCalled();
+        loadAtBoot.mockRestore();
+        stop.mockRestore();
       });
     });
 

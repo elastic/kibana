@@ -50,6 +50,17 @@ import type { ConnectorSigningKey, CredentialAccessor } from '@kbn/connector-spe
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
+import {
+  CatalogService,
+  CATALOG_BOOT_FETCH_TIMEOUT_MS,
+  CATALOG_BOOT_HARD_STOP_MS,
+  createLogOnce,
+  getCatalogPublicKeys,
+  registerCatalogRefreshTask,
+  RemoteCatalogSource,
+  scheduleCatalogRefreshTask,
+  withCatalogTimeout,
+} from './catalog';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
@@ -327,8 +338,13 @@ export class ActionsPlugin
   // discarded when the action returns, so the plugin instance owns the pool.
   private readonly clientLeasePool: LeasePool<unknown>;
   private relayClient?: RelayClientContract;
+  private catalogService?: CatalogService;
+  private readonly isDev: boolean;
+  private readonly kibanaVersion: string;
 
   constructor(initContext: PluginInitializerContext) {
+    this.isDev = initContext.env.mode.dev;
+    this.kibanaVersion = initContext.env.packageInfo.version;
     this.logger = initContext.logger.get();
     this.clientLeasePool = new LeasePool<unknown>(this.logger);
     this.actionsConfig = getValidatedConfig(
@@ -534,6 +550,8 @@ export class ActionsPlugin
       oauthRateLimiter,
       inboundEvents,
     });
+
+    this.maybeSetupCatalog(plugins);
 
     return {
       registerType: <
@@ -893,6 +911,7 @@ export class ActionsPlugin
     }
 
     this.validateEnabledConnectorTypes(plugins);
+    this.startCatalog(core, plugins);
 
     this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
@@ -1261,7 +1280,66 @@ export class ActionsPlugin
     if (this.licenseState) {
       this.licenseState.clean();
     }
+    this.catalogService?.stop();
     this.clientLeasePool.stop();
+  }
+
+  private maybeSetupCatalog(plugins: ActionsPluginsSetup): void {
+    if (!this.actionsConfig.catalog.enabled) {
+      return;
+    }
+    const catalogLogger = this.logger.get('catalog');
+    this.catalogService = new CatalogService({
+      source: new RemoteCatalogSource({
+        registryUrl: this.actionsConfig.catalog.url,
+        kibanaVersion: this.kibanaVersion,
+      }),
+      logger: catalogLogger,
+      logOnce: createLogOnce(catalogLogger),
+      publicKeys: getCatalogPublicKeys(this.isDev),
+      refreshIntervalMs: this.actionsConfig.catalog.refreshInterval.asMilliseconds(),
+    });
+    registerCatalogRefreshTask(plugins.taskManager, () => this.catalogService);
+    // buildType is provided by the declarative runtime, elastic/kibana#289816.
+  }
+
+  private startCatalog(core: CoreStart, plugins: ActionsPluginsStart): void {
+    if (!this.actionsConfig.catalog.enabled || !this.catalogService) {
+      return;
+    }
+    const catalogLogger = this.logger.get('catalog');
+    void withCatalogTimeout(
+      this.catalogService.loadAtBoot(
+        {
+          esClient: core.elasticsearch.client.asInternalUser,
+          registerType: (type) => {
+            if (this.actionTypeRegistry!.has(type.id)) {
+              return;
+            }
+            ensureSufficientLicense(type);
+            this.actionTypeRegistry!.register(type);
+          },
+          isTypeRegistered: (id) => this.actionTypeRegistry!.has(id),
+        },
+        { timeoutMs: CATALOG_BOOT_FETCH_TIMEOUT_MS }
+      ),
+      CATALOG_BOOT_HARD_STOP_MS,
+      () => {
+        catalogLogger.warn(
+          'Connector catalog boot exceeded the hard stop; continuing in the background'
+        );
+      },
+      (error) => {
+        catalogLogger.warn(
+          `Connector catalog boot failed: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    );
+    scheduleCatalogRefreshTask(
+      plugins.taskManager,
+      this.actionsConfig.catalog.refreshInterval,
+      this.logger
+    ).catch(() => {});
   }
 }
 

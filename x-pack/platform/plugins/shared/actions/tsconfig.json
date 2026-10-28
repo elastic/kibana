@@ -30,6 +30,7 @@
     "@kbn/es-query",
     "@kbn/apm-utils",
     "@kbn/std",
+    "@kbn/storage-adapter",
     "@kbn/logging",
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
