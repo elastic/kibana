@@ -10,7 +10,7 @@ A `custom_content` panel stores two pieces of state (both optional) alongside th
 
 | Field | Type | Purpose |
 |-------|------|---------|
-| `esql_query` | `string[] \| undefined` | Optional ES\|QL query whose results are injected into the template at render time. An array so the shape can hold several queries later without a migration, capped at one for now — read and write it via `readEsqlQuery` / `toEsqlQueryState` |
+| `esql_query` | `string[] \| undefined` | Optional ES\|QL queries whose results are injected into the template at render time. The first is the panel's main query (`rows`); up to five are allowed (`CUSTOM_CONTENT_MAX_ESQL_QUERIES`) and the rest are read by position as `queries[n]`. Read and write it via `readEsqlQuery` / `readAdditionalEsqlQueries` / `toEsqlQueryState`. The flyout edits all of them; the agent tools still work with the first query and keep the others as they are |
 | `template` | `string \| undefined` | LiquidJS HTML template — the actual rendered content |
 
 Panels are saved as part of the dashboard's serialized state (standard embeddable contract, `server/embeddable/schemas.ts`). No separate saved object is created. Both `template` and `esql_query` participate in unsaved-change detection (`esql_query` compares with `deepEquality`, since a fresh array would otherwise look changed on every serialize).
@@ -77,6 +77,14 @@ Templates use [LiquidJS](https://liquidjs.com/) syntax. `fill_template.ts` expos
 
 - `rows` — array of row objects, keyed by exact column name. Each column resolves to an object with `.value` (raw cell value) and `.pct` (the value as 0–100 percent of that column's max across all rows; numeric columns only, useful for bar widths).
 - `max` — object of per-column maximums, keyed by exact column name.
+- `queries` — one entry per query in `esql_query`, in order. `queries[n]` has its own `rows` and `max` (`.pct` is relative to that query's own max). `rows` and `max` are the same as `queries[0]`. All queries run in parallel with the panel's time range and filters, and if one fails the whole panel shows an error that names it.
+
+```html
+{% assign totals = queries[0].rows.first %}
+{% for row in queries[1].rows %}
+  <span>{{ row["service"].value }}</span>
+{% endfor %}
+```
 
 ```html
 {% if rows.size == 0 %}<p>No data</p>{% endif %}
@@ -96,6 +104,7 @@ Opening the panel context menu → Edit renders `EditCustomContentFlyout`, which
 
 - Edit the LiquidJS template directly in a Monaco editor (`liquid` language mode), with a copy-to-clipboard button and a vertically resizable editor pane
 - Add or change the ES|QL query, with a live data preview (`EsqlPreviewSection`)
+- Add up to four more queries (`EsqlDataSection`). With more than one, each query gets a tab (`UnifiedTabs`, configured like Lens's layer tabs: no close, rename or reorder) with its own editor and data preview; the first query is `rows` in the template and the others are `queries[1]`, `queries[2]`, … in tab order. Other queries are removed from their tab's menu; the first query cannot be removed. An empty one is dropped on save, and extra queries need the first query to exist. "Run Preview" fetches every query, and a failure is shown above the tabs
 - Hand off to the AI chat sidebar with the current draft attached — labelled "Refine with chat" when a template already exists and "Generate with chat" when the editor is empty, and shown only when `agentBuilder` is available
 
 "Run Preview" renders the current draft into the panel without saving, and is enabled only while there are unpreviewed changes. "Apply and close" is enabled only when the template or the query has changed from the saved state.
@@ -145,6 +154,24 @@ The dashboard generation tool in `agent_builder_dashboards` treats custom conten
 A static panel has no query: a new panel must state `hasData` (there is no default): `false` is static, so a banner never gets a stray `ROW` query, and omitting it is a validation error, so a panel that should show data can't silently be generated with no data and invented numbers. With `hasData: true` the server generates the query from `query` (and `index`). On an edit, omitting `esql` keeps the current query, `null` or `hasData: false` removes it, `hasData: true` gives a static panel a query, and `regenerateESQL: true` regenerates it from the current one. The visualization tool (`create_visualization` with `target.type: "custom_content"`) uses the same vocabulary as `has_data` / `regenerate_esql`.
 
 An edit targets a panel by its id in `panels`, so this path can reach any custom content panel on the dashboard whether or not it has a chat attachment. That makes it the fallback described above.
+
+### Panels with several queries
+
+The agent can create and change a panel's additional queries (see [Datasets](#datasets-asking-for-several-queries)), and works on panels that have them without losing them:
+
+- The context attachment carries them as `additional_esql_queries` and its text lists each one with the name the template reads it by (`queries[1]`, …). The chat card renders them, and an applied update, including `Preview` on an earlier version, puts them back on the panel.
+- `custom_content_update_panel` and the dashboard generation tool keep them through an edit. They are dropped with the main query when that is removed, because they have nothing to extend.
+- The template resolver samples each additional query on every refinement and adds `queries[n]` guidance to the Liquid system prompt, only for panels that have them, so a restyle does not drop or mangle a section that reads `queries[1]`. A failed sample names the query (`Query 2 (queries[1]): …`) and fails the whole resolve, like the main query.
+- "Generate with chat" and "Refine with chat" from the flyout send every query of the draft.
+
+#### Datasets: asking for several queries
+
+`custom_content_update_panel` and the dashboard generation tool take `datasets`, a list of the panel's queries by position. The template reads the first as `rows` and the n-th as `queries[n].rows`. An entry has a `description` (what ONE query returns, in words: the server generates the ES|QL), or an `esql` the user supplied verbatim, plus an optional `index`. It replaces `esql` / `hasData` / `regenerateESQL` / `index` (the single-query fields), and the layout and how each query is used stay in `query` / `prompt`.
+
+- **New panel:** every entry needs a `description` or an `esql`; the queries are generated in parallel (`resolveCustomContentQueries`, `@kbn/custom-content-common`).
+- **Edit:** entries apply to the stored queries by position. `description` regenerates that query, seeded with the stored one so the parts the request does not change survive, `esql` replaces it, `{}` keeps it, and an entry past the stored ones adds one. Queries the list does not reach are kept. Removing a query is not offered: it would shift the `queries[n]` every later one is read by. A dataset with a description, or one that adds a query, needs `query` / `prompt`; an edit that only replaces queries does not.
+- Generation uses `generateCustomContentEsql` with `isDataset`, which adds guidance that headline numbers are one row with a column per number and that the query returns only what it was described for, since the panel's other queries cover the rest.
+- `create_visualization` (the inline chat card) takes `target.datasets` on the `custom_content` and `attachment` targets, with the same rules. The visualization attachment stores the queries as `esql` plus `additional_esql`, which the chat card renders, "Save to dashboard" and `panels[].content.source: "attachment"` carry over to the dashboard panel's `esql_query`, and the attachment text lists for the agent. `datasets` is rejected for a Lens or Vega attachment, which has one query.
 
 ### How a panel's query is resolved
 

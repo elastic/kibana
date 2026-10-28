@@ -14,7 +14,7 @@ import { getEsQueryConfig } from '@kbn/data-service';
 import { stripMarkdownFences } from '@kbn/custom-content-common';
 import { i18n } from '@kbn/i18n';
 import { fetchEsqlData } from './fetch_esql_data';
-import { fillTemplate } from './fill_template';
+import { fillTemplateDatasets } from './fill_template';
 import { sanitizeHtml, applyHtmlTheme } from './prepare_html';
 import type { CustomContentRendererServices } from './types';
 import { getLinkBasePath } from './internal_link';
@@ -27,6 +27,8 @@ export interface UseCustomContentHtmlParams {
   services: CustomContentRendererServices;
   embeddableId: string;
   esqlQuery: string | undefined;
+  /** Further queries, exposed to the template as `queries[1]`, `queries[2]`, ... after `esqlQuery`. */
+  additionalEsqlQueries?: readonly string[];
   timeRange: TimeRange | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
@@ -54,6 +56,7 @@ export function useCustomContentHtml({
   services,
   embeddableId,
   esqlQuery,
+  additionalEsqlQueries,
   timeRange,
   generationVersion,
   savedTemplate,
@@ -74,6 +77,8 @@ export function useCustomContentHtml({
 
   const trimmedTemplate = savedTemplate?.trim() || undefined;
   const { http, uiSettings, search } = services;
+  // Callers build the list inline, so compare it by value to keep it from refetching on every render.
+  const additionalQueriesKey = JSON.stringify(additionalEsqlQueries ?? []);
 
   useEffect(() => {
     if (trimmedTemplate && !esqlQuery) {
@@ -93,15 +98,47 @@ export function useCustomContentHtml({
         esQueryConfig: getEsQueryConfig(uiSettings),
         esqlVariables,
         requestAdapter,
+        // The requests are cleared once below, so the queries don't wipe each other's entries.
+        keepRequests: true,
       };
       const template = stripMarkdownFences(trimmedTemplate);
+      const queries = [esqlQuery, ...(JSON.parse(additionalQueriesKey) as string[])];
 
+      requestAdapter?.reset();
       setIsLoading(true);
       setError(undefined);
-      fetchEsqlData(search, http, esqlQuery, timeRange, controller.signal, fetchOptions)
-        .then((response) => {
-          if (!controller.signal.aborted) setApproximationApplied?.(response.approximation_applied);
-          return fillTemplate(template, response.columns, response.values ?? []);
+      Promise.all(
+        queries.map((queryToFetch, index) =>
+          fetchEsqlData(
+            search,
+            http,
+            queryToFetch,
+            timeRange,
+            controller.signal,
+            fetchOptions
+          ).catch((err: Error) => {
+            // Say which query failed, but leave a single-query panel's message as it is.
+            if (queries.length === 1 || err.name === 'AbortError') throw err;
+            throw new Error(
+              i18n.translate('xpack.customContent.queryFailed', {
+                defaultMessage: 'Query {position} failed: {message}',
+                values: { position: index + 1, message: err.message },
+              })
+            );
+          })
+        )
+      )
+        .then((responses) => {
+          if (!controller.signal.aborted) {
+            const flags = responses.map(({ approximation_applied: applied }) => applied);
+            setApproximationApplied?.(
+              flags.some(Boolean) ? true : flags.includes(false) ? false : undefined
+            );
+          }
+          return fillTemplateDatasets(
+            template,
+            responses.map(({ columns, values }) => ({ columns, rows: values ?? [] }))
+          );
         })
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
@@ -125,6 +162,7 @@ export function useCustomContentHtml({
   }, [
     embeddableId,
     esqlQuery,
+    additionalQueriesKey,
     generationVersion,
     trimmedTemplate,
     timeRange,

@@ -9,7 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { generateVisualizationEsql } from './generate_visualization_esql';
-import { CUSTOM_CONTENT_ESQL_INSTRUCTIONS, generateCustomContentEsql } from './custom_content_esql';
+import {
+  CUSTOM_CONTENT_DATASET_INSTRUCTIONS,
+  CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
+  generateCustomContentEsql,
+} from './custom_content_esql';
 
 jest.mock('./generate_visualization_esql', () => ({
   generateVisualizationEsql: jest.fn(),
@@ -43,6 +47,20 @@ describe('generateCustomContentEsql', () => {
     expect(result).toBe('FROM logs-*');
   });
 
+  it('adds the dataset instructions when the query is one of several', async () => {
+    await generateCustomContentEsql({ ...params, noQueryHint: 'Pass an index.', isDataset: true });
+
+    expect(mockGenerate).toHaveBeenCalledWith({
+      ...params,
+      extraInstructions: `${CUSTOM_CONTENT_ESQL_INSTRUCTIONS}${CUSTOM_CONTENT_DATASET_INSTRUCTIONS}`,
+    });
+  });
+
+  it('does not pass isDataset on to the generator', async () => {
+    await generateCustomContentEsql({ ...params, noQueryHint: 'Pass an index.', isDataset: true });
+    expect(mockGenerate.mock.calls[0][0]).not.toHaveProperty('isDataset');
+  });
+
   it('throws with the reason and the caller hint when no query is produced', async () => {
     mockGenerate.mockResolvedValue({ query: undefined, error: 'index not found' });
 
@@ -74,6 +92,12 @@ describe('generateCustomContentEsql', () => {
 
     it('asks for one row per item', () => {
       expect(CUSTOM_CONTENT_ESQL_INSTRUCTIONS).toContain('one row per item');
+    });
+
+    it('lets a dataset of headline numbers be one row, and keeps it to its own data', () => {
+      expect(CUSTOM_CONTENT_DATASET_INSTRUCTIONS).toContain('ONE row with one column per number');
+      expect(CUSTOM_CONTENT_DATASET_INSTRUCTIONS).toContain('ONLY the data it was described for');
+      expect(CUSTOM_CONTENT_DATASET_INSTRUCTIONS).toContain('snake_case');
     });
   });
 });

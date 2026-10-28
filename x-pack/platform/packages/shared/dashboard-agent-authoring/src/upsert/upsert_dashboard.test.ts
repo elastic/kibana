@@ -804,6 +804,136 @@ describe('executeDashboardUpsert', () => {
           'Panel "kpi" is new, so `regenerateESQL` does not apply. Use `hasData` to say whether it has a query.',
       },
       {
+        name: 'a new custom_content panel that sends datasets with hasData and index',
+        panels: [],
+        upsert: {
+          panels: [
+            {
+              id: 'kpi',
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                query: 'totals and a host list',
+                hasData: true,
+                index: 'logs',
+                datasets: [{ description: 'totals' }],
+              },
+            },
+          ],
+        },
+        kind: 'panel',
+        identifier: 'kpi',
+        error:
+          'Panel "kpi" uses `datasets`, which replaces `hasData`, `index`: put each query\'s `esql` and `index` on its dataset and drop the others.',
+      },
+      {
+        name: 'a new custom_content panel with datasets but no query',
+        panels: [],
+        upsert: {
+          panels: [
+            {
+              id: 'kpi',
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                datasets: [{ description: 'totals' }],
+              },
+            },
+          ],
+        },
+        kind: 'panel',
+        identifier: 'kpi',
+        error: 'Panel "kpi" is new. Provide `query` to say how it looks and uses each dataset.',
+      },
+      {
+        name: 'a new custom_content panel with an empty dataset',
+        panels: [],
+        upsert: {
+          panels: [
+            {
+              id: 'kpi',
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                query: 'totals and a host list',
+                datasets: [{ description: 'totals' }, {}],
+              },
+            },
+          ],
+        },
+        kind: 'panel',
+        identifier: 'kpi',
+        error: 'Dataset 2 of the new panel "kpi" needs a `description` or an `esql` query.',
+      },
+      {
+        name: 'a custom_content edit that sends datasets with esql and regenerateESQL',
+        panels: [createPanel('cc-1', CUSTOM_CONTENT_EMBEDDABLE_TYPE, { template: '<div />' })],
+        upsert: {
+          panels: [
+            {
+              id: 'cc-1',
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                query: 'add hosts',
+                esql: 'FROM logs',
+                regenerateESQL: true,
+                datasets: [{}],
+              },
+            },
+          ],
+        },
+        kind: 'panel',
+        identifier: 'cc-1',
+        error:
+          'Panel "cc-1" uses `datasets`, which replaces `esql`, `regenerateESQL`: put each query\'s `esql` and `index` on its dataset and drop the others.',
+      },
+      {
+        name: 'a custom_content edit whose dataset has a description but no query',
+        panels: [createPanel('cc-1', CUSTOM_CONTENT_EMBEDDABLE_TYPE, { template: '<div />' })],
+        upsert: {
+          panels: [
+            {
+              id: 'cc-1',
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                datasets: [{ description: 'the busiest hosts' }],
+              },
+            },
+          ],
+        },
+        kind: 'panel',
+        identifier: 'cc-1',
+        error:
+          'Panel "cc-1" edit needs `query` when a dataset has a `description` or adds a query: say how the panel should now use the data.',
+      },
+      {
+        name: 'a custom_content edit that adds a query without a query description',
+        panels: [
+          createPanel('cc-1', CUSTOM_CONTENT_EMBEDDABLE_TYPE, {
+            template: '<div />',
+            esql_query: ['FROM logs'],
+          }),
+        ],
+        upsert: {
+          panels: [
+            {
+              id: 'cc-1',
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                datasets: [{}, { esql: 'FROM metrics' }],
+              },
+            },
+          ],
+        },
+        kind: 'panel',
+        identifier: 'cc-1',
+        error:
+          'Panel "cc-1" edit needs `query` when a dataset has a `description` or adds a query: say how the panel should now use the data.',
+      },
+      {
         name: 'attachment content on an existing panel',
         panels: [createLensPanel('panel-1')],
         upsert: {
@@ -2187,6 +2317,78 @@ describe('executeDashboardUpsert', () => {
           index: 'logs-*',
           existingPanel,
         })
+      );
+      expect(result.failures).toEqual([]);
+    });
+
+    it('turns datasets on a new custom_content panel into a request with hasData: true', async () => {
+      const resolvePanelContent = createResolverMock(async () =>
+        createResolvedPanelContent({
+          type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          config: { template: '<div>New</div>' },
+        })
+      );
+      const datasets = [{ description: 'totals', index: 'logs' }, { esql: 'FROM logs | LIMIT 5' }];
+
+      const result = await executeDashboardUpsert({
+        dashboardData: { title: 'Test', panels: [] },
+        upsert: {
+          panels: [
+            {
+              id: 'kpi',
+              content: {
+                source: 'request',
+                renderer: 'custom_content',
+                query: 'totals above a host list',
+                datasets,
+              },
+            },
+          ],
+        },
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).toHaveBeenCalledWith({
+        renderer: 'custom_content',
+        nlQuery: 'totals above a host list',
+        hasData: true,
+        datasets,
+      });
+      expect(result.failures).toEqual([]);
+    });
+
+    it('turns datasets on a custom_content edit into a request, without a query when it only replaces queries', async () => {
+      const existingPanel: AttachmentPanel = {
+        id: 'cc-1',
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: { esql_query: ['FROM logs', 'FROM metrics'], template: '<div>Old</div>' },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      };
+      const resolvePanelContent = createResolverMock(async () =>
+        createResolvedPanelContent({
+          type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          config: { template: '<div>New</div>' },
+        })
+      );
+      const datasets = [{}, { esql: 'FROM mine' }];
+
+      const result = await executeDashboardUpsert({
+        dashboardData: { title: 'Test', panels: [existingPanel] },
+        upsert: {
+          panels: [
+            {
+              id: 'cc-1',
+              content: { source: 'request', renderer: 'custom_content', datasets },
+            },
+          ],
+        },
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).toHaveBeenCalledWith(
+        expect.objectContaining({ renderer: 'custom_content', datasets, existingPanel })
       );
       expect(result.failures).toEqual([]);
     });

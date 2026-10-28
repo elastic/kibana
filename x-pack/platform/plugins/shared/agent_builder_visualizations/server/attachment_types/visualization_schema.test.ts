@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { CUSTOM_CONTENT_MAX_TEMPLATE_BYTES } from '@kbn/custom-content-common';
+import {
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES,
+  CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
+} from '@kbn/custom-content-common';
 import { MAX_VEGA_SPEC_LENGTH, visualizationAttachmentDataSchema } from './visualization_schema';
 
 describe('visualizationAttachmentDataSchema', () => {
@@ -131,6 +134,25 @@ describe('visualizationAttachmentDataSchema', () => {
       });
 
       expect(result.success).toBe(true);
+    });
+
+    it('accepts additional queries after the main one, up to the panel cap', () => {
+      const attachment = (additional: string[]) => ({
+        renderer: 'custom_content',
+        query: 'totals above a host list',
+        visualization: { template: '<div>x</div>' },
+        esql: 'FROM logs | STATS total = COUNT(*)',
+        additional_esql: additional,
+      });
+
+      expect(
+        visualizationAttachmentDataSchema.safeParse(attachment(['FROM a', 'FROM b'])).success
+      ).toBe(true);
+      expect(
+        visualizationAttachmentDataSchema.safeParse(
+          attachment(Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES }, () => 'FROM a'))
+        ).success
+      ).toBe(false);
     });
 
     it('accepts a static custom content attachment with no esql', () => {

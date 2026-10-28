@@ -6,12 +6,14 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import type { CustomContentDataset } from '@kbn/custom-content-common';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  customContentDatasetsSchema,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
 } from '@kbn/custom-content-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../resolve_panel';
 import { defineRequestPanelKind } from '../panel_kind';
 
@@ -34,6 +36,8 @@ export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase
   hasData: boolean;
   /** Index, alias or data stream to generate the query from. */
   index?: string;
+  /** The panel's queries by position, instead of `esql` / `index`. Then `hasData` is true. */
+  datasets?: CustomContentDataset[];
   existingPanel?: undefined;
 }
 
@@ -51,6 +55,8 @@ export interface CustomContentPanelEditRequest extends PanelResolutionRequestBas
   regenerateESQL?: boolean;
   /** Index, alias or data stream to generate the query from. */
   index?: string;
+  /** The panel's queries by position, instead of `esql` / `hasData` / `regenerateESQL` / `index`. */
+  datasets?: CustomContentDataset[];
 }
 
 /** Request to generate or refine a custom content panel's template; `existingPanel` tells them apart. */
@@ -59,49 +65,56 @@ export type CustomContentPanelResolutionRequest =
   | CustomContentPanelEditRequest;
 
 /** Creates or edits a custom content panel. */
-const customContentPanelContentSchema = z.object({
-  source: z.literal('request'),
-  renderer: z
-    .literal('custom_content')
-    .describe(
-      'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express. Required to edit a custom content panel; it is not inferred from the panel.'
-    ),
-  query: z
-    .string()
-    .min(1)
-    .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-    .optional()
-    .describe(
-      'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself. Required for new panels; on an existing panel, what to change, preserving layout and design where possible.'
-    ),
-  esql: z
-    .string()
-    .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-    .nullable()
-    .optional()
-    .describe(
-      'An ES|QL query the user supplied verbatim; it wins over hasData and, on an existing panel, replaces the current one (omit to keep it, pass null to remove it). Do not write a query yourself; set hasData to true and let the server generate it.'
-    ),
-  hasData: z
-    .boolean()
-    .optional()
-    .describe(
-      'Required for a new panel: true when it shows live Elasticsearch values, so the server generates the ES|QL query from "query" (and "index"); false for static content such as a banner, a legend or a note, which has no query. Always state which one it is. On an existing panel: true ensures it has data, generating a query from "query" only when it has none; false removes the query so the panel is static; omit to keep the current data state.'
-    ),
-  regenerateESQL: z
-    .boolean()
-    .optional()
-    .describe(
-      'Existing panel only. Set true when the edit changes what the panel shows: the server regenerates the ES|QL query from "query", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the current query. Requires "query".'
-    ),
-  index: z
-    .string()
-    .max(256)
-    .optional()
-    .describe(
-      'Exact index, alias, or data stream the data comes from. Pass it whenever known, together with hasData: true; on an existing panel, when regenerating or adding data.'
-    ),
-});
+const customContentPanelContentSchema = lazySchema(() =>
+  z.object({
+    source: z.literal('request'),
+    renderer: z
+      .literal('custom_content')
+      .describe(
+        'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express. Required to edit a custom content panel; it is not inferred from the panel.'
+      ),
+    query: z
+      .string()
+      .min(1)
+      .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
+      .optional()
+      .describe(
+        'Natural language description of what to display. The HTML template is generated server-side from it — do not supply markup yourself. Required for new panels; on an existing panel, what to change, preserving layout and design where possible.'
+      ),
+    esql: z
+      .string()
+      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
+      .nullable()
+      .optional()
+      .describe(
+        'An ES|QL query the user supplied verbatim; it wins over hasData and, on an existing panel, replaces the current one (omit to keep it, pass null to remove it). Do not write a query yourself; set hasData to true and let the server generate it.'
+      ),
+    hasData: z
+      .boolean()
+      .optional()
+      .describe(
+        'Required for a new panel: true when it shows live Elasticsearch values, so the server generates the ES|QL query from "query" (and "index"); false for static content such as a banner, a legend or a note, which has no query. Always state which one it is. On an existing panel: true ensures it has data, generating a query from "query" only when it has none; false removes the query so the panel is static; omit to keep the current data state.'
+      ),
+    regenerateESQL: z
+      .boolean()
+      .optional()
+      .describe(
+        'Existing panel only. Set true when the edit changes what the panel shows: the server regenerates the ES|QL query from "query", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the current query. Requires "query".'
+      ),
+    index: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'Exact index, alias, or data stream the data comes from. Pass it whenever known, together with hasData: true; on an existing panel, when regenerating or adding data.'
+      ),
+    datasets: customContentDatasetsSchema
+      .optional()
+      .describe(
+        'For a panel that needs several queries (see the description of each entry). Replaces esql, hasData, regenerateESQL and index: do not send them with it. "query" still says how the panel looks and how it uses each query; each dataset says what one query returns. Required "query" for a new panel, and for an edit when a dataset has a description or adds a query.'
+      ),
+  })
+);
 
 export const customContentPanelKind = defineRequestPanelKind({
   renderer: 'custom_content',

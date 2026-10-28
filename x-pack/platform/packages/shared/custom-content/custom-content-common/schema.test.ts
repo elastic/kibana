@@ -8,12 +8,15 @@
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from './constants';
 import {
   customContentStateSchema,
   customContentPanelUpdateSchema,
+  customContentDatasetsSchema,
   readEsqlQuery,
+  readAdditionalEsqlQueries,
   toEsqlQueryState,
 } from './schema';
 
@@ -56,10 +59,17 @@ describe('customContentStateSchema', () => {
     ).toBe(false);
   });
 
-  it('rejects more than one esql_query', () => {
-    expect(customContentStateSchema.safeParse({ esql_query: ['FROM a', 'FROM b'] }).success).toBe(
-      false
+  it('accepts several esql_query entries up to the cap', () => {
+    const queries = Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES }, (_, i) => `FROM a${i}`);
+    expect(customContentStateSchema.safeParse({ esql_query: queries }).success).toBe(true);
+  });
+
+  it('rejects more esql_query entries than the cap', () => {
+    const queries = Array.from(
+      { length: CUSTOM_CONTENT_MAX_ESQL_QUERIES + 1 },
+      (_, i) => `FROM a${i}`
     );
+    expect(customContentStateSchema.safeParse({ esql_query: queries }).success).toBe(false);
   });
 
   it('accepts an empty esql_query array', () => {
@@ -184,5 +194,89 @@ describe('esql_query accessors', () => {
   it('reads undefined from a panel with no query', () => {
     expect(readEsqlQuery({})).toBeUndefined();
     expect(readEsqlQuery({ esql_query: [] })).toBeUndefined();
+  });
+
+  it('reads the main query and the additional ones separately', () => {
+    const state = { esql_query: ['FROM a', 'FROM b', 'FROM c'] };
+    expect(readEsqlQuery(state)).toBe('FROM a');
+    expect(readAdditionalEsqlQueries(state)).toEqual(['FROM b', 'FROM c']);
+  });
+
+  it('reads no additional queries from a single-query or empty panel', () => {
+    expect(readAdditionalEsqlQueries({ esql_query: ['FROM a'] })).toEqual([]);
+    expect(readAdditionalEsqlQueries({})).toEqual([]);
+  });
+
+  it('keeps the additional queries after the main one when building state', () => {
+    expect(toEsqlQueryState('FROM a', ['FROM b'])).toEqual(['FROM a', 'FROM b']);
+  });
+
+  it('drops the additional queries when there is no main query', () => {
+    expect(toEsqlQueryState(undefined, ['FROM b'])).toBeUndefined();
+  });
+});
+
+describe('customContentDatasetsSchema', () => {
+  it('accepts descriptions, supplied queries and empty entries', () => {
+    expect(
+      customContentDatasetsSchema.safeParse([
+        { description: 'totals', index: 'logs' },
+        { esql: 'FROM logs | LIMIT 5' },
+        {},
+      ]).success
+    ).toBe(true);
+  });
+
+  it('rejects an empty list and more datasets than a panel can hold', () => {
+    expect(customContentDatasetsSchema.safeParse([]).success).toBe(false);
+    expect(
+      customContentDatasetsSchema.safeParse(
+        Array.from({ length: CUSTOM_CONTENT_MAX_ESQL_QUERIES + 1 }, () => ({ esql: 'FROM x' }))
+      ).success
+    ).toBe(false);
+  });
+
+  it('bounds the text of a dataset', () => {
+    expect(
+      customContentDatasetsSchema.safeParse([
+        { description: 'a'.repeat(CUSTOM_CONTENT_MAX_PROMPT_LENGTH + 1) },
+      ]).success
+    ).toBe(false);
+    expect(
+      customContentDatasetsSchema.safeParse([
+        { esql: 'a'.repeat(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH + 1) },
+      ]).success
+    ).toBe(false);
+    expect(customContentDatasetsSchema.safeParse([{ index: 'a'.repeat(257) }]).success).toBe(false);
+  });
+});
+
+describe('customContentPanelUpdateSchema datasets', () => {
+  const parse = (input: Record<string, unknown>) =>
+    customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', ...input });
+
+  it('accepts datasets with a prompt', () => {
+    expect(parse({ prompt: 'Show it', datasets: [{ description: 'totals' }] }).success).toBe(true);
+  });
+
+  it('counts datasets as a change', () => {
+    expect(parse({ datasets: [{ esql: 'FROM logs' }] }).success).toBe(true);
+  });
+
+  it('needs a prompt when a dataset has a description', () => {
+    const result = parse({ datasets: [{ description: 'totals' }] });
+    expect(result.success).toBe(false);
+    expect(JSON.stringify(result)).toContain('needs a prompt');
+  });
+
+  it.each([
+    [{ esqlQuery: 'FROM logs' }],
+    [{ esqlQuery: null }],
+    [{ regenerateEsql: true }],
+    [{ index: 'logs' }],
+  ])('cannot be combined with the single-query fields: %j', (extra) => {
+    const result = parse({ prompt: 'Show it', datasets: [{ esql: 'FROM a' }], ...extra });
+    expect(result.success).toBe(false);
+    expect(JSON.stringify(result)).toContain('datasets replaces');
   });
 });

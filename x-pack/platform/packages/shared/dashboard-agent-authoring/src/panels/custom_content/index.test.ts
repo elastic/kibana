@@ -35,6 +35,22 @@ describe('custom content panel kind content schema', () => {
     expect(parse({ query: 'also show errors', regenerateESQL: true }).success).toBe(true);
   });
 
+  it('accepts datasets to ask for several queries', () => {
+    expect(
+      parse({
+        query: 'totals above a host list',
+        datasets: [{ description: 'totals', index: 'logs' }, { esql: 'FROM logs | LIMIT 5' }],
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects an empty datasets list and more datasets than a panel can hold', () => {
+    expect(parse({ query: 'x', datasets: [] }).success).toBe(false);
+    expect(
+      parse({ query: 'x', datasets: Array.from({ length: 6 }, () => ({ esql: 'FROM a' })) }).success
+    ).toBe(false);
+  });
+
   it('rejects an index longer than the limit', () => {
     expect(parse({ query: 'status card', hasData: true, index: 'x'.repeat(257) }).success).toBe(
       false

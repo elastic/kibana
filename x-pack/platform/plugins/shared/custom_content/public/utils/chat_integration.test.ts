@@ -30,6 +30,38 @@ describe('buildCustomContentContextAttachment', () => {
     });
   });
 
+  it('carries the additional queries after the main one', () => {
+    const attachment = buildCustomContentContextAttachment({
+      template: '<div/>',
+      esqlQuery: 'FROM logs',
+      additionalEsqlQueries: ['FROM metrics', 'FROM traces'],
+      embeddableId: 'panel-1',
+    });
+
+    expect(attachment.data).toMatchObject({
+      esql_query: 'FROM logs',
+      additional_esql_queries: ['FROM metrics', 'FROM traces'],
+    });
+  });
+
+  it('omits additional_esql_queries when there are none, or no main query to extend', () => {
+    expect(
+      buildCustomContentContextAttachment({
+        template: '<div/>',
+        esqlQuery: 'FROM logs',
+        additionalEsqlQueries: [],
+        embeddableId: 'panel-1',
+      }).data
+    ).not.toHaveProperty('additional_esql_queries');
+    expect(
+      buildCustomContentContextAttachment({
+        template: '<div/>',
+        additionalEsqlQueries: ['FROM metrics'],
+        embeddableId: 'panel-1',
+      }).data
+    ).not.toHaveProperty('additional_esql_queries');
+  });
+
   // Without a stable id each push appends a new attachment, and the update tool reads the first
   // match by type — i.e. the stalest snapshot — instead of the panel's current state.
   it('derives a stable id from the embeddable id so re-pushes replace rather than accumulate', () => {

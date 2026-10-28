@@ -67,6 +67,7 @@ export const RenderPanelContext = ({ data }: { data: CustomContentContextAttachm
         services={services}
         embeddableId={data.embeddable_id}
         esqlQuery={data.esql_query}
+        additionalEsqlQueries={data.additional_esql_queries}
         // The range captured when the panel was sent to chat, so the preview matches what
         // the user was looking at. Older attachments have none and render unranged.
         timeRange={data.time_range}

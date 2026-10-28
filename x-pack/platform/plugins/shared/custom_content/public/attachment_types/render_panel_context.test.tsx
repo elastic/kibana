@@ -67,6 +67,14 @@ describe('RenderPanelContext', () => {
     );
   });
 
+  it('renders the additional queries the attachment carries', () => {
+    render(<RenderPanelContext data={makeData({ additional_esql_queries: ['FROM metrics'] })} />);
+
+    expect(mockComponentProps).toHaveBeenCalledWith(
+      expect.objectContaining({ esqlQuery: 'FROM logs', additionalEsqlQueries: ['FROM metrics'] })
+    );
+  });
+
   it('renders against the captured time range', () => {
     render(<RenderPanelContext data={makeData({ time_range: { from: 'now-7d', to: 'now' } })} />);
 

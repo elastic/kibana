@@ -44,6 +44,11 @@ interface CustomContentVisualizationAttachmentData extends VisualizationAttachme
   visualization: { template: string; title?: string; height?: number };
   /** Optional: a custom content panel with no query renders static content. */
   esql?: string;
+  /**
+   * The panel's queries after `esql`, which its template reads as `queries[1]`, `queries[2]`, ...
+   * Only present together with `esql`: they extend the main query, they do not replace it.
+   */
+  additional_esql?: string[];
 }
 
 export type VisualizationAttachmentData =

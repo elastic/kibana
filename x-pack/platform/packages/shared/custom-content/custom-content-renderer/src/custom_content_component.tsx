@@ -23,6 +23,8 @@ export interface CustomContentComponentProps {
   services: CustomContentRendererServices;
   embeddableId: string;
   esqlQuery: string | undefined;
+  /** Further queries, exposed to the template as `queries[1]`, `queries[2]`, ... after `esqlQuery`. */
+  additionalEsqlQueries?: readonly string[];
   timeRange: TimeRange | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
@@ -68,6 +70,7 @@ export const CustomContentComponent = ({
   services,
   embeddableId,
   esqlQuery,
+  additionalEsqlQueries,
   timeRange,
   generationVersion,
   savedTemplate,
@@ -90,6 +93,7 @@ export const CustomContentComponent = ({
     services,
     embeddableId,
     esqlQuery,
+    additionalEsqlQueries,
     timeRange,
     generationVersion,
     savedTemplate,

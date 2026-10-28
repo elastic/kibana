@@ -11,6 +11,8 @@ export const CUSTOM_CONTENT_SCRIPT_PATTERN = /<script[\s>/]/i;
 
 export const CUSTOM_CONTENT_MAX_PROMPT_LENGTH = 10_000;
 export const CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH = 1_000_000;
+/** Most queries one panel can hold; each one is fetched on every refresh. */
+export const CUSTOM_CONTENT_MAX_ESQL_QUERIES = 5;
 /** Maximum UTF-8 byte size of a rendered template. Enforced server-side on both the generation and agent paths. */
 export const CUSTOM_CONTENT_MAX_TEMPLATE_BYTES = 500_000;
 /** Character (code-point) cap for schema validation — set well above the byte cap so ASCII content has headroom but keep in sync with CUSTOM_CONTENT_MAX_TEMPLATE_BYTES for byte-level checks. */

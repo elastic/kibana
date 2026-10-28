@@ -8,7 +8,9 @@
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
+  readAdditionalEsqlQueries,
   resolveCustomContentQuery,
+  resolveCustomContentQueries,
   toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
@@ -24,6 +26,8 @@ export type CustomContentEsqlGenerator = (params: {
   nlQuery: string;
   index?: string;
   existingQueries: string[];
+  /** True when the query is one of several that feed the panel, not its only one. */
+  isDataset?: boolean;
 }) => Promise<string>;
 
 const resolveCustomContentState = async (
@@ -31,9 +35,34 @@ const resolveCustomContentState = async (
   resolveTemplate: CustomContentTemplateResolver,
   generateEsql: CustomContentEsqlGenerator
 ): Promise<CustomContentState> => {
-  const { nlQuery, esql, hasData, index, existingPanel } = request;
+  const { nlQuery, esql, hasData, index, existingPanel, datasets } = request;
   const generate = (existingQueries: string[]) =>
     generateEsql({ nlQuery: nlQuery ?? '', index, existingQueries });
+
+  if (datasets) {
+    // The panel's queries are listed by position: the first is `rows`, the n-th `queries[n].rows`.
+    const existing = existingPanel?.config as CustomContentState | undefined;
+    const { queries, changed } = await resolveCustomContentQueries({
+      datasets,
+      existingQueries: existing?.esql_query ?? [],
+      generate: ({ description, index: datasetIndex }, existingQueries) =>
+        generateEsql({
+          nlQuery: description,
+          index: datasetIndex,
+          existingQueries,
+          isDataset: true,
+        }),
+    });
+    const [mainQuery, ...additionalEsqlQueries] = queries;
+    const { template } = await resolveTemplate({
+      prompt: nlQuery ?? '',
+      esqlQuery: changed[0] ? mainQuery : undefined,
+      existingTemplate: existing?.template,
+      hasExistingQuery: !changed[0] && !!mainQuery,
+      additionalEsqlQueries,
+    });
+    return { esql_query: queries, template };
+  }
 
   if (!existingPanel) {
     // The agent always states hasData: a static panel (false) has no query unless one is supplied.
@@ -57,13 +86,19 @@ const resolveCustomContentState = async (
     isNewPanel: false,
     generate,
   });
+  // The panel's other queries are kept as they are, but only while it still has a main query.
+  const additionalEsqlQueries = mergedEsqlQuery ? readAdditionalEsqlQueries(existing) : [];
   const { template } = await resolveTemplate({
     prompt: nlQuery ?? '',
     esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
     existingTemplate: existing.template,
     hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
+    additionalEsqlQueries,
   });
-  return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
+  return {
+    esql_query: toEsqlQueryState(mergedEsqlQuery, additionalEsqlQueries),
+    template,
+  };
 };
 
 /**

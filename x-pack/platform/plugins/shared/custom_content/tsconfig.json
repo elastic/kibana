@@ -36,7 +36,8 @@
     "@kbn/kbn-client",
     "@kbn/esql-types",
     "@kbn/i18n-react",
-    "@kbn/inspector-plugin"
+    "@kbn/inspector-plugin",
+    "@kbn/unified-tabs"
   ],
   "exclude": ["target/**/*"]
 }

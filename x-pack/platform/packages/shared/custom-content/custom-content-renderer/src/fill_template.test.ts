@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fillTemplate } from './fill_template';
+import { fillTemplate, fillTemplateDatasets } from './fill_template';
 
 const columns = [
   { name: 'host', type: 'keyword' },
@@ -116,5 +116,52 @@ describe('fillTemplate', () => {
     await expect(fillWithMockedEngine('<p>hi</p>', [], [])).resolves.toBe('<p>hi</p>');
 
     jest.dontMock('liquidjs');
+  });
+});
+
+describe('fillTemplateDatasets', () => {
+  const secondColumns = [
+    { name: 'service', type: 'keyword' },
+    { name: 'errors', type: 'long' },
+  ];
+  const secondRows: unknown[][] = [
+    ['api', 8],
+    ['db', 2],
+  ];
+  const datasets = [
+    { columns, rows },
+    { columns: secondColumns, rows: secondRows },
+  ];
+
+  it('keeps rows and max as the first query', async () => {
+    const result = await fillTemplateDatasets(
+      '{% for row in rows %}{{ row["host"].value }};{% endfor %}max={{ max["count"] }}',
+      datasets
+    );
+    expect(result).toBe('web-1;web-2;max=100');
+  });
+
+  it('exposes every query by position, each with its own rows and pct', async () => {
+    const result = await fillTemplateDatasets(
+      '{% for row in queries[1].rows %}{{ row["service"].value }}={{ row["errors"].pct }};{% endfor %}max={{ queries[1].max["errors"] }}',
+      datasets
+    );
+    expect(result).toBe('api=100;db=25;max=8');
+  });
+
+  it('renders the same output as fillTemplate for a single query', async () => {
+    const template =
+      '{% for row in rows %}{{ row["host"].value }}{{ row["count"].pct }}{% endfor %}';
+    expect(await fillTemplateDatasets(template, [{ columns, rows }])).toBe(
+      await fillTemplate(template, columns, rows)
+    );
+  });
+
+  it('renders a missing query as empty instead of throwing', async () => {
+    const result = await fillTemplateDatasets(
+      '{% for row in queries[5].rows %}x{% endfor %}none',
+      datasets
+    );
+    expect(result).toBe('none');
   });
 });

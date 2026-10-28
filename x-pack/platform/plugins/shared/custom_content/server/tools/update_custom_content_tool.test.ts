@@ -60,6 +60,7 @@ const callHandler = async (
     esqlQuery?: string | null;
     regenerateEsql?: boolean;
     index?: string;
+    datasets?: Array<{ description?: string; esql?: string; index?: string }>;
   },
   attachmentData?: Record<string, unknown>
 ) => {
@@ -264,6 +265,243 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(result.data.message).toContain('no suitable index');
       expect(mockResolver).not.toHaveBeenCalled();
       expect(ctx.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('datasets', () => {
+    const singleQueryPanel = {
+      panel_template: '<p>old</p>',
+      esql_query: 'FROM logs | STATS total = COUNT(*)',
+      embeddable_id: 'p1',
+    };
+    const twoQueryPanel = {
+      ...singleQueryPanel,
+      additional_esql_queries: ['FROM logs | STATS hits = COUNT(*) BY host'],
+    };
+
+    const storedData = (ctx: { update: jest.Mock }) => ctx.update.mock.calls[0][1].data;
+
+    it('adds a second query to a single-query panel, keeping the first and not sampling it again', async () => {
+      mockGenerateEsql.mockResolvedValue('FROM logs | STATS hits = COUNT(*) BY host');
+
+      const { ctx } = await callHandler(
+        {
+          embeddable_id: 'p1',
+          prompt: 'Add a list of the busiest hosts under the total',
+          datasets: [{}, { description: 'the five hosts with the most requests', index: 'logs' }],
+        },
+        singleQueryPanel
+      );
+
+      expect(mockGenerateEsql).toHaveBeenCalledTimes(1);
+      expect(mockGenerateEsql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nlQuery: 'the five hosts with the most requests',
+          index: 'logs',
+          existingQueries: [],
+          isDataset: true,
+        })
+      );
+      expect(mockResolver).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: undefined,
+          hasExistingQuery: true,
+          additionalEsqlQueries: ['FROM logs | STATS hits = COUNT(*) BY host'],
+        })
+      );
+      expect(storedData(ctx)).toMatchObject({
+        esql_query: 'FROM logs | STATS total = COUNT(*)',
+        additional_esql_queries: ['FROM logs | STATS hits = COUNT(*) BY host'],
+      });
+    });
+
+    it('regenerates one position, seeded with the stored query there, and keeps the others', async () => {
+      mockGenerateEsql.mockResolvedValue('FROM logs | STATS hits = COUNT(*) BY host | LIMIT 10');
+
+      const { ctx } = await callHandler(
+        {
+          embeddable_id: 'p1',
+          prompt: 'Show ten hosts',
+          datasets: [{}, { description: 'top 10' }],
+        },
+        twoQueryPanel
+      );
+
+      expect(mockGenerateEsql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          existingQueries: ['FROM logs | STATS hits = COUNT(*) BY host'],
+        })
+      );
+      expect(storedData(ctx)).toMatchObject({
+        esql_query: 'FROM logs | STATS total = COUNT(*)',
+        additional_esql_queries: ['FROM logs | STATS hits = COUNT(*) BY host | LIMIT 10'],
+      });
+    });
+
+    it('replaces a query with one the user supplied, without generating', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'p1', datasets: [{}, { esql: 'FROM mine' }] },
+        twoQueryPanel
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(storedData(ctx)).toMatchObject({ additional_esql_queries: ['FROM mine'] });
+    });
+
+    it('tells the template resolver the main query is changing when the first dataset changes it', async () => {
+      mockGenerateEsql.mockResolvedValue('FROM logs | STATS total = COUNT(*), errors = COUNT(*)');
+
+      await callHandler(
+        {
+          embeddable_id: 'p1',
+          prompt: 'Add errors',
+          datasets: [{ description: 'totals and errors' }],
+        },
+        twoQueryPanel
+      );
+
+      expect(mockResolver).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: 'FROM logs | STATS total = COUNT(*), errors = COUNT(*)',
+          hasExistingQuery: false,
+          additionalEsqlQueries: ['FROM logs | STATS hits = COUNT(*) BY host'],
+        })
+      );
+    });
+
+    it('keeps every query when the list is empty entries', async () => {
+      const { ctx } = await callHandler({ embeddable_id: 'p1', datasets: [{}] }, twoQueryPanel);
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(storedData(ctx)).toMatchObject({
+        esql_query: 'FROM logs | STATS total = COUNT(*)',
+        additional_esql_queries: ['FROM logs | STATS hits = COUNT(*) BY host'],
+      });
+    });
+
+    it('creates the queries of a panel that has none', async () => {
+      mockGenerateEsql.mockResolvedValueOnce('FROM a').mockResolvedValueOnce('FROM b');
+
+      const { ctx } = await callHandler(
+        {
+          embeddable_id: 'p1',
+          prompt: 'Totals and a host list',
+          datasets: [{ description: 'totals' }, { description: 'hosts' }],
+        },
+        { panel_template: '', embeddable_id: 'p1' }
+      );
+
+      expect(storedData(ctx)).toMatchObject({
+        esql_query: 'FROM a',
+        additional_esql_queries: ['FROM b'],
+      });
+    });
+
+    it('sends the additional queries in the UI event', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'p1', datasets: [{}, { esql: 'FROM mine' }] },
+        twoQueryPanel
+      );
+
+      expect(ctx.sendUiEvent).toHaveBeenCalledWith(
+        CUSTOM_CONTENT_UPDATED_UI_EVENT,
+        expect.objectContaining({
+          data: expect.objectContaining({ additional_esql_queries: ['FROM mine'] }),
+        })
+      );
+    });
+
+    it('returns an error and stores nothing when a query cannot be generated', async () => {
+      mockGenerateEsql.mockRejectedValue(new Error('Could not generate an ES|QL query'));
+
+      const { results, ctx } = await callHandler(
+        { embeddable_id: 'p1', prompt: 'Add hosts', datasets: [{}, { description: 'hosts' }] },
+        singleQueryPanel
+      );
+
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(ctx.update).not.toHaveBeenCalled();
+      expect(mockResolver).not.toHaveBeenCalled();
+    });
+
+    it('returns an error for a new position with nothing to build a query from', async () => {
+      const { results, ctx } = await callHandler(
+        { embeddable_id: 'p1', prompt: 'Add one', datasets: [{}, {}] },
+        singleQueryPanel
+      );
+
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(JSON.stringify(results[0])).toContain('Dataset 2 adds a new query');
+      expect(ctx.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('panels with additional queries', () => {
+    const existing = {
+      panel_template: '<p>{{ queries[1].rows.size }}</p>',
+      esql_query: 'FROM logs',
+      additional_esql_queries: ['FROM metrics'],
+      panel_title: 'My Panel',
+      embeddable_id: 'p1',
+    };
+
+    it('gives the additional queries to the template resolver on a style edit', async () => {
+      await callHandler({ embeddable_id: 'p1', prompt: 'Make colors more vivid' }, existing);
+      expect(mockResolver).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlQuery: undefined, additionalEsqlQueries: ['FROM metrics'] })
+      );
+    });
+
+    it('keeps the additional queries in the updated attachment and the UI event', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'p1', prompt: 'Make colors more vivid' },
+        existing
+      );
+      expect(ctx.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.objectContaining({ additional_esql_queries: ['FROM metrics'] }),
+        }),
+        ATTACHMENT_REF_ACTOR.agent
+      );
+      expect(ctx.sendUiEvent).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          data: expect.objectContaining({ additional_esql_queries: ['FROM metrics'] }),
+        })
+      );
+    });
+
+    it('keeps them when the main query is replaced', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'p1', prompt: 'Show revenue', esqlQuery: 'FROM revenue' },
+        existing
+      );
+      expect(ctx.update).toHaveBeenCalledWith(
+        'att-1',
+        expect.objectContaining({
+          data: expect.objectContaining({
+            esql_query: 'FROM revenue',
+            additional_esql_queries: ['FROM metrics'],
+          }),
+        }),
+        ATTACHMENT_REF_ACTOR.agent
+      );
+    });
+
+    it('drops them, and does not sample them, when the main query is removed', async () => {
+      const { ctx } = await callHandler({ embeddable_id: 'p1', esqlQuery: null }, existing);
+      const updated = ctx.update.mock.calls[0][1].data;
+      expect(updated.esql_query).toBeUndefined();
+      expect(updated).not.toHaveProperty('additional_esql_queries');
+    });
+
+    it('does not add the field to a single-query panel', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'p1', prompt: 'Restyle' },
+        { ...existing, additional_esql_queries: undefined }
+      );
+      expect(ctx.update.mock.calls[0][1].data).not.toHaveProperty('additional_esql_queries');
     });
   });
 

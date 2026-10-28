@@ -112,6 +112,18 @@ describe('createCustomContentContextAttachmentType', () => {
       expect(value).toContain('```esql\nFROM logs | LIMIT 10\n```');
     });
 
+    it('lists the additional queries after the main one, with the name the template reads them by', async () => {
+      const value = await getRepresentationValue({
+        panel_template: '<div/>',
+        esql_query: 'FROM logs',
+        additional_esql_queries: ['FROM metrics', 'FROM traces'],
+        embeddable_id: 'panel-1',
+      });
+      expect(value).toContain('read by the template as queries[1]:\n```esql\nFROM metrics\n```');
+      expect(value).toContain('read by the template as queries[2]:\n```esql\nFROM traces\n```');
+      expect(value.indexOf('FROM logs')).toBeLessThan(value.indexOf('FROM metrics'));
+    });
+
     it('omits ES|QL query section when esql_query is not provided', async () => {
       const value = await getRepresentationValue({
         panel_template: '<div/>',

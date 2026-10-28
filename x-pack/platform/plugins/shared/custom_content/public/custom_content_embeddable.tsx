@@ -61,6 +61,7 @@ import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
+  readAdditionalEsqlQueries,
   toEsqlQueryState,
 } from '@kbn/custom-content-common';
 import {
@@ -137,6 +138,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const timeRangeManager = initializeTimeRangeManager(initialState);
     let isRetained = false;
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
+    // Only a hand-edited panel has these. They are kept and saved as they are, never edited here.
+    const additionalEsqlQueries$ = new BehaviorSubject<string[]>(
+      readAdditionalEsqlQueries(initialState)
+    );
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
@@ -170,12 +175,17 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
       ...timeRangeManager.getLatestState(),
-      esql_query: toEsqlQueryState(esqlQuery$.getValue()),
+      esql_query: toEsqlQueryState(esqlQuery$.getValue(), additionalEsqlQueries$.getValue()),
       template: template$.getValue(),
     });
 
-    const applyConfigUpdate = (update: { esqlQuery?: string; template?: string }) => {
+    const applyConfigUpdate = (update: {
+      esqlQuery?: string;
+      additionalEsqlQueries?: string[];
+      template?: string;
+    }) => {
       if ('esqlQuery' in update) esqlQuery$.next(update.esqlQuery);
+      if (update.additionalEsqlQueries) additionalEsqlQueries$.next(update.additionalEsqlQueries);
       if ('template' in update) template$.next(update.template);
     };
 
@@ -187,6 +197,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$,
         esqlQuery$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
+        additionalEsqlQueries$.pipe(
           skip(1),
           map(() => undefined)
         ),
@@ -205,6 +219,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         titleManager.reinitializeState(lastSaved ?? {});
         timeRangeManager.reinitializeState(lastSaved ?? {});
         esqlQuery$.next(lastSaved ? readEsqlQuery(lastSaved) : undefined);
+        additionalEsqlQueries$.next(lastSaved ? readAdditionalEsqlQueries(lastSaved) : []);
         template$.next(lastSaved?.template);
       },
     });
@@ -243,10 +258,15 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
             const handleSave = (
               newEsqlQuery: string | undefined,
-              newTemplate: string | undefined
+              newTemplate: string | undefined,
+              newAdditionalEsqlQueries: string[]
             ) => {
               hasSaved = true;
-              applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
+              applyConfigUpdate({
+                esqlQuery: newEsqlQuery,
+                additionalEsqlQueries: newAdditionalEsqlQueries,
+                template: newTemplate,
+              });
               closeFlyout();
             };
 
@@ -256,7 +276,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
             const handleGenerateWithChatFromFlyout = (
               draftTemplate: string,
-              draftEsqlQuery: string | undefined
+              draftEsqlQuery: string | undefined,
+              draftAdditionalEsqlQueries: string[]
             ) => {
               if (!agentBuilder) return;
               hasSaved = true;
@@ -268,6 +289,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
                     esqlQuery: draftEsqlQuery,
+                    additionalEsqlQueries: draftAdditionalEsqlQueries,
                     embeddableId: uuid,
                     panelTitle: titleManager.api.title$.getValue() ?? undefined,
                     panelHeight: measurePanelHeight(),
@@ -302,6 +324,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               return (
                 <EditCustomContentFlyout
                   esqlQuery={esqlQuery$.getValue()}
+                  additionalEsqlQueries={additionalEsqlQueries$.getValue()}
                   template={template$.getValue()}
                   timeRange={timeRange}
                   isApproximate={isApproximate}
@@ -390,6 +413,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       Component: function CustomContentEmbeddableComponent() {
         const [
           esqlQuery,
+          additionalEsqlQueries,
           savedTemplate,
           panelTitle,
           isApproximate,
@@ -403,6 +427,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           viewMode,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
+          additionalEsqlQueries$,
           template$,
           titleManager.api.title$,
           isApproximate$,
@@ -436,6 +461,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             registerPanelPreviewHandler(uuid, (data) => {
               template$.next(data.panel_template);
               esqlQuery$.next(data.esql_query);
+              additionalEsqlQueries$.next(data.additional_esql_queries ?? []);
             }),
           []
         );
@@ -475,6 +501,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
               template$.next(data.panel_template);
               esqlQuery$.next(data.esql_query);
+              additionalEsqlQueries$.next(data.additional_esql_queries ?? []);
               if (isGenerating$.getValue()) isGenerating$.next(false);
               getTelemetry().trackAgentUpdateApplied({
                 hasEsqlQuery: Boolean(data.esql_query),
@@ -529,6 +556,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               services={rendererServices}
               embeddableId={uuid}
               esqlQuery={esqlQuery}
+              additionalEsqlQueries={additionalEsqlQueries}
               timeRange={timeRange}
               generationVersion={generationVersion}
               savedTemplate={savedTemplate}

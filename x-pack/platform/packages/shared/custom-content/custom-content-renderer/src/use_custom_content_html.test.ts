@@ -27,13 +27,13 @@ import { getEsQueryConfig } from '@kbn/data-service';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { fetchEsqlData } from './fetch_esql_data';
-import { fillTemplate } from './fill_template';
+import { fillTemplateDatasets } from './fill_template';
 import { useCustomContentHtml } from './use_custom_content_html';
 import type { CustomContentRendererServices } from './types';
 
 const mockGetEsQueryConfig = getEsQueryConfig as jest.MockedFunction<typeof getEsQueryConfig>;
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
-const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
+const mockFillTemplate = fillTemplateDatasets as jest.MockedFunction<typeof fillTemplateDatasets>;
 
 const mockHttp = { basePath: { get: () => '', serverBasePath: '' } } as unknown as HttpStart;
 const mockSearch = jest.fn();
@@ -191,9 +191,54 @@ describe('useCustomContentHtml', () => {
           filters: undefined,
         })
       );
-      expect(mockFillTemplate).toHaveBeenCalledWith(esqlParams.savedTemplate, [], []);
+      expect(mockFillTemplate).toHaveBeenCalledWith(esqlParams.savedTemplate, [
+        { columns: [], rows: [] },
+      ]);
       expect(result.current.html).toContain('rendered');
       expect(result.current.noContent).toBe(false);
+    });
+
+    it('fetches every additional query and fills the template with one dataset per query', async () => {
+      const columns = [{ name: 'n', type: 'long' }];
+      mockFetchEsqlData
+        .mockResolvedValueOnce({ columns, values: [[1]], all_columns: columns })
+        .mockResolvedValueOnce({ columns, values: [[2]], all_columns: columns });
+
+      const { result } = renderHook(() =>
+        useCustomContentHtml({
+          ...esqlParams,
+          additionalEsqlQueries: ['FROM metrics | STATS n = COUNT()'],
+        })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockFetchEsqlData).toHaveBeenCalledTimes(2);
+      expect(mockFetchEsqlData).toHaveBeenNthCalledWith(
+        2,
+        mockSearch,
+        mockHttp,
+        'FROM metrics | STATS n = COUNT()',
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ keepRequests: true })
+      );
+      expect(mockFillTemplate).toHaveBeenCalledWith(esqlParams.savedTemplate, [
+        { columns, rows: [[1]] },
+        { columns, rows: [[2]] },
+      ]);
+    });
+
+    it('fails the whole panel when one of the queries fails', async () => {
+      mockFetchEsqlData
+        .mockResolvedValueOnce({ columns: [], values: [], all_columns: [] })
+        .mockRejectedValueOnce(new Error('second query failed'));
+
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...esqlParams, additionalEsqlQueries: ['FROM bad'] })
+      );
+
+      await waitFor(() => expect(result.current.error).toBe('Query 2 failed: second query failed'));
     });
 
     it('surfaces a fetch error', async () => {
