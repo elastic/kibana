@@ -22,9 +22,9 @@ import {
   deleteEntity,
   ensureFpTpSeedPrerequisites,
   ensureFpTpRawEventStore,
-  FP_TP_TWIN_SEED_LABEL,
   kbnErrorMessage,
   rawEventIndexNames,
+  seededRawEventsInSpaceQuery,
   writeIdentityFields,
   type FpTpLiveKbnRequest,
 } from '../world';
@@ -345,13 +345,14 @@ export const cleanupWorkerModeSpace = async ({
     // run's leftovers whose host ids the alerts search above cannot name. Prefix,
     // not term: worker-mode events carry their full run marker, which starts
     // with the seed label (verified live — a term sweep silently matches 0).
+    // The stream pattern spans every space, so the sweep is held to this namespace.
     const { data_streams: streams } = await esClient.indices
       .getDataStream({ name: targets.eventsIndexPattern })
       .catch(() => ({ data_streams: [] as Array<{ name: string }> }));
     for (const index of rawEventIndexNames(streams.map(({ name }) => ({ index: name })))) {
       await esClient.deleteByQuery({
         index,
-        query: { prefix: { 'labels.ad_portable_seed': FP_TP_TWIN_SEED_LABEL } },
+        query: seededRawEventsInSpaceQuery(space),
         conflicts: 'proceed',
         refresh: true,
       });

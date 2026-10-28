@@ -15,6 +15,7 @@ import {
   FP_TP_ATTACK_ADHOC_INDEX,
   FP_TP_BOOTSTRAP_RULE_ID,
   FP_TP_ENTITY_READ_ALIAS,
+  FP_TP_RAW_EVENT_INDEX_PREFIX,
   FP_TP_RAW_EVENT_INGEST_PIPELINE,
   FP_TP_REASONING_FEATURE_ID,
   FP_TP_TWIN_SEED_LABEL,
@@ -339,6 +340,52 @@ const deleteBySeedLabel = async (esClient: EsClient, index: string): Promise<voi
   }
 };
 
+/** deleteByQuery that tolerates a missing index or pattern. */
+const deleteQuietly = async (
+  esClient: EsClient,
+  { index, query }: { index: string; query: Record<string, unknown> }
+): Promise<void> => {
+  try {
+    await esClient.deleteByQuery({
+      index,
+      query,
+      conflicts: 'proceed',
+      refresh: true,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+  } catch (error) {
+    if (esStatusCode(error) !== 404) {
+      throw error;
+    }
+  }
+};
+
+/**
+ * Seeded raw events in the space's namespace of the seeder-owned streams: any
+ * whose run marker starts with the seed label, or that sit on `hostIds`. The
+ * namespace filter keeps a sweep from reaching another space's seed.
+ */
+export const seededRawEventsInSpaceQuery = (
+  space: string,
+  hostIds: readonly string[] = []
+): Record<string, unknown> => ({
+  bool: {
+    filter: [
+      { term: { 'data_stream.namespace': space } },
+      {
+        bool: {
+          should: [
+            { prefix: { 'labels.ad_portable_seed': FP_TP_TWIN_SEED_LABEL } },
+            ...(hostIds.length > 0 ? [{ terms: { 'host.id': [...hostIds] } }] : []),
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ],
+  },
+});
+
 /**
  * Endpoint logs data streams typically do not index `labels.ad_portable_seed`,
  * so a seed-label deleteByQuery leaves the previous twin's events in place.
@@ -549,6 +596,7 @@ const ALERTS_STREAM_POLL_INTERVAL_MS = 5_000;
 const VALIDATE_EXECUTION_TIMEOUT_MS = 300_000;
 const VALIDATE_POLL_INTERVAL_MS = 3_000;
 const SPACE_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,63}$/;
+const PREVIOUS_SERVERLESS_SEED_PAGE_SIZE = 10_000;
 
 /**
  * Refuses to run the serverless path against the default space: its bootstrap
@@ -572,6 +620,18 @@ export const assertServerlessSpace = (space: string | undefined): string => {
     );
   }
   return space;
+};
+
+/**
+ * The classic path writes the default space's alerts, discovery and entity
+ * indices, so a Kibana client scoped to another space would split the seed.
+ */
+export const assertClassicSpace = (space: string | undefined): void => {
+  if (space !== undefined && space !== 'default') {
+    throw new Error(
+      `--space "${space}" needs --serverless: the classic path seeds the default space only`
+    );
+  }
 };
 
 export interface FpTpServerlessSeedPlan extends FpTpLiveSeedPlan {
@@ -920,31 +980,52 @@ export const cleanupServerlessSeed = async ({
   kbnRequest: FpTpLiveKbnRequest;
   plan: FpTpServerlessSeedPlan;
 }): Promise<void> => {
+  // An earlier seed of another scenario or variant in this space has other
+  // ids and title, so find it by the seed label its alerts carry in `tags`.
+  const previous = await esClient.search<{ host?: { id?: unknown } }>({
+    index: plan.alertsIndex,
+    ignore_unavailable: true,
+    size: PREVIOUS_SERVERLESS_SEED_PAGE_SIZE,
+    _source: ['host.id'],
+    query: { prefix: { tags: FP_TP_TWIN_SEED_LABEL } },
+  });
+  const previousAlertIds = previous.hits.hits
+    .map(({ _id: id }) => id)
+    .filter((id): id is string => typeof id === 'string');
+  const previousHostIds = previous.hits.hits
+    .map(({ _source: source }) => source?.host?.id)
+    .filter((id): id is string => typeof id === 'string');
+  const hostIds = [...new Set([...plan.hostIds, ...previousHostIds])];
+
   // A seeder-owned raw-event stream DOES index `labels.ad_portable_seed`
   // (explicit mapping in the seeder-owned template), so a label sweep removes
-  // a crashed run's leftovers that the id sweep below cannot name.
-  for (const index of rawEventIndexNames(plan.serverlessEvents)) {
-    await deleteBySeedLabel(esClient, index);
-  }
+  // a crashed run's leftovers that the id sweep below cannot name. Prefix:
+  // serverless markers carry the space after the label.
+  await deleteQuietly(esClient, {
+    index: `${FP_TP_RAW_EVENT_INDEX_PREFIX}*`,
+    query: seededRawEventsInSpaceQuery(plan.space, hostIds),
+  });
   await deleteDocumentsById(esClient, [
-    ...plan.alertIds.map((id) => ({ index: plan.alertsIndex, id })),
+    ...[...new Set([...plan.alertIds, ...previousAlertIds])].map((id) => ({
+      index: plan.alertsIndex,
+      id,
+    })),
     ...plan.serverlessEvents,
   ]);
   // The persisted discovery's `_id` is a hash over alert ids, connector, user
-  // and space — unknown until after the validate run — so delete it by title.
+  // and space — unknown until after the validate run — so delete it by title,
+  // and an earlier seed's by the alerts it cites.
   if (plan.attackTitle !== undefined) {
-    try {
-      await esClient.deleteByQuery({
-        index: plan.adhocAttackIndex,
-        query: { match_phrase: { 'kibana.alert.attack_discovery.title': plan.attackTitle } },
-        conflicts: 'proceed',
-        refresh: true,
-      });
-    } catch (error) {
-      if (esStatusCode(error) !== 404) {
-        throw error;
-      }
-    }
+    await deleteQuietly(esClient, {
+      index: plan.adhocAttackIndex,
+      query: { match_phrase: { 'kibana.alert.attack_discovery.title': plan.attackTitle } },
+    });
+  }
+  if (previousAlertIds.length > 0) {
+    await deleteQuietly(esClient, {
+      index: plan.adhocAttackIndex,
+      query: { terms: { 'kibana.alert.attack_discovery.alert_ids': previousAlertIds } },
+    });
   }
   for (const entity of plan.entities) {
     await deleteEntity(kbnRequest, entity.entityId);
@@ -952,7 +1033,7 @@ export const cleanupServerlessSeed = async ({
   await deleteEntitiesOnHosts(
     esClient,
     kbnRequest,
-    plan.hostIds,
+    hostIds,
     fpTpEntityReadAliasForSpace(plan.space)
   );
 };
@@ -960,7 +1041,7 @@ export const cleanupServerlessSeed = async ({
 /**
  * Seeds one FP/TP twin into a Kibana space on a serverless project. Returns
  * the summary plus a cleanup handle. `reasoningConnectorId` maps the space's
- * `alertzero_reasoning` inference feature so the managed analysis (and the
+ * `alertzero_frontier` inference feature so the managed analysis (and the
  * validate workflow's connector bookkeeping) resolve a connector in the space.
  */
 export const seedTwinLiveServerless = async ({

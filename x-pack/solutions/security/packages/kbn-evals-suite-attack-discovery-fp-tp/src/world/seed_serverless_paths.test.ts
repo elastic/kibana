@@ -18,6 +18,7 @@ import {
   toServerlessEventIndex,
 } from './constants';
 import {
+  assertClassicSpace,
   assertServerlessSpace,
   buildServerlessPlan,
   cleanupServerlessSeed,
@@ -94,6 +95,17 @@ describe('assertServerlessSpace', () => {
   it('accepts a dedicated space id', () => {
     expect(assertServerlessSpace('fptp-eval_1')).toBe('fptp-eval_1');
     expect(assertServerlessSpace('x'.repeat(64))).toHaveLength(64);
+  });
+});
+
+describe('assertClassicSpace', () => {
+  it('accepts the default space and an omitted one', () => {
+    expect(() => assertClassicSpace('default')).not.toThrow();
+    expect(() => assertClassicSpace(undefined)).not.toThrow();
+  });
+
+  it('refuses any other space without --serverless', () => {
+    expect(() => assertClassicSpace('fptp-eval-1')).toThrow(/needs --serverless/);
   });
 });
 
@@ -344,10 +356,24 @@ describe('cleanupServerlessSeed targets', () => {
     expect(byIndex.get('.alerts-security.alerts-fptp-eval-1')).toContainEqual({
       ids: { values: [...plan.alertIds] },
     });
-    // the seeder-owned stream is swept by seed label (a crashed run's
-    // leftovers are not nameable by id) and by id
-    expect(byIndex.get('logs-endpoint.events.fp-tp-process-fptp-eval-1')).toContainEqual({
-      term: { 'labels.ad_portable_seed': FP_TP_TWIN_SEED_LABEL },
+    // the seeder-owned streams are swept by seed-label prefix within the
+    // space's namespace (a crashed run's leftovers are not nameable by id)
+    // and by id
+    expect(byIndex.get('logs-endpoint.events.fp-tp-*')).toContainEqual({
+      bool: {
+        filter: [
+          { term: { 'data_stream.namespace': 'fptp-eval-1' } },
+          {
+            bool: {
+              should: [
+                { prefix: { 'labels.ad_portable_seed': FP_TP_TWIN_SEED_LABEL } },
+                { terms: { 'host.id': [...plan.hostIds] } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
     });
     expect(byIndex.get('logs-endpoint.events.fp-tp-process-fptp-eval-1')).toContainEqual({
       ids: { values: expect.arrayContaining([ids.process1Id]) as string[] },
@@ -356,6 +382,61 @@ describe('cleanupServerlessSeed targets', () => {
       expect(index).not.toMatch(/-default$/);
       expect(index).not.toBe('.alerts-security.alerts-default');
     }
+  });
+
+  it("also removes an earlier seed of another scenario found by the space's seeded alerts", async () => {
+    const deleteByQuery = jest.fn().mockResolvedValue({});
+    const search = jest.fn(async ({ index }: { index: string }) =>
+      index === plan.alertsIndex
+        ? {
+            hits: {
+              hits: [
+                { _id: 'old-alert-1', _source: { host: { id: 'old-host' } } },
+                { _id: 'old-alert-2', _source: { host: { id: 'old-host' } } },
+              ],
+            },
+          }
+        : { hits: { hits: [] } }
+    );
+    const kbnRequest = jest.fn().mockResolvedValue({ statusCode: 404, body: {} });
+
+    await cleanupServerlessSeed({
+      esClient: { deleteByQuery, search } as unknown as EsClientArg,
+      kbnRequest,
+      plan,
+    });
+
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: plan.alertsIndex,
+        query: { prefix: { tags: FP_TP_TWIN_SEED_LABEL } },
+      })
+    );
+    const calls = (deleteByQuery.mock.calls as Array<[Record<string, unknown>]>).map(
+      ([params]) => params
+    );
+    expect(calls).toContainEqual(
+      expect.objectContaining({
+        index: plan.alertsIndex,
+        query: { ids: { values: expect.arrayContaining(['old-alert-1', 'old-alert-2']) } },
+      })
+    );
+    expect(calls).toContainEqual(
+      expect.objectContaining({
+        index: plan.adhocAttackIndex,
+        query: {
+          terms: { 'kibana.alert.attack_discovery.alert_ids': ['old-alert-1', 'old-alert-2'] },
+        },
+      })
+    );
+    const eventSweep = calls.find(({ index }) => index === 'logs-endpoint.events.fp-tp-*');
+    expect(JSON.stringify(eventSweep?.query)).toContain('old-host');
+    // entities on the earlier seed's hosts are looked up in the space's alias
+    expect(search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: { terms: { 'host.id': expect.arrayContaining(['old-host', ...plan.hostIds]) } },
+      })
+    );
   });
 });
 

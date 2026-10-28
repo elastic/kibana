@@ -82,10 +82,12 @@ export {
   seedFixture,
   seedTwinLive,
   seedTwinLiveServerless,
+  seededRawEventsInSpaceQuery,
   buildServerlessPlan,
   twinToWorld,
   toAnonymizedAlerts,
   toValidateAttackDiscovery,
+  assertClassicSpace,
   assertServerlessSpace,
   writeIdentityFields,
 } from './seed_live';

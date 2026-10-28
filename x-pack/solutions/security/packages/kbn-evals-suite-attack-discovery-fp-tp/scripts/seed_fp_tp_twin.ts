@@ -9,11 +9,13 @@ import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import { getFpTpScenario } from '../src/scenarios';
 import {
+  assertClassicSpace,
   assertServerlessSpace,
   createLiveKbnRequest,
   FP_TP_TWIN_SEED_LABEL,
   seedTwinLive,
   seedTwinLiveServerless,
+  toRunMarker,
 } from '../src/world';
 import type { FpTpLiveKbnRequest } from '../src/world';
 
@@ -40,11 +42,13 @@ run(
     if (serverless && reasoningConnectorId === undefined) {
       throw new Error(
         '--serverless needs --reasoningConnectorId: the connector the space maps the ' +
-          'alertzero_reasoning inference feature to (and the validate workflow bookkeeps).'
+          'alertzero_frontier inference feature to (and the validate workflow bookkeeps).'
       );
     }
     if (serverless) {
       assertServerlessSpace(space);
+    } else {
+      assertClassicSpace(space);
     }
 
     const esClient = new Client({
@@ -69,7 +73,9 @@ run(
             await seedTwinLiveServerless({
               esClient,
               kbnRequest,
-              twin: buildTwin(FP_TP_TWIN_SEED_LABEL),
+              // A per-space marker gives every space its own host ids: the
+              // analysis reads raw events by host.id across all namespaces.
+              twin: buildTwin(toRunMarker(space)),
               space,
               reasoningConnectorId: reasoningConnectorId as string,
             })
@@ -127,12 +133,13 @@ run(
         --username                      Kibana/ES username for Basic auth (Default: elastic)
         --password                      Kibana/ES password for Basic auth (Default: changeme)
         --apiKey                        ApiKey for Kibana and ES auth; overrides Basic auth
-        --space                         Kibana space to seed into (Default: default; with
-                                        --serverless a dedicated non-default space is required)
+        --space                         Kibana space to seed into (Default: default; only
+                                        with --serverless, which requires a dedicated
+                                        non-default space)
         --serverless                    Space-scoped serverless seeding: detection-engine
                                         bootstrap + no-match rule, Entity Store CRUD,
                                         seeder-owned event namespace, managed validate run
-        --reasoningConnectorId          Connector id mapped to the alertzero_reasoning
+        --reasoningConnectorId          Connector id mapped to the alertzero_frontier
                                         inference feature in the space (required with
                                         --serverless)
       `,

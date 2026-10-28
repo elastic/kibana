@@ -92,7 +92,7 @@ describe('cleanupWorkerModeSpace', () => {
     expect(esClient.deleteByQuery).not.toHaveBeenCalled();
   });
 
-  it('on serverless sweeps the seeder-owned streams by seed label', async () => {
+  it("on serverless sweeps the seeder-owned streams by seed label, in the space's namespace only", async () => {
     const stream = 'logs-endpoint.events.fp-tp-process-qa-fp';
     const esClient = {
       search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
@@ -111,7 +111,19 @@ describe('cleanupWorkerModeSpace', () => {
     expect(esClient.deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         index: stream,
-        query: { prefix: { 'labels.ad_portable_seed': 'ad-fp-tp-twins-2026-09' } },
+        query: {
+          bool: {
+            filter: [
+              { term: { 'data_stream.namespace': 'qa-fp' } },
+              {
+                bool: {
+                  should: [{ prefix: { 'labels.ad_portable_seed': 'ad-fp-tp-twins-2026-09' } }],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
       })
     );
   });
