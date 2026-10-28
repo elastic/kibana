@@ -71,7 +71,7 @@ export const CloudConnectorSetup: React.FC<CloudConnectorSetupProps> = ({
   const templateSha =
     cloudConnectors?.find(({ id }) => id === newPolicy.cloud_connector_id)?.iac_key ?? undefined;
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
-  const [hasAttachedCloudConnector] = useState<boolean>(
+  const [hasAttachedCloudConnector] = useState(
     () => isEditPage && Boolean(newPolicy.cloud_connector_id)
   );
 

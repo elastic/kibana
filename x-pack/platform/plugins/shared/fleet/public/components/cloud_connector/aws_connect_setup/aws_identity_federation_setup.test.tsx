@@ -250,8 +250,31 @@ describe('AwsIdentityFederationSetup', () => {
       expect(screen.getByRole('tab', { name: 'New Identity' })).toBeDisabled();
     });
 
-    it('keeps New Identity available when editing with no identity attached', () => {
+    it('opens on Existing Identity and keeps New Identity available when editing with no identity attached and some exist', () => {
       renderSetup({ isEditPage: true });
+
+      expect(screen.getByRole('tab', { name: 'Existing Identity' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+      expect(screen.getByRole('tab', { name: 'New Identity' })).toBeEnabled();
+    });
+
+    it('keeps New Identity available after an identity is attached during the edit', () => {
+      const { rerender } = renderSetup({ isEditPage: true });
+
+      rerender(
+        <I18nProvider>
+          <QueryClientProvider client={queryClient}>
+            <AwsIdentityFederationSetup
+              onReadyChange={onReadyChange}
+              onConnectorIdChange={onConnectorIdChange}
+              isEditPage={true}
+              initialConnectorId="connector-1"
+            />
+          </QueryClientProvider>
+        </I18nProvider>
+      );
 
       expect(screen.getByRole('tab', { name: 'New Identity' })).toBeEnabled();
     });

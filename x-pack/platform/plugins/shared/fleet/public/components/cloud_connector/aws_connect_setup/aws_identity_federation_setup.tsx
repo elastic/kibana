@@ -131,7 +131,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const trimmedStackArn = stackArn.trim();
   const stackArnInvalid = isStackArnInvalid(stackArn);
 
-  const hasAttachedCloudConnector = isEditPage && Boolean(initialConnectorId);
+  const [hasAttachedCloudConnector] = useState(() => isEditPage && Boolean(initialConnectorId));
 
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
