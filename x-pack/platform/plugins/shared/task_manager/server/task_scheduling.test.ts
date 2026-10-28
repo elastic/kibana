@@ -505,6 +505,68 @@ describe('TaskScheduling', () => {
       expect(mockTaskStore.bulkUpdate).toHaveBeenCalledTimes(2);
     });
 
+    describe('when every attempt to replace the key hits a version conflict', () => {
+      const conflict = (id: string) => ({
+        tag: 'err' as const,
+        error: {
+          type: 'task',
+          id,
+          error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
+        },
+      });
+
+      test('rejects with a conflict error so the caller can retry', async () => {
+        const existing = oneOffTask();
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+        mockTaskStore.taskExists.mockResolvedValue(true);
+        mockTaskStore.bulkGet.mockResolvedValue([asOk(existing)]);
+        mockTaskStore.bulkUpdate.mockResolvedValue([conflict(existing.id)]);
+
+        const error = await taskScheduling
+          .ensureScheduled({ id: existing.id, taskType: 'foo', params: {}, state: {} }, options)
+          .then(
+            () => undefined,
+            (err: Error) => err
+          );
+
+        expect(error?.message).toBe(
+          'The API key of task "resume-task" could not be regenerated because the task was updated concurrently; retry'
+        );
+        expect(SavedObjectsErrorHelpers.isConflictError(error!)).toBe(true);
+        // initial attempt + 2 retries
+        expect(mockTaskStore.bulkUpdate).toHaveBeenCalledTimes(3);
+      });
+
+      test('rejects with a conflict error for a recurring task too', async () => {
+        const existing = getTask();
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+        mockTaskStore.taskExists.mockResolvedValue(true);
+        mockTaskStore.bulkGet.mockResolvedValue([asOk(existing)]);
+        mockTaskStore.bulkUpdate.mockResolvedValue([conflict(existing.id)]);
+
+        const error = await taskScheduling.ensureScheduled(existing, options).then(
+          () => undefined,
+          (err: Error) => err
+        );
+
+        expect(SavedObjectsErrorHelpers.isConflictError(error!)).toBe(true);
+      });
+
+      test('still tolerates the conflict for a plain schedule update without regenerateApiKey', async () => {
+        const existing = getTask();
+        const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+        mockTaskStore.taskExists.mockResolvedValue(true);
+        mockTaskStore.bulkGet.mockResolvedValue([
+          asOk({ ...existing, schedule: { interval: '5m' } }),
+        ]);
+        mockTaskStore.bulkUpdate.mockResolvedValue([conflict(existing.id)]);
+
+        await expect(
+          taskScheduling.ensureScheduled(existing, { request: mockRequest })
+        ).resolves.toEqual(expect.objectContaining({ id: existing.id }));
+      });
+    });
+
     test('tolerates the task being removed before the key replacement', async () => {
       const existing = oneOffTask();
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);

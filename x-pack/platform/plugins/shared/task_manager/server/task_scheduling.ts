@@ -73,7 +73,8 @@ const BULK_ACTION_SIZE = 100;
 // A conflict means another writer already updated the task and a missing task was removed in the
 // meantime (a one-off task is deleted when its run completes); neither is an error for an
 // idempotent "make sure this exists" call. The caller's next interaction with the task (for example
-// `runSoon`) surfaces a removed task as not found.
+// `runSoon`) surfaces a removed task as not found. Not used for a key replacement, see
+// `assertApiKeyReplaced`.
 const throwUnlessConflictOrMissing = (result: BulkUpdateTaskResult, action: string): void => {
   const [firstError] = result.errors;
   if (
@@ -478,7 +479,9 @@ export class TaskScheduling {
    * When the task already exists its credential is left as stored, unless `options.regenerateApiKey`
    * is true: then the key of an idle task is replaced with one granted (or cloned) from
    * `options.request`, so the next claim runs as the current caller. Schedule and `runAt` are not
-   * changed by that replacement. A claimed task keeps its key; call again once it is idle.
+   * changed by that replacement. A claimed task keeps its key; call again once it is idle. Rejects
+   * with a conflict error when the key of an idle task could not be replaced because of concurrent
+   * updates, so the caller can retry.
    *
    * @param task - The task being scheduled.
    * @returns {Promise<TaskInstanceWithId>}
@@ -528,18 +531,42 @@ export class TaskScheduling {
         taskInstance.schedule,
         options
       );
-      throwUnlessConflictOrMissing(
-        result,
-        `update schedule for existing task "${taskInstance.id}"`
-      );
+      if (regenerateApiKey) {
+        this.assertApiKeyReplaced(result, taskInstance.id);
+      } else {
+        throwUnlessConflictOrMissing(
+          result,
+          `update schedule for existing task "${taskInstance.id}"`
+        );
+      }
     } else if (regenerateApiKey) {
       const result = await this.regenerateApiKeyOfExistingTask(taskInstance.id, options);
-      throwUnlessConflictOrMissing(
-        result,
-        `regenerate API key of existing task "${taskInstance.id}"`
-      );
+      this.assertApiKeyReplaced(result, taskInstance.id);
     }
     return taskInstance;
+  }
+
+  /**
+   * A version conflict on every attempt is tolerable for a plain schedule update, but a key
+   * replacement that never landed would leave the previous caller's key on the task while this call
+   * reports success, so the conflict is surfaced for the caller to retry. A removed task is not an
+   * error: a one-off task is deleted when its run completes.
+   */
+  private assertApiKeyReplaced(result: BulkUpdateTaskResult, taskId: string): void {
+    const [firstError] = result.errors;
+    if (!firstError || firstError.error.statusCode === NOT_FOUND_STATUS) {
+      return;
+    }
+    if (firstError.error.statusCode === VERSION_CONFLICT_STATUS) {
+      throw SavedObjectsErrorHelpers.decorateConflictError(
+        new Error(
+          `The API key of task "${taskId}" could not be regenerated because the task was updated concurrently; retry`
+        )
+      );
+    }
+    throw new Error(
+      `Tried to regenerate API key of existing task "${taskId}" but failed with error: ${firstError.error.message}`
+    );
   }
 
   /**
