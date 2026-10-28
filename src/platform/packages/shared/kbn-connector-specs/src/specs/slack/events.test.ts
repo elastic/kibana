@@ -180,6 +180,46 @@ describe('Slack inbound events', () => {
     });
   });
 
+  describe('message text', () => {
+    const emitText = async (event: Record<string, unknown>) => {
+      const result = expectEmit(
+        await events.handleEvents(
+          createContext(callback({ type: 'message', channel: 'C123', ts: '1.000005', ...event }))
+        )
+      );
+      return result.events[0].payload.text;
+    };
+
+    it.each<[string, Record<string, unknown>, string | undefined]>([
+      [
+        'an attachments-only post',
+        { attachments: [{ title: 'Alert', text: 'Disk full' }] },
+        'Alert\nDisk full',
+      ],
+      [
+        'an edited message',
+        {
+          subtype: 'message_changed',
+          message: { ts: '1.000001', attachments: [{ text: 'Edited' }] },
+        },
+        'Edited',
+      ],
+      [
+        'a deleted message',
+        {
+          subtype: 'message_deleted',
+          previous_message: {
+            ts: '1.000001',
+            blocks: [{ type: 'header', text: { text: 'Gone' } }],
+          },
+        },
+        'Gone',
+      ],
+    ])('reads %s', async (_name, event, expected) => {
+      expect(await emitText(event)).toBe(expected);
+    });
+  });
+
   it.each<[string, unknown, string | undefined]>([
     [
       "the Relay's Slack thread key",

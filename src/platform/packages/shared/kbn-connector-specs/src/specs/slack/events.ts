@@ -39,6 +39,7 @@ import {
   SLACK_TEAM_JOIN_EVENT_ID,
   SLACK_TEAM_JOIN_EVENT_KEY,
 } from './constants';
+import { readSlackMessageText } from './message_text';
 
 const SLACK_EVENT_ID_MAX = 128;
 const SLACK_EVENT_NAME_MAX = 256;
@@ -62,7 +63,9 @@ const SlackMessageEventSchema = lazySchema(() =>
       .string()
       .max(SLACK_EVENT_TEXT_MAX)
       .optional()
-      .describe('Message text, when Slack includes it.'),
+      .describe(
+        'Message text, when Slack includes it. Text from the message blocks and attachments that the message text does not already contain follows it, one line each.'
+      ),
     subtype: optionalSlackId('Slack message subtype, such as bot_message, when present.'),
     botId: optionalSlackId('Bot id when the message was sent by a bot.'),
     appId: optionalSlackId('Id of the Slack app that sent the message, when Slack includes it.'),
@@ -309,7 +312,7 @@ const parseMessage = (
       messageId,
       threadId: readId(event.thread_ts) ?? (nested ? readId(nested.thread_ts) : undefined),
       sender: fromSources((source) => readId(source.user)),
-      text: fromSources((source) => readText(source.text)),
+      text: fromSources((source) => readSlackMessageText(source, SLACK_EVENT_TEXT_MAX)),
       subtype,
       botId: fromSources((source) => readId(source.bot_id)),
       appId: fromSources(readAppId),

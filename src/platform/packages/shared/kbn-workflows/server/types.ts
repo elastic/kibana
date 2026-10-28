@@ -224,7 +224,11 @@ export interface ResumeExternalHitlParams {
 
 export interface WorkflowsClient {
   isWorkflowsAvailable: boolean;
-  emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
+  emitEvent: (
+    triggerId: string,
+    payload: Record<string, unknown>,
+    options?: { authenticatedUser?: string }
+  ) => Promise<void>;
   /**
    * Resume a paused HITL wait step using the external resume token (e.g. Slack interactivity).
    */

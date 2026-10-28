@@ -36,12 +36,17 @@ export const createWorkflowsClientProvider = (
 
     return {
       isWorkflowsAvailable,
-      emitEvent: async (triggerId, payload) => {
+      emitEvent: async (triggerId, payload, options) => {
         if (!isWorkflowsAvailable) {
           logger.debug('Workflows is not available in this environment. Trigger event ignored.');
           return;
         }
-        return workflowsExecutionEngine.triggerEvents.emitEvent({ triggerId, payload, request });
+        return workflowsExecutionEngine.triggerEvents.emitEvent({
+          triggerId,
+          payload,
+          request,
+          ...(options?.authenticatedUser ? { authenticatedUser: options.authenticatedUser } : {}),
+        });
       },
       resumeExternalHitl: async (params) => {
         if (!isWorkflowsAvailable) {

@@ -26,6 +26,7 @@ export {
   builtInTriggerDefinitions,
   getBuiltInTriggerDefinition,
 } from './spec/builtin_trigger_definitions';
+export { getTriggerName } from './common/get_trigger_name';
 export {
   builtinWorkflowInputDefinitions,
   builtinWorkflowInputDefinitionRefValuesForZod,

@@ -14,6 +14,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { useDetectionOverview } from '../../data/detection_overview/use_detection_overview';
 import { useDetectionEntities } from '../../data/detection_entities/use_detection_entities';
 import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
+import type { DetectionTabId } from './detection_tabs';
 import { DetectionPage } from './page';
 
 jest.mock('../../app/app_header', () => ({
@@ -22,11 +24,15 @@ jest.mock('../../app/app_header', () => ({
 jest.mock('../../data/detection_overview/use_detection_overview');
 jest.mock('../../data/detection_entities/use_detection_entities');
 jest.mock('../../data/maintenance/use_significant_events_maintenance');
+jest.mock('../../hooks/use_developer_mode');
 jest.mock('./events/events_tab', () => ({
   EventsTab: () => <div data-test-subj="eventsTabStub" />,
 }));
 jest.mock('./rules/rules_tab', () => ({
   RulesTab: () => <div data-test-subj="rulesTabStub" />,
+}));
+jest.mock('./signals/signals_tab', () => ({
+  SignalsTab: () => <div data-test-subj="signalsTabStub" />,
 }));
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -41,9 +47,10 @@ jest.mock('../../hooks/use_kibana', () => ({
 const mockUseDetectionOverview = useDetectionOverview as jest.Mock;
 const mockUseDetectionEntities = useDetectionEntities as jest.Mock;
 const mockUseMaintenanceStatus = useMaintenanceStatus as jest.Mock;
+const mockUseDeveloperMode = useDeveloperMode as jest.Mock;
 const refetch = jest.fn();
 
-const renderPage = (initialPath = '/detections/events', tab: 'events' | 'rules' = 'events') => {
+const renderPage = (initialPath = '/detections/events', tab: DetectionTabId = 'events') => {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
   render(
     <I18nProvider>
@@ -60,6 +67,7 @@ const renderPage = (initialPath = '/detections/events', tab: 'events' | 'rules' 
 describe('DetectionPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseDeveloperMode.mockReturnValue({ isDeveloperMode: false });
     mockUseDetectionEntities.mockReturnValue({
       data: { entities: [], unassigned: { rules: 0, active_events: 0 }, truncated: false },
       isLoading: false,
@@ -92,6 +100,19 @@ describe('DetectionPage', () => {
       'aria-selected',
       'true'
     );
+    expect(screen.queryByTestId('nightshiftDetectionTab-signals')).not.toBeInTheDocument();
+  });
+
+  it('shows the Signals tab in developer mode', async () => {
+    mockUseDeveloperMode.mockReturnValue({ isDeveloperMode: true });
+
+    renderPage('/detections/signals', 'signals');
+
+    expect(await screen.findByTestId('signalsTabStub')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionTab-signals')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 
   it('shows the paused detection process status', async () => {
@@ -100,7 +121,54 @@ describe('DetectionPage', () => {
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftDetectionStatus')).toHaveTextContent('Paused');
     expect(screen.getByText('knowledge indicators')).toBeInTheDocument();
-    expect(screen.getByText('detections')).toBeInTheDocument();
+    expect(screen.getByText('signals')).toBeInTheDocument();
+  });
+
+  it('moves the detection status above the entities rail while the tab body scrolls', async () => {
+    renderPage();
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    const tabBody = screen.getByTestId('nightshiftDetectionTabBody');
+    const fullSlot = screen.getByTestId('nightshiftDetectionOverviewFullSlot');
+    const compactSlot = screen.getByTestId('nightshiftDetectionOverviewCompactSlot');
+
+    expect(fullSlot).not.toHaveAttribute('data-collapsed');
+    expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
+
+    Object.defineProperties(tabBody, {
+      clientHeight: { configurable: true, value: 200 },
+      scrollHeight: { configurable: true, value: 500 },
+    });
+    Object.defineProperty(fullSlot, 'offsetHeight', { configurable: true, value: 128 });
+    Object.defineProperty(tabBody, 'scrollTop', { configurable: true, value: 9 });
+    fireEvent.scroll(tabBody);
+
+    expect(fullSlot).toHaveAttribute('data-collapsed', 'true');
+    expect(compactSlot).not.toHaveAttribute('data-collapsed');
+
+    Object.defineProperty(tabBody, 'scrollTop', { configurable: true, value: 0 });
+    fireEvent.scroll(tabBody);
+
+    expect(fullSlot).not.toHaveAttribute('data-collapsed');
+    expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
+  });
+
+  it('keeps the overview expanded when collapsing it would remove the tab overflow', async () => {
+    renderPage();
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    const tabBody = screen.getByTestId('nightshiftDetectionTabBody');
+    const fullSlot = screen.getByTestId('nightshiftDetectionOverviewFullSlot');
+    const compactSlot = screen.getByTestId('nightshiftDetectionOverviewCompactSlot');
+
+    Object.defineProperties(tabBody, {
+      clientHeight: { configurable: true, value: 200 },
+      scrollHeight: { configurable: true, value: 320 },
+      scrollTop: { configurable: true, value: 9 },
+    });
+    Object.defineProperty(fullSlot, 'offsetHeight', { configurable: true, value: 128 });
+    fireEvent.scroll(tabBody);
+
+    expect(fullSlot).not.toHaveAttribute('data-collapsed');
+    expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
   });
 
   it('shows the overview error instead of zero counts', async () => {

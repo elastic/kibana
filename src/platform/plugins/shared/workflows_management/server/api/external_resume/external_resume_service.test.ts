@@ -90,6 +90,7 @@ describe('external resume service', () => {
     );
     expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
       'step-exec-1',
+      'exec-1',
       'external_resume:step-exec-1',
       'default'
     );
@@ -245,6 +246,7 @@ describe('external resume service', () => {
     const engine = await workflowsService.getWorkflowsExecutionEngine();
     expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
       'step-exec-1',
+      'exec-1',
       'external_resume:step-exec-1',
       'default'
     );

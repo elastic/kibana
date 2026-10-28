@@ -7,12 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { INBOUND_WEBHOOK_CONNECTOR_TYPE_ID } from '@kbn/connector-specs';
+import {
+  connectorSpecHasEvents,
+  connectorsSpecs,
+  INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
+} from '@kbn/connector-specs';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import {
   getConnectorEventTriggerDefinitions,
   getConnectorTypeIdForTriggerEventId,
 } from './connector_event_triggers';
+
+/** Same rule as trigger titles: drop a trailing ` (v2)` from the connector catalog name. */
+const connectorTriggerDisplayName = (displayName: string): string =>
+  displayName.replace(/ \(v\d+\)$/, '');
+
+const expectedConnectorEventTitles = (specs: ConnectorSpec[]): Map<string, string> =>
+  new Map(
+    specs.filter(connectorSpecHasEvents).flatMap((spec) => {
+      const events = spec.events;
+      if (!events) {
+        return [];
+      }
+      const displayName = connectorTriggerDisplayName(spec.metadata.displayName);
+      return Object.values(events.definitions).map(
+        (eventDefinition) =>
+          [eventDefinition.eventId, `${displayName} - ${eventDefinition.title}`] as const
+      );
+    })
+  );
 
 describe('getConnectorTypeIdForTriggerEventId', () => {
   it('maps inboundWebhook.received to .inboundWebhook', () => {
@@ -28,6 +52,21 @@ describe('getConnectorTypeIdForTriggerEventId', () => {
 });
 
 describe('getConnectorEventTriggerDefinitions', () => {
+  it('returns no triggers when inbound events are disabled', () => {
+    expect(getConnectorEventTriggerDefinitions({ inboundEventsEnabled: false })).toEqual([]);
+  });
+
+  it('prefixes each event title with the connector display name', () => {
+    const specs = Object.values(connectorsSpecs);
+    const definitions = getConnectorEventTriggerDefinitions({ inboundEventsEnabled: true, specs });
+    const expected = expectedConnectorEventTitles(specs);
+
+    expect(expected.size).toBeGreaterThan(0);
+    expect(new Map(definitions.map((definition) => [definition.id, definition.title]))).toEqual(
+      expected
+    );
+  });
+
   it('keeps slack2.hitl_action off the workflow start catalog', () => {
     const ids = getConnectorEventTriggerDefinitions({ inboundEventsEnabled: true }).map(
       (definition) => definition.id
