@@ -29,6 +29,7 @@ describe('handleTokenUsageLogging', () => {
 
     context = {
       connectorId: 'test-connector',
+      spaceId: 'default',
       featureId: 'test-feature',
       parentFeatureId: 'test-parent',
       modelId: 'gpt-4',

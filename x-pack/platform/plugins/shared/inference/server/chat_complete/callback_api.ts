@@ -294,6 +294,8 @@ function createChatCompletePipeline({
             getContext: () =>
               buildTokenUsageContext({
                 connectorId,
+                // The namespace is the space id, defaulting to 'default' for the default space.
+                spaceId: namespace,
                 model: callbackContext.model,
                 modelName,
                 featureId: featureId ?? metadata?.connectorTelemetry?.pluginId,

@@ -23,6 +23,7 @@ import type { TokenUsageLogger } from '../token_usage';
 
 export interface CreateChatModelOptions {
   request: KibanaRequest;
+  namespace?: string;
   connectorId: string;
   actions: ActionsClientProvider;
   logger: Logger;
@@ -44,6 +45,7 @@ export interface CreateChatModelOptions {
 
 export const createChatModel = async ({
   request,
+  namespace,
   connectorId,
   actions,
   logger,
@@ -65,6 +67,7 @@ export const createChatModel = async ({
   const client = createClient({
     actions,
     request,
+    namespace,
     anonymizationRulesPromise,
     regexWorker,
     esClient,

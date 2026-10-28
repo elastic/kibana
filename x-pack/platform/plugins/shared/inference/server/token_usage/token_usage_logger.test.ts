@@ -29,6 +29,7 @@ describe('TokenUsageLogger', () => {
 
   const defaultContext = {
     connectorId: 'my-connector',
+    spaceId: 'my-space',
     featureId: 'observability_ai_assistant',
     parentFeatureId: 'observability',
     modelId: 'gpt-4',
@@ -89,6 +90,7 @@ describe('TokenUsageLogger', () => {
             },
             inference: {
               connector_id: 'my-connector',
+              space_id: 'my-space',
               feature_id: 'observability_ai_assistant',
               parent_feature_id: 'observability',
             },

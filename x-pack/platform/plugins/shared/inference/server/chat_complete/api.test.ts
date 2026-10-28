@@ -1752,6 +1752,41 @@ describe('createChatCompleteApi', () => {
         })
       );
     });
+
+    it('records the space the request was made in', async () => {
+      const callbackApi = createChatCompleteCallbackApi({
+        request,
+        namespace: 'my-space',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+        tokenUsageLogger: tokenUsageLogger as any,
+        isTokenUsageTrackingEnabled,
+      });
+
+      await createChatCompleteApi({ callbackApi })({
+        connectorId: 'my-endpoint',
+        messages: [],
+        modelName: 'gpt-4o',
+        template: {
+          id: '.attack-discovery-fp-tp',
+          version: 1,
+          variables: { cited_alerts: 'no email here' },
+        },
+        maxRetries: 0,
+      });
+
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(tokenUsageLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: expect.objectContaining({ spaceId: 'my-space' }),
+        })
+      );
+    });
   });
 
   describe('anonymization onFailure', () => {
