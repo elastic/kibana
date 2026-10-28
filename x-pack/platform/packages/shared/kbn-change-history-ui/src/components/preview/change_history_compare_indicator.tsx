@@ -12,12 +12,14 @@ import React, { useContext } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { ChangeHistoryConfigContext } from '../../provider/change_history_config_context';
+import type { ChangeHistoryCompareMode } from '../../telemetry';
+import type { ChangeHistoryCompareSpec } from '../../types';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import { ChangeHistoryActionBadge } from '../timeline/change_history_action_badge';
 import { changeHistoryPreviewTypography } from './change_history_preview_typography';
 
 /** The compared rows. Baseline = older side; target = newer / selected side. */
-export interface ChangeHistoryCompareIndicatorProps {
+interface CompareRowsProps {
   baseline: ChangeHistoryListItem;
   target: ChangeHistoryListItem;
 }
@@ -59,10 +61,7 @@ const CompareRowBadge = ({ item }: { item: ChangeHistoryListItem }): JSX.Element
   return <>{renderBadge ? renderBadge({ item }) : <ChangeHistoryActionBadge item={item} />}</>;
 };
 
-export const ChangeHistoryCompareIndicatorBar = ({
-  baseline,
-  target,
-}: ChangeHistoryCompareIndicatorProps): JSX.Element => {
+const ChangeHistoryCompareIndicatorBar = ({ baseline }: CompareRowsProps): JSX.Element => {
   const styles = useMemoCss(compareIndicatorStyles);
 
   return (
@@ -87,10 +86,10 @@ export const ChangeHistoryCompareIndicatorBar = ({
   );
 };
 
-export const ChangeHistoryCompareSplitPaneLabels = ({
+const ChangeHistoryCompareSplitPaneLabels = ({
   baseline,
   target,
-}: ChangeHistoryCompareIndicatorProps): JSX.Element => {
+}: CompareRowsProps): JSX.Element => {
   const styles = useMemoCss(compareIndicatorStyles);
 
   return (
@@ -129,5 +128,30 @@ export const ChangeHistoryCompareSplitPaneLabels = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+};
+
+export interface ChangeHistoryCompareIndicatorProps {
+  /** The compared rows. Nothing is labelled when omitted. */
+  compareSpec?: ChangeHistoryCompareSpec;
+  compareMode: ChangeHistoryCompareMode;
+}
+
+/** Labels the compared rows above the diff: one bar when unified, one label per pane when split. */
+export const ChangeHistoryCompareIndicator = ({
+  compareSpec,
+  compareMode,
+}: ChangeHistoryCompareIndicatorProps): JSX.Element => {
+  if (!compareSpec) {
+    // Keeps the header grid row occupied so the content and footer stay in their rows.
+    return <div />;
+  }
+
+  const { baseline, target } = compareSpec;
+
+  return compareMode === 'split' ? (
+    <ChangeHistoryCompareSplitPaneLabels baseline={baseline} target={target} />
+  ) : (
+    <ChangeHistoryCompareIndicatorBar baseline={baseline} target={target} />
   );
 };

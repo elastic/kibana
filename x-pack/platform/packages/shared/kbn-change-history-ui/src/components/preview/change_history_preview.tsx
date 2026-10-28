@@ -15,10 +15,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { ChangeHistoryCompareMode } from '../../telemetry';
 import type { ChangeHistoryCompareSpec, ChangeHistoryDiffTelemetry } from '../../types';
 import { useChangeHistoryDiffModeOptions } from './change_history_compare_mode_setting';
-import {
-  ChangeHistoryCompareIndicatorBar,
-  ChangeHistoryCompareSplitPaneLabels,
-} from './change_history_compare_indicator';
+import { ChangeHistoryCompareIndicator } from './change_history_compare_indicator';
 import {
   CHANGE_HISTORY_PREVIEW_NAVIGATOR_HEIGHT,
   ChangeHistoryDiffNavigator,
@@ -171,22 +168,10 @@ export const ChangeHistoryPreview = ({
           `,
         ]}
       >
-        {isCompareMode && compareSpec ? (
-          compareMode === 'split' ? (
-            <ChangeHistoryCompareSplitPaneLabels
-              baseline={compareSpec.baseline}
-              target={compareSpec.target}
-            />
-          ) : (
-            <ChangeHistoryCompareIndicatorBar
-              baseline={compareSpec.baseline}
-              target={compareSpec.target}
-            />
-          )
-        ) : (
-          // Keeps the header grid row occupied so the content and footer stay in their rows.
-          <div />
-        )}
+        <ChangeHistoryCompareIndicator
+          compareSpec={isCompareMode ? compareSpec : undefined}
+          compareMode={compareMode}
+        />
 
         <ChangeHistoryMonacoDiff
           baseline={baselineComparison}

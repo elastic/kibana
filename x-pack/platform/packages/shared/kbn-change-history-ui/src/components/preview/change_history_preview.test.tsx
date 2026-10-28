@@ -6,7 +6,7 @@
  */
 
 import '@testing-library/jest-dom';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { monaco } from '@kbn/code-editor';
 import type { ChangeHistoryConfigValue } from '../../provider/change_history_config_context';
@@ -394,7 +394,7 @@ describe('ChangeHistoryPreview', () => {
     expect(screen.getByTestId('changeHistoryCompareSplit')).toBeInTheDocument();
   });
 
-  it('moves compare mode selection and focus with arrow keys', () => {
+  it('exposes compare modes as a labelled native radio group', () => {
     jest.useFakeTimers();
     renderPreview({
       target: 'name: current\n',
@@ -403,15 +403,16 @@ describe('ChangeHistoryPreview', () => {
 
     fireEvent.click(screen.getByTestId('changeHistoryPreviewSettingsButton'));
 
-    const unifiedTile = screen.getByTestId('changeHistoryCompareUnified');
-    const splitTile = screen.getByTestId('changeHistoryCompareSplit');
+    const group = screen.getByRole('radiogroup', { name: 'Comparison mode' });
+    const [unifiedRadio, splitRadio] = within(group).getAllByRole('radio');
 
-    unifiedTile.focus();
-    expect(unifiedTile).toHaveFocus();
+    expect(unifiedRadio).toBeChecked();
+    expect(splitRadio).not.toBeChecked();
+    expect(unifiedRadio).toHaveAttribute('name', splitRadio.getAttribute('name'));
 
-    fireEvent.keyDown(unifiedTile, { key: 'ArrowRight' });
+    fireEvent.click(splitRadio);
 
-    expect(splitTile).toHaveFocus();
+    expect(splitRadio).toBeChecked();
     expect(mockDiffUpdateOptions).toHaveBeenCalledWith(
       expect.objectContaining({ renderSideBySide: true, renderIndicators: true })
     );

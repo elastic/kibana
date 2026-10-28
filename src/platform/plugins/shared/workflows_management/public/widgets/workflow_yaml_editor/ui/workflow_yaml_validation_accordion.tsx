@@ -58,7 +58,7 @@ const hasTextSelectionInside = (node: HTMLElement | null): boolean => {
   ).some((range) => range.intersectsNode(node));
 };
 
-/** Stable class on the accordion root so hosts can restyle it (e.g. its background) from outside. */
+/** class on the accordion root so hosts can restyle it (e.g. its background) from outside */
 export const WORKFLOW_YAML_VALIDATION_ACCORDION_CLASS = 'workflowYamlValidationAccordion';
 
 interface WorkflowYamlValidationAccordionProps {
