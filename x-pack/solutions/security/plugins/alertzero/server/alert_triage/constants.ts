@@ -125,6 +125,8 @@ export const TRIAGE_WOULD_SKIP_TAG_PREFIX = 'az:would_skip:';
 export const TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX = 'az:closed_by_decision:';
 /** Added with `az:inconclusive` to an alert a dismissed pattern kept out of analysis. */
 export const TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX = 'az:skipped_by_decision:';
+/** Pages of 10,000 alerts a revoke puts back at most. Run it again for more. */
+export const MAX_REVOKE_PAGES = 10;
 /** Most alerts one decision may close in 24 hours. A starting value, to size from shadow data. */
 export const DECISION_DAILY_CLOSE_CAP = 500;
 
