@@ -332,7 +332,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'slack2.slash_command',
-    schemaHash: '249777a77029f545fbbc81d16d37e4956fedd19387a56550c8a35f47b012cc85',
+    schemaHash: 'c9bf4583cec52b8f1608cd007df09e4535088ee372bf0cae3d7ee4fabad19d9d',
   },
   {
     id: 'slack2.team_join',
