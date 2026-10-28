@@ -1,0 +1,31 @@
+$schema: https://moonrepo.dev/schemas/v2/tasks.json
+
+inheritedBy:
+  tags:
+    - scout-tests
+
+fileGroups:
+  scoutConfigs:
+    - '**/test/scout*/**/*playwright.config.ts'
+
+tasks:
+  scoutConfigs:
+    command: noop
+    args:
+      - '@files(scoutConfigs)'
+    tags:
+      - scout-tests
+    deps:
+      - target: '~:test-source-upstream'
+        cacheStrategy: hash
+      - target: '@kbn/scout:test-source-upstream'
+        cacheStrategy: hash
+    inputs:
+      - '@group(default)'
+      - '!README*'
+      - '!**/*.test.{js,mjs,ts,tsx}'
+      - '!test/{functional,ftr}/**/*'
+      - '@group(scoutConfigs)'
+      - '@group(scoutGlobals)'
+    options:
+      runFromWorkspaceRoot: true
