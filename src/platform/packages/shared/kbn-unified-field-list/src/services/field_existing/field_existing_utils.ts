@@ -78,11 +78,15 @@ export async function fetchFieldExistence({
     // Refresh with force=true to ensure all fields are properly loaded
     await dataViewsService.refreshFields(dataView, false, true);
   }
+  // Take remapped fields from the refreshed data view, so their saved attributes (custom label, popularity count) are preserved
+  const remappedFields = fieldsWithMappingChanges.map(
+    (field) => dataView.getFieldByName(field.name)?.toSpec() ?? field
+  );
   const allFields = buildFieldList(dataView, metaFields);
   return {
     indexPatternTitle: dataView.getIndexPattern(),
     existingFieldNames: getExistingFields(existingFieldList, allFields),
-    newFields: [...newFields, ...fieldsWithMappingChanges],
+    newFields: [...newFields, ...remappedFields],
   };
 }
 

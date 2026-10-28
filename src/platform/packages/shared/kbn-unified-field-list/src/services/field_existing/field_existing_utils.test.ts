@@ -97,7 +97,10 @@ describe('fetchFieldExistence', () => {
   const createMockDataView = (fields: Array<Partial<DataViewField>> = []) => {
     return {
       getIndexPattern: jest.fn().mockReturnValue('test-pattern'),
-      getFieldByName: jest.fn((name) => fields.find((f) => f.name === name)),
+      getFieldByName: jest.fn((name) => {
+        const field = fields.find((f) => f.name === name);
+        return field && { ...field, toSpec: () => field };
+      }),
       fields,
     } as unknown as DataView;
   };
