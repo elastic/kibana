@@ -91,8 +91,8 @@ describe('useEnableWorkers error toasts', () => {
     expect(patch).toHaveBeenCalledTimes(2);
     expect(addError).toHaveBeenCalledTimes(2);
     expect(addError.mock.calls.map(([, options]) => options)).toEqual([
-      { title: "Couldn't update Alert Triage", toastMessage: 'No AI model is available.' },
-      { title: "Couldn't update Attack Discovery", toastMessage: 'Quota exceeded.' },
+      { title: 'Unable to update Alert Triage', toastMessage: 'No AI model is available.' },
+      { title: 'Unable to update Attack Discovery', toastMessage: 'Quota exceeded.' },
     ]);
   });
 });

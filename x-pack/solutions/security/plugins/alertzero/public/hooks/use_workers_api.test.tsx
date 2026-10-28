@@ -110,7 +110,7 @@ describe('notifyWorkerUpdateError', () => {
       notifyWorkerUpdateError(toasts, error, { workerName: 'Alert Triage' });
 
       expect(toasts.addError).toHaveBeenCalledWith(error, {
-        title: "Couldn't update Alert Triage",
+        title: 'Unable to update Alert Triage',
         toastMessage: '500 Internal Server Error',
       });
     });
@@ -123,7 +123,7 @@ describe('notifyWorkerUpdateError', () => {
       notifyWorkerUpdateError(toasts, error, { workerName: 'Attack Discovery' });
 
       expect(toasts.addError).toHaveBeenCalledWith(error, {
-        title: "Couldn't update Attack Discovery",
+        title: 'Unable to update Attack Discovery',
         toastMessage: 'Attack Discovery needs an AI model.',
       });
     });
@@ -133,7 +133,7 @@ describe('notifyWorkerUpdateError', () => {
       notifyWorkerUpdateError(toasts, error, { workerName: 'Alert Triage' });
 
       expect(toasts.addError).toHaveBeenCalledWith(error, {
-        title: "Couldn't update Alert Triage",
+        title: 'Unable to update Alert Triage',
         toastMessage: '500',
       });
     });
@@ -143,7 +143,7 @@ describe('notifyWorkerUpdateError', () => {
       notifyWorkerUpdateError(toasts, error, { workerName: 'Alert Triage' });
 
       expect(toasts.addError).toHaveBeenCalledWith(error, {
-        title: "Couldn't update Alert Triage",
+        title: 'Unable to update Alert Triage',
         toastMessage: '502',
       });
     });
@@ -163,7 +163,36 @@ describe('notifyWorkerUpdateError', () => {
       notifyWorkerUpdateError(toasts, error, { workerName: 'Alert Triage' });
 
       expect(toasts.addError).toHaveBeenCalledWith(error, {
-        title: "Couldn't update Alert Triage",
+        title: 'Unable to update Alert Triage',
+      });
+    });
+
+    it('shows a generic reason when there is no response and the error message is empty', () => {
+      const error = Object.assign(new Error(''), { name: 'Error', request: {} });
+      notifyWorkerUpdateError(toasts, error, { workerName: 'Alert Triage' });
+
+      expect(toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to update Alert Triage',
+        toastMessage: 'No response from the server',
+      });
+    });
+
+    it('shows a generic reason for a plain Error with an empty message', () => {
+      const error = new Error('');
+      notifyWorkerUpdateError(toasts, error);
+
+      expect(toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to update the worker',
+        toastMessage: 'No response from the server',
+      });
+    });
+
+    it('shows a generic reason for a thrown non-Error', () => {
+      notifyWorkerUpdateError(toasts, '');
+
+      expect(toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
+        title: 'Unable to update the worker',
+        toastMessage: 'No response from the server',
       });
     });
 
@@ -377,7 +406,7 @@ describe('useUpdateWorker', () => {
 
     // The built-in name for a known Worker id wins over the cached one.
     expect(services.notifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
-      title: "Couldn't update Alert Triage",
+      title: 'Unable to update Alert Triage',
       toastMessage: 'No AI model is available.',
     });
   });
@@ -394,7 +423,7 @@ describe('useUpdateWorker', () => {
     });
 
     expect(services.notifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
-      title: "Couldn't update My Custom Worker",
+      title: 'Unable to update My Custom Worker',
       toastMessage: '500',
     });
   });

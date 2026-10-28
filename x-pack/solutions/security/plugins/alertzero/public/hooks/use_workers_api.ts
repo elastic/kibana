@@ -66,9 +66,13 @@ const WORKER_UPDATE_ERROR_TITLE = i18n.translate('xpack.alertzero.workerUpdateEr
 
 const workerUpdateErrorTitle = (name: string) =>
   i18n.translate('xpack.alertzero.workerUpdateNamedErrorTitle', {
-    defaultMessage: "Couldn't update {workerName}",
+    defaultMessage: 'Unable to update {workerName}',
     values: { workerName: name },
   });
+
+const WORKER_UPDATE_UNKNOWN_REASON = i18n.translate('xpack.alertzero.workerUpdateUnknownReason', {
+  defaultMessage: 'No response from the server',
+});
 
 /**
  * The reason to show for a failed HTTP request: the server's message, else "{status} {statusText}".
@@ -115,7 +119,10 @@ export const notifyWorkerUpdateError = (
     return;
   }
   const cause = error instanceof Error ? error : new Error(String(error));
-  const reason = httpErrorReason(error);
+  // Without a response or a message, addError would show an empty toast body.
+  const reason =
+    httpErrorReason(error) ??
+    (cause.message.trim() === '' ? WORKER_UPDATE_UNKNOWN_REASON : undefined);
   toasts.addError(cause, {
     title: name ? workerUpdateErrorTitle(name) : WORKER_UPDATE_ERROR_TITLE,
     ...(reason ? { toastMessage: reason } : {}),
