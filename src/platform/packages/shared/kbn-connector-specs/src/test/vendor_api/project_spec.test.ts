@@ -29,7 +29,8 @@ const document = {
       get: {
         operationId: 'listPets',
         tags: ['pets'],
-        'x-speakeasy-pagination': { type: 'cursor' },
+        'x-codeSamples': [{ lang: 'curl', source: 'curl /pets' }],
+        'x-speakeasy-pagination': { type: 'cursor', outputs: { description: 'kept' } },
         responses: { '200': ok({ type: 'array', items: { $ref: '#/components/schemas/Pet' } }) },
       },
       post: { responses: { '201': ok({ $ref: '#/components/schemas/Unused' }) } },
@@ -95,6 +96,7 @@ describe('projectSpec', () => {
           parameters: [{ $ref: '#/components/parameters/Limit' }],
           get: {
             operationId: 'listPets',
+            'x-speakeasy-pagination': { type: 'cursor', outputs: { description: 'kept' } },
             responses: {
               '200': okProjected({ type: 'array', items: { $ref: '#/components/schemas/Pet' } }),
             },

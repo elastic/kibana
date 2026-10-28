@@ -21,21 +21,33 @@ const responseOverrideSchema = z
   })
   .strict();
 
+const queryOperationSchema = z
+  .object({
+    source: z.string().optional(),
+    method: z.string(),
+    path: z.string(),
+  })
+  .strict();
+
 const actionFixtureSchema = z
   .object({
     /** Merged into each generated input. */
     input: z.record(z.string(), z.unknown()).optional(),
-    /** The action must not change vendor state: only `GET`, `HEAD` and `OPTIONS` requests. */
-    readOnly: z.boolean().optional(),
+    /**
+     * Operations a `read` scoped action may call with a method other than `GET`, `HEAD` or
+     * `OPTIONS`, because they only query, e.g. a search sent as `POST`.
+     */
+    queries: z.array(queryOperationSchema).optional(),
     /** Served by the mock for this action's runs, in place of sampled responses. */
     responses: z.array(responseOverrideSchema).optional(),
   })
   .strict();
 
-/** `vendor_api/fixtures.json`: per-action inputs, read-only flags and response overrides. */
+/** `vendor_api/fixtures.json`: per-action inputs, query operations and response overrides. */
 export const vendorApiFixturesSchema = z.record(z.string(), actionFixtureSchema);
 
 export type ActionFixture = z.infer<typeof actionFixtureSchema>;
+export type QueryOperation = z.infer<typeof queryOperationSchema>;
 export type ResponseOverride = z.infer<typeof responseOverrideSchema>;
 export type VendorApiFixtures = z.infer<typeof vendorApiFixturesSchema>;
 

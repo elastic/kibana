@@ -1,0 +1,57 @@
+overlay: 1.0.0
+info:
+  title: Trello REST API corrections
+  version: 1.0.0
+actions:
+  # The spec defines the API key and token schemes, but every operation only allows OAuth2.
+  # Trello accepts key and token query parameters on all of them.
+  - target: $.paths.*.*.security
+    update:
+      - APIKey: []
+        APIToken: []
+
+  # GET /members/{id} accepts `me`, as Trello documents; the same id on /members/{id}/boards
+  # only allows a 24-hex ID.
+  - target: $.paths['/members/{id}/boards'].get.parameters[?@.name == 'id'].schema
+    remove: true
+  - target: $.paths['/members/{id}/boards'].get.parameters[?@.name == 'id']
+    update:
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/TrelloID'
+          - type: string
+
+  # Trello reads parameters from a form body as well as from the query, which is what the
+  # connector sends; the spec only documents the query.
+  - target: $.paths['/cards'].post.parameters[?@.name == 'idList']
+    update:
+      required: false
+  - target: $.paths['/cards'].post
+    update:
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [idList]
+              properties:
+                idList:
+                  $ref: '#/components/schemas/TrelloID'
+                name:
+                  type: string
+                desc:
+                  type: string
+  - target: $.paths['/cards/{id}/actions/comments'].post.parameters[?@.name == 'text']
+    update:
+      required: false
+  - target: $.paths['/cards/{id}/actions/comments'].post
+    update:
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
