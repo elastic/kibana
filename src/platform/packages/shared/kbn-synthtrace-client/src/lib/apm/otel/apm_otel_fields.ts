@@ -114,6 +114,8 @@ export type ApmOtelAttributes = {
     'attributes.gen_ai.response.model': string;
     'attributes.gen_ai.usage.input_tokens': number;
     'attributes.gen_ai.usage.output_tokens': number;
+    'attributes.gen_ai.usage.cache_read.input_tokens': number;
+    'attributes.gen_ai.usage.cache_write.input_tokens': number;
     'attributes.gen_ai.request.temperature': number;
     'attributes.gen_ai.request.top_p': number;
     'attributes.gen_ai.request.top_k': number;
