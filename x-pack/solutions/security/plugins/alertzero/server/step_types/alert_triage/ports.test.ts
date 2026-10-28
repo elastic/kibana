@@ -8,6 +8,7 @@
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { ALERT_FETCH_LIMIT, BATCH_ALERT_CAP, RULE_FETCH_LIMIT } from '../../alert_triage/constants';
 import {
+  fetchDecisionCandidates,
   fetchTriageAlerts,
   findKeyTagsWithVerdicts,
   listLiveExecutionIds,
@@ -520,5 +521,82 @@ describe('fetchTriageAlerts', () => {
     await expect(
       fetchTriageAlerts({ callKibanaApi }, 'alert_analysis:', Date.parse('2026-10-12'), NO_FILTERS)
     ).rejects.toThrow('Per-rule alerts missing');
+  });
+});
+
+describe('fetchDecisionCandidates', () => {
+  const run = (hits: unknown[], filters: Partial<TriageFilters> = {}, after?: unknown[]) => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits } } });
+    return {
+      callKibanaApi,
+      run: () =>
+        fetchDecisionCandidates(
+          { callKibanaApi },
+          'alert_analysis:',
+          Date.parse('2026-10-12'),
+          { ...NO_FILTERS, ...filters },
+          after
+        ),
+    };
+  };
+
+  it('returns each hit as an id, the fields a key reads and its severity', async () => {
+    const { run: fetch } = run([
+      { _id: 'a', _source: { 'kibana.alert.severity': 'low', process: { executable: 'x' } } },
+      { _id: 'b', _source: { process: { executable: 'y' } } },
+    ]);
+
+    const { candidates, after } = await fetch();
+
+    expect(candidates).toEqual([
+      { id: 'a', doc: expect.objectContaining({ process: { executable: 'x' } }), severity: 'low' },
+      { id: 'b', doc: expect.objectContaining({ process: { executable: 'y' } }) },
+    ]);
+    expect(after).toBeUndefined();
+  });
+
+  it('hands back the cursor of a full page, and reads the next page from a cursor', async () => {
+    const full = Array.from({ length: ALERT_FETCH_LIMIT }, (_unused, i) => ({
+      _id: `a${i}`,
+      _source: {},
+      sort: [i, `uuid-${i}`],
+    }));
+    const first = run(full);
+
+    const { after } = await first.run();
+
+    expect(after).toEqual([ALERT_FETCH_LIMIT - 1, `uuid-${ALERT_FETCH_LIMIT - 1}`]);
+    const next = run([], {}, after);
+    await next.run();
+    expect(next.callKibanaApi.mock.calls[0][0].body.search_after).toEqual(after);
+  });
+
+  it('searches oldest first with a tiebreaker, and reads only the fields it needs', async () => {
+    const { run: fetch, callKibanaApi } = run([]);
+
+    await fetch();
+
+    expect(callKibanaApi).toHaveBeenCalledTimes(1);
+    const { body } = callKibanaApi.mock.calls[0][0];
+    expect(body.size).toBe(ALERT_FETCH_LIMIT);
+    expect(body.sort).toEqual([{ '@timestamp': 'asc' }, { 'kibana.alert.uuid': 'asc' }]);
+    expect(body._source).toEqual(
+      expect.arrayContaining(['kibana.alert.severity', 'process.executable'])
+    );
+    expect(body._source).not.toContain('message');
+  });
+
+  it('leaves out alerts already triaged, claimed, or tagged by a decision', async () => {
+    const { run: fetch, callKibanaApi } = run([]);
+
+    await fetch();
+
+    const query = JSON.stringify(callKibanaApi.mock.calls[0][0].body.query);
+    expect(query).toContain('az:true_positive');
+    expect(query).toContain('alert_analysis:');
+    expect(query).toContain('az:would_close:');
+    expect(query).toContain('az:would_skip:');
   });
 });

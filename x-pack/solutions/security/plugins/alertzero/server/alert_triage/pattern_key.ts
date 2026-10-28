@@ -203,6 +203,27 @@ const widen = ({ kind, values }: Condition): Condition => ({
       : values,
 });
 
+/**
+ * Every alert field a key reads, so a search can fetch only those. Keep it in step with
+ * `buildCondition`, `serialize` and `getDetection`: a field missing here silently changes keys.
+ */
+export const PATTERN_KEY_SOURCE_FIELDS: readonly string[] = [
+  ...new Set([
+    ...Object.values(FIELD_SETS).flatMap(({ fields, identifying, hash }) => [
+      ...fields,
+      identifying,
+      ...(hash ? [hash] : []),
+    ]),
+    RULE_UUID,
+    RULE_REVISION,
+    NAME_OVERRIDE,
+    'rule.id',
+    'event.code',
+    'event.category',
+    'host.os.type',
+  ]),
+];
+
 export interface PatternKeyDescription {
   ruleId: string;
   ruleRevision?: string | number;

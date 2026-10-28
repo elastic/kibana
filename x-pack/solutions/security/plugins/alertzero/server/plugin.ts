@@ -27,7 +27,11 @@ import {
   TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
-import { TRIAGE_GROUPING_FLAG } from './alert_triage/constants';
+import {
+  TRIAGE_DECISION_AUTO_CLOSE_FLAG,
+  TRIAGE_GROUPING_FLAG,
+  type DecisionAutoCloseMode,
+} from './alert_triage/constants';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -129,6 +133,8 @@ export class AlertZeroPlugin
   private coreStart?: CoreStart;
   private triageGroupingEnabled = true;
   private triageGroupingFlagSubscription?: Subscription;
+  private decisionAutoCloseMode: DecisionAutoCloseMode = 'shadow';
+  private decisionAutoCloseFlagSubscription?: Subscription;
   private scanFailuresService?: ScanFailuresService;
   private threatIntelSupplyService?: ThreatIntelSupplyService;
 
@@ -273,6 +279,7 @@ export class AlertZeroPlugin
         getWorkflowsManagement: () => this.workflowsManagementApi,
         isGroupingEnabled: async () => this.triageGroupingEnabled,
       },
+      getDecisionAutoCloseMode: async () => this.decisionAutoCloseMode,
       logger: stepsLogger,
     });
 
@@ -356,6 +363,13 @@ export class AlertZeroPlugin
       .getBooleanValue$(TRIAGE_GROUPING_FLAG, true)
       .subscribe((enabled) => {
         this.triageGroupingEnabled = enabled;
+      });
+    // The kill switch for matching decisions in the sweep. Only `off` turns it off: any other value,
+    // and a missing flag provider, give shadow, which closes nothing.
+    this.decisionAutoCloseFlagSubscription = core.featureFlags
+      .getStringValue$<string>(TRIAGE_DECISION_AUTO_CLOSE_FLAG, 'shadow')
+      .subscribe((mode) => {
+        this.decisionAutoCloseMode = mode === 'off' ? 'off' : 'shadow';
       });
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
@@ -587,5 +601,6 @@ export class AlertZeroPlugin
 
   stop() {
     this.triageGroupingFlagSubscription?.unsubscribe();
+    this.decisionAutoCloseFlagSubscription?.unsubscribe();
   }
 }

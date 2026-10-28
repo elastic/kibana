@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { buildPatternKeys, describePatternKey } from './pattern_key';
+import {
+  PATTERN_KEY_SOURCE_FIELDS,
+  buildPatternKeys,
+  describePatternKey,
+  getField,
+} from './pattern_key';
 
 const RULE = { 'kibana.alert.rule.uuid': 'rule-1', 'kibana.alert.rule.revision': 1 };
 const WINDOWS = { host: { os: { type: 'windows' } } };
@@ -275,5 +280,58 @@ describe('describePatternKey', () => {
     expect(describePatternKey(wide)).toEqual(
       expect.objectContaining({ ruleId: 'rule-1', kind: '', values: [] })
     );
+  });
+});
+
+describe('PATTERN_KEY_SOURCE_FIELDS', () => {
+  // A search fetches only these fields. A key built from them must equal the key of the whole alert.
+  it.each([
+    [
+      'a process alert',
+      {
+        ...RULE,
+        'kibana.alert.rule.rule_name_override': 'x',
+        rule: { id: 'detection-1' },
+        host: { os: { type: 'windows' }, name: 'dropped' },
+        event: { category: ['process'], code: 'c1', action: 'dropped' },
+        process: {
+          executable: 'C:\\a.exe',
+          args: ['dropped'],
+          parent: { executable: 'C:\\p.exe' },
+          code_signature: { subject_name: 'Acme' },
+        },
+      },
+    ],
+    [
+      'an unsigned file alert',
+      {
+        ...RULE,
+        host: { os: { type: 'linux' } },
+        event: { category: ['file'] },
+        file: { path: '/home/al/x', hash: { sha256: 'ABC' }, name: 'dropped' },
+        process: { executable: '/bin/sh' },
+      },
+    ],
+    [
+      'a registry alert',
+      {
+        ...RULE,
+        event: { category: ['registry'] },
+        registry: { path: 'HKEY_USERS\\S-1-5-21-1-2-3\\Run' },
+        process: { executable: 'C:\\r.exe', pid: 1 },
+      },
+    ],
+    [
+      'a cloud alert',
+      { ...RULE, user: { name: 'dropped' }, cloud: { account: { id: 'dropped' } } },
+    ],
+  ])('gives %s the same keys as the whole alert', (_name, doc) => {
+    const projected: Record<string, unknown> = {};
+    for (const field of PATTERN_KEY_SOURCE_FIELDS) {
+      const value = getField(doc, field);
+      if (value !== undefined) projected[field] = value;
+    }
+
+    expect(buildPatternKeys(projected)).toEqual(buildPatternKeys(doc));
   });
 });

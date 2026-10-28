@@ -17,11 +17,14 @@ import {
   RULE_FETCH_LIMIT,
   TRIAGE_FAILED_TAG,
   TRIAGE_PENDING_TAG,
+  TRIAGE_WOULD_CLOSE_TAG_PREFIX,
+  TRIAGE_WOULD_SKIP_TAG_PREFIX,
   VERDICT_TAGS,
   type AlertSeverity,
 } from '../../alert_triage/constants';
-import { getDetection } from '../../alert_triage/pattern_key';
+import { PATTERN_KEY_SOURCE_FIELDS, getDetection } from '../../alert_triage/pattern_key';
 import type { SweepPorts } from '../../alert_triage/plan_sweep';
+import type { MatchCandidate } from '../../alert_triage/fp_decisions';
 import type { TriageAlert } from '../../alert_triage/types';
 
 type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
@@ -491,6 +494,79 @@ export const findKeyTagsWithVerdicts = async (
     for (const { key } of buckets) found.add(key);
   }
   return found;
+};
+
+/** Breaks ties between alerts of one timestamp, so a `search_after` cursor never skips one. */
+const ALERT_UUID_FIELD = 'kibana.alert.uuid';
+
+/** The status code of an Elasticsearch or Kibana client error, whichever shape the client used. */
+export const statusCodeOf = (error: unknown): number | undefined => {
+  if (typeof error !== 'object' || error === null) return undefined;
+  const { statusCode, meta } = error as { statusCode?: unknown; meta?: { statusCode?: unknown } };
+  const code = statusCode ?? meta?.statusCode;
+  return typeof code === 'number' ? code : undefined;
+};
+
+export interface DecisionCandidatesPage {
+  candidates: MatchCandidate[];
+  /** The cursor of the next page. Absent on the last page. */
+  after?: unknown[];
+}
+
+/**
+ * One page of the open, untriaged alerts of the look-back that a decision may match, oldest first,
+ * so the alerts closest to ageing out are matched first. They are the alerts the planner would
+ * consider, not only the ones it picks, so a match never has to wait for a batch. Alerts already
+ * tagged by a decision match are left out. Only the fields a key reads are fetched. A page is at
+ * most `ALERT_FETCH_LIMIT` alerts; pass `after` of the last page to read the next.
+ */
+export const fetchDecisionCandidates = async (
+  { callKibanaApi }: KibanaApi,
+  analysisTagPrefix: string,
+  windowStart: number,
+  filters: TriageFilters,
+  after?: unknown[]
+): Promise<DecisionCandidatesPage> => {
+  const { body } = await callKibanaApi<{
+    hits?: { hits?: Array<AlertHit & { sort?: unknown[] }> };
+  }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: ALERT_FETCH_LIMIT,
+      _source: [...PATTERN_KEY_SOURCE_FIELDS, SEVERITY_FIELD],
+      sort: [{ [ALERT_FIELDS.timestamp]: 'asc' }, { [ALERT_UUID_FIELD]: 'asc' }],
+      ...(after ? { search_after: after } : {}),
+      query: {
+        bool: {
+          filter: [
+            { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
+            { range: { [ALERT_FIELDS.timestamp]: { gte: new Date(windowStart).toISOString() } } },
+            ...severityFilter(filters.minSeverity),
+          ],
+          must_not: [
+            ...UNTRIAGED_MUST_NOT(analysisTagPrefix),
+            { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_CLOSE_TAG_PREFIX } },
+            { prefix: { [ALERT_FIELDS.tags]: TRIAGE_WOULD_SKIP_TAG_PREFIX } },
+            ...excludedByFilters(filters),
+          ],
+        },
+      },
+    },
+  });
+  const hits = body.hits?.hits ?? [];
+  const last = hits[hits.length - 1]?.sort;
+  return {
+    candidates: hits.map(({ _id, _source = {} }) => {
+      const severity = readField(_source, SEVERITY_FIELD);
+      return {
+        id: _id,
+        doc: expandDottedKeys(_source),
+        ...(typeof severity === 'string' ? { severity } : {}),
+      };
+    }),
+    ...(hits.length === ALERT_FETCH_LIMIT && last ? { after: last } : {}),
+  };
 };
 
 /** With `fields`, only those `_source` paths are returned, which keeps a read of many alerts small. */

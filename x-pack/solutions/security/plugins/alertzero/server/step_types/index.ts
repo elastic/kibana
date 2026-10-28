@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { DecisionAutoCloseMode } from '../alert_triage/constants';
 import type { ActionsService } from '../services/actions/actions_service';
 import type { HuntServices } from '../services/watches/hunt/types';
 import {
@@ -30,6 +31,7 @@ import {
   getTriageJoinProposalStepDefinition,
   type GroupProposalsStepDependencies,
 } from './alert_triage/group_proposals_step';
+import { getTriageMatchFpDecisionsStepDefinition } from './alert_triage/match_fp_decisions_step';
 import { getTriageStoreFpDecisionsStepDefinition } from './alert_triage/store_fp_decisions_step';
 import type { ReportWorkerOutcomeStepDeps } from './report_worker_outcome/report_worker_outcome_step';
 import { getReportWorkerOutcomeStepDefinition } from './report_worker_outcome/report_worker_outcome_step';
@@ -46,6 +48,7 @@ export const registerStepDefinitions = ({
   getInternalEsClient,
   getTaskManager,
   grouping,
+  getDecisionAutoCloseMode,
   logger,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -59,6 +62,7 @@ export const registerStepDefinitions = ({
   getInternalEsClient?: () => ElasticsearchClient;
   getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
   grouping: Omit<GroupProposalsStepDependencies, 'getConversations' | 'logger'>;
+  getDecisionAutoCloseMode: () => Promise<DecisionAutoCloseMode>;
   logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(
@@ -100,6 +104,12 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getTriageJoinProposalStepDefinition(groupingDeps));
   workflowsExtensions.registerStepDefinition(
     getTriageStoreFpDecisionsStepDefinition({ isContextEngineEnabled })
+  );
+  workflowsExtensions.registerStepDefinition(
+    getTriageMatchFpDecisionsStepDefinition({
+      isContextEngineEnabled,
+      getMode: getDecisionAutoCloseMode,
+    })
   );
 };
 

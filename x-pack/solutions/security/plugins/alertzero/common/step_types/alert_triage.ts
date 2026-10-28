@@ -18,6 +18,7 @@ export const TRIAGE_GROUP_FP_CANDIDATES_STEP_ID = 'alertzero.triage.groupFpCandi
 export const TRIAGE_JOIN_PROPOSAL_STEP_ID = 'alertzero.triage.joinProposal' as const;
 export const TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID = 'alertzero.triage.retagProposalAlerts' as const;
 export const TRIAGE_STORE_FP_DECISIONS_STEP_ID = 'alertzero.triage.storeFpDecisions' as const;
+export const TRIAGE_MATCH_FP_DECISIONS_STEP_ID = 'alertzero.triage.matchFpDecisions' as const;
 
 const idSchema = z.string().trim().min(1).max(256);
 
@@ -488,4 +489,61 @@ export const triageStoreFpDecisionsStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: storeFpDecisionsInputSchema,
   outputSchema: storeFpDecisionsOutputSchema,
+};
+
+export const MATCH_FP_DECISIONS_STATUSES = ['ok', 'off', 'disabled', 'failed'] as const;
+export type MatchFpDecisionsStatus = (typeof MATCH_FP_DECISIONS_STATUSES)[number];
+
+const matchFpDecisionsInputSchema = lazySchema(() =>
+  z.object({
+    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
+    analysis_tag_prefix: idSchema.describe(
+      'Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.'
+    ),
+    lookback_hours: z.number().int().min(1).max(8760),
+    min_severity: z.enum(['low', 'medium', 'high', 'critical']),
+    exclude_building_blocks: z.boolean(),
+    excluded_rule_tags: z.array(z.string().min(1).max(256)).max(50),
+  })
+);
+
+const matchFpDecisionsOutputSchema = lazySchema(() =>
+  z.object({
+    status: z
+      .enum(MATCH_FP_DECISIONS_STATUSES)
+      .describe(
+        '`off` when the kill switch is on, `disabled` when the Context Engine is off in the space, `failed` when nothing could be matched.'
+      ),
+    candidates: z.number().describe('Open untriaged alerts of the look-back that were checked.'),
+    decisions_matched: z.number().describe('Distinct decisions that matched an alert.'),
+    would_close: z.number().describe('Alerts a false positive decision matched.'),
+    would_skip: z.number().describe('Alerts a do-not-propose item matched.'),
+    excluded_by_severity: z
+      .number()
+      .describe('Matches the severity guard keeps with a human, not tagged.'),
+    tag_failures: z
+      .number()
+      .describe('Tag updates that failed. Those alerts match again next sweep.'),
+  })
+);
+
+export const triageMatchFpDecisionsStepCommonDefinition: CommonStepDefinition<
+  typeof matchFpDecisionsInputSchema,
+  typeof matchFpDecisionsOutputSchema
+> = {
+  id: TRIAGE_MATCH_FP_DECISIONS_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageMatchFpDecisions.label', {
+    defaultMessage: 'Match triage decisions',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageMatchFpDecisions.description',
+    {
+      defaultMessage:
+        'Matches open alerts against the stored decisions of the space, without a model. In shadow mode it only tags the matches.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: matchFpDecisionsInputSchema,
+  outputSchema: matchFpDecisionsOutputSchema,
 };
