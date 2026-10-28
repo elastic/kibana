@@ -24,12 +24,24 @@ import { diffUnifiedSearchState } from './unified_search_manager';
 
 const getRefId = (config?: object) => (config && 'ref_id' in config ? config.ref_id : undefined);
 
+// The baseline is usually the same last saved state object on every compare, and states are
+// never mutated in place, so its deserialized layout is computed once.
+const baselineLayoutCache = new WeakMap<DashboardState, ReturnType<typeof deserializeLayout>>();
+
+const getBaselineLayout = (baseline: DashboardState) => {
+  const cached = baselineLayoutCache.get(baseline);
+  if (cached) return cached;
+  const baselineLayout = deserializeLayout(baseline.panels, baseline.pinned_panels);
+  baselineLayoutCache.set(baseline, baselineLayout);
+  return baselineLayout;
+};
+
 const diffLayout = (
   baseline: DashboardState,
   current: DashboardState,
   children?: { [id: string]: unknown }
 ): Partial<Pick<DashboardState, 'panels' | 'pinned_panels'>> => {
-  const baselineLayout = deserializeLayout(baseline.panels, baseline.pinned_panels);
+  const baselineLayout = getBaselineLayout(baseline);
   const currentLayout = deserializeLayout(current.panels, current.pinned_panels);
 
   const getPanelType = ({ layout }: typeof baselineLayout, panelId: string) =>
