@@ -12,7 +12,6 @@ import type { ConfigType } from '../config';
 import { invariant } from '../../common/utils/invariant';
 
 interface SetupDependencies {
-  getSpaceId?: (request: KibanaRequest) => string | undefined;
   config: ConfigType;
   kibanaVersion: string;
   kibanaBranch: string;
@@ -20,20 +19,12 @@ interface SetupDependencies {
 }
 
 export class AppClientFactory {
-  private getSpaceId?: SetupDependencies['getSpaceId'];
   private config?: SetupDependencies['config'];
   private kibanaVersion?: string;
   private kibanaBranch?: string;
   private buildFlavor?: BuildFlavor;
 
-  public setup({
-    getSpaceId,
-    config,
-    kibanaBranch,
-    kibanaVersion,
-    buildFlavor,
-  }: SetupDependencies) {
-    this.getSpaceId = getSpaceId;
+  public setup({ config, kibanaBranch, kibanaVersion, buildFlavor }: SetupDependencies) {
     this.config = config;
     this.kibanaVersion = kibanaVersion;
     this.kibanaBranch = kibanaBranch;
@@ -58,9 +49,8 @@ export class AppClientFactory {
       'Cannot create AppClient as buildFlavor is not present. Did you forget to call setup()?'
     );
 
-    const spaceId = this.getSpaceId?.(request) ?? 'default';
     return new AppClient(
-      spaceId,
+      request.spaceId,
       this.config,
       this.kibanaVersion,
       this.kibanaBranch,

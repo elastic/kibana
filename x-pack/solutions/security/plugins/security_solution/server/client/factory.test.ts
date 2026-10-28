@@ -15,46 +15,46 @@ const mockClient = AppClient as jest.Mock;
 
 describe('AppClientFactory', () => {
   describe('#create', () => {
-    it('constructs a client with the current spaceId', () => {
-      const factory = new AppClientFactory();
-      const mockRequest = httpServerMock.createKibanaRequest();
+    const setupFactory = (factory: AppClientFactory) =>
       factory.setup({
-        getSpaceId: () => 'mockSpace',
         config: createMockConfig(),
         kibanaVersion: '8.7',
         kibanaBranch: 'main',
         buildFlavor: 'traditional',
       });
-      factory.create(mockRequest);
 
-      expect(mockClient).toHaveBeenCalledWith(
-        'mockSpace',
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything()
-      );
+    const getCreatedSpaceIds = () => mockClient.mock.calls.map(([spaceId]) => spaceId);
+
+    beforeEach(() => {
+      mockClient.mockClear();
     });
 
-    it('constructs a client with the default spaceId if spaces are disabled', () => {
+    it("constructs a client in the request's space", () => {
       const factory = new AppClientFactory();
-      const mockRequest = httpServerMock.createKibanaRequest();
-      factory.setup({
-        getSpaceId: undefined,
-        config: createMockConfig(),
-        kibanaVersion: '8.7',
-        kibanaBranch: 'main',
-        buildFlavor: 'traditional',
-      });
-      factory.create(mockRequest);
+      setupFactory(factory);
 
-      expect(mockClient).toHaveBeenCalledWith(
-        'default',
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        expect.anything()
-      );
+      factory.create(httpServerMock.createKibanaRequest({ spaceId: 'my-space' }));
+
+      expect(getCreatedSpaceIds()).toEqual(['my-space']);
+    });
+
+    it('constructs a client in the default space for requests without an explicit space', () => {
+      const factory = new AppClientFactory();
+      setupFactory(factory);
+
+      factory.create(httpServerMock.createKibanaRequest());
+
+      expect(getCreatedSpaceIds()).toEqual(['default']);
+    });
+
+    it('constructs each client in its own request space', () => {
+      const factory = new AppClientFactory();
+      setupFactory(factory);
+
+      factory.create(httpServerMock.createKibanaRequest({ spaceId: 'space-a' }));
+      factory.create(httpServerMock.createKibanaRequest({ spaceId: 'space-b' }));
+
+      expect(getCreatedSpaceIds()).toEqual(['space-a', 'space-b']);
     });
 
     it('cannot call create without calling setup first', () => {

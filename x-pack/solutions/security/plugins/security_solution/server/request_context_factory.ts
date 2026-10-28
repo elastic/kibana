@@ -100,7 +100,6 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getSpaceId = (): string => request.spaceId;
 
     appClientFactory.setup({
-      getSpaceId: () => request.spaceId,
       config,
       kibanaVersion: options.kibanaVersion,
       kibanaBranch: options.kibanaBranch,

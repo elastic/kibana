@@ -779,7 +779,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       .getStartServices()
       .then(async ([coreStart, depsStart]) => {
         appClientFactory.setup({
-          getSpaceId: (request: import('@kbn/core/server').KibanaRequest) => request.spaceId,
           config,
           kibanaVersion: pluginContext.env.packageInfo.version,
           kibanaBranch: pluginContext.env.packageInfo.branch,
@@ -805,7 +804,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
           depsStart.data,
           this.endpointContext,
-          (request: import('@kbn/core/server').KibanaRequest) => request.spaceId,
+          (request: KibanaRequest) => request.spaceId,
           ruleDataClient
         );
 
