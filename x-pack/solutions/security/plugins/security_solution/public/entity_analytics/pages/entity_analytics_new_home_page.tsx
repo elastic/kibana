@@ -255,6 +255,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
     useAlertsPrivileges();
   const { cases } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   const alerts = getReadAccess({
     isLoading: isAlertsPrivilegesLoading,
@@ -293,13 +294,23 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   return (
     <>
-      <EntityAnalyticsReadPrivilegesCallout
-        riskEngineReadPrivileges={riskEngineReadPrivileges}
-        entityEnginePrivileges={entityEnginePrivilegesQuery.data}
-        anomalyPrivileges={anomalyPrivilegesQuery.data}
-        alertsIndexPrivileges={alertsPrivilegesResult?.index}
-        id="entity-analytics-home"
-      />
+      <div
+        data-test-subj="entityAnalyticsPrivilegesCalloutWrapper"
+        css={css`
+          padding: ${euiTheme.size.base} ${euiTheme.size.base} 0;
+          &:empty {
+            display: none;
+          }
+        `}
+      >
+        <EntityAnalyticsReadPrivilegesCallout
+          riskEngineReadPrivileges={riskEngineReadPrivileges}
+          entityEnginePrivileges={entityEnginePrivilegesQuery.data}
+          anomalyPrivileges={anomalyPrivilegesQuery.data}
+          alertsIndexPrivileges={alertsPrivilegesResult?.index}
+          id="entity-analytics-home"
+        />
+      </div>
       {noPrivileges ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsNewHomePage">
@@ -626,6 +637,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     severeAlertsDelta: alertsDelta,
     watchlistedDelta,
+    severeAlertsPrevious,
+    watchlistedPrevious,
     isDeltaLoading,
     isHistoryMissing: alertBasedHistoryMissing,
     reachesBack: alertBasedReachesBack,
@@ -638,6 +651,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   });
   const {
     delta: anomaliesDelta,
+    previous: anomaliesPrevious,
     isDeltaLoading: anomaliesDeltaLoading,
     isHistoryMissing: anomaliesHistoryMissing,
     reachesBack: anomaliesReachesBack,
@@ -649,12 +663,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   });
   const {
     delta: newEntityDelta,
+    previous: newEntityPrevious,
     isDeltaLoading: newEntityDeltaLoading,
     isHistoryMissing: newEntityHistoryMissing,
     reachesBack: newEntityReachesBack,
   } = useNewEntityDelta({ ...deltaOptions, isReady: !newEntityPending, count: newEntityCount });
   const {
     delta: riskMoversDelta,
+    previous: riskMoversPrevious,
     isDeltaLoading: riskMoversDeltaLoading,
     isHistoryMissing: riskMoversHistoryMissing,
     reachesBack: riskMoversReachesBack,
@@ -666,6 +682,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   });
   const {
     delta: newlyHCDelta,
+    previous: newlyHCPrevious,
     isDeltaLoading: newlyHCDeltaLoading,
     isHistoryMissing: newlyHCHistoryMissing,
     reachesBack: newlyHCReachesBack,
@@ -689,6 +706,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     reachesBack: alertBasedReachesBack,
     severeAlertsCount,
     watchlistedCount,
+    severeAlertsBaseline: severeAlertsPrevious,
+    watchlistedBaseline: watchlistedPrevious,
   });
   const { trend: anomaliesTrend, isTrendLoading: anomaliesTrendLoading } =
     useEntitiesWithAnomaliesSeries({
@@ -697,12 +716,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       isReady: !anomaliesPending && !anomaliesDeltaLoading,
       reachesBack: anomaliesReachesBack,
       count: anomaliesCount,
+      deltaBaseline: anomaliesPrevious,
     });
   const { trend: newEntityTrend, isTrendLoading: newEntityTrendLoading } = useNewEntitySeries({
     ...deltaOptions,
     isReady: !newEntityPending && !newEntityDeltaLoading,
     reachesBack: newEntityReachesBack,
     count: newEntityCount,
+    deltaBaseline: newEntityPrevious,
   });
   // The two risk tiles read the same risk score history, so one query serves both sparklines: it
   // waits for both risk tiles.
@@ -719,6 +740,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     newlyHighCriticalReachesBack: newlyHCReachesBack,
     riskMoversCount,
     newlyHighCriticalCount: newlyHCCount,
+    riskMoversBaseline: riskMoversPrevious,
+    newlyHighCriticalBaseline: newlyHCPrevious,
   });
 
   // A new range or filter is a new page load for the timeout notice and the load telemetry.

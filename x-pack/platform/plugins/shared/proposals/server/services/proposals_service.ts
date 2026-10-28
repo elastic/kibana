@@ -60,6 +60,7 @@ import {
   ProposalAlreadyExistsError,
   ProposalConflictError,
   ProposalInvalidActionInputError,
+  ProposalLookupTruncatedError,
   ProposalNotFoundError,
 } from './errors';
 
@@ -110,6 +111,12 @@ export interface ProposalsServiceDeps {
 
 /** How long `reopen` waits for the gate workflow to create the successor. */
 const REOPEN_WAIT = { timeoutMs: 15_000, intervalMs: 250 };
+
+/**
+ * Elasticsearch's default `max_result_window`: the most live revisions one search can return, so
+ * also the most chains `getLatestRevisions` reads in one call.
+ */
+const MAX_LATEST_REVISIONS = 10_000;
 
 /**
  * The most proposals one `bulkDismiss` releases. Each release waits for a refresh and schedules a
@@ -1282,6 +1289,71 @@ export class ProposalsService {
   }
 
   /**
+   * The live revision of every chain rooted at one of `rootProposalIds`, read in one search and
+   * keyed by root id. A root with no live revision is absent rather than an error, and so is one
+   * whose live revision `filters` excludes.
+   *
+   * Returns every head or throws {@link ProposalLookupTruncatedError}: a caller that reads a
+   * missing chain as free would create a duplicate.
+   */
+  async getLatestRevisions(
+    rootProposalIds: string[],
+    spaceId: string,
+    filters: Partial<Pick<ProposalFilters, 'origin' | 'excludeExpired'>> = {}
+  ): Promise<Map<string, Proposal>> {
+    const ids = [...new Set(rootProposalIds.filter((id) => blankToUndefined(id) !== undefined))];
+    if (ids.length === 0) {
+      return new Map();
+    }
+    if (ids.length > MAX_LATEST_REVISIONS) {
+      throw new ProposalLookupTruncatedError(
+        `Cannot read ${ids.length} proposal chains in one lookup: the limit is ${MAX_LATEST_REVISIONS}`
+      );
+    }
+
+    const response = await this.deps.storage.search({
+      track_total_hits: true,
+      size: MAX_LATEST_REVISIONS,
+      // A failed shard would otherwise drop its heads from both the hits and the total.
+      allow_partial_search_results: false,
+      query: {
+        bool: {
+          filter: [
+            ...toFilterClauses(
+              { excludeExpired: false, ...filters, excludeSuperseded: true },
+              spaceId
+            ),
+            { terms: { rootProposalId: ids } },
+          ],
+        },
+      },
+      // A chain caught between the two writes of a revision has two live rows. The released one
+      // wins, for the reason `getLatestRevision` gives; otherwise the later revision, which is the
+      // one the chain settles on once its predecessor is marked. A retry keeps its original's
+      // revision, so between the two writes of `clone()` only the release orders them.
+      sort: [
+        { gateReleasedAt: { order: 'desc', missing: '_last', unmapped_type: 'date' } },
+        { revision: { order: 'desc' } },
+      ],
+    });
+
+    const { hits, total } = response.hits;
+    if (total.value > hits.length) {
+      throw new ProposalLookupTruncatedError(
+        `The lookup matched ${total.value} live revisions but returned ${hits.length}`
+      );
+    }
+
+    const heads = new Map<string, Proposal>();
+    for (const hit of hits) {
+      if (hit._id !== undefined && !heads.has(hit._source.rootProposalId)) {
+        heads.set(hit._source.rootProposalId, toProposal(hit._id, hit._source));
+      }
+    }
+    return heads;
+  }
+
+  /**
    * Reads the action workflow's self-declared metadata from `consts.actionMetadata`.
    * Resolved on read so a catalog change is picked up rather than baked into
    * every historical proposal.
@@ -1923,7 +1995,7 @@ const findWaitingGateStepId = (
     status: string;
     startedAt: string;
     finishedAt?: string;
-    hitl?: { respondedAt?: string };
+    hitl?: { respondedAt?: string } | null;
   }>
 ): string | undefined =>
   stepExecutions
