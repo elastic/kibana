@@ -12,9 +12,12 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ActionsService } from '../services/actions/actions_service';
 import type { HuntServices } from '../services/watches/hunt/types';
 import {
+  getTriageApplyFpDecisionsStepDefinition,
   getTriageHeadroomStepDefinition,
   getTriageLoadAlertsStepDefinition,
   getTriagePlanSweepStepDefinition,
+  getTriageRecordFpDecisionStepDefinition,
+  getTriageResolveFpClosureStepDefinition,
 } from './alert_triage/alert_triage_steps';
 import { getPackageReportStepDefinition } from './package_report';
 import { getResolveProposalsStepDefinition } from './resolve_proposals';
@@ -81,6 +84,21 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
   workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
   workflowsExtensions.registerStepDefinition(getTriageLoadAlertsStepDefinition());
+  workflowsExtensions.registerStepDefinition(
+    getTriageResolveFpClosureStepDefinition({
+      getProposalsService: () => getHuntServices().getProposalsService(),
+      getProposalPrivileges: () => getHuntServices().getProposalPrivileges(),
+      getConversations,
+      getInternalEsClient,
+      logger,
+    })
+  );
+  workflowsExtensions.registerStepDefinition(
+    getTriageApplyFpDecisionsStepDefinition({ getInternalEsClient, logger })
+  );
+  workflowsExtensions.registerStepDefinition(
+    getTriageRecordFpDecisionStepDefinition({ getInternalEsClient })
+  );
 };
 
 export { getPackageReportStepDefinition } from './package_report';

@@ -13,6 +13,9 @@ import { z } from '@kbn/zod/v4';
 export const TRIAGE_HEADROOM_STEP_ID = 'alertzero.triage.headroom' as const;
 export const TRIAGE_PLAN_SWEEP_STEP_ID = 'alertzero.triage.planSweep' as const;
 export const TRIAGE_LOAD_ALERTS_STEP_ID = 'alertzero.triage.loadAlerts' as const;
+export const TRIAGE_RESOLVE_FP_CLOSURE_STEP_ID = 'alertzero.triage.resolveFpClosure' as const;
+export const TRIAGE_APPLY_FP_DECISIONS_STEP_ID = 'alertzero.triage.applyFpDecisions' as const;
+export const TRIAGE_RECORD_FP_DECISION_STEP_ID = 'alertzero.triage.recordFpDecision' as const;
 
 const idSchema = z.string().trim().min(1).max(256);
 
@@ -135,4 +138,141 @@ export const triageLoadAlertsStepCommonDefinition: CommonStepDefinition<
   stability: 'tech_preview',
   inputSchema: loadAlertsInputSchema,
   outputSchema: loadAlertsOutputSchema,
+};
+
+const resolveFpClosureInputSchema = z.object({
+  rule_id: idSchema.describe('Detection rule id for this batch.'),
+  alert_ids: z
+    .array(idSchema)
+    .min(1)
+    .max(10000)
+    .describe('Confident false-positive alert ids to group and resolve.'),
+  alerts: z
+    .array(z.record(z.string(), z.unknown()))
+    .max(100)
+    .describe('Loaded alert documents for pattern-key fields.'),
+});
+
+const resolveFpClosureGroupSchema = z.object({
+  pattern_key: z.string().min(1).max(512),
+  subject_key: z.string().min(1).max(128),
+  alert_ids: z.array(z.string()).min(1).max(10000),
+  entity_summary: z.string().max(256),
+  proposal_id: z.string().min(1).max(128),
+});
+
+const resolveFpClosureOutputSchema = z.object({
+  mint: z.array(
+    resolveFpClosureGroupSchema.extend({
+      kind: z.literal('mint'),
+      ki_id: z.string().min(1).max(128),
+    })
+  ),
+  converged: z.array(
+    resolveFpClosureGroupSchema.extend({
+      kind: z.literal('converged'),
+      conversation_id: z.string().min(1).max(512),
+      outcome: z.enum([
+        'revised',
+        'not_revisable',
+        'revision_limit',
+        'alert_cap',
+        'too_long',
+        'failed',
+      ]),
+      alert_count: z.number().int().min(0),
+    })
+  ),
+  primary_conversation_id: z
+    .string()
+    .min(1)
+    .max(512)
+    .optional()
+    .describe(
+      'When every FP group converged onto the same open Investigation, reuse it instead of creating one.'
+    ),
+  mint_count: z.number().int().min(0),
+  converged_count: z.number().int().min(0),
+});
+
+export const triageResolveFpClosureStepCommonDefinition: CommonStepDefinition<
+  typeof resolveFpClosureInputSchema,
+  typeof resolveFpClosureOutputSchema
+> = {
+  id: TRIAGE_RESOLVE_FP_CLOSURE_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageResolveFpClosure.label', {
+    defaultMessage: 'Resolve FP closure groups',
+  }),
+  description: i18n.translate('xpack.alertzero.workflows.steps.triageResolveFpClosure.description', {
+    defaultMessage:
+      'Groups confident false positives by pattern, joins live open proposals when present, and returns mint groups for review.',
+  }),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: resolveFpClosureInputSchema,
+  outputSchema: resolveFpClosureOutputSchema,
+};
+
+const applyFpDecisionsInputSchema = z.object({
+  rule_id: idSchema,
+  alerts: z.array(z.record(z.string(), z.unknown())).max(100),
+});
+
+const applyFpDecisionsOutputSchema = z.object({
+  remaining_alert_ids: z.array(z.string()),
+  remaining_alerts: z.array(z.record(z.string(), z.unknown())),
+  close_alert_ids: z.array(z.string()),
+  suppressed_subject_keys: z.array(z.string()),
+  closed_count: z.number().int().min(0),
+  remaining_count: z.number().int().min(0),
+});
+
+export const triageApplyFpDecisionsStepCommonDefinition: CommonStepDefinition<
+  typeof applyFpDecisionsInputSchema,
+  typeof applyFpDecisionsOutputSchema
+> = {
+  id: TRIAGE_APPLY_FP_DECISIONS_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageApplyFpDecisions.label', {
+    defaultMessage: 'Apply FP decisions',
+  }),
+  description: i18n.translate('xpack.alertzero.workflows.steps.triageApplyFpDecisions.description', {
+    defaultMessage:
+      'Matches batch alerts against active security.fp_decision KIs before Alert Analysis spends the model budget.',
+  }),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: applyFpDecisionsInputSchema,
+  outputSchema: applyFpDecisionsOutputSchema,
+};
+
+const recordFpDecisionInputSchema = z.object({
+  rule_id: idSchema,
+  pattern_key: z.string().min(1).max(512),
+  subject_key: z.string().min(1).max(128),
+  decision: z.enum(['approved', 'dismissed']),
+});
+
+const recordFpDecisionOutputSchema = z.object({
+  ki_id: z.string().min(1).max(128),
+});
+
+export const triageRecordFpDecisionStepCommonDefinition: CommonStepDefinition<
+  typeof recordFpDecisionInputSchema,
+  typeof recordFpDecisionOutputSchema
+> = {
+  id: TRIAGE_RECORD_FP_DECISION_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageRecordFpDecision.label', {
+    defaultMessage: 'Record FP decision',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageRecordFpDecision.description',
+    {
+      defaultMessage:
+        'Stores an approved or dismissed false-positive pattern as a security.fp_decision knowledge item.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: recordFpDecisionInputSchema,
+  outputSchema: recordFpDecisionOutputSchema,
 };
