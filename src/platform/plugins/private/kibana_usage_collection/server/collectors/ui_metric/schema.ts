@@ -78,7 +78,7 @@ const uiMetricFromDataPluginSchema: MakeSchemaFrom<UIMetricUsage> = {
 export const uiMetricSchema: MakeSchemaFrom<UIMetricUsage> = {
   console: commonSchema,
   DashboardPanelVersionInUrl: commonSchema,
-  Kibana_home: commonSchema, // eslint-disable-line @typescript-eslint/naming-convention
+  Kibana_home: commonSchema, // eslint-disable-line @kbn/compat/typescript-naming-convention
   visualize: commonSchema,
   canvas: commonSchema,
   cross_cluster_replication: commonSchema,

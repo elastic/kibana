@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/order
+// eslint-disable-next-line @kbn/compat/import-order
 import { mockGetFakeKibanaRequest, mockValidateKibanaPrivileges } from './api_keys.test.mock';
 
 import { errors } from '@elastic/elasticsearch';

@@ -7,16 +7,16 @@
 
 require('@kbn/setup-node-env');
 
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 const AdmZip = require('adm-zip');
 const fs = require('fs');
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 const { parse } = require('yaml');
 const https = require('https');
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 const { get, isArray, isEmpty, isNumber, isString, pick } = require('lodash');
 const { resolve } = require('path');
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 const tar = require('tar');
 const zlib = require('zlib');
 

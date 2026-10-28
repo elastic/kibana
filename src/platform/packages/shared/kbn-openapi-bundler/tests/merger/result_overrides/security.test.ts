@@ -13,7 +13,7 @@ import { mergeSpecs } from '../merge_specs';
 
 // Disable naming convention check due to tests on spec title prefixes
 // like Spec1_Something which violates that rule
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 describe('OpenAPI Merger - with security requirements overrides', () => {
   describe('enabled', () => {

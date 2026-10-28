@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import { render } from '@testing-library/react';
 
 export function renderWithTheme(component: React.ReactNode, params?: any) {

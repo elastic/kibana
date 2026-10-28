@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @kbn/compat/import-no-extraneous-dependencies */
 import '@testing-library/jest-dom';
 import '@emotion/jest';

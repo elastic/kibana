@@ -49,7 +49,7 @@ export const FormattedTooltip: FC<{ tooltipData: TooltipData }> = ({ tooltipData
             .slice(1)
             .map(({ label, value, color, isHighlighted, seriesIdentifier, valueAccessor }) => {
               const classes = classNames({
-                // eslint-disable-next-line @typescript-eslint/naming-convention
+                // eslint-disable-next-line @kbn/compat/typescript-naming-convention
                 echTooltip__rowHighlighted: isHighlighted,
               });
 

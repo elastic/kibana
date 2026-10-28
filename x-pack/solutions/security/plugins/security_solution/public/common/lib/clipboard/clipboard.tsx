@@ -57,7 +57,7 @@ export const Clipboard = ({
   };
 
   const className = classNames(COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME, {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     securitySolution__hoverActionButton: isHoverAction,
   });
 

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function getEslintrcForGeneratedCode() {
-  return {
-    rules: {
-      '@typescript-eslint/naming-convention': 0,
-    },
-  };
-}
+const { rules } = require('eslint-plugin-import');
+
+// eslint-plugin-import rules that oxlint doesn't implement.
+module.exports = {
+  'import-no-extraneous-dependencies': rules['no-extraneous-dependencies'],
+  'import-order': rules.order,
+};

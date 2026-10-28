@@ -9,7 +9,7 @@
 
 // Test-only helpers; @testing-library is a devDependency and this filename isn't in the eslint
 // dev-file allowlist.
-/* eslint-disable import/no-extraneous-dependencies */
+/* eslint-disable @kbn/compat/import-no-extraneous-dependencies */
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_MENU_TEST_SUBJECTS } from './test_subjects';

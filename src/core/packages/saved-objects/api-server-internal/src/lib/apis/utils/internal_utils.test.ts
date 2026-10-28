@@ -98,11 +98,11 @@ describe('#getSavedObjectFromSource', () => {
   const coreMigrationVersion = 'coreMigrationVersion';
   const typeMigrationVersion = 'typeMigrationVersion';
   const originId = 'originId';
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   const updated_at = 'updatedAt';
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   const created_by = 'createdBy';
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   const updated_by = 'updatedBy';
   const managed = false;
 

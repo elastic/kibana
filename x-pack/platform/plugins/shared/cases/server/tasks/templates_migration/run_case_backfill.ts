@@ -122,7 +122,7 @@ const backfillCasesForSpace = async (
 
   // The cursor is advanced across awaits inside a strictly sequential scan loop (one page at a time,
   // no concurrent access), so require-atomic-updates is a false positive here.
-  /* eslint-disable require-atomic-updates */
+  /* eslint-disable @kbn/compat/eslint-require-atomic-updates */
   const cursor: { pitId: string; searchAfter?: SortResults; reopenedStalePit: boolean } = {
     pitId: resumeCursor?.pitId ?? (await openPit()),
     searchAfter: resumeCursor?.pitId ? resumeCursor.searchAfter : undefined,
@@ -292,7 +292,7 @@ const backfillCasesForSpace = async (
       return { outcome: 'paused', scanned, backfilled, cursor: makeCursor() };
     }
   }
-  /* eslint-enable require-atomic-updates */
+  /* eslint-enable @kbn/compat/eslint-require-atomic-updates */
 };
 
 /**

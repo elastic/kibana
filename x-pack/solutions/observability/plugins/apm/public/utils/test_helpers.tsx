@@ -7,7 +7,7 @@
 
 /* global jest */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import { render, waitFor } from '@testing-library/react';
 import type { Location } from 'history';
 import moment from 'moment';
