@@ -14964,7 +14964,6 @@
     "xpack.apm.views.traceOverview.title": "追溯",
     "xpack.apm.views.transactions.title": "事务",
     "xpack.apmSourcesAccess.apmSettings.index": "APM 设置 - 索引",
-    "xpack.automaticImport.components.connectorSelector.addConnectorButtonLabel": "添加连接器",
     "xpack.automaticImport.components.connectorSelector.addConnectorNoPermissionTooltip": "您无权创建连接器。请请求管理员授权管理 > 连接器访问权限。",
     "xpack.automaticImport.components.connectorSelector.selectConnectorPlaceholder": "选择连接器",
     "xpack.automaticImport.components.connectorSetup.createAiConnectorTitle": "请创建 AI 连接器",

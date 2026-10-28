@@ -14895,7 +14895,6 @@
     "xpack.apm.views.traceOverview.title": "Traces",
     "xpack.apm.views.transactions.title": "Transactions",
     "xpack.apmSourcesAccess.apmSettings.index": "Paramètres APM - Index",
-    "xpack.automaticImport.components.connectorSelector.addConnectorButtonLabel": "Ajouter un connecteur",
     "xpack.automaticImport.components.connectorSelector.addConnectorNoPermissionTooltip": "Vous ne disposez pas d'autorisation pour créer des connecteurs. Demandez à votre administrateur d'accorder l'accès Gestion > Connecteurs.",
     "xpack.automaticImport.components.connectorSelector.selectConnectorPlaceholder": "Sélectionner un connecteur",
     "xpack.automaticImport.components.connectorSetup.createAiConnectorTitle": "Créer un connecteur d'IA",

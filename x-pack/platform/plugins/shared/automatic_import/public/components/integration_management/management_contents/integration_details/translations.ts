@@ -38,6 +38,21 @@ export const LOGO_DESCRIPTION_PART_2 = i18n.translate(
   }
 );
 
+// AI connector required callout
+export const AI_CONNECTOR_REQUIRED_TITLE = i18n.translate(
+  'xpack.automaticImport.step.integration.aiConnectorRequired.title',
+  {
+    defaultMessage: 'Add an AI connector',
+  }
+);
+export const AI_CONNECTOR_REQUIRED_DESCRIPTION = i18n.translate(
+  'xpack.automaticImport.step.integration.aiConnectorRequired.description',
+  {
+    defaultMessage:
+      'A connector is needed to analyze your log samples and build the ingest pipeline',
+  }
+);
+
 // Package card preview
 export const PREVIEW = i18n.translate('xpack.automaticImport.step.integration.preview', {
   defaultMessage: 'Preview',

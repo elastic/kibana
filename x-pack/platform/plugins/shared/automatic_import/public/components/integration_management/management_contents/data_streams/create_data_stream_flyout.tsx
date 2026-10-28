@@ -39,7 +39,10 @@ import {
 import { PLUGIN_ID } from '../../../../../common/constants';
 import type { IntegrationFormData, LogsSourceOption } from '../../forms/types';
 import { useIntegrationForm } from '../../forms/integration_form';
-import { ANALYZE_LOGS_INTEGRATION_FIELDS, DATA_STREAM_DETAILS_FIELDS } from '../../forms/constants';
+import {
+  DATA_STREAM_DETAILS_FIELDS,
+  INTEGRATION_DETAILS_REQUIRED_FIELDS,
+} from '../../forms/constants';
 import * as i18n from './translations';
 import { FormStyledLabel } from '../../../../common/components/form_styled_label';
 import {
@@ -135,13 +138,12 @@ const dataCollectionMethodOptions: Array<EuiComboBoxOptionOption<string>> = [
 const getFieldErrorMessages = ({ errors }: Pick<FieldHook, 'errors'>): string[] =>
   errors.map(({ message }) => message);
 
-/** Validates fields rendered outside the flyout and returns their error messages. */
 const validateIntegrationFields = async (
   form: FormHook<IntegrationFormData>
 ): Promise<string[]> => {
   const fields = form.getFields();
   const results = await Promise.all(
-    ANALYZE_LOGS_INTEGRATION_FIELDS.map((fieldName) => fields[fieldName]?.validate())
+    INTEGRATION_DETAILS_REQUIRED_FIELDS.map((fieldName) => fields[fieldName]?.validate())
   );
   return results.flatMap((result) => (result ? getFieldErrorMessages(result) : []));
 };

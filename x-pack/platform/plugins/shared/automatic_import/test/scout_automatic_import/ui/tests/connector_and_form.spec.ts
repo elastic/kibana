@@ -71,7 +71,7 @@ test.describe(
       await expect(pageObjects.integrationManagement.getConnectorSelector()).toBeVisible();
     });
 
-    test('does not show the Add new connector button when connectors exist', async ({
+    test('does not show the Add AI connector button when connectors exist', async ({
       pageObjects,
     }) => {
       await expect(pageObjects.integrationManagement.getAddNewConnectorButton()).toBeHidden();
@@ -79,7 +79,7 @@ test.describe(
 
     // --- Connector Selector — no connectors (override route then re-navigate) ---
 
-    test('shows Add new connector button when no AI connectors are available', async ({
+    test('shows the empty connector selector and no AI connector callout on load when no AI connectors are available', async ({
       page,
       pageObjects,
     }) => {
@@ -91,10 +91,25 @@ test.describe(
         })
       );
       await pageObjects.integrationManagement.navigateToCreate();
-      await expect(pageObjects.integrationManagement.getAddNewConnectorButton()).toBeVisible();
+
+      await expect(pageObjects.integrationManagement.getConnectorSelector()).toHaveText(
+        'Select a connector'
+      );
+      await expect(pageObjects.integrationManagement.getAiConnectorRequiredCallout()).toBeHidden();
+      await expect(pageObjects.integrationManagement.getAddNewConnectorButton()).toBeHidden();
     });
 
-    test('opens the connector setup flyout when Add new connector is clicked', async ({
+    // --- AI connector required callout ---
+
+    test('does not show the AI connector callout when a connector is available', async ({
+      pageObjects,
+    }) => {
+      await expect(pageObjects.integrationManagement.getConnectorSelector()).toBeVisible();
+      await pageObjects.integrationManagement.getAddDataStreamButton().click();
+      await expect(pageObjects.integrationManagement.getAiConnectorRequiredCallout()).toBeHidden();
+    });
+
+    test('Add data stream shows the AI connector callout and does not open the flyout when no connector exists', async ({
       page,
       pageObjects,
     }) => {
@@ -106,6 +121,35 @@ test.describe(
         })
       );
       await pageObjects.integrationManagement.navigateToCreate();
+      await pageObjects.integrationManagement
+        .getIntegrationTitleInput()
+        .fill('My Custom Integration');
+      await pageObjects.integrationManagement
+        .getIntegrationDescriptionInput()
+        .fill('Parses custom log format');
+
+      await pageObjects.integrationManagement.getAddDataStreamButton().click();
+
+      const callout = pageObjects.integrationManagement.getAiConnectorRequiredCallout();
+      await expect(callout).toBeVisible();
+      await expect(callout.getByRole('button', { name: 'Add AI connector' })).toBeVisible();
+      await expect(pageObjects.integrationManagement.getConnectorSelector()).toBeHidden();
+      await expect(pageObjects.integrationManagement.getCreateDataStreamFlyout()).toBeHidden();
+    });
+
+    test('opens the connector setup flyout from the AI connector callout', async ({
+      page,
+      pageObjects,
+    }) => {
+      await page.route(CONNECTORS_API, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(CONNECTORS_EMPTY_RESPONSE),
+        })
+      );
+      await pageObjects.integrationManagement.navigateToCreate();
+      await pageObjects.integrationManagement.getAddDataStreamButton().click();
       await pageObjects.integrationManagement.getAddNewConnectorButton().click();
       await expect(pageObjects.integrationManagement.getConnectorSetupFlyout()).toBeVisible();
     });

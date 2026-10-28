@@ -14949,7 +14949,6 @@
     "xpack.apm.views.traceOverview.title": "Traces",
     "xpack.apm.views.transactions.title": "Transações",
     "xpack.apmSourcesAccess.apmSettings.index": "Configurações do APM - Índice",
-    "xpack.automaticImport.components.connectorSelector.addConnectorButtonLabel": "Adicionar conector",
     "xpack.automaticImport.components.connectorSelector.addConnectorNoPermissionTooltip": "Você não tem permissão para criar conectores. Peça ao seu administrador para conceder acesso a Gerenciamento > Conectores.",
     "xpack.automaticImport.components.connectorSelector.selectConnectorPlaceholder": "Selecione um conector",
     "xpack.automaticImport.components.connectorSetup.createAiConnectorTitle": "Criar conector de IA",

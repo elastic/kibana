@@ -14959,7 +14959,6 @@
     "xpack.apm.views.traceOverview.title": "トレース",
     "xpack.apm.views.transactions.title": "トランザクション",
     "xpack.apmSourcesAccess.apmSettings.index": "APM設定 - インデックス",
-    "xpack.automaticImport.components.connectorSelector.addConnectorButtonLabel": "コネクターを追加",
     "xpack.automaticImport.components.connectorSelector.addConnectorNoPermissionTooltip": "コネクターを作成する権限がありません。管理者に「管理」>「コネクター」へのアクセス権限を付与するよう依頼してください。",
     "xpack.automaticImport.components.connectorSelector.selectConnectorPlaceholder": "コネクターを選択",
     "xpack.automaticImport.components.connectorSetup.createAiConnectorTitle": "AIコネクターを作成",

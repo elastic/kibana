@@ -105,8 +105,23 @@ jest.mock('../../common/components/connector_selector', () => ({
   ConnectorSelector: () => <div data-test-subj="connectorSelectorMock" />,
 }));
 
+const mockUseAiConnectors = jest.fn();
+jest.mock('../../common/hooks/use_ai_connectors', () => ({
+  useAiConnectors: () => mockUseAiConnectors(),
+}));
+
+const mockIntegrationFormProvider = jest.fn();
 jest.mock('./forms/integration_form', () => ({
-  IntegrationFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  IntegrationFormProvider: ({
+    children,
+    initialValue,
+  }: {
+    children: React.ReactNode;
+    initialValue?: { connectorId: string };
+  }) => {
+    mockIntegrationFormProvider({ initialValue });
+    return <>{children}</>;
+  },
   useIntegrationForm: () => ({ formData: {}, form: {}, submit: mockSubmit, isFormModified: true }),
 }));
 
@@ -148,6 +163,53 @@ const renderComponent = (path = '/create') =>
       </I18nProvider>
     </MockAppHeaderProvider>
   );
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockUseAiConnectors.mockReturnValue({ data: [{ id: 'connector-1' }], isLoading: false });
+});
+
+describe('IntegrationManagement initial connector', () => {
+  const existingIntegration = {
+    integrationId: 'int-1',
+    title: 'Existing',
+    description: 'd',
+    connectorId: 'connector-1',
+    status: 'completed',
+    dataStreams: [],
+  };
+
+  beforeEach(() => {
+    mockUseGetIntegrationById.mockReturnValue({
+      integration: existingIntegration,
+      isLoading: false,
+      isError: false,
+    });
+  });
+
+  const getInitialConnectorId = () =>
+    mockIntegrationFormProvider.mock.lastCall?.[0].initialValue.connectorId;
+
+  it('keeps the saved connector when it still exists', () => {
+    renderComponent('/edit/int-1');
+
+    expect(getInitialConnectorId()).toBe('connector-1');
+  });
+
+  it('clears the saved connector when it no longer exists', () => {
+    mockUseAiConnectors.mockReturnValue({ data: [], isLoading: false });
+    renderComponent('/edit/int-1');
+
+    expect(getInitialConnectorId()).toBe('');
+  });
+
+  it('waits for connectors to load before rendering the form', () => {
+    mockUseAiConnectors.mockReturnValue({ data: undefined, isLoading: true });
+    renderComponent('/edit/int-1');
+
+    expect(mockIntegrationFormProvider).not.toHaveBeenCalled();
+  });
+});
 
 describe('IntegrationManagement telemetry', () => {
   beforeEach(() => {

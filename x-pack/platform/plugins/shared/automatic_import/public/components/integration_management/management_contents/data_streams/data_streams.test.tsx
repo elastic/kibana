@@ -232,13 +232,13 @@ describe('DataStreams', () => {
       expect(getByTestId('addDataStreamButton')).toBeEnabled();
     });
 
-    it('validates the integration name and description on click', async () => {
+    it('validates the integration name, description, and connector on click', async () => {
       const { getByTestId } = renderDataStreams();
 
       fireEvent.click(getByTestId('addDataStreamButton'));
 
       await waitFor(() => {
-        expect(mockValidateFields).toHaveBeenCalledWith(['title', 'description']);
+        expect(mockValidateFields).toHaveBeenCalledWith(['title', 'description', 'connectorId']);
       });
     });
 
@@ -264,7 +264,7 @@ describe('DataStreams', () => {
       fireEvent.click(getByTestId('addDataStreamButton'));
 
       await waitFor(() => {
-        expect(mockValidateFields).toHaveBeenCalledWith(['title', 'description']);
+        expect(mockValidateFields).toHaveBeenCalledWith(['title', 'description', 'connectorId']);
       });
       expect(queryByTestId('createDataStreamFlyoutMock')).not.toBeInTheDocument();
     });

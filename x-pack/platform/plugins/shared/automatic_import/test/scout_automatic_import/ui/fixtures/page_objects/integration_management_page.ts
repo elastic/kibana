@@ -32,6 +32,10 @@ export class IntegrationManagementPage {
     return this.page.testSubj.locator('addNewConnectorButton');
   }
 
+  getAiConnectorRequiredCallout() {
+    return this.page.testSubj.locator('aiConnectorRequiredCallout');
+  }
+
   getConnectorSetupFlyout() {
     return this.page.testSubj.locator('connectorSetupFlyout');
   }

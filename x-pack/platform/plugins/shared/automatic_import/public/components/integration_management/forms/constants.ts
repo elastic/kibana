@@ -26,11 +26,7 @@ export const DEFAULT_INTEGRATION_VALUES = {
 
 export const INTEGRATION_DETAILS_UNTRACKED_FIELDS = ['connectorId', 'integrationId'];
 
-/** Integration fields that must be valid before the create data stream flyout can open. */
-export const INTEGRATION_DETAILS_REQUIRED_FIELDS = ['title', 'description'];
-
-/** Integration-level fields validated when analyzing logs; they live outside the flyout. */
-export const ANALYZE_LOGS_INTEGRATION_FIELDS = ['title', 'description', 'connectorId'];
+export const INTEGRATION_DETAILS_REQUIRED_FIELDS = ['title', 'description', 'connectorId'];
 
 export const DATA_STREAM_DETAILS_FIELDS = [
   'dataStreamTitle',
