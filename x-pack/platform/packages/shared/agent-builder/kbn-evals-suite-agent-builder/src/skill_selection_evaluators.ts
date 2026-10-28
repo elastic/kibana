@@ -6,6 +6,7 @@
  */
 
 import type { EvaluationResult, Evaluator, TaskOutput } from '@kbn/evals';
+import { relevantSkillsHookId } from '@kbn/agent-builder-common';
 import type { BenchmarkExample } from '../evals/skill_selection/benchmark_dataset';
 
 // Raw step shape returned by the agent-builder converse API.
@@ -128,13 +129,55 @@ export const createShouldNotActivateSkillEvaluator = (skillName: string): Evalua
   },
 });
 
+interface SurfacedSkill {
+  id?: string;
+  name?: string;
+  path?: string;
+}
+
+interface RelevantSkillsHookStep extends Record<string, unknown> {
+  type: 'injected_context';
+  hook_id: typeof relevantSkillsHookId;
+  data?: { skills?: SurfacedSkill[] };
+}
+
+interface ImplicitRelevantSkillsStep extends Record<string, unknown> {
+  type: 'relevant_skills';
+  source: 'implicit';
+  skills?: SurfacedSkill[];
+}
+
+const isRelevantSkillsHookStep = (step: Record<string, unknown>): step is RelevantSkillsHookStep =>
+  step.type === 'injected_context' && step.hook_id === relevantSkillsHookId;
+
+const isImplicitRelevantSkillsStep = (
+  step: Record<string, unknown>
+): step is ImplicitRelevantSkillsStep =>
+  step.type === 'relevant_skills' && step.source === 'implicit';
+
+/**
+ * The skills the implicit pre-selection surfaced, or `undefined` when it produced no step. Today
+ * the selection is a cycle hook and lands as an `injected_context` step stamped with its hook id,
+ * with the skills in `data`; conversations recorded before that carry a `relevant_skills` step.
+ */
+const getImplicitPreSelection = (
+  steps: Array<Record<string, unknown>>
+): SurfacedSkill[] | undefined => {
+  const hookStep = steps.find(isRelevantSkillsHookStep);
+  if (hookStep) {
+    return hookStep.data?.skills ?? [];
+  }
+  const legacyStep = steps.find(isImplicitRelevantSkillsStep);
+  return legacyStep ? legacyStep.skills ?? [] : undefined;
+};
+
 /**
  * Evaluates whether the implicit `<relevant_skills>` pre-selection surfaced the correct skill
  * before the agent acts.
  *
- * Checks the `relevant_skills` step with `source: 'implicit'` in the output steps (the fast-model
- * call that runs at the start of each round when the `relevantSkills` experiment flag is on).
- * Returns `score: null / label: 'SKIP'` when the step is absent — meaning the feature is
+ * Reads the pre-selection step from the output steps (see {@link getImplicitPreSelection}): the
+ * fast-model call that runs at the start of each round when the `relevantSkills` experiment flag
+ * is on. Returns `score: null / label: 'SKIP'` when the step is absent — meaning the feature is
  * disabled or the skill list was below the threshold that bypasses the model call.
  *
  * Ground truth keys (same as {@link skillSelectionEvaluator}):
@@ -158,21 +201,17 @@ export const preSelectionEvaluator: Evaluator = {
     }
 
     const steps = (output as { steps?: Array<Record<string, unknown>> })?.steps ?? [];
-    const preSelectStep = steps.find(
-      (s) => s.type === 'relevant_skills' && s.source === 'implicit'
-    );
+    const surfaced = getImplicitPreSelection(steps);
 
-    if (!preSelectStep) {
+    if (!surfaced) {
       return {
         score: null,
         label: 'SKIP',
         explanation:
-          'No implicit relevant_skills step — feature disabled, or skill list below threshold',
+          'No implicit pre-selection step — feature disabled, or skill list below threshold',
       };
     }
 
-    const surfaced =
-      (preSelectStep.skills as Array<{ id?: string; name?: string; path?: string }>) ?? [];
     const surfacedNames = surfaced.flatMap((s) =>
       [s.id, s.name, s.path].filter((v): v is string => typeof v === 'string')
     );

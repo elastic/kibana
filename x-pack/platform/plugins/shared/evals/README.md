@@ -43,8 +43,9 @@ The evaluation system spans three packages:
 The plugin is **disabled by default**. To enable it locally, add the following to your `kibana.dev.yml`:
 
 ```yaml
-# Enable the evals plugin
+# Enable the evals plugin, with the full evals product (UI, API and workflow steps)
 xpack.evals.enabled: true
+xpack.evals.mode: full
 
 # Required: enable experimental agent-builder features
 uiSettings:
@@ -69,6 +70,17 @@ Then start the EDOT collector in a separate terminal:
 ```bash
 node scripts/edot_collector
 ```
+
+### Modes
+
+`xpack.evals.enabled` decides whether Kibana loads the plugin at all. `xpack.evals.mode` decides how much of it loads:
+
+| Mode | Loads |
+| --- | --- |
+| `runtime` | Only what other plugins need to run evaluators in-process. No HTTP routes, `evals` feature or privileges, data streams, app, management section, or `ai.evals.*` workflow steps. |
+| `full` (default) | Also everything runtime mode leaves out: the evals UI and API that the `@kbn/evals` CLI, in-tool experiments, and the Agent Builder evals skills use. |
+
+Runtime mode is for deployments that run evaluators in the background without exposing evals to users. The default will move to `runtime`, so anything that uses the evals UI or API, including local development, Scout and FTR configs, and the golden cluster, sets `xpack.evals.mode: full` explicitly. Against a runtime-mode Kibana, the `@kbn/evals` CLI reports that the evals API is not available.
 
 ### Prerequisite data
 
@@ -109,7 +121,7 @@ The **New experiment** button on the Experiments tab opens a form: choose one or
 
 #### From Agent Builder
 
-An `eval-experiment-authoring` skill lets you do the same thing from an Agent Builder chat: discover datasets, evaluators, task targets, and connectors, preview the experiment, then run it or save it as a workflow. It is available only when `xpack.evals.enabled` is set.
+An `eval-experiment-authoring` skill lets you do the same thing from an Agent Builder chat: discover datasets, evaluators, task targets, and connectors, preview the experiment, then run it or save it as a workflow. It is available only when `xpack.evals.enabled` is set and `xpack.evals.mode` is `full`.
 
 #### From YAML
 
@@ -218,6 +230,23 @@ All routes are internal (`elastic-api-version: 1`). Read routes require the `rea
 - **Remotes** — manage remote Kibana configurations for dataset forwarding
 
 For full request/response schemas, see the OpenAPI definitions in [`@kbn/evals-common/impl/schemas/`](../../packages/shared/kbn-evals-common/impl/schemas/).
+
+### Evaluating in-process
+
+Server plugins can grade a trace without HTTP through `evaluate()` on the evals start contract. It runs the same evaluator execution as `_evaluate` and takes the same `subject` and `evaluators`, held to the same bounds.
+
+```ts
+const results = await evals.evaluate?.({
+  request,
+  subject: { traces: [{ trace_id: traceId }] },
+  evaluators: [{ name: 'groundedness', connector_id: judgeConnectorId }],
+});
+```
+
+- Evaluators are resolved in `spaceId` when given, otherwise in the request's space.
+- Traces are read as the request's current user, and judges call their connector on behalf of the request. Whenever a trace is read, that identity needs read access to `traces-*` and `logs-*`. For a workflow step, it is the identity behind the step's fake request.
+- Invalid input, an unknown evaluator, a trace that is not ready, or missing privileges to read the trace throws `EvaluationExecutionError`. A failing evaluator does not throw; it is returned as an `error` result next to the others.
+- A caller with read access to only some of the matching indices gets no privilege error, because Elasticsearch narrows wildcard searches to the indices it can read. Its trace can then look not ready instead (see [Reading normalized trace evidence](#reading-normalized-trace-evidence)).
 
 ## Dataset tags and maturity
 

@@ -41,6 +41,26 @@ steps:
         risk_score: 21
 `;
 
+const enabledRuleWorkflowYaml = (ruleName: string) => `
+name: security.createRule step test - enabled rule
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: ${CREATE_RULE_STEP_ID}
+    type: security.createRule
+    with:
+      rule:
+        type: esql
+        language: esql
+        name: "${ruleName}"
+        description: Created enabled by a Scout API test
+        query: "FROM logs-* | LIMIT 1"
+        severity: low
+        risk_score: 21
+        enabled: true
+`;
+
 const invalidRuleWorkflowYaml = `
 name: security.createRule step test - invalid rule
 enabled: true
@@ -64,6 +84,7 @@ steps:
 apiTest.describe('security.createRule workflow step', { tag: [...tags.stateful.classic] }, () => {
   let editorHeaders: Record<string, string>;
   let validWorkflowId: string;
+  let enabledWorkflowId: string;
   let invalidWorkflowId: string;
   const createdRuleIds: string[] = [];
 
@@ -78,6 +99,11 @@ apiTest.describe('security.createRule workflow step', { tag: [...tags.stateful.c
       editorHeaders,
       validRuleWorkflowYaml(`Scout createRule step test ${Date.now()}`)
     );
+    enabledWorkflowId = await createWorkflow(
+      apiClient,
+      editorHeaders,
+      enabledRuleWorkflowYaml(`Scout createRule step enabled test ${Date.now()}`)
+    );
     invalidWorkflowId = await createWorkflow(apiClient, editorHeaders, invalidRuleWorkflowYaml);
   });
 
@@ -85,6 +111,7 @@ apiTest.describe('security.createRule workflow step', { tag: [...tags.stateful.c
     // Delete workflows
     await Promise.all([
       deleteWorkflow(apiClient, editorHeaders, validWorkflowId),
+      deleteWorkflow(apiClient, editorHeaders, enabledWorkflowId),
       deleteWorkflow(apiClient, editorHeaders, invalidWorkflowId),
     ]);
 
@@ -126,6 +153,30 @@ apiTest.describe('security.createRule workflow step', { tag: [...tags.stateful.c
       expect((readResponse.body as { enabled: boolean }).enabled).toBe(false);
     }
   );
+
+  apiTest('creates an enabled rule when "enabled" is true', async ({ apiClient }) => {
+    const workflowExecutionId = await runWorkflow(apiClient, editorHeaders, enabledWorkflowId);
+    const execution = await waitForExecution(apiClient, editorHeaders, workflowExecutionId);
+
+    expect(execution.status).toBe(ExecutionStatus.COMPLETED);
+
+    const step = execution.stepExecutions.find((s) => s.stepId === CREATE_RULE_STEP_ID);
+    const output = step?.output as { id?: string; enabled?: boolean } | undefined;
+    const ruleId = output?.id;
+    if (!ruleId) {
+      throw new Error('Expected the create_rule step output to include the created rule id');
+    }
+    createdRuleIds.push(ruleId);
+
+    expect(output?.enabled).toBe(true);
+
+    const readResponse = await apiClient.get(`${DETECTION_ENGINE_RULES_URL}?id=${ruleId}`, {
+      headers: { ...editorHeaders, ...PUBLIC_API_HEADERS },
+      responseType: 'json',
+    });
+    expect(readResponse).toHaveStatusCode(200);
+    expect((readResponse.body as { enabled: boolean }).enabled).toBe(true);
+  });
 
   apiTest('fails the step when the API rejects an invalid rule body', async ({ apiClient }) => {
     const workflowExecutionId = await runWorkflow(apiClient, editorHeaders, invalidWorkflowId);

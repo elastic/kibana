@@ -14,6 +14,7 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { EvalsMode } from './config';
 import type { DatasetService } from './storage/datasets/dataset_service';
 import type { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
 import type { EvaluationScoreService } from './storage/scores/evaluation_score_service';
@@ -22,11 +23,14 @@ import type {
   EvaluatorRegistry,
   RegisteredEvaluatorDefinition,
 } from './evaluators/types';
+import type { EvaluateFn } from './evaluation/create_evaluate_contract';
 import type { OnlineScoreService } from './storage/scores/online_score_service';
 import type { EvalsTaskProvider } from './task_providers/types';
 
 export interface EvalsPluginSetup {
   enabled: boolean;
+  /** `full` when the evals product (routes, feature, app, steps) is loaded; see `xpack.evals.mode`. */
+  mode: EvalsMode;
   registerTaskProvider: (provider: EvalsTaskProvider) => void;
   /**
    * Adds an evaluator the calling plugin owns. It resolves in every space as `built_in`, and
@@ -63,6 +67,13 @@ export interface EvalsPluginStart {
 
   listModelConnectors?: (request: KibanaRequest) => Promise<ModelConnectorSummary[]>;
   onlineScoreService?: OnlineScoreService;
+  /**
+   * Grades a subject in-process with the same evaluator execution as `_evaluate`. Throws
+   * `EvaluationExecutionError` when the input, the trace, or the caller's privileges to read
+   * it rule out evaluating; failures of individual evaluators are returned as `error`
+   * results instead.
+   */
+  evaluate?: EvaluateFn;
 }
 
 export type EvalsWorkflowsManagementSetup = Pick<WorkflowsServerPluginSetup, 'management'>;
