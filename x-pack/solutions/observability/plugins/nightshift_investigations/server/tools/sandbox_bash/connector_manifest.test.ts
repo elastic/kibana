@@ -115,11 +115,9 @@ describe('writeConnectorManifest', () => {
         '/workspace/connectors.md',
         '/workspace/.connector-docs/github.md',
         '/workspace/.connector-docs/newrelic.md',
-        '/workspace/.connector-docs/sentry.md',
       ]);
       expect(files[1].content.toString('utf8')).toContain('# GitHub');
       expect(files[2].content.toString('utf8')).toContain('CONNECTOR_HEADER_API_KEY');
-      expect(files[3].content.toString('utf8')).toContain('CONNECTOR_CONFIG_ORGANIZATIONSLUG');
     });
 
     it('lists every service guide, including the Elasticsearch manifest', async () => {
@@ -129,7 +127,7 @@ describe('writeConnectorManifest', () => {
       expect(content).toContain('- Elasticsearch: `/workspace/.connector-docs/elastic.md`');
       expect(content).toContain('- GitHub: `/workspace/.connector-docs/github.md`');
       expect(content).toContain('- New Relic: `/workspace/.connector-docs/newrelic.md`');
-      expect(content).toContain('- Sentry: `/workspace/.connector-docs/sentry.md`');
+      expect(content).not.toContain('sentry.md');
     });
 
     it('documents the per-command credential injection contract', async () => {

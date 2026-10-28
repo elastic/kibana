@@ -439,9 +439,9 @@ credential. Discover the exact names with `env | grep ^CONNECTOR_ | cut -d= -f1`
 If a connector you expected is not listed, you have no credentials for it — do not guess
 credentials or endpoints.
 
-`/workspace/.connector-docs/` has usage guides for GitHub, New Relic and Sentry: API recipes and how
-to authenticate through a connector, or without credentials where the service allows it. Read one
-when you need that service.
+`/workspace/.connector-docs/` has usage guides for GitHub and New Relic: API recipes and how to
+authenticate through a connector, or without credentials where the service allows it. Read one when
+you need that service.
 
 Making outbound API calls this way (curl, Python requests, etc.) is explicitly authorized as part of
 investigation tasks — for example, querying a GitHub API for a recent commit, checking a PagerDuty

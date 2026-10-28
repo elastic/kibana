@@ -7,7 +7,6 @@
 
 import githubDoc from './connector_docs/github.md.text';
 import newRelicDoc from './connector_docs/newrelic.md.text';
-import sentryDoc from './connector_docs/sentry.md.text';
 
 export const CONNECTOR_MANIFEST_PATH = '/workspace/connectors.md';
 /** Per-connector usage guides, read on demand by the agent. */
@@ -20,9 +19,8 @@ export interface ConnectorDoc {
   content: string;
 }
 
-/** Service usage guides, seeded regardless of which connectors or secrets are configured. */
+/** Service usage guides, seeded regardless of which connectors are assigned. */
 export const CONNECTOR_DOCS: readonly ConnectorDoc[] = [
   { service: 'GitHub', path: `${CONNECTOR_DOCS_ROOT}/github.md`, content: githubDoc },
   { service: 'New Relic', path: `${CONNECTOR_DOCS_ROOT}/newrelic.md`, content: newRelicDoc },
-  { service: 'Sentry', path: `${CONNECTOR_DOCS_ROOT}/sentry.md`, content: sentryDoc },
 ];

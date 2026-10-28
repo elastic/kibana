@@ -31,7 +31,7 @@ the same turn:
   connector, indices and remote clusters. For Elasticsearch questions it is the only file you need.
 - \`/workspace/connectors.md\`: the other connectors and secrets you may call, and how their
   credentials reach a \`${SANDBOX_BASH_TOOL_ID}\` command. Never guess credentials or endpoints.
-  It also lists usage guides under \`/workspace/.connector-docs/\` (GitHub, New Relic, Sentry) with
+  It also lists usage guides under \`/workspace/.connector-docs/\` (GitHub, New Relic) with
   API recipes and access options; read one when you need that service.
 - \`/workspace/cortex/README.md\` and \`/workspace/cortex/INDEX.md\`: the team's knowledge wiki.
   Read-only; it is updated after your reply.
