@@ -11,6 +11,7 @@ import { ACTION_POLICY_AUTHORING_SKILL_ID } from '@kbn/alerting-v2-constants';
 import { expect } from '@kbn/scout/ui';
 import {
   agentChatTest as test,
+  LLM_PROXY_CONNECTOR_NAME,
   mockFinalAnswerRenderingActionPolicyAttachment,
   mockLoadSkill,
   mockManageActionPolicy,
@@ -51,8 +52,13 @@ steps:
       message: "{{ inputs.payload.alerts | size }} alerts"
 `;
 
+const PERSISTED_CONVERSATION_URL = /\/conversations\/(?!new(?:[/?#]|$))([^/?#]+)/;
+
 const getConversationIdFromUrl = (page: ScoutPage): string | undefined =>
-  page.url().match(/\/conversations\/([^/?#]+)/)?.[1];
+  page.url().match(PERSISTED_CONVERSATION_URL)?.[1];
+
+/** Suffixed per run so cleanup by name never touches policies this suite did not create. */
+const uniquePolicyName = (base: string): string => `${base} ${Date.now()}`;
 
 test.describe(
   'Action policy attachment canvas in Agent Builder',
@@ -66,7 +72,7 @@ test.describe(
   () => {
     let workflowId: string;
     let workflowName: string;
-    let conversationIds: string[] = [];
+    let conversationIds = new Set<string>();
     let policyNames: string[] = [];
 
     const expectInlineCard = async (pageObjects: AlertingPageObjects, status: string) => {
@@ -97,6 +103,13 @@ test.describe(
       await expect(renderErrorCallout).toHaveCount(0);
     };
 
+    const trackConversation = (page: ScoutPage) => {
+      const conversationId = getConversationIdFromUrl(page);
+      if (conversationId) {
+        conversationIds.add(conversationId);
+      }
+    };
+
     const proposePolicy = async ({
       page,
       pageObjects,
@@ -111,6 +124,7 @@ test.describe(
       policyNames.push(policyName);
       // Each interceptor expires 30s after it is registered, so register after the app loads.
       await pageObjects.agentChat.goto();
+      await pageObjects.agentChat.selectConnector(LLM_PROXY_CONNECTOR_NAME);
       mockTitleGeneration(llmProxy, policyName);
       mockLoadSkill(llmProxy, ACTION_POLICY_AUTHORING_SKILL_ID);
       mockManageActionPolicy(llmProxy, [
@@ -125,13 +139,11 @@ test.describe(
 
       await pageObjects.agentChat.sendMessage(`Create an action policy named ${policyName}`);
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+      await page.waitForURL(PERSISTED_CONVERSATION_URL);
+      trackConversation(page);
 
       await expect(pageObjects.agentChat.previewButton).toBeVisible({ timeout: 60_000 });
       await expectInlineCard(pageObjects, 'Draft');
-      const conversationId = getConversationIdFromUrl(page);
-      if (conversationId) {
-        conversationIds.push(conversationId);
-      }
     };
 
     test.beforeAll(async ({ apiServices }) => {
@@ -142,13 +154,15 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      conversationIds = [];
+      conversationIds = new Set();
       policyNames = [];
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterEach(async ({ llmProxy, kbnClient, apiServices }) => {
+    test.afterEach(async ({ page, llmProxy, kbnClient, apiServices }) => {
       llmProxy.clear();
+      // Covers a conversation created by a turn that failed before proposePolicy tracked it.
+      trackConversation(page);
 
       for (const name of policyNames) {
         const { items } = await apiServices.alertingV2.actionPolicies.list({ search: name });
@@ -158,7 +172,7 @@ test.describe(
       }
 
       await Promise.allSettled(
-        conversationIds.map((conversationId) =>
+        [...conversationIds].map((conversationId) =>
           kbnClient.request({
             method: 'DELETE',
             path: `/api/agent_builder/conversations/${encodeURIComponent(conversationId)}`,
@@ -178,7 +192,7 @@ test.describe(
       pageObjects,
       llmProxy,
     }) => {
-      const policyName = 'Canvas proposed policy';
+      const policyName = uniquePolicyName('Canvas proposed policy');
       await proposePolicy({ page, pageObjects, llmProxy, policyName });
 
       await pageObjects.agentChat.openAttachmentCanvas();
@@ -194,7 +208,7 @@ test.describe(
       llmProxy,
       apiServices,
     }) => {
-      const policyName = 'Canvas created policy';
+      const policyName = uniquePolicyName('Canvas created policy');
       await proposePolicy({ page, pageObjects, llmProxy, policyName });
       await pageObjects.agentChat.openAttachmentCanvas();
 
@@ -223,7 +237,7 @@ test.describe(
     });
 
     test('View in Policies opens the persisted policy', async ({ page, pageObjects, llmProxy }) => {
-      const policyName = 'Canvas navigated policy';
+      const policyName = uniquePolicyName('Canvas navigated policy');
       await proposePolicy({ page, pageObjects, llmProxy, policyName });
       await pageObjects.agentChat.openAttachmentCanvas();
       await pageObjects.agentChat.canvasAction('Create policy').click();
@@ -243,7 +257,7 @@ test.describe(
       pageObjects,
       llmProxy,
     }) => {
-      const policyName = 'Canvas reopened policy';
+      const policyName = uniquePolicyName('Canvas reopened policy');
       await proposePolicy({ page, pageObjects, llmProxy, policyName });
       await pageObjects.agentChat.openAttachmentCanvas();
       await expectCanvasContent(pageObjects, policyName);
