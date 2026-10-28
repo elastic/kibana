@@ -27,6 +27,10 @@ const baseRule: RuleApiResponse = {
     name: 'My Rule',
     description: 'A rule description',
     tags: ['prod', 'latency'],
+    signature_id: 'test-sig-id',
+    revision: 0,
+    source: { type: 'internal' as const, version: 1 },
+    ownership: { managed: false },
   },
   time_field: '@timestamp',
   schedule: { every: '5m' },
@@ -52,7 +56,13 @@ describe('RuleSummaryAboutCard', () => {
   it('shows placeholders when description and tags are missing', () => {
     renderCard({
       ...baseRule,
-      metadata: { name: 'My Rule' },
+      metadata: {
+        name: 'My Rule',
+        signature_id: 'test-sig-id',
+        revision: 0,
+        source: { type: 'internal' as const, version: 1 },
+        ownership: { managed: false },
+      },
     });
 
     expect(screen.getByText('Description')).toBeInTheDocument();

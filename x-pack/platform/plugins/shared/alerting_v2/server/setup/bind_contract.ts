@@ -11,28 +11,35 @@ import { Global } from '@kbn/core-di-internal';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import { RulesClient, type CreateRulesClientOptions } from '../lib/rules_client';
+import { RulesClient } from '../lib/rules_client';
 import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import { BuilderTypeRegistry } from '../lib/builder_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { InternalRulesClient } from '../lib/internal_rules_client';
+import { CallerIdentityToken } from '../lib/rules_client/caller_identity';
 import type {
   AlertingServerSetup,
   AlertingServerStart,
   RulesClientApi,
   InternalRulesClientApi,
+  RulesClientCallerOptions,
   ActionPolicyClientApi,
   AlertEventsClientApi,
 } from '../types';
 
 export function bindContract({ bind }: ContainerModuleLoadOptions) {
   bind(Setup).toDynamicValue(({ get }) => {
-    const registry = get(ArtifactTypeRegistry);
+    const artifactTypes = get(ArtifactTypeRegistry);
+    const builderTypes = get(BuilderTypeRegistry);
     const contract: AlertingServerSetup = {
       registerArtifactType: (definition) => {
-        registry.register(definition);
+        artifactTypes.register(definition);
+      },
+      registerBuilderType: (definition) => {
+        builderTypes.register(definition);
       },
     };
     return contract;
@@ -44,16 +51,21 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
     const buildScope = (
       request: KibanaRequest,
       spaceId?: SpaceId,
-      rulesClientOptions?: CreateRulesClientOptions
+      options?: RulesClientCallerOptions
     ) => {
+      const { onBehalfOf, ...rulesClientOptions } = options ?? {};
       const scope = injection.fork();
       scope.bind(Request).toConstantValue(request);
       scope.bind(Global).toConstantValue(Request);
-      scope.bind(RulesClientOptionsToken).toConstantValue(rulesClientOptions ?? {});
+      scope.bind(RulesClientOptionsToken).toConstantValue(rulesClientOptions);
       scope.bind(Global).toConstantValue(RulesClientOptionsToken);
       if (spaceId) {
         scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
         scope.bind(Global).toConstantValue(RequestSpaceIdToken);
+      }
+      if (onBehalfOf !== undefined) {
+        scope.bind(CallerIdentityToken).toConstantValue(onBehalfOf);
+        scope.bind(Global).toConstantValue(CallerIdentityToken);
       }
       return scope;
     };
@@ -61,14 +73,14 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
     const contract: AlertingServerStart = {
       async getRulesClientWithRequest(
         request: KibanaRequest,
-        options?: CreateRulesClientOptions
+        options?: RulesClientCallerOptions
       ): Promise<RulesClientApi> {
         return buildScope(request, undefined, options).get(RulesClient);
       },
       async getRulesClientWithRequestInSpace(
         request: KibanaRequest,
         spaceId: SpaceId,
-        options?: CreateRulesClientOptions
+        options?: RulesClientCallerOptions
       ): Promise<RulesClientApi> {
         return buildScope(request, spaceId, options).get(RulesClient);
       },

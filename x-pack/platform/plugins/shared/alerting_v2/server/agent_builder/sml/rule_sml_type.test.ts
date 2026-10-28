@@ -43,7 +43,14 @@ const baseRuleResponse = {
   created_at: createdAt,
   updated_by: updatedBy,
   updated_at: updatedAt,
-  metadata: baseRuleAttrs.metadata,
+  metadata: {
+    ...baseRuleAttrs.metadata,
+    signature_id: 'base-rule-sig-id',
+    source: { type: 'internal' as const, version: 1 },
+    revision: baseRuleAttrs.metadata?.revision ?? 0,
+    // Step 4.4: ownership is now required in ruleResponseMetadataSchema.
+    ownership: { managed: false } as const,
+  },
 };
 
 const buildToAttachmentContext = () => ({
@@ -201,7 +208,7 @@ describe('createRuleSmlType', () => {
           'CPU breach detection',
           'alert',
           'ops, cpu',
-          baseRuleAttrs.query.base,
+          baseRuleAttrs.query!.base,
         ].join('\n'),
       });
       expect(result).not.toHaveProperty('permissions');

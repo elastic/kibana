@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
+import { v4 as uuidv4 } from 'uuid';
 import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
@@ -20,6 +21,8 @@ import {
   type BulkGetRulesResponse,
   type PutRuleData,
   type RuleKind,
+  type RuleOwnership,
+  type RuleSource,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
@@ -38,7 +41,7 @@ import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import type { EventOriginActor } from '../event_origin/origin_schemas';
 import { toEventOrigin } from '../event_origin/event_origin';
-import { type RuleSavedObjectAttributes } from '../../saved_objects';
+import { type RuleSavedObjectAttributes, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import {
   ArtifactTypeRegistry,
@@ -46,6 +49,7 @@ import {
   injectArtifactReferences,
   rebuildArtifactReferences,
 } from '../artifact_types';
+import { BuilderTypeRegistry } from '../builder_types';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getInvalidRuleDataMessage,
@@ -75,6 +79,7 @@ import {
   RulesSavedObjectServiceScopedToken,
 } from '../services/rules_saved_object_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
+import { type CallerIdentity, CallerIdentityToken } from './caller_identity';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
@@ -83,6 +88,7 @@ import type { CreateRulesClientOptions } from './types';
 import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import { RulesClientOptionsToken } from './tokens';
+import { mergedBuilderFieldMappings } from '../../saved_objects/rule_mappings';
 import type {
   BulkByIdsParams,
   BulkByQueryParams,
@@ -91,20 +97,37 @@ import type {
   BulkCreateRulesResponse,
   BulkOperationError,
   BulkResponse,
+  BuilderFieldsValidation,
   CreateRuleData,
   CreateRuleParams,
   FindMatchingRulesArgs,
   FindRulesArgs,
-  FindRulesResponse,
+  FindRulesResult,
   FindRulesSortField,
+  GetRuleResult,
   RotationCandidate,
   RuleResponse,
   UpdateRuleParams,
 } from './types';
 import {
+  assertBuilderTypeTransitionNotManaged,
+  requestedBuilderType,
+  resolveCreateRuleBuilder,
+  resolveReplaceRuleBuilder,
+  resolveUpdateRuleBuilder,
+} from './builder_resolution';
+import {
   assertImmutableUnchanged,
+  assertKindPinMatch,
+  assertManagedRuleWrite,
+  assertRuleSourceUnchanged,
+  assertSignatureIdUnchanged,
+  getManagedWriteOwner,
+  managedRuleWriteError,
   validateMergedRuleAttributes,
   buildUpdateRuleAttributes,
+  computeNextRevision,
+  deriveOwnership,
   groupCandidatesByInterval,
   isTaskMidRun,
   ruleDisabledError,
@@ -204,18 +227,67 @@ const throwOnCreateError = (error: BulkOperationError): never => {
   });
 };
 
-const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
+/**
+ * Fixed sort field names whose SO paths are determined by the framework's own
+ * mappings and do not change with registered builder-fields manifests. The
+ * `name` value targets the keyword sub-field of the `text` mapping so that
+ * lexicographic ordering works correctly.
+ */
+const FIXED_SORT_FIELD_MAP: Record<string, string> = {
+  kind: 'kind',
+  enabled: 'enabled',
+  // Targets the `.keyword` sub-field of the `text` mapping so sort is
+  // lexicographic rather than score-based.
+  name: 'metadata.name.keyword',
+  // Phase 4: builder_type is keyword-indexed (squashed model version '12';
+  // originally designed as a standalone model version '15' on this POC branch).
+  builder_type: 'metadata.builder_type',
+};
+
+/**
+ * The prefix that identifies a builder-fields sort request. Any
+ * `builder_fields.<path>` value not in the fixed map is resolved against the
+ * merged registered sub-fields from the manifests.
+ */
+const BUILDER_FIELDS_SORT_PREFIX = 'builder_fields.';
+
+/**
+ * Maps a client-facing sort field name to its saved-object path.
+ *
+ * - Fixed names (`kind`, `enabled`, `name`, `builder_type`) resolve to their
+ *   framework-owned SO paths and are not affected by registered manifests.
+ * - Any `builder_fields.<path>` is resolved against the merged sub-fields from
+ *   the registered builder-fields manifests. An unknown path or a `text` leaf
+ *   throws a 400: a sort on an unknown path would be silently wrong, and a `text`
+ *   leaf cannot be sorted because `simple_query_string` prefix queries reject it.
+ * - Any other value throws a 400.
+ *
+ * Ref: builder-type-registration-redesign.md "What this design needs from the framework"
+ */
+const mapSortField = (sortField?: FindRulesSortField | string): string | undefined => {
   if (!sortField) {
     return undefined;
   }
 
-  const sortFieldMap: Record<FindRulesSortField, string> = {
-    kind: 'kind',
-    enabled: 'enabled',
-    name: 'metadata.name.keyword',
-  };
+  if (Object.hasOwn(FIXED_SORT_FIELD_MAP, sortField)) {
+    return FIXED_SORT_FIELD_MAP[sortField];
+  }
 
-  return sortFieldMap[sortField];
+  if (sortField.startsWith(BUILDER_FIELDS_SORT_PREFIX)) {
+    const path = sortField.slice(BUILDER_FIELDS_SORT_PREFIX.length);
+    const subField = Object.hasOwn(mergedBuilderFieldMappings, path)
+      ? mergedBuilderFieldMappings[path]
+      : undefined;
+    if (subField === undefined) {
+      throw Boom.badRequest(`Unknown sort field: ${sortField}`);
+    }
+    if (subField.type === 'text') {
+      throw Boom.badRequest(`${sortField} is an analyzed field and cannot be sorted on`);
+    }
+    return `metadata.builder_fields.${path}`;
+  }
+
+  throw Boom.badRequest(`Unknown sort field: ${sortField}`);
 };
 
 @injectable()
@@ -240,7 +312,9 @@ export class RulesClient {
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
     @inject(EventOriginActorToken) actor: EventOriginActor,
-    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
+    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions,
+    @inject(BuilderTypeRegistry) private readonly builderTypeRegistry: BuilderTypeRegistry,
+    @inject(CallerIdentityToken) private readonly callerIdentity: CallerIdentity | undefined
   ) {
     this.eventContext = { request, origin: toEventOrigin(actor, request, rulesClientOptions) };
     this.config = pluginConfigAccessor.get<PluginConfig>();
@@ -422,6 +496,8 @@ export class RulesClient {
     nowIso,
     version,
     template,
+    signatureId,
+    validateBuilderFields = true,
   }: {
     data: CreateRuleData;
     id?: string;
@@ -430,11 +506,44 @@ export class RulesClient {
     nowIso: string;
     version: number;
     template?: RuleSavedObjectAttributes['metadata']['template'];
+    signatureId: string;
+    validateBuilderFields?: boolean;
   }): PreparedRule {
     this.artifactTypeRegistry.validate(data.artifacts);
     this.assertScheduleIntervalAllowed(data.schedule.every);
 
-    const attrs = transformCreateRuleBodyToRuleSoAttributes(data, {
+    // Gate: creating a rule of a managed type requires a matching caller identity.
+    // No stored ownership exists yet; the registration half of the gate applies.
+    // Ref: rule-ownership.md "Path by path" (create paths row)
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: undefined,
+      builderType: data.metadata?.builder?.type,
+    });
+
+    // Kind-pin check: if the builder type's registration pins a kind, the
+    // create body must supply that kind.
+    // Ref: rule-type-registration.md "Registration-time checks" (check 5, per-write half)
+    assertKindPinMatch(this.builderTypeRegistry, data.kind, data.metadata?.builder?.type);
+
+    const resolved = resolveCreateRuleBuilder(this.builderTypeRegistry, data, {
+      validateBuilderFields,
+    });
+
+    // Derive ownership from the builder type's registration.
+    // Managed types stamp { managed: true, solution, domain }; everything else
+    // stamps { managed: false }, with `app` from the caller identity when an
+    // in-process caller declared one. Immutable for the rule's life.
+    // Ref: rule-ownership.md "The invariant and how it holds"
+    // Ref: rule-ownership.md "Caller identity"
+    const ownership = deriveOwnership(
+      this.builderTypeRegistry,
+      data.metadata?.builder?.type,
+      this.callerIdentity?.app
+    );
+
+    const attrs = transformCreateRuleBodyToRuleSoAttributes(resolved, {
       enabled,
       createdBy: actor,
       createdAt: nowIso,
@@ -442,6 +551,11 @@ export class RulesClient {
       updatedAt: nowIso,
       version,
       template,
+      signatureId,
+      // Resolve source: use the caller-supplied value or default to internal.
+      // Ref: rule-source.md "Who writes the source"
+      source: data.metadata?.source ?? { type: 'internal', version: 1 },
+      ownership,
     });
 
     return {
@@ -612,6 +726,65 @@ export class RulesClient {
     );
   }
 
+  /**
+   * Validates `builder_fields` for a single rule against the registered type's
+   * schema and optional `validateFields` hook. Used by the read-path opt-in.
+   *
+   * Never throws. An unregistered type is reported as an ordinary validation
+   * error. The call itself must not fail because a rules list must not go
+   * blank because one rule predates a schema change.
+   *
+   * Ref: rule-validation.md "Read-path validation: off by default, opt-in per call"
+   * Ref: rule-validation.md "Rules whose builder type is not registered"
+   */
+  private validateBuilderFieldsForRule(rule: RuleResponse): BuilderFieldsValidation {
+    const builderType = rule.metadata.builder?.type;
+    const builderFields = rule.metadata.builder_fields;
+
+    if (!builderType || builderFields == null) {
+      // No builder type — nothing to validate.
+      return { valid: true, errors: [] };
+    }
+
+    const definition = this.builderTypeRegistry.get(builderType);
+    if (!definition) {
+      // Unknown type: ordinary error, not a thrown exception.
+      // Ref: rule-validation.md "Rules whose builder type is not registered"
+      return {
+        valid: false,
+        errors: [{ path: '', message: `Unknown builder type: "${builderType}"` }],
+      };
+    }
+
+    let parseResult: ReturnType<typeof definition.builderFieldsSchema.safeParse>;
+    try {
+      parseResult = definition.builderFieldsSchema.safeParse(builderFields);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return { valid: false, errors: [{ path: '', message }] };
+    }
+
+    if (!parseResult.success) {
+      const errors = parseResult.error.issues.map((issue) => ({
+        path: issue.path.join('.'),
+        message: issue.message,
+      }));
+      return { valid: false, errors };
+    }
+
+    if (definition.validateFields) {
+      const hookErrors = definition.validateFields(parseResult.data);
+      if (hookErrors.length > 0) {
+        return {
+          valid: false,
+          errors: hookErrors.map((message) => ({ path: '', message })),
+        };
+      }
+    }
+
+    return { valid: true, errors: [] };
+  }
+
   private async writeRuleAttrs({
     id,
     attrs,
@@ -681,11 +854,42 @@ export class RulesClient {
     }
   }
 
+  /**
+   * Verifies that no rule in the current space already carries `signatureId`.
+   * Application-level check — shares the read-then-write race v1 always had
+   * (documented and accepted by the rule-identity design, "Uniqueness" section).
+   * Throws a 409 RULE_ALREADY_EXISTS when a collision is found.
+   */
+  private async assertSignatureIdUniqueInSpace(signatureId: string): Promise<void> {
+    // Construct the SO-path KQL directly; this is an internal check that bypasses
+    // the public find-filter allowlist (allowlist addition is step 4.5).
+    const escapedId = signatureId.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const filter = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.signature_id: "${escapedId}"`;
+    const result = await this.rulesSavedObjectService.find({ page: 1, perPage: 1, filter });
+    if (result.total > 0) {
+      const collidingId = result.saved_objects[0]?.id;
+      throw Boom.conflict(
+        `A rule with metadata.signature_id "${signatureId}" already exists in this space`,
+        {
+          code: ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS,
+          details: { signature_id: signatureId, rule_id: collidingId },
+        }
+      );
+    }
+  }
+
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
+
+    // Resolve signature_id: use the caller-supplied value or generate a UUID v4.
+    const signatureId = parsed.metadata?.signature_id ?? uuidv4();
+
+    // Space-scoped uniqueness check. Application-level, shares the read-then-write
+    // race v1 has always had (documented and accepted by the design).
+    await this.assertSignatureIdUniqueInSpace(signatureId);
 
     const prepared = this.prepareRuleForCreate({
       data: parsed,
@@ -695,6 +899,8 @@ export class RulesClient {
       nowIso,
       version: this.getNextVersion(),
       template: params.options?.template,
+      signatureId,
+      validateBuilderFields: params.options?.validateBuilderFields ?? true,
     });
 
     await this.validateSchedule([
@@ -740,10 +946,12 @@ export class RulesClient {
     // to the request position instead.
     const positions = new Map<string, BulkCreateItemPosition>();
 
-    parsed.items.forEach((item, index) => {
+    for (const [index, item] of parsed.items.entries()) {
       const { id, enabled, ...data } = item;
       const position: BulkCreateItemPosition = { index, ...(id ? { id } : {}) };
       try {
+        const signatureId = data.metadata?.signature_id ?? uuidv4();
+        await this.assertSignatureIdUniqueInSpace(signatureId);
         const rule = this.prepareRuleForCreate({
           data,
           id,
@@ -751,17 +959,18 @@ export class RulesClient {
           actor,
           nowIso,
           version: ruleVersion,
+          signatureId,
         });
         prepared.push(rule);
         positions.set(rule.id, position);
       } catch (e) {
         if (Boom.isBoom(e)) {
           errors.push({ ...position, error: toPerItemError(e) });
-          return;
+          continue;
         }
         throw e;
       }
-    });
+    }
 
     await this.validateSchedule(
       prepared
@@ -807,7 +1016,7 @@ export class RulesClient {
   }
 
   @withApm
-  public async updateRule({ id, data }: UpdateRuleParams): Promise<RuleResponse> {
+  public async updateRule({ id, data, options }: UpdateRuleParams): Promise<RuleResponse> {
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
     if (parsed.artifacts !== undefined) {
       this.artifactTypeRegistry.validate(parsed.artifacts ?? undefined);
@@ -822,6 +1031,32 @@ export class RulesClient {
       references: existingReferences,
     } = await this.getExistingRule(id);
 
+    // Gate: managed rules may only be written by the owning solution's client.
+    // Both the stored ownership mark and the current registration are consulted.
+    // Ref: rule-ownership.md "The write gate"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: existingAttrs.metadata.builder_type,
+    });
+
+    // Second clause: builder-type transitions that touch a managed type are
+    // rejected regardless of caller identity. This runs after the identity
+    // gate because the gate's flowchart puts the identity clause first: a
+    // caller with no identity writing a managed rule receives RULE_IS_MANAGED,
+    // not BUILDER_TYPE_IS_MANAGED. The identity clause reads the stored rule,
+    // so a rule that is not yet managed adopting a managed type sails past it
+    // and is rejected here instead. Caller identity does not bypass this clause.
+    // Ref: rule-ownership.md "The write gate" (second clause)
+    assertBuilderTypeTransitionNotManaged(
+      this.builderTypeRegistry,
+      id,
+      requestedBuilderType(parsed.metadata),
+      existingAttrs.metadata.builder_type,
+      existingAttrs.metadata.ownership
+    );
+
     if (
       !isStateTransitionAllowed({
         kind: existingAttrs.kind,
@@ -834,7 +1069,26 @@ export class RulesClient {
       });
     }
 
-    const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
+    // Kind-pin check: kind is immutable, so we compare the stored kind against
+    // the effective builder type after the update resolves (which may change when
+    // the caller supplies a new builder_type).
+    // Ref: rule-type-registration.md "Registration-time checks" (check 5, per-write half)
+    assertKindPinMatch(
+      this.builderTypeRegistry,
+      existingAttrs.kind,
+      parsed.metadata?.builder?.type ?? existingAttrs.metadata.builder_type
+    );
+
+    // Immutability check: omitted keeps stored value, equal passes, different rejects.
+    assertSignatureIdUnchanged(parsed.metadata?.signature_id, existingAttrs);
+    // source.type and source.id are immutable; only source.version can move.
+    assertRuleSourceUnchanged(parsed.metadata?.source, existingAttrs);
+
+    const resolved = resolveUpdateRuleBuilder(this.builderTypeRegistry, id, parsed, existingAttrs, {
+      validateBuilderFields: options?.validateBuilderFields ?? true,
+    });
+
+    const nextAttrs = buildUpdateRuleAttributes(existingAttrs, resolved, {
       updatedBy: actor,
       updatedAt: nowIso,
       version: this.getNextVersion(existingAttrs.version),
@@ -884,9 +1138,16 @@ export class RulesClient {
   }
 
   @withApm
-  public async getRule({ id }: { id: string }): Promise<RuleResponse> {
+  public async getRule(
+    { id }: { id: string },
+    options?: { validateBuilderFields?: boolean }
+  ): Promise<GetRuleResult> {
     const { attrs, references } = await this.getExistingRule(id);
-    return this.toRuleApiResponse({ id, attrs, references });
+    const rule = this.toRuleApiResponse({ id, attrs, references });
+    if (options?.validateBuilderFields) {
+      return { ...rule, builder_fields_validation: this.validateBuilderFieldsForRule(rule) };
+    }
+    return rule;
   }
 
   /**
@@ -954,6 +1215,15 @@ export class RulesClient {
     // rule can be emitted as the change-history snapshot for the deletion.
     const { attrs: existingAttrs, references } = await this.getExistingRule(id);
 
+    // Gate: managed rules may only be deleted by the owning solution's client.
+    // Ref: rule-ownership.md "The write gate"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: existingAttrs.metadata.builder_type,
+    });
+
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
@@ -986,6 +1256,16 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
 
     const { attrs } = await this.getExistingRule(id);
+
+    // Gate: triggering execution of a managed rule is a lifecycle act gated
+    // the same as any other write. No exceptions per the design.
+    // Ref: rule-ownership.md "Path by path"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: attrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: attrs.metadata.builder_type,
+    });
 
     if (!attrs.enabled) {
       throw Boom.badRequest(`Rule with ID "${id}" is disabled and cannot be run`, {
@@ -1039,6 +1319,15 @@ export class RulesClient {
       references,
     } = await this.getExistingRule(id);
 
+    // Gate: enabling a managed rule is gated with no exceptions.
+    // Ref: rule-ownership.md "The write gate"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: existingAttrs.metadata.builder_type,
+    });
+
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
@@ -1088,6 +1377,15 @@ export class RulesClient {
       references,
     } = await this.getExistingRule(id);
 
+    // Gate: disabling a managed rule is gated with no exceptions.
+    // Ref: rule-ownership.md "The write gate"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: existingAttrs.metadata.builder_type,
+    });
+
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
@@ -1127,9 +1425,13 @@ export class RulesClient {
 
   @withApm
   public async getTags(
-    params: { search?: string; kind?: RuleKind; size?: number } = {}
+    params: { search?: string; kind?: RuleKind; filter?: string; size?: number } = {}
   ): Promise<string[]> {
-    const soFilter = params.kind ? buildRuleSoFilter(`kind:${params.kind}`) : undefined;
+    const parts: string[] = [];
+    if (params.kind) parts.push(`kind:${params.kind}`);
+    if (params.filter) parts.push(params.filter);
+    const combined = parts.length === 2 ? `(${parts[0]}) AND (${parts[1]})` : parts[0] ?? undefined;
+    const soFilter = combined ? buildRuleSoFilter(combined) : undefined;
     return this.rulesSavedObjectService.findTags({
       search: params.search,
       filter: soFilter,
@@ -1153,7 +1455,9 @@ export class RulesClient {
   }
 
   @withApm
-  public async findRules(params: FindRulesArgs = {}): Promise<FindRulesResponse> {
+  public async findRules(
+    params: FindRulesArgs & { validateBuilderFields?: boolean } = {}
+  ): Promise<FindRulesResult> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? FIND_DEFAULT_PER_PAGE;
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
@@ -1170,14 +1474,20 @@ export class RulesClient {
       sortOrder: params.sortOrder,
     });
 
+    const items = res.saved_objects.map((so) => {
+      const rule = this.toRuleApiResponse({
+        id: so.id,
+        attrs: so.attributes,
+        references: so.references,
+      });
+      if (params.validateBuilderFields) {
+        return { ...rule, builder_fields_validation: this.validateBuilderFieldsForRule(rule) };
+      }
+      return rule;
+    });
+
     return {
-      items: res.saved_objects.map((so) =>
-        this.toRuleApiResponse({
-          id: so.id,
-          attrs: so.attributes,
-          references: so.references,
-        })
-      ),
+      items,
       total: res.total,
       page,
       per_page: perPage,
@@ -1195,7 +1505,7 @@ export class RulesClient {
     matcher,
     page,
     perPage,
-  }: FindMatchingRulesArgs = {}): Promise<FindRulesResponse> {
+  }: FindMatchingRulesArgs = {}): Promise<FindRulesResult> {
     return this.findRules({
       page,
       perPage,
@@ -1211,15 +1521,42 @@ export class RulesClient {
    * the two consumers below — {@link countByQuery} and {@link getRuleIdsByQuery}
    * — always agree on the query they're issuing against the same index.
    */
+  /**
+   * Builds a KQL exclusion fragment (in SO-attribute-path form) that removes
+   * managed rules the current caller cannot write from the by-query match set.
+   * This keeps the dry-run match_count and sample honest about what a forced run
+   * would actually touch.
+   *
+   * Identity-less callers cannot write any managed rule, so the exclusion is
+   * simply `NOT <managedPath>: true`. A caller with a known solution may write
+   * that solution's managed rules, so only other solutions' managed rules are
+   * excluded.
+   *
+   * Enforcement does not depend on this exclusion — it exists for honest counts.
+   * The per-rule gate in each bulk executor is the authoritative enforcement.
+   *
+   * Ref: rule-ownership.md "Path by path"
+   */
+  private buildOwnershipExclusionFilter(): string {
+    const managedPath = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.ownership.managed`;
+    if (this.callerIdentity?.solution != null) {
+      const solutionPath = `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.ownership.solution`;
+      return `NOT (${managedPath}: true AND NOT ${solutionPath}: "${this.callerIdentity.solution}")`;
+    }
+    return `NOT ${managedPath}: true`;
+  }
+
   private buildSoQueryParams(params: Pick<BulkByQueryParams, 'filter' | 'search'>): {
     filter?: string;
     search?: string;
     searchFields?: string[];
   } {
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    const exclusion = this.buildOwnershipExclusionFilter();
+    const filter = soFilter ? `(${soFilter}) AND ${exclusion}` : exclusion;
     const search = buildSoSearch(params.search);
     return {
-      filter: soFilter,
+      filter,
       search,
       searchFields: search ? RULE_SEARCH_FIELDS : undefined,
     };
@@ -1300,18 +1637,58 @@ export class RulesClient {
     }
 
     // Capture pre-delete state so the deleted rule can be emitted as the
-    // change-history snapshot per deleted rule.
+    // change-history snapshot per deleted rule. While iterating, apply the
+    // managed-rule write gate: refuse managed rules as per-item errors and
+    // remove them from the set of ids to actually delete.
+    //
+    // Fetch errors are handled conservatively:
+    //   - 404 (not found): keep in the delete set so bulkDelete surfaces the
+    //     real RULE_NOT_FOUND error — the rule is genuinely absent.
+    //   - Any other status: fail closed — the gate could not evaluate the rule,
+    //     so push an error and exclude the id from the delete set rather than
+    //     deleting something we could not verify.
+    //
+    // Ref: rule-ownership.md "Path by path" — "the gate rejects any other write
+    // with a RULE_IS_MANAGED error"
     const docsById = new Map<
       string,
       { attrs: RuleSavedObjectAttributes; references: SavedObjectReference[] }
     >();
+    const refusedIds = new Set<string>();
     for (const doc of await this.rulesSavedObjectService.bulkGetByIds(ids)) {
-      if (!('error' in doc)) {
-        docsById.set(doc.id, { attrs: doc.attributes, references: doc.references ?? [] });
+      if ('error' in doc) {
+        if (doc.error.statusCode === 404) {
+          // Keep in the delete set — bulkDelete will surface the real
+          // RULE_NOT_FOUND error.
+          continue;
+        }
+        // Non-404 fetch error: the gate cannot evaluate this id. Fail closed.
+        errors.push(toBulkError(doc.id, doc.error));
+        refusedIds.add(doc.id);
+        continue;
       }
+      const owner = getManagedWriteOwner({
+        registry: this.builderTypeRegistry,
+        callerIdentity: this.callerIdentity,
+        storedOwnership: doc.attributes.metadata.ownership as RuleOwnership | undefined,
+        builderType: doc.attributes.metadata.builder_type,
+      });
+      if (owner !== undefined) {
+        errors.push(
+          managedRuleWriteError(doc.id, owner.solution, owner.domain, doc.attributes.metadata.name)
+        );
+        refusedIds.add(doc.id);
+        continue;
+      }
+      docsById.set(doc.id, { attrs: doc.attributes, references: doc.references ?? [] });
     }
 
-    const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
+    const idsToDelete = ids.filter((id) => !refusedIds.has(id));
+    if (idsToDelete.length === 0) {
+      return { affected_count: affectedCount, errors };
+    }
+
+    const deleteResults = await this.rulesSavedObjectService.bulkDelete(idsToDelete);
     const deletedRules: EventRule[] = [];
     for (const result of deleteResults) {
       if (!result.success) {
@@ -1375,6 +1752,21 @@ export class RulesClient {
     for (const doc of fetchResults) {
       if ('error' in doc) {
         errors.push(toBulkError(doc.id, doc.error));
+        continue;
+      }
+
+      // Managed-rule write gate — refuse per-item, never fail the whole request.
+      // Ref: rule-ownership.md "Path by path"
+      const owner = getManagedWriteOwner({
+        registry: this.builderTypeRegistry,
+        callerIdentity: this.callerIdentity,
+        storedOwnership: doc.attributes.metadata.ownership as RuleOwnership | undefined,
+        builderType: doc.attributes.metadata.builder_type,
+      });
+      if (owner !== undefined) {
+        errors.push(
+          managedRuleWriteError(doc.id, owner.solution, owner.domain, doc.attributes.metadata.name)
+        );
         continue;
       }
 
@@ -1503,6 +1895,21 @@ export class RulesClient {
         continue;
       }
 
+      // Managed-rule write gate — refuse per-item, never fail the whole request.
+      // Ref: rule-ownership.md "Path by path"
+      const owner = getManagedWriteOwner({
+        registry: this.builderTypeRegistry,
+        callerIdentity: this.callerIdentity,
+        storedOwnership: doc.attributes.metadata.ownership as RuleOwnership | undefined,
+        builderType: doc.attributes.metadata.builder_type,
+      });
+      if (owner !== undefined) {
+        errors.push(
+          managedRuleWriteError(doc.id, owner.solution, owner.domain, doc.attributes.metadata.name)
+        );
+        continue;
+      }
+
       if (!doc.attributes.enabled) {
         affectedCount += 1;
         continue;
@@ -1607,6 +2014,21 @@ export class RulesClient {
     for (const doc of fetchResults) {
       if ('error' in doc) {
         errors.push(toBulkError(doc.id, doc.error));
+        continue;
+      }
+
+      // Managed-rule write gate — refuse per-item, never fail the whole request.
+      // Ref: rule-ownership.md "Path by path"
+      const owner = getManagedWriteOwner({
+        registry: this.builderTypeRegistry,
+        callerIdentity: this.callerIdentity,
+        storedOwnership: doc.attributes.metadata.ownership as RuleOwnership | undefined,
+        builderType: doc.attributes.metadata.builder_type,
+      });
+      if (owner !== undefined) {
+        errors.push(
+          managedRuleWriteError(doc.id, owner.solution, owner.domain, doc.attributes.metadata.name)
+        );
         continue;
       }
 
@@ -1926,9 +2348,20 @@ export class RulesClient {
   public async upsertRule({
     id,
     data,
+    options,
   }: {
     id: string;
     data: PutRuleData;
+    options?: {
+      /**
+       * When false, the builder schema parse and `validateFields` hook are
+       * skipped on the replace branch. The wire schema always runs. For
+       * in-process callers only; the framework's HTTP routes never pass this.
+       *
+       * Ref: rule-validation.md "Write-path validation: on by default, opt-out per call"
+       */
+      validateBuilderFields?: boolean;
+    };
   }): Promise<{ rule: RuleResponse; created: boolean }> {
     const parsed = this.parseRuleData(putRuleDataSchema, data, 'upsert');
     this.artifactTypeRegistry.validate(parsed.artifacts);
@@ -1936,8 +2369,21 @@ export class RulesClient {
     const exists = await this.ruleExists({ id });
 
     if (!exists) {
-      const { enabled, ...createData } = parsed;
-      const rule = await this.createRule({ data: createData, options: { id, enabled } });
+      // Normalise `null` → `undefined` for the builder before the create path.
+      // The null escape hatch is only meaningful in the replace branch; createRule
+      // uses createRuleDataSchema which does not accept null.
+      const { enabled, ...body } = data;
+      const createData: CreateRuleData = {
+        ...body,
+        metadata: {
+          ...body.metadata,
+          builder: body.metadata.builder ?? undefined,
+        },
+      };
+      const rule = await this.createRule({
+        data: createData,
+        options: { id, enabled, validateBuilderFields: options?.validateBuilderFields },
+      });
       return { rule, created: true };
     }
 
@@ -1950,12 +2396,67 @@ export class RulesClient {
       references: existingReferences,
     } = await this.getExistingRule(id);
 
+    // Gate: managed rules may only be replaced by the owning solution's client.
+    // Ref: rule-ownership.md "The write gate"
+    assertManagedRuleWrite({
+      registry: this.builderTypeRegistry,
+      callerIdentity: this.callerIdentity,
+      storedOwnership: existingAttrs.metadata.ownership as RuleOwnership | undefined,
+      builderType: existingAttrs.metadata.builder_type,
+    });
+
+    // Second clause: builder-type transitions that touch a managed type are
+    // rejected regardless of caller identity. Same ordering rationale as the
+    // updateRule path above — rule-ownership.md "The write gate" second clause.
+    assertBuilderTypeTransitionNotManaged(
+      this.builderTypeRegistry,
+      id,
+      requestedBuilderType(parsed.metadata),
+      existingAttrs.metadata.builder_type,
+      existingAttrs.metadata.ownership
+    );
+
     assertImmutableUnchanged(parsed, existingAttrs);
+    // Separate omitted-means-keep check for the nested signature_id — see the
+    // design doc ("Immutability") for why assertImmutableUnchanged cannot cover it.
+    assertSignatureIdUnchanged(parsed.metadata?.signature_id, existingAttrs);
+    // source.type and source.id are immutable; only source.version can move.
+    assertRuleSourceUnchanged(parsed.metadata?.source, existingAttrs);
+
+    // Kind-pin check: assertImmutableUnchanged above already confirmed that
+    // parsed.kind equals the stored kind, so checking parsed.kind here is
+    // equivalent to checking the stored kind.
+    // Ref: rule-type-registration.md "Registration-time checks" (check 5, per-write half)
+    assertKindPinMatch(this.builderTypeRegistry, parsed.kind, parsed.metadata?.builder?.type);
 
     const prevEnabled = existingAttrs.enabled;
     const nextEnabled = parsed.enabled ?? prevEnabled;
 
-    const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
+    // PUT replaces the whole resource, but a stored builder relationship must
+    // not be silently stripped. resolveReplaceRuleBuilder runs the same
+    // BUILDER_TYPE_NOT_CLEARED guard as the PATCH path, for every builder rule,
+    // managed or not.
+    // Ref: rule-types.md "What this design needs from the framework"
+    const resolved = resolveReplaceRuleBuilder(
+      this.builderTypeRegistry,
+      id,
+      parsed,
+      existingAttrs,
+      {
+        validateBuilderFields: options?.validateBuilderFields ?? true,
+      }
+    );
+    // Resolve source for replace: omit keeps stored value (a PUT that omits
+    // source cannot silently reset an external rule to internal). When present,
+    // assertRuleSourceUnchanged above already confirmed type/id are unchanged.
+    // existingAttrs.metadata.source is typed by @kbn/config-schema's TypeOf, which
+    // produces a flat union rather than a discriminated one. The cast is safe because
+    // the v7 schema validates the same shape the Zod schema requires.
+    const resolvedSource = (parsed.metadata?.source ??
+      existingAttrs.metadata.source ?? { type: 'internal', version: 1 }) as RuleSource;
+    // Build the next attributes without revision first; the diff against stored
+    // attributes determines whether the replace actually changed anything meaningful.
+    const rawNextAttrs = transformCreateRuleBodyToRuleSoAttributes(resolved, {
       enabled: nextEnabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
@@ -1963,7 +2464,23 @@ export class RulesClient {
       updatedAt: nowIso,
       version: this.getNextVersion(existingAttrs.version),
       template: existingAttrs.metadata.template,
+      // Immutable: always carry the stored value forward on replace.
+      signatureId: existingAttrs.metadata.signature_id!,
+      source: resolvedSource,
+      // Ownership is immutable — always carry the stored value forward.
+      // Falls back to { managed: false } when the stored rule predates step 4.4
+      // (pending the model-version migration in step 4.5).
+      ownership: (existingAttrs.metadata.ownership ?? { managed: false }) as RuleOwnership,
     });
+    // Revision: diff the replacement against stored attributes and bump if needed.
+    // Ref: rule-versions.md "How the diff runs"
+    const nextAttrs = {
+      ...rawNextAttrs,
+      metadata: {
+        ...rawNextAttrs.metadata,
+        revision: computeNextRevision(rawNextAttrs, existingAttrs),
+      },
+    };
 
     await this.validateSchedule([
       {
