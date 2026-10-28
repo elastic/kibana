@@ -76,6 +76,11 @@ export interface EpisodesFilterState {
   severity?: string[] | null;
   /** Assignee UID — episodes whose last assignee matches this user profile UID */
   assigneeUid?: string;
+  /**
+   * Source values (OR). `v1` is Classic, `v2` is Universal, and any other
+   * value is a connector slug. Empty/undefined shows every source.
+   */
+  sources?: string[] | null;
 }
 
 export interface EpisodesSortState {

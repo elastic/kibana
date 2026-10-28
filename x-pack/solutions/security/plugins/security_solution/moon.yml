@@ -18,7 +18,6 @@ project:
   sourceRoot: x-pack/solutions/security/plugins/security_solution
 dependsOn:
   - '@kbn/data-source'
-  - '@kbn/securitysolution-alerts-page-url'
   - '@kbn/setup-node-env'
   - '@kbn/core'
   - '@kbn/data-plugin'
