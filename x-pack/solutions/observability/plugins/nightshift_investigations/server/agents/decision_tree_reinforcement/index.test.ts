@@ -20,12 +20,12 @@ import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replac
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
 
-const staticBase = () => {
+const baseFor = async (spaceId = 'default') => {
   const type = getDecisionTreeReinforcementAgentType();
-  if (typeof type.baseConfiguration === 'function') {
-    throw new Error('expected a static base configuration');
+  if (typeof type.baseConfiguration !== 'function') {
+    throw new Error('expected a per-space base configuration');
   }
-  return type.baseConfiguration;
+  return type.baseConfiguration({ spaceId } as never);
 };
 
 describe('Nightshift decision tree reinforcement agent type', () => {
@@ -42,21 +42,23 @@ describe('Nightshift decision tree reinforcement agent type', () => {
   // The reinforcement agent is launched by the combined optimize workflow, which is itself
   // the investigator's post-execution hook. If this agent also carried that hook, its round
   // would re-run the optimize workflow, which would launch another reinforcement agent.
-  it('does not re-run the investigator post-execution workflow', () => {
-    expect(staticBase().post_execution_workflow_ids).toBeUndefined();
+  it('does not re-run the investigator post-execution workflow', async () => {
+    expect((await baseFor()).post_execution_workflow_ids).toBeUndefined();
   });
 
   // It runs in its own conversation, so the sandbox is namespaced per conversation and it
   // must hydrate its own workspace rather than reusing the investigator's.
-  it('hydrates the trees into its own conversation', () => {
-    expect(staticBase().workflow_ids).toEqual(['system-nightshift-decision-tree-hydrate']);
+  it('hydrates the trees into its own conversation', async () => {
+    expect((await baseFor()).workflow_ids).toEqual([
+      'system-nightshift-decision-tree-hydrate-bound-default',
+    ]);
   });
 
   // It distills from the transcript it is handed, so shell and telemetry access would let it
   // re-investigate instead. Only the file tools and submit; the learning tools are added per
   // turn, on follow-up turns only, as Deductive does.
-  it('carries the file tools and submit, but no shell or learning tool', () => {
-    const toolIds = staticBase().tools?.[0]?.tool_ids ?? [];
+  it('carries the file tools and submit, but no shell or learning tool', async () => {
+    const toolIds = (await baseFor()).tools?.[0]?.tool_ids ?? [];
     expect([...toolIds].sort()).toEqual(
       [
         SANDBOX_VIEW_FILE_TOOL_ID,
@@ -71,14 +73,8 @@ describe('Nightshift decision tree reinforcement agent type', () => {
     }
   });
 
-  it('hydrates through the hook workflow the resolver names for the space', async () => {
-    const type = getDecisionTreeReinforcementAgentType({
-      resolveHookWorkflowId: async (id, { spaceId }) => `${id}-bound-${spaceId}`,
-    });
-    if (typeof type.baseConfiguration !== 'function') {
-      throw new Error('expected a dynamic base configuration');
-    }
-    const base = await type.baseConfiguration({ spaceId: 'sa-a' } as never);
+  it("hydrates through the space's bound hook entry point", async () => {
+    const base = await baseFor('sa-a');
     expect(base.workflow_ids).toEqual(['system-nightshift-decision-tree-hydrate-bound-sa-a']);
   });
 });
