@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { testUsers } from '../test_users';
+import { createAgentDoc } from '../agent_policy/cleanup_agent_policy_revisions';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 const BASE_URL = '/api/fleet/cloud_onboarding_deployments';
@@ -15,6 +17,8 @@ const SO_API = '/api/saved_objects';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
@@ -562,6 +566,121 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('GET /api/fleet/cloud_onboarding_deployments agent counts', () => {
+      const PACKAGE_NAME = 'agent-count-test-package';
+      // Stored agent policy ids are client-supplied: one the request's saved objects client cannot
+      // resolve (e.g. a policy of another space) must not have its agents counted.
+      const UNRESOLVABLE_POLICY_ID = 'agent-count-test-unresolvable-policy';
+      const agentIds = ['agent-count-test-agent-1', 'agent-count-test-agent-2'];
+      let agentPolicyId: string;
+      let deploymentId: string;
+
+      before(async () => {
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: `agent-count-test-policy-${Date.now()}`, namespace: 'default' })
+          .expect(200);
+        agentPolicyId = policyBody.item.id;
+
+        await createAgentDoc(providerContext, agentIds[0], agentPolicyId);
+        await createAgentDoc(providerContext, agentIds[1], UNRESOLVABLE_POLICY_ID);
+
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            mechanisms: ['agent_based'],
+            services: ['cloudtrail'],
+            packageNames: [PACKAGE_NAME],
+            agentPolicyIds: [agentPolicyId, UNRESOLVABLE_POLICY_ID],
+          })
+          .expect(200);
+        deploymentId = body.item.id;
+      });
+
+      after(async () => {
+        for (const id of agentIds) {
+          await es.delete({ index: '.fleet-agents', id, refresh: 'wait_for' }).catch(() => {});
+        }
+        await supertest
+          .delete(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .catch(() => {});
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .catch(() => {});
+      });
+
+      it('counts only the agents of agent policies the request can resolve', async () => {
+        const { body } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: PACKAGE_NAME })
+          .expect(200);
+
+        expect(body.items).to.have.length(1);
+        expect(body.items[0].id).to.equal(deploymentId);
+        expect(body.items[0].agentCount).to.equal(1);
+        expect(body.items[0].servicesByMethod).to.eql({ agent_based: ['cloudtrail'] });
+      });
+    });
+
+    describe('authorization', () => {
+      let deploymentId: string;
+
+      before(async () => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ provider: 'aws', mechanisms: ['ecf'], services: ['cloudtrail'] })
+          .expect(200);
+        deploymentId = body.item.id;
+      });
+
+      after(async () => {
+        await supertest
+          .delete(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .catch(() => {});
+      });
+
+      const asUser = (user: { username: string; password: string }) => ({
+        get: (url: string) => supertestWithoutAuth.get(url).auth(user.username, user.password),
+        post: (url: string) =>
+          supertestWithoutAuth.post(url).auth(user.username, user.password).set('kbn-xsrf', 'xxxx'),
+        put: (url: string) =>
+          supertestWithoutAuth.put(url).auth(user.username, user.password).set('kbn-xsrf', 'xxxx'),
+        delete: (url: string) =>
+          supertestWithoutAuth
+            .delete(url)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'xxxx'),
+      });
+
+      it('lets a read-only Fleet user list and get deployments', async () => {
+        const readOnly = asUser(testUsers.fleet_read_only);
+        await readOnly.get(BASE_URL).expect(200);
+        await readOnly.get(`${BASE_URL}/${deploymentId}`).expect(200);
+      });
+
+      it('forbids a read-only Fleet user to create, update or delete deployments', async () => {
+        const readOnly = asUser(testUsers.fleet_read_only);
+        await readOnly
+          .post(BASE_URL)
+          .send({ provider: 'aws', mechanisms: ['ecf'], services: ['cloudtrail'] })
+          .expect(403);
+        await readOnly.put(`${BASE_URL}/${deploymentId}`).send({ status: 'failed' }).expect(403);
+        await readOnly.delete(`${BASE_URL}/${deploymentId}`).expect(403);
+      });
+
+      it('forbids a user without Fleet access to list deployments', async () => {
+        await asUser(testUsers.fleet_no_access).get(BASE_URL).expect(403);
+      });
+    });
+
     describe('PUT /api/fleet/cloud_onboarding_deployments/{id}', () => {
       let deploymentId: string;
 
@@ -833,6 +952,24 @@ export default function (providerContext: FtrProviderContext) {
         } finally {
           await kibanaServer.spaces.delete(TEST_SPACE).catch(() => {});
         }
+      });
+
+      it('GET list returns only the deployments of the space', async () => {
+        const { body: spaceList } = await supertest
+          .get(spaceUrl(BASE_URL))
+          .query({ perPage: 100 })
+          .expect(200);
+        const spaceIds = spaceList.items.map((item: { id: string }) => item.id);
+        expect(spaceIds).to.contain(testSpaceDeploymentId);
+        expect(spaceIds).not.to.contain(defaultSpaceDeploymentId);
+
+        const { body: defaultList } = await supertest
+          .get(BASE_URL)
+          .query({ perPage: 100 })
+          .expect(200);
+        const defaultIds = defaultList.items.map((item: { id: string }) => item.id);
+        expect(defaultIds).to.contain(defaultSpaceDeploymentId);
+        expect(defaultIds).not.to.contain(testSpaceDeploymentId);
       });
 
       it('GET by ID returns a deployment from the same space', async () => {
