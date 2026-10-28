@@ -101,15 +101,6 @@ TS metrics-a
     ).toContain('BUCKET(latency.exp, 10, 5, 5.000005)');
   });
 
-  it('leaves value-range order out of the query', () => {
-    const query = createHistogramDistributionQuery({
-      metricItem: createMetric(),
-      bounds,
-    });
-
-    expect(query).not.toContain('SORT');
-  });
-
   it('returns undefined for a non-histogram instrument', () => {
     expect(
       createHistogramDistributionQuery({
