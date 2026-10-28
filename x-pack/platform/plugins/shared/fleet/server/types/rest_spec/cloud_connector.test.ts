@@ -9,6 +9,7 @@ import { MAX_IAC_RENDER_INTEGRATIONS } from '../../../common/types/rest_spec/iac
 
 import {
   CreateCloudConnectorRequestSchema,
+  GetCloudConnectorRequestSchema,
   GetCloudConnectorsRequestSchema,
   UpdateCloudConnectorRequestSchema,
   VerifyCloudConnectorIacKeyRequestSchema,
@@ -137,12 +138,18 @@ describe('VerifyCloudConnectorIacKeyResponseSchema', () => {
   });
 });
 
-describe('KQL fields in reporting mode', () => {
-  // kuery uses searchFilter.warn(): overlong input is recorded in the
-  // kibana.schema.string_length_violation.length histogram, not rejected.
+describe('reporting mode string fields', () => {
+  // These fields use the string helpers' warn() mode: overlong input is recorded in the
+  // kibana.schema.string_length_violation.length histogram instead of being rejected.
   it.each([10_000, 10_001, 50_000])('accepts a kuery of %i characters', (length) => {
     expect(() =>
       GetCloudConnectorsRequestSchema.query.validate({ kuery: 'a'.repeat(length) })
+    ).not.toThrow();
+  });
+
+  it('accepts an overlong cloudConnectorId', () => {
+    expect(() =>
+      GetCloudConnectorRequestSchema.params.validate({ cloudConnectorId: 'a'.repeat(1000) })
     ).not.toThrow();
   });
 });

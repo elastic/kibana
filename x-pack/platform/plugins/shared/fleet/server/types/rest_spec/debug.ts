@@ -15,13 +15,16 @@ export const FetchIndexRequestSchema = {
 
 export const FetchSavedObjectsRequestSchema = {
   body: schema.object({
-    type: schema.string(),
-    name: schema.string(),
+    type: schema.savedObjectType.warn({ minLength: 0, label: 'fleet.debug.saved_objects.type' }),
+    name: schema.displayName.warn({ minLength: 0, label: 'fleet.debug.saved_objects.name' }),
   }),
 };
 
 export const FetchSavedObjectNamesRequestSchema = {
   body: schema.object({
-    type: schema.string(),
+    type: schema.savedObjectType.warn({
+      minLength: 0,
+      label: 'fleet.debug.saved_object_names.type',
+    }),
   }),
 };

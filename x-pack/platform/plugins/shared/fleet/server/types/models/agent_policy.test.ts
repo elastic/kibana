@@ -179,52 +179,6 @@ describe('AgentPolicyBaseSchema', () => {
   });
 });
 
-// Bounds are enforced on the REST schema (NewAgentPolicySchema), not the SO base schema.
-describe('schema field length limits', () => {
-  const minValid = { name: 'test', namespace: 'default' };
-
-  it('rejects a policy name over 255 characters', () => {
-    expect(() => NewAgentPolicySchema.validate({ ...minValid, name: 'a'.repeat(256) })).toThrow();
-  });
-
-  it('accepts a policy name at exactly 255 characters', () => {
-    expect(() =>
-      NewAgentPolicySchema.validate({ ...minValid, name: 'a'.repeat(255) })
-    ).not.toThrow();
-  });
-
-  it('rejects a description over 10 000 characters', () => {
-    expect(() =>
-      NewAgentPolicySchema.validate({ ...minValid, description: 'a'.repeat(10_001) })
-    ).toThrow();
-  });
-
-  it('rejects a data_output_id over 512 characters', () => {
-    expect(() =>
-      NewAgentPolicySchema.validate({ ...minValid, data_output_id: 'a'.repeat(513) })
-    ).toThrow();
-  });
-
-  // The platform string helpers default to minLength: 1. These fields are adopted with an
-  // explicit minLength: 0 so that empty strings keep validating as they did before — Fleet's
-  // own package policy form seeds id/output fields with ''.
-  it.each([
-    ['id', { id: '' }],
-    ['data_output_id', { data_output_id: '' }],
-    ['monitoring_output_id', { monitoring_output_id: '' }],
-    ['download_source_id', { download_source_id: '' }],
-    ['fleet_server_host_id', { fleet_server_host_id: '' }],
-    ['space_ids', { space_ids: [''] }],
-    ['description', { description: '' }],
-  ])('still accepts an empty %s', (_name, field) => {
-    expect(() => NewAgentPolicySchema.validate({ ...minValid, ...field })).not.toThrow();
-  });
-
-  it('still requires a non-empty policy name', () => {
-    expect(() => NewAgentPolicySchema.validate({ ...minValid, name: '' })).toThrow();
-  });
-});
-
 describe('FullAgentPolicySchema', () => {
   it('support all advanced settings', () => {
     expect(() => {
@@ -256,5 +210,43 @@ describe('FullAgentPolicySchema', () => {
 
       FullAgentPolicyResponseSchema.validate(policyData);
     }).not.toThrow();
+  });
+});
+
+describe('NewAgentPolicySchema reporting mode string fields', () => {
+  // These fields use the string helpers' warn() mode: overlong input is recorded in the
+  // kibana.schema.string_length_violation.length histogram instead of being rejected.
+  const policy = (overrides: Record<string, unknown>) => ({
+    name: 'policy',
+    namespace: 'default',
+    ...overrides,
+  });
+
+  it('accepts an overlong name, description and IDs', () => {
+    expect(() =>
+      NewAgentPolicySchema.validate(
+        policy({
+          id: 'a'.repeat(1000),
+          name: 'a'.repeat(1000),
+          description: 'a'.repeat(20_000),
+          data_output_id: 'a'.repeat(1000),
+          monitoring_output_id: 'a'.repeat(1000),
+          fleet_server_host_id: 'a'.repeat(1000),
+          space_ids: ['a'.repeat(1000)],
+          global_data_tags: [{ name: 'a'.repeat(1000), value: 'value' }],
+        })
+      )
+    ).not.toThrow();
+  });
+
+  it('still requires a non-empty policy name', () => {
+    expect(() => NewAgentPolicySchema.validate(policy({ name: '' }))).toThrow();
+    expect(() => NewAgentPolicySchema.validate(policy({ name: '   ' }))).toThrow();
+  });
+
+  it('still accepts null for nullable IDs', () => {
+    expect(() =>
+      NewAgentPolicySchema.validate(policy({ data_output_id: null, download_source_id: null }))
+    ).not.toThrow();
   });
 });

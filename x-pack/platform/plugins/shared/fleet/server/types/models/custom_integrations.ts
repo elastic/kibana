@@ -15,6 +15,10 @@ const CustomIntegrationFieldsSchema = schema.object({
 export const CustomIntegrationRequestSchema = {
   body: CustomIntegrationFieldsSchema,
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgName: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.epm.update_custom_integration.pkgName',
+      meta: { description: 'Package name' },
+    }),
   }),
 };

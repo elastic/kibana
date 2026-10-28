@@ -9,12 +9,12 @@ import { schema } from '@kbn/config-schema';
 
 import { NewOutputSchema, OutputResponseItemSchema, UpdateOutputSchema } from '../models';
 import { ListResponseSchema } from '../../routes/schema/utils';
-import { FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH } from '../../constants';
 
 export const GetOneOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.savedObjectId({
+    outputId: schema.savedObjectId.warn({
       minLength: 0,
+      label: 'fleet.outputs.get.outputId',
       meta: { description: 'The ID of the output' },
     }),
   }),
@@ -22,19 +22,20 @@ export const GetOneOutputRequestSchema = {
 
 export const DeleteOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.savedObjectId({
+    outputId: schema.savedObjectId.warn({
       minLength: 0,
+      label: 'fleet.outputs.delete.outputId',
       meta: { description: 'The ID of the output' },
     }),
   }),
 };
 
 export const DeleteOutputResponseSchema = schema.object({
-  id: schema.savedObjectId({ minLength: 0 }),
+  id: schema.string(),
 });
 
 export const GenerateLogstashApiKeyResponseSchema = schema.object({
-  api_key: schema.string({ maxLength: 1000 }),
+  api_key: schema.string(),
 });
 
 export const GetOutputsRequestSchema = {};
@@ -47,8 +48,9 @@ export const PostOutputRequestSchema = {
 
 export const PutOutputRequestSchema = {
   params: schema.object({
-    outputId: schema.savedObjectId({
+    outputId: schema.savedObjectId.warn({
       minLength: 0,
+      label: 'fleet.outputs.update.outputId',
       meta: { description: 'The ID of the output' },
     }),
   }),
@@ -57,8 +59,9 @@ export const PutOutputRequestSchema = {
 
 export const GetLatestOutputHealthRequestSchema = {
   params: schema.object({
-    outputId: schema.savedObjectId({
+    outputId: schema.savedObjectId.warn({
       minLength: 0,
+      label: 'fleet.outputs.health.outputId',
       meta: { description: 'The ID of the output' },
     }),
   }),
@@ -66,19 +69,16 @@ export const GetLatestOutputHealthRequestSchema = {
 
 export const GetLatestOutputHealthResponseSchema = schema.object({
   state: schema.string({
-    maxLength: 50,
     meta: {
       description: 'state of output, HEALTHY or DEGRADED',
     },
   }),
   message: schema.string({
-    maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
     meta: {
       description: 'long message if unhealthy',
     },
   }),
   timestamp: schema.string({
-    maxLength: 50,
     meta: {
       description: 'timestamp of reported state',
     },

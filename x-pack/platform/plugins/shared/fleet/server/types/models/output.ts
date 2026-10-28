@@ -267,27 +267,24 @@ const KafkaOAuth2Schema = schema.object({
       schema.literal(kafkaOAuth2GrantType.JwtBearer),
     ])
   ),
-  client_id: schema.maybe(schema.string({ maxLength: 256 })),
-  client_id_file: schema.maybe(schema.string({ maxLength: 4096 })),
-  client_secret_file: schema.maybe(schema.string({ maxLength: 4096 })),
-  token_url: schema.string({ minLength: 1, maxLength: 2048 }),
-  scopes: schema.maybe(schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 })),
+  client_id: schema.maybe(schema.string()),
+  client_id_file: schema.maybe(schema.string()),
+  client_secret_file: schema.maybe(schema.string()),
+  token_url: schema.string({ minLength: 1 }),
+  scopes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   // url.Values of the agent: every parameter takes a list of values
   endpoint_params: schema.maybe(
-    schema.recordOf(
-      schema.string({ maxLength: 256 }),
-      schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 100 })
-    )
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 }))
   ),
   tls: schema.maybe(
     schema.object({
-      ca_file: schema.maybe(schema.string({ maxLength: 4096 })),
-      cert_file: schema.maybe(schema.string({ maxLength: 4096 })),
-      key_file: schema.maybe(schema.string({ maxLength: 4096 })),
+      ca_file: schema.maybe(schema.string()),
+      cert_file: schema.maybe(schema.string()),
+      key_file: schema.maybe(schema.string()),
       insecure_skip_verify: schema.maybe(schema.boolean()),
-      server_name_override: schema.maybe(schema.string({ maxLength: 256 })),
-      min_version: schema.maybe(schema.string({ maxLength: 10 })),
-      max_version: schema.maybe(schema.string({ maxLength: 10 })),
+      server_name_override: schema.maybe(schema.string()),
+      min_version: schema.maybe(schema.string()),
+      max_version: schema.maybe(schema.string()),
     })
   ),
   // in seconds, the agent is given them in nanoseconds
@@ -312,8 +309,8 @@ const KafkaOAuth2Schema = schema.object({
     })
   ),
   // jwt-bearer grant only
-  client_certificate_key_id: schema.maybe(schema.string({ maxLength: 256 })),
-  client_certificate_key_file: schema.maybe(schema.string({ maxLength: 4096 })),
+  client_certificate_key_id: schema.maybe(schema.string()),
+  client_certificate_key_file: schema.maybe(schema.string()),
   signature_algorithm: schema.maybe(
     schema.oneOf([
       schema.literal(kafkaOAuth2SignatureAlgorithm.Rs256),
@@ -321,9 +318,9 @@ const KafkaOAuth2Schema = schema.object({
       schema.literal(kafkaOAuth2SignatureAlgorithm.Rs512),
     ])
   ),
-  iss: schema.maybe(schema.string({ maxLength: 2048 })),
-  audience: schema.maybe(schema.string({ maxLength: 2048 })),
-  claims: schema.maybe(schema.recordOf(schema.string({ maxLength: 256 }), schema.any())),
+  iss: schema.maybe(schema.string()),
+  audience: schema.maybe(schema.string()),
+  claims: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
 
 /**

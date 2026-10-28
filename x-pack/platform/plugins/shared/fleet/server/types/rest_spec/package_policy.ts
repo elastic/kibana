@@ -35,7 +35,12 @@ export const GetPackagePoliciesRequestSchema = {
     perPage: schema.maybe(
       schema.number({ defaultValue: 20, meta: { description: 'Number of results per page' } })
     ),
-    sortField: schema.maybe(schema.string({ meta: { description: 'Field to sort results by' } })),
+    sortField: schema.maybe(
+      schema.querySortField.warn({
+        label: 'fleet.package_policies.sortField',
+        meta: { description: 'Field to sort results by' },
+      })
+    ),
     sortOrder: schema.maybe(
       schema.oneOf([schema.literal('desc'), schema.literal('asc')], {
         meta: { description: 'Sort order, ascending or descending' },
@@ -47,7 +52,8 @@ export const GetPackagePoliciesRequestSchema = {
       })
     ),
     kuery: schema.maybe(
-      schema.string({
+      schema.searchFilter.warn({
+        label: 'fleet.package_policies.kuery',
         meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(
@@ -93,7 +99,11 @@ export const BulkGetPackagePoliciesResponseBodySchema = schema.object(
 
 export const GetOnePackagePolicyRequestSchema = {
   params: schema.object({
-    packagePolicyId: schema.string({ meta: { description: 'The ID of the package policy' } }),
+    packagePolicyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.package_policies.packagePolicyId',
+      meta: { description: 'The ID of the package policy' },
+    }),
   }),
   query: schema.object({
     format: schema.maybe(
@@ -145,7 +155,13 @@ export const UpdatePackagePolicyRequestSchema = {
 export const DeletePackagePoliciesRequestSchema = {
   body: schema.object(
     {
-      packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      packagePolicyIds: schema.arrayOf(
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.package_policies.bulk_delete.packagePolicyIds',
+        }),
+        { maxSize: 1000 }
+      ),
       force: schema.maybe(schema.boolean()),
     },
     { meta: { id: 'delete_package_policies_request' } }
@@ -182,7 +198,11 @@ export const DeletePackagePoliciesResponseBodySchema = schema.arrayOf(
 
 export const DeleteOnePackagePolicyRequestSchema = {
   params: schema.object({
-    packagePolicyId: schema.string({ meta: { description: 'The ID of the package policy' } }),
+    packagePolicyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.package_policies.delete.packagePolicyId',
+      meta: { description: 'The ID of the package policy' },
+    }),
   }),
   query: schema.object({
     force: schema.maybe(
@@ -200,7 +220,15 @@ export const DeleteOnePackagePolicyResponseSchema = schema.object(
 
 export const UpgradePackagePoliciesRequestSchema = {
   body: schema.object(
-    { packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }) },
+    {
+      packagePolicyIds: schema.arrayOf(
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.package_policies.upgrade.packagePolicyIds',
+        }),
+        { maxSize: 1000 }
+      ),
+    },
     { meta: { id: 'upgrade_package_policies_request' } }
   ),
 };
@@ -213,7 +241,13 @@ export const UpgradePackagePoliciesResponseBodySchema = schema.arrayOf(
 export const DryRunPackagePoliciesRequestSchema = {
   body: schema.object(
     {
-      packagePolicyIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+      packagePolicyIds: schema.arrayOf(
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.package_policies.upgrade_dryrun.packagePolicyIds',
+        }),
+        { maxSize: 1000 }
+      ),
       packageVersion: schema.maybe(schema.string()),
     },
     { meta: { id: 'dry_run_package_policies_request' } }

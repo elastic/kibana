@@ -6,8 +6,8 @@
  */
 
 import {
-  PostEnrollmentAPIKeyRequestSchema,
   GetEnrollmentAPIKeysRequestSchema,
+  PostEnrollmentAPIKeyRequestSchema,
 } from './enrollment_api_key';
 
 describe('PostEnrollmentAPIKeyRequestSchema', () => {
@@ -74,17 +74,21 @@ describe('PostEnrollmentAPIKeyRequestSchema', () => {
   });
 });
 
-describe('schema field length limits', () => {
-  // kuery uses searchFilter.warn(): overlong input is reported, not rejected.
+describe('reporting mode string fields', () => {
+  // These fields use the string helpers' warn() mode: overlong input is recorded in the
+  // kibana.schema.string_length_violation.length histogram instead of being rejected.
   it.each([10_000, 10_001, 50_000])('accepts a kuery of %i characters', (length) => {
     expect(() =>
       GetEnrollmentAPIKeysRequestSchema.query.validate({ kuery: 'a'.repeat(length) })
     ).not.toThrow();
   });
 
-  it('rejects a policy_id over 512 characters in PostEnrollmentAPIKeyRequestSchema', () => {
+  it('accepts an overlong name and policy_id', () => {
     expect(() =>
-      PostEnrollmentAPIKeyRequestSchema.body.validate({ policy_id: 'a'.repeat(513) })
-    ).toThrow();
+      PostEnrollmentAPIKeyRequestSchema.body.validate({
+        name: 'a'.repeat(1000),
+        policy_id: 'a'.repeat(1000),
+      })
+    ).not.toThrow();
   });
 });

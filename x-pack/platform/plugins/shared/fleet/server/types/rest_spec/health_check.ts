@@ -9,7 +9,10 @@ import { schema } from '@kbn/config-schema';
 
 export const PostHealthCheckRequestSchema = {
   body: schema.object({
-    id: schema.string(),
+    id: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.health_check.id',
+    }),
   }),
 };
 

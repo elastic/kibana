@@ -214,7 +214,9 @@ export const GetCloudConnectorsResponseSchema = schema.object({
 
 export const GetCloudConnectorRequestSchema = {
   params: schema.object({
-    cloudConnectorId: schema.string({
+    cloudConnectorId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.cloud_connectors.get.cloudConnectorId',
       meta: { description: 'The unique identifier of the cloud connector.' },
     }),
   }),
@@ -238,7 +240,9 @@ export const GetCloudConnectorResponseSchema = schema.object({
 
 export const DeleteCloudConnectorRequestSchema = {
   params: schema.object({
-    cloudConnectorId: schema.string({
+    cloudConnectorId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.cloud_connectors.delete.cloudConnectorId',
       meta: { description: 'The unique identifier of the cloud connector to delete.' },
     }),
   }),
@@ -257,7 +261,9 @@ export const DeleteCloudConnectorResponseSchema = schema.object({
 
 export const UpdateCloudConnectorRequestSchema = {
   params: schema.object({
-    cloudConnectorId: schema.string({
+    cloudConnectorId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.cloud_connectors.update.cloudConnectorId',
       meta: { description: 'The unique identifier of the cloud connector to update.' },
     }),
   }),
@@ -320,7 +326,9 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
 
 export const GetCloudConnectorUsageRequestSchema = {
   params: schema.object({
-    cloudConnectorId: schema.string({
+    cloudConnectorId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.cloud_connectors.usage.cloudConnectorId',
       meta: { description: 'The unique identifier of the cloud connector.' },
     }),
   }),

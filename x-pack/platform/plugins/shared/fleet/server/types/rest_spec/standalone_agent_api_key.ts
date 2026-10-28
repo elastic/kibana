@@ -11,6 +11,10 @@ import { FLEET_SCHEMA_NAME_MAX_LENGTH } from '../../constants';
 
 export const PostStandaloneAgentAPIKeyRequestSchema = {
   body: schema.object({
-    name: schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
+    name: schema.displayName.warn({
+      minLength: 0,
+      maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+      label: 'fleet.standalone_agent_api_key.name',
+    }),
   }),
 };

@@ -44,8 +44,9 @@ export const GetEnrollmentAPIKeysRequestSchema = {
 
 export const GetOneEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
-    keyId: schema.string({
-      maxLength: 50,
+    keyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.enrollment_api_keys.get.keyId',
       meta: { description: 'The ID of the enrollment API key' },
     }),
   }),
@@ -58,8 +59,9 @@ export const EnrollmentAPIKeyResponseSchema = schema.object(
 
 export const DeleteEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
-    keyId: schema.string({
-      maxLength: 50,
+    keyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.enrollment_api_keys.delete.keyId',
       meta: { description: 'The ID of the enrollment API key' },
     }),
   }),
@@ -89,8 +91,17 @@ export const DeleteEnrollmentAPIKeyResponseSchema = schema.object(
 export const PostEnrollmentAPIKeyRequestSchema = {
   body: schema.object(
     {
-      name: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH })),
-      policy_id: schema.savedObjectId({ minLength: 0 }),
+      name: schema.maybe(
+        schema.displayName.warn({
+          minLength: 0,
+          maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+          label: 'fleet.enrollment_api_keys.create.name',
+        })
+      ),
+      policy_id: schema.savedObjectId.warn({
+        minLength: 0,
+        label: 'fleet.enrollment_api_keys.create.policy_id',
+      }),
       expiration: schema.maybe(
         schema.string({
           maxLength: 20,
@@ -114,10 +125,16 @@ export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
   body: schema.object(
     {
       tokenIds: schema.maybe(
-        schema.arrayOf(schema.string({ maxLength: 50 }), {
-          maxSize: 10000,
-          meta: { description: 'List of enrollment token IDs to delete.' },
-        })
+        schema.arrayOf(
+          schema.savedObjectId.warn({
+            minLength: 0,
+            label: 'fleet.enrollment_api_keys.bulk_delete.tokenIds',
+          }),
+          {
+            maxSize: 10000,
+            meta: { description: 'List of enrollment token IDs to delete.' },
+          }
+        )
       ),
       kuery: schema.maybe(
         schema.searchFilter.warn({
@@ -166,7 +183,7 @@ export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
 
 export const BulkDeleteEnrollmentAPIKeysResponseSchema = schema.object(
   {
-    action: schema.string({ maxLength: 50 }),
+    action: schema.string(),
     count: schema.number(),
     successCount: schema.number(),
     errorCount: schema.number(),

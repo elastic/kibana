@@ -8,8 +8,9 @@ import { schema } from '@kbn/config-schema';
 
 export const GetRemoteSyncedIntegrationsInfoRequestSchema = {
   params: schema.object({
-    outputId: schema.savedObjectId({
+    outputId: schema.savedObjectId.warn({
       minLength: 0,
+      label: 'fleet.remote_synced_integrations.outputId',
       meta: { description: 'The ID of the output' },
     }),
   }),

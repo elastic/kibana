@@ -401,52 +401,6 @@ describe('Output model', () => {
           })
         ).not.toThrow();
       });
-
-      describe('string length bounds', () => {
-        const withOauth2 = (fields: Record<string, unknown>) =>
-          oauth2Output({
-            oauth2: {
-              client_id: 'my-client',
-              token_url: 'https://idp.example.com/oauth2/token',
-              ...fields,
-            },
-          });
-
-        // Limits mirror the OTLP exporter schemas in this file: 2048 for URLs, 4096 for
-        // paths on the agent host, 256 for identifiers and record keys, 10 for TLS versions.
-        const bounds: Array<[string, number, (value: string) => Record<string, unknown>]> = [
-          ['client_id', 256, (v) => ({ client_id: v })],
-          ['client_certificate_key_id', 256, (v) => ({ client_certificate_key_id: v })],
-          ['scopes item', 256, (v) => ({ scopes: [v] })],
-          ['endpoint_params key', 256, (v) => ({ endpoint_params: { [v]: ['value'] } })],
-          ['endpoint_params value', 1000, (v) => ({ endpoint_params: { audience: [v] } })],
-          ['claims key', 256, (v) => ({ claims: { [v]: 'value' } })],
-          ['token_url', 2048, (v) => ({ token_url: v })],
-          ['iss', 2048, (v) => ({ iss: v })],
-          ['audience', 2048, (v) => ({ audience: v })],
-          ['client_id_file', 4096, (v) => ({ client_id_file: v })],
-          ['client_secret_file', 4096, (v) => ({ client_secret_file: v })],
-          ['client_certificate_key_file', 4096, (v) => ({ client_certificate_key_file: v })],
-          ['tls.ca_file', 4096, (v) => ({ tls: { ca_file: v } })],
-          ['tls.cert_file', 4096, (v) => ({ tls: { cert_file: v } })],
-          ['tls.key_file', 4096, (v) => ({ tls: { key_file: v } })],
-          ['tls.server_name_override', 256, (v) => ({ tls: { server_name_override: v } })],
-          ['tls.min_version', 10, (v) => ({ tls: { min_version: v } })],
-          ['tls.max_version', 10, (v) => ({ tls: { max_version: v } })],
-        ];
-
-        it.each(bounds)('should accept %s at exactly %i characters', (_name, max, build) => {
-          expect(() =>
-            schema.object(KafkaSchema).validate(withOauth2(build('a'.repeat(max))))
-          ).not.toThrow();
-        });
-
-        it.each(bounds)('should reject %s over %i characters', (_name, max, build) => {
-          expect(() =>
-            schema.object(KafkaSchema).validate(withOauth2(build('a'.repeat(max + 1))))
-          ).toThrow();
-        });
-      });
     });
 
     describe('update payloads (UpdateOutputSchema)', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetAgentPoliciesRequestSchema } from './agent_policy';
+import { CopyAgentPolicyRequestSchema, GetAgentPoliciesRequestSchema } from './agent_policy';
 
 describe('GetAgentPoliciesRequestSchema.query', () => {
   it('should default showAgentless to true', () => {
@@ -91,9 +91,9 @@ describe('GetAgentPoliciesRequestSchema.query', () => {
   });
 });
 
-describe('KQL fields in reporting mode', () => {
-  // kuery uses searchFilter.warn(): overlong input is recorded in the
-  // kibana.schema.string_length_violation.length histogram, not rejected.
+describe('reporting mode string fields', () => {
+  // These fields use the string helpers' warn() mode: overlong input is recorded in the
+  // kibana.schema.string_length_violation.length histogram instead of being rejected.
   it.each([10_000, 10_001, 50_000])('accepts a kuery of %i characters', (length) => {
     expect(() =>
       GetAgentPoliciesRequestSchema.query.validate({ kuery: 'a'.repeat(length) })
@@ -104,5 +104,24 @@ describe('KQL fields in reporting mode', () => {
     expect(() =>
       GetAgentPoliciesRequestSchema.query.validate({ kuery: 'not_a_field: 1' })
     ).toThrow();
+  });
+
+  it('accepts an overlong agentPolicyId', () => {
+    expect(() =>
+      CopyAgentPolicyRequestSchema.params.validate({ agentPolicyId: 'a'.repeat(1000) })
+    ).not.toThrow();
+  });
+
+  it('accepts an overlong name and description when copying a policy', () => {
+    expect(() =>
+      CopyAgentPolicyRequestSchema.body.validate({
+        name: 'a'.repeat(1000),
+        description: 'a'.repeat(20_000),
+      })
+    ).not.toThrow();
+  });
+
+  it('still requires a non-empty name when copying a policy', () => {
+    expect(() => CopyAgentPolicyRequestSchema.body.validate({ name: '' })).toThrow();
   });
 });

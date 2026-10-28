@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 
-import { AGENTS_PREFIX, AGENT_MAPPINGS, FLEET_SCHEMA_NAME_MAX_LENGTH } from '../../constants';
+import { AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
 
 export const GetTagsRequestSchema = {
   query: schema.object({
@@ -33,7 +33,5 @@ export const GetTagsRequestSchema = {
 };
 
 export const GetTagsResponseSchema = schema.object({
-  items: schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }), {
-    maxSize: 10000,
-  }),
+  items: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
