@@ -94,7 +94,8 @@ const normalizeRole = ({ indices = [], remote_indices: remoteIndices = [] }: Raw
   })),
 });
 
-const statusCodeOf = (error: unknown): number | undefined => {
+/** The HTTP status of an Elasticsearch client error, read from either place the client puts it. */
+export const statusCodeOf = (error: unknown): number | undefined => {
   const { statusCode, meta } = (error ?? {}) as {
     statusCode?: number;
     meta?: { statusCode?: number };

@@ -65,10 +65,6 @@ export const assertEsqlSourcesAllowed = (
   }
 
   for (const command of root.commands) {
-    if (command.name === 'enrich') {
-      const [policy = ''] = sourcesOf(command);
-      return { ok: false, reason: `ENRICH policy "${policy}" is not allowed in a hunt query` };
-    }
     for (const source of sourcesOf(command)) {
       if (!isIndexPatternAllowed(source, allowedPatterns)) {
         return {

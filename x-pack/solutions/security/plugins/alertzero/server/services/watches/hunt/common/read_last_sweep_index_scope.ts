@@ -71,3 +71,35 @@ export const readLastSweepIndexScope = async ({
     return undefined;
   }
 };
+
+/**
+ * The index scope of the newest finished sweep of one workflow, or `undefined` when no sweep has
+ * finished or the lookup fails (logged at debug). `skipped` and in-progress runs never count.
+ */
+export const readLatestFinishedSweepIndexScope = async ({
+  management,
+  workflowId,
+  spaceId,
+  request,
+  logger,
+}: {
+  management: WatchWorkflowsManagementClient;
+  workflowId: string;
+  spaceId: string;
+  request: KibanaRequest;
+  logger: Logger;
+}): Promise<LastSweepIndexScope | undefined> => {
+  let latest: { id: string } | undefined;
+  try {
+    latest = await management.getLatestFinishedWorkflowExecution(workflowId, spaceId, request);
+  } catch (err) {
+    logger.debug(
+      `Reading the latest finished hunt execution of ${workflowId} failed: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    return undefined;
+  }
+  if (!latest) return undefined;
+  return readLastSweepIndexScope({ management, executionId: latest.id, spaceId, request, logger });
+};

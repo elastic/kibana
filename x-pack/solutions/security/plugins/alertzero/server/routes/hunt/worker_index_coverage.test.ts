@@ -55,7 +55,11 @@ const makeDeps = ({
 
   const asCurrentUser = { indices: {} };
   const context = {
-    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+    alertzero: Promise.resolve({
+      subscription: 'available',
+      hasRequiredDependencies: true,
+      isSpaceSupported: true,
+    }),
     core: Promise.resolve({
       elasticsearch: { client: { asCurrentUser } },
       uiSettings: { client: { get: jest.fn().mockResolvedValue(['logs-*']) } },

@@ -7,7 +7,10 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { readLastSweepIndexScope } from './read_last_sweep_index_scope';
+import {
+  readLastSweepIndexScope,
+  readLatestFinishedSweepIndexScope,
+} from './read_last_sweep_index_scope';
 
 const scope = {
   status: 'blocked',
@@ -93,5 +96,63 @@ describe('readLastSweepIndexScope', () => {
     const { management, params } = setup(null);
     management.getWorkflowExecution.mockRejectedValue(new Error('boom'));
     await expect(readLastSweepIndexScope(params)).resolves.toBeUndefined();
+  });
+});
+
+describe('readLatestFinishedSweepIndexScope', () => {
+  const setupLatest = (latest: { id: string } | undefined | Error) => {
+    const management = {
+      getLatestFinishedWorkflowExecution:
+        latest instanceof Error
+          ? jest.fn().mockRejectedValue(latest)
+          : jest.fn().mockResolvedValue(latest),
+      getWorkflowExecution: jest.fn().mockResolvedValue({
+        startedAt: 'a',
+        finishedAt: 'b',
+        stepExecutions: [
+          { stepId: 'check_index_scope', startedAt: 's', finishedAt: 'f', output: scope },
+        ],
+      }),
+    };
+    const params = {
+      management: management as never,
+      workflowId: 'wf-1',
+      spaceId: 'default',
+      request: httpServerMock.createKibanaRequest(),
+      logger: loggingSystemMock.createLogger(),
+    };
+    return { management, params };
+  };
+
+  it('reads the execution the finished-execution lookup names', async () => {
+    const { management, params } = setupLatest({ id: 'exec-finished' });
+    await expect(readLatestFinishedSweepIndexScope(params)).resolves.toMatchObject({
+      executionId: 'exec-finished',
+      checkedAt: 'f',
+      scope: expect.objectContaining({ resolution: 'blocked:empty_universe' }),
+    });
+    expect(management.getLatestFinishedWorkflowExecution).toHaveBeenCalledWith(
+      'wf-1',
+      'default',
+      params.request
+    );
+    expect(management.getWorkflowExecution).toHaveBeenCalledWith(
+      'exec-finished',
+      'default',
+      params.request,
+      { includeOutput: true }
+    );
+  });
+
+  it('returns undefined without reading an execution when none has finished', async () => {
+    const { management, params } = setupLatest(undefined);
+    await expect(readLatestFinishedSweepIndexScope(params)).resolves.toBeUndefined();
+    expect(management.getWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('returns undefined when the lookup throws', async () => {
+    const { management, params } = setupLatest(new Error('boom'));
+    await expect(readLatestFinishedSweepIndexScope(params)).resolves.toBeUndefined();
+    expect(management.getWorkflowExecution).not.toHaveBeenCalled();
   });
 });

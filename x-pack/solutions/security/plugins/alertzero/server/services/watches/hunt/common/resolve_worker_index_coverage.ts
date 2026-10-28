@@ -13,8 +13,8 @@ import {
 } from '@kbn/alertzero-common';
 import { isIndexExclusion } from '../../../../../common/remote_cluster';
 import type { WatchWorkflowsManagementClient } from '../../watch_workflows_management_client';
-import { readLastSweepIndexScope } from './read_last_sweep_index_scope';
-import { readWorkerRole, uncoveredPatterns } from './role_pattern_coverage';
+import { readLatestFinishedSweepIndexScope } from './read_last_sweep_index_scope';
+import { readWorkerRole, statusCodeOf, uncoveredPatterns } from './role_pattern_coverage';
 import { unresolvedPatterns } from './resolve_index_scope';
 
 export type HuntWorkerIndexCoverage = HuntWorkerIndexCoverageResponse;
@@ -89,8 +89,7 @@ export const resolveWorkerIndexCoverage = async ({
     });
     missingForEveryone = unresolvedPatterns(universe, resolved);
   } catch (err) {
-    const { statusCode, meta } = err as { statusCode?: number; meta?: { statusCode?: number } };
-    if ((statusCode ?? meta?.statusCode) === 403) {
+    if (statusCodeOf(err) === 403) {
       return {
         ...base,
         unreadable_by_worker: [],
@@ -113,7 +112,13 @@ export const resolveWorkerIndexCoverage = async ({
   const readRole = () => readWorkerRole({ esClient, roleName, isServerless });
 
   if (workflowId && management) {
-    const sweep = await readLatestSweep({ management, workflowId, spaceId, request, logger });
+    const sweep = await readLatestFinishedSweepIndexScope({
+      management,
+      workflowId,
+      spaceId,
+      request,
+      logger,
+    });
     const scope = sweep?.scope;
     if (sweep && scope && scope.resolution !== 'blocked:discovery_failed') {
       const evaluated =
@@ -167,41 +172,4 @@ export const resolveWorkerIndexCoverage = async ({
     source: 'role',
     checked_at: new Date().toISOString(),
   };
-};
-
-const readLatestSweep = async ({
-  management,
-  workflowId,
-  spaceId,
-  request,
-  logger,
-}: {
-  management: WatchWorkflowsManagementClient;
-  workflowId: string;
-  spaceId: string;
-  request: KibanaRequest;
-  logger: Logger;
-}) => {
-  try {
-    const latest = await management.getLatestFinishedWorkflowExecution(
-      workflowId,
-      spaceId,
-      request
-    );
-    if (!latest) return undefined;
-    return await readLastSweepIndexScope({
-      management,
-      executionId: latest.id,
-      spaceId,
-      request,
-      logger,
-    });
-  } catch (err) {
-    logger.debug(
-      `Reading the latest finished hunt execution failed: ${
-        err instanceof Error ? err.message : String(err)
-      }`
-    );
-    return undefined;
-  }
 };

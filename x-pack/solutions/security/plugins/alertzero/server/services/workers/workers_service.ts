@@ -39,7 +39,7 @@ import {
   type ThreatIntelSupplyService,
 } from '../threat_intel_supply';
 import { getHuntAccountLabel } from '../watches/hunt/common/resolve_worker_index_coverage';
-import { readLastSweepIndexScope } from '../watches/hunt/common/read_last_sweep_index_scope';
+import { readLatestFinishedSweepIndexScope } from '../watches/hunt/common/read_last_sweep_index_scope';
 import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 /**
@@ -522,16 +522,9 @@ export class WorkersService {
     serviceAccountId: string | undefined;
   }): Promise<string | undefined> {
     try {
-      const management = this.requireManagement();
-      const latest = await management.getLatestFinishedWorkflowExecution(
+      const sweep = await readLatestFinishedSweepIndexScope({
+        management: this.requireManagement(),
         workflowId,
-        spaceId,
-        request
-      );
-      if (!latest) return undefined;
-      const sweep = await readLastSweepIndexScope({
-        management,
-        executionId: latest.id,
         spaceId,
         request,
         logger: this.logger,
