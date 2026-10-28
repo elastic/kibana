@@ -18,7 +18,7 @@ import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 import { act, render, waitFor } from '@testing-library/react';
 
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import type { ControlGroupRendererApi, ControlPanelsState } from '.';
 import type { ControlGroupRendererProps } from './control_group_renderer';
 import { ControlGroupRenderer } from './control_group_renderer';
@@ -51,10 +51,7 @@ const getTestEmbeddableFactory = () =>
       });
       return {
         Component: () => <div data-test-subj="testControl">{initialState.selection}</div>,
-        api: {
-          ...api,
-          hasUnsavedChanges$: new BehaviorSubject(false),
-        },
+        api,
       };
     },
   } as EmbeddablePublicDefinition<{ selection?: string }>);
