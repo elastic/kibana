@@ -118,6 +118,9 @@ interface ReqOptions {
 
 /** Object that helps report data to the ci-stats service */
 export class CiStatsReporter {
+  private oidcAuthorization?: Promise<string>;
+  private oidcRefreshAt = 0;
+
   /**
    * Create a CiStatsReporter by inspecting the ENV for the necessary config
    */
@@ -146,7 +149,11 @@ export class CiStatsReporter {
    * configured and able to send stats
    */
   hasBuildConfig() {
-    return this.isEnabled() && !!this.config?.apiToken && !!this.config?.buildId;
+    return (
+      this.isEnabled() &&
+      !!this.config?.buildId &&
+      (this.config.authType === 'buildkite_oidc' || !!this.config.apiToken)
+    );
   }
 
   /**
@@ -264,7 +271,10 @@ export class CiStatsReporter {
    * Send test reports to ci-stats
    */
   async reportTests({ group, testRuns }: CiStatsReportTestsOptions) {
-    if (!this.config?.buildId || !this.config?.apiToken) {
+    if (
+      !this.config?.buildId ||
+      (this.config.authType !== 'buildkite_oidc' && !this.config.apiToken)
+    ) {
       throw new Error(
         'unable to report tests unless buildId is configured and auth config available'
       );
@@ -358,27 +368,55 @@ export class CiStatsReporter {
     }
   }
 
-  private async req<T>({ auth, body, bodyDesc, path, query, timeout = 60 * SECOND }: ReqOptions) {
-    let attempt = 0;
-    const maxAttempts = 5;
+  private async getHeaders(auth: boolean): Promise<Record<string, string> | undefined> {
+    // Keep the refresh timing aligned with CiStatsClient in .buildkite/pipeline-utils/ci-stats/client.ts.
+    if (this.config?.authType === 'buildkite_oidc') {
+      if (!this.oidcAuthorization || Date.now() >= this.oidcRefreshAt) {
+        this.oidcRefreshAt = Date.now() + 240_000;
+        this.oidcAuthorization = execa(
+          'bash',
+          [Path.resolve(REPO_ROOT, '.buildkite/scripts/common/ci_stats_oidc_token.sh')],
+          { timeout: 30_000 }
+        )
+          .then(({ stdout }) => {
+            const token = stdout.trim();
+            if (!token) {
+              throw new Error('CI Stats OIDC token response was empty');
+            }
+            return `Bearer ${token}`;
+          })
+          .catch((error) => {
+            this.oidcAuthorization = undefined;
+            throw error;
+          });
+      }
+      return { Authorization: await this.oidcAuthorization };
+    }
 
-    let headers;
-    if (auth && this.config) {
-      headers = {
-        Authorization: `token ${this.config.apiToken}`,
-      };
-    } else if (auth) {
+    if (auth && !this.config) {
       throw new Error('this.req() shouldnt be called with auth=true if this.config is not defined');
     }
 
+    return auth ? { Authorization: `token ${this.config?.apiToken}` } : undefined;
+  }
+
+  private async req<T>({ auth, body, bodyDesc, path, query, timeout = 60 * SECOND }: ReqOptions) {
+    let attempt = 0;
+    const maxAttempts = 5;
+    let refreshedRejectedToken = false;
+
     while (true) {
       attempt += 1;
+      let mintingOidcToken = false;
 
       try {
+        mintingOidcToken = this.config?.authType === 'buildkite_oidc';
+        const headers = await this.getHeaders(auth);
+        mintingOidcToken = false;
         const resp = await Axios.request<T>({
           method: 'POST',
           url: path,
-          baseURL: BASE_URL,
+          baseURL: this.config?.apiUrl ?? BASE_URL,
           allowAbsoluteUrls: false,
           headers,
           data: body,
@@ -393,9 +431,23 @@ export class CiStatsReporter {
 
         return resp.data;
       } catch (error) {
-        if (!error?.request) {
-          // not an axios error, must be a usage error that we should notify user about
+        if (!mintingOidcToken && !error?.request) {
+          // not an Axios or OIDC error, so notify the caller about invalid usage
           throw error;
+        }
+
+        if (
+          error?.response?.status === 401 &&
+          this.config?.authType === 'buildkite_oidc' &&
+          !refreshedRejectedToken
+        ) {
+          // the broker rejected the cached token, so mint a new one and retry once
+          refreshedRejectedToken = true;
+          this.oidcAuthorization = undefined;
+          this.log.warning(
+            `CI Stats OIDC token was rejected, retrying ${bodyDesc} with a new token`
+          );
+          continue;
         }
 
         if (error?.response && error.response.status < 500) {
@@ -408,21 +460,25 @@ export class CiStatsReporter {
           return;
         }
 
-        if (attempt === maxAttempts) {
+        const failure = mintingOidcToken
+          ? 'failed to mint CI Stats OIDC token'
+          : 'failed to reach ci-stats service';
+        if (attempt >= maxAttempts) {
           this.log.warning(
-            `unable to report ${bodyDesc}, failed to reach ci-stats service too many times`
+            `unable to report ${bodyDesc}, ${failure} too many times [error=${error.message}]`
           );
           return;
         }
 
-        // we failed to reach the backend and we have remaining attempts, lets retry after a short delay
-        const reason = error?.response?.status
+        const reason = mintingOidcToken
+          ? 'OIDC token mint failed'
+          : error?.response?.status
           ? `${error.response.status} response`
           : 'no response';
 
         const seconds = attempt * 10;
         this.log.warning(
-          `failed to reach ci-stats service, retrying in ${seconds} seconds, [reason=${reason}], [error=${error.message}]`
+          `${failure}, retrying in ${seconds} seconds, [reason=${reason}], [error=${error.message}]`
         );
 
         await new Promise((resolve) => setTimeout(resolve, seconds * 1000));
