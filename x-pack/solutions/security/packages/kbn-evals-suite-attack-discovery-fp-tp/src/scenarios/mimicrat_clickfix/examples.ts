@@ -7,6 +7,7 @@
 
 import {
   getChainIds,
+  withoutAlertBridges,
   withoutEntities,
   withoutEventCategory,
   withoutEventIds,
@@ -18,6 +19,7 @@ import { MIMICRAT_CHAIN } from './chain';
 import {
   fpWorld,
   INTUNE_AGENT_PARENT,
+  jumpBoxWorld,
   tpWorld,
   withBenignActivity,
   withCradle,
@@ -28,6 +30,8 @@ import {
 const TP_ID = 'mimicrat-clickfix.tp';
 
 const FP_ID = 'mimicrat-clickfix.fp-benign-mimic';
+
+const JUMP_BOX_ID = 'mimicrat-clickfix.jump-box';
 
 const MANAGEMENT_CRADLE =
   'powershell.exe -w min -c "iex (irm \'https://manage.microsoft.com/ztd/update.ps1\')"';
@@ -98,7 +102,7 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
   },
   {
     id: 'mimicrat-clickfix.drop-one-sole-evidence',
-    situation: 'U3',
+    situation: 'U6',
     evidenceState: 'complete',
     expectedOutcome: 'true_positive',
     provenance: 'replay',
@@ -107,7 +111,6 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
       of: TP_ID,
       description: "AMSI-bypass event, its stage's only evidence, dropped",
     },
-    provisional: true,
     checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
     buildWorld: (runMarker) =>
       withoutEventIds(tpWorld(runMarker), [eventId(runMarker, 'amsi-bypass')]),
@@ -125,6 +128,36 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
     },
     checks: { entityRole: 'supports', processParent: 'neutral', networkDestination: 'supports' },
     buildWorld: (runMarker) => withoutChainParents(tpWorld(runMarker)),
+  },
+  {
+    id: 'mimicrat-clickfix.no-bridge-tp',
+    situation: 'U6',
+    evidenceState: 'complete',
+    expectedOutcome: 'true_positive',
+    provenance: 'replay',
+    variant: {
+      kind: 'perturbation',
+      of: TP_ID,
+      description: 'each alert has its own process ids; host and user are shared',
+    },
+    checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
+    buildWorld: (runMarker) => withoutAlertBridges(tpWorld(runMarker)),
+  },
+  {
+    id: 'mimicrat-clickfix.no-bridge',
+    situation: 'U3',
+    evidenceState: 'complete',
+    expectedOutcome: 'inconclusive',
+    provenance: 'replay',
+    variant: {
+      kind: 'mutation',
+      of: TP_ID,
+      description:
+        'each alert has its own process ids, no parents recorded, no network events; no process id joins two alerts',
+    },
+    checks: { entityRole: 'supports', processParent: 'neutral', networkDestination: 'neutral' },
+    buildWorld: (runMarker) =>
+      withoutAlertBridges(withoutEventCategory(withoutChainParents(tpWorld(runMarker)), 'network')),
   },
   {
     id: FP_ID,
@@ -155,6 +188,56 @@ export const MIMICRAT_EXAMPLES: readonly FpTpExample[] = [
       withManagementDestinations(
         withoutChainParents(withBenignActivity(tpWorld(runMarker, 'unknown'), runMarker))
       ),
+  },
+  {
+    id: 'mimicrat-clickfix.no-bridge-fp',
+    situation: 'U3',
+    evidenceState: 'complete',
+    expectedOutcome: 'false_positive',
+    provenance: 'authored',
+    variant: {
+      kind: 'perturbation',
+      of: FP_ID,
+      description: 'each alert has its own process ids; host and user are shared',
+    },
+    checks: {
+      entityRole: 'contradicts',
+      processParent: 'contradicts',
+      networkDestination: 'contradicts',
+    },
+    buildWorld: (runMarker) => withoutAlertBridges(fpWorld(runMarker)),
+  },
+  {
+    id: JUMP_BOX_ID,
+    situation: 'U4',
+    evidenceState: 'complete',
+    expectedOutcome: 'false_positive',
+    provenance: 'authored',
+    variant: {
+      kind: 'mutation',
+      of: FP_ID,
+      description: 'host is an administrative jump box; no parents recorded',
+    },
+    checks: {
+      entityRole: 'contradicts',
+      processParent: 'neutral',
+      networkDestination: 'contradicts',
+    },
+    buildWorld: jumpBoxWorld,
+  },
+  {
+    id: 'mimicrat-clickfix.network-only-entities-missing',
+    situation: 'U4',
+    evidenceState: 'entities_missing',
+    expectedOutcome: 'inconclusive',
+    provenance: 'authored',
+    variant: {
+      kind: 'mutation',
+      of: JUMP_BOX_ID,
+      description: 'the entity store has no record of the host or its user',
+    },
+    checks: { entityRole: 'skipped', processParent: 'neutral', networkDestination: 'contradicts' },
+    buildWorld: (runMarker) => withoutEntities(jumpBoxWorld(runMarker)),
   },
   {
     id: 'mimicrat-clickfix.fp-entities-missing',

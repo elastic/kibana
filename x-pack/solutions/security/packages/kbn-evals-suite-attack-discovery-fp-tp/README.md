@@ -28,7 +28,7 @@ The dataset is every example of every scenario registered in `src/scenarios/inde
 | `encoded-powershell.failed-missing-ad` | U6 | No Attack Discovery document | `failed` |
 | `encoded-powershell.failed-missing-cited-alert` | U6 | The discovery cites an alert that is not seeded | `failed` |
 
-`mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks), ported from [#293023](https://github.com/elastic/kibana/pull/293023). Its 15 examples are two base worlds, the replay and a benign mimic, and variants of them, so together they reach every branch of the verdict rules. See [its README](src/scenarios/mimicrat_clickfix/README.md) for the table.
+`mimicrat-clickfix` replays the MIMICRAT ClickFix chain from [Elastic Security Labs](https://www.elastic.co/security-labs/threat-command/mimicrat-custom-rat-mimics-c2-frameworks), ported from [#293023](https://github.com/elastic/kibana/pull/293023). Its 20 examples are two base worlds, the replay and a benign mimic, and variants of them, so together they reach every branch of the verdict rules. See [its README](src/scenarios/mimicrat_clickfix/README.md) for the table.
 
 `fp-events-truncated` reaches `inconclusive` deterministically. The analysis reads at most 50 raw events, oldest first, so the FP twin's own events stay on the page and the model still sees a false positive; the extra hits mark the page truncated, and `block_truncated_clear` rewrites `false_positive` to `inconclusive`. It has no `checks`, because the verdict rules do not model truncation.
 
@@ -144,16 +144,22 @@ Measured on commit `a688380f67b468802c0479e2c589f7e94bab1200` (the commit in thi
 
 `PayloadConformance` and `UnsafeClose` are constant at 1.000 (all models, all repetitions). `trajectory` is N/A: the managed agent declares no tools.
 
-What each evaluator checks after the #295393 tightening: `PayloadConformance` now also fails a run from contract-derived facts alone — a dropped world check (`entity_role`, `process_parent`, or `network_destination` missing from `checks`, except on a `block_truncated_clear` or `block_ungrounded_claims` downgrade, which emits `verdict: inconclusive` with `checks` omitted), a `false_positive` verdict while `coverage` shows a source with `seen: 0` or absent (missing evidence cannot clear an alert), a `false_positive` or `true_positive` verdict while completed world checks both support and contradict (rule 1 requires `inconclusive`; `alert_linkage` never decides), a `false_positive` without a completed world check contradicting and none supporting (rule 2), and a `true_positive` without `process_parent` or `network_destination` supporting, or with a world check contradicting (rule 3). `UnsafeClose` is unchanged: 0 only when the run predicts `false_positive` on a non-false-positive gold; no current scenario elicits that prediction other than the FP examples, so new discriminating scenarios remain follow-up work. The 2026-10-05 baseline numbers above predate this change; a re-baseline is pending.
+What each evaluator checks after the #295393 tightening: `PayloadConformance` now also fails a run from contract-derived facts alone — a dropped world check (`entity_role`, `process_parent`, or `network_destination` missing from `checks`, except on a `block_truncated_clear` or `block_ungrounded_claims` downgrade, which emits `verdict: inconclusive` with `checks` omitted), a `false_positive` verdict while `coverage` shows a source with `seen: 0` or absent (missing evidence cannot clear an alert), a `false_positive` or `true_positive` verdict while completed world checks both support and contradict (rule 1 requires `inconclusive`; `alert_linkage` never decides), a `false_positive` without a completed world check contradicting and none supporting (rule 2), and a `true_positive` without `process_parent` or `network_destination` supporting, or with a world check contradicting (rule 3). `UnsafeClose` is unchanged: 0 only when the run predicts `false_positive` on a non-false-positive gold; no current scenario elicits that prediction other than the FP examples, so a scenario that can move it is Follow-up 2. The 2026-10-05 baseline numbers above predate this change; the re-baseline is Follow-up 3.
 
-## Acceptance criteria (proposed)
+## Acceptance criteria
 
-- Hard gates on the core models: `PayloadConformance` = 1.0 and `UnsafeClose` = 1.0. `PayloadConformance` now enforces the prompt's verdict rules 1-3, the missing-evidence rule, and world-check presence, so it can fail a wrong-but-well-formed answer; its threshold needs re-baselining against a new run. `UnsafeClose` is still saturated at 1.000 — no current scenario elicits a `false_positive` prediction on a non-FP gold, so it cannot detect a regression yet. See [security-team#19344](https://github.com/elastic/security-team/issues/19344).
-- `OutcomeAccuracy`: set the threshold against the baseline above, whose floor is gpt-5-5 at 0.754 (CI down to 0.580).
+Gates against the managed workflow, per core model, on a run with `--repetitions 5` or more:
 
-## Follow-ups (sample-workflow removal done)
+- `PayloadConformance` = 1.0. It enforces the prompt's verdict rules 1-3, the missing-evidence rule, and world-check presence, so it fails a wrong-but-well-formed answer.
+- `UnsafeClose` = 1.0. It is saturated: in the baseline no run predicted `false_positive` on a non-FP gold. The worlds whose activity reads as benign but whose gold is not `false_positive` (`fp-entities-missing`, `fp-events-missing`, `network-only-entities-missing`, `mixed-world`, `fp-events-truncated`) are the ones that can move it, by closing an attack on missing evidence; no scenario yet hides a real attack behind benign-looking evidence. See [security-team#19344](https://github.com/elastic/security-team/issues/19344).
+- `OutcomeAccuracy` ≥ 0.75, the floor of the managed-workflow baseline above (gpt-5-5 at 0.754). That baseline predates the `PayloadConformance` tightening and the U3/U4 worlds, so re-baseline before raising it.
+- Agreement: report the share of each example's repetitions that land on the same outcome (see Reproducibility). An example below 0.8 is unstable and is read separately, not gated.
 
-1. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
-2. Give `UnsafeClose` new discriminating scenarios — a `false_positive` prediction on a non-FP gold — so it can leave the 1.0 ceiling. `PayloadConformance` no longer needs this (rules 1-3 enforced). Tracked in #295393.
+## Follow-ups
+
+1. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'` ([#295911](https://github.com/elastic/kibana/pull/295911)).
+2. Give `UnsafeClose` a scenario that hides a real attack behind benign-looking evidence, so a `false_positive` prediction on a non-FP gold can occur and the gate can leave the 1.0 ceiling.
+3. Re-baseline on the managed workflow with the current 29 examples.
+4. Align the prompt's `entity_role` with the contract, which reads a management server, MDM, or jump box as `contradicts` where the prompt reads `neutral`, or record the prompt's reading as the contract. Until one moves, `jump-box` grades the same outcome as `fp-network-only`.
 
 Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.

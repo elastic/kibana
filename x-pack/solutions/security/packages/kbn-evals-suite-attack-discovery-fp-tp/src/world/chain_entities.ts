@@ -23,8 +23,9 @@ interface FpTpEntityRole {
 
 /**
  * What the entity store says the host and user are, which the `entity_role` check reads.
- * An ordinary workstation supports the alert; a management server contradicts it;
- * `unknown` has records with no role, so the check is neutral.
+ * An ordinary workstation supports the alert; a management server or jump box
+ * contradicts it, as the eval contract states (the shipped prompt reads these roles as
+ * neutral); `unknown` has records with no role, so the check is neutral.
  */
 const FP_TP_ENTITY_ROLES = {
   employee_workstation: {
@@ -80,6 +81,26 @@ const FP_TP_ENTITY_ROLES = {
       criticality: 'low_impact',
       riskLevel: 'Moderate',
       riskScoreNorm: 41,
+    },
+  },
+  jump_box: {
+    host: {
+      subType: 'jump_box',
+      criticality: 'high_impact',
+      riskLevel: 'High',
+      riskScoreNorm: 68,
+      asset: {
+        owner: 'it-operations',
+        vendor: 'Microsoft',
+        model: 'Windows Server 2022 administrative jump host',
+        environment: 'management',
+      },
+    },
+    user: {
+      subType: 'it_admin',
+      criticality: 'high_impact',
+      riskLevel: 'Moderate',
+      riskScoreNorm: 44,
     },
   },
   unknown: {},

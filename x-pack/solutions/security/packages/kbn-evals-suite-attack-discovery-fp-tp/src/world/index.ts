@@ -46,6 +46,7 @@ export {
   withCommandLine,
   withFilePath,
   withNetworkDestination,
+  withoutAlertBridges,
   withoutEventCategory,
   withoutEventIds,
   withoutProcessParent,

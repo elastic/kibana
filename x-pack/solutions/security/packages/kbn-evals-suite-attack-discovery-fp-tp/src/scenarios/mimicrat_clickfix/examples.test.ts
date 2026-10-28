@@ -24,6 +24,33 @@ const VENDOR_DESTINATIONS = new Set(['manage.microsoft.com', 'sccm-dp-02.corp.lo
 const eventSources = (world: FpTpWorld): EventSource[] =>
   world.events.map(({ source }) => source as EventSource);
 
+/** Each alert's distinct pids, parent pids, and entity ids, its cited raw events included. */
+const processIdsPerAlert = (id: string): string[][] => {
+  const world = buildFpTpExampleWorld(id, 'run1');
+  const alertOf = new Map(
+    world.alerts.flatMap((alert, index) =>
+      (alert.source['kibana.alert.ancestors'] as Array<{ id: string }>).map(
+        ({ id: eventId }) => [eventId, index] as const
+      )
+    )
+  );
+  return world.alerts.map((alert, index) => {
+    const processes = [
+      alert.source.process,
+      ...world.events
+        .filter((event) => alertOf.get(event.id) === index)
+        .map(({ source }) => source.process),
+    ] as Array<{ pid?: number; entity_id?: string; parent?: { pid?: number } }>;
+    return [
+      ...new Set(
+        processes.flatMap(({ pid, entity_id: entityId, parent }) =>
+          [pid, entityId, parent?.pid].filter((value) => value !== undefined).map(String)
+        )
+      ),
+    ];
+  });
+};
+
 /** Reads each world check from the seeded evidence, independently of the declared labels. */
 const observedChecks = (world: FpTpWorld): Record<string, string> => {
   const host = world.entities.find(
@@ -104,5 +131,26 @@ describe('mimicrat-clickfix examples', () => {
     ['mimicrat-clickfix.domain-swap', MIMICRAT_STAGE2_DOMAIN],
   ])('returns %s raw events without %s', (id, needle) => {
     expect(rawEventText(id).toLowerCase()).not.toContain(needle.toLowerCase());
+  });
+
+  it.each([
+    'mimicrat-clickfix.no-bridge',
+    'mimicrat-clickfix.no-bridge-tp',
+    'mimicrat-clickfix.no-bridge-fp',
+  ])('returns %s with no process id shared across alerts', (id) => {
+    const all = processIdsPerAlert(id).flat();
+    expect(new Set(all).size).toBe(all.length);
+  });
+
+  it('returns tp with process ids shared across alerts', () => {
+    const all = processIdsPerAlert('mimicrat-clickfix.tp').flat();
+    expect(new Set(all).size).toBeLessThan(all.length);
+  });
+
+  it('returns no-bridge-tp alerts that still share the host and the user', () => {
+    const { alerts } = buildFpTpExampleWorld('mimicrat-clickfix.no-bridge-tp', 'run1');
+    const hosts = new Set(alerts.map(({ source }) => JSON.stringify(source.host)));
+    const users = new Set(alerts.map(({ source }) => JSON.stringify(source.user)));
+    expect([hosts.size, users.size]).toEqual([1, 1]);
   });
 });

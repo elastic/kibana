@@ -11,12 +11,19 @@ import {
   withCommandLine,
   withFilePath,
   withNetworkDestination,
+  withoutAlertBridges,
   withoutEventCategory,
   withoutEventIds,
   withoutProcessParent,
   withProcessExecutable,
   withProcessParent,
 } from './mutations';
+
+interface ProcessFields {
+  readonly pid: number;
+  readonly entity_id: string;
+  readonly parent?: { readonly pid: number };
+}
 
 const RUN_MARKER = 'run-marker';
 
@@ -219,6 +226,38 @@ describe('chain mutations', () => {
     expect(withoutEventIds(world, [ids.eventId('start')]).events.map(({ id }) => id)).toEqual([
       ids.eventId('beacon'),
     ]);
+  });
+
+  it('returns new pids and entity ids without the original trailing digits or prefix after withoutAlertBridges', () => {
+    const [before] = world.events;
+    const [after] = withoutAlertBridges(world).events;
+    const { process: original } = before.source as { process: ProcessFields };
+    const { process: separated } = after.source as { process: ProcessFields };
+    expect(separated.pid % 100).not.toBe(original.pid % 100);
+    expect(separated.parent?.pid).not.toBe(original.parent?.pid);
+    expect(separated.entity_id).not.toBe(original.entity_id);
+    expect(separated.entity_id).toMatch(/^ad-scenario-entity-/);
+  });
+
+  it('throws from withoutAlertBridges when two alerts cite one raw event', () => {
+    const [alert] = world.alerts;
+    expect(() => withoutAlertBridges({ ...world, alerts: [alert, alert] })).toThrow(
+      'is cited by more than one alert'
+    );
+  });
+
+  it('throws from withoutAlertBridges when no alert cites a raw event', () => {
+    const [alert] = world.alerts;
+    const citingStartOnly = {
+      ...alert,
+      source: {
+        ...alert.source,
+        'kibana.alert.ancestors': [{ id: ids.eventId('start') }],
+      },
+    };
+    expect(() => withoutAlertBridges({ ...world, alerts: [citingStartOnly] })).toThrow(
+      `No alert cites raw event ${ids.eventId('beacon')}`
+    );
   });
 
   it('returns no network events after withoutEventCategory', () => {
