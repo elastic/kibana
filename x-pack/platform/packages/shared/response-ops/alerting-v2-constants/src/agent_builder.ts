@@ -17,9 +17,7 @@ const alertingTool = (name: string) => `${ALERTING_NAMESPACE}.${name}`;
 export const ALERTING_TOOL_IDS = {
   manageRule: alertingTool('manage_rule'),
   manageActionPolicy: alertingTool('manage_action_policy'),
-  findActionPolicies: alertingTool('find_action_policies'),
   attachRule: alertingTool('attach_rule'),
-  attachActionPolicy: alertingTool('attach_action_policy'),
 } as const;
 
 /**
