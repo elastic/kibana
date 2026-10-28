@@ -80,12 +80,8 @@ describe('createAttacksGroupRenderer', () => {
     expect(await screen.findByText('2 attacks')).toBeInTheDocument();
     expect(screen.getAllByRole('listitem')).toHaveLength(1);
     expect(screen.getByRole('link')).toHaveAttribute('href', '/app/security/attacks');
-    expect(getUrlForApp).toHaveBeenCalledWith(
-      'securitySolutionUI',
-      expect.objectContaining({
-        deepLinkId: 'attacks',
-        path: expect.stringContaining('attack-1'),
-      })
-    );
+    expect(getUrlForApp).toHaveBeenCalledWith('securitySolutionUI', {
+      path: expect.stringMatching(/^\/attacks\?.*attack-1/),
+    });
   });
 });
