@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { uniqBy } from 'lodash';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import type { UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
+import { bumpAgentPolicyRevision } from './bump_agent_policy_revision';
 
 export class PackagePolicyService {
   private readonly server: SyntheticsServerSetup;
@@ -28,6 +29,27 @@ export class PackagePolicyService {
 
   private getInternalEsClient() {
     return this.server.coreStart.elasticsearch.client.asInternalUser;
+  }
+
+  /**
+   * Bumps every agent policy collected in `deferredBumps` (see the write
+   * methods), once each. Callers that pass `deferredBumps` must call this when
+   * done, also on failure: those package policies were written with
+   * `bumpRevision: false`, so Fleet does not redeploy them until this runs.
+   * Every bump is attempted; the first failure is rethrown.
+   */
+  async scheduleRevisionBumps(deferredBumps: Set<string>): Promise<void> {
+    const policyIds = [...deferredBumps];
+    deferredBumps.clear();
+    const results = await Promise.allSettled(
+      policyIds.map((policyId) => bumpAgentPolicyRevision(this.server, policyId))
+    );
+    const failed = results.find((result): result is PromiseRejectedResult => {
+      return result.status === 'rejected';
+    });
+    if (failed) {
+      throw failed.reason;
+    }
   }
 
   async buildPackagePolicyFromPackage({ spaceId }: { spaceId: string }) {
@@ -86,9 +108,12 @@ export class PackagePolicyService {
   async bulkCreate({
     newPolicies,
     spaceId,
+    deferredBumps,
   }: {
     newPolicies: NewPackagePolicyWithId[];
     spaceId: string;
+    /** Collects the agent policy ids to bump instead of bumping them now. */
+    deferredBumps?: Set<string>;
   }) {
     if (newPolicies.length === 0) {
       return { created: [], failed: [] };
@@ -106,11 +131,17 @@ export class PackagePolicyService {
         policies,
         {
           asyncDeploy: true,
+          ...(deferredBumps ? { bumpRevision: false } : {}),
         }
       )
     );
 
     const res = await Promise.all(promises);
+    if (deferredBumps) {
+      res
+        .flatMap((r) => r.created)
+        .forEach(({ policy_ids: policyIds }) => policyIds?.forEach((id) => deferredBumps.add(id)));
+    }
 
     return {
       created: res.flatMap((r) => r.created),
@@ -121,9 +152,12 @@ export class PackagePolicyService {
   async bulkUpdate({
     policiesToUpdate,
     spaceId,
+    deferredBumps,
   }: {
     policiesToUpdate: UpdatePackagePolicyWithId[];
     spaceId: string;
+    /** Collects the agent policy ids to bump instead of bumping them now. */
+    deferredBumps?: Set<string>;
   }) {
     if (policiesToUpdate.length === 0) {
       return [];
@@ -142,20 +176,29 @@ export class PackagePolicyService {
         {
           force: true,
           asyncDeploy: true,
+          ...(deferredBumps ? { bumpRevision: false } : {}),
         }
       )
     );
 
     const res = await Promise.all(promises);
+    if (deferredBumps) {
+      res
+        .flatMap((r) => r.updatedPolicies ?? [])
+        .forEach(({ policy_ids: policyIds }) => policyIds?.forEach((id) => deferredBumps.add(id)));
+    }
     return res.flatMap((r) => r.failedPolicies);
   }
 
   async bulkDelete({
     policyIdsToDelete,
     spaceId,
+    deferredBumps,
   }: {
     policyIdsToDelete: string[];
     spaceId: string;
+    /** Collects the agent policy ids to bump instead of bumping them now. */
+    deferredBumps?: Set<string>;
   }) {
     if (policyIdsToDelete.length === 0) {
       return;
@@ -174,12 +217,21 @@ export class PackagePolicyService {
         {
           force: true,
           asyncDeploy: true,
+          ...(deferredBumps ? { bumpRevision: false } : {}),
         }
       )
     );
 
     const res = await Promise.all(promises);
-    return res.flat();
+    const results = res.flat();
+    if (deferredBumps) {
+      results.forEach(({ success, policy_ids: policyIds }) => {
+        if (success) {
+          policyIds?.forEach((id) => deferredBumps.add(id));
+        }
+      });
+    }
+    return results;
   }
 
   // The agent policies can be in the default space or the spaceId
@@ -218,8 +270,9 @@ export class PackagePolicyService {
     ).flat();
 
     const agentPolicyById = new Map(agentPolicies.map((ap) => [ap.id, ap]));
-    const defaultSpacePackagePolicies: T[] = [];
-    const spacePackagePolicies: T[] = [];
+    // Dedupe by reference, not id: Test Now policies have no id until Fleet assigns one.
+    const defaultSpacePackagePolicies = new Set<T>();
+    const spacePackagePolicies = new Set<T>();
 
     for (const pkgPolicy of policies) {
       if (pkgPolicy.policy_ids) {
@@ -229,13 +282,13 @@ export class PackagePolicyService {
             agentPolicy?.space_ids?.includes(spaceId) ||
             agentPolicy?.space_ids?.includes(ALL_SPACES_ID)
           ) {
-            spacePackagePolicies.push(pkgPolicy);
+            spacePackagePolicies.add(pkgPolicy);
           } else {
-            defaultSpacePackagePolicies.push(pkgPolicy);
+            defaultSpacePackagePolicies.add(pkgPolicy);
           }
         });
       } else {
-        defaultSpacePackagePolicies.push(pkgPolicy);
+        defaultSpacePackagePolicies.add(pkgPolicy);
       }
     }
 
@@ -244,14 +297,11 @@ export class PackagePolicyService {
       policies: T[];
     }[] = [];
 
-    if (defaultSpacePackagePolicies.length > 0) {
-      res.push({
-        client: defaultSpaceSoClient,
-        policies: uniqBy(defaultSpacePackagePolicies, 'id'),
-      });
+    if (defaultSpacePackagePolicies.size > 0) {
+      res.push({ client: defaultSpaceSoClient, policies: [...defaultSpacePackagePolicies] });
     }
-    if (spacePackagePolicies.length > 0) {
-      res.push({ client: spaceSoClient, policies: uniqBy(spacePackagePolicies, 'id') });
+    if (spacePackagePolicies.size > 0) {
+      res.push({ client: spaceSoClient, policies: [...spacePackagePolicies] });
     }
 
     return res;

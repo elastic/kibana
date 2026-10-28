@@ -85,7 +85,7 @@ export const recalculateEntityRiskScore = async ({
     throw Boom.badRequest(`Entity not found in store: ${entityId}`);
   }
 
-  const { alertFilters, resolutionTargetId } = scoringContext;
+  const { alertFilters, resolutionAlertFilters, resolutionTargetId } = scoringContext;
 
   const { dataViewId } = engineConfig;
   const pageSize = engineConfig.pageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
@@ -97,6 +97,13 @@ export const recalculateEntityRiskScore = async ({
   const lookupIndex = getLookupIndexName(namespace);
   const calculationRunId = uuidv4();
   const now = new Date().toISOString();
+
+  // The alerts index is created lazily, so a space without alerts has none. Skip recalculation.
+  const alertsIndexExists = await esClient.indices.exists({ index: alertsIndex });
+  if (!alertsIndexExists) {
+    logger.warn(`Alerts index "${alertsIndex}" does not exist yet, skipping recalculation`);
+    return { baseScore: undefined, resolutionScore: undefined };
+  }
 
   const { scores: baseScores } = await scoreBaseEntities({
     esClient,
@@ -131,6 +138,7 @@ export const recalculateEntityRiskScore = async ({
     idBasedRiskScoringEnabled,
     writer,
     targetEntityIds: [resolutionTargetId],
+    alertFilters: resolutionAlertFilters,
     refresh: 'wait_for',
     collectScores: true,
   });
@@ -174,6 +182,8 @@ async function buildScoringContext({
 
   return {
     alertFilters: [...baseAlertFilters, entityIdentityFilter],
+    // Resolution scores the whole group, so it can't be narrowed to this entity's alerts.
+    resolutionAlertFilters: baseAlertFilters,
     resolutionTargetId: entityDoc?.entity?.relationships?.resolution?.resolved_to ?? entityId,
   };
 }

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EventTypeOpts } from '@kbn/core/server';
+import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
+import type { RiskScoreDistribution } from '@kbn/entity-store/common';
 import type { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type { CsvErrorCategory } from '../../entity_analytics/entity_resolution/csv_upload';
@@ -38,6 +39,7 @@ import type {
 } from '../../detection_engine/rule_management/logic/detection_rules_client/restore_telemetry';
 import type {
   RuleDuplicateTelemetry,
+  RuleImportTelemetry,
   RuleLifecycleTelemetry,
 } from '../../detection_engine/rule_management/logic/detection_rules_client/rule_lifecycle_telemetry';
 import { TRIAL_COMPANION_EVENTS } from '../../trial_companion/telemetry/trial_companion_ebt_events';
@@ -182,9 +184,15 @@ const ruleLifecycleTelemetrySchema = {
   },
 };
 
-export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
+export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleImportTelemetry> = {
   eventType: 'detection_rule_import',
-  schema: ruleLifecycleTelemetrySchema,
+  schema: {
+    ...ruleLifecycleTelemetrySchema,
+    outcome: {
+      type: 'keyword',
+      _meta: { description: 'Result of importing the rule: created, updated or skipped' },
+    },
+  },
 };
 
 export const DETECTION_RULE_REVERT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
@@ -510,6 +518,73 @@ export type RiskScoreMaintainerStageSummaryEvent =
   | Phase2ResolutionScoringSummary
   | ResetToZeroSummary;
 
+type RiskScoreDistributionFieldSchema = RootSchema<{
+  distribution?: RiskScoreDistribution;
+}>['distribution'];
+
+const riskScoreDistributionSchema = (
+  scoreKind: 'base' | 'resolution'
+): RiskScoreDistributionFieldSchema => {
+  const scoreKindLabel = scoreKind === 'base' ? 'Base' : 'Resolution';
+  return {
+    _meta: {
+      optional: true,
+      description: `Distribution of ${scoreKind} scores written in this run by risk band and percentile`,
+    },
+    properties: {
+      critical: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Critical`,
+        },
+      },
+      high: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is High`,
+        },
+      },
+      moderate: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Moderate`,
+        },
+      },
+      low: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Low`,
+        },
+      },
+      unknown: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Unknown, including scores with no band`,
+        },
+      },
+      normP50: {
+        type: 'float',
+        _meta: {
+          optional: true,
+          description: `Median calculated_score_norm of ${scoreKind} scores written in this run`,
+        },
+      },
+      normP90: {
+        type: 'float',
+        _meta: {
+          optional: true,
+          description: `90th percentile calculated_score_norm of ${scoreKind} scores written in this run`,
+        },
+      },
+    },
+  };
+};
+
 export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   namespace: string;
   entityType: string;
@@ -524,6 +599,8 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   pagesProcessed: number;
   lookupPrunedDocs: number;
   idBasedRiskScoringEnabled: boolean;
+  baseScoreDistribution?: RiskScoreDistribution;
+  resolutionScoreDistribution?: RiskScoreDistribution;
 }> = {
   eventType: 'risk_score_maintainer_run_summary',
   schema: {
@@ -564,6 +641,8 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: { description: 'Whether Entity Store dual-write was enabled' },
     },
+    baseScoreDistribution: riskScoreDistributionSchema('base'),
+    resolutionScoreDistribution: riskScoreDistributionSchema('resolution'),
   },
 };
 

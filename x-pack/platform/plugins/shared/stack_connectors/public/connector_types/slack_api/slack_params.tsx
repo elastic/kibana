@@ -31,14 +31,14 @@ type ParamsProps = ActionParamsProps<PostMessageParams | PostBlockkitParams>;
 
 const SlackParamsFields: React.FunctionComponent<ParamsProps> = (props) => {
   const { editAction, index, useDefaultMessage, defaultMessage } = props;
-  const { subActionParams } = props.actionParams;
+  const { subAction, subActionParams } = props.actionParams;
   const { channels = [], channelIds = [], channelNames = [], text } = subActionParams ?? {};
 
   const connectorId = props.actionConnector?.id ?? '';
   const key = `${connectorId}:${index}`;
 
   useEffect(() => {
-    editAction('subAction', 'postMessage', index);
+    editAction('subAction', subAction ?? 'postMessage', index);
     editAction(
       'subActionParams',
       {
@@ -78,7 +78,7 @@ const SlackParamsFieldsComponent: React.FunctionComponent<ParamsProps> = ({
 }) => {
   const channelsLabelId = useGeneratedHtmlId();
 
-  const { subActionParams } = actionParams;
+  const { subAction, subActionParams } = actionParams;
   const { channels = [], text, channelIds = [], channelNames = [] } = subActionParams ?? {};
 
   const selectedChannel = getSelectedChannel({
@@ -91,7 +91,7 @@ const SlackParamsFieldsComponent: React.FunctionComponent<ParamsProps> = ({
     ? defaultMessage
     : text;
 
-  const [messageType, setMessageType] = useState('text');
+  const [messageType, setMessageType] = useState(getMessageType(subAction));
   const [textValue, setTextValue] = useState<string | undefined>(initialTextValue);
 
   const allowedChannelsConfig =
@@ -361,6 +361,8 @@ const formatChannel = (channel: string): string => {
 
 const getSubAction = (messageType: string) =>
   messageType === 'text' ? 'postMessage' : 'postBlockkit';
+
+const getMessageType = (subAction?: string) => (subAction === 'postBlockkit' ? 'blockkit' : 'text');
 
 const shouldUseDefaultValue = ({
   useDefaultMessage,

@@ -21,7 +21,7 @@ import moment from 'moment';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import pRetry from 'p-retry';
 import { isEmpty } from 'lodash';
-import { registerCleanUpTask } from './private_location/clean_up_task';
+import { registerCleanUpTask } from '../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../types';
 import {
   legacySyntheticsMonitorTypeSingle,

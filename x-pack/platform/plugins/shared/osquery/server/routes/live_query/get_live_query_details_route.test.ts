@@ -236,4 +236,72 @@ describe('getLiveQueryDetailsRoute', () => {
       'custom-space'
     );
   });
+
+  it('returns 404 when the action document is not found in the active space', async () => {
+    const mockSearchFn = jest.fn().mockReturnValue(of({ actionDetails: undefined }));
+
+    mockOsqueryContext = {
+      service: {
+        getActiveSpace: jest.fn().mockResolvedValue({ id: 'space-b' }),
+      },
+      logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+    } as unknown as OsqueryAppContext;
+
+    const mockRouter = createMockRouter();
+    getLiveQueryDetailsRoute(mockRouter, mockOsqueryContext);
+    routeHandler = getRouteHandler(mockRouter);
+
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler(
+      createMockContext(mockSearchFn) as never,
+      httpServerMock.createKibanaRequest({ params: { id: 'action-1' }, query: {} }),
+      mockResponse
+    );
+
+    expect(mockResponse.notFound).toHaveBeenCalledWith({ body: { message: 'Action not found' } });
+    expect(getActionResponses).not.toHaveBeenCalled();
+    expect(mockResponse.customError).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['has no queries field', { action_id: 'action-1' }],
+    ['has an empty queries list', { action_id: 'action-1', queries: [] }],
+  ])('returns a completed action when the action document %s', async (_, source) => {
+    const mockSearchFn = jest.fn().mockReturnValue(
+      of({
+        actionDetails: {
+          _source: source,
+          fields: { expiration: [new Date(Date.now() + 60000).toISOString()] },
+        },
+      })
+    );
+
+    mockOsqueryContext = {
+      service: {
+        getActiveSpace: jest.fn().mockResolvedValue({ id: 'space-a' }),
+      },
+      logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+    } as unknown as OsqueryAppContext;
+
+    const mockRouter = createMockRouter();
+    getLiveQueryDetailsRoute(mockRouter, mockOsqueryContext);
+    routeHandler = getRouteHandler(mockRouter);
+
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler(
+      createMockContext(mockSearchFn) as never,
+      httpServerMock.createKibanaRequest({ params: { id: 'action-1' }, query: {} }),
+      mockResponse
+    );
+
+    expect(getActionResponses).not.toHaveBeenCalled();
+    expect(mockResponse.customError).not.toHaveBeenCalled();
+    expect(mockResponse.ok).toHaveBeenCalledWith({
+      body: {
+        data: expect.objectContaining({ action_id: 'action-1', queries: [], status: 'completed' }),
+      },
+    });
+  });
 });

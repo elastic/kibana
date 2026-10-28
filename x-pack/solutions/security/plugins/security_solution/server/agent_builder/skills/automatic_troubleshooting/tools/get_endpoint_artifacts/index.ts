@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
@@ -47,45 +47,47 @@ const DEFAULT_PER_PAGE = 20;
 const MAX_ARRAY_VALUES = 50;
 const MAX_STRING_LENGTH = 512;
 
-const getEndpointArtifactsSchema = z.object({
-  artifactType: z
-    .enum([
-      'endpoint_exceptions',
-      'trusted_apps',
-      'trusted_devices',
-      'event_filters',
-      'host_isolation_exceptions',
-      'blocklists',
-    ])
-    .optional()
-    .describe('The type of artifact to retrieve. Omit to get summary counts for all types.'),
-  search: z
-    .string()
-    .max(256)
-    .optional()
-    .describe(
-      'Free text search across artifact fields (name, description, tags, and others). Best suited for searching by artifact name or description. Uses simple query string search.'
-    ),
-  osType: z
-    .enum(['windows', 'linux', 'macos'])
-    .optional()
-    .describe('Filter artifacts by operating system.'),
-  policyId: z
-    .string()
-    .max(128)
-    .optional()
-    .describe(
-      'Filter to artifacts assigned to this policy ID (includes globally-assigned artifacts).'
-    ),
-  perPage: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .optional()
-    .describe('Number of items per page. Default 20, max 50.'),
-  page: z.number().int().min(1).optional().describe('Page number for pagination. Default 1.'),
-});
+const getEndpointArtifactsSchema = lazySchema(() =>
+  z.object({
+    artifactType: z
+      .enum([
+        'endpoint_exceptions',
+        'trusted_apps',
+        'trusted_devices',
+        'event_filters',
+        'host_isolation_exceptions',
+        'blocklists',
+      ])
+      .optional()
+      .describe('The type of artifact to retrieve. Omit to get summary counts for all types.'),
+    search: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'Free text search across artifact fields (name, description, tags, and others). Best suited for searching by artifact name or description. Uses simple query string search.'
+      ),
+    osType: z
+      .enum(['windows', 'linux', 'macos'])
+      .optional()
+      .describe('Filter artifacts by operating system.'),
+    policyId: z
+      .string()
+      .max(128)
+      .optional()
+      .describe(
+        'Filter to artifacts assigned to this policy ID (includes globally-assigned artifacts).'
+      ),
+    perPage: z
+      .number()
+      .int()
+      .min(1)
+      .max(50)
+      .optional()
+      .describe('Number of items per page. Default 20, max 50.'),
+    page: z.number().int().min(1).optional().describe('Page number for pagination. Default 1.'),
+  })
+);
 
 export const classifyArtifactError = (error: unknown): ArtifactErrorType => {
   if (error instanceof Error) {

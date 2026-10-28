@@ -10,9 +10,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as JSON5 from 'json5';
-import { getKibanaDir } from '../../utils';
-import { getModuleLookup } from '../../affected-packages/module_lookup';
-import { FTR_EXCLUDED_MODULES, shouldSkipFtrTests } from './selective_ftr';
+import { getKibanaDir } from '../../utils.ts';
+import { getModuleLookup } from '../../affected-packages/module_lookup.ts';
+import { FTR_EXCLUDED_MODULES, shouldSkipFtrTests } from './selective_ftr.ts';
 
 /**
  * Instead of asserting specific IDs in/out of the list (which just mirrors the

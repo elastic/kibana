@@ -64,6 +64,7 @@ const isPatternTargetEnabled = (state: StateType): state is StateType & { target
 export const createSearchToolGraph = async ({
   modelProvider,
   esClient,
+  internalEsClient,
   logger,
   events,
   topSnippetsConfig,
@@ -72,6 +73,7 @@ export const createSearchToolGraph = async ({
 }: {
   modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   topSnippetsConfig?: TopSnippetsConfig;
@@ -92,6 +94,7 @@ export const createSearchToolGraph = async ({
     const nlSearchTool = createNaturalLanguageSearchTool({
       modelProvider,
       esClient,
+      internalEsClient,
       events,
       logger,
       rowLimit: state.rowLimit,
@@ -162,6 +165,14 @@ export const createSearchToolGraph = async ({
         customInstructions: state.customInstructions,
       })
     );
+
+    const resourceNames = new Set(resources.map(({ name }) => name));
+    const hasUnlistedTarget = (response.tool_calls ?? []).some(
+      ({ args }) => args.index !== undefined && !resourceNames.has(args.index)
+    );
+    if (hasUnlistedTarget) {
+      return { error: NO_MATCHING_RESOURCE_ERROR };
+    }
 
     return { messages: [response] };
   };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType, type ErrorResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
@@ -63,22 +63,24 @@ const checkAssetCriticalityAccess = async ({
   };
 };
 
-const schema = z.object({
-  entityId: z
-    .string()
-    .min(1)
-    .describe(
-      'The entity ID (EUID) of the entity whose criticality to set. ' +
-        'Examples: "host:server1", "user:jsmith". ' +
-        'If the security.entity attachment identifies the target, use its entity ID here.'
+const schema = lazySchema(() =>
+  z.object({
+    entityId: z
+      .string()
+      .min(1)
+      .describe(
+        'The entity ID (EUID) of the entity whose criticality to set. ' +
+          'Examples: "host:server1", "user:jsmith". ' +
+          'If the security.entity attachment identifies the target, use its entity ID here.'
+      ),
+    entityType: IdentifierType.describe('The type of entity: host, user, service, or generic.'),
+    criticality: AssetCriticalityLevelsForBulkUpload.describe(
+      'The asset criticality level to assign. ' +
+        'Valid levels: low_impact, medium_impact, high_impact, extreme_impact. ' +
+        'Use "unassigned" to remove the existing criticality value.'
     ),
-  entityType: IdentifierType.describe('The type of entity: host, user, service, or generic.'),
-  criticality: AssetCriticalityLevelsForBulkUpload.describe(
-    'The asset criticality level to assign. ' +
-      'Valid levels: low_impact, medium_impact, high_impact, extreme_impact. ' +
-      'Use "unassigned" to remove the existing criticality value.'
-  ),
-});
+  })
+);
 
 export const setAssetCriticalityTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,

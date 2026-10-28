@@ -27,7 +27,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
-import type { PackagePolicyAssetsMap } from '../../common/types';
+import type { AgentPolicyPackagePoliciesSummary, PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
   NewPackagePolicy,
@@ -150,6 +150,11 @@ export interface PackagePolicyClient {
     agentPolicyId: string,
     options?: PackagePolicyClientFindAllForAgentPolicyOptions
   ): Promise<PackagePolicy[]>;
+
+  getSummaryForAgentPolicies(
+    soClient: SavedObjectsClientContract,
+    agentPolicyIds: string[]
+  ): Promise<Map<string, AgentPolicyPackagePoliciesSummary>>;
 
   compilePackagePolicyForVersions(
     soClient: SavedObjectsClientContract,
@@ -363,6 +368,8 @@ export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
 export interface PackagePolicyClientBulkUpdateOptions {
   user?: AuthenticatedUser;
   force?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
   asyncDeploy?: boolean;
   fromBulkUpgrade?: boolean;
   oldPackagePolicies?: PackagePolicy[];

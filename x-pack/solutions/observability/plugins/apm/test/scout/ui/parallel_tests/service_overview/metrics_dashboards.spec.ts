@@ -11,6 +11,8 @@ import { test, testData } from '../../fixtures';
 
 const { APM_METRICS_SERVICE_NAMES } = testData;
 
+const TEST_TIMEOUT = 2 * 60_000;
+
 interface DashboardScenario {
   title: string;
   serviceName: string;
@@ -210,6 +212,8 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
+      // Tab readiness and panel rendering are each budgeted at EXTENDED_TIMEOUT (45s), which cannot fit Scout's 60s default.
+      test.setTimeout(TEST_TIMEOUT);
       await browserAuth.loginAsViewer();
     });
 

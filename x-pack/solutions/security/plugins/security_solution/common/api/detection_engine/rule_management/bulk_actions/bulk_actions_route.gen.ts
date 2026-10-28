@@ -40,11 +40,14 @@ export type BulkEditSkipReason = z.infer<typeof BulkEditSkipReason>;
 export const BulkGapsFillingSkipReason = lazySchema(() => z.literal('NO_GAPS_TO_FILL'));
 export type BulkGapsFillingSkipReason = z.infer<typeof BulkGapsFillingSkipReason>;
 
+export const BulkDeleteSkipReason = lazySchema(() => z.literal('RULE_NOT_FOUND'));
+export type BulkDeleteSkipReason = z.infer<typeof BulkDeleteSkipReason>;
+
 export const BulkActionSkipResult = lazySchema(() =>
   z.object({
     id: z.string(),
     name: z.string().optional(),
-    skip_reason: z.union([BulkEditSkipReason, BulkGapsFillingSkipReason]),
+    skip_reason: z.union([BulkEditSkipReason, BulkGapsFillingSkipReason, BulkDeleteSkipReason]),
   })
 );
 export type BulkActionSkipResult = z.infer<typeof BulkActionSkipResult>;

@@ -28,6 +28,20 @@ Building Kibana and its distributables can take a lot of memory to finish succes
 NODE_OPTIONS="--max-old-space-size=4096" node scripts/build --release
 ```
 
+## Distribution defaults
+
+`lib/distribution_defaults.ts` defines package-owned defaults. Existing
+variants have no defaults, so the build emits no `config_defaults` directory
+and retains the existing configuration and Node option behavior.
+
+`CreateDistributionDefaults` writes configured defaults into `config_defaults`.
+Kibana loads its `kibana.yml` before user configuration, including custom
+`--config`, `KBN_CONFIG_PATHS`, and `KBN_PATH_CONF` files. All POSIX launchers
+source `bin/kibana_env`, which applies package-owned Node options before user
+`node.options`, followed by inherited `NODE_OPTIONS`. Later options override
+earlier defaults. Environment paths resolve relative to the installation root
+so archives remain relocatable.
+
 ## Structure
 
 The majority of this logic is extracted from the legacy grunt build, and is designed to maintain the general structure grunt provides including tasks and config. The [build_distributables.ts] file defines which tasks are run.

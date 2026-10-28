@@ -3,24 +3,22 @@
 exports[`getKpiUniquePrivateIpsAreaLensAttributes should render 1`] = `
 Object {
   "description": "",
-  "references": Array [
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-current-indexpattern",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-72dc4b99-b07d-4dc9-958b-081d259e11fa",
-      "type": "index-pattern",
-    },
-  ],
+  "references": Array [],
   "state": Object {
+    "adHocDataViews": Object {
+      "security-solution-my-test": Object {
+        "allowHidden": false,
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "security-solution-my-test",
+        "managed": false,
+        "name": "Default Security Data View",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "title": "auditbeat-mytest-*",
+      },
+    },
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
@@ -195,6 +193,23 @@ Object {
             "host.id": "123",
           },
         },
+      },
+    ],
+    "internalReferences": Array [
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-current-indexpattern",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-layer-38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "security-solution-my-test",
+        "name": "indexpattern-datasource-layer-72dc4b99-b07d-4dc9-958b-081d259e11fa",
+        "type": "index-pattern",
       },
     ],
     "query": Object {

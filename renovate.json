@@ -5,6 +5,10 @@
     "helpers:pinGitHubActionDigests",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "gitIgnoredAuthors": [
+    "174716857+elastic-renovate-prod[bot]@users.noreply.github.com",
+    "42973632+kibanamachine@users.noreply.github.com"
+  ],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**", ".github/workflows/*.lock.yml"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "9.4", "9.3", "8.19"],
@@ -37,7 +41,6 @@
     {
       "groupName": "webpack",
       "matchDepNames": [
-        "autoprefixer",
         "clean-webpack-plugin",
         "css-loader",
         "mini-css-extract-plugin",
@@ -47,7 +50,6 @@
         "webpack",
         "webpack-bundle-analyzer",
         "webpack-cli",
-        "webpack-dev-server",
         "webpack-merge",
         "webpack-sources",
         "@statoscope/webpack-plugin",
@@ -448,7 +450,7 @@
     {
       "groupName": "@reduxjs/toolkit",
       "matchDepNames": ["@reduxjs/toolkit", "immer"],
-      "reviewers": ["team:kibana-visualizations", "team:security-solution"],
+      "reviewers": ["team:kibana-dashboards"],
       "matchBaseBranches": ["main"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -499,7 +501,7 @@
     {
       "groupName": "unified - ESM Required",
       "matchDepNames": ["unified"],
-      "reviewers": ["team:kibana-cases", "team:security-solution"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["blocked", "effort:low"],
       "enabled": true,
@@ -508,7 +510,7 @@
     {
       "groupName": "use-resize-observer",
       "matchDepNames": ["use-resize-observer"],
-      "reviewers": ["team:kibana-presentation", "team:security-solution"],
+      "reviewers": ["team:kibana-dashboards", "team:security-investigations"],
       "matchBaseBranches": ["main"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -728,8 +730,8 @@
     {
       "groupName": "LaunchDarkly",
       "matchDepNames": [
-        "launchdarkly-js-client-sdk",
         "@openfeature/launchdarkly-client-provider",
+        "@launchdarkly/js-client-sdk",
         "@launchdarkly/node-server-sdk",
         "@launchdarkly/openfeature-node-server"
       ],
@@ -969,7 +971,6 @@
         "eslint-plugin-react-hooks",
         "eslint-plugin-react-perf",
         "eslint-plugin-testing-library",
-        "eslint-traverse",
         "@types/eslint"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -1103,8 +1104,7 @@
         "mocha-junit-reporter",
         "mocha-multi-reporters",
         "mochawesome",
-        "mochawesome-merge",
-        "regenerate"
+        "mochawesome-merge"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1132,7 +1132,7 @@
     },
     {
       "groupName": "postcss",
-      "matchDepNames": ["postcss", "postcss-scss", "postcss-loader"],
+      "matchDepNames": ["postcss", "postcss-scss"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1369,17 +1369,8 @@
       "enabled": true
     },
     {
-      "groupName": "borc",
-      "matchDepNames": ["borc"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "cssnano",
-      "matchDepNames": ["cssnano", "cssnano-preset-default"],
+      "groupName": "cbor2",
+      "matchDepNames": ["cbor2"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1521,7 +1512,7 @@
     },
     {
       "groupName": "reporting dependencies",
-      "matchDepNames": ["@types/pdfmake", "extract-zip", "pdfmake"],
+      "matchDepNames": ["@types/pdfmake", "pdfmake"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Reporting Services", "Team:ResponseOps"],
@@ -1695,7 +1686,7 @@
     {
       "groupName": "cypress",
       "matchDepPatterns": ["cypress"],
-      "reviewers": ["team:security-solution"],
+      "reviewers": ["team:security-engineering-productivity"],
       "matchBaseBranches": ["main"],
       "addLabels": ["buildkite-ci", "ci:all-cypress-suites"],
       "minimumReleaseAge": "14 days",
@@ -1704,96 +1695,148 @@
     {
       "groupName": "zod",
       "matchDepNames": ["zod"],
-      "reviewers": ["team:security-solution"],
+      "reviewers": ["team:security-detection-engineering", "team:security-threat-hunting"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team: SecuritySolution"],
+      "addLabels": ["Team:Detection Engineering", "Team:Threat Hunting"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "@hello-pangea/dnd",
       "matchDepNames": ["@hello-pangea/dnd"],
-      "reviewers": ["team:security-solution"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team: SecuritySolution"],
+      "addLabels": ["Team:Security Investigations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "adm-zip",
       "matchDepNames": ["adm-zip"],
-      "reviewers": ["team:security-solution"],
+      "reviewers": [
+        "team:siem-conduit",
+        "team:security-threat-hunting",
+        "team:security-data-engineering"
+      ],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team: SecuritySolution"],
+      "addLabels": ["Team:security-siem-conduit", "Team:Threat Hunting"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "rbush",
       "matchDepNames": ["rbush", "@types/rbush"],
-      "reviewers": ["team:security-solution"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team: SecuritySolution"],
+      "addLabels": ["Team:Security Investigations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "security solution test deps",
       "matchDepNames": ["buildkite-test-collector", "marge"],
-      "reviewers": ["team:security-solution"],
+      "reviewers": ["team:security-engineering-productivity"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team: SecuritySolution"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
-      "groupName": "misc security solution deps",
+      "groupName": "security investigations deps",
       "matchDepNames": [
-        "camelcase-keys",
         "copy-to-clipboard",
-        "css-box-model",
         "dom-to-image-more",
-        "i18n-iso-countries",
         "pdf-lib",
-        "node-diff3",
-        "react-diff-view",
         "reduce-reducers",
-        "snakecase-keys",
         "suricata-sid-db",
         "ts-easing",
-        "typescript-fsa",
-        "typescript-fsa-reducers",
-        "type-fest",
-        "unidiff"
+        "type-fest"
       ],
-      "reviewers": ["team:security-solution"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team: SecuritySolution"],
+      "addLabels": ["Team:Security Investigations"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "security detection diff deps",
+      "matchDepNames": ["node-diff3", "react-diff-view", "unidiff"],
+      "reviewers": ["team:security-detection-engineering"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Detection Engineering"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "security case converters",
+      "matchDepNames": ["camelcase-keys", "snakecase-keys"],
+      "reviewers": ["team:security-detection-engineering", "team:security-investigations"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Detection Engineering", "Team:Security Investigations"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "css-box-model",
+      "matchDepNames": ["css-box-model"],
+      "reviewers": ["team:security-investigations", "team:security-threat-hunting"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Security Investigations", "Team:Threat Hunting"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "i18n-iso-countries",
+      "matchDepNames": ["i18n-iso-countries"],
+      "reviewers": ["team:security-entity-analytics", "team:contextual-security-apps"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Entity Analytics", "Team:Cloud Security"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "typescript-fsa",
+      "matchDepNames": ["typescript-fsa"],
+      "reviewers": ["team:security-investigations", "team:security-entity-analytics"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Security Investigations", "Team:Entity Analytics"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "typescript-fsa-reducers",
+      "matchDepNames": ["typescript-fsa-reducers"],
+      "reviewers": [
+        "team:security-investigations",
+        "team:security-entity-analytics",
+        "team:security-threat-hunting"
+      ],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Security Investigations", "Team:Entity Analytics", "Team:Threat Hunting"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "camelcase-keys - ESM Required",
       "matchDepNames": ["camelcase-keys"],
-      "reviewers": ["team:security-solution"],
+      "reviewers": ["team:security-detection-engineering", "team:security-investigations"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team: SecuritySolution", "effort:low", "blocked"],
+      "addLabels": ["Team:Detection Engineering", "Team:Security Investigations", "effort:low", "blocked"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "papaparse",
       "matchDepNames": ["papaparse", "@types/papaparse"],
-      "reviewers": ["team:security-solution", "team:kibana-management"],
+      "reviewers": ["team:security-entity-analytics", "team:kibana-management"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team: SecuritySolution"],
+      "addLabels": ["Team:Entity Analytics"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "p-limit",
       "matchDepNames": ["p-limit"],
-      "reviewers": ["team:fleet", "team:nightshift-sre-agent-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "allowedVersions": "<4.0.0",
       "minimumReleaseAge": "14 days",
@@ -1802,7 +1845,11 @@
     {
       "groupName": "p-map - ESM Required",
       "matchDepNames": ["p-map"],
-      "reviewers": ["team:fleet", "team:nightshift-sre-agent-team", "team:security-solution"],
+      "reviewers": [
+        "team:streams-ui",
+        "team:nightshift-sre-agent-team",
+        "team:security-defend-workflows"
+      ],
       "matchBaseBranches": ["main"],
       "addLabels": ["effort:low", "blocked"],
       "minimumReleaseAge": "14 days",
@@ -1811,7 +1858,12 @@
     {
       "groupName": "p-retry - ESM Required",
       "matchDepNames": ["p-retry"],
-      "reviewers": ["team:fleet", "team:nightshift-sre-agent-team", "team:security-solution"],
+      "reviewers": [
+        "team:streams-ui",
+        "team:nightshift-sre-agent-team",
+        "team:security-defend-workflows",
+        "team:security-genai-research-and-development"
+      ],
       "matchBaseBranches": ["main"],
       "addLabels": ["blocked", "effort:low"],
       "minimumReleaseAge": "14 days",
@@ -1828,7 +1880,7 @@
     {
       "groupName": "redux-devtools-extension",
       "matchDepNames": ["redux-devtools-extension"],
-      "reviewers": ["team:security-solution"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1836,7 +1888,7 @@
     {
       "groupName": "redux-thunk",
       "matchDepNames": ["redux-thunk"],
-      "reviewers": ["team:kibana-presentation", "team:kibana-management", "team:security-solution"],
+      "reviewers": ["team:kibana-dashboards", "team:kibana-management"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1844,7 +1896,7 @@
     {
       "groupName": "remark-parse-no-trim",
       "matchDepNames": ["remark-parse-no-trim"],
-      "reviewers": ["team:security-solution"],
+      "reviewers": ["team:security-defend-workflows"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1908,7 +1960,6 @@
         "@types/chromedriver",
         "@types/selenium-webdriver",
         "geckodriver",
-        "ms-chromium-edge-driver",
         "selenium-webdriver"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -1967,13 +2018,14 @@
       "matchDepNames": [
         "@emotion/jest",
         "@jest/console",
+        "@ampproject/remapping",
         "@jest/reporters",
         "@jest/transform",
         "@jest/types",
+        "@swc/jest",
         "@types/jest",
         "babel-jest",
         "expect",
-        "jest",
         "jest-canvas-mock",
         "jest-config",
         "jest-diff",
@@ -1982,7 +2034,9 @@
         "jest-mock",
         "jest-runtime",
         "jest-snapshot",
-        "jest-styled-components"
+        "jest-styled-components",
+        "jest",
+        "magic-string"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1994,7 +2048,7 @@
       "groupName": "storybook",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "8.19"],
-      "matchDepNames": ["@pmmmwh/react-refresh-webpack-plugin", "fix-esm", "react-refresh"],
+      "matchDepNames": ["@pmmmwh/react-refresh-webpack-plugin", "react-refresh"],
       "matchDepPatterns": ["storybook"],
       "labels": ["Team:Operations", "release_note:skip", "ci:build-storybooks", "backport:skip"],
       "allowedVersions": "<9.0.0",
@@ -2087,7 +2141,7 @@
         "team:kibana-presentation",
         "team:kibana-data-discovery",
         "team:kibana-management",
-        "team:security-solution"
+        "team:security-investigations"
       ],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "effort:high", "upgrade-risk:high"],
@@ -2361,7 +2415,7 @@
     {
       "groupName": "Kibana Cases misc dependencies",
       "matchDepNames": ["pretty-ms", "remark-stringify"],
-      "reviewers": ["team:kibana-cases"],
+      "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2406,15 +2460,6 @@
       "addLabels": ["team:obs-entities"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
-    },
-    {
-      "groupName": "dotenv",
-      "matchDepNames": ["dotenv"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
     },
     {
       "groupName": "oxlint",
@@ -2585,7 +2630,7 @@
     {
       "description": "Update Wolfi FIPS base image",
       "customType": "regex",
-      "fileMatch": ["^src/dev/build/tasks/os_packages/docker_generator/run\\.ts$"],
+      "fileMatch": ["^src/dev/build/lib/fips_config\\.ts$"],
       "matchStrings": [
         "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base-fips):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
       ],

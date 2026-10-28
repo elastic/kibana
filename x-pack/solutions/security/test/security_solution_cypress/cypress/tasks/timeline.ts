@@ -362,40 +362,28 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   openCreateTimelineOptionsPopover();
-  cy.get(CREATE_NEW_TIMELINE).click();
+  cy.get(CREATE_NEW_TIMELINE).filter(':visible').click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
-  recurse(
-    () => {
-      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
-      return cy.get(CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
+  // NEW_TIMELINE_ACTION toggles the popover, so click it once and wait on the
+  // menu item instead of re-clicking in a retry loop, which would re-toggle the
+  // popover shut and detach CREATE_NEW_TIMELINE mid-click.
+  cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
+  cy.get(CREATE_NEW_TIMELINE).should('be.visible');
 };
 
 export const createTimelineFromBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
-
+  // The plus icon toggles the popover, so click it once and let `should` wait for the
+  // opening transition; re-clicking in a retry loop would close the popover again.
+  cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).click();
 };
 
 export const createTimelineTemplateFromBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
-      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
-    },
-    (sub) => sub.is(':visible')
-  );
-
+  cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).should('be.visible');
   cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click();
 };
 

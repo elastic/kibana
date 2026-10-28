@@ -26,6 +26,11 @@ interface ColorMappingByValuesProps {
   paletteService: PaletteRegistry;
   panelRef: MutableRefObject<HTMLDivElement | null>;
   dataBounds: DataBounds;
+  /**
+   * Band count applied when switching to a named palette. Required so every editor surface that
+   * renders this component stays consistent (see the datatable cell vs progress-bar editors).
+   */
+  defaultBandCount: number;
 }
 
 export function ColorMappingByValues<T>({
@@ -35,6 +40,7 @@ export function ColorMappingByValues<T>({
   paletteService,
   panelRef,
   dataBounds,
+  defaultBandCount,
 }: ColorMappingByValuesProps) {
   const colors = palette.params?.stops?.map(({ color }) => color) ?? [];
 
@@ -63,6 +69,7 @@ export function ColorMappingByValues<T>({
             palettes={paletteService}
             dataBounds={dataBounds}
             activePalette={palette}
+            defaultBandCount={defaultBandCount}
             setPalette={(p) => {
               setPalette(p);
             }}

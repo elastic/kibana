@@ -23,7 +23,7 @@ import { WarningSchema } from '../../model/warning_schema.gen';
 export const ImportRulesRequestQuery = lazySchema(() =>
   z.object({
     /**
-     * Determines whether existing rules with the same `rule_id` are overwritten.
+     * Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`.
      */
     overwrite: BooleanFromString.optional().default(false),
     /**
@@ -52,6 +52,29 @@ export const ImportRulesResponse = lazySchema(() =>
       rules_count: z.number().int().min(0),
       success: z.boolean(),
       success_count: z.number().int().min(0),
+      /**
+       * Counts of imported rules by outcome. `created`, `updated`, and `skipped` are included in `success_count`. `failed` did not import successfully.
+       */
+      rules_summary: z
+        .object({
+          /**
+           * Rules created by this import.
+           */
+          created: z.number().int().min(0),
+          /**
+           * Existing rules overwritten because the payload changed.
+           */
+          updated: z.number().int().min(0),
+          /**
+           * Existing rules skipped because nothing changed. Included in `success_count`.
+           */
+          skipped: z.number().int().min(0),
+          /**
+           * Rules that did not import successfully.
+           */
+          failed: z.number().int().min(0),
+        })
+        .strict(),
       errors: z.array(ErrorSchema),
       action_connectors_errors: z.array(ErrorSchema),
       action_connectors_warnings: z.array(WarningSchema),

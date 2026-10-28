@@ -125,6 +125,8 @@ steps:
     depends_on:
       - ftr-configs
       - jest-integration
+      - scout_test_lanes
+      - scout-agent-builder-smoke-tests
 
   - wait: ~
     continue_on_failure: true

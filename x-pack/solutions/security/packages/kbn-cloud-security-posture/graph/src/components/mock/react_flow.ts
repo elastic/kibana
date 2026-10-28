@@ -19,7 +19,10 @@ class ResizeObserver {
   }
 
   observe(target: Element) {
-    this.callback([{ target } as globalThis.ResizeObserverEntry], this);
+    this.callback(
+      [{ target, contentRect: target.getBoundingClientRect() } as globalThis.ResizeObserverEntry],
+      this
+    );
   }
 
   unobserve() {}

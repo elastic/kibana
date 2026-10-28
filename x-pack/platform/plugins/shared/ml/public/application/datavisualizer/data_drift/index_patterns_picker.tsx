@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { EuiPageBody, EuiPageSection } from '@elastic/eui';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type DataViewEditorService as DataViewEditorServiceSpec } from '@kbn/data-view-editor-plugin/public';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
@@ -19,7 +19,7 @@ import { useMlKibana } from '../../contexts/kibana';
 import { PageTitle } from '../../components/page_title';
 
 export const DataDriftIndexPatternsPicker: FC = () => {
-  const { reference, comparison } = parse(location.search, {
+  const { reference, comparison } = queryString.parse(location.search, {
     sort: false,
   }) as { reference: string; comparison: string };
 

@@ -62,16 +62,15 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('elastic-api-version', '2023-10-31')
         .set('Content-Type', 'multipart/form-data; boundary=boundary')
         .send('--boundary--')
-        // TODO: Missing `file` currently 500s; This should return 400 instead which is correct response here.
-        .expect(500);
+        .expect(400);
 
-      expect(body).toMatchObject({
-        status_code: 500,
+      expect(body).toEqual({
+        status_code: 400,
+        message: 'file is required',
       });
-      expect(typeof body.message).toBe('string');
     });
 
-    it('rejects a non-multipart application/json body with a 500', async () => {
+    it('rejects a non-multipart application/json body with a 400', async () => {
       const { body } = await supertest
         .post(DETECTION_ENGINE_RULES_IMPORT_URL)
         .set('kbn-xsrf', 'true')
@@ -86,12 +85,12 @@ export default ({ getService }: FtrProviderContext): void => {
           type: 'query',
           query: '*',
         })
-        .expect(500);
+        .expect(400);
 
-      expect(body).toMatchObject({
-        status_code: 500,
+      expect(body).toEqual({
+        status_code: 400,
+        message: 'file is required',
       });
-      expect(typeof body.message).toBe('string');
     });
 
     it('still accepts a valid rule after a blank line in the NDJSON stream', async () => {

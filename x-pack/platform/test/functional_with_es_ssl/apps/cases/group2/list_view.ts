@@ -396,8 +396,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await input.type(caseIds[0]);
         await input.pressKeys(browser.keys.ENTER);
 
+        await cases.casesTable.waitForCaseToBeListed(caseIds[0]);
         await cases.casesTable.validateCasesTableHasNthRows(1);
-        await cases.casesTable.getCaseById(caseIds[0]);
         await testSubjects.click('clearSearchButton');
         await cases.casesTable.validateCasesTableHasNthRows(4);
       });

@@ -77,17 +77,22 @@ interface RelativeImportReqOptions extends WrapOptions {
   type: ImportType;
   sourcePath?: string;
   original?: string;
+  preserveFileExtensions?: boolean;
 }
 
 export function getRelativeImportReq(options: RelativeImportReqOptions) {
   const relative = normalizePath(Path.relative(options.dirname, options.absolute));
+  const request = relative.startsWith('.') ? relative : `./${relative}`;
+
   return wrap(
-    reduceImportRequest(
-      relative.startsWith('.') ? relative : `./${relative}`,
-      options.type,
-      options.original,
-      options.sourcePath ? Path.extname(options.sourcePath) : undefined
-    ),
+    options.preserveFileExtensions
+      ? request
+      : reduceImportRequest(
+          request,
+          options.type,
+          options.original,
+          options.sourcePath ? Path.extname(options.sourcePath) : undefined
+        ),
     options
   );
 }

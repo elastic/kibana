@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { dirname, resolve } from 'path';
-import * as globby from 'globby';
+import { createRequire } from 'node:module';
+import globby from 'globby';
 import minimatch from 'minimatch';
 import { getKibanaDir } from '#pipeline-utils';
 
@@ -61,11 +62,11 @@ interface JestConfigRules {
  * anything the config leaves unset.
  */
 function parseJestConfigRules(configAbsPath: string): JestConfigRules {
-  const isIntegration = /jest\.integration\.config\.(js|ts)$/.test(configAbsPath);
+  const isIntegration = /jest\.integration\.config\.(c?js|ts)$/.test(configAbsPath);
   const configDir = dirname(configAbsPath);
+  const requireConfig = createRequire(configAbsPath);
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const config = require(configAbsPath) as {
+  const config = requireConfig(configAbsPath) as {
     rootDir?: string;
     roots?: string[];
     testMatch?: string[];

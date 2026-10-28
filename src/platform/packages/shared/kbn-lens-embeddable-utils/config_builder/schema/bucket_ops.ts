@@ -118,7 +118,6 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
       schema.literal('standard_deviation'),
       schema.literal('unique_count'),
       schema.literal('sum'),
-      schema.literal('last_value'),
     ]),
   },
   {
@@ -126,6 +125,31 @@ const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSche
       id: 'termsRankByCustomOperation',
       title: 'Terms Rank By Custom Operation',
       description: 'Terms ranked by custom operation.',
+    },
+  }
+);
+
+const bucketTermsRankByCustomLastValueOperationSchema = bucketTermsRankByCustomSharedSchema.extends(
+  {
+    operation: schema.literal('last_value'),
+    /**
+     * Time field used to determine document recency for the last-value ranking. Mirrors the
+     * `time_field` of the `last_value` metric operation.
+     */
+    time_field: schema.maybe(
+      schema.string({
+        minLength: 1,
+        meta: {
+          description: 'Time field used to determine document recency for the last-value ranking.',
+        },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'termsRankByCustomLastValueOperation',
+      title: 'Terms Rank By Custom Last Value Operation',
+      description: 'Terms ranked by the last value of a field.',
     },
   }
 );
@@ -369,6 +393,7 @@ export const bucketTermsOperationSchema = schema.object(
           }
         ),
         bucketTermsRankByCustomOperationSchema,
+        bucketTermsRankByCustomLastValueOperationSchema,
         bucketTermsRankByCustomCountOperationSchema,
         bucketTermsRankByPercentileOperationSchema,
         bucketTermsRankByPercentileRankOperationSchema,
@@ -534,6 +559,9 @@ export const bucketOperationDefinitionSchema = schema.oneOf(
 
 export type TermOperationRankByCustomOperationType = TypeOf<
   typeof bucketTermsRankByCustomOperationSchema
+>;
+export type TermOperationRankByCustomLastValueType = TypeOf<
+  typeof bucketTermsRankByCustomLastValueOperationSchema
 >;
 export type TermOperationRankByCustomCountOperationType = TypeOf<
   typeof bucketTermsRankByCustomCountOperationSchema

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import SimpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { File } from '../file';
@@ -22,10 +22,10 @@ import { File } from '../file';
  */
 export async function getFilesForCommit(gitRef, options = {}) {
   const { includeUntracked = false } = options;
-  const simpleGit = new SimpleGit(REPO_ROOT);
+  const git = simpleGit(REPO_ROOT);
   const normalizedGitRef = Array.isArray(gitRef) ? gitRef.find(Boolean) : gitRef;
   const gitRefForDiff = normalizedGitRef ? normalizedGitRef : '--cached';
-  const output = await simpleGit.diff(['--name-status', gitRefForDiff]);
+  const output = await git.diff(['--name-status', gitRefForDiff]);
 
   const trackedPaths = output
     .split('\n')
@@ -52,7 +52,7 @@ export async function getFilesForCommit(gitRef, options = {}) {
     return trackedPaths.map((path) => new File(path));
   }
 
-  const untrackedOutput = await simpleGit.raw(['ls-files', '--others', '--exclude-standard']);
+  const untrackedOutput = await git.raw(['ls-files', '--others', '--exclude-standard']);
   const untrackedPaths = untrackedOutput
     .split('\n')
     .map((line) => line.trim())

@@ -23,6 +23,7 @@ import {
 } from '../../../common/fixtures/monitors';
 import {
   createLegacyPackagePolicy,
+  deletePackagePolicyById,
   getSyntheticsPackagePolicies,
 } from '../../../common/fixtures/fleet';
 import { tryForTime } from '../../../common/fixtures/retry';
@@ -127,16 +128,13 @@ apiTest.describe(
         const monitorId = uuidv4();
         const legacyPolicyId = await seedLegacyPolicy(apiClient, monitorId, 'default');
 
-        let policies = await getPackagePolicies(apiClient);
-        expect(policies.some((policy) => policy.id === legacyPolicyId)).toBe(true);
-
         const createdMonitorId = await createMonitor(apiClient, monitorId);
         expect(createdMonitorId).toBe(monitorId);
 
         await editMonitor(apiClient, editorHeaders, createdMonitorId, { name: uuidv4() });
 
         await tryForTime(CLEANUP_TIMEOUT, async () => {
-          policies = await getPackagePolicies(apiClient);
+          const policies = await getPackagePolicies(apiClient);
           const newFormatPolicyId = `${monitorId}-${privateLocation.id}`;
           expect(policies.some((policy) => policy.id === newFormatPolicyId)).toBe(true);
           expect(policies.some((policy) => policy.id === legacyPolicyId)).toBe(false);
@@ -156,15 +154,11 @@ apiTest.describe(
           const legacyPolicy1 = await seedLegacyPolicy(apiClient, monitorId, 'default');
           const legacyPolicy2 = await seedLegacyPolicy(apiClient, monitorId, space2);
 
-          let policies = await getPackagePolicies(apiClient);
-          expect(policies.some((policy) => policy.id === legacyPolicy1)).toBe(true);
-          expect(policies.some((policy) => policy.id === legacyPolicy2)).toBe(true);
-
           await createMonitor(apiClient, monitorId, { spaces: ['default', space2] });
           await editMonitor(apiClient, editorHeaders, monitorId, { name: uuidv4() });
 
           await tryForTime(CLEANUP_TIMEOUT, async () => {
-            policies = await getPackagePolicies(apiClient);
+            const policies = await getPackagePolicies(apiClient);
             const newFormatPolicyId = `${monitorId}-${privateLocation.id}`;
             expect(policies.some((policy) => policy.id === newFormatPolicyId)).toBe(true);
             expect(policies.some((policy) => policy.id === legacyPolicy1)).toBe(false);
@@ -186,19 +180,22 @@ apiTest.describe(
         const monitorBId = uuidv4();
         const extraSpace = await createSpace(kbnClient);
         try {
+          // Seed leftover before creating monitors so Fleet isn't mid-deploy on
+          // the shared agent policy (create package_policies 404s while
+          // agentPolicyService.get returns null). Same order as the multi-space
+          // test above.
+          const staleLegacyPolicyId = await seedLegacyPolicy(apiClient, monitorAId, extraSpace);
           await createMonitor(apiClient, monitorBId, { spaces: ['default', extraSpace] });
           await createMonitor(apiClient, monitorAId);
-          const staleLegacyPolicyId = await seedLegacyPolicy(apiClient, monitorAId, extraSpace);
-
-          let policies = await getPackagePolicies(apiClient);
-          expect(policies.some((policy) => policy.id === staleLegacyPolicyId)).toBe(true);
 
           await editMonitor(apiClient, editorHeaders, monitorAId, { name: uuidv4() });
 
           await tryForTime(CLEANUP_TIMEOUT, async () => {
-            policies = await getPackagePolicies(apiClient);
-            const newFormatPolicyId = `${monitorAId}-${privateLocation.id}`;
-            expect(policies.some((policy) => policy.id === newFormatPolicyId)).toBe(true);
+            const policies = await getPackagePolicies(apiClient);
+            const monitorAPolicyId = `${monitorAId}-${privateLocation.id}`;
+            const monitorBPolicyId = `${monitorBId}-${privateLocation.id}`;
+            expect(policies.some((policy) => policy.id === monitorAPolicyId)).toBe(true);
+            expect(policies.some((policy) => policy.id === monitorBPolicyId)).toBe(true);
             expect(policies.some((policy) => policy.id === staleLegacyPolicyId)).toBe(false);
           });
 
@@ -231,13 +228,10 @@ apiTest.describe(
           'orphaned-space'
         );
 
-        let policies = await getPackagePolicies(apiClient);
-        expect(policies.some((policy) => policy.id === orphanedLegacyPolicyId)).toBe(true);
-
         await triggerPrivateLocationCleanup(apiClient, editorHeaders);
 
         await tryForTime(CLEANUP_TIMEOUT, async () => {
-          policies = await getPackagePolicies(apiClient);
+          const policies = await getPackagePolicies(apiClient);
           expect(policies.some((policy) => policy.id === newFormatPolicyId)).toBe(true);
           expect(policies.some((policy) => policy.id === orphanedLegacyPolicyId)).toBe(false);
         });
@@ -246,11 +240,36 @@ apiTest.describe(
       }
     );
 
-    // https://github.com/elastic/kibana/issues/263665
-    // The cleanup task deletes legacy policies but the subsequent
-    // syncAllPackagePolicies does not reliably recreate the missing new-format
-    // policy. Skipped until the sync-after-cleanup path in the product is fixed.
-    apiTest.skip('should migrate legacy policies to new format when cleanup runs', async () => {});
+    apiTest(
+      'should migrate legacy policies to new format when cleanup runs',
+      async ({ apiClient }) => {
+        apiTest.setTimeout(TEST_TIMEOUT);
+        const monitorId = uuidv4();
+        await createMonitor(apiClient, monitorId);
+
+        const newFormatPolicyId = `${monitorId}-${privateLocation.id}`;
+        await tryForTime(CLEANUP_TIMEOUT, async () => {
+          const policies = await getPackagePolicies(apiClient);
+          expect(policies.some((policy) => policy.id === newFormatPolicyId)).toBe(true);
+        });
+
+        await deletePackagePolicyById(apiClient, adminHeaders, newFormatPolicyId);
+
+        const legacyPolicy1 = await seedLegacyPolicy(apiClient, monitorId, 'default');
+        const legacyPolicy2 = await seedLegacyPolicy(apiClient, monitorId, 'space-2');
+
+        await triggerPrivateLocationCleanup(apiClient, editorHeaders);
+
+        await tryForTime(CLEANUP_TIMEOUT, async () => {
+          const policies = await getPackagePolicies(apiClient);
+          expect(policies.some((policy) => policy.id === newFormatPolicyId)).toBe(true);
+          expect(policies.some((policy) => policy.id === legacyPolicy1)).toBe(false);
+          expect(policies.some((policy) => policy.id === legacyPolicy2)).toBe(false);
+        });
+
+        await deleteMonitors(apiClient, editorHeaders, [monitorId]);
+      }
+    );
 
     apiTest(
       'should clean up legacy policies from spaces with no monitors',
@@ -264,14 +283,10 @@ apiTest.describe(
           const legacyPolicy1 = await seedLegacyPolicy(apiClient, monitorId1, emptySpace1);
           const legacyPolicy2 = await seedLegacyPolicy(apiClient, monitorId2, emptySpace2);
 
-          let policies = await getPackagePolicies(apiClient);
-          expect(policies.some((policy) => policy.id === legacyPolicy1)).toBe(true);
-          expect(policies.some((policy) => policy.id === legacyPolicy2)).toBe(true);
-
           await triggerPrivateLocationCleanup(apiClient, editorHeaders);
 
           await tryForTime(CLEANUP_TIMEOUT, async () => {
-            policies = await getPackagePolicies(apiClient);
+            const policies = await getPackagePolicies(apiClient);
             expect(policies.some((policy) => policy.id === legacyPolicy1)).toBe(false);
             expect(policies.some((policy) => policy.id === legacyPolicy2)).toBe(false);
           });

@@ -11,6 +11,7 @@ require('@kbn/babel-register').install();
 
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
+const { TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB } = require('@kbn/scout-info');
 
 /**
  * FTR / Jest / Cypress test-infrastructure modules that Scout tests must never import.
@@ -41,6 +42,11 @@ const scoutRestrictedFtrPatterns = {
   message:
     "Scout tests must not import FTR/Cypress/Jest test infrastructure. The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
 };
+
+const SCOUT_TEST_FILE_GLOBS = [
+  `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.ts`,
+  'packages/**/test/scout{_*,}/**/*.ts',
+];
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -1734,13 +1740,7 @@ module.exports = {
       },
     },
     {
-      files: [
-        'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
-        'x-pack/solutions/**/packages/kbn-scout-*/src/playwright/**/*.ts',
-        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-      ],
+      files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
       plugins: ['playwright'],
@@ -1752,36 +1752,50 @@ module.exports = {
         },
       },
       rules: {
+        // Allow assert* helpers (e.g. assertDowngradeResult) that wrap expect()
+        // calls. The linter can't trace expects into called functions, so without
+        // this config tests using assertion helpers trigger a false-positive
+        // "Test has no assertions" warning. Registering the assert* pattern as
+        // known assertion functions avoids that.
+        'playwright/expect-expect': [
+          'warn',
+          {
+            assertFunctionNames: ['expect', 'expect.soft'],
+            assertFunctionPatterns: ['^assert[A-Z]'],
+          },
+        ],
+        'playwright/consistent-spacing-between-blocks': 'error',
         'playwright/no-commented-out-tests': 'error',
         'playwright/no-conditional-expect': 'error',
-        'playwright/no-conditional-in-test': 'warn',
         'playwright/no-duplicate-hooks': 'error',
-        'playwright/no-focused-test': 'error',
+        'playwright/no-element-handle': 'error',
+        'playwright/no-eval': 'error',
         'playwright/no-get-by-title': 'error',
+        'playwright/no-identical-title': 'error',
+        'playwright/no-magic-timeouts': 'warn',
+        'playwright/no-nested-step': 'error',
         'playwright/no-nth-methods': 'error',
         'playwright/no-page-pause': 'error',
+        'playwright/no-raw-locators': ['warn', { allowed: ['[data-test-subj'] }],
         'playwright/no-restricted-matchers': 'error',
         'playwright/no-slowed-test': 'error',
-        'playwright/no-standalone-expect': 'error',
-        'playwright/no-unsafe-references': 'error',
+        'playwright/no-test-return-statement': 'error',
+        'playwright/no-unnecessary-assertions': 'error',
         'playwright/no-useless-await': 'error',
         'playwright/no-wait-for-selector': 'error',
         'playwright/max-nested-describe': ['error', { max: 1 }],
-        'playwright/missing-playwright-await': 'error',
         'playwright/prefer-comparison-matcher': 'error',
         'playwright/prefer-equality-matcher': 'error',
         'playwright/prefer-hooks-in-order': 'error',
         'playwright/prefer-hooks-on-top': 'error',
+        'playwright/prefer-native-locators': 'warn',
         'playwright/prefer-strict-equal': 'error',
         'playwright/prefer-to-be': 'error',
         'playwright/prefer-to-contain': 'error',
         'playwright/prefer-to-have-count': 'error',
         'playwright/prefer-to-have-length': 'error',
-        'playwright/prefer-web-first-assertions': 'error',
         'playwright/require-to-throw-message': 'error',
         'playwright/require-top-level-describe': 'error',
-        'playwright/valid-describe-callback': 'error',
-        'playwright/valid-title': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
         // Check all function arguments to catch unused destructured params
@@ -1795,6 +1809,17 @@ module.exports = {
             argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
           },
         ],
+      },
+    },
+    {
+      // no-export only applies to spec files — fixture/helper modules legitimately export
+      files: [
+        '**/kbn-scout*/src/playwright/**/*.spec.ts',
+        `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.spec.ts`,
+        'packages/**/test/scout{_*,}/**/*.spec.ts',
+      ],
+      rules: {
+        'playwright/no-export': 'error',
       },
     },
     {
@@ -2779,18 +2804,22 @@ module.exports = {
       },
     },
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
      */
     {
-      files: '.buildkite/**/*.{js,ts}',
+      files: '.buildkite/**/*.{cjs,js,mjs,ts}',
+      parserOptions: {
+        ecmaVersion: 2022,
+      },
       rules: {
         'no-console': 'off',
         '@kbn/imports/no_unresolvable_imports': 'off',
+        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
       },
     },
 
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
      */
     {
       files: [
@@ -2890,10 +2919,11 @@ module.exports = {
       },
     },
     {
-      files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
-      ],
+      // Default for every Scout suite; the solution overrides below re-declare
+      // `no-restricted-imports` for their own paths and take precedence.
+      files: SCOUT_TEST_FILE_GLOBS,
+      // Scout's own `ScoutPage` fixture is built on top of Playwright, so it has to import it.
+      excludedFiles: ['src/platform/packages/shared/kbn-scout/src/**'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2937,7 +2967,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/observability/plugins/**/test/{scout,scout_*}/**/*.ts'],
+      files: ['x-pack/solutions/observability/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2973,7 +3003,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/search/plugins/**/test/{scout,scout_*}/**/*.ts'],
+      files: ['x-pack/solutions/search/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -3005,7 +3035,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/*.ts'],
+      files: ['x-pack/solutions/security/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -3042,12 +3072,8 @@ module.exports = {
     },
     // Custom rules for scout tests
     {
-      // Platform & Solutions (plugins and packages, excluding Scout framework's own tests)
-      files: [
-        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-      ],
+      // Every Scout suite, excluding the Scout framework's own tests
+      files: SCOUT_TEST_FILE_GLOBS,
       excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',

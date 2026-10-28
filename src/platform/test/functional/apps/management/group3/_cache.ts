@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -20,9 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaSettings();
     });
     it('should have cache setting', async () => {
-      expect(
-        await testSubjects.exists('management-settings-editField-data_views:cache_max_age')
-      ).to.be(true);
+      await testSubjects.existOrFail('management-settings-editField-data_views:cache_max_age', {
+        timeout: 5000,
+      });
     });
   });
 }

@@ -11,16 +11,28 @@ import userEvent from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { basicCase } from '../../../containers/mock';
 import { EditAssigneesFlyout } from './edit_assignees_flyout';
-import { screen, waitFor } from '@testing-library/react';
-import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
-import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
-import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
+import { screen } from '@testing-library/react';
+import type { ItemsSelectionState } from '../types';
 
-jest.mock('../../../containers/user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../../containers/user_profiles/use_suggest_user_profiles');
+const mockUnSelectedAssignee = 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0';
 
-const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
-const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
+jest.mock('./edit_assignees_selectable', () => ({
+  EditAssigneesSelectable: ({
+    onChangeAssignees,
+  }: {
+    onChangeAssignees: (args: ItemsSelectionState) => void;
+  }) => (
+    <button
+      type="button"
+      data-test-subj="cases-edit-assignees-selectable-mock"
+      onClick={() =>
+        onChangeAssignees({ selectedItems: [], unSelectedItems: [mockUnSelectedAssignee] })
+      }
+    >
+      {'Change assignees'}
+    </button>
+  ),
+}));
 
 describe('EditAssigneesFlyout', () => {
   const props = {
@@ -31,57 +43,48 @@ describe('EditAssigneesFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap, isLoading: false });
-    useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
   });
 
-  it('renders correctly', async () => {
+  it('renders correctly', () => {
     renderWithTestingProviders(<EditAssigneesFlyout {...props} />);
 
-    expect(await screen.findByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-assignees-flyout-title')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-assignees-flyout-cancel')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-assignees-flyout-submit')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-edit-assignees-flyout-title')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-edit-assignees-flyout-cancel')).toBeInTheDocument();
+    expect(screen.getByTestId('cases-edit-assignees-flyout-submit')).toBeInTheDocument();
   });
 
   it('calls onClose when pressing the cancel button', async () => {
     renderWithTestingProviders(<EditAssigneesFlyout {...props} />);
 
-    await userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-cancel'));
+    await userEvent.click(screen.getByTestId('cases-edit-assignees-flyout-cancel'));
 
-    await waitFor(() => {
-      expect(props.onClose).toHaveBeenCalled();
-    });
+    expect(props.onClose).toHaveBeenCalled();
   });
 
   it('calls onSaveAssignees when pressing the save selection button', async () => {
     renderWithTestingProviders(<EditAssigneesFlyout {...props} />);
 
-    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
+    await userEvent.click(screen.getByTestId('cases-edit-assignees-selectable-mock'));
+    await userEvent.click(screen.getByTestId('cases-edit-assignees-flyout-submit'));
 
-    await userEvent.click(await screen.findByText('Damaged Raccoon'));
-    await userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-submit'));
-
-    await waitFor(() => {
-      expect(props.onSaveAssignees).toHaveBeenCalledWith({
-        selectedItems: [],
-        unSelectedItems: ['u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0'],
-      });
+    expect(props.onSaveAssignees).toHaveBeenCalledWith({
+      selectedItems: [],
+      unSelectedItems: [mockUnSelectedAssignee],
     });
   });
 
-  it('shows the case title when selecting one case', async () => {
+  it('shows the case title when selecting one case', () => {
     renderWithTestingProviders(<EditAssigneesFlyout {...props} />);
 
-    expect(await screen.findByText(basicCase.title)).toBeInTheDocument();
+    expect(screen.getByText(basicCase.title)).toBeInTheDocument();
   });
 
-  it('shows the number of total selected cases in the title  when selecting multiple cases', async () => {
+  it('shows the number of total selected cases in the title  when selecting multiple cases', () => {
     renderWithTestingProviders(
       <EditAssigneesFlyout {...props} selectedCases={[basicCase, basicCase]} />
     );
 
-    expect(await screen.findByText('Selected cases: 2')).toBeInTheDocument();
+    expect(screen.getByText('Selected cases: 2')).toBeInTheDocument();
   });
 });

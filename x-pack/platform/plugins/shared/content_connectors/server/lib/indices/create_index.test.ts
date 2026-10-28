@@ -52,6 +52,11 @@ describe('createApiIndex lib function', () => {
         },
       },
     ],
+    properties: {
+      id: {
+        type: 'keyword',
+      },
+    },
   };
 
   beforeEach(() => {

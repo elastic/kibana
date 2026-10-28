@@ -36,7 +36,6 @@ export const DynamicSettingsCodec = t.intersection([
     defaultEmail: DefaultEmailCodec,
     defaultTLSRuleEnabled: t.boolean,
     defaultStatusRuleEnabled: t.boolean,
-    privateLocationsSyncInterval: t.number,
   }),
 ]);
 

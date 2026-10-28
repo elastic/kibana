@@ -28,7 +28,6 @@ import type {
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesDataLoading,
-  PublishesBlockingError,
 } from '@kbn/presentation-publishing';
 import { apiHasExecutionContext, apiHasParentApi, fetch$ } from '@kbn/presentation-publishing';
 import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
@@ -49,7 +48,6 @@ import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
-  PublishesBlockingError &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesTitle &
@@ -135,7 +133,7 @@ export function initializeFetch({
   scopedProfilesManager,
   refreshTrigger$,
   setDataLoading,
-  setBlockingError,
+  setSearchError,
 }: {
   api: SavedSearchPartialFetchApi;
   stateManager: SearchEmbeddableStateManager;
@@ -143,7 +141,7 @@ export function initializeFetch({
   scopedProfilesManager: ScopedProfilesManager;
   refreshTrigger$: BehaviorSubject<void>;
   setDataLoading: (dataLoading: boolean | undefined) => void;
-  setBlockingError: (error: Error | undefined) => void;
+  setSearchError: (error: Error | undefined) => void;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
@@ -163,7 +161,7 @@ export function initializeFetch({
       switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
 
-        setBlockingError(undefined);
+        setSearchError(undefined);
         if (!dataView || !savedSearch.searchSource) {
           return;
         }
@@ -285,7 +283,7 @@ export function initializeFetch({
     .subscribe((next) => {
       setDataLoading(false);
       if (!next || Object.hasOwn(next, 'error')) {
-        setBlockingError(next?.error);
+        setSearchError(next?.error);
         return;
       }
 

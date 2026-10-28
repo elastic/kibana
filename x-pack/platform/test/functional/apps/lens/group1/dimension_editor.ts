@@ -57,8 +57,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not show static value tab for data layers', async () => {
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       // Quick functions and Formula tabs should be visible
-      expect(await testSubjects.exists('lens-dimensionTabs-quickFunctions')).to.eql(true);
-      expect(await testSubjects.exists('lens-dimensionTabs-formula')).to.eql(true);
+      await testSubjects.existOrFail('lens-dimensionTabs-quickFunctions', { timeout: 5000 });
+      await testSubjects.existOrFail('lens-dimensionTabs-formula', { timeout: 5000 });
       // Static value tab should not be visible
       expect(await testSubjects.exists('lens-dimensionTabs-static_value')).to.eql(false);
 
@@ -172,16 +172,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'cumulative_sum',
       });
-      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await lens.assertWorkspaceErrorCount(1);
 
       await lens.removeDimension('lnsXY_xDimensionPanel');
-      expect(await lens.getWorkspaceErrorCount()).to.eql(2);
+      await lens.assertWorkspaceErrorCount(2);
 
       await lens.dragFieldToDimensionTrigger(
         '@timestamp',
         'lnsXY_xDimensionPanel > lns-empty-dimension'
       );
-      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await lens.assertWorkspaceErrorCount(1);
 
       expect(await lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await lens.switchToVisualization('lnsDatatable');

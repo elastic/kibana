@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TEST_SUITE_TYPES } from './constants';
+import { TEST_SUITE_TYPES } from './constants.ts';
 import { BuildkiteClient, getGithubClient } from '#pipeline-utils';
 
 interface TestSuiteResult {

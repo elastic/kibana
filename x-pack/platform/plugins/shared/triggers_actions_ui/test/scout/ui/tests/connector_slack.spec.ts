@@ -17,9 +17,15 @@ import {
   findRuleIdByName,
   deleteRuleById,
   deleteRulesByPrefix,
+  getMonacoValue,
 } from '../fixtures';
 
 const RULES_LIST_SUBJ = 'rulesList';
+const RULES_MANAGEMENT_PATH = 'management/insightsAndAlerting/triggersActions';
+
+const BLOCK_KIT_MESSAGE = JSON.stringify({
+  blocks: [{ type: 'section', text: { type: 'mrkdwn', text: 'scout block kit message' } }],
+});
 
 const selectConnectorInRuleAction = async (page: ScoutPage, connectorName: string) => {
   await page.testSubj.click('ruleActionsAddActionButton');
@@ -217,6 +223,83 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('rulesTableCell-name')).toContainText(ruleName);
     await expect(page.testSubj.locator('rulesTableCell-name')).toContainText('Index threshold');
     await expect(page.testSubj.locator('rulesTableCell-interval')).toContainText('1 min');
+  });
+
+  test('keeps a saved Block Kit action when the rule is edited and saved', async ({
+    page,
+    apiServices,
+    kbnUrl,
+  }) => {
+    const connector = await apiServices.alerting.connectors.create({
+      name: `scout-slack-api-blockkit-${Date.now()}`,
+      connectorTypeId: '.slack_api',
+      config: { allowedChannels: [{ name: '#general' }] },
+      secrets: { token: 'fake-token' },
+    });
+    createdConnectorIds.push(connector.id);
+
+    const ruleName = `scout-slack-api-blockkit-${Date.now()}`;
+    const updatedRuleName = `${ruleName}-updated`;
+    createdRuleNames.push(ruleName, updatedRuleName);
+
+    const { data: rule } = await apiServices.alerting.rules.create({
+      name: ruleName,
+      ruleTypeId: '.index-threshold',
+      consumer: 'stackAlerts',
+      enabled: false,
+      schedule: { interval: '1m' },
+      notifyWhen: 'onActionGroupChange',
+      params: {
+        aggType: 'count',
+        termSize: 5,
+        thresholdComparator: '>',
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        groupBy: 'all',
+        threshold: [1000],
+        index: [THRESHOLD_TEST_INDEX],
+        timeField: '@timestamp',
+      },
+      actions: [
+        {
+          id: connector.id,
+          group: 'threshold met',
+          params: {
+            subAction: 'postBlockkit',
+            subActionParams: { channelNames: ['#general'], text: BLOCK_KIT_MESSAGE },
+          },
+        },
+      ],
+    });
+
+    await page.goto(kbnUrl.get(`/app/${RULES_MANAGEMENT_PATH}/edit/${rule.id}`));
+    await expect(page.testSubj.locator('ruleForm')).toBeVisible();
+
+    await test.step('shows the saved Block Kit message', async () => {
+      await expect(
+        page.testSubj.locator('slackMessageTypeChangeButton').getByTestId('blockkit')
+      ).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.testSubj.locator('webApiBlock')).toBeVisible();
+      await expect.poll(() => getMonacoValue(page)).toBe(BLOCK_KIT_MESSAGE);
+    });
+
+    await test.step('saves after renaming the rule without touching the action', async () => {
+      await page.testSubj.locator('ruleDetailsNameInput').fill(updatedRuleName);
+      await page.testSubj.click('rulePageFooterSaveButton');
+      await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+        `Updated "${updatedRuleName}"`
+      );
+    });
+
+    await test.step('persists postBlockkit and the original JSON', async () => {
+      const { data: saved } = await apiServices.alerting.rules.get(rule.id);
+      expect(saved.name).toBe(updatedRuleName);
+      expect(saved.actions).toHaveLength(1);
+      expect(saved.actions[0].params).toMatchObject({
+        subAction: 'postBlockkit',
+        subActionParams: { channelNames: ['#general'], text: BLOCK_KIT_MESSAGE },
+      });
+    });
   });
 
   // TODO: Add a test that creates a Slack API connector via the UI:

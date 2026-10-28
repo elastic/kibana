@@ -31,7 +31,7 @@ import {
 } from '../../simulated_function_calling';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
-import { sanitizeToolSchemasForVertex } from './sanitize_tool_schemas_for_vertex';
+import { sanitizeToolSchemasForVertex } from '../../utils/sanitize_tool_schemas_for_vertex';
 import type { OpenAIRequest } from '../openai/types';
 
 export interface InferenceEndpointAdapterChatCompleteOptions {
