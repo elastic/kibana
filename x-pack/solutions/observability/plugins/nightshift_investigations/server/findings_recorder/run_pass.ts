@@ -50,6 +50,8 @@ export interface FindingsPassParams {
   question?: string;
   /** Set on the final pass: the agent's own answer. Its presence makes the pass final. */
   answer?: string;
+  /** The connector the investigation ran on, so the recorder uses the same model. */
+  connectorId?: string;
 }
 
 const MAX_METADATA_TEXT_LENGTH = 10_000;
@@ -151,7 +153,16 @@ const storedRecord = async (
  */
 export const runFindingsPass = async (
   deps: FindingsPassDeps,
-  { request, conversationId, steps, guard, memory, question, answer }: FindingsPassParams
+  {
+    request,
+    conversationId,
+    steps,
+    guard,
+    memory,
+    question,
+    answer,
+    connectorId,
+  }: FindingsPassParams
 ): Promise<boolean> => {
   const { logger } = deps;
   const final = answer !== undefined;
@@ -163,6 +174,7 @@ export const runFindingsPass = async (
   try {
     const model = await createOptimizeModel({
       request,
+      roundConnectorId: connectorId,
       agentBuilder,
       inference: deps.getInference(),
       savedObjects: deps.getSavedObjects(),

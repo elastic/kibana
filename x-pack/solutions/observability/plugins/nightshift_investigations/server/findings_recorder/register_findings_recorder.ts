@@ -51,20 +51,33 @@ export const registerFindingsRecorder = ({
     id: FINDINGS_RECORDER_CYCLE_HOOK_ID,
     when: { everyCycles: FINDINGS_RECORDER_EVERY_CYCLES },
     boundAgents: [NIGHTSHIFT_INVESTIGATION_AGENT_ID],
-    getHandler: ({ conversation, request, abortSignal, input }) => {
+    getHandler: async ({ conversation, request, abortSignal, input, services }) => {
       const conversationId = conversation.id;
       // A read-only run must not write findings, as in the final pass below.
       if (!conversationId || conversation.access === 'readOnly') return undefined;
       const question = typeof input?.message === 'string' ? input.message : undefined;
 
       const memory = coordinator.memory(conversationId);
+      // The cycle hook is not told the connector, but the run's own default model is it.
+      const connectorId = await services.modelProvider
+        .getDefaultModel()
+        .then((model) => model.connector.connectorId)
+        .catch(() => undefined);
       return ({ steps }) => {
         coordinator.startLive({
           conversationId,
           executionSignal: abortSignal,
           timeoutMs: FINDINGS_RECORDER_LIVE_TIMEOUT_MS,
           run: (guard) =>
-            runFindingsPass(deps, { request, conversationId, steps, guard, memory, question }),
+            runFindingsPass(deps, {
+              request,
+              conversationId,
+              steps,
+              guard,
+              memory,
+              question,
+              connectorId,
+            }),
         });
       };
     },
@@ -77,7 +90,8 @@ export const registerFindingsRecorder = ({
         mode: HookExecutionMode.blocking,
         timeout: AFTER_EXECUTION_HOOK_TIMEOUT_MS,
         handler: async (context) => {
-          const { agentId, conversationId, conversationAccess, round, request } = context;
+          const { agentId, conversationId, conversationAccess, round, request, connectorId } =
+            context;
           if (
             agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID ||
             !conversationId ||
@@ -104,6 +118,7 @@ export const registerFindingsRecorder = ({
                   memory: coordinator.memory(conversationId),
                   question: round.input?.message,
                   answer,
+                  connectorId,
                 }),
             });
           } catch (error) {

@@ -41,7 +41,11 @@ describe('registerFindingsRecorder', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('registers a cycle hook bound to the investigator that never appends to the agent', () => {
+  const services = (connectorId = 'custom-connector') => ({
+    modelProvider: { getDefaultModel: async () => ({ connector: { connectorId } }) },
+  });
+
+  it('registers a cycle hook bound to the investigator that never appends to the agent', async () => {
     const { registerCycleHook, coordinator } = setup();
 
     const [definition] = registerCycleHook.mock.calls[0];
@@ -52,11 +56,12 @@ describe('registerFindingsRecorder', () => {
     });
 
     const abort = new AbortController();
-    const handler = definition.getHandler({
+    const handler = await definition.getHandler({
       conversation: { id: 'c1', access: 'readWrite' },
       request,
       abortSignal: abort.signal,
       input: { message: 'Why is checkout failing?' },
+      services: services(),
     });
     const api = { append: jest.fn() };
     handler({ steps: [] }, api);
@@ -67,30 +72,78 @@ describe('registerFindingsRecorder', () => {
     expect(api.append).not.toHaveBeenCalled();
   });
 
-  it('sits the cycle hook out when there is no conversation', () => {
+  it("runs the live pass on the investigation's own connector", async () => {
+    const { registerCycleHook, coordinator } = setup();
+    const [definition] = registerCycleHook.mock.calls[0];
+    const handler = await definition.getHandler({
+      conversation: { id: 'c1', access: 'readWrite' },
+      request,
+      abortSignal: new AbortController().signal,
+      services: services('custom-connector'),
+    });
+    handler({ steps: [] }, { append: jest.fn() });
+
+    const [{ run }] = coordinator.startLive.mock.calls[0];
+    await run({ signal: new AbortController().signal, claimWrite: () => true });
+
+    expect(runFindingsPass).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ connectorId: 'custom-connector' })
+    );
+  });
+
+  it('still records when the run model cannot be read, leaving the connector to the default', async () => {
+    const { registerCycleHook, coordinator } = setup();
+    const [definition] = registerCycleHook.mock.calls[0];
+    const handler = await definition.getHandler({
+      conversation: { id: 'c1', access: 'readWrite' },
+      request,
+      abortSignal: new AbortController().signal,
+      services: {
+        modelProvider: {
+          getDefaultModel: async () => {
+            throw new Error('no model');
+          },
+        },
+      },
+    });
+    handler({ steps: [] }, { append: jest.fn() });
+
+    const [{ run }] = coordinator.startLive.mock.calls[0];
+    await run({ signal: new AbortController().signal, claimWrite: () => true });
+
+    expect(runFindingsPass).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ connectorId: undefined })
+    );
+  });
+
+  it('sits the cycle hook out when there is no conversation', async () => {
     const { registerCycleHook } = setup();
 
     const [definition] = registerCycleHook.mock.calls[0];
-    expect(
+    await expect(
       definition.getHandler({
         conversation: {},
         request,
         abortSignal: new AbortController().signal,
+        services: services(),
       })
-    ).toBeUndefined();
+    ).resolves.toBeUndefined();
   });
 
-  it('sits the cycle hook out when the run is read-only', () => {
+  it('sits the cycle hook out when the run is read-only', async () => {
     const { registerCycleHook } = setup();
 
     const [definition] = registerCycleHook.mock.calls[0];
-    expect(
+    await expect(
       definition.getHandler({
         conversation: { id: 'c1', access: 'readOnly' },
         request,
         abortSignal: new AbortController().signal,
+        services: services(),
       })
-    ).toBeUndefined();
+    ).resolves.toBeUndefined();
   });
 
   it('registers a blocking after-execution hook', () => {
@@ -109,6 +162,7 @@ describe('registerFindingsRecorder', () => {
       agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
       conversationId: 'c1',
       conversationAccess: 'readWrite',
+      connectorId: 'custom-connector',
       request,
       round: {
         status: ConversationRoundStatus.completed,
@@ -135,6 +189,7 @@ describe('registerFindingsRecorder', () => {
         conversationId: 'c1',
         answer: 'Root cause: bad deploy',
         question: 'Why is checkout failing?',
+        connectorId: 'custom-connector',
       })
     );
   });

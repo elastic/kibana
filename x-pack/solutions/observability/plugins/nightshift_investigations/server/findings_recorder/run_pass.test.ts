@@ -342,6 +342,16 @@ describe('runFindingsPass', () => {
     expect(entities[1]).toEqual({ id: 'checkout', name: 'checkout' });
   });
 
+  it("asks for the model of the investigation's connector", async () => {
+    const { deps, memory } = setup();
+
+    await run(deps, memory, { connectorId: 'custom-connector' });
+
+    expect(createOptimizeModel).toHaveBeenCalledWith(
+      expect.objectContaining({ roundConnectorId: 'custom-connector' })
+    );
+  });
+
   it('keeps its answer in the conversation for the next pass', async () => {
     const { deps, memory } = setup();
 
