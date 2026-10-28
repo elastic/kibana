@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Type } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MAX_MONITOR_FANOUT_SIZE, MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import { updateSyntheticsMonitorBulkRoute } from './update_monitor_bulk';
 
 jest.mock('../services/update_monitor_api', () => ({
@@ -82,11 +83,11 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
   });
 
   describe('body schema', () => {
-    const bodySchema = (route.validation as { request: { body: Type<unknown> } }).request.body;
+    const bodySchema = (route.validation as { request: { body: z.ZodType } }).request.body;
 
     it('accepts a non-empty updates array of { id, attributes }', () => {
       expect(() =>
-        bodySchema.validate({
+        bodySchema.parse({
           updates: [
             { id: 'monitor-id-1', attributes: { enabled: false } },
             { id: 'monitor-id-2', attributes: { tags: ['x'] } },
@@ -95,9 +96,23 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
       ).not.toThrow();
     });
 
-    it('allows unknown keys inside attributes — schema uses unknowns: allow', () => {
+    it('rejects unknown keys on the body and each update entry', () => {
+      expect(
+        bodySchema.safeParse({
+          updates: [{ id: 'monitor-id-1', attributes: { enabled: false } }],
+          dry_run: true,
+        }).success
+      ).toBe(false);
+      expect(
+        bodySchema.safeParse({
+          updates: [{ id: 'monitor-id-1', attributes: { enabled: false }, extra: true }],
+        }).success
+      ).toBe(false);
+    });
+
+    it('allows unknown keys inside attributes — looseObject keeps extras', () => {
       expect(() =>
-        bodySchema.validate({
+        bodySchema.parse({
           updates: [
             {
               id: 'monitor-id-1',
@@ -112,62 +127,54 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
     });
 
     it('rejects an empty updates array', () => {
-      expect(() => bodySchema.validate({ updates: [] })).toThrow(
-        /array size is \[0\], but cannot be smaller than \[1\]/
-      );
+      expect(() => bodySchema.parse({ updates: [] })).toThrow(/too small|at least 1|>=1/i);
     });
 
     it('rejects a missing updates field', () => {
-      expect(() => bodySchema.validate({})).toThrow(
-        /\[updates\]: expected value of type \[array\] but got \[undefined\]/
-      );
+      expect(() => bodySchema.parse({})).toThrow(/expected.*array|required|undefined/i);
     });
 
     it('rejects an update item missing id', () => {
-      expect(() => bodySchema.validate({ updates: [{ attributes: { enabled: false } }] })).toThrow(
-        /\[updates\.0\.id\]: expected value of type \[string\] but got \[undefined\]/
+      expect(() => bodySchema.parse({ updates: [{ attributes: { enabled: false } }] })).toThrow(
+        /expected.*string|required|undefined/i
       );
     });
 
     it('rejects an update item with an empty id', () => {
       expect(() =>
-        bodySchema.validate({ updates: [{ id: '', attributes: { enabled: false } }] })
-      ).toThrow(
-        /\[updates\.0\.id\]: value has length \[0\] but it must have a minimum length of \[1\]/
-      );
+        bodySchema.parse({ updates: [{ id: '', attributes: { enabled: false } }] })
+      ).toThrow(/too small|minimum|>=1/i);
     });
 
     it('rejects an update item with a non-string id', () => {
-      expect(() => bodySchema.validate({ updates: [{ id: 1, attributes: {} }] })).toThrow(
-        /\[updates\.0\.id\]: expected value of type \[string\]/
+      expect(() => bodySchema.parse({ updates: [{ id: 1, attributes: {} }] })).toThrow(
+        /expected.*string|invalid/i
       );
     });
 
     it('treats a missing attributes field as an empty update — handler enforces non-empty', () => {
-      const value = bodySchema.validate({ updates: [{ id: 'monitor-id-1' }] }) as {
+      const value = bodySchema.parse({ updates: [{ id: 'monitor-id-1' }] }) as {
         updates: Array<{ id: string; attributes: Record<string, unknown> }>;
       };
       expect(value.updates[0].attributes).toEqual({});
     });
 
-    it('rejects more than 500 updates', () => {
-      const updates = Array.from({ length: 501 }, (_, i) => ({
+    it(`rejects more than ${MAX_MONITOR_FANOUT_SIZE} updates`, () => {
+      const updates = Array.from({ length: MAX_MONITOR_FANOUT_SIZE + 1 }, (_, i) => ({
         id: `monitor-id-${i}`,
         attributes: { enabled: false },
       }));
-      expect(() => bodySchema.validate({ updates })).toThrow(
-        /array size is \[501\], but cannot be greater than \[500\]/
+      expect(() => bodySchema.parse({ updates })).toThrow(
+        new RegExp(`too big|maximum|<=${MAX_MONITOR_FANOUT_SIZE}`, 'i')
       );
     });
 
-    it('rejects an id longer than 1024 characters', () => {
+    it(`rejects an id longer than ${MAX_ROUTE_ID_LENGTH} characters`, () => {
       expect(() =>
-        bodySchema.validate({
-          updates: [{ id: 'a'.repeat(1025), attributes: { enabled: false } }],
+        bodySchema.parse({
+          updates: [{ id: 'a'.repeat(MAX_ROUTE_ID_LENGTH + 1), attributes: { enabled: false } }],
         })
-      ).toThrow(
-        /\[updates\.0\.id\]: value has length \[1025\] but it must have a maximum length of \[1024\]/
-      );
+      ).toThrow(new RegExp(`too big|maximum|<=${MAX_ROUTE_ID_LENGTH}`, 'i'));
     });
   });
 

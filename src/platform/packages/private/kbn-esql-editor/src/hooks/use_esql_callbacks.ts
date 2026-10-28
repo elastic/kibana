@@ -12,20 +12,19 @@ import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLCallbacks, ESQLControlVariable, ESQLRegistrySolutionId } from '@kbn/esql-types';
 import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
-import type { ISearchGeneric } from '@kbn/search-types';
 import type { ILicense } from '@kbn/licensing-types';
 import type { MapCache } from 'lodash';
 import type { FavoritesClient } from '@kbn/content-management-favorites-public';
 import {
-  getESQLAdHocDataview,
   getEditorExtensions,
   getEsqlPolicies,
   getInferenceEndpoints,
-  getTimeseriesIndices,
   getViews,
   getDatasets,
+  getSourceCommandQueryFromESQLQuery,
 } from '@kbn/esql-utils';
-import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import type { getEsqlSourceColumns, getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { clearCacheWhenOld } from '../helpers';
 import { getHistoryItems } from '../history_local_storage';
@@ -33,7 +32,11 @@ import type { ESQLEditorDeps } from '../types';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
 import { useCanCreateLookupIndex } from '../lookup_join';
 import { useCanSuggestResourceBrowser } from '../resource_browser/use_can_suggest_resource_browser';
-import { DATA_SOURCES_CACHE_KEY, HISTORY_STARRED_ITEMS_CACHE_KEY } from '../helpers';
+import {
+  DATA_SOURCES_CACHE_KEY,
+  HISTORY_STARRED_ITEMS_CACHE_KEY,
+  TIMESERIES_INDICES_CACHE_KEY,
+} from '../helpers';
 
 type MemoizedFn<TArgs extends unknown[], TResult> = (...args: TArgs) => {
   timestamp: number;
@@ -44,14 +47,12 @@ type MemoizedFieldsFromESQL = MemoizedFn<
   [
     {
       esqlQuery: string;
-      search: ISearchGeneric;
       timeRange: TimeRange;
       signal?: AbortSignal;
-      dropNullColumns?: boolean;
       variables?: ESQLControlVariable[];
     }
   ],
-  ReturnType<typeof getEsqlColumns>
+  ReturnType<typeof getEsqlSourceColumns>
 >;
 
 type MemoizedSources = MemoizedFn<
@@ -69,6 +70,11 @@ type MemoizedHistoryStarredItems = MemoizedFn<
   Promise<string[]>
 >;
 
+type MemoizedTimeseriesIndices = MemoizedFn<
+  [CoreStart['http'], AbortSignal?],
+  ReturnType<typeof getTimeseriesIndices>
+>;
+
 interface UseEsqlCallbacksParams {
   core: CoreStart;
   data: ESQLEditorDeps['data'];
@@ -84,9 +90,12 @@ interface UseEsqlCallbacksParams {
   memoizedFieldsFromESQL: MemoizedFieldsFromESQL;
   historyStarredItemsCache: MapCache;
   memoizedHistoryStarredItems: MemoizedHistoryStarredItems;
+  timeseriesIndicesCache: MapCache;
+  memoizedTimeseriesIndices: MemoizedTimeseriesIndices;
   favoritesClient: FavoritesClient<StarredQueryMetadata>;
   getJoinIndicesCallback: Required<ESQLCallbacks>['getJoinIndices'];
   enableResourceBrowser: boolean;
+  projectRouting?: string;
 }
 
 export const useEsqlCallbacks = ({
@@ -104,9 +113,12 @@ export const useEsqlCallbacks = ({
   memoizedFieldsFromESQL,
   historyStarredItemsCache,
   memoizedHistoryStarredItems,
+  timeseriesIndicesCache,
+  memoizedTimeseriesIndices,
   favoritesClient,
   getJoinIndicesCallback,
   enableResourceBrowser,
+  projectRouting,
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
   const columnsAbortControllerRef = useRef<AbortController | undefined>(undefined);
   const previousColumnsQueryRef = useRef<string | undefined>(undefined);
@@ -160,11 +172,9 @@ export const useEsqlCallbacks = ({
         const timeRange = data.query.timefilter.timefilter.getTime();
         const result = await memoizedFieldsFromESQL({
           esqlQuery: queryToExecute,
-          search: data.search.search,
           timeRange,
           signal: currentController.signal,
           variables: esqlService?.variablesService?.esqlVariables,
-          dropNullColumns: true,
         }).result;
 
         // Bail out without touching the cache — cache cleanup for the aborted query
@@ -180,13 +190,7 @@ export const useEsqlCallbacks = ({
       }
       return [];
     },
-    [
-      data.query.timefilter.timefilter,
-      data.search.search,
-      esqlFieldsCache,
-      memoizedFieldsFromESQL,
-      esqlService,
-    ]
+    [data.query.timefilter.timefilter, esqlFieldsCache, memoizedFieldsFromESQL, esqlService]
   );
 
   // Abort any in-flight requests when the editor unmounts.
@@ -194,12 +198,21 @@ export const useEsqlCallbacks = ({
     const lifecycleController = lifecycleAbortControllerRef.current;
     const sourcesController = sourcesAbortControllerRef.current;
     return () => {
+      lifecycleController.abort();
+      sourcesController.abort();
+    };
+  }, []);
+
+  // The fields cache is also replaced when the project routing changes: drop its in-flight request
+  // and start the next one with a fresh controller.
+  useEffect(() => {
+    return () => {
       columnsAbortControllerRef.current?.abort();
       if (previousColumnsQueryRef.current) {
         esqlFieldsCache.delete(previousColumnsQueryRef.current);
       }
-      lifecycleController.abort();
-      sourcesController.abort();
+      columnsAbortControllerRef.current = undefined;
+      previousColumnsQueryRef.current = undefined;
     };
   }, [esqlFieldsCache]);
 
@@ -228,10 +241,12 @@ export const useEsqlCallbacks = ({
   );
 
   const getTimeseriesIndicesCallback = useCallback(async () => {
+    clearCacheWhenOld(timeseriesIndicesCache, TIMESERIES_INDICES_CACHE_KEY);
     return (
-      (await getTimeseriesIndices(core.http, lifecycleAbortControllerRef.current.signal)) || []
+      (await memoizedTimeseriesIndices(core.http, lifecycleAbortControllerRef.current.signal)
+        .result) || { indices: [] }
     );
-  }, [core.http]);
+  }, [core.http, memoizedTimeseriesIndices, timeseriesIndicesCache]);
 
   const getViewsCallback = useCallback(async () => {
     const views = await getViews(core.http, lifecycleAbortControllerRef.current.signal);
@@ -310,10 +325,18 @@ export const useEsqlCallbacks = ({
       if (!hasQuerySuggestions) {
         return undefined;
       }
-      const dataView = await getESQLAdHocDataview({
-        dataViewsService: data.dataViews,
-        query: minimalQueryRef.current,
+      const sourceQuery = getSourceCommandQueryFromESQLQuery(minimalQueryRef.current);
+      if (!sourceQuery) {
+        return undefined;
+      }
+      const source = await EsqlSource.create({
+        query: sourceQuery,
+        http: core.http,
+        projectRouting,
+        // Only the fields are needed for KQL suggestions: skip the time field request.
+        resolveTimeField: false,
       });
+      const dataView = await registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http);
       const suggestions = await kql?.autocomplete.getQuerySuggestions({
         language: 'kuery',
         query: kqlQuery,
@@ -333,7 +356,7 @@ export const useEsqlCallbacks = ({
         }) ?? []
       );
     },
-    [data.dataViews, kql?.autocomplete, minimalQueryRef]
+    [core.http, data.dataViews, kql?.autocomplete, minimalQueryRef, projectRouting]
   );
 
   return useMemo<ESQLCallbacks>(

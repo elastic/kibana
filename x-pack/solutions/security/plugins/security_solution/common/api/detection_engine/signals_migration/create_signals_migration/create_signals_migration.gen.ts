@@ -22,15 +22,36 @@ export const AlertsReindexOptions = lazySchema(() =>
     /**
      * The throttle for the migration task in sub-requests per second. Corresponds to requests_per_second on the Reindex API.
      */
-    requests_per_second: z.number().int().min(1).optional(),
+    requests_per_second: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe(
+        'The throttle for the migration task in sub-requests per second. Corresponds to requests_per_second on the Reindex API.'
+      ),
     /**
      * Number of alerts to migrate per batch. Corresponds to the source.size option on the Reindex API.
      */
-    size: z.number().int().min(1).optional(),
+    size: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe(
+        'Number of alerts to migrate per batch. Corresponds to the source.size option on the Reindex API.'
+      ),
     /**
      * The number of subtasks for the migration task. Corresponds to slices on the Reindex API.
      */
-    slices: z.number().int().min(1).optional(),
+    slices: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe(
+        'The number of subtasks for the migration task. Corresponds to slices on the Reindex API.'
+      ),
   })
 );
 export type AlertsReindexOptions = z.infer<typeof AlertsReindexOptions>;
@@ -68,7 +89,10 @@ export const CreateAlertsMigrationRequestBody = lazySchema(() =>
       /**
        * Array of index names to migrate.
        */
-      index: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
+      index: z
+        .array(z.string().min(1).superRefine(isNonEmptyString))
+        .min(1)
+        .describe('Array of index names to migrate.'),
     })
     .merge(AlertsReindexOptions)
 );

@@ -42,6 +42,28 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     await testSubjects.click('rulesTab');
   };
 
+  const assertRuleEnabledState = async (ruleId: string, enabled: boolean) => {
+    await retry.try(async () => {
+      const { body: rule } = await supertest
+        .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}`)
+        .expect(200);
+      expect(rule.enabled).to.eql(enabled);
+    });
+  };
+
+  // The row menu reuses one item to enable or disable a rule, so wait until it offers the intended
+  // action before clicking: a row that has not caught up with a status change would route the click
+  // to the other action.
+  const clickRuleRowStatusAction = async (expectedLabel: 'Enable' | 'Disable') => {
+    await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+    await testSubjects.click('collapsedItemActions');
+    await retry.waitForWithTimeout(`row action "${expectedLabel}" to show up`, 30000, async () => {
+      const label = await testSubjects.getVisibleText('disableButton');
+      return label.trim() === expectedLabel;
+    });
+    await testSubjects.click('disableButton');
+  };
+
   const toggleRuleStatusFilter = (selector: string) => {
     return retry.try(async () => {
       const filter = await testSubjects.find(selector);
@@ -74,6 +96,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     });
 
     afterEach(async () => {
+      await toasts.dismissAll();
       await objectRemover.removeAll();
     });
 
@@ -202,19 +225,13 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await testSubjects.click('disableButton');
+      await clickRuleRowStatusAction('Disable');
 
       await testSubjects.click('confirmModalConfirmButton');
 
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'disabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, false);
     });
 
     it('should untrack disable rule if untrack switch is true', async () => {
@@ -243,11 +260,14 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdRule.name);
 
-      await testSubjects.click('collapsedItemActions');
+      await clickRuleRowStatusAction('Disable');
 
-      await testSubjects.click('disableButton');
+      await testSubjects.existOrFail('untrackAlertsModal');
 
       await testSubjects.click('untrackAlertsModalSwitch');
+      await retry.waitFor('untrack switch to be checked', () =>
+        testSubjects.isEuiSwitchChecked('untrackAlertsModalSwitch')
+      );
 
       await testSubjects.click('confirmModalConfirmButton');
 
@@ -285,9 +305,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdRule.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await testSubjects.click('disableButton');
+      await clickRuleRowStatusAction('Disable');
 
       await testSubjects.click('confirmModalConfirmButton');
 
@@ -307,39 +325,16 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
-        return await testSubjects.isDisplayed('disableButton');
-      });
-
-      await testSubjects.click('disableButton');
-
+      await clickRuleRowStatusAction('Disable');
       await testSubjects.click('confirmModalConfirmButton');
-
       await header.waitUntilLoadingHasFinished();
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'disabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, false);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
-        return await testSubjects.isDisplayed('disableButton');
-      });
-
-      await testSubjects.click('disableButton');
-
+      await clickRuleRowStatusAction('Enable');
       await header.waitUntilLoadingHasFinished();
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'enabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, true);
     });
 
     it('should delete single alert', async () => {
@@ -353,12 +348,11 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('deleteRule');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
-
-      await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Deleted 1 rule');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(secondAlert.name);
@@ -379,16 +373,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await header.waitUntilLoadingHasFinished();
 
-      await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Disabled 1 rule');
-      });
-
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'disabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, false);
     });
 
     it('should enable all selection', async () => {
@@ -402,11 +387,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkEnable');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'enabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, true);
     });
 
     it('should render percentile column and cells correctly', async () => {
@@ -457,8 +438,14 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       // open edit flyout when icon is clicked
       const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
       await infoIcon.click();
+      await testSubjects.existOrFail('ruleForm');
 
-      await testSubjects.click('rulePageFooterCancelButton');
+      // Cancel can be swallowed while the edit form is still re-rendering, so navigate back instead.
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
+      await testSubjects.click('rulesTab');
+      await testSubjects.existOrFail('rulesList');
     });
 
     it('should delete all selection', async () => {
@@ -475,12 +462,11 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('bulkAction');
 
       await testSubjects.click('bulkDelete');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
-
-      await retry.try(async () => {
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Deleted 1 rule');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
@@ -570,18 +556,29 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       expect(expandRulesErrorLink).to.have.length(0);
 
       await createFailingAlert({ supertest, objectRemover });
+      // The banner counts errors from an aggregation, but expanding reads the rules-list snapshot.
       await retry.try(async () => {
         await refreshAlertsList();
+        const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(refreshResults.some((item: any) => item.status === 'Failed')).to.equal(true);
         expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
         expect(expandRulesErrorLink).to.have.length(1);
       });
-      await refreshAlertsList();
       await testSubjects.click('expandRulesError');
-      const expandedRow = await find.allByCssSelector('.euiTableRow-isExpandedRow');
-      expect(expandedRow).to.have.length(1);
-      expect(await (await expandedRow[0].findByTagName('div')).getVisibleText()).to.equal(
-        'Error from last run\nFailed to execute alert type'
+      let expandedRowText = '';
+      await retry.waitForWithTimeout(
+        'expanded rule error row to render its content',
+        30000,
+        async () => {
+          const expandedRows = await find.allByCssSelector('.euiTableRow-isExpandedRow');
+          if (expandedRows.length !== 1) {
+            return false;
+          }
+          expandedRowText = await (await expandedRows[0].findByTagName('div')).getVisibleText();
+          return expandedRowText === 'Error from last run\nFailed to execute alert type';
+        }
       );
+      expect(expandedRowText).to.equal('Error from last run\nFailed to execute alert type');
     });
 
     it('should filter alerts by the alert type', async () => {

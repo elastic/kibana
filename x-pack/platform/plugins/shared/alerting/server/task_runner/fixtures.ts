@@ -9,6 +9,7 @@ import type { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { SavedObject } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type {
   Rule,
   RuleTypeParams,
@@ -332,7 +333,7 @@ export const mockTaskInstance = () => ({
   taskType: 'alerting:test',
   params: {
     alertId: RULE_ID,
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
     consumer: 'bar',
   },
   ownerId: null,

@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/280986
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-07-28
-- product: kibana
-title: Fix custom workflow steps calling Kibana APIs in the wrong space
-description: Custom workflow steps in non-default spaces now send Kibana API requests to the workflow's space instead of the default space.

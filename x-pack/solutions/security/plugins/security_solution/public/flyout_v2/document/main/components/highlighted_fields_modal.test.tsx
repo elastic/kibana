@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, act, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../../common/mock';
@@ -113,12 +113,10 @@ describe('<HighlighedFieldsModal />', () => {
     expect(getAllByTestId('euiComboBoxPill')[1]).toHaveTextContent('custom2');
   });
 
-  it('should close modal when cancel button is clicked', async () => {
+  it('should close modal when cancel button is clicked', () => {
     const { getByTestId } = renderHighlighedFieldsModal();
     const cancelButton = getByTestId(HIGHLIGHTED_FIELDS_MODAL_CANCEL_BUTTON_TEST_ID);
-    await act(async () => {
-      fireEvent.click(cancelButton);
-    });
+    fireEvent.click(cancelButton);
     expect(mockSetIsModalVisible).toHaveBeenCalledWith(false);
   });
 
@@ -147,5 +145,5 @@ describe('<HighlighedFieldsModal />', () => {
     expect(mockAddSuccess).toHaveBeenCalledWith('updated rule was saved');
     expect(mockUpdateRule).toHaveBeenCalled();
     expect(mockSetIsEditLoading).toHaveBeenCalledTimes(2);
-  });
+  }, 15000);
 });

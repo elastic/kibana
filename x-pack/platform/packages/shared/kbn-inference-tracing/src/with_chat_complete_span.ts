@@ -7,7 +7,9 @@
 
 import type {
   AssistantMessage,
+  ChatCompleteCacheControl,
   ChatCompleteCompositeResponse,
+  ChatCompletionReasoning,
   Message,
   Model,
   ToolCall,
@@ -27,6 +29,7 @@ import { SpanKind } from '@opentelemetry/api';
 import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
 import { withActiveInferenceSpan } from './with_active_inference_span';
+import { getGenAiToolDefinitions } from './gen_ai_tool_definitions';
 import type {
   GenAIInputMessage,
   GenAIMessagePart,
@@ -141,7 +144,12 @@ function setOutputMessages(
 
 function setTokens(
   span: Span,
-  { prompt, completion, cached }: { prompt: number; completion: number; cached?: number }
+  {
+    prompt,
+    completion,
+    cached,
+    cacheWrite,
+  }: { prompt: number; completion: number; cached?: number; cacheWrite?: number }
 ) {
   if (!span.isRecording()) {
     return;
@@ -152,6 +160,9 @@ function setTokens(
   };
   if (cached != null) {
     attributes[GenAISemanticConventions.GenAIUsageCacheReadInputTokens] = cached;
+  }
+  if (cacheWrite != null) {
+    attributes[GenAISemanticConventions.GenAIUsageCacheWriteInputTokens] = cacheWrite;
   }
   span.setAttributes(attributes);
 }
@@ -171,6 +182,9 @@ interface InferenceGenerationOptions {
   messages: Message[];
   tools?: Record<string, ToolDefinition>;
   toolChoice?: ToolChoice;
+  cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
+  reasoning?: ChatCompletionReasoning;
 }
 
 /**
@@ -187,7 +201,17 @@ export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
   cb: (span?: Span) => ChatCompleteCompositeResponse
 ): ChatCompleteCompositeResponse {
-  const { system, messages, model, toolChoice, tools, ...attributes } = options;
+  const {
+    system,
+    messages,
+    model,
+    toolChoice,
+    tools,
+    cacheControl,
+    sessionId,
+    reasoning,
+    ...attributes
+  } = options;
 
   const modelProvider = model?.provider ?? 'unknown';
   const modelId = model?.id ?? model?.family ?? 'unknown';
@@ -202,8 +226,22 @@ export function withChatCompleteSpan(
         [GenAISemanticConventions.GenAIRequestModel]: modelId,
         [GenAISemanticConventions.GenAIProviderName]: modelProvider,
         [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
-        [GenAISemanticConventions.GenAIToolDefinitions]: tools ? JSON.stringify(tools) : undefined,
+        [GenAISemanticConventions.GenAIToolDefinitions]: tools
+          ? JSON.stringify(getGenAiToolDefinitions(tools))
+          : undefined,
         [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
+        ...(cacheControl
+          ? {
+              [ElasticGenAIAttributes.CacheControlType]: cacheControl.type,
+              [ElasticGenAIAttributes.CacheControlTTL]: cacheControl.ttl
+                ? cacheControl.ttl
+                : undefined,
+            }
+          : {}),
+        ...(sessionId ? { [ElasticGenAIAttributes.CacheControlSessionId]: sessionId } : {}),
+        ...(reasoning?.effort
+          ? { [GenAISemanticConventions.GenAIRequestReasoningLevel]: reasoning.effort }
+          : {}),
       },
     },
     (span) => {

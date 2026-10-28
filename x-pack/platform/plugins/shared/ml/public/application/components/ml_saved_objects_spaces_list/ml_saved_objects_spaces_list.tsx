@@ -10,6 +10,7 @@ import React, { useCallback, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALL_SPACES_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
 import type { SavedObjectResult, MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import { ML_JOB_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
@@ -25,7 +26,6 @@ interface Props {
   disabled?: boolean;
 }
 
-const ALL_SPACES_ID = '*';
 const jobObjectNoun = i18n.translate('xpack.ml.management.jobsSpacesList.jobObjectNoun', {
   defaultMessage: 'job',
 });

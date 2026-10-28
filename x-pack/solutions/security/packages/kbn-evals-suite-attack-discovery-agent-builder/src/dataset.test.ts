@@ -6,6 +6,7 @@
  */
 
 import { goldenPathExamples } from './dataset';
+import { attackDiscoveryFixtureMarker } from './fixtures';
 
 /**
  * Regression test for the golden-path slice partitioning used by
@@ -35,6 +36,16 @@ describe('goldenPathExamples fixture partitioning', () => {
     // The live-retrieval slice must be the happy path (alertCount > 0), not
     // the zero-alert negative control — that's the bug this test guards.
     expect(slice[0].metadata?.alertCount).toBeGreaterThan(0);
+  });
+
+  // The example asserts an EXACT retrieved population against a shared alerts
+  // index, so the retrieval it counts must be scoped to the fixture's own
+  // marker. Declaring it here is what makes an unscoped query's row count — the
+  // shared index's, not this fixture's — unable to satisfy the assertion.
+  it('live-retrieval example declares the marker scope its question instructs', () => {
+    const [example] = filterByFixture('live-retrieval');
+    expect(example.input?.retrievalScope).toBe(attackDiscoveryFixtureMarker);
+    expect(example.input?.question ?? '').toContain(attackDiscoveryFixtureMarker);
   });
 
   it('multiple-alert-sets slice resolves to exactly one example', () => {

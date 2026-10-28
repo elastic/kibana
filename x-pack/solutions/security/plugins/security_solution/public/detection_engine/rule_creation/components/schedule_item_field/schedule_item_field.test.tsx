@@ -113,6 +113,39 @@ describe('ScheduleItemField', () => {
     expect(mockField.setValue).toHaveBeenCalledWith(`${expected}s`);
   });
 
+  it('does not render sentinel min/max attributes when bounds are not passed', () => {
+    const mockField = useFormFieldMock<string>();
+    const wrapper = mount(
+      <TestProviders>
+        <ScheduleItemField field={mockField} dataTestSubj="schedule-item" idAria="idAria" />
+      </TestProviders>
+    );
+
+    const input = wrapper.find('input[data-test-subj="interval"]').getDOMNode();
+
+    expect(input.hasAttribute('min')).toBe(false);
+    expect(input.hasAttribute('max')).toBe(false);
+  });
+
+  it('renders only the bounds that are passed', () => {
+    const mockField = useFormFieldMock<string>();
+    const wrapper = mount(
+      <TestProviders>
+        <ScheduleItemField
+          field={mockField}
+          minValue={1}
+          dataTestSubj="schedule-item"
+          idAria="idAria"
+        />
+      </TestProviders>
+    );
+
+    const input = wrapper.find('input[data-test-subj="interval"]').getDOMNode();
+
+    expect(input.getAttribute('min')).toBe('1');
+    expect(input.hasAttribute('max')).toBe(false);
+  });
+
   it('skips updating a non-numeric values', () => {
     const unsafeInput = 'this is not a number';
 

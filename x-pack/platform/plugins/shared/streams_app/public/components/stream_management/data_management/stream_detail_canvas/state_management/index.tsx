@@ -6,4 +6,5 @@
  */
 
 export * from './use_canvas_state';
+export { defaultCanvasUrlState } from './types';
 export type * from './types';

@@ -11,6 +11,7 @@ import {
   getCaseStepCommonDefinition,
   type GetCaseStepInput,
 } from '../../../common/workflows/steps/get_case';
+import { toLegacyCaseResponse } from '../../common/attachments';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler, safeParseCaseForWorkflowOutput } from './utils';
 
@@ -28,9 +29,12 @@ export const getCaseStepDefinition = (
         includeComments: input.include_comments,
       });
 
+      // The client is unified-only; the output schema mirrors the public (legacy) wire
+      // shape, so unified comments must be converted back or they'd silently mismatch
+      // the schema and fall through `safeParseCaseForWorkflowOutput`'s raw fallback.
       return safeParseCaseForWorkflowOutput(
         getCaseStepCommonDefinition.outputSchema.shape.case,
-        theCase
+        toLegacyCaseResponse(theCase)
       );
     }),
   });

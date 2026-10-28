@@ -15,26 +15,34 @@ describe('validateSLO', () => {
   describe('any slo', () => {
     it("throws when 'objective.target' is lte 0", () => {
       const slo = createSLO({ objective: { target: 0 } });
-      expect(() => validateSLO(slo)).toThrowError('Invalid objective.target');
+      expect(() => validateSLO(slo)).toThrow('Invalid objective.target');
     });
 
     it("throws when 'objective.target' is gte 1", () => {
       const slo = createSLO({ objective: { target: 1 } });
-      expect(() => validateSLO(slo)).toThrowError('Invalid objective.target');
+      expect(() => validateSLO(slo)).toThrow('Invalid objective.target');
+    });
+
+    it('throws when a rolling time window duration formats past the wire-length bound', () => {
+      // '9999999999999999d' fits the request bound but formats to '10000000000000000d'
+      const slo = createSLO({
+        timeWindow: { duration: Duration.fromString('9999999999999999d'), type: 'rolling' },
+      });
+      expect(() => validateSLO(slo)).toThrow('Invalid time_window.duration');
     });
 
     it("throws when time window duration unit is 'm'", () => {
       const slo = createSLO({
         timeWindow: { duration: new Duration(1, DurationUnit.Minute), type: 'rolling' },
       });
-      expect(() => validateSLO(slo)).toThrowError('Invalid time_window.duration');
+      expect(() => validateSLO(slo)).toThrow('Invalid time_window.duration');
     });
 
     it("throws when time window duration unit is 'h'", () => {
       const slo = createSLO({
         timeWindow: { duration: new Duration(1, DurationUnit.Hour), type: 'rolling' },
       });
-      expect(() => validateSLO(slo)).toThrowError('Invalid time_window.duration');
+      expect(() => validateSLO(slo)).toThrow('Invalid time_window.duration');
     });
 
     it.each([
@@ -56,7 +64,7 @@ describe('validateSLO', () => {
                 timeWindow: { duration, type: 'calendarAligned' },
               })
             )
-          ).toThrowError('Invalid time_window.duration');
+          ).toThrow('Invalid time_window.duration');
         } else {
           expect(() =>
             validateSLO(
@@ -64,7 +72,7 @@ describe('validateSLO', () => {
                 timeWindow: { duration, type: 'calendarAligned' },
               })
             )
-          ).not.toThrowError();
+          ).not.toThrow();
         }
       }
     );
@@ -85,7 +93,7 @@ describe('validateSLO', () => {
               timeWindow: { duration, type: 'rolling' },
             })
           )
-        ).toThrowError('Invalid time_window.duration');
+        ).toThrow('Invalid time_window.duration');
       } else {
         expect(() =>
           validateSLO(
@@ -93,7 +101,7 @@ describe('validateSLO', () => {
               timeWindow: { duration, type: 'rolling' },
             })
           )
-        ).not.toThrowError();
+        ).not.toThrow();
       }
     });
 
@@ -107,7 +115,7 @@ describe('validateSLO', () => {
             preventCrossProjectSearch: false,
           },
         });
-        expect(() => validateSLO(slo)).toThrowError('Invalid settings.frequency');
+        expect(() => validateSLO(slo)).toThrow('Invalid settings.frequency');
       });
 
       it("throws when sync_delay is longer or equal than '6h'", () => {
@@ -119,7 +127,7 @@ describe('validateSLO', () => {
             preventCrossProjectSearch: false,
           },
         });
-        expect(() => validateSLO(slo)).toThrowError('Invalid settings.sync_delay');
+        expect(() => validateSLO(slo)).toThrow('Invalid settings.sync_delay');
       });
     });
   });
@@ -133,7 +141,7 @@ describe('validateSLO', () => {
           timesliceWindow: new Duration(1, DurationUnit.Minute),
         },
       });
-      expect(() => validateSLO(slo)).toThrowError('Invalid objective.timeslice_target');
+      expect(() => validateSLO(slo)).toThrow('Invalid objective.timeslice_target');
     });
 
     it("throws when 'objective.timeslice_target' is lt 0", () => {
@@ -146,7 +154,7 @@ describe('validateSLO', () => {
         },
       });
 
-      expect(() => validateSLO(slo)).toThrowError('Invalid objective.timeslice_target');
+      expect(() => validateSLO(slo)).toThrow('Invalid objective.timeslice_target');
     });
 
     it("throws when 'objective.timeslice_target' is gt 1", () => {
@@ -158,7 +166,7 @@ describe('validateSLO', () => {
           timesliceWindow: new Duration(1, DurationUnit.Minute),
         },
       });
-      expect(() => validateSLO(slo)).toThrowError('Invalid objective.timeslice_target');
+      expect(() => validateSLO(slo)).toThrow('Invalid objective.timeslice_target');
     });
 
     it("throws when 'objective.timeslice_window' is not present", () => {
@@ -170,7 +178,7 @@ describe('validateSLO', () => {
         },
       });
 
-      expect(() => validateSLO(slo)).toThrowError('Invalid objective.timeslice_window');
+      expect(() => validateSLO(slo)).toThrow('Invalid objective.timeslice_window');
     });
 
     it("throws when 'objective.timeslice_window' is not in minutes or hours", () => {
@@ -187,21 +195,21 @@ describe('validateSLO', () => {
           ...slo,
           objective: { ...slo.objective, timesliceWindow: new Duration(1, DurationUnit.Day) },
         })
-      ).toThrowError('Invalid objective.timeslice_window');
+      ).toThrow('Invalid objective.timeslice_window');
 
       expect(() =>
         validateSLO({
           ...slo,
           objective: { ...slo.objective, timesliceWindow: new Duration(1, DurationUnit.Week) },
         })
-      ).toThrowError('Invalid objective.timeslice_window');
+      ).toThrow('Invalid objective.timeslice_window');
 
       expect(() =>
         validateSLO({
           ...slo,
           objective: { ...slo.objective, timesliceWindow: new Duration(1, DurationUnit.Month) },
         })
-      ).toThrowError('Invalid objective.timeslice_window');
+      ).toThrow('Invalid objective.timeslice_window');
     });
 
     it("throws when 'objective.timeslice_window' is longer than 'slo.time_window'", () => {
@@ -215,7 +223,7 @@ describe('validateSLO', () => {
         },
       });
 
-      expect(() => validateSLO(slo)).toThrowError('Invalid objective.timeslice_window');
+      expect(() => validateSLO(slo)).toThrow('Invalid objective.timeslice_window');
     });
   });
 });

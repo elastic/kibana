@@ -22,6 +22,7 @@ import type {
   ESQLFunction,
   ESQLSingleAstItem,
   ESQLSource,
+  ESQLStringLiteral,
 } from '@elastic/esql/types';
 
 // ---------------------------------------------------------------------------
@@ -554,6 +555,167 @@ export function getStatsQueryHints(esql: string): string[] {
   }
 
   return hints;
+}
+
+export interface OverBroadMatchPredicate {
+  field: string;
+  value: string;
+  operator: ':' | 'MATCH';
+}
+
+function isKeywordLiteral(node: ESQLAstItem | undefined): node is ESQLStringLiteral {
+  return (
+    !!node &&
+    !Array.isArray(node) &&
+    'type' in node &&
+    node.type === 'literal' &&
+    node.literalType === 'keyword'
+  );
+}
+
+function getUnquotedLiteral(node: ESQLAstItem | undefined): string | null {
+  return isKeywordLiteral(node) ? node.valueUnquoted : null;
+}
+
+function matchOptionsForceAndOperator(node: ESQLAstItem | undefined): boolean {
+  if (!node || Array.isArray(node) || !('type' in node) || node.type !== 'map') return false;
+  return node.entries.some(
+    (entry) =>
+      getUnquotedLiteral(entry.key)?.toLowerCase() === 'operator' &&
+      getUnquotedLiteral(entry.value)?.toLowerCase() === 'and'
+  );
+}
+
+function getColumnName(node: ESQLAstItem | undefined): string {
+  if (!node || Array.isArray(node)) return '<field>';
+  return BasicPrettyPrinter.expression(node as ESQLSingleAstItem);
+}
+
+type FullTextOperator = ':' | 'MATCH' | 'MATCH_PHRASE';
+
+const FULL_TEXT_CALL_NAMES: Record<string, FullTextOperator> = {
+  match: 'MATCH',
+  match_phrase: 'MATCH_PHRASE',
+};
+
+/** The full-text operator a function node represents, or null when it is any other function. */
+function getFullTextOperator(fn: ESQLFunction): FullTextOperator | null {
+  if (fn.name === ':') {
+    // `:` is also used by non-predicate syntax; only the binary form is the match operator.
+    return fn.subtype === 'binary-expression' ? ':' : null;
+  }
+  return FULL_TEXT_CALL_NAMES[fn.name] ?? null;
+}
+
+function isColumnNode(node: ESQLAstItem | undefined): boolean {
+  return !!node && !Array.isArray(node) && 'type' in node && node.type === 'column';
+}
+
+/**
+ * Finds multi-word `:` / `MATCH` predicates - ORed term-by-term on text, an over-match.
+ * Mapping-blind on purpose: a field's type is ambiguous across backing indices, and the fix
+ * `MATCH_PHRASE` is safe either way.
+ */
+export function findOverBroadMatchPredicates(esql: string): OverBroadMatchPredicate[] {
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return [];
+
+  const issues: OverBroadMatchPredicate[] = [];
+  walk(root, {
+    visitFunction: (fn) => {
+      const operator = getFullTextOperator(fn);
+      if (operator !== ':' && operator !== 'MATCH') return;
+
+      const value = getUnquotedLiteral(fn.args[1]);
+      if (value === null) return;
+      if (operator === 'MATCH' && matchOptionsForceAndOperator(fn.args[2])) return;
+      if (!/\s/.test(value.trim())) return;
+
+      issues.push({ field: getColumnName(fn.args[0]), value, operator });
+    },
+  });
+  return issues;
+}
+
+/** A full-text predicate whose field argument is an expression (a cast, a function call), not a mapped column. */
+export interface NonColumnFullTextArgument {
+  operator: FullTextOperator;
+  field: string;
+}
+
+/**
+ * Finds `:` / `MATCH` / `MATCH_PHRASE` calls whose field argument is anything other than a plain
+ * column, typically a `field::keyword` cast. Elasticsearch pushes full-text functions down to the
+ * index, so it rejects them with `not a field from an index mapping`.
+ *
+ * The check is static because the validation query can run against fewer backing indices than the
+ * real one, so the union-type error may never surface there. It only sees the argument as written:
+ * a cast assigned by `EVAL` and referenced as a plain column afterwards is not detected.
+ * Returns an empty list when the query does not parse; the live validation reports that.
+ */
+export function findNonColumnFullTextArguments(esql: string): NonColumnFullTextArgument[] {
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return [];
+
+  const issues: NonColumnFullTextArgument[] = [];
+  walk(root, {
+    visitFunction: (fn) => {
+      const operator = getFullTextOperator(fn);
+      const [field] = fn.args;
+      if (!operator || !field || isColumnNode(field)) {
+        return;
+      }
+
+      issues.push({ operator, field: getColumnName(field) });
+    },
+  });
+  return issues;
+}
+
+/** Rejection message for {@link findNonColumnFullTextArguments} results, written for the LLM that must repair the query. */
+export function renderNonColumnFullTextArgumentError(issues: NonColumnFullTextArgument[]): string {
+  const rendered = issues
+    .map((issue) =>
+      issue.operator === ':' ? `${issue.field} : ...` : `${issue.operator}(${issue.field}, ...)`
+    )
+    .join(', ');
+  return (
+    `Full-text predicate(s) need a plain mapped field, not a cast or expression: ${rendered}. ` +
+    `Elasticsearch rejects them with "not a field from an index mapping". If the field is not ` +
+    `union-typed, reference the bare field name. If dataset_analysis says the field needs a cast, ` +
+    `a full-text predicate cannot be used on it: compare the cast field with LIKE or ==, using ` +
+    `the recommended cast and not necessarily keyword, e.g. field::<recommended cast> LIKE ` +
+    `"*a phrase*". LIKE is case-sensitive, so match the casing in the sample values or lower both ` +
+    `sides with TO_LOWER, and escape any * ? or \\ in the phrase.`
+  );
+}
+
+/**
+ * Every column identifier in the query (field references, output aliases, and `*`),
+ * de-duplicated; empty when it does not parse.
+ */
+export function extractReferencedColumns(esql: string): string[] {
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return [];
+
+  const names = new Set<string>();
+  walk(root, { visitColumn: (node) => names.add(node.name) });
+  return [...names];
+}
+
+/** Shared rejection message for {@link findOverBroadMatchPredicates} results, so callers stay identical. */
+export function renderOverBroadMatchError(predicates: OverBroadMatchPredicate[]): string {
+  const rendered = predicates
+    .map((p) =>
+      p.operator === ':' ? `${p.field} : "${p.value}"` : `MATCH(${p.field}, "${p.value}")`
+    )
+    .join(', ');
+  return (
+    `Full-text predicate(s) match ANY word rather than the whole value - a multi-word ":" or ` +
+    `MATCH value is ORed term-by-term, which is far too broad: ${rendered}. Replace each with ` +
+    `MATCH_PHRASE(field, "a b") for an exact phrase, or MATCH(field, "a b", {"operator": "AND"}) ` +
+    `to require all terms in any order; both match exactly on keyword fields.`
+  );
 }
 
 type ByArg = ESQLCommand['args'][number];

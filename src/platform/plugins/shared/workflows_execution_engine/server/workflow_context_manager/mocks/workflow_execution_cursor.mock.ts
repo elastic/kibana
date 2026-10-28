@@ -81,6 +81,7 @@ export const createMockWorkflowExecutionCursor = (
     navigateToNode: jest.fn(),
     navigateToNextNode: jest.fn(),
     navigateToAfterNode: jest.fn(),
+    navigateToSynthetic: jest.fn(),
     setCurrentScopeId: jest.fn(),
     setMockCurrentNode: (node: GraphNodeUnion | null) => {
       currentNode = node;

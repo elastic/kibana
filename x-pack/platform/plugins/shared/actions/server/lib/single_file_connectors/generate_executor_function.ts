@@ -7,13 +7,22 @@
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import {
+  authTypeUsesRelay,
   getAuthModeForAuthTypeId,
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getHeaderValue,
-  clientTypes as defaultClientTypes,
+  isSelectedActionEnabled,
+  type SelectedActions,
 } from '@kbn/connector-specs';
-import type { ActionContext, ClientTypeSpec, ConnectorNetworkSettings } from '@kbn/connector-specs';
+import { clientTypes as defaultClientTypes } from '@kbn/connector-specs/server';
+import type {
+  ActionContext,
+  ClientTypeSpec,
+  ConnectorNetworkSettings,
+  PlatformServices,
+  RelayActionClient,
+} from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import type { ExecutorParams } from '../../sub_action_framework/types';
@@ -32,6 +41,30 @@ interface FetchOptions {
 }
 
 const DEFAULT_RESPONSE_SIZE_HEADER = 'content-length';
+const RATE_LIMIT_RESET_HEADERS = ['x-ratelimit-reset', 'ratelimit-reset'] as const;
+const RATE_LIMIT_REMAINING_HEADERS = ['x-ratelimit-remaining', 'ratelimit-remaining'] as const;
+// Reset headers above this are epoch seconds (e.g. GitHub's `x-ratelimit-reset`), not a delay.
+const MIN_EPOCH_SECONDS = 1_000_000_000;
+
+interface AxiosLikeError {
+  response?: { status?: unknown; headers?: unknown };
+  request?: { res?: { headers?: unknown } };
+}
+
+const getErrorHeaderValue = ({
+  error,
+  headerName,
+}: {
+  error: unknown;
+  headerName: string;
+}): unknown => {
+  const { response, request } = (error ?? {}) as AxiosLikeError;
+  const headerValue =
+    getHeaderValue({ headers: response?.headers, headerName }) ??
+    getHeaderValue({ headers: request?.res?.headers, headerName });
+
+  return Array.isArray(headerValue) ? headerValue[0] : headerValue;
+};
 
 const getResponseSizeHeaderBytes = ({
   error,
@@ -39,17 +72,55 @@ const getResponseSizeHeaderBytes = ({
 }: {
   error: unknown;
   headerName: string;
-}): number | undefined => {
-  const axiosError = error as {
-    response?: { headers?: unknown };
-    request?: { res?: { headers?: unknown } };
-  };
+}): number | undefined => getFinitePositiveNumber(getErrorHeaderValue({ error, headerName }));
 
-  const headerValue =
-    getHeaderValue({ headers: axiosError.response?.headers, headerName }) ??
-    getHeaderValue({ headers: axiosError.request?.res?.headers, headerName });
+const getHttpStatus = (error: unknown): number | undefined => {
+  const status = (error as AxiosLikeError | undefined)?.response?.status;
+  return typeof status === 'number' ? status : undefined;
+};
 
-  return getFinitePositiveNumber(Array.isArray(headerValue) ? headerValue[0] : headerValue);
+// A time in the past means the service can be called again now. Dates beyond the JS range are
+// dropped: they would make `retry.toISOString()` throw downstream.
+const toRetryDate = (epochMs: number): Date | undefined => {
+  const date = new Date(Math.max(epochMs, Date.now()));
+  return Number.isNaN(date.getTime()) ? undefined : date;
+};
+
+// Reset headers (GitHub sends them on every response) only mean "wait" once the quota is used up.
+const hasQuotaRemaining = (error: unknown): boolean =>
+  RATE_LIMIT_REMAINING_HEADERS.some((headerName) => {
+    const remaining = Number(getErrorHeaderValue({ error, headerName }));
+    return Number.isFinite(remaining) && remaining > 0;
+  });
+
+/**
+ * When the service says it can be called again, from `Retry-After` (delta-seconds or an HTTP
+ * date), else from a rate-limit reset header while no quota remains, for errors that carry an
+ * HTTP response.
+ */
+const getRetryDate = (error: unknown): Date | undefined => {
+  if (getHttpStatus(error) === undefined) return undefined;
+
+  const retryAfter = getErrorHeaderValue({ error, headerName: 'retry-after' });
+  if (typeof retryAfter === 'string' && retryAfter.trim() !== '') {
+    const seconds = getFinitePositiveNumber(retryAfter.trim());
+    if (seconds !== undefined) return toRetryDate(Date.now() + seconds * 1000);
+    const dateMs = Date.parse(retryAfter);
+    if (!Number.isNaN(dateMs)) return toRetryDate(dateMs);
+  }
+
+  if (hasQuotaRemaining(error)) return undefined;
+
+  for (const headerName of RATE_LIMIT_RESET_HEADERS) {
+    const reset = getFinitePositiveNumber(getErrorHeaderValue({ error, headerName }));
+    if (reset !== undefined) {
+      return reset >= MIN_EPOCH_SECONDS
+        ? toRetryDate(reset * 1000)
+        : toRetryDate(Date.now() + reset * 1000);
+    }
+  }
+
+  return undefined;
 };
 
 const getErrorMeta = ({
@@ -60,10 +131,12 @@ const getErrorMeta = ({
   contentLengthBytes?: number;
 }): Record<string, unknown> | undefined => {
   const connectorActionErrorMeta = getConnectorActionErrorMeta(error);
+  const statusCode = getHttpStatus(error);
   // Connector-provided metadata (e.g. file size from provider API) takes
   // precedence over generic header-derived values.
   const errorMeta = {
     ...(contentLengthBytes !== undefined ? { contentLengthBytes } : {}),
+    ...(statusCode !== undefined ? { statusCode } : {}),
     ...connectorActionErrorMeta,
   };
 
@@ -79,18 +152,26 @@ const isClientUserError = (error: unknown, clientType: ClientTypeSpec<unknown>):
 };
 
 export const generateExecutorFunction = ({
+  connectorTypeId,
   actions,
   getAxiosInstanceWithAuth,
   getCredential,
   getClientLeasePool,
+  getRelayClient,
   networkSettings,
+  platform,
   clientTypes = defaultClientTypes,
+  getJwtSigner,
 }: {
+  connectorTypeId?: string;
   actions: ConnectorSpec['actions'];
+  getJwtSigner?: (connectorId: string) => ActionContext['signJwt'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
   getCredential: GetCredentialFn;
   getClientLeasePool: () => LeasePool<unknown>;
+  getRelayClient?: () => RelayActionClient | undefined;
   networkSettings: ConnectorNetworkSettings;
+  platform: PlatformServices;
   clientTypes?: Readonly<Record<string, ClientTypeSpec<unknown>>>;
 }) =>
   async function (
@@ -115,6 +196,7 @@ export const generateExecutorFunction = ({
 
     const axiosInstance = await getAxiosInstanceWithAuth({
       connectorId,
+      connectorTypeId,
       connectorTokenClient,
       additionalHeaders: globalAuthHeaders,
       secrets,
@@ -132,19 +214,52 @@ export const generateExecutorFunction = ({
       throw new Error(errorMessage);
     }
 
+    const selectedActions = config.selectedActions as SelectedActions;
+    if (!isSelectedActionEnabled(subAction, selectedActions)) {
+      const errorMessage = `[Action][ExternalService] Action '${subAction}' is not enabled for this connector.`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
     const pool = getClientLeasePool();
+    const acquiredClients: Array<{
+      clientType: ClientTypeSpec<unknown>;
+      key: string;
+      promise: Promise<unknown>;
+      release: () => void;
+    }> = [];
+
+    // Release before invalidating: termination waits for every active use, including ours.
+    const releaseAcquiredClients = (): void => {
+      acquiredClients.forEach(({ release }) => release());
+    };
+
+    const invalidateAcquiredClientsForError = async (error: unknown): Promise<void> => {
+      await Promise.all(
+        acquiredClients.map(async ({ clientType, key, promise }) => {
+          if (clientType.shouldInvalidateOnError?.(error)) {
+            await pool.invalidate(key, promise);
+          }
+        })
+      );
+    };
+
+    // Shared by getClient (authMode) and the Relay gate. Specs that route through the Relay
+    // (isRelayAuth) read this same secrets.authType, so the two cannot disagree: the discriminated
+    // union makes authType mandatory on saved connectors and buildConnector sets it on the
+    // in-memory one. We read the auth type from `secrets` rather than the connector's persisted
+    // `authMode`, which is inferred once when the connector is created and so can be absent (no
+    // `authType` field, an auth type unknown at creation time, or an in-memory connector) and
+    // would then fall back to `shared`.
+    const authTypeId = (secrets as { authType?: string }).authType ?? 'none';
     const getClient = async (id: string): Promise<unknown> => {
       const clientType = clientTypes[id];
       if (!clientType) {
         throw new Error(`[Action][ExternalService] Unknown client type ${id}.`);
       }
-      // The lease key is derived from the auth type in `secrets` rather than the connector's
-      // persisted `authMode`. A per-user credential leased under a `shared` identity would serve
-      // one user's warm client, and its captured credential accessor, to every other user.
-      // `authMode` is inferred once when the connector is created, so it can be absent (no
-      // `authType` field, an auth type unknown at creation time, or an in-memory connector) and
-      // would then fall back to `shared`.
-      const authTypeId = (secrets as { authType?: string }).authType ?? 'none';
+      // The lease key uses this derived mode, not the persisted `authMode`: a per-user credential
+      // leased under a `shared` identity would serve one user's warm client, and its captured
+      // credential accessor, to every other user.
       const derivedAuthMode = getAuthModeForAuthTypeId(authTypeId);
 
       if (derivedAuthMode === 'per-user' && authMode !== 'per-user') {
@@ -168,21 +283,24 @@ export const generateExecutorFunction = ({
         if (!connectorVersion) {
           throw new Error(`Missing saved-object version for persisted connector "${connectorId}".`);
         }
-        return await pool.lease(
-          buildClientLeaseKey({
-            connectorId,
-            clientTypeId: id,
-            authMode: derivedAuthMode,
-            profileUid,
-            connectorVersion,
-          }),
+        const key = buildClientLeaseKey({
+          connectorId,
+          clientTypeId: id,
+          authMode: derivedAuthMode,
+          profileUid,
+          connectorVersion,
+        });
+        const { promise, release } = pool.acquire(
+          key,
           () =>
             clientType.build({
               logger,
               config,
               networkSettings,
+              platform,
               credential: getCredential({
                 connectorId,
+                connectorTypeId,
                 secrets,
                 connectorTokenClient,
                 authMode,
@@ -191,6 +309,8 @@ export const generateExecutorFunction = ({
             }),
           (client) => clientType.terminate(client)
         );
+        acquiredClients.push({ clientType, key, promise, release });
+        return await promise;
       } catch (err) {
         const isUser = isClientUserError(err, clientType);
         const error = err instanceof Error ? err : new Error(String(err));
@@ -204,6 +324,8 @@ export const generateExecutorFunction = ({
       secrets,
       config,
       getClient: getClient as ActionContext['getClient'],
+      relay: authTypeUsesRelay(authTypeId) ? getRelayClient?.() : undefined,
+      signJwt: getJwtSigner?.(connectorId),
     };
 
     try {
@@ -216,6 +338,8 @@ export const generateExecutorFunction = ({
 
       return { status: 'ok', data, actionId: connectorId };
     } catch (error) {
+      releaseAcquiredClients();
+      await invalidateAcquiredClientsForError(error);
       const errorSource = error instanceof Error ? getErrorSource(error) : undefined;
       if (errorSource === TaskErrorSource.FRAMEWORK) throw error;
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -224,6 +348,7 @@ export const generateExecutorFunction = ({
         headerName: actions[subAction].responseSizeHeader ?? DEFAULT_RESPONSE_SIZE_HEADER,
       });
       const errorMeta = getErrorMeta({ error, contentLengthBytes });
+      const retryDate = getRetryDate(error);
       logger.error(`error on ${connectorId} event: ${errorMessage}`);
       return {
         status: 'error',
@@ -232,7 +357,11 @@ export const generateExecutorFunction = ({
         ...(errorMeta ? { errorMeta } : {}),
         ...(errorSource === TaskErrorSource.USER
           ? { retry: false, errorSource: TaskErrorSource.USER }
+          : retryDate
+          ? { retry: retryDate }
           : {}),
       };
+    } finally {
+      releaseAcquiredClients();
     }
   };

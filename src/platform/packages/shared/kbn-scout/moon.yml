@@ -35,11 +35,18 @@ dependsOn:
   - '@kbn/test-subj-selector'
   - '@kbn/scout-info'
   - '@kbn/scout-reporting'
+  - '@kbn/std'
   - '@kbn/zod'
   - '@kbn/core-http-common'
   - '@kbn/axe-config'
   - '@kbn/peggy'
   - '@kbn/test-docker-servers'
+  - '@kbn/app-header'
+  - '@kbn/utils'
+  - '@kbn/core-chrome-browser-components'
+  - '@kbn/as-code-dashboard-schema'
+  - '@kbn/as-code-discover-schema'
+  - '@kbn/monaco'
 tags:
   - test-helper
   - package
@@ -51,6 +58,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

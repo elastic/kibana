@@ -8,5 +8,6 @@
 export default function loadTests({ loadTestFile }) {
   describe('Agentless', () => {
     loadTestFile(require.resolve('./agentless_policies'));
+    loadTestFile(require.resolve('./agentless_policy_delete_unenroll'));
   });
 }

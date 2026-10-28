@@ -25,12 +25,12 @@
       "ruleRegistry",
       "security",
       "usageCollection",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "taskManager"
     ],
     "optionalPlugins": [
       "agentBuilder",
       "agentBuilderSml",
-      "alertingVTwo",
       "cloud",
       "esql",
       "serverless",

@@ -13,11 +13,8 @@ import { basename } from 'path';
 import { encode } from '@kbn/cbor';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { endpointActionResponseCodes } from '../../../public/management/components/endpoint_responder/lib/endpoint_action_response_codes';
-import {
-  isCancelAction,
-  isKillProcessAction,
-} from '../../../common/endpoint/service/response_actions/type_guards';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { isCancelAction } from '../../../common/endpoint/service/response_actions/type_guards';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import type {
@@ -35,10 +32,9 @@ import type {
   ResponseActionScanOutputContent,
   ResponseActionRunScriptOutputContent,
   LogsEndpointAction,
-  KillProcessActionOutputContent,
-  ResponseActionParametersWithPid,
-  ResponseActionParametersWithEntityId,
   ResponseActionMemoryDumpParameters,
+  ResponseActionParametersWithPid,
+  ResponseActionParametersWithProcessData,
 } from '../../../common/endpoint/types';
 import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
@@ -62,8 +58,11 @@ export const sendFleetActionResponse = async (
   { state }: { state?: 'success' | 'failure' } = {}
 ): Promise<EndpointActionResponse> => {
   let fleetResponse: EndpointActionResponse;
+  const pendingAgentIds = action.agents.filter(
+    (agentId) => !action.agentState[agentId].isCompleted
+  );
 
-  for (const agentId of action.agents) {
+  for (const agentId of pendingAgentIds) {
     fleetResponse = fleetActionGenerator.generateResponse({
       action_id: action.id,
       agent_id: agentId,
@@ -88,7 +87,7 @@ export const sendFleetActionResponse = async (
         },
         ES_INDEX_OPTIONS
       )
-      .catch(catchAxiosErrorFormatAndThrow);
+      .catch(catchHttpErrorFormatAndThrow);
   }
 
   // @ts-expect-error
@@ -97,11 +96,14 @@ export const sendFleetActionResponse = async (
 export const sendEndpointActionResponse = async (
   esClient: Client,
   action: ActionDetails,
-  { state }: { state?: 'success' | 'failure' } = {}
+  { state, responseCode }: { state?: 'success' | 'failure'; responseCode?: string } = {}
 ): Promise<LogsEndpointActionResponse> => {
   let endpointResponse: LogsEndpointActionResponse;
+  const pendingAgentIds = action.agents.filter(
+    (agentId) => !action.agentState[agentId].isCompleted
+  );
 
-  for (const actionAgentId of action.agents) {
+  for (const actionAgentId of pendingAgentIds) {
     endpointResponse = endpointActionGenerator.generateResponse<EndpointActionResponseDataOutput>({
       agent: { id: actionAgentId },
       EndpointActions: {
@@ -109,9 +111,10 @@ export const sendEndpointActionResponse = async (
         data: {
           command: action.command as EndpointActionData['command'],
           comment: '',
-          ...getOutputDataIfNeeded(action),
+          ...getOutputDataIfNeeded(action, state, responseCode),
         },
         started_at: action.startedAt,
+        ...(state === 'failure' ? { error: { message: 'Action failed' } } : {}),
       },
     });
 
@@ -172,29 +175,13 @@ export const sendEndpointActionResponse = async (
       }
     }
 
-    // `kill-process --kill-descendants`: add list of descendants killed
-    if (
-      isKillProcessAction(action) &&
-      (action.parameters as ResponseActionParametersWithEntityId | ResponseActionParametersWithPid)
-        ?.kill_descendants
-    ) {
-      const tree = endpointActionGenerator.createProcessDescendants(
-        action.parameters?.pid ?? endpointActionGenerator.randomN(50)
-      );
-
-      (
-        endpointResponse.EndpointActions.data.output!
-          .content as unknown as KillProcessActionOutputContent
-      ).descendants = tree;
-    }
-
     await esClient
       .index({
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
         body: endpointResponse,
         refresh: 'wait_for',
       })
-      .catch(catchAxiosErrorFormatAndThrow);
+      .catch(catchHttpErrorFormatAndThrow);
 
     // ------------------------------------------
     // Post Action Response tasks
@@ -279,7 +266,7 @@ export const sendEndpointActionResponse = async (
           refresh: 'wait_for',
           body: fileMetaDoc,
         })
-        .catch(catchAxiosErrorFormatAndThrow);
+        .catch(catchHttpErrorFormatAndThrow);
 
       // Index the file content (just one chunk)
       // call to `.index()` copied from File plugin here:
@@ -308,7 +295,7 @@ export const sendEndpointActionResponse = async (
             },
           }
         )
-        .catch(catchAxiosErrorFormatAndThrow)
+        .catch(catchHttpErrorFormatAndThrow)
         .then(() => sleep(2000));
     }
 
@@ -327,7 +314,7 @@ export const sendEndpointActionResponse = async (
         .then(
           (response) => response.hits?.hits[0]?._source?.EndpointActions.data.command || 'runscript'
         )
-        .catch(catchAxiosErrorFormatAndThrow);
+        .catch(catchHttpErrorFormatAndThrow);
 
       const canceledActionResponse =
         endpointActionGenerator.generateResponse<EndpointActionResponseDataOutput>({
@@ -357,7 +344,7 @@ export const sendEndpointActionResponse = async (
           body: canceledActionResponse,
           refresh: 'wait_for',
         })
-        .catch(catchAxiosErrorFormatAndThrow);
+        .catch(catchHttpErrorFormatAndThrow);
     }
   }
 
@@ -369,7 +356,11 @@ type ResponseOutput<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > = Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'], 'output'>;
 
-const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
+const getOutputDataIfNeeded = (
+  action: ActionDetails,
+  state: 'success' | 'failure' = 'success',
+  responseCode?: string
+): ResponseOutput => {
   const commentUppercase = (action?.comment ?? '').toUpperCase();
 
   switch (action.command) {
@@ -472,6 +463,29 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
         },
       } as unknown as ResponseOutput;
 
+    case 'kill-process':
+      return {
+        output: endpointActionGenerator.generateKillProcessOutputResponse(
+          {
+            content: {
+              ...(responseCode ? { code: responseCode } : {}),
+              ...(state === 'success' &&
+              (action.parameters as ResponseActionParametersWithPid).kill_descendants
+                ? {
+                    descendants: endpointActionGenerator.createProcessDescendants(
+                      (action.parameters as ResponseActionParametersWithPid)?.pid ??
+                        endpointActionGenerator.randomN(50)
+                    ),
+                  }
+                : {}),
+            },
+          },
+          {
+            parameters: action.parameters as ResponseActionParametersWithProcessData,
+            atError: state === 'failure',
+          }
+        ),
+      } as unknown as ResponseOutput;
     default:
       return { output: undefined };
   }
@@ -497,7 +511,7 @@ export async function getLatestActionDoc(
         },
         size: 1,
       })
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
   ).hits.hits.at(0);
 }
 
@@ -529,5 +543,5 @@ export function updateActionDoc<T = unknown>(esClient: Client, id: string, doc: 
       doc,
       refresh: 'wait_for',
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 }

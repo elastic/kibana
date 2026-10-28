@@ -19,25 +19,13 @@ jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../../common/lib/kibana');
 
 const mockSearch = jest.fn();
+const mockUseSearchStrategy = jest.fn();
 
 jest.mock('../../../../common/containers/use_search_strategy', () => {
   const original = jest.requireActual('../../../../common/containers/use_search_strategy');
   return {
     ...original,
-    useSearchStrategy: () => ({
-      search: mockSearch,
-      loading: false,
-      inspect: {
-        dsl: [],
-        response: [],
-      },
-      result: {
-        users: [],
-        totalCount: 0,
-        pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
-      },
-      refetch: jest.fn(),
-    }),
+    useSearchStrategy: (params: unknown) => mockUseSearchStrategy(params),
   };
 });
 
@@ -71,7 +59,41 @@ describe('All users query tab body', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseSearchStrategy.mockReturnValue({
+      search: mockSearch,
+      loading: false,
+      inspect: {
+        dsl: [],
+        response: [],
+      },
+      result: {
+        users: [],
+        totalCount: 0,
+        pageInfo: { activePage: 1, fakeTotalCount: 100, showMorePagesIndicator: false },
+      },
+      refetch: jest.fn(),
+    });
     mockUseAllEntityStoreUsers.mockReturnValue([false, emptyUsersArgs]);
+  });
+
+  it('labels the users search with the users page execution context', () => {
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+    render(
+      <TestProviders>
+        <AllUsersQueryTabBody {...defaultProps} />
+      </TestProviders>
+    );
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-users_page',
+            id: 'users_all',
+          },
+        },
+      })
+    );
   });
 
   it('calls search when toggleStatus=true and entity store v2 is disabled', () => {

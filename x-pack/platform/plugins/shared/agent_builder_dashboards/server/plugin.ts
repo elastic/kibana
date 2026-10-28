@@ -12,7 +12,7 @@ import type {
   PluginInitializerContext,
   Logger,
 } from '@kbn/core/server';
-import { CUSTOM_CONTENT_ENABLED_FLAG_KEY } from '@kbn/custom-content-common';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type {
   AgentBuilderDashboardsSetupDependencies,
   AgentBuilderDashboardsStartDependencies,
@@ -22,6 +22,7 @@ import type {
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
 import { createDashboardSmlType } from './sml_types';
+import { createDashboardAppStateValidator } from './tools/generate/validate_dashboard_app_state';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -45,9 +46,17 @@ export class AgentBuilderDashboardsPlugin
     >,
     setupDeps: AgentBuilderDashboardsSetupDependencies
   ): AgentBuilderDashboardsPluginSetup {
-    const getDashboardClient = async () => {
+    // Read dashboards the way the Dashboard app loads them, so unconvertible panels are kept.
+    const getDashboardClient = async (): Promise<DashboardPluginStart['client']> => {
+      const [, { dashboard }] = await coreSetup.getStartServices();
+      return {
+        read: (savedObjectsClient, id) =>
+          dashboard.client.read(savedObjectsClient, id, { isDashboardAppRequest: true }),
+      };
+    };
+    const getDashboardValidator = async () => {
       const [, startDeps] = await coreSetup.getStartServices();
-      return startDeps.dashboard.client;
+      return createDashboardAppStateValidator(startDeps.embeddable);
     };
 
     setupDeps.agentBuilder.attachments.registerType(
@@ -58,10 +67,7 @@ export class AgentBuilderDashboardsPlugin
     );
     setupDeps.agentBuilderSml.registerType(createDashboardSmlType({ getDashboardClient }));
 
-    registerSkills(setupDeps.agentBuilder, async () => {
-      const [coreStart] = await coreSetup.getStartServices();
-      return coreStart.featureFlags.getBooleanValue(CUSTOM_CONTENT_ENABLED_FLAG_KEY, false);
-    });
+    registerSkills(setupDeps.agentBuilder, { getDashboardValidator });
 
     return {};
   }

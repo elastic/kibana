@@ -12,7 +12,6 @@ import { useValues, useActions } from 'kea';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -25,6 +24,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -37,16 +37,15 @@ export interface DefaultSettingsFlyoutProps {
 }
 
 const Callout = (
-  <EuiCallOut
+  <KbnInfoCallout
     title={i18n.translate('xpack.contentConnectors.defaultSettingsFlyout.callout.title', {
       defaultMessage: 'Individual settings management',
     })}
-  >
-    {i18n.translate('xpack.contentConnectors.defaultSettingsFlyout.callout.body', {
+    text={i18n.translate('xpack.contentConnectors.defaultSettingsFlyout.callout.body', {
       defaultMessage:
-        'You can also enable or disable this feature for a specific index on the index’s configuration page.',
+        "You can also enable or disable this feature for a specific index on the index's configuration page.",
     })}
-  </EuiCallOut>
+  />
 );
 export const DefaultSettingsFlyout: React.FC<DefaultSettingsFlyoutProps> = ({ closeFlyout }) => {
   const modalTitleId = useGeneratedHtmlId();

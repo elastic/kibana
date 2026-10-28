@@ -48,60 +48,6 @@ describe('useRegionTabState', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // isAllExpanded
-  // ---------------------------------------------------------------------------
-  describe('isAllExpanded', () => {
-    it('is false when there are zones but none are expanded', () => {
-      const { result } = renderHook(() => useRegionTabState(twoRegions));
-      expect(result.current.isAllExpanded).toBe(false);
-    });
-
-    it('is false when zone list is empty (not a false positive)', () => {
-      const { result } = renderHook(() => useRegionTabState([]));
-      expect(result.current.zoneGroups).toHaveLength(0);
-      expect(result.current.isAllExpanded).toBe(false);
-    });
-
-    it('is true only when all zones are expanded', () => {
-      const { result } = renderHook(() => useRegionTabState(twoRegions));
-      act(() => result.current.handleExpandAll());
-      expect(result.current.isAllExpanded).toBe(true);
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // handleExpandAll / handleToggleExpand
-  // ---------------------------------------------------------------------------
-  describe('handleExpandAll / handleToggleExpand', () => {
-    it('expands all zones on first call', () => {
-      const { result } = renderHook(() => useRegionTabState(twoRegions));
-      act(() => result.current.handleExpandAll());
-      expect(result.current.expandedZones.size).toBe(2);
-    });
-
-    it('collapses all zones when all are already expanded', () => {
-      const { result } = renderHook(() => useRegionTabState(twoRegions));
-      act(() => result.current.handleExpandAll());
-      act(() => result.current.handleExpandAll());
-      expect(result.current.expandedZones.size).toBe(0);
-    });
-
-    it('is a no-op when zoneGroups is empty', () => {
-      const { result } = renderHook(() => useRegionTabState([]));
-      act(() => result.current.handleExpandAll());
-      expect(result.current.expandedZones.size).toBe(0);
-    });
-
-    it('toggles a single zone open and closed', () => {
-      const { result } = renderHook(() => useRegionTabState(twoRegions));
-      act(() => result.current.handleToggleExpand('us', true));
-      expect(result.current.expandedZones.has('us')).toBe(true);
-      act(() => result.current.handleToggleExpand('us', false));
-      expect(result.current.expandedZones.has('us')).toBe(false);
-    });
-  });
-
-  // ---------------------------------------------------------------------------
   // regionSelection.toggle
   // ---------------------------------------------------------------------------
   describe('regionSelection.toggle', () => {

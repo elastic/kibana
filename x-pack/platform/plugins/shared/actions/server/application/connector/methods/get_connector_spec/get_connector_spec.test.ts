@@ -6,37 +6,115 @@
  */
 
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import type { ConnectorSpec } from '@kbn/connector-specs';
+import { connectorsSpecs } from '@kbn/connector-specs';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { z as z4 } from '@kbn/zod/v4';
+import type { ActionType } from '../../../../../common';
 import type { ActionsClientContext } from '../../../../actions_client';
 import type { ActionsConfigurationUtilities } from '../../../../actions_config';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
+import { actionTypeRegistryMock } from '../../../../action_type_registry.mock';
 import { getConnectorSpecAsJsonSchema } from './get_connector_spec';
-
-// All connector specs in kbn-connector-specs have test.enabled = true, so we inject a
-// synthetic non-testable spec to cover the isTestable: false branch.
-jest.mock('@kbn/connector-specs', () => {
-  const actual = jest.requireActual('@kbn/connector-specs');
-  return {
-    ...actual,
-    connectorsSpecs: {
-      ...actual.connectorsSpecs,
-      StubNoTest: {
-        metadata: {
-          id: '.stub-no-test',
-          displayName: 'Stub (no test)',
-          minimumLicense: 'basic',
-          supportedFeatureIds: [],
-        },
-        auth: null,
-        schema: null,
-        actions: {},
-        test: { handler: async () => ({}), enabled: false },
-      },
-    },
-  };
-});
 
 const authorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const actionTypeRegistry = actionTypeRegistryMock.create();
+
+const stubNoTest = {
+  metadata: {
+    id: '.stub-no-test',
+    displayName: 'Stub (no test)',
+    minimumLicense: 'basic',
+    supportedFeatureIds: [],
+  },
+  auth: null,
+  schema: null,
+  actions: {},
+  test: { handler: async () => ({}), enabled: false },
+} as unknown as ConnectorSpec;
+
+const stubExperimentalEars = {
+  metadata: {
+    id: '.stub-experimental-ears',
+    displayName: 'Stub (experimental EARS)',
+    minimumLicense: 'basic',
+    supportedFeatureIds: [],
+  },
+  auth: {
+    types: [{ type: 'ears', isExperimental: true, defaults: {} }],
+  },
+  schema: null,
+  actions: {},
+  test: { handler: async () => ({}), enabled: true },
+} as unknown as ConnectorSpec;
+
+const catalogOnly = {
+  metadata: {
+    id: '.catalog-only',
+    displayName: 'Catalog Only',
+    minimumLicense: 'basic',
+    supportedFeatureIds: [],
+  },
+  auth: null,
+  schema: null,
+  actions: {
+    catalogAction: {
+      scope: 'read',
+      input: z4.object({}),
+      handler: async () => ({}),
+    },
+  },
+  test: { handler: async () => ({}), enabled: true },
+} as unknown as ConnectorSpec;
+
+const stubWithSkill = {
+  metadata: {
+    id: '.stub-with-skill',
+    displayName: 'Stub (with skill)',
+    minimumLicense: 'basic',
+    supportedFeatureIds: [],
+  },
+  auth: null,
+  schema: null,
+  skill: 'Use listThings to search. '.repeat(40),
+  actions: {},
+  test: { handler: async () => ({}), enabled: true },
+} as unknown as ConnectorSpec;
+
+const specsById: Record<string, ConnectorSpec> = {
+  ...Object.fromEntries(Object.values(connectorsSpecs).map((spec) => [spec.metadata.id, spec])),
+  [stubNoTest.metadata.id]: stubNoTest,
+  [stubExperimentalEars.metadata.id]: stubExperimentalEars,
+  [catalogOnly.metadata.id]: catalogOnly,
+  [stubWithSkill.metadata.id]: stubWithSkill,
+};
+
+const listRow = (spec: ConnectorSpec): ActionType => ({
+  id: spec.metadata.id,
+  name: spec.metadata.displayName,
+  enabled: true,
+  enabledInConfig: true,
+  enabledInLicense: true,
+  minimumLicenseRequired: spec.metadata.minimumLicense,
+  supportedFeatureIds: spec.metadata.supportedFeatureIds,
+  isSystemActionType: false,
+  source: ACTION_TYPE_SOURCES.spec,
+  isDeprecated: false,
+});
+
+const serverLogRow: ActionType = {
+  id: '.server-log',
+  name: 'Server log',
+  enabled: true,
+  enabledInConfig: true,
+  enabledInLicense: true,
+  minimumLicenseRequired: 'basic',
+  supportedFeatureIds: ['alerting'],
+  isSystemActionType: false,
+  source: ACTION_TYPE_SOURCES.stack,
+  isDeprecated: false,
+};
 
 const configurationUtilities = {
   getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
@@ -45,13 +123,18 @@ const configurationUtilities = {
 } as unknown as ActionsConfigurationUtilities;
 
 function createContext(): ActionsClientContext {
-  return { authorization, auditLogger } as unknown as ActionsClientContext;
+  return { authorization, auditLogger, actionTypeRegistry } as unknown as ActionsClientContext;
 }
 
 describe('getConnectorSpecAsJsonSchema', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     authorization.ensureAuthorized.mockResolvedValue(undefined);
+    actionTypeRegistry.getSpec.mockImplementation((id: string) => specsById[id]);
+    actionTypeRegistry.list.mockReturnValue([
+      ...Object.values(specsById).map(listRow),
+      serverLogRow,
+    ]);
   });
 
   describe('authorization', () => {
@@ -77,6 +160,20 @@ describe('getConnectorSpecAsJsonSchema', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to get actions]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+    });
+
+    test('does not look up the spec when authorization fails', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized to get actions'));
+
+      await expect(
+        getConnectorSpecAsJsonSchema({
+          context: createContext(),
+          id: '.alienvault-otx',
+          configurationUtilities,
+        })
+      ).rejects.toThrow();
+
+      expect(actionTypeRegistry.getSpec).not.toHaveBeenCalled();
     });
   });
 
@@ -115,6 +212,62 @@ describe('getConnectorSpecAsJsonSchema', () => {
     expect(result.metadata).toHaveProperty('displayName');
     expect(result.metadata).toHaveProperty('supportedFeatureIds');
     expect(result).toHaveProperty('schema');
+    expect(result).toHaveProperty('actions');
+    expect(Array.isArray(result.actions)).toBe(true);
+  });
+
+  it('returns the connector spec with auth, inbound flags and action input schemas', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.alienvault-otx',
+      configurationUtilities,
+    });
+    expect(result.metadata).toHaveProperty('id', '.alienvault-otx');
+    expect(result).toHaveProperty('schema');
+    expect(result).toHaveProperty('authTypeIds');
+    expect(result).toHaveProperty('hasInboundEvents');
+    expect(result).toHaveProperty('isInboundOnly');
+    expect(result).toHaveProperty('isEarsExperimental');
+    expect(result).not.toHaveProperty('detail');
+    expect(result).not.toHaveProperty('availability');
+    for (const action of result.actions) {
+      expect(action).toHaveProperty('inputSchema');
+    }
+  });
+
+  it('returns the bundled skill for server callers when the spec defines one', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.stub-with-skill',
+      configurationUtilities,
+    });
+    expect(result.skill).toBe(stubWithSkill.skill);
+  });
+
+  it('omits skill when the spec does not define one', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.alienvault-otx',
+      configurationUtilities,
+    });
+    expect(result).not.toHaveProperty('skill');
+  });
+
+  it('returns actions with name, isTool, scope and input schema', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.pagerduty_mcp',
+      configurationUtilities,
+    });
+    expect(result.actions.length).toBeGreaterThan(0);
+    for (const action of result.actions) {
+      expect(action).toHaveProperty('name');
+      expect(typeof action.name).toBe('string');
+      expect(action).toHaveProperty('isTool');
+      expect(typeof action.isTool).toBe('boolean');
+      expect(typeof action.scope).toBe('string');
+      expect(action.inputSchema).toEqual(expect.objectContaining({ type: expect.any(String) }));
+    }
   });
 
   it('returns isTestable true when the spec opts in to testing', async () => {
@@ -145,6 +298,30 @@ describe('getConnectorSpecAsJsonSchema', () => {
     ).rejects.toMatchObject({ output: { statusCode: 404 } });
   });
 
+  it('resolves a spec registered at runtime that is not in the bundled map', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.catalog-only',
+      configurationUtilities,
+    });
+
+    expect(result.metadata).toHaveProperty('id', '.catalog-only');
+    expect(result).toHaveProperty('isTestable', true);
+    expect(result.actions).toHaveLength(1);
+    expect(actionTypeRegistry.getSpec).toHaveBeenCalledWith('.catalog-only');
+    expect(actionTypeRegistry.getSpec).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects with 404 for a classic connector type without a spec', async () => {
+    await expect(
+      getConnectorSpecAsJsonSchema({
+        context: createContext(),
+        id: '.server-log',
+        configurationUtilities,
+      })
+    ).rejects.toMatchObject({ output: { statusCode: 404 } });
+  });
+
   it('excludes experimental EARS auth types when isEarsExperimentalEnabled is false', async () => {
     const earsEnabledUtils = {
       getWebhookSettings: () => ({ ssl: { pfx: { enabled: true } } }),
@@ -154,7 +331,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
 
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
-      id: '.google_calendar',
+      id: '.stub-experimental-ears',
       configurationUtilities: earsEnabledUtils,
     });
 
@@ -180,7 +357,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
 
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
-      id: '.microsoft-teams',
+      id: '.google_calendar',
       configurationUtilities: earsEnabledUtils,
     });
 
@@ -206,7 +383,7 @@ describe('getConnectorSpecAsJsonSchema', () => {
 
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
-      id: '.google_calendar',
+      id: '.stub-experimental-ears',
       configurationUtilities: earsEnabledUtils,
     });
 

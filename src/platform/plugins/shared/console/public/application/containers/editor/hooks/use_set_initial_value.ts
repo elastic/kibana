@@ -8,12 +8,13 @@
  */
 
 import { debounce } from 'lodash';
-import { parse } from 'query-string';
+import qs from 'query-string';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
+import { removeLoadFromParameter } from '../../../lib/load_from';
 import { useEditorActionContext } from '../../../contexts';
 
 const httpsProtocol = 'https:';
@@ -41,7 +42,7 @@ interface SetInitialValueParams {
 export const readLoadFromParam = () => {
   const [, queryString] = (window.location.hash || window.location.search || '').split('?');
 
-  const queryParams = parse(queryString || '', { sort: false }) as Required<QueryParams>;
+  const queryParams = qs.parse(queryString || '', { sort: false }) as Required<QueryParams>;
   return queryParams.load_from;
 };
 
@@ -112,15 +113,27 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     };
 
     // Support for loading a console snippet from a remote source, like support docs.
-    const loadFromUrl = debounce(async () => {
+    const loadFromUrl = async () => {
       const url = readLoadFromParam();
       if (!url) {
         return;
       }
-      await loadBufferFromRemote(url);
-    }, 200);
+      try {
+        await loadBufferFromRemote(url);
+      } catch (e) {
+        // Nothing was appended, so leave the parameter in place and let a reload retry it.
+        return;
+      }
+      // The parameter is a one-shot instruction. Leaving it in the URL would re-append the
+      // request on every later page load, resurrecting requests the user has since cleared.
+      // Replace rather than push, so Back cannot return to the URL and re-consume it.
+      removeLoadFromParameter({ replace: true });
+    };
+    // Debounced for hash-change bursts only: the initial read must not be cancellable by the
+    // cleanup below, which runs whenever one of this effect's dependencies changes.
+    const debouncedLoadFromUrl = debounce(loadFromUrl, 200);
 
-    window.addEventListener('hashchange', loadFromUrl);
+    window.addEventListener('hashchange', debouncedLoadFromUrl);
 
     // Only set the value in the editor if an initial value hasn't been set yet
     if (!isInitialValueSet.current) {
@@ -131,7 +144,8 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     }
 
     return () => {
-      window.removeEventListener('hashchange', loadFromUrl);
+      window.removeEventListener('hashchange', debouncedLoadFromUrl);
+      debouncedLoadFromUrl.cancel();
     };
   }, [localStorageValue, setValue, toasts, editorDispatch, defaultEditorContent]);
 };

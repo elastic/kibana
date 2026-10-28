@@ -87,6 +87,7 @@ export const AlertDelayField = () => {
               ...st,
               pendingCount: null,
               pendingTimeframe: null,
+              pendingOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );
@@ -99,6 +100,7 @@ export const AlertDelayField = () => {
               ...st,
               pendingCount: st.pendingCount || DEFAULT_PENDING_COUNT,
               pendingTimeframe: null,
+              pendingOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );
@@ -111,6 +113,7 @@ export const AlertDelayField = () => {
               ...st,
               pendingCount: null,
               pendingTimeframe: st.pendingTimeframe ?? DEFAULT_PENDING_TIMEFRAME,
+              pendingOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );

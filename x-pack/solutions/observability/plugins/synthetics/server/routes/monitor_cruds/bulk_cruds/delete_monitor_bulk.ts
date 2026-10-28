@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import path from 'path';
+import { z } from '@kbn/zod';
+import { MAX_MONITOR_BULK_SIZE, routeId } from '../../zod_query';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -18,13 +20,21 @@ export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/_bulk_delete',
+  options: {
+    summary: 'Delete monitors',
+    description: 'Delete multiple monitors by sending a list of config IDs.',
+    operationId: 'delete-synthetic-monitors',
+    oasOperationObject: () => path.join(__dirname, '../examples/bulk_delete_monitors.yaml'),
+  },
   validate: {},
   validation: {
     request: {
-      body: schema.object({
-        ids: schema.arrayOf(schema.string(), {
-          minSize: 1,
-        }),
+      body: z.strictObject({
+        ids: z
+          .array(routeId)
+          .min(1)
+          .max(MAX_MONITOR_BULK_SIZE)
+          .describe('An array of monitor IDs to delete.'),
       }),
     },
   },
@@ -34,9 +44,13 @@ export const deleteSyntheticsMonitorBulkRoute: SyntheticsRestApiRouteFactory<
     const { ids: idsToDelete } = request.body || {};
     const deleteMonitorAPI = new DeleteMonitorAPI(routeContext);
 
-    const { errors, result } = await deleteMonitorAPI.execute({
+    const { errors, result, res } = await deleteMonitorAPI.execute({
       monitorIds: idsToDelete,
     });
+
+    if (res) {
+      return res;
+    }
 
     return { result, errors };
   },

@@ -29,7 +29,7 @@ export const ftrTestChannels: {
   default: Set<FTRTestChannel>;
 } = {
   all: new Set(COMPLETE_CHANNEL_LIST),
-  default: new Set(['ci-on-commit', 'ci-batch-3h']),
+  default: new Set(['ci-on-commit']),
 };
 
 export const ftrTestChannel = {

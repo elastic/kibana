@@ -10,6 +10,8 @@ import type {
   BuiltInAgentDefinition,
   AgentTypeDefinition,
   AgentAvailabilityConfig,
+  AgentBaseConfiguration,
+  AiIndexResolver,
 } from '@kbn/agent-builder-server/agents';
 import type {
   AgentConfiguration,
@@ -22,6 +24,7 @@ import type { AgentsUsingSkillsResult, AgentsUsingToolsResult } from './persiste
 export interface AgentsServiceSetup {
   register(agent: BuiltInAgentDefinition): void;
   registerType(type: AgentTypeDefinition): void;
+  registerAiIndexResolver(resolver: AiIndexResolver): void;
 }
 
 export interface ToolRefsParams {
@@ -46,15 +49,21 @@ export interface AgentsServiceStart {
     spaceId: string;
     agent: AgentCreateRequest;
     availability?: AgentAvailabilityConfig;
+    hidden?: boolean;
   }) => Promise<void>;
   resolveAgentConfiguration: (opts: {
     agent: AgentDefinition;
     request: KibanaRequest;
   }) => Promise<AgentConfiguration>;
+  resolveAgentBaseConfiguration: (opts: {
+    agentType: string;
+    request: KibanaRequest;
+  }) => Promise<AgentBaseConfiguration | undefined>;
   removeToolRefsFromAgents: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   getAgentsUsingTools: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   removePluginRefsFromAgents: (params: PluginRefsParams) => Promise<AgentsUsingToolsResult>;
   getAgentsUsingPlugins: (params: PluginRefsParams) => Promise<AgentsUsingToolsResult>;
   removeSkillRefsFromAgents: (params: SkillRefsParams) => Promise<AgentsUsingSkillsResult>;
   getAgentsUsingSkills: (params: SkillRefsParams) => Promise<AgentsUsingSkillsResult>;
+  getAiIndexResolver: () => AiIndexResolver | undefined;
 }

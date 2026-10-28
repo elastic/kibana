@@ -46,7 +46,9 @@ let onSeverityChange: ((opts: SeverityOption[]) => void) | undefined;
 // ─── Child component mocks ────────────────────────────────────────────────────
 
 jest.mock('@kbn/date-range-picker', () => ({
-  DateRangePicker: () => <div data-test-subj="mock-date-range-picker" />,
+  DateRangePicker: ({ value }: { value: string }) => (
+    <div data-test-subj="mock-date-range-picker" data-value={value} />
+  ),
 }));
 
 // Capture onSelectTactic so tests can drive tactic selection.
@@ -77,6 +79,12 @@ jest.mock('./mitre/components/mitre_attack_chain', () => ({
       />
     );
   },
+}));
+
+jest.mock('./mitre/components/mitre_attack_chain_placeholder', () => ({
+  MitreAttackChainPlaceholder: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="mock-mitre-attack-chain-placeholder">{children}</div>
+  ),
 }));
 
 jest.mock('./anomalies_tab_timeline', () => ({
@@ -115,7 +123,18 @@ jest.mock('@elastic/eui', () => {
 });
 
 jest.mock('../../../common/lib/kibana', () => ({
-  useKibana: () => ({ services: { ml: {} } }),
+  useKibana: () => ({
+    services: {
+      ml: {},
+      uiSettings: {
+        get: (key: 'dateFormat:tz' | 'dateFormat:dow') =>
+          ({
+            'dateFormat:tz': 'Japan',
+            'dateFormat:dow': 'Wednesday',
+          }[key]),
+      },
+    },
+  }),
 }));
 
 jest.mock('@kbn/ml-plugin/public', () => ({
@@ -155,7 +174,7 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
 
-const defaultProps = { entityId: 'host-1', entityType: 'host' as const };
+const defaultProps = { entityId: 'entity-1', entityName: 'host-1', entityType: 'host' as const };
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
@@ -262,6 +281,47 @@ describe('AnomaliesTab', () => {
       expect(mockUseAnomalySummary).toHaveBeenLastCalledWith(
         expect.objectContaining({
           body: expect.objectContaining({ score_ranges: [{ min_score: 50, max_score: 75 }] }),
+        })
+      );
+    });
+  });
+
+  describe('initial time range', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2024-06-15T12:00:00.000Z'));
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('defaults to the last 30 days when the scope does not pin a range', () => {
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      expect(screen.getByTestId('mock-date-range-picker')).toHaveAttribute(
+        'data-value',
+        'Last 30 days'
+      );
+      expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          from: new Date('2024-05-16T12:00:00.000Z').valueOf(),
+          to: new Date('2024-06-15T12:00:00.000Z').valueOf(),
+        })
+      );
+    });
+
+    it('opens on the pinned range (matching preset label) when opened from the new Entity Analytics home', () => {
+      render(<AnomaliesTab {...defaultProps} scopeId="entity-analytics-new-entities-table-7d" />, {
+        wrapper: Wrapper,
+      });
+
+      expect(screen.getByTestId('mock-date-range-picker')).toHaveAttribute(
+        'data-value',
+        'Last 7 days'
+      );
+      expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          from: new Date('2024-06-08T12:00:00.000Z').valueOf(),
+          to: new Date('2024-06-15T12:00:00.000Z').valueOf(),
         })
       );
     });
@@ -442,11 +502,7 @@ describe('AnomaliesTab', () => {
       });
       const { container } = render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
       expect(container.querySelector('.euiLoadingChart')).toBeInTheDocument();
-      // The placeholder renders a hidden MitreAttackChain with no tactic data.
-      expect(screen.getByTestId('mock-mitre-attack-chain')).toHaveAttribute(
-        'data-triggered-tactics',
-        '[]'
-      );
+      expect(screen.queryByTestId('mock-mitre-attack-chain')).not.toBeInTheDocument();
     });
 
     it('renders the real MitreAttackChain once overview finishes loading', () => {

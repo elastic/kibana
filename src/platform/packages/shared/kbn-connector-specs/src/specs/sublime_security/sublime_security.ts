@@ -142,7 +142,7 @@ export const SublimeSecurityConnector: ConnectorSpec = {
   metadata: {
     id: '.sublime_security',
     displayName: 'Sublime Security',
-    description: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.metadata.description', {
+    description: i18n.translate('connectorSpecs.sublimeSecurity.metadata.description', {
       defaultMessage:
         'Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security',
     }),
@@ -157,15 +157,14 @@ export const SublimeSecurityConnector: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.auth.bearer.label', {
+          label: i18n.translate('connectorSpecs.sublimeSecurity.auth.bearer.label', {
             defaultMessage: 'API key',
           }),
           meta: {
             token: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.sublimeSecurity.auth.bearer.tokenLabel',
-                { defaultMessage: 'API key' }
-              ),
+              label: i18n.translate('connectorSpecs.sublimeSecurity.auth.bearer.tokenLabel', {
+                defaultMessage: 'API key',
+              }),
             },
           },
         },
@@ -185,10 +184,10 @@ export const SublimeSecurityConnector: ConnectorSpec = {
           'Sublime Platform API base URL. Shown under Automate > API in the Sublime dashboard'
         )
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.config.baseUrl', {
+          label: i18n.translate('connectorSpecs.sublimeSecurity.config.baseUrl', {
             defaultMessage: 'API base URL',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.config.baseUrlHelp', {
+          helpText: i18n.translate('connectorSpecs.sublimeSecurity.config.baseUrlHelp', {
             defaultMessage:
               'Region-specific for Sublime Cloud (for example https://platform.sublime.security or https://eu.platform.sublime.security) or the host of a self-hosted instance. Find it under Automate > API in the Sublime dashboard.',
           }),
@@ -215,6 +214,7 @@ Gotchas:
   actions: {
     searchMessageGroups: {
       isTool: true,
+      scope: 'read',
       description:
         'Search Sublime Security message groups (campaign-like clusters of deduplicated email). ' +
         'Filter by sender, domain, recipient, mailbox, attachment SHA-256, Attack Score verdict, rule severity, review state, or time window. ' +
@@ -279,6 +279,7 @@ Gotchas:
 
     getMessageGroup: {
       isTool: true,
+      scope: 'read',
       description:
         'Get one Sublime Security message group by its canonical ID, including flagged rules, review state, ' +
         'user report count, link click count, and up to 50 member messages with sender, subject, and read/forward/reply telemetry. ' +
@@ -303,6 +304,7 @@ Gotchas:
 
     getMessage: {
       isTool: true,
+      scope: 'read',
       description:
         'Get metadata for a single message by its ID: subject, sender, recipients, mailbox, timestamps ' +
         '(created, read, forwarded, replied), and whether it landed in spam. ' +
@@ -347,6 +349,7 @@ Gotchas:
 
     getAttackScore: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the Sublime Attack Score for a message: a 0-100 machine-learning score, a verdict ' +
         '(malicious, suspicious, spam, graymail, likely_benign, or unknown), a graymail score, and the ranked top signals explaining the verdict. ' +
@@ -381,6 +384,7 @@ Gotchas:
 
     getAsaVerdict: {
       isTool: true,
+      scope: 'read',
       description:
         "Get the verdict from Sublime's Autonomous Security Analyst (ASA) for a message: " +
         'malicious, spam, graymail, likely_benign, benign, or unknown. ' +
@@ -406,6 +410,7 @@ Gotchas:
 
     listMailboxes: {
       isTool: true,
+      scope: 'read',
       description:
         'List the mailboxes protected by Sublime Security, with active state and subscription health. ' +
         'The orientation tool: use it to discover which mailboxes Sublime covers or to resolve a mailbox email before filtering searches.',
@@ -451,6 +456,7 @@ Gotchas:
     quarantineMessageGroups: {
       // Deliberately not a tool: destructive mailbox mutation, workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Quarantine one or more message groups: removes the messages from user mailboxes and holds them, ' +
         'and also quarantines late-arriving copies of the same messages. Optionally records a classification, report label, and review comment. ' +
@@ -473,6 +479,7 @@ Gotchas:
     trashMessageGroups: {
       // Deliberately not a tool: destructive mailbox mutation, workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Move all messages in one or more message groups to trash in the affected mailboxes, ' +
         'and keep auto-trashing late-arriving copies of the same messages. ' +
@@ -496,6 +503,7 @@ Gotchas:
     restoreMessageGroups: {
       // Deliberately not a tool: mailbox mutation (the undo), workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Restore one or more previously quarantined or trashed message groups back to user mailboxes, ' +
         'and turn off automatic trashing of late-arriving copies. ' +
@@ -518,6 +526,7 @@ Gotchas:
 
     getTask: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the status of an asynchronous Sublime task by ID: pending, started, succeeded, failed, or retrying, plus an error message when failed. ' +
         'Quarantine, trash, and restore return a task_id; poll this until the state is succeeded or failed before reporting the outcome.',
@@ -558,7 +567,7 @@ Gotchas:
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.sublimeSecurity.test.description', {
+    description: i18n.translate('connectorSpecs.sublimeSecurity.test.description', {
       defaultMessage: 'Verifies the Sublime Security connection by listing one protected mailbox',
     }),
     handler: async (ctx) => {

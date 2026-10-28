@@ -9,7 +9,7 @@
 
 import { promises as fs, existsSync } from 'fs';
 import { ToolingLog } from '@kbn/tooling-log';
-import { findProductionDependencies, readYarnLock } from '@kbn/yarn-lock-validator';
+import { findProductionDependencies, readPnpmLock } from '@kbn/yarn-lock-validator';
 import {
   checkProdNativeModules,
   checkDependencies,
@@ -37,14 +37,14 @@ jest.mock('@kbn/tooling-log', () => ({
 
 jest.mock('@kbn/yarn-lock-validator', () => ({
   findProductionDependencies: jest.fn(),
-  readYarnLock: jest.fn(),
+  readPnpmLock: jest.fn(),
 }));
 
 jest.mock(
   // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
-  '/test/node_modules/test-package/package.json',
+  '/test/node_modules/@elastic/test-package/package.json',
   () => ({
-    name: 'test-package',
+    name: '@elastic/test-package',
     version: '1.0.0',
   }),
   { virtual: true }
@@ -52,9 +52,9 @@ jest.mock(
 
 jest.mock(
   // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
-  '/test/node_modules/@scope/package/package.json',
+  '/test/node_modules/@elastic/package/package.json',
   () => ({
-    name: '@scope/package',
+    name: '@elastic/package',
     version: '1.0.0',
   }),
   { virtual: true }
@@ -106,12 +106,12 @@ describe('Check Prod Native Modules', () => {
 
   describe('checkDependencies', () => {
     it('should identify native modules in production dependencies', async () => {
-      const mockProductionDependencies = new Map([['test-package@1.0.0', true]]);
+      const mockProductionDependencies = new Map([['@elastic/test-package@1.0.0', true]]);
       const mockProdNativeModulesFound: Array<{ name: string; version: string; path: string }> = [];
 
-      (fs.readdir as jest.Mock).mockResolvedValueOnce([
-        { name: 'test-package', isDirectory: () => true },
-      ]);
+      (fs.readdir as jest.Mock)
+        .mockResolvedValueOnce([{ name: '@elastic', isDirectory: () => true }])
+        .mockResolvedValueOnce([{ name: 'test-package', isDirectory: () => true }]);
       (fs.readdir as jest.Mock)
         .mockResolvedValueOnce([{ name: 'binding.gyp', isDirectory: () => false }])
         .mockResolvedValueOnce([]);
@@ -129,16 +129,20 @@ describe('Check Prod Native Modules', () => {
       );
 
       expect(mockProdNativeModulesFound).toEqual([
-        { name: 'test-package', version: '1.0.0', path: '/test/node_modules/test-package' },
+        {
+          name: '@elastic/test-package',
+          version: '1.0.0',
+          path: '/test/node_modules/@elastic/test-package',
+        },
       ]);
     });
 
     it('should handle scoped packages', async () => {
-      const mockProductionDependencies = new Map([['@scope/package@1.0.0', true]]);
+      const mockProductionDependencies = new Map([['@elastic/package@1.0.0', true]]);
       const mockProdNativeModulesFound: Array<{ name: string; version: string; path: string }> = [];
 
       (fs.readdir as jest.Mock)
-        .mockResolvedValueOnce([{ name: '@scope', isDirectory: () => true }])
+        .mockResolvedValueOnce([{ name: '@elastic', isDirectory: () => true }])
         .mockResolvedValueOnce([{ name: 'package', isDirectory: () => true }]);
       (fs.readdir as jest.Mock)
         .mockResolvedValueOnce([{ name: 'binding.gyp', isDirectory: () => false }])
@@ -158,7 +162,7 @@ describe('Check Prod Native Modules', () => {
       );
 
       expect(mockProdNativeModulesFound).toEqual([
-        { name: '@scope/package', version: '1.0.0', path: '/test/node_modules/@scope/package' },
+        { name: '@elastic/package', version: '1.0.0', path: '/test/node_modules/@elastic/package' },
       ]);
     });
   });
@@ -167,7 +171,7 @@ describe('Check Prod Native Modules', () => {
     it('should return false when no native modules are found', async () => {
       (existsSync as jest.Mock).mockReturnValue(true);
       (findProductionDependencies as jest.Mock).mockReturnValue(new Map());
-      (readYarnLock as jest.Mock).mockResolvedValueOnce({});
+      (readPnpmLock as jest.Mock).mockResolvedValueOnce({});
       (fs.readdir as jest.Mock).mockResolvedValue([]);
       jest
         // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -185,9 +189,11 @@ describe('Check Prod Native Modules', () => {
     it('should return true and log errors when native modules are found', async () => {
       (existsSync as jest.Mock).mockReturnValueOnce(true).mockReturnValueOnce(true);
       (findProductionDependencies as jest.Mock).mockReturnValue(
-        new Map([['native-module@1.0.0', { name: 'native-module', version: '1.0.0' }]])
+        new Map([
+          ['@elastic/native-module@1.0.0', { name: '@elastic/native-module', version: '1.0.0' }],
+        ])
       );
-      (readYarnLock as jest.Mock).mockResolvedValueOnce({});
+      (readPnpmLock as jest.Mock).mockResolvedValueOnce({});
 
       // Mock loadPackageJson to return a mock package JSON object
       jest
@@ -195,12 +201,13 @@ describe('Check Prod Native Modules', () => {
         .spyOn(require('./helpers'), 'loadPackageJson')
         .mockImplementation((packageJsonPath: any) => {
           return {
-            name: 'native-module',
+            name: '@elastic/native-module',
             version: '1.0.0',
           };
         });
 
       (fs.readdir as jest.Mock)
+        .mockResolvedValueOnce([{ name: '@elastic', isDirectory: () => true }])
         .mockResolvedValueOnce([{ name: 'native-module', isDirectory: () => true }])
         // .mockResolvedValueOnce([{ name: 'package.json', isDirectory: () => false }])
         .mockResolvedValueOnce([{ name: 'binding.gyp', isDirectory: () => false }]);
@@ -209,9 +216,9 @@ describe('Check Prod Native Modules', () => {
         .spyOn(require('./check_prod_native_modules'), 'checkDependencies')
         .mockImplementationOnce((_, __, prodNativeModulesFound: any) => {
           prodNativeModulesFound.push({
-            name: 'native-module',
+            name: '@elastic/native-module',
             version: '1.0.0',
-            path: '/path/to/native-module',
+            path: '/mocked/repo/root/node_modules/@elastic/native-module',
           });
         });
 
@@ -220,7 +227,7 @@ describe('Check Prod Native Modules', () => {
       expect(result).toBe(true);
       expect(mockLog.error).toHaveBeenNthCalledWith(
         1,
-        'Production native module detected: node_modules/native-module'
+        'Production native module detected: node_modules/@elastic/native-module'
       );
       expect(mockLog.error).toHaveBeenNthCalledWith(
         2,
@@ -231,7 +238,7 @@ describe('Check Prod Native Modules', () => {
     it('should throw an error if root node_modules folder is not found', async () => {
       (existsSync as jest.Mock).mockReturnValue(false);
       (findProductionDependencies as jest.Mock).mockReturnValue(new Map());
-      (readYarnLock as jest.Mock).mockResolvedValueOnce({});
+      (readPnpmLock as jest.Mock).mockResolvedValueOnce({});
 
       const result = await checkProdNativeModules(mockLog);
 

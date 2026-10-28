@@ -30,6 +30,12 @@ export type {
 } from './types';
 
 export type {
+  ConnectorEventEmitParams,
+  ConnectorEventEmitter,
+  DispatchConnectorEventsResult,
+} from './inbound';
+
+export type {
   ConnectorWithExtraFindData as FindActionResult,
   Connector,
   ConnectorType,
@@ -44,6 +50,8 @@ export type {
   RelayClientContract,
   RelayInstallRequest,
   RelayInstallResponse,
+  RelayTriggerInput,
+  RelayTriggerResponse,
 } from './lib/relay';
 
 export {

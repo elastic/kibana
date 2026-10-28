@@ -24,15 +24,22 @@ export const ReadListItemRequestQuery = lazySchema(() =>
     /**
      * Value list item identifier. Required if `list_id` and `value` are not specified.
      */
-    id: ListId.optional(),
+    id: ListId.optional().describe(
+      'Value list item identifier. Required if `list_id` and `value` are not specified.'
+    ),
     /**
      * Value list item list's `id` identfier. Required if `id` is not specified.
      */
-    list_id: ListId.optional(),
+    list_id: ListId.optional().describe(
+      "Value list item list's `id` identfier. Required if `id` is not specified."
+    ),
     /**
      * The value used to evaluate exceptions. Required if `id` is not specified.
      */
-    value: z.string().optional(),
+    value: z
+      .string()
+      .optional()
+      .describe('The value used to evaluate exceptions. Required if `id` is not specified.'),
   })
 );
 export type ReadListItemRequestQuery = z.infer<typeof ReadListItemRequestQuery>;

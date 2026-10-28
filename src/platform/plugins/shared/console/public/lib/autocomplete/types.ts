@@ -15,7 +15,7 @@ export interface ResultTerm {
   meta?: string;
   context?: AutoCompleteContext;
   insertValue?: string;
-  name?: string | boolean;
+  name?: string | number | boolean;
   value?: string;
   score?: number;
   /**
@@ -47,7 +47,7 @@ export interface DataAutoCompleteRulesOneOf {
   __condition?: {
     lines_regex: string;
   };
-  __template: Record<string, unknown>;
+  __template?: unknown;
   [key: string]: unknown;
 }
 

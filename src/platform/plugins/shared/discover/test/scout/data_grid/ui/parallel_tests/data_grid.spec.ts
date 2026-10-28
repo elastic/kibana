@@ -88,6 +88,11 @@ spaceTest.describe('Discover data grid', { tag: '@local-stateful-classic' }, () 
     await toggleColumnFromSidebar(page, 'agent');
     await expect.poll(() => getColumnTitles(page)).toStrictEqual(['@timestamp', 'bytes', 'agent']);
 
+    const { violations } = await page.checkA11y({
+      include: ['[data-test-subj="discoverDocTable"]'],
+    });
+    expect(violations).toStrictEqual([]);
+
     await toggleColumnFromSidebar(page, 'bytes');
     await expect.poll(() => getColumnTitles(page)).toStrictEqual(['@timestamp', 'agent']);
 
@@ -108,6 +113,11 @@ spaceTest.describe('Discover data grid', { tag: '@local-stateful-classic' }, () 
       await expect
         .poll(() => isTopMostAtCenter(page, 'unifiedHistogramResizableButton'))
         .toBe(false);
+
+      const { violations } = await page.checkA11y({
+        include: ['[data-test-subj="discoverDocTable"]'],
+      });
+      expect(violations).toStrictEqual([]);
 
       await page.testSubj.click('dataGridFullScreenButton');
       await expect.poll(() => isTopMostAtCenter(page, 'discover-dataView-switch-link')).toBe(true);

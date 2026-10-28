@@ -8,9 +8,7 @@
  */
 
 // General settings
-export const DISABLE_REQUEST_BATCHING_ID = 'bfetch:disable';
 export const ELASTIC_CONSOLE_ENABLED_SETTING_ID = 'elasticRamen:enabled';
-export const DISABLE_BATCH_COMPRESSION_ID = 'bfetch:disableCompression';
 export const CSV_QUOTE_VALUES_ID = 'csv:quoteValues';
 export const CSV_SEPARATOR_ID = 'csv:separator';
 export const DATE_FORMAT_ID = 'dateFormat';
@@ -54,11 +52,20 @@ export const TIMEPICKER_TIME_DEFAULTS_ID = 'timepicker:timeDefaults';
 // Accessibility settings
 export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimations';
 
+// Alerting v2 settings
+export const ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID = 'alerting:v2:experimentalFeatures';
+
 // Agent builder settings
 export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:experimentalFeatures';
 export const AGENT_BUILDER_BASH_SUPPORT_SETTING_ID = 'agentBuilder:bashSupport';
+export const AGENT_BUILDER_API_DISCOVERY_SETTING_ID = 'agentBuilder:apiDiscovery';
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
+export const AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID =
+  'agentBuilder:includeFrozenByDefault';
+export const AGENT_BUILDER_DEDUCTIVE_ENABLED_SETTING_ID = 'agentBuilder:deductiveEnabled';
+export const AGENT_BUILDER_DEDUCTIVE_ENDPOINT_SETTING_ID = 'agentBuilder:deductiveEndpoint';
+export const AGENT_BUILDER_DEDUCTIVE_API_KEY_SETTING_ID = 'agentBuilder:deductiveApiKey';
 export const AGENT_BUILDER_TRACING_ENABLED_SETTING_ID = 'agentBuilder:tracing:enabled';
 export const AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID =
   'agentBuilder:tracing:includeUserPrompts';
@@ -72,8 +79,17 @@ export const AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID = 'agentBuilder:tracing
 export const AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID = 'agentBuilder:tracing:includeRealIds';
 export const AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID = 'agentBuilder:tracing:includeUserData';
 
+// Alerting settings
+export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
+export const ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID =
+  'alerting:v1:showV1ObservabilityAlertsTable';
+
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
+export const CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID = 'contextEngine:memoryEnabled';
+
+// Data federation settings
+export const DATA_FEDERATION_ENABLED_SETTING_ID = 'dataFederation:enabled';
 
 // Autocomplete settings
 export const AUTOCOMPLETE_USE_TIME_RANGE_ID = 'autocomplete:useTimeRange';
@@ -86,12 +102,19 @@ export const BANNERS_TEXT_COLOR_ID = 'banners:textColor';
 export const BANNERS_LINK_COLOR_ID = 'banners:linkColor';
 export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
 
+// Custom branding settings
+export const XPACK_CUSTOM_BRANDING_LOGO_ID = 'xpackCustomBranding:logo';
+export const XPACK_CUSTOM_BRANDING_CUSTOMIZED_LOGO_ID = 'xpackCustomBranding:customizedLogo';
+export const XPACK_CUSTOM_BRANDING_FAVICON_PNG_ID = 'xpackCustomBranding:faviconPNG';
+export const XPACK_CUSTOM_BRANDING_FAVICON_SVG_ID = 'xpackCustomBranding:faviconSVG';
+
 // Discover settings
 export const CONTEXT_DEFAULT_SIZE_ID = 'context:defaultSize';
 export const CONTEXT_STEP_ID = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_ID = 'context:tieBreakerFields';
 export const DEFAULT_COLUMNS_ID = 'defaultColumns';
 export const ENABLE_ESQL_ID = 'enableESQL';
+export const DISCOVER_DEFAULT_ESQL_QUERY_ID = 'discover:defaultEsqlQuery';
 export const DISCOVER_MAX_DOC_FIELDS_DISPLAYED_ID = 'discover:maxDocFieldsDisplayed';
 export const DISCOVER_MODIFY_COLUMNS_ON_SWITCH_ID = 'discover:modifyColumnsOnSwitch';
 export const DISCOVER_ROW_HEIGHT_OPTION_ID = 'discover:rowHeightOption';
@@ -126,6 +149,7 @@ export const OBSERVABILITY_APM_DEFAULT_SERVICE_ENVIRONMENT_ID =
 export const OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID = 'observability:apmProgressiveLoading';
 export const OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVICE_ID =
   'observability:apmServiceGroupMaxNumberOfServices';
+export const OBSERVABILITY_APM_MAX_NUMBER_OF_SERVICES_ID = 'observability:apmMaxNumberOfServices';
 export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =
@@ -137,6 +161,21 @@ export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const OBSERVABILITY_APM_TRACE_LOGS_DEFAULT_COLUMNS_ID =
   'observability:apmTraceLogsDefaultColumns';
+export const OBSERVABILITY_APM_ENABLE_TRANSACTION_PROFILING_ID =
+  'observability:apmEnableTransactionProfiling';
+export const OBSERVABILITY_PROFILING_SHOW_ERROR_FRAMES_ID =
+  'observability:profilingShowErrorFrames';
+export const OBSERVABILITY_PROFILING_PER_VCPU_WATT_X86_ID = 'observability:profilingPerVCPUWattX86';
+export const OBSERVABILITY_PROFILING_PER_VCPU_WATT_ARM64_ID =
+  'observability:profilingPervCPUWattArm64';
+export const OBSERVABILITY_PROFILING_CO2_PER_KWH_ID = 'observability:profilingCo2PerKWH';
+export const OBSERVABILITY_PROFILING_DATACENTER_PUE_ID = 'observability:profilingDatacenterPUE';
+export const OBSERVABILITY_PROFILING_AWS_COST_DISCOUNT_RATE_ID =
+  'observability:profilingAWSCostDiscountRate';
+export const OBSERVABILITY_PROFILING_AZURE_COST_DISCOUNT_RATE_ID =
+  'observability:profilingAzureCostDiscountRate';
+export const OBSERVABILITY_PROFILING_COST_PER_VCPU_PER_HOUR_ID =
+  'observability:profilingCostPervCPUPerHour';
 export const OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID = 'observability:newLogsOverview';
 export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
 export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
@@ -147,6 +186,7 @@ export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR = 'genAiSettings:defaultAIConn
 export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY =
   'genAiSettings:defaultAIConnectorOnly';
 export const GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING = 'genAiSettings:tokenUsageTracking';
+export const GEN_AI_SETTINGS_INFERENCE_STREAMING = 'genAiSettings:inferenceStreaming';
 export const AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE = 'aiAssistant:preferredAIAssistantType';
 export const AI_CHAT_EXPERIENCE_TYPE = 'aiAssistant:preferredChatExperience';
 export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
@@ -158,12 +198,6 @@ export const OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS =
   'observability:streamsEnableWiredStreamViews';
 export const OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS = 'observability:streamsEnableDraftStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CANVAS = 'observability:streamsEnableCanvas';
-export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED =
-  'observability:streamsContinuousKiExtractionEnabled';
-export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS =
-  'observability:streamsContinuousKiExtractionIntervalHours';
-export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS =
-  'observability:streamsSigEventsIndexPatterns';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG =
   'observability:streamsSigEventsTuningConfig';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED =
@@ -188,6 +222,11 @@ export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_
   'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE =
   'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore';
+export const OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE = 'observability:nightshiftDeveloperMode';
+export const OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED =
+  'observability:nightshiftContinuousOnboardingEnabled';
+export const OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS =
+  'observability:nightshiftContinuousOnboardingIntervalHours';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings
@@ -256,6 +295,8 @@ export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID =
   'securitySolution:alertAnalysisWorkflowAgentId' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION =
   'securitySolution:alertAnalysisWorkflowCreateConversation' as const;
+export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT =
+  'securitySolution:alertAnalysisWorkflowUsePrompt' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED =
   'securitySolution:alertAnalysisWorkflowEnabled' as const;
 export const SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX =

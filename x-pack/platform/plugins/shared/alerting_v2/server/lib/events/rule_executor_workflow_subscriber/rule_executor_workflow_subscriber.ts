@@ -38,19 +38,22 @@ import {
 export class RuleExecutorWorkflowSubscriber {
   #subscriptions: Subscription[] = [];
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(AlertingDomainEventBusToken)
     private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(WorkflowServiceToken)
     private readonly workflows: WorkflowServiceContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('events');
+  }
 
   public start(): void {
     if (this.#subscriptions.length > 0) {
       this.logger.debug({
-        message: () =>
-          '[RuleExecutorWorkflowSubscriber] start() called more than once. Ignoring. Subscriptions already active.',
+        message: () => 'Subscriber start called more than once; ignoring',
       });
 
       return;

@@ -8,16 +8,19 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
-  type AgentDefinition,
+  type AgentAccessControl,
   type AgentAccessControlEntry,
+  type AgentDefinition,
   AgentAccessControlMode,
+  getAccessControlEntryKey,
   type ToolSelection,
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../common/agents';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useAgentBuilderAgentById } from './use_agent_by_id';
+import { useCanUpdateAgentApprovals } from './use_can_update_agent_approvals';
 import { useToolsService } from '../tools/use_tools';
 import { useSkillsService } from '../skills/use_skills';
 import { usePluginsService } from '../plugins/use_plugins';
@@ -48,15 +51,18 @@ const emptyState = (): AgentEditState => ({
     tools: defaultToolSelection,
     enable_elastic_capabilities: false,
     workflow_ids: [],
+    post_execution_workflow_ids: [],
     plugin_ids: [],
+    connector_ids: [],
+    subagent_ids: [],
   },
 });
 
-const accessControlEntriesSignature = (entries: AgentAccessControlEntry[] = []): string =>
+const accessControlEntriesSignature = (entries: AgentAccessControl['entries'] = []): string =>
   JSON.stringify(
     [...entries]
-      .map((entry) => ({ type: entry.type, name: entry.name, role: entry.role }))
-      .sort((a, b) => `${a.type}:${a.name}`.localeCompare(`${b.type}:${b.name}`))
+      .map((entry) => ({ key: getAccessControlEntryKey(entry), role: entry.role }))
+      .sort((a, b) => a.key.localeCompare(b.key))
   );
 
 export function useAgentEdit({
@@ -81,6 +87,7 @@ export function useAgentEdit({
   const isClone = Boolean(!editingAgentId && sourceAgentId);
   const agentId = editingAgentId || sourceAgentId || '';
   const { agent, isLoading: agentLoading, error: agentError } = useAgentBuilderAgentById(agentId);
+  const canUpdateAgentApprovals = useCanUpdateAgentApprovals(agent);
 
   const createMutation = useMutation({
     mutationFn: (data: AgentCreateRequest) => agentService.create(data),
@@ -138,7 +145,11 @@ export function useAgentEdit({
       const requestData = cleanInvalidToolReferences(data, tools);
 
       if (editingAgentId) {
-        const { id, access_control, ...updatedAgent } = requestData;
+        const { id, access_control, ...editableAgent } = requestData;
+        const { approvals, ...configurationWithoutApprovals } = editableAgent.configuration;
+        const updatedAgent = canUpdateAgentApprovals
+          ? editableAgent
+          : { ...editableAgent, configuration: configurationWithoutApprovals };
         const result = await updateMutation.mutateAsync(
           access_control
             ? { ...updatedAgent, access_control: { access_mode: access_control.access_mode } }
@@ -154,7 +165,9 @@ export function useAgentEdit({
             accessControlEntriesSignature(nextEntries);
 
         if (shouldUpdateAccessControl) {
-          await updateAccessControlMutation.mutateAsync(nextEntries);
+          await updateAccessControlMutation.mutateAsync(
+            nextEntries.map(({ added_at, ...entry }) => entry)
+          );
         }
 
         queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
@@ -182,6 +195,7 @@ export function useAgentEdit({
       updateMutation,
       updateAccessControlMutation,
       tools,
+      canUpdateAgentApprovals,
       agent?.access_control?.entries,
       agentId,
       queryClient,

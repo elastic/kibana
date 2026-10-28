@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest } from '@kbn/scout';
+import type {
+  ScoutPage,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+} from '@kbn/scout';
+import { spaceTest as baseSpaceTest, test as baseTest } from '@kbn/scout';
 import type { GlobalSearchPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
@@ -27,5 +33,18 @@ export const test = baseTest.extend<GlobalSearchTestFixtures, ScoutWorkerFixture
   ) => {
     const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
+  },
+});
+
+export interface GlobalSearchParallelTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: GlobalSearchPageObjects;
+}
+
+export const spaceTest = baseSpaceTest.extend<
+  GlobalSearchParallelTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
+  pageObjects: async ({ pageObjects, page }, use) => {
+    await use(extendPageObjects(pageObjects, page));
   },
 });

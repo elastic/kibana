@@ -1,0 +1,1370 @@
+{
+  "sha1": "76b05343dabeb21717b540d68490620a54653746",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "48ab216d52a1644-c503fd972778af9",
+      "title": "Agent Builder — conversation attachments API PUT origin updates attachment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
+        "line": 84,
+        "column": 50
+      }
+    },
+    {
+      "id": "48ab216d52a1644-c2fb133aa666fa5",
+      "title": "Agent Builder — conversation attachments API GET list attachments reflects origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
+        "line": 101,
+        "column": 27
+      }
+    },
+    {
+      "id": "48ab216d52a1644-7e128ae3628bb61",
+      "title": "Agent Builder — conversation attachments API stale check for text without origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
+        "line": 120,
+        "column": 27
+      }
+    },
+    {
+      "id": "48ab216d52a1644-c893158514d02e6",
+      "title": "Agent Builder — conversation attachments API stale check empty when no attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
+        "line": 135,
+        "column": 13
+      }
+    },
+    {
+      "id": "48ab216d52a1644-97af3b082282f69",
+      "title": "Agent Builder — conversation attachments API POST attachment persists an attachment_added event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
+        "line": 157,
+        "column": 25
+      }
+    },
+    {
+      "id": "48ab216d52a1644-5cdc5d91f9735f4",
+      "title": "Agent Builder — conversation attachments API PUT with new content persists an attachment_updated event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
+        "line": 186,
+        "column": 86
+      }
+    },
+    {
+      "id": "48ab216d52a1644-15a6d65558fd7eb",
+      "title": "Agent Builder — conversation attachments API PUT with unchanged content persists no additional event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
+        "line": 212,
+        "column": 23
+      }
+    },
+    {
+      "id": "48ab216d52a1644-c5be635d519712f",
+      "title": "Agent Builder — conversation attachments API DELETE persists an attachment_deleted event with hard_delete=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
+        "line": 228,
+        "column": 7
+      }
+    },
+    {
+      "id": "48ab216d52a1644-7caee24510382d0",
+      "title": "Agent Builder — conversation attachments API POST _restore persists an attachment_restored event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
+        "line": 246,
+        "column": 16
+      }
+    },
+    {
+      "id": "48ab216d52a1644-f75fe4037648e1e",
+      "title": "Agent Builder — conversation attachments API DELETE ?permanent=true removes the attachment and persists hard_delete=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
+        "line": 270,
+        "column": 90
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-83fed8ff3b9d10d",
+      "title": "Agent Builder — chat API converse (/api/chat) user message sync requests persist context for the next model request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 141,
+        "column": 8
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-646bebf93f1b464",
+      "title": "Agent Builder — chat API converse (/api/chat) trigger_mode: never still validates execution-only options, even though they are unused",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 257,
+        "column": 13
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-c34d6cb565fa2b6",
+      "title": "Agent Builder — chat API converse (/api/chat) trigger_mode: never persists an attachment-only message, and rejects an invalid one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 290,
+        "column": 13
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-be0896f70545849",
+      "title": "Agent Builder — chat API converse (/api/chat) converse returns the conversation with its events timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 352,
+        "column": 17
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-4257ca0cb38be62",
+      "title": "Agent Builder — chat API converse (/api/chat) multi-round converse accumulates the timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 321,
+        "column": 27
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-9be67d9f1b2a81d",
+      "title": "Agent Builder — chat API converse (/api/chat) a user message on the streaming route reports the conversation and stops",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 437,
+        "column": 7
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-951e46f459bffc8",
+      "title": "Agent Builder — chat API converse (/api/chat) streaming converse responds with an event stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 467,
+        "column": 16
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-a5fad68cdf3d422",
+      "title": "Agent Builder — chat API converse (/api/chat) invalid converse payload returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 537,
+        "column": 14
+      }
+    },
+    {
+      "id": "89815b88d825848-36a8096503f4066",
+      "title": "Agent Builder — chat API message (/api/chat/message) answers a new conversation with text only, then continues it with the returned conversation_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 114,
+        "column": 7
+      }
+    },
+    {
+      "id": "89815b88d825848-a973fe264ad4206",
+      "title": "Agent Builder — chat API message (/api/chat/message) declines a tool confirmation instead of pausing, and reports it next to the answer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 187,
+        "column": 13
+      }
+    },
+    {
+      "id": "89815b88d825848-d40081a38e00ba0",
+      "title": "Agent Builder — chat API message (/api/chat/message) answers 404 for an unknown agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 243,
+        "column": 17
+      }
+    },
+    {
+      "id": "89815b88d825848-1468902586a1963",
+      "title": "Agent Builder — chat API message (/api/chat/message) answers 404 for an unknown conversation_id without creating a conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 260,
+        "column": 13
+      }
+    },
+    {
+      "id": "89815b88d825848-851cf3f66c3b61e",
+      "title": "Agent Builder — chat API message (/api/chat/message) rejects requests outside the minimal shape with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 278,
+        "column": 23
+      }
+    },
+    {
+      "id": "9220e328dff6e91-b94fd512ffd866c",
+      "title": "Agent Builder — execute_api state change events a successful create call sends one api_state_changed event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_api_state_changes_api.spec.ts",
+        "line": 124,
+        "column": 19
+      }
+    },
+    {
+      "id": "9220e328dff6e91-2267afb1048b4ce",
+      "title": "Agent Builder — execute_api state change events a successful read-only call sends no api_state_changed event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_api_state_changes_api.spec.ts",
+        "line": 149,
+        "column": 17
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-80b2570c588b8a3",
+      "title": "Agent Builder — converse attachments API [local] rejects unknown attachment type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 49,
+        "column": 33
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-a51876655ed541f",
+      "title": "Agent Builder — converse attachments API [local] rejects invalid attachment payload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-bfaac4b5fcb49a0",
+      "title": "Agent Builder — converse attachments API [local] accepts data-only text attachment for model",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 79,
+        "column": 12
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-f53c31ae702bf30",
+      "title": "Agent Builder — converse attachments API [local] rejects attachment without data or origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 114,
+        "column": 52
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-23784a2bb5e4adb",
+      "title": "Agent Builder — converse attachments API [local] rejects origin-only for text attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-c6dfd489ed6c839",
+      "title": "Agent Builder — converse attachments API [local] prefers inline data when both data and origin provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 144,
+        "column": 12
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-7d89288520791c6",
+      "title": "Agent Builder — converse attachments API [local] persists conversation-level attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 188,
+        "column": 18
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-ef1371e3bd6f930",
+      "title": "Agent Builder — converse attachments API [task_manager] rejects unknown attachment type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 49,
+        "column": 33
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-8df15fcc00cff07",
+      "title": "Agent Builder — converse attachments API [task_manager] rejects invalid attachment payload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-204a2026a972681",
+      "title": "Agent Builder — converse attachments API [task_manager] accepts data-only text attachment for model",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 79,
+        "column": 12
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-a7c40321e3629b5",
+      "title": "Agent Builder — converse attachments API [task_manager] rejects attachment without data or origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 114,
+        "column": 52
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-20bcf4b1ee3ad32",
+      "title": "Agent Builder — converse attachments API [task_manager] rejects origin-only for text attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-66c217395e9cf34",
+      "title": "Agent Builder — converse attachments API [task_manager] prefers inline data when both data and origin provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 144,
+        "column": 12
+      }
+    },
+    {
+      "id": "40bd1ba0cff0864-fe373e6c78e84cb",
+      "title": "Agent Builder — converse attachments API [task_manager] persists conversation-level attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_attachments_api.spec.ts",
+        "line": 188,
+        "column": 18
+      }
+    },
+    {
+      "id": "69411a87481f950-3869981e6c97b56",
+      "title": "Agent Builder - converse callback API delivers completed response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 138,
+        "column": 23
+      }
+    },
+    {
+      "id": "69411a87481f950-afb719b3a3f36ee",
+      "title": "Agent Builder - converse callback API renders the Slack surface payload with attachments in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 225,
+        "column": 14
+      }
+    },
+    {
+      "id": "69411a87481f950-92f5e782bc9e4c1",
+      "title": "Agent Builder - converse callback API stores callback origin authorship on list and get conversation responses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 268,
+        "column": 14
+      }
+    },
+    {
+      "id": "69411a87481f950-edfb8df4e3d1793",
+      "title": "Agent Builder - converse callback API delivers failed response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 365,
+        "column": 15
+      }
+    },
+    {
+      "id": "69411a87481f950-0dffc761e12b7ef",
+      "title": "Agent Builder - converse callback API delivers aborted response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 397,
+        "column": 18
+      }
+    },
+    {
+      "id": "69411a87481f950-82a75a6c138a614",
+      "title": "Agent Builder - converse callback API returns the existing execution for a replayed idempotency key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 439,
+        "column": 19
+      }
+    },
+    {
+      "id": "69411a87481f950-e3a4852c5eeefc2",
+      "title": "Agent Builder - converse callback API schedules a single execution for concurrent duplicate deliveries",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 507,
+        "column": 17
+      }
+    },
+    {
+      "id": "69411a87481f950-be5f9d8b14fa9ea",
+      "title": "Agent Builder - converse callback API schedules separate executions for the same key on different origins",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 568,
+        "column": 13
+      }
+    },
+    {
+      "id": "69411a87481f950-a98d347436e2dcf",
+      "title": "Agent Builder - converse callback API prefers a caller-provided execution id over the idempotency key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 627,
+        "column": 13
+      }
+    },
+    {
+      "id": "69411a87481f950-8077e4c805574b4",
+      "title": "Agent Builder - converse callback API continues conversation for repeated Slack origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 668,
+        "column": 32
+      }
+    },
+    {
+      "id": "bca2309a02a613a-e12e2371ba1dd9a",
+      "title": "Agent Builder — ephemeral ai.agent workflow step runs on top of the conversation without modifying it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_ephemeral_workflow_step_api.spec.ts",
+        "line": 67,
+        "column": 37
+      }
+    },
+    {
+      "id": "ae478a169442b27-a40b3e12dc6fbcb",
+      "title": "Agent Builder — converse error handling API [local] recovers when answer agent calls unavailable tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_error_api.spec.ts",
+        "line": 59,
+        "column": 33
+      }
+    },
+    {
+      "id": "ae478a169442b27-d4b98741d94e8bc",
+      "title": "Agent Builder — converse error handling API [local] ignores the deprecated regenerate action and appends a new round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_error_api.spec.ts",
+        "line": 102,
+        "column": 31
+      }
+    },
+    {
+      "id": "ae478a169442b27-7851f179dce6157",
+      "title": "Agent Builder — converse error handling API [task_manager] recovers when answer agent calls unavailable tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_error_api.spec.ts",
+        "line": 59,
+        "column": 33
+      }
+    },
+    {
+      "id": "ae478a169442b27-17f9717c2893ae1",
+      "title": "Agent Builder — converse error handling API [task_manager] ignores the deprecated regenerate action and appends a new round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_error_api.spec.ts",
+        "line": 102,
+        "column": 31
+      }
+    },
+    {
+      "id": "0b614cb2a52c564-6bf2fc164afa18b",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [local] persists a failed execution as an interrupted round and surfaces it to the next round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 222,
+        "column": 32
+      }
+    },
+    {
+      "id": "0b614cb2a52c564-28aa7f06ae37c2d",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [local] an interrupted resume of a paused round completes that round and keeps the prompt response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 339,
+        "column": 35
+      }
+    },
+    {
+      "id": "0b614cb2a52c564-34e4ab3a8d87fd4",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [task_manager] persists a failed execution as an interrupted round and surfaces it to the next round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 222,
+        "column": 32
+      }
+    },
+    {
+      "id": "0b614cb2a52c564-08999c64efe49b2",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation [task_manager] an interrupted resume of a paused round completes that round and keeps the prompt response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 339,
+        "column": 35
+      }
+    },
+    {
+      "id": "0b614cb2a52c564-1e1897e3cbf7a78",
+      "title": "Agent Builder — interrupted executions are persisted on the conversation aborted execution (callback / task manager) is persisted as an interrupted round and stays in the next round's context",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_interrupted_executions_api.spec.ts",
+        "line": 482,
+        "column": 18
+      }
+    },
+    {
+      "id": "015e64ce8f76935-f03e132b75a9c25",
+      "title": "Agent Builder — relevant-skills stays off without a fast model API does not run skill selection or break converse when no fast model is configured",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_relevant_skills_api.spec.ts",
+        "line": 44,
+        "column": 38
+      }
+    },
+    {
+      "id": "72c4fe143dacb2b-f35e0e11e25fd7b",
+      "title": "Agent Builder — converse simple & multi-round API [local] simple conversation persists title and response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 45,
+        "column": 26
+      }
+    },
+    {
+      "id": "72c4fe143dacb2b-cebe45d8f5e57cd",
+      "title": "Agent Builder — converse simple & multi-round API [local] multi-round conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 68,
+        "column": 92
+      }
+    },
+    {
+      "id": "72c4fe143dacb2b-404f745bbf271f2",
+      "title": "Agent Builder — converse simple & multi-round API [local] invalid converse payload returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 114,
+        "column": 27
+      }
+    },
+    {
+      "id": "72c4fe143dacb2b-b6457688b8bed55",
+      "title": "Agent Builder — converse simple & multi-round API [task_manager] simple conversation persists title and response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 45,
+        "column": 26
+      }
+    },
+    {
+      "id": "72c4fe143dacb2b-19be2e31efda0e1",
+      "title": "Agent Builder — converse simple & multi-round API [task_manager] multi-round conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 68,
+        "column": 92
+      }
+    },
+    {
+      "id": "72c4fe143dacb2b-e6ef844a508942f",
+      "title": "Agent Builder — converse simple & multi-round API [task_manager] invalid converse payload returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 114,
+        "column": 27
+      }
+    },
+    {
+      "id": "d4715fb1272d42d-21c7644969d5435",
+      "title": "Agent Builder — Task Manager runs act as the API key owner the owner of a private agent can run it on Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 194,
+        "column": 15
+      }
+    },
+    {
+      "id": "d4715fb1272d42d-7b51574e37ba431",
+      "title": "Agent Builder — Task Manager runs act as the API key owner the agent can write metadata to its owner private conversation on Task Manager",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 255,
+        "column": 32
+      }
+    },
+    {
+      "id": "d4715fb1272d42d-b213631e46799f4",
+      "title": "Agent Builder — Task Manager runs act as the API key owner a workflow run by the owner continues their private conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_task_manager_ownership_api.spec.ts",
+        "line": 291,
+        "column": 16
+      }
+    },
+    {
+      "id": "be88358eebd37c5-1345ac6a07bbd58",
+      "title": "Agent Builder — converse tool attachment events API [local] an attachment added by a tool is stored after its step and shown after its result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tool_attachment_events_api.spec.ts",
+        "line": 79,
+        "column": 38
+      }
+    },
+    {
+      "id": "be88358eebd37c5-f65c0e7ab0dcf37",
+      "title": "Agent Builder — converse tool attachment events API [task_manager] an attachment added by a tool is stored after its step and shown after its result",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tool_attachment_events_api.spec.ts",
+        "line": 79,
+        "column": 38
+      }
+    },
+    {
+      "id": "12984d044214c4f-d856e86368deee2",
+      "title": "Agent Builder — converse tool calling API [local] single tool call (search with esql)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tool_calling_api.spec.ts",
+        "line": 70,
+        "column": 33
+      }
+    },
+    {
+      "id": "12984d044214c4f-a3869ffa33b920a",
+      "title": "Agent Builder — converse tool calling API [local] parallel tool calls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tool_calling_api.spec.ts",
+        "line": 132,
+        "column": 18
+      }
+    },
+    {
+      "id": "12984d044214c4f-9c28eead7f3112d",
+      "title": "Agent Builder — converse tool calling API [task_manager] single tool call (search with esql)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tool_calling_api.spec.ts",
+        "line": 70,
+        "column": 33
+      }
+    },
+    {
+      "id": "12984d044214c4f-93f6f1fb2e7860e",
+      "title": "Agent Builder — converse tool calling API [task_manager] parallel tool calls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tool_calling_api.spec.ts",
+        "line": 132,
+        "column": 18
+      }
+    },
+    {
+      "id": "bb961fed9064daf-1121048c07532a3",
+      "title": "Agent Builder — tracing snapshot trace documents match snapshot after conversation with tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tracing_snapshot_api.spec.ts",
+        "line": 207,
+        "column": 9
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-fe43db7a08d704e",
+      "title": "Agent Builder — service accounts creates a public conversation under its own identity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 94,
+        "column": 62
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-3d82ffa9f55715f",
+      "title": "Agent Builder — service accounts reads back its own conversation as the owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 111,
+        "column": 12
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-e7dc0faef234077",
+      "title": "Agent Builder — service accounts attributes messages it posts to a public conversation owned by a user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 123,
+        "column": 7
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-4a10c45b3a30d58",
+      "title": "Agent Builder — service accounts attributes custom events it adds to a public conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 147,
+        "column": 23
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-e9eb2f1b4aff288",
+      "title": "Agent Builder — service accounts creates and owns a public conversation through converse [local]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 173,
+        "column": 64
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-cfe6b836147825f",
+      "title": "Agent Builder — service accounts joins a user's public conversation through converse [local]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 207,
+        "column": 21
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-536d17559f67531",
+      "title": "Agent Builder — service accounts creates and owns a public conversation through converse [task_manager]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 173,
+        "column": 64
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-f952ce7bb27c974",
+      "title": "Agent Builder — service accounts joins a user's public conversation through converse [task_manager]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 207,
+        "column": 21
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-902888b2f2c0c18",
+      "title": "Agent Builder — service accounts runs tools with its own Elasticsearch privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 249,
+        "column": 16
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-bb99a80394dc8f6",
+      "title": "Agent Builder — service accounts cannot reach a private conversation it does not own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 288,
+        "column": 7
+      }
+    },
+    {
+      "id": "6185b0ac00bccab-7cdc2dc0a76610d",
+      "title": "Agent Builder — service accounts refuses a service account without Agent Builder privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/service_accounts_api.spec.ts",
+        "line": 304,
+        "column": 78
+      }
+    }
+  ]
+}

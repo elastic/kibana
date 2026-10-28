@@ -14,7 +14,5 @@ export const initUnifiedHistoryRoutes = (
   router: IRouter<DataRequestHandlerContext>,
   context: OsqueryAppContext
 ) => {
-  if (!context.experimentalFeatures.queryHistoryRework) return;
-
   getUnifiedHistoryRoute(router, context);
 };

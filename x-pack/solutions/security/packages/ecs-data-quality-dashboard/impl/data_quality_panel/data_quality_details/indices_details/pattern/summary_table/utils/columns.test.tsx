@@ -169,7 +169,7 @@ describe('helpers', () => {
         const button = screen.getByTestId(`checkNowAction-${indexName}`);
         await userEvent.click(button);
 
-        expect(onCheckNowAction).toBeCalledWith(indexSummaryTableItem.indexName);
+        expect(onCheckNowAction).toHaveBeenCalledWith(indexSummaryTableItem.indexName);
       });
 
       test('it invokes the `onViewHistoryAction` with the index name when the view history button is clicked', async () => {
@@ -199,7 +199,7 @@ describe('helpers', () => {
         const button = screen.getByTestId(`viewHistoryAction-${indexName}`);
         await userEvent.click(button);
 
-        expect(onViewHistoryAction).toBeCalledWith(indexSummaryTableItem.indexName);
+        expect(onViewHistoryAction).toHaveBeenCalledWith(indexSummaryTableItem.indexName);
       });
     });
 

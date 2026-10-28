@@ -275,7 +275,6 @@ export const LegendControls = ({
         })}
       </EuiPopoverTitle>
       <EuiButtonGroup
-        color="primary"
         idSelected={draft.type}
         isFullWidth={true}
         legend={i18n.translate('xpack.infra.legendControls.legendOptionsPopoverTypeLabel', {

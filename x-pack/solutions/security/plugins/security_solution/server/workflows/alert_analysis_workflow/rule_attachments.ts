@@ -22,6 +22,7 @@ import {
   type NormalizedRuleAction,
 } from '../../../common/api/detection_engine/rule_management';
 import { convertRuleSearchTermToKQL } from '../../../common/detection_engine/rule_management/rule_filtering';
+import { PARAMS_TYPE_FIELD } from '../../../common/detection_engine/rule_management/rule_fields';
 import type { DetectionRulesAuthz } from '../../../common/detection_engine/rule_management/authz';
 import type { PrebuiltRulesCustomizationStatus } from '../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { MlAuthz } from '../../lib/machine_learning/authz';
@@ -83,6 +84,23 @@ const normalizeSearch = (search: string): string | undefined => {
 // shared `.workflows` system connector is not counted as attached to this one.
 const buildAttachedRulesFilter = (workflowId: string): string =>
   `alert.attributes.actions:{ actionRef: "${systemConnectorActionRefPrefix}${ALERT_ANALYSIS_WORKFLOW_SYSTEM_CONNECTOR_ID}" and params.subActionParams.workflowId: "${workflowId}" }`;
+
+const ML_RULE_CLAUSE = `${PARAMS_TYPE_FIELD}: "machine_learning"`;
+
+// Editing an ML rule requires ML authorization (see validateBulkEditRule), so a caller without it
+// cannot attach or detach those rules. Bulk selection leaves them out and reports how many were
+// skipped instead of letting the whole bulk edit fail on them. Without bulk edit dependencies the
+// service is read-only and selection is unchanged.
+const canEditMlRules = async (
+  bulkEditDependencies: RuleAttachmentBulkEditDependencies | undefined
+): Promise<boolean> => {
+  if (!bulkEditDependencies) {
+    return true;
+  }
+
+  const { valid } = await bulkEditDependencies.mlAuthz.validateRuleType('machine_learning');
+  return valid;
+};
 
 // Match the Rules page: a single search term becomes a `name.keyword: *term*` substring filter
 // (plus the MITRE/index attributes), so `Endpoin`/`Sec`/`Def` match like they do there. The plain
@@ -368,13 +386,25 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
       // count-only + paginated read paths above.
       const searchClause = buildSearchClause(search);
       const attachmentClause = buildAttachmentFilterClause(workflowId, attachmentFilter);
+      const skipMlRules = !(await canEditMlRules(dependencies.bulkEditDependencies));
+      const baseClauses = [searchClause, attachmentClause];
 
-      const { total, rules } = await fetchMatchingRules({
-        rulesClient,
-        filter: combineFilters([searchClause, attachmentClause]),
-        page: 1,
-        perPage: MAX_RULES_TO_ATTACH,
-      });
+      const [{ total, rules }, skippedRuleCount] = await Promise.all([
+        fetchMatchingRules({
+          rulesClient,
+          filter: combineFilters(
+            skipMlRules ? [...baseClauses, `not ${ML_RULE_CLAUSE}`] : baseClauses
+          ),
+          page: 1,
+          perPage: MAX_RULES_TO_ATTACH,
+        }),
+        skipMlRules
+          ? countMatchingRules({
+              rulesClient,
+              filter: combineFilters([...baseClauses, ML_RULE_CLAUSE]),
+            })
+          : Promise.resolve(0),
+      ]);
       const rulesMissingWorkflowAction = getRulesMissingWorkflowAction(rules, workflowId);
       const rulesWithWorkflowAction = getRulesWithWorkflowAction(rules, workflowId);
 
@@ -382,6 +412,7 @@ export const createAlertAnalysisWorkflowRuleAttachmentService = (
         total,
         attached: rulesWithWorkflowAction.length,
         selectable: rulesMissingWorkflowAction.length,
+        skippedRuleCount,
         attachedRuleIds: rulesWithWorkflowAction.map(({ id }) => id),
         ruleIds: rulesMissingWorkflowAction.map(({ id }) => id),
       };

@@ -1,0 +1,22 @@
+{
+  "sha1": "64bd8890074dafc42a5ed384b8cd84587d468835",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "6ea01ced63fa402-d51e48a39c29654",
+      "title": "Files management breaks files down by extension and status in the diagnostics flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/files_management/test/scout/ui/tests/files_management.spec.ts",
+        "line": 34,
+        "column": 22
+      }
+    }
+  ]
+}

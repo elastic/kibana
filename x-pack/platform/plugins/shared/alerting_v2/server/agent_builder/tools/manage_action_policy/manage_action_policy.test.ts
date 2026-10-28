@@ -12,10 +12,10 @@ jest.mock('uuid', () => ({
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
-import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 const createLogger = (): jest.Mocked<
   Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
@@ -31,7 +31,9 @@ const createDeps = (
   logger: LoggerServiceContract = createLogger() as unknown as LoggerServiceContract
 ): ManageActionPolicyToolDeps => ({
   logger,
-  getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
+  getWorkflowClient: jest.fn(() => ({
+    getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
+  })),
   getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
 });
 
@@ -69,6 +71,7 @@ describe('manageActionPolicyTool', () => {
         ctx
       );
 
+      expect(deps.getWorkflowClient).toHaveBeenCalledWith(ctx.request);
       expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
       expect(ctx.attachments.update).not.toHaveBeenCalled();
       const { results } = result as {
@@ -109,6 +112,7 @@ describe('manageActionPolicyTool', () => {
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
         versions: [
           {
             data: {
@@ -132,12 +136,6 @@ describe('manageActionPolicyTool', () => {
       expect(ctx.attachments.add).not.toHaveBeenCalled();
       const { results } = result as { results: Array<{ type: string }> };
       expect(results[0].type).toBe(ToolResultType.other);
-
-      // The agent-builder-assisted tag is stamped on the data persisted via update()
-      const updateCall = ctx.attachments.update.mock.calls[0][1] as {
-        data: { tags?: string[] };
-      };
-      expect(updateCall.data.tags).toContain(AGENT_BUILDER_TAG);
     });
 
     it('returns an error when creating a policy without a name', async () => {
@@ -206,6 +204,215 @@ describe('manageActionPolicyTool', () => {
 
       expect(ctx.attachments.add).toHaveBeenCalled();
     });
+
+    it('returns an error when the destination workflow has no manual trigger', async () => {
+      const deps = createDeps();
+      deps.getWorkflowClient = jest.fn(() => ({
+        getWorkflow: jest.fn().mockResolvedValue({
+          id: 'wf-1',
+          name: 'Alert-only workflow',
+          yaml: 'name: notify\ntriggers:\n  - type: alert\n',
+        }),
+      }));
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Invalid Workflow Policy' },
+            {
+              operation: 'set_destinations',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as { results: Array<{ type: string; data: { message: string } }> };
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data.message).toContain('does not have a "manual" trigger');
+      expect(ctx.attachments.add).not.toHaveBeenCalled();
+    });
+
+    it('warns instead of blocking when editing an existing policy whose destination already lacks a manual trigger', async () => {
+      const deps = createDeps();
+      deps.getWorkflowClient = jest.fn(() => ({
+        getWorkflow: jest.fn().mockResolvedValue({
+          id: 'wf-1',
+          name: 'Alert-only workflow',
+          yaml: 'name: notify\ntriggers:\n  - type: alert\n',
+        }),
+      }));
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
+        origin: 'policy-uuid',
+        versions: [
+          {
+            data: {
+              id: 'policy-uuid',
+              name: 'Existing Policy',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          },
+        ],
+      } as never);
+
+      const result = await tool.handler(
+        {
+          actionPolicyAttachmentId: 'existing-id',
+          operations: [{ operation: 'set_metadata', name: 'Renamed Policy' }],
+        },
+        ctx
+      );
+
+      expect(ctx.attachments.update).toHaveBeenCalledTimes(1);
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data?: { workflowDiagnostics?: Array<{ message: string }> };
+        }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.other);
+      expect(results[0].data?.workflowDiagnostics).toEqual([
+        expect.objectContaining({
+          message: expect.stringContaining('does not have a "manual" trigger'),
+        }),
+      ]);
+    });
+
+    it('returns an error result when inputs.payload has no $ref and set_destinations is used', async () => {
+      const deps = createDeps();
+      deps.getWorkflowClient = jest.fn(() => ({
+        getWorkflow: jest.fn().mockResolvedValue({
+          id: 'wf-1',
+          name: 'Missing payload ref',
+          yaml: 'name: notify\ntriggers:\n  - type: manual\n',
+        }),
+      }));
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Warning Policy' },
+            {
+              operation: 'set_destinations',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data?: { message?: string };
+        }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data?.message).toContain('does not declare `inputs.payload`');
+    });
+
+    it('returns an error result for variable-ref errors from validateWorkflow when set_destinations is used', async () => {
+      const deps = createDeps();
+      deps.getWorkflowClient = jest.fn(() => ({
+        getWorkflow: jest.fn().mockResolvedValue({
+          id: 'wf-1',
+          name: 'Typo in payload ref',
+          yaml: [
+            'name: notify',
+            'triggers:',
+            '  - type: manual',
+            '    inputs:',
+            '      properties:',
+            '        payload:',
+            "          $ref: '#/kibana/definitions/alertingV2NotificationGroup'",
+          ].join('\n'),
+        }),
+      }));
+      deps.validateWorkflow = jest.fn().mockResolvedValue({
+        valid: false,
+        diagnostics: [
+          {
+            severity: 'error',
+            ruleId: 'invalidVariablePath',
+            message: 'Unknown path "episodez" on `inputs.payload`',
+            source: 'variables',
+          },
+        ],
+      });
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Variable Ref Error Policy' },
+            {
+              operation: 'set_destinations',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as {
+        results: Array<{ type: string; data?: { message?: string } }>;
+      };
+      expect(deps.validateWorkflow).toHaveBeenCalled();
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data?.message).toContain('[error] [invalidVariablePath]');
+      expect(results[0].data?.message).toContain('episodez');
+      expect(ctx.attachments.add).not.toHaveBeenCalled();
+    });
+
+    it('omits workflowDiagnostics entirely when the destination workflow is fully valid', async () => {
+      const deps = createDeps();
+      deps.getWorkflowClient = jest.fn(() => ({
+        getWorkflow: jest.fn().mockResolvedValue({
+          id: 'wf-1',
+          name: 'Fully valid workflow',
+          yaml: [
+            'name: notify',
+            'triggers:',
+            '  - type: manual',
+            '    inputs:',
+            '      properties:',
+            '        payload:',
+            "          $ref: '#/kibana/definitions/alertingV2NotificationGroup'",
+          ].join('\n'),
+        }),
+      }));
+      deps.validateWorkflow = jest.fn().mockResolvedValue({ valid: true, diagnostics: [] });
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Clean Policy' },
+            {
+              operation: 'set_destinations',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as {
+        results: Array<{ type: string; data?: Record<string, unknown> }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.other);
+      expect(results[0].data).not.toHaveProperty('workflowDiagnostics');
+    });
   });
 
   it('creates a rule-scoped policy with the rule.id matcher in the result', async () => {
@@ -221,7 +428,7 @@ describe('manageActionPolicyTool', () => {
             operation: 'set_destinations',
             destinations: [{ type: 'workflow', id: 'wf-1' }],
           },
-          { operation: 'set_matcher', matcher: 'rule.id: "rule-abc"' },
+          { operation: 'set_matcher', matcher: { tags: ['rule-abc'] } },
         ],
       },
       ctx
@@ -232,14 +439,14 @@ describe('manageActionPolicyTool', () => {
         type: string;
         data?: {
           actionPolicyAttachment?: {
-            matcher?: string | null;
+            matcher?: unknown;
             name?: string;
           };
         };
       }>;
     };
     expect(results[0].type).toBe(ToolResultType.other);
-    expect(results[0].data?.actionPolicyAttachment?.matcher).toBe('rule.id: "rule-abc"');
+    expect(results[0].data?.actionPolicyAttachment?.matcher).toEqual({ tags: ['rule-abc'] });
     expect(results[0].data?.actionPolicyAttachment?.name).toBe('Rule-scoped Policy');
   });
 
@@ -305,6 +512,7 @@ describe('manageActionPolicyTool', () => {
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
         origin: 'policy-persisted-id',
         versions: [
           {
@@ -340,6 +548,7 @@ describe('manageActionPolicyTool', () => {
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
+        type: ACTION_POLICY_ATTACHMENT_TYPE,
         versions: [
           {
             data: {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AttachmentType } from '../../types/domain';
 import type { AttachmentUIV2 } from '../../ui/types';
 import { isUnifiedAlertAttachment } from './v2_type_guards';
+import { hasLegacyAlertId } from './v1_type_guards';
 import { toStringArray } from './string_utils';
 
 /**
@@ -17,7 +17,7 @@ import { toStringArray } from './string_utils';
  */
 export const getManualAlertIds = (attachments: AttachmentUIV2[]): string[] => {
   const dedupedAlertIds = attachments.reduce((alertIds, attachment) => {
-    if (attachment.type === AttachmentType.alert && 'alertId' in attachment) {
+    if (hasLegacyAlertId(attachment)) {
       const ids = toStringArray(attachment.alertId);
       ids.forEach((id) => alertIds.add(id));
     } else if (isUnifiedAlertAttachment(attachment)) {

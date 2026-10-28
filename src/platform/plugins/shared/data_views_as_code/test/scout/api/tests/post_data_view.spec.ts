@@ -24,7 +24,7 @@ const INDEX_PATTERNS_READ_ROLE: KibanaRole = {
   ],
 };
 
-apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgnostic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let readOnlyApiCredentials: RoleApiCredentials;
 
@@ -69,7 +69,7 @@ apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnosti
     });
     expect(response.body.meta.managed).toBe(false);
     expect(response.body.meta.version).toBeDefined();
-    expect(response.body.meta.namespaces).toBeDefined();
+    expect(response.body.meta.spaces).toBeDefined();
   });
 
   apiTest(

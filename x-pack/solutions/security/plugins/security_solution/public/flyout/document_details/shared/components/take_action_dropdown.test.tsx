@@ -194,17 +194,10 @@ describe('take action dropdown', () => {
         .find(`button[data-test-subj="${FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}"]`)
         .simulate('click');
     });
-    test('should render "Add to existing case"', async () => {
+    test('should render "Add to case"', async () => {
       await waitFor(() => {
-        expect(
-          wrapper.find('[data-test-subj="add-to-existing-case-action"]').first().text()
-        ).toEqual('Add to existing case');
-      });
-    });
-    test('should render "Add to new case"', async () => {
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').first().text()).toEqual(
-          'Add to new case'
+        expect(wrapper.find('[data-test-subj="add-to-case-action"]').first().text()).toEqual(
+          'Add to case'
         );
       });
     });
@@ -517,47 +510,20 @@ describe('take action dropdown', () => {
     });
   });
 
-  describe('searchHit prop', () => {
-    it('should pass searchHit._source fields to the document workflow panel', () => {
-      const searchHit = {
-        _id: 'alert-123',
-        _index: 'alerts-index',
-        _source: { 'host.name': 'my-host', 'agent.type': 'endpoint' },
-      };
-
+  describe('document workflow payload', () => {
+    it('should pass the document id and index to the document workflow panel', () => {
       mount(
         <TestProviders>
-          <TakeActionDropdown {...defaultProps} searchHit={searchHit} />
+          <TakeActionDropdown
+            {...defaultProps}
+            dataAsNestedObject={getDetectionAlertMock({ _index: 'test-index' })}
+          />
         </TestProviders>
       );
 
       expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
         expect.objectContaining({
-          documents: [
-            expect.objectContaining({
-              _id: defaultProps.dataAsNestedObject._id,
-              'host.name': 'my-host',
-              'agent.type': 'endpoint',
-            }),
-          ],
-        })
-      );
-    });
-
-    it('should pass empty source fields when searchHit is undefined', () => {
-      mount(
-        <TestProviders>
-          <TakeActionDropdown {...defaultProps} />
-        </TestProviders>
-      );
-
-      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          documents: [
-            expect.objectContaining({
-              _id: defaultProps.dataAsNestedObject._id,
-            }),
-          ],
+          documentIds: [{ _id: defaultProps.dataAsNestedObject._id, _index: 'test-index' }],
         })
       );
     });
@@ -601,7 +567,7 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').exists()
         ).toBeTruthy();
-        expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').exists()).toBeFalsy();
+        expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeFalsy();
         expect(wrapper.find('[data-test-subj="acknowledged-alert-status"]').exists()).toBeFalsy();
         expect(
           wrapper.find('[data-test-subj="alert-tags-context-menu-item"]').exists()
@@ -626,9 +592,7 @@ describe('take action dropdown', () => {
         expect(
           wrapper.find('[data-test-subj="investigate-in-timeline-action-item"]').exists()
         ).toBeTruthy();
-        expect(
-          wrapper.find('[data-test-subj="add-to-existing-case-action"]').exists()
-        ).toBeTruthy();
+        expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
         expect(wrapper.find('[data-test-subj="acknowledged-alert-status"]').exists()).toBeTruthy();
       });
     });

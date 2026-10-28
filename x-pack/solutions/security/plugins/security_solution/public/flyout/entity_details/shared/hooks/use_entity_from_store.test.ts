@@ -5,8 +5,25 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
+import type { InspectQuery } from '@kbn/entity-store/common';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useEntityFromStore } from './use_entity_from_store';
+import {
+  applyEntityStoreSearchCachePatch,
+  ENTITY_FROM_STORE_QUERY_KEY,
+  useEntityFromStore,
+  type EntityStoreRecord,
+} from './use_entity_from_store';
+import {
+  buildEntityIdFilter,
+  RESOLUTION_GROUP_RISK_SORT_FIELD,
+  RESOLVED_MODE_MAX_RECORDS,
+  RESOLVED_TO_FIELD,
+} from '../../../../../common/entity_analytics/entity_store/resolution_group';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 
 const mockFetchEntitiesListV2 = jest.fn();
 const mockGetEuidFilterBasedOnDocument = jest.fn();
@@ -18,6 +35,8 @@ jest.mock('@kbn/entity-store/public', () => ({
         getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument,
       },
     },
+    getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+      .getBuiltInEntityDefinition,
   }),
 }));
 
@@ -31,14 +50,24 @@ jest.mock('../../../../entity_analytics/api/api', () => ({
 const { QueryClient, QueryClientProvider } = jest.requireActual('@kbn/react-query');
 const React = jest.requireActual('react');
 
-function createWrapper() {
-  const queryClient = new QueryClient({
+function createQueryClient() {
+  return new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
+}
+
+function createWrapper(queryClient = createQueryClient()) {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
   return Wrapper;
 }
+
+const hostRecord = (id: string, criticality?: string): EntityStoreRecord =>
+  ({
+    entity: { id, name: id, type: 'host' },
+    host: { name: id },
+    ...(criticality ? { asset: { criticality } } : {}),
+  } as unknown as EntityStoreRecord);
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -66,7 +95,7 @@ describe('useEntityFromStore', () => {
 
       // Partition semantics must be disabled for the lookup (wiring check, #278276).
       expect(mockGetEuidFilterBasedOnDocument).toHaveBeenCalledWith(
-        'host',
+        getBuiltInEntityDefinition('host'),
         { 'host.name': 'web01' },
         { excludeHigherRankedFields: false }
       );
@@ -77,6 +106,380 @@ describe('useEntityFromStore', () => {
       const mustClauses = parsed?.bool?.must ?? [];
       const hasHostIdExclusion = JSON.stringify(mustClauses).includes('host.id');
       expect(hasHostIdExclusion).toBe(false);
+    });
+  });
+
+  describe('entityId path (single mode)', () => {
+    it('queries the id with a term filter and perPage 1 by default', async () => {
+      mockFetchEntitiesListV2.mockResolvedValue({ records: [hostRecord('host-1')] });
+
+      const { result } = renderHook(
+        () => useEntityFromStore({ entityId: 'host-1', entityType: 'host', skip: false }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+
+      const [{ params }] = mockFetchEntitiesListV2.mock.calls[0];
+      expect(JSON.parse(params.filterQuery)).toEqual({
+        bool: { filter: [{ term: { 'entity.id': 'host-1' } }] },
+      });
+      expect(params.perPage).toBe(1);
+      expect(result.current.entityRecord?.entity?.id).toBe('host-1');
+      expect(result.current.aliasRecords).toEqual([]);
+      expect(result.current.aliasCount).toBe(0);
+    });
+
+    it('returns a null entityRecord when the returned record does not match entityId', async () => {
+      mockFetchEntitiesListV2.mockResolvedValue({ records: [hostRecord('other-host')] });
+
+      const { result } = renderHook(
+        () => useEntityFromStore({ entityId: 'host-1', entityType: 'host', skip: false }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.isInitialLoading).toBe(false));
+      expect(result.current.entityRecord).toBeNull();
+      expect(result.current.entity).toBeNull();
+    });
+
+    it('ignores identityFields when entityId is supplied', async () => {
+      mockFetchEntitiesListV2.mockResolvedValue({ records: [hostRecord('a')] });
+
+      renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'a',
+            identityFields: { 'host.name': 'web01' },
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalled());
+      const [{ params }] = mockFetchEntitiesListV2.mock.calls[0];
+      expect(params.filterQuery).toContain('"entity.id"');
+      expect(params.filterQuery).not.toContain('host.name');
+    });
+  });
+
+  describe('entityId path (resolved mode)', () => {
+    /** Answers the target lookup (perPage 1) and the aliases lookup separately. */
+    const mockTargetAndAliases = (
+      target: EntityStoreRecord[],
+      aliases: EntityStoreRecord[],
+      extra?: { inspect?: { target: InspectQuery; aliases: InspectQuery }; aliasesTotal?: number }
+    ) => {
+      mockFetchEntitiesListV2.mockImplementation(
+        async ({ params }: { params: { perPage: number } }) =>
+          params.perPage === 1
+            ? { records: target, total: target.length, inspect: extra?.inspect?.target }
+            : {
+                records: aliases,
+                total: extra?.aliasesTotal ?? aliases.length,
+                inspect: extra?.inspect?.aliases,
+              }
+      );
+    };
+
+    it('fetches the target by id and its aliases riskiest-first, capped to the group size', async () => {
+      mockTargetAndAliases([hostRecord('target')], [hostRecord('alias-1'), hostRecord('alias-2')]);
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+
+      expect(mockFetchEntitiesListV2).toHaveBeenCalledTimes(2);
+      const [[{ params: targetParams }], [{ params: aliasParams }]] =
+        mockFetchEntitiesListV2.mock.calls;
+      expect(JSON.parse(targetParams.filterQuery)).toEqual({
+        bool: { filter: [{ term: { 'entity.id': 'target' } }] },
+      });
+      expect(targetParams.perPage).toBe(1);
+      expect(JSON.parse(aliasParams.filterQuery)).toEqual({
+        term: { [RESOLVED_TO_FIELD]: 'target' },
+      });
+      // The target takes one of the member slots; the riskiest aliases fill the rest.
+      expect(aliasParams.perPage).toBe(RESOLVED_MODE_MAX_RECORDS - 1);
+      expect(aliasParams.sortField).toBe(RESOLUTION_GROUP_RISK_SORT_FIELD);
+      expect(aliasParams.sortOrder).toBe('desc');
+
+      expect(result.current.entityRecord?.entity?.id).toBe('target');
+      expect(result.current.aliasRecords.map((r) => r.entity?.id)).toEqual(['alias-1', 'alias-2']);
+    });
+
+    it('keeps the aliases in the order the store returned them (riskiest first)', async () => {
+      mockTargetAndAliases(
+        [hostRecord('target')],
+        [hostRecord('risky'), hostRecord('medium'), hostRecord('low')]
+      );
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+      expect(result.current.aliasRecords.map((r) => r.entity?.id)).toEqual([
+        'risky',
+        'medium',
+        'low',
+      ]);
+    });
+
+    it('never lists the target among the aliases if the aliases lookup returns it', async () => {
+      mockTargetAndAliases([hostRecord('target')], [hostRecord('alias-1'), hostRecord('target')]);
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+      expect(result.current.aliasRecords.map((r) => r.entity?.id)).toEqual(['alias-1']);
+    });
+
+    it('returns a null entityRecord rather than promoting an alias when the target itself is not returned', async () => {
+      mockTargetAndAliases([], [hostRecord('alias-1'), hostRecord('alias-2')]);
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.isInitialLoading).toBe(false));
+      expect(result.current.entityRecord).toBeNull();
+      expect(result.current.entity).toBeNull();
+      expect(result.current.aliasRecords.map((r) => r.entity?.id)).toEqual(['alias-1', 'alias-2']);
+    });
+
+    it('returns no aliases when only the target resolves', async () => {
+      mockTargetAndAliases([hostRecord('target')], []);
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+      expect(result.current.aliasRecords).toEqual([]);
+    });
+
+    it('reports the full alias count from the store even when the loaded aliases are capped', async () => {
+      mockTargetAndAliases([hostRecord('target')], [hostRecord('alias-1'), hostRecord('alias-2')], {
+        aliasesTotal: 250,
+      });
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+      expect(result.current.aliasRecords).toHaveLength(2);
+      expect(result.current.aliasCount).toBe(250);
+    });
+
+    it('merges the inspect payloads of both lookups so the inspector shows each query', async () => {
+      mockTargetAndAliases([hostRecord('target')], [hostRecord('alias-1')], {
+        inspect: {
+          target: { dsl: ['target-dsl'], response: ['target-response'] },
+          aliases: { dsl: ['aliases-dsl'], response: ['aliases-response'] },
+        },
+      });
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+      expect(result.current.inspect).toEqual({
+        dsl: ['target-dsl', 'aliases-dsl'],
+        response: ['target-response', 'aliases-response'],
+      });
+    });
+
+    it('uses distinct query caches for single and resolved mode of the same id', async () => {
+      const queryClient = createQueryClient();
+      mockFetchEntitiesListV2.mockResolvedValue({ records: [hostRecord('target')] });
+
+      const { rerender } = renderHook(
+        ({ mode }: { mode: 'single' | 'resolved' }) =>
+          useEntityFromStore({ entityId: 'target', mode, entityType: 'host', skip: false }),
+        { wrapper: createWrapper(queryClient), initialProps: { mode: 'single' } }
+      );
+      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalledTimes(1));
+
+      rerender({ mode: 'resolved' });
+      // Resolved mode issues the target and aliases lookups.
+      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalledTimes(3));
+
+      const keys = queryClient
+        .getQueryCache()
+        .getAll()
+        .map((query: { queryKey: unknown[] }) => query.queryKey[3]);
+      expect(keys).toEqual(expect.arrayContaining(['id:target', 'resolved:target']));
+    });
+
+    it('falls back to identityFields when resolved mode is requested without an entityId', async () => {
+      renderHook(
+        () =>
+          useEntityFromStore({
+            mode: 'resolved',
+            identityFields: { 'host.name': 'web01' },
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalled());
+      const [{ params }] = mockFetchEntitiesListV2.mock.calls[0];
+      expect(params.filterQuery).toContain('host.name');
+      expect(params.filterQuery).not.toContain(RESOLVED_TO_FIELD);
+      expect(params.perPage).toBe(1);
+    });
+  });
+
+  describe('buildEntityIdFilter', () => {
+    it('builds a term filter in single mode', () => {
+      expect(buildEntityIdFilter('x', 'single')).toEqual({
+        bool: { filter: [{ term: { 'entity.id': 'x' } }] },
+      });
+    });
+
+    it('builds a should filter over entity.id and resolved_to in resolved mode', () => {
+      expect(buildEntityIdFilter('x', 'resolved')).toEqual({
+        bool: {
+          should: [{ term: { 'entity.id': 'x' } }, { term: { [RESOLVED_TO_FIELD]: 'x' } }],
+          minimum_should_match: 1,
+        },
+      });
+    });
+  });
+
+  describe('applyEntityStoreSearchCachePatch', () => {
+    it('replaces the matching record wherever it sits in the cached list', () => {
+      const queryClient = createQueryClient();
+      const queryKey = [ENTITY_FROM_STORE_QUERY_KEY, 'host', 'a', 'resolved:a', false, 'a'];
+      queryClient.setQueryData(queryKey, {
+        records: [hostRecord('a'), hostRecord('b')],
+      });
+
+      applyEntityStoreSearchCachePatch(queryClient, 'host', hostRecord('b', 'high_impact'));
+
+      const cached = queryClient.getQueryData(queryKey) as
+        | { records: EntityStoreRecord[] }
+        | undefined;
+      expect(cached?.records.map((r: EntityStoreRecord) => r.entity?.id)).toEqual(['a', 'b']);
+      expect(cached?.records[1].asset?.criticality).toBe('high_impact');
+      expect(cached?.records[0].asset).toBeUndefined();
+    });
+
+    it('leaves caches untouched when no record matches', () => {
+      const queryClient = createQueryClient();
+      const queryKey = [ENTITY_FROM_STORE_QUERY_KEY, 'host', 'a', 'id:a', false, 'a'];
+      const previous = { records: [hostRecord('a')] };
+      queryClient.setQueryData(queryKey, previous);
+
+      applyEntityStoreSearchCachePatch(queryClient, 'host', hostRecord('zzz', 'high_impact'));
+
+      expect(queryClient.getQueryData(queryKey)).toBe(previous);
+    });
+  });
+
+  describe('executionContext propagation', () => {
+    it('forwards the caller-supplied executionContext to fetchEntitiesListV2', async () => {
+      const executionContext = buildExecutionContext(
+        EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+        'host_entity_from_store'
+      );
+
+      renderHook(
+        () =>
+          useEntityFromStore({
+            identityFields: { 'host.name': 'web01' },
+            entityType: 'host',
+            skip: false,
+            executionContext,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalled());
+
+      const [callArg] = mockFetchEntitiesListV2.mock.calls[0];
+      expect(callArg.context).toEqual({
+        child: {
+          type: 'security_solution',
+          name: 'entity_analytics:entity_details_flyout',
+          id: 'host_entity_from_store',
+        },
+      });
+    });
+
+    it('omits context when the caller does not supply executionContext', async () => {
+      renderHook(
+        () =>
+          useEntityFromStore({
+            identityFields: { 'host.name': 'web01' },
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(mockFetchEntitiesListV2).toHaveBeenCalled());
+
+      const [callArg] = mockFetchEntitiesListV2.mock.calls[0];
+      expect(callArg.context).toBeUndefined();
     });
   });
 });

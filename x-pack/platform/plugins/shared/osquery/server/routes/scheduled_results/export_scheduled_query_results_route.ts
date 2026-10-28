@@ -53,6 +53,7 @@ export const exportScheduledQueryResultsRoute = (
       },
       async (context, request, response) => {
         const { scheduleId, executionCount } = request.params;
+        const cpsActive = await osqueryContext.isCpsActive(request);
 
         let query: string | undefined;
         let ecsMapping: ECSMapping | undefined;
@@ -102,7 +103,7 @@ export const exportScheduledQueryResultsRoute = (
           },
           fileNamePrefix: `osquery-scheduled-results-${scheduleId}-${executionCount}`,
           ecsMapping,
-          ...(osqueryContext.cpsEnabled ? { matchMissingSpaceId: false } : {}),
+          ...(cpsActive ? { matchMissingSpaceId: false } : {}),
         });
       }
     );

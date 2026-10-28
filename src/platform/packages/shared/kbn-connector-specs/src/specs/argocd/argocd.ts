@@ -421,7 +421,7 @@ export const ArgocdConnector: ConnectorSpec = {
   metadata: {
     id: '.argocd',
     displayName: 'Argo CD',
-    description: i18n.translate('core.kibanaConnectorSpecs.argocd.metadata.description', {
+    description: i18n.translate('connectorSpecs.argocd.metadata.description', {
       defaultMessage: 'Manage GitOps applications in Argo CD — sync, inspect health and resources',
     }),
     minimumLicense: 'enterprise',
@@ -436,38 +436,31 @@ export const ArgocdConnector: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.label', {
+          label: i18n.translate('connectorSpecs.argocd.auth.bearerWithTls.label', {
             defaultMessage: 'API token',
           }),
           meta: {
             token: {
-              label: i18n.translate(
-                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.tokenLabel',
-                { defaultMessage: 'Token' }
-              ),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.tokenHelpText',
-                {
-                  defaultMessage:
-                    'A long-lived Argo CD account or project-role API token. Do not use short-lived session JWTs from username/password login.',
-                }
-              ),
+              label: i18n.translate('connectorSpecs.argocd.auth.bearerWithTls.tokenLabel', {
+                defaultMessage: 'Token',
+              }),
+              helpText: i18n.translate('connectorSpecs.argocd.auth.bearerWithTls.tokenHelpText', {
+                defaultMessage:
+                  'A long-lived Argo CD account or project-role API token. Do not use short-lived session JWTs from username/password login.',
+              }),
             },
             caCert: {
-              label: i18n.translate('core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.caLabel', {
+              label: i18n.translate('connectorSpecs.argocd.auth.bearerWithTls.caLabel', {
                 defaultMessage: 'Server CA certificate (PEM)',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.caHelpText',
-                {
-                  defaultMessage:
-                    'Paste the PEM-encoded certificate authority used to verify the Argo CD server. Leave empty to rely on the system trust store or to disable verification.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.argocd.auth.bearerWithTls.caHelpText', {
+                defaultMessage:
+                  'Paste the PEM-encoded certificate authority used to verify the Argo CD server. Leave empty to rely on the system trust store or to disable verification.',
+              }),
             },
             verificationMode: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.verificationModeHelpText',
+                'connectorSpecs.argocd.auth.bearerWithTls.verificationModeHelpText',
                 {
                   defaultMessage:
                     'How to verify the Argo CD server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
@@ -487,7 +480,7 @@ export const ArgocdConnector: ConnectorSpec = {
         .url()
         .describe('Argo CD API server URL (e.g., https://argocd.example.com)')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.argocd.config.apiUrl.label', {
+          label: i18n.translate('connectorSpecs.argocd.config.apiUrl.label', {
             defaultMessage: 'API server URL',
           }),
           widget: 'text',
@@ -500,6 +493,7 @@ export const ArgocdConnector: ConnectorSpec = {
   actions: {
     request: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Make an authenticated request to any Argo CD API path. Prefer the typed actions ' +
         '(listApplications, getApplication, syncApplication, getResourceTree, listApplicationEvents, ' +
@@ -518,6 +512,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     listApplications: {
       isTool: true,
+      scope: 'read',
       description:
         'List Argo CD applications with optional filters (project, selector, name, repo). ' +
         'Returns a slim summary per app (name, project, source, destination, sync/health status). ' +
@@ -547,6 +542,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     getApplication: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a single Argo CD application by name. Returns condensed status (history capped to ' +
         `the last ${MAX_HISTORY_ENTRIES} entries; oversized syncResult.resources stripped). ` +
@@ -569,6 +565,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     getResourceTree: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the resource tree for an application — health and sync state per managed Kubernetes ' +
         'object. Primary diagnostic tool when an app is Degraded or OutOfSync.',
@@ -584,6 +581,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     listApplicationEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'List Kubernetes events related to an Argo CD application (or a specific managed resource). ' +
         'Useful for diagnosing why sync or hooks failed.',
@@ -604,6 +602,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     getPodLogs: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve logs for a pod managed by an Argo CD application. Output is capped to the last ' +
         `${MAX_LOG_CHARS} characters. Prefer finite query params (tailLines, sinceSeconds); ` +
@@ -640,6 +639,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     syncApplication: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Trigger a sync of an Argo CD application to reconcile the live cluster state with Git. ' +
         'prune defaults to false (does not delete resources removed from Git). Prefer dryRun: true ' +
@@ -667,6 +667,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     listClusters: {
       isTool: true,
+      scope: 'read',
       description:
         'List clusters registered with Argo CD. Credential fields (bearerToken, tlsClientConfig, ' +
         'etc.) are scrubbed from the response.',
@@ -688,6 +689,7 @@ export const ArgocdConnector: ConnectorSpec = {
 
     getProject: {
       isTool: true,
+      scope: 'read',
       description:
         'Get an Argo CD AppProject by name. Defaults to the detailed endpoint for richer agent ' +
         'context (destinations, source repos, roles).',
@@ -736,7 +738,7 @@ export const ArgocdConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.argocd.test.description', {
+    description: i18n.translate('connectorSpecs.argocd.test.description', {
       defaultMessage: 'Verifies connectivity by requesting Argo CD userinfo',
     }),
     handler: async (ctx) => {

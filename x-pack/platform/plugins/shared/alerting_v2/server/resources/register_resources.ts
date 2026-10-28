@@ -7,7 +7,9 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { ChangeHistoryClient } from '@kbn/change-history';
+import type { RetentionConfig } from '../config';
 import type { ResourceManagerContract } from '../lib/services/resource_service/resource_manager';
 import {
   RuleChangesHistoryInitializer,
@@ -19,22 +21,26 @@ import { registerEsqlViews } from './esql_views/register';
 export interface InitializeResourcesOptions {
   resourceManager: ResourceManagerContract;
   esClient: ElasticsearchClient;
-  logger: Logger;
+  coreLogger: Logger;
   changeHistoryClient: ChangeHistoryClient;
+  retention: RetentionConfig;
+  userProfileService: UserProfileServiceStart;
 }
 
 export function initializeResources({
   resourceManager,
   esClient,
-  logger,
+  coreLogger,
   changeHistoryClient,
+  retention,
+  userProfileService,
 }: InitializeResourcesOptions): void {
-  registerDatastreams({ resourceManager, esClient, logger });
-  registerEsqlViews({ resourceManager, esClient, logger });
+  registerDatastreams({ resourceManager, esClient, logger: coreLogger, retention });
+  registerEsqlViews({ resourceManager, esClient, logger: coreLogger });
 
   resourceManager.registerResource(
     RULE_CHANGES_HISTORY_RESOURCE_KEY,
-    new RuleChangesHistoryInitializer(changeHistoryClient, esClient),
+    new RuleChangesHistoryInitializer(changeHistoryClient, esClient, userProfileService),
     { optional: true }
   );
 

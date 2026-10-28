@@ -31,9 +31,14 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
     width: 'fit-content',
   }),
   bodyContainer: css({
+    height: 'inherit',
     overflowY: 'auto',
     overflowAnchor: 'none',
     scrollbarGutter: 'auto',
     scrollbarWidth: 'thin',
+  }),
+  // Contains the sticky filter box's z-index so the frame's EuiPanel border (`::after`) paints above it.
+  scrollContainer: css({
+    isolation: 'isolate',
   }),
 });

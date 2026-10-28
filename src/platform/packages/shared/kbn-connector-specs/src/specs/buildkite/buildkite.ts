@@ -99,7 +99,7 @@ export const Buildkite: ConnectorSpec = {
   metadata: {
     id: '.buildkite',
     displayName: 'Buildkite',
-    description: i18n.translate('core.kibanaConnectorSpecs.buildkite.metadata.description', {
+    description: i18n.translate('connectorSpecs.buildkite.metadata.description', {
       defaultMessage:
         'Trigger, observe, retry, and cancel Buildkite builds, unblock deploy gates, and post annotations',
     }),
@@ -117,16 +117,13 @@ export const Buildkite: ConnectorSpec = {
         overrides: {
           meta: {
             token: {
-              label: i18n.translate('core.kibanaConnectorSpecs.buildkite.auth.bearer.token.label', {
+              label: i18n.translate('connectorSpecs.buildkite.auth.bearer.token.label', {
                 defaultMessage: 'API Access Token',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.buildkite.auth.bearer.token.helpText',
-                {
-                  defaultMessage:
-                    'A Buildkite API access token with the read_pipelines, read_builds, write_builds, read_artifacts, and read_build_logs scopes. Create one at buildkite.com/user/api-access-tokens.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.buildkite.auth.bearer.token.helpText', {
+                defaultMessage:
+                  'A Buildkite API access token with the read_pipelines, read_builds, write_builds, read_artifacts, and read_build_logs scopes. Create one at buildkite.com/user/api-access-tokens.',
+              }),
             },
           },
         },
@@ -143,16 +140,13 @@ export const Buildkite: ConnectorSpec = {
           widget: 'text',
           placeholder: BUILDKITE_MCP_SERVER_URL,
           hidden: true,
-          label: i18n.translate('core.kibanaConnectorSpecs.buildkite.config.serverUrl.label', {
+          label: i18n.translate('connectorSpecs.buildkite.config.serverUrl.label', {
             defaultMessage: 'MCP Server URL',
           }),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.buildkite.config.serverUrl.helpText',
-            {
-              defaultMessage:
-                "The URL of Buildkite's hosted MCP server (API-token pass-through endpoint).",
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.buildkite.config.serverUrl.helpText', {
+            defaultMessage:
+              "The URL of Buildkite's hosted MCP server (API-token pass-through endpoint).",
+          }),
         }),
       orgSlug: z
         .string()
@@ -161,11 +155,11 @@ export const Buildkite: ConnectorSpec = {
         .describe('Your Buildkite organization slug')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.buildkite.config.orgSlug.label', {
+          label: i18n.translate('connectorSpecs.buildkite.config.orgSlug.label', {
             defaultMessage: 'Organization slug',
           }),
           placeholder: 'my-organization',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.buildkite.config.orgSlug.helpText', {
+          helpText: i18n.translate('connectorSpecs.buildkite.config.orgSlug.helpText', {
             defaultMessage:
               'The slug of your Buildkite organization, found in the URL: buildkite.com/your-slug/. Every action in this connector runs against this organization.',
           }),
@@ -180,6 +174,7 @@ export const Buildkite: ConnectorSpec = {
   actions: {
     createBuild: {
       isTool: true,
+      scope: 'write',
       description:
         'Trigger a new build on a Buildkite pipeline for a specific commit and branch, with optional message, environment variables, and meta-data. Returns the created build, including its number and state. This is the core action for kicking off CI/CD from a workflow.',
       input: CreateBuildInputSchema,
@@ -202,6 +197,7 @@ export const Buildkite: ConnectorSpec = {
 
     getBuild: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a single build by pipeline slug and build number, including its state, timing, and annotation summaries. Jobs are not included — use listJobs or getJobLog for job-level detail. Use this to poll a build triggered by createBuild before deciding the next workflow step.',
       input: GetBuildInputSchema,
@@ -219,6 +215,7 @@ export const Buildkite: ConnectorSpec = {
 
     listBuilds: {
       isTool: true,
+      scope: 'read',
       description:
         'List builds for a pipeline, or across every pipeline in the organization when pipelineSlug is omitted, with optional filtering by branch, state, commit, or creator. Returns lightweight build summaries (jobs are excluded). Use this to find a build to act on when you do not already know its build number.',
       input: ListBuildsInputSchema,
@@ -241,6 +238,7 @@ export const Buildkite: ConnectorSpec = {
 
     cancelBuild: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Cancel a running or scheduled build on a Buildkite pipeline. Use this to stop a bad or superseded build automatically, for example after detecting a newer commit on the same branch.',
       input: CancelBuildInputSchema,
@@ -258,6 +256,7 @@ export const Buildkite: ConnectorSpec = {
 
     rebuild: {
       isTool: true,
+      scope: 'write',
       description:
         'Rebuild an entire build on a Buildkite pipeline, creating a new build from the same commit, branch, and environment. Use this to re-run everything after a transient infrastructure failure or a pipeline configuration fix. To retry only the jobs that failed instead of the whole build, use retryFailedJobs.',
       input: RebuildInputSchema,
@@ -275,6 +274,7 @@ export const Buildkite: ConnectorSpec = {
 
     retryFailedJobs: {
       isTool: true,
+      scope: 'write',
       description:
         'Retry every failed, broken, or timed-out job in a build, leaving passed jobs alone. This is the standard self-heal action for flaky CI failures. Returns the list of jobs that were retried, plus any that could not be retried. To retry a single job instead, use retryJob; to re-run the whole build, use rebuild.',
       input: RetryFailedJobsInputSchema,
@@ -331,6 +331,7 @@ export const Buildkite: ConnectorSpec = {
 
     listJobs: {
       isTool: true,
+      scope: 'read',
       description:
         'List the jobs in a build, with an optional comma-separated state filter (e.g. "failed,broken" to find jobs to investigate or retry). Returns each job\'s id, name, state, and command. Use the returned job ids with retryJob, unblockJob, or getJobLog.',
       input: ListJobsInputSchema,
@@ -350,6 +351,7 @@ export const Buildkite: ConnectorSpec = {
 
     unblockJob: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Unblock a blocked (manual-gate) job so the build proceeds, optionally supplying values for the block step\'s input fields. Use this to automate deploy-gate approval. Find the blocked job\'s id with listJobs (state="blocked").',
       input: UnblockJobInputSchema,
@@ -369,6 +371,7 @@ export const Buildkite: ConnectorSpec = {
 
     retryJob: {
       isTool: true,
+      scope: 'write',
       description:
         'Retry a single failed or timed-out job in a build, leaving every other job untouched. Use this for a targeted retry when only one step failed. Find the job id with listJobs. To retry every failed job in a build at once, use retryFailedJobs instead.',
       input: RetryJobInputSchema,
@@ -387,6 +390,7 @@ export const Buildkite: ConnectorSpec = {
 
     getJobLog: {
       isTool: true,
+      scope: 'read',
       description:
         'Get log output for a job, returning up to `limit` lines starting at row `seek`. Find the job id with listJobs. Use this to pull failure output for triage or to attach to a case. The response is bounded by `limit` (default 500) to control token usage — for a long log, page through with increasing `seek` values.',
       input: GetJobLogInputSchema,
@@ -407,6 +411,7 @@ export const Buildkite: ConnectorSpec = {
 
     createBuildAnnotation: {
       isTool: true,
+      scope: 'write',
       description:
         'Create or append to an annotation on a build, shown on the build page in the Buildkite UI. Use this to post workflow findings, remediation status, or links back onto the build. Pass the same `context` value with `append: true` to append to an existing annotation instead of creating a new one.',
       input: CreateBuildAnnotationInputSchema,
@@ -429,6 +434,7 @@ export const Buildkite: ConnectorSpec = {
 
     listBuildAnnotations: {
       isTool: true,
+      scope: 'read',
       description:
         'List the annotations posted on a build. Use this to read context posted by earlier workflow steps or other tools before deciding what to post next with createBuildAnnotation.',
       input: ListBuildAnnotationsInputSchema,
@@ -448,6 +454,7 @@ export const Buildkite: ConnectorSpec = {
 
     listPipelines: {
       isTool: true,
+      scope: 'read',
       description:
         'List the pipelines in the configured organization, with their names, slugs, and basic status. Use this to discover the pipelineSlug to target with other actions when you do not already know it.',
       input: ListPipelinesInputSchema,
@@ -467,6 +474,7 @@ export const Buildkite: ConnectorSpec = {
 
     getPipeline: {
       isTool: true,
+      scope: 'read',
       description:
         'Get detailed configuration and metadata for a single pipeline, including its repository, default branch, and step count. Use listPipelines first if you do not already know the pipelineSlug.',
       input: GetPipelineInputSchema,
@@ -483,6 +491,7 @@ export const Buildkite: ConnectorSpec = {
 
     listArtifacts: {
       isTool: true,
+      scope: 'read',
       description:
         'List the artifacts a build produced across all of its jobs, including filenames, paths, sizes, and MIME types. Use this to locate a build output a workflow needs; download the file itself using the callTool escape hatch with the "get_artifact" tool and the returned artifact id and job_id.',
       input: ListArtifactsInputSchema,
@@ -502,6 +511,7 @@ export const Buildkite: ConnectorSpec = {
 
     listTools: {
       isTool: true,
+      scope: 'read',
       description:
         'List every MCP tool exposed by the Buildkite MCP server, including ones not covered by a named action (e.g. clusters, agents, pipeline schedules, Test Engine). Use this to discover tools to call with callTool.',
       input: ListToolsInputSchema,
@@ -515,6 +525,7 @@ export const Buildkite: ConnectorSpec = {
 
     callTool: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Call any tool on the Buildkite MCP server directly by name. Use this as an escape hatch for tools not yet exposed as a named action — for example, downloading an artifact\'s content with "get_artifact", or searching job logs with "search_logs". The organization slug is filled in automatically for tools that accept it (most do; a few org-independent tools like "access_token" or "current_user" do not). Use listTools first to discover available tool names and their parameters.',
       input: CallToolInputSchema,
@@ -558,7 +569,7 @@ export const Buildkite: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.buildkite.test.description', {
+    description: i18n.translate('connectorSpecs.buildkite.test.description', {
       defaultMessage:
         'Verifies the connection to Buildkite by listing pipelines in the configured organization.',
     }),

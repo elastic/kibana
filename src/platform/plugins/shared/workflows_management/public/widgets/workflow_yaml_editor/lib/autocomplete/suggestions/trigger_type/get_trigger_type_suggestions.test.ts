@@ -129,9 +129,9 @@ describe('get_trigger_type_suggestions', () => {
       beforeEach(() => {
         mockGetTriggerDefinitions.mockReturnValue([
           mockTrigger({
-            id: 'alerting.episodeAcked',
-            title: 'Alerting - Episode acknowledged',
-            description: 'Emitted when acknowledgement is removed from an alerting episode.',
+            id: 'alerting.actions.alertAcked',
+            title: 'Alerting - Alert acknowledged',
+            description: 'Emitted when an alert is acknowledged.',
             stability: 'tech_preview',
           }),
           mockTrigger({
@@ -146,30 +146,33 @@ describe('get_trigger_type_suggestions', () => {
       it('should show technical ids as label with human-readable titles as detail', () => {
         const result = getTriggerTypeSuggestions('', mockRange);
 
-        const alertingSuggestion = result.find((s) => s.label === 'alerting.episodeAcked');
+        const alertingSuggestion = result.find((s) => s.label === 'alerting.actions.alertAcked');
         expect(alertingSuggestion).toMatchObject({
-          label: 'alerting.episodeAcked',
-          detail: 'Alerting - Episode acknowledged',
-          filterText: 'alerting.episodeAcked',
+          label: 'alerting.actions.alertAcked',
+          detail: 'Alerting - Alert acknowledged',
+          filterText: 'alerting.actions.alertAcked',
         });
 
         const casesSuggestion = result.find((s) => s.label === 'cases.caseCreated');
         expect(casesSuggestion).toMatchObject({
           label: 'cases.caseCreated',
           detail: 'Cases - Case created',
+          filterText: 'cases.caseCreated',
         });
       });
 
       it('should filter registered triggers by namespace prefix', () => {
         const result = getTriggerTypeSuggestions('alerting.', mockRange);
 
-        expect(result.map((s) => s.label)).toEqual(['alerting.episodeAcked']);
+        expect(result.map((s) => s.label)).toEqual(['alerting.actions.alertAcked']);
+        expect(result.map((s) => s.detail)).toEqual(['Alerting - Alert acknowledged']);
       });
 
       it('should filter registered triggers by title prefix', () => {
         const result = getTriggerTypeSuggestions('Cases - Case', mockRange);
 
         expect(result.map((s) => s.label)).toEqual(['cases.caseCreated']);
+        expect(result.map((s) => s.detail)).toEqual(['Cases - Case created']);
       });
     });
 
@@ -180,12 +183,46 @@ describe('get_trigger_type_suggestions', () => {
         expect(generateTriggerSnippet).toHaveBeenCalledTimes(3);
         expect(generateTriggerSnippet).toHaveBeenCalledWith('alert', {
           defaultCondition: undefined,
+          requiresConnectorId: undefined,
         });
         expect(generateTriggerSnippet).toHaveBeenCalledWith('scheduled', {
           defaultCondition: undefined,
+          requiresConnectorId: undefined,
         });
         expect(generateTriggerSnippet).toHaveBeenCalledWith('manual', {
           defaultCondition: undefined,
+          requiresConnectorId: undefined,
+        });
+      });
+
+      it('should pass requiresConnectorId for connector-event triggers', () => {
+        const connectorEventTriggerId = 'example.connector_event';
+        mockGetTriggerDefinitions.mockReturnValue([
+          mockTrigger({
+            id: connectorEventTriggerId,
+            title: 'Example connector event',
+            description: 'Emitted when an example connector receives an event.',
+            stability: 'tech_preview',
+            requiresConnectorId: true,
+          }),
+        ]);
+        mockGetTriggerDefinition.mockImplementation((id) =>
+          id === connectorEventTriggerId
+            ? mockTrigger({
+                id: connectorEventTriggerId,
+                title: 'Example connector event',
+                description: 'Emitted when an example connector receives an event.',
+                stability: 'tech_preview',
+                requiresConnectorId: true,
+              })
+            : undefined
+        );
+
+        getTriggerTypeSuggestions('example.connector', mockRange);
+
+        expect(generateTriggerSnippet).toHaveBeenCalledWith(connectorEventTriggerId, {
+          defaultCondition: undefined,
+          requiresConnectorId: true,
         });
       });
 

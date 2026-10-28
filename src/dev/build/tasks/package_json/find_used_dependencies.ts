@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import globby from 'globby';
+import { globby } from 'globby';
 import { ImportResolver } from '@kbn/import-resolver';
 import { ImportLocator } from '@kbn/import-locator';
 import type { PluginPackage } from '@kbn/repo-packages';
@@ -56,7 +56,7 @@ export async function findUsedDependencies(
             'src/cli/*/dist.js',
             'src/cli*/dist.js',
             // core entry
-            'src/core/server/index.js',
+            'src/core/packages/core/server/index.js',
             // entries that are loaded into the server with dynamic require() calls
             'src/platform/plugins/private/vis_types/timelion/server/**/*.js',
           ],

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+
 import { schema } from '@kbn/config-schema';
 import { AuthzDisabled } from '@kbn/core-security-server';
 
+import { queryAllRoles } from './lib';
 import { getRolesResponseSchema } from './model';
 import type { RouteDefinitionParams } from '../..';
 import { API_VERSIONS } from '../../../../common/constants';
+import { isRoleHiddenOnServerless } from '../../../../common/model';
 import { compareRolesByName, transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
@@ -74,6 +78,14 @@ export function defineGetAllRolesRoutes({
           request: {
             query: schema.maybe(
               schema.object({
+                includeReservedRoles: schema.maybe(
+                  schema.boolean({
+                    meta: {
+                      description:
+                        'If true, include built-in roles on serverless. By default, serverless returns only custom roles. Other deployments always include built-in roles.',
+                    },
+                  })
+                ),
                 replaceDeprecatedPrivileges: schema.maybe(
                   schema.boolean({
                     meta: {
@@ -95,16 +107,21 @@ export function defineGetAllRolesRoutes({
       },
       createLicensedRouteHandler(async (context, request, response) => {
         try {
-          const hideReservedRoles = buildFlavor === 'serverless';
+          const hideReservedRoles =
+            buildFlavor === 'serverless' && !request.query?.includeReservedRoles;
           const esClient = (await context.core).elasticsearch.client;
           const [features, elasticsearchRoles] = await Promise.all([
             getFeatures(),
-            await esClient.asCurrentUser.security.getRole(),
+            buildFlavor === 'serverless' && request.query?.includeReservedRoles
+              ? queryAllRoles(esClient.asCurrentUser)
+              : esClient.asCurrentUser.security.getRole(),
           ]);
 
           // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.
           return response.ok({
-            body: Object.entries(elasticsearchRoles)
+            body: Object.entries<estypes.SecurityGetRoleRole | estypes.SecurityRoleDescriptor>(
+              elasticsearchRoles
+            )
               .map(([roleName, elasticsearchRole]) =>
                 transformElasticsearchRoleToRole({
                   features,
@@ -119,6 +136,9 @@ export function defineGetAllRolesRoutes({
                 })
               )
               .filter((role) => {
+                if (buildFlavor === 'serverless' && isRoleHiddenOnServerless(role)) {
+                  return false;
+                }
                 return !hideReservedRoles || !role.metadata?._reserved;
               })
               .sort(compareRolesByName),

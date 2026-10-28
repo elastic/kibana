@@ -122,4 +122,33 @@ describe('RoutedConversationsProvider — attachment lifecycle', () => {
     // Staged attachments from conv-1 must not leak into conv-2
     expect(capture.attachments).toBeUndefined();
   });
+
+  it('restores attachments from location state on the cancel bounce to a new conversation', async () => {
+    // Cancelling an in-progress first message of a brand-new conversation bounces the URL
+    // back to `/new` with the sent attachments carried in location state. The provider never
+    // remounts (both routes share one Route element), so the conversationId effect must
+    // re-seed from location state rather than clear — otherwise the thumbnail pill row is lost.
+    const capture: ContextCapture = { attachments: undefined, upsertAttachments: undefined };
+
+    mockUseParams.mockReturnValue({ conversationId: 'conv-1', agentId: 'agent-1' });
+    const { rerender } = render(
+      <RoutedConversationsProvider>
+        <ContextReader capture={capture} />
+      </RoutedConversationsProvider>
+    );
+
+    await act(async () => {});
+
+    // Bounce to a new conversation with restored attachments in location state
+    const restored = [createMockAttachment()];
+    mockUseParams.mockReturnValue({ conversationId: 'new', agentId: 'agent-1' });
+    mockUseLocation.mockReturnValue({ state: { attachments: restored } });
+    rerender(
+      <RoutedConversationsProvider>
+        <ContextReader capture={capture} />
+      </RoutedConversationsProvider>
+    );
+
+    expect(capture.attachments).toEqual(restored);
+  });
 });

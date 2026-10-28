@@ -32,8 +32,6 @@ const buildUrl = (params: Record<string, string | string[] | number | undefined>
 apiTest.describe('dashboards - search', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
-  // The `asCode.useGASchemas` flag defaults to `true`, so this suite exercises the GA schemas
-  // without an explicit override.
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
     viewerCredentials = await requestAuth.getApiKey('viewer');
     await kbnClient.importExport.load(KBN_ARCHIVES.MANY_DASHBOARDS);

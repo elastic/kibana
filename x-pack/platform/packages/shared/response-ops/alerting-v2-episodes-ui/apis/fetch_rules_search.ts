@@ -30,7 +30,7 @@ export async function fetchRulesSearch({
   const res = await http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
     query: {
       search: query.trim(),
-      perPage: SEARCH_PAGE_SIZE,
+      per_page: SEARCH_PAGE_SIZE,
       page: 1,
     },
   });

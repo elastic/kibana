@@ -84,6 +84,28 @@ describe('AgentReassignAgentPolicyModal', () => {
     });
   });
 
+  it('does not offer agentless policies', async () => {
+    mockPolicies([
+      POLICY_A,
+      POLICY_B,
+      {
+        id: 'policy-agentless',
+        name: 'Agentless Policy',
+        is_managed: false,
+        supports_agentless: true,
+      },
+    ] as any);
+    const { utils } = render({ agents: [{ id: 'agent-1', policy_id: 'policy-a' } as any] });
+
+    const combobox = utils.getByRole('combobox');
+    act(() => {
+      fireEvent.change(combobox, { target: { value: 'Polic' } });
+    });
+
+    expect(await utils.findByText('Policy B')).toBeInTheDocument();
+    expect(utils.queryByText('Agentless Policy')).not.toBeInTheDocument();
+  });
+
   describe('single agent', () => {
     const singleAgent = [{ id: 'agent-1', policy_id: 'policy-a' } as any];
 
@@ -92,6 +114,63 @@ describe('AgentReassignAgentPolicyModal', () => {
 
       // policy-a is pre-selected (matches agent's current policy) — button must be disabled
       expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+    });
+
+    describe('versioned policy_id (e.g. policy-a#9.4)', () => {
+      const versionedAgent = [{ id: 'agent-1', policy_id: 'policy-a#9.4' } as any];
+
+      it('pre-selects the base policy in the dropdown', () => {
+        const { utils } = render({ agents: versionedAgent });
+
+        // The combobox pill should show the base policy name, not an empty string
+        expect(utils.getByRole('combobox')).toBeInTheDocument();
+        expect(utils.getByText('Policy A')).toBeInTheDocument();
+      });
+
+      it('confirm button is disabled when the base policy is already selected', () => {
+        const { utils } = render({ agents: versionedAgent });
+
+        expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+      });
+
+      it('confirm button is enabled after selecting a different policy', async () => {
+        const { utils } = render({ agents: versionedAgent });
+
+        const combobox = utils.getByRole('combobox');
+        act(() => {
+          fireEvent.change(combobox, { target: { value: 'Policy B' } });
+        });
+        const optionB = await utils.findByText('Policy B');
+        act(() => {
+          fireEvent.click(optionB);
+        });
+
+        expect(utils.getByTestId('confirmModalConfirmButton')).not.toBeDisabled();
+      });
+
+      it('calls sendPostAgentReassign with the selected base policy id', async () => {
+        mockSendPostAgentReassign.mockResolvedValue({});
+        const { utils } = render({ agents: versionedAgent });
+
+        const combobox = utils.getByRole('combobox');
+        act(() => {
+          fireEvent.change(combobox, { target: { value: 'Policy B' } });
+        });
+        const optionB = await utils.findByText('Policy B');
+        act(() => {
+          fireEvent.click(optionB);
+        });
+
+        act(() => {
+          fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
+        });
+
+        await waitFor(() => {
+          expect(mockSendPostAgentReassign).toHaveBeenCalledWith('agent-1', {
+            policy_id: 'policy-b',
+          });
+        });
+      });
     });
 
     it('shows the singular agent count in the description', () => {
@@ -302,6 +381,24 @@ describe('AgentReassignAgentPolicyModal', () => {
         expect(mockSendPostBulkAgentReassign).toHaveBeenCalled();
       });
       expect(mockSendPostAgentReassign).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('policy ordering', () => {
+    it('lists policies alphabetically, case-insensitive', async () => {
+      mockPolicies([
+        { id: 'p-c', name: 'charlie', is_managed: false },
+        { id: 'p-a', name: 'Alpha', is_managed: false },
+        { id: 'p-b', name: 'bravo', is_managed: false },
+      ]);
+      const { utils } = render({ agents: [{ id: 'agent-1', policy_id: 'p-a' } as any] });
+
+      act(() => {
+        fireEvent.click(utils.getByTestId('comboBoxToggleListButton'));
+      });
+
+      const options = await utils.findAllByRole('option');
+      expect(options.map((o) => o.textContent)).toEqual(['Alpha', 'bravo', 'charlie']);
     });
   });
 });

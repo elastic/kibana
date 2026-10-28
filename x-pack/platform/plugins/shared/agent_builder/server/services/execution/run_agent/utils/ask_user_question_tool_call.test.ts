@@ -20,31 +20,20 @@ const hobbiesQuestion = {
 };
 
 describe('materializeAskUserQuestionToolCall', () => {
-  it('produces a fresh toolCallId and the correct toolName + args', () => {
+  it('uses the prompt id as toolCallId and the correct toolName + args', () => {
     const { toolCallId, toolName, args } = materializeAskUserQuestionToolCall({
+      promptId: 'p1',
       questions: [colorQuestion],
       answers: [{ choice: [0] }],
     });
-    expect(toolCallId).toEqual(expect.any(String));
-    expect(toolCallId.length).toBeGreaterThan(0);
+    expect(toolCallId).toBe('p1');
     expect(toolName).toBe('ask_user_question');
     expect(args).toEqual({ questions: [colorQuestion] });
   });
 
-  it('produces fresh toolCallIds on each call', () => {
-    const a = materializeAskUserQuestionToolCall({
-      questions: [colorQuestion],
-      answers: [{ choice: [0] }],
-    });
-    const b = materializeAskUserQuestionToolCall({
-      questions: [colorQuestion],
-      answers: [{ choice: [0] }],
-    });
-    expect(a.toolCallId).not.toEqual(b.toolCallId);
-  });
-
   it('keeps the artifact as the canonical indices form', () => {
     const { artifact } = materializeAskUserQuestionToolCall({
+      promptId: 'p1',
       questions: [colorQuestion],
       answers: [{ choice: [1] }],
     });
@@ -54,6 +43,7 @@ describe('materializeAskUserQuestionToolCall', () => {
   describe('content denormalization', () => {
     it('resolves choice indices to option labels', () => {
       const { content } = materializeAskUserQuestionToolCall({
+        promptId: 'p1',
         questions: [colorQuestion],
         answers: [{ choice: [0] }],
       });
@@ -64,6 +54,7 @@ describe('materializeAskUserQuestionToolCall', () => {
 
     it('resolves multi-select choice indices', () => {
       const { content } = materializeAskUserQuestionToolCall({
+        promptId: 'p1',
         questions: [hobbiesQuestion],
         answers: [{ choice: [0, 2] }],
       });
@@ -74,6 +65,7 @@ describe('materializeAskUserQuestionToolCall', () => {
 
     it('includes the custom field when present and non-empty', () => {
       const { content } = materializeAskUserQuestionToolCall({
+        promptId: 'p1',
         questions: [colorQuestion],
         answers: [{ choice: [0], custom: 'rainy red' }],
       });
@@ -84,6 +76,7 @@ describe('materializeAskUserQuestionToolCall', () => {
 
     it('renders skipped: true with empty selected_options and no custom', () => {
       const { content } = materializeAskUserQuestionToolCall({
+        promptId: 'p1',
         questions: [colorQuestion],
         answers: [{ skipped: true }],
       });
@@ -94,6 +87,7 @@ describe('materializeAskUserQuestionToolCall', () => {
 
     it('renders an empty selected_options when only custom is provided', () => {
       const { content } = materializeAskUserQuestionToolCall({
+        promptId: 'p1',
         questions: [colorQuestion],
         answers: [{ custom: 'pink' }],
       });
@@ -104,6 +98,7 @@ describe('materializeAskUserQuestionToolCall', () => {
 
     it('handles multiple questions in order', () => {
       const { content } = materializeAskUserQuestionToolCall({
+        promptId: 'p1',
         questions: [colorQuestion, hobbiesQuestion],
         answers: [{ choice: [2] }, { choice: [1], custom: 'painting' }],
       });
@@ -117,6 +112,7 @@ describe('materializeAskUserQuestionToolCall', () => {
 
     it('omits an empty custom string', () => {
       const { content } = materializeAskUserQuestionToolCall({
+        promptId: 'p1',
         questions: [colorQuestion],
         answers: [{ choice: [0], custom: '' }],
       });

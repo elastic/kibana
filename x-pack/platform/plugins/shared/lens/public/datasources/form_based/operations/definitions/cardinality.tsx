@@ -13,18 +13,21 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
 import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
-import { esql } from '@elastic/esql';
+import {
+  toEsqlRegistry,
+  ofNameCardinality,
+  cardinalityEsqlMeta,
+  getSafeName,
+} from '@kbn/lens-common';
 import type { OperationDefinition, ParamEditorProps } from '.';
 
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
-  getSafeName,
   getFilter,
   hasOperationType,
   getBooleanParam,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
@@ -44,23 +47,6 @@ const supportedTypes = new Set([
 const SCALE = 'ratio';
 const IS_BUCKETED = false;
 
-function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
-  return adjustTimeScaleLabelSuffix(
-    i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
-      defaultMessage: 'Unique count of {name}',
-      values: {
-        name,
-      },
-    }),
-    undefined,
-    undefined,
-    undefined,
-    timeShift,
-    undefined,
-    reducedTimeRange
-  );
-}
-
 export const cardinalityOperation: OperationDefinition<
   CardinalityIndexPatternColumn,
   'field',
@@ -71,11 +57,7 @@ export const cardinalityOperation: OperationDefinition<
   displayName: CARDINALITY_NAME,
   allowAsReference: true,
   input: 'field',
-  getSerializedFormat() {
-    return {
-      id: 'number',
-    };
-  },
+  ...cardinalityEsqlMeta,
   getPossibleOperationForField: ({
     aggregationRestrictions,
     aggregatable,
@@ -105,18 +87,20 @@ export const cardinalityOperation: OperationDefinition<
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
-  filterable: true,
   shiftable: true,
-  canReduceTimeRange: true,
   getDefaultLabel: (column, columns, indexPattern) =>
-    ofName(
+    ofNameCardinality(
       getSafeName(column.sourceField, indexPattern),
       column.timeShift,
       column.reducedTimeRange
     ),
   buildColumn({ field, previousColumn }, columnParams) {
     return {
-      label: ofName(field.displayName, previousColumn?.timeShift, previousColumn?.reducedTimeRange),
+      label: ofNameCardinality(
+        field.displayName,
+        previousColumn?.timeShift,
+        previousColumn?.reducedTimeRange
+      ),
       dataType: 'number',
       operationType: CARDINALITY_ID,
       sourceField: field.name,
@@ -173,12 +157,7 @@ export const cardinalityOperation: OperationDefinition<
       },
     ];
   },
-  toESQL: (column) => {
-    if (column.params?.emptyAsNull || column.timeShift) return;
-    return {
-      template: `COUNT_DISTINCT(${esql.col(column.sourceField)})`,
-    };
-  },
+  toESQL: toEsqlRegistry[CARDINALITY_ID],
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {
       id: columnId,
@@ -200,7 +179,7 @@ export const cardinalityOperation: OperationDefinition<
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
+      label: ofNameCardinality(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
     };
   },

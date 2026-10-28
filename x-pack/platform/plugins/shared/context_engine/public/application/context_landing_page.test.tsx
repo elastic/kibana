@@ -6,9 +6,10 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { contentListQueryClient } from '@kbn/content-list-provider';
+import { createAppChromeMock } from './test_utils/app_chrome_mock';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -22,9 +23,11 @@ import { AI_INDICES_PER_PAGE } from './utils/ai_index_content_list_utils';
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
+  traces: [],
   date_created: '2026-07-17T00:00:00.000Z',
   date_modified: '2026-07-17T00:00:00.000Z',
   ...overrides,
@@ -49,19 +52,47 @@ const createCore = () => {
   return core;
 };
 
-const renderWithProviders = (core: CoreStart) =>
+const mockContextEngineHttpGet = (
+  core: ReturnType<typeof coreMock.createStart>,
+  aiIndices: AiIndexHttpItem[],
+  kiTotal = 9
+) => {
+  core.http.get.mockImplementation((pathOrOptions) => {
+    const path = typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
+
+    if (path.includes('/kis')) {
+      return Promise.resolve({
+        kis: [],
+        total: kiTotal,
+        summary: { total: kiTotal, counts_by_type: [] },
+      });
+    }
+
+    return Promise.resolve({ ai_indices: aiIndices });
+  });
+};
+
+const renderWithProviders = (core: ReturnType<typeof createCore>) =>
   render(
-    <I18nProvider>
-      <EuiProvider>
-        <KibanaContextProvider services={core}>
-          <QueryClientProvider client={createTestQueryClient()}>
-            <MemoryRouter>
-              <ContextLandingPage />
-            </MemoryRouter>
-          </QueryClientProvider>
-        </KibanaContextProvider>
-      </EuiProvider>
-    </I18nProvider>
+    <MockAppHeaderProvider>
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider
+            services={{
+              ...core,
+              history: scopedHistoryMock.create(),
+              appChrome: createAppChromeMock(),
+            }}
+          >
+            <QueryClientProvider client={createTestQueryClient()}>
+              <MemoryRouter>
+                <ContextLandingPage />
+              </MemoryRouter>
+            </QueryClientProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    </MockAppHeaderProvider>
   );
 
 describe('ContextLandingPage', () => {
@@ -71,20 +102,20 @@ describe('ContextLandingPage', () => {
     contentListQueryClient.clear();
   });
 
-  it('renders the header and a create button in the empty prompt when there are no indexes', async () => {
+  it('renders the onboarding panel when there are no indexes', async () => {
     const core = createCore();
     core.http.get.mockResolvedValue({ ai_indices: [] });
 
     renderWithProviders(core);
 
     expect(screen.getByTestId('contextLandingPage')).toBeInTheDocument();
-    expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
+    await waitFor(() => expect(core.http.get).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByTestId('content-list-emptyState')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTestId('contextAiIndexOnboarding')).toBeInTheDocument());
 
     const createButtons = screen.getAllByTestId('contextCreateAiIndexButton');
     expect(createButtons).toHaveLength(1);
     expect(createButtons[0]).toHaveTextContent('Create AI Index');
-
-    await waitFor(() => expect(core.http.get).toHaveBeenCalled());
   });
 
   it('renders exactly one create button in the page header when indexes exist', async () => {
@@ -97,9 +128,10 @@ describe('ContextLandingPage', () => {
 
     await screen.findAllByTestId('contextAiIndexCard');
 
-    const createButtons = screen.getAllByTestId('contextCreateAiIndexButton');
-    expect(createButtons).toHaveLength(1);
-    expect(screen.queryByTestId('contextAiIndexCardsEmpty')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
+    });
+    expect(screen.queryByTestId('contextAiIndexOnboarding')).not.toBeInTheDocument();
   });
 
   it('renders skeleton cards while the list API is loading', () => {
@@ -150,17 +182,29 @@ describe('ContextLandingPage', () => {
     expect(screen.getAllByTestId('contextAiIndexCardUpdated')[0]).toHaveTextContent('Updated');
   });
 
-  it('renders an empty prompt when there are no AI indexes', async () => {
+  it('renders the onboarding panel when there are no AI indexes', async () => {
     const core = createCore();
     core.http.get.mockResolvedValue({ ai_indices: [] });
 
     renderWithProviders(core);
 
-    expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
+    await waitFor(() => expect(core.http.get).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByTestId('contextAiIndexOnboarding')).toBeInTheDocument());
     expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
-    await waitFor(() =>
-      expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1)
-    );
+    expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
+  });
+
+  it('renders the onboarding panel above managed indexes when no custom indexes exist', async () => {
+    const core = createCore();
+    mockContextEngineHttpGet(core, [buildAiIndex({ id: 'elastic', managed: true })]);
+
+    renderWithProviders(core);
+
+    expect(await screen.findByTestId('contextAiIndexOnboarding')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexManagedRow')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexList-searchBox')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
   });
 
   it('renders an error prompt when the list API fails', async () => {
@@ -176,13 +220,14 @@ describe('ContextLandingPage', () => {
 
   it('marks managed AI indexes as owned by Elastic instead of showing a modified date', async () => {
     const core = createCore();
-    core.http.get.mockResolvedValue({
-      ai_indices: [buildAiIndex({ id: 'elastic', managed: true })],
-    });
+    mockContextEngineHttpGet(core, [buildAiIndex({ id: 'elastic', managed: true })]);
 
     renderWithProviders(core);
 
-    expect(await screen.findByTestId('contextAiIndexCardManaged')).toHaveTextContent('Managed');
+    expect(await screen.findByTestId('contextAiIndexManagedRowManaged')).toHaveTextContent(
+      'Managed'
+    );
+    expect(screen.queryByTestId('contextAiIndexManagedRowIntegratedVia')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexCardUpdated')).not.toBeInTheDocument();
   });
 
@@ -192,7 +237,8 @@ describe('ContextLandingPage', () => {
 
     renderWithProviders(core);
 
-    await screen.findByTestId('contextAiIndexCardsEmpty');
+    await waitFor(() => expect(core.http.get).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByTestId('contextAiIndexOnboarding')).toBeInTheDocument());
     expect(screen.queryByTestId('contextAiIndexList-searchBox')).not.toBeInTheDocument();
   });
 
@@ -237,18 +283,6 @@ describe('ContextLandingPage', () => {
 
       await waitFor(() => expect(cardTitles()).toHaveLength(1));
       expect(cardTitles()[0]).toContain('elastic');
-    });
-
-    it('narrows the cards to the selected type', async () => {
-      await renderWithAiIndexes();
-
-      fireEvent.click(screen.getByTestId('contextAiIndexListTypeFilter'));
-      fireEvent.click(await screen.findByTestId('aiIndexType-searchbar-option-data_stream'));
-
-      await waitFor(() => expect(cardTitles()).toHaveLength(2));
-      expect(cardTitles().some((title) => title?.includes('support-tickets'))).toBe(true);
-      expect(cardTitles().some((title) => title?.includes('elastic'))).toBe(true);
-      expect(cardTitles().every((title) => !title?.includes('logs-index'))).toBe(true);
     });
 
     it('narrows to the intersection when search and filters are combined', async () => {

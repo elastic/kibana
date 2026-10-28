@@ -10,26 +10,36 @@ import type {
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
-import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import type { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
 import type { SLODefinition } from '../../domain/models';
+import { getSloProjectRouting } from '../utils';
 
 export abstract class TransformGenerator {
   constructor(
     protected spaceId: string,
     protected dataViewService: DataViewsService,
     protected isServerless: boolean = false,
-    protected isCpsEnabled: boolean = false
+    protected isCpsAvailable: boolean = false
   ) {}
 
   public abstract getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest>;
+
+  protected getProjectRouting(slo: SLODefinition): string | undefined {
+    return getSloProjectRouting(slo.settings, {
+      isServerless: this.isServerless,
+      isCpsAvailable: this.isCpsAvailable,
+    });
+  }
 
   public buildCommonRuntimeMappings(dataView?: DataView): MappingRuntimeFields {
     return dataView?.getRuntimeMappings?.() ?? {};
   }
 
   public buildDescription(slo: SLODefinition): string {
-    return `Rolled-up SLI data for SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}]`;
+    return `Rolled-up SLI data for SLO: ${slo.name.slice(0, 850)} [id: ${slo.id}, revision: ${
+      slo.revision
+    }]`;
   }
 
   public buildCommonGroupBy(
@@ -38,7 +48,7 @@ export abstract class TransformGenerator {
     extraGroupByFields = {}
   ) {
     let fixedInterval = '1m';
-    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+    if (slo.budgetingMethod === 'timeslices') {
       fixedInterval = slo.objective.timesliceWindow!.format();
     }
 

@@ -10,5 +10,6 @@ export { CONTEXT_DEFAULTS } from './context_defaults';
 export * from './capabilities';
 export * from './settings_defaults';
 export * from './ui';
+export * from './license';
 export * from './synthetics';
 export * from './filters_fields_with_logical_and';

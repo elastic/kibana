@@ -18,6 +18,7 @@ import type {
   RecognizeModuleResultDataView,
 } from '@kbn/ml-common-types/modules';
 import { useMlKibana, useMlManagementLocator } from '../../contexts/kibana';
+import { getIsMlCpsEnabled } from '../../services/ml_server_info';
 
 interface Props {
   matchingDataViews: RecognizeModuleResult;
@@ -33,10 +34,12 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
     },
   } = useMlKibana();
   const mlManagementLocator = useMlManagementLocator()!;
+  const isMlCpsEnabled = getIsMlCpsEnabled();
 
   const getUrl = useCallback(
     (id: string) => {
-      const projectRouting = cps?.cpsManager?.getProjectRouting();
+      const projectRouting =
+        isMlCpsEnabled && cps?.cpsManager ? cps?.cpsManager?.getProjectRouting() : undefined;
       const params = new URLSearchParams();
       params.set('id', moduleId);
       params.set('index', id);
@@ -52,7 +55,7 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
         }?${params.toString()}`,
       });
     },
-    [mlManagementLocator, moduleId, cps?.cpsManager]
+    [mlManagementLocator, moduleId, cps?.cpsManager, isMlCpsEnabled]
   );
 
   const columns: Array<

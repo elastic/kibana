@@ -16,6 +16,7 @@ import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKeys } from '../api_keys';
 
 import { resetPreconfiguredAgentPolicies } from './reset_agent_policies';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
 
 jest.mock('../agent_policy');
 jest.mock('../package_policy');
@@ -88,9 +89,9 @@ describe('reset agent policies', () => {
     });
     await resetPreconfiguredAgentPolicies(soClient, esClient);
 
-    expect(mockedSetupFleet).toBeCalled();
-    expect(mockedForceUnenrollAgent).not.toBeCalled();
-    expect(mockedDeleteEnrollmentApiKeys).not.toBeCalled();
+    expect(mockedSetupFleet).toHaveBeenCalled();
+    expect(mockedForceUnenrollAgent).not.toHaveBeenCalled();
+    expect(mockedDeleteEnrollmentApiKeys).not.toHaveBeenCalled();
   });
 
   it('should unenroll agents and revoke enrollment api keys if there is policies', async () => {
@@ -119,9 +120,41 @@ describe('reset agent policies', () => {
     });
     await resetPreconfiguredAgentPolicies(soClient, esClient);
 
-    expect(mockedSetupFleet).toBeCalled();
-    expect(mockedForceUnenrollAgent).toBeCalled();
-    expect(mockedDeleteEnrollmentApiKeys).toBeCalled();
+    expect(mockedSetupFleet).toHaveBeenCalled();
+    expect(mockedForceUnenrollAgent).toHaveBeenCalled();
+    expect(mockedDeleteEnrollmentApiKeys).toHaveBeenCalled();
+  });
+
+  it('should find the agents by their base policy id, so agents on #sentinel are unenrolled, and the enrollment api keys by the policy id', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    mockedAgentPolicyService.list.mockResolvedValueOnce({
+      items: [{ id: 'policy1' }, { id: 'policy2' }],
+    } as any);
+    mockedPackagePolicyService.list.mockResolvedValueOnce({ items: [] } as any);
+    mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
+    mockedListEnrollmentApiKeys.mockResolvedValueOnce({ items: [] } as any);
+    soClient.find.mockImplementation(async (option) => {
+      if (option.type === PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE) {
+        return { saved_objects: [] } as any;
+      }
+      throw new Error('not mocked');
+    });
+
+    await resetPreconfiguredAgentPolicies(soClient, esClient);
+
+    expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({
+        kuery: buildPolicyBaseIdsWithFallbackKuery(['policy1', 'policy2']),
+      })
+    );
+    // enrollment api keys always have the plain policy id
+    expect(mockedListEnrollmentApiKeys).toHaveBeenCalledWith(
+      esClient,
+      expect.objectContaining({ kuery: 'policy_id:"policy1" or policy_id:"policy2"' })
+    );
   });
 
   describe('_deleteGhostPackagePolicies with legacy (non-space-aware) saved object types', () => {
@@ -150,9 +183,11 @@ describe('reset agent policies', () => {
 
       await resetPreconfiguredAgentPolicies(soClient, esClient);
 
-      expect(soClient.bulkGet).toBeCalledWith([{ id: 'policy1', type: 'ingest-agent-policies' }]);
-      expect(soClient.delete).not.toBeCalled();
-      expect(mockedSetupFleet).toBeCalled();
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'policy1', type: 'ingest-agent-policies' },
+      ]);
+      expect(soClient.delete).not.toHaveBeenCalled();
+      expect(mockedSetupFleet).toHaveBeenCalled();
     });
 
     it('should delete a ghost package policy using the resolved legacy package policy type', async () => {
@@ -180,8 +215,8 @@ describe('reset agent policies', () => {
 
       await resetPreconfiguredAgentPolicies(soClient, esClient);
 
-      expect(soClient.delete).toBeCalledWith('ingest-package-policies', 'pkgPolicy1');
-      expect(mockedSetupFleet).toBeCalled();
+      expect(soClient.delete).toHaveBeenCalledWith('ingest-package-policies', 'pkgPolicy1');
+      expect(mockedSetupFleet).toHaveBeenCalled();
     });
 
     it('should not abort the reset when deleting a ghost package policy 404s', async () => {
@@ -211,7 +246,7 @@ describe('reset agent policies', () => {
 
       await expect(resetPreconfiguredAgentPolicies(soClient, esClient)).resolves.not.toThrow();
 
-      expect(mockedSetupFleet).toBeCalled();
+      expect(mockedSetupFleet).toHaveBeenCalled();
     });
 
     it('should propagate non-404 errors from deleting a ghost package policy', async () => {
@@ -239,7 +274,7 @@ describe('reset agent policies', () => {
 
       await expect(resetPreconfiguredAgentPolicies(soClient, esClient)).rejects.toThrow('boom');
 
-      expect(mockedSetupFleet).not.toBeCalled();
+      expect(mockedSetupFleet).not.toHaveBeenCalled();
     });
   });
 });

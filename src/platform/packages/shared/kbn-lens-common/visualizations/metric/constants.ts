@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { VisIconType } from '@kbn/chart-icons';
 import type {
   MetricLayoutWithDefault,
   MetricStateDefaults,
@@ -75,7 +76,7 @@ export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
   iconAlign: 'right',
   valueFontMode: 'default',
   density: 'default',
-  secondaryLabelPosition: 'before',
+  secondaryNameVisibility: 'hidden',
   applyColorTo: 'background',
 };
 
@@ -112,6 +113,6 @@ export const LENS_METRIC_AVAILABLE_METRIC_ICONS = {
   TAG: 'tag',
   GLOBE: 'globe',
   TEMPERATURE: 'temperature',
-} as const;
+} as const satisfies Record<string, VisIconType>;
 
 export const LENS_EXPRESSION_METRIC_TRENDLINE_NAME = 'metricTrendline';

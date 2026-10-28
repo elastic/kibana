@@ -11,14 +11,16 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 const MAX_LABEL_ENTRIES = 50;
 
-const eventPropertiesSchema = z
-  .record(z.string().max(100), z.string().max(4096))
-  .refine((props) => Object.keys(props).length <= MAX_LABEL_ENTRIES, {
-    message: `At most ${MAX_LABEL_ENTRIES} event properties are allowed.`,
-  })
-  .describe(
-    'Map of event properties (max 50 entries). Use dt.event.* / dt.davis.* for classic behavior, dt.entity.* to attach entities, or any non-dt.* key for custom metadata.'
-  );
+const eventPropertiesSchema = lazySchema(() =>
+  z
+    .record(z.string().max(100), z.string().max(4096))
+    .refine((props) => Object.keys(props).length <= MAX_LABEL_ENTRIES, {
+      message: `At most ${MAX_LABEL_ENTRIES} event properties are allowed.`,
+    })
+    .describe(
+      'Map of event properties (max 50 entries). Use dt.event.* / dt.davis.* for classic behavior, dt.entity.* to attach entities, or any non-dt.* key for custom metadata.'
+    )
+);
 
 export const DynatraceListProblemsInputSchema = lazySchema(() =>
   z.object({

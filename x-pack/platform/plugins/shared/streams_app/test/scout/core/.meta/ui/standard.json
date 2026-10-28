@@ -1,21 +1,9 @@
 {
-  "sha1": "e5cf9dfdb3f95de95befc6764dfacab1e872f274",
+  "sha1": "67e6a4c84878155c5da21ee14c5934d4eaef42bb",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "fbe5c6bcfe99e83-7132d4e40af07dc",
-      "title": "Teardown environment for streams tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "230fcfe7ad78991-744ce32675c025c",
       "title": "Setup environment for streams tests",
@@ -92,8 +80,8 @@
       }
     },
     {
-      "id": "63983bc249d77f4-742f5ddf45e2615",
-      "title": "Stream canvas - classic source to destination nodes renders inferred source and destination nodes for classic streams",
+      "id": "9639991af5c40c2-e06a7848fd31c3d",
+      "title": "Stream canvas - processing adds a processing node between a source and a destination",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -102,14 +90,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 70,
-        "column": 10
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_processing.spec.ts",
+        "line": 129,
+        "column": 19
       }
     },
     {
-      "id": "63983bc249d77f4-53dbed096f9102c",
-      "title": "Stream canvas - classic source to destination nodes renders a minimap that collapses and reopens",
+      "id": "9639991af5c40c2-e5ec5164283ca8c",
+      "title": "Stream canvas - processing processes one fan-out line on a pipeline of its own",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -118,14 +106,62 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 77,
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_processing.spec.ts",
+        "line": 172,
+        "column": 14
+      }
+    },
+    {
+      "id": "03f5a8c29bdbfde-bd62876d14d3d25",
+      "title": "Stream map - search pivots from a destination row into a pre-filled map search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
+        "line": 116,
+        "column": 21
+      }
+    },
+    {
+      "id": "03f5a8c29bdbfde-ebf0b792d31c21e",
+      "title": "Stream map - search filters the map while typing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
+        "line": 138,
+        "column": 70
+      }
+    },
+    {
+      "id": "03f5a8c29bdbfde-d51a0fb33f299aa",
+      "title": "Stream map - search applies a search from the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
+        "line": 148,
         "column": 13
       }
     },
     {
-      "id": "63983bc249d77f4-cea0e326d059f2a",
-      "title": "Stream canvas - classic source to destination nodes tidies up the whole graph from the pane menu and enables undo",
+      "id": "03f5a8c29bdbfde-13659ba98724575",
+      "title": "Stream map - search explains when nothing matches the search",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -134,30 +170,14 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 85,
-        "column": 7
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
+        "line": 152,
+        "column": 75
       }
     },
     {
-      "id": "63983bc249d77f4-fb6ccdc1b694d87",
-      "title": "Stream canvas - classic source to destination nodes renders the canvas toolbar with undo/redo and add-node placeholders",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 96,
-        "column": 7
-      }
-    },
-    {
-      "id": "63983bc249d77f4-68ba85ffd15d224",
-      "title": "Stream canvas - classic source to destination nodes exposes accessible node labels and keyboard controls",
+      "id": "63983bc249d77f4-4236bbb07ccd991",
+      "title": "Stream map renders unit sources and destinations without a Data streams hub",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -172,8 +192,8 @@
       }
     },
     {
-      "id": "63983bc249d77f4-07e1b29a8d7c4c2",
-      "title": "Stream canvas - classic source to destination nodes undoes a keyboard-driven node reposition",
+      "id": "63983bc249d77f4-e4da54983b60575",
+      "title": "Stream map renders a minimap that collapses and reopens",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -183,13 +203,45 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 121,
+        "line": 108,
+        "column": 90
+      }
+    },
+    {
+      "id": "63983bc249d77f4-86dfce50815fde8",
+      "title": "Stream map tidies up the whole graph from the pane menu and enables undo",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 117,
+        "column": 7
+      }
+    },
+    {
+      "id": "63983bc249d77f4-e37ea574ca0e64e",
+      "title": "Stream map keeps the viewport where the user left it when tidying up",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 128,
         "column": 13
       }
     },
     {
-      "id": "63983bc249d77f4-0b811fdb96ea78f",
-      "title": "Stream canvas - classic source to destination nodes shows the processing glyph only on destinations with processing",
+      "id": "63983bc249d77f4-a142ece1eba0cf6",
+      "title": "Stream map keeps the viewport where the user left it when opening a node flyout",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -200,12 +252,12 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
         "line": 137,
-        "column": 7
+        "column": 22
       }
     },
     {
-      "id": "63983bc249d77f4-96951f3e43395ce",
-      "title": "Stream canvas - classic source to destination nodes shows a flyout for classic streams when a destination node is clicked",
+      "id": "63983bc249d77f4-7ce96a081b5863e",
+      "title": "Stream map renders the canvas toolbar with undo/redo and add-node placeholders",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -215,13 +267,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 142,
-        "column": 24
+        "line": 146,
+        "column": 14
       }
     },
     {
-      "id": "63983bc249d77f4-34668eb28f9e51d",
-      "title": "Stream canvas - classic source to destination nodes navigating away from a flyout and back will restore the flyout to its previous state",
+      "id": "63983bc249d77f4-c11d1e508e4f597",
+      "title": "Stream map exposes accessible node labels and keyboard controls",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -232,7 +284,23 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
         "line": 153,
-        "column": 91
+        "column": 21
+      }
+    },
+    {
+      "id": "63983bc249d77f4-e2a237adb3fbf63",
+      "title": "Stream map undoes a keyboard-driven node reposition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 171,
+        "column": 13
       }
     },
     {
@@ -375,7 +443,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_header.spec.ts",
-        "line": 44,
+        "line": 45,
         "column": 9
       }
     },
@@ -391,13 +459,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_header.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 26
       }
     },
     {
-      "id": "6697d27925b9def-16d50274d54ed1c",
-      "title": "Streams layout renders every tab and lands on canvas",
+      "id": "6697d27925b9def-e78b5bb02dd2c12",
+      "title": "Streams layout renders every tab and lands on map",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -407,13 +475,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 33,
-        "column": 7
+        "line": 32,
+        "column": 9
       }
     },
     {
-      "id": "6697d27925b9def-46be01c9ed77676",
-      "title": "Streams layout falls back to the canvas tab for an unknown tab",
+      "id": "6697d27925b9def-a7b7220c5a14d4a",
+      "title": "Streams layout falls back to the map tab for an unknown tab",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -423,13 +491,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 38,
-        "column": 25
+        "line": 36,
+        "column": 21
       }
     },
     {
-      "id": "6697d27925b9def-79e01a18e79b2dd",
-      "title": "Streams layout shows a placeholder for the tabs that have no content yet",
+      "id": "6697d27925b9def-2d929861841bf1e",
+      "title": "Streams layout renders the sources table",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -439,8 +507,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 42,
+        "column": 13
+      }
+    },
+    {
+      "id": "6697d27925b9def-ea242490a272e1b",
+      "title": "Streams layout renders the destinations table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_layout.spec.ts",
+        "line": 45,
+        "column": 98
       }
     },
     {
@@ -539,6 +623,17 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_table_values.spec.ts",
         "line": 177,
         "column": 80
+      }
+    },
+    {
+      "id": "fbe5c6bcfe99e83-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

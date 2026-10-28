@@ -13,13 +13,6 @@ import { test as lensTest } from '../../../common/ui/fixtures';
 
 export const TSDB_DATA_VIEW_ID = '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51';
 export const TSDB_DOWNSAMPLED_DATA_VIEW_ID = 'lens-tsdb-downsampled-data-view';
-export const TSDB_INDEX = 'kibana_sample_data_logstsdb';
-export const TSDB_ES_ARCHIVE =
-  'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb';
-export const TSDB_TIME_RANGE = {
-  from: 'Apr 16, 2023 @ 00:00:00.000',
-  to: 'Jun 16, 2023 @ 00:00:00.000',
-} as const;
 
 export const ROLLED_UP_MEDIAN_WARNING =
   'Median of bytes_gauge uses a function that is unsupported by rolled up data. Select a different function or change the time range.';
@@ -29,11 +22,7 @@ export const TSDB_SCENARIO_DOCUMENT_COUNT = 100;
 export interface TsdbScenarioContext {
   page: ScoutTestFixtures['page'];
   pageObjects: LensPageObjects;
-  tsdbScenario: TsdbScenario;
 }
-
-export const sumFirstNValues = (count: number, bars: Array<{ y: number }> | undefined): number =>
-  (bars ?? []).slice(0, count).reduce((sum, bar) => sum + bar.y, 0);
 
 const PICKER_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -52,7 +41,8 @@ export interface TsdbScenarioIndex {
   create?: boolean;
   downsample?: boolean;
   removeTSDBFields?: boolean;
-  mode?: 'tsdb';
+  removeLogsDBFields?: boolean;
+  mode?: 'tsdb' | 'logsdb';
 }
 
 export interface TsdbScenarioTimeRange {
@@ -86,6 +76,10 @@ export interface TsdbHelper {
     stream: string,
     timeRange: TsdbScenarioTimeRange
   ) => Promise<CleanupHandle>;
+  createDowngradedLogsDBStream: (
+    stream: string,
+    timeRange: TsdbScenarioTimeRange
+  ) => Promise<CleanupHandle>;
   setupScenario: (
     initialIndex: string,
     indexes: TsdbScenarioIndex[],
@@ -93,20 +87,21 @@ export interface TsdbHelper {
   ) => Promise<TsdbScenarioSetup>;
 }
 
-export interface TsdbScenario {
-  setup: (
-    initialIndex: string,
-    indexes: TsdbScenarioIndex[],
-    timeRange: TsdbScenarioTimeRange
-  ) => Promise<{ expectedDocumentCountBeforeRollover: number }>;
-}
+export type LensUiTestFixtures = LensTestFixtures;
 
-interface LensUiTestFixtures extends LensTestFixtures {
-  tsdbScenario: TsdbScenario;
-}
-
-interface LensUiWorkerFixtures extends ScoutWorkerFixtures {
+export interface LensUiWorkerFixtures extends ScoutWorkerFixtures {
   tsdbHelper: TsdbHelper;
+}
+
+type TsdbStreamScenarioFixtures = Pick<
+  LensUiWorkerFixtures,
+  'apiServices' | 'tsdbHelper' | 'uiSettings'
+>;
+
+export interface TsdbStreamScenario {
+  setup: (fixtures: TsdbStreamScenarioFixtures) => Promise<void>;
+  cleanup: () => Promise<void>;
+  readonly expectedDocumentCountBeforeRollover: number;
 }
 
 const DOWNSAMPLE_RETRY_TIMEOUT = 15_000;
@@ -149,7 +144,59 @@ export const createTsdbScenarioTimeRange = (now = Date.now()): TsdbScenarioTimeR
   },
 });
 
-const runCleanupActions = async (
+const ONE_SECOND = 1000;
+const ONE_HOUR = 60 * 60 * 1000;
+const TWO_HOURS = 2 * ONE_HOUR;
+
+interface DowngradeBoundaryData {
+  hasDataBeforeDowngrade: boolean;
+  hasDataAfterDowngrade: boolean;
+}
+
+/** Verifies chart data around a stream downgrade using a caller-configured metric dimension. */
+export const getDowngradeBoundaryData = async ({
+  pageObjects,
+  timeRange,
+  configureMetricDimension,
+}: {
+  pageObjects: LensPageObjects;
+  timeRange: TsdbScenarioTimeRange;
+  configureMetricDimension: () => Promise<void>;
+}): Promise<DowngradeBoundaryData> => {
+  await pageObjects.lens.workspace.openFullEditor();
+  await pageObjects.datePicker.setAbsoluteRange({
+    from: offsetPickerTime(timeRange.beforeRollover, -ONE_HOUR),
+    to: offsetPickerTime(timeRange.beforeRollover, ONE_HOUR),
+  });
+  await pageObjects.lens.configureDimension({
+    dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+    operation: 'date_histogram',
+    field: '@timestamp',
+  });
+  await configureMetricDimension();
+
+  await pageObjects.lens.waitForVisualization('xyVisChart');
+  const barsBeforeDowngrade =
+    (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ??
+    [];
+
+  await pageObjects.datePicker.setAbsoluteRange({
+    from: offsetPickerTime(timeRange.afterRollover, ONE_SECOND),
+    to: offsetPickerTime(timeRange.afterRollover, TWO_HOURS),
+  });
+  await pageObjects.lens.waitForVisualization('xyVisChart');
+  const barsAfterDowngrade =
+    (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]?.bars ??
+    [];
+
+  return {
+    hasDataBeforeDowngrade: barsBeforeDowngrade.some(({ y }) => y > 0),
+    hasDataAfterDowngrade: barsAfterDowngrade.some(({ y }) => y > 0),
+  };
+};
+
+/** Runs all cleanup actions and reports their failures together. */
+export const runCleanupActions = async (
   description: string,
   actions: Array<() => Promise<void>>
 ): Promise<void> => {
@@ -168,12 +215,19 @@ const runCleanupActions = async (
 
 const getTsdbMapping = ({
   removeTSDBFields = false,
+  removeLogsDBFields = false,
   includeTimeSeriesMetadata = true,
 }: {
   removeTSDBFields?: boolean;
+  removeLogsDBFields?: boolean;
   includeTimeSeriesMetadata?: boolean;
 } = {}): Record<string, MappingProperty> => ({
   '@timestamp': { type: 'date' },
+  utc_time: { type: 'date' },
+  bytes: { type: 'long' },
+  extension: {
+    type: 'keyword',
+  },
   request: {
     type: 'keyword',
     ...(includeTimeSeriesMetadata ? { time_series_dimension: true } : {}),
@@ -186,15 +240,99 @@ const getTsdbMapping = ({
           ...(includeTimeSeriesMetadata ? { time_series_metric: 'counter' as const } : {}),
         },
       }),
+  ...(removeLogsDBFields
+    ? {}
+    : {
+        host: {
+          properties: {
+            name: { type: 'keyword' },
+          },
+        },
+      }),
 });
 
 /**
- * Non-parallel counterpart of `spaceTest`, for suites that need a clean, dedicated ES state.
- * Also the single source of the `tsdbHelper`/`tsdbScenario` fixtures used by the TSDB specs;
- * kept here (rather than duplicated in `./index.ts`) so `export *` doesn't have to pick between
- * two same-named `test` exports.
+ * Provisions one TSDB scenario's Elasticsearch and Kibana state, to be driven from
+ * `beforeAll`/`afterAll` so that those hooks' own timeouts cover it instead of the test timeout.
  */
-export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
+export const createTsdbStreamScenario = ({
+  baseStream,
+  baseStreamKind,
+  indexes,
+  timeRange,
+}: {
+  baseStream: string;
+  baseStreamKind: 'upgraded' | 'downgraded';
+  indexes: TsdbScenarioIndex[];
+  timeRange: TsdbScenarioTimeRange;
+}): TsdbStreamScenario => {
+  let cleanupActions: Array<() => Promise<void>> = [];
+  let expectedDocumentCountBeforeRollover = 0;
+
+  const cleanup = async (): Promise<void> => {
+    const actions = [...cleanupActions].reverse();
+    cleanupActions = [];
+    await runCleanupActions(`TSDB scenario for "${baseStream}"`, actions);
+  };
+
+  const setup = async ({
+    apiServices,
+    tsdbHelper,
+    uiSettings,
+  }: TsdbStreamScenarioFixtures): Promise<void> => {
+    try {
+      const baseStreamHandle =
+        baseStreamKind === 'upgraded'
+          ? await tsdbHelper.createUpgradedStream(baseStream, timeRange)
+          : await tsdbHelper.createDowngradedStream(baseStream, timeRange);
+      cleanupActions.push(baseStreamHandle.cleanup);
+
+      const scenario = await tsdbHelper.setupScenario(
+        baseStream,
+        indexes,
+        timeRange.beforeRollover
+      );
+      cleanupActions.push(scenario.cleanup);
+      expectedDocumentCountBeforeRollover = scenario.expectedDocumentCountBeforeRollover;
+
+      const { data: dataView } = await apiServices.dataViews.create({
+        title: scenario.dataViewTitle,
+        timeFieldName: '@timestamp',
+      });
+      cleanupActions.push(async () => {
+        await apiServices.dataViews.delete(dataView.id);
+      });
+
+      cleanupActions.push(async () =>
+        uiSettings.unset('dateFormat:tz', 'defaultIndex', 'timepicker:timeDefaults')
+      );
+      await uiSettings.set({
+        'dateFormat:tz': 'UTC',
+        defaultIndex: dataView.id,
+        'timepicker:timeDefaults': JSON.stringify(timeRange.picker),
+      });
+    } catch (error) {
+      await cleanup();
+      throw error;
+    }
+  };
+
+  return {
+    setup,
+    cleanup,
+    get expectedDocumentCountBeforeRollover() {
+      return expectedDocumentCountBeforeRollover;
+    },
+  };
+};
+
+/**
+ * Non-parallel counterpart of `spaceTest`, for suites that need a clean, dedicated ES state.
+ * Also the single source of the `tsdbHelper` fixture used by the TSDB specs; kept here (rather
+ * than duplicated in `./index.ts`) so `export *` doesn't have to pick between two same-named
+ * `test` exports.
+ */
+export const test = lensTest.extend<{}, LensUiWorkerFixtures>({
   tsdbHelper: [
     async ({ esClient, log }, use) => {
       const deleteDataStream = async (stream: string): Promise<void> => {
@@ -219,8 +357,11 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
 
       const putDataStreamTemplate = async (
         stream: string,
-        mode: 'tsdb' | undefined,
-        { includeTimeSeriesMetadata = true }: { includeTimeSeriesMetadata?: boolean } = {}
+        mode: 'tsdb' | 'logsdb' | undefined,
+        {
+          includeTimeSeriesMetadata = true,
+          removeLogsDBFields = false,
+        }: { includeTimeSeriesMetadata?: boolean; removeLogsDBFields?: boolean } = {}
       ): Promise<void> => {
         await esClient.cluster.putComponentTemplate({
           name: `${stream}_mapping`,
@@ -233,8 +374,15 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
                   },
                 }
               : {}),
+            ...(mode === 'logsdb'
+              ? {
+                  settings: {
+                    mode: 'logsdb',
+                  },
+                }
+              : {}),
             mappings: {
-              properties: getTsdbMapping({ includeTimeSeriesMetadata }),
+              properties: getTsdbMapping({ includeTimeSeriesMetadata, removeLogsDBFields }),
             },
           },
         });
@@ -249,8 +397,15 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
         });
       };
 
-      const createDataStream = async (stream: string, mode: 'tsdb' | undefined): Promise<void> => {
-        await putDataStreamTemplate(stream, mode);
+      const createDataStream = async (
+        stream: string,
+        mode: 'tsdb' | 'logsdb' | undefined,
+        mappingOptions?: { includeTimeSeriesMetadata?: boolean; removeLogsDBFields?: boolean }
+      ): Promise<void> => {
+        await putDataStreamTemplate(stream, mode, {
+          includeTimeSeriesMetadata: mappingOptions?.includeTimeSeriesMetadata,
+          removeLogsDBFields: mappingOptions?.removeLogsDBFields,
+        });
         await esClient.indices.createDataStream({ name: stream });
       };
 
@@ -266,7 +421,13 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
             '@timestamp': new Date(
               startTimeMs + (TSDB_SCENARIO_DOCUMENT_COUNT + indexOffset) * 1000
             ).toISOString(),
+            utc_time: new Date(
+              startTimeMs + (TSDB_SCENARIO_DOCUMENT_COUNT + indexOffset) * 1000
+            ).toISOString(),
             request: `/lens-tsdb-test/${indexOffset % 5}`,
+            bytes: 6219,
+            extension: ['deb', 'rpm', 'zip', 'gz', 'tar'][indexOffset % 5],
+            host: { name: `host-${indexOffset % 3}` },
             ...(removeTSDBFields ? {} : { bytes_counter: 5000 }),
           })
         );
@@ -370,6 +531,30 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
         }
       };
 
+      const createDowngradedLogsDBStream: TsdbHelper['createDowngradedLogsDBStream'] = async (
+        stream,
+        timeRange
+      ) => {
+        const cleanup = async () => deleteDataStream(stream);
+        try {
+          log.info(`Creating LogsDB data stream "${stream}"`);
+          await createDataStream(stream, 'logsdb', { includeTimeSeriesMetadata: false });
+          await createDocs(stream, timeRange.beforeRollover, { isStream: true });
+
+          log.info(`Downgrading LogsDB data stream "${stream}" to a regular data stream`);
+          await putDataStreamTemplate(stream, undefined, {
+            includeTimeSeriesMetadata: false,
+          });
+          await esClient.indices.rollover({ alias: stream });
+          await createDocs(stream, timeRange.afterRollover, { isStream: true });
+
+          return { cleanup };
+        } catch (error) {
+          await cleanup();
+          throw error;
+        }
+      };
+
       const setupScenario: TsdbHelper['setupScenario'] = async (
         initialIndex,
         indexes,
@@ -382,14 +567,27 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
           runCleanupActions(`TSDB scenario for "${initialIndex}"`, [...cleanupActions].reverse());
 
         try {
-          for (const { index, create, downsample, removeTSDBFields, mode } of indexes) {
+          for (const {
+            index,
+            create,
+            downsample,
+            removeTSDBFields,
+            removeLogsDBFields,
+            mode,
+          } of indexes) {
             if (!create) {
               continue;
             }
-            if (mode === 'tsdb') {
+            if (mode === 'tsdb' || mode === 'logsdb') {
               cleanupActions.push(async () => deleteDataStream(index));
-              await createDataStream(index, 'tsdb');
-              await createDocs(index, beforeRollover, { isStream: true, removeTSDBFields });
+              await createDataStream(index, mode, {
+                includeTimeSeriesMetadata: mode === 'tsdb',
+                removeLogsDBFields,
+              });
+              await createDocs(index, beforeRollover, {
+                isStream: true,
+                removeTSDBFields,
+              });
             } else {
               cleanupActions.push(async () => {
                 await esClient.indices.delete({ index }, { ignore: [404] });
@@ -397,7 +595,7 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
               await esClient.indices.create({
                 index,
                 mappings: {
-                  properties: getTsdbMapping({ removeTSDBFields }),
+                  properties: getTsdbMapping({ removeTSDBFields, removeLogsDBFields }),
                 },
               });
               await createDocs(index, beforeRollover, { isStream: false, removeTSDBFields });
@@ -434,54 +632,10 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
         downsampleTSDBIndex,
         createUpgradedStream,
         createDowngradedStream,
+        createDowngradedLogsDBStream,
         setupScenario,
       });
     },
     { scope: 'worker' },
   ],
-  tsdbScenario: async ({ apiServices, tsdbHelper, uiSettings }, use) => {
-    const dataViewIds: string[] = [];
-    const scenarioCleanups: Array<() => Promise<void>> = [];
-
-    const setup: TsdbScenario['setup'] = async (initialIndex, indexes, timeRange) => {
-      const scenario = await tsdbHelper.setupScenario(
-        initialIndex,
-        indexes,
-        timeRange.beforeRollover
-      );
-      try {
-        const { data: dataView } = await apiServices.dataViews.create({
-          title: scenario.dataViewTitle,
-          timeFieldName: '@timestamp',
-        });
-        dataViewIds.push(dataView.id);
-        scenarioCleanups.push(scenario.cleanup);
-        await uiSettings.set({
-          'dateFormat:tz': 'UTC',
-          defaultIndex: dataView.id,
-          'timepicker:timeDefaults': JSON.stringify(timeRange.picker),
-        });
-        return {
-          expectedDocumentCountBeforeRollover: scenario.expectedDocumentCountBeforeRollover,
-        };
-      } catch (error) {
-        await scenario.cleanup();
-        throw error;
-      }
-    };
-
-    try {
-      await use({ setup });
-    } finally {
-      await runCleanupActions('TSDB scenario fixture', [
-        ...dataViewIds.map((dataViewId) => async () => {
-          await apiServices.dataViews.delete(dataViewId);
-        }),
-        async () => {
-          await uiSettings.unset('dateFormat:tz', 'defaultIndex', 'timepicker:timeDefaults');
-        },
-        ...[...scenarioCleanups].reverse(),
-      ]);
-    }
-  },
 });

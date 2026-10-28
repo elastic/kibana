@@ -29,8 +29,7 @@ import type {
 import { BulkActionsVerbs } from '../types';
 import type { CasesService, PublicAlertsDataGridProps } from '../types';
 import {
-  ADD_TO_EXISTING_CASE,
-  ADD_TO_NEW_CASE,
+  ADD_TO_CASE,
   ADD_TO_CHAT,
   ALERTS_ALREADY_ATTACHED_TO_CASE,
   EDIT_TAGS,
@@ -41,6 +40,17 @@ import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
 import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 import { useTagsAction } from '../components/tags/use_tags_action';
 import { MUTE_SELECTED, UNMUTE_SELECTED } from '../translations';
+
+export const BULK_ADD_TO_CASE_ACTION_ID = 'alerts-table-add-to-case';
+
+export const BULK_ADD_TO_CHAT_ACTION_ID = 'bulk-add-to-chat';
+export const BULK_EDIT_TAGS_ACTION_ID = 'edit-tags';
+export const BULK_UNTRACK_ACTION_ID = 'mark-as-untracked';
+
+export const BULK_MUTE_ACTION_IDS = {
+  mute: 'bulk-mute',
+  unmute: 'bulk-unmute',
+} as const;
 
 interface BulkActionsProps {
   ruleTypeIds?: string[];
@@ -119,14 +129,16 @@ const filterAlertsAlreadyAttachedToCase = (alerts: TimelineItem[], caseId: strin
 const getCaseAttachments = ({
   alerts,
   caseId,
+  owner,
   groupAlertsByRule,
 }: {
   caseId: string;
+  owner: string;
   groupAlertsByRule?: CasesService['helpers']['groupAlertsByRule'];
   alerts?: TimelineItem[];
 }) => {
   const filteredAlerts = filterAlertsAlreadyAttachedToCase(alerts ?? [], caseId);
-  return groupAlertsByRule?.(filteredAlerts) ?? [];
+  return groupAlertsByRule?.(filteredAlerts, owner) ?? [];
 };
 
 const addItemsToInitialPanel = ({
@@ -135,17 +147,23 @@ const addItemsToInitialPanel = ({
 }: {
   panels: BulkActionsPanelConfig[];
   items: BulkActionsConfig[];
-}) => {
-  if (panels.length > 0) {
-    if (panels[0].items) {
-      panels[0].items = [...panels[0].items, ...items].filter(
-        (item, index, self) => index === self.findIndex((newItem) => newItem.key === item.key)
-      );
-    }
-    return panels;
-  } else {
+}): BulkActionsPanelConfig[] => {
+  if (panels.length === 0) {
     return [{ id: 0, items }];
   }
+  const [firstPanel, ...restPanels] = panels;
+  if (!firstPanel.items) {
+    return panels;
+  }
+  return [
+    {
+      ...firstPanel,
+      items: [...firstPanel.items, ...items].filter(
+        (item, index, self) => index === self.findIndex((newItem) => newItem.key === item.key)
+      ),
+    },
+    ...restPanels,
+  ];
 };
 
 export const useBulkAddToCaseActions = ({
@@ -165,7 +183,6 @@ export const useBulkAddToCaseActions = ({
     clearSelection();
   }, [clearSelection, refresh]);
 
-  const createCaseFlyout = casesService?.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
   const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({
     onSuccess,
     noAttachmentsToaster: {
@@ -173,45 +190,38 @@ export const useBulkAddToCaseActions = ({
       content: ALERTS_ALREADY_ATTACHED_TO_CASE,
     },
   });
+  const caseOwner = casesConfig?.owner?.[0];
 
   return useMemo(() => {
     return isCasesContextAvailable &&
-      createCaseFlyout &&
       selectCaseModal &&
       userCasesPermissions?.create &&
       userCasesPermissions?.read
       ? [
           {
-            label: ADD_TO_NEW_CASE,
-            key: 'attach-new-case',
-            'data-test-subj': 'attach-new-case',
+            label: ADD_TO_CASE,
+            key: BULK_ADD_TO_CASE_ACTION_ID,
+            'data-test-subj': BULK_ADD_TO_CASE_ACTION_ID,
             disableOnQuery: true,
-            disabledLabel: ADD_TO_NEW_CASE,
-            onClick: (alerts?: TimelineItem[]) => {
-              const caseAttachments = alerts
-                ? casesService?.helpers.groupAlertsByRule(alerts) ?? []
-                : [];
-              createCaseFlyout.open({
-                attachments: caseAttachments,
-              });
-            },
-          },
-          {
-            label: ADD_TO_EXISTING_CASE,
-            key: 'attach-existing-case',
-            disableOnQuery: true,
-            disabledLabel: ADD_TO_EXISTING_CASE,
-            'data-test-subj': 'attach-existing-case',
+            disabledLabel: ADD_TO_CASE,
             onClick: (alerts?: TimelineItem[]) => {
               selectCaseModal.open({
                 getAttachments: ({ theCase }) => {
                   if (theCase == null) {
-                    return alerts ? casesService?.helpers.groupAlertsByRule(alerts) ?? [] : [];
+                    return alerts && caseOwner
+                      ? casesService?.helpers.groupAlertsByRule(alerts, caseOwner) ?? []
+                      : [];
+                  }
+
+                  const owner = theCase.owner ?? caseOwner;
+                  if (!owner) {
+                    return [];
                   }
 
                   return getCaseAttachments({
                     alerts,
                     caseId: theCase.id,
+                    owner,
                     groupAlertsByRule: casesService?.helpers.groupAlertsByRule,
                   });
                 },
@@ -221,8 +231,8 @@ export const useBulkAddToCaseActions = ({
         ]
       : [];
   }, [
+    caseOwner,
     casesService?.helpers,
-    createCaseFlyout,
     isCasesContextAvailable,
     selectCaseModal,
     userCasesPermissions?.create,
@@ -285,7 +295,7 @@ export const useBulkUntrackActions = ({
     return [
       {
         label: MARK_AS_UNTRACKED,
-        key: 'mark-as-untracked',
+        key: BULK_UNTRACK_ACTION_ID,
         disableOnQuery: false,
         disabledLabel: MARK_AS_UNTRACKED,
         'data-test-subj': 'mark-as-untracked',
@@ -386,7 +396,7 @@ export const useBulkMuteActions = ({
     () => [
       {
         label: MUTE_SELECTED,
-        key: 'bulk-mute',
+        key: BULK_MUTE_ACTION_IDS.mute,
         disableOnQuery: true,
         disabledLabel: MUTE_SELECTED,
         'data-test-subj': 'bulk-mute',
@@ -394,7 +404,7 @@ export const useBulkMuteActions = ({
       },
       {
         label: UNMUTE_SELECTED,
-        key: 'bulk-unmute',
+        key: BULK_MUTE_ACTION_IDS.unmute,
         disableOnQuery: true,
         disabledLabel: UNMUTE_SELECTED,
         'data-test-subj': 'bulk-unmute',
@@ -434,7 +444,7 @@ export const useBulkAddToChatActions = ({
     return [
       {
         label: ADD_TO_CHAT,
-        key: 'bulk-add-to-chat',
+        key: BULK_ADD_TO_CHAT_ACTION_ID,
         disableOnQuery: true,
         disabledLabel: ADD_TO_CHAT,
         'data-test-subj': 'bulk-add-to-chat',
@@ -511,7 +521,7 @@ export function useBulkActions({
       : [
           {
             label: EDIT_TAGS,
-            key: 'edit-tags',
+            key: BULK_EDIT_TAGS_ACTION_ID,
             disableOnQuery: true,
             disabledLabel: EDIT_TAGS,
             'data-test-subj': 'edit-tags',

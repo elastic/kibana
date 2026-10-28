@@ -7,20 +7,15 @@
 
 import Boom from '@hapi/boom';
 import type { z } from '@kbn/zod/v4';
+import { UnifiedAttachmentBoundsSchema } from '../../../common/types/api/attachment/v2';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
-import {
-  isCommentRequestTypeExternalReference,
-  isCommentRequestTypePersistableState,
-  isLegacyAttachmentRequest,
-  isUnifiedAttachmentRequest,
-  isPersistableType,
-  toUnifiedPersistableStateAttachmentType,
-} from '../../../common/utils/attachments';
-import { EXTERNAL_REFERENCE_TYPE_MAP } from '../../../common/constants/attachments';
-import type { AttachmentRequest, AttachmentRequestV2 } from '../../../common/types/api';
+import { isTypeAllowedForOwner } from '../../../common/utils/attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
-import { externalReferenceAttachmentTransformer } from '../../common/attachments/external_reference';
-import { persistableStateAttachmentTransformer } from '../../common/attachments/persistable_state';
+
+const summarizeIssues = (error: z.ZodError): string =>
+  error.issues
+    .map(({ path, message }) => `${path.length > 0 ? path.join('.') : '(root)'}: ${message}`)
+    .join('; ');
 
 /** Throws `Boom.badRequest` with a `path: message` summary of every zod issue. */
 export const parseUnifiedAttachmentWithSchema = (
@@ -32,117 +27,42 @@ export const parseUnifiedAttachmentWithSchema = (
   if (result.success) {
     return;
   }
-  const summary = result.error.issues
-    .map(({ path, message }) => `${path.length > 0 ? path.join('.') : '(root)'}: ${message}`)
-    .join('; ');
-  throw Boom.badRequest(`Invalid attachment payload for type '${type}': ${summary}`);
+  throw Boom.badRequest(
+    `Invalid attachment payload for type '${type}': ${summarizeIssues(result.error)}`
+  );
 };
 
-/**
- * A legacy attachment is only valid when its type maps to a migrated unified
- * type that is registered; otherwise it is rejected as unregistered.
- */
-const assertMigratedUnifiedType = (
-  legacyTypeId: string,
-  unifiedTypeId: string | undefined,
-  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry
-): void => {
-  if (unifiedTypeId === undefined) {
-    throw Boom.badRequest(`Attachment type ${legacyTypeId} is not registered.`);
-  }
-  if (!unifiedAttachmentTypeRegistry.has(unifiedTypeId)) {
-    throw Boom.badRequest(
-      `Attachment type ${legacyTypeId} (unified: ${unifiedTypeId}) is not registered in unified attachment type registry.`
-    );
-  }
-};
-
-export const validateLegacyRegisteredAttachments = ({
-  query,
-  unifiedAttachmentTypeRegistry,
-}: {
-  query: AttachmentRequest;
-  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
-}) => {
-  // Each legacy branch resolves its unified type id, asserts it is a registered
-  // migrated type, then transforms the legacy payload into its unified shape and
-  // re-validates via the unified zod schema so legacy clients get the same
-  // strictness as unified clients.
-  if (isCommentRequestTypeExternalReference(query)) {
-    const legacyTypeId = query.externalReferenceAttachmentTypeId;
-    assertMigratedUnifiedType(
-      legacyTypeId,
-      EXTERNAL_REFERENCE_TYPE_MAP[legacyTypeId],
-      unifiedAttachmentTypeRegistry
-    );
-    validateUnifiedRegisteredAttachments({
-      query: externalReferenceAttachmentTransformer.toUnifiedPayload(query),
-      unifiedAttachmentTypeRegistry,
-    });
-    return;
-  }
-
-  if (isCommentRequestTypePersistableState(query)) {
-    const legacyTypeId = query.persistableStateAttachmentTypeId;
-    assertMigratedUnifiedType(
-      legacyTypeId,
-      isPersistableType(legacyTypeId)
-        ? toUnifiedPersistableStateAttachmentType(legacyTypeId)
-        : undefined,
-      unifiedAttachmentTypeRegistry
-    );
-    validateUnifiedRegisteredAttachments({
-      query: persistableStateAttachmentTransformer.toUnifiedPayload(query),
-      unifiedAttachmentTypeRegistry,
-    });
-  }
-};
-
-export const validateUnifiedRegisteredAttachments = ({
+export const validateUnifiedAttachments = ({
   query,
   unifiedAttachmentTypeRegistry,
 }: {
   query: UnifiedAttachmentPayload;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }) => {
+  // Runs first so later errors, which echo `type` and `owner`, only see bounded values.
+  const bounds = UnifiedAttachmentBoundsSchema.safeParse(query);
+  if (!bounds.success) {
+    throw Boom.badRequest(`Invalid attachment payload: ${summarizeIssues(bounds.error)}`);
+  }
+
   if (!unifiedAttachmentTypeRegistry.has(query.type)) {
     throw Boom.badRequest(
       `Attachment type ${query.type} is not registered in unified attachment type registry.`
     );
   }
 
-  const attachmentType = unifiedAttachmentTypeRegistry.get(query.type);
-  if (!attachmentType) {
+  // A solution-scoped type renders with that solution's providers; under another owner it
+  // passes schema validation but crashes the case view.
+  if (!isTypeAllowedForOwner(query.type, query.owner)) {
     throw Boom.badRequest(
-      `Attachment type ${query.type} is not registered in unified attachment type registry.`
+      `Attachment type ${query.type} cannot be attached to a case with owner ${query.owner}.`
     );
   }
 
+  const attachmentType = unifiedAttachmentTypeRegistry.get(query.type);
   if (!attachmentType.schema) {
     throw Boom.badRequest(`Attachment type '${query.type}' does not define a schema.`);
   }
 
   parseUnifiedAttachmentWithSchema(attachmentType.schema, query, query.type);
-};
-
-export const validateRegisteredAttachments = ({
-  query,
-  unifiedAttachmentTypeRegistry,
-}: {
-  query: AttachmentRequestV2;
-  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
-}) => {
-  if (isLegacyAttachmentRequest(query)) {
-    validateLegacyRegisteredAttachments({
-      query,
-      unifiedAttachmentTypeRegistry,
-    });
-  } else if (isUnifiedAttachmentRequest(query)) {
-    validateUnifiedRegisteredAttachments({
-      query,
-      unifiedAttachmentTypeRegistry,
-    });
-  } else {
-    throw Boom.badRequest(`Invalid attachment request type: ${typeof query}`);
-  }
 };

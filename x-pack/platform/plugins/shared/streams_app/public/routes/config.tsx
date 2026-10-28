@@ -16,9 +16,10 @@ import { StreamManagementDefaultRedirect } from '../components/stream_management
 import { StreamsRootRedirect } from '../components/streams_root_redirect';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
-import { SignificantEventsAppRedirect } from '../components/significant_events_app_redirect';
 import { StreamsLayout } from '../components/streams_layout';
 import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
+import { IndexInspectPage } from '../components/index_inspect/index_inspect_page';
+import { DEFAULT_INDEX_INSPECT_TAB } from '../components/index_inspect/types';
 
 /**
  * Optional time range query params.
@@ -73,38 +74,6 @@ const streamsAppRoutes = {
           query: timeRangeQueryParams,
         }),
       },
-      '/_discovery': {
-        element: <Outlet />,
-        children: {
-          '/_discovery': {
-            element: <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />,
-          },
-          '/_discovery/{tab}': {
-            element: <SignificantEventsAppRedirect />,
-            params: t.intersection([
-              t.type({
-                path: t.type({
-                  tab: t.string,
-                }),
-              }),
-              t.partial({
-                query: t.partial({
-                  rangeFrom: t.string,
-                  rangeTo: t.string,
-                  search: t.string,
-                  status: t.string,
-                  type: t.union([t.string, t.array(t.string)]),
-                  subtype: t.union([t.string, t.array(t.string)]),
-                  stream: t.union([t.string, t.array(t.string)]),
-                  showComputed: t.string,
-                  selectedItem: t.string,
-                  selectedEvent: t.string,
-                }),
-              }),
-            ]),
-          },
-        },
-      },
       /**
        * Declared before `/{key}` so the literal path wins over a stream name.
        */
@@ -118,6 +87,41 @@ const streamsAppRoutes = {
                 params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
               />
             ),
+          },
+          /**
+           * Declared before `/{tab}` so `indices` is not treated as a layout tab.
+           */
+          '/new-experience/indices/{indexName}': {
+            element: (
+              <RedirectTo
+                path="/new-experience/indices/{indexName}/{tab}"
+                params={{ path: { tab: DEFAULT_INDEX_INSPECT_TAB } }}
+              />
+            ),
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  indexName: t.string,
+                }),
+              }),
+              t.partial({
+                query: timeRangeQueryParams,
+              }),
+            ]),
+          },
+          '/new-experience/indices/{indexName}/{tab}': {
+            element: <IndexInspectPage />,
+            params: t.intersection([
+              t.type({
+                path: t.type({
+                  indexName: t.string,
+                  tab: t.string,
+                }),
+              }),
+              t.partial({
+                query: managementQueryParams,
+              }),
+            ]),
           },
           '/new-experience/{tab}': {
             element: <StreamsLayout />,

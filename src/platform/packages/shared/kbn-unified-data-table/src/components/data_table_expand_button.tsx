@@ -27,9 +27,13 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
   const tourStep = componentsTourSteps ? componentsTourSteps.expandButton : undefined;
 
   const isCurrentRowExpanded = record === expanded;
-  const buttonLabel = i18n.translate('unifiedDataTable.grid.viewDoc', {
-    defaultMessage: 'Toggle dialog with details',
-  });
+  const buttonLabel = isCurrentRowExpanded
+    ? i18n.translate('unifiedDataTable.grid.closeDocDetails', {
+        defaultMessage: 'Close details',
+      })
+    : i18n.translate('unifiedDataTable.grid.viewDocDetails', {
+        defaultMessage: 'View details',
+      });
 
   const testSubj = record?.isAnchor
     ? 'docTableExpandToggleColumnAnchor'

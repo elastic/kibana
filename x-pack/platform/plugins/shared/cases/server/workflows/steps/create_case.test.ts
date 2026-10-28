@@ -51,6 +51,27 @@ describe('createCaseStepDefinition', () => {
     });
   });
 
+  it('passes extended_fields through to client.cases.create', async () => {
+    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest
+      .fn()
+      .mockResolvedValue({ cases: { create } } as unknown as CasesClient);
+    const definition = createCaseStepDefinition(getCasesClient);
+
+    await definition.handler(
+      createContext({
+        ...createCaseRequestFixture,
+        extended_fields: { priority_as_keyword: 'high' },
+      })
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        extended_fields: { priority_as_keyword: 'high' },
+      })
+    );
+  });
+
   it('returns error when client.cases.create throws', async () => {
     const createError = new Error('create failed');
     const create = jest.fn().mockRejectedValue(createError);
@@ -137,5 +158,24 @@ describe('createCaseStepDefinition', () => {
       connectorId: createCaseResponseFixture.connector.id,
       pushType: 'automatic',
     });
+  });
+
+  it('omits extractObservables from the create payload when the caller did not supply it', async () => {
+    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const getCasesClient = jest
+      .fn()
+      .mockResolvedValue({ cases: { create } } as unknown as CasesClient);
+    const definition = createCaseStepDefinition(getCasesClient);
+
+    await definition.handler(
+      createContext({
+        ...createCaseRequestFixture,
+        settings: { syncAlerts: true }, // extractObservables intentionally absent
+      })
+    );
+
+    // extractObservables must be absent so the server-side create path applies the space
+    // configuration default instead of a value hard-coded from owner info.
+    expect(create.mock.calls[0][0].settings).not.toHaveProperty('extractObservables');
   });
 });

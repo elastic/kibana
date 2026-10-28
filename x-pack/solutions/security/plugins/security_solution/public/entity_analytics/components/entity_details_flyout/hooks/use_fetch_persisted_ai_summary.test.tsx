@@ -12,7 +12,15 @@ import type { GetPersistedAiSummaryResponse } from '@kbn/entity-store/common';
 import { useFetchPersistedAiSummary } from './use_fetch_persisted_ai_summary';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 
+const mockAddError = jest.fn();
+
 jest.mock('../../../api/api');
+
+jest.mock('../../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: () => ({
+    addError: mockAddError,
+  }),
+}));
 
 describe('useFetchPersistedAiSummary', () => {
   const fetchPersistedAiSummary = jest.fn();
@@ -48,9 +56,37 @@ describe('useFetchPersistedAiSummary', () => {
       expect(result.current.summary).toEqual(persisted.summary);
       expect(result.current.canRead).toBe(true);
     });
+    expect(fetchPersistedAiSummary).toHaveBeenCalledWith({
+      params: { entityType: 'user', entityIdentifier: 'user:alice', mode: 'single' },
+      signal: expect.any(AbortSignal),
+      context: {
+        child: {
+          type: 'security_solution',
+          name: 'entity_analytics:entity_details_flyout',
+          id: 'ai_summary_get',
+        },
+      },
+    });
+  });
+
+  it('requests the resolution-group variant when mode is resolved', async () => {
+    fetchPersistedAiSummary.mockResolvedValueOnce(persisted);
+
+    const { result } = renderHook(
+      () =>
+        useFetchPersistedAiSummary({
+          entityType: 'user',
+          entityIdentifier: 'user:alice',
+          mode: 'resolved',
+        }),
+      { wrapper: TestWrapper }
+    );
+
+    await waitFor(() => expect(result.current.summary).toEqual(persisted.summary));
     expect(fetchPersistedAiSummary).toHaveBeenCalledWith(
-      { entityType: 'user', entityIdentifier: 'user:alice' },
-      expect.any(AbortSignal)
+      expect.objectContaining({
+        params: { entityType: 'user', entityIdentifier: 'user:alice', mode: 'resolved' },
+      })
     );
   });
 

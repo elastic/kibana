@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/scout-search'
   - '@kbn/search-agent'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/custom-icons'
   - '@kbn/agent-builder-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/core-spaces-common'
@@ -64,6 +65,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

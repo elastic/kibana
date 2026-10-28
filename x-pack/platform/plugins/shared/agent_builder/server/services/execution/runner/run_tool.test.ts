@@ -14,6 +14,8 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { ScopedRunnerRunInternalToolParams } from '@kbn/agent-builder-server/runner';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ConfirmationStatus, AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import type { CreateScopedRunnerDepsMock, MockedTool, ToolRegistryMock } from '../../../test_utils';
 import {
@@ -25,8 +27,15 @@ import type { AnalyticsService } from '../../../telemetry';
 import { RunnerManager } from './runner';
 import { forkContextForAgentRun } from './utils';
 import { runTool, runInternalTool } from './run_tool';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { HookLifecycle, AgentExecutionMode } from '@kbn/agent-builder-common';
+import {
+  ToolResultType,
+  isNonInteractiveDeclinedResult,
+} from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  HookLifecycle,
+  AgentExecutionMode,
+  ConversationOriginType,
+} from '@kbn/agent-builder-common';
 
 jest.mock('@kbn/agent-builder-server/tools/utils', () => ({
   ...jest.requireActual('@kbn/agent-builder-server/tools/utils'),
@@ -102,7 +111,7 @@ describe('runTool', () => {
         toolExecutionParams: params,
         parentManager: runnerManager,
       })
-    ).rejects.toThrowError(/Tool test-tool was called with invalid parameters/);
+    ).rejects.toThrow(/Tool test-tool was called with invalid parameters/);
   });
 
   it('calls the tool handler with the expected parameters', async () => {
@@ -249,6 +258,37 @@ describe('runTool', () => {
     );
   });
 
+  it('records attachment changes made by the tool handler under its tool call id', async () => {
+    const attachmentStateManager = createAttachmentStateManager([], {
+      getTypeDefinition: () =>
+        ({
+          id: 'text',
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+        } as unknown as AttachmentTypeDefinition),
+    });
+    const manager = new RunnerManager({ ...runnerDeps, attachmentStateManager });
+
+    toolHandler.mockImplementation(async (_params, context) => {
+      await context.attachments.add({ type: 'text', data: 'hello', description: 'Test' });
+      return { results: [] };
+    });
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-42',
+        source: 'agent',
+      },
+      parentManager: manager,
+    });
+
+    expect(attachmentStateManager.drainChanges()).toEqual([
+      expect.objectContaining({ kind: 'added', tool_call_id: 'call-42' }),
+    ]);
+  });
+
   it('passes the run context (including agent stack) to the tool handler', async () => {
     const contextWithAgent = forkContextForAgentRun({
       agentId: 'my-agent',
@@ -382,7 +422,25 @@ describe('runTool', () => {
     );
   });
 
-  it('scopes the ES client with space-level project routing for CPS support', async () => {
+  it('scopes the ES client to the run project routing expression when one is provided', async () => {
+    const managerWithRouting = new RunnerManager({ ...runnerDeps, projectRouting: '_alias:*' });
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    await runTool({
+      toolExecutionParams: params,
+      parentManager: managerWithRouting,
+    });
+
+    expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(runnerDeps.request, {
+      projectRouting: 'expression',
+      value: '_alias:*',
+    });
+  });
+
+  it('defaults the ES client to space routing when no project routing is provided', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',
       toolParams: { foo: 'bar' },
@@ -477,6 +535,88 @@ describe('runInternalTool - confirmation policy', () => {
         })
       );
       expect(toolHandler).not.toHaveBeenCalled();
+    });
+
+    it('auto-declines a pre-call confirmation instead of prompting when interactivity is off', async () => {
+      runnerDeps.interactivity = { enabled: false };
+      tool.confirmation = { askUser: 'always' };
+      runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+
+      const result = await runInternalTool({
+        toolExecutionParams: {
+          tool,
+          toolParams: { foo: 'bar' },
+          toolCallId: 'call-non-interactive',
+          source: 'agent',
+        },
+        parentManager: new RunnerManager(runnerDeps),
+      });
+
+      expect(result.prompt).toBeUndefined();
+      const [declinedResult] = result.results ?? [];
+      expect(declinedResult.type).toBe(ToolResultType.error);
+      expect((declinedResult.data as { message: string }).message).toContain(
+        'non-interactive mode'
+      );
+      // Tagged so text-only consumers can report the declined prompt without parsing the message.
+      expect(isNonInteractiveDeclinedResult(declinedResult)).toBe(true);
+      expect(toolHandler).not.toHaveBeenCalled();
+    });
+
+    it('returns an on-demand handler prompt when interactivity is on', async () => {
+      toolHandler.mockReturnValue({
+        prompt: { type: AgentPromptType.confirmation, id: 'handler-prompt' },
+      });
+
+      const result = await runInternalTool({
+        toolExecutionParams: {
+          tool,
+          toolParams: { foo: 'bar' },
+          toolCallId: 'call-on-demand-interactive',
+          source: 'agent',
+        },
+        parentManager: runnerManager,
+      });
+
+      expect(result.prompt).toEqual(
+        expect.objectContaining({ type: AgentPromptType.confirmation, id: 'handler-prompt' })
+      );
+    });
+
+    it('passes toolParams and toolHandlerContext to getConfirmation', async () => {
+      const getConfirmation = jest.fn().mockResolvedValue({
+        title: 'Confirm',
+        message: 'Proceed?',
+      });
+      tool.confirmation = { askUser: 'always', getConfirmation };
+      runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+
+      const params: ScopedRunnerRunInternalToolParams = {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-789',
+        source: 'agent',
+      };
+
+      await runInternalTool({
+        toolExecutionParams: params,
+        parentManager: runnerManager,
+      });
+
+      expect(getConfirmation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          toolParams: { foo: 'bar' },
+          context: expect.objectContaining({
+            attachments: runnerDeps.attachmentStateManager,
+            request: runnerDeps.request,
+            spaceId: expect.any(String),
+          }),
+        })
+      );
     });
 
     it('should execute tool when confirmation status is accepted', async () => {
@@ -862,7 +1002,48 @@ describe('runInternalTool - telemetry', () => {
     expect(analyticsService.reportToolCallSuccess).toHaveBeenCalledWith(
       expect.objectContaining({
         agentId: undefined,
+        origin: undefined,
       })
+    );
+  });
+
+  it('extracts the conversation origin from the run context stack', async () => {
+    const contextWithAgent = forkContextForAgentRun({
+      agentId: 'my-custom-agent',
+      origin: ConversationOriginType.Slack,
+      parentContext: runnerManager.context,
+    });
+    const managerWithAgent = new RunnerManager(runnerDeps, contextWithAgent);
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-origin-success',
+        source: 'agent',
+      },
+      parentManager: managerWithAgent,
+    });
+
+    toolHandler.mockReturnValue({
+      results: [{ type: ToolResultType.error, data: { message: 'nope' } }],
+    });
+
+    await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-origin-error',
+        source: 'agent',
+      },
+      parentManager: managerWithAgent,
+    });
+
+    expect(analyticsService.reportToolCallSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: ConversationOriginType.Slack })
+    );
+    expect(analyticsService.reportToolCallError).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: ConversationOriginType.Slack })
     );
   });
 
@@ -955,8 +1136,9 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
     tool.getHandler.mockReturnValue(toolHandler);
   });
 
-  it('returns error result instead of confirmation prompt when executionMode is standalone', async () => {
+  it('returns error result instead of confirmation prompt when interactivity is disabled', async () => {
     runnerDeps.executionMode = AgentExecutionMode.standalone;
+    runnerDeps.interactivity = { enabled: false };
     const runnerManager = new RunnerManager(runnerDeps);
 
     tool.confirmation = { askUser: 'always' };
@@ -980,11 +1162,13 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
     expect(result.results![0].data).toEqual(
       expect.objectContaining({ message: expect.stringContaining('non-interactive mode') })
     );
+    expect(isNonInteractiveDeclinedResult(result.results![0])).toBe(true);
     expect(toolHandler).not.toHaveBeenCalled();
   });
 
-  it('returns error result instead of on-demand prompt when executionMode is standalone', async () => {
+  it('returns error result instead of on-demand prompt when interactivity is disabled', async () => {
     runnerDeps.executionMode = AgentExecutionMode.standalone;
+    runnerDeps.interactivity = { enabled: false };
     const runnerManager = new RunnerManager(runnerDeps);
 
     toolHandler.mockReturnValue({
@@ -1011,6 +1195,7 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
     expect(result.results![0].data).toEqual(
       expect.objectContaining({ message: expect.stringContaining('non-interactive mode') })
     );
+    expect(isNonInteractiveDeclinedResult(result.results![0])).toBe(true);
   });
 
   it('allows HITL prompts when executionMode is undefined', async () => {

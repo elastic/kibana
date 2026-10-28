@@ -26,6 +26,8 @@ import {
   getCaseViewPath,
   countUserAttachments,
   isPersistableStateOrExternalReference,
+  getAlertInfoFromComments,
+  getEventInfoFromComments,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
@@ -33,8 +35,10 @@ import { mockCases, mockCaseComments } from '../mocks';
 import { createAlertAttachment, createUserAttachment } from '../services/attachments/test_utils';
 import type {
   AttachmentAttributes,
+  AttachmentAttributesV2,
   Case,
   CaseConnector,
+  EventAttachmentPayload,
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
 import {
@@ -44,11 +48,13 @@ import {
   CustomFieldTypes,
 } from '../../common/types/domain';
 import type { AttachmentRequest } from '../../common/types/api';
+import { SECURITY_EVENT_ATTACHMENT_TYPE } from '../../common/constants/attachments';
 import {
   createAlertRequests,
   createExternalReferenceRequests,
   createPersistableStateRequests,
   createUserRequests,
+  createUnifiedAlertRequests,
 } from './limiter_checker/test_utils';
 
 interface CommentReference {
@@ -828,18 +834,20 @@ describe('common utils', () => {
           "closed_by": null,
           "comments": Array [
             Object {
-              "comment": "Wow, good luck catching that bad meanie!",
               "created_at": "2019-11-25T21:55:00.177Z",
               "created_by": Object {
                 "email": "testemail@elastic.co",
                 "full_name": "elastic",
                 "username": "elastic",
               },
+              "data": Object {
+                "content": "Wow, good luck catching that bad meanie!",
+              },
               "id": "mock-comment-1",
               "owner": "securitySolution",
               "pushed_at": null,
               "pushed_by": null,
-              "type": "user",
+              "type": "comment",
               "updated_at": "2019-11-25T21:55:00.177Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -1059,13 +1067,23 @@ describe('common utils', () => {
   });
 
   describe('flattenCommentSavedObject', () => {
+    type LegacyCommentAttributes = Extract<
+      (typeof mockCaseComments)[0]['attributes'],
+      { comment: string }
+    >;
+
+    const unifiedAttributes = () => {
+      const { comment, type, ...rest } = mockCaseComments[0].attributes as LegacyCommentAttributes;
+      return { ...rest, type: 'comment', data: { content: comment } };
+    };
+
     it('flattens correctly', () => {
       const comment = { ...mockCaseComments[0] };
       const res = flattenAttachmentSavedObject(comment);
       expect(res).toEqual({
         id: comment.id,
         version: comment.version,
-        ...comment.attributes,
+        ...unifiedAttributes(),
       });
     });
 
@@ -1076,8 +1094,39 @@ describe('common utils', () => {
       expect(res).toEqual({
         id: comment.id,
         version: '0',
-        ...comment.attributes,
+        ...unifiedAttributes(),
       });
+    });
+
+    it('keeps a legacy shape for an unrecognized attachment type (no errors channel to reject it into)', () => {
+      // persistableState is self-contained (no SO-reference injection needed, unlike
+      // externalReference), so it decodes against the legacy Rt without extra setup.
+      const unrecognizedAttachment = {
+        id: 'unrecognized-1',
+        version: '1',
+        references: [],
+        attributes: {
+          type: AttachmentType.persistableState,
+          owner: 'cases',
+          persistableStateAttachmentTypeId: 'unknown-third-party-type',
+          persistableStateAttachmentState: {},
+          created_at: '2020-01-01T00:00:00.000Z',
+          created_by: { username: 'elastic', full_name: null, email: null },
+          pushed_at: null,
+          pushed_by: null,
+          updated_at: null,
+          updated_by: null,
+        },
+      } as unknown as SavedObject<AttachmentAttributesV2>;
+
+      const res = flattenAttachmentSavedObject(unrecognizedAttachment);
+
+      expect(res).toEqual(
+        expect.objectContaining({
+          type: AttachmentType.persistableState,
+          persistableStateAttachmentTypeId: 'unknown-third-party-type',
+        })
+      );
     });
   });
 
@@ -1646,6 +1695,15 @@ describe('common utils', () => {
 
       expect(countUserAttachments(attachments)).toBe(0);
     });
+
+    it('counts a unified comment attachment', () => {
+      const attachments = [
+        createUserAttachment({ type: 'comment', comment: undefined, data: { content: 'hi' } }),
+        createAlertAttachment(),
+      ];
+
+      expect(countUserAttachments(attachments)).toBe(1);
+    });
   });
 
   describe('isPersistableStateOrExternalReference', () => {
@@ -1666,6 +1724,213 @@ describe('common utils', () => {
       expect(isPersistableStateOrExternalReference(createAlertRequests(1, 'alert-id')[0])).toBe(
         false
       );
+    });
+  });
+
+  describe('getAlertInfoFromComments', () => {
+    it('extracts id/index pairs for legacy alert attachments', () => {
+      const requests = createAlertRequests(1, ['alert-1', 'alert-2']);
+
+      expect(getAlertInfoFromComments(requests)).toEqual([
+        { id: 'alert-1', index: 'alert-1' },
+        { id: 'alert-2', index: 'alert-2' },
+      ]);
+    });
+
+    it('extracts id/index pairs for unified alert attachments when metadata.index is present', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: ['index-1', 'index-2'] },
+      }));
+
+      expect(getAlertInfoFromComments(requests)).toEqual([
+        { id: 'alert-1', index: 'index-1' },
+        { id: 'alert-2', index: 'index-2' },
+      ]);
+    });
+
+    it('silently drops a unified alert attachment that omits metadata.index', () => {
+      // Lenient by default so reads of already-persisted (possibly malformed) data don't fail;
+      // write-time validation passes `strict: true` instead (see below).
+      const requests = createUnifiedAlertRequests(1, 'alert-1');
+
+      expect(getAlertInfoFromComments(requests)).toEqual([]);
+    });
+
+    it('silently drops when attachmentId and a metadata.index array have mismatched lengths', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: ['index-1'] },
+      }));
+
+      expect(getAlertInfoFromComments(requests)).toEqual([]);
+    });
+
+    it('broadcasts a scalar metadata.index across every id (no length mismatch)', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: 'shared-index' },
+      }));
+
+      expect(getAlertInfoFromComments(requests)).toEqual([
+        { id: 'alert-1', index: 'shared-index' },
+        { id: 'alert-2', index: 'shared-index' },
+      ]);
+    });
+
+    it('ignores non-alert attachments', () => {
+      expect(getAlertInfoFromComments(createUserRequests(1))).toEqual([]);
+    });
+  });
+
+  describe('getAlertInfoFromComments (strict: true)', () => {
+    it('extracts id/index pairs for unified alert attachments when metadata.index is present', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: ['index-1', 'index-2'] },
+      }));
+
+      expect(getAlertInfoFromComments(requests, true)).toEqual([
+        { id: 'alert-1', index: 'index-1' },
+        { id: 'alert-2', index: 'index-2' },
+      ]);
+    });
+
+    it('throws instead of silently skipping when a unified alert attachment omits metadata.index', () => {
+      // the exact shape that let ensureAlertsAuthorized be bypassed before this fix.
+      const requests = createUnifiedAlertRequests(1, 'alert-1');
+
+      expect(() => getAlertInfoFromComments(requests, true)).toThrow(
+        /missing a valid index reference/
+      );
+    });
+
+    it('broadcasts a scalar metadata.index across every id instead of throwing', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: 'shared-index' },
+      }));
+
+      expect(getAlertInfoFromComments(requests, true)).toEqual([
+        { id: 'alert-1', index: 'shared-index' },
+        { id: 'alert-2', index: 'shared-index' },
+      ]);
+    });
+
+    it('throws when attachmentId and a metadata.index array have mismatched lengths', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: ['index-1'] },
+      }));
+
+      expect(() => getAlertInfoFromComments(requests, true)).toThrow(
+        /missing a valid index reference/
+      );
+    });
+
+    it('ignores non-alert attachments', () => {
+      expect(getAlertInfoFromComments(createUserRequests(1), true)).toEqual([]);
+    });
+  });
+
+  describe('getEventInfoFromComments', () => {
+    it('extracts id/index pairs for legacy event attachments', () => {
+      const requests: EventAttachmentPayload[] = [
+        {
+          type: AttachmentType.event as const,
+          eventId: 'event-1',
+          index: 'event-index-1',
+          owner: 'test',
+        },
+      ];
+
+      expect(getEventInfoFromComments(requests)).toEqual([
+        { id: 'event-1', index: 'event-index-1' },
+      ]);
+    });
+
+    it('extracts id/index pairs for unified security.event attachments when metadata.index is present', () => {
+      const requests = [
+        {
+          type: SECURITY_EVENT_ATTACHMENT_TYPE,
+          attachmentId: 'event-1',
+          metadata: { index: 'event-index-1' },
+          owner: 'test',
+        },
+      ];
+
+      expect(getEventInfoFromComments(requests)).toEqual([
+        { id: 'event-1', index: 'event-index-1' },
+      ]);
+    });
+
+    it('silently drops a unified event attachment that omits metadata.index', () => {
+      // getEventInfoFromComments stays lenient by default — see the getAlertInfoFromComments
+      // comment above for why. Write-time validation passes `strict: true` instead.
+      const requests = [
+        {
+          type: SECURITY_EVENT_ATTACHMENT_TYPE,
+          attachmentId: 'event-1',
+          owner: 'test',
+        },
+      ];
+
+      expect(getEventInfoFromComments(requests)).toEqual([]);
+    });
+
+    it('broadcasts a scalar metadata.index across every id (no length mismatch)', () => {
+      const requests = [
+        {
+          type: SECURITY_EVENT_ATTACHMENT_TYPE,
+          attachmentId: ['event-1', 'event-2'],
+          metadata: { index: 'shared-index' },
+          owner: 'test',
+        },
+      ];
+
+      expect(getEventInfoFromComments(requests)).toEqual([
+        { id: 'event-1', index: 'shared-index' },
+        { id: 'event-2', index: 'shared-index' },
+      ]);
+    });
+
+    it('ignores non-event attachments', () => {
+      expect(getEventInfoFromComments(createAlertRequests(1, 'alert-1'))).toEqual([]);
+    });
+  });
+
+  describe('getEventInfoFromComments (strict: true)', () => {
+    it('extracts id/index pairs for unified security.event attachments when metadata.index is present', () => {
+      const requests = [
+        {
+          type: SECURITY_EVENT_ATTACHMENT_TYPE,
+          attachmentId: 'event-1',
+          metadata: { index: 'event-index-1' },
+          owner: 'test',
+        },
+      ];
+
+      expect(getEventInfoFromComments(requests, true)).toEqual([
+        { id: 'event-1', index: 'event-index-1' },
+      ]);
+    });
+
+    it('throws instead of silently skipping when a unified event attachment omits metadata.index', () => {
+      const requests = [
+        {
+          type: SECURITY_EVENT_ATTACHMENT_TYPE,
+          attachmentId: 'event-1',
+          owner: 'test',
+        },
+      ];
+
+      expect(() => getEventInfoFromComments(requests, true)).toThrow(
+        /missing a valid index reference/
+      );
+    });
+
+    it('ignores non-event attachments', () => {
+      expect(getEventInfoFromComments(createAlertRequests(1, 'alert-1'), true)).toEqual([]);
     });
   });
 });

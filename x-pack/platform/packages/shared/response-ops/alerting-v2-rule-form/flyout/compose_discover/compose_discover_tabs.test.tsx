@@ -19,25 +19,37 @@ jest.mock('@kbn/code-editor', () => {
 
   return {
     ESQL_LANG_ID: 'esql',
+    monaco: {
+      KeyMod: { CtrlCmd: 2048 },
+      KeyCode: { KeyI: 39 },
+      editor: { EditorOption: { fontInfo: 0 } },
+    },
     CodeEditor: ({
       value,
       languageId,
       editorDidMount,
+      options,
     }: {
       value: string;
       languageId: string;
       editorDidMount?: (editor: unknown) => void;
+      options?: { theme?: string };
     }) => {
       ReactActual.useEffect(() => {
         editorDidMount?.({
           getModel: () => ({ id: value }),
           getContentHeight: () => 40,
           onDidContentSizeChange: () => ({ dispose: () => {} }),
+          addAction: () => ({ dispose: () => {} }),
         });
       }, [editorDidMount, value]);
 
       return (
-        <pre data-language-id={languageId} data-test-subj="codeEditorMock">
+        <pre
+          data-language-id={languageId}
+          data-theme={options?.theme}
+          data-test-subj="codeEditorMock"
+        >
           {value}
         </pre>
       );
@@ -100,6 +112,9 @@ describe('ComposeDiscoverTabs', () => {
         expect.objectContaining({ dataset: expect.objectContaining({ languageId: 'esql' }) }),
       ])
     );
+    for (const editor of screen.getAllByTestId('codeEditorMock')) {
+      expect(editor).toHaveAttribute('data-theme', 'esql');
+    }
   });
 
   it('disables the alert tab when the base query is empty', () => {
@@ -180,13 +195,11 @@ describe('isAlertTabDisabled', () => {
     expect(isAlertTabDisabled(['recovery'], '')).toBe(false);
   });
 
-  it('allows the alert tab for standalone queries with breach content', () => {
+  it('reads the base off a rule query object', () => {
     expect(
-      isAlertTabDisabled(['base', 'alert'], {
-        format: 'standalone',
-        breach: { query: 'FROM kbn*' },
-      })
+      isAlertTabDisabled(['base', 'alert'], { base: 'FROM kbn*', breach: { segment: '' } })
     ).toBe(false);
+    expect(isAlertTabDisabled(['base', 'alert'], { base: '', breach: { segment: '' } })).toBe(true);
   });
 });
 

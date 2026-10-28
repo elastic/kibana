@@ -8,19 +8,19 @@
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import {
   getImpactedServiceKey,
-  getImpactedServiceStreamNames,
+  getImpactedServiceSourceIds,
   getImpactedServices,
+  resolveImpactedServices,
 } from './impacted_services';
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
-  event_uuid: 'evt-uuid-001',
-  status: 'open',
-  stream_names: ['logs.web-frontend'],
+  status: 'active',
+  source_ids: ['logs.web-frontend'],
   title: 'Test event',
   summary: 'Summary',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.9,
   ...overrides,
 });
@@ -28,7 +28,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
 const mockFeature = (overrides: Partial<Feature> = {}): Feature => ({
   uuid: 'feat-checkout',
   id: 'checkout-api',
-  stream_name: 'logs.checkout',
+  source_id: 'logs.checkout',
   type: 'entity',
   subtype: 'service',
   title: 'Checkout API',
@@ -40,21 +40,18 @@ const mockFeature = (overrides: Partial<Feature> = {}): Feature => ({
 
 const entityEntry = {
   type: 'entity' as const,
+  subtype: 'service',
   feature_id: 'feat-checkout',
   name: 'checkout-api',
-  stream_name: 'logs.checkout',
+  source_id: 'logs.checkout',
 };
 
 describe('getImpactedServices', () => {
-  it('resolves entity entries backed by a service knowledge indicator', () => {
-    const feature = mockFeature();
-
-    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toEqual([
+  it('returns service entities from the blast radius', () => {
+    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }))).toEqual([
       {
-        key: 'entity:feat-checkout:checkout-api',
+        key: 'entity:checkout-api',
         name: 'checkout-api',
-        streamName: 'logs.checkout',
-        feature,
       },
     ]);
   });
@@ -62,9 +59,9 @@ describe('getImpactedServices', () => {
   it('matches a feature by its id when the entry does not reference the uuid', () => {
     const feature = mockFeature({ uuid: 'some-other-uuid', id: 'feat-checkout' });
 
-    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toHaveLength(
-      1
-    );
+    expect(
+      resolveImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])
+    ).toHaveLength(1);
   });
 
   it('prefers a uuid match over another feature that reuses the same value as its id', () => {
@@ -72,63 +69,29 @@ describe('getImpactedServices', () => {
     const byUuid = mockFeature({ uuid: 'feat-checkout', id: 'unrelated-id', title: 'By uuid' });
 
     expect(
-      getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [byId, byUuid])[0].feature
+      resolveImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [byId, byUuid])[0].feature
     ).toBe(byUuid);
   });
 
-  // `Feature.subtype` is an unconstrained string written by a model, so casing is not guaranteed.
   it('accepts a service subtype regardless of casing', () => {
-    const feature = mockFeature({ subtype: 'Service' });
+    const entry = { ...entityEntry, subtype: 'Service' };
 
-    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toHaveLength(
-      1
-    );
+    expect(getImpactedServices(mockEvent({ blast_radius: [entry] }))).toHaveLength(1);
   });
 
-  // A row's `type` is the agent's per-event wording; the knowledge indicator decides what the thing
-  // it points at actually is.
-  it('resolves an infrastructure entry whose knowledge indicator is a service', () => {
+  it('drops infrastructure entries even when their subtype is service', () => {
     const event = mockEvent({
       blast_radius: [
         {
           type: 'infrastructure',
+          subtype: 'service',
           feature_id: 'feat-ingress',
           title: 'Ingress controller',
-          stream_name: 'logs.checkout',
+          source_id: 'logs.checkout',
         },
       ],
     });
-    const feature = mockFeature({ uuid: 'feat-ingress' });
-
-    expect(getImpactedServices(event, [feature])).toEqual([
-      {
-        key: 'infrastructure:feat-ingress:Ingress controller',
-        name: 'Ingress controller',
-        streamName: 'logs.checkout',
-        feature,
-      },
-    ]);
-  });
-
-  it('names an infrastructure entry from its title, then the indicator title, then its id', () => {
-    const named = (feature: Feature, title?: string) =>
-      getImpactedServices(
-        mockEvent({
-          blast_radius: [
-            {
-              type: 'infrastructure',
-              feature_id: 'feat-checkout',
-              stream_name: 'logs.checkout',
-              title,
-            },
-          ],
-        }),
-        [feature]
-      )[0].name;
-
-    expect(named(mockFeature(), 'Ingress controller')).toBe('Ingress controller');
-    expect(named(mockFeature())).toBe('Checkout API');
-    expect(named(mockFeature({ title: undefined }))).toBe('checkout-api');
+    expect(getImpactedServices(event)).toEqual([]);
   });
 
   // A dependency row names an edge — `source` → `target` behind one `feature_id` — so there is no
@@ -138,15 +101,16 @@ describe('getImpactedServices', () => {
       blast_radius: [
         {
           type: 'dependency',
+          subtype: 'http',
           feature_id: 'feat-edge',
           source: 'checkout-api',
           target: 'payments-api',
-          stream_name: 'logs.checkout',
+          source_id: 'logs.checkout',
         },
       ],
     });
 
-    expect(getImpactedServices(event, [mockFeature({ uuid: 'feat-edge' })])).toEqual([]);
+    expect(getImpactedServices(event)).toEqual([]);
   });
 
   it('drops an infrastructure entry whose knowledge indicator is not a service', () => {
@@ -154,47 +118,88 @@ describe('getImpactedServices', () => {
       blast_radius: [
         {
           type: 'infrastructure',
+          subtype: 'infrastructure',
           feature_id: 'feat-nodes',
           title: 'Wolfi Linux nodes',
-          stream_name: 'logs.checkout',
+          source_id: 'logs.checkout',
         },
       ],
     });
 
-    expect(
-      getImpactedServices(event, [mockFeature({ uuid: 'feat-nodes', subtype: 'infrastructure' })])
-    ).toEqual([]);
+    expect(getImpactedServices(event)).toEqual([]);
   });
 
-  it('drops entities whose knowledge indicator is not a service', () => {
-    const feature = mockFeature({ subtype: 'database' });
+  it('drops entities whose topology subtype is not service', () => {
+    const entry = { ...entityEntry, subtype: 'database' };
 
-    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toEqual([]);
+    expect(getImpactedServices(mockEvent({ blast_radius: [entry] }))).toEqual([]);
   });
 
-  it('drops entities whose knowledge indicator has no subtype', () => {
-    const feature = mockFeature({ subtype: undefined });
+  it('drops entities whose topology reference has no subtype', () => {
+    const { subtype, ...entry } = entityEntry;
 
-    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [feature])).toEqual([]);
+    expect(subtype).toBe('service');
+    expect(getImpactedServices(mockEvent({ blast_radius: [entry] }))).toEqual([]);
   });
 
-  it('drops entities whose feature_id resolves to nothing', () => {
-    expect(getImpactedServices(mockEvent({ blast_radius: [entityEntry] }), [])).toEqual([]);
+  it('returns direct services but does not resolve a missing knowledge indicator', () => {
+    const event = mockEvent({ blast_radius: [entityEntry] });
+
+    expect(getImpactedServices(event)).toHaveLength(1);
+    expect(resolveImpactedServices(event, [])).toEqual([]);
   });
 
-  it('never falls back to a stream name when there is no blast radius', () => {
-    expect(getImpactedServices(mockEvent(), [mockFeature()])).toEqual([]);
+  it('resolves a duplicate service when its first reference is missing', () => {
+    const feature = mockFeature({ uuid: 'feat-resolved' });
+    const event = mockEvent({
+      blast_radius: [entityEntry],
+      causal_features: [
+        {
+          feature_id: 'feat-resolved',
+          type: 'entity',
+          subtype: 'service',
+          name: 'Checkout-API',
+          source_id: 'logs.checkout',
+        },
+      ],
+    });
+
+    expect(resolveImpactedServices(event, [feature])[0].feature).toBe(feature);
   });
 
-  it('deduplicates repeated entries', () => {
-    const event = mockEvent({ blast_radius: [entityEntry, { ...entityEntry }] });
+  it('never falls back to a source id when there is no blast radius', () => {
+    expect(getImpactedServices(mockEvent())).toEqual([]);
+  });
 
-    expect(getImpactedServices(event, [mockFeature()])).toHaveLength(1);
+  it('merges causal features and deduplicates service names case-insensitively', () => {
+    const event = mockEvent({
+      blast_radius: [entityEntry],
+      causal_features: [
+        {
+          feature_id: 'other-checkout',
+          type: 'entity',
+          subtype: 'service',
+          name: 'Checkout-API',
+          source_id: 'logs.other-checkout',
+        },
+        {
+          feature_id: 'payments',
+          type: 'entity',
+          subtype: 'service',
+          name: 'payments-api',
+        },
+      ],
+    });
+
+    expect(getImpactedServices(event).map(({ name }) => name)).toEqual([
+      'checkout-api',
+      'payments-api',
+    ]);
   });
 });
 
-describe('getImpactedServiceStreamNames', () => {
-  it('collects distinct streams from every entry that can name a service', () => {
+describe('getImpactedServiceSourceIds', () => {
+  it('collects distinct sources from every entry that can name a service', () => {
     const events = [
       mockEvent({ blast_radius: [entityEntry] }),
       mockEvent({
@@ -203,43 +208,53 @@ describe('getImpactedServiceStreamNames', () => {
             ...entityEntry,
             feature_id: 'feat-eis',
             name: 'eis-gateway',
-            stream_name: 'logging-eis',
+            source_id: 'logging-eis',
           },
           {
             type: 'infrastructure',
+            subtype: 'service',
             feature_id: 'feat-nodes',
             title: 'Wolfi Linux nodes',
-            stream_name: 'logs.infra',
+            source_id: 'logs.infra',
           },
           {
             type: 'dependency',
+            subtype: 'http',
             feature_id: 'feat-edge',
             source: 'checkout-api',
             target: 'payments-api',
-            stream_name: 'logs.edges',
+            source_id: 'logs.edges',
+          },
+        ],
+        causal_features: [
+          {
+            feature_id: 'feat-payments',
+            type: 'entity',
+            subtype: 'service',
+            name: 'payments-api',
+            source_id: 'logs.payments',
           },
         ],
       }),
       mockEvent(),
     ];
 
-    expect(getImpactedServiceStreamNames(events)).toEqual([
+    expect(getImpactedServiceSourceIds(events)).toEqual([
       'logs.checkout',
       'logging-eis',
-      'logs.infra',
+      'logs.payments',
     ]);
   });
 });
 
 describe('getImpactedServiceKey', () => {
-  it('separates entries that share a feature but name different services', () => {
-    expect(getImpactedServiceKey(entityEntry, 'checkout-api')).not.toBe(
-      getImpactedServiceKey(entityEntry, 'checkout-worker')
+  it('separates differently named services', () => {
+    expect(getImpactedServiceKey('checkout-api')).not.toBe(
+      getImpactedServiceKey('checkout-worker')
     );
   });
 
-  // `getBlastRadiusEbtDetail` reads this prefix to derive the privacy-safe analytics category.
   it('keeps the entry type as the leading key segment', () => {
-    expect(getImpactedServiceKey(entityEntry, 'checkout-api')).toMatch(/^entity:/);
+    expect(getImpactedServiceKey('checkout-api')).toMatch(/^entity:/);
   });
 });

@@ -15,7 +15,7 @@
             }
         ] */
 
-import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
+import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline.ts';
 import { emitPipeline, getPipeline } from '#pipeline-utils';
 
 // Forwarded by the trigger from kibana-pull-request; re-selects the same suites/models.
@@ -28,7 +28,7 @@ const preludeSteps = [
   `    command: .buildkite/scripts/lifecycle/pre_build.sh`,
   `    timeout_in_minutes: 10`,
   `    agents:`,
-  `      image: family/kibana-ubuntu-2404`,
+  `      image: family/kibana-minimal-ubuntu-2604`,
   `      imageProject: elastic-images-prod`,
   `      provider: gcp`,
   `      machineType: n2-standard-2`,

@@ -7,7 +7,14 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger, LogMeta } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  LogMeta,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -16,10 +23,11 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
-import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
+import { registerCustomYaraSignaturesRoutes } from './endpoint/routes/custom_yara_signatures';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
@@ -32,6 +40,7 @@ import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_str
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
+import { registerAlertUpdateAuthorizationAudit } from './lib/detection_engine/routes/common/operations/audit_alert_update_authz';
 import {
   createEqlAlertType,
   createEsqlAlertType,
@@ -49,6 +58,13 @@ import { initEncryptedSavedObjects, initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
+import type { ThreatIntelRuntime } from './threat_intel/wiring';
+import {
+  createThreatIntelRuntime,
+  isThreatIntelSupplyEnabled,
+  setupThreatIntel,
+  startThreatIntel,
+} from './threat_intel/wiring';
 import { initUiSettings } from './ui_settings';
 import { registerDeprecations } from './deprecations';
 import {
@@ -102,6 +118,7 @@ import {
   securityRuleTypeFieldMap,
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 import type { CreateSecurityRuleTypeWrapperProps } from './lib/detection_engine/rule_types/types';
+import { calculateRulesAuthz } from './lib/detection_engine/rule_management/authz';
 
 import { RequestContextFactory } from './request_context_factory';
 
@@ -166,8 +183,17 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
-import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
-import { installSecurityAlertAnalysisWorkflowAndMarkReady } from './workflows/alert_analysis_workflow/install';
+import { setFingerprintCreateAllowed } from './workflows/step_types/match_attack_fingerprints/match_attack_fingerprints';
+import {
+  registerSecurityManagedWorkflowOwner,
+  initSecurityManagedWorkflowsClient,
+} from './workflows/managed_workflows';
+import { installSecurityManagedWorkflowsAndMarkReady } from './workflows/security_managed_workflows';
+import { ensureThreatIntelSupplyWorkflowsForSpace } from './workflows/threat_intel_workflow/install';
+import { SecuritySolutionEventBus } from './events/event_bus';
+import { registerSecurityWorkflowTriggers } from './workflows/triggers';
+import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { forwardCasesAlertStatusToSecuritySolution } from './workflows/triggers/cases_alert_status_bridge';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
@@ -207,9 +233,22 @@ export class Plugin implements ISecuritySolutionPlugin {
   private usageCollection?: UsageCollectionSetup;
 
   private isServerless: boolean;
+  private securityEventBus?: SecuritySolutionEventBus;
+
+  /** Captured in `setup()`: rule lifecycle telemetry needs the setup contract, not the start one. */
 
   /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
-  private defendCpsEnabled = false;
+  private platformCpsEnabled = false;
+  /** The `defendCrossProjectSearch` experimental flag; AND-ed with `cps.isCpsActive` per request */
+  private defendCpsFeatureFlagEnabled = false;
+
+  /** Cross-lifecycle state for the threat-intel supply pipeline. */
+  private threatIntelRuntime: ThreatIntelRuntime = createThreatIntelRuntime();
+  /**
+   * Captured in setup from the optional alertzero plugin's soft-enable switch.
+   * Threat-intel supply (routes, tasks, managed workflows) gates on this.
+   */
+  private threatIntelSupplyEnabled = false;
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -295,7 +334,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.pluginContext.env.packageInfo.version,
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
-    registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
+    registerAttachments(
+      agentBuilder,
+      core,
+      logger,
+      experimentalFeatures,
+      this.pluginContext.env.packageInfo.version,
+      plugins.ml
+    ).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
 
@@ -318,6 +364,11 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
+    registerAlertUpdateAuthorizationAudit({
+      http: core.http,
+      getAuditLogger: (request) => plugins.security?.audit.asScoped(request),
+    });
+
     if (plugins.share) {
       plugins.share.url.locators.create(new AIValueReportLocatorDefinition());
     }
@@ -325,8 +376,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
-    this.defendCpsEnabled =
-      (plugins.cps?.getCpsEnabled() ?? false) && experimentalFeatures.defendCrossProjectSearch;
+    this.platformCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
+    this.defendCpsFeatureFlagEnabled = experimentalFeatures.defendCrossProjectSearch;
 
     initSavedObjects(core.savedObjects, experimentalFeatures, this.logger.get('initSavedObjects'));
     initEncryptedSavedObjects({
@@ -355,6 +406,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         auditLogger: plugins.security?.audit.withoutRequest,
         productFeaturesService,
         entityAnalyticsConfig: config.entityAnalytics,
+        experimentalFeatures,
         telemetry: core.analytics,
       });
       if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
@@ -385,6 +437,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
+      entityAnalyticsConfig: config.entityAnalytics,
       hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
@@ -529,8 +582,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
-    plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
+    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures, {
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+    });
+    plugins.cases.attachmentFramework.registerAttachment(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();
@@ -577,6 +633,12 @@ export class Plugin implements ISecuritySolutionPlugin {
             osquery?.checkResponseActionAuthz(request, actionParams) ?? Promise.resolve()
         : undefined;
 
+    // Resolves the acting user's detection-rules authorization for a request.
+    const getRulesAuthz: CreateSecurityRuleTypeWrapperProps['getRulesAuthz'] = async (request) => {
+      const [coreStart] = await core.getStartServices();
+      return calculateRulesAuthz({ coreStart, request });
+    };
+
     const securityRuleTypeOptions = {
       lists: plugins.lists,
       docLinks: core.docLinks,
@@ -603,6 +665,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         const [, startPlugins] = await core.getStartServices();
         return startPlugins.entityStore;
       },
+      getRulesAuthz,
       getOsqueryResponseActionsAuthzChecker,
     };
 
@@ -639,6 +702,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
     };
 
+    this.securityEventBus = plugins.workflowsExtensions
+      ? new SecuritySolutionEventBus()
+      : undefined;
+
     // TODO We need to get the endpoint routes inside of initRoutes
     const enableDataGeneratorRoutes =
       pluginContext.env.mode.dev || plugins.cloud.isElasticStaffOwned === true;
@@ -660,7 +727,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.docLinks,
       this.endpointContext,
       trialCompanionDeps,
-      enableDataGeneratorRoutes
+      enableDataGeneratorRoutes,
+      this.platformCpsEnabled,
+      this.securityEventBus
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -680,6 +749,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerAgentRoutes(router, this.endpointContext);
     registerEndpointExceptionsRoutes(router, this.endpointContext);
     registerScriptsLibraryRoutes(router, this.endpointContext);
+    registerCustomYaraSignaturesRoutes(router, this.endpointContext);
 
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationRuleType({ logger });
@@ -805,6 +875,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
         isServerless: this.isServerless,
+        stackVersion: this.pluginContext.env.packageInfo.version,
       });
 
       this.trialCompanionMilestoneService.setup({
@@ -826,8 +897,18 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions);
+      registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
+
+    this.threatIntelSupplyEnabled = isThreatIntelSupplyEnabled(plugins.alertzero);
+    setupThreatIntel({
+      alertZeroEnabled: this.threatIntelSupplyEnabled,
+      plugins,
+      core,
+      logger: this.logger,
+      runtime: this.threatIntelRuntime,
+    });
 
     setupAlertsCapabilitiesSwitcher({
       core,
@@ -849,6 +930,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
+    if (plugins.alertzero) {
+      const alertzero = plugins.alertzero;
+      setFingerprintCreateAllowed(() => alertzero.attackFingerprintWritesAllowed);
+    }
+
     const { config, logger, productFeaturesService } = this;
 
     initializeEndpointExceptionsPerPolicyOptInStatus(
@@ -859,12 +945,39 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.start(core, plugins);
 
+    if (this.securityEventBus && plugins.workflowsExtensions) {
+      registerSecurityWorkflowEventBridge(
+        this.securityEventBus,
+        plugins.workflowsExtensions,
+        logger
+      );
+    }
+
+    if (this.securityEventBus && plugins.cases) {
+      const securityEventBus = this.securityEventBus;
+      plugins.cases.getCasesEventBus().onAlertStatusChanged(({ request, payload }) => {
+        forwardCasesAlertStatusToSecuritySolution(securityEventBus, logger, request, payload);
+      });
+    }
+
+    // Start TI first so `bootstrapReady` is the real promise before the managed
+    // workflow installer awaits it. The installer is fire-and-forget: startup
+    // must not block on install or ready().
+    startThreatIntel({
+      alertZeroEnabled: this.threatIntelSupplyEnabled,
+      plugins,
+      core,
+      logger: this.logger,
+      runtime: this.threatIntelRuntime,
+    });
+
     if (plugins.workflowsExtensions) {
-      // Install once in the global space, then mark ready (install is awaited before ready inside
-      // the helper). Fire-and-forget: startup must not block on it.
-      void installSecurityAlertAnalysisWorkflowAndMarkReady({
+      void installSecurityManagedWorkflowsAndMarkReady({
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
+        threatIntelSupplyEnabled: this.threatIntelSupplyEnabled,
+        bootstrapReady: this.threatIntelRuntime.bootstrapReady,
+        core,
       });
     }
 
@@ -942,7 +1055,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       esClient: core.elasticsearch.client.asInternalUser,
       clusterClient: core.elasticsearch.client,
       dataStart: plugins.data,
-      cpsEnabled: this.defendCpsEnabled,
+      // `cps.isCpsActive` is tri-state: `undefined` means the linked projects could not be
+      // resolved, which is not the same as there being none. Defend collapses that to "do not fan
+      // out" deliberately. An unresolved scope is one whose index grants we cannot inspect --
+      // almost always a custom role missing `read_project_routing` -- and fanning those out would
+      // put exactly the principals we know least about on `asCurrentUser`. The cost is that such a
+      // role reads origin-only until the predefined roles carry the privilege.
+      isCpsActive: async (request: KibanaRequest): Promise<boolean> =>
+        this.defendCpsFeatureFlagEnabled && (await plugins.cps?.isCpsActive(request)) === true,
       productFeaturesService,
       savedObjectsServiceStart: core.savedObjects,
       connectorActions: plugins.actions,
@@ -1095,11 +1215,17 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (registerIngestCallback) {
       registerIngestCallback(
         'packagePolicyCreate',
-        async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
+        async (
+          packagePolicy: NewPackagePolicy,
+          _soClient: SavedObjectsClientContract,
+          esClient: ElasticsearchClient,
+          context?: RequestHandlerContext
+        ) => {
           await getCriblPackagePolicyPostCreateOrUpdateCallback(
-            core.elasticsearch.client.asInternalUser,
             packagePolicy,
-            this.logger
+            this.logger,
+            context,
+            esClient
           );
           return packagePolicy;
         }
@@ -1107,11 +1233,17 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       registerIngestCallback(
         'packagePolicyUpdate',
-        async (packagePolicy: UpdatePackagePolicy): Promise<UpdatePackagePolicy> => {
+        async (
+          packagePolicy: UpdatePackagePolicyWithId,
+          _soClient: SavedObjectsClientContract,
+          esClient: ElasticsearchClient,
+          context?: RequestHandlerContext
+        ) => {
           await getCriblPackagePolicyPostCreateOrUpdateCallback(
-            core.elasticsearch.client.asInternalUser,
             packagePolicy,
-            this.logger
+            this.logger,
+            context,
+            esClient
           );
           return packagePolicy;
         }
@@ -1155,6 +1287,28 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
 
+    // Push, not pull: alertzero cannot declare a dependency on this plugin's start contract, since
+    // this plugin already depends on alertzero (the `alertzero` setup dependency above) and the
+    // reverse edge would fail Kibana's plugin boot with a circular-dependency error. AlertZero Hunt
+    // ensure calls this when a required TI supply workflow document is missing (e.g. per-space
+    // attribute lag after space create).
+    if (plugins.alertzero && plugins.workflowsExtensions && this.threatIntelSupplyEnabled) {
+      const workflowsExtensions = plugins.workflowsExtensions;
+      const tiLogger = this.logger.get('threatIntel');
+      plugins.alertzero.registerThreatIntelSupplyWorkflowInstaller(async ({ spaceId }) => {
+        const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
+          workflowsExtensions
+        );
+        await ensureThreatIntelSupplyWorkflowsForSpace({
+          managedWorkflowsClient,
+          spaceId,
+        });
+        tiLogger.info(
+          `Installed threat intel supply workflows for space '${spaceId}' on Hunt ensure request`
+        );
+      });
+    }
+
     return {};
   }
 
@@ -1169,5 +1323,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();
     licenseService.stop();
+    this.securityEventBus?.removeAllListeners();
   }
 }

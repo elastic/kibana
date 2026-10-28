@@ -20,7 +20,6 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { where } from '@kbn/esql-composer';
 import {
   OTEL_LINKS_SPAN_ID,
   OTEL_LINKS_TRACE_ID,
@@ -32,7 +31,16 @@ import type { SpanLinkDetails } from '@kbn/apm-types';
 import { SPAN_LINKS_SPAN_ID } from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import { getEbtProps } from '@kbn/ebt-click';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
+import {
+  esqlAnd,
+  esqlFunction,
+  esqlIn,
+  esqlOr,
+  esqlString,
+  isNonEmptyArray,
+} from '../../../../../utils/esql_expressions';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';
@@ -225,25 +233,26 @@ export function SpanLinks({ docId, traceId, processorEvent }: Props) {
   );
 }
 
-export function getIncomingSpanLinksESQL(traceId: string, docId: string) {
-  return where(
-    `QSTR("${OTEL_LINKS_TRACE_ID}:${traceId} AND ${OTEL_LINKS_SPAN_ID}:${docId}") OR QSTR("${SPAN_LINKS_TRACE_ID}:${traceId} AND ${SPAN_LINKS_SPAN_ID}:${docId}")`
-  );
+export function getIncomingSpanLinksESQL(traceId: string, docId: string): ESQLAstExpression {
+  const otelQuery = `${OTEL_LINKS_TRACE_ID}:${traceId} AND ${OTEL_LINKS_SPAN_ID}:${docId}`;
+  const spanLinksQuery = `${SPAN_LINKS_TRACE_ID}:${traceId} AND ${SPAN_LINKS_SPAN_ID}:${docId}`;
+
+  return esqlOr([
+    esqlFunction('QSTR', [esqlString(otelQuery)]),
+    esqlFunction('QSTR', [esqlString(spanLinksQuery)]),
+  ]);
 }
 
-export function getOutgoingSpanLinksESQL(spanLinks: SpanLinkDetails[]) {
-  const traceIds: string[] = [];
-  const spanIds: string[] = [];
+export function getOutgoingSpanLinksESQL(
+  spanLinks: SpanLinkDetails[]
+): ESQLAstExpression | undefined {
+  const traceIds = spanLinks.map(({ traceId }) => traceId);
+  const spanIds = spanLinks.map(({ spanId }) => spanId);
 
-  spanLinks.forEach(({ traceId, spanId }) => {
-    traceIds.push(traceId);
-    spanIds.push(spanId);
-  });
+  // `IN ()` is not valid ES|QL, so there is no clause to build without links.
+  if (!isNonEmptyArray(traceIds) || !isNonEmptyArray(spanIds)) {
+    return undefined;
+  }
 
-  return where(
-    `${TRACE_ID_FIELD} IN (${traceIds.map(() => '?').join()}) AND ${SPAN_ID_FIELD} IN (${spanIds
-      .map(() => '?')
-      .join()})`,
-    [...traceIds, ...spanIds]
-  );
+  return esqlAnd([esqlIn(TRACE_ID_FIELD, traceIds), esqlIn(SPAN_ID_FIELD, spanIds)]);
 }

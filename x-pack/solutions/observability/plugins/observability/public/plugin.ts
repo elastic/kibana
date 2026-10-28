@@ -83,6 +83,9 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
+import type { EntityInventoryAppPublicStart } from '@kbn/entity-inventory-app-plugin/public';
+import { isAlertingV2Enabled, shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
@@ -93,6 +96,9 @@ import {
   RULES_PATH,
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
+import { getObservabilityAlertsLinkTitle } from './nav/get_alerts_nav_panel';
+import { getClassicNavTopSections } from './nav/get_classic_nav_top_sections';
+import { setInvestigationsClient } from './services/investigations_client';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
@@ -101,6 +107,7 @@ import {
   CaseDetailsLocatorDefinition,
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
+import { AlertsLocatorDefinition } from '../common/locators/alerts';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
@@ -189,6 +196,8 @@ export interface ObservabilityPublicPluginsStart {
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginPublicStart;
   cps?: CPSPluginStart;
   ingestHub?: IngestHubStart;
+  nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
+  entityInventoryApp?: EntityInventoryAppPublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -211,9 +220,7 @@ export class Plugin
   private readonly deepLinks: AppDeepLink[] = [
     {
       id: 'alerts',
-      title: i18n.translate('xpack.observability.alertsLinkTitle', {
-        defaultMessage: 'Alerts',
-      }),
+      title: getObservabilityAlertsLinkTitle(false),
       order: 8001,
       path: ALERTS_PATH,
       visibleIn: ['projectSideNav'],
@@ -257,7 +264,7 @@ export class Plugin
           },
         })
       );
-      pluginsSetup.cases.attachmentFramework.registerUnified(getObservabilityAlertType());
+      pluginsSetup.cases.attachmentFramework.registerAttachment(getObservabilityAlertType());
     }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
@@ -271,6 +278,7 @@ export class Plugin
 
     pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition());
     pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition());
+    pluginsSetup.share.url.locators.create(new AlertsLocatorDefinition());
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
@@ -469,19 +477,11 @@ export class Plugin
                       path: link.path ?? '',
                     }));
 
-                  return [
-                    {
-                      label: '',
-                      sortKey: 100,
-                      entries: [
-                        ...overviewLink,
-                        ...alertsLinks,
-                        ...sloLink,
-                        ...casesLink,
-                        ...aiAssistantLink,
-                      ],
-                    },
-                  ];
+                  return getClassicNavTopSections(coreStart, {
+                    overviewLinks: overviewLink,
+                    alertsLinks,
+                    trailingLinks: [...sloLink, ...casesLink, ...aiAssistantLink],
+                  });
                 })
               );
             })
@@ -502,7 +502,7 @@ export class Plugin
               return [
                 {
                   label: '',
-                  sortKey: 101,
+                  sortKey: 103,
                   entries: [
                     {
                       label: i18n.translate('xpack.observability.streamsAppLinkTitle', {
@@ -534,11 +534,20 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
+    setInvestigationsClient(pluginsStart.nightshiftInvestigations?.investigationsClient);
+    const alertingV2Enabled = isAlertingV2Enabled(coreStart);
+    const deepLinks = this.deepLinks.map((link) =>
+      link.id === 'alerts'
+        ? { ...link, title: getObservabilityAlertsLinkTitle(alertingV2Enabled) }
+        : link
+    );
+
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
-      deepLinks: this.deepLinks,
+      deepLinks,
       updater$: this.appUpdater$,
       pricing: coreStart.pricing,
+      showV1Alerts: shouldShowV1ObservabilityAlertsTable(coreStart),
     });
 
     import('./navigation_tree').then(({ createDefinition }) => {
@@ -546,6 +555,12 @@ export class Plugin
         createDefinition(coreStart, pluginsStart)
       );
     });
+
+    if (alertingV2Enabled) {
+      void import('./nav/alerting_nav_tour').then(({ mountAlertingNavTour }) => {
+        mountAlertingNavTour(coreStart);
+      });
+    }
 
     return {
       config,

@@ -15,8 +15,9 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { CPS_TIER_ELIGIBLE_FEATURE } from '@kbn/cps-common';
+import { CPS_TIER_ELIGIBLE_FEATURE, CPS_TIER_ELIGIBLE_FEATURE_ID } from '@kbn/cps-common';
 import { NpreClient } from './npre/npre_client';
+import { LinkedProjectsService } from './linked_projects';
 import { registerRoutes } from './routes';
 import type { CPSConfig } from './config';
 import type { CPSServerSetup, CPSServerStart } from './types';
@@ -46,6 +47,7 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup, CPSServerStart | 
 
     return {
       getCpsEnabled: () => !!cpsEnabled,
+      isTierEligible: () => core.pricing.isFeatureAvailable(CPS_TIER_ELIGIBLE_FEATURE_ID),
     };
   }
 
@@ -57,9 +59,14 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup, CPSServerStart | 
       return undefined;
     }
 
+    const linkedProjectsService = new LinkedProjectsService(this.log, core.elasticsearch);
+
     return {
       createNpreClient: (request: KibanaRequest) =>
         new NpreClient(this.log, core.elasticsearch.client.asScoped(request)),
+      getLinkedProjects: (request: KibanaRequest) =>
+        linkedProjectsService.getLinkedProjects(request),
+      isCpsActive: (request: KibanaRequest) => linkedProjectsService.isCpsActive(request),
     };
   }
 

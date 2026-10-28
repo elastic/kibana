@@ -17,7 +17,19 @@ export const docCountErrorTooltip = i18n.translate(
 
 export const docCountErrorLabel = i18n.translate(
   'xpack.idxMgmt.indexDetails.overviewTab.status.docCountErrorLabel',
-  { defaultMessage: 'Unable to retrieve' }
+  { defaultMessage: 'Unable to retrieve documents' }
+);
+
+export const vectorCountErrorTooltip = i18n.translate(
+  'xpack.idxMgmt.indexDetails.overviewTab.storage.vectorCountErrorTooltip',
+  {
+    defaultMessage: 'Unable to retrieve vector count. Please refresh the page or try again later.',
+  }
+);
+
+export const vectorCountErrorLabel = i18n.translate(
+  'xpack.idxMgmt.indexDetails.overviewTab.storage.vectorCountErrorLabel',
+  { defaultMessage: 'Unable to retrieve vectors' }
 );
 
 export { docCountApproximateTooltip, docCountClosedIndexTooltip } from '../../translations';

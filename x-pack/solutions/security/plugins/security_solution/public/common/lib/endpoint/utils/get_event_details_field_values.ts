@@ -15,7 +15,7 @@ import { find } from 'lodash/fp';
  * @param field
  * @param data
  */
-const getEventDetailsFieldValues = (
+export const getEventDetailsFieldValues = (
   {
     category,
     field,

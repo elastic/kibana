@@ -90,8 +90,6 @@ export const GRID_STYLE: EuiDataGridStyle = { border: 'horizontal' };
 export const CASES_CONFIGURATION = {
   featureId: CASES_FEATURE_ID,
   owner: [APP_ID],
-  syncAlerts: true,
-  extractObservables: true,
 };
 
 // This will guarantee that ALL cells will have their values vertically centered.
@@ -110,6 +108,10 @@ export interface AdditionalTableContext {
    * List of installed EASE integrations
    */
   packages: PackageListItem[];
+  /**
+   * Adds a "Remove from case" item to each row's actions menu, used in the case view
+   */
+  onRemoveFromCase?: (alertId: string) => void;
 }
 
 export interface TableProps {

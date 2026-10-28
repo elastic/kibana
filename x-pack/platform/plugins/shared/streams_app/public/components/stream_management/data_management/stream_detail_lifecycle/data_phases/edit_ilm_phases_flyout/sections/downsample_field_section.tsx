@@ -12,12 +12,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  EuiText,
   EuiTitle,
-  EuiCallOut,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useFormContext, useWatch, type FieldPath } from 'react-hook-form';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { DownsamplePhase, IlmPhasesFlyoutFormInternal } from '../form';
 import { DOWNSAMPLE_PHASES } from '../form';
 import { DownsampleIntervalField } from '../form';
@@ -144,21 +143,18 @@ export const DownsampleFieldSection = ({
       </EuiFlexGroup>
 
       {!isMetricsStream && isEnabled && (
-        <EuiCallOut
+        <KbnInfoCallout
           announceOnMount
           size="s"
           data-test-subj={`${dataTestSubj}DownsamplingNotSupportedCallout-${phaseName}`}
           title={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedTitle', {
             defaultMessage: 'Downsampling requires a time series stream',
           })}
-        >
-          <EuiText size="s">
-            {i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody', {
-              defaultMessage:
-                'As this stream is not a time series, downsampling steps from this ILM policy will be excluded.',
-            })}
-          </EuiText>
-        </EuiCallOut>
+          text={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingNotSupportedBody', {
+            defaultMessage:
+              'As this stream is not a time series, downsampling steps from this ILM policy will be excluded.',
+          })}
+        />
       )}
 
       <div hidden={!isEnabled} aria-hidden={!isEnabled}>

@@ -239,5 +239,5 @@ Do **not** wrap declarative components with `React.memo()`, `forwardRef()`, or H
 ## Testing
 
 ```bash
-yarn test:jest src/platform/kbn-ui/react-assembly
+pnpm test:jest src/platform/kbn-ui/react-assembly
 ```

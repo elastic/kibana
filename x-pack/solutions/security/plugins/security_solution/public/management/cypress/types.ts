@@ -54,10 +54,9 @@ export type IndexEndpointHostsCyTaskOptions = Partial<
 >;
 
 export interface HostActionResponse {
-  data: {
-    action: ActionDetails;
-    state: { state?: 'success' | 'failure' };
-  };
+  action: ActionDetails;
+  state: { state?: 'success' | 'failure' };
+  responseCode?: string;
 }
 
 export interface LoadUserAndRoleCyTaskOptions {
@@ -85,9 +84,4 @@ export interface LogItTaskOptions {
 export interface CaptureHostVmAgentDiagnosticsOptions {
   hostname: string;
   fileNamePrefix?: string;
-}
-
-export interface ExecuteCommandOnHostOptions {
-  hostname: string;
-  command: string;
 }

@@ -21,6 +21,7 @@
     "@kbn/expressions-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/esql-utils",
+    "@kbn/esql-types",
     "@kbn/zod",
     "@kbn/coloring",
     "@kbn/content-management-utils",
@@ -31,6 +32,7 @@
     "@kbn/palettes",
     "@kbn/crypto-browser",
     "@kbn/zod-helpers",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/chart-icons"
   ]
 }

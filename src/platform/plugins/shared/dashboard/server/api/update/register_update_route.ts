@@ -22,6 +22,7 @@ import { getRouteConfig } from '../get_route_config';
 import { TransformPanelsInError } from '../transforms/in/transform_panels_in_error';
 import { getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
+import { spacesService } from '../../kibana_services';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -34,6 +35,9 @@ export function registerUpdateRoute(
     path: `${basePath}/{id}`,
     ...routeConfig,
     summary: `Upsert a dashboard`,
+    // Only the public route carries a curated ID. The dashboard-app route is
+    // internal and keeps its derived one.
+    ...(isDashboardAppRequest ? {} : { operationId: 'upsert-dashboard' }),
   });
 
   // Do not call getDashboardStateSchema when registering route.
@@ -92,8 +96,11 @@ export function registerUpdateRoute(
             getCachedDashboardStateSchema(),
             req.params.id,
             req.body,
-            req.serverTiming,
-            isDashboardAppRequest
+            {
+              serverTiming: req.serverTiming,
+              spaceId: spacesService?.getSpaceId(req),
+              isDashboardAppRequest,
+            }
           );
           if (operation === 'create') {
             // do not await tracking actions

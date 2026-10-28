@@ -9,7 +9,11 @@
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { Filter } from '@kbn/es-query';
-import { getInitialAppState } from './get_initial_app_state';
+import {
+  getConfiguredDefaultEsqlQuery,
+  getDefaultQuery,
+  getInitialAppState,
+} from './get_initial_app_state';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
@@ -79,6 +83,7 @@ describe('getInitialAppState', () => {
       }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -126,6 +131,7 @@ describe('getInitialAppState', () => {
       }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -175,6 +181,7 @@ describe('getInitialAppState', () => {
           "type": "dataView",
         },
         "density": undefined,
+        "documentsDisplayMode": undefined,
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
@@ -183,6 +190,7 @@ describe('getInitialAppState', () => {
         "hideSidebar": undefined,
         "hideTable": undefined,
         "interval": "auto",
+        "jsonModeSettings": undefined,
         "query": Object {
           "language": "kuery",
           "query": "",
@@ -222,6 +230,7 @@ describe('getInitialAppState', () => {
           "type": "dataView",
         },
         "density": undefined,
+        "documentsDisplayMode": undefined,
         "filters": undefined,
         "grid": undefined,
         "headerRowHeight": undefined,
@@ -230,6 +239,7 @@ describe('getInitialAppState', () => {
         "hideSidebar": undefined,
         "hideTable": undefined,
         "interval": "auto",
+        "jsonModeSettings": undefined,
         "query": Object {
           "language": "kuery",
           "query": "",
@@ -266,6 +276,7 @@ describe('getInitialAppState', () => {
       tab: getTabStateMock({ id: 'mock-tab' }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
     });
 
   test('should set view mode correctly', () => {
@@ -1022,5 +1033,60 @@ describe('getInitialAppState', () => {
       });
       expect(appState.columns).toEqual(undefined);
     });
+  });
+});
+
+describe('when the navigation passes a data view spec', () => {
+  const createServices = (isEsqlDefault: boolean) => {
+    const services = createDiscoverServicesMock();
+    services.storage.get = jest.fn().mockReturnValue(undefined);
+    services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => isEsqlDefault);
+    mockParticularUiSettings(
+      {
+        [DEFAULT_ESQL_QUERY_SETTING]: 'FROM my-custom-index',
+        [ENABLE_ESQL]: true,
+      },
+      services.uiSettings
+    );
+    return services;
+  };
+  const dataView = new DataView({
+    spec: dataViewMock.toSpec(),
+    fieldFormats: {} as DataView['fieldFormats'],
+  });
+  const baseArgs = {
+    initialUrlState: undefined,
+    hasGlobalState: false,
+    persistedTab: undefined,
+    defaultProfileEsqlQuery: { query: 'FROM profile-index' },
+  };
+
+  it('should not return the configured ES|QL query', () => {
+    const services = createServices(true);
+
+    expect(getConfiguredDefaultEsqlQuery({ ...baseArgs, services })).toEqual({
+      esql: 'FROM my-custom-index',
+    });
+    expect(
+      getConfiguredDefaultEsqlQuery({ ...baseArgs, services, locationStateHasDataViewSpec: true })
+    ).toBeUndefined();
+  });
+
+  it('should derive the ES|QL query from the data view instead of the configured query', () => {
+    const services = createServices(true);
+
+    expect(
+      getDefaultQuery({ ...baseArgs, services, dataView, locationStateHasDataViewSpec: true })
+    ).toEqual({ esql: 'FROM the-data-view-title' });
+  });
+
+  it('should keep the classic query when ES|QL is not the default', () => {
+    const services = createServices(false);
+    const defaultQuery = { query: '', language: 'kuery' };
+    services.data.query.queryString.getDefaultQuery = jest.fn().mockReturnValue(defaultQuery);
+
+    expect(
+      getDefaultQuery({ ...baseArgs, services, dataView, locationStateHasDataViewSpec: true })
+    ).toEqual(defaultQuery);
   });
 });

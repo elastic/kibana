@@ -8,6 +8,10 @@
 import { renderHook } from '@testing-library/react';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
+import {
   useAddAttachmentToExistingCaseTransaction,
   useCreateCaseWithAttachmentsTransaction,
 } from './use_cases_transactions';
@@ -22,15 +26,15 @@ jest.mock('./use_start_transaction', () => ({
 
 const appId = 'testAppId';
 
-const singleAttachments = [
-  { type: 'alert', alertId: 'someAlertId' },
-] as CaseAttachmentsWithoutOwner;
+const singleAttachments: CaseAttachmentsWithoutOwner = [
+  { type: SECURITY_ALERT_ATTACHMENT_TYPE, attachmentId: 'someAlertId' },
+];
 
-const bulkAttachments = [
-  { type: 'alert', alertId: ['someAlertId', 'someAlertId2'] },
-  { type: 'alert', alertId: ['someAlertId3'] },
-  { type: 'user', comment: 'someComment' },
-] as CaseAttachmentsWithoutOwner;
+const bulkAttachments: CaseAttachmentsWithoutOwner = [
+  { type: SECURITY_ALERT_ATTACHMENT_TYPE, attachmentId: ['someAlertId', 'someAlertId2'] },
+  { type: SECURITY_ALERT_ATTACHMENT_TYPE, attachmentId: ['someAlertId3'] },
+  { type: COMMENT_ATTACHMENT_TYPE, data: { content: 'someComment' } },
+];
 
 const renderUseCreateCaseWithAttachmentsTransaction = () =>
   renderHook(useCreateCaseWithAttachmentsTransaction);

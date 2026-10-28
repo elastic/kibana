@@ -15,8 +15,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { DeprecationCallout } from '../components';
 
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
-  EuiCallOut,
   EuiLoadingLogo,
   EuiOverlayMask,
   EuiPageSection,
@@ -514,29 +514,23 @@ export class JobCreateUi extends Component {
     if (saveError) {
       const { message, cause } = saveError;
 
-      let errorBody;
-
-      if (cause) {
-        if (cause.length === 1) {
-          errorBody = <p>{cause[0]}</p>;
-        } else {
-          errorBody = (
-            <ul>
-              {cause.map((causeValue) => (
-                <li key={causeValue}>{causeValue}</li>
-              ))}
-            </ul>
-          );
-        }
-      }
-
       saveErrorFeedback = (
         <>
           <EuiSpacer />
 
-          <EuiCallOut announceOnMount title={message} icon="cross" color="danger">
-            {errorBody}
-          </EuiCallOut>
+          <KbnDangerCallout
+            announceOnMount
+            title={message}
+            text={cause?.length === 1 ? cause[0] : undefined}
+          >
+            {cause?.length > 1 && (
+              <ul>
+                {cause.map((causeValue) => (
+                  <li key={causeValue}>{causeValue}</li>
+                ))}
+              </ul>
+            )}
+          </KbnDangerCallout>
 
           <EuiSpacer />
         </>

@@ -39,7 +39,10 @@ describe('Inspector Data View', () => {
   beforeEach(() => {
     DataView = getTableViewDescription(() => ({
       fieldFormats: {
-        deserialize: jest.fn().mockReturnValue({ convertToText: (v: string) => v }),
+        deserialize: jest.fn().mockReturnValue({
+          convertToText: (v: unknown) => (v == null ? '(null)' : String(v)),
+          convertToReact: (v: unknown) => (v == null ? '-' : String(v)),
+        }),
       } as unknown as FieldFormatsStart,
       isFilterable: jest.fn(),
       uiActions: {} as UiActionsStart,
@@ -96,6 +99,36 @@ describe('Inspector Data View', () => {
       expect(screen.queryByText(/There are \d+ tables? in total/)).not.toBeInTheDocument();
       expect(screen.getByText('123')).toBeVisible();
       expect(screen.getByRole('button', { name: /Download CSV/i })).toBeVisible();
+    });
+
+    it('should format a missing value as (null) for chart inspector tables', async () => {
+      renderInspectorDataView(<InspectorDataView adapters={adapters} title="Test Data" />);
+
+      act(() => {
+        adapters.tables.logDatatable('table1', {
+          columns: [{ id: '1', name: 'column1', meta: { type: 'string' } }],
+          rows: [{ '1': null }],
+          type: 'datatable',
+        });
+      });
+
+      expect(await screen.findByText('(null)')).toBeVisible();
+    });
+
+    it('should format a missing value as a dash when the visualization uses table presentation', async () => {
+      renderInspectorDataView(<InspectorDataView adapters={adapters} title="Test Data" />);
+
+      act(() => {
+        adapters.tables.missingValueDisplay = 'table';
+        adapters.tables.logDatatable('table1', {
+          columns: [{ id: '1', name: 'column1', meta: { type: 'string' } }],
+          rows: [{ '1': null }],
+          type: 'datatable',
+        });
+      });
+
+      expect(await screen.findByText('-')).toBeVisible();
+      expect(screen.queryByText('(null)')).not.toBeInTheDocument();
     });
 
     it('should support multiple datatables', async () => {

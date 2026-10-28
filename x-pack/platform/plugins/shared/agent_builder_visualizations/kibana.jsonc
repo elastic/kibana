@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/agent-builder-visualizations-plugin",
-  "owner": "@elastic/kibana-presentation",
+  "owner": "@elastic/kibana-dashboards",
   "group": "platform",
   "visibility": "shared",
   "plugin": {

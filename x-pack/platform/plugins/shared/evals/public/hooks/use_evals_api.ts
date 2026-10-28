@@ -15,6 +15,7 @@ import {
   EVALS_EXPERIMENT_URL,
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
+  EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL,
   EVALS_EXPERIMENTS_COMPARE_URL,
   EVALS_EXAMPLE_SCORES_URL,
   EVALS_TRACE_URL,
@@ -23,6 +24,7 @@ import {
   EVALS_DATASETS_URL,
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
+  EVALS_DATASET_COPY_URL,
   EVALS_DATASET_EXAMPLE_URL,
   API_VERSIONS,
   type DatasetMaturity,
@@ -33,9 +35,12 @@ import {
   type CreateEvaluationDatasetResponse,
   type UpdateEvaluationDatasetRequestBodyInput,
   type UpdateEvaluationDatasetResponse,
+  type DeleteEvaluationDatasetRequestQuery,
   type DeleteEvaluationDatasetResponse,
   type AddEvaluationDatasetExamplesRequestBodyInput,
   type AddEvaluationDatasetExamplesResponse,
+  type CopyEvaluationDatasetRequestBodyInput,
+  type CopyEvaluationDatasetResponse,
   type UpdateEvaluationDatasetExampleRequestBodyInput,
   type UpdateEvaluationDatasetExampleResponse,
   type DeleteEvaluationDatasetExampleResponse,
@@ -43,6 +48,7 @@ import {
   type GetEvaluationExperimentResponse,
   type GetEvaluationExperimentScoresResponse,
   type GetEvaluationExperimentDatasetExamplesResponse,
+  type GetEvaluationExperimentExampleDetailsResponse,
   type GetExampleScoresResponse,
   type GetTraceResponse,
   type GetTracingProjectsResponse,
@@ -104,6 +110,18 @@ interface AddExamplesVariables extends DatasetWithId {
   body: AddEvaluationDatasetExamplesRequestBodyInput;
 }
 
+interface CopyDatasetVariables extends DatasetWithId {
+  body: CopyEvaluationDatasetRequestBodyInput;
+}
+
+interface DeleteDatasetVariables extends DatasetWithId {
+  /**
+   * Which outcome the confirmation the user saw described, so the server can
+   * refuse the other one rather than perform it unannounced.
+   */
+  intent?: DeleteEvaluationDatasetRequestQuery['intent'];
+}
+
 interface ExampleWithDatasetId extends DatasetWithId {
   exampleId: string;
 }
@@ -117,6 +135,9 @@ const getDatasetUrl = (datasetId: string) =>
 
 const getDatasetExamplesUrl = (datasetId: string) =>
   EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', encodeURIComponent(datasetId));
+
+const getDatasetCopyUrl = (datasetId: string) =>
+  EVALS_DATASET_COPY_URL.replace('{datasetId}', encodeURIComponent(datasetId));
 
 const getDatasetExampleUrl = (datasetId: string, exampleId: string) =>
   EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', encodeURIComponent(datasetId)).replace(
@@ -243,15 +264,23 @@ export const useDeleteDataset = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ datasetId }: DatasetWithId): Promise<DeleteEvaluationDatasetResponse> => {
+    mutationFn: async ({
+      datasetId,
+      intent,
+    }: DeleteDatasetVariables): Promise<DeleteEvaluationDatasetResponse> => {
       return services.http!.delete<DeleteEvaluationDatasetResponse>(getDatasetUrl(datasetId), {
         version: API_VERSIONS.internal.v1,
+        ...(intent ? { query: { intent } } : {}),
       });
     },
-    onSuccess: async (_response, { datasetId }) => {
+    onSuccess: async () => {
+      // Invalidating `datasets.all` would cover both in one call, but it is a
+      // prefix of `datasets.detail`, so it would also refetch the dataset just
+      // deleted, from the detail page still on screen while it redirects away.
+      // That request 404s, so the stale detail entry is left to expire instead.
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.lists }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.tagSuggestions() }),
       ]);
     },
   });
@@ -278,6 +307,31 @@ export const useAddExamples = () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
+      ]);
+    },
+  });
+};
+
+export const useCopyDataset = () => {
+  const { services } = useKibana();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      datasetId,
+      body,
+    }: CopyDatasetVariables): Promise<CopyEvaluationDatasetResponse> => {
+      return services.http!.post<CopyEvaluationDatasetResponse>(getDatasetCopyUrl(datasetId), {
+        body: JSON.stringify(body),
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    onSuccess: async () => {
+      // As with deletion, avoid refetching a detail page whose dataset is not
+      // affected by this mutation. The caller navigates to the new dataset.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.lists }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.tagSuggestions() }),
       ]);
     },
   });
@@ -536,6 +590,7 @@ export const useCompareExperiments = (
 };
 
 interface ExperimentDatasetExamplesOptions {
+  includePreviews?: boolean;
   refetchInterval?: number | false;
   staleTime?: number;
 }
@@ -547,17 +602,26 @@ export const useExperimentDatasetExamples = (
   options: ExperimentDatasetExamplesOptions = {}
 ) => {
   const { services } = useKibana();
+  const includePreviews = options.includePreviews ?? false;
 
   return useQuery({
-    queryKey: queryKeys.experiments.datasetExamples(experimentId, datasetId, executionId),
+    queryKey: queryKeys.experiments.datasetExamples(
+      experimentId,
+      datasetId,
+      executionId,
+      includePreviews
+    ),
     queryFn: async (): Promise<GetEvaluationExperimentDatasetExamplesResponse> => {
       const url = EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace(
         '{experimentId}',
         encodeURIComponent(experimentId)
       ).replace('{datasetId}', encodeURIComponent(datasetId));
-      const query: Record<string, string> = {};
+      const query: Record<string, string | boolean> = {};
       if (executionId) {
         query.execution_id = executionId;
+      }
+      if (includePreviews) {
+        query.include_previews = true;
       }
       return services.http!.get<GetEvaluationExperimentDatasetExamplesResponse>(url, {
         query,
@@ -565,20 +629,74 @@ export const useExperimentDatasetExamples = (
       });
     },
     enabled: experimentId.length > 0 && datasetId.length > 0,
-    refetchInterval: options.refetchInterval,
-    staleTime: options.staleTime,
+    refetchInterval: includePreviews ? false : options.refetchInterval,
+    staleTime: includePreviews ? Infinity : options.staleTime,
   });
 };
 
-export const useExampleScores = (exampleId: string) => {
+interface ExperimentExampleDetailsOptions {
+  enabled?: boolean;
+}
+
+export const useExperimentExampleDetails = (
+  experimentId: string,
+  datasetId: string,
+  exampleId: string,
+  repetitionIndex: number,
+  executionId?: string,
+  options: ExperimentExampleDetailsOptions = {}
+) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.examples.scores(exampleId),
+    queryKey: queryKeys.experiments.exampleDetails(
+      experimentId,
+      datasetId,
+      exampleId,
+      repetitionIndex,
+      executionId
+    ),
+    queryFn: async (): Promise<GetEvaluationExperimentExampleDetailsResponse> => {
+      const url = EVALS_EXPERIMENT_EXAMPLE_DETAILS_URL.replace(
+        '{experimentId}',
+        encodeURIComponent(experimentId)
+      )
+        .replace('{datasetId}', encodeURIComponent(datasetId))
+        .replace('{exampleId}', encodeURIComponent(exampleId))
+        .replace('{repetitionIndex}', String(repetitionIndex));
+      const query: Record<string, string> = {};
+      if (executionId) {
+        query.execution_id = executionId;
+      }
+      return services.http!.get<GetEvaluationExperimentExampleDetailsResponse>(url, {
+        query,
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    enabled:
+      (options.enabled ?? false) &&
+      experimentId.length > 0 &&
+      datasetId.length > 0 &&
+      exampleId.length > 0,
+    staleTime: Infinity,
+    refetchInterval: false,
+  });
+};
+
+export const useExampleScores = (exampleId: string, datasetId?: string) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.examples.scores(exampleId, datasetId),
     queryFn: async (): Promise<GetExampleScoresResponse> => {
       const url = EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', encodeURIComponent(exampleId));
+      const query: Record<string, string> = {};
+      if (datasetId) {
+        query.dataset_id = datasetId;
+      }
       return services.http!.get<GetExampleScoresResponse>(url, {
         version: API_VERSIONS.internal.v1,
+        query,
       });
     },
     enabled: exampleId.length > 0,

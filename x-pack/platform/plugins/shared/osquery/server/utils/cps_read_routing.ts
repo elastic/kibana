@@ -43,8 +43,8 @@ const isFleetIndex = (index: string): boolean => {
 const isOsqueryIndex = (index: string): boolean =>
   index.includes('osquery_manager') && !isFleetIndex(index);
 
-export const shouldUseInternalSearchClient = (indices: string[], cpsEnabled: boolean): boolean => {
-  if (!cpsEnabled) {
+export const shouldUseInternalSearchClient = (indices: string[], cpsActive: boolean): boolean => {
+  if (!cpsActive) {
     return indices.some((index) => isFleetIndex(index) || isOsqueryIndex(index));
   }
 

@@ -7,23 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { UnifiedHistogramChartContext } from '../../../types';
 
 export function checkChartAvailability({
   chart,
-  dataView,
-  isPlainRecord,
+  dataSource,
 }: {
   chart?: UnifiedHistogramChartContext;
-  dataView: DataView | undefined;
-  isPlainRecord?: boolean;
+  dataSource: DataSource | undefined;
 }): boolean {
   return Boolean(
     chart &&
-      dataView &&
-      dataView.id &&
-      dataView.type !== DataViewType.ROLLUP &&
-      (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
+      dataSource &&
+      dataSource.id &&
+      !dataSource.isRollup() &&
+      (dataSource.kind === 'esql' || dataSource.isTimeBased())
   );
 }

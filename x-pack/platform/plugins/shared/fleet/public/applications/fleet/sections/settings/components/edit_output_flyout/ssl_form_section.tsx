@@ -10,13 +10,13 @@ import {
   EuiTextArea,
   EuiFormRow,
   EuiSpacer,
-  EuiCallOut,
   EuiPanel,
   EuiTitle,
   EuiAccordion,
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -94,7 +94,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
         <EuiSpacer size="s" />
         <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
           {type === 'download_source' ? (
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={i18n.translate(
                 'xpack.fleet.editOutputFlyout.downloadSource.sslWarningCallout',
@@ -103,18 +103,14 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                     'Invalid settings can prevent Elastic Agent from being able to upgrade. If this happens, you will need to provide valid credentials.',
                 }
               )}
-              color="warning"
-              iconType="warning"
             />
           ) : (
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={i18n.translate('xpack.fleet.editOutputFlyout.sslWarningCallout', {
                 defaultMessage:
                   'Invalid settings can break the connection between Elastic Agent and the configured output. If this happens, you will need to provide valid credentials.',
               })}
-              color="warning"
-              iconType="warning"
             />
           )}
           <EuiSpacer size="m" />

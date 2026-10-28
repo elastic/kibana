@@ -6,13 +6,13 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import { escapeQuotes } from '@kbn/es-query';
 
 import { SO_SEARCH_LIMIT } from '../../common';
 import { getAgentsByKuery } from '../services/agents';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, AGENTS_PREFIX } from '../constants';
 
 import { packagePolicyService } from '../services/package_policy';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../common/services/version_specific_policies_utils';
 
 export const getAllFleetServerAgents = async (
   soClient: SavedObjectsClientContract,
@@ -39,9 +39,11 @@ export const getAllFleetServerAgents = async (
     agentsResponse = await getAgentsByKuery(esClient, soClient, {
       showInactive: false,
       perPage: SO_SEARCH_LIMIT,
-      kuery: `${AGENTS_PREFIX}.policy_id:${agentPoliciesIds
-        .map((id) => `"${escapeQuotes(id)}"`)
-        .join(' or ')}`,
+      kuery: buildPolicyBaseIdsWithFallbackKuery(
+        agentPoliciesIds,
+        `${AGENTS_PREFIX}.policy_base_id`,
+        `${AGENTS_PREFIX}.policy_id`
+      ),
     });
   } catch (error) {
     throw new Error(error.message);

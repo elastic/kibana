@@ -2,7 +2,7 @@
 
 Discover is Kibana's data exploration application: a dynamic chart area above a document table with rich content, for querying and exploring Elasticsearch data. It runs in two query modes, classic (data view with KQL/Lucene) and ES|QL. It also ships the saved search embeddable that renders Discover sessions on dashboards.
 
-Owned by [`@elastic/kibana-data-discovery`](https://github.com/orgs/elastic/teams/kibana-data-discovery).
+Owned by [`@elastic/kibana-discover`](https://github.com/orgs/elastic/teams/kibana-discover).
 
 ## Key concepts
 
@@ -169,7 +169,6 @@ Feature flag keys are re-exported as constants from [public/constants.ts](./publ
 | Flag key                        | Constant                                  | Description                                                      |
 | ------------------------------- | ----------------------------------------- | ---------------------------------------------------------------- |
 | `discover.cascadeLayoutEnabled` | `CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY` | Enables the cascaded documents layout.                           |
-| `discover.embeddableTransforms` | `EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY`  | Enables saved object transforms for the saved search embeddable. |
 | `discover.isEsqlDefault`        | `IS_ESQL_DEFAULT_FEATURE_FLAG_KEY`        | Makes ES\|QL the default query mode.                             |
 
 Discover also exposes plugin config options, defined in [server/config.ts](./server/config.ts):

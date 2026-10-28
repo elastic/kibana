@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../..',
   /** all nested directories have their own Jest config file */
   testMatch: [

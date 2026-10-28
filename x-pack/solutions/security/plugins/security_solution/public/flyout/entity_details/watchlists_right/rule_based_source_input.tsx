@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, type FC } from 'react';
+import React, { useMemo, type FC } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -27,12 +27,12 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import type { CreateWatchlistRequestBodyInput } from '../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import type { MonitoringEntitySource } from '../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { QueryBar } from '../../../common/components/query_bar';
 import { useFetchWatchlistIndices } from './hooks/use_fetch_watchlist_indices';
 import { getApiErrorMessage } from './utils';
-import { ENTITY_FIELD_OPTIONS, useRuleBasedSourceState } from './hooks/use_rule_based_source_state';
+import { ENTITY_FIELD_OPTIONS } from './hooks/use_rule_based_source_state';
+import type { useRuleBasedSourceState } from './hooks/use_rule_based_source_state';
 import { useDataViewSetup } from './hooks/use_data_view_setup';
 import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
 import { useKibana } from '../../../common/lib/kibana';
@@ -42,6 +42,7 @@ import {
   WATCHLIST_FILTER_QUERY_LABEL,
   WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL,
   WATCHLIST_INDEX_PATTERN_LABEL,
+  WATCHLIST_INDEX_PATTERN_MISSING_TIMESTAMP,
   WATCHLIST_INDEX_PATTERN_PLACEHOLDER,
   WATCHLIST_LOOKBACK_PERIOD_LABEL,
 } from './translations';
@@ -104,28 +105,15 @@ const FilterQueryRow: FC<FilterQueryRowProps> = ({
 );
 
 export interface RuleBasedSourceInputProps {
-  watchlistName: string;
   watchlistId?: string;
   indexSourceWithMissingApiKey?: MonitoringEntitySource;
-  isEditMode: boolean;
-  isManaged?: boolean;
-  onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
-    key: K,
-    value: CreateWatchlistRequestBodyInput[K]
-  ) => void;
-  initialEntitySources?: CreateWatchlistRequestBodyInput['entitySources'];
-  onSourceValidationChange: (valid: boolean) => void;
+  ruleBasedSource: ReturnType<typeof useRuleBasedSourceState>;
 }
 
 export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
-  watchlistName,
   watchlistId,
   indexSourceWithMissingApiKey,
-  isEditMode,
-  isManaged = false,
-  onFieldChange,
-  initialEntitySources,
-  onSourceValidationChange,
+  ruleBasedSource,
 }) => {
   const { dataView, status } = useDataView(PageScope.default);
   const { filters, filterManager } = useDataViewSetup();
@@ -172,23 +160,15 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
     savedQuery,
     toggleButtons,
     activeToggle,
+    isValidatingTimestamp,
+    indexPatternMissingTimestamp,
     onToggleChange,
     onQueryChange,
     onSavedQueryChange,
     onIndexPatternsChange,
     onEntityFieldChange,
     onRangeChange,
-  } = useRuleBasedSourceState({
-    watchlistName,
-    isEditMode,
-    isManaged,
-    initialEntitySources,
-    onFieldChange,
-  });
-
-  useEffect(() => {
-    onSourceValidationChange(validation.isValid);
-  }, [validation.isValid, onSourceValidationChange]);
+  } = ruleBasedSource;
 
   const [indexSearchQuery, setIndexSearchQuery] = React.useState<string | undefined>(undefined);
   const {
@@ -275,11 +255,14 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
         <EuiFormRow
           label={WATCHLIST_INDEX_PATTERN_LABEL}
           fullWidth
-          isInvalid={validation.errors.indexPattern}
+          isInvalid={validation.errors.indexPattern || indexPatternMissingTimestamp}
+          error={
+            indexPatternMissingTimestamp ? WATCHLIST_INDEX_PATTERN_MISSING_TIMESTAMP : undefined
+          }
         >
           <EuiComboBox
-            isInvalid={validation.errors.indexPattern}
-            isLoading={isLoadingIndices && !indicesError}
+            isInvalid={validation.errors.indexPattern || indexPatternMissingTimestamp}
+            isLoading={(isLoadingIndices && !indicesError) || isValidatingTimestamp}
             fullWidth
             aria-label={WATCHLIST_INDEX_PATTERN_PLACEHOLDER}
             placeholder={WATCHLIST_INDEX_PATTERN_PLACEHOLDER}

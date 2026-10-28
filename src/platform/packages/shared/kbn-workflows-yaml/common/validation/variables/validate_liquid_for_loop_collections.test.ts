@@ -1,0 +1,299 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { LineCounter, parseDocument } from 'yaml';
+import { DynamicStepContextSchema } from '@kbn/workflows';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
+import { WorkflowGraph } from '@kbn/workflows/graph';
+import { z } from '@kbn/zod/v4';
+import {
+  FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML,
+  FOR_LOOP_ESQL_CELL_YAML,
+  FOR_LOOP_FOLDED_ONLY_YAML,
+  FOR_LOOP_NESTED_YAML,
+  FOR_LOOP_RUNTIME_JSON_YAML,
+  FOR_LOOP_VALIDATION_YAML,
+  forLoopEmptyArrayIdiomWorkflowDefinition,
+  forLoopEsqlCellWorkflowDefinition,
+  forLoopFoldedOnlyWorkflowDefinition,
+  forLoopNestedWorkflowDefinition,
+  forLoopRuntimeJsonWorkflowDefinition,
+  forLoopValidationWorkflowDefinition,
+} from './__fixtures__/for_loop_validation_workflow';
+import { validateLiquidForLoopCollections } from './validate_liquid_for_loop_collections';
+import { positionAt } from './__fixtures__/text_position';
+import { getContextSchemaForStep } from '../context/get_context_for_path';
+import {
+  FOREACH_ITEM_SCHEMA_DESC,
+  getForeachCollectionDiagnostic,
+  getForeachItemSchema,
+} from '../context/get_foreach_state_schema';
+import { getWorkflowContextSchema } from '../context/get_workflow_context_schema';
+import { createMockWorkflowContextRegistry } from '../context/registry.mock';
+import { createStepContextResolver } from '../context/step_context_resolver';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
+
+describe('validateLiquidForLoopCollections', () => {
+  const lineCounter = new LineCounter();
+  const yamlDocument = parseDocument(FOR_LOOP_VALIDATION_YAML, { lineCounter });
+  const workflowGraph = WorkflowGraph.fromWorkflowDefinition(forLoopValidationWorkflowDefinition);
+
+  let results: ReturnType<typeof validateLiquidForLoopCollections>;
+
+  beforeEach(() => {
+    results = validateLiquidForLoopCollections(
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopValidationWorkflowDefinition,
+        workflowGraph,
+        yamlDocument
+      ),
+      FOR_LOOP_VALIDATION_YAML,
+      yamlDocument,
+      lineCounter,
+      forLoopValidationWorkflowDefinition
+    );
+  });
+
+  it('places marker on the collection path in YAML source', () => {
+    const collectionPath = 'steps.non_existing_step';
+    const yamlOffset = FOR_LOOP_VALIDATION_YAML.indexOf(collectionPath);
+    expect(yamlOffset).toBeGreaterThan(-1);
+
+    const nonExistingError = results.find((r) => r.message?.includes(collectionPath));
+    expect(nonExistingError).toBeDefined();
+    expect(nonExistingError?.startLineNumber).toBe(
+      positionAt(FOR_LOOP_VALIDATION_YAML, yamlOffset).lineNumber
+    );
+    expect(nonExistingError?.startColumn).toBe(
+      positionAt(FOR_LOOP_VALIDATION_YAML, yamlOffset).column
+    );
+    expect(nonExistingError?.endLineNumber).toBe(
+      positionAt(FOR_LOOP_VALIDATION_YAML, yamlOffset + collectionPath.length).lineNumber
+    );
+    expect(nonExistingError?.endColumn).toBe(
+      positionAt(FOR_LOOP_VALIDATION_YAML, yamlOffset + collectionPath.length).column
+    );
+  });
+
+  it('returns no diagnostics for output-only liquid without for tags in AST', () => {
+    const plainYaml = `name: Plain
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: only
+    type: console
+    with:
+      message: '{{ steps.only }}'
+`;
+    const plainLineCounter = new LineCounter();
+    const plainDoc = parseDocument(plainYaml, { lineCounter: plainLineCounter });
+    const plainResults = validateLiquidForLoopCollections(
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopValidationWorkflowDefinition,
+        workflowGraph,
+        plainDoc
+      ),
+      plainYaml,
+      plainDoc,
+      plainLineCounter,
+      forLoopValidationWorkflowDefinition
+    );
+    expect(plainResults).toHaveLength(0);
+  });
+
+  it('reports collection error on block-folded message field with marker position', () => {
+    const collectionPath = 'steps.non_existing_step';
+    const foldedLineCounter = new LineCounter();
+    const foldedDoc = parseDocument(FOR_LOOP_FOLDED_ONLY_YAML, { lineCounter: foldedLineCounter });
+    const foldedGraph = WorkflowGraph.fromWorkflowDefinition(forLoopFoldedOnlyWorkflowDefinition);
+    const yamlOffset = FOR_LOOP_FOLDED_ONLY_YAML.indexOf(collectionPath);
+    expect(yamlOffset).toBeGreaterThan(-1);
+
+    const foldedResults = validateLiquidForLoopCollections(
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopFoldedOnlyWorkflowDefinition,
+        foldedGraph,
+        foldedDoc
+      ),
+      FOR_LOOP_FOLDED_ONLY_YAML,
+      foldedDoc,
+      foldedLineCounter,
+      forLoopFoldedOnlyWorkflowDefinition
+    );
+
+    const badCollection = foldedResults.find((r) => r.message?.includes(collectionPath));
+    expect(badCollection).toBeDefined();
+    expect(badCollection?.severity).toBe('error');
+    expect(badCollection?.startLineNumber).toBe(
+      positionAt(FOR_LOOP_FOLDED_ONLY_YAML, yamlOffset).lineNumber
+    );
+    expect(badCollection?.startColumn).toBe(
+      positionAt(FOR_LOOP_FOLDED_ONLY_YAML, yamlOffset).column
+    );
+  });
+
+  it('reports nested inner collection error without error on valid outer collection', () => {
+    const nestedLineCounter = new LineCounter();
+    const nestedDoc = parseDocument(FOR_LOOP_NESTED_YAML, { lineCounter: nestedLineCounter });
+    const nestedGraph = WorkflowGraph.fromWorkflowDefinition(forLoopNestedWorkflowDefinition);
+
+    const nestedResults = validateLiquidForLoopCollections(
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopNestedWorkflowDefinition,
+        nestedGraph,
+        nestedDoc
+      ),
+      FOR_LOOP_NESTED_YAML,
+      nestedDoc,
+      nestedLineCounter,
+      forLoopNestedWorkflowDefinition
+    );
+
+    expect(nestedResults.some((r) => r.message?.includes('steps.non_existing_step'))).toBe(true);
+    expect(
+      nestedResults.filter((r) => r.message?.includes('steps.iterate_items.items'))
+    ).toHaveLength(0);
+  });
+
+  it('maps runtime JSON string collection paths to warning diagnostics', () => {
+    const stepContext = DynamicStepContextSchema.extend({
+      steps: z.object({
+        fetch: z.object({ output: z.string() }),
+      }),
+    });
+    expect(
+      getForeachCollectionDiagnostic(
+        getForeachItemSchema(stepContext, 'steps.fetch.output'),
+        'steps.fetch.output'
+      )
+    ).toEqual({
+      message: FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON,
+      severity: 'warning',
+    });
+
+    const runtimeLineCounter = new LineCounter();
+    const runtimeDoc = parseDocument(FOR_LOOP_RUNTIME_JSON_YAML, {
+      lineCounter: runtimeLineCounter,
+    });
+    const runtimeGraph = WorkflowGraph.fromWorkflowDefinition(forLoopRuntimeJsonWorkflowDefinition);
+    const baseSchema = DynamicStepContextSchema.merge(
+      getWorkflowContextSchema(emptyRegistry, forLoopRuntimeJsonWorkflowDefinition, runtimeDoc)
+    ) as typeof DynamicStepContextSchema;
+    const summarizeSchema = getContextSchemaForStep(
+      emptyRegistry,
+      baseSchema,
+      runtimeGraph,
+      'summarize'
+    );
+    const { schema: fetchOutputSchema } = getSchemaAtPath(summarizeSchema, 'steps.fetch.output');
+    if (!(fetchOutputSchema instanceof z.ZodString)) {
+      return;
+    }
+
+    const runtimeResults = validateLiquidForLoopCollections(
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopRuntimeJsonWorkflowDefinition,
+        runtimeGraph,
+        runtimeDoc
+      ),
+      FOR_LOOP_RUNTIME_JSON_YAML,
+      runtimeDoc,
+      runtimeLineCounter,
+      forLoopRuntimeJsonWorkflowDefinition
+    );
+    expect(
+      runtimeResults.some(
+        (r) => r.severity === 'warning' && r.message === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON
+      )
+    ).toBe(true);
+  });
+
+  it('maps ES|QL result cell collections to warning diagnostics', () => {
+    const esqlLineCounter = new LineCounter();
+    const esqlDoc = parseDocument(FOR_LOOP_ESQL_CELL_YAML, { lineCounter: esqlLineCounter });
+    const esqlGraph = WorkflowGraph.fromWorkflowDefinition(forLoopEsqlCellWorkflowDefinition);
+
+    const esqlResults = validateLiquidForLoopCollections(
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopEsqlCellWorkflowDefinition,
+        esqlGraph,
+        esqlDoc
+      ),
+      FOR_LOOP_ESQL_CELL_YAML,
+      esqlDoc,
+      esqlLineCounter,
+      forLoopEsqlCellWorkflowDefinition
+    );
+
+    expect(esqlResults.filter((r) => r.severity === 'error')).toHaveLength(0);
+    expect(
+      esqlResults.some(
+        (r) => r.severity === 'warning' && r.message === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE
+      )
+    ).toBe(true);
+  });
+
+  it('does not error when the collection resolves to a string literal via assign filters', () => {
+    const idiomLineCounter = new LineCounter();
+    const idiomDoc = parseDocument(FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML, {
+      lineCounter: idiomLineCounter,
+    });
+    const idiomGraph = WorkflowGraph.fromWorkflowDefinition(
+      forLoopEmptyArrayIdiomWorkflowDefinition
+    );
+
+    const idiomResults = validateLiquidForLoopCollections(
+      createStepContextResolver(
+        emptyRegistry,
+        forLoopEmptyArrayIdiomWorkflowDefinition,
+        idiomGraph,
+        idiomDoc
+      ),
+      FOR_LOOP_EMPTY_ARRAY_IDIOM_YAML,
+      idiomDoc,
+      idiomLineCounter,
+      forLoopEmptyArrayIdiomWorkflowDefinition
+    );
+
+    expect(idiomResults.filter((r) => r.severity === 'error')).toHaveLength(0);
+    expect(idiomResults.some((r) => r.message?.includes('Invalid collection path'))).toBe(false);
+  });
+
+  it.each([
+    ['steps.non_existing_step', 'error', 'is invalid'],
+    ['steps.log_item', 'error', 'Expected array'],
+    ['steps.iterate_items.items', null, null],
+  ] as const)(
+    'collection path %s severity %s',
+    (collectionPath, expectedSeverity, messageSubstring) => {
+      const match = results.find(
+        (r) =>
+          r.message?.includes(collectionPath) ||
+          (messageSubstring != null && r.message?.includes(messageSubstring))
+      );
+      if (expectedSeverity === null) {
+        expect(match).toBeUndefined();
+        return;
+      }
+      expect(match).toBeDefined();
+      expect(match?.severity).toBe(expectedSeverity);
+      if (messageSubstring) {
+        expect(match?.message).toContain(messageSubstring);
+      }
+    }
+  );
+});

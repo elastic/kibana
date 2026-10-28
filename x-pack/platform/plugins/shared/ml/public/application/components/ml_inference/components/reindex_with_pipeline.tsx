@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { type ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiCallOut,
   EuiCheckbox,
   EuiComboBox,
   type EuiComboBoxOptionOption,
@@ -24,6 +23,7 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
@@ -397,7 +397,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiCallOut
+        <KbnSuccessCallout
           announceOnMount
           data-test-subj="mlTrainedModelsInferenceReviewAndCreateStepSuccessCallout"
           title={i18n.translate(
@@ -407,37 +407,36 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
               values: { sourceIndex: selectedIndex[0].label, destinationIndex },
             }
           )}
-          color="success"
-          iconType="check"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexingTaskIdMessage"
-              defaultMessage="Reindexing task id {taskId} can be used to monitor the progress via the {tasksApi}."
-              values={{
-                taskId: reindexingTaskId,
-                tasksApi: (
-                  <EuiLink href={`${links.apis.tasks}`} target="_blank" external>
-                    {'task management API'}
-                  </EuiLink>
-                ),
-              }}
-            />
-            {discoverLink !== undefined ? (
+          text={
+            <p>
               <FormattedMessage
-                id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexedlinkToDiscover"
-                defaultMessage=" View {destIndexInDiscover} in Discover."
+                id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexingTaskIdMessage"
+                defaultMessage="Reindexing task id {taskId} can be used to monitor the progress via the {tasksApi}."
                 values={{
-                  destIndexInDiscover: (
-                    <EuiLink href={`${discoverLink}`} target="_blank" external>
-                      {destinationIndex}
+                  taskId: reindexingTaskId,
+                  tasksApi: (
+                    <EuiLink href={`${links.apis.tasks}`} target="_blank" external>
+                      {'task management API'}
                     </EuiLink>
                   ),
                 }}
               />
-            ) : null}
-          </p>
-        </EuiCallOut>
+              {discoverLink !== undefined ? (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexedlinkToDiscover"
+                  defaultMessage=" View {destIndexInDiscover} in Discover."
+                  values={{
+                    destIndexInDiscover: (
+                      <EuiLink href={`${discoverLink}`} target="_blank" external>
+                        {destinationIndex}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              ) : null}
+            </p>
+          }
+        />
       )}
     </EuiPanel>
   );

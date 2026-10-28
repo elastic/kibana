@@ -47,6 +47,31 @@ describe('resolveResourceForEsqlWithSamplingStats', () => {
     expect(result.fields.map((f) => f.path)).toEqual(['first_name']);
   });
 
+  it('resolves an ES|QL view without sampling via _search', async () => {
+    esClient.indices.resolveIndex.mockRejectedValue(
+      new esErrors.ResponseError({ statusCode: 404 } as any)
+    );
+    esClient.esql.getView.mockResolvedValue({
+      views: [{ name: 'logs-proxy-parsed', query: 'FROM logs-* | KEEP status' }],
+    } as never);
+    esClient.esql.query.mockResolvedValue({
+      columns: [{ name: 'status', type: 'integer' }],
+      values: [],
+    });
+    esClient.search.mockRejectedValue(new esErrors.ResponseError({ statusCode: 404 } as any));
+
+    const result = await resolveResourceForEsqlWithSamplingStats({
+      resourceName: 'logs-proxy-parsed',
+      esClient,
+      includeViews: true,
+    });
+
+    expect(esClient.search).not.toHaveBeenCalled();
+    expect(result.type).toBe(EsResourceType.view);
+    expect(result.query).toBe('FROM logs-* | KEEP status');
+    expect(result.fields.map((f) => f.path)).toEqual(['status']);
+  });
+
   it('does not resolve datasets when includeDatasets is not set', async () => {
     esClient.indices.resolveIndex.mockRejectedValue(
       new esErrors.ResponseError({ statusCode: 404 } as any)

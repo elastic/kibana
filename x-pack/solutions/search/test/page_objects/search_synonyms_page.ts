@@ -9,7 +9,6 @@ import type { FtrProviderContext } from './ftr_provider_context';
 
 export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
 
@@ -23,15 +22,17 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
           'searchSynonymsCreateSynonymsSetModalForceWrite',
       },
       async expectSynonymsGetStartedPageComponentsToExist() {
-        await retry.tryForTime(10000, async () => {
-          if (!(await testSubjects.exists(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 2000 }))) {
+        await retry.tryForTime(15000, async () => {
+          if (
+            !(await testSubjects.waitForExists(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 5000 }))
+          ) {
             await browser.refresh();
             throw new Error(`${this.TEST_IDS.GET_STARTED_BUTTON} not visible`);
           }
         });
       },
       async clickCreateSynonymsSetButton() {
-        await retry.tryForTime(10000, async () => {
+        await retry.tryForTime(15000, async () => {
           await browser.refresh();
           await testSubjects.click(this.TEST_IDS.GET_STARTED_BUTTON);
         });
@@ -115,8 +116,7 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
       },
       async expectSynonymsSetDetailPageNavigated(name: string) {
         await retry.tryForTime(5000, async () => {
-          const h1Element = await find.byCssSelector('main header h1');
-          const text = await h1Element.getVisibleText();
+          const text = await testSubjects.getVisibleText('appHeaderTitle');
           if (text !== name) {
             throw new Error(`Expected page title to be "${name}" but got "${text}"`);
           }
@@ -205,17 +205,24 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
           throw new Error(`Badge with index ${index} not found`);
         }
         const expectedCount = initialBadges.length - 1;
-        await retry.try(async () => {
-          const badges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
-          if (badges.length === expectedCount) {
-            return;
+        const termToRemove = await initialBadges[index].getVisibleText();
+
+        // Click the remove button exactly once. Re-clicking while waiting for the DOM to update
+        // removes whichever term has shifted into this position, deleting more than one term.
+        const deleteButton = await initialBadges[index].findByTagName('button');
+        await deleteButton.click();
+
+        await retry.waitFor(
+          `term "${termToRemove}" to be removed (expecting ${expectedCount} badges)`,
+          async () => {
+            const badges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
+            if (badges.length !== expectedCount) {
+              return false;
+            }
+            const terms = await Promise.all(badges.map((badge) => badge.getVisibleText()));
+            return !terms.includes(termToRemove);
           }
-          const deleteButton = await badges[index].findByTagName('button');
-          await deleteButton.click();
-          throw new Error(
-            `Clicked remove on badge ${index}, waiting for badge count to drop to ${expectedCount}`
-          );
-        });
+        );
       },
     },
   };

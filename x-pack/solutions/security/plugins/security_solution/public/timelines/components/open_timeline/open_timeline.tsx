@@ -85,7 +85,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
       deleteTimelines: timelinePrivileges.crud ? deleteTimelines : undefined,
       selectedItems,
-      searchResults,
       tableRef,
       timelineType,
     });

@@ -15,6 +15,8 @@ import {
   extractAndWriteOutputSecrets,
   extractAndUpdateOutputSecrets,
   deleteOutputSecrets,
+  getKafkaSecretLeaves,
+  getOutputSecretReferences,
 } from './outputs';
 
 describe('Outputs secrets', () => {
@@ -50,6 +52,28 @@ describe('Outputs secrets', () => {
       },
     },
     proxy_id: null,
+  } as any;
+
+  const otlpOutput = {
+    name: 'OTLP output',
+    type: 'otlp',
+    is_default: false,
+    is_default_monitoring: false,
+    otlp_exporter: {
+      endpoint: 'https://otel.example.com:4317',
+      protocol: 'grpc',
+    },
+    secrets: {
+      otlp_exporter: {
+        tls: {
+          key_pem: 'my-key-pem',
+          tpm: {
+            owner_auth: 'my-owner-auth',
+            auth: 'my-auth',
+          },
+        },
+      },
+    },
   } as any;
 
   describe('extractAndWriteOutputSecrets', () => {
@@ -95,6 +119,130 @@ describe('Outputs secrets', () => {
             path: '/_fleet/secret',
           },
         ],
+      ]);
+    });
+
+    it('should create OTLP secrets for key_pem and tpm credentials', async () => {
+      const result = await extractAndWriteOutputSecrets({
+        output: otlpOutput,
+        esClient: esClientMock,
+      });
+
+      expect(result.output).toEqual({
+        ...otlpOutput,
+        secrets: {
+          otlp_exporter: {
+            tls: {
+              key_pem: { id: expect.any(String) },
+              tpm: {
+                owner_auth: { id: expect.any(String) },
+                auth: { id: expect.any(String) },
+              },
+            },
+          },
+        },
+      });
+      expect(result.secretReferences).toEqual([
+        { id: expect.anything() },
+        { id: expect.anything() },
+        { id: expect.anything() },
+      ]);
+      expect(esClientMock.transport.request.mock.calls).toEqual([
+        [{ body: { value: 'my-key-pem' }, method: 'POST', path: '/_fleet/secret' }],
+        [{ body: { value: 'my-owner-auth' }, method: 'POST', path: '/_fleet/secret' }],
+        [{ body: { value: 'my-auth' }, method: 'POST', path: '/_fleet/secret' }],
+      ]);
+    });
+  });
+
+  describe('Kafka secrets', () => {
+    const kafkaOutput = {
+      name: 'Kafka output',
+      type: 'kafka',
+      hosts: ['localhost:9092'],
+      is_default: false,
+      is_default_monitoring: false,
+      auth_type: 'user_pass',
+      username: 'user',
+      topic: 'topic',
+      secrets: {
+        password: 'pass1',
+        // a nested secret, like the ones of the new authentication methods
+        nested: { deeper: { token: 'token1' } },
+        ssl: { key: 'key1' },
+      },
+    } as any;
+
+    it('getKafkaSecretLeaves should find secrets at any depth and skip ssl.key', () => {
+      expect(
+        getKafkaSecretLeaves({
+          password: 'pass1',
+          nested: { deeper: { token: { id: 'token-id' } } },
+          empty: '',
+          cleared: null,
+          ssl: { key: 'key1' },
+        })
+      ).toEqual([
+        { path: 'password', value: 'pass1' },
+        { path: 'nested.deeper.token', value: { id: 'token-id' } },
+      ]);
+    });
+
+    it('getKafkaSecretLeaves should return nothing without secrets', () => {
+      expect(getKafkaSecretLeaves(undefined)).toEqual([]);
+      expect(getKafkaSecretLeaves({})).toEqual([]);
+    });
+
+    it('getOutputSecretReferences should list the stored Kafka secrets only', () => {
+      expect(
+        getOutputSecretReferences({
+          ...kafkaOutput,
+          secrets: {
+            password: { id: 'password-id' },
+            nested: { deeper: { token: { id: 'token-id' } } },
+            // not stored yet, so there is no reference
+            other: 'plain-text',
+            ssl: { key: { id: 'key-id' } },
+          },
+        })
+      ).toEqual([{ id: 'key-id' }, { id: 'password-id' }, { id: 'token-id' }]);
+    });
+
+    it('extractAndWriteOutputSecrets should store the Kafka secrets whatever their depth', async () => {
+      const result = await extractAndWriteOutputSecrets({
+        output: kafkaOutput,
+        esClient: esClientMock,
+      });
+
+      expect(result.output.secrets).toEqual({
+        password: { id: expect.any(String) },
+        nested: { deeper: { token: { id: expect.any(String) } } },
+        ssl: { key: { id: expect.any(String) } },
+      });
+      expect(result.secretReferences).toHaveLength(3);
+      expect(esClientMock.transport.request.mock.calls.map(([req]: any) => req.body.value)).toEqual(
+        ['pass1', 'token1', 'key1']
+      );
+    });
+
+    it('deleteOutputSecrets should delete the Kafka secrets whatever their depth', async () => {
+      await deleteOutputSecrets({
+        output: {
+          ...kafkaOutput,
+          id: 'kafka-id',
+          secrets: {
+            password: { id: 'password-id' },
+            nested: { deeper: { token: { id: 'token-id' } } },
+            ssl: { key: { id: 'key-id' } },
+          },
+        },
+        esClient: esClientMock,
+      });
+
+      expect(esClientMock.transport.request.mock.calls.map(([req]: any) => req.path)).toEqual([
+        '/_fleet/secret/password-id',
+        '/_fleet/secret/token-id',
+        '/_fleet/secret/key-id',
       ]);
     });
   });
@@ -197,6 +345,44 @@ describe('Outputs secrets', () => {
 
       expect(result.secretsToDelete).toEqual([{ id: 'ssl-key-token' }]);
     });
+
+    it('should delete OTLP key_pem secret when replaced by tpm credentials', async () => {
+      const result = await extractAndUpdateOutputSecrets({
+        oldOutput: {
+          id: 'otlp-id',
+          name: 'OTLP output',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+          otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+          secrets: {
+            otlp_exporter: {
+              tls: {
+                key_pem: { id: 'old-key-pem-id' },
+              },
+            },
+          },
+        },
+        outputUpdate: {
+          type: 'otlp',
+          otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+          secrets: {
+            otlp_exporter: {
+              tls: {
+                tpm: { owner_auth: 'new-owner-auth', auth: 'new-auth' },
+              },
+            },
+          },
+        },
+        esClient: esClientMock,
+      });
+
+      expect(result.secretsToDelete).toEqual([{ id: 'old-key-pem-id' }]);
+      expect(result.secretReferences).toEqual([
+        { id: expect.anything() },
+        { id: expect.anything() },
+      ]);
+    });
   });
 
   describe('deleteOutputSecrets', () => {
@@ -233,6 +419,42 @@ describe('Outputs secrets', () => {
           },
         ],
       ]);
+    });
+
+    it('should delete all OTLP TLS secrets', async () => {
+      const otlpOutputWithSecrets = {
+        id: 'otlp-id',
+        name: 'OTLP output',
+        type: 'otlp',
+        is_default: false,
+        is_default_monitoring: false,
+        otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+        secrets: {
+          otlp_exporter: {
+            tls: {
+              key_pem: { id: 'key-pem-secret-id' },
+              tpm: {
+                owner_auth: { id: 'owner-auth-secret-id' },
+                auth: { id: 'auth-secret-id' },
+              },
+            },
+          },
+        },
+      } as any;
+
+      await deleteOutputSecrets({
+        output: otlpOutputWithSecrets,
+        esClient: esClientMock,
+      });
+
+      expect(esClientMock.transport.request.mock.calls).toEqual(
+        expect.arrayContaining([
+          [{ method: 'DELETE', path: '/_fleet/secret/key-pem-secret-id' }],
+          [{ method: 'DELETE', path: '/_fleet/secret/owner-auth-secret-id' }],
+          [{ method: 'DELETE', path: '/_fleet/secret/auth-secret-id' }],
+        ])
+      );
+      expect(esClientMock.transport.request.mock.calls).toHaveLength(3);
     });
 
     it('should do nothing if there are no existing secrets', async () => {

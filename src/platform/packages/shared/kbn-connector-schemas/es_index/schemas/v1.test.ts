@@ -80,6 +80,21 @@ describe('ES Index Schema', () => {
       ).not.toThrow();
     });
 
+    it('accepts JSON string documents and coerces to object', () => {
+      const result = ParamsSchema.parse({
+        documents: [JSON.stringify({ field: 'value' })],
+      });
+      expect(result.documents).toEqual([{ field: 'value' }]);
+    });
+
+    it('throws on invalid JSON string documents', () => {
+      expect(() =>
+        ParamsSchema.parse({
+          documents: ['not-JSON'],
+        })
+      ).toThrow();
+    });
+
     it('applies default null for indexOverride', () => {
       const result = ParamsSchema.parse({
         documents: [{ field: 'value' }],

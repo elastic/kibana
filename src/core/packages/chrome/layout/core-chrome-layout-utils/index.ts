@@ -7,4 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from '@kbn/ui-chrome-layout-utils';
+/** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+export {
+  getScrollContainer,
+  scrollTo,
+  scrollToTop,
+  scrollToBottom,
+  getViewportHeight,
+  getViewportBoundaries,
+  getScrollPosition,
+  getScrollDimensions,
+  scrollBy,
+  isAtBottomOfPage,
+  getHighContrastBorder,
+  getHighContrastSeparator,
+  useCurrentChromeApplicationBreakpoint,
+  useIsWithinChromeApplicationBreakpoints,
+} from '@kbn/core-chrome-layout';
+
+/** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+export type { ScrollContainer, HighContrastSeparatorOptions } from '@kbn/core-chrome-layout';

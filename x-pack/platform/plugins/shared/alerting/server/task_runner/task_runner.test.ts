@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import { errors } from '@elastic/elasticsearch';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { SavedObject } from '@kbn/core/server';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type {
   RuleExecutorOptions,
   RuleTypeParams,
@@ -34,6 +35,7 @@ import {
 import type { TaskRunnerContext } from './types';
 import { ApiKeyType } from './types';
 import { TaskRunner } from './task_runner';
+import { ActionScheduler } from './action_scheduler';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
@@ -62,6 +64,7 @@ import {
   mockedRuleTypeSavedObject,
   ruleType,
   RULE_NAME,
+  RULE_TYPE_ID,
   generateRunnerResult,
   RULE_ACTIONS,
   generateEnqueueFunctionInput,
@@ -77,6 +80,7 @@ import {
   mockAAD,
   mockedRawRuleSO,
 } from './fixtures';
+import { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../lib/workflow_extensions/events';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { translations } from '../constants/translations';
@@ -107,6 +111,7 @@ import {
 } from './maintenance_windows/maintenance_windows_service.mock';
 import { ErrorWithType } from '../lib/error_with_type';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import { alertStatusChangedV1EventSchema } from '../../common/workflows/triggers/alert_status_changed';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 jest.mock('uuid', () => ({
@@ -327,23 +332,57 @@ describe('Task Runner', () => {
     expect(call.services).toBeTruthy();
 
     expect(logger.debug).toHaveBeenCalledTimes(5);
-    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      tags: ['1', 'test'],
-    });
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       4,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
 
     testAlertingEventLogCalls({ status: 'ok' });
@@ -356,7 +395,9 @@ describe('Task Runner', () => {
       })
     );
 
-    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledTimes(
+      1
+    );
     expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledWith(
       {
         id: '1',
@@ -572,28 +613,70 @@ describe('Task Runner', () => {
     );
 
     expect(logger.debug).toHaveBeenCalledTimes(6);
-    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      tags: ['1', 'test'],
-    });
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       4,
       'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       5,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
 
     testAlertingEventLogCalls({
@@ -668,12 +751,60 @@ describe('Task Runner', () => {
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     const [enqueuedActions] = actionsClient.bulkEnqueueExecution.mock.calls[0];
     expect(enqueuedActions).toHaveLength(1);
+    // The enqueued action must also carry the UIAM key id so the API key invalidation task's
+    // in-use guard can see that this pending connector execution still needs the key.
     expect(enqueuedActions[0]).toEqual(
       expect.objectContaining({
         id: '1',
         apiKey: 'essu_uiam_api_key',
+        uiamApiKeyId: '456',
       })
     );
+  });
+
+  test('does not enqueue the UIAM API key id when the rule run falls back to the ES API key', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(
+      async ({
+        services: executorServices,
+      }: RuleExecutorOptions<
+        RuleTypeParams,
+        RuleTypeState,
+        AlertInstanceState,
+        AlertInstanceContext,
+        string,
+        RuleAlertData
+      >) => {
+        executorServices.alertFactory.create('1').scheduleActions('default');
+        return { state: {} };
+      }
+    );
+    const taskRunner = createTaskRunner({
+      context: {
+        ...taskRunnerFactoryInitializerParams,
+        apiKeyType: ApiKeyType.UIAM,
+        shouldGrantUiam: true,
+      },
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    // UIAM is expected, but the rule has no UIAM key, so the run authenticates with the ES key.
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        uiamApiKey: null,
+      },
+    });
+
+    await taskRunner.run();
+
+    expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+    const [fallbackEnqueuedActions] = actionsClient.bulkEnqueueExecution.mock.calls[0];
+    // Recording the id here would claim a UIAM key the connector task never presents, keeping
+    // an unused key alive.
+    expect(fallbackEnqueuedActions[0]).not.toHaveProperty('uiamApiKeyId');
   });
 
   test('actionsPlugin.execute is skipped if muteAll is true', async () => {
@@ -705,33 +836,83 @@ describe('Task Runner', () => {
     await taskRunner.run();
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
-    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      tags: ['1', 'test'],
-    });
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       `no scheduling of actions for rule test:1: '${RULE_NAME}': rule is snoozed.`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       4,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       5,
       'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       6,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
 
     testAlertingEventLogCalls({
@@ -840,7 +1021,15 @@ describe('Task Runner', () => {
       if (expectedExecutions) {
         expect(logger.debug).not.toHaveBeenCalledWith(expectedMessage);
       } else {
-        expect(logger.debug).toHaveBeenCalledWith(expectedMessage, { tags: ['1', 'test'] });
+        expect(logger.debug).toHaveBeenCalledWith(expectedMessage, {
+          labels: {
+            executionId: RULE_EXECUTION_UUID,
+            ruleId: '1',
+            ruleType: 'test',
+            spaceId: 'default',
+            taskInstanceId: '1',
+          },
+        });
       }
     }
   );
@@ -1068,33 +1257,85 @@ describe('Task Runner', () => {
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
-    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      tags: ['1', 'test'],
-    });
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:1: '${RULE_NAME}' has 2 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          alertId: '2',
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       4,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       5,
       'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":2,"new":2,"recovered":0,"ignored":0}}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       6,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":2,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":2,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
@@ -1152,10 +1393,21 @@ describe('Task Runner', () => {
     // expect(enqueueFunction).toHaveBeenCalledTimes(1);
 
     // expect(logger.debug).toHaveBeenCalledTimes(5);
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is throttled`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          actionId: '1',
+          alertId: '2',
+          actionTypeId: 'action',
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
   });
 
@@ -1189,10 +1441,19 @@ describe('Task Runner', () => {
     await taskRunner.run();
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(logger.debug).toHaveBeenCalledTimes(7);
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       `skipping scheduling of actions for '2' in rule test:1: '${RULE_NAME}': rule is muted`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          alertId: '2',
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
   });
 
@@ -1456,33 +1717,83 @@ describe('Task Runner', () => {
     );
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
-    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      tags: ['1', 'test'],
-    });
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
+    expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       `rule test:1: '${RULE_NAME}' has 1 recovered alerts: [\"2\"]`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       4,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       5,
       'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       6,
       'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
 
     testAlertingEventLogCalls({
@@ -1583,28 +1894,68 @@ describe('Task Runner', () => {
 
     expect(logger.debug).toHaveBeenCalledWith(
       `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
 
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       `rule test:1: '${RULE_NAME}' has 1 recovered alerts: [\"2\"]`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       4,
       `deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       5,
       'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":0,"recovered":1,"ignored":0}}',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       6,
       `ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":1,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}`,
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
 
     testAlertingEventLogCalls({
@@ -1942,7 +2293,7 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
 
-    expect(logger.error).toBeCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledTimes(1);
 
     const loggerCall = logger.error.mock.calls[0][0];
     const loggerMeta = logger.error.mock.calls[0][1];
@@ -1950,7 +2301,7 @@ describe('Task Runner', () => {
     expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
       `"Executing Rule default:test:1 has resulted in Error: Response Error"`
     );
-    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'user-error']);
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'user-error']);
   });
 
   test('should set unexpected errors as framework-error', async () => {
@@ -1965,7 +2316,7 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
 
-    expect(logger.error).toBeCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledTimes(1);
 
     const loggerCall = logger.error.mock.calls[0][0];
     const loggerMeta = logger.error.mock.calls[0][1];
@@ -1973,7 +2324,7 @@ describe('Task Runner', () => {
     expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
       `"Executing Rule default:test:1 has resulted in Error: test"`
     );
-    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'framework-error']);
   });
 
   test('recovers gracefully when the RuleType executor throws an exception', async () => {
@@ -2018,9 +2369,9 @@ describe('Task Runner', () => {
     expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
       `"Executing Rule default:test:1 has resulted in Error: GENERIC ERROR MESSAGE"`
     );
-    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
+    expect(loggerMeta?.tags).toEqual(['rule-run-failed', 'framework-error']);
     expect(loggerMeta?.error?.stack_trace).toBeDefined();
-    expect(logger.error).toBeCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledTimes(1);
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
@@ -2135,10 +2486,10 @@ describe('Task Runner', () => {
 
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.warn).nthCalledWith(
+      expect(logger.warn).toHaveBeenNthCalledWith(
         1,
         `Unable to execute rule "1" in the "foo" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`,
-        { tags: ['1', 'test'] }
+        { labels: { ruleId: '1', ruleType: 'test', spaceId: 'foo' } }
       );
       expect(isUnrecoverableError(ex)).toBeTruthy();
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
@@ -2207,10 +2558,10 @@ describe('Task Runner', () => {
 
       expect(logger.error).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.warn).nthCalledWith(
+      expect(logger.warn).toHaveBeenNthCalledWith(
         1,
         `Unable to execute rule "1" in the "test-space" space because Saved object [alert/1] not found - this rule will not be rescheduled. To restart rule execution, try disabling and re-enabling this rule.`,
-        { tags: ['1', 'test'] }
+        { labels: { ruleId: '1', ruleType: 'test', spaceId: 'test-space' } }
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     });
@@ -2868,10 +3219,20 @@ describe('Task Runner', () => {
 
     expect(logger.debug).toHaveBeenCalledTimes(8);
 
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       'Rule "1" skipped scheduling action "4" because the maximum number of allowed actions has been reached.',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          actionId: '4',
+          actionTypeId: 'action',
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
 
     testAlertingEventLogCalls({
@@ -3059,10 +3420,20 @@ describe('Task Runner', () => {
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
 
-    expect(logger.debug).nthCalledWith(
+    expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       'Rule "1" skipped scheduling action "1" because the maximum number of allowed actions for connector type .server-log has been reached.',
-      { tags: ['1', 'test'] }
+      {
+        labels: {
+          actionId: '1',
+          actionTypeId: '.server-log',
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
     );
 
     testAlertingEventLogCalls({
@@ -3213,7 +3584,16 @@ describe('Task Runner', () => {
     );
     expect(logger.error).toHaveBeenCalledWith(
       'Executing Rule test:1 has resulted in the following error(s): an error occurred,second error occurred',
-      { tags: ['1', 'test', 'rule-run-failed', 'framework-error'] }
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+        tags: ['rule-run-failed', 'framework-error'],
+      }
     );
   });
 
@@ -3322,7 +3702,14 @@ describe('Task Runner', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       'Executing Rule default:test:1 has resulted in Error: Index is blocked',
       {
-        tags: ['1', 'test', 'rule-run-failed', 'framework-error'],
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+        tags: ['rule-run-failed', 'framework-error'],
       }
     );
   });
@@ -3345,7 +3732,13 @@ describe('Task Runner', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       'ruleRunStatus for test:1: {"outcome":"failed","outcomeOrder":20,"warning":"unknown","outcomeMsg":["GENERIC ERROR MESSAGE"],"alertsCount":{}}',
       {
-        tags: ['1', 'test'],
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
       }
     );
   });
@@ -3360,7 +3753,7 @@ describe('Task Runner', () => {
 
     const result = await taskRunner.run();
 
-    expect(logger.info).toBeCalledTimes(1);
+    expect(logger.info).toHaveBeenCalledTimes(1);
     const loggerCall = logger.info.mock.calls[0][0];
     expect(loggerCall).toMatchInlineSnapshot(
       `"Outdated task version: The task instance ID: old-task-id does not match the rule ID: 1."`
@@ -4119,4 +4512,477 @@ describe('Task Runner', () => {
     }
     expect(alertingEventLogger.logTimeout).not.toHaveBeenCalled();
   }
+
+  // ---------------------------------------------------------------------------
+  // alerting.v1.alertStatusChanged workflow trigger
+  // ---------------------------------------------------------------------------
+
+  describe('alerting.v1.alertStatusChanged workflow trigger', () => {
+    const mockBus = { publish: jest.fn(), subscribe: jest.fn() };
+
+    /** Minimal alert stub — only the methods task_runner.ts calls for the payload. */
+    const makeMockAlert = (opts: {
+      id: string;
+      uuid: string;
+      start?: string | null;
+      actionGroup?: string | null;
+      lastGroup?: string | null;
+    }) => ({
+      getId: () => opts.id,
+      getUuid: () => opts.uuid,
+      getStart: () => opts.start ?? null,
+      getScheduledActionOptions: () =>
+        opts.actionGroup !== undefined ? { actionGroup: opts.actionGroup } : null,
+      getLastScheduledActions: () =>
+        opts.lastGroup !== undefined ? { group: opts.lastGroup } : null,
+    });
+
+    // The opt-in that most tests use. It answers true unless a test says otherwise.
+    const isEnabled = jest.fn();
+
+    const contextWithBus = () => ({
+      ...taskRunnerFactoryInitializerParams,
+      alertingEventBus: mockBus,
+      alertStatusChangedOptIns: [{ isEnabled }],
+    });
+
+    const createRunnerWithBus = (
+      overrides: Partial<ConstructorParameters<typeof TaskRunner>[0]> = {}
+    ) => createTaskRunner({ context: contextWithBus(), ...overrides });
+
+    beforeEach(() => {
+      mockBus.publish.mockClear();
+      isEnabled.mockReset();
+      isEnabled.mockResolvedValue(true);
+      ruleType.autoRecoverAlerts = true;
+      ruleType.executor.mockResolvedValue({ state: {} });
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+      alertsClient.getRawAlertInstancesForState.mockReturnValue({
+        rawActiveAlerts: {},
+        rawRecoveredAlerts: {},
+      });
+      // Repair shallow-spread mutation from the "should return shouldDisableTask" test
+      // (line ~3779) which sets mockedRawRuleSO.attributes.enabled = false on the
+      // shared attributes reference, and the outer beforeEach never resets it.
+      mockedRawRuleSO.attributes.enabled = true;
+      // Use a rule with no actions so ActionScheduler is a no-op and won't
+      // call methods on our minimal alert stubs.
+      mockGetRuleFromRaw.mockReturnValue({ ...(mockedRuleTypeSavedObject as Rule), actions: [] });
+      alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+      alertsClient.getProcessedAlerts.mockReturnValue({});
+      alertsClient.getBuiltActiveAlertDataByInstanceId.mockReset();
+    });
+
+    afterEach(() => {
+      ruleType.autoRecoverAlerts = true;
+      ruleType.cancelAlertsOnRuleTimeout = true;
+    });
+
+    describe('opt-in gate', () => {
+      const newAlertProcessed = () => {
+        const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+        alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+          type === 'new' ? { 'alert-1': alert } : {}
+        );
+        return alert;
+      };
+
+      test('does no work when nobody has opted in', async () => {
+        const alert = newAlertProcessed();
+        const actionGroupSpy = jest.spyOn(alert, 'getScheduledActionOptions');
+
+        await createRunnerWithBus({
+          context: { ...contextWithBus(), alertStatusChangedOptIns: [] },
+        }).run();
+
+        // No snapshot of the action group, no opt-in to ask, and nothing published.
+        expect(actionGroupSpy).not.toHaveBeenCalled();
+        expect(isEnabled).not.toHaveBeenCalled();
+        expect(mockBus.publish).not.toHaveBeenCalled();
+      });
+
+      test('does not publish when the opt-in is not enabled', async () => {
+        isEnabled.mockResolvedValue(false);
+        newAlertProcessed();
+
+        await createRunnerWithBus().run();
+
+        expect(isEnabled).toHaveBeenCalledTimes(1);
+        expect(mockBus.publish).not.toHaveBeenCalled();
+      });
+
+      test('asks the opt-in with the rule request, so the answer can differ per space', async () => {
+        newAlertProcessed();
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish).toHaveBeenCalledTimes(1);
+        const [, publishContext] = mockBus.publish.mock.calls[0];
+        expect(isEnabled).toHaveBeenCalledWith(publishContext.request);
+      });
+
+      test('publishes when any opt-in is enabled, even if an earlier check throws', async () => {
+        const failingCheck = jest.fn().mockRejectedValue(new Error('flag service unavailable'));
+        const enabledCheck = jest.fn().mockResolvedValue(true);
+        newAlertProcessed();
+
+        await createRunnerWithBus({
+          context: {
+            ...contextWithBus(),
+            alertStatusChangedOptIns: [{ isEnabled: failingCheck }, { isEnabled: enabledCheck }],
+          },
+        }).run();
+
+        expect(failingCheck).toHaveBeenCalledTimes(1);
+        expect(enabledCheck).toHaveBeenCalledTimes(1);
+        expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      });
+
+      test('does not publish when every opt-in throws', async () => {
+        isEnabled.mockRejectedValue(new Error('flag service unavailable'));
+        newAlertProcessed();
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish).not.toHaveBeenCalled();
+      });
+
+      describe('when the rule is muted', () => {
+        // The describe-level beforeEach copies the shared rule fixture, and this beforeAll runs
+        // before it, so every test here sees a muted rule.
+        beforeAll(() => {
+          mockedRuleTypeSavedObject.muteAll = true;
+        });
+        afterAll(() => {
+          mockedRuleTypeSavedObject.muteAll = false;
+        });
+
+        test('still publishes, because muting only suppresses notifications', async () => {
+          newAlertProcessed();
+
+          await createRunnerWithBus().run();
+
+          expect(mockBus.publish).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      test('does not ask the opt-in when no alert changed status', async () => {
+        await createRunnerWithBus().run();
+
+        expect(isEnabled).not.toHaveBeenCalled();
+        expect(mockBus.publish).not.toHaveBeenCalled();
+      });
+    });
+
+    test('keeps the action group of a new alert when ActionScheduler unschedules its actions', async () => {
+      // Model the real Alert: the per-alert action scheduler calls unscheduleActions() after it
+      // schedules an action, which clears the scheduled options.
+      let scheduledGroup: string | null = 'default';
+      const alert = {
+        ...makeMockAlert({ id: 'alert-1', uuid: 'uuid-1' }),
+        getScheduledActionOptions: () =>
+          scheduledGroup === null ? undefined : { actionGroup: scheduledGroup },
+        unscheduleActions: () => {
+          scheduledGroup = null;
+        },
+      };
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+      // The rule keeps its per-alert action (not `actions: []`).
+      mockGetRuleFromRaw.mockReturnValue({
+        ...(mockedRuleTypeSavedObject as Rule),
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: 'action',
+            params: {},
+            uuid: 'action-uuid-1',
+          },
+        ],
+      });
+      const runSpy = jest.spyOn(ActionScheduler.prototype, 'run').mockImplementation(async () => {
+        alert.unscheduleActions();
+        return { throttledSummaryActions: {} };
+      });
+
+      try {
+        await createRunnerWithBus().run();
+        expect(runSpy).toHaveBeenCalledTimes(1);
+      } finally {
+        runSpy.mockRestore();
+      }
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      expect(mockBus.publish.mock.calls[0][0].payload.alert.actionGroup).toBe('default');
+    });
+
+    test('publishes active event when an alert transitions to new', async () => {
+      const alert = makeMockAlert({
+        id: 'alert-1',
+        uuid: 'uuid-1',
+        start: '2024-01-01T00:00:00.000Z',
+        actionGroup: 'default',
+      });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      expect(mockBus.publish).toHaveBeenCalledWith(
+        {
+          type: ALERT_STATUS_CHANGED_EVENT_TYPE,
+          payload: {
+            rule: {
+              id: '1',
+              name: RULE_NAME,
+              spaceId: 'default',
+              consumer: 'bar',
+              ruleTypeId: RULE_TYPE_ID,
+              tags: ['rule-', '-tags'],
+              ruleTypeName: ruleType.name,
+            },
+            alert: {
+              id: 'alert-1',
+              uuid: 'uuid-1',
+              status: 'active',
+              actionGroup: 'default',
+              start: '2024-01-01T00:00:00.000Z',
+              severity: null,
+            },
+          },
+        },
+        expect.anything()
+      );
+    });
+
+    describe('severity', () => {
+      const newAlertProcessed = () => {
+        const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+        alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+          type === 'new' ? { 'alert-1': alert } : {}
+        );
+      };
+
+      test('reports the severity the alerts client built for a new alert', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockImplementation((instanceId: string) =>
+          instanceId === 'alert-1' ? { [ALERT_SEVERITY]: 'critical' } : undefined
+        );
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish).toHaveBeenCalledTimes(1);
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBe('critical');
+      });
+
+      test('reports severity read from a nested alert document', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue({
+          kibana: { alert: { severity: 'low' } },
+        });
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBe('low');
+      });
+
+      test('reports null when the rule type sets no severity', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue({
+          'kibana.alert.reason': 'x',
+        });
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBeNull();
+      });
+
+      test('reports null when the alerts client has no built document for the alert', async () => {
+        newAlertProcessed();
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue(undefined);
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBeNull();
+      });
+
+      test('reports null for a recovered alert', async () => {
+        const alert = makeMockAlert({ id: 'alert-2', uuid: 'uuid-2', lastGroup: 'default' });
+        alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+          type === 'recovered' ? { 'alert-2': alert } : {}
+        );
+        alertsClient.getBuiltActiveAlertDataByInstanceId.mockReturnValue({
+          [ALERT_SEVERITY]: 'critical',
+        });
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish.mock.calls[0][0].payload.alert.severity).toBeNull();
+      });
+    });
+
+    test('payload built in task_runner passes alertStatusChangedV1EventSchema.parse()', async () => {
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      const published = mockBus.publish.mock.calls[0][0];
+      expect(() => alertStatusChangedV1EventSchema.parse(published.payload)).not.toThrow();
+    });
+
+    test('publishes recovered event when an alert recovers', async () => {
+      const alert = makeMockAlert({
+        id: 'alert-2',
+        uuid: 'uuid-2',
+        start: '2024-01-01T00:00:00.000Z',
+        lastGroup: 'default',
+      });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'recovered' ? { 'alert-2': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      expect(mockBus.publish).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: ALERT_STATUS_CHANGED_EVENT_TYPE,
+          payload: expect.objectContaining({
+            alert: expect.objectContaining({
+              id: 'alert-2',
+              uuid: 'uuid-2',
+              status: 'recovered',
+              actionGroup: 'default',
+              start: '2024-01-01T00:00:00.000Z',
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    test('publishes one event per alert when both new and recovered alerts exist', async () => {
+      const newAlert = makeMockAlert({ id: 'new-1', uuid: 'uuid-new', actionGroup: 'default' });
+      const recAlert = makeMockAlert({ id: 'rec-1', uuid: 'uuid-rec', lastGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) => {
+        if (type === 'new') return { 'new-1': newAlert };
+        if (type === 'recovered') return { 'rec-1': recAlert };
+        return {};
+      });
+
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+
+      expect(mockBus.publish).toHaveBeenCalledTimes(2);
+    });
+
+    test('does not publish when there are no new or recovered alerts', async () => {
+      alertsClient.getProcessedAlerts.mockReturnValue({});
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+      expect(mockBus.publish).not.toHaveBeenCalled();
+    });
+
+    test('does not publish when autoRecoverAlerts is false', async () => {
+      ruleType.autoRecoverAlerts = false;
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+      expect(mockBus.publish).not.toHaveBeenCalled();
+    });
+
+    test('publishes when the executor records a run error but finishes, because the alert state is persisted', async () => {
+      // addLastRunError does not make the run result an error, so the new alert state is saved
+      // and its actions are scheduled. Holding the events back would lose them for good, since
+      // the next run sees these alerts as ongoing.
+      ruleResultService.getLastRunResults.mockReturnValue({
+        errors: [{ message: 'executor error', userError: false }],
+        warnings: [],
+        outcomeMessage: '',
+      });
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+      expect(mockBus.publish).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not publish when the executor throws', async () => {
+      // A thrown executor makes the run result an error, so the state falls back to the previous
+      // run and the next run classifies these alerts again.
+      ruleType.executor.mockRejectedValue(new Error('executor failed'));
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+      const taskRunner = createRunnerWithBus();
+      await taskRunner.run();
+      expect(mockBus.publish).not.toHaveBeenCalled();
+    });
+
+    test('does not publish when the run is cancelled while the rule saved object is being updated', async () => {
+      // The batch is built before processRunResults() awaits the post-run rule update, so a
+      // timeout that cancels the task during that await must still suppress publication.
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus();
+      elasticsearchService.client.asInternalUser.update.mockImplementationOnce(async () => {
+        await taskRunner.cancel();
+        return {
+          _id: 'alert:1',
+          _index: 'idx',
+          _version: 2,
+          _seq_no: 2,
+          _primary_term: 1,
+          result: 'updated',
+          _shards: { total: 1, successful: 1, failed: 0 },
+        };
+      });
+
+      await taskRunner.run();
+
+      expect(mockBus.publish).not.toHaveBeenCalled();
+    });
+
+    test('does not publish when run is cancelled, even when cancelAlertsOnRuleTimeout is disabled', async () => {
+      // With cancelAlertsOnRuleTimeout:false, shouldLogAndScheduleActionsForAlerts() returns
+      // true for a cancelled run, so alerts are still persisted. A cancelled run must still
+      // publish nothing. The run is cancelled very early here, so this test does not show which
+      // check stops it. The test above covers the check that runs after the rule update.
+      ruleType.cancelAlertsOnRuleTimeout = false;
+      const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
+      alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
+        type === 'new' ? { 'alert-1': alert } : {}
+      );
+
+      const taskRunner = createRunnerWithBus({
+        context: { ...contextWithBus(), cancelAlertsOnRuleTimeout: false },
+      });
+      const promise = taskRunner.run();
+      await Promise.resolve();
+      await taskRunner.cancel();
+      await promise;
+
+      expect(mockBus.publish).not.toHaveBeenCalled();
+    });
+  });
 });

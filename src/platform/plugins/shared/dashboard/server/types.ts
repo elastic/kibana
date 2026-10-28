@@ -17,7 +17,11 @@ import type { DashboardReadResponseBody } from './api';
 export interface DashboardServerClient {
   read(
     savedObjectsClient: SavedObjectsClientContract,
-    id: string
+    id: string,
+    options?: {
+      /** Returns the dashboard the way the Dashboard app loads it, keeping panels that can't be converted to the as-code API format. */
+      isDashboardAppRequest?: boolean;
+    }
   ): Promise<DashboardReadResponseBody>;
 }
 
@@ -35,7 +39,7 @@ export interface DashboardPluginStart {
   /**
    * Scans dashboards with pagination.
    *
-   * @deprecated Contact #kibana-presentation about requirements for a proper panel search interface.
+   * @deprecated Contact #kibana-dashboards about requirements for a proper panel search interface.
    * @param ctx - The request handler context.
    * @param page - The page number.
    * @param perPage - The number of items per page.

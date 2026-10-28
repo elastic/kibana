@@ -9,16 +9,24 @@
 
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useHistory } from 'react-router-dom';
+import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { useWorkflowUrlState } from './use_workflow_url_state';
+import { getStoredEditorView, getStoredGraphDirection } from '../lib/workflow_editor_preferences';
 
-const createWrapper = (initialEntries: string[] = ['/']) => {
+type InitialEntries = React.ComponentProps<typeof MemoryRouter>['initialEntries'];
+
+const createWrapper = (initialEntries: InitialEntries = ['/']) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(MemoryRouter, { initialEntries }, children);
   return Wrapper;
 };
 
 describe('useWorkflowUrlState', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it('should return default state when no query params are present', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
       wrapper: createWrapper(),
@@ -31,6 +39,12 @@ describe('useWorkflowUrlState', () => {
     expect(result.current.selectedStepExecutionId).toBeUndefined();
     expect(result.current.selectedStepId).toBeUndefined();
     expect(result.current.shouldAutoResume).toBe(false);
+    expect(result.current.executionListFilters).toEqual({
+      statuses: [],
+      executionTypes: [],
+      executedBy: [],
+    });
+    expect(result.current.lastViewedExecutionId).toBeUndefined();
   });
 
   it('should parse view=graph and direction=LR from URL', () => {
@@ -87,6 +101,63 @@ describe('useWorkflowUrlState', () => {
     expect(result.current.activeTab).toBe('executions');
   });
 
+  it('parses execution list filters and the last viewed row from the URL', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper([
+        '/?executionStatuses=completed&executionStatuses=not-a-status&executionTypes=production&executedBy=user-1&lastViewedExecutionId=exec-1',
+      ]),
+    });
+
+    expect(result.current.executionListFilters).toEqual({
+      statuses: [ExecutionStatus.COMPLETED],
+      executionTypes: [ExecutionType.PRODUCTION],
+      executedBy: ['user-1'],
+    });
+    expect(result.current.lastViewedExecutionId).toBe('exec-1');
+  });
+
+  it('omits empty execution list filters from the URL', () => {
+    const { result } = renderHook(
+      () => ({ urlState: useWorkflowUrlState(), history: useHistory() }),
+      {
+        wrapper: createWrapper([
+          '/?executionStatuses=completed&executionTypes=test&executedBy=user-1&lastViewedExecutionId=exec-1',
+        ]),
+      }
+    );
+
+    act(() => {
+      result.current.urlState.updateUrlState({
+        executionStatuses: [],
+        executionTypes: [],
+        executedBy: [],
+        lastViewedExecutionId: undefined,
+      });
+    });
+
+    expect(result.current.urlState.executionListFilters).toEqual({
+      statuses: [],
+      executionTypes: [],
+      executedBy: [],
+    });
+    expect(result.current.urlState.lastViewedExecutionId).toBeUndefined();
+    expect(result.current.history.location.search).not.toContain('executionStatuses');
+    expect(result.current.history.location.search).not.toContain('lastViewedExecutionId');
+  });
+
+  it('keeps the last viewed execution when the selected execution is cleared', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?executionId=exec-1&lastViewedExecutionId=exec-1']),
+    });
+
+    act(() => {
+      result.current.setSelectedExecution(null);
+    });
+
+    expect(result.current.selectedExecutionId).toBeUndefined();
+    expect(result.current.lastViewedExecutionId).toBe('exec-1');
+  });
+
   it('should parse executionId from URL', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
       wrapper: createWrapper(['/?executionId=exec-1']),
@@ -126,6 +197,16 @@ describe('useWorkflowUrlState', () => {
     });
 
     expect(result.current.replayExecutionId).toBe('exec-1');
+    expect(result.current.replayIsTestRun).toBe(false);
+  });
+
+  it('should parse replayIsTestRun from URL', () => {
+    const { result } = renderHook(() => useWorkflowUrlState(), {
+      wrapper: createWrapper(['/?replayExecutionId=exec-1&replayIsTestRun=true']),
+    });
+
+    expect(result.current.replayExecutionId).toBe('exec-1');
+    expect(result.current.replayIsTestRun).toBe(true);
   });
 
   it('should update URL when setActiveTab is called', () => {
@@ -210,7 +291,7 @@ describe('useWorkflowUrlState', () => {
 
   it('should clear replayExecutionId when clearReplayExecutionId is called', () => {
     const { result } = renderHook(() => useWorkflowUrlState(), {
-      wrapper: createWrapper(['/?replayExecutionId=exec-1']),
+      wrapper: createWrapper(['/?replayExecutionId=exec-1&replayIsTestRun=true']),
     });
 
     act(() => {
@@ -218,6 +299,7 @@ describe('useWorkflowUrlState', () => {
     });
 
     expect(result.current.replayExecutionId).toBeUndefined();
+    expect(result.current.replayIsTestRun).toBe(false);
   });
 
   it('should support updateUrlState for arbitrary updates', () => {
@@ -248,5 +330,371 @@ describe('useWorkflowUrlState', () => {
 
     expect(result.current.activeTab).toBe('workflow');
     expect(result.current.selectedExecutionId).toBeUndefined();
+  });
+
+  describe('localStorage persistence', () => {
+    it('falls back to stored editorView when no URL param is present', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"graph"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.editorView).toBe('graph');
+    });
+
+    it('falls back to stored graphDirection when no URL param is present', () => {
+      localStorage.setItem('workflowsUi.graph.direction', '"LR"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.graphDirection).toBe('LR');
+    });
+
+    it('stored editorView takes priority over URL param', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"graph"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?view=yaml']),
+      });
+
+      expect(result.current.editorView).toBe('graph');
+    });
+
+    it('stored graphDirection takes priority over URL param', () => {
+      localStorage.setItem('workflowsUi.graph.direction', '"LR"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?direction=TB']),
+      });
+
+      expect(result.current.graphDirection).toBe('LR');
+    });
+
+    it('falls back to URL param for editorView when localStorage is not set', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?view=graph']),
+      });
+
+      expect(result.current.editorView).toBe('graph');
+    });
+
+    it('falls back to URL param for graphDirection when localStorage is not set', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?direction=LR']),
+      });
+
+      expect(result.current.graphDirection).toBe('LR');
+    });
+
+    it('setEditorView persists to localStorage', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.setEditorView('graph');
+      });
+
+      expect(getStoredEditorView()).toBe('graph');
+    });
+
+    it('setEditorView persists default yaml to localStorage', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?view=graph']),
+      });
+
+      act(() => {
+        result.current.setEditorView('yaml');
+      });
+
+      expect(getStoredEditorView()).toBe('yaml');
+    });
+
+    it('setGraphDirection persists to localStorage', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      act(() => {
+        result.current.setGraphDirection('LR');
+      });
+
+      expect(getStoredGraphDirection()).toBe('LR');
+    });
+
+    it('setGraphDirection persists default TB to localStorage', () => {
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(['/?direction=LR']),
+      });
+
+      act(() => {
+        result.current.setGraphDirection('TB');
+      });
+
+      expect(getStoredGraphDirection()).toBe('TB');
+    });
+
+    it('ignores a garbage stored editorView and falls back to default', () => {
+      localStorage.setItem('workflowsUi.editor.view', '"invalid"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.editorView).toBe('yaml');
+    });
+
+    it('ignores a garbage stored graphDirection and falls back to default', () => {
+      localStorage.setItem('workflowsUi.graph.direction', '"XY"');
+
+      const { result } = renderHook(() => useWorkflowUrlState(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.graphDirection).toBe('TB');
+    });
+  });
+  describe('browser history', () => {
+    const renderWithHistory = (initialEntries: InitialEntries) =>
+      renderHook(() => ({ urlState: useWorkflowUrlState(), history: useHistory() }), {
+        wrapper: createWrapper(initialEntries),
+      });
+
+    it('pushes an entry per explicit step selection so Back returns to the previous step', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-b');
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('step-b');
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('step-a');
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBeUndefined();
+    });
+
+    it('pushes an entry when the step selection is cleared', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1&stepExecutionId=step-a']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution(null);
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBeUndefined();
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('step-a');
+    });
+
+    it('pushes an entry when an execution is selected', () => {
+      const { result } = renderWithHistory(['/?tab=executions']);
+
+      act(() => {
+        result.current.urlState.setSelectedExecution('exec-1');
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+    });
+
+    it('replaces the entry when a graph step is selected so Back leaves the page', () => {
+      const { result } = renderWithHistory(['/?view=graph']);
+
+      act(() => {
+        result.current.urlState.setSelectedStep('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStep('step-b');
+      });
+
+      expect(result.current.urlState.selectedStepId).toBe('step-b');
+      expect(result.current.history.length).toBe(1);
+    });
+
+    it('drops every entry a run added when a filter change closes it after step selections', () => {
+      const { result } = renderWithHistory(['/?tab=executions']);
+
+      act(() => {
+        result.current.urlState.setSelectedExecution('exec-1');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-b');
+      });
+      act(() => {
+        result.current.urlState.setSelectedExecution(null, { replace: true });
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+      // The entry before the run, then the closed state: no run entry left, none ahead.
+      expect(result.current.history.length).toBe(2);
+
+      act(() => {
+        result.current.history.goForward();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+      expect(result.current.urlState.selectedStepExecutionId).toBeUndefined();
+    });
+
+    it('drops the step entries of a deep-linked run when it is closed with replace', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('step-a');
+      });
+      act(() => {
+        result.current.urlState.setSelectedExecution(null, { replace: true });
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedExecutionId).toBeUndefined();
+    });
+
+    it('keeps the same history state object when a URL update does not change the run entry', () => {
+      const entryState = { fromList: true };
+      const { result } = renderWithHistory([{ pathname: '/', search: '', state: entryState }]);
+
+      act(() => {
+        result.current.urlState.setGraphDirection('LR');
+      });
+
+      expect(result.current.history.location.state).toBe(entryState);
+    });
+
+    it('does not add history state to entries outside a run', () => {
+      const { result } = renderWithHistory(['/']);
+
+      act(() => {
+        result.current.urlState.setActiveTab('executions');
+      });
+
+      expect(result.current.history.location.state).toBeUndefined();
+    });
+
+    it('keeps other history state on entries it pushes', () => {
+      const { result } = renderWithHistory([
+        { pathname: '/', search: '?tab=executions', state: { fromList: true } },
+      ]);
+
+      act(() => {
+        result.current.urlState.setSelectedExecution('exec-1');
+      });
+
+      expect(result.current.history.location.state).toEqual(
+        expect.objectContaining({ fromList: true })
+      );
+    });
+
+    // Iteration and case-branch ids embed author-controlled step names and case matches.
+    it.each([
+      ['a foreach iteration of a step named with &', 'foreach-iteration:loop&x:0'],
+      ['a switch case matching R&D', 'enter-case-branch:case_R&D:0:completed'],
+      ['#', 'foreach-iteration:a#b:0'],
+      ['%', 'foreach-iteration:100%:0'],
+      ['+', 'foreach-iteration:a+b:0'],
+      ['=', 'foreach-iteration:k=v:0'],
+      ['a space', 'foreach-iteration:with space:0'],
+    ])('keeps the step selection intact for %s, including after a reload', (_label, id) => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution(id);
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe(id);
+      const params = new URLSearchParams(result.current.history.location.search);
+      expect(params.get('stepExecutionId')).toBe(id);
+      expect([...params.keys()].sort()).toEqual(['executionId', 'stepExecutionId']);
+
+      // A reload or a shared link starts from the written URL alone.
+      const { result: reloaded } = renderWithHistory([result.current.history.location.search]);
+      expect(reloaded.current.urlState.selectedStepExecutionId).toBe(id);
+    });
+
+    it('replaces the entry when a selection is normalised with replace', () => {
+      const { result } = renderWithHistory(['/?executionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.setSelectedStepExecution('trigger', { replace: true });
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('trigger');
+
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.selectedStepExecutionId).toBe('trigger');
+    });
+
+    it('replaces the entry when clearing replayExecutionId so Back does not restore it', () => {
+      const { result } = renderWithHistory(['/?replayExecutionId=exec-1']);
+
+      act(() => {
+        result.current.urlState.clearReplayExecutionId();
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.replayExecutionId).toBeUndefined();
+    });
+
+    it('replaces the entry when clearing the resume param so Back does not restore it', () => {
+      const { result } = renderWithHistory(['/?resume=true']);
+
+      act(() => {
+        result.current.urlState.clearResumeParam();
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.urlState.shouldAutoResume).toBe(false);
+    });
+
+    it('replaces the entry when the editor view changes', () => {
+      const { result } = renderWithHistory(['/?view=yaml']);
+
+      act(() => {
+        result.current.urlState.setEditorView('graph');
+      });
+      act(() => {
+        result.current.history.goBack();
+      });
+
+      expect(result.current.history.length).toBe(1);
+    });
   });
 });

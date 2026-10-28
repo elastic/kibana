@@ -11,9 +11,10 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -63,6 +64,8 @@ export const createMockServices = (): RuleFormServices => ({
   dataViews: dataViewPluginMocks.createStartContract(),
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreMock.createStart().featureFlags,
   lens: lensPluginMock.createStartContract(),
   uiActions: uiActionsPluginMock.createStartContract(),
   dashboard: createMockDashboardStart(),
@@ -90,7 +93,7 @@ export const defaultTestFormValues: FormValues = {
   },
   timeField: '@timestamp',
   schedule: { every: '5m', lookback: '1m' },
-  query: { format: 'standalone', breach: { query: '' } },
+  query: { base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: DELAY_MODE.immediate,
   stateTransitionRecoveryDelayMode: DELAY_MODE.immediate,
 };

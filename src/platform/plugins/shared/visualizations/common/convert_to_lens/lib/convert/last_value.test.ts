@@ -99,8 +99,8 @@ describe('convertToLastValueColumn', () => {
   test('should skip if top hit field is not specified', () => {
     mockGetFieldNameFromField.mockReturnValue(null);
     expect(convertToLastValueColumn({ agg: topHitAgg, dataView, visType })).toBeNull();
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(0);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(0);
   });
 
   test('should skip if top hit field is not present in index pattern', () => {
@@ -108,9 +108,9 @@ describe('convertToLastValueColumn', () => {
     dataView.getFieldByName = mockGetFieldByName;
 
     expect(convertToLastValueColumn({ agg: topHitAgg, dataView, visType })).toBeNull();
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
-    expect(mockGetLabel).toBeCalledTimes(0);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
+    expect(mockGetLabel).toHaveBeenCalledTimes(0);
   });
 
   test('should return top hit column if top hit field is not present in index pattern', () => {
@@ -123,8 +123,8 @@ describe('convertToLastValueColumn', () => {
         sourceField: 'bytes',
       })
     );
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
-    expect(mockGetLabel).toBeCalledTimes(1);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
+    expect(mockGetLabel).toHaveBeenCalledTimes(1);
   });
 });

@@ -18,6 +18,7 @@ Embeddables require registration in both server and public.
 
 ### registerEmbeddableServerDefinition
 Server registration defines the embeddable schema and other information required to include embeddables in public REST APIs like "dashboards as code". 
+Dashboard’s public panel union and generated OpenAPI include only embeddable types with a registered server schema (for example: `markdown`, `image`, `vis`).
 
 ### registerEmbeddablePublicDefinition
 Public registration defines the embeddable's UI. Embeddable UI consumes and returns state in the shape defined by the embeddable schema registered in the server. 
@@ -170,7 +171,7 @@ Embeddables should never throw. Instead, use [PublishesBlockingError](https://gi
 ### Examples 
 Examples available at [/examples/embeddable_examples](https://github.com/elastic/kibana/tree/main/examples/embeddable_examples)
 
-Run examples with `yarn start --run-examples`
+Run examples with `pnpm start --run-examples`
 
 #### Embeddable factory examples
 Use the following examples to learn how to create new Embeddable types. To access new Embeddable types, create a new dashboard, click "Add panel" and finally select "Embeddable examples".

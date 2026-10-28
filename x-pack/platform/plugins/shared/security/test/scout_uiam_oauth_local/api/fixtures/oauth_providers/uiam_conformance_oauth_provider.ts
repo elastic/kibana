@@ -70,12 +70,20 @@ export class UiamConformanceOAuthProvider implements OAuthClientProvider {
     const r1 = await insecureFetch(authorizationUrl.toString(), { redirect: 'manual' });
     const samlInitiateUrl = r1.headers.get('location')!;
 
-    // Hop 2: /saml/initiate → sets saml_state cookie + redirects to mock IdP.
+    // Hop 2: /saml/initiate → sets the SAML state cookie + redirects to mock IdP. UIAM names that
+    // cookie per request (`saml_state_<hash of the AuthnRequest ID>`) so overlapping SAML flows in
+    // one cookie jar don't clobber each other, and the ACS re-derives the name from the
+    // SAMLResponse's `InResponseTo`. Match the prefix without the `=` (that also accepts the older
+    // fixed `saml_state` name) and keep the whole `name=value` pair, since the ACS below has to
+    // receive the cookie under the exact name UIAM chose.
     const r2 = await insecureFetch(samlInitiateUrl, { redirect: 'manual' });
-    const samlStateCookieValue = cookiesFrom(r2)
+    const samlStateCookie = cookiesFrom(r2)
       .split('; ')
-      .find((c) => c.startsWith('saml_state='))!
-      .slice('saml_state='.length);
+      .find((c) => c.startsWith('saml_state'));
+    if (!samlStateCookie) {
+      throw new Error(`Missing saml_state cookie on the /saml/initiate response`);
+    }
+    const samlStateCookieValue = samlStateCookie.slice(samlStateCookie.indexOf('=') + 1);
     const { sub: authnRequestId, sp_entity_id: spEntityId } = JSON.parse(
       Buffer.from(samlStateCookieValue.split('.')[1], 'base64url').toString()
     ) as {
@@ -97,10 +105,10 @@ export class UiamConformanceOAuthProvider implements OAuthClientProvider {
       },
     });
 
-    // POST SAMLResponse to UIAM's ACS with the saml_state cookie.
+    // POST SAMLResponse to UIAM's ACS with the SAML state cookie, under the name UIAM set it with.
     const acsResp = await insecureFetch(UIAM_SAML_ACS_URL, {
       method: 'POST',
-      headers: { Cookie: `saml_state=${samlStateCookieValue}` },
+      headers: { Cookie: samlStateCookie },
       body: new URLSearchParams({ SAMLResponse }),
       redirect: 'manual',
     });

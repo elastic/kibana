@@ -719,6 +719,10 @@ export class ModelsProvider {
               // 5. If any of the transforms use these indices as source , find the destination indices to complete the map
               if (foundTransform) {
                 const transformDestIndex = foundTransform.dest.index;
+                // Destination index is optional on the transform API; skip nodes we cannot name.
+                if (!isDefined(transformDestIndex)) {
+                  continue;
+                }
                 const transformNodeId = `${foundTransform.id}-${JOB_MAP_NODE_TYPES.TRANSFORM}`;
                 const transformDestIndexNodeId = `${transformDestIndex}-${JOB_MAP_NODE_TYPES.INDEX}`;
 

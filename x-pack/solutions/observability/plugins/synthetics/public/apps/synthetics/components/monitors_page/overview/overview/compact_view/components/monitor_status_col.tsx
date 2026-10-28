@@ -34,9 +34,11 @@ import { getLatestDownSummary } from '../get_latest_down_summary';
 export const MonitorStatusCol = ({
   monitor,
   openFlyout,
+  isInteractive = true,
 }: {
   monitor: OverviewStatusMetaData;
   openFlyout: (monitor: OverviewStatusMetaData) => void;
+  isInteractive?: boolean;
 }) => {
   const timestamp = monitor.timestamp ? parseTimestamp(monitor.timestamp) : null;
   // Per-user, per-space display preference set from the overview's display
@@ -78,8 +80,12 @@ export const MonitorStatusCol = ({
             <BadgeStatus
               monitor={monitor}
               status={displayStatus}
-              isBrowserType={monitor.type === MonitorTypeEnum.BROWSER}
-              onClickBadge={() => openFlyout(monitor)}
+              // API monitors are script-based like browser; the status badge needs
+              // the same "script error" handling as browser monitors.
+              isBrowserType={
+                monitor.type === MonitorTypeEnum.BROWSER || monitor.type === MonitorTypeEnum.API
+              }
+              onClickBadge={() => (isInteractive ? openFlyout(monitor) : null)}
             />
           </EuiFlexItem>
           {isStaleLastRun ? (
@@ -95,7 +101,6 @@ export const MonitorStatusCol = ({
           ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
-
       {showAuxLine ? (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
@@ -150,7 +155,6 @@ export const MonitorStatusCol = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       ) : null}
-
       <EuiFlexItem grow={false}>
         {timestamp ? (
           <EuiToolTip

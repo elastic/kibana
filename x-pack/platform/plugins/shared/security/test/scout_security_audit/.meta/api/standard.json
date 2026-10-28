@@ -1,8 +1,7 @@
 {
   "sha1": "c8500880f0a50addcfc6db090f9208fef74da3ce",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -18,7 +17,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit/api/tests/audit_log.spec.ts",
         "line": 36,
-        "column": 12
+        "column": 13
       }
     },
     {
@@ -33,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit/api/tests/audit_log.spec.ts",
-        "line": 65,
-        "column": 12
+        "line": 55,
+        "column": 14
       }
     }
   ]

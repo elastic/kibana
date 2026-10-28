@@ -21,11 +21,15 @@ const emptyMetrics = (overrides: Partial<RunMetrics> = {}): RunMetrics => ({
   scoresWrittenEntityStoreResetToZero: 0,
   scoresCalculatedBase: 0,
   scoresDroppedNotInStore: 0,
+  scoresMissingFromStoreBase: 0,
   scoresFailedBase: 0,
   scoresFailedResolution: 0,
   scoresFailedResetToZero: 0,
   pagesProcessed: 0,
   lookupPrunedDocs: 0,
+  entitiesCreated: 0,
+  entitiesCreateSkipped: 0,
+  entitiesCreateFailed: 0,
   ...overrides,
 });
 
@@ -134,7 +138,7 @@ describe('buildRiskScorePhase0EntityMaintainerRunSummary', () => {
 });
 
 describe('buildRiskScoreEntityMaintainerRunSummary', () => {
-  it('builds funnel from base-scoring metrics with qualified = scanned - droppedNotInStore', () => {
+  it('builds funnel from base-scoring metrics with qualified = scanned - skipped', () => {
     const stages = [
       { name: 'base' as const, status: 'success' as const, durationMs: 10, applied: 7 },
       { name: 'resolution' as const, status: 'success' as const, durationMs: 4, applied: 2 },
@@ -147,6 +151,7 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
         metrics: emptyMetrics({
           scoresCalculatedBase: 12,
           scoresDroppedNotInStore: 3,
+          scoresMissingFromStoreBase: 3,
           scoresWrittenRiskIndexBase: 7,
           scoresWrittenEntityStoreBase: 7,
           scoresFailedBase: 2,
@@ -161,7 +166,7 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
         scanned: 12,
         qualified: 9,
         applied: 7,
-        droppedNotInStore: 3,
+        skipped: 3,
         failed: 2,
       },
       stages,
@@ -185,7 +190,84 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
       scanned: 5,
       qualified: 5,
       applied: 0,
-      droppedNotInStore: 0,
+      skipped: 0,
+      failed: 0,
+    });
+  });
+
+  it('folds create-if-missing recoveries into applied/qualified, keeping skipped narrower than the raw miss count', () => {
+    expect(
+      buildRiskScoreEntityMaintainerRunSummary({
+        entityType: 'host',
+        metrics: emptyMetrics({
+          scoresCalculatedBase: 10,
+          scoresMissingFromStoreBase: 5,
+          entitiesCreated: 3,
+          entitiesCreateSkipped: 2,
+          scoresDroppedNotInStore: 2,
+          scoresWrittenRiskIndexBase: 8,
+          scoresWrittenEntityStoreBase: 5,
+          scoresFailedBase: 0,
+          pagesProcessed: 2,
+        }),
+        stages: [],
+      }).funnel
+    ).toEqual({
+      scanned: 10,
+      qualified: 8,
+      applied: 8,
+      skipped: 2,
+      failed: 0,
+    });
+  });
+
+  it('adds create-if-missing write failures into funnel.failed while keeping them qualified', () => {
+    expect(
+      buildRiskScoreEntityMaintainerRunSummary({
+        entityType: 'host',
+        metrics: emptyMetrics({
+          scoresCalculatedBase: 6,
+          // The failed create remains dropped but qualified, not skipped.
+          scoresMissingFromStoreBase: 2,
+          scoresDroppedNotInStore: 1,
+          entitiesCreated: 1,
+          entitiesCreateFailed: 1,
+          scoresWrittenRiskIndexBase: 5,
+          scoresWrittenEntityStoreBase: 4,
+          scoresFailedBase: 0,
+          pagesProcessed: 1,
+        }),
+        stages: [],
+      }).funnel
+    ).toEqual({
+      scanned: 6,
+      qualified: 6,
+      applied: 5,
+      skipped: 0,
+      failed: 1,
+    });
+  });
+
+  it('keeps the funnel balanced with create-if-missing disabled (skipped = raw not-in-store misses)', () => {
+    expect(
+      buildRiskScoreEntityMaintainerRunSummary({
+        entityType: 'host',
+        metrics: emptyMetrics({
+          scoresCalculatedBase: 10,
+          scoresMissingFromStoreBase: 4,
+          scoresDroppedNotInStore: 4,
+          scoresWrittenRiskIndexBase: 6,
+          scoresWrittenEntityStoreBase: 6,
+          scoresFailedBase: 0,
+          pagesProcessed: 3,
+        }),
+        stages: [],
+      }).funnel
+    ).toEqual({
+      scanned: 10,
+      qualified: 6,
+      applied: 6,
+      skipped: 4,
       failed: 0,
     });
   });

@@ -120,6 +120,7 @@ export const applicationUsageSchema = {
   // OSS
   dashboards: commonSchema,
   dev_tools: commonSchema,
+  digital_experience: commonSchema,
   discover: commonSchema,
   home: commonSchema,
   kibana: commonSchema, // It's a forward app so we'll likely never report it
@@ -142,6 +143,9 @@ export const applicationUsageSchema = {
   context_engine: commonSchema,
   enterpriseSearch: commonSchema,
   enterpriseSearchContent: commonSchema,
+  /**
+   * @deprecated legacy key retained because persisted application usage totals for the removed Playground app are never expired
+   */
   searchPlayground: commonSchema,
   searchSynonyms: commonSchema,
   searchQueryRules: commonSchema,
@@ -169,6 +173,7 @@ export const applicationUsageSchema = {
   'observability-overview': commonSchema,
   observabilityOnboarding: commonSchema,
   observabilityAIAssistant: commonSchema,
+  observabilityAlerting: commonSchema,
   onboarding: commonSchema,
   'exploratory-view': commonSchema,
   osquery: commonSchema,

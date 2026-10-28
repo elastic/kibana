@@ -7,7 +7,12 @@
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { registerAttachmentUiDefinitions } from '.';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { registerAttachmentUiDefinitions, registerEntityAttachment } from '.';
+
+jest.mock('./entity_attachment', () => ({
+  createEntityAttachmentDefinition: jest.fn(),
+}));
 
 describe('registerAttachmentUiDefinitions', () => {
   const mockAddAttachmentType = jest.fn();
@@ -15,12 +20,14 @@ describe('registerAttachmentUiDefinitions', () => {
     addAttachmentType: mockAddAttachmentType,
   } as unknown as AttachmentServiceStartContract;
 
+  const register = () => registerAttachmentUiDefinitions({ attachments: mockAttachments });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns attachmentLabel when provided in alert attachment data', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    register();
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -36,7 +43,7 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns default label when attachmentLabel is not provided', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    register();
 
     const ruleCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
@@ -52,11 +59,60 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('does not register the security.entity attachment type (owned by registerEntityAttachment)', () => {
-    registerAttachmentUiDefinitions(mockAttachments);
+    register();
 
     const entityCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.entity
     );
     expect(entityCall).toBeUndefined();
   });
+
+  it('registers security.alerts with a label and icon only', () => {
+    register();
+
+    const alertsCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alerts
+    );
+    expect(alertsCall).toBeDefined();
+    expect(alertsCall![1].renderConversationDetailsContent).toBeUndefined();
+  });
+});
+
+describe('registerEntityAttachment impact entity opener', () => {
+  const setup = (spaces?: SpacesPluginStart) => {
+    const registerImpactEntityOpener = jest.fn();
+    registerEntityAttachment({
+      attachments: { addAttachmentType: jest.fn() } as unknown as AttachmentServiceStartContract,
+      application: {} as unknown as Parameters<typeof registerEntityAttachment>[0]['application'],
+      experimentalFeatures: {} as unknown as Parameters<
+        typeof registerEntityAttachment
+      >[0]['experimentalFeatures'],
+      resolveSecurityCanvasContext: jest.fn(),
+      uiSettings: {} as unknown as Parameters<typeof registerEntityAttachment>[0]['uiSettings'],
+      rendering: {} as unknown as Parameters<typeof registerEntityAttachment>[0]['rendering'],
+      spaces,
+      registerImpactEntityOpener,
+    });
+    return registerImpactEntityOpener;
+  };
+
+  const spacesWithSolution = (solution?: string) =>
+    ({
+      getActiveSpace: jest.fn().mockResolvedValue({ id: 'default', name: 'Default', solution }),
+    } as unknown as SpacesPluginStart);
+
+  it('registers the opener in a security space', async () => {
+    const registerImpactEntityOpener = setup(spacesWithSolution('security'));
+    await new Promise(process.nextTick);
+    expect(registerImpactEntityOpener).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([undefined, 'classic', 'oblt', 'es', 'workplaceai'])(
+    'does not register the opener in a %s space',
+    async (solution) => {
+      const registerImpactEntityOpener = setup(spacesWithSolution(solution));
+      await new Promise(process.nextTick);
+      expect(registerImpactEntityOpener).not.toHaveBeenCalled();
+    }
+  );
 });

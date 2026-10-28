@@ -30,14 +30,27 @@ describe('useEditModal', () => {
     expect(result.current.newListDetails).toStrictEqual({ name: '' });
     expect(result.current.error).toBeTruthy();
   });
-  it('should call onSubmit if no errors and stop the event default', () => {
+  it('should call onSubmit if no errors and stop the event default', async () => {
     const { result } = renderHook(() => useEditModal({ listDetails, onSave }));
     const { error, onSubmit } = result.current;
 
     const preventDefault = jest.fn();
-    act(() => onSubmit({ preventDefault } as unknown as SyntheticEvent));
+    await act(async () => onSubmit({ preventDefault } as unknown as SyntheticEvent));
     expect(error).toBeFalsy();
-    expect(onSave).toBeCalled();
-    expect(preventDefault).toBeCalled();
+    expect(onSave).toHaveBeenCalled();
+    expect(preventDefault).toHaveBeenCalled();
+  });
+  it('should show progress while saving and reset it once a failed save settles', async () => {
+    let rejectSave: (error: Error) => void = () => {};
+    const pendingSave = jest.fn(() => new Promise<void>((_, reject) => (rejectSave = reject)));
+    const { result } = renderHook(() => useEditModal({ listDetails, onSave: pendingSave }));
+
+    act(() => {
+      result.current.onSubmit();
+    });
+    expect(result.current.showProgress).toBe(true);
+
+    await act(async () => rejectSave(new Error('save failed')));
+    expect(result.current.showProgress).toBe(false);
   });
 });

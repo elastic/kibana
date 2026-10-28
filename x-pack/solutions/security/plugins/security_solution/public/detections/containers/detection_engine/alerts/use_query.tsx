@@ -7,7 +7,8 @@
 
 import { isEmpty } from 'lodash';
 import type { Dispatch, SetStateAction } from 'react';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   fetchQueryAttacks,
   fetchQueryUnifiedAlerts,
@@ -45,6 +46,12 @@ export interface AlertsQueryParams {
    * The query name is used for performance monitoring with APM
    */
   queryName: AlertsQueryName;
+  /**
+   * Optional Kibana execution context forwarded to `http.fetch` (surfaced as `x-opaque-id` in ES
+   * slow logs and as APM trace labels) so the alert query can be attributed to the calling
+   * page/panel.
+   */
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
@@ -84,6 +91,7 @@ export const useQueryAlerts = <Hit, Aggs>({
   indexName,
   skip,
   queryName,
+  executionContext,
 }: AlertsQueryParams): ReturnQueryAlerts<Hit, Aggs> => {
   const [query, setQuery] = useState(initialQuery);
   const [alerts, setAlerts] = useState<
@@ -99,6 +107,16 @@ export const useQueryAlerts = <Hit, Aggs>({
 
   const fetchAlerts = useTrackedFetchMethod(fetchMethod, queryName);
 
+  // Hold the latest executionContext in a ref so re-renders that pass a fresh
+  // literal (e.g. `executionContext: buildExecutionContext(...)` inline) don't
+  // change the effect dependency identity, which would abort the in-flight
+  // request and re-fetch on every render — an unbounded loop when the effect's
+  // own setState updates feed back into the same render cycle. The values here
+  // are pure trace labels; reading them at invocation time (not close-over
+  // time) is functionally equivalent.
+  const executionContextRef = useRef(executionContext);
+  executionContextRef.current = executionContext;
+
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
@@ -110,6 +128,7 @@ export const useQueryAlerts = <Hit, Aggs>({
         const alertResponse = await fetchAlerts<Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
+          context: executionContextRef.current,
         });
 
         if (isSubscribed) {

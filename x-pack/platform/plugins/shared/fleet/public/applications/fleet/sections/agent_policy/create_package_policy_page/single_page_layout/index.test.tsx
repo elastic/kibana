@@ -10,9 +10,11 @@ import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
 import { sendCreateAgentlessPolicy } from '../../../../../../hooks/use_request/agentless_policy';
+import { IAC_TEMPLATE_WRITE_FAILED_TOAST } from '../../../../../../components/cloud_connector/constants';
 
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
+import { ExperimentalFeaturesService } from '../../../../../../services';
 import {
   INTEGRATIONS_ROUTING_PATHS,
   pagePathGetters,
@@ -28,6 +30,7 @@ import {
   useStartServices,
   useGetPackageInfoByKeyQuery,
   useConfig,
+  useFleetStatus,
 } from '../../../../hooks';
 
 jest.mock('../../../../../../services/use_yaml', () => ({
@@ -113,6 +116,7 @@ jest.mock('../../../../hooks', () => {
         toasts: {
           addError: jest.fn(),
           addSuccess: jest.fn(),
+          addWarning: jest.fn(),
         },
       },
       docLinks: {
@@ -138,6 +142,14 @@ jest.mock('../../../../hooks', () => {
     }),
   };
 });
+
+jest.mock('./components/package_documentation_modal', () => ({
+  PackageDocumentationModal: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="packageDocumentationModal" role="dialog">
+      <button onClick={onClose}>Close modal</button>
+    </div>
+  ),
+}));
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -177,15 +189,16 @@ describe('When on the package policy create page', () => {
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = (queryParamsPolicyId?: string) =>
+  const render = (queryParamsPolicyId?: string, integration?: string) =>
     (renderResult = testRenderer.render(
       <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
         <CreatePackagePolicySinglePage
           from="package"
           queryParamsPolicyId={queryParamsPolicyId}
           prerelease={false}
-          pkgName={'nginx'}
-          pkgVersion={'1.3.0'}
+          pkgName={integration ? 'aws' : 'nginx'}
+          pkgVersion={integration ? '8.12.0' : '1.3.0'}
+          integration={integration}
         />
       </Route>
     ));
@@ -370,6 +383,108 @@ describe('When on the package policy create page', () => {
     });
   });
 
+  describe('When the package has a non FIPS policy template', () => {
+    const NON_FIPS_INPUT_TITLE = 'Collect metrics from Nginx stub status';
+
+    const mockPackageWithNonFipsTemplate = () => {
+      const mockPackageInfo = getMockPackageInfo();
+      const item = mockPackageInfo.data.item as any;
+      item.policy_templates.push({
+        name: 'nginx_metrics',
+        title: 'Nginx metrics',
+        description: 'Collect metrics from Nginx instances',
+        fips_compatible: false,
+        inputs: [{ type: 'nginx/metrics', title: NON_FIPS_INPUT_TITLE, description: 'metrics' }],
+        multiple: true,
+      });
+      item.data_streams.push({
+        type: 'metrics',
+        dataset: 'nginx.stubstatus',
+        title: 'Nginx stub status',
+        ingest_pipeline: 'default',
+        package: 'nginx',
+        path: 'stubstatus',
+        streams: [
+          {
+            input: 'nginx/metrics',
+            title: 'Nginx stub status metrics',
+            template_path: 'stream.yml.hbs',
+            description: 'Collect Nginx stub status metrics',
+            enabled: true,
+          },
+        ],
+      });
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(mockPackageInfo);
+    };
+
+    afterEach(() => {
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true });
+    });
+
+    it('should not show the inputs of the non FIPS policy template when FIPS is enabled', async () => {
+      mockPackageWithNonFipsTemplate();
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true, isFipsEnabled: true });
+
+      act(() => {
+        render();
+      });
+
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+      expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
+    });
+
+    it('should not initialize the inputs before the FIPS status is loaded', async () => {
+      mockPackageWithNonFipsTemplate();
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: false, isLoading: true });
+
+      act(() => {
+        render();
+      });
+
+      expect(renderResult.queryByText('Collect logs from Nginx instances')).not.toBeInTheDocument();
+      expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
+
+      (useFleetStatus as jest.Mock).mockReturnValue({
+        isReady: true,
+        isLoading: false,
+        isFipsEnabled: true,
+      });
+      act(() => {
+        renderResult.rerender(
+          <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
+            <CreatePackagePolicySinglePage
+              from="package"
+              prerelease={false}
+              pkgName={'nginx'}
+              pkgVersion={'1.3.0'}
+            />
+          </Route>
+        );
+      });
+
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+      expect(renderResult.queryByText(NON_FIPS_INPUT_TITLE)).not.toBeInTheDocument();
+    });
+
+    it('should show the inputs of the non FIPS policy template when FIPS is not enabled', async () => {
+      mockPackageWithNonFipsTemplate();
+      (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true, isFipsEnabled: false });
+
+      act(() => {
+        render();
+      });
+
+      expect(
+        await renderResult.findByText('Collect logs from Nginx instances')
+      ).toBeInTheDocument();
+      expect(await renderResult.findByText(NON_FIPS_INPUT_TITLE)).toBeInTheDocument();
+    });
+  });
+
   describe('Submit page', () => {
     const newPackagePolicy = {
       description: '',
@@ -475,14 +590,54 @@ describe('When on the package policy create page', () => {
         fireEvent.click(saveBtn);
       });
 
-      expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
-        ...newPackagePolicy,
-        policy_ids: ['agent-policy-1'],
-        force: false,
-        create_dataset_templates: true,
-      });
+      expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith(
+        {
+          ...newPackagePolicy,
+          policy_ids: ['agent-policy-1'],
+          force: false,
+          create_dataset_templates: true,
+        },
+        expect.objectContaining({ onIacPersistError: expect.any(Function) })
+      );
       expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
 
+      await waitFor(() => {
+        expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
+      });
+    });
+
+    test('warns when the policy saved but its cloud connector could not record the template details', async () => {
+      // The request helper reports the failed template-details write through the options it is handed;
+      // the save itself succeeded, so the page must add a warning next to the success toast.
+      (sendCreatePackagePolicyForRq as jest.MockedFunction<any>).mockImplementationOnce(
+        async (_body: unknown, options?: { onIacPersistError?: (error: Error) => void }) => {
+          options?.onIacPersistError?.(new Error('boom'));
+          return {
+            item: {
+              id: 'policy-1',
+              inputs: [],
+              policy_ids: ['agent-policy-1'],
+              package: { name: 'nginx', version: '1.3.0', title: 'Nginx' },
+            },
+          };
+        }
+      );
+      await act(async () => {
+        render('agent-policy-1');
+      });
+
+      let saveBtn: HTMLElement;
+      await waitFor(() => {
+        saveBtn = renderResult.getByText(/Save and continue/).closest('button')!;
+        expect(saveBtn).not.toBeDisabled();
+      });
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      expect(useStartServices().notifications.toasts.addWarning).toHaveBeenCalledWith(
+        IAC_TEMPLATE_WRITE_FAILED_TOAST
+      );
       await waitFor(() => {
         expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
       });
@@ -634,12 +789,15 @@ describe('When on the package policy create page', () => {
           },
           { withSysMonitoring: true }
         );
-        expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
-          ...newPackagePolicy,
-          policy_ids: ['agent-policy-2'],
-          force: false,
-          create_dataset_templates: true,
-        });
+        expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith(
+          {
+            ...newPackagePolicy,
+            policy_ids: ['agent-policy-2'],
+            force: false,
+            create_dataset_templates: true,
+          },
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
+        );
 
         await waitFor(() => {
           expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
@@ -698,12 +856,15 @@ describe('When on the package policy create page', () => {
           });
 
           expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
-          expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
-            ...newPackagePolicy,
-            policy_ids: ['agent-policy-1'],
-            force: false,
-            create_dataset_templates: true,
-          });
+          expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith(
+            {
+              ...newPackagePolicy,
+              policy_ids: ['agent-policy-1'],
+              force: false,
+              create_dataset_templates: true,
+            },
+            expect.objectContaining({ onIacPersistError: expect.any(Function) })
+          );
 
           await waitFor(() => {
             expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
@@ -754,30 +915,107 @@ describe('When on the package policy create page', () => {
           await act(async () => {
             fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
           });
-          expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith({
-            ...newPackagePolicy,
-            inputs: [
-              {
-                ...newPackagePolicy.inputs[0],
-                streams: [
-                  {
-                    ...newPackagePolicy.inputs[0].streams[0],
-                    vars: {
-                      paths: {
-                        type: 'text',
-                        value: ['/path/to/log'],
+          expect(sendCreatePackagePolicyForRq as jest.MockedFunction<any>).toHaveBeenCalledWith(
+            {
+              ...newPackagePolicy,
+              inputs: [
+                {
+                  ...newPackagePolicy.inputs[0],
+                  streams: [
+                    {
+                      ...newPackagePolicy.inputs[0].streams[0],
+                      vars: {
+                        paths: {
+                          type: 'text',
+                          value: ['/path/to/log'],
+                        },
                       },
                     },
-                  },
-                  {
-                    ...newPackagePolicy.inputs[0].streams[1],
-                  },
-                ],
-              },
-            ],
-            force: false,
-            create_dataset_templates: true,
-          });
+                    {
+                      ...newPackagePolicy.inputs[0].streams[1],
+                    },
+                  ],
+                },
+              ],
+              force: false,
+              create_dataset_templates: true,
+            },
+            expect.objectContaining({ onIacPersistError: expect.any(Function) })
+          );
+        });
+      });
+    });
+
+    describe('Documentation callout', () => {
+      test('should not render documentation callout when packageInfo has no readme', async () => {
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('packageDocumentationCallout')).not.toBeInTheDocument();
+        });
+      });
+
+      test('should not render documentation callout when enableIntegrationTileClickToAdd is disabled', async () => {
+        ExperimentalFeaturesService.init({ enableIntegrationTileClickToAdd: false } as any);
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+          ...getMockPackageInfo(),
+          data: {
+            item: { ...getMockPackageInfo().data!.item, readme: '/package/nginx-1.3.0/README.md' },
+          },
+        });
+
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('packageDocumentationCallout')).not.toBeInTheDocument();
+        });
+      });
+
+      test('should render documentation callout when packageInfo has a readme and enableIntegrationTileClickToAdd is enabled', async () => {
+        ExperimentalFeaturesService.init({ enableIntegrationTileClickToAdd: true } as any);
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+          ...getMockPackageInfo(),
+          data: {
+            item: { ...getMockPackageInfo().data!.item, readme: '/package/nginx-1.3.0/README.md' },
+          },
+        });
+
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packageDocumentationCallout')).toBeInTheDocument();
+        });
+      });
+
+      test('should open documentation modal when View documentation button is clicked', async () => {
+        ExperimentalFeaturesService.init({ enableIntegrationTileClickToAdd: true } as any);
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+          ...getMockPackageInfo(),
+          data: {
+            item: { ...getMockPackageInfo().data!.item, readme: '/package/nginx-1.3.0/README.md' },
+          },
+        });
+
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packageDocumentationButton')).toBeInTheDocument();
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByTestId('packageDocumentationButton'));
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('packageDocumentationModal')).toBeInTheDocument();
         });
       });
     });
@@ -839,7 +1077,8 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'nginx-1',
-          })
+          }),
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
         );
         expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 
@@ -865,13 +1104,183 @@ describe('When on the package policy create page', () => {
         expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'nginx-1',
-          })
+          }),
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
         );
         expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(
           INTEGRATIONS_PLUGIN_ID,
           { path: '/detail/nginx-1.3.0/policies?openEnrollmentFlyout=policy-1' }
+        );
+      });
+    });
+
+    describe('With agentless as the default deployment mode of a package with a cloud connector var group', () => {
+      // Mirrors the aws package: agentless is the default of the `billing` policy template and the
+      // credentials are selected with a var group that has a cloud connector (`provider`) option
+      const getAwsLikePackageInfo = () => ({
+        data: {
+          item: {
+            name: 'aws',
+            title: 'AWS',
+            version: '8.12.0',
+            description: 'Collect logs and metrics from Amazon Web Services',
+            policy_templates: [
+              {
+                name: 'billing',
+                title: 'AWS Billing',
+                description: 'Collect billing metrics',
+                data_streams: ['billing'],
+                inputs: [{ type: 'aws/metrics', title: 'Collect billing metrics' }],
+                deployment_modes: {
+                  default: { enabled: true },
+                  agentless: {
+                    enabled: true,
+                    is_default: true,
+                    organization: 'org',
+                    division: 'division',
+                    team: 'team',
+                  },
+                },
+              },
+              {
+                name: 'cloudtrail',
+                title: 'AWS CloudTrail',
+                description: 'Collect CloudTrail logs',
+                data_streams: [],
+                inputs: [],
+                deployment_modes: { default: { enabled: true } },
+              },
+            ],
+            vars: [
+              { name: 'access_key_id', type: 'password', title: 'Access Key ID', secret: true },
+              {
+                name: 'secret_access_key',
+                type: 'password',
+                title: 'Secret Access Key',
+                secret: true,
+              },
+              { name: 'role_arn', type: 'text', title: 'Role ARN' },
+              { name: 'supports_identity_federation', type: 'bool', title: 'Identity Federation' },
+            ],
+            var_groups: [
+              {
+                name: 'credential_type',
+                title: 'Setup Access',
+                selector_title: 'Preferred method',
+                required: true,
+                options: [
+                  {
+                    name: 'identity_federation',
+                    title: 'Identity Federation',
+                    vars: ['role_arn', 'supports_identity_federation'],
+                    hide_in_deployment_modes: ['default'],
+                    provider: 'aws',
+                  },
+                  {
+                    name: 'direct_access_key',
+                    title: 'Direct Access Keys',
+                    vars: ['access_key_id', 'secret_access_key'],
+                  },
+                ],
+              },
+            ],
+            data_streams: [
+              {
+                type: 'metrics',
+                dataset: 'aws.billing',
+                title: 'AWS Billing Metrics',
+                release: 'ga',
+                package: 'aws',
+                path: 'billing',
+                ingest_pipeline: 'default',
+                streams: [
+                  {
+                    input: 'aws/metrics',
+                    title: 'AWS billing metrics',
+                    description: 'Collect billing metrics',
+                    template_path: 'stream.yml.hbs',
+                    enabled: true,
+                    vars: [
+                      {
+                        name: 'period',
+                        type: 'text',
+                        title: 'Collection Period',
+                        required: true,
+                        show_user: false,
+                        default: '24h',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+            latestVersion: '8.12.0',
+            keepPoliciesUpToDate: false,
+            status: 'not_installed',
+          },
+        },
+        isLoading: false,
+      });
+
+      beforeEach(() => {
+        (useConfig as jest.MockedFunction<any>).mockReturnValue({
+          agentless: { enabled: true, api: { url: 'http://agentless-api-url' } },
+          agents: { enabled: true },
+        });
+        (useStartServices as jest.MockedFunction<any>).mockReturnValue({
+          ...useStartServices(),
+          cloud: {
+            ...useStartServices().cloud,
+            isServerlessEnabled: true,
+            isCloudEnabled: true,
+          },
+        });
+        (sendCreateAgentlessPolicy as jest.MockedFunction<any>).mockResolvedValue({
+          item: {
+            name: 'aws-1',
+            id: 'policy-1',
+            namespace: 'default',
+            inputs: {},
+            package: { name: 'aws', title: 'AWS', version: '8.12.0' },
+          },
+        });
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(getAwsLikePackageInfo());
+      });
+
+      test('should create an agentless policy on save when the deployment mode was not changed', async () => {
+        await act(async () => {
+          render(undefined, 'billing');
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        });
+
+        await act(async () => {
+          fireEvent.change(renderResult.getByTestId('varGroupSelector-credential_type'), {
+            target: { value: 'direct_access_key' },
+          });
+        });
+        await act(async () => {
+          fireEvent.change(renderResult.getByTestId('passwordInput-access-key-id'), {
+            target: { value: 'key-id' },
+          });
+          fireEvent.change(renderResult.getByTestId('passwordInput-secret-access-key'), {
+            target: { value: 'secret' },
+          });
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        expect(sendCreateAgentPolicy).not.toHaveBeenCalled();
+        expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
+        expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'aws-1' }),
+          expect.objectContaining({ onIacPersistError: expect.any(Function) })
         );
       });
     });
@@ -975,6 +1384,15 @@ const mockApiCalls = (http: MockedFleetStartServices['http']) => {
     }
     if (path === '/api/fleet/agent_download_sources') {
       return Promise.resolve({ data: { items: [] } });
+    }
+    if (path === '/api/fleet/space_settings') {
+      return Promise.resolve({ item: {} });
+    }
+    if (path === '/api/fleet/cloud_connectors') {
+      return Promise.resolve({ items: [] });
+    }
+    if (path === '/api/fleet/epm/data_streams') {
+      return Promise.resolve({ items: [] });
     }
     const err = new Error(`API [GET ${path}] is not MOCKED!`);
     // eslint-disable-next-line no-console

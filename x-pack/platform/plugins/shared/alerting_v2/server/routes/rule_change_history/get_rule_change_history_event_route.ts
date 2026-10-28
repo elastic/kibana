@@ -21,19 +21,21 @@ import {
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-import { ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH } from '../constants';
+import { ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH } from '../constants';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { getRuleChangeHistoryEventOasExamples } from './get_rule_change_history_event_oas_example';
 
 @injectable()
 export class GetRuleChangeHistoryEventRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_RULE_CHANGE_HISTORY_API_PATH}/{eventId}`;
+  static path = `${ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH}/{change_id}`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
     },
   };
   static routeOptions = {
+    access: 'internal' as const,
     summary: 'Get a rule change-history event',
     description:
       'Get the full detail for a single rule change-history event, including the rule configuration snapshot.',
@@ -47,6 +49,10 @@ export class GetRuleChangeHistoryEventRoute extends BaseAlertingRoute {
       200: {
         body: () => ruleChangeHistoryDetailSchema,
         description: 'Returns the requested rule change-history event.',
+      },
+      400: {
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
@@ -69,8 +75,7 @@ export class GetRuleChangeHistoryEventRoute extends BaseAlertingRoute {
 
   protected async execute() {
     const result = await this.ruleChangesHistoryClient.getRuleChange({
-      ruleId: this.request.params.id,
-      eventId: this.request.params.eventId,
+      eventId: this.request.params.change_id,
     });
     return this.ctx.response.ok({ body: result });
   }

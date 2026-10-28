@@ -8,11 +8,12 @@
 import { useMemo } from 'react';
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { LifecycleDetection } from '@kbn/significant-events-schema';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import {
   DETECTION_OCCURRENCE_BUCKET_SIZE,
   getDetectionOccurrenceTimeRange,
   type OccurrencePoint,
-} from '../detection/change_point';
+} from '../common/change_point';
 import { useKibana } from './use_kibana';
 
 export type DetectionOccurrencesByRuleUuid = ReadonlyMap<string, OccurrencePoint[]>;
@@ -21,7 +22,7 @@ interface DetectionOccurrencesRequest {
   from: string;
   to: string;
   ruleUuids: string[];
-  streamNames: string[];
+  sourceIds: string[];
 }
 
 export const buildDetectionOccurrencesRequest = (
@@ -41,11 +42,11 @@ export const buildDetectionOccurrencesRequest = (
     from: new Date(Math.min(...fetchableDetections.map(({ range }) => range.from))).toISOString(),
     to: new Date(Math.max(...fetchableDetections.map(({ range }) => range.to))).toISOString(),
     ruleUuids: [...new Set(fetchableDetections.map(({ ruleUuid }) => ruleUuid))].sort(),
-    streamNames: [
+    sourceIds: [
       ...new Set(
         fetchableDetections
-          .map(({ detection }) => detection.stream_name)
-          .filter((streamName): streamName is string => Boolean(streamName))
+          .map(({ detection }) => detection.source_id)
+          .filter((sourceId): sourceId is string => Boolean(sourceId))
       ),
     ].sort(),
   };
@@ -84,13 +85,15 @@ export const useFetchDetectionOccurrences = (
   detections: readonly LifecycleDetection[]
 ): UseQueryResult<DetectionOccurrencesByRuleUuid, Error> => {
   const {
+    application,
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
+  const { canShow } = getNightshiftCapabilities(application.capabilities.nightshift);
   const request = useMemo(() => buildDetectionOccurrencesRequest(detections), [detections]);
 
   return useQuery<DetectionOccurrencesByRuleUuid, Error>({
     queryKey: ['nightshift.detectionOccurrences', request],
-    enabled: request != null,
+    enabled: request != null && canShow,
     queryFn: async ({ signal }) => {
       if (!request) {
         return new Map();
@@ -105,7 +108,7 @@ export const useFetchDetectionOccurrences = (
               to: request.to,
               bucketSize: DETECTION_OCCURRENCE_BUCKET_SIZE,
               rule_uuid: request.ruleUuids,
-              streamNames: request.streamNames,
+              sourceIds: request.sourceIds,
             },
           },
           signal: signal ?? null,

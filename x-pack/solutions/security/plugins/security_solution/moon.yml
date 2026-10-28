@@ -17,6 +17,7 @@ project:
   owner: '@elastic/security-solution'
   sourceRoot: x-pack/solutions/security/plugins/security_solution
 dependsOn:
+  - '@kbn/securitysolution-alerts-page-url'
   - '@kbn/setup-node-env'
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -50,6 +51,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/timelines-plugin'
   - '@kbn/es-query'
+  - '@kbn/es-errors'
   - '@kbn/as-code-shared-transforms'
   - '@kbn/utility-types'
   - '@kbn/securitysolution-list-utils'
@@ -115,6 +117,7 @@ dependsOn:
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/apm-utils'
+  - '@kbn/tracing-utils'
   - '@kbn/core-saved-objects-server'
   - '@kbn/es-types'
   - '@kbn/utils'
@@ -218,8 +221,6 @@ dependsOn:
   - '@kbn/data-stream-adapter'
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-user-profile-common'
-  - '@kbn/core-user-profile-server'
-  - '@kbn/core-user-profile-server-mocks'
   - '@kbn/langchain'
   - '@kbn/discover-shared-plugin'
   - '@kbn/react-hooks'
@@ -239,8 +240,6 @@ dependsOn:
   - '@kbn/security-ai-prompts'
   - '@kbn/inference-common'
   - '@kbn/inference-langchain'
-  - '@kbn/scout-security'
-  - '@kbn/ftr-llm-proxy'
   - '@kbn/custom-icons'
   - '@kbn/security-plugin-types-common'
   - '@kbn/management-settings-ids'
@@ -273,6 +272,12 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/agent-builder-browser'
+  - '@kbn/agentic-investigations-common'
+  - '@kbn/agentic-investigations-plugin'
+  - '@kbn/mitre-attack-plugin'
+  - '@kbn/security-mitre-attack-common'
+  - '@kbn/security-mitre-attack-mocks'
+  - '@kbn/security-mitre-attack-server'
   - '@kbn/lazy-object'
   - '@kbn/ai-assistant-common'
   - '@kbn/product-doc-common'
@@ -286,12 +291,12 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/workflows-ui'
   - '@kbn/workflows'
-  - '@kbn/deeplinks-workflows'
-  - '@kbn/core-rendering-browser'
   - '@kbn/controls-constants'
   - '@kbn/anonymization-plugin'
   - '@kbn/anonymization-common'
   - '@kbn/workflows-extensions'
+  - '@kbn/alertzero-common'
+  - '@kbn/alertzero-plugin'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/shared-ux-markdown'
   - '@kbn/controls-schemas'
@@ -306,6 +311,17 @@ dependsOn:
   - '@kbn/discoveries-schemas'
   - '@kbn/chart-icons'
   - '@kbn/core-mount-utils-browser'
+  - '@kbn/ui-callout'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/app-header'
+  - '@kbn/app-menu'
+  - '@kbn/core-execution-context-common'
+  - '@kbn/code-editor'
+  - '@kbn/code-editor-mock'
+  - '@kbn/core-security-server'
+  - '@kbn/css-utils'
+  - '@kbn/custom-content-common'
+  - '@kbn/custom-content-renderer'
 tags:
   - plugin
   - prod
@@ -317,15 +333,12 @@ fileGroups:
     - public/**/*
     - server/**/*
     - scripts/**/*
-    - test/scout/**/*
-    - test/scout_ai_value_report/**/*
-    - test/scout_cps_local/**/*
-    - test/scout_security_attacks_alignment/**/*
     - common/**/*.json
     - server/**/*.json
     - scripts/**/*.json
     - public/**/*.json
     - '!target/**/*'
+    - '!test/**/*'
     - '!**/cypress/**'
     - '!public/management/cypress.config.ts'
 tasks: {}

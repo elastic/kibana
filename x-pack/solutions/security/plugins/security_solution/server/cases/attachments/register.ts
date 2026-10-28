@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
@@ -12,17 +13,25 @@ import { getEndpointAttachmentType } from './endpoint';
 import { getEventAttachmentType } from './event';
 import { getIndicatorAttachmentType } from './indicator';
 import { getEntityAttachmentType } from './entity';
+import { getAttackAttachmentType } from './attack';
 import { getTimelineAttachmentType } from './timeline';
 
 export const registerCaseAttachments = (
   attachmentFramework: CasesServerSetup['attachmentFramework'],
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  deps: { getStartServices: CoreSetup['getStartServices']; logger: Logger }
 ): void => {
-  attachmentFramework.registerUnified(getEndpointAttachmentType());
-  attachmentFramework.registerUnified(getEventAttachmentType());
-  attachmentFramework.registerUnified(getIndicatorAttachmentType());
+  attachmentFramework.registerAttachment(getEndpointAttachmentType());
+  attachmentFramework.registerAttachment(getEventAttachmentType());
+  attachmentFramework.registerAttachment(getIndicatorAttachmentType());
   if (experimentalFeatures.entityAttachmentsEnabled) {
-    attachmentFramework.registerUnified(getEntityAttachmentType());
+    attachmentFramework.registerAttachment(getEntityAttachmentType());
   }
-  attachmentFramework.registerUnified(getTimelineAttachmentType());
+  attachmentFramework.registerAttachment(
+    getAttackAttachmentType({
+      ...deps,
+      isAttachEnabled: experimentalFeatures.attackAttachments,
+    })
+  );
+  attachmentFramework.registerAttachment(getTimelineAttachmentType());
 };

@@ -1,17 +1,16 @@
 # KI Features Identification Workflow
 #
 # On-demand workflow that identifies KI features for a single stream.
-# Each iteration samples documents, runs LLM inference, and reconciles
-# features in a single endpoint call.
 #
 # Flow:
 #   init → while(iterationCount < max) {
-#     identify_inferred → if(noDocuments) break → update_state → mark_success
+#     prepare → if(noDocuments) break → identify_inferred → update_state → mark_success
 #     → track_convergence → if(converged) break
 #   } → if(allFailed) fail → identify_computed → output
 #
-# Concurrency is keyed per stream so only one identification run can be active
-# for a given stream at any time; overlapping triggers are dropped.
+# Concurrency is keyed per source slug so only one identification run can be
+# active for a given source in a space at any time; overlapping triggers are
+# dropped. Every request targets the space that runs the workflow.
 
 version: "1"
 name: "KI Features Identification"
@@ -25,16 +24,24 @@ tags:
 settings:
   timeout: "15m"
   concurrency:
-    key: "streams-ki-features-identification-{{ inputs.streamName }}"
+    key: "nightshift-source-features-identification-{{ inputs.sourceSlug }}:{{ inputs.sourceId }}"
     strategy: drop
     max: 1
 triggers:
   - type: manual
     inputs:
-      - name: streamName
+      - name: sourceId
         type: string
         required: true
-        description: "Target stream name to identify KI features for."
+        description: "Target source id to identify KI features for."
+      - name: sourceRevision
+        type: string
+        required: true
+        description: "Source query revision used by this onboarding run."
+      - name: sourceSlug
+        type: string
+        required: true
+        description: "Slug of the target source. Together with the source id it keys concurrency."
       - name: start
         type: number
         description: "Start timestamp (epoch ms) for the document sampling window. Defaults to 24 h ago."
@@ -92,43 +99,58 @@ steps:
       effectivePatience: "${{ inputs.convergencePatience | at_least: 1 }}"
 
   # -----------------------------------------------------------------------
-  # Step 2: Main loop — each pass runs identify_inferred_features.
+  # Step 2: Main loop — each pass samples, then identifies inferred features.
   # -----------------------------------------------------------------------
   - name: identify_loop
     type: while
     condition: "${{ variables.iterationResults.size < inputs.maxIterations }}"
     steps:
-      # 2a: Sample, infer, and reconcile in one call.
-      - name: identify_inferred
+      # 2a: Sample documents for this iteration.
+      - name: prepare
         type: kibana.request
         with:
           method: POST
-          path: "/internal/streams/{{ inputs.streamName }}/features/_identify/inferred"
+          path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_identify/inferred/prepare"
           headers:
             x-elastic-internal-origin: "kibana"
+            x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
           body:
-            connectorId: "${{ inputs.connectorId }}"
             start: "${{ inputs.start }}"
             end: "${{ inputs.end }}"
             runId: "${{ execution.id }}"
             iteration: "${{ variables.iterationResults.size | plus: 1 }}"
-            featureTtlDays: "${{ inputs.featureTtlDays }}"
             sampleSize: "${{ inputs.sampleSize }}"
             entityFilteredRatio: "${{ inputs.entityFilteredRatio }}"
             diverseRatio: "${{ inputs.diverseRatio }}"
             maxEntityFilters: "${{ inputs.maxEntityFilters }}"
-            maxExcludedFeaturesInPrompt: "${{ inputs.maxExcludedFeaturesInPrompt }}"
-            maxPreviouslyIdentifiedFeatures: "${{ inputs.maxPreviouslyIdentifiedFeatures }}"
 
       # 2b: If no documents were returned, stop the loop.
       - name: check_docs
         type: if
-        condition: "steps.identify_inferred.output.hasDocuments:false"
+        condition: "steps.prepare.output.hasDocuments:false"
         steps:
           - name: stop_loop
             type: loop.break
 
-      # 2c: Update loop variables with iteration output.
+      # 2c: Infer and reconcile from the prepared sample.
+      - name: identify_inferred
+        type: kibana.request
+        with:
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_identify/inferred"
+          headers:
+            x-elastic-internal-origin: "kibana"
+            x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
+          body:
+            connectorId: "${{ inputs.connectorId }}"
+            runId: "${{ execution.id }}"
+            iteration: "${{ variables.iterationResults.size | plus: 1 }}"
+            documents: "${{ steps.prepare.output.documents }}"
+            samplingTelemetry: "${{ steps.prepare.output.samplingTelemetry }}"
+            maxExcludedFeaturesInPrompt: "${{ inputs.maxExcludedFeaturesInPrompt }}"
+            maxPreviouslyIdentifiedFeatures: "${{ inputs.maxPreviouslyIdentifiedFeatures }}"
+
+      # 2d: Update loop variables with iteration output.
       - name: update_state
         type: data.set
         with:
@@ -140,7 +162,7 @@ steps:
           totalTokens: "${{ variables.totalTokens | plus: steps.identify_inferred.output.iterationResult.tokensUsed.total }}"
           totalCachedTokens: "${{ variables.totalCachedTokens | plus: steps.identify_inferred.output.iterationResult.tokensUsed.cached }}"
 
-      # 2d: Track whether at least one iteration succeeded.
+      # 2e: Track whether at least one iteration succeeded.
       - name: mark_success
         type: if
         condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' }}"
@@ -150,7 +172,7 @@ steps:
             with:
               hasSuccess: true
 
-      # 2e: Convergence early-stop. LLM failures are neutral; only successful iterations move the counter.
+      # 2f: Convergence early-stop. LLM failures are neutral; only successful iterations move the counter.
       - name: track_convergence
         type: if
         condition: "${{ steps.identify_inferred.output.iterationResult.state == 'success' }}"
@@ -185,7 +207,7 @@ steps:
       - name: all_failed
         type: workflow.fail
         with:
-          message: "All LLM iterations failed for stream {{ inputs.streamName }}"
+          message: "All LLM iterations failed for source {{ inputs.sourceId }}"
 
   # -----------------------------------------------------------------------
   # Step 4: Identify computed features.
@@ -195,12 +217,17 @@ steps:
   - name: identify_computed
     type: kibana.request
     on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
       continue: true
     with:
       method: POST
-      path: "/internal/streams/{{ inputs.streamName }}/features/_identify/computed"
+      path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_identify/computed"
       headers:
         x-elastic-internal-origin: "kibana"
+        x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
       body:
         start: "${{ inputs.start }}"
         end: "${{ inputs.end }}"
@@ -213,7 +240,7 @@ steps:
   - name: output_result
     type: workflow.output
     with:
-      streamName: "${{ inputs.streamName }}"
+      sourceId: "${{ inputs.sourceId }}"
       connectorId: "${{ variables.connectorId }}"
       discoveredFeatures: "${{ variables.discoveredFeatures }}"
       computedFeaturesCount: "${{ steps.identify_computed.output.computedFeaturesCount }}"

@@ -16,14 +16,18 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { SignalGroup } from '../../../../common/http_api/signals';
 import { analyzeAndImprove } from '../../utils/analyze_and_improve';
 import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignalGroups } from '../../hooks/use_signal_groups';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
+import { FeedbackAgentSelector } from './feedback_agent_selector';
 import { SignalGroupFlyout } from './signal_group_flyout';
 import { SignalGroupRow } from './signal_group_row';
 import { SignalsErrorPrompt } from './signals_error_prompt';
@@ -36,7 +40,7 @@ interface SignalsPanelProps {
 /**
  * Read-only Signals panel. Shows a preaggregated grouped-by-tag list of "issue" cards; clicking a
  * group opens a flyout with its member signals (each drilling into a trace waterfall). A panel-level
- * "Analyze & improve" button opens Agent Builder over all signals once a chat opener is registered.
+ * "Analyze & improve" button opens Agent Builder over all signals once Agent Builder is available.
  */
 export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
   const {
@@ -58,6 +62,8 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
   const [selectedGroup, setSelectedGroup] = useState<SignalGroup | undefined>();
 
   const loading = isLoading || isLoadingGroups;
+
+  const hasFeedbackAgent = Boolean(aiIndex?.feedback_analysis?.agent_id);
 
   const handleAnalyze = () => {
     if (aiIndex) {
@@ -81,6 +87,12 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
               })}
             </h2>
           </EuiTitle>
+          <AiIndexDetailPanelDescription data-test-subj="contextSignalsPanelDescription">
+            {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.description', {
+              defaultMessage:
+                'Signals are observations classified from Agent Builder traces, grouped by tag. Open a group to inspect individual signals and their traces.',
+            })}
+          </AiIndexDetailPanelDescription>
         </EuiFlexItem>
         {chatOpener && (
           <EuiFlexItem grow={false}>
@@ -88,8 +100,12 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
               size="s"
               iconType="sparkles"
               onClick={handleAnalyze}
-              isDisabled={aiIndex === undefined}
+              isDisabled={aiIndex === undefined || !hasFeedbackAgent}
               data-test-subj="contextSignalsAnalyzeButton"
+              {...getEbtProps({
+                element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSignalsPanel,
+                action: CONTEXT_ENGINE_UI_EBT.action.signals.ANALYZE,
+              })}
             >
               {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.analyzeButton', {
                 defaultMessage: 'Analyze & improve',
@@ -99,15 +115,42 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
         )}
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.description', {
-            defaultMessage:
-              'Signals are observations classified from Agent Builder traces, grouped by tag. Open a group to inspect individual signals and their traces.',
-          })}
-        </p>
-      </EuiText>
+      {chatOpener && aiIndex && !aiIndex.managed && (
+        <>
+          <EuiSpacer size="m" />
+          <FeedbackAgentSelector aiIndex={aiIndex} />
+          {!hasFeedbackAgent && (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiText size="xs" color="subdued" data-test-subj="contextSignalsFeedbackAgentPrompt">
+                <p>
+                  {i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.signals.feedbackAgent.prompt',
+                    {
+                      defaultMessage: 'Select an analysis agent to enable "Analyze & improve".',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            </>
+          )}
+        </>
+      )}
+
+      {chatOpener && aiIndex && aiIndex.managed && !hasFeedbackAgent && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="xs" color="subdued" data-test-subj="contextSignalsManagedNoAgentPrompt">
+            <p>
+              {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.managedNoAgent.prompt', {
+                defaultMessage:
+                  'A feedback agent must be configured for this managed index to enable "Analyze & improve".',
+              })}
+            </p>
+          </EuiText>
+        </>
+      )}
+
       <EuiSpacer size="m" />
 
       {loading ? (

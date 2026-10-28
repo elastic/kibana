@@ -11,6 +11,7 @@ import type { EuiIconProps, IconType } from '@elastic/eui';
 import { EuiIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Suspense, useMemo } from 'react';
+import { getTriggerName } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getMaskableIconUrl } from './get_maskable_icon_url';
 import { getStepIconType } from './get_step_icon_type';
@@ -78,7 +79,8 @@ export interface TypeIconProps extends Omit<EuiIconProps, 'type'> {
  * fallbacks, so connectors like `http` that only exist in the action-type
  * registry still render their real icon. The registries come from
  * {@link useWorkflowsUiServices}, so consumers must be wrapped in a
- * `WorkflowsUiServicesProvider`. The tooltip shows the raw `type`.
+ * `WorkflowsUiServicesProvider`. A trigger tooltip uses {@link getTriggerName}.
+ * A step tooltip shows the raw `type`.
  */
 /*
  * EuiToolTip's default anchor is an inline-block with a normal line box, which
@@ -107,7 +109,11 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
     [kind, type, workflowsExtensions, triggersActionsUi]
   );
 
-  const label = title ?? type;
+  const label =
+    title ??
+    (kind === 'trigger'
+      ? getTriggerName(type, workflowsExtensions.getTriggerDefinition(type)?.title)
+      : type);
   const maskUrl = tintable ? getMaskableIconUrl(iconType) : undefined;
 
   const icon = maskUrl ? (

@@ -41,6 +41,32 @@ function parseCommaSeparatedList(value: string | undefined): string[] | undefine
     .filter(Boolean);
 }
 
+function parseIndexSettingValue(value: string): string | number | boolean {
+  if (/^[+-]?\d+$/.test(value)) return Number(value);
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return value;
+}
+
+function parseIndexSettings(value: string | undefined): Record<string, unknown> | undefined {
+  const items = parseCommaSeparatedList(value);
+  if (!items) return undefined;
+
+  return Object.fromEntries(
+    items.map((item) => {
+      const separatorIndex = item.indexOf('=');
+      const key = item.slice(0, separatorIndex).trim();
+      const rawValue = item.slice(separatorIndex + 1).trim();
+
+      if (separatorIndex < 1 || !key || !rawValue) {
+        throw new Error(`--index-settings entries must use key=value: ${item}`);
+      }
+
+      return [key, parseIndexSettingValue(rawValue)];
+    })
+  );
+}
+
 function createEsClientFromUrl(esUrl: string, apiKey?: string): Client {
   const url = new URL(esUrl);
   const username = url.username;
@@ -301,16 +327,19 @@ function runRestoreCli(): void {
         'rename-pattern': renamePattern,
         'rename-replacement': renameReplacement,
         'allow-no-matches': allowNoMatches,
+        'index-settings': indexSettingsFlag,
       } = flags as CommonFlags & {
         indices?: string;
         'rename-pattern'?: string;
         'rename-replacement'?: string;
         'allow-no-matches'?: boolean;
+        'index-settings'?: string;
       };
 
       const repository = resolveRepositoryFromFlags(flags as CommonFlags);
       const esClient = await getEsClient(flags as CommonFlags, log);
       const indices = parseCommaSeparatedList(indicesFlag);
+      const indexSettings = parseIndexSettings(indexSettingsFlag);
 
       log.info(`Snapshot Restore`);
       log.info(`================`);
@@ -329,6 +358,7 @@ function runRestoreCli(): void {
         renamePattern,
         renameReplacement,
         allowNoMatches,
+        indexSettings,
       });
 
       if (result.success) {
@@ -358,6 +388,7 @@ function runRestoreCli(): void {
           'indices',
           'rename-pattern',
           'rename-replacement',
+          'index-settings',
         ],
         boolean: ['allow-no-matches', 'fs-compress'],
         help: `
@@ -375,6 +406,8 @@ function runRestoreCli(): void {
 
       --allow-no-matches    When set, a restore that matches no indices succeeds
                             silently instead of throwing an error
+
+      --index-settings      Comma-separated index settings as key=value pairs
         `,
         allowUnexpected: false,
       },
@@ -391,9 +424,11 @@ function runReplayCli(): void {
         'snapshot-name': snapshotName,
         patterns: patternsFlag,
         concurrency: concurrencyFlag,
+        'index-settings': indexSettingsFlag,
       } = flags as CommonFlags & {
         patterns?: string;
         concurrency?: string;
+        'index-settings'?: string;
       };
 
       const repository = resolveRepositoryFromFlags(flags as CommonFlags);
@@ -403,6 +438,7 @@ function runReplayCli(): void {
 
       const esClient = await getEsClient(flags as CommonFlags, log);
       const patterns = parseCommaSeparatedList(patternsFlag)!;
+      const indexSettings = parseIndexSettings(indexSettingsFlag);
       const concurrency = concurrencyFlag ? parseInt(concurrencyFlag, 10) : undefined;
       if (concurrencyFlag && (isNaN(concurrency!) || concurrency! < 1)) {
         throw new Error('--concurrency must be a positive integer');
@@ -422,6 +458,7 @@ function runReplayCli(): void {
         snapshotName,
         patterns,
         concurrency,
+        indexSettings,
       });
 
       if (result.success) {
@@ -452,6 +489,7 @@ function runReplayCli(): void {
           'fs-location',
           'patterns',
           'concurrency',
+          'index-settings',
         ],
         boolean: ['fs-compress'],
         help: `
@@ -461,6 +499,8 @@ function runReplayCli(): void {
 
       --concurrency       Number of indices to reindex in parallel
                           Default: all indices at once (no limit)
+
+      --index-settings    Comma-separated index settings as key=value pairs
         `,
         allowUnexpected: false,
       },

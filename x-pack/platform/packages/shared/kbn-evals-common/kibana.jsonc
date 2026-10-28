@@ -3,7 +3,7 @@
   "id": "@kbn/evals-common",
   "owner": [
     "@elastic/nightshift-context-and-research-team",
-    "@elastic/security-genai-research-and-development"
+    "@elastic/security-generative-ai"
   ],
   "group": "platform",
   "visibility": "shared"

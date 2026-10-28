@@ -13,18 +13,20 @@ import type {
   ComposeDiscoverAction,
   ComposeDiscoverState,
   CustomRecoveryRenderProps,
-  RecoveryType,
 } from '../types';
-import type { FormValues } from '../../../form/types';
-import { ModeSelect } from '../../../form/fields/mode_select';
+import type { FormValues, RecoveryStrategy } from '../../../form/types';
+import { KindSelect } from '../../../form/fields/kind_select';
 import { AlertDelayField } from '../../../form/fields/alert_delay_field';
-import { NoDataStrategySelect } from '../../../form/fields/no_data_strategy_select';
+import {
+  DEFAULT_NO_DATA_STRATEGY,
+  NoDataStrategySelect,
+} from '../../../form/fields/no_data_strategy_select';
 import { RecoveryConditionStep } from './recovery_condition_step';
 
 interface OutcomeStepProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
-  onRecoveryTypeChange: (type: RecoveryType) => void;
+  onRecoveryTypeChange: (strategy: RecoveryStrategy) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
   isEditing: boolean;
   renderCustomRecovery?: (props: CustomRecoveryRenderProps) => React.ReactNode;
@@ -38,19 +40,22 @@ export function OutcomeStep({
   isEditing,
   renderCustomRecovery,
 }: OutcomeStepProps) {
-  const { setValue } = useFormContext<FormValues>();
+  const {
+    setValue,
+    formState: { errors },
+  } = useFormContext<FormValues>();
   const kind = useWatch<FormValues, 'kind'>({ name: 'kind' });
   const isAlert = kind === 'alert';
-  const noDataStrategy = useWatch<FormValues, 'noDataStrategy'>({ name: 'noDataStrategy' });
+  const noData = useWatch<FormValues, 'noData'>({ name: 'noData' });
 
   return (
     <>
-      <ModeSelect
+      <KindSelect
         value={isAlert ? 'alert' : 'signal'}
         onChange={onKindChange}
         disabled={state.childOpen}
         readOnly={isEditing}
-        data-test-subj="composeDiscoverModeSelect"
+        data-test-subj="composeDiscoverKindSelect"
       />
       {isAlert && (
         <>
@@ -68,9 +73,12 @@ export function OutcomeStep({
           <AlertDelayField />
           <EuiSpacer size="m" />
           <NoDataStrategySelect
-            value={noDataStrategy ?? 'none'}
-            onChange={(strategy) => setValue('noDataStrategy', strategy, { shouldDirty: true })}
+            value={noData?.strategy ?? DEFAULT_NO_DATA_STRATEGY}
+            onChange={(strategy) =>
+              setValue('noData', { ...noData, strategy }, { shouldDirty: true })
+            }
             compressed
+            error={errors.noData?.message}
             data-test-subj="composeDiscoverNoDataStrategy"
           />
           <EuiSpacer size="m" />

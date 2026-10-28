@@ -244,6 +244,77 @@ describe('FieldDefinitionsService', () => {
     });
   });
 
+  describe('getFieldDefinitionSavedObjects', () => {
+    it('returns the full saved objects (attributes + version), not bare attributes', async () => {
+      const so = makeFieldDefinitionSO();
+      soClient.find.mockResolvedValue({
+        saved_objects: [{ ...so, version: 'so-version-1' }],
+        total: 1,
+        per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getFieldDefinitionSavedObjects('securitySolution');
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+          filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "securitySolution"`,
+          perPage: MAX_FIELD_DEFINITIONS_PER_OWNER,
+        })
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].version).toBe('so-version-1');
+      expect(result[0].attributes).toEqual(so.attributes);
+    });
+
+    it('does not apply isGlobal filtering — callers (link resolution) need every definition', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [
+          makeFieldDefinitionSO({ isGlobal: true }),
+          makeFieldDefinitionSO({ name: 'non_global', isGlobal: false }),
+        ],
+        total: 2,
+        per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getFieldDefinitionSavedObjects('securitySolution');
+
+      expect(result).toHaveLength(2);
+    });
+
+    it('pages past a single perPage when the owner has more definitions than the cap', async () => {
+      const pageOne = Array.from({ length: MAX_FIELD_DEFINITIONS_PER_OWNER }, (_, i) =>
+        makeFieldDefinitionSO({ fieldDefinitionId: `page1-${i}`, name: `field_${i}` })
+      );
+      const pageTwo = [
+        makeFieldDefinitionSO({ fieldDefinitionId: 'page2-0', name: 'field_extra' }),
+      ];
+      const total = pageOne.length + pageTwo.length;
+
+      soClient.find
+        .mockResolvedValueOnce({
+          saved_objects: pageOne,
+          total,
+          per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+          page: 1,
+        } as SavedObjectsFindResponse<FieldDefinition>)
+        .mockResolvedValueOnce({
+          saved_objects: pageTwo,
+          total,
+          per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+          page: 2,
+        } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getFieldDefinitionSavedObjects('securitySolution');
+
+      expect(soClient.find).toHaveBeenCalledTimes(2);
+      expect(soClient.find).toHaveBeenNthCalledWith(2, expect.objectContaining({ page: 2 }));
+      expect(result).toHaveLength(total);
+    });
+  });
+
   describe('createFieldDefinition', () => {
     it('creates a saved object with a generated id', async () => {
       const so = makeFieldDefinitionSO();
@@ -375,6 +446,59 @@ describe('FieldDefinitionsService', () => {
 
       expect(soClient.create).toHaveBeenCalledTimes(1);
     });
+
+    describe('serverManaged (migration / configuration-mirroring only)', () => {
+      it('uses the server-managed id instead of generating one', async () => {
+        soClient.create.mockResolvedValue(makeFieldDefinitionSO());
+
+        await service.createFieldDefinition(
+          {
+            name: 'my_field',
+            owner: 'securitySolution',
+            definition: 'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+          },
+          { id: 'deterministic-id' }
+        );
+
+        expect(soClient.create).toHaveBeenCalledWith(
+          CASE_FIELD_DEFINITION_SAVED_OBJECT,
+          expect.objectContaining({ fieldDefinitionId: 'deterministic-id' }),
+          { id: 'deterministic-id' }
+        );
+      });
+
+      it('persists the server-managed legacyKey link on the created attributes', async () => {
+        soClient.create.mockResolvedValue(makeFieldDefinitionSO({ legacyKey: 'legacy_priority' }));
+
+        await service.createFieldDefinition(
+          {
+            name: 'priority',
+            owner: 'securitySolution',
+            definition: 'name: priority\ncontrol: INPUT_TEXT\ntype: keyword\n',
+          },
+          { legacyKey: 'legacy_priority' }
+        );
+
+        expect(soClient.create).toHaveBeenCalledWith(
+          CASE_FIELD_DEFINITION_SAVED_OBJECT,
+          expect.objectContaining({ legacyKey: 'legacy_priority' }),
+          expect.anything()
+        );
+      });
+
+      it('omits legacyKey from the persisted attributes when not provided', async () => {
+        soClient.create.mockResolvedValue(makeFieldDefinitionSO());
+
+        await service.createFieldDefinition({
+          name: 'my_field',
+          owner: 'securitySolution',
+          definition: 'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+        });
+
+        const [, attributes] = soClient.create.mock.calls[0];
+        expect(attributes as FieldDefinition).not.toHaveProperty('legacyKey');
+      });
+    });
   });
 
   describe('updateFieldDefinition', () => {
@@ -392,10 +516,34 @@ describe('FieldDefinitionsService', () => {
       expect(soClient.update).toHaveBeenCalledWith(
         CASE_FIELD_DEFINITION_SAVED_OBJECT,
         'fd-1',
-        expect.objectContaining({ name: 'updated_field' })
+        expect.objectContaining({ name: 'updated_field' }),
+        { version: undefined }
       );
       expect(soClient.get).toHaveBeenCalledWith(CASE_FIELD_DEFINITION_SAVED_OBJECT, 'fd-1');
       expect(result).toBe(so);
+    });
+
+    it('forwards options.version for optimistic concurrency', async () => {
+      const so = makeFieldDefinitionSO({ name: 'updated_field' });
+      soClient.update.mockResolvedValue(so as never);
+      soClient.get.mockResolvedValue(so);
+
+      await service.updateFieldDefinition(
+        'fd-1',
+        {
+          name: 'updated_field',
+          owner: 'securitySolution',
+          definition: 'name: updated_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+        },
+        { version: 'v9' }
+      );
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        'fd-1',
+        expect.objectContaining({ name: 'updated_field' }),
+        { version: 'v9' }
+      );
     });
 
     it('refreshes the analytics v2 data view after updating', async () => {
@@ -429,6 +577,59 @@ describe('FieldDefinitionsService', () => {
     });
   });
 
+  describe('setLegacyKey', () => {
+    it('updates only the legacyKey attribute', async () => {
+      soClient.update.mockResolvedValue({} as never);
+
+      await service.setLegacyKey('fd-1', 'legacy_priority');
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        'fd-1',
+        { legacyKey: 'legacy_priority' },
+        { version: undefined }
+      );
+    });
+
+    it('forwards options.version so a concurrent repair/update conflicts instead of overwriting', async () => {
+      soClient.update.mockResolvedValue({} as never);
+
+      await service.setLegacyKey('fd-1', 'legacy_priority', { version: 'v3' });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        'fd-1',
+        { legacyKey: 'legacy_priority' },
+        { version: 'v3' }
+      );
+    });
+
+    it('propagates a version conflict from a concurrent write instead of retrying', async () => {
+      soClient.update.mockRejectedValue(new Error('version conflict'));
+
+      await expect(
+        service.setLegacyKey('fd-1', 'legacy_priority', { version: 'stale' })
+      ).rejects.toThrow('version conflict');
+    });
+
+    it('does not refresh the analytics v2 data view — legacyKey has no effect on runtime fields', async () => {
+      soClient.update.mockResolvedValue({} as never);
+
+      await service.setLegacyKey('fd-1', 'legacy_priority');
+
+      expect(refreshAnalyticsV2DataView).not.toHaveBeenCalled();
+    });
+
+    it('resolves with the saved objects client update response', async () => {
+      const updateResponse = { id: 'fd-1', attributes: { legacyKey: 'legacy_priority' } };
+      soClient.update.mockResolvedValue(updateResponse as never);
+
+      const result = await service.setLegacyKey('fd-1', 'legacy_priority');
+
+      expect(result).toBe(updateResponse);
+    });
+  });
+
   describe('deleteFieldDefinition', () => {
     it('deletes the saved object by id', async () => {
       soClient.delete.mockResolvedValue({});
@@ -436,6 +637,35 @@ describe('FieldDefinitionsService', () => {
       await service.deleteFieldDefinition('fd-1');
 
       expect(soClient.delete).toHaveBeenCalledWith(CASE_FIELD_DEFINITION_SAVED_OBJECT, 'fd-1');
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('performs a version-guarded no-op update before deleting when options.version is provided', async () => {
+      // SO client `delete` has no version/OCC option, so a version-guarded compare-and-swap
+      // update is used as a gate: a concurrent write since the caller's read bumps the version
+      // and this 409s before the delete is attempted.
+      soClient.update.mockResolvedValue({} as never);
+      soClient.delete.mockResolvedValue({});
+
+      await service.deleteFieldDefinition('fd-1', { version: 'v4' });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        'fd-1',
+        {},
+        { version: 'v4' }
+      );
+      expect(soClient.delete).toHaveBeenCalledWith(CASE_FIELD_DEFINITION_SAVED_OBJECT, 'fd-1');
+    });
+
+    it('does not delete when the version-guarded update conflicts', async () => {
+      soClient.update.mockRejectedValue(new Error('version conflict'));
+
+      await expect(service.deleteFieldDefinition('fd-1', { version: 'stale' })).rejects.toThrow(
+        'version conflict'
+      );
+
+      expect(soClient.delete).not.toHaveBeenCalled();
     });
 
     it('refreshes the analytics v2 data view after deleting', async () => {

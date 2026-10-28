@@ -23,6 +23,7 @@ export const SCOUT_TEST_CONFIG_STATS_PATH = path.resolve(
   SCOUT_OUTPUT_ROOT,
   'test_config_stats.json'
 );
+export const SCOUT_FLAKY_TESTS_PATH = path.resolve(SCOUT_OUTPUT_ROOT, 'flaky_tests.json');
 
 // Scout definitions
 
@@ -37,12 +38,15 @@ export const PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB =
 
 export const EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB = '{examples,x-pack/examples}/**/test/scout{_*,}';
 
-export const CORE_MODULE_SCOUT_ROOT_PATH_GLOB = 'src/core/test/scout{_*,}';
+export const CORE_MODULE_SCOUT_ROOT_PATH_GLOB = 'src/core/packages/core/test/scout{_*,}';
+
+export const DEV_BUILD_SCOUT_ROOT_PATH_GLOB = 'src/dev/build/test/scout{_*,}';
 
 export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB = `{${[
   PLATFORM_AND_SOLUTION_SCOUT_ROOT_PATH_GLOB,
   EXAMPLE_PLUGIN_SCOUT_ROOT_PATH_GLOB,
   CORE_MODULE_SCOUT_ROOT_PATH_GLOB,
+  DEV_BUILD_SCOUT_ROOT_PATH_GLOB,
 ].join(',')}}`;
 
 export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX = new RegExp(
@@ -82,7 +86,7 @@ export const SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX = new RegExp(
 );
 
 /**
- * Unified regex matching both platform/solution and example plugin Playwright config paths.
+ * Unified regex matching platform/solution, example plugin, and build tooling Playwright config paths.
  * Uses named capture groups so callers can branch on `examplesRoot` to decide how to
  * resolve module metadata (kibana.jsonc vs directory-derived).
  */
@@ -90,7 +94,9 @@ export const SCOUT_UNIFIED_CONFIG_PATH_REGEX = new RegExp(
   `^(?:` +
     `(?<examplesRoot>examples|x-pack/examples)/(?<examplePlugin>[^/]+)` +
     `|` +
-    `(?<coreRoot>src/core)` +
+    `(?<coreRoot>src/core/packages/core)` +
+    `|` +
+    `(?<devBuildRoot>src/dev/build)` +
     `|` +
     `(?:src|x-pack)/(?:(?<platformOrCore>platform|core)|solutions/(?<solution>\\w+))` +
     `/(?<moduleKind>plugins|packages)/?(?<moduleVisibility>shared|private|)` +
@@ -181,10 +187,11 @@ export const SCOUT_TEST_SCOPE_PATTERN = new RegExp(
  */
 export const CRITICAL_FILES_SCOUT: readonly string[] = [
   'package.json',
-  'yarn.lock',
+  'pnpm-lock.yaml',
   'tsconfig.json',
-  '.node-version',
   '.nvmrc',
+  'config/**/*.yml',
+  'config/node.options',
   'src/setup_node_env/**/*',
   'packages/kbn-babel-preset/**/*',
   'src/platform/packages/shared/kbn-repo-info/**/*',

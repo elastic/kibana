@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
@@ -17,19 +17,31 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 
-const suggestionsBodySchema = z
-  .object({
-    field: z.string().min(1).max(256).describe('The field to suggest values for.'),
-    query: z.string().max(1024).describe('Optional search query for filtering suggestions.'),
-    // Sent by @kbn/kql's value suggestion provider; unused by this route.
-    fieldMeta: z.unknown().optional(),
-    filters: z.unknown().optional(),
-  })
-  .strict();
+const MAX_UNUSED_FIELD_LENGTH = 16_000;
+const unusedFieldSchema = lazySchema(() =>
+  z
+    .unknown()
+    .refine((value) => JSON.stringify(value).length <= MAX_UNUSED_FIELD_LENGTH, {
+      message: `must not exceed ${MAX_UNUSED_FIELD_LENGTH} characters when serialized`,
+    })
+    .optional()
+);
 
-const matcherValueSuggestionsResponseSchema = z
-  .array(z.string())
-  .describe('The list of suggested matcher values.');
+const suggestionsBodySchema = lazySchema(() =>
+  z
+    .object({
+      field: z.string().min(1).max(256).describe('The field to suggest values for.'),
+      query: z.string().max(1024).describe('Optional search query for filtering suggestions.'),
+      // filters and fieldMeta are sent by @kbn/kql's value suggestion provider; unused by this route, so only their size is bounded.
+      fieldMeta: unusedFieldSchema,
+      filters: unusedFieldSchema,
+    })
+    .strict()
+);
+
+const matcherValueSuggestionsResponseSchema = lazySchema(() =>
+  z.array(z.string()).describe('The list of suggested matcher values.')
+);
 
 type SuggestionsBody = z.infer<typeof suggestionsBodySchema>;
 
@@ -39,13 +51,11 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
   static path = ALERTING_V2_INTERNAL_SUGGESTIONS_MATCHER_VALUES_API_PATH;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [
-        ALERTING_V2_API_PRIVILEGES.rules.read,
-        ALERTING_V2_API_PRIVILEGES.alerts.read,
-      ],
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.read],
     },
   };
   static routeOptions = {
+    access: 'internal' as const,
     summary: 'Get matcher value suggestions',
     description:
       'Get suggestions for action policy matcher values based on an optional search query.',

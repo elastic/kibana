@@ -1,8 +1,7 @@
 {
-  "sha1": "a33433c2983800a0256c54af1a7b543909ae7f1a",
+  "sha1": "51d3ddde061a98a4c5d6cb7726ae166c6075eb5a",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_a11y.spec.ts",
-        "line": 21,
-        "column": 7
+        "line": 18,
+        "column": 21
       }
     },
     {
@@ -29,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_actions.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 18,
+        "column": 54
       }
     },
     {
@@ -43,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_actions.spec.ts",
-        "line": 44,
-        "column": 7
+        "line": 29,
+        "column": 13
       }
     },
     {
@@ -57,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_actions.spec.ts",
-        "line": 59,
-        "column": 7
+        "line": 42,
+        "column": 5
       }
     },
     {
@@ -71,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_assign.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 16,
+        "column": 21
       }
     },
     {
@@ -85,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_assign.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 28,
+        "column": 11
       }
     },
     {
@@ -99,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_assign.spec.ts",
-        "line": 59,
-        "column": 7
+        "line": 43,
+        "column": 11
       }
     },
     {
@@ -113,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 18,
+        "column": 54
       }
     },
     {
@@ -127,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 29,
+        "column": 11
       }
     },
     {
@@ -141,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
-        "line": 66,
-        "column": 7
+        "line": 47,
+        "column": 11
       }
     },
     {
@@ -155,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
-        "line": 89,
-        "column": 7
+        "line": 66,
+        "column": 8
       }
     },
     {
@@ -169,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 18,
+        "column": 70
       }
     },
     {
@@ -183,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 43,
-        "column": 7
+        "line": 30,
+        "column": 22
       }
     },
     {
@@ -197,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 54,
-        "column": 7
+        "line": 43,
+        "column": 93
       }
     },
     {
@@ -211,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 69,
-        "column": 7
+        "line": 56,
+        "column": 23
       }
     },
     {
@@ -225,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 86,
-        "column": 7
+        "line": 76,
+        "column": 24
       }
     },
     {
@@ -239,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 112,
-        "column": 7
+        "line": 100,
+        "column": 23
       }
     },
     {
@@ -253,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
-        "line": 129,
-        "column": 7
+        "line": 112,
+        "column": 68
       }
     },
     {
@@ -267,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 40,
+        "column": 23
       }
     },
     {
@@ -281,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 67,
-        "column": 7
+        "line": 45,
+        "column": 42
       }
     },
     {
@@ -295,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 78,
-        "column": 7
+        "line": 50,
+        "column": 11
       }
     },
     {
@@ -309,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 92,
-        "column": 7
+        "line": 60,
+        "column": 9
       }
     },
     {
@@ -323,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 114,
-        "column": 7
+        "line": 87,
+        "column": 8
       }
     },
     {
@@ -337,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 140,
-        "column": 7
+        "line": 109,
+        "column": 97
       }
     },
     {
@@ -351,8 +350,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 18,
+        "column": 54
       }
     },
     {
@@ -365,8 +364,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 25,
+        "column": 21
       }
     },
     {
@@ -379,8 +378,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 61,
-        "column": 7
+        "line": 40,
+        "column": 11
       }
     },
     {
@@ -393,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 77,
-        "column": 7
+        "line": 53,
+        "column": 20
       }
     },
     {
@@ -407,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 102,
-        "column": 7
+        "line": 70,
+        "column": 12
       }
     },
     {
@@ -421,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 123,
-        "column": 7
+        "line": 83,
+        "column": 16
       }
     },
     {
@@ -435,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 92,
+        "column": 24
       }
     },
     {
@@ -444,12 +443,13 @@
       "title": "Tags management feature controls no saved objects tagging privileges cannot access tags page",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 152,
-        "column": 7
+        "line": 145,
+        "column": 5
       }
     },
     {
@@ -457,12 +457,13 @@
       "title": "Tags management feature controls read role can see all tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 163,
-        "column": 9
+        "line": 151,
+        "column": 8
       }
     },
     {
@@ -470,12 +471,13 @@
       "title": "Tags management feature controls read role cannot delete a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 161,
+        "column": 23
       }
     },
     {
@@ -483,12 +485,13 @@
       "title": "Tags management feature controls read role cannot bulk delete tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 180,
-        "column": 9
+        "line": 163,
+        "column": 81
       }
     },
     {
@@ -496,12 +499,13 @@
       "title": "Tags management feature controls read role cannot create a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 190,
-        "column": 9
+        "line": 170,
+        "column": 67
       }
     },
     {
@@ -509,12 +513,13 @@
       "title": "Tags management feature controls read role cannot edit a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 198,
-        "column": 9
+        "line": 179,
+        "column": 75
       }
     },
     {
@@ -522,12 +527,13 @@
       "title": "Tags management feature controls read role cannot see tag relations",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 208,
-        "column": 9
+        "line": 183,
+        "column": 13
       }
     },
     {
@@ -535,12 +541,13 @@
       "title": "Tags management feature controls write role can see all tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 163,
-        "column": 9
+        "line": 151,
+        "column": 8
       }
     },
     {
@@ -548,12 +555,13 @@
       "title": "Tags management feature controls write role can delete a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 161,
+        "column": 23
       }
     },
     {
@@ -561,12 +569,13 @@
       "title": "Tags management feature controls write role can bulk delete tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 180,
-        "column": 9
+        "line": 163,
+        "column": 81
       }
     },
     {
@@ -574,12 +583,13 @@
       "title": "Tags management feature controls write role can create a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 190,
-        "column": 9
+        "line": 170,
+        "column": 67
       }
     },
     {
@@ -587,12 +597,13 @@
       "title": "Tags management feature controls write role can edit a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 198,
-        "column": 9
+        "line": 179,
+        "column": 75
       }
     },
     {
@@ -600,12 +611,13 @@
       "title": "Tags management feature controls write role cannot see tag relations",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 208,
-        "column": 9
+        "line": 183,
+        "column": 13
       }
     },
     {
@@ -613,12 +625,13 @@
       "title": "Tags management feature controls read + so management read role can see all tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 163,
-        "column": 9
+        "line": 151,
+        "column": 8
       }
     },
     {
@@ -626,12 +639,13 @@
       "title": "Tags management feature controls read + so management read role cannot delete a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 161,
+        "column": 23
       }
     },
     {
@@ -639,12 +653,13 @@
       "title": "Tags management feature controls read + so management read role cannot bulk delete tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 180,
-        "column": 9
+        "line": 163,
+        "column": 81
       }
     },
     {
@@ -652,12 +667,13 @@
       "title": "Tags management feature controls read + so management read role cannot create a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 190,
-        "column": 9
+        "line": 170,
+        "column": 67
       }
     },
     {
@@ -665,12 +681,13 @@
       "title": "Tags management feature controls read + so management read role cannot edit a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 198,
-        "column": 9
+        "line": 179,
+        "column": 75
       }
     },
     {
@@ -678,12 +695,13 @@
       "title": "Tags management feature controls read + so management read role can see tag relations",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 208,
-        "column": 9
+        "line": 183,
+        "column": 13
       }
     },
     {
@@ -691,12 +709,13 @@
       "title": "Tags management feature controls base write role can see all tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 163,
-        "column": 9
+        "line": 151,
+        "column": 8
       }
     },
     {
@@ -704,12 +723,13 @@
       "title": "Tags management feature controls base write role can delete a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 161,
+        "column": 23
       }
     },
     {
@@ -717,12 +737,13 @@
       "title": "Tags management feature controls base write role can bulk delete tags",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 180,
-        "column": 9
+        "line": 163,
+        "column": 81
       }
     },
     {
@@ -730,12 +751,13 @@
       "title": "Tags management feature controls base write role can create a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 190,
-        "column": 9
+        "line": 170,
+        "column": 67
       }
     },
     {
@@ -743,12 +765,13 @@
       "title": "Tags management feature controls base write role can edit a tag",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 198,
-        "column": 9
+        "line": 179,
+        "column": 75
       }
     },
     {
@@ -756,12 +779,13 @@
       "title": "Tags management feature controls base write role can see tag relations",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
-        "line": 208,
-        "column": 9
+        "line": 183,
+        "column": 13
       }
     },
     {
@@ -774,8 +798,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_listing.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 19,
+        "column": 41
       }
     },
     {
@@ -788,8 +812,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 19,
+        "column": 53
       }
     },
     {
@@ -802,8 +826,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 29,
+        "column": 61
       }
     },
     {
@@ -816,8 +840,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 49,
-        "column": 7
+        "line": 39,
+        "column": 8
       }
     },
     {
@@ -830,8 +854,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 59,
-        "column": 7
+        "line": 49,
+        "column": 72
       }
     },
     {
@@ -844,8 +868,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 75,
-        "column": 7
+        "line": 60,
+        "column": 23
       }
     },
     {
@@ -858,8 +882,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
-        "line": 99,
-        "column": 7
+        "line": 83,
+        "column": 23
       }
     },
     {
@@ -872,8 +896,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 19,
+        "column": 41
       }
     },
     {
@@ -886,8 +910,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
-        "line": 53,
-        "column": 7
+        "line": 34,
+        "column": 23
       }
     },
     {
@@ -900,8 +924,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 39,
+        "column": 18
       }
     },
     {
@@ -914,8 +938,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
-        "line": 77,
-        "column": 7
+        "line": 48,
+        "column": 11
       }
     },
     {
@@ -928,8 +952,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
-        "line": 94,
-        "column": 7
+        "line": 57,
+        "column": 11
       }
     },
     {
@@ -942,8 +966,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 20,
+        "column": 8
       }
     },
     {
@@ -956,8 +980,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 33,
+        "column": 23
       }
     },
     {
@@ -970,8 +994,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 56,
-        "column": 7
+        "line": 46,
+        "column": 23
       }
     },
     {
@@ -984,8 +1008,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 61,
+        "column": 23
       }
     },
     {
@@ -998,8 +1022,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 86,
-        "column": 7
+        "line": 75,
+        "column": 23
       }
     },
     {
@@ -1012,7 +1036,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
-        "line": 110,
+        "line": 98,
         "column": 7
       }
     }

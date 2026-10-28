@@ -40,6 +40,19 @@ describe('UiamOAuth', () => {
     });
   });
 
+  it('forwards the request so the UIAM service can extract the token and client authentication', async () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        authorization: 'Bearer essu_ephemeral_token',
+        'x-client-authentication': 'upstream-shared-secret',
+      },
+    });
+
+    await uiamOAuth.listClients(request);
+
+    expect(mockUiam.listOAuthClients).toHaveBeenCalledWith(request, undefined, undefined);
+  });
+
   describe('createClient()', () => {
     it('returns null when license is not enabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
@@ -70,7 +83,7 @@ describe('UiamOAuth', () => {
       });
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith('essu_access_token', {
+      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith(request, {
         resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
         project_id: 'test-project-id',
         client_name: 'Test',
@@ -101,7 +114,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.createClient(request, params);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith('essu_access_token', params);
+      expect(mockUiam.createOAuthClient).toHaveBeenCalledWith(request, params);
     });
 
     it('logs and throws error when UIAM call fails', async () => {
@@ -139,7 +152,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.listClients(request, 'c1');
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith('essu_access_token', 'c1', undefined);
+      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith(request, 'c1', undefined);
     });
 
     it('forwards project_id filter to UIAM service', async () => {
@@ -150,11 +163,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.listClients(request, undefined, 'my-project-id');
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith(
-        'essu_access_token',
-        undefined,
-        'my-project-id'
-      );
+      expect(mockUiam.listOAuthClients).toHaveBeenCalledWith(request, undefined, 'my-project-id');
     });
   });
 
@@ -183,7 +192,7 @@ describe('UiamOAuth', () => {
       });
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.updateOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1', {
+      expect(mockUiam.updateOAuthClient).toHaveBeenCalledWith(request, 'c1', {
         client_name: 'Updated',
         client_metadata: { k: 'v' },
       });
@@ -206,7 +215,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.updateClient(request, 'c1', params);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.updateOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1', params);
+      expect(mockUiam.updateOAuthClient).toHaveBeenCalledWith(request, 'c1', params);
     });
   });
 
@@ -232,7 +241,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.revokeClient(request, 'c1', 'done');
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.revokeOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1', 'done');
+      expect(mockUiam.revokeOAuthClient).toHaveBeenCalledWith(request, 'c1', 'done');
     });
   });
 
@@ -253,7 +262,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.deleteClient(request, 'c1');
 
       expect(result).toBe(true);
-      expect(mockUiam.deleteOAuthClient).toHaveBeenCalledWith('essu_access_token', 'c1');
+      expect(mockUiam.deleteOAuthClient).toHaveBeenCalledWith(request, 'c1');
     });
 
     it('logs and throws error when UIAM call fails', async () => {
@@ -292,12 +301,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.listConnections(request, 'c1', 'conn1');
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.listOAuthConnections).toHaveBeenCalledWith(
-        'essu_access_token',
-        'c1',
-        'conn1',
-        undefined
-      );
+      expect(mockUiam.listOAuthConnections).toHaveBeenCalledWith(request, 'c1', 'conn1', undefined);
     });
 
     it('forwards project_id filter to UIAM service', async () => {
@@ -314,7 +318,7 @@ describe('UiamOAuth', () => {
 
       expect(result).toEqual(mockResponse);
       expect(mockUiam.listOAuthConnections).toHaveBeenCalledWith(
-        'essu_access_token',
+        request,
         undefined,
         undefined,
         'my-project-id'
@@ -348,12 +352,9 @@ describe('UiamOAuth', () => {
       });
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.updateOAuthConnection).toHaveBeenCalledWith(
-        'essu_access_token',
-        'c1',
-        'conn1',
-        { name: 'New name' }
-      );
+      expect(mockUiam.updateOAuthConnection).toHaveBeenCalledWith(request, 'c1', 'conn1', {
+        name: 'New name',
+      });
     });
 
     it('logs and throws error when UIAM call fails', async () => {
@@ -393,12 +394,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.revokeConnection(request, 'c1', 'conn1', 'reason');
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.revokeOAuthConnection).toHaveBeenCalledWith(
-        'essu_access_token',
-        'c1',
-        'conn1',
-        'reason'
-      );
+      expect(mockUiam.revokeOAuthConnection).toHaveBeenCalledWith(request, 'c1', 'conn1', 'reason');
     });
   });
 
@@ -419,11 +415,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.deleteConnection(request, 'c1', 'conn1');
 
       expect(result).toBe(true);
-      expect(mockUiam.deleteOAuthConnection).toHaveBeenCalledWith(
-        'essu_access_token',
-        'c1',
-        'conn1'
-      );
+      expect(mockUiam.deleteOAuthConnection).toHaveBeenCalledWith(request, 'c1', 'conn1');
     });
 
     it('logs and throws error when UIAM call fails', async () => {
@@ -463,7 +455,7 @@ describe('UiamOAuth', () => {
       const result = await uiamOAuth.resolveUsers(request, ['user-1']);
 
       expect(result).toEqual(mockResponse);
-      expect(mockUiam.resolveUsers).toHaveBeenCalledWith('essu_access_token', ['user-1']);
+      expect(mockUiam.resolveUsers).toHaveBeenCalledWith(request, ['user-1']);
     });
 
     it('propagates the error when UIAM call fails', async () => {
@@ -471,30 +463,6 @@ describe('UiamOAuth', () => {
       const request = createMockRequest('Bearer essu_access_token');
 
       await expect(uiamOAuth.resolveUsers(request, ['user-1'])).rejects.toThrow('UIAM error');
-    });
-  });
-
-  describe('getAccessToken()', () => {
-    it('extracts UIAM access token from request', () => {
-      const request = createMockRequest('Bearer essu_my_token');
-
-      expect(UiamOAuth.getAccessToken(request)).toBe('essu_my_token');
-    });
-
-    it('throws when authorization header is missing', () => {
-      const request = createMockRequest();
-
-      expect(() => UiamOAuth.getAccessToken(request)).toThrow(
-        'Request does not contain an authorization header'
-      );
-    });
-
-    it('throws when credential is not a UIAM credential', () => {
-      const request = createMockRequest('Bearer regular_token');
-
-      expect(() => UiamOAuth.getAccessToken(request)).toThrow(
-        'Provided credential is not compatible with UIAM'
-      );
     });
   });
 });

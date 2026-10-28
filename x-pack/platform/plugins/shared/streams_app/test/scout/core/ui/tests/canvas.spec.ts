@@ -5,83 +5,104 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
+import { tags, type ScoutPage } from '@kbn/scout';
 import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import { generateLogsData } from '../fixtures/generators';
 
-const INGESTION_DURATION_MINUTES = 5;
-const INGESTION_RATE = 10;
-const PLAIN_STREAM = 'logs-canvas-plain';
-const PROCESSING_STREAM = 'logs-canvas-processing';
+const SOURCE_NAME = 'OTLP';
+const DESTINATION_NAME = 'Elasticsearch';
+const SUPPORTED_TELEMETRY = ['logs', 'metrics', 'traces'];
+
+/**
+ * Unit writes go through the config distributor, which the test stack does not
+ * run, so the map is served from a mocked unit instead. The map only renders
+ * supported source and destination types, so this fixture uses OTLP and
+ * Elasticsearch rather than the temporary nop/debug defaults.
+ */
+const MOCK_UNIT = {
+  unit: {
+    sources: [
+      {
+        id: 'otlp-input',
+        name: SOURCE_NAME,
+        type: 'otlp',
+        supported_telemetry: SUPPORTED_TELEMETRY,
+      },
+    ],
+    destinations: [
+      {
+        id: 'es-out',
+        name: DESTINATION_NAME,
+        type: 'elasticsearch',
+        supported_telemetry: SUPPORTED_TELEMETRY,
+      },
+    ],
+    pipelines: [
+      {
+        id: 'main',
+        supported_telemetry: SUPPORTED_TELEMETRY,
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'destinations', value: ['es-out'] },
+        ],
+      },
+    ],
+  },
+  ui_metadata: {},
+};
+
+const mockUnitDefinition = async (page: ScoutPage) => {
+  await page.route('**/internal/streams/unit/default', async (route) => {
+    if (route.request().method() !== 'GET') {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(MOCK_UNIT),
+    });
+  });
+  await page.route('**/internal/streams/unit/*/_resolve_indices', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ destinations: {} }),
+    });
+  });
+};
 
 test.describe(
-  'Stream canvas - classic source to destination nodes',
+  'Stream map',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ kbnClient, apiServices, logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ kbnClient }) => {
       await kbnClient.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_CANVAS]: true,
       });
-
-      const currentTime = Date.now();
-      const startTime = new Date(
-        currentTime - INGESTION_DURATION_MINUTES * 60 * 1000
-      ).toISOString();
-      const endTime = new Date(currentTime).toISOString();
-
-      for (const index of [PLAIN_STREAM, PROCESSING_STREAM]) {
-        await generateLogsData(logsSynthtraceEsClient)({
-          index,
-          startTime,
-          endTime,
-          docsPerMinute: INGESTION_RATE,
-        });
-      }
-
-      // Give one stream processing so its destination renders the processing glyph.
-      await apiServices.streams.updateStreamProcessors(PROCESSING_STREAM, {
-        steps: [
-          {
-            action: 'set',
-            to: 'canvas_test_field',
-            value: 'canvas_test_value',
-          },
-        ],
-      });
     });
 
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoStreamsLayoutTab('canvas');
+      await mockUnitDefinition(page);
+      await pageObjects.streams.gotoStreamsLayoutTab('map');
     });
 
-    test.afterAll(async ({ kbnClient, apiServices }) => {
-      for (const name of [PLAIN_STREAM, PROCESSING_STREAM]) {
-        try {
-          await apiServices.streams.deleteStream(name);
-        } catch {
-          // stream may already be gone
-        }
-      }
-
+    test.afterAll(async ({ kbnClient }) => {
       await kbnClient.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_CANVAS]: false,
       });
     });
 
-    test('renders inferred source and destination nodes for classic streams', async ({
+    test('renders unit sources and destinations without a Data streams hub', async ({
       pageObjects: { streams },
     }) => {
       await expect(streams.canvasTab).toBeVisible();
-
-      // The inferred source node is labeled from the stream name.
-      await expect(streams.getCanvasSourceNode(PLAIN_STREAM)).toBeVisible();
-
-      // Both seeded streams render as their own destination node.
-      await expect(streams.getCanvasDestinationNode(PLAIN_STREAM)).toBeVisible();
-      await expect(streams.getCanvasDestinationNode(PROCESSING_STREAM)).toBeVisible();
+      await expect(streams.canvasDataStreamsNode).toHaveCount(0);
+      await expect(streams.getCanvasSourceNode(SOURCE_NAME)).toBeVisible();
+      await expect(streams.getCanvasDestinationNode(DESTINATION_NAME)).toBeVisible();
+      await expect(streams.canvasEmptyState).toHaveCount(0);
     });
 
     test('renders a minimap that collapses and reopens', async ({ pageObjects: { streams } }) => {
@@ -99,7 +120,7 @@ test.describe(
       pageObjects: { streams },
     }) => {
       // A single node has no tidy action, so right-clicking one opens no menu.
-      await streams.rightClickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM));
+      await streams.rightClickCanvasNode(streams.getCanvasDestinationNode(DESTINATION_NAME));
       await expect(streams.canvasContextMenu).toHaveCount(0);
 
       // Right-clicking the empty canvas offers "Tidy up" for the whole graph.
@@ -110,6 +131,34 @@ test.describe(
       await expect(streams.canvasContextMenu).toHaveCount(0);
       // Tidying records a history step, so undo becomes available.
       await expect(streams.canvasUndo).toBeEnabled();
+    });
+
+    test('keeps the viewport where the user left it when tidying up', async ({
+      pageObjects: { streams },
+    }) => {
+      await streams.zoomInCanvas();
+      const transform = await streams.getCanvasViewportTransform();
+
+      // Tidy up relayouts the nodes and must leave the camera alone.
+      await streams.tidyUpCanvasFromPane();
+      await expect(streams.canvasUndo).toBeEnabled();
+
+      expect(await streams.getCanvasViewportTransform()).toBe(transform);
+    });
+
+    test('keeps the viewport where the user left it when opening a node flyout', async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await streams.zoomInCanvas();
+      const transform = await streams.getCanvasViewportTransform();
+
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(DESTINATION_NAME));
+      await expect(page.testSubj.locator('streamsUnitDestinationFlyout')).toBeVisible();
+
+      // The flyout is an overlay, so the canvas is neither resized nor
+      // remounted and the viewport should be untouched.
+      expect(await streams.getCanvasViewportTransform()).toBe(transform);
     });
 
     test('renders the canvas toolbar with undo/redo and add-node placeholders', async ({
@@ -130,9 +179,7 @@ test.describe(
       pageObjects: { streams },
     }) => {
       // Nodes carry a screen-reader label so Tab-focusing announces what they are.
-      await expect(
-        streams.getCanvasNodeByAriaLabel(`Source: ${PLAIN_STREAM}, async bulk ingest`)
-      ).toBeVisible();
+      await expect(page.locator('.react-flow__node[aria-label*="Destination:"]')).toBeVisible();
 
       // Escape closes an open context menu.
       await streams.openCanvasPaneContextMenu();
@@ -143,14 +190,18 @@ test.describe(
       await streams.tidyUpCanvasFromPane();
       await expect(streams.canvasUndo).toBeEnabled();
 
-      await streams.getCanvasDestinationNode(PLAIN_STREAM).click({ modifiers: ['Shift'] });
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(DESTINATION_NAME), {
+        modifiers: ['Shift'],
+      });
       await page.keyboard.press('Control+z');
       await expect(streams.canvasUndo).toBeDisabled();
     });
 
     test('undoes a keyboard-driven node reposition', async ({ page, pageObjects: { streams } }) => {
       // Selecting + focusing a node lets the arrow keys reposition it.
-      await streams.getCanvasDestinationNode(PLAIN_STREAM).click({ modifiers: ['Shift'] });
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(DESTINATION_NAME), {
+        modifiers: ['Shift'],
+      });
       await page.keyboard.press('ArrowRight');
 
       // The keyboard move records a history step even though no pointer drag ran,
@@ -158,66 +209,6 @@ test.describe(
       await expect(streams.canvasUndo).toBeEnabled();
       await page.keyboard.press('Control+z');
       await expect(streams.canvasUndo).toBeDisabled();
-    });
-
-    test('shows the processing glyph only on destinations with processing', async ({
-      pageObjects: { streams },
-    }) => {
-      await expect(streams.getCanvasProcessingGlyph(PROCESSING_STREAM)).toBeVisible();
-      await expect(streams.getCanvasProcessingGlyph(PLAIN_STREAM)).toHaveCount(0);
-    });
-
-    test('shows a flyout for classic streams when a destination node is clicked', async ({
-      page,
-    }) => {
-      await page.testSubj.click('streamsCanvasDestinationNode');
-
-      const loadingEffect = page.testSubj.locator('streamsCanvasFlyout-loading');
-      const flyout = page.testSubj.locator('streamsCanvasFlyout');
-
-      await expect(flyout).toBeVisible();
-      await expect(page.testSubj.locator('streamsCanvasFlyoutTitle')).toBeVisible();
-
-      await loadingEffect.waitFor({ state: 'hidden' });
-
-      await expect(flyout.getByTestId('classicStreamBadge')).toBeVisible();
-      await expect(flyout.getByTestId('streamsCanvasFlyoutTab-overview')).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
-
-      await expect(page).toHaveURL(/flyoutName:/);
-      await expect(page).toHaveURL(/flyoutTab:overview/);
-
-      const attachmentsTab = flyout.getByTestId('streamsCanvasFlyoutTab-attachments');
-
-      await attachmentsTab.click();
-
-      await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
-      // Expect the url to have changed, and to have a certain tab value
-      await expect(page).toHaveURL(/flyoutTab:attachments/);
-    });
-
-    test('navigating away from a flyout and back will restore the flyout to its previous state', async ({
-      page,
-      pageObjects,
-    }) => {
-      await page.testSubj.click('streamsCanvasDestinationNode');
-
-      const flyout = page.testSubj.locator('streamsCanvasFlyout');
-      const attachmentsTab = flyout.getByTestId('streamsCanvasFlyoutTab-attachments');
-
-      await attachmentsTab.click();
-      await pageObjects.discover.goto({ queryMode: 'esql' });
-
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-      await expect(page).not.toHaveURL(/flyoutTab:attachments/);
-
-      await page.goBack();
-
-      await expect(page).toHaveURL(/flyoutTab:attachments/);
-      await expect(flyout).toBeVisible();
-      await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
     });
   }
 );

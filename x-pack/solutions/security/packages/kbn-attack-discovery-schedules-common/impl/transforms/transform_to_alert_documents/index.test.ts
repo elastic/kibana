@@ -18,7 +18,14 @@ import {
   ALERT_RISK_SCORE,
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
 } from '../../fields/field_names';
+
+/**
+ * An arbitrary producer identity. No production caller passes a
+ * `generationSource` yet — this only exercises the opt-in mechanism.
+ */
+const TEST_GENERATION_SOURCE = 'test-producer';
 
 describe('Transform attack discoveries to alert documents', () => {
   describe('transformToBaseAlertDocument', () => {
@@ -188,6 +195,33 @@ describe('Transform attack discoveries to alert documents', () => {
     });
   });
 
+  describe('transformToBaseAlertDocument generation source', () => {
+    const { attackDiscoveries, generationUuid, ...alertsParams } =
+      mockCreateAttackDiscoveryAlertsParams;
+
+    const transform = (generationSource?: string) =>
+      transformToBaseAlertDocument({
+        alertDocId: 'test-alert-id',
+        alertInstanceId: 'test-alert-instance-id',
+        attackDiscovery: attackDiscoveries[0],
+        alertsParams,
+        generationSource,
+        spaceId: 'default',
+      });
+
+    it(`does NOT set ${ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE} when no generation source is provided`, () => {
+      // the field must be absent, not undefined: `toEqual` ignores undefined
+      // properties, so an absent key is what keeps existing documents unchanged
+      expect(Object.keys(transform())).not.toContain(ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE);
+    });
+
+    it(`sets ${ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE} when a generation source is provided`, () => {
+      expect(transform(TEST_GENERATION_SOURCE)[ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE]).toBe(
+        TEST_GENERATION_SOURCE
+      );
+    });
+  });
+
   describe('generateAttackDiscoveryAlertHash', () => {
     const computeSha256Hash = jest.fn().mockReturnValue('mocked-hash');
 
@@ -321,6 +355,79 @@ describe('Transform attack discoveries to alert documents', () => {
       });
 
       expect(result).toBe('expected-hash-value');
+    });
+
+    describe('generationSource', () => {
+      it('appends nothing to the hash input when generationSource is not provided', () => {
+        generateAttackDiscoveryAlertHash({
+          ...defaultProps,
+          attackDiscovery: mockAttackDiscoveries[0],
+        });
+        generateAttackDiscoveryAlertHash({
+          ...defaultProps,
+          attackDiscovery: mockAttackDiscoveries[0],
+          generationSource: undefined,
+        });
+
+        const [call1Input] = computeSha256Hash.mock.calls[0];
+        const [call2Input] = computeSha256Hash.mock.calls[1];
+
+        expect(call1Input).toBe(call2Input);
+        expect(call1Input).not.toContain('generation_source');
+      });
+
+      it('appends the delimited generationSource to the hash input', () => {
+        generateAttackDiscoveryAlertHash({
+          ...defaultProps,
+          attackDiscovery: mockAttackDiscoveries[0],
+        });
+        generateAttackDiscoveryAlertHash({
+          ...defaultProps,
+          attackDiscovery: mockAttackDiscoveries[0],
+          generationSource: TEST_GENERATION_SOURCE,
+        });
+
+        const [withoutSource] = computeSha256Hash.mock.calls[0];
+        const [withSource] = computeSha256Hash.mock.calls[1];
+
+        expect(withSource).toBe(`${withoutSource}|generation_source=${TEST_GENERATION_SOURCE}`);
+      });
+
+      it('generates the same input for the same generationSource', () => {
+        generateAttackDiscoveryAlertHash({
+          ...defaultProps,
+          attackDiscovery: mockAttackDiscoveries[0],
+          generationSource: TEST_GENERATION_SOURCE,
+        });
+        generateAttackDiscoveryAlertHash({
+          ...defaultProps,
+          attackDiscovery: mockAttackDiscoveries[0],
+          generationSource: TEST_GENERATION_SOURCE,
+        });
+
+        const [call1Input] = computeSha256Hash.mock.calls[0];
+        const [call2Input] = computeSha256Hash.mock.calls[1];
+
+        expect(call1Input).toBe(call2Input);
+      });
+
+      it('generates different inputs for different generationSources', () => {
+        generateAttackDiscoveryAlertHash({
+          ...defaultProps,
+          attackDiscovery: mockAttackDiscoveries[0],
+          generationSource: 'producer-a',
+        });
+        generateAttackDiscoveryAlertHash({
+          ...defaultProps,
+          attackDiscovery: mockAttackDiscoveries[0],
+          generationSource: 'producer-b',
+        });
+
+        const [call1Input] = computeSha256Hash.mock.calls[0];
+        const [call2Input] = computeSha256Hash.mock.calls[1];
+
+        expect(call1Input).not.toBe(call2Input);
+      });
     });
   });
 });

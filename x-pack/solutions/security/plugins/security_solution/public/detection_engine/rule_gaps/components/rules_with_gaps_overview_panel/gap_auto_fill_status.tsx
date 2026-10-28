@@ -51,7 +51,7 @@ export const GapAutoFillStatus = React.memo(() => {
           color={badgeColor}
           data-test-subj="gap-auto-fill-status-badge"
           onClick={openRuleSettingsModal}
-          onClickAriaLabel={i18n.RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_LABEL}
+          onClickAriaLabel={`${i18n.RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_LABEL} ${badgeLabel}`}
         >
           {badgeLabel}
         </EuiBadge>

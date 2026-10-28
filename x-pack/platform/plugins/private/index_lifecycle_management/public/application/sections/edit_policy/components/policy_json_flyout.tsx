@@ -18,10 +18,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiCallOut,
   EuiLoadingSpinner,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { SerializedPolicy } from '../../../../../common/types';
 
@@ -91,19 +91,19 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
       break;
     case null:
       content = (
-        <EuiCallOut
+        <KbnDangerCallout
           data-test-subj="policyRequestInvalidAlert"
-          iconType="warning"
-          color="danger"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.policyJsonFlyout.validationErrorCallout.title',
             { defaultMessage: 'Invalid policy' }
           )}
-        >
-          {i18n.translate('xpack.indexLifecycleMgmt.policyJsonFlyout.validationErrorCallout.body', {
-            defaultMessage: 'To view the JSON for this policy address all validation errors.',
-          })}
-        </EuiCallOut>
+          text={i18n.translate(
+            'xpack.indexLifecycleMgmt.policyJsonFlyout.validationErrorCallout.body',
+            {
+              defaultMessage: 'To view the JSON for this policy address all validation errors.',
+            }
+          )}
+        />
       );
       break;
     default:

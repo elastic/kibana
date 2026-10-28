@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React from 'react';
+import { css } from '@emotion/react';
 import { Streams } from '@kbn/streams-schema';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { ErrorPrompt } from './error_prompt';
 import { StreamDetailAttachments } from '../stream_detail_attachments';
 import { useStreamFlyoutDetail } from '../../hooks/use_stream_flyout_detail';
@@ -26,10 +27,12 @@ export function StreamAttachments({ name, onClose }: StreamFlyoutProps) {
   return !definition || Streams.QueryStream.GetResponse.is(definition) ? (
     <ErrorPrompt name={name} onClose={onClose} />
   ) : (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <StreamDetailAttachments definition={definition} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div
+      css={css`
+        height: 100%;
+      `}
+    >
+      <StreamDetailAttachments definition={definition} />
+    </div>
   );
 }

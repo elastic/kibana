@@ -24,13 +24,9 @@ const basePolicyData: ActionPolicyAttachmentData = {
   description: 'Page on-call for critical episodes',
   enabled: true,
   destinations: [{ type: 'workflow', id: 'wf-1' }],
-  matcher: 'rule.id: "rule-1"',
-  groupBy: null,
-  tags: ['ops'],
-  groupingMode: 'per_episode',
-  throttle: null,
-  snoozedUntil: null,
-  updatedAt: '2026-04-10T00:00:00.000Z',
+  matcher: { tags: ['ops-critical'] },
+  grouping: { mode: 'per_alert' },
+  updated_at: '2026-04-10T00:00:00.000Z',
 };
 
 type ActionPolicyVersionedAttachment = VersionedAttachmentWithOrigin<

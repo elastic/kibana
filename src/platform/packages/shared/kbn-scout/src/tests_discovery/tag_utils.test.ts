@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { collectUniqueTags, getServerRunFlagsFromTags, getTestTagsForTarget } from './tag_utils';
+import {
+  collectUniqueTags,
+  getServerRunFlagsFromTags,
+  getTestTagsForTarget,
+  isScoutTestFile,
+  resolveTargetAttributes,
+  selectTestsForTargetAttributes,
+} from './tag_utils';
 
 describe('getTestTagsForTarget', () => {
   it('returns only @local-* tags for target "local"', () => {
@@ -52,7 +59,7 @@ describe('getTestTagsForTarget', () => {
 });
 
 describe('collectUniqueTags', () => {
-  it('returns unique tags from tests with passed status and .spec.ts file', () => {
+  it('returns unique tags from runnable tests', () => {
     const tests = [
       {
         expectedStatus: 'passed',
@@ -83,15 +90,37 @@ describe('collectUniqueTags', () => {
     expect(collectUniqueTags(tests)).toEqual([]);
   });
 
-  it('ignores tests whose file does not end with .spec.ts', () => {
+  it('includes tests registered from a shared factory file', () => {
     const tests = [
       {
         expectedStatus: 'passed',
-        location: { file: '/path/to/setup.ts' },
+        location: { file: 'test/scout/foo/ui/fixtures/artifact_tabs_suite.ts' },
         tags: ['@local-stateful-classic'],
       },
     ];
+    expect(collectUniqueTags(tests)).toEqual(['@local-stateful-classic']);
+  });
+
+  it('ignores global setup and teardown hooks', () => {
+    const tests = [
+      {
+        expectedStatus: 'passed',
+        location: { file: 'test/scout/foo/ui/parallel_tests/global.setup.ts' },
+        tags: ['@local-stateful-classic'],
+      },
+      {
+        expectedStatus: 'passed',
+        location: { file: 'test/scout/foo/ui/parallel_tests/global.teardown.ts' },
+        tags: ['@local-serverless-security_complete'],
+      },
+    ];
     expect(collectUniqueTags(tests)).toEqual([]);
+    expect(
+      isScoutTestFile({
+        expectedStatus: 'passed',
+        location: { file: 'test/scout/foo/ui/parallel_tests/global.setup.ts' },
+      })
+    ).toBe(false);
   });
 
   it('ignores tests without tags', () => {
@@ -106,6 +135,99 @@ describe('collectUniqueTags', () => {
 
   it('returns empty array for empty input', () => {
     expect(collectUniqueTags([])).toEqual([]);
+  });
+
+  it('drops limit tags, keeping only test target tags', () => {
+    const tests = [
+      {
+        expectedStatus: 'passed',
+        location: { file: '/path/to/foo.spec.ts' },
+        tags: ['@local-stateful-classic', '@limit/only-fips'],
+      },
+    ];
+    expect(collectUniqueTags(tests)).toEqual(['@local-stateful-classic']);
+  });
+});
+
+describe('selectTestsForTargetAttributes', () => {
+  const unlimited = { tags: ['@local-stateful-classic'] };
+  const onlyFips = { tags: ['@local-stateful-classic', '@limit/only-fips'] };
+  const exceptFips = { tags: ['@local-stateful-classic', '@limit/except-fips'] };
+
+  it('keeps unlimited and except-fips tests when no attributes are declared', () => {
+    expect(selectTestsForTargetAttributes([unlimited, onlyFips, exceptFips], [])).toEqual([
+      unlimited,
+      exceptFips,
+    ]);
+  });
+
+  it('keeps unlimited and only-fips tests when fips is declared', () => {
+    expect(selectTestsForTargetAttributes([unlimited, onlyFips, exceptFips], ['fips'])).toEqual([
+      unlimited,
+      onlyFips,
+    ]);
+  });
+
+  it('treats tests without tags as unlimited', () => {
+    const untagged = {};
+    expect(selectTestsForTargetAttributes([untagged], ['fips'])).toEqual([untagged]);
+  });
+
+  it('names the offending test when a limit tag is malformed', () => {
+    const malformed = {
+      title: 'does a thing',
+      location: { file: 'test/scout/foo/ui/tests/foo.spec.ts' },
+      tags: ['@local-stateful-classic', '@limit/onlyfips'],
+    };
+
+    expect(() => selectTestsForTargetAttributes([malformed], [])).toThrow(
+      /Invalid Scout test limit tag on test "does a thing" in 'test\/scout\/foo\/ui\/tests\/foo.spec.ts'/
+    );
+  });
+});
+
+describe('resolveTargetAttributes', () => {
+  const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
+
+  afterEach(() => {
+    if (originalTargetAttributes === undefined) {
+      delete process.env.SCOUT_TARGET_ATTRIBUTES;
+    } else {
+      process.env.SCOUT_TARGET_ATTRIBUTES = originalTargetAttributes;
+    }
+  });
+
+  it('parses repeated and comma-separated flag values', () => {
+    expect(resolveTargetAttributes(['fips'])).toEqual(['fips']);
+    expect(resolveTargetAttributes(['fips', 'fips'])).toEqual(['fips']);
+    expect(resolveTargetAttributes([' fips , fips '])).toEqual(['fips']);
+  });
+
+  it('falls back to SCOUT_TARGET_ATTRIBUTES when no flag is given', () => {
+    process.env.SCOUT_TARGET_ATTRIBUTES = 'fips';
+
+    expect(resolveTargetAttributes(undefined)).toEqual(['fips']);
+    expect(resolveTargetAttributes([])).toEqual(['fips']);
+  });
+
+  it('lets flag values win over the environment', () => {
+    // A bogus env value proves precedence: if the environment were consulted at all when a
+    // flag is present, resolution would throw instead of returning the flag value.
+    process.env.SCOUT_TARGET_ATTRIBUTES = 'quantum';
+
+    expect(resolveTargetAttributes(['fips'])).toEqual(['fips']);
+  });
+
+  it('returns no attributes when neither flag nor environment declares any', () => {
+    delete process.env.SCOUT_TARGET_ATTRIBUTES;
+
+    expect(resolveTargetAttributes(undefined)).toEqual([]);
+  });
+
+  it('throws on unknown attributes', () => {
+    expect(() => resolveTargetAttributes(['quantum'])).toThrow(
+      /Failed to parse the string 'quantum' as a Scout test target attribute/
+    );
   });
 });
 

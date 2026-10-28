@@ -8,7 +8,6 @@
 import type { TransformSource } from '@elastic/elasticsearch/lib/api/types';
 import { getSLOTransformTemplate } from './slo_transform_template';
 import { createKQLCustomIndicator, createSLO } from '../../services/fixtures/slo';
-import { oneMinute } from '../../services/fixtures/duration';
 
 describe('slo transform template', () => {
   const transformId = 'irrelevant';
@@ -72,8 +71,7 @@ describe('slo transform template', () => {
       groupBy,
       aggregations,
       settings,
-      slo,
-      false
+      slo
     );
 
     expect(result).toEqual({
@@ -168,8 +166,7 @@ describe('slo transform template', () => {
       groupBy,
       aggregations,
       settings,
-      slo,
-      false
+      slo
     );
 
     expect(result).toEqual({
@@ -259,17 +256,8 @@ describe('slo transform template', () => {
     });
   });
 
-  it('adds project_routing when applyProjectRouting and preventCrossProjectSearch', () => {
-    const slo = createSLO({
-      id: 'irrelevant',
-      indicator: createKQLCustomIndicator(),
-      settings: {
-        syncDelay: oneMinute(),
-        frequency: oneMinute(),
-        preventInitialBackfill: false,
-        preventCrossProjectSearch: true,
-      },
-    });
+  it('passes project_routing through verbatim', () => {
+    const slo = createSLO({ id: 'irrelevant', indicator: createKQLCustomIndicator() });
 
     const result = getSLOTransformTemplate(
       transformId,
@@ -280,23 +268,14 @@ describe('slo transform template', () => {
       aggregations,
       settings,
       slo,
-      true
+      '_id:p1 AND _id:p2'
     );
 
-    expect(result.source.project_routing).toBe('_alias:_origin');
+    expect(result.source.project_routing).toBe('_id:p1 AND _id:p2');
   });
 
-  it('omits project_routing when applyProjectRouting but not preventCrossProjectSearch', () => {
-    const slo = createSLO({
-      id: 'irrelevant',
-      indicator: createKQLCustomIndicator(),
-      settings: {
-        syncDelay: oneMinute(),
-        frequency: oneMinute(),
-        preventInitialBackfill: false,
-        preventCrossProjectSearch: false,
-      },
-    });
+  it('omits project_routing when projectRouting is undefined', () => {
+    const slo = createSLO({ id: 'irrelevant', indicator: createKQLCustomIndicator() });
 
     const result = getSLOTransformTemplate(
       transformId,
@@ -306,37 +285,9 @@ describe('slo transform template', () => {
       groupBy,
       aggregations,
       settings,
-      slo,
-      true
+      slo
     );
 
-    expect(result.source.project_routing).toBeUndefined();
-  });
-
-  it('omits project_routing when applyProjectRouting is false', () => {
-    const slo = createSLO({
-      id: 'irrelevant',
-      indicator: createKQLCustomIndicator(),
-      settings: {
-        syncDelay: oneMinute(),
-        frequency: oneMinute(),
-        preventInitialBackfill: false,
-        preventCrossProjectSearch: true,
-      },
-    });
-
-    const result = getSLOTransformTemplate(
-      transformId,
-      description,
-      source,
-      destination,
-      groupBy,
-      aggregations,
-      settings,
-      slo,
-      false
-    );
-
-    expect(result.source.project_routing).toBeUndefined();
+    expect(result.source).not.toHaveProperty('project_routing');
   });
 });

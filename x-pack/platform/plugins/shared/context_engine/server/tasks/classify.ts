@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { EsqlToolCallSignal } from '../../common/http_api/signals';
+import type { EsqlToolCallSignal, SignalTag } from '../../common/http_api/signals';
 
 /** Returns the classification tags for a signal. */
-export const classify = (signal: EsqlToolCallSignal): string[] => {
+export const classify = (signal: EsqlToolCallSignal): SignalTag[] => {
   const { data } = signal;
 
-  if (data.agent.class === 'management') {
-    return [];
-  }
-
-  const tags: string[] = [];
+  const tags: SignalTag[] = [];
 
   // Outcome tags are mutually exclusive: a query either failed, or ran and returned
   // nothing, or returned rows. A failed query reports 0 rows *because* it errored, so

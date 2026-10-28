@@ -42,7 +42,7 @@ spaceTest.describe(
         await browserAuth.loginAsAdmin();
         await managementPage.navigate();
 
-        await expect(managementPage.statusLoading).toBeHidden({ timeout: 30000 });
+        await managementPage.waitForStatusLoaded();
         await expect(managementPage.riskEnginePrivilegesCallout).toBeHidden();
       }
     );
@@ -55,7 +55,7 @@ spaceTest.describe(
         await browserAuth.loginWithCustomRole(NO_RISK_ENGINE_PRIVILEGES_ROLE);
         await managementPage.navigate();
 
-        await expect(managementPage.statusLoading).toBeHidden({ timeout: 30000 });
+        await managementPage.waitForStatusLoaded();
 
         await expect(managementPage.riskEnginePrivilegesCallout).toBeVisible({ timeout: 15000 });
         await expect(managementPage.riskEnginePrivilegesCallout).toContainText(

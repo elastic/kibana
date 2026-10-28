@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument, isScalar, stringify } from 'yaml';
+import { parseDocument, isScalar, Scalar, stringify } from 'yaml';
 
 /**
  * Updates a field in YAML by `fieldPath` (e.g. `enabled`, `metadata.author`).
@@ -25,7 +25,13 @@ export function updateYamlField(yamlString: string, fieldPath: string, value: un
 
     const existingNode = doc.getIn(pathArray, true);
 
-    if (isScalar(existingNode) && Array.isArray(existingNode.range) && isPrimitive(value)) {
+    if (
+      isScalar(existingNode) &&
+      existingNode.type !== Scalar.BLOCK_FOLDED &&
+      existingNode.type !== Scalar.BLOCK_LITERAL &&
+      Array.isArray(existingNode.range) &&
+      isPrimitive(value)
+    ) {
       const [start, end] = existingNode.range;
       const serialized = stringify(value, { lineWidth: 0 }).replace(/\n+$/, '');
       return yamlString.slice(0, start) + serialized + yamlString.slice(end);

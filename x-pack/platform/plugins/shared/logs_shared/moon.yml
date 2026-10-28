@@ -61,6 +61,7 @@ dependsOn:
   - '@kbn/ml-plugin'
   - '@kbn/saved-search-component'
   - '@kbn/core-execution-context-common'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -74,6 +75,4 @@ fileGroups:
     - server/**/*
     - types/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

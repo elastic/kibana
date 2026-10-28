@@ -97,7 +97,7 @@ export const registerLensInternalVisualizationsSearchAPIRoute: RegisterAPIRouteF
         }
 
         return res.ok<z.output<typeof lensSearchResponseBodySchema>>({
-          body: {
+          body: lensSearchResponseBodySchema.parse({
             data: hits.map((item) => {
               return getLensInternalResponseItem(builder, item);
             }),
@@ -106,7 +106,7 @@ export const registerLensInternalVisualizationsSearchAPIRoute: RegisterAPIRouteF
               perPage,
               total: pagination.total,
             },
-          },
+          }),
         });
       } catch (error) {
         if (isBoom(error) && error.output.statusCode === 403) {

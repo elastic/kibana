@@ -7,7 +7,7 @@
 
 import { Streams, isInheritFailureStore } from '@kbn/streams-schema';
 import { isInheritLifecycle } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
 import {
   isAndCondition,
@@ -18,9 +18,11 @@ import {
 } from '@kbn/streamlang';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
 import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_error';
+import { getDefaultRootFields } from '../root_stream_definition';
 
 /*
- * Changes to mappings (fields) and processing rules are not allowed on the root stream.
+ * Custom field mappings may be added on the root stream, but built-in default mappings
+ * cannot be removed or overridden. Processing rules cannot change.
  * Changes to routing rules are allowed.
  * Root stream cannot inherit a lifecycle.
  */
@@ -28,14 +30,7 @@ export function validateRootStreamChanges(
   currentStreamDefinition: Streams.WiredStream.Definition,
   nextStreamDefinition: Streams.WiredStream.Definition
 ) {
-  const hasFieldChanges = !isEqual(
-    currentStreamDefinition.ingest.wired.fields,
-    nextStreamDefinition.ingest.wired.fields
-  );
-
-  if (hasFieldChanges) {
-    throw new RootStreamImmutabilityError('Root stream fields cannot be changed');
-  }
+  assertBuiltInRootFieldsPreserved(currentStreamDefinition, nextStreamDefinition);
 
   const hasProcessingChanges = !isEqual(
     currentStreamDefinition.ingest.processing,
@@ -52,6 +47,36 @@ export function validateRootStreamChanges(
 
   if (isInheritFailureStore(nextStreamDefinition.ingest.failure_store)) {
     throw new MalformedStreamError('Root stream cannot inherit failure store');
+  }
+}
+
+function assertBuiltInRootFieldsPreserved(
+  currentStreamDefinition: Streams.WiredStream.Definition,
+  nextStreamDefinition: Streams.WiredStream.Definition
+) {
+  const defaultFields = getDefaultRootFields(nextStreamDefinition.name);
+  const currentFields = currentStreamDefinition.ingest.wired.fields;
+  const nextFields = nextStreamDefinition.ingest.wired.fields;
+
+  for (const fieldName of Object.keys(defaultFields)) {
+    const currentConfig = currentFields[fieldName];
+    const nextConfig = nextFields[fieldName];
+
+    if (!currentConfig) {
+      continue;
+    }
+
+    if (!nextConfig) {
+      throw new RootStreamImmutabilityError(
+        `Cannot remove built-in field [${fieldName}] from the root stream`
+      );
+    }
+
+    if (!isEqual(omit(currentConfig, 'description'), omit(nextConfig, 'description'))) {
+      throw new RootStreamImmutabilityError(
+        `Cannot override built-in field [${fieldName}] on the root stream`
+      );
+    }
   }
 }
 

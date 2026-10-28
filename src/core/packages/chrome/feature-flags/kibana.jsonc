@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/core-chrome-feature-flags",
-  "owner": "@elastic/appex-sharedux",
-  "group": "platform",
-  "visibility": "shared"
-}

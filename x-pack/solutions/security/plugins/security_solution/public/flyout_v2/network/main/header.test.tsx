@@ -24,6 +24,12 @@ jest.mock('../../../common/components/links', () => {
   };
 });
 
+jest.mock('../../shared/components/flyout_header_actions', () => ({
+  FlyoutHeaderActions: ({ children }: { children?: React.ReactNode }) => (
+    <div data-test-subj="mockFlyoutHeaderActions">{children}</div>
+  ),
+}));
+
 describe('<Header />', () => {
   it('should check for href value of the anchor element', () => {
     const { container } = render(
@@ -45,5 +51,15 @@ describe('<Header />', () => {
     );
 
     expect(getByTestId('network-details-flyout-headerText')).toHaveTextContent('192.168.1.1/24');
+  });
+
+  it('should render the flyout header actions', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <Header {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('mockFlyoutHeaderActions')).toBeInTheDocument();
   });
 });

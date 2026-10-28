@@ -24,8 +24,9 @@ import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strate
 import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
 import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
+import { getKibanaBaseUrl } from '../lib/dispatcher/kibana_base_url';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
-import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
+import { DispatcherServiceInternalToken, KibanaBaseUrlToken } from '../lib/dispatcher/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
@@ -33,7 +34,15 @@ import {
   ExecutionHistoryClient,
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
+import { EventOriginActorToken } from '../lib/event_origin/token';
+import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
+import { InternalRulesClient, InternalRulesClientProvider } from '../lib/internal_rules_client';
 import { RulesClient } from '../lib/rules_client';
+import { ArtifactTypeRegistry } from '../lib/artifact_types';
+import {
+  RuleTemplatesClient,
+  RuleTemplateSavedObjectsClientToken,
+} from '../lib/rule_templates_client';
 import {
   createChangeHistoryClient,
   ChangeHistoryClientToken,
@@ -68,6 +77,8 @@ import {
   ActionPolicySavedObjectServiceInternalToken,
   ActionPolicySavedObjectServiceScopedToken,
 } from '../lib/services/action_policy_saved_object_service/tokens';
+import { EsqlResponseFormatService } from '../lib/services/esql_response_format_service/esql_response_format_service';
+import { EsqlResponseFormatServiceToken } from '../lib/services/esql_response_format_service/tokens';
 import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
@@ -95,12 +106,17 @@ import {
 import { UserService } from '../lib/services/user_service/user_service';
 import { WorkflowService } from '../lib/services/workflow_service/workflow_service';
 import { WorkflowServiceToken } from '../lib/services/workflow_service/tokens';
+import { LicenseService } from '../lib/services/license_service/license_service';
+import { LicenseServiceToken } from '../lib/services/license_service/tokens';
+import { EbtService } from '../lib/services/ebt_service/ebt_service';
+import { EbtServiceToken } from '../lib/services/ebt_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
+import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/saved_object_types';
 import {
   EncryptedSavedObjectsClientToken,
   WorkflowsManagementApiToken,
@@ -108,12 +124,18 @@ import {
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import { SpaceUiSettingsClientToken } from '../settings/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(AlertEventsClient).toSelf().inRequestScope();
   bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
+  bind(InternalRulesClientProvider).toSelf().inSingletonScope();
+  bind(InternalRulesClient).toSelf().inSingletonScope();
+  bind(EventOriginActorToken).toConstantValue('user');
+  bind(RulesClientOptionsToken).toConstantValue({});
+  bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
@@ -131,6 +153,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
+  bind(RuleTemplatesClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
   bind(UserService).toSelf().inRequestScope();
@@ -161,13 +184,25 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return uiSettings.globalAsScopedToClient(internalSoClient);
     })
     .inSingletonScope();
-  bind(SettingsService).toSelf().inSingletonScope();
+  bind(SettingsService).toSelf().inRequestScope();
   bind(SettingsServiceToken).toService(SettingsService);
+
+  bind(SpaceUiSettingsClientToken)
+    .toResolvedValue(
+      async (savedObjectsClientFactory, uiSettings) =>
+        uiSettings.asScopedToClient(await savedObjectsClientFactory()),
+      [SavedObjectsClientFactory, CoreStart('uiSettings')]
+    )
+    .inRequestScope();
 
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);
   bind(WorkflowService).toSelf().inSingletonScope();
   bind(WorkflowServiceToken).toService(WorkflowService);
+  bind(LicenseService).toSelf().inSingletonScope();
+  bind(LicenseServiceToken).toService(LicenseService);
+  bind(EbtService).toSelf().inSingletonScope();
+  bind(EbtServiceToken).toService(EbtService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
@@ -214,6 +249,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toResolvedValue(
       (savedObjectsClientFactory) =>
         savedObjectsClientFactory({ includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE] }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
+  // The `alerting_rule_template` type is hidden and owned by the alerting (v1)
+  // plugin, so it has to be opted into explicitly here.
+  bind(RuleTemplateSavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({ includedHiddenTypes: [RULE_TEMPLATE_SAVED_OBJECT_TYPE] }),
       [SavedObjectsClientFactory]
     )
     .inRequestScope();
@@ -286,11 +331,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
+  // Singleton so the feature flag is subscribed to once per process, and every
+  // QueryService flavor plus the rule-executor step read the same resolved format.
+  bind(EsqlResponseFormatService).toSelf().inSingletonScope();
+  bind(EsqlResponseFormatServiceToken).toService(EsqlResponseFormatService);
+
   bind(QueryServiceScopedToken)
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
-      return new QueryService(esClient, loggerService);
+      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
     })
     .inRequestScope();
 
@@ -299,7 +349,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const loggerService = get(LoggerServiceToken);
       // Rule-execution queries run against user data and must respect the space project routing.
       const esClient = get(EsServiceScopedSpaceRoutingToken);
-      return new QueryService(esClient, loggerService);
+      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
     })
     .inRequestScope();
 
@@ -307,7 +357,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
-      return new QueryService(esClient, loggerService);
+      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
     })
     .inSingletonScope();
 
@@ -333,6 +383,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')
       );
       return wfm.management;
+    })
+    .inSingletonScope();
+
+  bind(KibanaBaseUrlToken)
+    .toDynamicValue(({ get }) => {
+      const http = get(CoreStart('http'));
+      const cloud = get(PluginSetup<AlertingServerSetupDependencies['cloud']>('cloud'), {
+        optional: true,
+      });
+      return getKibanaBaseUrl(http, cloud);
     })
     .inSingletonScope();
 

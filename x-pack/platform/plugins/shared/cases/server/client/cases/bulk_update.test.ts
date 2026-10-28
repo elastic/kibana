@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { AttachmentAttributes } from '../../../common/types/domain';
 import { CustomFieldTypes, CaseStatuses, CaseSeverity } from '../../../common/types/domain';
 import { stringify as yamlStringify } from 'yaml';
 import {
@@ -17,8 +19,15 @@ import {
   MAX_USER_ACTIONS_PER_CASE,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  CASE_ATTACHMENT_SAVED_OBJECT,
 } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants/owners';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import {
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
@@ -461,7 +470,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: invalid keys \\"foo\\""`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Excess keys are not allowed"`
       );
     });
 
@@ -483,7 +492,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field assignees is too long. Array must be of length <= 10.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.assignees: The length of the field assignees is too long. Array must be of length <= 10.'
       );
     });
 
@@ -741,7 +750,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}.,Invalid value \"A very long category with more than fifty characters!\" supplied to \"cases,category\"`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.category: The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}.`
       );
     });
 
@@ -761,7 +770,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category field cannot be an empty string.,Invalid value "" supplied to "cases,category"'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.category: The category field cannot be an empty string.'
       );
     });
 
@@ -781,7 +790,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "cases,category"'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.category: The category field cannot be an empty string.'
       );
     });
 
@@ -844,7 +853,7 @@ describe('update', () => {
 
     it('resolves the applied template name and passes it to buildUserActions', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue({
-        attributes: { name: 'My Template' },
+        attributes: { name: 'My Template', owner: SECURITY_SOLUTION_OWNER, templateId: 'tmpl-1' },
       } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
 
       await bulkUpdate(
@@ -869,8 +878,81 @@ describe('update', () => {
       );
     });
 
-    it('omits the applied template from templateNamesByKey when it cannot be resolved', async () => {
+    it('rejects when the applied template cannot be found', async () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-missing version 1 not found');
+    });
+
+    it('rejects when the applied template belongs to a different owner', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: {
+          name: 'Other Template',
+          owner: OBSERVABILITY_OWNER,
+          templateId: 'tmpl-other-owner',
+        },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-other-owner', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-other-owner version 1 not found');
+    });
+
+    it('rejects when the template id is empty', async () => {
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: '', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template id must not be empty');
+    });
+
+    it('issues one getTemplate search when multiple cases switch to the same template version', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: { name: 'My Template', owner: SECURITY_SOLUTION_OWNER, templateId: 'tmpl-1' },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
 
       await bulkUpdate(
         {
@@ -878,7 +960,12 @@ describe('update', () => {
             {
               id: mockCases[0].id,
               version: mockCases[0].version ?? '',
-              template: { id: 'tmpl-missing', version: 1 },
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
             },
           ],
         },
@@ -886,11 +973,516 @@ describe('update', () => {
         casesClientMock
       );
 
-      expect(clientArgs.services.userActionService.creator.buildUserActions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          templateNamesByKey: new Map(),
-        })
+      // Both cases share the same template id+version — validation issues one search (not one
+      // per case), and the name-lookup for buildUserActions issues one more = 2 total, not 4.
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(2);
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith('tmpl-1', '3');
+    });
+
+    it('issues one getTemplate search when multiple cases request the same nonexistent template', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(undefined);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+              {
+                id: secondCase.id,
+                version: secondCase.version ?? '',
+                template: { id: 'tmpl-missing', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-missing version 1 not found');
+
+      // Both cases share the same nonexistent template — the cached undefined result
+      // is preserved as a null sentinel, so getTemplate is called exactly once.
+      expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects when the fetched template id does not match the requested id', async () => {
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: {
+          name: 'Unrelated Template',
+          owner: SECURITY_SOLUTION_OWNER,
+          templateId: 'tmpl-different',
+        },
+      } as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-requested', version: 1 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Template tmpl-requested version 1 not found');
+    });
+  });
+
+  describe('Template counters', () => {
+    const usageCounter = usageCollectionPluginMock
+      .createSetupContract()
+      .createUsageCounter('cases');
+    const caseWithTemplate = {
+      ...mockCases[0],
+      attributes: { ...mockCases[0].attributes, template: { id: 'tmpl-1', version: 3 } },
+    };
+
+    type PatchedCaseResult = Awaited<
+      ReturnType<
+        ReturnType<typeof createCasesClientMockArgs>['services']['caseService']['patchCases']
+      >
+    >['saved_objects'][number];
+
+    const setupArgs = ({
+      clientSource = 'rest_api',
+      originalCases = [mockCases[0]],
+      patchedCases,
+    }: {
+      clientSource?: 'rest_api' | 'connector';
+      originalCases?: CaseSavedObjectTransformed[];
+      patchedCases?: PatchedCaseResult[];
+    } = {}) => {
+      const args = { ...createCasesClientMockArgs(), usageCounter, clientSource };
+
+      args.services.caseService.getCases.mockResolvedValue({ saved_objects: originalCases });
+      args.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      args.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(new Map());
+      args.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: patchedCases ?? originalCases,
+      });
+      args.services.templatesService.getTemplate.mockImplementation((templateId: string) =>
+        Promise.resolve({
+          attributes: {
+            name: 'My Template',
+            owner: SECURITY_SOLUTION_OWNER,
+            templateId,
+          },
+        } as Awaited<ReturnType<typeof args.services.templatesService.getTemplate>>)
       );
+
+      return args;
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('counts a template applied to an existing case', async () => {
+      const clientArgs = setupArgs();
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('counts a template cleared from an existing case', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: null,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'clear_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not count clearing a template from a case that never had one', async () => {
+      const clientArgs = setupArgs();
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: null,
+              title: 'A new title',
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'clear_template' })
+      );
+    });
+
+    // The no-op filter drops an unchanged template before the update logic runs, so this counts
+    // effective changes rather than what the caller happened to send.
+    it('does not count re-sending the template a case already has', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+              title: 'A new title',
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
+        expect.objectContaining({ counterName: 'apply_template' })
+      );
+    });
+
+    it('counts cases, not update calls', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      const clientArgs = setupArgs({ originalCases: [mockCases[0], secondCase] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 2,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('splits one update across both buckets', async () => {
+      const secondCase = { ...caseWithTemplate, id: 'mock-id-2' };
+      const clientArgs = setupArgs({ originalCases: [mockCases[0], secondCase] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: null,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'clear_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+    });
+
+    it('counts a case once when the request repeats its id', async () => {
+      const clientArgs = setupArgs();
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+    });
+
+    // Matches how the adjacent updatedFieldsByCaseId reducer resolves a repeated id.
+    it('keeps the first template change when the request repeats an id with conflicting ones', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: null,
+            },
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: { id: 'tmpl-2', version: 1 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'clear_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('attributes counters to the calling source', async () => {
+      const clientArgs = setupArgs({ clientSource: 'connector' });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.connector',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not count a case whose update failed to persist', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      const clientArgs = setupArgs({
+        originalCases: [mockCases[0], secondCase],
+        patchedCases: [
+          mockCases[0],
+          {
+            type: 'cases',
+            id: secondCase.id,
+            attributes: {},
+            error: { error: 'Conflict', message: 'conflict', statusCode: 409 },
+          },
+        ],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'apply_template',
+        counterType: 'cases_client.rest_api',
+        incrementBy: 1,
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('adds one use per case to the applied template usage stats', async () => {
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      const clientArgs = setupArgs({ originalCases: [mockCases[0], secondCase] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              template: { id: 'tmpl-1', version: 3 },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledTimes(1);
+      expect(clientArgs.services.templatesService.incrementUsageStats).toHaveBeenCalledWith(
+        'tmpl-1',
+        2
+      );
+    });
+
+    it('does not touch usage stats when a template is only cleared', async () => {
+      const clientArgs = setupArgs({ originalCases: [caseWithTemplate] });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: caseWithTemplate.id,
+              version: caseWithTemplate.version ?? '',
+              template: null,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).not.toHaveBeenCalled();
+    });
+
+    it('does not fail the update when the template usage stats write fails', async () => {
+      const clientArgs = setupArgs();
+      clientArgs.services.templatesService.incrementUsageStats.mockRejectedValueOnce(
+        new Error('stats update failed')
+      );
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-1', version: 3 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to update template usage stats')
+      );
+    });
+
+    it('does not count an update that failed', async () => {
+      const clientArgs = setupArgs();
+      clientArgs.services.caseService.patchCases.mockRejectedValueOnce(new Error('update failed'));
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                template: { id: 'tmpl-1', version: 3 },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow();
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
     });
   });
 
@@ -950,7 +1542,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.title: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
       );
     });
 
@@ -970,7 +1562,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The title field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.title: The title field cannot be an empty string.'
       );
     });
 
@@ -990,7 +1582,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The title field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.title: The title field cannot be an empty string.'
       );
     });
 
@@ -1090,7 +1682,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.description: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
       );
     });
 
@@ -1110,7 +1702,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The description field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.description: The description field cannot be an empty string.'
       );
     });
 
@@ -1130,7 +1722,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The description field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.description: The description field cannot be an empty string.'
       );
     });
 
@@ -1406,7 +1998,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
       );
     });
 
@@ -1430,7 +2022,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags.0: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
       );
     });
 
@@ -1450,7 +2042,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags.0: The tag field cannot be an empty string.'
       );
     });
 
@@ -1470,7 +2062,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: cases.0.tags.0: The tag field cannot be an empty string.'
       );
     });
 
@@ -1745,7 +2337,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: The length of the field customFields is too long. Array must be of length <= 10."`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: cases.0.customFields: The length of the field customFields is too long. Array must be of length <= 10."`
       );
     });
 
@@ -1960,7 +2552,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Error: The length of the field cases is too long. Array must be of length <= 100.'
+        'Error: cases: The length of the field cases is too long. Array must be of length <= 100.'
       );
     });
 
@@ -1974,7 +2566,7 @@ describe('update', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        'Error: The length of the field cases is too short. Array must be of length >= 1.'
+        'Error: cases: The length of the field cases is too short. Array must be of length >= 1.'
       );
     });
 
@@ -2729,6 +3321,189 @@ describe('update', () => {
     });
   });
 
+  describe('Attack status sync', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    type FoundAttachment = SavedObjectsFindResult<AttachmentAttributes>;
+
+    const attachmentBase = {
+      created_at: '2019-11-25T22:32:30.608Z',
+      created_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+      owner: SECURITY_SOLUTION_OWNER,
+      pushed_at: null,
+      pushed_by: null,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      updated_by: { full_name: 'elastic', email: 'testemail@elastic.co', username: 'elastic' },
+    };
+
+    const caseReference = [
+      { type: 'cases', name: 'associated-cases', id: mockCases[0].id },
+    ] as const;
+
+    const attackAttachment = {
+      type: CASE_ATTACHMENT_SAVED_OBJECT,
+      id: 'mock-attack-attachment-1',
+      attributes: {
+        ...attachmentBase,
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        attachmentId: 'attack-doc-1',
+        metadata: {
+          title: 'Credential harvesting',
+          alertCount: 1,
+          index: 'alerts-security.attack.discovery.alerts',
+        },
+      },
+      references: [...caseReference],
+      score: 0,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      version: 'WzYsMV0=',
+    } as unknown as FoundAttachment;
+
+    const entityAttachment = {
+      type: CASE_ATTACHMENT_SAVED_OBJECT,
+      id: 'mock-entity-attachment-1',
+      attributes: {
+        ...attachmentBase,
+        type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+        attachmentId: 'host-1',
+        metadata: { entityType: 'host' },
+      },
+      references: [...caseReference],
+      score: 0,
+      updated_at: '2019-11-25T22:32:30.608Z',
+      version: 'WzYsMV0=',
+    } as unknown as FoundAttachment;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.alertsService.updateAlertsStatus.mockResolvedValue(1);
+    });
+
+    const mockAttachments = (savedObjects: FoundAttachment[]) => {
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: savedObjects,
+        total: savedObjects.length,
+        per_page: 10,
+        page: 1,
+      });
+    };
+
+    const patchStatus = async (status: CaseStatuses, closeReason?: string) =>
+      bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status,
+              ...(closeReason != null ? { closeReason } : {}),
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+    it('closes the attack document and its attached alerts in separate calls', async () => {
+      const alertAttachment = {
+        ...mockCaseComments[3],
+        score: 0,
+        references: [{ ...mockCaseComments[3].references[0], id: mockCases[0].id }],
+      } as unknown as FoundAttachment;
+
+      mockAttachments([attackAttachment, alertAttachment]);
+
+      await patchStatus(CaseStatuses.closed, 'false_positive');
+
+      // Attacks are synced on their own so their updated document count never lands in
+      // `syncedAlertCount`.
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledTimes(2);
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'attack-doc-1',
+          index: 'alerts-security.attack.discovery.alerts',
+          status: CaseStatuses.closed,
+          closingReason: 'false_positive',
+        },
+      ]);
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'test-id',
+          index: 'test-index',
+          status: CaseStatuses.closed,
+          closingReason: 'false_positive',
+        },
+      ]);
+    });
+
+    it('does not count synced attacks towards the synced alert count', async () => {
+      mockAttachments([attackAttachment]);
+
+      const updatedCases = await patchStatus(CaseStatuses['in-progress']);
+
+      expect(updatedCases[0]).not.toHaveProperty('updateSummary');
+    });
+
+    it('syncs an attack attached from the adhoc index', async () => {
+      mockAttachments([
+        {
+          ...attackAttachment,
+          attributes: {
+            ...attackAttachment.attributes,
+            metadata: {
+              title: 'Credential harvesting',
+              alertCount: 0,
+              index: '.adhoc.alerts-security.attack.discovery.alerts',
+            },
+          },
+        } as unknown as FoundAttachment,
+      ]);
+
+      await patchStatus(CaseStatuses['in-progress']);
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'attack-doc-1',
+          index: '.adhoc.alerts-security.attack.discovery.alerts',
+          status: CaseStatuses['in-progress'],
+          closingReason: undefined,
+        },
+      ]);
+    });
+
+    it('moves the attack document to in-progress with the case', async () => {
+      mockAttachments([attackAttachment]);
+
+      await patchStatus(CaseStatuses['in-progress']);
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+        {
+          id: 'attack-doc-1',
+          index: 'alerts-security.attack.discovery.alerts',
+          status: CaseStatuses['in-progress'],
+          closingReason: undefined,
+        },
+      ]);
+    });
+
+    it('ignores attachment types that carry no workflow status', async () => {
+      mockAttachments([entityAttachment]);
+
+      await patchStatus(CaseStatuses.closed, 'false_positive');
+
+      expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Global extended_fields — per-owner key isolation', () => {
     const clientArgs = createCasesClientMockArgs();
 
@@ -2814,9 +3589,10 @@ describe('update', () => {
         casesClientMock
       );
 
-      // One call per unique owner (2 owners), not one per case.
+      // Bounded per unique owner (2 owners), not per case: one fetch for global-field
+      // resolution plus one for the pairing-adapter link indexes per owner.
       expect(clientArgs.services.fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledTimes(
-        2
+        4
       );
     });
 
@@ -2850,7 +3626,118 @@ describe('update', () => {
           clientArgs,
           casesClientMock
         )
-      ).rejects.toThrow('are not global (isGlobal) field definitions');
+      ).rejects.toThrow(
+        'Unknown extended field key: "risk_score_as_keyword". No fields are available for this case'
+      );
+    });
+  });
+
+  describe('Template extended_fields — per-owner getFieldDefinitions dedup', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    // Two cases sharing the same owner, backed by different mockCase fixtures.
+    const secCase1 = {
+      ...mockCases[0],
+      attributes: { ...mockCases[0].attributes, owner: SECURITY_SOLUTION_OWNER },
+    };
+    const secCase2 = {
+      ...mockCases[1],
+      attributes: { ...mockCases[1].attributes, owner: SECURITY_SOLUTION_OWNER },
+    };
+
+    // Template whose definition contains a $ref field that must be resolved against the
+    // field library — this is the code path that triggers getFieldDefinitions(owner) with
+    // no options inside validateCaseExtendedFields.
+    const templateSO = {
+      attributes: {
+        templateId: 'tmpl-1',
+        owner: SECURITY_SOLUTION_OWNER,
+        name: 'Ref Template',
+        definition: yamlStringify({ name: 'Ref Template', fields: [{ $ref: 'resolution' }] }),
+      },
+    } as unknown as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>;
+
+    const resolutionFieldDef = {
+      fieldDefinitionId: 'fd-resolution',
+      name: 'resolution',
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      definition: yamlStringify({
+        control: 'INPUT_TEXT',
+        name: 'resolution',
+        label: 'Resolution',
+        type: 'keyword',
+      }),
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [secCase1, secCase2],
+      });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [secCase1, secCase2],
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [secCase1.id]: 0,
+        [secCase2.id]: 0,
+      });
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(templateSO);
+      // Discriminate the two getFieldDefinitions call sites:
+      //   resolveGlobalFields  → called with { isGlobal: true }  → returns [] (no global fields)
+      //   template pre-fetch   → called with no options           → returns resolutionFieldDef
+      // Without the pre-fetch pass-through, the per-case fallback in validateCaseExtendedFields
+      // also calls the no-options variant — once per case — so the count rises from 1 to N+1.
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockImplementation(
+        async (_owner: string | string[], options?: { isGlobal?: boolean }) => {
+          if (options?.isGlobal) {
+            return { fieldDefinitions: [], total: 0 };
+          }
+          return { fieldDefinitions: [resolutionFieldDef], total: 1 };
+        }
+      );
+    });
+
+    it('calls getFieldDefinitions (no options) a fixed number of times per owner, not once per case, when extended_fields reference a template $ref field', async () => {
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: secCase1.id,
+              version: secCase1.version ?? '',
+              template: { id: 'tmpl-1', version: 1 },
+              extended_fields: { resolution_as_keyword: 'Fixed upstream' },
+            },
+            {
+              id: secCase2.id,
+              version: secCase2.version ?? '',
+              template: { id: 'tmpl-1', version: 1 },
+              extended_fields: { resolution_as_keyword: 'Restarted service' },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      // Two per-owner fetches fire getFieldDefinitions(owner) [no options], regardless of how
+      // many cases share that owner: the template pre-fetch and loadFieldLinkIndexes. If the
+      // fieldDefinitions pass-through is dropped, the fallback inside validateCaseExtendedFields
+      // fires once per case, turning this count from 2 to N+2.
+      const noOptionCalls =
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mock.calls.filter(
+          ([, options]) => options == null
+        );
+      expect(noOptionCalls).toHaveLength(2);
     });
   });
 
@@ -2958,6 +3845,41 @@ describe('update', () => {
       clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
         new Map()
       );
+      // Linked v2 definitions for the configured v1 fields — write-time mirroring
+      // only writes keys that resolve to a definition (via legacyKey or name).
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-priority',
+            name: 'priority',
+            owner: mockCases[0].attributes.owner,
+            description: '',
+            isGlobal: true,
+            legacyKey: 'priority',
+            definition: yamlStringify({
+              name: 'priority',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Priority',
+            }),
+          },
+          {
+            fieldDefinitionId: 'fd-count',
+            name: 'count',
+            owner: mockCases[0].attributes.owner,
+            description: '',
+            isGlobal: true,
+            legacyKey: 'count',
+            definition: yamlStringify({
+              name: 'count',
+              type: 'integer',
+              control: 'INPUT_NUMBER',
+              label: 'Count',
+            }),
+          },
+        ],
+        total: 2,
+      });
       casesClientMock2.configure.get = jest
         .fn()
         .mockResolvedValue([
@@ -2992,8 +3914,65 @@ describe('update', () => {
       });
     });
 
-    it('does not mirror customFields when templates flag is disabled', async () => {
-      // FAILURE SCENARIO: adapter runs unconditionally — extended_fields is written when flag is off.
+    it('does not reject keys retained from another template version when pairing validates the pinned definition', async () => {
+      // Sequence: a case at template v2 is switched to v1 (all stored keys are intentionally
+      // preserved), then a later customFields update triggers pairing. Post-pairing validation
+      // is pinned to v1, but the merged map still holds the v2-only key the request never wrote.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs, { v2_only_as_keyword: 'kept' });
+      const pinnedCase = {
+        ...mockCases[0],
+        attributes: {
+          ...mockCases[0].attributes,
+          template: { id: 'tmpl-1', version: 1 },
+          extended_fields: { v2_only_as_keyword: 'kept' },
+        },
+      };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [pinnedCase],
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [pinnedCase],
+      });
+      // v1 of the template defines no fields of its own; `v2_only` only exists in v2.
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: {
+          templateId: 'tmpl-1',
+          owner: mockCases[0].attributes.owner,
+          name: 'Template',
+          definition: yamlStringify({ name: 'Template', fields: [] }),
+        },
+      } as unknown as Awaited<ReturnType<typeof clientArgs.services.templatesService.getTemplate>>);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: patchPayload,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock2
+        )
+      ).resolves.not.toThrow();
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '3',
+        v2_only_as_keyword: 'kept',
+      });
+    });
+
+    it('mirrors customFields even when templates flag is disabled (addendum A1)', async () => {
+      // Pairing for existing links runs independently of the feature flag: once
+      // a link exists, live sync must not depend on xpack.cases.templates.enabled.
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
       setupMocks(clientArgs);
@@ -3014,7 +3993,10 @@ describe('update', () => {
 
       const updatedAttributes =
         clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
-      expect(updatedAttributes.extended_fields).toBeUndefined();
+      expect(updatedAttributes.extended_fields).toMatchObject({
+        priority_as_keyword: 'high',
+        count_as_integer: '3',
+      });
     });
 
     it('does not touch extended_fields when update omits customFields', async () => {
@@ -3155,6 +4137,449 @@ describe('update', () => {
         clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
       // Explicit null — the mirror key must be deleted.
       expect(updatedAttributes.extended_fields).not.toHaveProperty('priority_as_keyword');
+    });
+
+    it('resolves global fields once per owner even when concurrent cases race the lazy cache', async () => {
+      // Neither case's request includes `extended_fields` or a status transition, so the
+      // pre-resolution pass (uniqueOwnersNeedingFields) skips this owner entirely — only
+      // pairing-derived extended_fields changes (from customFields) reach the LAZY fallback
+      // cache inside createPatchCasesPayload, which is where two same-owner cases processed
+      // under one Promise.all could previously race and double-fetch.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      setupMocks(clientArgs);
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: patchPayload,
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              customFields: patchPayload,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const globalFieldsLookups =
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mock.calls.filter(
+          ([, options]) => options?.isGlobal === true
+        );
+      expect(globalFieldsLookups).toHaveLength(1);
+    });
+
+    it('derives the linked customFields entry from a v2-originated extended_fields update', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              extended_fields: { count_as_integer: '42' },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.extended_fields).toMatchObject({ count_as_integer: '42' });
+      // The linked v1 entry is derived through the reversible codec (42, not '42').
+      expect(updatedAttributes.customFields).toEqual(
+        expect.arrayContaining([{ key: 'count', type: CustomFieldTypes.NUMBER, value: 42 }])
+      );
+    });
+
+    it('treats an explicit v2 empty string as clear: removes the key and nulls the v1 entry', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs, { priority_as_keyword: 'crit' });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              extended_fields: { priority_as_keyword: '' },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.extended_fields).not.toHaveProperty('priority_as_keyword');
+      expect(updatedAttributes.customFields).toEqual(
+        expect.arrayContaining([{ key: 'priority', type: CustomFieldTypes.TEXT, value: null }])
+      );
+    });
+
+    it('rejects conflicting explicit dual input with a structured 400 instead of picking a side', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs);
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: [
+                  { key: 'priority', type: CustomFieldTypes.TEXT as const, value: 'low' },
+                ],
+                extended_fields: { priority_as_keyword: 'critical' },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock2
+        )
+      ).rejects.toThrow(
+        'conflicting values for both representations of the linked field(s): "priority"'
+      );
+
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+    });
+
+    it('records the paired storage keys on the patch payload for user-action suppression', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: patchPayload,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const patchedCase = clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0];
+      expect(patchedCase.pairedCustomFieldStorageKeys).toEqual({
+        priority: 'priority_as_keyword',
+        count: 'count_as_integer',
+      });
+    });
+
+    it('passes the mirrored extended_fields to emitCaseUpdated.extraInfo when updatedFields is [customFields]', async () => {
+      /*
+       * FAILURE SCENARIO: if patchCases echoes back the original SO (without mirrored
+       * extended_fields in attributes) then updatedCase.extended_fields stays pre-mirror,
+       * and the event bridge would compute an empty diff — never firing the trigger.
+       */
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupMocks(clientArgs);
+
+      // Override patchCases to echo the post-mirror SO (as the real Elasticsearch response would).
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockCases[0],
+            attributes: {
+              ...mockCases[0].attributes,
+              extended_fields: { priority_as_keyword: 'high' },
+            },
+          },
+        ],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: [
+                { key: 'priority', type: CustomFieldTypes.TEXT as const, value: 'high' },
+              ],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
+        clientArgs.request,
+        expect.objectContaining({ updatedFields: expect.arrayContaining(['customFields']) }),
+        expect.objectContaining({
+          updatedCase: expect.objectContaining({
+            extended_fields: expect.objectContaining({ priority_as_keyword: 'high' }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('close validation against the final paired extended_fields', () => {
+    // A linked global field that is required on close. The v1 side is optional so write-time
+    // validation never interferes — only the close-time required_on_close rule is exercised.
+    const casesClientMock3 = createCasesClientMock();
+
+    const closeCustomFieldsCfg = [
+      {
+        key: 'priority',
+        type: CustomFieldTypes.TEXT as const,
+        label: 'Priority',
+        required: false,
+      },
+    ];
+
+    const setupCloseMocks = (
+      clientArgs: ReturnType<typeof createCasesClientMockArgs>,
+      {
+        originalExtendedFields,
+        originalCustomFields,
+      }: {
+        originalExtendedFields?: Record<string, string>;
+        originalCustomFields?: Array<{
+          key: string;
+          type: CustomFieldTypes.TEXT;
+          value: string | null;
+        }>;
+      } = {}
+    ) => {
+      const originalCase = {
+        ...mockCases[0],
+        attributes: {
+          ...mockCases[0].attributes,
+          ...(originalExtendedFields != null ? { extended_fields: originalExtendedFields } : {}),
+          ...(originalCustomFields != null ? { customFields: originalCustomFields } : {}),
+        },
+      };
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [originalCase],
+      });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [originalCase],
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-priority',
+            name: 'priority',
+            owner: mockCases[0].attributes.owner,
+            description: '',
+            isGlobal: true,
+            legacyKey: 'priority',
+            definition: yamlStringify({
+              name: 'priority',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Priority',
+              validation: { required_on_close: true },
+            }),
+          },
+        ],
+        total: 1,
+      });
+      casesClientMock3.configure.get = jest
+        .fn()
+        .mockResolvedValue([
+          { owner: mockCases[0].attributes.owner, customFields: closeCustomFieldsCfg },
+        ]);
+    };
+
+    it('rejects clear-and-close when the linked field is cleared via customFields', async () => {
+      // REGRESSION (the bug this guards): pairing deletes priority_as_keyword from the final
+      // extended_fields, but close validation used to merge the original stored value back in,
+      // see the old value, and allow closing a case that is missing a required-on-close field.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupCloseMocks(clientArgs, {
+        originalExtendedFields: { priority_as_keyword: 'crit' },
+        originalCustomFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'crit' }],
+      });
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.closed,
+                customFields: [
+                  { key: 'priority', type: CustomFieldTypes.TEXT as const, value: null },
+                ],
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock3
+        )
+      ).rejects.toThrow(
+        `Cannot close case ${mockCases[0].id}, required fields must be filled: Field "Priority" is required`
+      );
+
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+    });
+
+    it('rejects clear-and-close when the linked field is cleared via an empty extended_fields value', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupCloseMocks(clientArgs, {
+        originalExtendedFields: { priority_as_keyword: 'crit' },
+        originalCustomFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'crit' }],
+      });
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.closed,
+                extended_fields: { priority_as_keyword: '' },
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock3
+        )
+      ).rejects.toThrow(
+        `Cannot close case ${mockCases[0].id}, required fields must be filled: Field "Priority" is required`
+      );
+
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+    });
+
+    it('allows fill-and-close when the value is supplied via customFields', async () => {
+      // The paired value must be visible to close validation even though the request never
+      // touched extended_fields directly.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupCloseMocks(clientArgs);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status: CaseStatuses.closed,
+              customFields: [
+                { key: 'priority', type: CustomFieldTypes.TEXT as const, value: 'fixed' },
+              ],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock3
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.status).toEqual(CaseStatuses.closed);
+      expect(updatedAttributes.extended_fields).toMatchObject({ priority_as_keyword: 'fixed' });
+      expect(updatedAttributes.customFields).toEqual(
+        expect.arrayContaining([{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'fixed' }])
+      );
+    });
+
+    it('allows fill-and-close when the value is supplied via extended_fields', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupCloseMocks(clientArgs);
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              status: CaseStatuses.closed,
+              extended_fields: { priority_as_keyword: 'fixed' },
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock3
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.status).toEqual(CaseStatuses.closed);
+      expect(updatedAttributes.extended_fields).toMatchObject({ priority_as_keyword: 'fixed' });
+      expect(updatedAttributes.customFields).toEqual(
+        expect.arrayContaining([{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'fixed' }])
+      );
+    });
+
+    it('still allows clearing a required-on-close field while the case stays open', async () => {
+      // required_on_close only gates the transition to closed — clearing on an open case is a
+      // normal edit.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      setupCloseMocks(clientArgs, {
+        originalExtendedFields: { priority_as_keyword: 'crit' },
+        originalCustomFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'crit' }],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: [
+                { key: 'priority', type: CustomFieldTypes.TEXT as const, value: null },
+              ],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock3
+      );
+
+      const updatedAttributes =
+        clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+      expect(updatedAttributes.extended_fields).not.toHaveProperty('priority_as_keyword');
+      expect(updatedAttributes.customFields).toEqual(
+        expect.arrayContaining([{ key: 'priority', type: CustomFieldTypes.TEXT, value: null }])
+      );
     });
   });
 });

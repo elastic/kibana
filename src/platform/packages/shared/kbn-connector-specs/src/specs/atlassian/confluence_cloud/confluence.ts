@@ -54,7 +54,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
   metadata: {
     id: '.confluence-cloud',
     displayName: 'Confluence Cloud',
-    description: i18n.translate('core.kibanaConnectorSpecs.confluence.metadata.description', {
+    description: i18n.translate('connectorSpecs.confluence.metadata.description', {
       defaultMessage: 'Connect to Confluence Cloud to search and retrieve pages and spaces.',
     }),
     minimumLicense: 'enterprise',
@@ -69,20 +69,17 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
         overrides: {
           meta: {
             username: {
-              label: i18n.translate('core.kibanaConnectorSpecs.confluence.auth.username.label', {
+              label: i18n.translate('connectorSpecs.confluence.auth.username.label', {
                 defaultMessage: 'Account email',
               }),
             },
             password: {
-              label: i18n.translate('core.kibanaConnectorSpecs.confluence.auth.password.label', {
+              label: i18n.translate('connectorSpecs.confluence.auth.password.label', {
                 defaultMessage: 'API token',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.confluence.auth.password.helpText',
-                {
-                  defaultMessage: 'Your Atlassian API token',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.confluence.auth.password.helpText', {
+                defaultMessage: 'Your Atlassian API token',
+              }),
             },
           },
         },
@@ -100,23 +97,20 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
             'Subdomain may only contain letters, numbers, and hyphens (for example, your-domain)',
         })
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.description', {
+          i18n.translate('connectorSpecs.confluence.config.subdomain.description', {
             defaultMessage: 'Your Atlassian subdomain',
           })
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.label', {
+          label: i18n.translate('connectorSpecs.confluence.config.subdomain.label', {
             defaultMessage: 'Subdomain',
           }),
           placeholder: 'your-domain',
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.confluence.config.subdomain.helpText',
-            {
-              defaultMessage:
-                'The subdomain for your Confluence Cloud site (for example, your-domain for https://your-domain.atlassian.net)',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.confluence.config.subdomain.helpText', {
+            defaultMessage:
+              'The subdomain for your Confluence Cloud site (for example, your-domain for https://your-domain.atlassian.net)',
+          }),
         }),
     })
   ),
@@ -125,6 +119,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       description:
         'List Confluence pages. Use when you need to find pages, optionally filtered by space, title, or status. Supports pagination via cursor.',
       isTool: true,
+      scope: 'read',
       input: ListPagesInputSchema,
       handler: async (ctx, input: ListPagesInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -151,6 +146,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       description:
         'Fetch full details of a single Confluence page by its ID. Use when you already have the page ID and need the complete record including its content.',
       isTool: true,
+      scope: 'read',
       input: GetPageInputSchema,
       handler: async (ctx, input: GetPageInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -167,6 +163,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       description:
         'List Confluence spaces. Use when you need to discover available spaces or find a specific space by ID, key, type, or status. Supports pagination via cursor.',
       isTool: true,
+      scope: 'read',
       input: ListSpacesInputSchema,
       handler: async (ctx, input: ListSpacesInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -193,6 +190,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       description:
         'Fetch full details of a single Confluence space by its ID. Use when you already have the space ID and need the complete record.',
       isTool: true,
+      scope: 'read',
       input: GetSpaceInputSchema,
       handler: async (ctx, input: GetSpaceInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -207,7 +205,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
     'Typical pattern: listSpaces → listPages (with spaceId) → getPage (with bodyFormat) to retrieve full page content.',
   ].join('\n'),
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.confluence.test.description', {
+    description: i18n.translate('connectorSpecs.confluence.test.description', {
       defaultMessage: 'Verifies Confluence Cloud connection by listing spaces',
     }),
     handler: async (ctx) => {

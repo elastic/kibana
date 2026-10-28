@@ -10,7 +10,7 @@ import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
@@ -18,13 +18,30 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
-import { useSecurityMlModuleJobIds } from '../../../../common/components/ml/hooks/use_security_ml_module_job_ids';
+import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import type { AnomalyBand } from '../anomaly_bands';
 import {
   useRecentAnomaliesDataEsqlSource,
   useRecentAnomaliesTopRowsEsqlSource,
   type ViewByMode,
 } from './recent_anomalies_esql_source_query_hooks';
+
+const ANOMALIES_ENTITY_FILTER_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'anomalies_entity_filter'
+);
+const ANOMALIES_TOP_ROWS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'anomalies_top_rows'
+);
+const ANOMALIES_HEATMAP_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.HOME_PAGE,
+  'anomalies_heatmap'
+);
 
 export interface EntityMetadata {
   entityId: string;
@@ -96,7 +113,8 @@ const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
 
   const esqlSource =
     isFilterActive && spaceId
-      ? `FROM ${getLatestEntitiesIndexName(
+      ? `FROM ${getEntitiesAlias(
+          ENTITY_LATEST,
           spaceId
         )} | WHERE entity.id IS NOT NULL | KEEP entity.id | SORT entity.id | LIMIT ${MAX_FILTERED_ENTITIES}`
       : undefined;
@@ -112,6 +130,7 @@ const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
         search,
         signal,
         filter: filterQuery,
+        executionContext: ANOMALIES_ENTITY_FILTER_CONTEXT,
       });
       return esqlResponseToRecords<{ 'entity.id': string }>(esqlResult?.response)
         .map((record) => record['entity.id'])
@@ -135,13 +154,13 @@ interface SecurityJobIds {
 }
 
 /**
- * Resolves the ML jobs in the `security`/`siem` ML group, matching the
- * server's `getSecurityMlJobIds` (all module-defined security jobs, whether
- * installed or not) so this panel is constrained to the same job set as the
- * anomaly overview/summary APIs.
+ * Resolves the security ML jobs actually installed in the current space,
+ * matching the space-aware job set the anomaly overview/summary APIs search
+ * (server/lib/entity_analytics/anomaly_summary) so this panel does not
+ * surface anomaly records from jobs installed in other spaces.
  */
 const useSecurityJobIds = (): SecurityJobIds => {
-  const { jobIds, loading } = useSecurityMlModuleJobIds();
+  const { jobIds, loading } = useInstalledSecurityJobsIds();
   return { jobIds: loading ? undefined : jobIds, isLoading: loading };
 };
 
@@ -206,6 +225,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
         search,
         signal,
         timeRange,
+        executionContext: ANOMALIES_TOP_ROWS_CONTEXT,
       });
       return {
         records: esqlResponseToRecords<Record<string, string>>(esqlResult?.response),
@@ -300,6 +320,7 @@ export const useRecentAnomaliesQuery = (params: {
         search,
         signal,
         timeRange,
+        executionContext: ANOMALIES_HEATMAP_CONTEXT,
       });
       const anomalyRecords = esqlResponseToRecords<Record<string, string | number>>(
         esqlResult.response

@@ -22,6 +22,7 @@ import { HUNT_WITH_AI_PROMPT } from '../prompts';
 import { EntityEventTypes } from '../../common/lib/telemetry';
 import type { StartServices } from '../../types';
 import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks/use_stored_state';
+import { LEADS_INDEX_PATTERN } from '../../../common/entity_analytics/lead_generation/constants';
 
 jest.mock('../../common/components/links/link_props', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -193,6 +194,9 @@ const mockUseStoredAssistantConnectorId = useStoredAssistantConnectorId as jest.
 describe('EntityAnalyticsHomePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest
+      .mocked(kibanaMock.application.getUrlForApp)
+      .mockImplementation((appId, options) => `/app/${appId}${options?.path ?? ''}`);
 
     mockUseEntityStoreDataView.mockReturnValue({
       dataView: { id: 'test-entity-store', fields: [], matchedIndices: ['index-1'] },
@@ -342,12 +346,20 @@ describe('EntityAnalyticsHomePage', () => {
       <MemoryRouter>
         <EntityAnalyticsHomePage />
       </MemoryRouter>,
-      { wrapper: TestProviders }
+      {
+        wrapper: ({ children }) => (
+          <TestProviders startServices={kibanaMock}>{children}</TestProviders>
+        ),
+      }
     );
 
     expect(screen.getByTestId('entityStoreDisabledEmptyPrompt')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Add integrations/ })).toHaveAttribute(
+      'href',
+      '/app/integrations/browse/advanced_analytics_ueba'
+    );
     expect(screen.getByRole('link', { name: /Read the docs/ })).toBeInTheDocument();
     expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
@@ -361,12 +373,20 @@ describe('EntityAnalyticsHomePage', () => {
       <MemoryRouter>
         <EntityAnalyticsHomePage />
       </MemoryRouter>,
-      { wrapper: TestProviders }
+      {
+        wrapper: ({ children }) => (
+          <TestProviders startServices={kibanaMock}>{children}</TestProviders>
+        ),
+      }
     );
 
     expect(screen.getByTestId('entityStoreDisabledEmptyPrompt')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Entity analytics' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Enable Entity analytics' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Add integrations/ })).toHaveAttribute(
+      'href',
+      '/app/integrations/browse/advanced_analytics_ueba'
+    );
     expect(screen.getByRole('link', { name: /Read the docs/ })).toBeInTheDocument();
     expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
@@ -384,6 +404,9 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.queryByTestId('entityStoreDisabledEmptyPrompt')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('entityStoreDisabledEmptyPromptAddIntegrations')
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
   });
 
@@ -493,7 +516,7 @@ describe('EntityAnalyticsHomePage', () => {
   });
 
   it('shows privileges callout and hides leads section when lead generation read access is missing', () => {
-    const leadsIndex = '.entity_analytics.entity-leads-*';
+    const leadsIndex = LEADS_INDEX_PATTERN;
     mockUseIsExperimentalFeatureEnabled.mockImplementation((flag: string) => {
       if (flag === 'leadGenerationEnabled') return true;
       if (flag === 'newDataViewPickerEnabled') return false;

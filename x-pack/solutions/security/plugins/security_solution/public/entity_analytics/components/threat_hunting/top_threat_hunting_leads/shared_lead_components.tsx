@@ -36,7 +36,7 @@ const isKnownEntityType = (type: string): type is EntityType =>
   (Object.values(EntityType) as string[]).includes(type);
 
 interface EntityBadgeProps {
-  entity: { type: string; name: string; id?: string };
+  entity: { type: string; name: string; id: string };
   scopeId: string;
 }
 
@@ -99,15 +99,8 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
     );
   }
 
-  // Prefer the real Entity Store EUID (e.g. `host:8c67cb16-...`) so the
-  // flyout resolves the entity directly by id. Older leads persisted before
-  // this field existed fall back to `type:name`, which is only correct when
-  // the display name happens to be the entity's raw id (e.g. hosts without a
-  // friendly name) — best-effort, but strictly better than a name-only match.
-  const entityId = entity.id ?? `${entity.type}:${entity.name}`;
-
   const handleOpenEntityFlyout = () => {
-    const sharedParams = { entityId, contextID: scopeId, scopeId };
+    const sharedParams = { entityId: entity.id, contextID: scopeId, scopeId };
 
     if (enableNewFlyout) {
       openEntityFlyout({
@@ -179,55 +172,28 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
   );
 };
 
-export const renderTextWithEntities = (
+export const renderTextWithEntity = (
   text: string,
-  entities: Array<{ type: string; name: string; id?: string }>,
+  entity: { type: string; name: string; id: string },
   scopeId: string
 ): React.ReactNode => {
-  if (!entities.length) return text;
+  const typeLabel = entity.type.charAt(0).toUpperCase() + entity.type.slice(1);
+  const withPrefix = `${typeLabel} ${entity.name}`;
+  let start = text.indexOf(withPrefix);
+  let end = start + withPrefix.length;
 
-  interface Match {
-    start: number;
-    end: number;
-    entity: { type: string; name: string; id?: string };
-  }
-  const matches: Match[] = [];
-
-  for (const entity of entities) {
-    const typeLabel = entity.type.charAt(0).toUpperCase() + entity.type.slice(1);
-    const withPrefix = `${typeLabel} ${entity.name}`;
-    let idx = text.indexOf(withPrefix);
-    if (idx !== -1) {
-      matches.push({ start: idx, end: idx + withPrefix.length, entity });
-    } else {
-      idx = text.indexOf(entity.name);
-      if (idx !== -1) {
-        matches.push({ start: idx, end: idx + entity.name.length, entity });
-      }
-    }
+  if (start === -1) {
+    start = text.indexOf(entity.name);
+    end = start + entity.name.length;
   }
 
-  if (!matches.length) return text;
+  if (start === -1) return text;
 
-  matches.sort((a, b) => a.start - b.start);
-  const parts: React.ReactNode[] = [];
-  let lastEnd = 0;
-
-  for (const match of matches) {
-    if (match.start >= lastEnd) {
-      if (match.start > lastEnd) {
-        parts.push(text.slice(lastEnd, match.start));
-      }
-      parts.push(
-        <EntityBadge entity={match.entity} scopeId={scopeId} key={`entity-${match.start}`} />
-      );
-      lastEnd = match.end;
-    }
-  }
-
-  if (lastEnd < text.length) {
-    parts.push(text.slice(lastEnd));
-  }
-
-  return <>{parts}</>;
+  return (
+    <>
+      {start > 0 && text.slice(0, start)}
+      <EntityBadge entity={entity} scopeId={scopeId} />
+      {end < text.length && text.slice(end)}
+    </>
+  );
 };

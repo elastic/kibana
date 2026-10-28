@@ -36,6 +36,11 @@ const ROLE_NAME_PATTERN =
 const MEMBER_PATTERN =
   /^(allUsers|allAuthenticatedUsers|(user|serviceAccount|group|domain|deleted|principal|principalSet|principalHierarchy):[^\s]{1,512})$/;
 
+const MAX_GRANTABLE_ROLES_PAGE_SIZE = 2000;
+// testIamPermissions documents no limit on permissions per request. The ceiling sits above the
+// permission count of the largest predefined roles, so a getRole result can be checked whole.
+const MAX_TESTED_PERMISSIONS = 20_000;
+
 const projectId = () =>
   z
     .string()
@@ -77,11 +82,13 @@ const keyId = () =>
  * question from "what may this identity do". Revoking an impersonator is a containment step in
  * its own right, and it is far narrower than editing a whole project's policy.
  */
-export const ResourceTypeSchema = z
-  .enum(['projects', 'folders', 'organizations', 'serviceAccounts'])
-  .describe(
-    'What the policy is attached to. Use "projects", "folders" or "organizations" for a resource-hierarchy policy, or "serviceAccounts" for the policy on a single service account, which controls who can impersonate it.'
-  );
+export const ResourceTypeSchema = lazySchema(() =>
+  z
+    .enum(['projects', 'folders', 'organizations', 'serviceAccounts'])
+    .describe(
+      'What the policy is attached to. Use "projects", "folders" or "organizations" for a resource-hierarchy policy, or "serviceAccounts" for the policy on a single service account, which controls who can impersonate it.'
+    )
+);
 
 const resourceId = () =>
   z
@@ -109,7 +116,9 @@ export const ListServiceAccountsInputSchema = lazySchema(() =>
       .min(1)
       .max(100)
       .optional()
-      .describe('Maximum number of service accounts to return per page. Defaults to 100.'),
+      .describe(
+        'Maximum number of service accounts to return per page (1-100). Defaults to the API default of 20.'
+      ),
     pageToken: z
       .string()
       .max(2048)
@@ -271,9 +280,9 @@ export const TestIamPermissionsInputSchema = lazySchema(() =>
           .regex(/^[a-zA-Z0-9.]+$/, { message: 'Must be a permission such as iam.roles.get' })
       )
       .min(1)
-      .max(100)
+      .max(MAX_TESTED_PERMISSIONS)
       .describe(
-        'Permissions to check, for example ["resourcemanager.projects.setIamPolicy"]. Only the held subset is returned.'
+        'Permissions to check, for example ["resourcemanager.projects.setIamPolicy"]. Accepts the full includedPermissions list returned by getRole. Only the held subset is returned.'
       ),
   })
 );
@@ -302,9 +311,11 @@ export const QueryGrantableRolesInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(1)
-      .max(100)
+      .max(MAX_GRANTABLE_ROLES_PAGE_SIZE)
       .optional()
-      .describe('Maximum roles to return per page. Defaults to 100.'),
+      .describe(
+        `Maximum roles to return per page (1-${MAX_GRANTABLE_ROLES_PAGE_SIZE}). Defaults to the API default of 300.`
+      ),
     pageToken: z.string().max(2048).optional().describe('Page token from a previous response.'),
   })
 );

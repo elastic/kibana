@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
+import React, { type PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react';
+import { QueryClientProvider, useQuery as _useQuery } from '@kbn/react-query';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetEndpointPendingActionsSummary } from './use_get_endpoint_pending_actions_summary';
 import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
-import { useQuery as _useQuery } from '@kbn/react-query';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 
 const useQueryMock = _useQuery as jest.Mock;
@@ -24,40 +26,38 @@ jest.mock('@kbn/react-query', () => {
 });
 
 describe('useGetEndpointPendingActionsSummary hook', () => {
-  let renderReactQueryHook: ReactQueryHookRenderer<
-    Parameters<typeof useGetEndpointPendingActionsSummary>,
-    ReturnType<typeof useGetEndpointPendingActionsSummary>
-  >;
+  let wrapper: React.FC<PropsWithChildren>;
   let http: AppContextTestRender['coreStart']['http'];
-  let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
 
   beforeEach(() => {
     const testContext = createAppRootMockRenderer();
+    const { queryClient } = testContext;
 
-    renderReactQueryHook = testContext.renderReactQueryHook as typeof renderReactQueryHook;
     http = testContext.coreStart.http;
+    responseActionsHttpMocks(http);
 
-    apiMocks = responseActionsHttpMocks(http);
+    // Bare QueryClientProvider instead of the full `AppRootProvider`, whose mount starved the event loop under parallel CI load.
+    wrapper = ({ children }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
   });
 
-  it('should call the proper API', async () => {
-    await renderReactQueryHook(() => useGetEndpointPendingActionsSummary(['123', '456']));
+  it('should call the proper API', () => {
+    renderHook(() => useGetEndpointPendingActionsSummary(['123', '456']), { wrapper });
 
-    expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalledWith({
-      path: `${ACTION_STATUS_ROUTE}`,
-      query: { agent_ids: ['123', '456'] },
+    expect(http.get).toHaveBeenCalledWith(ACTION_STATUS_ROUTE, {
       version: '2023-10-31',
+      query: { agent_ids: ['123', '456'] },
     });
   });
 
-  it('should allow custom options to be used', async () => {
-    await renderReactQueryHook(
+  it('should allow custom options to be used', () => {
+    renderHook(
       () =>
         useGetEndpointPendingActionsSummary(['123', '456'], {
           queryKey: ['1', '2'],
           enabled: false,
         }),
-      false
+      { wrapper }
     );
 
     expect(useQueryMock).toHaveBeenCalledWith(

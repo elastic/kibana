@@ -60,6 +60,7 @@ export function generateAlertingConfig(overwrites: Partial<AlertingConfig> = {})
     enableFrameworkAlerts: false,
     alertsService: {
       totalFieldsLimit: 2800,
+      coordinateInstallation: true,
     },
     ruleChangeTracking: {
       enabled: false,

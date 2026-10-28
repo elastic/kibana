@@ -12,11 +12,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import {
-  MANAGEMENT_AGENT_ID,
-  SIGNAL_GENERATOR_TASK_ID,
-  SIGNAL_GENERATOR_TASK_TYPE,
-} from '../../common/constants';
+import { SIGNAL_GENERATOR_TASK_ID, SIGNAL_GENERATOR_TASK_TYPE } from '../../common/constants';
 import type { Signal } from '../../common/http_api/signals';
 import type { SignalsServiceApi } from '../signals/service';
 import {
@@ -53,27 +49,6 @@ describe('spaceFromTracesIndex', () => {
 });
 
 describe('buildConvAgentMap', () => {
-  it('flags the management agent by id, not by display name', () => {
-    const map = buildConvAgentMap([
-      {
-        trace_id: 'trace-1',
-        'attributes.gen_ai.conversation.id': 'conv-1',
-        'attributes.gen_ai.agent.id': MANAGEMENT_AGENT_ID,
-        'attributes.gen_ai.agent.name': 'Context Engine',
-      },
-      {
-        trace_id: 'trace-2',
-        'attributes.gen_ai.conversation.id': 'conv-2',
-        // A user agent that happens to share the management display name.
-        'attributes.gen_ai.agent.id': 'user-agent-9',
-        'attributes.gen_ai.agent.name': 'Context Engine',
-      },
-    ]);
-
-    expect(map.get('trace-1')?.class).toBe('management');
-    expect(map.get('trace-2')?.class).toBe('user');
-  });
-
   it('keeps only the first invoke_agent span per round', () => {
     const map = buildConvAgentMap([
       { trace_id: 'trace-1', 'attributes.gen_ai.agent.id': 'agent-a' },
@@ -118,6 +93,13 @@ const AGENT_COLUMNS = [
   'attributes.gen_ai.agent.name',
 ];
 
+const LOAD_SKILL_COLUMNS = ['trace_id', 'attributes.gen_ai.tool.call.arguments'];
+
+const loadSkillRow = (traceId: string, skill: string): EsqlRow => ({
+  trace_id: traceId,
+  'attributes.gen_ai.tool.call.arguments': JSON.stringify({ skill }),
+});
+
 const toolRow = (overrides: Partial<EsqlRow> = {}): EsqlRow => ({
   _index: '.ds-traces-agent_builder.otel-default-2026.08.10-000001',
   '@timestamp': '2026-07-08T12:10:30.000Z',
@@ -133,11 +115,19 @@ const toolRow = (overrides: Partial<EsqlRow> = {}): EsqlRow => ({
   ...overrides,
 });
 
-// The mock is watermark-aware for execute_tool (`>=` filter on the param) and
-// trace_id-aware for invoke_agent (returns only rows for requested trace_ids),
-// so idempotency/boundary and management-round behavior are actually exercised.
-const createEsClient = (toolRows: EsqlRow[], agentRows: EsqlRow[]): ElasticsearchClient => {
+const createEsClient = (
+  toolRows: EsqlRow[],
+  agentRows: EsqlRow[],
+  loadSkillRows: EsqlRow[] = []
+): ElasticsearchClient => {
   const query = jest.fn(async ({ query: q, params }: EsqlQueryArgs) => {
+    if (q.includes('"load_skill"')) {
+      const requested = new Set((params ?? []).map((param) => String(param)));
+      return esqlResponse(
+        LOAD_SKILL_COLUMNS,
+        loadSkillRows.filter((row) => requested.has(String(row.trace_id)))
+      );
+    }
     if (q.includes('execute_tool')) {
       const watermark =
         q.includes('?watermark') && params?.[0] && typeof params[0] === 'object'
@@ -210,6 +200,7 @@ describe('signal generator task run()', () => {
   const run = async (opts: {
     toolRows: EsqlRow[];
     agentRows: EsqlRow[];
+    loadSkillRows?: EsqlRow[];
     enabled?: boolean;
     state?: Record<string, unknown>;
     signal?: AbortSignal;
@@ -217,7 +208,7 @@ describe('signal generator task run()', () => {
     writes?: Array<{ spaceId: string; signals: Signal[] }>;
     logger?: Logger;
   }) => {
-    const esClient = createEsClient(opts.toolRows, opts.agentRows);
+    const esClient = createEsClient(opts.toolRows, opts.agentRows, opts.loadSkillRows);
     const built =
       opts.service && opts.writes
         ? { service: opts.service, writes: opts.writes }
@@ -359,29 +350,28 @@ describe('signal generator task run()', () => {
     expect(result.state).toEqual({ watermark: '2026-07-08T12:10:30.000Z' });
   });
 
-  it('resolves invoke_agent by trace_id, so a management round is excluded even when its tool spans are the only batch', async () => {
+  it('resolves the round agent by trace_id, parameterizing the invoke_agent query with the batch', async () => {
     const { writes, esClient } = await run({
-      toolRows: [toolRow({ trace_id: 'trace-mgmt', span_id: 'span-1' })],
+      toolRows: [toolRow({ trace_id: 'trace-a', span_id: 'span-1' })],
       agentRows: [
         {
-          trace_id: 'trace-mgmt',
-          'attributes.gen_ai.conversation.id': 'conv-mgmt',
-          'attributes.gen_ai.agent.id': MANAGEMENT_AGENT_ID,
-          'attributes.gen_ai.agent.name': 'Context Engine',
+          trace_id: 'trace-a',
+          'attributes.gen_ai.conversation.id': 'conv-a',
+          'attributes.gen_ai.agent.id': 'agent-9',
+          'attributes.gen_ai.agent.name': 'Support',
         },
       ],
       state: { watermark: '2026-01-01T00:00:00.000Z' },
     });
 
     const [signal] = writes[0].signals;
-    expect(signal.data.agent.class).toBe('management');
-    expect(signal.tags).toEqual([]);
+    expect(signal.data.agent).toEqual({ id: 'agent-9', name: 'Support' });
+    expect(signal.data.conversation_id).toBe('conv-a');
 
-    // The invoke_agent query is parameterized by the batch's trace_ids.
     const invokeCall = (esClient.esql.query as jest.Mock).mock.calls.find(([arg]) =>
       arg.query.includes('invoke_agent')
     );
-    expect(invokeCall?.[0].params).toEqual(['trace-mgmt']);
+    expect(invokeCall?.[0].params).toEqual(['trace-a']);
   });
 
   it('reads only execute_esql tool spans (filters non-ES|QL tools at read-time)', async () => {
@@ -393,6 +383,70 @@ describe('signal generator task run()', () => {
     expect(toolCall?.[0].query).toContain(
       'attributes.gen_ai.tool.name == "platform.core.execute_esql"'
     );
+  });
+
+  it('drops every span from a round that loaded the analysis skill', async () => {
+    const { writes } = await run({
+      toolRows: [
+        toolRow({ trace_id: 'trace-analysis', span_id: 'span-1' }),
+        toolRow({ trace_id: 'trace-analysis', span_id: 'span-2' }),
+        toolRow({ trace_id: 'trace-user', span_id: 'span-1' }),
+      ],
+      agentRows: [],
+      loadSkillRows: [loadSkillRow('trace-analysis', 'analyze-and-improve')],
+    });
+
+    const ids = writes.flatMap((w) => w.signals).map((s) => s.signal_id);
+    expect(ids).toEqual(['trace-user:span-1']);
+  });
+
+  it('recognizes the analysis skill when it was loaded by path', async () => {
+    const { writes } = await run({
+      toolRows: [toolRow({ trace_id: 'trace-1', span_id: 'span-1' })],
+      agentRows: [],
+      loadSkillRows: [
+        loadSkillRow('trace-1', 'skills/platform/context-engine/analyze-and-improve/SKILL.md'),
+      ],
+    });
+
+    expect(writes.flatMap((w) => w.signals)).toHaveLength(0);
+  });
+
+  it('keeps rounds that loaded an unrelated skill', async () => {
+    const { writes } = await run({
+      toolRows: [toolRow({ trace_id: 'trace-1', span_id: 'span-1' })],
+      agentRows: [],
+      loadSkillRows: [loadSkillRow('trace-1', 'ki-retrieval')],
+    });
+
+    expect(writes.flatMap((w) => w.signals)).toHaveLength(1);
+  });
+
+  it('advances the watermark when every round in the batch was self-analysis', async () => {
+    const { result, writes } = await run({
+      toolRows: [toolRow({ trace_id: 'trace-analysis', '@timestamp': '2026-07-08T12:11:00.000Z' })],
+      agentRows: [],
+      loadSkillRows: [loadSkillRow('trace-analysis', 'analyze-and-improve')],
+      state: { watermark: '2026-01-01T00:00:00.000Z' },
+    });
+
+    expect(writes.flatMap((w) => w.signals)).toHaveLength(0);
+    expect(result.state).toEqual({ watermark: '2026-07-08T12:11:00.000Z' });
+  });
+
+  it('resolves load_skill by trace_id rather than by the watermark, so a round split across two batches is still excluded', async () => {
+    const { esClient } = await run({
+      toolRows: [toolRow({ trace_id: 'trace-analysis' })],
+      agentRows: [],
+      loadSkillRows: [loadSkillRow('trace-analysis', 'analyze-and-improve')],
+      state: { watermark: '2026-07-08T12:00:00.000Z' },
+    });
+
+    const loadSkillCall = (esClient.esql.query as jest.Mock).mock.calls.find(([arg]) =>
+      arg.query.includes('"load_skill"')
+    );
+    expect(loadSkillCall?.[0].params).toEqual(['trace-analysis']);
+    expect(loadSkillCall?.[0].query).not.toContain('?watermark');
   });
 
   it('keeps the watermark unchanged when the batch is aborted mid-loop', async () => {

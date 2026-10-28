@@ -103,6 +103,7 @@ export const TemplateForm = ({
   history,
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
+  const [isReviewSaveBlocked, setIsReviewSaveBlocked] = useState(false);
   const {
     config: { enableIndexMode },
   } = useAppContext();
@@ -280,7 +281,12 @@ export const TemplateForm = ({
     <>
       <AppHeader
         title={title}
-        back="/app/management/data/index_management/templates"
+        back={{
+          href: '/app/management/data/index_management/templates',
+          label: i18n.translate('xpack.idxMgmt.templateForm.backToListLabel', {
+            defaultMessage: 'Templates',
+          }),
+        }}
         spacing="bleed"
       />
 
@@ -299,6 +305,7 @@ export const TemplateForm = ({
           onSave={onSaveTemplate}
           isEditing={isEditing}
           isSaving={isSaving}
+          isNextButtonDisabled={isReviewSaveBlocked}
           apiError={apiError}
           texts={i18nTexts}
           onChange={onWizardContentChange}
@@ -346,6 +353,7 @@ export const TemplateForm = ({
             <StepReviewContainer
               getTemplateData={buildTemplateObject(indexTemplate)}
               dataStreamOptions={dataStreamOptions}
+              onSaveBlockedChange={setIsReviewSaveBlocked}
             />
           </FormWizardStep>
         </FormWizard>

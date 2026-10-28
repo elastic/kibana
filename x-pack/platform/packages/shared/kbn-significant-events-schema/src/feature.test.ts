@@ -24,7 +24,6 @@ const createFeature = ({
   meta?: Record<string, unknown>;
 } = {}): BaseFeature => ({
   id,
-  stream_name: 'logs.test',
   type: 'technology',
   subtype: 'identity_provider',
   title: 'Okta',
@@ -74,8 +73,8 @@ describe('normalizeFeatureSlugForMatching', () => {
   });
 
   it('keeps matching normalization out of UUID generation', () => {
-    const canonical = { id: 'okta', stream_name: 'logs.test' };
-    const versioned = { id: 'okta-3.15.0', stream_name: 'logs.test' };
+    const canonical = { id: 'okta', source_id: 'logs.test' };
+    const versioned = { id: 'okta-3.15.0', source_id: 'logs.test' };
 
     expect(normalizeFeatureSlugForMatching(versioned.id)).toBe(canonical.id);
     expect(computeFeatureUuid(versioned)).not.toBe(computeFeatureUuid(canonical));
@@ -147,15 +146,6 @@ describe('mergeFeature version history', () => {
 
     expect(missingIncoming.meta).toBeUndefined();
     expect(emptyExisting.meta).toBeUndefined();
-  });
-
-  it('preserves existing aliases and safely merges newly captured aliases', () => {
-    const merged = mergeFeature(
-      createFeature({ meta: { aliases: ['old-alias', 'shared-alias'] } }),
-      createFeature({ meta: { aliases: ['shared-alias', 'new-alias', 42] } })
-    );
-
-    expect(merged.meta?.aliases).toEqual(['old-alias', 'shared-alias', 'new-alias']);
   });
 
   it('does not trust incoming version history', () => {

@@ -73,7 +73,7 @@ export class DataViewsAsCodeService {
       meta: {
         managed: dataView.managed,
         version: dataView.version,
-        namespaces: dataView.namespaces,
+        spaces: dataView.namespaces,
       },
     };
   }
@@ -161,6 +161,7 @@ export class DataViewsAsCodeService {
       page,
       perPage,
       search,
+      searchFields: ['name', 'title'],
       fields: ['name', 'title', 'timeFieldName'],
     });
 
@@ -178,7 +179,7 @@ export class DataViewsAsCodeService {
         },
         meta: {
           ...getMeta(so),
-          namespaces: so.namespaces,
+          spaces: so.namespaces,
         },
       };
     });

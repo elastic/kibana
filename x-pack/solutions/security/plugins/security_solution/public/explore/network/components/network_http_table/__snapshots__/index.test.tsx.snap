@@ -77,7 +77,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
     data-test-subj="table-http-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div
@@ -111,6 +111,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                         id="generated-id_euiToolTipAnchor"
                       >
                         <button
+                          aria-expanded="true"
                           aria-label="Open"
                           class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
                           data-test-subj="query-toggle-header"
@@ -190,7 +191,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
       data-test-subj="paginated-basic-table"
     >
       <div
-        class="emotion-euiContainerCSS"
+        class="euiTable__wrapper emotion-euiContainerCSS"
       >
         <table
           class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
@@ -382,7 +383,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <span
-                    class="css-16x51zl-EmptyWrapper"
+                    class="css-c6a0f4"
                   >
                     —
                   </span>
@@ -425,7 +426,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                       >
                         <div>
                           <button
-                            class="euiLink emotion-euiLink-primary"
+                            class="euiLink emotion-euiLink-text"
                             data-test-subj="network-details"
                             type="button"
                           >
@@ -528,7 +529,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                       >
                         <div>
                           <button
-                            class="euiLink emotion-euiLink-primary"
+                            class="euiLink emotion-euiLink-text"
                             data-test-subj="network-details"
                             type="button"
                           >
@@ -591,7 +592,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                   class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
                   <span
-                    class="css-16x51zl-EmptyWrapper"
+                    class="css-c6a0f4"
                   >
                     —
                   </span>
@@ -634,7 +635,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                       >
                         <div>
                           <button
-                            class="euiLink emotion-euiLink-primary"
+                            class="euiLink emotion-euiLink-text"
                             data-test-subj="network-details"
                             type="button"
                           >
@@ -737,7 +738,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
                       >
                         <div>
                           <button
-                            class="euiLink emotion-euiLink-primary"
+                            class="euiLink emotion-euiLink-text"
                             data-test-subj="network-details"
                             type="button"
                           >

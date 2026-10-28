@@ -17,7 +17,7 @@ import type {
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import { useLayoutUpdate } from '@kbn/ui-chrome-layout';
 import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
 
@@ -83,11 +83,12 @@ function useFallbackProps(): FallbackProps {
     const backTargets: AppHeaderBack[] = [];
     for (let i = breadcrumbs.length - 2; i >= 0; i--) {
       const crumb = breadcrumbs[i];
-      if (crumb.href && !isCurrentLocation(crumb.href)) {
+      const label = getBreadcrumbText(crumb);
+      if (label && crumb.href && !isCurrentLocation(crumb.href)) {
         backTargets.push({
           href: crumb.href,
           onClick: crumb.onClick,
-          label: getBreadcrumbText(crumb),
+          label,
         });
       }
     }
@@ -106,7 +107,7 @@ function useFallbackProps(): FallbackProps {
 
 function useAppHeaderConfig(): ChromeAppHeaderConfig | undefined {
   const chrome = useChromeService();
-  const config$ = useMemo(() => chrome.next.appHeader.get$(), [chrome]);
+  const config$ = useMemo(() => chrome.appHeader.get$(), [chrome]);
   return useObservable(config$, undefined);
 }
 
@@ -142,6 +143,7 @@ function hasExplicitAppHeaderContent(config: ChromeAppHeaderConfig | undefined):
     !!config.menu?.items?.length ||
     !!config.favorite ||
     !!config.share ||
+    !!config.experimentalDashboardAiAction ||
     !!config.description ||
     !!config.metadata?.length
   );
@@ -204,7 +206,8 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
     !config?.metadata?.length &&
     !config?.badges?.length &&
     !config?.favorite &&
-    !config?.share;
+    !config?.share &&
+    !config?.experimentalDashboardAiAction;
   const reservedMinHeight =
     config?.spacing === 'compact' || isSparse
       ? RESERVED_COMPACT_MIN_HEIGHT_PX
@@ -229,6 +232,7 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
           menu={menu}
           favorite={config?.favorite}
           share={config?.share}
+          experimentalDashboardAiAction={config?.experimentalDashboardAiAction}
           {...secondaryContent}
           sticky={false}
           spacing={config?.spacing}

@@ -13,6 +13,7 @@ import {
   CONNECTORS_API,
   CONNECTORS_WITH_ONE,
   FLEET_PACKAGES_API,
+  INTEGRATION_NAMES_API,
   INTEGRATIONS_LIST_API,
 } from '../fixtures/mock_data';
 
@@ -48,6 +49,14 @@ test.describe(
           route.continue();
         }
       });
+
+      await page.route(INTEGRATION_NAMES_API, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([]),
+        })
+      );
 
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.integrationManagement.navigateToCreate();

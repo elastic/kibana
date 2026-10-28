@@ -8,7 +8,6 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
-  coreFeatureFlagsMock,
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
@@ -66,6 +65,7 @@ const rulesClientContext: RulesClientContext = {
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
+  getProfileUid: jest.fn(),
   createAPIKey: createAPIKeyMock,
   cloneAPIKey: jest.fn(),
   logger,
@@ -86,7 +86,6 @@ const rulesClientContext: RulesClientContext = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   minimumScheduleIntervalInMs: 0,
-  featureFlags: coreFeatureFlagsMock.createStart(),
   isServerless: false,
 };
 
@@ -439,6 +438,7 @@ describe('bulkEditRules', () => {
       rules: [],
       skipped: [],
       username: undefined,
+      profileUid: undefined,
     });
     expect(updateFn).toHaveBeenNthCalledWith(2, {
       apiKeysMap: expect.any(Map),
@@ -447,6 +447,7 @@ describe('bulkEditRules', () => {
       rules: [],
       skipped: [],
       username: undefined,
+      profileUid: undefined,
     });
     expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });

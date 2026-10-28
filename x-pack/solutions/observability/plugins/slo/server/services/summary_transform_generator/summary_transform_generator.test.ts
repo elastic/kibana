@@ -11,7 +11,7 @@ import { DefaultSummaryTransformGenerator } from './summary_transform_generator'
 
 describe('DefaultSummaryTransformGenerator', () => {
   describe('project_routing', () => {
-    it('adds project_routing to the source when isServerless and isCpsEnabled (occurrences)', () => {
+    it('adds project_routing to the source when isServerless and isCpsAvailable (occurrences)', () => {
       const slo = createSLO({ id: 'irrelevant', budgetingMethod: 'occurrences' });
       const generator = new DefaultSummaryTransformGenerator(true, true);
       expect(generator.generate(slo).source.project_routing).toBe('_alias:_origin');
@@ -23,13 +23,13 @@ describe('DefaultSummaryTransformGenerator', () => {
       expect(generator.generate(slo).source.project_routing).toBeUndefined();
     });
 
-    it('omits project_routing from the source when isCpsEnabled is false (occurrences)', () => {
+    it('omits project_routing from the source when isCpsAvailable is false (occurrences)', () => {
       const slo = createSLO({ id: 'irrelevant', budgetingMethod: 'occurrences' });
       const generator = new DefaultSummaryTransformGenerator(true, false);
       expect(generator.generate(slo).source.project_routing).toBeUndefined();
     });
 
-    it('adds project_routing to the source when isServerless and isCpsEnabled (timeslices rolling)', () => {
+    it('adds project_routing to the source when isServerless and isCpsAvailable (timeslices rolling)', () => {
       const slo = createSLOWithTimeslicesBudgetingMethod({
         id: 'irrelevant',
         timeWindow: sevenDaysRolling(),
@@ -38,7 +38,7 @@ describe('DefaultSummaryTransformGenerator', () => {
       expect(generator.generate(slo).source.project_routing).toBe('_alias:_origin');
     });
 
-    it('adds project_routing to the source when isServerless and isCpsEnabled (timeslices calendar-aligned)', () => {
+    it('adds project_routing to the source when isServerless and isCpsAvailable (timeslices calendar-aligned)', () => {
       const slo = createSLOWithTimeslicesBudgetingMethod({
         id: 'irrelevant',
         timeWindow: monthlyCalendarAligned(),

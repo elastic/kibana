@@ -141,8 +141,72 @@ describe('Memory dump response action', () => {
       await enterConsoleCommand(renderResult, user, 'memory-dump --kernel');
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('memoryDumpResult').textContent).toBeTruthy();
+        expect(renderResult.getByTestId('memoryDump-success')).toBeTruthy();
       });
+
+      expect(renderResult.getByTestId('memoryDump-actionResult-hostStatus')).toHaveTextContent(
+        'memory-dump completed successfully'
+      );
+      expect(
+        renderResult.getByTestId('memoryDump-actionResult-memoryDumpResults-success')
+      ).toHaveTextContent('Memory dump file was created on host:');
+    });
+
+    it('should display pending status while action is not yet complete', async () => {
+      apiMocks.responseProvider.actionDetails.mockReturnValue({
+        data: new EndpointActionGenerator('seed').generateActionDetails({
+          agents: ['a.b.c'],
+          command: 'memory-dump',
+          isCompleted: false,
+          wasSuccessful: false,
+          agentState: {
+            'a.b.c': { isCompleted: false, wasSuccessful: false },
+          },
+        }),
+      });
+      await render();
+      await enterConsoleCommand(renderResult, user, 'memory-dump --kernel');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('memoryDump-pending')).toBeTruthy();
+      });
+
+      expect(renderResult.getByTestId('memoryDump-actionResult-hostStatus')).toHaveTextContent(
+        'memory-dump is pending'
+      );
+    });
+
+    it('should display failure when action completes with errors', async () => {
+      apiMocks.responseProvider.actionDetails.mockReturnValue({
+        data: new EndpointActionGenerator('seed').generateActionDetails({
+          agents: ['a.b.c'],
+          command: 'memory-dump',
+          wasSuccessful: false,
+          errors: ['memory dump failed on host'],
+          agentState: {
+            'a.b.c': { wasSuccessful: false, errors: ['memory dump failed on host'] },
+          },
+        }),
+      });
+      await render();
+      await enterConsoleCommand(renderResult, user, 'memory-dump --kernel');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('memoryDump-actionFailure')).toBeTruthy();
+      });
+
+      expect(renderResult.getByTestId('memoryDump-actionResult-hostStatus')).toHaveTextContent(
+        'memory-dump failed'
+      );
+      expect(
+        renderResult.getByTestId(
+          'memoryDump-actionResult-memoryDumpResults-failure-response-action-failure-info'
+        )
+      ).toHaveTextContent('memory dump failed on host');
     });
 
     it.each`
@@ -162,8 +226,8 @@ describe('Memory dump response action', () => {
       await render();
       await enterConsoleCommand(renderResult, user, `memory-dump --process`);
 
-      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-        '"pid" or "entityId argument is required for "process" memory dumps'
+      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+        'Argument --process requires (only) one of the following arguments: --entityId, --pid'
       );
     });
 

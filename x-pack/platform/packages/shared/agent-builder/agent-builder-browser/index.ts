@@ -7,6 +7,11 @@
 
 export { formatAgentBuilderErrorMessage } from './base/errors';
 export type {
+  AddConversationEventsParams,
+  AddConversationEventsResult,
+  ConversationsServiceStartContract,
+} from './conversations';
+export type {
   ToolServiceStartContract,
   ExecuteToolParams,
   ExecuteToolReturn,
@@ -15,17 +20,53 @@ export type {
   WorkflowListItem,
 } from './tools';
 export type { AgentsServiceStartContract } from './agents';
-export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './attachments';
+export type {
+  AttachmentUIDefinition,
+  AttachmentServiceStartContract,
+  AttachmentBrowserClient,
+  ListAttachmentsResult,
+  CreateAttachmentArgs,
+  GetAttachmentArgs,
+  UpdateAttachmentArgs,
+  DeleteAttachmentArgs,
+  ListAttachmentsArgs,
+  ConversationDetailsRenderProps,
+} from './attachments';
 export type { RendererUIDefinition, RendererServiceStartContract } from './renderers';
+export type {
+  ConversationEventRenderContext,
+  ConversationEventHeaderData,
+  ConversationEventUIDefinition,
+  ValidatedConversationEventUIDefinition,
+  ConversationEventsServiceStartContract,
+} from './conversation_events';
+export type {
+  ConversationTemplateTabDefinition,
+  ConversationTemplateUIDefinition,
+  ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateDetailsFlyoutRenderProps,
+  ConversationTemplateUIContext,
+  ConversationTemplateServiceStartContract,
+} from './templates';
+export {
+  TIMELINE_TAB_ID,
+  BUILTIN_TAB_IDS,
+  CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+} from './templates';
 export type {
   EventsServiceStartContract,
   ChatUiEventsContract,
   BrowserChatEvent,
   ActiveConversation,
+  ApiStateChangesOptions,
 } from './events';
+export { filterApiStateChanges } from './events';
 export { WorkflowComboBox } from './workflow_combo_box';
 export type { WorkflowComboBoxProps, WorkflowComboBoxOption } from './workflow_combo_box';
-export { ConversationInputShell } from './conversation_input_shell';
+export {
+  ConversationInputShell,
+  CONVERSATION_INPUT_SHELL_RADIUS,
+} from './conversation_input_shell';
 export type { ConversationInputShellProps } from './conversation_input_shell';
 export type {
   AgentBuilderPluginSetup,
@@ -36,6 +77,7 @@ export type {
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,
   OpenConversationSidebarOptions,
+  OpenConversationDetailsOptions,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
 } from './plugin_contract';

@@ -44,16 +44,32 @@ const createFilterExpressions = (
     ])
   );
 
-const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
-  filterExpressions: new Map(),
-  filteringDimensions: [],
-  availableProjects: new Map(),
-  excludedOverrides: [],
-  filteredProjectIds: [],
-  visibleProjectIds: [],
-  selectedProjects: [],
-  ...overrides,
-});
+const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
+  const filterExpressions = overrides.filterExpressions ?? new Map();
+
+  return {
+    filterExpressions,
+    filteringDimensions: [],
+    availableProjects: new Map(),
+    excludedOverrides: [],
+    proposedFilters: null,
+    filteredProjectIds: [],
+    isFilterSearchLoading: false,
+    filterSearchError: null,
+    visibleProjectIds: [],
+    selectedProjectIds: [],
+    originProjectId: 'origin',
+    defaultProjectRouting: '',
+    projectRoutingStrategy: 'dynamic',
+    hasUserModifiedRouting: false,
+    currentProjectRouting: '',
+    isUsingSpaceDefaults: false,
+    displayedFilterExpressions: filterExpressions,
+    isFilterProposalPending: false,
+    controlsState: 'enabled',
+    ...overrides,
+  };
+};
 
 const defaultActions = {
   clearProjectFilters: jest.fn(),
@@ -87,21 +103,45 @@ describe('ProjectPickerFrameHeader', () => {
     excludedOverrides: ['p2'],
   };
 
-  describe('read-only mode', () => {
-    it('disables clear and revert menu items', async () => {
-      renderHeader({ ...stateWithFilters, isReadOnly: true });
+  describe('controlsState', () => {
+    it('disables clear and revert menu items when controlsState is `disabled`', async () => {
+      renderHeader({ ...stateWithFilters, controlsState: 'disabled' });
       await openGlobalActionsMenu();
 
       expect(screen.getByText('Clear project tag filters').closest('button')).toBeDisabled();
       expect(screen.getByText('Revert to space defaults').closest('button')).toBeDisabled();
     });
+
+    it('enables clear and revert menu items when controlsState is `enabled`', async () => {
+      renderHeader({ ...stateWithFilters, controlsState: 'enabled' });
+      await openGlobalActionsMenu();
+
+      expect(screen.getByText('Clear project tag filters').closest('button')).not.toBeDisabled();
+      expect(screen.getByText('Revert to space defaults').closest('button')).not.toBeDisabled();
+    });
   });
 
-  it('enables clear and revert menu items when not read-only', async () => {
-    renderHeader({ ...stateWithFilters, isReadOnly: false });
-    await openGlobalActionsMenu();
+  describe('propose-then-commit filter state', () => {
+    it('disables clear and revert menu items while a filter proposal is pending, even with filters displayed', async () => {
+      renderHeader({
+        ...stateWithFilters,
+        proposedFilters: { filterExpressions: new Map(), excludedOverrides: [] },
+        isFilterProposalPending: true,
+      });
+      await openGlobalActionsMenu();
 
-    expect(screen.getByText('Clear project tag filters').closest('button')).not.toBeDisabled();
-    expect(screen.getByText('Revert to space defaults').closest('button')).not.toBeDisabled();
+      expect(screen.getByText('Clear project tag filters').closest('button')).toBeDisabled();
+      expect(screen.getByText('Revert to space defaults').closest('button')).toBeDisabled();
+    });
+
+    it('reads displayedFilterExpressions (not the committed filters) for the clear-filters disabled check', async () => {
+      renderHeader({
+        filterExpressions: new Map(),
+        displayedFilterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      });
+      await openGlobalActionsMenu();
+
+      expect(screen.getByText('Clear project tag filters').closest('button')).not.toBeDisabled();
+    });
   });
 });

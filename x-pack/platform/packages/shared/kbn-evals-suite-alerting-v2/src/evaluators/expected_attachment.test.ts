@@ -12,6 +12,8 @@ import {
   RENDER_ATTACHMENT_TAG_RE,
   createExpectedAttachmentDataEvaluator,
   createExpectedRenderAttachmentEvaluator,
+  getAttachmentVersionData,
+  getLatestAttachmentData,
 } from './expected_attachment';
 
 const attachment = (
@@ -66,6 +68,50 @@ const runAttachmentData = (output: TaskOutput, expected: Record<string, unknown>
     expected: expected ?? {},
     metadata: null,
   });
+
+describe('getAttachmentVersionData', () => {
+  it('returns an empty array when no attachment of that type exists', () => {
+    expect(getAttachmentVersionData([attachment('a1', RULE_ATTACHMENT_TYPE)], 'missing')).toEqual(
+      []
+    );
+  });
+
+  it('returns version payloads ordered by version number', () => {
+    const versioned = {
+      ...attachment('rule-1', RULE_ATTACHMENT_TYPE, { recovery: { strategy: 'manual' } }),
+      current_version: 3,
+      versions: [
+        {
+          version: 3,
+          data: { recovery: { strategy: 'no_breach' } },
+          created_at: '2026-01-01T00:00:03.000Z',
+          content_hash: 'hash-3',
+        },
+        {
+          version: 1,
+          data: { recovery: { strategy: 'query', query: 'FROM logs-*' } },
+          created_at: '2026-01-01T00:00:01.000Z',
+          content_hash: 'hash-1',
+        },
+        {
+          version: 2,
+          data: { recovery: { strategy: 'manual' } },
+          created_at: '2026-01-01T00:00:02.000Z',
+          content_hash: 'hash-2',
+        },
+      ],
+    } as VersionedAttachment;
+
+    expect(getAttachmentVersionData([versioned], RULE_ATTACHMENT_TYPE)).toEqual([
+      { recovery: { strategy: 'query', query: 'FROM logs-*' } },
+      { recovery: { strategy: 'manual' } },
+      { recovery: { strategy: 'no_breach' } },
+    ]);
+    expect(getLatestAttachmentData([versioned], RULE_ATTACHMENT_TYPE)).toEqual({
+      recovery: { strategy: 'no_breach' },
+    });
+  });
+});
 
 describe('RENDER_ATTACHMENT_TAG_RE', () => {
   it('matches a self-closing tag with id and version', () => {

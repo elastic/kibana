@@ -25,7 +25,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { AreaFillOptions, LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
@@ -53,6 +53,7 @@ import {
   nonNullable,
   renewIDs,
   getColorMappingDefaults,
+  isEsqlChart,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import {
@@ -71,7 +72,12 @@ import type {
   XYByValueAnnotationLayerConfig,
   XYVisualizationState,
 } from './types';
-import { visualizationSubtypes, visualizationTypes, defaultSeriesType } from './types';
+import {
+  visualizationSubtypes,
+  visualizationTypes,
+  defaultSeriesType,
+  defaultAreaFill,
+} from './types';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import {
   getAccessorColorConfigs,
@@ -331,7 +337,6 @@ export const getXyVisualization = ({
     }
 
     return {
-      title: 'Empty XY chart',
       legend: { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
       valueLabels: 'hide',
       preferredSeriesType: defaultSeriesType,
@@ -372,7 +377,8 @@ export const getXyVisualization = ({
     state,
     setState,
     registerLibraryAnnotationGroup,
-    isSaveable
+    isSaveable,
+    framePublicAPI
   ) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
@@ -386,6 +392,9 @@ export const getXyVisualization = ({
           registerLibraryAnnotationGroup,
           core,
           isSaveable,
+          // Annotation library groups are data-view-based. Until the library supports
+          // ES|QL static annotations, hide both loading and saving library groups.
+          isAnnotationLibrarySupported: !isEsqlChart(framePublicAPI?.datasourceLayers ?? {}),
           eventAnnotationService,
           savedObjectsTagging,
           dataViews: data.dataViews,
@@ -404,9 +413,14 @@ export const getXyVisualization = ({
     }
   },
 
-  hasLayerSettings({ state, layerId: currentLayerId }) {
+  hasLayerSettings({ state, layerId: currentLayerId, frame }) {
     const layer = state.layers?.find(({ layerId }) => layerId === currentLayerId);
-    return { data: Boolean(layer && isAnnotationsLayer(layer)), appearance: false };
+    return {
+      // the only annotation layer setting (ignore global filters) only affects query-based
+      // annotations, which are not supported on ES|QL charts
+      data: Boolean(layer && isAnnotationsLayer(layer) && !isEsqlChart(frame.datasourceLayers)),
+      appearance: false,
+    };
   },
 
   LayerSettingsComponent(props) {
@@ -814,7 +828,7 @@ export const getXyVisualization = ({
       return null;
     }
 
-    return () => (
+    return (
       <SubtypeSwitch
         layer={layer}
         setLayerState={(newLayer: XYDataLayerConfig) =>
@@ -1008,8 +1022,21 @@ export const getXyVisualization = ({
     for (const layer of getDataLayers(state.layers)) {
       const datasourceAPI = datasourceLayers[layer.layerId];
       if (datasourceAPI) {
+        const isTextBasedLayer = datasourceAPI.isTextBasedLanguage();
         for (const accessor of layer.accessors) {
           const operation = datasourceAPI.getOperationForColumnId(accessor);
+          // For ES|QL layers the real column type is only known once the query has run and
+          // produced an inspector table. Until then `getOperationForColumnId` falls back to the
+          // persisted role-based type, which can be `string` for a column that is actually numeric.
+          // Emitting this blocking error before the table exists would stop the expression from
+          // ever running, so the table that resolves the true type would never arrive (permanent
+          // error). Defer the check until this column is present in the layer's activeData.
+          const hasResolvedActiveDataColumn = Boolean(
+            activeData?.[layer.layerId]?.columns.some((column) => column.id === accessor)
+          );
+          if (isTextBasedLayer && !hasResolvedActiveDataColumn) {
+            continue;
+          }
           if (operation && operation.dataType !== 'number') {
             errors.push({
               uniqueId: XY_Y_WRONG_DATA_TYPE,
@@ -1339,7 +1366,7 @@ export const applyChartDefaultsIfNeeded = (
 
   return {
     ...state,
-    areaFill: AreaFillOptions.SOLID,
+    areaFill: defaultAreaFill,
   };
 };
 
@@ -1617,8 +1644,9 @@ const SubtypeSwitch = ({
         panelPaddingSize="s"
         button={
           <ToolbarButton
-            aria-label={i18n.translate('xpack.lens.xyChart.stackingOptions', {
-              defaultMessage: 'Stacking',
+            aria-label={i18n.translate('xpack.lens.xyChart.stackingOptionsButtonAriaLabel', {
+              defaultMessage: 'Stacking: {stackingType}',
+              values: { stackingType: stackingType.label },
             })}
             onClick={() => setFlyoutOpen(true)}
             fullWidth

@@ -30,8 +30,8 @@ describe('Point visibility option', () => {
     const button = screen.getByRole('button', { name: /show/i });
     await userEvent.click(button);
 
-    expect(onChange).toBeCalledTimes(1);
-    expect(onChange).toBeCalledWith('always');
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith('always');
   });
 
   it(`should be hidden when not enabled`, async () => {

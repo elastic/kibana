@@ -72,8 +72,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // index management, dev tools, dashboards and maps navigation links are hidden
       await testSubjects.missingOrFail('~nav-item-id-management:index_management');
       await testSubjects.missingOrFail('~nav-item-id-dev_tools');
-      // Playground should be also hidden, probably a bug
-      // await testSubjects.missingOrFail('~nav-item-id-searchPlayground');
       await testSubjects.missingOrFail('~nav-item-id-dashboards');
       await testSubjects.missingOrFail('~nav-item-id-maps');
     });
@@ -82,8 +80,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('discover');
       await pageObjects.timePicker.setDefaultAbsoluteRange();
       await pageObjects.header.waitUntilLoadingHasFinished();
-      expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-      expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
+      await testSubjects.existOrFail('unifiedHistogramChart', { timeout: 5000 });
+      await testSubjects.existOrFail('discoverQueryHits', { timeout: 5000 });
     });
 
     it('should access console with API key', async () => {

@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { testTargets } from '@kbn/scout-info';
 import type { ModuleDiscoveryInfo } from './types';
+import { getServerRunFlagsFromTags } from './tag_utils';
 import { countModulesByType, flattenModulesByServerRunFlag } from './transform_utils';
 
 describe('countModulesByType', () => {
@@ -54,7 +56,7 @@ describe('flattenModulesByServerRunFlag', () => {
     });
   });
 
-  it('maps search group to search domain for stateful', () => {
+  it('maps stateful domain from serverRunFlag, not from module group', () => {
     const modules: ModuleDiscoveryInfo[] = [
       {
         name: 'searchPlugin',
@@ -72,7 +74,8 @@ describe('flattenModulesByServerRunFlag', () => {
       },
     ];
     const result = flattenModulesByServerRunFlag(modules);
-    expect(result[0].testTarget.domain).toBe('search');
+    expect(result[0].testTarget).toEqual({ arch: 'stateful', domain: 'classic' });
+    expect(result[0].group).toBe('search');
   });
 
   it('maps serverless serverRunFlag to domain', () => {
@@ -98,6 +101,33 @@ describe('flattenModulesByServerRunFlag', () => {
       domain: 'observability_complete',
     });
     expect(result[0].scoutCommand).toContain('--arch serverless --domain observability_complete');
+  });
+
+  it('maps every serverless server run flag that discovery can produce', () => {
+    const cloudServerlessTags = testTargets.cloud
+      .filter(({ arch }) => arch === 'serverless')
+      .map(({ playwrightTag }) => playwrightTag);
+    const serverRunFlags = getServerRunFlagsFromTags(cloudServerlessTags);
+
+    const modules: ModuleDiscoveryInfo[] = [
+      {
+        name: 'serverlessPlugin',
+        group: 'platform',
+        type: 'plugin',
+        configs: [
+          {
+            path: '/path/config',
+            hasTests: true,
+            tags: cloudServerlessTags,
+            serverRunFlags,
+            usesParallelWorkers: false,
+          },
+        ],
+      },
+    ];
+
+    expect(() => flattenModulesByServerRunFlag(modules)).not.toThrow();
+    expect(flattenModulesByServerRunFlag(modules)).toHaveLength(serverRunFlags.length);
   });
 
   it('aggregates config paths for same group and server run flag', () => {

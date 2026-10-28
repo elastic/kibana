@@ -7,7 +7,6 @@
 
 import { randomUUID } from 'crypto';
 import { z } from '@kbn/zod/v4';
-import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import type { Model } from '@kbn/evals-common';
 import {
   createServerStepDefinition,
@@ -19,11 +18,17 @@ import {
   executeTaskCommonDefinition,
   evaluateTraceCommonDefinition,
   ingestScoresCommonDefinition,
+  persistOnlineScoresCommonDefinition,
   evaluateExampleCommonDefinition,
   evaluateDatasetCommonDefinition,
   startExperimentCommonDefinition,
   compareExperimentsCommonDefinition,
 } from '../../common/workflows/steps';
+import { resolveConnectorModel } from '../lib/resolve_connector_model';
+import {
+  findDuplicateEvaluatorNames,
+  getDuplicateEvaluatorNamesMessage,
+} from '../lib/duplicate_evaluator_names';
 import type { EvalStepDeps } from './types';
 import {
   buildExampleScoreBody,
@@ -32,6 +37,7 @@ import {
   evaluateWorkBatch,
   flattenDatasetWork,
   ingestScores,
+  persistOnlineScores,
   resolveDatasets,
   resolveEvaluatorModel,
   resolveTaskModel,
@@ -98,25 +104,15 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       const request = context.contextManager.getFakeRequest();
       return inference.getClient({ request, bindTo: { connectorId } });
     },
-    resolveModel: async (connectorId: string): Promise<Model> => {
-      try {
-        const inference = await deps.getInferenceStart();
-        const request = context.contextManager.getFakeRequest();
-        const connector = await inference.getConnectorById(connectorId, request);
-        return {
-          id: getConnectorModel(connector) ?? connector.name,
-          family: getConnectorFamily(connector),
-          provider: getConnectorProvider(connector),
-        };
-      } catch (error) {
-        context.logger.debug(
-          `Could not resolve a model for connector "${connectorId}"; using the connector id as the model id: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-        return { id: connectorId };
-      }
-    },
+    // The experiment-wide task and judge models are required at ingest, so an unreadable
+    // connector degrades to its id here rather than leaving the experiment unlabelled.
+    resolveModel: async (connectorId: string): Promise<Model> =>
+      (await resolveConnectorModel({
+        connectorId,
+        inference: await deps.getInferenceStart(),
+        request: context.contextManager.getFakeRequest(),
+        logger: context.logger,
+      })) ?? { id: connectorId },
   });
 
   const resolveDatasetStep = createServerStepDefinition({
@@ -150,11 +146,22 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     ...evaluateTraceCommonDefinition,
     handler: async (context) => {
       const { trace_id, reference_data, evaluators } = context.input;
-      const { results, errors } = await evaluateTrace(makeRuntime(context), {
+      const { results, errors, hasRetriableErrors } = await evaluateTrace(makeRuntime(context), {
         traceId: trace_id,
         referenceData: reference_data,
         evaluators,
       });
+
+      // A trace with no scores is a failed step, so `on-failure.retry` can try it again, unless
+      // every failure was unmet evidence, which a retry can't fix. Partial failures still return
+      // the successful results for persistence.
+      if (results.length === 0 && hasRetriableErrors) {
+        throw new Error(
+          `ai.evals.evaluateTrace: every evaluator failed for trace "${trace_id}": ${errors.join(
+            '; '
+          )}`
+        );
+      }
 
       if (errors.length > 0) {
         context.logger.warn(
@@ -201,6 +208,21 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
           failed: response.failed.length,
         },
       };
+    },
+  });
+
+  const persistOnlineScoresStep = createServerStepDefinition({
+    ...persistOnlineScoresCommonDefinition,
+    handler: async (context) => {
+      const { monitor, trace_id, connector_id, results, errors } = context.input;
+      const response = await persistOnlineScores(makeRuntime(context), {
+        monitor,
+        traceId: trace_id,
+        connectorId: connector_id,
+        results,
+        errors,
+      });
+      return { output: response };
     },
   });
 
@@ -299,6 +321,12 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     start: async (context) => {
       const runtime = makeRuntime(context);
       const { input } = context;
+      // `/_evaluate` refuses this too, but only once an example has already run its task.
+      // Stopping here costs the caller nothing and reports the problem once, not per example.
+      const duplicateEvaluatorNames = findDuplicateEvaluatorNames(input.evaluators);
+      if (duplicateEvaluatorNames.length > 0) {
+        throw new Error(getDuplicateEvaluatorNamesMessage(duplicateEvaluatorNames));
+      }
       const datasets = await resolveDatasets(runtime, input.dataset_ids);
       const work = flattenDatasetWork(datasets);
       if (work.length === 0) {
@@ -422,6 +450,7 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     executeTaskStep,
     evaluateTraceStep,
     ingestScoresStep,
+    persistOnlineScoresStep,
     evaluateExampleStep,
     evaluateDatasetStep,
     startExperimentStep,

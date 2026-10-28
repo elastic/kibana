@@ -6,20 +6,30 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../../constants';
+import {
+  DEFAULT_DOWNLOAD_SOURCE_REFERENCE,
+  DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+} from '../../constants';
 import type { AgentPolicy } from '../../types';
 import { appContextService } from '../../services/app_context';
 
-import { getDownloadSourceForAgentPolicy } from './source_uri_utils';
+import {
+  getDownloadSourceForAgentPolicy,
+  getDownloadSourcesForAgentPolicy,
+} from './source_uri_utils';
 
 jest.mock('../../services/app_context');
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
   ...securityMock.createSetup(),
 }));
+mockedAppContextService.getLogger.mockReturnValue({
+  get: () => ({ warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() }),
+} as any);
 
 function getMockedSoClient() {
   const soClientMock = savedObjectsClientMock.create();
@@ -70,7 +80,7 @@ function getMockedEncryptedSoClient() {
         });
       }
       default:
-        throw new Error('not found: ' + id);
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
   });
 
@@ -140,6 +150,135 @@ describe('helpers', () => {
         is_default: true,
         name: 'Default host',
       });
+    });
+  });
+
+  describe('getDownloadSourcesForAgentPolicy', () => {
+    it('should return all sources when download_source_ids is set', async () => {
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const agentPolicy: AgentPolicy = {
+        id: 'agent-policy-id',
+        status: 'active',
+        package_policies: [],
+        is_managed: false,
+        namespace: 'default',
+        revision: 1,
+        name: 'Policy',
+        updated_at: '2022-01-01',
+        updated_by: 'qwerty',
+        download_source_ids: ['test-ds-1', 'default-download-source-id'],
+        is_protected: false,
+      };
+
+      expect(await getDownloadSourcesForAgentPolicy(agentPolicy)).toEqual([
+        { host: 'http://custom-registry-test', id: 'test-ds-1', is_default: false, name: 'Test' },
+        {
+          host: 'http://default-registry.co',
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+        },
+      ]);
+    });
+
+    it('should resolve the default reference to whichever source is currently default', async () => {
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const agentPolicy: AgentPolicy = {
+        id: 'agent-policy-id',
+        status: 'active',
+        package_policies: [],
+        is_managed: false,
+        namespace: 'default',
+        revision: 1,
+        name: 'Policy',
+        updated_at: '2022-01-01',
+        updated_by: 'qwerty',
+        download_source_ids: [DEFAULT_DOWNLOAD_SOURCE_REFERENCE, 'test-ds-1'],
+        is_protected: false,
+      };
+
+      expect(await getDownloadSourcesForAgentPolicy(agentPolicy)).toEqual([
+        {
+          host: 'http://default-registry.co',
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+        },
+        { host: 'http://custom-registry-test', id: 'test-ds-1', is_default: false, name: 'Test' },
+      ]);
+    });
+
+    it('should fall back to download_source_id when download_source_ids is not set', async () => {
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const agentPolicy: AgentPolicy = {
+        id: 'agent-policy-id',
+        status: 'active',
+        package_policies: [],
+        is_managed: false,
+        namespace: 'default',
+        revision: 1,
+        name: 'Policy',
+        updated_at: '2022-01-01',
+        updated_by: 'qwerty',
+        download_source_id: 'test-ds-1',
+        is_protected: false,
+      };
+
+      expect(await getDownloadSourcesForAgentPolicy(agentPolicy)).toEqual([
+        { host: 'http://custom-registry-test', id: 'test-ds-1', is_default: false, name: 'Test' },
+      ]);
+    });
+
+    it('should skip unresolvable sources and keep valid ones', async () => {
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const agentPolicy: AgentPolicy = {
+        id: 'agent-policy-id',
+        status: 'active',
+        package_policies: [],
+        is_managed: false,
+        namespace: 'default',
+        revision: 1,
+        name: 'Policy',
+        updated_at: '2022-01-01',
+        updated_by: 'qwerty',
+        download_source_ids: ['test-ds-1', 'stale-dangling-id'],
+        is_protected: false,
+      };
+
+      expect(await getDownloadSourcesForAgentPolicy(agentPolicy)).toEqual([
+        { host: 'http://custom-registry-test', id: 'test-ds-1', is_default: false, name: 'Test' },
+      ]);
+    });
+
+    it('should fall back to default when all sources are unresolvable', async () => {
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const agentPolicy: AgentPolicy = {
+        id: 'agent-policy-id',
+        status: 'active',
+        package_policies: [],
+        is_managed: false,
+        namespace: 'default',
+        revision: 1,
+        name: 'Policy',
+        updated_at: '2022-01-01',
+        updated_by: 'qwerty',
+        download_source_ids: ['stale-dangling-id'],
+        is_protected: false,
+      };
+
+      expect(await getDownloadSourcesForAgentPolicy(agentPolicy)).toEqual([
+        {
+          host: 'http://default-registry.co',
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+        },
+      ]);
     });
   });
 });

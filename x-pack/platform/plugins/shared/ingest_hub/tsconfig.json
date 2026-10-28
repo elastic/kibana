@@ -14,10 +14,10 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/shared-ux-utility",
     "@kbn/shared-ux-router",
+    "@kbn/core-spaces-common",
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
     "@kbn/deeplinks-observability",
@@ -25,6 +25,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/react-query",
     "@kbn/fleet-plugin",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/ui-callout",
+    "@kbn/react-kibana-context-styled"
   ]
 }

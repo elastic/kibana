@@ -54,7 +54,11 @@ export const CorrelationsOverview = memo(
   ({ hit, scopeId, showIcon, onShowCorrelationsDetails }: CorrelationsOverviewProps) => {
     const documentId = useMemo(() => hit.raw._id || '', [hit.raw._id]);
 
-    const { show: showAlertsByAncestry, ancestryDocumentId } = useShowRelatedAlertsByAncestry({
+    const {
+      show: showAlertsByAncestry,
+      ancestryDocumentId,
+      ancestryDocumentIndex,
+    } = useShowRelatedAlertsByAncestry({
       hit,
     });
     const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
@@ -138,6 +142,7 @@ export const CorrelationsOverview = memo(
             {showAlertsByAncestry && (
               <RelatedAlertsByAncestry
                 documentId={ancestryDocumentId}
+                documentIndex={ancestryDocumentIndex}
                 onShowCorrelationsDetails={onShowCorrelationsDetails}
               />
             )}

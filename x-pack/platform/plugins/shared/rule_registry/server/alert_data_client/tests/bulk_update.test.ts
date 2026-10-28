@@ -213,19 +213,6 @@ describe('bulkUpdate()', () => {
         ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized for fake.rule and apm"`);
         expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
-          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
-          event: {
-            action: 'alert_update',
-            category: ['database'],
-            outcome: 'failure',
-            type: ['change'],
-          },
-          error: {
-            code: 'Error',
-            message: 'Unauthorized for fake.rule and apm',
-          },
-        });
-        expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
           message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
           event: {
             action: 'alert_update',
@@ -238,7 +225,120 @@ describe('bulkUpdate()', () => {
             message: 'Unauthorized for fake.rule and apm',
           },
         });
+        expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
+          event: {
+            action: 'alert_update',
+            category: ['database'],
+            outcome: 'failure',
+            type: ['change'],
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized for fake.rule and apm',
+          },
+        });
       });
+    });
+
+    test('throws and does not write when a document is missing the authorization fields', async () => {
+      const indexName = '.alerts-observability.apm.alerts';
+      const alertsClient = new AlertsClient(alertsClientParams);
+      esClientMock.mget.mockResponseOnce({
+        docs: [
+          {
+            found: true,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
+          },
+        ],
+      });
+
+      await expect(
+        alertsClient.bulkUpdate({
+          ids: [fakeAlertId],
+          query: undefined,
+          index: indexName,
+          status: 'closed',
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid alert found with id of \\"myfakeid1\\" and operation update"`
+      );
+
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        message: `Failed attempt to update alert [id=${fakeAlertId}]`,
+        event: {
+          action: 'alert_update',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['change'],
+        },
+        error: {
+          code: 'Error',
+          message: 'Invalid alert found with id of "myfakeid1" and operation update',
+        },
+      });
+    });
+
+    test('authorizes valid documents and skips not-found and errored lookups', async () => {
+      const indexName = '.alerts-observability.apm.alerts';
+      const alertsClient = new AlertsClient(alertsClientParams);
+      esClientMock.mget.mockResponseOnce({
+        docs: [
+          {
+            found: true,
+            _id: fakeAlertId,
+            _index: indexName,
+            _source: {
+              [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+              [ALERT_RULE_CONSUMER]: 'apm',
+              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
+              [SPACE_IDS]: [DEFAULT_SPACE],
+            },
+          },
+          { found: false, _id: 'absent-id', _index: indexName },
+          {
+            _id: 'error-id',
+            _index: indexName,
+            error: { type: 'index_not_found_exception', reason: 'no such index' },
+          },
+        ],
+      });
+      esClientMock.bulk.mockResponseOnce({
+        errors: false,
+        took: 1,
+        items: [],
+      });
+
+      await alertsClient.bulkUpdate({
+        ids: [fakeAlertId, 'absent-id', 'error-id'],
+        query: undefined,
+        index: indexName,
+        status: 'closed',
+      });
+
+      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+      expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
+        consumer: 'apm',
+        entity: 'alert',
+        operation: 'update',
+        ruleTypeId: 'apm.error_rate',
+      });
+      expect(alertsClientParams.logger.warn).toHaveBeenCalledTimes(1);
+      expect(alertsClientParams.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('error-id')
+      );
+      expect(esClientMock.bulk).toHaveBeenCalled();
+      const bulkBody = esClientMock.bulk.mock.calls[0][0].body;
+      expect(bulkBody).toEqual([
+        { update: { _index: indexName, _id: fakeAlertId } },
+        { doc: { signal: { status: 'closed' } } },
+      ]);
     });
 
     // test('throws an error if ES client fetch fails', async () => {});
@@ -410,7 +510,7 @@ describe('bulkUpdate()', () => {
 
         expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
-          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
+          message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
           event: {
             action: 'alert_update',
             category: ['database'],
@@ -423,7 +523,7 @@ describe('bulkUpdate()', () => {
           },
         });
         expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
-          message: `Failed attempt to update alert [id=${successfulAuthzHit}]`,
+          message: `Failed attempt to update alert [id=${unsuccessfulAuthzHit}]`,
           event: {
             action: 'alert_update',
             category: ['database'],

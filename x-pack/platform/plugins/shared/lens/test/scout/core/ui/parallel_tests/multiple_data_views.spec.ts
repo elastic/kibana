@@ -74,13 +74,15 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
       const { visualize, lens, filterBar } = pageObjects;
 
       await spaceTest.step('build multi-layer chart with logstash and flights layers', async () => {
-        await openEmptyLensEditor(pageObjects);
+        await openEmptyLensEditor(pageObjects, {
+          timeRange: testData.MULTIPLE_DATA_VIEWS_TIME_RANGE,
+        });
 
         // defaultIndex already points at the long-window DV; wait for it to resolve instead of
         // opening the switcher (search + `*` titles races under parallel CI load).
-        await expect(page.testSubj.locator('lns-dataView-switch-link')).toHaveText(
-          testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH
-        );
+        await expect(
+          page.testSubj.locator('lns-dataView-switch-link').locator('[data-test-subj="fullText"]')
+        ).toHaveText(testData.DATA_VIEW_ID.LONG_WINDOW_LOGSTASH);
         await page.testSubj.locator('fieldToggle-bytes').waitFor({ state: 'visible' });
         await page.testSubj.click('fieldToggle-bytes');
 

@@ -22,7 +22,7 @@ import {
   checkoutFeature,
   checkoutLifecycle,
   checkoutOccurrences,
-  dismissedShippingEvent,
+  inactiveShippingEvent,
   nightshiftEvents,
   inventoryEvent,
   checkoutEvent,
@@ -36,7 +36,7 @@ export type NightshiftStorybookScenario =
   | 'populated'
   | 'allClear'
   | 'openOnly'
-  | 'dismissed'
+  | 'inactive'
   | 'cachedError'
   | 'error';
 
@@ -48,8 +48,8 @@ export type NightshiftStreamFeaturesScenario =
   | 'error'
   | 'partialError';
 
-/** The one stream `partialError` refuses to serve, so the others still resolve their services. */
-const UNREACHABLE_STREAM_NAME = 'logs.inventory-service';
+/** The one source `partialError` refuses to serve, so the others still resolve their services. */
+const UNREACHABLE_SOURCE_ID = 'logs.inventory-service';
 
 const performanceApi = {
   onPageReady: () => undefined,
@@ -96,8 +96,8 @@ const getEventsResponse = (
       ? [resolvedPaymentEvent]
       : scenario === 'openOnly'
       ? [checkoutEvent, inventoryEvent]
-      : scenario === 'dismissed'
-      ? [...nightshiftEvents, dismissedShippingEvent]
+      : scenario === 'inactive'
+      ? [...nightshiftEvents, inactiveShippingEvent]
       : nightshiftEvents;
 
   return {
@@ -117,11 +117,13 @@ const createServices = ({
   scenario: NightshiftStorybookScenario;
   streamFeaturesScenario: NightshiftStreamFeaturesScenario;
 }) => {
-  const closedEventUuids = new Set<string>();
+  const inactiveEventIds = new Set<string>();
   const significantEventsRepositoryClient = {
     fetch: async (
       route: string,
-      options?: { params?: { path?: { id?: string; name?: string } } }
+      options?: {
+        params?: { path?: { id?: string; sourceId?: string }; query?: { event_id?: string } };
+      }
     ) => {
       if (route === 'GET /internal/significant_events/events') {
         if (scenario === 'loading') {
@@ -134,12 +136,13 @@ const createServices = ({
           throw new Error('The significant events request failed');
         }
         const response = getEventsResponse(scenario);
-        return {
-          ...response,
-          hits: response.hits.map((event) =>
-            closedEventUuids.has(event.event_uuid) ? { ...event, status: 'closed' as const } : event
-          ),
-        };
+        const requestedEventId = options?.params?.query?.event_id;
+        const hits = response.hits
+          .filter((event) => !requestedEventId || event.event_id === requestedEventId)
+          .map((event) =>
+            inactiveEventIds.has(event.event_id) ? { ...event, status: 'inactive' as const } : event
+          );
+        return { ...response, hits, total: hits.length };
       }
 
       if (route === 'GET /internal/significant_events/events/{id}/lifecycle') {
@@ -155,14 +158,14 @@ const createServices = ({
         return checkoutLifecycle;
       }
 
-      const eventUuid = options?.params?.path?.id;
-      if (route === 'POST /internal/significant_events/events/{id}/update' && eventUuid) {
-        closedEventUuids.add(eventUuid);
+      const eventId = options?.params?.path?.id;
+      if (route === 'POST /internal/significant_events/events/{id}/update' && eventId) {
+        inactiveEventIds.add(eventId);
         return {
-          event_uuid: eventUuid,
+          event_id: eventId,
           updated: 1,
           ignored: 0,
-          status: 'closed',
+          status: 'inactive',
         };
       }
 
@@ -170,21 +173,21 @@ const createServices = ({
         return checkoutOccurrences;
       }
 
-      if (route === 'GET /internal/streams/{name}/features') {
+      if (route === 'GET /internal/streams/{sourceId}/features') {
         if (streamFeaturesScenario === 'loading') {
           return neverResolve();
         }
         if (streamFeaturesScenario === 'error') {
-          throw new Error('The stream features request failed');
+          throw new Error('The source features request failed');
         }
         if (streamFeaturesScenario === 'empty') {
           return { features: [] };
         }
         if (
           streamFeaturesScenario === 'partialError' &&
-          options?.params?.path?.name === UNREACHABLE_STREAM_NAME
+          options?.params?.path?.sourceId === UNREACHABLE_SOURCE_ID
         ) {
-          throw new Error(`The ${UNREACHABLE_STREAM_NAME} features request failed`);
+          throw new Error(`The ${UNREACHABLE_SOURCE_ID} features request failed`);
         }
       }
 

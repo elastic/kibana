@@ -12,12 +12,25 @@ import supertest from 'supertest';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { coreFeatureFlagsMock, type savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  coreFeatureFlagsMock,
+  securityServiceMock,
+  type savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
+import { getChangeHistoryClient } from '../../change_history/change_history_service';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { coreServices, taggingService, logger } from '../../kibana_services';
 import { setStubKibanaServices } from '../../mocks';
 import { registerCreateRoute } from '../create/register_create_route';
+import { registerUpdateRoute } from '../update/register_update_route';
+
+jest.mock('../../change_history/change_history_service');
+
+const mockedGetClient = getChangeHistoryClient as jest.MockedFunction<
+  typeof getChangeHistoryClient
+>;
 
 const input: DashboardSavedObjectAttributes = {
   pinned_panels: { panels: {} },
@@ -50,9 +63,11 @@ describe(`create`, () => {
     savedObjectsClient = handlerContext.savedObjects.client;
     const { versioned } = createRouter<RequestHandlerContext>('/');
     registerCreateRoute(versioned, undefined, false, logger);
+    registerUpdateRoute(versioned, undefined, false, logger);
 
     Object.assign(handlerContext, {
       featureFlags: coreFeatureFlagsMock.createRequestHandlerContext(),
+      security: securityServiceMock.createRequestHandlerContext(),
     });
     savedObjectsClient.create.mockResolvedValue({
       id: 'test-dashboard',
@@ -76,6 +91,38 @@ describe(`create`, () => {
     expect(result.status).toEqual(201);
   });
 
+  it('stores the first history sequence on the new dashboard', async () => {
+    await supertest(server.listener).post('/api/dashboards').send({ title: 'title' });
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'dashboard',
+      expect.objectContaining({ historySequence: 1 }),
+      expect.anything()
+    );
+  });
+
+  it('continues after the history of a deleted dashboard with the same ID', async () => {
+    // the latest event of the deleted dashboard, which is its delete event
+    const changeHistoryClient = {
+      getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 4 } }] }),
+      log: jest.fn().mockResolvedValue(undefined),
+    };
+    mockedGetClient.mockResolvedValue(changeHistoryClient as never);
+    savedObjectsClient.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('dashboard', 'old')
+    );
+
+    const result = await supertest(server.listener)
+      .put('/api/dashboards/old')
+      .send({ title: 'Recreated' });
+
+    expect(result.status).toEqual(201);
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'dashboard',
+      expect.objectContaining({ historySequence: 5 }),
+      expect.objectContaining({ id: 'old' })
+    );
+  });
+
   it('silences error when thrown in tracking', async () => {
     coreServices.userActivity.trackUserAction = jest.fn().mockImplementationOnce(() => {
       throw new Error('there was a tracking error!');
@@ -88,10 +135,10 @@ describe(`create`, () => {
 
   it('tracks create action - no tags', async () => {
     await supertest(server.listener).post(`/api/dashboards`).send({ title: 'title' });
-    expect(coreServices.userActivity.trackUserAction).toBeCalledWith({
+    expect(coreServices.userActivity.trackUserAction).toHaveBeenCalledWith({
       event: {
         action: 'dashboard_create',
-        type: 'creation',
+        type: ['creation'],
       },
       message: `User created dashboard "title" (id: test-dashboard).`,
       object: {
@@ -133,10 +180,10 @@ describe(`create`, () => {
     });
 
     await supertest(server.listener).post(`/api/dashboards`).send({ title: 'title' });
-    expect(coreServices.userActivity.trackUserAction).toBeCalledWith({
+    expect(coreServices.userActivity.trackUserAction).toHaveBeenCalledWith({
       event: {
         action: 'dashboard_create',
-        type: 'creation',
+        type: ['creation'],
       },
       message: `User created dashboard "title" (id: test-dashboard).`,
       object: {

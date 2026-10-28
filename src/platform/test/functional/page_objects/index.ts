@@ -38,12 +38,10 @@ import { DashboardPageLinks } from './dashboard_page_links';
 import { UnifiedSearchPageObject } from './unified_search_page';
 import { UnifiedFieldListPageObject } from './unified_field_list';
 import { UnifiedTabsPageObject } from './unified_tabs';
-import { FilesManagementPageObject } from './files_management';
 import { AnnotationEditorPageObject } from './annotation_library_editor_page';
 import { SolutionNavigationProvider } from './solution_navigation';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { SpaceSettingsPageObject } from './space_settings';
-import { MarkdownVisPageObject } from './markdown_vis';
 import { IndexEditorObject } from './index_editor';
 
 export const pageObjects = {
@@ -81,9 +79,7 @@ export const pageObjects = {
   unifiedSearch: UnifiedSearchPageObject,
   unifiedFieldList: UnifiedFieldListPageObject,
   unifiedTabs: UnifiedTabsPageObject,
-  filesManagement: FilesManagementPageObject,
   spaceSettings: SpaceSettingsPageObject,
-  markdownVis: MarkdownVisPageObject,
   indexEditor: IndexEditorObject,
 };
 

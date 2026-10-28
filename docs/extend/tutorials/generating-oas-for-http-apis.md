@@ -127,7 +127,8 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
     .post({
       path: '/api/foo',
       access: 'public',
-      summary: 'Create a foo resource'
+      summary: 'Create a foo resource',
+      operationId: 'create-foo', // kebab-case verb-resource. SDK and CLI generators use this ID.
       description: `A foo resource enables baz. See the following [documentation](${docLinks.links.fooResource}).`,
       deprecated: true,  // An indicator that the operation is deprecated
       options: {
@@ -168,6 +169,12 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
   );
 }
 ```
+
+##### Set an operation ID
+
+Set an explicit `operationId` on public routes. If you omit it, the generator derives an ID from the method and path, which yields names like `post-foo`. SDK and CLI generators turn that ID into method and command names, so in some cases setting an explicit, user-friendly ID is recommended.
+
+Prefer kebab-case `verb-resource` names such as `create-foo`. The ID must be unique in the generated document. A duplicate raises an error during OAS generation.
 
 ##### Adding examples
 

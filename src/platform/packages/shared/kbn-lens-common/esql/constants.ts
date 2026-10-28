@@ -17,3 +17,6 @@
  * interval match Lens's form-based `auto` date_histogram; the default 50 would not.
  */
 export const AUTO_TARGET_NUMBER_OF_BUCKETS = 75;
+
+/** Default value used for static value columns when none is configured. */
+export const DEFAULT_STATIC_VALUE = 100;

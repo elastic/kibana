@@ -51,9 +51,7 @@ describe('CollectorSet', () => {
         });
       };
 
-      expect(registerPojo).toThrowError(
-        'CollectorSet can only have Collector instances registered'
-      );
+      expect(registerPojo).toThrow('CollectorSet can only have Collector instances registered');
     });
 
     it('should throw when 2 collectors with the same type are registered', () => {
@@ -71,7 +69,7 @@ describe('CollectorSet', () => {
             schema: { prop: { type: 'long' } },
           })
         )
-      ).toThrowError(`Usage collector's type "test_duplicated" is duplicated.`);
+      ).toThrow(`Usage collector's type "test_duplicated" is duplicated.`);
     });
 
     it('should log debug status of fetching from the collector', async () => {
@@ -391,10 +389,10 @@ describe('CollectorSet', () => {
       const mockSoClient = savedObjectsClientMock.create();
       const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
-      expect(mockIsReady).toBeCalledTimes(1);
-      expect(mockReadyFetch).toBeCalledTimes(1);
-      expect(mockIsNotReady).toBeCalledTimes(1);
-      expect(mockNonReadyFetch).toBeCalledTimes(0);
+      expect(mockIsReady).toHaveBeenCalledTimes(1);
+      expect(mockReadyFetch).toHaveBeenCalledTimes(1);
+      expect(mockIsNotReady).toHaveBeenCalledTimes(1);
+      expect(mockNonReadyFetch).toHaveBeenCalledTimes(0);
 
       // Passing object instead of array due to https://github.com/facebook/jest/issues/13352
       expect({ results }).toMatchSnapshot({
@@ -481,10 +479,10 @@ describe('CollectorSet', () => {
       const mockSoClient = savedObjectsClientMock.create();
       const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
-      expect(mockFastReady).toBeCalledTimes(1);
-      expect(mockReadyFetch).toBeCalledTimes(1);
-      expect(mockTimedOutReady).toBeCalledTimes(1);
-      expect(mockNonReadyFetch).toBeCalledTimes(0);
+      expect(mockFastReady).toHaveBeenCalledTimes(1);
+      expect(mockReadyFetch).toHaveBeenCalledTimes(1);
+      expect(mockTimedOutReady).toHaveBeenCalledTimes(1);
+      expect(mockNonReadyFetch).toHaveBeenCalledTimes(0);
 
       // Passing object instead of array due to https://github.com/facebook/jest/issues/13352
       expect({ results }).toMatchSnapshot({
@@ -552,8 +550,8 @@ describe('CollectorSet', () => {
       const mockSoClient = savedObjectsClientMock.create();
       const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
-      expect(mockReadyFetch).toBeCalledTimes(1);
-      expect(mockReadyFetch).toBeCalledWith({
+      expect(mockReadyFetch).toHaveBeenCalledTimes(1);
+      expect(mockReadyFetch).toHaveBeenCalledWith({
         esClient: mockEsClient,
         soClient: mockSoClient,
       });

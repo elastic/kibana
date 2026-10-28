@@ -7,7 +7,7 @@
 
 const actualOperations = jest.requireActual('../operations');
 const actualHelpers = jest.requireActual('../layer_helpers');
-const actualTimeScaleUtils = jest.requireActual('../time_scale_utils');
+const actualTimeScaleUtils = jest.requireActual('@kbn/lens-common');
 const actualMocks = jest.requireActual('../mocks');
 
 jest.spyOn(actualOperations.operationDefinitionMap.date_histogram, 'paramEditor');

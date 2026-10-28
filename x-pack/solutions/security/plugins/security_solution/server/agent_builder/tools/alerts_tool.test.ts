@@ -6,6 +6,8 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
+import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
@@ -34,66 +36,65 @@ describe('alertsTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
+    // Existing handler tests assume the space alerts alias is present.
+    mockEsClient.asInternalUser.indices.exists.mockResolvedValue(true);
   });
 
   describe('schema', () => {
     it('validates correct schema with required query', () => {
-      const validInput = {
+      const result = tool.schema.safeParse({
         query: 'find all alerts',
-      };
-
-      const result = tool.schema.safeParse(validInput);
+      });
 
       expect(result.success).toBe(true);
     });
 
-    it('validates schema with optional index', () => {
-      const validInput = {
+    it('strips a provided index field (parameter removed for space isolation)', () => {
+      const result = tool.schema.safeParse({
         query: 'find alerts',
-        index: '.alerts-security.alerts-default',
-      };
+        index: '.alerts-security.alerts-*',
+      });
 
-      const result = tool.schema.safeParse(validInput);
-
-      expect(result.success).toBe(true);
+      // Zod strips unknown keys by default; the handler never reads `index`.
+      expect(result.success && !('index' in result.data)).toBe(true);
     });
 
     it('validates schema with optional isCount', () => {
-      const validInput = {
+      const result = tool.schema.safeParse({
         query: 'how many alerts',
         isCount: true,
-      };
-
-      const result = tool.schema.safeParse(validInput);
+      });
 
       expect(result.success).toBe(true);
     });
 
     it('rejects missing query', () => {
-      const invalidInput = {};
-
-      const result = tool.schema.safeParse(invalidInput);
+      const result = tool.schema.safeParse({});
 
       expect(result.success).toBe(false);
     });
 
     it('rejects non-string query', () => {
-      const invalidInput = {
+      const result = tool.schema.safeParse({
         query: 123,
-      };
+      });
 
-      const result = tool.schema.safeParse(invalidInput);
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects query longer than 4000 characters', () => {
+      const result = tool.schema.safeParse({
+        query: 'a'.repeat(4001),
+      });
 
       expect(result.success).toBe(false);
     });
 
     it('rejects non-boolean isCount', () => {
-      const invalidInput = {
+      const result = tool.schema.safeParse({
         query: 'test',
         isCount: 'yes',
-      };
-
-      const result = tool.schema.safeParse(invalidInput);
+      });
 
       expect(result.success).toBe(false);
     });
@@ -107,12 +108,71 @@ describe('alertsTool', () => {
     it('has correct tags', () => {
       expect(tool.tags).toEqual(['security', 'alerts']);
     });
+
+    it('describes space-scoped search behavior', () => {
+      expect(tool.description).toContain("current space's exact alerts alias");
+      expect(tool.description).toMatch(/^Do NOT use platform\.core\.generate_esql/);
+      expect(tool.description).toContain('execute_esql');
+    });
   });
 
   describe('handler', () => {
-    it('calls runSearchTool with default index when index not provided', async () => {
+    it('returns 0 alerts without searching when the space alerts alias does not exist', async () => {
+      mockEsClient.asInternalUser.indices.exists.mockResolvedValue(false);
+
+      const result = await tool.handler(
+        { query: 'how many alerts', isCount: true },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents as ToolHandlerContext['events'],
+          spaceId: 'testing',
+        })
+      );
+
+      expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
+        index: `${DEFAULT_ALERTS_INDEX}-testing`,
+      });
+      expect(runSearchTool).not.toHaveBeenCalled();
+      expect(isToolHandlerStandardReturn(result)).toBe(true);
+      expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
+      expect((result as ToolHandlerStandardReturn).results[0]).toMatchObject({
+        type: ToolResultType.other,
+        data: {
+          count: 0,
+          spaceId: 'testing',
+          index: `${DEFAULT_ALERTS_INDEX}-testing`,
+          message: expect.stringContaining('There are 0 security alerts'),
+        },
+      });
+    });
+
+    it('calls runSearchTool with the current space alerts alias', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
+
+      await tool.handler(
+        { query: 'find all alerts' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider,
+          events: mockEvents as ToolHandlerContext['events'],
+        })
+      );
+
+      expect(mockEsClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
+        index: `${DEFAULT_ALERTS_INDEX}-default`,
+      });
+      expect(runSearchTool).toHaveBeenCalledWith({
+        nlQuery: expect.stringContaining('find all alerts'),
+        index: `${DEFAULT_ALERTS_INDEX}-default`,
+        esClient: mockEsClient.asCurrentUser,
+        modelProvider: mockModelProvider,
+        events: mockEvents,
+        logger: mockLogger,
+      });
+    });
+
+    it('enhances the query with a KEEP clause for essential alert fields', async () => {
+      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
       const fieldsList = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
 
       await tool.handler(
@@ -123,20 +183,11 @@ describe('alertsTool', () => {
         })
       );
 
-      expect(runSearchTool).toHaveBeenCalledWith({
-        nlQuery: expect.stringContaining('find all alerts'),
-        index: `${DEFAULT_ALERTS_INDEX}-default`,
-        esClient: mockEsClient.asCurrentUser,
-        modelProvider: mockModelProvider,
-        events: mockEvents,
-        logger: mockLogger,
-      });
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
-      expect(callArgs.nlQuery).toContain('KEEP clause');
       expect(callArgs.nlQuery).toContain(fieldsList);
     });
 
-    it('uses handler context spaceId when building default index', async () => {
+    it('uses handler context spaceId when building the alerts alias', async () => {
       (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
@@ -182,53 +233,29 @@ describe('alertsTool', () => {
       expect(callArgs.timeRange).toBeUndefined();
     });
 
-    it('calls runSearchTool with explicit index when provided', async () => {
-      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
+    it('ignores a caller-supplied index and still uses the space alias', async () => {
+      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
-        { query: 'find alerts', index: '.alerts-security.alerts-custom' },
+        // Simulate a stale model/tool call that still sends index; schema strips it,
+        // and the handler never reads it.
+        { query: 'find alerts', index: '.alerts-security.alerts-*' } as { query: string },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
           modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
-        })
-      );
-
-      expect(runSearchTool).toHaveBeenCalledWith({
-        nlQuery: expect.stringContaining('find alerts'),
-        index: '.alerts-security.alerts-custom',
-        esClient: mockEsClient.asCurrentUser,
-        modelProvider: mockModelProvider,
-        events: mockEvents,
-        logger: mockLogger,
-      });
-    });
-
-    it('enhances query with KEEP clause for alerts index', async () => {
-      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
-      const fieldsList = ESSENTIAL_ALERT_FIELDS.map((field) => `\`${field}\``).join(', ');
-
-      await tool.handler(
-        { query: 'find alerts', index: '.alerts-security.alerts-default' },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents as ToolHandlerContext['events'],
+          spaceId: 'qa',
         })
       );
 
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
-      expect(callArgs.nlQuery).toContain('find alerts');
-      expect(callArgs.nlQuery).toContain('KEEP clause');
-      expect(callArgs.nlQuery).toContain(fieldsList);
+      expect(callArgs.index).toBe(`${DEFAULT_ALERTS_INDEX}-qa`);
     });
 
     it('enhances query with count instructions when isCount is true', async () => {
-      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
+      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
-        { query: 'how many alerts', index: '.alerts-security.alerts-default', isCount: true },
+        { query: 'how many alerts', isCount: true },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
           modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
@@ -236,34 +263,14 @@ describe('alertsTool', () => {
       );
 
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
-      expect(callArgs.nlQuery).toContain('how many alerts');
-      expect(callArgs.nlQuery).toContain('count query');
       expect(callArgs.nlQuery).toContain('STATS count = COUNT(*)');
     });
 
-    it('does not enhance query for non-alerts index', async () => {
-      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
-
-      await tool.handler(
-        { query: 'find documents', index: 'custom-index' },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents as ToolHandlerContext['events'],
-        })
-      );
-
-      const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
-      expect(callArgs.nlQuery).toBe('find documents');
-      expect(callArgs.nlQuery).not.toContain('KEEP clause');
-    });
-
     it('logs debug message with correct parameters', async () => {
-      const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
-      (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });
+      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
-        { query: 'test query', index: '.alerts-security.alerts-default', isCount: true },
+        { query: 'test query', isCount: true },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
           modelProvider: mockModelProvider,
           events: mockEvents as ToolHandlerContext['events'],
@@ -271,7 +278,7 @@ describe('alertsTool', () => {
       );
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        'alerts tool called with query: test query, index: .alerts-security.alerts-default, isCount: true, timeWindowHours: default'
+        `alerts tool called with query: test query, index: ${DEFAULT_ALERTS_INDEX}-default, isCount: true, timeWindowHours: default`
       );
     });
 

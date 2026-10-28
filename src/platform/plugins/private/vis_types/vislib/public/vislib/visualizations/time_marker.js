@@ -8,7 +8,7 @@
  */
 
 import d3 from 'd3';
-import dateMath from '@kbn/datemath';
+import * as dateMath from '@kbn/datemath';
 
 export class TimeMarker {
   constructor(times, xScale, height) {

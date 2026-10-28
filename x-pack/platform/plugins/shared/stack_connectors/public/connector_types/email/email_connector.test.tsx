@@ -454,7 +454,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.email',
             config: {
@@ -518,7 +518,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.email',
             config: {
@@ -582,7 +582,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.email',
             config: {
@@ -644,7 +644,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.email',
             config: {
@@ -707,7 +707,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {},
           isValid: false,
         });
@@ -754,7 +754,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {},
           isValid: false,
         });
@@ -802,7 +802,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {},
           isValid: false,
         });
@@ -847,7 +847,7 @@ describe('EmailActionConnectorFields', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
 
         await waitFor(() => {
-          expect(onSubmit).toBeCalledWith({
+          expect(onSubmit).toHaveBeenCalledWith({
             data: {},
             isValid: false,
           });
@@ -892,7 +892,7 @@ describe('EmailActionConnectorFields', () => {
       await userEvent.click(submitButton);
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.email',
             config: {

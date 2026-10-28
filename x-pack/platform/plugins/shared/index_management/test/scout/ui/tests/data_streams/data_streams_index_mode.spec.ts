@@ -180,21 +180,19 @@ test.describe('Data streams index mode', { tag: tags.deploymentAgnostic }, () =>
     await expect(dataStreamIndexMode(page)).toHaveText(INDEX_MODE.LOGSDB);
   });
 
-  // Skipped: the details flyout reports "Standard" for a time series data stream.
-  // See https://github.com/elastic/kibana/issues/283371
-  test.skip('allows to downgrade data stream from logsdb to time series index mode', async ({
+  test('allows to upgrade data stream from standard to time series index mode', async ({
     page,
     esClient,
     pageObjects,
   }) => {
     test.setTimeout(120_000);
-    await setIndexModeTemplate(page, esClient, { mode: 'logsdb' });
+    await setIndexModeTemplate(page, esClient, { mode: 'standard' });
     await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
-    await expect(dataStreamIndexMode(page)).toHaveText(INDEX_MODE.LOGSDB);
+    await expect(dataStreamIndexMode(page)).toHaveText(INDEX_MODE.STANDARD);
     await page.testSubj.locator('closeDetailsButton').click();
 
     await openTemplateEditor(page, pageObjects);
-    await expect(templateIndexMode(page)).toContainText(INDEX_MODE.LOGSDB);
+    await expect(templateIndexMode(page)).toContainText(INDEX_MODE.STANDARD);
 
     await changeIndexMode(page, 'index_mode_time_series');
 

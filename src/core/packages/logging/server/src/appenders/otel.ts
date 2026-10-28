@@ -8,6 +8,7 @@
  */
 
 import type { Attributes } from '@opentelemetry/api';
+import type { Duration } from 'moment-timezone';
 
 import type { LayoutConfigType } from '../layout';
 
@@ -78,6 +79,18 @@ export interface OtelAppenderConfig {
    * Defaults to an empty object.
    */
   headers?: Record<string, string>;
+  /**
+   * Serverless / internal only — not accepted in YAML on the traditional offering.
+   * Max log records buffered in memory; once full, new records are dropped. Must be at least
+   * `512` (the SDK's export batch size). Defaults to `15000` on serverless (SDK default: `2048`).
+   */
+  maxQueueSize?: number;
+  /**
+   * Serverless / internal only — not accepted in YAML on the traditional offering.
+   * How long failed exports are retried (transient errors only) before the batch is dropped.
+   * When unset, only the SDK's built-in ~13s retry applies. Defaults to `2m` on serverless.
+   */
+  maxElapsedTime?: Duration;
   /**
    * Controls how the log record body is serialised.
    *

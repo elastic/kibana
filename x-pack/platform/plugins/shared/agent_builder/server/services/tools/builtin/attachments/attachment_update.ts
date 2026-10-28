@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
 
@@ -26,16 +26,19 @@ const attachmentUpdateSchema = z.object({
  * Updates an attachment's content, creating a new version if content changed.
  */
 export const createAttachmentUpdateTool = ({
-  attachmentManager,
   attachmentsService,
-}: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentUpdateSchema> => ({
+}: AttachmentToolsOptions): InternalBuiltinToolDefinition<typeof attachmentUpdateSchema> => ({
   id: attachmentTools.update,
   type: ToolType.builtin,
   description:
     'Update the content of an existing attachment. This creates a new version if the content changed. Use this to modify data you previously stored.',
   schema: attachmentUpdateSchema,
   tags: ['attachment'],
-  handler: async ({ attachment_id: attachmentId, data, description }) => {
+  excludeFromMcp: true,
+  handler: async (
+    { attachment_id: attachmentId, data, description },
+    { attachments: attachmentManager }
+  ) => {
     const existing = attachmentManager.getAttachmentRecord(attachmentId);
 
     if (!existing) {

@@ -5,92 +5,88 @@
  * 2.0.
  */
 
-import { getChartTypeSelectionPromptContent } from '@kbn/agent-builder-visualizations-server';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import {
+  getChartTypeSelectionPromptContent,
+  seriesStatisticsAgentGuidance,
+} from '@kbn/agent-builder-visualizations-server';
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
+import { ENHANCE_GUIDANCE_PATH, enhanceGuidanceReference } from './enhance_guidance';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
 
-const guidance = `## Building a Dashboard
+const guidance = `## Dashboard Changes
 
-The ${dashboardTools.generateDashboard} tool builds the resulting dashboard from the current dashboard (if any) plus an ordered \`operations\` array. This section describes the \`operations\` vocabulary; see the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
+The ${dashboardTools.generateDashboard} tool applies the changes you describe to the current dashboard (if any). Describe the desired result, keyed by id, rather than steps: \`title\`, \`description\`, and \`time_range\` for dashboard fields, \`sections\`, \`panels\` and \`controls\` to create or update, and \`remove\` for ids to delete. Everything you leave out stays unchanged. See the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
 
-Every dashboard MUST have a non-empty \`title\`. If the current dashboard's title is empty, missing, or \`"User Dashboard"\`, your first operation MUST be \`set_metadata\` with a title you invent from its contents.
+## Improving an Existing Dashboard (Enhance)
 
-Operations run in order, so earlier operations should set up state needed by later ones. Batch all operations into a single ${dashboardTools.generateDashboard} call whenever possible.
+When asked to enhance, improve, or clean up an existing dashboard, read \`${ENHANCE_GUIDANCE_PATH}\` with \`read_file\` before inspecting the dashboard or calling any other tool. Follow that file. It takes precedence over the create-dashboard guidance in this skill. Do not enhance without reading it.
 
-When a dashboard needs sections, prefer a single batched call:
-1. Use \`add_section\` with its optional \`panels\` array when you already know the panels that belong in the new section.
-2. Use a follow-up \`add_panels\` with per-item \`sectionId\` only when you need to target an existing section returned by an earlier tool result.
+## Describing Changes
 
-For a new dashboard:
-- Start with \`set_metadata\` and provide both \`title\` and \`description\`. Only include \`time_range\` when the user explicitly named a specific time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise — a data-aware default is applied automatically.
-- Use \`add_panels\` to add panels in one batched operation. A single \`add_panels\` call may mix panel kinds and target different \`sectionId\` values, so batch related panels together.
-- Use \`add_section\` when panels naturally group into distinct topics or the dashboard is large enough that sections improve scanability. Include \`panels\` on the section when you can create that section's initial panels immediately.
+The tool schema describes each field. The rules below cover what the schema cannot express.
+
+Make all changes in a single ${dashboardTools.generateDashboard} call whenever possible. The tool applies them together, so each change is checked against the dashboard as it was before the call. Place panels in a new section in the same call that creates it.
+
+For a new dashboard, set both \`title\` and \`description\`.
 
 For an existing dashboard:
-- Prefer \`edit_panels\` to change existing panel content in place rather than removing and re-adding a panel.
-- If a requested change targets a DSL, form-based, or other non-ES|QL Lens visualization panel, explicitly tell the user direct editing is not supported and ask for confirmation before replacing that panel with a newly created ES|QL-based Lens panel.
-- Use \`update_panel_layouts\` to resize, reposition, or move existing panels between top-level and sections without changing panel content.
+- Edit a panel by its id with \`content\` of the same kind rather than removing and re-adding it. Reorganizing or enhancing a dashboard does not require replacing panels. Edits work for ES|QL Lens, Vega, and custom content panels (\`source: "request"\` with the panel's \`renderer\`), and for markdown and ML anomaly panels (\`source: "config"\` with the panel's \`type\`).
+- For focused edits, pass only the requested change in the \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings.
+- These panels cannot be edited, only moved, resized, or removed: DSL-based, form-based, and other non-ES|QL Lens panels, and by-reference panels (\`config.savedObjectId\` or \`config.ref_id\`). A by-reference panel's content is unknown: do not look it up with any tool or API; its title is the only hint. When the user asks to change one of these panels, say so, propose replacing it with a new ES|QL-based Lens panel, and wait for explicit confirmation before replacing it.
 
 ## Panel Inputs
 
-- Use \`source: "request"\` to create or edit a Lens or Vega panel from a natural-language / ES|QL query — this is the only correct way to make a **new** visualization. Never hand-build a visualization \`config\` for a new visualization.
-- Use \`source: "config"\` only for content you have already resolved (an existing visualization's config or markdown). The generation tool never reads an attachment or saved-object store, so the config must be supplied directly.
+Each visualization request is authored in a separate context. New-panel authors do not see the dashboard attachment or other panels, so for Lens and Vega panels pass the exact known \`index\` and describe the measure, fields, and filters in \`query\`. Omit \`index\` only when the source is unknown and discovery is needed. Custom content panels take no \`index\`; their data comes only from \`esql\` (see Custom Content Panels). Edits of existing panels receive the original configuration and queries automatically through the panel id.
+
+- Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel.
+- Use \`source: "attachment"\` to place a visualization that \`${platformCoreTools.createVisualization}\` already returned in this conversation. A \`source: "request"\` would generate a **new**, different panel instead.
+- Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels.
 
 ## Panel Type Selection
 
-Choose the panel type in this priority order:
+Choose the first panel type that fits:
 
-1. **Lens** (\`source: "request"\`, \`renderer: "lens"\` or omit renderer) — default for metric, time series, bar, line, pie, area, and data table visualizations.
-2. **Vega** (\`source: "request"\`, \`renderer: "vega"\`) — for scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user explicitly asks for Vega.
-3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — for static explanatory text, links, or simple formatted notes with no data.
-4. **Custom content** (\`source: "config"\`, \`type: "custom_content"\`) — only if listed under "Use operations[] to" in the tool description. When available, use it as a last resort for HTML-based layouts that Lens and Vega cannot express.
+1. **Lens** (\`renderer: "lens"\` or omitted) — metrics, time series, bar, line, pie, area, and data tables.
+2. **Vega** (\`renderer: "vega"\`) — scatter/bubble plots, small multiples/faceting, layered or combination charts, or when the user asks for Vega.
+3. **Markdown** (\`source: "config"\`, \`type: "markdown"\`) — static text, links, or notes with no data.
+4. **Custom content** (\`renderer: "custom_content"\`) — a last resort for HTML/CSS layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or narrative text mixed with live data values, or when the user asks for a custom/HTML panel.
+
+## Custom Content Panels
+
+A custom content panel with live data does not need a query from you. Always set \`hasData\` when you create one, since there is no default: \`hasData: true\` (and \`index\` when you know it) and the server generates the query from \`query\`, then samples its schema before generating the template. \`hasData: false\` makes a static panel with no query — use that for banners, legends and notes, and never invent a query for them. Do not write the query yourself; pass \`esql\` only when the user supplied one verbatim. If the server cannot generate a query, the panel fails with an error naming the reason — fix the \`index\` or the description and retry rather than proceeding.
+
+To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
+
+To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits keep the current query. When the edit changes what the panel shows, also set \`regenerateESQL: true\`: the server regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. The server refines the existing template.
+
+Other panel types never take \`esql\` unless it came from \`${platformCoreTools.generateEsql}\` or the user pasted it: their query is generated from \`query\`.
 
 ## Chart Type Guidance
 
-For every new Lens panel, choose and pass \`chartType\`; it is required. For a new Vega panel, \`chartType\` is an optional authoring hint — omit it when no Lens chart type represents the requested visualization. On edits, \`chartType\` is optional because the existing panel configuration provides the current visual form. When editing a Lens panel, omit \`chartType\` to preserve its current chart family; provide a new \`chartType\` when the request changes the chart family, such as from \`xy\` to \`pie\`.
+Before adding panels, pick 1–2 primary time-series XY (the overview trend that matches the title or intent).
+On a new dashboard, phrase at least one and at most two of those primary time-series XY queries as "<measure> over time, show avg/min/max in the legend" (e.g. "log volume over time, show avg/min/max in the legend"). Skip categorical bar charts and queries whose measure is already AVG/MIN/MAX of a field.
+
+${seriesStatisticsAgentGuidance}
 
 ${chartTypeSelectionGuidance}
 
 ${dashboardDesignGuidancePrompt}
 
-## ES|QL
-
-Omit the \`esql\` field on visualization panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`.
-
 ## Controls
 
-Controls are interactive filters pinned above the dashboard that let users explore data without editing queries. Add them with \`add_controls\` and remove them by id with \`remove_controls\`.
+Controls are interactive filters pinned above the dashboard that let users explore data without editing queries.
 
-**When building a new dashboard from scratch**, proactively add 3–5 \`options_list_control\` dropdowns for the most useful categorical fields. Pick fields that appear in panel \`BY\` / \`WHERE\` clauses, prefer low-cardinality keyword fields (e.g. \`service.name\`, \`host.name\`, \`env\`, \`region\`, \`kubernetes.namespace\`, \`http.response.status_code\`). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs).
+**When building a new dashboard from scratch**, proactively add 3–5 \`options_list_control\` dropdowns for the most useful categorical fields. Pick fields that appear in panel \`BY\` / \`WHERE\` clauses, prefer low-cardinality keyword fields (e.g. \`service.name\`, \`host.name\`, \`env\`, \`region\`, \`kubernetes.namespace\`, \`http.response.status_code\`). Avoid high-cardinality identifiers (trace IDs, request IDs, UUIDs). Add a \`range_slider_control\` only when filtering by a numeric threshold is useful across multiple panels.
 
 Do not add controls to dashboards already scoped to a single entity (one host, one service, etc.).
 
-**Control types:**
-- \`options_list_control\` — dropdown for categorical / keyword fields. The most common type (95% of cases).
-- \`range_slider_control\` — numeric range slider. Add sparingly, only when filtering by a numeric threshold is useful across multiple panels (e.g. \`latency\`, \`bytes\`, \`duration\`).
-- \`time_slider_control\` — global time sub-range picker. Add at most one per dashboard, only when time-range narrowing within the global window is useful.
+Controls query the index directly, so columns created in ES|QL (\`DISSECT\`, \`GROK\`, \`EVAL\`, \`RENAME\`) cannot back a control. Controls are optional: when no mapped field fits, add fewer controls or none.
 
-**Required fields per control:**
-- \`type\`: one of the three above.
-- \`field_name\` (not for \`time_slider_control\`): exact field name as it appears in the panel queries (e.g. \`"service.name"\`).
-- \`index\` (not for \`time_slider_control\`): same index as the dashboard panels (e.g. \`"logs-*"\`).
-- \`title\` (optional, \`options_list_control\` and \`range_slider_control\` only): human-readable label shown above the control (e.g. \`"Service"\`).
-
-**Defaults applied by the server:** \`width: "medium"\`, \`grow: true\` (fills available horizontal space). Override only if the user asks.
-
-**Removing controls:** use \`remove_controls\` with the \`id\` values from the \`controls[]\` list in the tool result.
-
-## Generation Edge Cases
-
-- Never invent a \`source: "config"\` payload for content you have not actually resolved. If you cannot obtain a panel's configuration, report it clearly instead of fabricating one.
-- Use \`update_panel_layouts\` when the user wants to resize, reposition, or move panels without changing panel content.
-- If a user wants to change a dashboard panel's content, prefer \`edit_panels\` over removing and re-adding the panel. \`edit_panels\` works for ES|QL-backed Lens visualization panels (\`source: "request"\`) and markdown panels (\`source: "config"\`, \`type: "markdown"\`). Additional panel types may be supported — check the tool description for the current list.
-- A dashboard can include DSL-based, form-based, or other non-ES|QL Lens panels. Do not attempt to edit those panels directly.
-- If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you remove or replace the existing panel.
-- Never silently follow a remove-and-recreate flow for a non-ES|QL panel. Wait for explicit user confirmation before regenerating the dashboard with replacement operations.`;
+Controls are keyed by the \`id\` from the \`controls[]\` list in the tool result. To change a control, send its full new definition with that \`id\`; to remove it, list the \`id\` in \`remove\`.`;
 
 /**
  * Environment-agnostic dashboard *generation* guidance.
@@ -104,4 +100,5 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
+  referencedContent: [enhanceGuidanceReference],
 };

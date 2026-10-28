@@ -17,10 +17,12 @@ import type { HapiReadableStream } from '../../../client/attachments/types';
 import type { attachmentApiV1 } from '../../../../common/types/api';
 
 import { CASE_FILES_URL } from '../../../../common/constants';
+import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
+import { toLegacyCaseResponse } from '../../../common/attachments';
 
 export const postFileRoute = createCasesRoute({
   method: 'post',
@@ -44,7 +46,7 @@ export const postFileRoute = createCasesRoute({
       accepts: 'multipart/form-data',
     },
   },
-  handler: async ({ context, request, response }) => {
+  handler: async ({ context, request, response, incrementAttachmentTypeCounters }) => {
     const $abort = new ReplaySubject();
     const sub = request.events.aborted$.subscribe($abort);
 
@@ -65,14 +67,17 @@ export const postFileRoute = createCasesRoute({
         mimeType = mime.lookup(parsedFilename.ext.toLowerCase()) || undefined;
       }
 
-      const res: caseDomainV1.Case = await casesClient.attachments.addFile({
-        file,
-        filename: filename ?? '',
-        mimeType,
-        caseId: request.params.case_id,
-        $abort,
-      });
+      const res: caseDomainV1.Case = toLegacyCaseResponse(
+        await casesClient.attachments.addFile({
+          file,
+          filename: filename ?? '',
+          mimeType,
+          caseId: request.params.case_id,
+          $abort,
+        })
+      );
 
+      incrementAttachmentTypeCounters([FILE_ATTACHMENT_TYPE]);
       return response.ok({
         body: res,
       });

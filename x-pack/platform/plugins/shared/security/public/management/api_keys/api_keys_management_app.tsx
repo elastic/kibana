@@ -42,7 +42,7 @@ export const apiKeysManagementApp = Object.freeze({
         defaultMessage: 'API keys',
       }),
       async mount({ element, setBreadcrumbs, history }) {
-        const [[coreStart], { APIKeysGridPage }] = await Promise.all([
+        const [[coreStart, { cps }], { APIKeysGridPage }] = await Promise.all([
           getStartServices(),
           import('./api_keys_grid/api_keys_grid_page'),
         ]);
@@ -61,7 +61,7 @@ export const apiKeysManagementApp = Object.freeze({
                 })}
                 href="/"
               >
-                <APIKeysGridPage />
+                <APIKeysGridPage cpsManager={cps?.cpsManager} />
               </Breadcrumb>
             </Providers>
           ),

@@ -12,7 +12,12 @@ import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import type { EmbeddableStoryObj } from '@kbn/storybook';
 
-import { FeedbackTriggerButton, FeedbackContainer } from '../components';
+import {
+  FeedbackTriggerButton,
+  FeedbackContainer,
+  FeedbackSuccessToastTitle,
+  FeedbackSuccessToastBody,
+} from '../components';
 import type { FeedbackFormData, FeedbackRegistryEntry } from '../types';
 
 const questions: FeedbackRegistryEntry[] = [
@@ -61,5 +66,19 @@ export const Form: EmbeddableStoryObj = {
   parameters: { embeddable: { height: 640 } },
   render: () => (
     <FeedbackContainer {...services} hideFeedbackContainer={action('hideFeedbackContainer')} />
+  ),
+};
+
+export const SuccessToast: EmbeddableStoryObj = {
+  tags: ['embeddable'],
+  parameters: { embeddable: { height: 160 } },
+  render: () => (
+    <>
+      <FeedbackSuccessToastTitle />
+      <FeedbackSuccessToastBody
+        onDismiss={action('onDismiss')}
+        surveyUrl="https://www.elastic.co/"
+      />
+    </>
   ),
 };

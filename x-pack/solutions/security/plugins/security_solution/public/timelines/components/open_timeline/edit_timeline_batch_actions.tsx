@@ -20,15 +20,16 @@ import { useSuperTimelineGate } from './use_super_timeline_gate';
 
 export const useEditTimelineBatchActions = ({
   deleteTimelines,
+  onRemoveSelectedFromCase,
   selectedItems,
-  searchResults,
   showExportAction = true,
   tableRef,
   timelineType = TimelineTypeEnum.default,
 }: {
   deleteTimelines?: DeleteTimelines;
+  /** Adds a "Remove from case" item, used in the case view */
+  onRemoveSelectedFromCase?: () => void;
   selectedItems?: OpenTimelineResult[];
-  searchResults?: OpenTimelineResult[] | null;
   showExportAction?: boolean;
   tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | null>;
   timelineType: TimelineType | null;
@@ -46,7 +47,7 @@ export const useEditTimelineBatchActions = ({
     isEnabled: isSuperTimelineActionEnabled,
     tooltip: superTimelineTooltip,
     handleOpen: handleOpenSuperTimeline,
-  } = useSuperTimelineGate({ selectedItems, searchResults });
+  } = useSuperTimelineGate({ selectedItems });
 
   const onCompleteBatchActions = useCallback(
     (closePopover?: () => void) => {
@@ -112,6 +113,22 @@ export const useEditTimelineBatchActions = ({
           </EuiContextMenuItem>
         );
       }
+      if (onRemoveSelectedFromCase) {
+        items.push(
+          <EuiContextMenuItem
+            data-test-subj="remove-timelines-from-case-action"
+            disabled={disabled}
+            icon="trash"
+            key="RemoveFromCaseItemKey"
+            onClick={() => {
+              closePopover();
+              onRemoveSelectedFromCase();
+            }}
+          >
+            {i18n.REMOVE_FROM_CASE}
+          </EuiContextMenuItem>
+        );
+      }
       if (deleteTimelines) {
         items.push(
           <EuiContextMenuItem
@@ -149,6 +166,7 @@ export const useEditTimelineBatchActions = ({
     [
       selectedItems,
       showExportAction,
+      onRemoveSelectedFromCase,
       deleteTimelines,
       timelineIds,
       searchIds,

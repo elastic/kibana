@@ -5,115 +5,161 @@
  * 2.0.
  */
 
-import type { Either } from 'fp-ts/Either';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
+
 import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
+import {
+  MAX_PROJECT_ROUTINGS_LENGTH,
+  MAX_SLO_ID_LENGTH,
+  MIN_SLO_ID_LENGTH,
+  PROJECT_ROUTINGS_EMPTY_MESSAGE,
+  PROJECT_ROUTINGS_TOO_LONG_MESSAGE,
+  SLO_ID_INVALID_MESSAGE,
+  SLO_ID_REGEX,
+} from './validation_constants';
 
-const occurrencesBudgetingMethodSchema = t.literal('occurrences');
-const timeslicesBudgetingMethodSchema = t.literal('timeslices');
+const occurrencesBudgetingMethodSchema = z.literal('occurrences');
+const timeslicesBudgetingMethodSchema = z.literal('timeslices');
 
-const budgetingMethodSchema = t.union([
-  occurrencesBudgetingMethodSchema,
-  timeslicesBudgetingMethodSchema,
-]);
+const budgetingMethodSchema = z
+  .union([occurrencesBudgetingMethodSchema, timeslicesBudgetingMethodSchema])
+  .meta({
+    id: 'SLOBudgetingMethod',
+    description: 'The budgeting method to use when computing the rollup data.',
+  });
 
-const targetSchema = t.type({ target: t.number });
-
-const objectiveSchema = t.intersection([
-  targetSchema,
-  t.partial({ timesliceTarget: t.number, timesliceWindow: durationType }),
-]);
-
-const settingsSchema = t.intersection([
-  t.type({
-    syncDelay: durationType,
-    frequency: durationType,
-    preventInitialBackfill: t.boolean,
-    preventCrossProjectSearch: t.boolean,
-  }),
-  t.partial({ syncField: t.union([t.string, t.null]) }),
-]);
-
-const groupBySchema = allOrAnyStringOrArray;
-
-const optionalSettingsSchema = t.partial({
-  syncDelay: durationType,
-  frequency: durationType,
-  preventInitialBackfill: t.boolean,
-  preventCrossProjectSearch: t.boolean,
-  syncField: t.union([t.string, t.null]),
+const targetSchema = z.object({
+  target: z.number().describe('the target objective between 0 and 1 excluded'),
 });
 
-const tagsSchema = t.array(t.string);
+const objectiveSchema = targetSchema
+  .extend({
+    timesliceTarget: z
+      .number()
+      .describe('the target objective for each slice when using a timeslices budgeting method')
+      .optional(),
+    timesliceWindow: durationType
+      .describe(
+        'the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}'
+      )
+      .optional(),
+  })
+  .meta({ id: 'SLOObjective', description: 'Defines properties for the SLO objective' });
+
+const boundedProjectRoutingSchema = z
+  .string()
+  .max(MAX_PROJECT_ROUTINGS_LENGTH, PROJECT_ROUTINGS_TOO_LONG_MESSAGE)
+  .refine((value) => value.trim().length > 0, PROJECT_ROUTINGS_EMPTY_MESSAGE)
+  .describe(
+    'ES ProjectRouting expression controlling which linked projects the L1 rollup reads. ' +
+      'When set (including null), overrides preventCrossProjectSearch. null and `_alias:_origin` mean origin only; ' +
+      '`_alias:*` means all linked projects. Subset example `_id:p1 AND _id:p2`.'
+  );
+
+const settingsSchema = z
+  .object({
+    syncDelay: durationType.describe(
+      'The time delay in minutes between the current time and the latest source data time. ' +
+        'Increasing the value will delay any alerting. The default value is 1 minute. ' +
+        'The minimum value is 1m and the maximum is 359m. It should always be greater then source index refresh interval.'
+    ),
+    frequency: durationType.describe(
+      'The interval between checks for changes in the source data. The minimum value is 1m and the maximum is 59m. The default value is 1 minute.'
+    ),
+    preventInitialBackfill: z
+      .boolean()
+      .describe(
+        'Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.'
+      ),
+    syncField: z
+      .string()
+      .describe(
+        'The date field that is used to identify new documents in the source. ' +
+          'It is strongly recommended to use a field that contains the ingest timestamp. ' +
+          'If you use a different field, you might need to set the delay such that it accounts for data transmission delays. ' +
+          'When unspecified, we use the indicator timestamp field.'
+      )
+      .nullable()
+      .optional(),
+    /** @deprecated use projectRoutings */
+    preventCrossProjectSearch: z
+      .boolean()
+      .describe(
+        'Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. ' +
+          'Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.'
+      )
+      .optional(),
+    projectRoutings: boundedProjectRoutingSchema.nullable().optional(),
+  })
+  .meta({ id: 'SLOSettings', description: 'Defines properties for SLO settings.' });
+
+const groupBySchema = allOrAnyStringOrArray.meta({
+  id: 'SLOGroupBy',
+  description: 'optional group by field or fields to use to generate an SLO per distinct value',
+});
+
+const optionalSettingsSchema = settingsSchema.partial();
+
+const tagsSchema = z.array(z.string()).describe('List of tags');
 
 // id cannot contain special characters and spaces
-const sloIdSchema = new t.Type<string, string, unknown>(
-  'sloIdSchema',
-  t.string.is,
-  (input, context): Either<t.Errors, string> => {
-    if (typeof input === 'string') {
-      const valid = isValidId(input);
-      if (!valid) {
-        return t.failure(
-          input,
-          context,
-          'Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores'
-        );
-      }
+const sloIdSchema = z
+  .string()
+  .min(MIN_SLO_ID_LENGTH, SLO_ID_INVALID_MESSAGE)
+  .max(MAX_SLO_ID_LENGTH, SLO_ID_INVALID_MESSAGE)
+  .regex(SLO_ID_REGEX, SLO_ID_INVALID_MESSAGE)
+  .describe('The identifier of the SLO.');
 
-      return t.success(input);
-    } else {
-      return t.failure(input, context);
-    }
-  },
-  t.identity
-);
-
-function isValidId(id: string): boolean {
-  const MIN_ID_LENGTH = 8;
-  const MAX_ID_LENGTH = 48;
-  const validLength = MIN_ID_LENGTH <= id.length && id.length <= MAX_ID_LENGTH;
-  return validLength && /^[a-z0-9-_]+$/.test(id);
-}
-
-const requiredSloFields = t.type({
+const baseSloSchema = z.object({
   id: sloIdSchema,
-  name: t.string,
-  description: t.string,
+  name: z.string().describe('The name of the SLO.'),
+  description: z.string().describe('The description of the SLO.'),
   indicator: indicatorSchema,
   timeWindow: timeWindowSchema,
   budgetingMethod: budgetingMethodSchema,
   objective: objectiveSchema,
   settings: settingsSchema,
-  revision: t.number,
-  enabled: t.boolean,
+  revision: z.number().describe('The SLO revision'),
+  enabled: z.boolean().describe('Indicate if the SLO is enabled'),
   tags: tagsSchema,
-  createdAt: dateType,
-  updatedAt: dateType,
+  createdAt: dateType.describe('The creation date'),
+  updatedAt: dateType.describe('The last update date'),
   groupBy: groupBySchema,
-  version: t.number,
+  version: z.number().describe('The internal SLO version'),
+  createdBy: z.string().describe('The user who created the SLO.').optional(),
+  updatedBy: z.string().describe('The user who last updated the SLO.').optional(),
 });
 
-const optionalSloFields = t.partial({
-  createdBy: t.string,
-  updatedBy: t.string,
+const dashboardsWithIdSchema = z.object({
+  dashboards: z
+    .array(z.object({ id: z.string().describe('Dashboard saved-object id') }))
+    .describe('Array of dashboard references')
+    .optional(),
+});
+const dashboardsWithRefIdSchema = z.object({
+  dashboards: z
+    .array(z.object({ refId: z.string().describe('Dashboard reference id') }))
+    .describe('Array of dashboard references')
+    .optional(),
 });
 
-const baseSloSchema = t.intersection([requiredSloFields, optionalSloFields]);
+const artifactsWithIdSchema = dashboardsWithIdSchema.meta({
+  id: 'SLOArtifacts',
+  description: 'Links to related assets for the SLO',
+});
 
-const dashboardsWithIdSchema = t.partial({ dashboards: t.array(t.type({ id: t.string })) });
-const dashboardsWithRefIdSchema = t.partial({ dashboards: t.array(t.type({ refId: t.string })) });
-
-const artifactsWithIdSchema = t.partial({ artifacts: dashboardsWithIdSchema });
-const artifactsWithRefIdSchema = t.partial({ artifacts: dashboardsWithRefIdSchema });
-
-const sloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithIdSchema]);
-const storedSloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithRefIdSchema]);
+const sloDefinitionSchema = baseSloSchema
+  .extend({ artifacts: artifactsWithIdSchema.optional() })
+  .meta({ id: 'SLODefinition', description: 'The SLO definition' });
+const storedSloDefinitionSchema = baseSloSchema.extend({
+  artifacts: dashboardsWithRefIdSchema.optional(),
+});
 
 export {
+  boundedProjectRoutingSchema,
   budgetingMethodSchema,
   dashboardsWithIdSchema,
   groupBySchema,

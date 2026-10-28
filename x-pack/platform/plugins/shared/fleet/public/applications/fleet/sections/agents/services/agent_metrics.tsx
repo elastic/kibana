@@ -8,25 +8,29 @@
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
-import type { AgentMetrics, AgentPolicy } from '../../../../../../common/types';
+import type { Agent, AgentMetrics, AgentPolicy } from '../../../../../../common/types';
 
 import { MetricNonAvailable } from '../components';
 
-export function formatAgentCPU(metrics?: AgentMetrics, agentPolicy?: AgentPolicy) {
+export function formatAgentCPU(metrics?: AgentMetrics, agentPolicy?: AgentPolicy, agent?: Agent) {
   return typeof metrics?.cpu_avg !== 'undefined' ? (
     <EuiToolTip content={`${(metrics.cpu_avg * 100).toFixed(4)} %`}>
       <span tabIndex={0}>{(metrics.cpu_avg * 100).toFixed(2)} %</span>
     </EuiToolTip>
   ) : (
-    <MetricNonAvailable agentPolicy={agentPolicy} />
+    <MetricNonAvailable agentPolicy={agentPolicy} agent={agent} />
   );
 }
 
-export function formatAgentMemory(metrics?: AgentMetrics, agentPolicy?: AgentPolicy) {
+export function formatAgentMemory(
+  metrics?: AgentMetrics,
+  agentPolicy?: AgentPolicy,
+  agent?: Agent
+) {
   return metrics?.memory_size_byte_avg ? (
     formatBytes(metrics.memory_size_byte_avg)
   ) : (
-    <MetricNonAvailable agentPolicy={agentPolicy} />
+    <MetricNonAvailable agentPolicy={agentPolicy} agent={agent} />
   );
 }
 

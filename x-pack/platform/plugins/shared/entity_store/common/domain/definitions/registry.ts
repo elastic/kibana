@@ -1,0 +1,128 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import assert from 'assert';
+
+import { EXTRACTION_MODE, EntityType, type ExtractionMode } from './entity_schema';
+import {
+  type GatedEntityDefinition,
+  type ManagedEntityDefinition,
+  type ManagedEntityDefinitionWithoutId,
+} from './entity_schema';
+import { resolveExtractionGate } from './extraction_gate';
+import { hostEntityDefinition } from './host';
+import { buildUserEntityDefinition, userEntityDefinition } from './user';
+import { serviceEntityDefinition } from './service';
+import { genericEntityDefinition } from './generic';
+
+export interface EntityDefinitionOptions {
+  excludedUserNames?: string[];
+}
+
+/** One definition per entity type; the extraction processes are modes of it, not copies of it. */
+const entitiesDefinitionRegistry = {
+  host: hostEntityDefinition,
+  user: userEntityDefinition,
+  service: serviceEntityDefinition,
+  generic: genericEntityDefinition,
+} as const satisfies Record<EntityType, ManagedEntityDefinitionWithoutId>;
+
+const getRegisteredDefinition = (type: EntityType): ManagedEntityDefinitionWithoutId => {
+  const definition = entitiesDefinitionRegistry[type];
+  assert(
+    definition,
+    `No entity definition found for type: ${type}. Only the Entity Store's built-in types can be ` +
+      `resolved by name; for any other definition, read it from the entity definition registry ` +
+      `and pass it to the euid helper.`
+  );
+
+  return definition;
+};
+
+/**
+ * Dual-process capability is derived from the definition, so it cannot be declared without being
+ * implemented. A declared gate yields both processes at once, since the non-priority process scans
+ * the complement the same gate defines.
+ */
+export const hasPriorityExtractionGate = (type: EntityType): boolean =>
+  getRegisteredDefinition(type).extraction.priorityExtractionGate !== undefined;
+
+/**
+ * Whether this type's non-priority process applies sampling. Requires the priority gate, since
+ * sampling only exists where a non-priority process does.
+ */
+export const supportsNonPrioritySampling = (type: EntityType): boolean =>
+  hasPriorityExtractionGate(type) &&
+  getRegisteredDefinition(type).extraction.nonPrioritySampling === true;
+
+/**
+ * 'nonPriority' is excluded: the non-priority task hardcodes its own mode directly.
+ *
+ * Enabling the flag for a type sends it down the priority mode, which scans only the documents its
+ * gate admits. The complement is reached solely by the non-priority task, so the flag is safe to
+ * enable only once that task is scheduled for the type; a declared gate on its own is not enough.
+ */
+export const resolveExtractionMode = (
+  isDualProcessEnabled: boolean,
+  entityType: EntityType
+): Extract<ExtractionMode, 'priority' | 'single'> => {
+  if (isDualProcessEnabled && hasPriorityExtractionGate(entityType))
+    return EXTRACTION_MODE.priority;
+  return EXTRACTION_MODE.single;
+};
+
+export const getEntityDefinitionId = (entityType: EntityType, space: string) =>
+  `security_${entityType}_${space}`;
+
+export function getEntityDefinition(
+  type: EntityType,
+  namespace: string,
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single,
+  options?: EntityDefinitionOptions
+): GatedEntityDefinition<ManagedEntityDefinition> {
+  const definition = getBuiltInEntityDefinition(type, extractionMode, options);
+
+  return {
+    ...definition,
+    id: getEntityDefinitionId(type, namespace),
+    type,
+  };
+}
+
+/**
+ * Resolves one of the Entity Store's built-in definitions (`user`, `host`, `service`, `generic`)
+ * by type name; definitions other plugins register are read from the entity definition registry.
+ *
+ * The default `'single'` mode returns the registered definition untouched, which is what every
+ * consumer outside log extraction reads.
+ *
+ * The process modes return it with `extractionGate` resolved from `priorityExtractionGate`. Both
+ * gates come from that one declaration, so they cannot drift out of being complements.
+ */
+export function getBuiltInEntityDefinition(
+  type: EntityType,
+  extractionMode: ExtractionMode = EXTRACTION_MODE.single,
+  options?: EntityDefinitionOptions
+): GatedEntityDefinition<ManagedEntityDefinitionWithoutId> {
+  const definition =
+    type === EntityType.enum.user && options?.excludedUserNames?.length
+      ? buildUserEntityDefinition({ excludedUserNames: options.excludedUserNames })
+      : getRegisteredDefinition(type);
+
+  assert(
+    extractionMode === EXTRACTION_MODE.single || definition.extraction.priorityExtractionGate,
+    `No priority extraction gate declared for entity type: ${type}, cannot resolve '${extractionMode}' mode`
+  );
+
+  const extractionGate = resolveExtractionGate(
+    definition.extraction.priorityExtractionGate,
+    extractionMode
+  );
+  if (!extractionGate) return definition;
+
+  return { ...definition, extractionGate };
+}

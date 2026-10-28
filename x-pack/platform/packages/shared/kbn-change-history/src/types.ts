@@ -10,6 +10,7 @@ import type {
   Refresh,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { UserActivityActionId } from '@kbn/core-user-activity-server';
 
 /**
  * Mapped keyword fields that support terms aggregations in change history.
@@ -78,6 +79,10 @@ export interface ChangeHistoryDocument {
     id?: string;
     /** Current login name for user that generated the change. */
     name: string;
+    /** Resolved at read time from the user profile; not persisted. */
+    full_name?: string;
+    /** Resolved at read time from the user profile; not persisted. */
+    email?: string;
   };
 
   event: {
@@ -126,7 +131,7 @@ export interface ChangeHistoryDocument {
       /** Full paths of fields replaced with a `[redacted]` placeholder (low-entropy sensitive data, large blobs). */
       redacted: string[];
     };
-    /** Full snapshot after the change. */
+    /** Full snapshot after the change, with masked fields applied. Another Kibana version may have written it. See "Reading snapshots back" in the README. */
     snapshot: Record<string, unknown>;
   };
 
@@ -163,10 +168,49 @@ export interface ObjectChange {
   sequence?: number;
   /**
    * Full snapshot of the object **after** the change (post-write state). Persisted as
-   * `object.snapshot`.
+   * `object.snapshot` and never migrated, so other Kibana versions read it back as stored.
+   * See "Reading snapshots back" in the README.
    */
   snapshot: Record<string, any>;
 }
+
+/**
+ * Change History action IDs that predate the User Activity Log registry.
+ * Temporary; remove via https://github.com/elastic/kibana-team/issues/4011.
+ */
+export const LEGACY_CHANGE_HISTORY_ACTION_IDS = [
+  // Alerting (`RuleChangeTrackingAction`)
+  'rule_create',
+  'rule_update',
+  'rule_update_api_key',
+  'rule_enable',
+  'rule_disable',
+  'rule_snooze',
+  'rule_unsnooze',
+  'rule_delete',
+  // Security Solution (`SecurityRuleChangeTrackingAction`)
+  'rule_install',
+  'rule_upgrade',
+  'rule_duplicate',
+  'rule_import',
+  'rule_revert',
+  'rule_restore',
+  // Workflows (`WorkflowChangeHistoryAction`)
+  'create',
+  'update',
+  'install',
+  'restore',
+] as const;
+
+/** Closed union of {@link LEGACY_CHANGE_HISTORY_ACTION_IDS}. Temporary; see #4011. */
+export type LegacyChangeHistoryActionId = (typeof LEGACY_CHANGE_HISTORY_ACTION_IDS)[number];
+
+/**
+ * Action IDs accepted when persisting a change-history revision.
+ * Prefer {@link UserActivityActionId}; the legacy union keeps existing call sites compiling until
+ * https://github.com/elastic/kibana-team/issues/4011.
+ */
+export type ChangeHistoryActionId = UserActivityActionId | LegacyChangeHistoryActionId;
 
 /** Optional overrides merged into a logged change document. */
 export interface LogChangeHistoryDataOverrides {
@@ -177,8 +221,8 @@ export interface LogChangeHistoryDataOverrides {
 }
 
 export interface LogChangeHistoryOptions {
-  /** Action performed by the user (`rule_create`, `rule_update`, `rule_delete`, etc.). Some Audit log examples (@see https://www.elastic.co/docs/reference/kibana/kibana-audit-events#xpack-security-ecs-audit-logging) */
-  action: string;
+  /** Action performed by the user. Must be a {@link ChangeHistoryActionId}. */
+  action: ChangeHistoryActionId;
   /** Current login name for user that generated the change. */
   username: string;
   /** Unique profile identifier used by auth realm (@see https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/user-profiles) */
@@ -209,6 +253,14 @@ export interface GetChangeHistoryOptions {
   size?: number;
   /**
    * Caller-supplied labels attached to every span this method emits. The caller owns the
+   * keys and values, keeping `kbn-change-history` solution-agnostic.
+   */
+  spanLabels?: Record<string, string>;
+}
+
+export interface GetChangeHistoryEventOptions {
+  /**
+   * Caller-supplied labels attached to the span this method emits. The caller owns the
    * keys and values, keeping `kbn-change-history` solution-agnostic.
    */
   spanLabels?: Record<string, string>;

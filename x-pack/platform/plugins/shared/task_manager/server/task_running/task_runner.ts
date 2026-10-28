@@ -15,15 +15,14 @@ import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { flow, identity, omit } from 'lodash';
+import { flow, identity, isEqual, omit } from 'lodash';
 import type { ExecutionContextStart, Logger } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
-import { asErr, asOk, eitherAsync, isOk, mapErr, mapOk, unwrap } from '../lib/result_type';
+import { asErr, asOk, eitherAsync, isErr, isOk, mapErr, mapOk, unwrap } from '../lib/result_type';
 import { getExecutionContextRunner } from '../lib/execution_context';
 import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
@@ -44,17 +43,36 @@ import type {
   PartialConcreteTaskInstance,
   RruleSchedule,
   SuccessfulRunResult,
+  TaskCredential,
   TaskDefinition,
   TaskEventLogger,
+  TaskRunAsContext,
+  TaskTypeGroup,
 } from '../task';
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
-import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
+import {
+  createTaskRunError,
+  isUnrecoverableError,
+  isUserError,
+  type DecoratedError,
+} from './errors';
+import {
+  resolveTaskDocumentConflicts,
+  isVersionConflictError,
+  getTaskReclaimReason,
+} from './resolve_so_conflicts';
+import { createRunAsContext } from './run_as_context';
+import {
+  getCredentialRunAs,
+  SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+} from '../lib/service_account_credential';
 import type { TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
+import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
 import { TaskValidator } from '../task_validator';
 import { getRetryDate, getTimeout } from '../lib/get_retry_at';
-import { getNextRunAt } from '../lib/get_next_run_at';
+import { getNextRunAt, getRRuleScheduleDurationMs } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
 import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
@@ -67,6 +85,7 @@ export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
 const UPDATE_RETRY_AT_INTERVAL = 60000; // 1m
+const CREDENTIAL_RETRY_DELAY = 5 * 60 * 1000; // 5m
 const MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE = 4096; // 4 KB
 
 export interface TaskRunner {
@@ -107,6 +126,8 @@ export interface Updatable {
     options: { validate: boolean; doc: ConcreteTaskInstance }
   ): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
+  get(id: string): Promise<ConcreteTaskInstance>;
+  getVerifiedCredential(id: string): Promise<Result<TaskCredential, Error>>;
 }
 
 type Opts = {
@@ -152,6 +173,10 @@ export type RanTask = TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>;
 
 export type TaskRunningInstance = PendingTask | ReadyToRunTask | RanTask;
 
+type CredentialCheck =
+  | { outcome: 'run'; runAs?: TaskRunAsContext }
+  | { outcome: 'retry' | 'fail'; error: DecoratedError };
+
 /**
  * Runs a background task, ensures that errors are properly handled,
  * allows for cancellation.
@@ -179,6 +204,7 @@ export class TaskManagerRunner implements TaskRunner {
   private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
+  private scheduleAtRunStart?: IntervalSchedule | RruleSchedule;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
   private taskRunEventCustomFields?: Record<string, unknown>;
 
@@ -364,6 +390,9 @@ export class TaskManagerRunner implements TaskRunner {
     // We extract it here because the narrowing is lost inside the async closure below
     // since this.instance is a mutable class property.
     const { startedAt } = this.instance.task;
+    // Snapshot the schedule before the heartbeat can refresh `this.instance` from the store, so
+    // completion can tell whether the schedule was changed externally while the task was running.
+    this.scheduleAtRunStart = this.instance.task.schedule;
 
     this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
 
@@ -422,17 +451,68 @@ export class TaskManagerRunner implements TaskRunner {
         );
 
         // For long running tasks, update retryAt on an interval to allow for quicker task recovery
-        const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
+        const stopUpdatingLongRunningTasks =
+          this.updateRetryAtOnIntervalForLongRunningTasks(startedAt);
 
         try {
+          const { credential } = this.instance.task;
+          const credentialCheck: CredentialCheck = credential
+            ? await this.checkCredential(credential, definition)
+            : { outcome: 'run' };
+          if (credentialCheck.outcome !== 'run') {
+            stopUpdatingLongRunningTasks();
+            const { error } = credentialCheck;
+            this.logger.error(`Task ${this} failed: ${error}`, {
+              tags: [
+                this.taskType,
+                this.instance.task.id,
+                'task-run-failed',
+                `${TaskErrorSource.FRAMEWORK}-error`,
+              ],
+            });
+            const processedResult = await withSpan(
+              { name: 'process result', type: 'task manager' },
+              () =>
+                credentialCheck.outcome === 'fail'
+                  ? this.failAndKeepTask(
+                      error,
+                      modifiedContext.taskInstance.state,
+                      makeTaskTiming()
+                    )
+                  : // Reported as a successful run with an error, because a failed run uses up an
+                    // attempt and a one-off task is deleted once it runs out of attempts.
+                    this.processResult(
+                      asOk({
+                        state: modifiedContext.taskInstance.state,
+                        taskRunError: error,
+                        ...(this.instance.task.schedule
+                          ? {}
+                          : { runAt: new Date(Date.now() + CREDENTIAL_RETRY_DELAY) }),
+                      }),
+                      makeTaskTiming()
+                    )
+            );
+            if (apmTrans) apmTrans.end('failure');
+            return processedResult;
+          }
+          const { runAs } = credentialCheck;
+
           const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
             'apiKey',
             'uiamApiKey',
             'userScope',
+            'credential',
+            'encryptedCredential',
           ]);
-          const apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
-            modifiedContext.taskInstance
-          );
+          // A service account task never runs with an API key, even one left on the task.
+          let apiKeyForRequest: string | undefined;
+          if (runAs) {
+            taskManagerUiamTelemetry.recordTaskRun('service_account', 'run_as');
+          } else {
+            apiKeyForRequest = this.apiKeyStrategy.getApiKeyForFakeRequest(
+              modifiedContext.taskInstance
+            );
+          }
           const userProfileId = modifiedContext.taskInstance.userScope?.userProfileId;
           const userName = modifiedContext.taskInstance.userScope?.userName;
 
@@ -441,6 +521,7 @@ export class TaskManagerRunner implements TaskRunner {
             spaceId: modifiedContext.taskInstance.userScope?.spaceId,
             userProfileId,
             userName,
+            uiamApiKeyExternal: modifiedContext.taskInstance.userScope?.uiamApiKeyExternal,
             enrichFakeRequest: this.enrichFakeRequest,
           });
 
@@ -454,9 +535,8 @@ export class TaskManagerRunner implements TaskRunner {
 
           this.task = definition.createTaskRunner({
             taskInstance: sanitizedTaskInstance,
-            fakeRequest,
+            ...(runAs ? { runAs } : { fakeRequest, enrichRequest }),
             signal: abortController.signal,
-            enrichRequest,
             executionUuid: this.uuid,
             setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
           });
@@ -532,6 +612,136 @@ export class TaskManagerRunner implements TaskRunner {
     );
   }
 
+  /**
+   * Decides whether the task's credential lets it run. A credential that fails its integrity check
+   * fails the task; any other credential this run can't use retries it later.
+   */
+  private async checkCredential(
+    credential: TaskCredential,
+    definition: TaskDefinition
+  ): Promise<CredentialCheck> {
+    const retry = (error: Error): CredentialCheck => ({
+      outcome: 'retry',
+      error: createTaskRunError(error, TaskErrorSource.FRAMEWORK),
+    });
+
+    // Includes credential types added by later versions.
+    if (credential.type !== SERVICE_ACCOUNT_CREDENTIAL_TYPE) {
+      return retry(
+        new Error(
+          `Task uses credential type "${credential.type}", which this version of Kibana cannot run`
+        )
+      );
+    }
+
+    const { runAs } = definition;
+    if (!runAs) {
+      return retry(
+        new Error(
+          `Task type "${this.taskType}" can't run as a service account because it doesn't define runAs`
+        )
+      );
+    }
+
+    let verifiedCredential: Result<TaskCredential, Error>;
+    try {
+      verifiedCredential = await this.bufferedTaskStore.getVerifiedCredential(this.id);
+    } catch (e) {
+      return retry(e);
+    }
+    if (isErr(verifiedCredential)) {
+      return {
+        outcome: 'fail',
+        error: createTaskRunError(verifiedCredential.error, TaskErrorSource.FRAMEWORK),
+      };
+    }
+
+    const verifiedRunAs = getCredentialRunAs(verifiedCredential.value);
+    if (!verifiedRunAs) {
+      return {
+        outcome: 'fail',
+        error: createTaskRunError(
+          new Error(
+            'Task credential failed its integrity check: it is not a complete service account credential'
+          ),
+          TaskErrorSource.FRAMEWORK
+        ),
+      };
+    }
+    if (!runAs.workloadTypes.includes(verifiedRunAs.workloadType)) {
+      return retry(
+        new Error(
+          `Task type "${this.taskType}" doesn't allow running as workload type "${verifiedRunAs.workloadType}"`
+        )
+      );
+    }
+
+    return { outcome: 'run', runAs: createRunAsContext(runAs, verifiedRunAs) };
+  }
+
+  /**
+   * Marks the task as failed instead of removing it, so it can be inspected and revived with
+   * `runSoon`. Claiming never picks up a failed task. The task didn't run, so the attempt its claim
+   * used up is given back; otherwise a one-off task on its last attempt would be deleted when
+   * claimed after `runSoon`.
+   */
+  private async failAndKeepTask(
+    error: DecoratedError,
+    state: ConcreteTaskInstance['state'],
+    taskTiming: TaskTiming
+  ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
+    const { task } = this.instance;
+    try {
+      this.instance = asRan(
+        await this.bufferedTaskStore.partialUpdate(
+          {
+            id: task.id,
+            version: task.version,
+            status: TaskStatus.Failed,
+            attempts: Math.max(task.attempts - 1, 0),
+            startedAt: null,
+            retryAt: null,
+            ownerId: null,
+          },
+          { validate: false, doc: task }
+        )
+      );
+    } catch (updateError) {
+      // Not rethrown: the generic failure handling could delete the task. Its next claim, once
+      // `retryAt` passes, checks the credential again.
+      this.logger.warn(
+        `Unable to mark task ${this} as failed: ${
+          updateError.message ?? JSON.stringify(updateError)
+        }`,
+        { tags: [this.id, this.taskType] }
+      );
+      this.instance = asRan(task);
+    }
+
+    this.onTaskEvent(
+      asTaskRunEvent(
+        this.id,
+        asErr({
+          task,
+          persistence: task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
+          result: TaskRunResult.Failed,
+          isExpired: this.isExpired,
+          error,
+          taskTypeGroup: this.definition?.taskTypeGroup,
+        }),
+        taskTiming
+      )
+    );
+    this.logTaskRunEvent(
+      task,
+      taskTiming,
+      EventLogOutcomes.failure,
+      `Task ${this.taskType} "${this.id}" failed.`,
+      error
+    );
+    return asErr({ error, state });
+  }
+
   private validateTaskState(taskInstance: ConcreteTaskInstance) {
     const { taskType, id } = taskInstance;
     try {
@@ -574,22 +784,7 @@ export class TaskManagerRunner implements TaskRunner {
 
     // mget claim strategy sets the task to `running` during the claim cycle
     // so this update to mark the task as running is unnecessary
-    const { task } = this.instance;
-    // A ready-to-run mget task should always have a `startedAt`; log if it doesn't
-    // so we can diagnose the issue.
-    if (task.startedAt == null) {
-      this.logger.warn(
-        `Task ${this} is ready to run (mget) without a startedAt, which breaks the running-task invariant. ` +
-          `status=${task.status} attempts=${task.attempts} ` +
-          `runAt=${task.runAt?.toISOString() ?? 'null'} ` +
-          `retryAt=${task.retryAt?.toISOString() ?? 'null'} ` +
-          `scheduledAt=${task.scheduledAt?.toISOString() ?? 'null'} ` +
-          `ownerId=${task.ownerId ?? 'null'} version=${task.version ?? 'null'} ` +
-          `schedule=${task.schedule ? JSON.stringify(task.schedule) : 'null'}`,
-        { tags: [this.taskType, this.id] }
-      );
-    }
-    this.instance = asReadyToRun(task as ConcreteTaskInstanceWithStartedAt);
+    this.instance = asReadyToRun(this.instance.task as ConcreteTaskInstanceWithStartedAt);
     return true;
   }
 
@@ -633,15 +828,19 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private shouldUpdateExpiredTask(): boolean {
-    if (!this.instance.task.schedule || !this.instance.task.schedule.interval) {
-      // if the task does not have a schedule interval, we will not update it on timeout
-      return false;
+    const { interval, rrule } = this.instance.task.schedule ?? {};
+    const timeoutDuration = parseIntervalAsMillisecond(this.timeout);
+
+    if (interval) {
+      return parseIntervalAsMillisecond(interval) > timeoutDuration;
     }
 
-    const timeoutDuration = parseIntervalAsMillisecond(this.timeout);
-    const scheduleDuration = parseIntervalAsMillisecond(this.instance.task.schedule.interval);
+    if (rrule) {
+      return getRRuleScheduleDurationMs(rrule, this.instance.task.runAt) > timeoutDuration;
+    }
 
-    return scheduleDuration > timeoutDuration;
+    // if the task does not have a schedule, we will not update it on timeout
+    return false;
   }
 
   private rescheduleFailedRun = (
@@ -686,6 +885,9 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<TaskRunResult> {
     const hasTaskRunFailed = isOk(result);
     let shouldTaskBeDisabled = false;
+    // Set when the next runAt is derived from the schedule (not returned by the task runner), so the
+    // conflict resolver can recompute it if the schedule was changed externally during the run.
+    let getRunAtForSchedule: ((schedule: IntervalSchedule | RruleSchedule) => Date) | undefined;
     const fieldUpdates: Partial<ConcreteTaskInstance> & Pick<ConcreteTaskInstance, 'status'> = flow(
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
@@ -698,6 +900,7 @@ export class TaskManagerRunner implements TaskRunner {
           attempts = 0,
           shouldDeleteTask,
           shouldDisableTask,
+          priority,
         }: SuccessfulRunResult & { attempts: number }) => {
           if (shouldDeleteTask) {
             // set the status to failed so task will get deleted
@@ -709,21 +912,39 @@ export class TaskManagerRunner implements TaskRunner {
             return asOk({ status: TaskStatus.Idle });
           }
 
-          const updatedTaskSchedule = reschedule ?? this.instance.task.schedule;
+          const allowPriority = this.definition?.allowPriorityOverride === true;
+          if (priority !== undefined && !allowPriority) {
+            this.logger.warn(
+              `Ignoring priority returned by task ${this}: task type does not allow priority overrides`,
+              { tags: [this.taskType] }
+            );
+          }
+          // A schedule changed externally during the run takes precedence over the one returned by the task runner.
+          const scheduleChangedDuringRun = !isEqual(
+            this.instance.task.schedule,
+            this.scheduleAtRunStart
+          );
+          const updatedTaskSchedule = scheduleChangedDuringRun
+            ? this.instance.task.schedule
+            : reschedule ?? this.instance.task.schedule;
+          const nextRunAtForSchedule = (schedule?: IntervalSchedule | RruleSchedule) =>
+            getNextRunAt(
+              {
+                runAt: this.instance.task.runAt,
+                startedAt: this.instance.task.startedAt,
+                schedule,
+              },
+              this.getPollInterval(),
+              this.logger
+            );
+          if (!runAt) {
+            getRunAtForSchedule = nextRunAtForSchedule;
+          }
           return asOk({
-            runAt:
-              runAt ||
-              getNextRunAt(
-                {
-                  runAt: this.instance.task.runAt,
-                  startedAt: this.instance.task.startedAt,
-                  schedule: updatedTaskSchedule,
-                },
-                this.getPollInterval(),
-                this.logger
-              ),
+            runAt: runAt || nextRunAtForSchedule(updatedTaskSchedule),
             state,
             schedule: updatedTaskSchedule,
+            ...(priority !== undefined && allowPriority ? { priority } : {}),
             attempts,
             status: TaskStatus.Idle,
           });
@@ -744,6 +965,7 @@ export class TaskManagerRunner implements TaskRunner {
       const label = `${this.taskType}:${this.instance.task.id}`;
 
       let shouldUpdateTask: boolean = false;
+      const originalTask = this.instance.task;
       let partialTask: PartialConcreteTaskInstance = {
         id: this.instance.task.id,
         version: this.instance.task.version,
@@ -800,17 +1022,15 @@ export class TaskManagerRunner implements TaskRunner {
             })
           );
         } catch (error) {
-          const isVersionConflict =
-            SavedObjectsErrorHelpers.isConflictError(error) ||
-            error.status === 409 ||
-            error.statusCode === 409 ||
-            error.error?.type === 'version_conflict_engine_exception';
-
-          if ((this.isExpired || this.isCancelled) && isVersionConflict) {
-            this.logger.debug(
-              `Skipping the update of expired/cancelled task ${label} because it was reclaimed by another Kibana while running.`,
-              { tags: [this.id, this.taskType] }
-            );
+          if (isVersionConflictError(error)) {
+            await resolveTaskDocumentConflicts({
+              taskId: this.id,
+              partialTask,
+              originalTask,
+              bufferedTaskStore: this.bufferedTaskStore,
+              logger: this.logger,
+              getRunAtForSchedule,
+            });
           } else {
             throw error;
           }
@@ -851,12 +1071,16 @@ export class TaskManagerRunner implements TaskRunner {
     const debugLogger = createWrappedLogger({ logger: this.logger, tags: [`metrics-debugger`] });
 
     const taskHasExpired = this.isExpired;
+    const taskTypeGroup = this.definitions.get(this.taskType)?.taskTypeGroup as
+      | TaskTypeGroup
+      | undefined;
 
     await eitherAsync(
       result,
       async ({ runAt, schedule, taskRunError }: SuccessfulRunResult) => {
         const taskPersistence =
           schedule || task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring;
+
         try {
           const processedResult = {
             task,
@@ -875,7 +1099,12 @@ export class TaskManagerRunner implements TaskRunner {
             this.onTaskEvent(
               asTaskRunEvent(
                 this.id,
-                asErr({ ...processedResult, isExpired: taskHasExpired, error: taskRunError }),
+                asErr({
+                  ...processedResult,
+                  isExpired: taskHasExpired,
+                  error: taskRunError,
+                  taskTypeGroup,
+                }),
                 taskTiming
               )
             );
@@ -890,7 +1119,7 @@ export class TaskManagerRunner implements TaskRunner {
             this.onTaskEvent(
               asTaskRunEvent(
                 this.id,
-                asOk({ ...processedResult, isExpired: taskHasExpired }),
+                asOk({ ...processedResult, isExpired: taskHasExpired, taskTypeGroup }),
                 taskTiming
               )
             );
@@ -911,6 +1140,7 @@ export class TaskManagerRunner implements TaskRunner {
                 result: TaskRunResult.Failed,
                 isExpired: taskHasExpired,
                 error: err,
+                taskTypeGroup,
               }),
               taskTiming
             )
@@ -936,6 +1166,7 @@ export class TaskManagerRunner implements TaskRunner {
               result: await this.processResultForRecurringTask(result),
               isExpired: taskHasExpired,
               error,
+              taskTypeGroup,
             }),
             taskTiming
           )
@@ -967,11 +1198,12 @@ export class TaskManagerRunner implements TaskRunner {
     return this.definition?.maxAttempts ?? this.defaultMaxAttempts;
   }
 
-  private updateRetryAtOnIntervalForLongRunningTasks() {
+  private updateRetryAtOnIntervalForLongRunningTasks(startedAt: Date) {
     let stopped = false;
 
     const updateRetryAt = async () => {
       if (!stopped) {
+        const taskInstance = this.instance.task;
         try {
           // Set retryAt to now + 5m
           const updatedRetryAt = new Date(Date.now() + 5 * 60 * 1000);
@@ -983,26 +1215,44 @@ export class TaskManagerRunner implements TaskRunner {
               tags: [this.id, this.taskType],
             }
           );
-          const taskInstance = this.instance.task;
-          this.instance = asReadyToRun(
-            (await this.bufferedTaskStore.partialUpdate(
-              {
-                id: taskInstance.id,
-                retryAt: updatedRetryAt,
-              },
-              { validate: false, doc: taskInstance }
-            )) as ConcreteTaskInstanceWithStartedAt
+          const updatedTask = await this.bufferedTaskStore.partialUpdate(
+            {
+              id: taskInstance.id,
+              version: taskInstance.version,
+              retryAt: updatedRetryAt,
+            },
+            { validate: false, doc: taskInstance }
           );
+          this.instance = asReadyToRun({ ...updatedTask, startedAt });
         } catch (error) {
-          // If there is a 409 conflict error, stop the timer and try to cancel the task
-          // as this task may have been picked up by another Kibana node.
-          if (SavedObjectsErrorHelpers.isConflictError(error)) {
-            stop();
-            this.logger.warn(
-              `Conflict error trying to update retryAt for a long-running task. Cancelling task: ${this.id}`,
-              { tags: [this.id, this.taskType] }
-            );
-            await this.cancel();
+          if (isVersionConflictError(error)) {
+            let currentTask: ConcreteTaskInstance | undefined;
+            try {
+              currentTask = await this.bufferedTaskStore.get(this.id);
+            } catch (e) {
+              this.logger.warn(
+                `Unable to update retryAt for long running task: ${this.id} - could not re-read the current task document to check for a reclaim (${e.message}), will retry on the next interval`,
+                { tags: [this.id, this.taskType] }
+              );
+            }
+
+            const reclaimReason = currentTask && getTaskReclaimReason(currentTask, taskInstance);
+            if (reclaimReason) {
+              // The task was reclaimed by another Kibana node, stop the timer and cancel the task.
+              stop();
+              this.logger.warn(
+                `Conflict error trying to update retryAt for a long-running task. Cancelling task: ${this.id}`,
+                { tags: [this.id, this.taskType] }
+              );
+              await this.cancel();
+            } else if (currentTask) {
+              // Update to the current task, and retryAt on the next interval.
+              this.instance = asReadyToRun({ ...currentTask, startedAt });
+              this.logger.warn(
+                `Conflict error trying to update retryAt for a long-running task: ${this.id} - updated to the current task document, will retry on the next interval`,
+                { tags: [this.id, this.taskType] }
+              );
+            }
           } else {
             this.logger.warn(
               `Unable to update retryAt for long running task: ${this.id} - ${error.message}`,

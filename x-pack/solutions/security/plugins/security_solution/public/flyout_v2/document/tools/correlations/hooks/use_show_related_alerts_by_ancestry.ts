@@ -11,6 +11,8 @@ import { ALERT_ANCESTORS_ID } from '../../../../../../common/field_maps/field_na
 import { useIsAnalyzerEnabled } from '../../../../../detections/hooks/use_is_analyzer_enabled';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isRulePreviewDocument } from '../../../../shared/utils/is_rule_preview_document';
+import { getNonLocalQualifiedIndex } from '../../../../shared/utils/non_local_index';
+import { ANCESTOR_INDEX } from '../../../main/constants/field_names';
 
 export interface UseShowRelatedAlertsByAncestryParams {
   /**
@@ -28,6 +30,11 @@ export interface UseShowRelatedAlertsByAncestryResult {
    * Value of the document id for fetching ancestry alerts
    */
   ancestryDocumentId: string;
+  /**
+   * Project-qualified index of the ancestry document, used to disambiguate the same `_id` across
+   * linked projects (CPS). Undefined when the document has no index.
+   */
+  ancestryDocumentIndex?: string;
 }
 
 /**
@@ -43,6 +50,17 @@ export const useShowRelatedAlertsByAncestry = ({
   const ancestorId = (getFieldValue(hit, ALERT_ANCESTORS_ID) as string) ?? '';
   const ancestryDocumentId = isRulePreview ? ancestorId : hit.raw._id ?? '';
 
+  // Mirror the index the Analyzer preview threads: for rule-preview documents the ancestry lookup
+  // targets the ancestor (which can live in a linked project even though the preview alert is
+  // stored locally), so pass its project-qualified index for cross-project disambiguation;
+  // otherwise use the document's own `_index` (the fanned-in linked-alert case).
+  const ancestryDocumentIndex = isRulePreview
+    ? getNonLocalQualifiedIndex(
+        (getFieldValue(hit, ANCESTOR_INDEX) as string) ?? hit.raw._index ?? '',
+        hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''
+      )
+    : hit.raw._index;
+
   const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
 
   const show = hasProcessEntityInfo && hasAtLeastPlatinum;
@@ -51,7 +69,8 @@ export const useShowRelatedAlertsByAncestry = ({
     () => ({
       show,
       ancestryDocumentId,
+      ancestryDocumentIndex,
     }),
-    [ancestryDocumentId, show]
+    [ancestryDocumentId, ancestryDocumentIndex, show]
   );
 };

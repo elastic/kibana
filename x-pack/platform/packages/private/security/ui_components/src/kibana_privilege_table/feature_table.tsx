@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './feature_table.scss';
-
 import type { EuiAccordionProps, EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiAccordion,
@@ -37,6 +35,13 @@ import { FeatureTableCell } from './components/feature_table_cell';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 import { NO_PRIVILEGE_VALUE } from '../constants';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
+
+const featureAccordionButtonStyles = css`
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+`;
 
 interface Props {
   role: Role;
@@ -220,8 +225,8 @@ export class FeatureTable extends Component<Props, State> {
               id={`featurePrivilegeControls_${feature.id}`}
               data-test-subj="featurePrivilegeControls"
               buttonContent={buttonContent}
-              buttonClassName="euiAccordionWithDescription"
               buttonProps={{
+                css: featureAccordionButtonStyles,
                 'data-test-subj': `featurePrivilegeControls_${feature.category.id}_${feature.id}_accordionToggle`,
               }}
               extraAction={extraAction}

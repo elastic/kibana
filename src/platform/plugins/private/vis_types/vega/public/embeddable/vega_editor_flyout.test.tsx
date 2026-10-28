@@ -8,133 +8,317 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { BehaviorSubject } from 'rxjs';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import {
+  BooleanRelation,
+  FILTERS,
+  type CombinedFilter,
+  type Filter,
+  type Query,
+} from '@kbn/es-query';
+import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { VegaPluginStartDependencies } from '../plugin';
+import { setData } from '../services';
+import type { VegaEmbeddableApi } from './vega_embeddable';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
 jest.mock('../components/vega_vis_editor', () => ({
   VegaSpecEditor: ({
     editorValue,
     onChange,
+    onFormatChange,
+    actionsPlacement,
   }: {
     editorValue: string;
     onChange: (value: string) => void;
+    onFormatChange: (format: 'hjson' | 'json') => void;
+    actionsPlacement?: 'overlay' | 'toolbar';
   }) => (
-    <textarea
-      aria-label="Vega spec"
-      value={editorValue}
-      onChange={(event) => onChange(event.target.value)}
-    />
+    <div>
+      <div data-test-subj="vegaSpecEditorValue">{editorValue}</div>
+      <div data-test-subj="vegaSpecEditorActionsPlacement">{actionsPlacement}</div>
+      <button onClick={() => onFormatChange('hjson')}>setFormat</button>
+      <button onClick={() => onChange('{ mark: bar }')}>changeSpec</button>
+    </div>
   ),
 }));
 
-describe('VegaEditorFlyout', () => {
-  const renderFlyout = ({ isNewPanel = false }: { isNewPanel?: boolean } = {}) => {
-    const closeFlyout = jest.fn();
-    const onRevert = jest.fn();
-    const onPreview = jest.fn();
-    const onSave = jest.fn();
-    const { unmount } = render(
-      <VegaEditorFlyout
-        ariaLabelledBy="vega-flyout-title"
-        closeFlyout={closeFlyout}
-        initialSpec="{ mark: point }"
-        isNewPanel={isNewPanel}
-        onPreview={onPreview}
-        onRevert={onRevert}
-        onSave={onSave}
-      />
-    );
-    return { closeFlyout, onRevert, onPreview, onSave, unmount };
+const createDataView = (id: string, persisted = true): DataView =>
+  ({ id, isPersisted: () => persisted } as DataView);
+
+const renderFlyout = ({
+  initialQuery,
+  initialFilters,
+  initialDataViews = [],
+  defaultDataView,
+  isNewPanel = false,
+}: {
+  initialQuery?: Query;
+  initialFilters?: Filter[];
+  initialDataViews?: DataView[];
+  defaultDataView?: DataView;
+  isNewPanel?: boolean;
+} = {}) => {
+  const query$ = new BehaviorSubject<Query | undefined>(initialQuery);
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(initialFilters);
+  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(initialDataViews);
+  const api = {
+    query$,
+    filters$,
+    dataViews$,
+    setQuery: jest.fn((query?: Query) => query$.next(query)),
+    setFilters: jest.fn((filters?: Filter[]) => filters$.next(filters)),
+  } as unknown as VegaEmbeddableApi;
+
+  const SearchBar = jest.fn((_props: StatefulSearchBarProps): null => null);
+  const getSearchBarProps = (): StatefulSearchBarProps => {
+    const props = SearchBar.mock.lastCall?.[0];
+    if (!props) throw new Error('SearchBar has not rendered');
+    return props;
   };
 
-  it('does not preview while typing; Preview pushes the current spec', async () => {
-    const { onPreview } = renderFlyout();
-    const user = userEvent.setup();
+  const closeFlyout = jest.fn();
+  const onPreview = jest.fn();
+  const onRevert = jest.fn();
+  const onSave = jest.fn();
 
-    expect(screen.getByRole('heading', { name: 'Vega' })).toBeInTheDocument();
-    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
-    const previewButton = screen.getByRole('button', { name: 'Preview' });
+  const view = render(
+    <VegaEditorFlyout
+      api={api}
+      ariaLabelledBy="vegaEditorTitle"
+      closeFlyout={closeFlyout}
+      defaultDataView={defaultDataView}
+      initialSpec={{ format: 'hjson', value: '{ mark: point }' }}
+      SearchBar={SearchBar as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar']}
+      isNewPanel={isNewPanel}
+      onPreview={onPreview}
+      onRevert={onRevert}
+      onSave={onSave}
+    />
+  );
 
-    // Preview is disabled until the spec differs from what is rendered on the panel.
-    expect(previewButton).toBeDisabled();
+  return { api, closeFlyout, getSearchBarProps, onPreview, onRevert, onSave, view };
+};
 
-    await user.clear(editor);
-    await user.paste('{ mark: bar }');
-    // Editing must not trigger the preview (no queries run on keystrokes).
-    expect(onPreview).not.toHaveBeenCalled();
-    expect(previewButton).toBeEnabled();
-
-    await user.click(previewButton);
-    expect(onPreview).toHaveBeenCalledTimes(1);
-    expect(onPreview).toHaveBeenCalledWith('{ mark: bar }');
-    // After previewing, Preview is disabled again until further edits.
-    expect(previewButton).toBeDisabled();
+describe('VegaEditorFlyout', () => {
+  beforeEach(() => {
+    const data = dataPluginMock.createStartContract();
+    jest
+      .mocked(data.query.queryString.getDefaultQuery)
+      .mockReturnValue({ language: 'lucene', query: '' });
+    setData(data);
   });
 
-  it('disables Apply and close until an existing panel has real changes', async () => {
+  it('renders the title with the flyout label id and all footer actions', async () => {
     renderFlyout();
-    const user = userEvent.setup();
 
-    // No edits yet → nothing to save.
-    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
+    await screen.findByText('changeSpec');
 
-    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
-    await user.clear(editor);
-    await user.paste('{ mark: bar }');
-    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled();
-
-    // Editing back to the original spec disables Save again.
-    await user.clear(editor);
-    await user.paste('{ mark: point }');
+    expect(screen.getByRole('heading', { name: 'Vega' })).toHaveAttribute('id', 'vegaEditorTitle');
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Run preview' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
   });
 
-  it('enables Apply and close for a new panel so its default spec can be accepted', () => {
-    renderFlyout({ isNewPanel: true });
-    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled();
+  it('renders the spec editor actions in a toolbar so they do not cover the code', async () => {
+    renderFlyout();
+
+    expect(await screen.findByTestId('vegaSpecEditorActionsPlacement')).toHaveTextContent(
+      'toolbar'
+    );
   });
 
-  it('saves the current spec, closes, and does not revert on unmount', async () => {
-    const { closeFlyout, onPreview, onRevert, onSave, unmount } = renderFlyout();
-    const user = userEvent.setup();
+  it('runs preview for an updated spec', async () => {
+    const { onPreview } = renderFlyout();
 
-    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
-    await user.clear(editor);
-    await user.paste('{ mark: bar }');
+    fireEvent.click(await screen.findByText('changeSpec'));
+    fireEvent.click(screen.getByRole('button', { name: 'Run preview' }));
 
-    await user.click(screen.getByRole('button', { name: 'Apply and close' }));
-    expect(onSave).toHaveBeenCalledWith('{ mark: bar }');
+    expect(onPreview).toHaveBeenCalledWith({ format: 'hjson', value: '{ mark: bar }' });
+  });
+
+  it('applies and closes after saving', async () => {
+    const { closeFlyout, onSave } = renderFlyout();
+
+    fireEvent.click(await screen.findByText('changeSpec'));
+    fireEvent.click(screen.getByRole('button', { name: 'Apply and close' }));
+
+    expect(onSave).toHaveBeenCalledWith({ format: 'hjson', value: '{ mark: bar }' });
     expect(closeFlyout).toHaveBeenCalledTimes(1);
-    // Save persists directly; it does not depend on a prior Preview.
-    expect(onPreview).not.toHaveBeenCalled();
-
-    // Unmounting after a Save must not revert the committed spec.
-    unmount();
-    expect(onRevert).not.toHaveBeenCalled();
   });
 
-  it('reverts to the pre-edit state on unmount when not applied (e.g. Esc / click-away)', async () => {
-    const { onRevert, unmount } = renderFlyout();
-    const user = userEvent.setup();
+  it('closes without saving when cancel is clicked', async () => {
+    const { closeFlyout, onSave } = renderFlyout();
 
-    const editor = screen.getByRole('textbox', { name: 'Vega spec' });
-    await user.clear(editor);
-    await user.paste('{ mark: bar }');
-    await user.click(screen.getByRole('button', { name: 'Preview' })); // previewed but not saved
+    await screen.findByText('changeSpec');
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
-    unmount();
+    expect(closeFlyout).toHaveBeenCalledTimes(1);
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('reverts when the flyout unmounts without saving', async () => {
+    const { onRevert, view } = renderFlyout();
+
+    await screen.findByText('changeSpec');
+    view.unmount();
+
     expect(onRevert).toHaveBeenCalledTimes(1);
   });
 
-  it('closes the flyout when Cancel is clicked (revert happens on the ensuing unmount)', async () => {
-    const { closeFlyout, onSave, onRevert } = renderFlyout();
-    const user = userEvent.setup();
+  it('applies search changes live and enables saving for them', async () => {
+    const { api, getSearchBarProps } = renderFlyout();
+    const panelFilter = { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } };
 
-    await user.click(screen.getByRole('button', { name: 'Cancel' }));
-    expect(closeFlyout).toHaveBeenCalledTimes(1);
-    expect(onSave).not.toHaveBeenCalled();
-    // Cancel only closes; the revert is driven by unmount, not the button.
-    expect(onRevert).not.toHaveBeenCalled();
+    act(() => {
+      getSearchBarProps().onQuerySubmit?.({
+        dateRange: { from: 'now-15m', to: 'now' },
+        query: { language: 'kuery', query: 'bytes > 1000' },
+      });
+      getSearchBarProps().onFiltersUpdated?.([panelFilter]);
+    });
+
+    expect(api.setQuery).toHaveBeenCalledWith({ language: 'kuery', query: 'bytes > 1000' });
+    expect(api.setFilters).toHaveBeenCalledWith([panelFilter]);
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Apply and close' })).toBeEnabled()
+    );
+  });
+
+  it('does not enable saving when filters only differ in display metadata', async () => {
+    const { api, getSearchBarProps } = renderFlyout({
+      initialFilters: [
+        { meta: { alias: 'panel filter', key: 'status' }, query: { match: { status: 200 } } },
+      ],
+    });
+
+    act(() => {
+      getSearchBarProps().onFiltersUpdated?.([
+        { meta: { alias: 'panel filter' }, query: { match: { status: 200 } } },
+      ]);
+    });
+
+    expect(api.setFilters).toHaveBeenCalled();
+    await waitFor(() => expect(getSearchBarProps().filters?.[0].meta).not.toHaveProperty('key'));
+    expect(screen.getByRole('button', { name: 'Apply and close' })).toBeDisabled();
+  });
+
+  // SearchBar hides the query input when it gets no query, and with useDefaultBehaviors={false}
+  // it doesn't substitute a default.
+  it('passes the default query to the search bar when the panel has no query', () => {
+    const { getSearchBarProps } = renderFlyout();
+
+    expect(getSearchBarProps().query).toEqual({ language: 'lucene', query: '' });
+  });
+
+  it('passes the panel query to the search bar', () => {
+    const { getSearchBarProps } = renderFlyout({
+      initialQuery: { language: 'kuery', query: 'bytes > 1000' },
+    });
+
+    expect(getSearchBarProps().query).toEqual({ language: 'kuery', query: 'bytes > 1000' });
+  });
+
+  it('passes an empty filters array to the search bar when the panel has no filters', () => {
+    const { getSearchBarProps } = renderFlyout();
+
+    expect(getSearchBarProps().filters).toEqual([]);
+  });
+
+  it('hides the pin filter options because panel filters cannot be pinned', () => {
+    const { getSearchBarProps } = renderFlyout();
+
+    expect(getSearchBarProps().hiddenFilterPanelOptions).toEqual(['pinFilter']);
+  });
+
+  it('gives the search bar the default data view when the spec names none', () => {
+    const defaultDataView = createDataView('default-view');
+    const { getSearchBarProps } = renderFlyout({ defaultDataView });
+
+    expect(getSearchBarProps().indexPatterns).toEqual([defaultDataView]);
+  });
+
+  it('gives the search bar the data views named by the spec', () => {
+    const specDataView = createDataView('spec-view');
+    const { getSearchBarProps } = renderFlyout({
+      initialDataViews: [specDataView],
+      defaultDataView: createDataView('default-view'),
+    });
+
+    expect(getSearchBarProps().indexPatterns).toEqual([specDataView]);
+  });
+
+  describe('with a single ad-hoc data view', () => {
+    const initialDataViews = [createDataView('ad-hoc-view', false), createDataView('saved-view')];
+
+    it('stores filters on the ad-hoc data view without its id', () => {
+      const { api, getSearchBarProps } = renderFlyout({ initialDataViews });
+
+      act(() => {
+        getSearchBarProps().onFiltersUpdated?.([
+          { meta: { index: 'ad-hoc-view' }, query: { match: { status: 200 } } },
+          { meta: { index: 'saved-view' }, query: { match: { status: 404 } } },
+        ]);
+      });
+
+      expect(api.setFilters).toHaveBeenCalledWith([
+        { meta: {}, query: { match: { status: 200 } } },
+        { meta: { index: 'saved-view' }, query: { match: { status: 404 } } },
+      ]);
+    });
+
+    it('binds filters without a data view to the ad-hoc data view for the search bar', () => {
+      const combinedFilter: CombinedFilter = {
+        meta: {
+          type: FILTERS.COMBINED,
+          relation: BooleanRelation.AND,
+          params: [{ meta: {}, query: { match: { status: 500 } } }],
+        },
+        query: {},
+      };
+      const { getSearchBarProps } = renderFlyout({
+        initialDataViews,
+        initialFilters: [
+          { meta: {}, query: { match: { status: 200 } } },
+          { meta: { index: 'saved-view' }, query: { match: { status: 404 } } },
+          combinedFilter,
+        ],
+      });
+
+      const [unbound, saved, combined] = getSearchBarProps().filters ?? [];
+      expect(unbound.meta.index).toBe('ad-hoc-view');
+      expect(saved.meta.index).toBe('saved-view');
+      expect(combined.meta.index).toBe('ad-hoc-view');
+      expect(combined.meta.params).toEqual([
+        { meta: { index: 'ad-hoc-view' }, query: { match: { status: 500 } } },
+      ]);
+    });
+  });
+
+  describe('with more than one ad-hoc data view', () => {
+    const initialDataViews = [createDataView('ad-hoc-a', false), createDataView('ad-hoc-b', false)];
+
+    it('stores filters with their data view id', () => {
+      const { api, getSearchBarProps } = renderFlyout({ initialDataViews });
+      const filters = [{ meta: { index: 'ad-hoc-a' }, query: { match: { status: 200 } } }];
+
+      act(() => {
+        getSearchBarProps().onFiltersUpdated?.(filters);
+      });
+
+      expect(api.setFilters).toHaveBeenCalledWith(filters);
+    });
+
+    it('does not bind filters without a data view', () => {
+      const { getSearchBarProps } = renderFlyout({
+        initialDataViews,
+        initialFilters: [{ meta: {}, query: { match: { status: 200 } } }],
+      });
+
+      expect(getSearchBarProps().filters?.[0].meta).not.toHaveProperty('index');
+    });
   });
 });

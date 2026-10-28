@@ -25,11 +25,6 @@ export interface DocumentCountBuckets {
   [key: string]: number;
 }
 
-export interface DocumentCounts {
-  buckets?: DocumentCountBuckets;
-  interval?: number;
-}
-
 export interface LatLongExample {
   lat: number;
   lon: number;
@@ -82,11 +77,4 @@ export interface FieldVisStats {
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
   approximate?: boolean;
-}
-
-export interface DVErrorObject {
-  causedBy?: string;
-  message: string;
-  statusCode?: number;
-  fullError?: Error;
 }

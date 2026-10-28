@@ -24,14 +24,16 @@ import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import type { RerunWorkflowExecutionParams } from './build_replay_inputs_from_execution_context';
 import { getWorkflowExecutionActionContextFromDto } from './workflow_executions_table_cells';
 import { useKibana } from '../../hooks/use_kibana';
+import { useTelemetry } from '../../hooks/use_telemetry';
 
 export const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_ID = 'actions';
-const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_WIDTH = 64;
+const WORKFLOW_EXECUTIONS_ACTIONS_COLUMN_WIDTH = 56;
 
 export interface WorkflowExecutionActionContext {
   executionId?: string;
   workflowId?: string;
   context?: Record<string, unknown>;
+  isTestRun?: boolean;
 }
 
 export const getWorkflowExecutionActionContext = (
@@ -46,23 +48,25 @@ export const getWorkflowExecutionActionContext = (
 
 const ActionsHeader = () => (
   <EuiText size="xs" css={{ fontWeight: 600, textAlign: 'center', width: '100%' }}>
-    {i18n.translate('workflowsManagement.executionsPage.column.actions', {
+    {i18n.translate('workflows.executionsPage.column.actions', {
       defaultMessage: 'Actions',
     })}
   </EuiText>
 );
 
-const menuAriaLabel = i18n.translate('workflowsManagement.executionsPage.actions.menuAriaLabel', {
+const menuAriaLabel = i18n.translate('workflows.executionsPage.actions.menuAriaLabel', {
   defaultMessage: 'Execution actions',
 });
 
 const useExecutionActionListItems = (
-  { executionId, workflowId, context }: WorkflowExecutionActionContext,
+  { executionId, workflowId, context, isTestRun }: WorkflowExecutionActionContext,
   onClosePopover: () => void,
+  origin: 'table_actions' | 'flyout_actions',
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void,
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => void
 ): EuiListGroupProps['listItems'] => {
   const { application } = useKibana().services;
+  const telemetry = useTelemetry();
   const { canExecuteWorkflow, canReadWorkflowExecution, canUpdateWorkflow } =
     useWorkflowsCapabilities();
 
@@ -79,7 +83,7 @@ const useExecutionActionListItems = (
 
     if (canExecuteWorkflow) {
       items.push({
-        label: i18n.translate('workflowsManagement.executionsPage.actions.reRun', {
+        label: i18n.translate('workflows.executionsPage.actions.reRun', {
           defaultMessage: 'Re-run',
         }),
         iconType: 'refresh',
@@ -89,7 +93,7 @@ const useExecutionActionListItems = (
           }
 
           onClosePopover();
-          void onReRunExecution({ workflowId, executionId, context });
+          void onReRunExecution({ workflowId, executionId, context, isTestRun });
         },
         isDisabled: !workflowId || !onReRunExecution,
         'data-test-subj': 'workflowExecutionActionReRun',
@@ -98,7 +102,7 @@ const useExecutionActionListItems = (
 
     if (canUpdateWorkflow) {
       items.push({
-        label: i18n.translate('workflowsManagement.executionsPage.actions.editWorkflow', {
+        label: i18n.translate('workflows.executionsPage.actions.editWorkflow', {
           defaultMessage: 'Edit workflow',
         }),
         iconType: 'pencil',
@@ -106,6 +110,7 @@ const useExecutionActionListItems = (
           if (!workflowId) {
             return;
           }
+          telemetry.reportWorkflowExecutionsOpenInEditorClicked({ workflowId, origin });
           navigateToWorkflow(`/${workflowId}`);
         },
         isDisabled: !workflowId,
@@ -115,7 +120,7 @@ const useExecutionActionListItems = (
 
     if (canReadWorkflowExecution && onViewAllExecutionsForWorkflow) {
       items.push({
-        label: i18n.translate('workflowsManagement.executionsPage.actions.viewAllExecutions', {
+        label: i18n.translate('workflows.executionsPage.actions.viewAllExecutions', {
           defaultMessage: 'View all executions',
         }),
         iconType: 'eye',
@@ -142,7 +147,10 @@ const useExecutionActionListItems = (
     onClosePopover,
     onReRunExecution,
     onViewAllExecutionsForWorkflow,
+    origin,
+    telemetry,
     workflowId,
+    isTestRun,
   ]);
 };
 
@@ -151,6 +159,7 @@ export interface WorkflowExecutionActionsMenuProps {
   onReRunExecution?: (params: RerunWorkflowExecutionParams) => void;
   onViewAllExecutionsForWorkflow?: (workflowId: string) => void;
   variant?: 'icon' | 'takeAction';
+  origin?: 'table_actions' | 'flyout_actions';
 }
 
 export const WorkflowExecutionActionsMenu = ({
@@ -158,6 +167,7 @@ export const WorkflowExecutionActionsMenu = ({
   onReRunExecution,
   onViewAllExecutionsForWorkflow,
   variant = 'icon',
+  origin = 'table_actions',
 }: WorkflowExecutionActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({ prefix: 'workflowExecutionActionsPopover' });
@@ -165,23 +175,21 @@ export const WorkflowExecutionActionsMenu = ({
   const listItems = useExecutionActionListItems(
     actionContext,
     closePopover,
+    origin,
     onViewAllExecutionsForWorkflow,
     onReRunExecution
   );
 
-  const showActionsLabel = i18n.translate(
-    'workflowsManagement.executionsPage.actions.showActions',
-    {
-      defaultMessage: 'Show actions',
-    }
-  );
+  const showActionsLabel = i18n.translate('workflows.executionsPage.actions.showActions', {
+    defaultMessage: 'Show actions',
+  });
 
-  const takeActionLabel = i18n.translate('workflowsManagement.executionsPage.actions.takeAction', {
+  const takeActionLabel = i18n.translate('workflows.executionsPage.actions.takeAction', {
     defaultMessage: 'Take action',
   });
 
   const anchorPosition: EuiPopoverProps['anchorPosition'] =
-    variant === 'takeAction' ? 'upRight' : 'upCenter';
+    variant === 'takeAction' ? 'upRight' : 'downLeft';
 
   if (!listItems?.length) {
     return null;
@@ -204,7 +212,7 @@ export const WorkflowExecutionActionsMenu = ({
           aria-label={showActionsLabel}
           color="text"
           data-test-subj="workflowExecutionActionsButton"
-          iconType="boxesVertical"
+          iconType="ellipsis"
           onClick={() => setIsOpen((prev) => !prev)}
         />
       </EuiToolTip>

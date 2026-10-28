@@ -7,8 +7,8 @@
 
 import { expect } from '@kbn/scout/ui';
 
+import { waitForSnapshotToFinish } from '../../common/fixtures/es_helpers';
 import { test } from '../fixtures';
-import { waitForSlmSnapshotToFinish } from '../fixtures/snapshot_repository_helpers';
 
 // Local only: a source-only `fs` repository is an on-prem type, which the plugin hides whenever
 // Kibana reports `isCloudEnabled` — genuinely the case on ECH.
@@ -109,7 +109,7 @@ test.describe(
       });
 
       await test.step('wait for snapshot to complete', async () => {
-        await waitForSlmSnapshotToFinish(esClient, currentRepository, currentSnapshotPrefix);
+        await waitForSnapshotToFinish(esClient, currentRepository, `${currentSnapshotPrefix}-*`);
         await snapshotRestore.navToSnapshots({ empty: false });
         await snapshotRestore.waitUntilSnapshotComplete(currentSnapshotPrefix);
       });

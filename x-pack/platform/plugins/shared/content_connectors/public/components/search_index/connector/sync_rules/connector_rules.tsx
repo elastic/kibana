@@ -11,7 +11,6 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +20,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 
@@ -209,27 +210,20 @@ export const ConnectorSyncRules: React.FC = () => {
                   {advancedSnippet}
                 </EuiCodeBlock>
                 <EuiFlexItem>
-                  <EuiCallOut
+                  <KbnWarningCallout
                     announceOnMount
                     title={i18n.translate(
                       'xpack.contentConnectors.content.index.connector.syncRules.advancedRulesCalloutTitle',
                       { defaultMessage: 'Configuration' }
                     )}
-                    color="warning"
-                    iconType="info"
-                  >
-                    <EuiText size="s">
-                      <p>
-                        {i18n.translate(
-                          'xpack.contentConnectors.content.index.connector.syncRules.advancedRulesCalloutDescription',
-                          {
-                            defaultMessage:
-                              'This advanced sync rule might override some configuration fields.',
-                          }
-                        )}
-                      </p>
-                    </EuiText>
-                  </EuiCallOut>
+                    text={i18n.translate(
+                      'xpack.contentConnectors.content.index.connector.syncRules.advancedRulesCalloutDescription',
+                      {
+                        defaultMessage:
+                          'This advanced sync rule might override some configuration fields.',
+                      }
+                    )}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

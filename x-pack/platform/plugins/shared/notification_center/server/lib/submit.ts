@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { CoreSetup } from '@kbn/core/server';
 import { notificationWriteSchema } from '../../common/notification_schema';
 import {
@@ -23,7 +24,7 @@ import type {
   StateSubmitIdParts,
   TimeseriesSubmitIdParts,
 } from '../../common/types';
-import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import type {
   NotificationCenterPluginSetup,
   NotificationCenterPluginStart,
@@ -55,12 +56,18 @@ const writeNotification = async (
   }
 
   const { namespace, type } = parsed.data;
-  const [{ dataStreams, featureFlags }] = await core.getStartServices();
+  const [{ elasticsearch, featureFlags }] = await core.getStartServices();
 
   // A notification type without a flag defined in the registry passes through.
+  // Risk: this reads only the first emission. If the provider is not initialized
+  // yet, that value is the fallback and this submission is not retried when the
+  // provider later becomes ready. Later `submit` calls evaluate the flag again,
+  // so they use the real value once the provider is initialized.
   const flagKey = NOTIFICATION_TYPE_FLAGS[joinNotificationTypeId(namespace, type)];
   const enabled = flagKey
-    ? await featureFlags.getBooleanValue(flagKey, NOTIFICATION_TYPE_ENABLED_DEFAULT)
+    ? await firstValueFrom(
+        featureFlags.getBooleanValue$(flagKey, NOTIFICATION_TYPE_ENABLED_DEFAULT)
+      )
     : true;
   if (!enabled) {
     return { status: 'skipped_disabled' };
@@ -71,14 +78,13 @@ const writeNotification = async (
     '@timestamp': new Date().toISOString(),
   };
 
-  // Core caches one client per data stream name, so resolve it at the write site.
-  const client = await getNotificationDataStreamClient(dataStreams);
-
-  const response = await client.create({ documents: [document] });
-  if (response.errors) {
-    const reason = response.items[0]?.create?.error?.reason ?? 'unknown error';
-    throw new Error(`Failed to append notification: ${reason}`);
-  }
+  // A data stream accepts only `create`, so append with `op_type` rather than a plain index.
+  // A rejected write throws, so there is no response body to inspect.
+  await elasticsearch.client.asInternalUser.index<NotificationDocument>({
+    index: NOTIFICATION_DATA_STREAM_NAME,
+    op_type: 'create',
+    document,
+  });
 
   return { status: 'submitted' };
 };

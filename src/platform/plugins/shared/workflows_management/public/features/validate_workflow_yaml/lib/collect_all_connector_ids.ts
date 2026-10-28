@@ -8,9 +8,10 @@
  */
 
 import { type Document, isPair, isScalar, type LineCounter, visit } from 'yaml';
-import { WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES } from '@kbn/workflows';
+import { getHitlChannelConnectorTypeFromPath } from '@kbn/workflows';
+import type { ConnectorIdItem } from '@kbn/workflows-yaml';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
-import type { ConnectorIdItem } from '../model/types';
+import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
 
 function isConnectorIdValue(node: unknown, lastAncestor: unknown): boolean {
   return isPair(lastAncestor) && lastAncestor.value === node;
@@ -47,22 +48,6 @@ function findConnectorTypeFromStepAncestor(ancestors: readonly unknown[]): strin
   return undefined;
 }
 
-function findConnectorTypeFromChannelsPath(path: readonly unknown[]): string | undefined {
-  const channelsIdx = path.indexOf('channels');
-  if (
-    channelsIdx < 0 ||
-    path[channelsIdx + 2] !== 'connector-id' ||
-    typeof path[channelsIdx + 1] !== 'string'
-  ) {
-    return undefined;
-  }
-
-  const channelKey = path[
-    channelsIdx + 1
-  ] as keyof typeof WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES;
-  return WAIT_FOR_APPROVAL_CHANNEL_CONNECTOR_TYPES[channelKey];
-}
-
 export function collectAllConnectorIds(
   yamlDocument: Document,
   lineCounter: LineCounter | undefined
@@ -90,10 +75,13 @@ export function collectAllConnectorIds(
       }
 
       const path = getPathFromAncestors(ancestors);
-      const connectorType =
+      // Nested HITL channel connector-ids must win over a parent wait step `type`.
+      const rawConnectorType =
+        getHitlChannelConnectorTypeFromPath(path) ??
         findConnectorTypeFromStepAncestor(ancestors ?? []) ??
-        findConnectorTypeFromChannelsPath(path) ??
         'unknown';
+      const connectorType =
+        getConnectorTypeIdForTriggerEventId(rawConnectorType) ?? rawConnectorType;
 
       const [startOffset, endOffset] = node.range;
       const startPos = lineCounter.linePos(startOffset);

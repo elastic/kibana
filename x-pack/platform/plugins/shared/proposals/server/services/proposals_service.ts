@@ -1,0 +1,1854 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { isEqual } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+import { asyncMapWithLimit } from '@kbn/std';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import type { JSONSchema7 } from 'json-schema';
+import {
+  ACTION_WORKFLOW_INPUT,
+  actionMetadataSchema,
+  convertJsonSchemaToZod,
+  ExecutionStatus,
+  isHitlWaitStepType,
+  isTerminalStatus,
+} from '@kbn/workflows';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { ActionMetadata, WorkflowExecutionDto } from '@kbn/workflows';
+import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
+import { CREATE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  DEFAULT_PROPOSAL_TITLE,
+  isTodoProposal,
+  isTerminal,
+  PROPOSAL_CATEGORY_TODO,
+  PROPOSAL_ATTACHMENT_TYPE,
+  PROPOSALS_RESUME_CHANNEL,
+} from '@kbn/proposals-common';
+import type {
+  CreateProposalRequest,
+  DismissReason,
+  ListProposalsQuery,
+  ListProposalsResponse,
+  Proposal,
+  ProposalChartsSummaryBucket,
+  ProposalChartsSummaryQuery,
+  ProposalChartsSummaryResponse,
+  ProposalDecision,
+  ProposalFilters,
+  ProposalStatus,
+  ProposalUser,
+  ProposalWithMetadata,
+} from '@kbn/proposals-common';
+import type { ReviseProposalRequest } from '@kbn/proposals-common';
+import {
+  anchorQuery,
+  bucketedEventQuery,
+  currentOpenQuery,
+  ESQL_RESULT_TRUNCATION_MAX_SIZE,
+} from './esql';
+import type { ChartsWindow } from './esql';
+import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
+import { CONFIDENCE_RANK_FIELD, IMPACT_RANK_FIELD, toSortRanks } from '../storage/sort_ranks';
+import {
+  ProposalAlreadyExistsError,
+  ProposalConflictError,
+  ProposalInvalidActionInputError,
+  ProposalNotFoundError,
+} from './errors';
+
+type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
+
+/** The parts of an action workflow definition this service reads. */
+interface ActionWorkflowDefinition {
+  consts?: { actionMetadata?: unknown };
+  triggers?: Array<{ type?: string; inputs?: { properties?: Record<string, unknown> } }>;
+}
+
+/**
+ * The stored document plus its id. Writers thread this through unchanged so the
+ * sort ranks survive an update; only the public returns strip them.
+ */
+type StoredProposalRecord = { id: string } & ProposalDocument;
+
+interface StoredProposal {
+  proposal: StoredProposalRecord;
+  seqNo?: number;
+  primaryTerm?: number;
+}
+
+/** The version a write is guarded by, or the one it produced. */
+type WriteVersion = Pick<StoredProposal, 'seqNo' | 'primaryTerm'>;
+
+/**
+ * Every field the gate workflow can advance. All optional: a call may move the
+ * status, record the decision, or annotate, and the guards in `update` decide
+ * whether the resulting pair is legal.
+ */
+export interface UpdateProposalParams {
+  id: string;
+  status?: ProposalStatus;
+  decision?: ProposalDecision;
+  decidedBy?: ProposalUser;
+  dismissReason?: DismissReason;
+  rationale?: string;
+  executionError?: string;
+}
+
+export interface ProposalsServiceDeps {
+  storage: ProposalsStorageClient;
+  logger: Logger;
+  getWorkflowsApi: () => WorkflowsManagementApi;
+  getAttachmentsClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
+}
+
+/** How long `reopen` waits for the gate workflow to create the successor. */
+const REOPEN_WAIT = { timeoutMs: 15_000, intervalMs: 250 };
+
+const gateEndedError = (status: ExecutionStatus): string =>
+  `The gate execution ended as ${status} before it settled the proposal.`;
+
+/**
+ * Owns every write to the proposals index, and the invariants that go with it:
+ * a settled status cannot move, a decision cannot be overwritten, and only the
+ * legal decision/status pairs can be stored.
+ *
+ * The decision itself is written by the gate workflow rather than here, because
+ * every resume surface funnels through the gate — so a single write behind it
+ * covers the API, the workflows resume route, the Inbox and Agent Builder at
+ * once. The routes only release the gate.
+ */
+const PRIORITY_SORT: SortCombinations[] = [
+  { [IMPACT_RANK_FIELD]: { order: 'asc' } },
+  { [CONFIDENCE_RANK_FIELD]: { order: 'asc' } },
+  // Soonest deadline first; proposals without one come after those with.
+  { expiresAt: { order: 'asc', missing: '_last' } },
+  // Final tiebreak, so paging over equally-ranked proposals is stable.
+  { createdAt: { order: 'desc' } },
+];
+
+/**
+ * A conversation's history, newest first. A decision or a status change does not move a row.
+ * A retry copies `createdAt`, `rootProposalId` and `revision` from its original, so
+ * `supersededBy` tells the attempts apart. The current attempt has none and comes first. Each
+ * older attempt has the id of its own retry. The order is total, so paging cannot repeat or
+ * skip a row.
+ */
+const NEWEST_SORT: SortCombinations[] = [
+  { createdAt: { order: 'desc' } },
+  { rootProposalId: { order: 'asc' } },
+  { revision: { order: 'asc' } },
+  { supersededBy: { order: 'asc', missing: '_first' } },
+];
+
+export class ProposalsService {
+  constructor(private readonly deps: ProposalsServiceDeps) {}
+
+  /**
+   * Returns the action's metadata alongside the record, because the creation
+   * path has already resolved it: a caller that needs the approval policy —
+   * the gate workflow does, to honour `always-gate` — would otherwise have to
+   * fetch the same definition a second time.
+   *
+   * `id`, when supplied, is the id the proposal is created under instead of a
+   * random one, claimed with `op_type: 'create'`. An id that already exists is
+   * refused with {@link ProposalAlreadyExistsError} and nothing is read or
+   * returned: what a duplicate should mean is the caller's to decide, which is
+   * the point of the caller choosing the id.
+   */
+  async create(
+    params: CreateProposalRequest,
+    { spaceId, user, request }: { spaceId: string; user?: ProposalUser; request: KibanaRequest }
+  ): Promise<ProposalWithMetadata> {
+    const id = params.id ?? uuidv4();
+    // Workflow callers reach us through Liquid templates, which render an
+    // absent input as an empty string. Left as-is, `expiresAt: ''` is rejected
+    // by the `date` mapping and an empty `actionWorkflowId` would make a
+    // proposal look action-bearing when it is not.
+    const actionWorkflowId = blankToUndefined(params.actionWorkflowId);
+
+    // A single fetch of the action definition serves three purposes: the queue
+    // grouping, the impact (intrinsic to the action rather than to the situation
+    // that produced it), and rejecting an `actionInput` the action could not
+    // accept — before an analyst is asked to approve something that cannot run.
+    const metadata = actionWorkflowId
+      ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId, request)
+      : undefined;
+
+    // Caller first in both: it knows the situation the proposal came out of,
+    // which the action's own metadata cannot. A category can end up absent —
+    // the vocabulary belongs to the solution that authored the action — but
+    // impact cannot, because it is the queue's primary sort key.
+    //
+    // Blanked first, and not defensively: `??` treats the `''` that Liquid
+    // renders for an absent workflow input as a value, so without this the
+    // caller always "wins" with an empty string, the action's own metadata is
+    // never consulted, and the queue silently drops a proposal it cannot group.
+    const category = blankToUndefined(params.category) ?? metadata?.category;
+    // A to-do is offered as "I've applied" alone, so approving one must not run anything: the
+    // click records work the analyst already did, and there is no Decline beside it.
+    if (actionWorkflowId !== undefined && category === PROPOSAL_CATEGORY_TODO) {
+      throw new ProposalInvalidActionInputError(
+        `A "${PROPOSAL_CATEGORY_TODO}" proposal is carried out by the analyst, so it cannot ` +
+          `run action workflow [${actionWorkflowId}]`
+      );
+    }
+    const impact = blankToUndefined(params.impact) ?? metadata?.impact ?? 'low';
+    // Required on the stored document, so a blank has to resolve to something
+    // rather than to an omission: it feeds the queue's secondary sort rank.
+    const confidence = blankToUndefined(params.confidence) ?? 'medium';
+
+    const document: ProposalDocument = {
+      spaceId,
+      conversationId: params.conversationId,
+      // Resolved once here rather than re-derived by every reader: same
+      // precedence as `category`, with the action's own name behind it and a
+      // constant behind that, so every proposal is named exactly once.
+      title: blankToUndefined(params.title) ?? metadata?.name ?? DEFAULT_PROPOSAL_TITLE,
+      comment: params.comment,
+      actionWorkflowId,
+      actionInput: params.actionInput,
+      status: 'pending',
+      impact,
+      confidence,
+      category,
+      origin: params.origin,
+      ...toSortRanks({ impact, confidence }),
+      expiresAt: blankToUndefined(params.expiresAt),
+      workflowExecutionId: blankToUndefined(params.workflowExecutionId),
+      createdAt: new Date().toISOString(),
+      createdBy: user,
+      // A fresh proposal is a single-member revision chain rooted at itself.
+      // `clone()` retries deliberately do not touch it: a retry is not a revision.
+      rootProposalId: id,
+      revision: 1,
+    };
+
+    try {
+      await this.deps.storage.index({ id, document, op_type: 'create' });
+    } catch (error) {
+      // Only a caller-chosen id can already exist: a random one never collides.
+      if (params.id !== undefined && isVersionConflict(error)) {
+        throw new ProposalAlreadyExistsError(`Proposal [${id}] already exists`);
+      }
+      throw error;
+    }
+
+    await this.attachToConversation(id, params.conversationId, document.title, request);
+
+    const proposal = toProposal(id, document);
+    return { ...proposal, action: metadata };
+  }
+
+  /**
+   * Surfaces the proposal in its conversation, so an analyst meets the decision
+   * in the chat rather than only in the queue.
+   *
+   * Best-effort: the proposal is the record, and the attachment is a view of it.
+   * Losing the card is worth a warning, not the loss of the proposal that the
+   * gate workflow is already parked on.
+   */
+  private async attachToConversation(
+    proposalId: string,
+    conversationId: string,
+    title: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    try {
+      const client = await this.deps.getAttachmentsClient(request);
+      await client.create({
+        conversationId,
+        type: PROPOSAL_ATTACHMENT_TYPE,
+        // Both: `origin` is what the card reads to look the proposal up, and a
+        // payload is required because this type declares no `resolve()` hook.
+        origin: proposalId,
+        // The title rides along because the card's label is rendered
+        // synchronously and so cannot read the proposal; everything else the
+        // card shows is read live.
+        data: { proposalId, title },
+        // The analyst has to see the decision on opening the conversation; the
+        // agent referencing it first would make the card conditional on chat.
+        render_inline: true,
+      });
+    } catch (error) {
+      this.deps.logger.warn(
+        `Failed to attach proposal ${proposalId} to conversation ${conversationId}: ${error}`
+      );
+    }
+  }
+
+  async get(id: string, spaceId: string, request: KibanaRequest): Promise<ProposalWithMetadata> {
+    const { proposal } = await this.load(id, spaceId);
+    const [current] = await this.settleOrphans([stripRanks(proposal)], spaceId, request);
+    return this.withMetadata(current, spaceId, request);
+  }
+
+  /**
+   * Ordering and paging both happen in Elasticsearch. The queue's order is
+   * impact, then confidence, then the nearest deadline — which the stored rank
+   * fields express, because the keyword enums would otherwise sort
+   * alphabetically. Doing it here rather than in memory is what makes the list
+   * pageable instead of capped at a single fetch. Category is not part of the
+   * order: a UI groups by it and decides for itself which group leads.
+   *
+   * Action-metadata resolution is batched across the page, so a page of
+   * proposals sharing an action costs one `getWorkflow` rather than one each.
+   */
+  async list(
+    query: ListProposalsQuery & InProcessProposalFilters,
+    spaceId: string,
+    request: KibanaRequest,
+    /** Replaces the default priority sort; the queues page by recency instead. */
+    sort?: SortCombinations[]
+  ): Promise<ListProposalsResponse> {
+    const response = await this.deps.storage.search({
+      track_total_hits: true,
+      size: query.size,
+      from: query.from,
+      query: { bool: { filter: toFilterClauses(query, spaceId) } },
+      sort: sort ?? (query.order === 'newest' ? NEWEST_SORT : PRIORITY_SORT),
+    });
+
+    const current = await this.settleOrphans(
+      response.hits.hits.reduce<Proposal[]>((proposals, hit) => {
+        if (hit._id !== undefined) {
+          proposals.push(toProposal(hit._id, hit._source));
+        }
+        return proposals;
+      }, []),
+      spaceId,
+      request
+    );
+    // A proposal settled on this read no longer matches the status it was searched by.
+    const matching = current.filter(
+      ({ status }) =>
+        (!query.status || status === query.status) &&
+        (!query.statuses || query.statuses.includes(status))
+    );
+    const settledAway = current.length - matching.length;
+
+    const proposals = await this.withMetadataBatch(matching, spaceId, request);
+
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? current.length;
+    return { proposals, total: total - settledAway };
+  }
+
+  /**
+   * Per bucket, how many proposals were open at any point during it, except the bucket still in
+   * progress, which counts what is open now. Open means
+   * `status: 'pending'`, so an expiry closes a proposal the same way a decision
+   * does. An anchor count seeds a running sum that opens and closes then move,
+   * keeping this to four queries rather than one per bucket.
+   */
+  async chartsSummary(
+    { windowHours, bucketMinutes, origin }: ProposalChartsSummaryQuery,
+    spaceId: string
+  ): Promise<ProposalChartsSummaryResponse> {
+    const now = Date.now();
+    const bucketMs = bucketMinutes * 60 * 1000;
+    const windowStartMs = Math.floor((now - windowHours * 60 * 60 * 1000) / bucketMs) * bucketMs;
+    const windowStartIso = new Date(windowStartMs).toISOString();
+    // +1 so the window always ends at or after `now` even after flooring.
+    const bucketCount = Math.floor((now - windowStartMs) / bucketMs) + 1;
+
+    const zeroBuckets = (): ProposalChartsSummaryResponse => ({
+      buckets: Array.from({ length: bucketCount }, (_, i) => ({
+        timestamp: windowStartMs + i * bucketMs,
+        counts: {},
+      })),
+      currentOpen: 0,
+    });
+
+    const window: ChartsWindow = { spaceId, windowStartIso, bucketMinutes, origin };
+
+    let anchorResponse;
+    let opensResponse;
+    let closesResponse;
+    let currentOpenResponse;
+    try {
+      [anchorResponse, opensResponse, closesResponse, currentOpenResponse] = await Promise.all([
+        this.deps.storage.esql({ pipeline: anchorQuery(window) }),
+        this.deps.storage.esql({ pipeline: bucketedEventQuery('opens', window) }),
+        this.deps.storage.esql({ pipeline: bucketedEventQuery('closes', window) }),
+        this.deps.storage.esql({ pipeline: currentOpenQuery(window) }),
+      ]);
+    } catch (error) {
+      // An index created outside the storage adapter can be missing a field this
+      // queries, which ES|QL rejects rather than treating as null. Read *that*
+      // case as "no data" so the UI flatlines instead of 500ing; every other
+      // verification failure is a genuine query defect and must propagate.
+      if (isEsqlUnknownColumnError(error)) {
+        this.deps.logger.warn(
+          `chartsSummary: ES|QL reported an unknown column — returning zero buckets. ` +
+            `Recreate the index via the proposals write path to fix the mapping. Error: ${error.message}`
+        );
+        return zeroBuckets();
+      }
+      throw error;
+    }
+
+    this.warnIfTruncated(opensResponse, 'opens');
+    this.warnIfTruncated(closesResponse, 'closes');
+
+    const anchorByCat = parseEsqlCountByCategory(anchorResponse, 'anchor');
+    const opensByIdxAndCat = parseEsqlCountByIdxAndCategory(opensResponse, 'opens');
+    const closesByIdxAndCat = parseEsqlCountByIdxAndCategory(closesResponse, 'closes');
+
+    const runningSums: Record<string, number> = { ...anchorByCat };
+    const buckets: ProposalChartsSummaryBucket[] = [];
+
+    for (let i = 0; i < bucketCount; i++) {
+      const timestamp = windowStartMs + i * bucketMinutes * 60_000;
+
+      for (const [cat, count] of Object.entries(opensByIdxAndCat[i] ?? {})) {
+        runningSums[cat] = (runningSums[cat] ?? 0) + count;
+      }
+
+      // Snapshotted after opens but before closes: those two sets are disjoint,
+      // so this is exactly the count open at some point in the bucket. A
+      // proposal that opened and closed inside one bucket would otherwise net to
+      // zero and never appear.
+      const openDuring: Record<string, number> = { ...runningSums };
+
+      for (const [cat, count] of Object.entries(closesByIdxAndCat[i] ?? {})) {
+        // Clamped because a close whose open the anchor missed would go negative.
+        runningSums[cat] = Math.max(0, (runningSums[cat] ?? 0) - count);
+      }
+
+      // The bucket in progress reports what is open now, so it agrees with the queues and
+      // `currentOpen` rather than counting proposals already closed within it.
+      const counts = i === bucketCount - 1 ? { ...runningSums } : openDuring;
+
+      // Keeps the key set stable: a category whose only event here was a close
+      // is absent from the pre-close snapshot.
+      for (const cat of Object.keys(runningSums)) {
+        counts[cat] ??= 0;
+      }
+
+      buckets.push({ timestamp, counts });
+    }
+
+    return { buckets, currentOpen: parseEsqlScalar(currentOpenResponse, 'currentOpen') };
+  }
+
+  /**
+   * Elasticsearch caps an ES|QL result set at `esql.query.result_truncation_max_size`
+   * whatever LIMIT the query asked for, and drops the tail of the sort — here, the
+   * most recent buckets. The schema's bucket ceiling should keep this unreachable,
+   * so a hit means an unexpectedly wide category vocabulary.
+   */
+  private warnIfTruncated(response: { values: unknown[] }, label: string): void {
+    if (response.values.length >= ESQL_RESULT_TRUNCATION_MAX_SIZE) {
+      this.deps.logger.warn(
+        `chartsSummary: the ${label} query returned ${response.values.length} rows, at or above ` +
+          `the ES|QL truncation ceiling of ${ESQL_RESULT_TRUNCATION_MAX_SIZE}. The most recent ` +
+          `buckets may be undercounted.`
+      );
+    }
+  }
+
+  /**
+   * Releases the parked gate so the workflow can record the decision behind it.
+   * Writes nothing but the release mark and the annotations below, and only
+   * once every refusal has passed — so the decision reaches the record by
+   * exactly one path regardless of which surface released the gate. The one
+   * write a refusal makes is settling a proposal whose gate has ended, since
+   * nothing else can settle it anymore.
+   *
+   * The caller is expected to have been authorized already — the routes do it
+   * declaratively, and the workflow re-checks the resumer behind the gate.
+   */
+  async releaseGate(
+    id: string,
+    { approved, actionInput, dismissReason, rationale, spaceId, request }: ReleaseGateParams
+  ): Promise<Proposal> {
+    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+
+    // Every refusal comes first, so a rejected release never leaves an
+    // annotation behind. Ordering matters more than it looks: an annotation
+    // written ahead of a conflict would leave a dismiss reason on a proposal
+    // that was never dismissed, and a later approval would land on top of it.
+    this.assertDecidable(proposal);
+
+    // Refused without settling: the live gate expires the proposal itself at the
+    // deadline, and settling here could race a decision released just before it.
+    if (isPastDeadline(proposal, Date.now())) {
+      throw new ProposalConflictError(`Proposal [${id}] passed its decision deadline`);
+    }
+
+    if (approved && actionInput !== undefined && !sameInput(actionInput, proposal.actionInput)) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was modified since it was rendered; re-read it before approving`
+      );
+    }
+
+    const execution = await this.getGateExecution(proposal, spaceId, request);
+    if (isTerminalStatus(execution.status)) {
+      await this.settleOrphan(id, execution.status, spaceId);
+      throw new ProposalConflictError(
+        `Proposal [${id}] can no longer be decided: ${gateEndedError(execution.status)}`
+      );
+    }
+    if (execution.status !== ExecutionStatus.WAITING_FOR_INPUT || execution.finishedAt) {
+      throw new ProposalConflictError(
+        `Execution [${execution.id}] is not waiting for input (status: ${execution.status})`
+      );
+    }
+    // The execution keeps reading as waiting until the resumed gate runs, so a
+    // second release would get this far. Resolving the step before writing
+    // refuses one whose gate another resumer already claimed, which would
+    // otherwise bump the version the gate's own decision write is guarded by.
+    const stepExecutionId = findWaitingGateStepId(execution.stepExecutions);
+    if (stepExecutionId === undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] is already being decided: its gate has no unclaimed step waiting`
+      );
+    }
+
+    const released = await this.markReleased(
+      proposal,
+      { dismissReason, rationale },
+      { seqNo, primaryTerm }
+    );
+
+    try {
+      await this.resumeGate(execution.id, stepExecutionId, { spaceId, request, approved });
+    } catch (error) {
+      // Only a resume the engine turned away is undone, because it is the one
+      // failure that proves the gate will never act on this release. Any other
+      // leaves its outcome unknown, and lifting the mark under a resume that
+      // did land would reopen the window it closes; a mark left standing only
+      // holds revisions back until the proposal is decided or expires.
+      if (isRefusedResume(error)) {
+        await this.revertRelease(proposal, released);
+      }
+      throw error;
+    }
+
+    return stripRanks(released.proposal);
+  }
+
+  /**
+   * Stamps `gateReleasedAt` and writes the decision's free-text annotations,
+   * under the loaded sequence number, so this and a concurrent `revise()`
+   * cannot both land: whichever writes second conflicts.
+   *
+   * The mark is what `revise()` refuses. The gate writes the decision only
+   * after it has adopted the chain head, so without it a revision appended
+   * between the resume and that write is the one the approval would execute.
+   *
+   * The annotations are here because `waitForApproval` reconstructs its resume
+   * payload as `{ approved: approved === true }` and discards the rest — so a
+   * dismiss reason or a rationale cannot reach the workflow through the gate.
+   * The line is "the route annotates, the workflow decides". A dismissal
+   * arriving through the platform's own resume API simply carries no reason,
+   * which is fine because both fields are optional.
+   *
+   * A resume that fails ambiguously after this point leaves both behind on an
+   * undecided proposal. That window cannot be closed without a transaction, and
+   * it is the better trade: writing after the resume would race the workflow's
+   * own decision write, losing the reason and reopening the revise window.
+   */
+  private async markReleased(
+    proposal: StoredProposalRecord,
+    { dismissReason, rationale }: Pick<ReleaseGateParams, 'dismissReason' | 'rationale'>,
+    { seqNo, primaryTerm }: WriteVersion
+  ): Promise<StoredProposal> {
+    const released: StoredProposalRecord = {
+      ...proposal,
+      gateReleasedAt: new Date().toISOString(),
+      ...(dismissReason !== undefined ? { dismissReason } : {}),
+      ...(rationale !== undefined ? { rationale } : {}),
+    };
+    const { id, ...document } = released;
+
+    const version = await this.writeDocument(id, document, { seqNo, primaryTerm });
+
+    return { proposal: released, ...version };
+  }
+
+  /**
+   * Puts back the record a refused release replaced, so it can be revised again
+   * and keeps no annotation for a decision that never happened. Guarded by the
+   * release write's own sequence number, so a record that moved since is left
+   * as it is. Best effort: the caller has to see the refused resume, not this.
+   */
+  private async revertRelease(
+    { id, ...original }: StoredProposalRecord,
+    { seqNo, primaryTerm }: WriteVersion
+  ): Promise<void> {
+    try {
+      await this.writeDocument(id, original, { seqNo, primaryTerm });
+    } catch (error) {
+      if (error instanceof ProposalConflictError) {
+        this.deps.logger.debug(`Proposal [${id}] moved before its release could be reverted`);
+      } else {
+        this.deps.logger.warn(
+          `Could not revert the release of proposal [${id}] after its gate refused the resume: ${error}`
+        );
+      }
+    }
+  }
+
+  /**
+   * Called by the gate workflow to advance a proposal it owns. Two independent
+   * guards, because the two axes settle independently: a status cannot leave a
+   * terminal state, so a late `on-failure` handler firing after the action
+   * succeeded cannot rewrite the outcome; and a decision cannot be overwritten,
+   * so a second approver cannot reattribute the first one's call. Both live
+   * here rather than in the workflow YAML so they hold for every caller.
+   */
+  async update(params: UpdateProposalParams, spaceId: string): Promise<Proposal> {
+    return this.applyUpdate(await this.load(params.id, spaceId), params);
+  }
+
+  /** `update` against a record already loaded, written under that load's sequence number. */
+  private async applyUpdate(
+    { proposal, seqNo, primaryTerm }: StoredProposal,
+    params: UpdateProposalParams
+  ): Promise<Proposal> {
+    const { id } = params;
+
+    // The status vocabulary admits `superseded`, but it is only correct alongside
+    // the successor that replaced the row, which only `revise()` establishes.
+    if (params.status === 'superseded') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] cannot be moved to superseded: only revise() establishes that ` +
+          `status, together with the successor it points at`
+      );
+    }
+
+    // Re-writing the same terminal status is allowed, so a settled proposal
+    // stays idempotent: the workflow's failure handler writes `failed` onto a
+    // record the loop may have already failed, and refusing that would replace
+    // the real error with a conflict about recording it.
+    if (
+      params.status !== undefined &&
+      params.status !== proposal.status &&
+      isTerminal(proposal.status)
+    ) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] already settled as ${proposal.status} and cannot be moved to ${params.status}`
+      );
+    }
+    if (params.decision !== undefined && proposal.decision !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already decided as ${proposal.decision}`
+      );
+    }
+
+    const decision = params.decision ?? proposal.decision;
+    const status = params.status ?? proposal.status;
+    assertValidPair(id, decision, status);
+
+    /**
+     * Stamped the moment the proposal stops awaiting, by either route: a human
+     * deciding, or the workflow settling it without one. Server-derived rather
+     * than a parameter, so the recorded moment is always the moment it was
+     * written, and write-once so a later annotation cannot move it.
+     *
+     * The second half is what `chartsSummary` needs: it reads `decidedAt` as the
+     * "closed" event, and a proposal the workflow terminated early — a
+     * malfunction settling it `expired` while its deadline is still in the
+     * future — would otherwise read as open until that deadline arrived.
+     */
+    const settledAt =
+      proposal.decidedAt ??
+      (params.decision !== undefined || isTerminal(status) ? new Date().toISOString() : undefined);
+
+    const updated: StoredProposalRecord = {
+      ...proposal,
+      status,
+      decision,
+      ...(settledAt !== undefined ? { decidedAt: settledAt } : {}),
+      ...(params.decision !== undefined
+        ? { decidedBy: params.decidedBy ?? proposal.decidedBy }
+        : {}),
+      ...(params.dismissReason !== undefined ? { dismissReason: params.dismissReason } : {}),
+      ...(params.rationale !== undefined ? { rationale: params.rationale } : {}),
+      ...(params.executionError !== undefined ? { executionError: params.executionError } : {}),
+    };
+    const { id: _id, ...document } = updated;
+
+    await this.writeDocument(id, document, { seqNo, primaryTerm });
+
+    return stripRanks(updated);
+  }
+
+  /**
+   * Creates a fresh proposal for the same subject and marks the original as
+   * superseded by it, so a failed action can be re-offered to a human without
+   * reusing a record that already settled as `failed`.
+   *
+   * `createdAt` and `expiresAt` are inherited rather than restarted. The
+   * deadline is the analyst's, not the attempt's: letting each retry reset it
+   * would make a chain of failures outlive any deadline the queue ever showed.
+   * Inheriting `createdAt` keeps the chain sorting where the original sat.
+   *
+   * `workflowExecutionId` is the original's, because the gate execution is
+   * still running and parked — approving the clone resumes that same execution.
+   */
+  async clone(
+    { id, executionError }: CloneProposalParams,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<string> {
+    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+
+    // Asserted here rather than left to the caller, because this is reachable
+    // as a registered step: any workflow could otherwise re-open a succeeded
+    // or dismissed proposal as `pending` and hide the real one behind
+    // `supersededBy`. A failed action is the only thing there is to re-offer.
+    if (proposal.decision !== 'approved' || proposal.status !== 'failed') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] cannot be cloned: only an approved proposal whose action failed can be ` +
+          `re-offered, and this one is ${proposal.decision ?? 'undecided'}/${proposal.status}`
+      );
+    }
+
+    if (proposal.supersededBy !== undefined) {
+      // Overwriting the pointer would orphan the first clone: it would stay
+      // live and undecided with nothing referring to it.
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
+      );
+    }
+
+    const cloneId = uuidv4();
+    const { id: _id, ...original } = proposal;
+
+    // What the predecessor will carry once the supersession write below lands,
+    // resolved here so both documents agree on it.
+    const failure = executionError ?? original.executionError;
+
+    const document: ProposalDocument = {
+      ...original,
+      status: 'pending',
+      decision: undefined,
+      supersededBy: undefined,
+      decidedBy: undefined,
+      decidedAt: undefined,
+      dismissReason: undefined,
+      rationale: undefined,
+      executionError: undefined,
+      // The original was released to reach `failed`, and inheriting the mark
+      // would refuse every revision of the retry for good.
+      gateReleasedAt: undefined,
+      // Why the attempt this one re-offers failed. Denormalised from the
+      // predecessor so the queue can say so from the row it already has.
+      previousExecutionError: failure,
+    };
+
+    // The clone is created before the original is marked, deliberately. The
+    // two writes cannot be atomic, and if the second one loses its race the
+    // queue shows both records — whereas marking first would leave a pointer
+    // to a clone that does not exist, hiding the original behind
+    // `excludeSuperseded` with nothing live in its place.
+    await this.deps.storage.index({ id: cloneId, document, op_type: 'create' });
+
+    // Allowed even though the original sits at a terminal status: only status
+    // transitions and the decision are guarded, and neither moves here.
+    const superseded: ProposalDocument = {
+      ...original,
+      supersededBy: cloneId,
+      ...(failure !== undefined ? { executionError: failure } : {}),
+    };
+
+    await this.writeDocument(id, superseded, { seqNo, primaryTerm });
+
+    await this.attachToConversation(cloneId, document.conversationId, document.title, request);
+
+    return cloneId;
+  }
+
+  /**
+   * Re-offers a to-do proposal that was marked as applied, for the analyst who marked it by
+   * mistake: a successor carrying the same content is created pending, behind a gate of its own,
+   * and the original is pointed at it.
+   *
+   * The original keeps its decision. A decision is immutable and reaches the record only through
+   * the gate, and the original's gate has ended, so it cannot be undone in place. Superseding it
+   * instead leaves the chain saying what happened — applied, then re-opened — and the successor
+   * goes through the same gate as any proposal, so "I've applied" works on it again.
+   *
+   * Only for a to-do proposal: an action that ran cannot be un-run by relabelling it.
+   */
+  async reopen(
+    id: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ proposalId: string }> {
+    const { proposal } = await this.load(id, spaceId);
+
+    if (!isTodoProposal(proposal)) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] is not a to-do, and only a to-do proposal can be marked as not applied`
+      );
+    }
+    if (proposal.decision !== 'approved' || proposal.status !== 'no_action') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was not marked as applied: it is ${proposal.decision ?? 'undecided'}/${
+          proposal.status
+        }`
+      );
+    }
+    if (proposal.supersededBy !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
+      );
+    }
+
+    // Through the gate workflow rather than written here, so the successor is gated, deadlined
+    // and attached to the conversation exactly like a proposal the agent created.
+    const successorId = uuidv4();
+    await this.deps.getWorkflowsApi().executeWorkflow({
+      workflowId: CREATE_PROPOSAL_WORKFLOW_ID,
+      spaceId,
+      request,
+      inputs: {
+        conversationId: proposal.conversationId,
+        title: proposal.title,
+        comment: proposal.comment,
+        origin: proposal.origin,
+        impact: proposal.impact,
+        confidence: proposal.confidence,
+        ...(proposal.category !== undefined && { category: proposal.category }),
+        proposalId: successorId,
+      },
+      // The gate parks on the analyst's decision; only its start is awaited.
+      waitForCompletion: false,
+    });
+
+    const successor = await this.waitForCreated(successorId, spaceId);
+    if (!successor) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] could not be re-offered: its successor [${successorId}] was not created in time`
+      );
+    }
+
+    // The original is marked before the successor joins its chain. If the successor were linked
+    // first and this write then lost, the chain would have two live heads for the gate's
+    // `getLatestRevision` to choose between; this way a failure leaves the successor as a
+    // chain of its own, still decidable.
+    const current = await this.load(id, spaceId);
+    if (current.proposal.supersededBy !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${current.proposal.supersededBy}`
+      );
+    }
+    const { id: _originalId, ...original } = current.proposal;
+    await this.writeDocument(id, { ...original, supersededBy: successorId }, current);
+
+    const { id: _successorId, ...successorDocument } = successor.proposal;
+    await this.writeDocument(
+      successorId,
+      {
+        ...successorDocument,
+        rootProposalId: original.rootProposalId,
+        supersedes: id,
+        revision: original.revision + 1,
+      },
+      successor
+    );
+
+    return { proposalId: successorId };
+  }
+
+  /** Waits for a proposal a gate workflow is creating, or `undefined` once the wait runs out. */
+  private async waitForCreated(
+    id: string,
+    spaceId: string,
+    { timeoutMs, intervalMs } = REOPEN_WAIT
+  ): Promise<StoredProposal | undefined> {
+    const deadline = Date.now() + timeoutMs;
+    do {
+      try {
+        return await this.load(id, spaceId);
+      } catch (error) {
+        if (!(error instanceof ProposalNotFoundError)) {
+          throw error;
+        }
+      }
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    } while (Date.now() < deadline);
+    return undefined;
+  }
+
+  /**
+   * Appends a revision carrying the caller's overrides and retires the addressed
+   * proposal.
+   *
+   * `createdAt`, `expiresAt` and `workflowExecutionId` are inherited rather than
+   * restarted — the deadline and the gate execution belong to the chain, not to
+   * any single revision — mirroring `clone()`'s inheritance of the same fields.
+   */
+  async revise(
+    { id, title, comment, actionInput, impact, confidence }: ReviseProposalParams,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ proposalId: string; revision: number }> {
+    const { proposal, seqNo, primaryTerm } = await this.load(id, spaceId);
+
+    // Only the live revision may be revised: anything decided, settled or already
+    // superseded is not the head, and revising it would fork the chain.
+    if (proposal.decision !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already decided as ${proposal.decision} and cannot be revised`
+      );
+    }
+    // Released but not yet decided: the gate adopts the chain head before it
+    // writes the decision, so a revision appended now would be the one executed
+    // under an approval given to this one.
+    if (proposal.gateReleasedAt !== undefined) {
+      throw new ProposalConflictError(`Proposal [${id}] is being decided and cannot be revised`);
+    }
+    if (proposal.status !== 'pending') {
+      throw new ProposalConflictError(
+        `Proposal [${id}] has settled as ${proposal.status} and cannot be revised`
+      );
+    }
+    if (proposal.supersededBy !== undefined) {
+      // Overwriting the pointer would fork the chain: two rows would claim to
+      // be the latest revision, with nothing to say which one actually is.
+      throw new ProposalConflictError(
+        `Proposal [${id}] was already superseded by ${proposal.supersededBy}`
+      );
+    }
+    const { id: _id, ...original } = proposal;
+
+    // The override is merged over the predecessor's input and the merged object is
+    // what gets validated: the action's contract describes the whole input, so
+    // changing one key must not silently drop the other required ones.
+    const mergedActionInput =
+      actionInput === undefined
+        ? original.actionInput
+        : { ...original.actionInput, ...actionInput };
+
+    if (mergedActionInput !== undefined && original.actionWorkflowId !== undefined) {
+      await this.resolveAndValidateAction(
+        original.actionWorkflowId,
+        mergedActionInput,
+        spaceId,
+        request
+      );
+    }
+
+    // Resolved once, so the enums and the ranks derived from them cannot drift.
+    const nextImpact = impact ?? original.impact;
+    const nextConfidence = confidence ?? original.confidence;
+    // Only a real override replaces the predecessor's: a blank would strip the
+    // proposal of the name `create()` resolved for it.
+    const nextTitle = blankToUndefined(title);
+
+    const revisionId = uuidv4();
+    const { rootProposalId } = original;
+    const revision = original.revision + 1;
+
+    const document: ProposalDocument = {
+      ...original,
+      rootProposalId,
+      supersedes: id,
+      revision,
+      supersededBy: undefined,
+      status: 'pending',
+      decision: undefined,
+      decidedBy: undefined,
+      decidedAt: undefined,
+      dismissReason: undefined,
+      rationale: undefined,
+      executionError: undefined,
+      gateReleasedAt: undefined,
+      // `previousExecutionError` rides along with the spread untouched: a
+      // revision corrects a proposal, it does not run anything, so the last
+      // attempt to fail is still the one the predecessor was re-offered for.
+      ...(nextTitle !== undefined ? { title: nextTitle } : {}),
+      ...(comment !== undefined ? { comment } : {}),
+      ...(mergedActionInput !== undefined ? { actionInput: mergedActionInput } : {}),
+      impact: nextImpact,
+      confidence: nextConfidence,
+      // Recomputed from the final enums rather than inherited with the rest of
+      // the document: the queue sorts on these mirrors, so a revision that
+      // changes the rating but keeps the predecessor's rank would show one
+      // impact and queue as another.
+      ...toSortRanks({ impact: nextImpact, confidence: nextConfidence }),
+    };
+
+    // The new revision is created before the predecessor is marked,
+    // deliberately — the same ordering `clone()` uses and for the same
+    // reason: if the second write loses its race, the queue shows both
+    // records rather than a pointer to a revision that does not exist.
+    await this.deps.storage.index({ id: revisionId, document, op_type: 'create' });
+
+    const superseded: ProposalDocument = {
+      ...original,
+      status: 'superseded',
+      supersededBy: revisionId,
+    };
+
+    try {
+      await this.writeDocument(id, superseded, { seqNo, primaryTerm });
+    } catch (error) {
+      // The create above already landed and nothing points at it. A concurrent
+      // revision that won the predecessor's sequence-number race would
+      // otherwise leave this row live and unreachable, giving the chain two
+      // heads that `getLatestRevision` and the queue could pick between
+      // nondeterministically. Only a conflict is compensated for: it is the
+      // one failure that proves the predecessor write did not apply, whereas
+      // any other error leaves its outcome unknown, and deleting this row
+      // could orphan the predecessor's pointer instead.
+      if (error instanceof ProposalConflictError) {
+        await this.retireOrphanRevision(revisionId);
+      }
+      throw error;
+    }
+
+    await this.attachToConversation(revisionId, document.conversationId, document.title, request);
+
+    return { proposalId: revisionId, revision };
+  }
+
+  /**
+   * Removes a revision whose link write lost its race. Best-effort: the
+   * original failure is what the caller has to see, so a cleanup failure is
+   * logged rather than replacing it.
+   */
+  private async retireOrphanRevision(revisionId: string): Promise<void> {
+    try {
+      await this.deps.storage.delete({ id: revisionId });
+    } catch (error) {
+      this.deps.logger.warn(
+        `Failed to retire orphaned revision [${revisionId}] after a lost race: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  /**
+   * The proposal a gate workflow execution created, or undefined while its create step has not
+   * run yet. Revisions inherit the execution id, so the original (revision 1) is the one returned.
+   */
+  async findByWorkflowExecutionId(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<Proposal | undefined> {
+    if (blankToUndefined(workflowExecutionId) === undefined) {
+      return undefined;
+    }
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: { filter: [{ term: { workflowExecutionId } }, { term: { spaceId } }] },
+      },
+      sort: [{ createdAt: { order: 'asc' } }],
+    });
+    const hit = response.hits.hits[0];
+    return hit?._source && hit._id !== undefined
+      ? toProposal(hit._id, hit._source as ProposalDocument)
+      : undefined;
+  }
+
+  /**
+   * Proposals awaiting a decision per conversation (pending, not superseded, deadline not passed),
+   * in one aggregation. Conversations without any are absent from the map.
+   */
+  async countPendingByConversationIds(
+    conversationIds: string[],
+    spaceId: string
+  ): Promise<Map<string, number>> {
+    const ids = [...new Set(conversationIds.filter((id) => blankToUndefined(id) !== undefined))];
+    if (ids.length === 0) {
+      return new Map();
+    }
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...toFilterClauses(
+              {
+                status: 'pending',
+                excludeSuperseded: true,
+                // Past its deadline a proposal awaits no decision, even before the gate settles it.
+                excludeExpired: true,
+              },
+              spaceId
+            ),
+            { terms: { conversationId: ids } },
+          ],
+        },
+      },
+      aggs: {
+        by_conversation: { terms: { field: 'conversationId', size: ids.length } },
+      },
+    });
+    const buckets = response.aggregations?.by_conversation.buckets ?? [];
+    return new Map(buckets.map(({ key, doc_count: count }) => [String(key), count]));
+  }
+
+  /**
+   * Proposals matching the filters per conversation, in one aggregation. Conversations without
+   * any are absent from the map.
+   */
+  async countByConversation(
+    filters: ProposalFilters & { decidedWithinHours?: number } & InProcessProposalFilters,
+    spaceId: string,
+    size: number
+  ): Promise<Map<string, number>> {
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 0,
+      query: { bool: { filter: toFilterClauses(filters, spaceId) } },
+      aggs: {
+        by_conversation: { terms: { field: 'conversationId', size } },
+      },
+    });
+    const buckets = response.aggregations?.by_conversation.buckets ?? [];
+    return new Map(buckets.map(({ key, doc_count: count }) => [String(key), count]));
+  }
+
+  /** Resolves any proposal in a revision chain to its live revision using the root ID. */
+  async getLatestRevision(
+    id: string,
+    spaceId: string
+  ): Promise<{
+    proposalId: string;
+    revision: number;
+    status: ProposalStatus;
+    decision: ProposalDecision | undefined;
+    /**
+     * The live revision's action input, so a caller that resolves the head
+     * before executing can run the parameters the analyst actually approved.
+     * A revision that corrected `actionInput` would otherwise leave the
+     * original's stale parameters in whatever the caller captured earlier.
+     */
+    actionInput: Record<string, unknown> | undefined;
+  }> {
+    const { proposal } = await this.load(id, spaceId);
+
+    const { rootProposalId } = proposal;
+
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      query: {
+        bool: {
+          filter: [{ term: { rootProposalId } }, { term: { spaceId } }],
+          must_not: [{ exists: { field: 'supersededBy' } }],
+        },
+      },
+      // A released revision wins. A revision that lost its race to the release
+      // stays live until its cleanup lands, and an unsorted read could adopt it.
+      // `revise()` refuses a released row, so at most one live row in a chain
+      // carries the mark, and it is the revision the approver answered.
+      sort: [{ gateReleasedAt: { order: 'desc', missing: '_last', unmapped_type: 'date' } }],
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source || hit._id === undefined) {
+      // Should be unreachable: every chain has exactly one live revision by
+      // construction. Falls back to the proposal that was asked about rather
+      // than throwing, so a storage inconsistency degrades to "trust the
+      // caller's id" instead of failing the gate outright.
+      return {
+        proposalId: proposal.id,
+        revision: proposal.revision,
+        status: proposal.status,
+        decision: proposal.decision,
+        actionInput: proposal.actionInput,
+      };
+    }
+
+    const source = hit._source as ProposalDocument;
+    return {
+      proposalId: hit._id,
+      revision: source.revision,
+      status: source.status,
+      decision: source.decision,
+      actionInput: source.actionInput,
+    };
+  }
+
+  /**
+   * Reads the action workflow's self-declared metadata from `consts.actionMetadata`.
+   * Resolved on read so a catalog change is picked up rather than baked into
+   * every historical proposal.
+   */
+  async resolveActionMetadata(
+    actionWorkflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ActionMetadata | undefined> {
+    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId, request);
+    return definition && this.readActionMetadata(actionWorkflowId, definition);
+  }
+
+  /**
+   * The creation path: one fetch, then both the metadata and the input check.
+   * An invalid input throws, because a proposal whose action can never run has
+   * no business sitting in a human's queue.
+   */
+  private async resolveAndValidateAction(
+    actionWorkflowId: string,
+    actionInput: Record<string, unknown> | undefined,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ActionMetadata | undefined> {
+    const definition = await this.fetchActionDefinition(actionWorkflowId, spaceId, request);
+    if (!definition) {
+      return undefined;
+    }
+
+    this.assertActionInputValid(actionWorkflowId, definition, actionInput);
+    return this.readActionMetadata(actionWorkflowId, definition);
+  }
+
+  /**
+   * Validates `actionInput` against the schema the action declares on its manual
+   * trigger. Best-effort by design: the JSON Schema to zod conversion does not
+   * cover every keyword, so this catches the common mistakes — a missing
+   * required field or the wrong type — and lets anything it cannot express
+   * through rather than rejecting a valid input.
+   */
+  private assertActionInputValid(
+    actionWorkflowId: string,
+    definition: ActionWorkflowDefinition,
+    actionInput: Record<string, unknown> | undefined
+  ): void {
+    const inputSchema = definition.triggers?.find(({ type }) => type === 'manual')?.inputs
+      ?.properties?.[ACTION_WORKFLOW_INPUT];
+
+    if (!inputSchema) {
+      // The action declares no input contract, so there is nothing to check.
+      return;
+    }
+
+    const parsed = convertJsonSchemaToZod(inputSchema as JSONSchema7).safeParse(actionInput ?? {});
+    if (!parsed.success) {
+      throw new ProposalInvalidActionInputError(
+        `actionInput does not satisfy action workflow [${actionWorkflowId}]: ${parsed.error.issues
+          .map(({ path, message }) => `${path.join('.') || '(root)'}: ${message}`)
+          .join('; ')}`
+      );
+    }
+  }
+
+  private async fetchActionDefinition(
+    actionWorkflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ActionWorkflowDefinition | undefined> {
+    try {
+      const workflow = await this.deps
+        .getWorkflowsApi()
+        .getWorkflow(actionWorkflowId, spaceId, request);
+      return workflow?.definition as ActionWorkflowDefinition | undefined;
+    } catch (error) {
+      this.deps.logger.warn(
+        `Failed to read action workflow [${actionWorkflowId}]: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
+  }
+
+  private readActionMetadata(
+    actionWorkflowId: string,
+    definition: ActionWorkflowDefinition
+  ): ActionMetadata | undefined {
+    const candidate = definition.consts?.actionMetadata;
+    if (!candidate) {
+      return undefined;
+    }
+
+    const parsed = actionMetadataSchema.safeParse(candidate);
+    if (!parsed.success) {
+      this.deps.logger.warn(
+        `Action workflow [${actionWorkflowId}] declares invalid consts.actionMetadata: ${parsed.error.message}`
+      );
+      return undefined;
+    }
+    return parsed.data;
+  }
+
+  private async load(id: string, spaceId: string): Promise<StoredProposal> {
+    // A blank id reaches us when a workflow template resolves to nothing — for
+    // instance an on-failure handler firing before the proposal was created.
+    // Elasticsearch would answer with an opaque "Ids can't be empty" shard
+    // failure, so refuse it here instead.
+    if (blankToUndefined(id) === undefined) {
+      throw new ProposalNotFoundError(id);
+    }
+
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 1,
+      seq_no_primary_term: true,
+      query: { bool: { filter: [{ ids: { values: [id] } }, { term: { spaceId } }] } },
+    });
+
+    const hit = response.hits.hits[0];
+    if (!hit?._source || hit._id === undefined) {
+      throw new ProposalNotFoundError(id);
+    }
+
+    return {
+      proposal: { id: hit._id, ...(hit._source as ProposalDocument) },
+      seqNo: hit._seq_no,
+      primaryTerm: hit._primary_term,
+    };
+  }
+
+  /**
+   * Whether a decision can still be made. Both axes have to be checked, for
+   * different reasons.
+   *
+   * The decision catches the window the status cannot: an approved proposal
+   * stays at `pending` for as long as the gate workflow's post-gate steps take
+   * to run, so a status check alone would let a second approver through.
+   *
+   * The `status` catches what the decision cannot: the workflow settles an
+   * undecided proposal as `expired` on attempt exhaustion or a failure before
+   * anyone decided, which leaves no decision behind. A deadline that has
+   * passed but not yet been settled still reads `pending` here, so
+   * `releaseGate` checks `expiresAt` itself.
+   *
+   * `pending` is the only status that is valid while undecided, so anything
+   * else is already settled.
+   */
+  private assertDecidable(proposal: StoredProposalRecord): void {
+    if (proposal.decision !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${proposal.id}] was already decided as ${proposal.decision}`
+      );
+    }
+    if (proposal.status !== 'pending') {
+      throw new ProposalConflictError(
+        `Proposal [${proposal.id}] has settled as ${proposal.status}`
+      );
+    }
+  }
+
+  /**
+   * Optimistically-concurrent write, with the lost race reported as a conflict.
+   * Returns the version it produced, for a follow-up write that must not land
+   * on top of anyone else's.
+   */
+  private async writeDocument(
+    id: string,
+    document: ProposalDocument,
+    { seqNo, primaryTerm }: WriteVersion
+  ): Promise<WriteVersion> {
+    try {
+      const { _seq_no: writtenSeqNo, _primary_term: writtenPrimaryTerm } =
+        await this.deps.storage.index({
+          id,
+          document,
+          ...(seqNo !== undefined && primaryTerm !== undefined
+            ? { if_seq_no: seqNo, if_primary_term: primaryTerm }
+            : {}),
+        });
+      return { seqNo: writtenSeqNo, primaryTerm: writtenPrimaryTerm };
+    } catch (error) {
+      if (isVersionConflict(error)) {
+        throw new ProposalConflictError(`Proposal [${id}] was modified by another actor first`);
+      }
+      throw error;
+    }
+  }
+
+  /** The execution behind the proposal's gate, whatever its status. */
+  private async getGateExecution(
+    proposal: StoredProposalRecord,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowExecutionDto> {
+    if (!proposal.workflowExecutionId) {
+      // Unreachable by construction — the gate workflow's create step is the
+      // only way to make a proposal, and it stamps its own execution id. Kept
+      // as a refusal rather than an early return because the decision is
+      // written behind the gate: returning would answer the caller with a 200
+      // for a record that nothing will ever decide.
+      throw new ProposalConflictError(
+        `Proposal [${proposal.id}] has no gate execution, so its decision cannot be recorded`
+      );
+    }
+
+    const execution = await this.deps
+      .getWorkflowsApi()
+      .getWorkflowExecution(proposal.workflowExecutionId, spaceId, { request });
+    if (!execution) {
+      throw new ProposalConflictError(
+        `Execution [${proposal.workflowExecutionId}] for proposal [${proposal.id}] not found`
+      );
+    }
+    return execution;
+  }
+
+  /**
+   * Releases the parked gate. The waiting step is resolved by the caller and
+   * passed explicitly: the platform's own lookup only matches `waitForInput`,
+   * and when it resolves nothing it resumes without claiming the step or
+   * stamping the audit envelope.
+   */
+  private async resumeGate(
+    executionId: string,
+    stepExecutionId: string,
+    { spaceId, request, approved }: { spaceId: string; request: KibanaRequest; approved: boolean }
+  ): Promise<void> {
+    await this.deps
+      .getWorkflowsApi()
+      .resumeWorkflowExecution(executionId, spaceId, { approved }, request, {
+        channel: PROPOSALS_RESUME_CHANNEL,
+        stepExecutionId,
+      });
+  }
+
+  /**
+   * Settles the pending and executing proposals whose gate execution has
+   * ended. A cancelled or timed-out gate runs no handler, so without this the
+   * record would wait forever on an execution that is gone.
+   *
+   * Only an ended gate settles, never the deadline alone: a live gate expires
+   * its own proposal at the deadline, and a decision released just before it
+   * may still be on its way to the gate, whose write would then conflict and
+   * lose it. The gates are read in one bulk read, and an execution that is
+   * missing or unreadable is left alone. Best effort: a failed lookup or write
+   * is logged and the proposal is returned as read, because a read must not
+   * fail on it.
+   */
+  private async settleOrphans(
+    proposals: Proposal[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<Proposal[]> {
+    const settlements = new Map<string, ExecutionStatus>();
+    const awaitingGate: Array<{ proposal: Proposal; executionId: string }> = [];
+    for (const proposal of proposals) {
+      if (isUnsettled(proposal) && proposal.workflowExecutionId) {
+        awaitingGate.push({ proposal, executionId: proposal.workflowExecutionId });
+      }
+    }
+
+    const endedGates = await this.findEndedGates(
+      awaitingGate.map(({ executionId }) => executionId),
+      spaceId,
+      request
+    );
+    for (const { proposal, executionId } of awaitingGate) {
+      const gateStatus = endedGates.get(executionId);
+      if (gateStatus !== undefined) {
+        settlements.set(proposal.id, gateStatus);
+      }
+    }
+
+    if (settlements.size === 0) {
+      return proposals;
+    }
+    const settled = new Map(
+      await asyncMapWithLimit(
+        [...settlements],
+        10,
+        async ([id, gateStatus]) => [id, await this.settleOrphan(id, gateStatus, spaceId)] as const
+      )
+    );
+    return proposals.map((proposal) => settled.get(proposal.id) ?? proposal);
+  }
+
+  /** The terminal status of each readable gate execution among `executionIds`. */
+  private async findEndedGates(
+    executionIds: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<Map<string, ExecutionStatus>> {
+    if (executionIds.length === 0) {
+      return new Map();
+    }
+    try {
+      const executions = await this.deps
+        .getWorkflowsApi()
+        .getWorkflowExecutionStatuses(executionIds, spaceId, { request });
+      return new Map(
+        executions
+          .filter(({ status }) => isTerminalStatus(status))
+          .map(({ id, status }) => [id, status])
+      );
+    } catch (error) {
+      this.deps.logger.warn(`Could not read the gate executions of unsettled proposals: ${error}`);
+      return new Map();
+    }
+  }
+
+  /**
+   * Settles a proposal whose gate ended, but only while it is still unsettled,
+   * checked on the same load the write is guarded by: `update` accepts the same
+   * terminal status twice, so a gate that settled it first would otherwise have
+   * its real error replaced. Returns the stored record when the gate got there
+   * first, and undefined when the write did not land.
+   */
+  private async settleOrphan(
+    id: string,
+    gateStatus: ExecutionStatus,
+    spaceId: string
+  ): Promise<Proposal | undefined> {
+    try {
+      const stored = await this.load(id, spaceId);
+      if (!isUnsettled(stored.proposal)) {
+        return stripRanks(stored.proposal);
+      }
+      return await this.applyUpdate(stored, {
+        id,
+        // `executing` is only ever approved, and `pending` only ever undecided.
+        status: stored.proposal.status === 'executing' ? 'failed' : 'expired',
+        executionError: gateEndedError(gateStatus),
+      });
+    } catch (error) {
+      if (error instanceof ProposalConflictError) {
+        this.deps.logger.debug(`Proposal [${id}] moved before it could be settled: ${error}`);
+      } else {
+        this.deps.logger.warn(
+          `Could not settle proposal [${id}] after its gate ended as ${gateStatus}: ${error}`
+        );
+      }
+      return undefined;
+    }
+  }
+
+  private async withMetadata(
+    proposal: Proposal,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ProposalWithMetadata> {
+    const action = proposal.actionWorkflowId
+      ? await this.resolveActionMetadata(proposal.actionWorkflowId, spaceId, request)
+      : undefined;
+
+    return { ...proposal, action };
+  }
+
+  /**
+   * Resolves action metadata for a collection of proposals with a concurrency
+   * cap. Unique workflow IDs are fetched once each (deduplicated up front) and
+   * results are collected into a Map before the proposals are assembled, so a
+   * single failure for one workflow ID never affects proposals backed by a
+   * different one.
+   */
+  private async withMetadataBatch(
+    proposals: Proposal[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ProposalWithMetadata[]> {
+    const uniqueWorkflowIds = [
+      ...new Set(
+        proposals.map((p) => p.actionWorkflowId).filter((id): id is string => id !== undefined)
+      ),
+    ];
+
+    const metaEntries = await asyncMapWithLimit(uniqueWorkflowIds, 10, async (id) => {
+      const meta = await this.resolveActionMetadata(id, spaceId, request);
+      return [id, meta] as [string, ActionMetadata | undefined];
+    });
+
+    const metaMap = new Map<string, ActionMetadata | undefined>(metaEntries);
+
+    return proposals.map((proposal) => ({
+      ...proposal,
+      action:
+        proposal.actionWorkflowId !== undefined
+          ? metaMap.get(proposal.actionWorkflowId)
+          : undefined,
+    }));
+  }
+}
+
+export interface ReleaseGateParams {
+  approved: boolean;
+  /**
+   * The action input the approver was shown. Rejected with a conflict when it
+   * no longer matches the record, so an approval can never apply to values the
+   * decider never saw.
+   */
+  actionInput?: Record<string, unknown>;
+  /** Annotations the gate cannot carry; written only once every check passes. */
+  dismissReason?: DismissReason;
+  rationale?: string;
+  spaceId: string;
+  request: KibanaRequest;
+}
+
+export interface CloneProposalParams {
+  id: string;
+  /** Why the original failed, recorded alongside the supersession. */
+  executionError?: string;
+}
+
+export interface ReviseProposalParams extends ReviseProposalRequest {
+  id: string;
+}
+
+type QueryFilterList = Array<Record<string, unknown>>;
+
+/** Filters only in-process callers may use; none is part of the HTTP list contract. */
+export interface InProcessProposalFilters {
+  categories?: string[];
+  statuses?: ProposalStatus[];
+  conversationIds?: string[];
+}
+
+/**
+ * Translates the shared filter vocabulary once, so every read applies it
+ * identically. The space term is always present: no read crosses a space.
+ */
+const toFilterClauses = (
+  filters: ProposalFilters & {
+    category?: string;
+    decidedWithinHours?: number;
+  } & InProcessProposalFilters,
+  spaceId: string
+): QueryFilterList => {
+  const filter: QueryFilterList = [{ term: { spaceId } }];
+
+  if (filters.status) {
+    filter.push({ term: { status: filters.status } });
+  }
+  if (filters.decision) {
+    filter.push({ term: { decision: filters.decision } });
+  }
+  if (filters.conversationId) {
+    filter.push({ term: { conversationId: filters.conversationId } });
+  }
+  if (filters.origin) {
+    filter.push({ term: { origin: filters.origin } });
+  }
+  if (filters.category) {
+    filter.push({ term: { category: filters.category } });
+  }
+  if (filters.categories) {
+    filter.push({ terms: { category: filters.categories } });
+  }
+  if (filters.statuses) {
+    filter.push({ terms: { status: filters.statuses } });
+  }
+  if (filters.conversationIds) {
+    filter.push({ terms: { conversationId: filters.conversationIds } });
+  }
+  if (filters.decidedWithinHours !== undefined) {
+    filter.push({ range: { decidedAt: { gte: `now-${filters.decidedWithinHours}h` } } });
+  }
+  if (filters.excludeSuperseded) {
+    // A superseded proposal is represented by its successor, so showing both
+    // would put every retry of the same subject in the queue.
+    filter.push({ bool: { must_not: { exists: { field: 'supersededBy' } } } });
+  }
+  if (filters.excludeExpired) {
+    // A proposal with no deadline never expires, so it has to survive the
+    // filter alongside those whose deadline is still ahead.
+    filter.push({
+      bool: {
+        should: [
+          { bool: { must_not: { exists: { field: 'expiresAt' } } } },
+          { range: { expiresAt: { gt: 'now' } } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  }
+
+  return filter;
+};
+
+/**
+ * Drops the storage-only sort ranks, so they never reach the API contract.
+ * One key rather than a list, because they are nested under `ranks`: a third
+ * rank is a change to `ProposalSortRanks` alone.
+ */
+const stripRanks = ({ ranks, ...proposal }: StoredProposalRecord): Proposal => proposal;
+
+const toProposal = (id: string, document: ProposalDocument): Proposal =>
+  stripRanks({ id, ...document });
+
+/** Still waiting on its gate: undecided, or approved with the action running. */
+const isUnsettled = ({ status, supersededBy }: Proposal): boolean =>
+  (status === 'pending' || status === 'executing') && supersededBy === undefined;
+
+/** Only an undecided proposal has a deadline to pass: an executing action runs past it. */
+const isPastDeadline = ({ status, expiresAt }: Proposal, now: number): boolean =>
+  status === 'pending' && expiresAt !== undefined && Date.parse(expiresAt) <= now;
+
+/**
+ * The only legal decision/status pairs. Exhaustive on purpose: the two axes are
+ * independent, but not every combination means anything, and a pair like
+ * `dismissed` + `executing` would say an action is running for a proposal that
+ * was declined.
+ *
+ * `no_action` reads as "no action was executed" under both decisions — a
+ * dismissal, or an approval of a proposal that carries nothing to run.
+ */
+const VALID_STATUSES: Record<'undecided' | ProposalDecision, readonly ProposalStatus[]> = {
+  undecided: ['pending', 'expired', 'superseded'],
+  dismissed: ['no_action'],
+  approved: ['no_action', 'executing', 'succeeded', 'failed'],
+};
+
+const assertValidPair = (
+  id: string,
+  decision: ProposalDecision | undefined,
+  status: ProposalStatus
+): void => {
+  const allowed = VALID_STATUSES[decision ?? 'undecided'];
+  if (!allowed.includes(status)) {
+    throw new ProposalConflictError(
+      `Proposal [${id}] cannot be ${
+        decision ? `decided as ${decision}` : 'left undecided'
+      } with status ${status}; expected one of ${allowed.join(', ')}`
+    );
+  }
+};
+
+/**
+ * Treats an empty or whitespace-only string as absent. Liquid renders a missing
+ * workflow input as `''`, which is not the same thing as a value — and `??`
+ * cannot tell them apart, so every default behind one of these would be skipped.
+ *
+ * Generic so an enum-typed field keeps its type: trimming cannot move a value
+ * off its union, since none of the members carry surrounding whitespace.
+ */
+const blankToUndefined = <Value extends string>(value: Value | undefined): Value | undefined => {
+  const trimmed = value?.trim();
+  return trimmed === undefined || trimmed === '' ? undefined : (trimmed as Value);
+};
+
+/**
+ * The most recently started gate step that has neither finished nor been
+ * answered. Mirrors the platform's own waiting-step query, but for
+ * `waitForApproval`.
+ */
+const findWaitingGateStepId = (
+  stepExecutions: Array<{
+    id: string;
+    stepType?: string;
+    status: string;
+    startedAt: string;
+    finishedAt?: string;
+    hitl?: { respondedAt?: string };
+  }>
+): string | undefined =>
+  stepExecutions
+    .filter(
+      (step) =>
+        isHitlWaitStepType(step.stepType) &&
+        step.status === ExecutionStatus.WAITING_FOR_INPUT &&
+        !step.finishedAt &&
+        !step.hitl?.respondedAt
+    )
+    .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0]?.id;
+
+/**
+ * Deep equality rather than a serialized comparison: the submitted input is
+ * parsed from the request body and the stored one from `_source`, so their key
+ * order need not match even when the values do.
+ */
+const sameInput = (
+  submitted: Record<string, unknown>,
+  stored: Record<string, unknown> | undefined
+): boolean => isEqual(submitted ?? {}, stored ?? {});
+
+/**
+ * Narrow on purpose. ES|QL raises `verification_exception` for every query it
+ * refuses to plan — a renamed field, an unsupported function, a bad cast. Only
+ * the unknown-column case means "the mapping has not caught up yet"; treating
+ * the rest as no-data would turn a broken query into a silent flat line.
+ */
+const isEsqlUnknownColumnError = (error: unknown): boolean => {
+  const body =
+    (error as { meta?: { body?: { error?: { type?: string; reason?: string } } } })?.meta?.body
+      ?.error ?? (error as { body?: { error?: { type?: string; reason?: string } } })?.body?.error;
+
+  if (body?.type !== 'verification_exception') return false;
+
+  const detail = `${body.reason ?? ''} ${(error as { message?: string })?.message ?? ''}`;
+  return /unknown column/i.test(detail);
+};
+
+const isVersionConflict = (error: unknown): boolean => {
+  const status = (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode;
+  const metaStatus = (error as { meta?: { statusCode?: number } })?.meta?.statusCode;
+  return status === 409 || metaStatus === 409;
+};
+
+/**
+ * A resume the engine turned away before scheduling anything: the gate step was
+ * claimed by someone else, or the execution is no longer waiting. Matched by
+ * name because `@kbn/workflows` does not export the class from its entry point.
+ */
+const isRefusedResume = (error: unknown): boolean =>
+  error instanceof Error && error.name === 'WorkflowExecutionInvalidStatusError';
+
+/**
+ * Columns are looked up by name, not position: `drop_null_columns: true` (the
+ * adapter default) shifts the offsets when a column comes back entirely null.
+ */
+const parseEsqlCountByCategory = (
+  response: { columns: Array<{ name: string }>; values: Array<unknown[]> },
+  countField: string
+): Record<string, number> => {
+  const colIdx = response.columns.findIndex((c) => c.name === countField);
+  const catIdx = response.columns.findIndex((c) => c.name === 'category');
+  if (colIdx === -1 || catIdx === -1) return {};
+
+  const result: Record<string, number> = {};
+  for (const row of response.values) {
+    const category = row[catIdx] as string | null;
+    const count = row[colIdx] as number | null;
+    if (category) result[category] = count ?? 0;
+  }
+  return result;
+};
+
+/** Same by-name lookup, for a bare `STATS` returning a single unkeyed row. */
+const parseEsqlScalar = (
+  response: { columns: Array<{ name: string }>; values: Array<unknown[]> },
+  countField: string
+): number => {
+  const colIdx = response.columns.findIndex((c) => c.name === countField);
+  if (colIdx === -1) return 0;
+  return (response.values[0]?.[colIdx] as number | null) ?? 0;
+};
+
+/** Same by-name lookup as above. Rows with a negative or non-finite `idx` are dropped. */
+const parseEsqlCountByIdxAndCategory = (
+  response: { columns: Array<{ name: string }>; values: Array<unknown[]> },
+  countField: string
+): Record<number, Record<string, number>> => {
+  const idxCol = response.columns.findIndex((c) => c.name === 'idx');
+  const catCol = response.columns.findIndex((c) => c.name === 'category');
+  const cntCol = response.columns.findIndex((c) => c.name === countField);
+  if (idxCol === -1 || catCol === -1 || cntCol === -1) return {};
+
+  const result: Record<number, Record<string, number>> = {};
+  for (const row of response.values) {
+    const rawIdx = row[idxCol] as number | null;
+    const category = row[catCol] as string | null;
+    const count = row[cntCol] as number | null;
+
+    if (rawIdx === null || rawIdx === undefined || !Number.isFinite(rawIdx) || !category) continue;
+    const idx = Math.floor(rawIdx);
+    if (idx < 0) continue;
+
+    if (!result[idx]) result[idx] = {};
+    result[idx][category] = count ?? 0;
+  }
+  return result;
+};

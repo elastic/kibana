@@ -55,55 +55,81 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     filterOperations,
   } = props;
 
+  // Extract the primitives the fetch effect actually depends on so that a
+  // rebuilt but structurally-equal `query` or `indexPatterns` object from the
+  // parent does not retrigger the ES|QL round trip.
+  const queryEsql = query?.esql;
+  const timeFieldName = useMemo(() => {
+    const values = Object.values(indexPatterns);
+    return values.length ? values[0].timeFieldName : undefined;
+  }, [indexPatterns]);
+
   useEffect(() => {
     // in case the columns are not in the cache, I refetch them
+    if (!queryEsql) return;
+
+    // Cancel the in-flight request when the inputs change or the editor unmounts so
+    // a slower, stale response cannot overwrite the columns of a newer query.
+    const controller = new AbortController();
+    let cancelled = false;
+
     async function fetchColumns() {
-      if (query) {
+      try {
         const table = await fetchFieldsFromESQLExpression(
-          { esql: `${query.esql} | limit 0` },
+          { esql: `${queryEsql} | limit 0` },
           expressions,
           { from: dateRange.fromDate, to: dateRange.toDate },
-          undefined,
-          Object.values(indexPatterns).length
-            ? Object.values(indexPatterns)[0].timeFieldName
-            : undefined,
+          controller,
+          timeFieldName,
           esqlVariables,
           isApproximate
         );
 
-        if (table) {
-          const hasNumberTypeColumns = table.columns?.some(isNumeric);
-          const columns = table.columns.map((col) => {
-            return {
-              id: col.variable ?? col.id,
-              name: col.variable ? `??${col.variable}` : col.name,
-              meta: col?.meta ?? { type: 'number' },
-              variable: col.variable,
-              compatible:
-                isMetricDimension && hasNumberTypeColumns
-                  ? filterOperations({
-                      dataType: col?.meta?.type as DataType,
-                      isBucketed: Boolean(isNotNumeric(col)),
-                      scale: 'ordinal',
-                    })
-                  : true,
-            };
-          });
-          setAllColumns(columns);
+        if (cancelled || !table) return;
+
+        const hasNumberTypeColumns = table.columns?.some(isNumeric);
+        const columns = table.columns.map((col) => {
+          return {
+            id: col.variable ?? col.id,
+            name: col.variable ? `??${col.variable}` : col.name,
+            meta: col?.meta ?? { type: 'number' },
+            variable: col.variable,
+            compatible:
+              isMetricDimension && hasNumberTypeColumns
+                ? filterOperations({
+                    dataType: col?.meta?.type as DataType,
+                    isBucketed: Boolean(isNotNumeric(col)),
+                    scale: 'ordinal',
+                  })
+                : true,
+          };
+        });
+        setAllColumns(columns);
+      } catch (err) {
+        // Only swallow the abort we caused via cleanup; let real fetch /
+        // ES|QL errors propagate as an unhandled promise rejection, matching
+        // the pre-fix behavior where they surfaced in the browser console.
+        if (!cancelled) {
+          throw err;
         }
       }
     }
     fetchColumns();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [
     dateRange.fromDate,
     dateRange.toDate,
     esqlVariables,
     isApproximate,
     expressions,
-    indexPatterns,
+    queryEsql,
+    timeFieldName,
     isMetricDimension,
     filterOperations,
-    query,
   ]);
 
   const selectedField = useMemo(() => {

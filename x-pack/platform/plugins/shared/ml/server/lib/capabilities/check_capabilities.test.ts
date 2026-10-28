@@ -83,7 +83,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(true);
       expect(capabilities.canUseMlAlerts).toBe(true);
       expect(capabilities.canGetTrainedModels).toBe(true);
-      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -110,6 +109,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
       expect(capabilities.canCreateInferenceEndpoint).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
 
@@ -144,7 +144,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(true);
       expect(capabilities.canUseMlAlerts).toBe(true);
       expect(capabilities.canGetTrainedModels).toBe(true);
-      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(true);
       expect(capabilities.canDeleteJob).toBe(true);
@@ -170,6 +169,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(true);
       expect(capabilities.canViewMlNodes).toBe(true);
       expect(capabilities.canCreateTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(true);
       expect(capabilities.canCreateInferenceEndpoint).toBe(true);
       expect(capabilities.canDeleteTrainedModels).toBe(true);
       expect(capabilities.canStartStopTrainedModels).toBe(true);
@@ -205,7 +205,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(true);
-      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -231,6 +230,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
       expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
@@ -266,7 +266,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(true);
-      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -292,6 +291,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
       expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
@@ -327,7 +327,6 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(false);
-      expect(capabilities.canTestTrainedModels).toBe(false);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -353,6 +352,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
       expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
@@ -389,7 +389,6 @@ describe('check_capabilities', () => {
     expect(capabilities.canDeleteAnnotation).toBe(false);
     expect(capabilities.canUseMlAlerts).toBe(false);
     expect(capabilities.canGetTrainedModels).toBe(false);
-    expect(capabilities.canTestTrainedModels).toBe(false);
 
     expect(capabilities.canCreateJob).toBe(false);
     expect(capabilities.canDeleteJob).toBe(false);
@@ -415,6 +414,7 @@ describe('check_capabilities', () => {
     expect(capabilities.canCreateMlAlerts).toBe(false);
     expect(capabilities.canViewMlNodes).toBe(false);
     expect(capabilities.canCreateTrainedModels).toBe(false);
+    expect(capabilities.canTestTrainedModels).toBe(false);
     expect(capabilities.canCreateInferenceEndpoint).toBe(false);
     expect(capabilities.canDeleteTrainedModels).toBe(false);
     expect(capabilities.canStartStopTrainedModels).toBe(false);

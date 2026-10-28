@@ -93,12 +93,18 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
         },
       },
       async (context, request, response) => {
+        // Hoisted above the `try` so the error paths below can report which read routing was in
+        // effect; the catch block is what surfaces an authorization failure on a fanned-out read.
+        let cpsActive = false;
+
         try {
+          cpsActive = await osqueryContext.isCpsActive(request);
           const [coreStart] = await osqueryContext.getStartServices();
           const clusterClient = coreStart.elasticsearch.client;
           const internalEsClient = clusterClient.asInternalUser;
-          const readEsClient = getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled);
-          const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
+          const readEsClient = getReadEsClient(clusterClient, request, cpsActive);
+          // A fanned-out CPS read does not also add CCS `*:` remote expressions.
+          const ccsEnabled = !cpsActive && (await hasConnectedRemoteClusters(internalEsClient));
 
           const spaceId = osqueryContext?.service?.getActiveSpace
             ? (await osqueryContext.service.getActiveSpace(request))?.id || DEFAULT_SPACE_ID
@@ -205,7 +211,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 startDate,
                 endDate,
                 sortDirection,
-                cpsEnabled: osqueryContext.cpsEnabled,
+                cpsActive,
               })
             : undefined;
 
@@ -246,7 +252,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                     }
 
                     logger.warn(
-                      `Scheduled query aggregation failed, likely outdated integration mappings (spaceId: ${spaceId}, cpsEnabled: ${osqueryContext.cpsEnabled}): ${err.message}`
+                      `Scheduled query aggregation failed, likely outdated integration mappings (spaceId: ${spaceId}, cpsActive: ${cpsActive}): ${err.message}`
                     );
 
                     return emptyScheduledResult;
@@ -260,9 +266,9 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             liveHits,
             osqueryContext,
             request,
-            spaceId,
             integrationNamespaces,
             ccsEnabled,
+            cpsActive,
             logger,
           });
 
@@ -311,7 +317,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
         } catch (err) {
           const error = err as Error & { statusCode?: number };
           logger.error(
-            `Failed to fetch unified history (cpsEnabled: ${osqueryContext.cpsEnabled}, indices: ${ACTIONS_INDEX}* and ${ACTION_RESPONSES_DATA_STREAM_INDEX}-*): ${error.message}`
+            `Failed to fetch unified history (cpsActive: ${cpsActive}, indices: ${ACTIONS_INDEX}* and ${ACTION_RESPONSES_DATA_STREAM_INDEX}-*): ${error.message}`
           );
 
           return response.customError({

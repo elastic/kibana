@@ -8,14 +8,16 @@
 import Boom from '@hapi/boom';
 import { esql } from '@elastic/esql';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { BulkCreateAlertActionItemBody } from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { EVENTS_SERIES_ID_EVAL } from '@kbn/alerting-v2-common-queries';
+import { encodeSeriesId, type DecodedSeriesId } from '@kbn/alerting-v2-utils';
 import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
-import { getAlertEventNotFoundMessage } from '../../errors/alert_error_messages';
+import { getAlertEpisodeNotFoundMessage } from '../../errors/alert_error_messages';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import type { AlertEventRecord, RawAlertEventRow } from '../types';
 import { parseDataJson } from '../utils/parse_data_json';
+import { getSeriesNotFoundError } from '../utils/series_id';
 
 /**
  * Canonicalises an ES|QL response from any of the alert-event projections
@@ -31,65 +33,52 @@ export const toAlertEventRecords = (response: EsqlQueryResponse): AlertEventReco
     data_json: parseDataJson(row.data_json),
   }));
 
-/**
- * One alert-event target: a `group_hash` (always required) plus an optional
- * `episode_id` narrowing. Omitting `episode_id` means "latest event for any
- * episode of this group"; including it means "latest event for this exact
- * episode" — the shape both the single-action route and the bulk route
- * already speak.
- */
-export interface AlertEventTarget {
-  groupHash: string;
-  episodeId?: string;
-}
+/** Row of the by-series projection: the event columns plus the series it was grouped under. */
+type RawSeriesEventRow = RawAlertEventRow & { series_id: string };
 
-interface LoadLatestAlertEventsParams {
+interface LoadLatestAlertEventsBySeriesParams {
   queryService: QueryServiceContract;
   spaceId: string;
-  targets: readonly AlertEventTarget[];
+  series: readonly DecodedSeriesId[];
 }
 
 /**
- * Resolves the latest `.rule-events` row per (`group_hash`, optional
- * `episode_id`) target in a single ES|QL round-trip. The projection is the
- * canonical {@link AlertEventRecord} shape every handler consumes — no
- * branching by caller.
- *
- * This is the only ES|QL definition for "latest alert event(s)" in the
- * client; the single-event throw-on-empty path
- * ({@link loadLastAlertEventOrThrow}) and the bulk route's adapter
- * ({@link bulkLoadLatestAlertEvents}) both delegate here so the projection
- * can't drift between the two surfaces.
- *
- * Items whose group has no matching event simply don't appear in the
- * result; callers that need throw-on-empty semantics layer that on top.
+ * Filters `.rule-events` to one decoded series: rule-backed series by the
+ * rule that owns them, external ones by their source, both by `group_hash`.
  */
-export const loadLatestAlertEvents = async ({
+const buildSeriesCondition = (series: DecodedSeriesId) =>
+  series.kind === 'rule'
+    ? esql.exp`rule.id == ${series.rule_id} AND group_hash == ${series.group_hash}`
+    : esql.exp`source == ${series.source} AND group_hash == ${series.group_hash}`;
+
+/**
+ * Resolves the latest `.rule-events` row per series in a single ES|QL
+ * round-trip, keyed by the series' id(`encodeSeriesId`). A series
+ * is identified by its owner and `group_hash`. The space is always the
+ * request's `spaceId`, which every series passed in must already belong to:
+ * callers validate the space of a client-supplied series id before getting
+ * here. Series that have no matching event don't appear in the result;
+ * callers that need throw-on-empty semantics layer that on top
+ * ({@link loadLastSeriesAlertEventOrThrow}).
+ */
+export const loadLatestAlertEventsBySeries = async ({
   queryService,
   spaceId,
-  targets,
-}: LoadLatestAlertEventsParams): Promise<AlertEventRecord[]> => {
-  if (targets.length === 0) {
-    return [];
+  series,
+}: LoadLatestAlertEventsBySeriesParams): Promise<Map<string, AlertEventRecord>> => {
+  if (series.length === 0) {
+    return new Map();
   }
 
-  // Build a disjunction of `(group_hash == "h" AND episode.id == "e")` per
-  // target (or `(group_hash == "h" AND TRUE)` when the target doesn't
-  // narrow to an episode), starting from `FALSE` so the chain stays
-  // well-formed for a single-target input.
-  let whereClause = esql.exp`FALSE`;
-  for (const target of targets) {
-    whereClause = esql.exp`${whereClause} OR (group_hash == ${target.groupHash} AND ${
-      target.episodeId !== undefined ? esql.exp`episode.id == ${target.episodeId}` : esql.exp`TRUE`
-    })`;
-  }
+  const conditions = series.map(buildSeriesCondition);
+  const seriesCondition = conditions.reduce(
+    (accumulated, condition) => esql.exp`${accumulated} OR ${condition}`
+  );
 
-  const query = esql`
-    FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
-    | WHERE type == "alert" AND space_id == ${spaceId} AND (${whereClause})
-    | EVAL data_json = JSON_EXTRACT(_source, "$.data")
-    | DROP _source
-    | STATS
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+    .where`type == "alert" AND space_id == ${spaceId}`.where`${seriesCondition}`
+    .pipe`EVAL data_json = JSON_EXTRACT(_source, "$.data")`.pipe(EVENTS_SERIES_ID_EVAL)
+    .pipe`DROP _source`.pipe`STATS
         @timestamp = MAX(@timestamp),
         episode_id = LAST(episode.id, @timestamp),
         episode_status = LAST(episode.status, @timestamp),
@@ -99,85 +88,153 @@ export const loadLatestAlertEvents = async ({
         status = LAST(status, @timestamp),
         source = LAST(source, @timestamp),
         rule_id = LAST(rule.id, @timestamp),
+        rule_version = LAST(rule.version, @timestamp),
+        group_hash = LAST(group_hash, @timestamp),
+        space_id = LAST(space_id, @timestamp)
+      BY series_id`
+    .keep(
+      '@timestamp',
+      'group_hash',
+      'episode_id',
+      'episode_status',
+      'episode_status_count',
+      'rule_id',
+      'rule_version',
+      'space_id',
+      'status',
+      'source',
+      'data_json',
+      'severity',
+      'series_id'
+    )
+    .toRequest();
+
+  const rows = queryResponseToRecords<RawSeriesEventRow>(
+    await queryService.executeQuery({ query: query.query })
+  );
+
+  return new Map(
+    rows.map(({ series_id: seriesId, ...row }) => [
+      seriesId,
+      { ...row, data_json: parseDataJson(row.data_json) },
+    ])
+  );
+};
+
+interface LoadLatestAlertEventsByEpisodeIdParams {
+  queryService: QueryServiceContract;
+  spaceId: string;
+  episodeIds: readonly string[];
+}
+
+/**
+ * Resolves the latest `.rule-events` row per episode (`episode.id`) in a
+ * single ES|QL round-trip, without requiring the caller to know the series
+ * the episode belongs to — `group_hash` is aggregated off the episode's own
+ * events. Episode ids are UUIDv4 (see the director's episode creation), so
+ * an id plus the `space_id` filter uniquely identifies one episode;
+ * externally-sourced events could theoretically collide across groups
+ * within a space, in which case the per-episode bucket would merge rows —
+ * practically unreachable.
+ *
+ * Episodes with no matching event don't appear in the result; callers that
+ * need throw-on-empty semantics layer that on top
+ * ({@link loadLastEpisodeAlertEventOrThrow}).
+ */
+export const loadLatestAlertEventsByEpisodeId = async ({
+  queryService,
+  spaceId,
+  episodeIds,
+}: LoadLatestAlertEventsByEpisodeIdParams): Promise<AlertEventRecord[]> => {
+  if (episodeIds.length === 0) {
+    return [];
+  }
+
+  const episodeIdValues = [...new Set(episodeIds)].map((episodeId) => esql.str(episodeId));
+
+  const query = esql`
+    FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
+    | WHERE type == "alert" AND space_id == ${spaceId} AND episode.id IN (${episodeIdValues})
+    | EVAL data_json = JSON_EXTRACT(_source, "$.data"), episode_id = episode.id
+    | DROP _source
+    | STATS
+        @timestamp = MAX(@timestamp),
+        group_hash = LAST(group_hash, @timestamp),
+        episode_status = LAST(episode.status, @timestamp),
+        episode_status_count = LAST(episode.status_count, @timestamp),
+        data_json = LAST(data_json, @timestamp),
+        severity = LAST(severity, @timestamp),
+        status = LAST(status, @timestamp),
+        source = LAST(source, @timestamp),
+        rule_id = LAST(rule.id, @timestamp),
         rule_version = LAST(rule.version, @timestamp)
-      BY group_hash, space_id
+      BY episode_id, space_id
     | KEEP @timestamp, group_hash, episode_id, episode_status, episode_status_count, rule_id, rule_version, space_id, status, source, data_json, severity
   `.toRequest();
 
   return toAlertEventRecords(await queryService.executeQuery({ query: query.query }));
 };
 
-interface BulkLoadLatestAlertEventsParams {
+interface LoadLastSeriesAlertEventParams {
   queryService: QueryServiceContract;
   spaceId: string;
-  actions: readonly BulkCreateAlertActionItemBody[];
+  /** The id the caller sent, echoed back in the not-found error. */
+  seriesId: string;
+  series: DecodedSeriesId;
 }
 
 /**
- * Bulk-route adapter over {@link loadLatestAlertEvents}. Maps each
- * `BulkCreateAlertActionItemBody` to a generic {@link AlertEventTarget}
- * (so the loader doesn't need to know the bulk-request schema) and
- * delegates. Items targeting a specific `episode_id` whose group's latest
- * event belongs to a different episode are filtered out by the caller's
- * post-query pairing step — that policy stays out of the loader.
+ * Single-series adapter over {@link loadLatestAlertEventsBySeries}: returns
+ * the most recent `.rule-events` row for one series or throws `Boom.notFound`
+ * with the canonical `ALERT_EVENT_NOT_FOUND` shape the series-level route
+ * surface relies on. A series of another space is not found without a query.
  */
-export const bulkLoadLatestAlertEvents = ({
+export const loadLastSeriesAlertEventOrThrow = async ({
   queryService,
   spaceId,
-  actions,
-}: BulkLoadLatestAlertEventsParams): Promise<AlertEventRecord[]> =>
-  loadLatestAlertEvents({
-    queryService,
-    spaceId,
-    targets: actions.map((action) => ({
-      groupHash: action.group_hash,
-      episodeId: 'episode_id' in action ? action.episode_id : undefined,
-    })),
-  });
+  seriesId,
+  series,
+}: LoadLastSeriesAlertEventParams): Promise<AlertEventRecord> => {
+  const events = await loadLatestAlertEventsBySeries({ queryService, spaceId, series: [series] });
+  // The owner and hash filter can also match events of another series (the same rule id with
+  // an external source), which ES|QL groups apart, so the requested series is picked by its id.
+  const requestedSeriesId = encodeSeriesId(series);
+  const event = requestedSeriesId ? events.get(requestedSeriesId) : undefined;
 
-interface LoadLastAlertEventParams {
+  if (!event) {
+    throw getSeriesNotFoundError(seriesId);
+  }
+
+  return event;
+};
+
+interface LoadLastEpisodeAlertEventParams {
   queryService: QueryServiceContract;
   spaceId: string;
-  groupHash: string;
-  /**
-   * When provided, narrows the lookup to that specific episode. Required
-   * for actions that target a non-latest episode (e.g. `activate`); omitted
-   * for the natural "latest episode of this group" case.
-   */
-  episodeId?: string;
+  episodeId: string;
 }
 
 /**
- * Single-target adapter over {@link loadLatestAlertEvents}: returns the
- * most recent `.rule-events` row for one (`group_hash`, optional
- * `episode_id`) or throws `Boom.notFound` with the canonical
- * `ALERT_EVENT_NOT_FOUND` shape. The single-action route surface depends
- * on this exact error shape, so it lives here (next to the throw) rather
- * than inline at each call site.
- *
- * Callers in the bulk path that prefer silent-skip semantics must use
- * {@link loadLatestAlertEvents} (or {@link bulkLoadLatestAlertEvents})
- * directly.
+ * Single-episode adapter over {@link loadLatestAlertEventsByEpisodeId}:
+ * returns the most recent `.rule-events` row for one `episode.id` or throws
+ * `Boom.notFound` with the canonical `ALERT_EPISODE_NOT_FOUND` shape the
+ * episode-level route surface relies on.
  */
-export const loadLastAlertEventOrThrow = async ({
+export const loadLastEpisodeAlertEventOrThrow = async ({
   queryService,
   spaceId,
-  groupHash,
   episodeId,
-}: LoadLastAlertEventParams): Promise<AlertEventRecord> => {
-  const events = await loadLatestAlertEvents({
+}: LoadLastEpisodeAlertEventParams): Promise<AlertEventRecord> => {
+  const events = await loadLatestAlertEventsByEpisodeId({
     queryService,
     spaceId,
-    targets: [{ groupHash, episodeId }],
+    episodeIds: [episodeId],
   });
 
   if (events.length === 0) {
-    throw Boom.notFound(getAlertEventNotFoundMessage(groupHash, episodeId), {
-      code: ALERTING_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
-      details: {
-        group_hash: groupHash,
-        ...(episodeId ? { episode_id: episodeId } : {}),
-      },
+    throw Boom.notFound(getAlertEpisodeNotFoundMessage(episodeId), {
+      code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
+      details: { alert_id: episodeId },
     });
   }
 

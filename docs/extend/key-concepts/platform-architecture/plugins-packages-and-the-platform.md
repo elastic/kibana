@@ -103,7 +103,7 @@ An extension point is a function provided by core, or a plugin's plugin API, tha
 - `core.notifications.toasts.addSuccess`
 - `core.overlays.showModal`
 - `embeddables.registerEmbeddableFactory`
-- `uiActions.registerAction`
+- `uiActions.registerActionAsync`
 - `core.savedObjects.registerType`
 
 ## Follow up material

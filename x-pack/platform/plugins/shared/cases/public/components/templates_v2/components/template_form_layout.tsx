@@ -52,8 +52,8 @@ import {
 import { normalizeTemplateCaseDefaultsYaml } from '../utils/normalize_template_case_defaults';
 import { seedRequiredTemplateBlocks } from '../utils/seed_template_definition';
 import { reorderTemplateDefinitionKeys } from '../utils/reorder_template_definition_keys';
-import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
-import type { CaseAssignees } from '../../../../common/types/domain_zod/user/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain/connector/v1';
+import type { CaseAssignees } from '../../../../common/types/domain/user/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
 import {
   type TemplateMetadata,
@@ -328,8 +328,12 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   ]);
 
   const yamlValidationResult = useMemo(
-    () => validateTemplateDefinitionYaml(normalizedYamlValue),
-    [normalizedYamlValue]
+    () =>
+      validateTemplateDefinitionYaml(
+        normalizedYamlValue,
+        isEdit ? initialDefinitionYaml : undefined
+      ),
+    [normalizedYamlValue, isEdit, initialDefinitionYaml]
   );
   const isYamlDefinitionValid = yamlValidationResult.success;
 
@@ -485,7 +489,10 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       { settings: settingsRef.current, connector: connectorRef.current }
     );
 
-    const validationResult = validateTemplateDefinitionYaml(mergedDefinition);
+    const validationResult = validateTemplateDefinitionYaml(
+      mergedDefinition,
+      isEdit ? initialDefinitionYaml : undefined
+    );
     if (
       !validationResult.success ||
       hasTemplateMetadataErrors(validateTemplateMetadata(normalizedMetadata))
@@ -523,6 +530,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     onCreate,
     isEnabled,
     isEdit,
+    initialDefinitionYaml,
     clearDraft,
     setStoredMetadataState,
     setStoredConfigState,

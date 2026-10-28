@@ -17,7 +17,7 @@ export const LIST_ACTION_POLICIES_RESPONSE: FindActionPoliciesResponse = {
   items: [ACTION_POLICY_RESPONSE],
   total: 1,
   page: 1,
-  perPage: 20,
+  per_page: 20,
 };
 
 export const listActionPoliciesOasExamples = (): AlertingOasOperationObject =>
