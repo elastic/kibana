@@ -30,6 +30,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { StatusError } from '../errors/status_error';
 import { isStartedBefore, WorkflowExecutionService } from './workflow_execution_service';
+import { pollUntil } from './poll_until';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
 
 const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0 };
@@ -648,6 +649,24 @@ export class SignificantEventsKIsOnboardingClient {
     );
 
     return runs.length;
+  }
+
+  /**
+   * Cancels the runs of the space's entry point (and the onboarding runs they wait for), then waits
+   * until none is running: a workflow bound to a service account cannot be deleted while it runs.
+   */
+  async stopEntryPointRuns({ request }: { request: KibanaRequest }): Promise<void> {
+    await this.cancelAllRunning({ request });
+    const entryPoint = this.getEntryPointService(request.spaceId);
+    await pollUntil(
+      () =>
+        entryPoint.getExecutions(
+          { statuses: [...NonTerminalExecutionStatuses], size: 1 },
+          request.spaceId,
+          request
+        ),
+      ({ total }) => total === 0
+    );
   }
 
   /**

@@ -47,6 +47,7 @@ const enableServiceAccountsRoute = createServerRoute({
     server,
     getScopedClients,
     getSpaceId,
+    workflowClients,
   }): Promise<{ spaceId: string; serviceAccountIds: DetectionEngineServiceAccountIds }> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
@@ -55,6 +56,7 @@ const enableServiceAccountsRoute = createServerRoute({
       core: server.core,
       spaces: server.spaces,
       workflowsExtensions: server.workflowsExtensions,
+      onboardingClient: workflowClients.streamsKIsOnboardingClient,
     }).enable({
       request,
       spaceId: await getSpaceId(request),
@@ -63,6 +65,34 @@ const enableServiceAccountsRoute = createServerRoute({
   },
 });
 
+const disableServiceAccountsRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/service_account/_disable',
+  options: {
+    access: 'internal',
+    summary: 'Remove the detection engine service account setup from this space',
+  },
+  security: DELEGATED_AUTHZ,
+  params: z.object({}),
+  handler: async ({
+    request,
+    server,
+    getScopedClients,
+    getSpaceId,
+    workflowClients,
+  }): Promise<{ spaceId: string }> => {
+    const { licensing } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing });
+
+    return createServiceAccountSetupService({
+      core: server.core,
+      spaces: server.spaces,
+      workflowsExtensions: server.workflowsExtensions,
+      onboardingClient: workflowClients.streamsKIsOnboardingClient,
+    }).disable({ request, spaceId: await getSpaceId(request) });
+  },
+});
+
 export const internalServiceAccountRoutes = {
   ...enableServiceAccountsRoute,
+  ...disableServiceAccountsRoute,
 };

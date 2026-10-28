@@ -11,6 +11,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { StatusError } from '../errors/status_error';
+import type { SignificantEventsKIsOnboardingClient } from '../workflows/onboarding_workflow_client';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from '../workflows/managed_workflow_owner';
 
 /** The ids of the accounts a space is set up with, as the service accounts backend assigned them. */
@@ -55,10 +56,12 @@ export const createServiceAccountSetupService = ({
   core,
   spaces,
   workflowsExtensions,
+  onboardingClient,
 }: {
   core: CoreStart;
   spaces: SpacesPluginStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
+  onboardingClient: SignificantEventsKIsOnboardingClient | undefined;
 }) => {
   /** Refuses before anything is written: 400 when service accounts are off, 403, then 404. */
   const assertCanSetUp = async (request: KibanaRequest, spaceId: string): Promise<void> => {
@@ -105,7 +108,34 @@ export const createServiceAccountSetupService = ({
     return { spaceId, serviceAccountIds };
   };
 
-  return { enable };
+  /**
+   * Removes the space's setup: uninstalls the bound entry point, which also unbinds it from the
+   * account, so the space can no longer run KI extraction. The account is shared by every space
+   * and is kept.
+   */
+  const disable = async ({
+    request,
+    spaceId,
+  }: {
+    request: KibanaRequest;
+    spaceId: string;
+  }): Promise<{ spaceId: string }> => {
+    await assertCanSetUp(request, spaceId);
+    if (!workflowsExtensions || !onboardingClient) {
+      throw new StatusError('Workflows are not available', 400);
+    }
+    // A workflow bound to a service account cannot be deleted while it runs.
+    await onboardingClient.stopEntryPointRuns({ request });
+    const client = await workflowsExtensions.getClient(request);
+    await client.managedWorkflows.uninstall(
+      SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+      NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+      { spaceId, workflowIdSuffix: spaceId }
+    );
+    return { spaceId };
+  };
+
+  return { enable, disable };
 };
 
 export type ServiceAccountSetupService = ReturnType<typeof createServiceAccountSetupService>;
