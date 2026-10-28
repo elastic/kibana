@@ -200,7 +200,6 @@ type AppMenuLinkItem = AppMenuItemBase & {
    * Sub-items to show in a popover when the item is clicked. Only used if `run` and `href` is not provided.
    */
   items?: never;
-  switches?: never;
   /**
    * Width of the popover in pixels.
    * Only used if `run` and `href` is not provided.
@@ -230,7 +229,6 @@ type AppMenuButtonItem = AppMenuItemBase & {
    * Sub-items to show in a popover when the item is clicked. Only used if `run` and `href` is not provided.
    */
   items?: never;
-  switches?: never;
   /**
    * Width of the popover in pixels.
    * Only used if `run` and `href` is not provided.
@@ -260,7 +258,6 @@ type AppMenuItemWithPopover = AppMenuItemBase & {
    * Sub-items to show in a popover when the item is clicked. Only used if `run` and `href` is not provided.
    */
   items: AppMenuPopoverItem[];
-  switches?: never;
   /**
    * Width of the popover in pixels.
    */
@@ -272,32 +269,7 @@ type AppMenuItemWithPopover = AppMenuItemBase & {
   popoverTestId?: string;
 };
 
-type AppMenuItemWithSwitches = AppMenuItemBase & {
-  href?: never;
-  target?: never;
-  run?: never;
-  items?: never;
-  /**
-   * Switches to show in a popover when the item is clicked. Toggling a switch keeps the popover
-   * open. When the item is rendered inside another popover (e.g. the "More" menu), the switches
-   * are shown in a nested panel.
-   */
-  switches: AppMenuSwitch[];
-  /**
-   * Width of the popover in pixels.
-   */
-  popoverWidth?: number;
-  /**
-   * A unique identifier for the popover, used for testing purposes. Maps to `data-test-subj` attribute.
-   */
-  popoverTestId?: string;
-};
-
-export type AppMenuItemCommon =
-  | AppMenuButtonItem
-  | AppMenuItemWithPopover
-  | AppMenuItemWithSwitches
-  | AppMenuLinkItem;
+export type AppMenuItemCommon = AppMenuButtonItem | AppMenuItemWithPopover | AppMenuLinkItem;
 
 type AppMenuItemTypeBase = AppMenuItemCommon & {
   /**

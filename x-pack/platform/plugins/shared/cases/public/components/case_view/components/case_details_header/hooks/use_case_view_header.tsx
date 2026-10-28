@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
-import type { AppMenuSwitch } from '@kbn/app-menu';
 import type { CaseSeverity, CaseStatuses } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import type { OnUpdateFields } from '../../../types';
@@ -32,7 +31,7 @@ import {
   SYNC_ALERTS,
 } from '../../../translations';
 import { getBadges } from '../utils/header_badges';
-import { getMenu } from '../utils/header_menu';
+import { getMenu, type CaseSettingToggle } from '../utils/header_menu';
 import { useRunCaseWorkflow } from '../../../../workflows/use_run_case_workflow';
 import { RunCaseWorkflowModal } from '../../../../workflows/run_case_workflow_modal';
 
@@ -168,8 +167,9 @@ export const useCaseViewHeader = ({
     [caseConnectors, caseData.connector.id]
   );
 
-  const settingsSwitches = useMemo((): AppMenuSwitch[] => {
+  const settingToggles = useMemo((): CaseSettingToggle[] => {
     const { settings } = caseData;
+    const extractObservables = settings.extractObservables ?? false;
 
     return [
       ...(isSyncAlertsEnabled
@@ -178,9 +178,12 @@ export const useCaseViewHeader = ({
               id: 'caseSettingsSyncAlerts',
               label: SYNC_ALERTS,
               checked: settings.syncAlerts,
-              onChange: (checked: boolean) =>
-                onUpdateField({ key: 'settings', value: { ...settings, syncAlerts: checked } }),
-              'data-test-subj': 'case-settings-sync-alerts-switch',
+              onToggle: () =>
+                onUpdateField({
+                  key: 'settings',
+                  value: { ...settings, syncAlerts: !settings.syncAlerts },
+                }),
+              testId: 'case-settings-sync-alerts',
             },
           ]
         : []),
@@ -189,13 +192,13 @@ export const useCaseViewHeader = ({
             {
               id: 'caseSettingsExtractObservables',
               label: commonI18n.EXTRACT_OBSERVABLES_LABEL,
-              checked: settings.extractObservables ?? false,
-              onChange: (checked: boolean) =>
+              checked: extractObservables,
+              onToggle: () =>
                 onUpdateField({
                   key: 'settings',
-                  value: { ...settings, extractObservables: checked },
+                  value: { ...settings, extractObservables: !extractObservables },
                 }),
-              'data-test-subj': 'case-settings-extract-observables-switch',
+              testId: 'case-settings-extract-observables',
             },
           ]
         : []),
@@ -205,8 +208,8 @@ export const useCaseViewHeader = ({
               id: 'caseSettingsShowMetrics',
               label: SHOW_METRICS,
               checked: showMetrics,
-              onChange: onShowMetricsChange,
-              'data-test-subj': 'case-settings-show-metrics-switch',
+              onToggle: () => onShowMetricsChange(!showMetrics),
+              testId: 'case-settings-show-metrics',
             },
           ]
         : []),
@@ -239,7 +242,7 @@ export const useCaseViewHeader = ({
     () =>
       getMenu({
         permissions,
-        settingsSwitches,
+        settingToggles,
         caseId: caseData.id,
         chat: {
           addToChat,
@@ -259,7 +262,7 @@ export const useCaseViewHeader = ({
       summarizeCase,
       isAddToChatAvailable,
       permissions,
-      settingsSwitches,
+      settingToggles,
       caseData.id,
       currentExternalIncident,
       refreshCaseViewPage,

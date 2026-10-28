@@ -477,65 +477,6 @@ export const SwitchWithItems: Story = {
   },
 };
 
-const InteractiveSettingsSwitchesWrapper = ({
-  overflow,
-  ...props
-}: AppMenuWrapperProps & { overflow: boolean }) => {
-  const [syncAlerts, setSyncAlerts] = useState(true);
-  const [showMetrics, setShowMetrics] = useState(false);
-
-  const config: AppMenuConfig = {
-    items: [
-      {
-        id: 'refresh',
-        order: 1,
-        label: 'Refresh',
-        run: action('refresh-clicked'),
-        iconType: 'refresh',
-      },
-      {
-        id: 'settings',
-        order: 2,
-        label: 'Settings',
-        iconType: 'gear',
-        testId: 'settingsButton',
-        overflow,
-        switches: [
-          { id: 'syncAlerts', label: 'Sync alerts', checked: syncAlerts, onChange: setSyncAlerts },
-          {
-            id: 'showMetrics',
-            label: 'Show metrics',
-            checked: showMetrics,
-            onChange: setShowMetrics,
-          },
-        ],
-      },
-    ],
-  };
-
-  return <AppMenuWrapper {...props} config={config} />;
-};
-
-/**
- * Items with `switches` open a list of toggles that stay open while toggling. Inline they open
- * a popover; in the "More" menu they open a nested panel.
- */
-export const SettingsSwitches: Story = {
-  name: 'Settings switches - inline',
-  render: (args) => <InteractiveSettingsSwitchesWrapper {...args} overflow={false} />,
-  args: {
-    config: {},
-  },
-};
-
-export const SettingsSwitchesInOverflow: Story = {
-  name: 'Settings switches - in overflow menu',
-  render: (args) => <InteractiveSettingsSwitchesWrapper {...args} overflow={true} />,
-  args: {
-    config: {},
-  },
-};
-
 const overflowLoadingConfig: AppMenuConfig = {
   items: [
     {

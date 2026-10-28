@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
 
 import { CaseDetailsAppHeader } from './case_details_app_header';
 import { renderWithTestingProviders } from '../../../../common/mock';
@@ -132,20 +132,19 @@ describe('CaseDetailsAppHeader', () => {
     });
   });
 
-  it('toggles case settings from the overflow menu without closing it', async () => {
+  it('toggles a case setting from the case settings submenu in the overflow menu', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
     await userEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
     fireEvent.click(await screen.findByTestId('case-settings-button'));
 
     const settingsPanel = await screen.findByTestId('case-settings-popover');
-    fireEvent.click(within(settingsPanel).getByTestId('case-settings-sync-alerts-switch'));
+    fireEvent.click(within(settingsPanel).getByTestId('case-settings-sync-alerts'));
 
     expect(onUpdateField).toHaveBeenCalledWith({
       key: 'settings',
       value: { ...basicCase.settings, syncAlerts: !basicCase.settings.syncAlerts },
     });
-    expect(screen.getByTestId('case-settings-popover')).toBeInTheDocument();
   });
 
   it('adds the case to chat from the chat actions dropdown', async () => {

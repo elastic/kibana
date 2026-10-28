@@ -128,7 +128,7 @@ dependsOn:
   - '@kbn/saved-objects-tagging-oss-plugin'
   - '@kbn/core-spaces-common'
   - '@kbn/app-header'
-  - '@kbn/app-menu'
+  - '@kbn/core-chrome-app-menu-components'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
   - '@kbn/core-http-common'

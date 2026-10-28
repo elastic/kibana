@@ -45,5 +45,4 @@ export type {
   AppMenuPopoverItem,
   AppMenuSplitButtonProps,
   AppMenuStaticItem,
-  AppMenuSwitch,
 } from '@kbn/ui-app-menu';

@@ -381,7 +381,7 @@ describe('useCaseViewHeader', () => {
     );
   });
 
-  describe('case settings switches', () => {
+  describe('case settings items', () => {
     afterEach(() => {
       useLicenseMock.mockImplementation(actualUseLicense);
     });
@@ -395,57 +395,53 @@ describe('useCaseViewHeader', () => {
         children
       );
 
-    const getSettingsSwitch = (
-      menu: ReturnType<typeof useCaseViewHeader>['menu'],
-      testSubj: string
-    ) =>
+    const getSettingItem = (menu: ReturnType<typeof useCaseViewHeader>['menu'], testId: string) =>
       menu
         .items!.find((item) => item.id === 'caseSettings')
-        ?.switches?.find((settingsSwitch) => settingsSwitch['data-test-subj'] === testSubj);
+        ?.items?.find((settingItem) => settingItem.testId === testId);
 
-    it('renders the case settings as switches reflecting the current values', () => {
-      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
-        wrapper: metricsWrapper,
-      });
-
-      expect(getSettingsSwitch(result.current.menu, 'case-settings-sync-alerts-switch')).toEqual(
-        expect.objectContaining({ checked: basicCase.settings.syncAlerts })
+    it('marks enabled settings with a check icon', () => {
+      const { result } = renderHook(
+        () => useCaseViewHeader({ ...defaultArgs, showMetrics: false }),
+        { wrapper: metricsWrapper }
       );
-      expect(getSettingsSwitch(result.current.menu, 'case-settings-show-metrics-switch')).toEqual(
-        expect.objectContaining({ checked: true })
+
+      expect(getSettingItem(result.current.menu, 'case-settings-sync-alerts')).toEqual(
+        expect.objectContaining({ iconType: basicCase.settings.syncAlerts ? 'check' : 'empty' })
+      );
+      expect(getSettingItem(result.current.menu, 'case-settings-show-metrics')).toEqual(
+        expect.objectContaining({ iconType: 'empty' })
       );
     });
 
-    it('updates the case settings when the sync alerts switch is toggled', () => {
+    it('toggles sync alerts when its item is clicked', () => {
       const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
 
       act(() => {
-        getSettingsSwitch(result.current.menu, 'case-settings-sync-alerts-switch')?.onChange(false);
+        getSettingItem(result.current.menu, 'case-settings-sync-alerts')?.run?.();
       });
 
       expect(onUpdateField).toHaveBeenCalledWith({
         key: 'settings',
-        value: { ...basicCase.settings, syncAlerts: false },
+        value: { ...basicCase.settings, syncAlerts: !basicCase.settings.syncAlerts },
       });
     });
 
-    it('omits the show metrics switch when no metrics features are configured', () => {
+    it('omits the show metrics item when no metrics features are configured', () => {
+      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
+
+      expect(getSettingItem(result.current.menu, 'case-settings-show-metrics')).toBeUndefined();
+    });
+
+    it('omits the extract observables item without a platinum+ license', () => {
       const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
 
       expect(
-        getSettingsSwitch(result.current.menu, 'case-settings-show-metrics-switch')
+        getSettingItem(result.current.menu, 'case-settings-extract-observables')
       ).toBeUndefined();
     });
 
-    it('omits the extract observables switch without a platinum+ license', () => {
-      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
-
-      expect(
-        getSettingsSwitch(result.current.menu, 'case-settings-extract-observables-switch')
-      ).toBeUndefined();
-    });
-
-    it('updates the case settings when the extract observables switch is toggled', () => {
+    it('toggles extract observables when its item is clicked', () => {
       useLicenseMock.mockReturnValue({
         isAtLeast: () => true,
         isAtLeastPlatinum: () => true,
@@ -457,27 +453,25 @@ describe('useCaseViewHeader', () => {
       const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
 
       act(() => {
-        getSettingsSwitch(
-          result.current.menu,
-          'case-settings-extract-observables-switch'
-        )?.onChange(true);
+        getSettingItem(result.current.menu, 'case-settings-extract-observables')?.run?.();
       });
 
       expect(onUpdateField).toHaveBeenCalledWith({
         key: 'settings',
-        value: { ...basicCase.settings, extractObservables: true },
+        value: {
+          ...basicCase.settings,
+          extractObservables: !(basicCase.settings.extractObservables ?? false),
+        },
       });
     });
 
-    it('calls onShowMetricsChange when the show metrics switch is toggled', () => {
+    it('toggles show metrics when its item is clicked', () => {
       const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
         wrapper: metricsWrapper,
       });
 
       act(() => {
-        getSettingsSwitch(result.current.menu, 'case-settings-show-metrics-switch')?.onChange(
-          false
-        );
+        getSettingItem(result.current.menu, 'case-settings-show-metrics')?.run?.();
       });
 
       expect(onShowMetricsChange).toHaveBeenCalledWith(false);

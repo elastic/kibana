@@ -46,7 +46,6 @@ export const AppMenuItem = ({
   tooltipContent,
   tooltipTitle,
   items,
-  switches,
   isPopoverOpen,
   hidden,
   popoverWidth,
@@ -59,8 +58,7 @@ export const AppMenuItem = ({
   const itemText = upperFirst(asPlainText(label));
   const { title, content } = getTooltip({ tooltipContent, tooltipTitle });
   const showTooltip = Boolean(content || title);
-  const hasSwitches = Boolean(switches && switches.length > 0);
-  const hasItems = Boolean(items && items.length > 0) || hasSwitches;
+  const hasItems = items && items.length > 0;
   const anchorDomElementRef = useRef<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
@@ -109,7 +107,7 @@ export const AppMenuItem = ({
         iconSide="left"
         iconSize="m"
         color="text"
-        aria-haspopup={hasSwitches ? 'dialog' : hasItems ? 'menu' : undefined}
+        aria-haspopup={hasItems ? 'menu' : undefined}
         isSelected={showAsSelected}
         css={buttonCss}
         {...linkProps}
@@ -136,8 +134,7 @@ export const AppMenuItem = ({
   if (hasItems) {
     return (
       <AppMenuPopover
-        items={items ?? []}
-        switches={switches}
+        items={items}
         anchorElement={button}
         anchorDomElement={anchorDomElementRef.current ?? undefined}
         tooltipContent={content}

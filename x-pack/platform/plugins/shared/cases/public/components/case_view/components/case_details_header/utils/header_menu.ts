@@ -6,7 +6,6 @@
  */
 
 import type { AppHeaderMenu } from '@kbn/app-header';
-import type { AppMenuSwitch } from '@kbn/app-menu';
 import type { CasesPermissions } from '../../../../../../common';
 import * as i18n from '../../../translations';
 import * as commonI18n from '../../../../../common/translations';
@@ -18,13 +17,21 @@ interface ExternalIncident {
   externalTitle?: string | null;
 }
 
+export interface CaseSettingToggle {
+  id: string;
+  label: string;
+  checked: boolean;
+  onToggle: () => void;
+  testId: string;
+}
+
 interface GetMenuArgs {
   permissions: CasesPermissions;
   /**
    * Case settings enabled by the current solution (alert syncing, observable extraction, or
    * metrics). When empty the settings item is omitted entirely.
    */
-  settingsSwitches: AppMenuSwitch[];
+  settingToggles: CaseSettingToggle[];
   caseId: string;
   currentExternalIncident: ExternalIncident | null;
   chat: { addToChat: () => void; summarizeCase: () => void; isAddToChatAvailable: boolean };
@@ -37,7 +44,7 @@ interface GetMenuArgs {
 
 export const getMenu = ({
   permissions,
-  settingsSwitches,
+  settingToggles,
   caseId,
   chat,
   currentExternalIncident,
@@ -67,13 +74,19 @@ export const getMenu = ({
           },
         ]
       : []),
-    ...(permissions.update && settingsSwitches.length > 0
+    ...(permissions.update && settingToggles.length > 0
       ? [
           {
             id: 'caseSettings',
             label: i18n.CASE_SETTINGS,
             iconType: 'gear' as const,
-            switches: settingsSwitches,
+            items: settingToggles.map(({ id, label, checked, onToggle, testId }) => ({
+              id,
+              label,
+              iconType: checked ? 'check' : 'empty',
+              run: onToggle,
+              testId,
+            })),
             testId: 'case-settings-button',
             popoverTestId: 'case-settings-popover',
             order: 200,
