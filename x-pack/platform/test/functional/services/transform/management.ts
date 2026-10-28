@@ -14,7 +14,6 @@ export type TransformManagement = ProvidedType<typeof TransformManagementProvide
 
 export function TransformManagementProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
 
   return {
     async assertTransformListPageExists() {
@@ -66,17 +65,14 @@ export function TransformManagementProvider({ getService }: FtrProviderContext) 
     },
 
     async startTransformCreation() {
-      await retry.waitFor('transform creation action', async () => {
-        return (
-          (await testSubjects.exists('transformNoTransformsFound')) ||
-          (await testSubjects.exists('transformButtonCreate'))
-        );
-      });
-      if (await testSubjects.exists('transformNoTransformsFound')) {
-        await testSubjects.click('transformCreateFirstButton');
-      } else {
-        await testSubjects.click('transformButtonCreate');
+      const createButton = await testSubjects.waitForFirst(
+        ['transformCreateFirstButton', 'transformButtonCreate'],
+        { timeout: 20_000 }
+      );
+      if (createButton === undefined) {
+        throw new Error('expected a transform create button to be displayed');
       }
+      await testSubjects.click(createButton);
       await testSubjects.existOrFail('transformSelectSourceModal');
     },
   };

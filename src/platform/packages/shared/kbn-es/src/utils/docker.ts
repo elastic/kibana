@@ -71,6 +71,18 @@ export const isServerlessProjectType = (value: string): value is ServerlessProje
 
 export type ServerlessProjectType = 'es' | 'oblt' | 'security';
 
+export const serverlessProductTiers = [
+  'essentials',
+  'logs_essentials',
+  'complete',
+  'search_ai_lake',
+] as const;
+export type ServerlessProductTier = (typeof serverlessProductTiers)[number];
+
+export const isServerlessProjectTier = (value: string): value is ServerlessProductTier => {
+  return serverlessProductTiers.includes(value as ServerlessProductTier);
+};
+
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
 }
@@ -110,6 +122,7 @@ interface ServerlessEsNodeArgs {
 
 export const DEFAULT_PORT = 9200;
 const DOCKER_REGISTRY = 'docker.elastic.co';
+const ALLOWED_IMAGE_PREFIX = `${DOCKER_REGISTRY}/`;
 
 const DOCKER_BASE_CMD = [
   'run',
@@ -318,7 +331,7 @@ export function resolveDockerImage({
   defaultImg: string;
 }) {
   if (image) {
-    if (!image.includes(DOCKER_REGISTRY)) {
+    if (!image.startsWith(ALLOWED_IMAGE_PREFIX)) {
       throw createCliError(
         `Only verified images from ${DOCKER_REGISTRY} are currently allowed.\nIf you require this functionality in @kbn/es please contact the Kibana Operations Team.`
       );

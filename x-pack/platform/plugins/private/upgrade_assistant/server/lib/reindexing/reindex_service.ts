@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
+import { pickBy } from 'lodash';
 
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
@@ -189,6 +190,42 @@ export const reindexServiceFactory = (
   };
 
   /**
+   * Returns whether the index is managed by ILM and, if so, its lifecycle date and whether its current phase rolls over.
+   */
+  const getIlmLifecycle = async (
+    indexName: string
+  ): Promise<{ managed: boolean; lifecycleDate?: number; hasRolloverAction?: boolean }> => {
+    const { indices } = await esClient.ilm.explainLifecycle({ index: indexName });
+    const ilmExplain = indices[indexName];
+    if (!ilmExplain?.managed) {
+      return { managed: false };
+    }
+    const {
+      lifecycle_date_millis: lifecycleDate,
+      policy,
+      phase_execution: phaseExecution,
+    } = ilmExplain;
+    // Not cached until ILM enters the first phase
+    const phaseDefinition = phaseExecution?.phase_definition;
+    return {
+      managed: true,
+      lifecycleDate,
+      hasRolloverAction: phaseDefinition
+        ? phaseDefinition.actions?.rollover !== undefined
+        : await hasHotPhaseRollover(policy),
+    };
+  };
+
+  const hasHotPhaseRollover = async (policyName?: string): Promise<boolean> => {
+    if (!policyName) {
+      return false;
+    }
+    // A missing policy never rolls over
+    const policies = await esClient.ilm.getLifecycle({ name: policyName }, { ignore: [404] });
+    return policies[policyName]?.policy.phases.hot?.actions?.rollover !== undefined;
+  };
+
+  /**
    * Creates a new index with the same mappings and settings as the original index.
    * @param reindexOp
    */
@@ -204,10 +241,21 @@ export const reindexServiceFactory = (
 
     // Backup the current settings to restore them after the reindex
     // https://github.com/elastic/kibana/issues/201605
-    const backupSettings = {
-      'index.number_of_replicas': settings['index.number_of_replicas'],
-      'index.refresh_interval': settings['index.refresh_interval'],
-    };
+    const backupSettings = pickBy(
+      {
+        'index.number_of_replicas': settings['index.number_of_replicas'],
+        'index.refresh_interval': settings['index.refresh_interval'],
+        'index.lifecycle.skip': settings['index.lifecycle.skip'],
+      },
+      (value) => value !== undefined
+    );
+
+    // Preserve the ILM age of the source index, otherwise it is computed from the new index creation date
+    const { managed, lifecycleDate, hasRolloverAction } = await getIlmLifecycle(indexName);
+    // Indices pending rollover get their lifecycle date at rollover time, which origination_date would override.
+    // ILM sets indexing_complete once the index has rolled over.
+    const isRolloverPending =
+      hasRolloverAction && settings['index.lifecycle.indexing_complete'] !== 'true';
 
     let createIndex;
     try {
@@ -219,6 +267,12 @@ export const reindexServiceFactory = (
             // Reindexing optimizations
             'index.number_of_replicas': 0,
             'index.refresh_interval': -1,
+            ...(lifecycleDate !== undefined &&
+              !isRolloverPending && {
+                'index.lifecycle.origination_date': lifecycleDate,
+              }),
+            // Pause ILM until the reindex completes, otherwise phases already due (e.g. readonly) would block writes
+            ...(managed && { 'index.lifecycle.skip': true }),
           },
         },
       });
@@ -399,6 +453,7 @@ export const reindexServiceFactory = (
       // Defaulting to null in case the original setting was empty to remove the setting.
       'index.number_of_replicas': null,
       'index.refresh_interval': null,
+      'index.lifecycle.skip': null,
       ...backupSettings,
     };
 

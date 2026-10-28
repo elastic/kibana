@@ -25,7 +25,6 @@ node scripts/build \
   --skip-archives \
   --docker-images \
   --docker-tag-qualifier="$GIT_COMMIT" \
-  --docker-push \
   --skip-docker-ubi \
   --skip-docker-ubuntu \
   --skip-docker-cloud \
@@ -34,7 +33,9 @@ node scripts/build \
   --skip-docker-serverless \
   --skip-docker-contexts
 
-CLOUD_FIPS_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud-fips)
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud-fips:$VERSION-$GIT_COMMIT"
+CLOUD_FIPS_IMAGE="$(kibana_ci_image_repository kibana-cloud-fips):$VERSION-$GIT_COMMIT"
+retag_and_push_image "$BUILD_OUTPUT_IMAGE" "$CLOUD_FIPS_IMAGE"
 cat <<EOF | buildkite-agent annotate --style "info" --context kibana-cloud-fips-image
 
   Kibana cloud FIPS image: \`$CLOUD_FIPS_IMAGE\`

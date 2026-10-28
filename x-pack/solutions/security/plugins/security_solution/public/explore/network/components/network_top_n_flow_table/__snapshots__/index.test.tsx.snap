@@ -97,7 +97,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     data-test-subj="table-topNFlowSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div
@@ -399,7 +399,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 </div>
                  
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-purdnl-FlagWrapper e1nywon80"
                   data-test-subj="country-flag"
                 >
                   🇺🇸
@@ -492,7 +492,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 </div>
                  
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-purdnl-FlagWrapper e1nywon80"
                   data-test-subj="country-flag"
                 >
                   🇲🇾
@@ -511,7 +511,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 test.domain.net
                  
                 <div
-                  class="css-19lowmu-subtext"
+                  class="css-du0w0-subtext"
                 >
                   <div
                     class="euiPopover emotion-euiPopover-inline-block"
@@ -857,7 +857,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     data-test-subj="table-topNFlowSource-loading-false"
   >
     <header
-      class="toggle-expand siemHeaderSection css-125xqyz-header"
+      class="toggle-expand siemHeaderSection css-qibzrl-header"
       data-test-subj="header-section"
     >
       <div
@@ -1192,7 +1192,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 </div>
                  
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-purdnl-FlagWrapper e1nywon80"
                   data-test-subj="country-flag"
                 >
                   🇺🇸
@@ -1294,7 +1294,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 </div>
                  
                 <span
-                  class="css-purdnl-FlagWrapper e1v8vkkw0"
+                  class="css-purdnl-FlagWrapper e1nywon80"
                   data-test-subj="country-flag"
                 >
                   🇲🇾
@@ -1313,7 +1313,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 test.domain.net
                  
                 <div
-                  class="css-19lowmu-subtext"
+                  class="css-du0w0-subtext"
                 >
                   <div
                     class="euiPopover emotion-euiPopover-inline-block"

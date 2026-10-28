@@ -164,7 +164,7 @@ steps:
     key: epr-image-cache-update
     build:
       env:
-        EPR_IMAGE: "$PACKAGE_REGISTRY_TEMP_IMAGE"
+        EPR_IMAGE: '$PACKAGE_REGISTRY_TEMP_IMAGE'
         IMAGES_CONFIG: 'kibana/image_cache.tpl.yml'
         BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
         RETRY: '1'

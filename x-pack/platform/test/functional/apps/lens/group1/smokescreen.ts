@@ -574,16 +574,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'cumulative_sum',
       });
-      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await lens.assertWorkspaceErrorCount(1);
 
       await lens.removeDimension('lnsXY_xDimensionPanel');
-      expect(await lens.getWorkspaceErrorCount()).to.eql(2);
+      await lens.assertWorkspaceErrorCount(2);
 
       await lens.dragFieldToDimensionTrigger(
         '@timestamp',
         'lnsXY_xDimensionPanel > lns-empty-dimension'
       );
-      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await lens.assertWorkspaceErrorCount(1);
 
       expect(await lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await lens.switchToVisualization('lnsDatatable');
@@ -736,8 +736,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.filterLegend('jpg');
-      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
-      expect(hasExtensionFilter).to.be(true);
+      await filterBar.expectFilter('extension.raw', 'jpg');
 
       await filterBar.removeFilter('extension.raw');
     });
@@ -767,8 +766,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.filterLegend('jpg');
-      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
-      expect(hasExtensionFilter).to.be(true);
+      await filterBar.expectFilter('extension.raw', 'jpg');
 
       await filterBar.removeFilter('extension.raw');
     });
@@ -850,7 +848,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.switchToVisualizationSubtype('Percentage');
 
       // now check that both the main visualization and the current visualization suggestion are in error state
-      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await lens.assertWorkspaceErrorCount(1);
       await testSubjects.existOrFail(
         'lnsSuggestion-currentVisualization > lnsSuggestionPanel__error'
       );

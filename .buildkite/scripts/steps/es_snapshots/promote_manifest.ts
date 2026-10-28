@@ -92,16 +92,6 @@ function getExpectedSnapshotBucket(version: string, id: string) {
     `,
       { shell: '/bin/bash' }
     );
-
-    const registry = 'docker.elastic.co/kibana-ci/elasticsearch';
-    const sourceTag = `${version}-SNAPSHOT-${sha}`;
-    const targetTag = `${version}-SNAPSHOT`;
-
-    console.log(`Promoting docker image: ${registry}:${sourceTag} -> ${registry}:${targetTag}`);
-    execSync(
-      `docker buildx imagetools create -t ${registry}:${targetTag} ${registry}:${sourceTag}`,
-      { stdio: 'inherit' }
-    );
   } catch (ex) {
     console.error(ex);
     process.exit(1);

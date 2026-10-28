@@ -257,8 +257,8 @@
       "@kbn/controls-example-plugin/*": ["./examples/controls_example/*"],
       "@kbn/controls-plugin": ["./src/platform/plugins/shared/controls"],
       "@kbn/controls-plugin/*": ["./src/platform/plugins/shared/controls/*"],
-      "@kbn/core": ["./src/core"],
-      "@kbn/core/*": ["./src/core/*"],
+      "@kbn/core": ["./src/core/packages/core"],
+      "@kbn/core/*": ["./src/core/packages/core/*"],
       "@kbn/core-analytics-browser": ["./src/core/packages/analytics/browser"],
       "@kbn/core-analytics-browser/*": ["./src/core/packages/analytics/browser/*"],
       "@kbn/core-analytics-browser-internal": ["./src/core/packages/analytics/browser-internal"],
@@ -2269,7 +2269,7 @@
       "zod/v3/standard-schema.cjs": ["./node_modules/zod/v3/standard-schema.d.cts"],
       "zod/v4": ["./typings/zod/v4"],
       "fflate": ["./node_modules/fflate/lib/index.d.ts"],
-      "canvg": ["./node_modules/canvg/lib/index.d.ts"],
+      "canvg": ["./typings/canvg"],
       "immer/dist/types/types-external": [
         "./node_modules/immer/dist/types/types-external.d.ts"
       ],

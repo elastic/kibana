@@ -728,7 +728,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `input[data-test-subj="${testSubj}"][type='number']`
       );
       await numericInput.click();
-      await numericInput.clearValue();
+      // These inputs are controlled by React state, so the clear has to arrive as real key events
+      await numericInput.clearValueWithKeyboard();
       return numericInput;
     },
 
@@ -1051,6 +1052,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const paginationControl = await testSubjects.find('lnsWorkspaceErrorsPaginationControl');
       const paginationItems = await paginationControl.findAllByCssSelector('.euiPagination__item');
       return paginationItems.length;
+    },
+
+    /** Waits for the visible warnings in the config panel to settle on the expected count */
+    async assertWorkspaceErrorCount(expectedCount: number) {
+      await retry.waitForWithTimeout(
+        `workspace error count to be ${expectedCount}`,
+        10_000,
+        async () => {
+          const actualCount = await this.getWorkspaceErrorCount();
+          if (actualCount !== expectedCount) {
+            throw new Error(`Expected ${expectedCount} workspace errors, found ${actualCount}`);
+          }
+          return true;
+        }
+      );
     },
 
     async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {
