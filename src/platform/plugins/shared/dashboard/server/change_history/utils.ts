@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { diffLines } from 'diff';
 import equal from 'fast-deep-equal';
-import * as jsondiffpatch from 'jsondiffpatch';
-import * as jsonpatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
 import { omit } from 'lodash';
 
 import type { ObjectChange } from '@kbn/change-history';
@@ -31,6 +30,23 @@ import { logger, securityService, spacesService } from '../kibana_services';
 import { getChangeHistoryClient } from './change_history_service';
 
 export const INITIAL_HISTORY_SEQUENCE = 1;
+
+const toDiffText = (value: object): string => JSON.stringify(value, null, 2);
+
+/**
+ * Number of contiguous changed line blocks between two snapshots rendered as pretty-printed JSON,
+ * which is how the history preview's diff navigator counts changes.
+ */
+export const countChangedLineBlocks = (previous: object, current: object): number => {
+  let blocks = 0;
+  let inChangedBlock = false;
+  for (const { added, removed } of diffLines(toDiffText(previous), toDiffText(current))) {
+    const isChanged = Boolean(added || removed);
+    if (isChanged && !inChangedBlock) blocks++;
+    inChangedBlock = isChanged;
+  }
+  return blocks;
+};
 
 // Granted by both `all` and `minimal_all`, so editors with customized sub-feature privileges
 // (e.g. without short URLs or search sessions) are not rejected.
@@ -169,7 +185,7 @@ export const addToHistory = async ({
     // Diffed against the pre-update saved object, not the latest history event, which may not be
     // searchable yet. Stored with the event so listing history doesn't need to diff every snapshot.
     const changeCount = previousSnapshot
-      ? jsonpatchFormatter.format(jsondiffpatch.diff(previousSnapshot, snapshot)).length
+      ? countChangedLineBlocks(previousSnapshot, snapshot)
       : undefined;
 
     await client.log(change, {

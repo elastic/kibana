@@ -17,6 +17,7 @@ import { transformDashboardOut } from '../api/transforms';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import {
   addToHistory,
+  countChangedLineBlocks,
   getHistorySequences,
   getChangeHistoryContext,
   getHistorySnapshot,
@@ -180,6 +181,21 @@ describe('addToHistory', () => {
     expect(client.log.mock.calls[0][1].refresh).toBeUndefined();
   });
 
+  it('counts adjacent changed lines as a single change', async () => {
+    const client = getClient();
+    mockedGetClient.mockResolvedValue(client as never);
+    await addToHistory({
+      ...baseArgs,
+      ctx: getContext(),
+      sequence: 2,
+      previousSnapshot: { title: 'Old', description: 'Old', panels: [{ x: 1, y: 1 }] } as never,
+      snapshot: { title: 'New', description: 'New', panels: [{ x: 2, y: 2 }] } as never,
+    });
+
+    // title + description are adjacent lines, and x + y are adjacent lines: two blocks, four JSON patch operations
+    expect(client.log.mock.calls[0][1].data.metadata).toEqual({ changeCount: 2 });
+  });
+
   it('does not read history to compute the change count, since it lags behind saves', async () => {
     // e.g. v1 is still the latest searchable event while saving v3
     const client = getClient({ ...baseArgs.snapshot, title: 'v1' } as DashboardState);
@@ -217,6 +233,25 @@ describe('addToHistory', () => {
     await expect(
       addToHistory({ ...baseArgs, ctx: getContext(), sequence: 1 })
     ).resolves.toBeUndefined();
+  });
+});
+
+describe('countChangedLineBlocks', () => {
+  it('is 0 for identical snapshots', () => {
+    expect(countChangedLineBlocks({ a: 1 }, { a: 1 })).toBe(0);
+  });
+
+  it('merges adjacent changed lines into one block', () => {
+    expect(countChangedLineBlocks({ a: 1, b: 2, c: 3 }, { a: 9, b: 9, c: 3 })).toBe(1);
+  });
+
+  it('counts separated changes individually', () => {
+    expect(countChangedLineBlocks({ a: 1, b: 2, c: 3 }, { a: 9, b: 2, c: 9 })).toBe(2);
+  });
+
+  it('counts added and removed lines', () => {
+    expect(countChangedLineBlocks({ a: 1, b: 2 }, { a: 1, c: 3 })).toBe(1);
+    expect(countChangedLineBlocks({ a: 1 }, { a: 1, b: 2 })).toBe(1);
   });
 });
 
