@@ -77,8 +77,10 @@ export const runWatchdogWorker = (
   };
 
   const poll = () => {
-    const heartbeatUs = Number(Atomics.load(shared, Slot.heartbeat));
+    // Clock first: if the worker pauses between the two reads, a heartbeat stamped meanwhile is
+    // newer than now, instead of looking stale and reading as a block.
     const nowMs = toMs(nowUs());
+    const heartbeatUs = Number(Atomics.load(shared, Slot.heartbeat));
     // The threshold and the phase tag come from the same read.
     const phase = phaseAt(heartbeatUs);
     const block = detector.poll(nowMs, toMs(heartbeatUs), {

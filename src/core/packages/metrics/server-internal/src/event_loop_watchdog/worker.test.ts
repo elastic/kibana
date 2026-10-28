@@ -42,7 +42,7 @@ describe('runWatchdogWorker', () => {
     resume();
   };
 
-  const start = (overrides: Partial<WatchdogWorkerData> = {}) => {
+  const start = (overrides: Partial<WatchdogWorkerData> = {}, readClock = () => nowUs) => {
     stop = runWatchdogWorker(
       {
         shared: shared.buffer as SharedArrayBuffer,
@@ -56,7 +56,7 @@ describe('runWatchdogWorker', () => {
         },
         ...overrides,
       },
-      { logger, nowUs: () => nowUs, heapUsed: () => 1234 }
+      { logger, nowUs: readClock, heapUsed: () => 1234 }
     );
   };
   const statsMeta = (call = 0) =>
@@ -73,6 +73,24 @@ describe('runWatchdogWorker', () => {
   afterEach(() => {
     stop();
     jest.useRealTimers();
+  });
+
+  it("doesn't report a block when the worker pauses while it reads the clock", () => {
+    let pauseOnNextClockRead = false;
+    start({}, () => {
+      if (pauseOnNextClockRead) {
+        // The worker is paused for 250ms while the main thread keeps stamping its heartbeat.
+        pauseOnNextClockRead = false;
+        nowUs += 250_000;
+        beat();
+      }
+      return nowUs;
+    });
+    pauseOnNextClockRead = true;
+    jest.advanceTimersByTime(25);
+    resume();
+    resume();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('logs a warning when a block ends', () => {
