@@ -8,10 +8,10 @@
 import { workerScheduleCadenceLabel } from './worker_trigger_cadence';
 
 describe('workerScheduleCadenceLabel', () => {
-  it('uses the singular unit for a one-unit interval', () => {
-    expect(workerScheduleCadenceLabel('1h')).toBe('Every 1 hour');
-    expect(workerScheduleCadenceLabel('1m')).toBe('Every 1 minute');
-    expect(workerScheduleCadenceLabel('1d')).toBe('Every 1 day');
+  it('drops the count for a one-unit interval', () => {
+    expect(workerScheduleCadenceLabel('1h')).toBe('Every hour');
+    expect(workerScheduleCadenceLabel('1m')).toBe('Every minute');
+    expect(workerScheduleCadenceLabel('1d')).toBe('Every day');
   });
 
   it('uses the plural unit for a multi-unit interval', () => {
@@ -20,7 +20,7 @@ describe('workerScheduleCadenceLabel', () => {
     expect(workerScheduleCadenceLabel('7d')).toBe('Every 7 days');
   });
 
-  it('defaults to 1 hour, singular, when no interval is set', () => {
-    expect(workerScheduleCadenceLabel(undefined)).toBe('Every 1 hour');
+  it('defaults to every hour when no interval is set', () => {
+    expect(workerScheduleCadenceLabel(undefined)).toBe('Every hour');
   });
 });

@@ -180,7 +180,7 @@ describe('OnboardingPage', () => {
 
       expect(screen.getByTestId('alertZeroOnboardingContinueButton')).toBeDisabled();
       expect(screen.getByTestId('alertZeroOnboardingContinueDisabledReason')).toHaveTextContent(
-        'You need the AlertZero All privilege'
+        'You need the All privilege for AlertZero'
       );
 
       fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
@@ -211,7 +211,7 @@ describe('OnboardingPage', () => {
       fireEvent.click(screen.getByTestId('alertZeroOnboardingPreviewDot-investigate'));
 
       expect(
-        screen.getByText('Run investigations end to end and close what I can')
+        screen.getByText('Run investigations end to end and propose next steps')
       ).toBeInTheDocument();
       expect(screen.getByText('Named-pipe backdoor — eng-ws-19')).toBeInTheDocument();
     });
@@ -251,7 +251,7 @@ describe('OnboardingPage', () => {
 
       fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
 
-      expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+      expect(screen.getByText('Ready to turn on your Watches?')).toBeInTheDocument();
       expect(screen.getAllByRole('switch').length).toBeGreaterThan(0);
     });
   });
@@ -337,7 +337,7 @@ describe('OnboardingPage', () => {
 
   it('renders the title', () => {
     renderPage({ canWrite: true });
-    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+    expect(screen.getByText('Ready to turn on your Watches?')).toBeInTheDocument();
   });
 
   describe('with write capability', () => {
@@ -355,7 +355,7 @@ describe('OnboardingPage', () => {
     it('renders a Read more link pointing at the placeholder docs URL', () => {
       renderPage({ canWrite: true });
       const link = screen.getByTestId('alertZeroOnboardingReadMoreLink');
-      expect(link).toHaveTextContent('Read more about Watches in the documentation');
+      expect(link).toHaveTextContent('Read more about Watches');
       expect(link).toHaveAttribute('href', ONBOARDING_READ_MORE_URL_PLACEHOLDER);
     });
 
@@ -445,9 +445,9 @@ describe('OnboardingPage', () => {
       );
     });
 
-    it('recommends keeping all Watches enabled', () => {
+    it('recommends turning on all Workers', () => {
       renderPage({ canWrite: true });
-      expect(screen.getByText(/We recommend keeping all Watches enabled/)).toBeInTheDocument();
+      expect(screen.getByText(/We recommend turning on all Workers/)).toBeInTheDocument();
     });
 
     it('shows the watch and trigger badges for each worker', () => {

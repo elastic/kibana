@@ -22,7 +22,7 @@ export const WorkerSelectionDescription: React.FC<Props> = ({ isSaving, onWatchS
     <p>
       <FormattedMessage
         id="xpack.alertzero.onboarding.subtitle"
-        defaultMessage="A Watch is a small team of Workers on one job. Each Worker runs on its own trigger, opens investigations, and proposes actions for you to approve. They use the AI models set up in {featureSettingsLink}. Turn on the Workers you want now — every one of them can be tuned later in {watchSettingsLink}."
+        defaultMessage="A Watch is a small team of Workers focused on one job, such as triaging alerts or hunting for threats. Workers use the AI models configured in {featureSettingsLink}, and by default they propose actions for you to approve or decline. Choose which Workers to turn on. You can change their settings later in {watchSettingsLink}."
         values={{
           featureSettingsLink: (
             <FeatureSettingsLink data-test-subj="alertZeroOnboardingFeatureSettingsLink" />

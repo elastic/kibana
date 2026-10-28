@@ -30,17 +30,17 @@ export const workerScheduleCadenceLabel = (interval: string | undefined): string
   switch (unit) {
     case 'm':
       return i18n.translate('xpack.alertzero.watches.settings.trigger.cadence.minutes', {
-        defaultMessage: 'Every {amount} {amount, plural, one {minute} other {minutes}}',
+        defaultMessage: '{amount, plural, =1 {Every minute} other {Every # minutes}}',
         values: { amount },
       });
     case 'h':
       return i18n.translate('xpack.alertzero.watches.settings.trigger.cadence.hours', {
-        defaultMessage: 'Every {amount} {amount, plural, one {hour} other {hours}}',
+        defaultMessage: '{amount, plural, =1 {Every hour} other {Every # hours}}',
         values: { amount },
       });
     case 'd':
       return i18n.translate('xpack.alertzero.watches.settings.trigger.cadence.days', {
-        defaultMessage: 'Every {amount} {amount, plural, one {day} other {days}}',
+        defaultMessage: '{amount, plural, =1 {Every day} other {Every # days}}',
         values: { amount },
       });
   }

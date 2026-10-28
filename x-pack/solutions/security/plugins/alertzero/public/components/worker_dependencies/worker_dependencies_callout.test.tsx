@@ -115,7 +115,7 @@ describe('WorkerDependenciesCallout', () => {
     const first = renderCallouts([hunt], 'onboarding');
     const onboardingRow = screen.getByTestId('alertZeroWorkerDependency-contextEngine');
     expect(onboardingRow).toHaveTextContent(
-      "Context Engine is off, so Continuous Threat Hunt can't write coverage records for Rule Coverage."
+      "Context Engine is off, so Continuous Threat Hunt can't share detection gaps with Rule Coverage."
     );
     expect(screen.queryByText('Worker setup needs attention')).toBeNull();
     expect(screen.queryByRole('link', { name: /^Open Advanced Settings/ })).toBeNull();
@@ -124,7 +124,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([hunt]);
     const callout = screen.getByTestId(`alertZeroWorkerDependencies-settings-${hunt.id}`);
     expect(within(callout).getByText('Worker setup needs attention')).toBeInTheDocument();
-    expect(callout).toHaveTextContent("can't write coverage records");
+    expect(callout).toHaveTextContent("can't share detection gaps");
     expect(
       within(screen.getByTestId('alertZeroDependencyDescription-contextEngine')).queryByRole('link')
     ).toBeNull();
@@ -142,11 +142,11 @@ describe('WorkerDependenciesCallout', () => {
   it.each([
     [
       SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
-      "so Rule Coverage can't process coverage records",
+      "so Rule Coverage can't receive detection gaps",
     ],
     [
       SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
-      "so Attack Discovery findings won't reach Endpoint Analysis",
+      "so Endpoint Analysis can't analyze the attacks that Attack Discovery finds",
     ],
     [
       SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
@@ -220,7 +220,7 @@ describe('WorkerDependenciesCallout', () => {
     core.uiSettings.set.mockRejectedValue(error);
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID)]);
     fireEvent.click(screen.getByRole('button', { name: 'Enable Context Engine' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Could not enable Context Engine');
+    expect(await screen.findByRole('alert')).toHaveTextContent("Couldn't enable Context Engine");
     const row = screen.getByTestId('alertZeroWorkerDependency-contextEngine');
     expect(row).toBeInTheDocument();
     // The settings link comes back as a fallback next to the retry-able Enable button.
@@ -230,7 +230,7 @@ describe('WorkerDependenciesCallout', () => {
     );
     expect(within(row).getByRole('button', { name: 'Enable Context Engine' })).toBeInTheDocument();
     expect(core.notifications.toasts.addError).toHaveBeenCalledWith(error, {
-      title: 'Could not enable Context Engine',
+      title: "Couldn't enable Context Engine",
     });
   });
 
@@ -248,9 +248,9 @@ describe('WorkerDependenciesCallout', () => {
 
     fireEvent.click(screen.getByRole('button', { name: buttonLabel }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(`Could not enable ${label}`);
+    expect(await screen.findByRole('alert')).toHaveTextContent(`Couldn't enable ${label}`);
     expect(core.notifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
-      title: `Could not enable ${label}`,
+      title: `Couldn't enable ${label}`,
     });
     expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
     expect(
@@ -293,12 +293,12 @@ describe('WorkerDependenciesCallout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('alertZeroWorkerDependency-threatEnrich')).toHaveTextContent(
-        'could not be verified'
+        "couldn't be verified"
       );
     });
     const disabled = screen.getByTestId('alertZeroWorkerDependency-threatIngest');
     expect(disabled).toHaveTextContent(
-      'Ingest threat feeds workflow is off, so Continuous Threat Hunt may have no reports to investigate.'
+      'Ingest threat feeds workflow is off, so Continuous Threat Hunt might not have any threat reports to compare against your data.'
     );
     expect(
       within(disabled).getByRole('button', { name: 'Enable Ingest threat feeds' })
@@ -365,7 +365,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID)]);
     fireEvent.click(await screen.findByRole('button', { name: 'Enable Ingest threat feeds' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Could not enable Ingest threat feeds'
+      "Couldn't enable Ingest threat feeds"
     );
     const item = screen.getByTestId('alertZeroWorkerDependency-threatIngest');
     expect(item).toBeInTheDocument();
@@ -379,7 +379,7 @@ describe('WorkerDependenciesCallout', () => {
     ).toBeInTheDocument();
     expect(core.http.post).toHaveBeenCalledTimes(1);
     expect(core.notifications.toasts.addError).toHaveBeenCalledWith(error, {
-      title: 'Could not enable Ingest threat feeds',
+      title: "Couldn't enable Ingest threat feeds",
     });
     expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
   });
@@ -454,7 +454,7 @@ describe('WorkerDependenciesCallout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('alertZeroWorkerDependency-defend')).toHaveTextContent(
-        'could not be verified'
+        "couldn't be verified"
       );
     });
     expect(screen.getByTestId('alertZeroWorkerDependency-contextEngine')).toBeInTheDocument();
@@ -462,7 +462,7 @@ describe('WorkerDependenciesCallout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('alertZeroWorkerDependency-defend')).toHaveTextContent(
-        "Elastic Defend is not set up, so Endpoint Analysis can't investigate hosts."
+        "Elastic Defend isn't set up, so Endpoint Analysis can't investigate hosts."
       );
     });
     expect(core.http.get).toHaveBeenCalledWith('/api/fleet/package_policies', {
@@ -496,7 +496,7 @@ describe('WorkerDependenciesCallout', () => {
     const onboarding = renderCallouts([endpoint], 'onboarding');
 
     expect(await screen.findByTestId('alertZeroWorkerDependency-defend')).toHaveTextContent(
-      'could not be verified'
+      "couldn't be verified"
     );
     expect(screen.queryByText('Could not verify worker setup')).toBeNull();
     onboarding.unmount();
@@ -531,11 +531,11 @@ describe('WorkerDependenciesCallout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('alertZeroWorkerDependency-threatIngest')).toHaveTextContent(
-        'could not be verified'
+        "couldn't be verified"
       );
     });
     expect(screen.getByTestId('alertZeroWorkerDependency-threatEnrich')).toHaveTextContent(
-      'could not be verified'
+      "couldn't be verified"
     );
     fireEvent.click(screen.getByRole('button', { name: 'Retry checks' }));
     await waitFor(() => {
@@ -550,7 +550,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
     const item = await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis');
     expect(item).toHaveTextContent(
-      "Alert Analysis workflow is missing or disabled, so Alert Triage can't analyze alerts."
+      "Alert Analysis workflow is missing or disabled, so Alert Triage can't classify alerts."
     );
     expect(within(item).getByRole('link')).toHaveAttribute(
       'href',
@@ -568,7 +568,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)], 'onboarding');
 
     const item = await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis');
-    expect(item).toHaveTextContent("Alert analysis is off, so Alert Triage can't analyze alerts.");
+    expect(item).toHaveTextContent("Alert analysis is off, so Alert Triage can't classify alerts.");
     expect(screen.queryByText('Worker setup needs attention')).toBeNull();
     expect(core.http.get).toHaveBeenCalledWith('/internal/kibana/settings');
 
@@ -618,7 +618,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
 
     expect(await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis')).toHaveTextContent(
-      'could not be verified'
+      "couldn't be verified"
     );
   });
 
@@ -630,7 +630,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
 
     expect(await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis')).toHaveTextContent(
-      'could not be verified'
+      "couldn't be verified"
     );
     fireEvent.click(screen.getByRole('button', { name: 'Retry checks' }));
     await waitFor(() =>
@@ -645,7 +645,7 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID)]);
 
     expect(await screen.findByTestId('alertZeroWorkerDependency-alertAnalysis')).toHaveTextContent(
-      'could not be verified'
+      "couldn't be verified"
     );
   });
 

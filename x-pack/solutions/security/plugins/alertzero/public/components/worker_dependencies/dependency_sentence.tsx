@@ -35,7 +35,7 @@ export const DependencySentence: React.FC<Props> = ({ sentence, label }) => {
       return (
         <FormattedMessage
           id="xpack.alertzero.workerDependencies.contextEngineCoverageSentence"
-          defaultMessage="{label} is off, so Rule Coverage can't process coverage records from Continuous Threat Hunt."
+          defaultMessage="{label} is off, so Rule Coverage can't receive detection gaps from Continuous Threat Hunt."
           values={{ label }}
         />
       );
@@ -43,7 +43,7 @@ export const DependencySentence: React.FC<Props> = ({ sentence, label }) => {
       return (
         <FormattedMessage
           id="xpack.alertzero.workerDependencies.contextEngineAttackSentence"
-          defaultMessage="{label} is off, so Attack Discovery findings won't reach Endpoint Analysis."
+          defaultMessage="{label} is off, so Endpoint Analysis can't analyze the attacks that Attack Discovery finds."
           values={{ label }}
         />
       );
@@ -51,7 +51,7 @@ export const DependencySentence: React.FC<Props> = ({ sentence, label }) => {
       return (
         <FormattedMessage
           id="xpack.alertzero.workerDependencies.contextEngineEndpointSentence"
-          defaultMessage="{label} is off, so Endpoint Analysis can't read or update investigation records."
+          defaultMessage="{label} is off, so Endpoint Analysis can't read or update investigations."
           values={{ label }}
         />
       );
@@ -59,7 +59,7 @@ export const DependencySentence: React.FC<Props> = ({ sentence, label }) => {
       return (
         <FormattedMessage
           id="xpack.alertzero.workerDependencies.contextEngineHuntSentence"
-          defaultMessage="{label} is off, so Continuous Threat Hunt can't write coverage records for Rule Coverage."
+          defaultMessage="{label} is off, so Continuous Threat Hunt can't share detection gaps with Rule Coverage."
           values={{ label }}
         />
       );
@@ -67,7 +67,7 @@ export const DependencySentence: React.FC<Props> = ({ sentence, label }) => {
       return (
         <FormattedMessage
           id="xpack.alertzero.workerDependencies.alertAnalysisOffSentence"
-          defaultMessage="{label} is off, so Alert Triage can't analyze alerts."
+          defaultMessage="{label} is off, so Alert Triage can't classify alerts."
           values={{ label }}
         />
       );
@@ -75,7 +75,7 @@ export const DependencySentence: React.FC<Props> = ({ sentence, label }) => {
       return (
         <FormattedMessage
           id="xpack.alertzero.workerDependencies.alertAnalysisWorkflowMissingSentence"
-          defaultMessage="{label} is missing or disabled, so Alert Triage can't analyze alerts."
+          defaultMessage="{label} is missing or disabled, so Alert Triage can't classify alerts."
           values={{ label }}
         />
       );
@@ -83,7 +83,7 @@ export const DependencySentence: React.FC<Props> = ({ sentence, label }) => {
       return (
         <FormattedMessage
           id="xpack.alertzero.workerDependencies.attackDiscoveryOffSentence"
-          defaultMessage="{label} are off, so Attack Discovery can't generate discoveries."
+          defaultMessage="{label} are off, so Attack Discovery can't find potential attacks."
           values={{ label }}
         />
       );
@@ -99,7 +99,7 @@ export const DependencySentence: React.FC<Props> = ({ sentence, label }) => {
       return (
         <FormattedMessage
           id="xpack.alertzero.workerDependencies.defendMissingSentence"
-          defaultMessage="{label} is not set up, so Endpoint Analysis can't investigate hosts."
+          defaultMessage="{label} isn't set up, so Endpoint Analysis can't investigate hosts."
           values={{ label }}
         />
       );
@@ -107,7 +107,7 @@ export const DependencySentence: React.FC<Props> = ({ sentence, label }) => {
       return (
         <FormattedMessage
           id="xpack.alertzero.workerDependencies.threatWorkflowOffSentence"
-          defaultMessage="{label} workflow is off, so Continuous Threat Hunt may have no reports to investigate."
+          defaultMessage="{label} workflow is off, so Continuous Threat Hunt might not have any threat reports to compare against your data."
           values={{ label }}
         />
       );
@@ -115,7 +115,7 @@ export const DependencySentence: React.FC<Props> = ({ sentence, label }) => {
       return (
         <FormattedMessage
           id="xpack.alertzero.workerDependencies.unverifiedSentence"
-          defaultMessage="{label} could not be verified. Try again or ask an administrator to check access."
+          defaultMessage="{label} couldn't be verified. Try again or ask an administrator to check access."
           values={{ label }}
         />
       );
@@ -123,7 +123,7 @@ export const DependencySentence: React.FC<Props> = ({ sentence, label }) => {
       return (
         <FormattedMessage
           id="xpack.alertzero.workerDependencies.unverifiedThreatWorkflowSentence"
-          defaultMessage="{label} workflow could not be verified. Try again or ask an administrator to check access and restore it if missing."
+          defaultMessage="{label} workflow couldn't be verified. Try again, or ask an administrator to check access and restore the workflow if it's missing."
           values={{ label }}
         />
       );

@@ -39,13 +39,14 @@ export const dependencyEnabledTitle = (dependencyName: string): string =>
 
 export const enableDependencyFailedTitle = (dependencyName: string): string =>
   i18n.translate('xpack.alertzero.workerDependencies.enableDependencyFailedTitle', {
-    defaultMessage: 'Could not enable {dependencyName}',
+    defaultMessage: "Couldn't enable {dependencyName}",
     values: { dependencyName },
   });
 
 export const enableDependencyFailedDescription = (dependencyName: string): string =>
   i18n.translate('xpack.alertzero.workerDependencies.enableDependencyFailedDescription', {
-    defaultMessage: 'Could not enable {dependencyName}. Try again or use the link.',
+    defaultMessage:
+      "Couldn't enable {dependencyName}. Try again, or use the link next to it to enable it yourself.",
     values: { dependencyName },
   });
 

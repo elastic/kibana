@@ -147,7 +147,7 @@ describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
 
   it('reads the unit options as singular when the amount is one', () => {
     // The collapsed header band pluralizes its cadence badge, so a unit-only plural here would
-    // have the same Worker read "Every 1 hour" collapsed and "Every 1 hours" expanded.
+    // have the same Worker read "Every hour" collapsed and "Every 1 hours" expanded.
     render(
       <ScheduleIntervalField
         workerId={WORKER_ID}

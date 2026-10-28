@@ -20,7 +20,11 @@ export const ONBOARDING_GREETING = i18n.translate('xpack.alertzero.onboarding.gr
 });
 
 export const ONBOARDING_TITLE = i18n.translate('xpack.alertzero.onboarding.title', {
-  defaultMessage: "Let's turn on the Watches?",
+  defaultMessage: 'Ready to turn on your Watches?',
+});
+
+export const ONBOARDING_DOC_TITLE = i18n.translate('xpack.alertzero.onboarding.docTitle', {
+  defaultMessage: 'Set up Watches',
 });
 
 export const ONBOARDING_INTRO_GREETING = i18n.translate(
@@ -29,7 +33,7 @@ export const ONBOARDING_INTRO_GREETING = i18n.translate(
 );
 
 export const ONBOARDING_INTRO_HEADING = i18n.translate('xpack.alertzero.onboarding.intro.heading', {
-  defaultMessage: "Let's add your data?",
+  defaultMessage: 'Ready to add your data?',
 });
 
 export const ONBOARDING_WATCHES_HEADING = i18n.translate(
@@ -45,13 +49,13 @@ export const WATCH_SETTINGS = i18n.translate('xpack.alertzero.onboarding.watchSe
 
 export const ONBOARDING_KEEP_ALL_ENABLED_NOTE = i18n.translate(
   'xpack.alertzero.onboarding.keepAllEnabledNote',
-  { defaultMessage: 'We recommend keeping all Watches enabled.' }
+  { defaultMessage: 'We recommend turning on all Workers.' }
 );
 
 export const ONBOARDING_WORKERS_FOOTNOTE = i18n.translate(
   'xpack.alertzero.onboarding.workersFootnote',
   {
-    defaultMessage: 'Enable acts on the checked set; at least one must stay checked.',
+    defaultMessage: 'Select at least one to continue.',
   }
 );
 
@@ -59,7 +63,7 @@ export const ONBOARDING_NO_WORKERS_AVAILABLE = i18n.translate(
   'xpack.alertzero.onboarding.noWorkersAvailable',
   {
     defaultMessage:
-      'No workers are available for your current subscription. Contact your administrator to enable additional features.',
+      'No Workers are available with your current subscription. Contact your administrator for access.',
   }
 );
 
@@ -68,7 +72,7 @@ export const ENABLE_AND_RUN = i18n.translate('xpack.alertzero.onboarding.enableA
 });
 
 export const READ_MORE = i18n.translate('xpack.alertzero.onboarding.readMore', {
-  defaultMessage: 'Read more about Watches in the documentation',
+  defaultMessage: 'Read more about Watches',
 });
 
 export const workersSelectedCount = (selected: number, total: number) =>
@@ -99,7 +103,7 @@ export const ONBOARDING_MODIFY_FORBIDDEN = i18n.translate(
   'xpack.alertzero.onboarding.modifyForbiddenCallout',
   {
     defaultMessage:
-      'You need the manage_security cluster privilege to enable workers. Ask an administrator.',
+      'You need the manage_security cluster privilege to turn on Workers. Ask an administrator to grant it.',
   }
 );
 
@@ -112,7 +116,7 @@ export const NO_MODEL_CALLOUT_TEXT = i18n.translate(
   'xpack.alertzero.onboarding.noModelCallout.text',
   {
     defaultMessage:
-      'Workers need AI models to run. Set up the models for each level in Feature settings, then come back to turn on Workers.',
+      'Workers need AI models to run. Choose your models in Feature settings, then come back to turn on Workers.',
   }
 );
 
@@ -125,7 +129,7 @@ export const ONBOARDING_CONTINUE_REQUIRES_WRITE = i18n.translate(
   'xpack.alertzero.onboarding.continueRequiresWrite',
   {
     defaultMessage:
-      'You need the AlertZero All privilege to set up Watches. Ask an administrator to enable them.',
+      'You need the All privilege for AlertZero to set up Watches. Ask an administrator to grant it.',
   }
 );
 
@@ -136,42 +140,42 @@ const ONBOARDING_WORKER_DESCRIPTIONS: Record<string, string> = {
     'xpack.alertzero.onboarding.workerDescription.attackDiscovery',
     {
       defaultMessage:
-        'Finds candidate attacks on its schedule, opens an Investigation for each, and sends true positives to forensics.',
+        "Finds potential attacks in your alerts, opens an investigation for each, and proposes forensic analysis of the affected hosts for any that aren't false positives.",
     }
   ),
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.alertTriage',
     {
       defaultMessage:
-        'Classifies each batch of alerts a rule execution generates, and reduces the noise Attack Discovery has to analyze.',
+        'Classifies new alerts and proposes closing false positives, so Attack Discovery has less noise to analyze.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.ruleTuning',
     {
       defaultMessage:
-        'Diagnoses noisy or under-covering rules and produces a tuning proposal with a backtest.',
+        'Finds rules that are too noisy or too narrow, and proposes tuning changes tested against past data.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.endpointAnalysis',
     {
       defaultMessage:
-        'Runs deeper forensics on the hosts from a promoted attack and proposes response actions.',
+        'Analyzes the affected hosts for attacks that Attack Discovery hands off, and proposes response actions such as isolating a host.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.continuousThreatHunt',
     {
       defaultMessage:
-        'Hunts previously ingested threat reports for matching and related activity, and opens an Investigation for anything it finds.',
+        'Searches your data for activity that matches threat reports, and opens an investigation for each match.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.ruleCoverage',
     {
       defaultMessage:
-        'Assesses detection gaps surfaced by Hunt Watch and proposes new or existing rules to close them.',
+        "Reviews detection gaps that Continuous Threat Hunt finds, and proposes rules to close them, either new ones or existing ones you haven't turned on.",
     }
   ),
 };
@@ -187,7 +191,7 @@ const ONBOARDING_WORKER_EVENT_TRIGGERS: Record<string, string> = {
   ),
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerTrigger.endpointAnalysis',
-    { defaultMessage: 'On Attack Discovery promotion' }
+    { defaultMessage: 'On handoff from Attack Discovery' }
   ),
 };
 
@@ -195,12 +199,12 @@ export const onboardingWorkerEventTrigger = (workerId: string): string | undefin
   ONBOARDING_WORKER_EVENT_TRIGGERS[workerId];
 
 export const INTRO_PROMO_LEAD = i18n.translate('xpack.alertzero.onboarding.intro.promoLead', {
-  defaultMessage: 'AlertZero is a coworker that is always there — always working for you.',
+  defaultMessage: 'AlertZero works for you around the clock.',
 });
 
 export const INTRO_PROMO_BODY = i18n.translate('xpack.alertzero.onboarding.intro.promoBody', {
   defaultMessage:
-    'Once your data is in, its Watches triage alerts, hunt for threats, tune noisy rules, and investigate on their own — around the clock. You only see the actions that need a human.',
+    'Once your data is in, AlertZero takes the first pass at your alert queue. It flags false positives, hunts for threats, and investigates potential attacks, then recommends next steps for you to approve or decline.',
 });
 
 export const INTRO_READ_MORE = i18n.translate('xpack.alertzero.onboarding.intro.readMore', {
@@ -209,7 +213,7 @@ export const INTRO_READ_MORE = i18n.translate('xpack.alertzero.onboarding.intro.
 
 export const INTRO_PREVIEW_HEADING = i18n.translate(
   'xpack.alertzero.onboarding.intro.previewHeading',
-  { defaultMessage: 'Once I have data, I will:' }
+  { defaultMessage: 'Once your data is in, AlertZero will:' }
 );
 
 export const INTRO_SET_UP_DATA_TITLE = i18n.translate(
@@ -221,13 +225,13 @@ export const INTRO_SET_UP_DATA_BODY = i18n.translate(
   'xpack.alertzero.onboarding.intro.setUpDataBody',
   {
     defaultMessage:
-      'Getting started walks you through connecting your first sources — endpoint, identity, cloud, and network — and confirms the data is flowing. Any Elastic integration works; the more you connect, the more the Watches can see.',
+      "The Get started page walks you through connecting endpoint, identity, cloud, and network data, and confirms that it's flowing. Any Elastic integration works, and the more you connect, the more AlertZero can see.",
   }
 );
 
 export const INTRO_SET_UP_DATA_LINK = i18n.translate(
   'xpack.alertzero.onboarding.intro.setUpDataLink',
-  { defaultMessage: 'Open Getting started' }
+  { defaultMessage: 'Add data' }
 );
 
 export const CONTINUE = i18n.translate('xpack.alertzero.onboarding.continue', {
@@ -271,7 +275,7 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
       defaultMessage: 'Respond',
     }),
     subtitle: i18n.translate('xpack.alertzero.onboarding.preview.respond.subtitle', {
-      defaultMessage: 'Let you decide on the things that really matter',
+      defaultMessage: 'Let you decide on the things that matter',
     }),
     count: 5,
     badgeColor: 'danger',
@@ -288,7 +292,7 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
           'xpack.alertzero.onboarding.preview.respond.item1.description',
           {
             defaultMessage:
-              "MFA was satisfied from two countries in 40 minutes — a replayed session cookie. Elastic Defend on the CFO's laptop shows an unsigned launch agent reading the browser cookie store at 13:39.",
+              "MFA was satisfied from two countries in 40 minutes, which suggests a replayed session cookie. Elastic Defend on the CFO's laptop shows an unsigned launch agent reading the browser cookie store at 13:39.",
           }
         ),
       },
@@ -304,7 +308,7 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
           'xpack.alertzero.onboarding.preview.respond.item2.description',
           {
             defaultMessage:
-              '19 SPN ticket requests for svc-helpdesk and svc-backup in four minutes from fin-ws-31, all downgraded to RC4 — offline cracking is the point.',
+              'In four minutes, fin-ws-31 requested 19 SPN tickets for svc-helpdesk and svc-backup, all downgraded to RC4 so an attacker can crack them offline.',
           }
         ),
       },
@@ -320,7 +324,7 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
           'xpack.alertzero.onboarding.preview.respond.item3.description',
           {
             defaultMessage:
-              'hr-admin granted finance-sync Mail.ReadWrite and offline_access on the payroll mailbox — no ticket, publisher verified this morning.',
+              "hr-admin granted finance-sync Mail.ReadWrite and offline_access on the payroll mailbox. There's no matching ticket, and the publisher was verified only this morning.",
           }
         ),
       },
@@ -332,7 +336,7 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
       defaultMessage: 'Investigate',
     }),
     subtitle: i18n.translate('xpack.alertzero.onboarding.preview.investigate.subtitle', {
-      defaultMessage: 'Run investigations end to end and close what I can',
+      defaultMessage: 'Run investigations end to end and propose next steps',
     }),
     count: 4,
     badgeColor: 'warning',
@@ -349,7 +353,7 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
           'xpack.alertzero.onboarding.preview.investigate.item1.description',
           {
             defaultMessage:
-              'Forensics pass on eng-ws-19 found an unsigned service on \\\\.\\pipe\\msupdate. Isolate is staged so the implant cannot reach out while the service is pulled.',
+              "Endpoint Analysis found an unsigned service on \\\\.\\pipe\\msupdate and proposes isolating the host so the implant can't reach out while the service is removed.",
           }
         ),
       },
@@ -365,7 +369,7 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
           'xpack.alertzero.onboarding.preview.investigate.item2.description',
           {
             defaultMessage:
-              'Endpoint analysis posted a follow-up after close: inspect the GPO that pushed the scheduled task.',
+              'Endpoint Analysis posted a follow-up after close: inspect the GPO that pushed the scheduled task.',
           }
         ),
       },
@@ -381,7 +385,7 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
           'xpack.alertzero.onboarding.preview.investigate.item3.description',
           {
             defaultMessage:
-              'KRBTGT last rotated 412 days ago — a forged ticket from tonight would still validate. Worth proving before it matters.',
+              "KRBTGT was last rotated 412 days ago, so a ticket forged tonight would still validate. Nothing shows that one has been, but it's worth confirming before it matters.",
           }
         ),
       },
@@ -410,7 +414,7 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
           'xpack.alertzero.onboarding.preview.configure.item1.description',
           {
             defaultMessage:
-              'The previous disable failed because the service account is not an org owner. An org owner granted admin:org — disabling now prevents the app from minting another PAT.',
+              "The previous attempt to disable it failed because the service account isn't an org owner. An org owner has since granted admin:org, so disabling it now stops the app from minting another PAT.",
           }
         ),
       },
@@ -426,7 +430,7 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
           'xpack.alertzero.onboarding.preview.configure.item2.description',
           {
             defaultMessage:
-              'Require admin consent for Graph mail scopes so an hr-admin grant cannot recur.',
+              "Require admin consent for Graph mail scopes so an hr-admin grant can't happen again.",
           }
         ),
       },
@@ -442,7 +446,7 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
           'xpack.alertzero.onboarding.preview.configure.item3.description',
           {
             defaultMessage:
-              'Hunt found LSASS access from an unbacked module on eng-ws-06 with no covering rule. Rule coverage drafted one — enabling it closes the gap.',
+              'Continuous Threat Hunt found LSASS access from an unbacked module on eng-ws-06 that no rule covers. Rule Coverage proposes a new rule to close the gap.',
           }
         ),
       },
