@@ -9,6 +9,9 @@ import { useQuery } from '@kbn/react-query';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useEntityAnalyticsRoutes } from '../api';
 
+/** Query key of the watchlists list; invalidate it after any change to the set of watchlists. */
+export const GET_WATCHLISTS_QUERY_KEY = ['GET', 'WATCHLISTS'] as const;
+
 export const useGetWatchlists = ({
   executionContext,
 }: {
@@ -21,7 +24,7 @@ export const useGetWatchlists = ({
   const { fetchWatchlists } = useEntityAnalyticsRoutes();
 
   return useQuery({
-    queryKey: ['GET', 'WATCHLISTS'],
+    queryKey: GET_WATCHLISTS_QUERY_KEY,
     queryFn: ({ signal }) =>
       fetchWatchlists({
         signal,
