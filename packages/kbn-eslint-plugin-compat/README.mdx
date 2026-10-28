@@ -1,0 +1,26 @@
+---
+id: kibDevDocsOpsEslintPluginCompat
+slug: /kibana-dev-docs/ops/eslint-plugin-compat
+title: "@kbn/eslint-plugin-compat"
+description: Runs third-party ESLint 8 plugins in Oxlint
+date: 2026-10-28
+tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'oxlint', 'plugin']
+---
+
+Oxlint runs ESLint plugins as JS plugins, but its rule context implements ESLint 9's API. Plugins written for ESLint 8 call the context methods ESLint 9 removed (`context.getScope()`, `context.getAncestors()`, `context.getSourceCode()` and the `SourceCode` methods ESLint 8 forwarded from the context) or read `context.parserServices`, and fail with a `TypeError` in Oxlint.
+
+`eslint8_context.js` wraps a plugin's rules so they get those methods back. Each entry point wraps one plugin and keeps its name, so rule names and `eslint-disable` comments don't change:
+
+| Entry point | Plugin |
+| --- | --- |
+| `formatjs.js` | `eslint-plugin-formatjs` |
+| `mocha.js` | `eslint-plugin-mocha` |
+| `no_unsanitized.js` | `eslint-plugin-no-unsanitized` |
+
+`.oxlint/index.mts` loads them:
+
+```ts
+export default defineConfig({
+  jsPlugins: [{ name: 'mocha', specifier: './packages/kbn-eslint-plugin-compat/mocha.js' }],
+});
+```
