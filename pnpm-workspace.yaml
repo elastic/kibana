@@ -96,9 +96,9 @@ overrides:
   'isomorphic-fetch>node-fetch': '2.7.0'
   'langchain': '1.2.30'
   'pixelmatch': '5.3.0'
-  'qs': '6.16.1'
+  'qs': '6.17.0'
   'remark-parse>trim': '1.0.1'
-  'serialize-javascript': '7.1.2'
+  'serialize-javascript': '7.1.3'
   'sharp': '0.35.5'
   'typescript': '6.0.3'
   'util': '0.12.5'
@@ -188,6 +188,7 @@ overrides:
 minimumReleaseAgeExclude:
   # First-party packages are trusted publishes; don't delay consuming fresh @elastic releases.
   - '@elastic/*'
+  - qs@6.17.0
 
 
 # pnpm reads all workspace config from this file — pnpm 11 no longer reads
