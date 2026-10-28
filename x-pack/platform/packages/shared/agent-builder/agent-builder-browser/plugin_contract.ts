@@ -6,7 +6,7 @@
  */
 
 import type { ComponentType, RefAttributes } from 'react';
-import type { EuiFlyoutMenuAction, EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
 import type {
   AttachmentInput,
   ConversationAttachment,
@@ -171,8 +171,6 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 export interface OpenConversationDetailsOptions {
   conversationId: string;
   onClose?: () => void;
-  /** Flyout width. Defaults to `'s'`; use a wider size for content that needs the room. */
-  size?: EuiFlyoutProps['size'];
   /** Icon buttons rendered in the flyout menu bar, before the close button (e.g. copy link). */
   trailingActions?: EuiFlyoutMenuAction[];
 }

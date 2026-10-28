@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { NightshiftHeader } from '../app/header';
 import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button';
-import { INVESTIGATION_FLYOUT_SIZE } from '../common/constants';
 import {
   buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
@@ -140,7 +139,6 @@ export function NightshiftOnboarding({
     void agentBuilder
       .openConversationDetails({
         conversationId: selectedInvestigationId,
-        size: INVESTIGATION_FLYOUT_SIZE,
         trailingActions: [shareInvestigationAction],
         // Closed by the user, not replaced by another selection or unmounted.
         onClose: () => {

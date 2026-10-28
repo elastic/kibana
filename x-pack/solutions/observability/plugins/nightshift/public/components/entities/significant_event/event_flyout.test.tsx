@@ -557,10 +557,7 @@ describe('EventFlyout', () => {
       'Web latency spike'
     );
     fireEvent.click(screen.getByTestId('nightshiftEventInvestigationCard'));
-    expect(mockOpenConversationDetails).toHaveBeenCalledWith({
-      conversationId: 'conv-1',
-      size: 'm',
-    });
+    expect(mockOpenConversationDetails).toHaveBeenCalledWith({ conversationId: 'conv-1' });
     // The flyout opens without `?investigationId=`, so this card reports the view itself.
     expect(mockReportEvent).toHaveBeenCalledWith(
       'nightshift_investigation_viewed',
