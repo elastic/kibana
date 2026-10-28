@@ -52,7 +52,9 @@ describe('createRecorderWorkspace', () => {
           content: Buffer.from(files[path] ?? '').subarray(0, maxReadBytes),
         }))
       ),
-      writeFiles: jest.fn().mockResolvedValue([]),
+      writeFiles: jest.fn(async (written: unknown[]) =>
+        written.map(() => ({ bytes_written: 1, success: true }))
+      ),
       mkdirs: jest.fn().mockResolvedValue([true]),
     };
     const workspace = createRecorderWorkspace({
@@ -74,17 +76,53 @@ describe('createRecorderWorkspace', () => {
 
     expect(text).toContain('234');
     expect(text).toContain('read on with offset 5');
-    expect(session.readFiles).toHaveBeenCalledWith([{ path: '/workspace/a.txt', maxReadBytes: 5 }]);
+    // The whole file is read, and then paged, so that redaction sees all of it.
+    expect(session.readFiles).toHaveBeenCalledWith([
+      { path: '/workspace/a.txt', maxReadBytes: 10 },
+    ]);
   });
 
-  it('caps one read at the maximum', async () => {
-    const { workspace, session } = setup({ files: { '/workspace/a.txt': 'x'.repeat(100_000) } });
+  it('does not show a secret that a page boundary cuts in two', async () => {
+    const secret = 'sk-very-secret-value';
+    const { workspace } = setup({
+      files: { '/workspace/a.txt': `before ${secret} after, and ${secret} again` },
+      redact: [secret],
+    });
 
-    await workspace.readFile({ path: '/workspace/a.txt', length: 1_000_000 });
+    // Page through the whole file in small windows, at offsets that would land inside the secret
+    // if the pages were redacted one by one.
+    let shown = '';
+    for (let offset = 0; offset < 200; offset += 5) {
+      shown += await workspace.readFile({ path: '/workspace/a.txt', offset, length: 5 });
+    }
 
-    expect(session.readFiles).toHaveBeenCalledWith([
-      { path: '/workspace/a.txt', maxReadBytes: 32_000 },
-    ]);
+    const redactedText = shown.replace(/\n\[bytes[^\]]*\]/g, '');
+    expect(redactedText).toBe('before [REDACTED] after, and [REDACTED] again');
+    expect(shown).not.toMatch(/sk-very|secret-value|-secret|ret-val|alue/);
+  });
+
+  it('shows less of a file cut at the read limit, so a secret cut by it is not shown in part', async () => {
+    const { workspace } = setup({ files: { '/workspace/big.txt': 'x'.repeat(2_000_100) } });
+
+    const text = await workspace.readFile({
+      path: '/workspace/big.txt',
+      offset: 1_998_000,
+      length: 5_000,
+    });
+
+    expect(text).toContain('the file is longer than can be read');
+    // 2,000,000 read, less the 1,024-byte margin.
+    expect(text).toContain('bytes 1998000-1998976');
+  });
+
+  it('returns at most the maximum for one read, whatever length is asked for', async () => {
+    const { workspace } = setup({ files: { '/workspace/a.txt': 'x'.repeat(100_000) } });
+
+    const text = await workspace.readFile({ path: '/workspace/a.txt', length: 1_000_000 });
+
+    expect(text.startsWith('x'.repeat(32_000))).toBe(true);
+    expect(text).not.toContain('x'.repeat(32_001));
+    expect(text).toContain('read on with offset 32000');
   });
 
   it('redacts secrets from what it returns', async () => {
@@ -127,5 +165,24 @@ describe('createRecorderWorkspace', () => {
     expect(session.writeFiles).toHaveBeenCalledWith([
       { path: '/workspace/.recorder/results/001-x.txt', content: Buffer.from('abc') },
     ]);
+  });
+
+  it('fails when a file is reported as not written, even though the call resolved', async () => {
+    const { workspace, session } = setup();
+    session.writeFiles.mockResolvedValue([{ bytes_written: 0, success: false }]);
+
+    await expect(
+      workspace.writeResults([{ path: '/workspace/.recorder/results/001-x.txt', content: 'abc' }])
+    ).rejects.toThrow('Could not write /workspace/.recorder/results/001-x.txt');
+  });
+
+  it('fails when the results directory could not be created', async () => {
+    const { workspace, session } = setup();
+    session.mkdirs.mockResolvedValue([false]);
+
+    await expect(
+      workspace.writeResults([{ path: '/workspace/.recorder/results/001-x.txt', content: 'abc' }])
+    ).rejects.toThrow('Could not create');
+    expect(session.writeFiles).not.toHaveBeenCalled();
   });
 });

@@ -9,8 +9,10 @@ import { posix } from 'path';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { OutputRedactor } from '../tools/sandbox_bash/output_redactor';
 import {
+  RECORDER_FILE_MAX_BYTES,
   RECORDER_READ_DEFAULT_BYTES,
   RECORDER_READ_MAX_BYTES,
+  RECORDER_REDACTION_MARGIN_BYTES,
   RECORDER_RESULTS_DIR,
   RECORDER_WORKSPACE_ROOT,
 } from './constants';
@@ -85,10 +87,14 @@ export const createRecorderWorkspace = ({
 }): RecorderWorkspace => ({
   writeResults: async (files) => {
     if (files.length === 0) return;
-    await session.mkdirs([RECORDER_RESULTS_DIR]);
-    await session.writeFiles(
+    // A resolved call can still report that a path was not written, so each flag is checked.
+    const made = await session.mkdirs([RECORDER_RESULTS_DIR]);
+    if (!made.every(Boolean)) throw new Error(`Could not create ${RECORDER_RESULTS_DIR}.`);
+    const written = await session.writeFiles(
       files.map(({ path, content }) => ({ path, content: Buffer.from(content, 'utf8') }))
     );
+    const failed = files.filter((_, index) => !written[index]?.success).map(({ path }) => path);
+    if (failed.length > 0) throw new Error(`Could not write ${failed.join(', ')}.`);
   },
 
   readFile: async ({ path: rawPath, offset, length }) => {
@@ -100,17 +106,29 @@ export const createRecorderWorkspace = ({
     if (!stat?.exists) return `Error: ${path} does not exist.`;
     if (stat.is_dir) return `Error: ${path} is a directory, not a file.`;
 
+    // The file is read and redacted whole, then paged. Redacting a page on its own would miss a
+    // secret that crosses the page boundary, and two reads could put its halves together.
+    const [result] = await session.readFiles([
+      { path, maxReadBytes: Math.min(stat.size, RECORDER_FILE_MAX_BYTES) },
+    ]);
+    if (!result?.success) return `Error: ${path} could not be read.`;
+    const redacted = Buffer.from(redactor.redact(result.content.toString('utf8')), 'utf8');
+    const cutAtLimit = stat.size > RECORDER_FILE_MAX_BYTES;
+    const readable = cutAtLimit
+      ? redacted.subarray(0, Math.max(0, redacted.length - RECORDER_REDACTION_MARGIN_BYTES))
+      : redacted;
+
+    // Offsets count bytes of the redacted text, which is what the model is shown.
     const start = toInt(offset, 0, 0, Number.MAX_SAFE_INTEGER);
     const count = toInt(length, RECORDER_READ_DEFAULT_BYTES, 1, RECORDER_READ_MAX_BYTES);
-    const [result] = await session.readFiles([{ path, maxReadBytes: start + count }]);
-    if (!result?.success) return `Error: ${path} could not be read.`;
-
-    const slice = result.content.subarray(start, start + count);
+    const slice = readable.subarray(start, start + count);
     const end = start + slice.length;
     const more =
-      end < stat.size
-        ? `\n[bytes ${start}-${end} of ${stat.size}; read on with offset ${end}]`
+      end < readable.length
+        ? `\n[bytes ${start}-${end} of ${readable.length}; read on with offset ${end}]`
+        : cutAtLimit
+        ? `\n[bytes ${start}-${end}; the file is longer than can be read]`
         : '';
-    return `${redactor.redact(slice.toString('utf8'))}${more}`;
+    return `${slice.toString('utf8')}${more}`;
   },
 });

@@ -33,5 +33,12 @@ export const RECORDER_RESULTS_DIR = '/workspace/.recorder/results';
 export const RECORDER_MAX_TOOL_ROUNDS = 10;
 /** Reads and lists the final pass may make in total, so a loop cannot read the whole workspace. */
 export const RECORDER_MAX_TOOL_CALLS = 20;
+/**
+ * A file is read whole, up to this size, and redacted whole before any of it is paged out, so a
+ * secret that crosses a page boundary is still found. A longer file is readable up to here.
+ */
+export const RECORDER_FILE_MAX_BYTES = 2_000_000;
+/** Left off the end of a file cut at the limit, so a secret cut by it is not shown in part. */
+export const RECORDER_REDACTION_MARGIN_BYTES = 1_024;
 export const RECORDER_READ_DEFAULT_BYTES = 16_000;
 export const RECORDER_READ_MAX_BYTES = 32_000;

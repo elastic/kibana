@@ -390,6 +390,28 @@ describe('runFindingsPass', () => {
     expect(writer.setImpact).toHaveBeenCalledWith(expect.objectContaining({ evidence: null }));
   });
 
+  it('retracts the impact evidence on the final pass even when the summary is not restated', async () => {
+    const { impact_summary: _summary, impact_entities: _entities, ...withoutImpact } = output;
+    const { deps, writer, memory } = setup({
+      answers: [answerWith({ ...withoutImpact, impact_evidence: null })],
+    });
+
+    await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+    const [params] = writer.setImpact.mock.calls[0];
+    expect(params).toEqual({ conversationId: 'c1', evidence: null });
+    expect(params).not.toHaveProperty('summary');
+  });
+
+  it('writes no impact from a final pass that carries no impact field', async () => {
+    const { impact_summary: _summary, impact_entities: _entities, ...withoutImpact } = output;
+    const { deps, writer, memory } = setup({ answers: [answerWith(withoutImpact)] });
+
+    await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+    expect(writer.setImpact).not.toHaveBeenCalled();
+  });
+
   it('gives an entity with a long name an id within the store limit', async () => {
     const longName = 'x'.repeat(400);
     const { deps, writer, memory } = setup({

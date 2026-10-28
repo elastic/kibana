@@ -95,7 +95,10 @@ import {
   createSandboxOutputRedactorProvider,
   withSandboxOutputRedaction,
 } from './tools/sandbox_bash/sandbox_output_redaction';
-import { createSandboxToolAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
+import {
+  checkSandboxAccess,
+  createSandboxToolAvailability,
+} from './tools/sandbox_bash/sandbox_tool_availability';
 import {
   nightshiftSecretsEncryptionParams,
   nightshiftSecretsSavedObjectType,
@@ -304,6 +307,14 @@ export class NightshiftInvestigationsPlugin
             getWorkspace: async ({ request, conversationId, allowedConnectorIds }) => {
               const sandboxStart = getGatedSandboxStart();
               if (!sandboxStart) return undefined;
+              // The same per-request check the investigator's sandbox tools pass: a user who may
+              // not use the sandbox must not have its files read on their behalf either.
+              const access = await checkSandboxAccess({
+                request,
+                featureFlags: this.featureFlags,
+                security: this.securityStart,
+              });
+              if (access.status !== 'available') return undefined;
               const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
               const redactor = await getRecorderOutputRedactor({
                 request,

@@ -534,7 +534,14 @@ export const runFindingsPass = async (
           ),
         }),
     ]);
-    if (final && record.impact_summary) {
+    // Any impact field is a write: a pass may retract the evidence (`null`) or change the
+    // entities without restating the summary, and an absent field keeps what is stored.
+    if (
+      final &&
+      (record.impact_summary !== undefined ||
+        record.impact_evidence !== undefined ||
+        record.impact_entities !== undefined)
+    ) {
       const {
         impact_summary: impactSummary,
         impact_entities: entities,
@@ -545,7 +552,7 @@ export const runFindingsPass = async (
         () =>
           writer.setImpact({
             conversationId,
-            summary: impactSummary,
+            ...(impactSummary !== undefined ? { summary: impactSummary } : {}),
             // Omitted keeps the stored evidence; `null` removes it.
             ...(impactEvidence !== undefined ? { evidence: impactEvidence } : {}),
             // Omitted keeps the stored entities. The entity form is only for two or more entities
