@@ -4,13 +4,13 @@ Libra is the AI reviewer that posts as `infra-vault-gh-plugin-prod[bot]`. It rev
 
 ## When it reviews
 
-`.libra/settings.yaml` configures it. Libra skips draft PRs unless they have the `ci:draft-checks` label, and skips any PR labelled `reviewer:skip-ai`. It doesn't review kibanamachine fix-up commits, which is why `pr.sh wait` defaults to the newest commit not pushed by kibanamachine.
+`.libra/settings.yaml` configures it. Libra skips draft PRs unless they have the `ci:draft-checks` label, and skips any PR labelled `reviewer:skip-ai`. It doesn't review kibanamachine fix-up commits, which is why `pr.mjs wait` defaults to the newest commit not pushed by kibanamachine.
 
-`pr.sh wait --for libra` reads Libra's commit status (context `Libra`). `pending` means it's still reviewing. It then ends in one of three states: `Review submitted` (`findings`), `Review completed with noop` (`clean`) or `Review skipped` (`skipped`).
+`pr.mjs wait --for libra` reads Libra's commit status (context `Libra`). `pending` means it's still reviewing. It then ends in one of three states: `Review submitted` (`findings`), `Review completed with noop` (`clean`) or `Review skipped` (`skipped`).
 
 ## Where findings appear
 
-Most findings are inline threads (`pr.sh threads <pr> --reviewer libra`). After `findings`, also read the body of Libra's review of that commit, because some findings appear only there:
+Most findings are inline threads (`pr.mjs threads <pr>`). After `findings`, also read the body of Libra's review of that commit, because some findings appear only there:
 
 ```bash
 gh api repos/elastic/kibana/pulls/<pr>/reviews --paginate \
@@ -34,7 +34,7 @@ gh api repos/elastic/kibana/pulls/comments/<commentId>/reactions -f content=-1
 Libra doesn't resolve its own threads. After the push, resolve the thread of each valid finding yourself:
 
 ```bash
-pr.sh resolve <threadId>
+pr.mjs resolve <threadId>
 ```
 
 Leave false positives and out-of-scope threads unresolved for human reviewers.

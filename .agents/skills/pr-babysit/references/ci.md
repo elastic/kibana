@@ -3,10 +3,10 @@
 Kibana's PR pipeline is the Buildkite pipeline `kibana-pull-request`. It reports on each commit as the `kibana-ci` commit status, whose link is the build. `.buildkite/pull_requests.json` configures when it runs:
 
 - It builds every push to a non-draft PR. Drafts build only with the `ci:build-draft` label, and the `skip-ci` label turns it off.
-- It skips commits that only change files such as docs, `.md` files, `.github/` or `.libra/`. `pr.sh wait --for ci` then reports `none`, which is expected.
+- It skips commits that only change files such as docs, `.md` files, `.github/` or `.libra/`. `pr.mjs wait --for ci` then reports `none`, which is expected.
 - A PR comment that is exactly `/ci` (or `buildkite test this`) starts a new build of the PR head.
 
-kibanamachine pushes fix-up commits to PR branches, and CI runs again on them. That's why `pr.sh wait --for ci` follows the PR head instead of a fixed SHA.
+kibanamachine pushes fix-up commits to PR branches, and CI runs again on them. That's why `pr.mjs wait --for ci` follows the PR head instead of a fixed SHA.
 
 ## Reading a failure
 
@@ -56,7 +56,7 @@ bk job retry <job-id>
 If your token can't retry jobs, comment `/ci` on the PR instead, which rebuilds everything. Then wait with `--since`:
 
 ```bash
-pr.sh wait <pr> --for ci --since "$since"
+pr.mjs wait <pr> --for ci --since "$since"
 ```
 
 Until the new attempt reports, the `kibana-ci` status still shows the failure you retried. `--since` makes `wait` ignore it, so the result you get is the retry's. If the same job fails again, stop retrying and list it in the final report with the build link and any tracking issue.
