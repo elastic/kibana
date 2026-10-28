@@ -73,6 +73,10 @@ export interface ApplicationStart {
    * Before rendering a UI element that a user could use to navigate to another application,
    * first check if the destination application is actually available using the isAppRegistered API.
    *
+   * For links, render `href={getUrlForApp(appId, options)}` instead of calling this from `onClick`.
+   * Core already routes same-origin `<a href>` clicks through {@link ApplicationStart.navigateToUrl},
+   * and a plain `href` keeps Cmd/Ctrl-click and "open in new tab" working.
+   *
    * @param appId - The identifier of the app to navigate to
    * @param options - navigation options
    */
@@ -83,7 +87,7 @@ export interface ApplicationStart {
    * within the current basePath).
    *
    * **Important**: This method always uses `history.push()` and creates a NEW entry in the browser history stack.
-   * This is appropriate for user-initiated navigation (e.g., clicking links or buttons), but NOT for:
+   * This is appropriate for user-initiated navigation (e.g., clicking buttons), but NOT for:
    * - **In-app navigation** within the same React Router instance - use React Router's `history.replace()` instead
    * - **Conditional redirects** in components - use `navigateToApp(appId, { replace: true })` for cross-app redirects
    *
@@ -99,6 +103,12 @@ export interface ApplicationStart {
    *
    * Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.
    * Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`.
+   *
+   * Links don't need to call this: core listens for clicks on `document.body` and routes same-origin
+   * `<a href>` clicks through this method, leaving modifier clicks, `target="_blank"`, `download`
+   * and `data-kbn-redirect-app-link-ignore` links to the browser. Call it from `onClick` only when
+   * the element has no `href`, navigation must wait for async work, or click propagation is stopped
+   * before it reaches `document.body`.
    *
    * @example
    * ```ts
