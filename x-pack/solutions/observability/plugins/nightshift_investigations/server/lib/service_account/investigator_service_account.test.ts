@@ -103,6 +103,7 @@ const setup = ({
   });
   return {
     service,
+    esClient,
     serviceAccounts,
     managedWorkflows,
     getWorkflow,
