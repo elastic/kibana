@@ -1006,7 +1006,13 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     version: true,
   },
   // ml signal fields
-  influencers: true,
+  influencers: {
+    influencer_field_name: true,
+  },
+  influencers_sanitized: {
+    influencer_field_name: true,
+    influencer_field_values: true,
+  },
   signal: {
     ancestors: true,
     depth: true,
