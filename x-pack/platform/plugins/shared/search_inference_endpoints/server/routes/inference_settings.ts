@@ -38,7 +38,7 @@ const resolveAllEndpointIds = (
 
   const resolvedEndpointIds = featureRegistry
     .getAll()
-    .filter((f) => f.parentFeatureId !== undefined && !f.isHidden)
+    .filter((f) => f.parentFeatureId !== undefined)
     .flatMap((f) =>
       resolveFeatureEndpoints(featureRegistry, soFeaturesMap, f.featureId, logger).endpoints.map(
         ({ id }) => id

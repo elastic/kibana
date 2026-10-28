@@ -142,62 +142,6 @@ describe('Inference Settings API', () => {
       await expect(mockRouter.callRoute({})).rejects.toThrow(error);
     });
 
-    it('should skip hidden features when checking for invalid endpoints', async () => {
-      const featureRegistry = new InferenceFeatureRegistry(mockLogger);
-      featureRegistry.register({
-        featureId: 'parent',
-        featureName: 'Parent',
-        featureDescription: 'Parent.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: [],
-      });
-      featureRegistry.register({
-        featureId: 'visible_child',
-        parentFeatureId: 'parent',
-        featureName: 'Visible child',
-        featureDescription: 'Visible child.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: ['.visible-recommended'],
-      });
-      featureRegistry.register({
-        featureId: 'hidden_child',
-        parentFeatureId: 'parent',
-        featureName: 'Hidden child',
-        featureDescription: 'Hidden child.',
-        taskType: 'chat_completion',
-        recommendedEndpoints: ['.hidden-recommended'],
-        isHidden: true,
-      });
-      const router = new MockRouter({
-        context,
-        method: 'get',
-        path: APIRoutes.GET_INFERENCE_SETTINGS,
-        version: ROUTE_VERSIONS.v1,
-      });
-      defineInferenceSettingsRoutes({
-        logger: mockLogger,
-        router: router.router,
-        featureRegistry,
-        getConnectorById,
-      });
-      mockSOClient.get.mockResolvedValue({
-        id: INFERENCE_SETTINGS_ID,
-        type: INFERENCE_SETTINGS_SO_TYPE,
-        attributes: {
-          features: [{ feature_id: 'visible_child', endpoints: [{ id: '.visible-saved' }] }],
-        },
-        references: [],
-      });
-
-      await router.callRoute({});
-
-      expect(router.response.ok).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: expect.objectContaining({ invalidEndpoints: ['.visible-saved'] }),
-        })
-      );
-    });
-
     it('should use hidden types client', async () => {
       mockSOClient.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
