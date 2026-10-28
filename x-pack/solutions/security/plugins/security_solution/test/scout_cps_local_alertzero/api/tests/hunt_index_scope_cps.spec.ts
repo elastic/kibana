@@ -6,6 +6,7 @@
  */
 
 import type {
+  HuntForThreatResponse,
   HuntIndexScopeResponse,
   HuntWorkerIndexCoverageResponse,
 } from '@kbn/alertzero-common';
@@ -13,6 +14,7 @@ import { HUNT_INDEX_SCOPE_URL, HUNT_WORKER_INDEX_COVERAGE_URL } from '@kbn/alert
 import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
+  HUNT_FOR_THREAT_URL,
   enableAlertZeroInSpace,
   runCleanupSteps,
   setDefaultIndexInSpace,
@@ -28,11 +30,16 @@ const LINKED_PATTERN = `${LINKED_ALIAS}:logs-cps-hunt-*`;
 const CUSTOM_PATTERN = `custom-edr-cps-${RUN}-*`;
 const CUSTOM_INDEX = `custom-edr-cps-${RUN}-1`;
 const SPACE = `hunt-cps-${RUN}`;
-// Flat world: origin plus every linked project (`PROJECT_ROUTING.ALL` in `@kbn/cps-common`). A space
-// with origin-only routing cannot resolve a `<project>:<pattern>` expression: the resolve fails
-// with `no_matching_project_exception` and the hunt scope stays blocked.
+const ORIGIN_SPACE = `hunt-cps-origin-${RUN}`;
+// The Hunt routes read with the space's project routing, so the space setting decides what a
+// `<project>:<pattern>` expression can reach. Flat world (`PROJECT_ROUTING.ALL` in
+// `@kbn/cps-common`) is origin plus every linked project; origin-only cannot resolve the
+// expression and the resolve fails with `no_matching_project_exception`.
 const PROJECT_ROUTING_ALL = '_alias:*';
+const PROJECT_ROUTING_ORIGIN_ONLY = '_alias:_origin';
 const HUNT_ROLE_NAME = '_alertzero_threat_hunt';
+// TEST-NET-3, never routable; only the linked document carries it.
+const LINKED_IOC_IP = '203.0.113.7';
 
 const document = () => ({ '@timestamp': new Date().toISOString(), message: 'scout' });
 
@@ -65,10 +72,22 @@ apiTest.describe.serial(
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminHeaders = withHuntHeaders(cookieHeader);
       await enableAlertZeroInSpace({ apiClient, headers: adminHeaders, spaceId: SPACE });
+      await apiServices.spaces.create({
+        id: ORIGIN_SPACE,
+        name: ORIGIN_SPACE,
+        projectRouting: PROJECT_ROUTING_ORIGIN_ONLY,
+      });
+      await enableAlertZeroInSpace({ apiClient, headers: adminHeaders, spaceId: ORIGIN_SPACE });
+      await setDefaultIndexInSpace({
+        apiClient,
+        headers: adminHeaders,
+        spaceId: ORIGIN_SPACE,
+        patterns: ['logs-*', LINKED_PATTERN],
+      });
       // Both names match the `logs-*-*` template and become data streams.
       await linkedProject.esClient.index({
         index: LINKED_STREAM,
-        document: document(),
+        document: { ...document(), source: { ip: LINKED_IOC_IP } },
         refresh: true,
       });
       await esClient.index({ index: ORIGIN_STREAM, document: document(), refresh: true });
@@ -101,6 +120,11 @@ apiTest.describe.serial(
           run: () => esClient.indices.deleteDataStream({ name: ORIGIN_STREAM }),
         },
         { name: `delete space ${SPACE}`, run: () => apiServices.spaces.delete(SPACE) },
+        // Deleting the space deletes its space-scoped config saved object with it.
+        {
+          name: `delete space ${ORIGIN_SPACE}`,
+          run: () => apiServices.spaces.delete(ORIGIN_SPACE),
+        },
         {
           name: 'delete the custom index',
           run: () => esClient.indices.delete({ index: CUSTOM_INDEX, ignore_unavailable: true }),
@@ -108,12 +132,10 @@ apiTest.describe.serial(
       ]);
     });
 
-    // Known limitation, pinned here so a fix has to update it: the Hunt resolve uses the plain
-    // current-user client, which sends no project routing, so a `<project>:<pattern>` expression
-    // cannot match the linked project even in a space whose routing includes it. The scope stays
-    // blocked and the worker coverage answers `unavailable` / `discovery_failed`.
+    // The Hunt routes scope their Elasticsearch client with the space's project routing, so a
+    // `<project>:<pattern>` expression resolves in a space whose routing includes that project.
     apiTest(
-      'cannot yet resolve a linked project pattern through index_scope',
+      'resolves a linked project pattern through index_scope when the space routes to it',
       async ({ apiClient }) => {
         await setDefaultIndexInSpace({
           apiClient,
@@ -121,21 +143,47 @@ apiTest.describe.serial(
           spaceId: SPACE,
           patterns: ['logs-*', LINKED_PATTERN],
         });
+        try {
+          const response = await apiClient.get(spaceUrl(HUNT_INDEX_SCOPE_URL, SPACE), {
+            headers: adminHeaders,
+            responseType: 'json',
+          });
+          const coverage = await apiClient.get(spaceUrl(HUNT_WORKER_INDEX_COVERAGE_URL, SPACE), {
+            headers: adminHeaders,
+            responseType: 'json',
+          });
 
-        const response = await apiClient.get(spaceUrl(HUNT_INDEX_SCOPE_URL, SPACE), {
+          const scope = response.body as HuntIndexScopeResponse;
+          expect(scope).toMatchObject({ status: 'ok', resolution: 'universe', missing: [] });
+          expect(scope.index_patterns).toContain(LINKED_PATTERN);
+          const coverageBody = coverage.body as HuntWorkerIndexCoverageResponse;
+          expect(coverageBody).toMatchObject({ source: 'role', missing_for_everyone: [] });
+          expect(coverageBody.unreadable_by_worker).not.toContain(LINKED_PATTERN);
+        } finally {
+          // Never leave the linked pattern behind for the role-coverage tests below.
+          await setDefaultIndexInSpace({
+            apiClient,
+            headers: adminHeaders,
+            spaceId: SPACE,
+            patterns: ['logs-*', CUSTOM_PATTERN],
+          });
+        }
+      }
+    );
+
+    // The fix honours the space setting rather than fanning out everywhere: with origin-only
+    // routing the resolve still fails with `no_matching_project_exception`.
+    apiTest(
+      'cannot resolve a linked project pattern in a space routed to the origin only',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(spaceUrl(HUNT_INDEX_SCOPE_URL, ORIGIN_SPACE), {
           headers: adminHeaders,
           responseType: 'json',
         });
-        const coverage = await apiClient.get(spaceUrl(HUNT_WORKER_INDEX_COVERAGE_URL, SPACE), {
-          headers: adminHeaders,
-          responseType: 'json',
-        });
-        await setDefaultIndexInSpace({
-          apiClient,
-          headers: adminHeaders,
-          spaceId: SPACE,
-          patterns: ['logs-*', CUSTOM_PATTERN],
-        });
+        const coverage = await apiClient.get(
+          spaceUrl(HUNT_WORKER_INDEX_COVERAGE_URL, ORIGIN_SPACE),
+          { headers: adminHeaders, responseType: 'json' }
+        );
 
         expect(response.body as HuntIndexScopeResponse).toMatchObject({
           status: 'blocked',
@@ -147,6 +195,49 @@ apiTest.describe.serial(
         });
       }
     );
+
+    // The search path, not only the resolve, reads the linked project. The universe is the
+    // linked pattern alone: an unqualified `logs-*` in a flat-world space fans out to the linked
+    // project too and would find the document on its own.
+    apiTest('finds a Tier 1 IOC hit on the linked project', async ({ apiClient }) => {
+      await setDefaultIndexInSpace({
+        apiClient,
+        headers: adminHeaders,
+        spaceId: SPACE,
+        patterns: [LINKED_PATTERN],
+      });
+      try {
+        const response = await apiClient.post(spaceUrl(HUNT_FOR_THREAT_URL, SPACE), {
+          headers: adminHeaders,
+          responseType: 'json',
+          body: {
+            iocs: [{ type: 'ip', value: LINKED_IOC_IP }],
+            time_range: { from: 'now-1h', to: 'now' },
+          },
+        });
+
+        expect(response.statusCode).toBe(200);
+        const { result } = response.body as HuntForThreatResponse;
+        expect(result).toMatchObject({ status: 'environment_hits_found', has_confirmed_hit: true });
+        const linkedIndices = result.per_index
+          .map(({ index }) => index)
+          .filter((index) => index.startsWith(`${LINKED_ALIAS}:`));
+        expect(linkedIndices).not.toHaveLength(0);
+        expect(linkedIndices.every((index) => index.includes(LINKED_STREAM))).toBe(true);
+        expect(result.per_index.some(({ index }) => index.includes(ORIGIN_STREAM))).toBe(false);
+        expect(result.hits[0].index.startsWith(`${LINKED_ALIAS}:`)).toBe(true);
+        expect(result.hits[0]).toMatchObject({
+          matched: { field: 'source.ip', ioc: { type: 'ip', value: LINKED_IOC_IP } },
+        });
+      } finally {
+        await setDefaultIndexInSpace({
+          apiClient,
+          headers: adminHeaders,
+          spaceId: SPACE,
+          patterns: ['logs-*', CUSTOM_PATTERN],
+        });
+      }
+    });
 
     apiTest(
       'answers worker coverage from the role for the built-in Serverless role',

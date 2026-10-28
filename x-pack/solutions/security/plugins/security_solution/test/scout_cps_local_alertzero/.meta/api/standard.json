@@ -1,12 +1,12 @@
 {
-  "sha1": "",
+  "sha1": "489c93eab4253d2b77632439308077de7f76d6b3",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "b51ae3ff0f0dc15-c25cd499066ccbf",
-      "title": "Hunt Watch - index scope and worker coverage across projects cannot yet resolve a linked project pattern through index_scope",
+      "id": "b51ae3ff0f0dc15-45adf789df21325",
+      "title": "Hunt Watch - index scope and worker coverage across projects resolves a linked project pattern through index_scope when the space routes to it",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -14,8 +14,36 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local_alertzero/api/tests/hunt_index_scope_cps.spec.ts",
-        "line": 106,
-        "column": 95
+        "line": 132,
+        "column": 9
+      }
+    },
+    {
+      "id": "b51ae3ff0f0dc15-100b06c2a31330c",
+      "title": "Hunt Watch - index scope and worker coverage across projects cannot resolve a linked project pattern in a space routed to the origin only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local_alertzero/api/tests/hunt_index_scope_cps.spec.ts",
+        "line": 174,
+        "column": 5
+      }
+    },
+    {
+      "id": "b51ae3ff0f0dc15-687412fd0a9b7d5",
+      "title": "Hunt Watch - index scope and worker coverage across projects finds a Tier 1 IOC hit on the linked project",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local_alertzero/api/tests/hunt_index_scope_cps.spec.ts",
+        "line": 197,
+        "column": 6
       }
     },
     {
@@ -28,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local_alertzero/api/tests/hunt_index_scope_cps.spec.ts",
-        "line": 145,
+        "line": 235,
         "column": 32
       }
     },
@@ -42,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local_alertzero/api/tests/hunt_index_scope_cps.spec.ts",
-        "line": 164,
-        "column": 35
+        "line": 253,
+        "column": 36
       }
     }
   ]

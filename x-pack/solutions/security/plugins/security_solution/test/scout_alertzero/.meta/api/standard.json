@@ -1,5 +1,5 @@
 {
-  "sha1": "b0d5d7a9372a6dfd25642c36417847e1a0ea565d",
+  "sha1": "a9538f8a3b0df890e34d009336d5703e48da0beb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 98,
+        "line": 100,
         "column": 9
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 107,
+        "line": 109,
         "column": 25
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 123,
+        "line": 125,
         "column": 6
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 129,
+        "line": 131,
         "column": 25
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 144,
+        "line": 146,
         "column": 24
       }
     },
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 152,
+        "line": 154,
         "column": 6
       }
     },
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 162,
+        "line": 164,
         "column": 33
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 179,
+        "line": 181,
         "column": 17
       }
     },
@@ -152,8 +152,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 154,
-        "column": 11
+        "line": 178,
+        "column": 24
       }
     },
     {
@@ -166,8 +166,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 189,
-        "column": 24
+        "line": 213,
+        "column": 20
       }
     },
     {
@@ -180,8 +180,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 227,
-        "column": 15
+        "line": 251,
+        "column": 31
       }
     },
     {
@@ -194,8 +194,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 247,
-        "column": 21
+        "line": 271,
+        "column": 51
       }
     },
     {
@@ -208,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 266,
-        "column": 22
+        "line": 290,
+        "column": 18
       }
     },
     {
@@ -222,7 +222,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 31
       }
     },
@@ -236,7 +236,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 20
       }
     },
@@ -250,7 +250,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
-        "line": 98,
+        "line": 99,
         "column": 25
       }
     },
@@ -265,7 +265,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
         "line": 113,
-        "column": 26
+        "column": 49
       }
     },
     {
@@ -278,8 +278,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_role.spec.ts",
-        "line": 130,
-        "column": 26
+        "line": 132,
+        "column": 24
       }
     },
     {
@@ -292,8 +292,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_sweep.spec.ts",
-        "line": 83,
-        "column": 60
+        "line": 118,
+        "column": 9
       }
     },
     {
