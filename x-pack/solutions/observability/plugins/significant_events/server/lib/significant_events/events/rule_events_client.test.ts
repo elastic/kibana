@@ -916,6 +916,17 @@ describe('RuleEventsClient', () => {
       expect(lastQuery(query)).toContain('SORT @timestamp DESC');
     });
 
+    it('reduces to the latest action per series before returning rows', async () => {
+      const { client, query } = setup([]);
+
+      await client.findOperatorDeactivations({ heads });
+
+      const text = lastQuery(query);
+      expect(text).toContain('INLINE STATS latest_action_at = MAX(@timestamp) BY group_hash');
+      expect(text).toContain('INLINE STATS latest_action_rank = MAX(action_rank) BY group_hash');
+      expect(text.indexOf('latest_action_at')).toBeLessThan(text.indexOf('SORT @timestamp DESC'));
+    });
+
     it('logs an error when it has to read with the request credentials', async () => {
       const { client, logger } = setup([]);
 

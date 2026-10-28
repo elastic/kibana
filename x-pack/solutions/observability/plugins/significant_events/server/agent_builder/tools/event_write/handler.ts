@@ -37,6 +37,7 @@ import {
   applyWriteOutcomes,
   buildPendingWrite,
   computeEventFacts,
+  episodeHistory,
   loadHistory,
   shouldSkipAsNoOp,
 } from './event_facts';
@@ -116,11 +117,14 @@ export async function eventsWriteBulkHandler({
     competing.length === 0
       ? new Set<string>()
       : new Set((await eventSearchClient.findOperatorDeactivations({ heads: competing })).keys());
-  const toWrite = reopenMatchingInactiveSeries({
-    candidates: unskipped,
-    inactive: inactiveEvents,
-    deactivatedGroupHashes,
-  });
+  const toWrite = markDuplicateKeys(
+    reopenMatchingInactiveSeries({
+      candidates: unskipped,
+      inactive: inactiveEvents,
+      deactivatedGroupHashes,
+    }),
+    results
+  );
 
   const eventHistory = await loadHistory({ eventSearchClient, candidates: toWrite });
   const known = keepKnownEvents({ candidates: eventHistory, enabled: rejectUnknownEventIds });
@@ -219,7 +223,7 @@ const decideStatuses = ({
     const signals =
       input.event_id === undefined || !isLive
         ? input.signals ?? []
-        : mergeSignalsLatestPerRule(priorDocs, input.signals ?? [], timestamp);
+        : mergeSignalsLatestPerRule(episodeHistory(priorDocs), input.signals ?? [], timestamp);
     const outcome = assessMembers(signals);
     const decision = decideLifecycle({
       state: { status: latest?.status },

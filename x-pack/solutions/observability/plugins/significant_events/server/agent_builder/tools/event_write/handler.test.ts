@@ -621,6 +621,40 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-c']);
   });
 
+  it('does not restore closed-episode signals on a later healthy continuation', async () => {
+    const eventId = 'checkout-current-episode';
+    const closed = makeStoredEvent(eventId, {
+      status: 'inactive',
+      signals: [
+        makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' }),
+        makeDetectionSignal({ ruleUuid: 'rule-b', verdict: 'confirms' }),
+      ],
+    });
+    const reopened = makeStoredEvent(eventId, {
+      status: 'active',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findByEventId: jest.fn().mockResolvedValue({ hits: [closed, reopened] }),
+      }),
+      inputs: [
+        {
+          ...baseInput,
+          event_id: eventId,
+          status: undefined,
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'refutes' })],
+        },
+      ],
+    });
+
+    expect(result).toMatchObject({ written: true, status: 'recovering' });
+    expect(writtenDocs()[0].signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual([
+      'rule-a',
+    ]);
+  });
+
   it('does not skip a continuation that re-submits a rule from the closed episode of a reopened event', async () => {
     const eventId = 'checkout-reopened-again';
     const closed = makeStoredEvent(eventId, {
@@ -1459,6 +1493,28 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     expect(results[0]).toMatchObject({ written: true, event_id: closedEventId, status: 'active' });
     const [written] = writtenDocs();
     expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-a']);
+  });
+
+  it('rejects a second batch item that resolves to the same closed series', async () => {
+    const closed = closedSeries({
+      signals: [
+        makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' }),
+        makeDetectionSignal({ ruleUuid: 'rule-b', verdict: 'confirms' }),
+      ],
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: clientWithClosedSeries(closed),
+      inputs: [breachFor('rule-a'), breachFor('rule-b')],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, event_id: closedEventId });
+    expect(results[1]).toMatchObject({
+      written: false,
+      event_id: closedEventId,
+      reason: 'duplicate_in_batch',
+    });
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
   });
 
   it('opens a new event when the batch has a rule the closed series lacks', async () => {

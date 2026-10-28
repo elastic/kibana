@@ -730,10 +730,18 @@ export class RuleEventsClient {
 
     try {
       const groupHashes = [...new Set(heads.map(({ groupHash }) => groupHash))];
-      const query = esql.from([ALERT_ACTIONS_DATA_STREAM], []).where`space_id == ${esql.str(
+      let query = esql.from([ALERT_ACTIONS_DATA_STREAM], ['_id']).where`space_id == ${esql.str(
         this.clients.space
       )}`.where`group_hash IN (${groupHashes.map((hash) => esql.str(hash))})`
-        .where`action_type IN ("deactivate", "activate")`
+        .where`action_type IN ("deactivate", "activate")`;
+      query =
+        // Preserve isLaterAction's rule that an activate wins a same-timestamp tie.
+        query.pipe`INLINE STATS latest_action_at = MAX(@timestamp) BY group_hash`
+          .where`@timestamp == latest_action_at`
+          .pipe`EVAL action_rank = CASE(action_type == "activate", 1, 0)`
+          .pipe`INLINE STATS latest_action_rank = MAX(action_rank) BY group_hash`
+          .where`action_rank == latest_action_rank`;
+      query = pickLatestPerGroup(query, GROUP_HASH_FIELD)
         .sort(['@timestamp', 'DESC'])
         .keep('@timestamp', 'group_hash', 'alert_id', 'action_type', 'actor.type', 'reason');
       const rows = esqlToObjects<ActionRow>(
