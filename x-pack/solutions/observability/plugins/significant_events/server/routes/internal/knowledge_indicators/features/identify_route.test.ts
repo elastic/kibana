@@ -255,11 +255,24 @@ describe('feature identification route schemas', () => {
         sampleSize: 20,
         entityFilteredRatio: 0,
         diverseRatio: 1,
+        maxEntityFilters: 10,
         samplingTimeoutMs: 1_000,
       },
     };
 
     expect(prepareRoute.params.safeParse(prepareParams).success).toBe(true);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, maxEntityFilters: undefined },
+      }).success
+    ).toBe(false);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, maxEntityFilters: 51 },
+      }).success
+    ).toBe(false);
     expect(
       prepareRoute.params.safeParse({
         ...prepareParams,

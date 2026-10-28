@@ -117,7 +117,7 @@ const prepareInferredSamplingRoute = createServerRoute({
         sampleSize: z.number().int().min(1).max(100),
         entityFilteredRatio: z.number().min(0).max(1).optional(),
         diverseRatio: z.number().min(0).max(1).optional(),
-        maxEntityFilters: z.number().int().min(1).max(50).optional(),
+        maxEntityFilters: z.number().int().min(1).max(50),
         samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
       }),
     })
@@ -140,7 +140,7 @@ const prepareInferredSamplingRoute = createServerRoute({
       sampleSize,
       entityFilteredRatio = tuningConfig.entity_filtered_ratio,
       diverseRatio = tuningConfig.diverse_ratio,
-      maxEntityFilters = tuningConfig.max_entity_filters,
+      maxEntityFilters,
       samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
     } = params.body;
     const resolvedRunId = runId?.trim() || uuidv4();
