@@ -29,14 +29,17 @@ import type {
   AttachmentRequestV2,
   AttachmentsFindResponseV2,
 } from '../../../common/types/api';
-import { AttachmentPatchRequestRtV2, AttachmentRequestRtV2 } from '../../../common/types/api';
+import {
+  AttachmentPatchRequestSchemaV2,
+  AttachmentRequestSchemaV2,
+} from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
 import type {
   AttachmentAttributesV2,
   AttachmentV2,
   UnifiedAttachmentPayload,
 } from '../../../common/types/domain/attachment/v2';
-import { decodeWithExcessOrThrow } from '../runtime_types';
+import { decodeWithExcessOrThrowZod } from '../runtime_types';
 import { isUnifiedOnlyAttachment } from '../../services/type_guards';
 import { passThroughTransformer, type AttachmentTypeTransformer } from './base';
 import { commentAttachmentTransformer } from './comment';
@@ -184,13 +187,13 @@ export const toUnifiedAttachmentPatchPayload = (
  * unified body (e.g. `osquery`, `entity`, `file`) that a caller sends today.
  */
 export const toUnifiedAttachmentRequest = (body: unknown): UnifiedAttachmentPayload =>
-  toUnifiedAttachmentPayload(decodeWithExcessOrThrow(AttachmentRequestRtV2)(body));
+  toUnifiedAttachmentPayload(decodeWithExcessOrThrowZod(AttachmentRequestSchemaV2)(body));
 
 /** Public `/comments` PATCH body: decode the v1-or-unified shape, then convert to unified. */
 export const toUnifiedAttachmentPatchRequest = (
   body: unknown
 ): UnifiedAttachmentPayload & { id: string; version: string } =>
-  toUnifiedAttachmentPatchPayload(decodeWithExcessOrThrow(AttachmentPatchRequestRtV2)(body));
+  toUnifiedAttachmentPatchPayload(decodeWithExcessOrThrowZod(AttachmentPatchRequestSchemaV2)(body));
 
 /**
  * Rebuilds the v1 wire attributes for a hybrid attachment. Unified-only
