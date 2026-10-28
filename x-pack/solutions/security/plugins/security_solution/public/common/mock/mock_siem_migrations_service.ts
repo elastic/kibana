@@ -38,7 +38,7 @@ export const createSiemMigrationsMock = () => {
       getMissingResources: jest.fn(),
       getIntegrations: jest.fn(),
       addRuleToMigration: jest.fn(),
-      telemetry: createTelemetryServiceMock(),
+      telemetry: { ...createTelemetryServiceMock(), reportTranslatedItemUpdate: jest.fn() },
       api: {
         getMissingResources: jest.fn(),
       },

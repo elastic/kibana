@@ -357,12 +357,20 @@ describe('NightshiftPage', () => {
     expect(history.location.search).toBe('?entity=checkout&signalsSearch=latency');
   });
 
-  it('shows Sources and detection Settings in the Detections header', async () => {
+  it('shows the Detections header actions and marks Detections as the Settings origin', async () => {
     renderPage('/detections/events');
 
     expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detections');
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+
+    await openAppMenuOverflow();
+    const knowledgeLink = await screen.findByTestId('nightshiftKnowledgeLink');
+    expect(knowledgeLink).toHaveAttribute('href', '/app/nightshift/knowledge');
+    expect(screen.getAllByRole('menuitem')[0]).toBe(knowledgeLink);
+
+    await act(async () => fireEvent.click(knowledgeLink));
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/knowledge');
 
     const sourcesLink = screen.getByTestId('nightshiftSourcesLink');
     expect(sourcesLink).toBeVisible();
@@ -373,8 +381,16 @@ describe('NightshiftPage', () => {
 
     const settingsLink = screen.getByTestId('nightshiftSettingsLink');
     expect(settingsLink).toBeVisible();
-    expect(settingsLink).toHaveAttribute('href', '/app/nightshift/settings/detections');
+    expect(settingsLink).toHaveAttribute(
+      'href',
+      '/app/nightshift/settings/detections?origin=detections'
+    );
     expect(screen.queryByTestId('nightshiftAutomationsPrimaryAction')).not.toBeInTheDocument();
+
+    await act(async () => fireEvent.click(settingsLink));
+    expect(navigateToUrl).toHaveBeenLastCalledWith(
+      '/app/nightshift/settings/detections?origin=detections'
+    );
   });
 
   describe('app menu', () => {

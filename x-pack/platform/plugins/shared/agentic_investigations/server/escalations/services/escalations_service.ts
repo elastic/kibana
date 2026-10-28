@@ -18,6 +18,8 @@ import type {
   ConversationTemplatesStart,
 } from '@kbn/agent-builder-server';
 import type { ConversationSearchSort } from '@kbn/agent-builder-common';
+import type { EscalationLinkActor } from '../../../common/escalations/can_link_escalation';
+import { canLinkEscalation } from '../../../common/escalations/can_link_escalation';
 import type {
   CreateEscalationRequest,
   EscalationConversation,
@@ -50,6 +52,7 @@ import {
 } from '../../../common/escalations/constants';
 import { MAX_ESCALATIONS_SCAN } from '../constants';
 import {
+  EscalationLinkForbiddenError,
   InvalidLinkedInvestigationError,
   NotAnEscalationError,
   TooManyLinkedInvestigationsError,
@@ -141,6 +144,8 @@ export interface EscalationsServiceDeps {
     request: KibanaRequest,
     conversationIds: string[]
   ) => Promise<Map<string, number> | undefined>;
+  /** Conversation principal of the caller, matching `user.id` and ACL entry ids. */
+  getLinkActor: (request: KibanaRequest) => EscalationLinkActor | Promise<EscalationLinkActor>;
 }
 
 export class EscalationsService {
@@ -155,6 +160,7 @@ export class EscalationsService {
   private readonly conversationTemplates: ConversationTemplatesStart;
   private readonly getInvestigationStatusService: () => InvestigationStatusService;
   private readonly countPendingProposals: EscalationsServiceDeps['countPendingProposals'];
+  private readonly getLinkActor: EscalationsServiceDeps['getLinkActor'];
 
   constructor({
     logger,
@@ -164,6 +170,7 @@ export class EscalationsService {
     getInvestigationStatusService,
     getImpactClient,
     countPendingProposals,
+    getLinkActor,
   }: EscalationsServiceDeps) {
     this.logger = logger;
     this.getImpactClient = getImpactClient;
@@ -172,6 +179,7 @@ export class EscalationsService {
     this.conversationTemplates = conversationTemplates;
     this.getInvestigationStatusService = getInvestigationStatusService;
     this.countPendingProposals = countPendingProposals;
+    this.getLinkActor = getLinkActor;
   }
 
   async create(
@@ -259,6 +267,14 @@ export class EscalationsService {
     const current = await client.get(escalationId);
     if (current.template_id !== ESCALATION_TEMPLATE_ID) {
       throw new NotAnEscalationError(escalationId);
+    }
+
+    // Converse access also covers every authenticated user on a public escalation.
+    // Attaching copies the investigation onto that escalation, so require ownership
+    // or a listed participant before the metadata write.
+    const actor = await this.getLinkActor(request);
+    if (!canLinkEscalation(current, actor)) {
+      throw new EscalationLinkForbiddenError(escalationId);
     }
 
     const toAdd = body.linked_investigations;
@@ -641,9 +657,15 @@ export class EscalationsService {
       query: query.search,
     });
 
+    const actor = await this.getLinkActor(request);
+    const withEntities = await this.withEntityIds(request, results);
+
     return {
       pagination: { total, page: query.page, per_page: query.per_page },
-      results: await this.withEntityIds(request, results),
+      results: withEntities.map((escalation) => ({
+        ...escalation,
+        can_link: canLinkEscalation(escalation, actor),
+      })),
     };
   }
 
@@ -695,10 +717,15 @@ export class EscalationsService {
     const { entity, page, per_page: perPage } = query;
     const scanned = await this.scanWithEntityIds(request, query);
     const matching = scanned.filter((escalation) => escalation.entity_ids?.includes(entity));
+    const actor = await this.getLinkActor(request);
+    const pageResults = matching.slice((page - 1) * perPage, page * perPage);
 
     return {
       pagination: { total: matching.length, page, per_page: perPage },
-      results: matching.slice((page - 1) * perPage, page * perPage),
+      results: pageResults.map((escalation) => ({
+        ...escalation,
+        can_link: canLinkEscalation(escalation, actor),
+      })),
     };
   }
 
