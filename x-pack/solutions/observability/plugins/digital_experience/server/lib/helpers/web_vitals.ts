@@ -84,14 +84,3 @@ export const toWebVitals = ({ lcp, inp, cls, fcp, ttfb }: WebVitalAggregations):
   fcp: toDurationVital(fcp),
   ttfb: toDurationVital(ttfb),
 });
-
-const NO_DURATION_VITAL: DurationVital = { p75Ms: null, sampleCount: 0, ratings: null };
-
-/** The web vitals without any sample, e.g. when the index does not exist. */
-export const NO_WEB_VITALS: WebVitals = {
-  lcp: NO_DURATION_VITAL,
-  inp: NO_DURATION_VITAL,
-  cls: { p75: null, sampleCount: 0, ratings: null },
-  fcp: NO_DURATION_VITAL,
-  ttfb: NO_DURATION_VITAL,
-};

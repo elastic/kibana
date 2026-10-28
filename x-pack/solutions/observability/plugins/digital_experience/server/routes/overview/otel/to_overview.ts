@@ -8,7 +8,8 @@
 import type { ApplicationOverview, OverviewTrendPoint } from '../../../../common/types/overview';
 import { getP75 } from '../../../lib/helpers/aggregations';
 import { toHttpRequests } from '../../../lib/helpers/http_requests';
-import { NO_WEB_VITALS, toWebVitals } from '../../../lib/helpers/web_vitals';
+import { NO_WEB_VITALS } from '../../../../common/core_web_vitals';
+import { toWebVitals } from '../../../lib/helpers/web_vitals';
 import type { OverviewLogsAggregations, OverviewSpansAggregations } from './search_responses';
 
 /** The trend of both charts: every bucket, with a `null` duration where nothing was timed. */
