@@ -86,9 +86,19 @@ interface LifecycleDetection {
   skip?: DetectionSkip;
 }
 
+/** An operator's deactivation of one episode of an event, from Alerting v2's action log. */
+interface EventDeactivation {
+  /** The episode that was deactivated: the `episode_id` of the version it produced. */
+  episode_id: string;
+  /** The operator's reason, trimmed; empty when none was given. */
+  reason: string;
+}
+
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
   events: SignificantEventResponse[];
+  /** Operator deactivations of the event. A deactivation's version only copies the previous note. */
+  deactivations?: EventDeactivation[];
   /** Set when the event has more skipped detections than the response carries. */
   skipped_truncated?: boolean;
 }
@@ -100,4 +110,5 @@ export type {
   SignificantEventsQueriesGenerationResult,
   LifecycleDetection,
   EventLifecycleResponse,
+  EventDeactivation,
 };
