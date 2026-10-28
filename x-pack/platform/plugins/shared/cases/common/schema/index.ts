@@ -198,9 +198,38 @@ export const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
 );
 
 /**
- * Bounded JSON object for request input: caps every nested string and array, and the serialized size.
+ * Returns true when `value` nests arrays or objects deeper than `maxDepth`. Iterative, so a
+ * deeply nested input can't overflow the stack.
  */
-export const limitedJsonObjectSchema = ({ fieldName, max }: Omit<LimitedSchemaType, 'min'>) => {
+const exceedsJsonDepth = (value: unknown, maxDepth: number): boolean => {
+  const stack: Array<{ node: unknown; depth: number }> = [{ node: value, depth: 0 }];
+
+  for (let entry = stack.pop(); entry; entry = stack.pop()) {
+    const { node, depth } = entry;
+
+    if (typeof node === 'object' && node !== null) {
+      if (depth + 1 > maxDepth) {
+        return true;
+      }
+
+      for (const child of Object.values(node)) {
+        stack.push({ node: child, depth: depth + 1 });
+      }
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Bounded JSON object for request input: caps nesting depth, every nested string and array, and
+ * the serialized size.
+ */
+export const limitedJsonObjectSchema = ({
+  fieldName,
+  max,
+  maxDepth,
+}: Omit<LimitedSchemaType, 'min'> & { maxDepth: number }) => {
   const limitedJsonValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
     z.union([
       z.string().max(max),
@@ -212,12 +241,25 @@ export const limitedJsonObjectSchema = ({ fieldName, max }: Omit<LimitedSchemaTy
     ])
   );
 
-  return z.record(z.string().max(max), limitedJsonValueSchema).superRefine((value, ctx) => {
-    if (JSON.stringify(value).length > max) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `The ${fieldName} field is too large. The maximum serialized length is ${max}.`,
-      });
-    }
-  });
+  // The depth check runs before the recursive parse, which would otherwise overflow the stack.
+  return z
+    .unknown()
+    .superRefine((value, ctx) => {
+      if (exceedsJsonDepth(value, maxDepth)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `The ${fieldName} field is nested too deeply. The maximum depth is ${maxDepth}.`,
+        });
+      }
+    })
+    .pipe(
+      z.record(z.string().max(max), limitedJsonValueSchema).superRefine((value, ctx) => {
+        if (JSON.stringify(value).length > max) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `The ${fieldName} field is too large. The maximum serialized length is ${max}.`,
+          });
+        }
+      })
+    );
 };

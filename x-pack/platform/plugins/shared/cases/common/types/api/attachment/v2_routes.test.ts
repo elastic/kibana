@@ -7,6 +7,7 @@
 
 import {
   MAX_ATTACHMENT_ID_LENGTH,
+  MAX_ATTACHMENT_JSON_DEPTH,
   MAX_ATTACHMENT_JSON_LENGTH,
   MAX_ATTACHMENT_TYPE_LENGTH,
   MAX_IDS_PER_ATTACHMENT,
@@ -133,6 +134,44 @@ describe('UnifiedAttachmentRouteRequestSchema', () => {
     expect(result.success).toBe(false);
     expect(result.error?.issues).toEqual([
       expect.objectContaining({ code: 'custom', path: ['metadata'] }),
+    ]);
+  });
+
+  // Builds an object nested `depth` levels deep, counting the top-level object as 1.
+  const nestedObject = (depth: number): Record<string, unknown> => {
+    let value: Record<string, unknown> = { leaf: true };
+    for (let level = 1; level < depth; level++) {
+      value = { child: value };
+    }
+    return value;
+  };
+
+  it('accepts data and metadata at the max depth', () => {
+    expect(
+      UnifiedAttachmentRouteRequestSchema.safeParse({
+        ...referencePayload,
+        data: nestedObject(MAX_ATTACHMENT_JSON_DEPTH),
+        metadata: nestedObject(MAX_ATTACHMENT_JSON_DEPTH),
+      }).success
+    ).toBe(true);
+  });
+
+  it.each([
+    ['data', valuePayload],
+    ['metadata', referencePayload],
+  ])('rejects %s nested deeper than the max depth', (field, payload) => {
+    const result = UnifiedAttachmentRouteRequestSchema.safeParse({
+      ...payload,
+      [field]: nestedObject(MAX_ATTACHMENT_JSON_DEPTH + 1),
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({
+        code: 'custom',
+        path: [field],
+        message: `The ${field} field is nested too deeply. The maximum depth is ${MAX_ATTACHMENT_JSON_DEPTH}.`,
+      }),
     ]);
   });
 
