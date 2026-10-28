@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-connector-vendor-api-drift
+  description: Compares the connectors' vendor API artifacts with the vendors' latest specs, files an issue per drifting connector and refreshes the others in a PR
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-connector-vendor-api-drift'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:workflows-eng'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / connector vendor API drift
+      description: Compares the connectors' vendor API artifacts with the vendors' latest specs, files an issue per drifting connector and refreshes the others in a PR
+    spec:
+      env:
+        # Set a channel and flip to 'true' once the check has an owning channel
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        # Inputs of .buildkite/scripts/steps/connector_vendor_api_drift.sh.
+        # Repository the drift issues are filed in: '' for a dry run against elastic/kibana that
+        # writes nothing, a sandbox repository to try the issues out, or elastic/kibana to go live
+        # (which also opens the refresh PR).
+        CONNECTOR_VENDOR_API_GITHUB_REPO: ''
+        # A connector metadata.id to check only that one; set it on a manual build
+        CONNECTOR_VENDOR_API_CONNECTOR: ''
+      allow_rebuilds: true
+      branch_configuration: main
+      cancel_intermediate_builds: true
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/connector_vendor_api_drift.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/connector_vendor_api_drift.yml
+            cleanup_sparse_state: true
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        build_tags: false
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: true
+      teams:
+        workflows-eng:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
+      schedules:
+        Weekly build:
+          cronline: 0 6 * * 1 America/New_York
+          message: Weekly connector vendor API drift check
+          branch: main
+      tags:
+        - kibana
+        - connectors
