@@ -9,7 +9,6 @@ import type { ChatCompletionTokenCount, Model } from '@kbn/inference-common';
 
 export interface TokenUsageContext {
   connectorId: string;
-  /** Kibana space the inference request was made in (`default` for the default space). */
   spaceId: string;
   featureId?: string;
   parentFeatureId?: string;
