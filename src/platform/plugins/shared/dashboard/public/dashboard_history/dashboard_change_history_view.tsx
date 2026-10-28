@@ -17,7 +17,7 @@ import { ChangeHistoryPreview } from '@kbn/change-history-ui';
 
 import { getDashboardChangeHistoryCompareIndicator } from './get_dashboard_change_history_compare_indicator';
 
-// the preview embeds a second dashboard renderer, so only load it once a change is previewed
+/** the preview embeds a second dashboard renderer, so only load it once a change is previewed */
 const LazyDashboardPreview = lazy(async () => {
   const { DashboardPreview } = await import('./dashboard_preview');
   return { default: DashboardPreview };
@@ -29,20 +29,19 @@ export interface DashboardChangeHistoryViewProps {
   previewProps: PreviewProps;
   setPreviewTitle: (title: string) => void;
   inheritedTimeRange: DashboardState['time_range'];
-  comparisonChangeId?: string; // when it matches the previewed change, shows the JSON comparison instead of the dashboard
+  isComparing?: boolean; // when true, shows the JSON comparison instead of the dashboard
 }
 
-/** Switches between the rendered dashboard preview and the JSON comparison of a change. */
+/** switches between rendered dashboard preview and JSON comparison depending on isComparing */
 export const DashboardChangeHistoryView = ({
   previewProps,
   setPreviewTitle,
   inheritedTimeRange,
-  comparisonChangeId,
+  isComparing,
 }: DashboardChangeHistoryViewProps): JSX.Element => {
-  const { compareSpec, diffTelemetry, change } = previewProps;
+  const { compareSpec, diffTelemetry } = previewProps;
 
-  const isComparison = comparisonChangeId && comparisonChangeId === change?.id && compareSpec;
-  if (isComparison) {
+  if (isComparing && compareSpec) {
     return (
       <ChangeHistoryPreview
         baseline={compareSpec.baseline.snapshot as object}

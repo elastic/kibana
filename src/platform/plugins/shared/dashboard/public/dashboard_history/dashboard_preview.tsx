@@ -119,8 +119,9 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
           query={toStoredQuery((change.snapshot as DashboardState).query)}
           dateRangeFrom={timeRange?.from}
           dateRangeTo={timeRange?.to}
-          {...searchBarVisibilityProps}
           disableSubscribingToGlobalDataServices
+          isDisabled={true}
+          {...searchBarVisibilityProps}
         />
       )}
       <PreviewRenderer initialState={initialState.current} onApiAvailable={setDashboardApi} />

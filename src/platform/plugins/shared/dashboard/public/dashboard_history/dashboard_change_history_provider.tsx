@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 
@@ -32,7 +32,8 @@ export const DashboardChangeHistoryProvider = ({
   const dashboardId = dashboardApi.savedObjectId$.getValue() ?? dashboardApi.uuid;
 
   const { analytics } = coreServices;
-  const [comparisonChangeId, setComparisonChangeId] = useState<string | undefined>();
+  const [isComparing, setIsComparing] = useState<boolean>(false);
+  const ignoreEventPropogation = useRef<boolean>(false);
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [previewTitle, setPreviewTitle] = useState<string>(
@@ -62,12 +63,17 @@ export const DashboardChangeHistoryProvider = ({
     [dashboardApi]
   );
 
-  // the "changes" button also selects its row; keep that row's comparison, drop any other
-  const onSelectChange = useCallback<NonNullable<ChangeHistoryProviderProps['onSelectChange']>>(
-    ({ id }) => setComparisonChangeId((current) => (current === id ? current : undefined)),
-    []
-  );
+  // selecting a row clears the comparison, except when the select was triggered by clicking that row's "changes" button
+  const onSelectChange = useCallback<
+    NonNullable<ChangeHistoryProviderProps['onSelectChange']>
+  >(() => {
+    if (!ignoreEventPropogation.current) {
+      setIsComparing(false);
+    }
+    ignoreEventPropogation.current = false;
+  }, []);
 
+  // renders the nChanges string as a link that triggers the comparison view
   const renderChanges = useCallback<NonNullable<ChangeHistoryProviderProps['renderChanges']>>(
     ({ item, nChanges }) =>
       item.metadata?.version === 1 ? (
@@ -78,7 +84,8 @@ export const DashboardChangeHistoryProvider = ({
           size={'xs'}
           flush={'both'}
           onClick={() => {
-            setComparisonChangeId(item.id);
+            ignoreEventPropogation.current = true; // if clicking the nChanges button, ignore propogation up to `onSelectChange`
+            setIsComparing(true);
           }}
         >
           {nChanges}
@@ -87,16 +94,17 @@ export const DashboardChangeHistoryProvider = ({
     []
   );
 
+  // renders the dashboard preview and/or the JSON comparison mode, depending on isComparing
   const renderPreview = useCallback<NonNullable<ChangeHistoryProviderProps['renderPreview']>>(
     (props) => (
       <DashboardChangeHistoryView
         previewProps={props}
         setPreviewTitle={setPreviewTitle}
-        comparisonChangeId={comparisonChangeId}
+        isComparing={isComparing}
         inheritedTimeRange={dashboardApi?.timeRange$.getValue()}
       />
     ),
-    [comparisonChangeId, dashboardApi]
+    [isComparing, dashboardApi]
   );
 
   return (
