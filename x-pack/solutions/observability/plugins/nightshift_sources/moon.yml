@@ -36,6 +36,7 @@ tags:
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - server/**/*

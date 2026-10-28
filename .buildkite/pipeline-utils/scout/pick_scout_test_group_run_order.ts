@@ -118,6 +118,33 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     Fs.readFileSync(scoutConfigsPath, 'utf-8')
   ) as ModuleDiscoveryInfo[];
 
+  const moonShadowPath = path.join(getKibanaDir(), '.scout/code_changes.moon_shadow.json');
+  if (Fs.existsSync(moonShadowPath)) {
+    const shadow = JSON.parse(Fs.readFileSync(moonShadowPath, 'utf-8')) as {
+      scoutTasks?: { modeledConfigs: string[]; affectedConfigs: string[] };
+    };
+    if (shadow.scoutTasks) {
+      const selected = new Set(
+        modulesWithTests.flatMap((module) => module.configs.map((config) => config.path))
+      );
+      const modeled = new Set(shadow.scoutTasks.modeledConfigs);
+      const affected = new Set(shadow.scoutTasks.affectedConfigs);
+      const currentOnly = [...selected].filter(
+        (config) => modeled.has(config) && !affected.has(config)
+      );
+      const moonOnly = [...affected].filter((config) => !selected.has(config));
+      console.log(
+        `Moon Scout task shadow selection: ${selected.size} current, ${affected.size} Moon, ${currentOnly.length} current-only, ${moonOnly.length} Moon-only`
+      );
+      if (currentOnly.length || moonOnly.length) {
+        console.log('Moon Scout task shadow differences:', {
+          currentOnly: currentOnly.slice(0, 20),
+          moonOnly: moonOnly.slice(0, 20),
+        });
+      }
+    }
+  }
+
   if (modulesWithTests.length === 0) {
     // no scout configs found, nothing to need to upload steps
     return;
