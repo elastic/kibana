@@ -8,6 +8,7 @@
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { KibanaRequest } from '@kbn/core/server';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type {
   BulkScheduleWorkflowResult,
   WorkflowDetailDto,
@@ -136,12 +137,15 @@ export class DispatchStep implements DispatcherStep {
       return done();
     }
 
-    const batches: DispatchBatch[] = [...groupsByApiKey].map(([apiKey, groups]) => ({
-      groups,
-      request: this.craftFakeRequest(apiKey),
-      workflowsBySpace: new Map(),
-      failedSpaces: new Map(),
-    }));
+    // One batch per (API key, space): the request's space scopes the scheduled workflow runs.
+    const batches: DispatchBatch[] = [...groupsByApiKey].flatMap(([apiKey, keyGroups]) =>
+      [...Map.groupBy(keyGroups, ({ spaceId }) => spaceId)].map(([spaceId, groups]) => ({
+        groups,
+        request: this.craftFakeRequest(apiKey, spaceId),
+        workflowsBySpace: new Map(),
+        failedSpaces: new Map(),
+      }))
+    );
     await this.prefetchWorkflows(batches);
     for (const { groups, request, workflowsBySpace, failedSpaces } of batches) {
       if (signal.aborted) break;
@@ -461,13 +465,19 @@ export class DispatchStep implements DispatcherStep {
     };
   }
 
-  private craftFakeRequest(apiKey: string): KibanaRequest {
+  /**
+   * Workflows are looked up and scheduled as the policy's API key owner, so a policy only reaches
+   * the workflows its owner may access. The request is scoped to the policy's space so the
+   * scheduled workflow runs, and resolves its connectors, in that space.
+   */
+  private craftFakeRequest(apiKey: string, spaceId: string): KibanaRequest {
     const requestHeaders: Headers = {
       authorization: `ApiKey ${getUiamApiKeySecret(apiKey)}`,
     };
 
     const fakeRawRequest: FakeRawRequest = {
       headers: requestHeaders,
+      spaceId: brandSpaceId(spaceId),
     };
 
     return kibanaRequestFactory(fakeRawRequest);
