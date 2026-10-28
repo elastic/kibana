@@ -158,7 +158,8 @@ export type InternalResumeWorkflowExecution = (
 export type ScheduleWorkflow = (
   workflow: WorkflowExecutionEngineModel,
   context: Record<string, unknown>,
-  request: KibanaRequest
+  request: KibanaRequest,
+  options?: { authenticatedUser?: string }
 ) => Promise<ExecuteWorkflowResponse>;
 
 export type BulkScheduleWorkflow = (

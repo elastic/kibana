@@ -13,11 +13,11 @@ import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { formatPageFilterSearchParam } from '@kbn/securitysolution-alerts-page-url';
 import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { inputsSelectors } from '../../../common/store';
-import { formatPageFilterSearchParam } from '../../../../common/utils/format_page_filter_search_param';
 import { FLYOUT_V2_URL_PARAM } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { resolveFlyoutParams, resolveFlyoutV2Params } from './utils';
 

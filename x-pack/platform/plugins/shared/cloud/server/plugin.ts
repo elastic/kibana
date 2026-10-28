@@ -24,7 +24,7 @@ import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_i
 import type { DecodedCloudId } from '../common/decode_cloud_id';
 import { decodeCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
-import { getFullCloudUrl } from '../common/utils';
+import { getFullCloudUrl, withTargetOrganization } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
 import type { CloudRequestHandlerContext } from './routes/types';
@@ -410,8 +410,11 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   }
 
   private getCloudUrls() {
-    const { base_url: baseUrl } = this.config;
-    const projectsUrl = getFullCloudUrl(baseUrl, this.config.projects_url);
+    const { base_url: baseUrl, organization_id: organizationId } = this.config;
+    const projectsUrl = withTargetOrganization(
+      getFullCloudUrl(baseUrl, this.config.projects_url),
+      organizationId
+    );
     return {
       baseUrl,
       projectsUrl,
