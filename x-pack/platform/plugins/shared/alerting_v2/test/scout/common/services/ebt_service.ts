@@ -8,6 +8,10 @@
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import type {
+  ActionPolicyChangedEbtData,
+  ActionPolicyEbtEventType,
+} from '../../../../server/lib/telemetry/action_policy_ebt_schema';
+import type {
   AlertActionAppliedEbtData,
   AlertActionEbtEventType,
 } from '../../../../server/lib/telemetry/alert_action_ebt_schema';
@@ -21,11 +25,17 @@ const EBT_HELPERS_PATH = '/internal/analytics_ftr_helpers';
 const DEFAULT_EVENT_TIMEOUT_MS = 10_000;
 
 /** An EBT event as buffered by the `analytics_ftr_helpers` server shipper. */
-export interface RuleChangedEbtEvent {
+interface BufferedEbtEvent<TProperties> {
   event_type: string;
   timestamp: string;
-  properties: RuleChangedEbtData;
+  properties: TProperties;
 }
+
+export type RuleChangedEbtEvent = BufferedEbtEvent<RuleChangedEbtData>;
+
+export type ActionPolicyChangedEbtEvent = BufferedEbtEvent<ActionPolicyChangedEbtData>;
+
+export type AlertActionAppliedEbtEvent = BufferedEbtEvent<AlertActionAppliedEbtData>;
 
 export interface WaitForRuleChangedEventsParams {
   ruleId: string;
@@ -35,11 +45,12 @@ export interface WaitForRuleChangedEventsParams {
   timeoutMs?: number;
 }
 
-/** An alert-action EBT event as buffered by the `analytics_ftr_helpers` server shipper. */
-export interface AlertActionAppliedEbtEvent {
-  event_type: string;
-  timestamp: string;
-  properties: AlertActionAppliedEbtData;
+export interface WaitForActionPolicyChangedEventsParams {
+  actionPolicyId: string;
+  eventType: ActionPolicyEbtEventType;
+  /** Number of matching events to wait for. Defaults to 1. */
+  count?: number;
+  timeoutMs?: number;
 }
 
 export interface WaitForAlertActionEventsParams {
@@ -67,6 +78,13 @@ export interface EbtService {
     params: WaitForRuleChangedEventsParams
   ) => Promise<RuleChangedEbtEvent[]>;
   /**
+   * Resolves with the action policy change events of `eventType` reported for the policy.
+   * Returns as soon as `count` events arrived and throws if they do not within the timeout.
+   */
+  waitForActionPolicyChangedEvents: (
+    params: WaitForActionPolicyChangedEventsParams
+  ) => Promise<ActionPolicyChangedEbtEvent[]>;
+  /**
    * Resolves with the alert-action events of `eventType` reported for the rule.
    * Returns as soon as `count` events arrived and throws if they do not within the timeout.
    */
@@ -93,19 +111,19 @@ export const getEbtService = ({
     });
 
   const waitForEvents = <TEvent>({
-    metricName,
     eventType,
-    ruleId,
-    count = 1,
-    timeoutMs = DEFAULT_EVENT_TIMEOUT_MS,
+    idProperty,
+    id,
+    count,
+    timeoutMs,
   }: {
-    metricName: string;
     eventType: string;
-    ruleId: string;
-    count?: number;
-    timeoutMs?: number;
+    idProperty: string;
+    id: string;
+    count: number;
+    timeoutMs: number;
   }) =>
-    measurePerformanceAsync(log, metricName, async () => {
+    measurePerformanceAsync(log, `ebt.waitForEvents[${eventType}]`, async () => {
       const response = await kbnClient.request<TEvent[]>({
         method: 'GET',
         path: `${EBT_HELPERS_PATH}/events`,
@@ -115,7 +133,7 @@ export const getEbtService = ({
           eventTypes: JSON.stringify([eventType]),
           withTimeoutMs: timeoutMs,
           filters: JSON.stringify({
-            'properties.rule_id': { eq: ruleId },
+            [`properties.${idProperty}`]: { eq: id },
           }),
         },
       });
@@ -123,7 +141,7 @@ export const getEbtService = ({
       const events = response.data;
       if (events.length < count) {
         throw new Error(
-          `Expected ${count} '${eventType}' event(s) for rule '${ruleId}' within ${timeoutMs}ms, received ${events.length}`
+          `Expected ${count} '${eventType}' event(s) for ${idProperty} '${id}' within ${timeoutMs}ms, received ${events.length}`
         );
       }
       return events;
@@ -132,19 +150,42 @@ export const getEbtService = ({
   return {
     optIn: () => setConsent(true),
     optOut: () => setConsent(false),
-    waitForRuleChangedEvents: ({ ruleId, eventType, count, timeoutMs }) =>
+    waitForRuleChangedEvents: ({
+      ruleId,
+      eventType,
+      count = 1,
+      timeoutMs = DEFAULT_EVENT_TIMEOUT_MS,
+    }) =>
       waitForEvents<RuleChangedEbtEvent>({
-        metricName: `ebt.waitForRuleChangedEvents[${eventType}]`,
         eventType,
-        ruleId,
+        idProperty: 'rule_id',
+        id: ruleId,
         count,
         timeoutMs,
       }),
-    waitForAlertActionEvents: ({ ruleId, eventType, count, timeoutMs }) =>
-      waitForEvents<AlertActionAppliedEbtEvent>({
-        metricName: `ebt.waitForAlertActionEvents[${eventType}]`,
+    waitForActionPolicyChangedEvents: ({
+      actionPolicyId,
+      eventType,
+      count = 1,
+      timeoutMs = DEFAULT_EVENT_TIMEOUT_MS,
+    }) =>
+      waitForEvents<ActionPolicyChangedEbtEvent>({
         eventType,
-        ruleId,
+        idProperty: 'action_policy_id',
+        id: actionPolicyId,
+        count,
+        timeoutMs,
+      }),
+    waitForAlertActionEvents: ({
+      ruleId,
+      eventType,
+      count = 1,
+      timeoutMs = DEFAULT_EVENT_TIMEOUT_MS,
+    }) =>
+      waitForEvents<AlertActionAppliedEbtEvent>({
+        eventType,
+        idProperty: 'rule_id',
+        id: ruleId,
         count,
         timeoutMs,
       }),

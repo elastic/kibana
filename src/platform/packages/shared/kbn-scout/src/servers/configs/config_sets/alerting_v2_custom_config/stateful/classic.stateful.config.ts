@@ -16,9 +16,10 @@ import { defaultConfig } from '../../default/stateful/base.config';
  * Escape-hatch config set for alerting_v2 Scout suites that need server-start args
  * the default config cannot provide (every other suite runs on the default config).
  * Each namespace under `test/scout_alerting_v2_custom_config` shares this server:
- *   - `engine`  — `alert_actions_cleanup.spec.ts`
- *   - `rules`   — `ebt_telemetry.spec.ts` (api + ui)
- *   - `alerts`  — `ebt_telemetry.spec.ts` (api)
+ *   - `engine`          — `alert_actions_cleanup.spec.ts`
+ *   - `rules`           — `ebt_telemetry.spec.ts` (api + ui)
+ *   - `alerts`          — `ebt_telemetry.spec.ts` (api)
+ *   - `action_policies` — `ebt_telemetry.spec.ts` (api)
  *
  *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet alerting_v2_custom_config
  */
@@ -29,9 +30,9 @@ const DISPATCHER_CLEANUP_ENABLED =
   '--xpack.alerting_v2.retention.alertActions.dispatcher.enabled=true';
 
 // Buffers server-side EBT events behind `/internal/analytics_ftr_helpers/events` so the
-// rules and alerts tests can assert on `alerting_v2_rule_*` and `alerting_v2_alert_*`
-// events. Loaded as a server arg, so those assertions are local-only: Cloud attaches
-// to an existing deployment.
+// rules, alerts, and action policies tests can assert on `alerting_v2_rule_*`,
+// `alerting_v2_alert_*`, and `alerting_v2_action_policy_*` events. Loaded as a server
+// arg, so those assertions are local-only: Cloud attaches to an existing deployment.
 const analyticsFtrHelpersPluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
   'src/platform/test/analytics/plugins/analytics_ftr_helpers'

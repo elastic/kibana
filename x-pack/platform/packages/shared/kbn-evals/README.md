@@ -242,7 +242,7 @@ suite config. Drop `KBN_EVALS_WEEKLY=1` to see the PR / on-demand fanout.
 
 ```bash
 CI=x-pack/platform/packages/shared/kbn-evals/scripts/ci
-export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js significant-events)"
+export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js nightshift-investigations)"
 export EVAL_MODEL_GROUPS="$(jq -r '.weeklyEisModelGroups | join(",")' <<<"$EVAL_SUITE_INFO")"
 export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(jq -c '[.weeklyEisModelGroups[] | ltrimstr("eis/")]
   | map({ key: ("eis-" + gsub("[^a-zA-Z0-9]+"; "-")), value: { provider: "elastic", providerConfig: { model_id: . } } })

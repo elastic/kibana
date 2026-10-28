@@ -6,7 +6,7 @@
  */
 
 import { ALERT_EPISODE_ACTION_TYPE, type AlertEpisodeActionType } from '@kbn/alerting-v2-schemas';
-import type { AnalyticsServiceSetup, EventTypeOpts } from '@kbn/core/server';
+import type { EventTypeOpts } from '@kbn/core/server';
 import type { EventOrigin } from '../event_origin/origin_schemas';
 import type { EbtServiceContract } from '../services/ebt_service/ebt_service';
 import {
@@ -110,11 +110,6 @@ export const alertActionTelemetryEvents: Array<EventTypeOpts<AlertActionAppliedE
     eventType: ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE[actionType],
     schema: alertActionAppliedEventSchema,
   }));
-
-/** Registers every alert-action EBT event type with Core analytics. */
-export const registerAlertActionTelemetryEvents = (analytics: AnalyticsServiceSetup): void => {
-  alertActionTelemetryEvents.forEach((eventConfig) => analytics.registerEventType(eventConfig));
-};
 
 /** An applied alert action reduced to the fields telemetry is allowed to read. */
 export interface AppliedAlertAction {

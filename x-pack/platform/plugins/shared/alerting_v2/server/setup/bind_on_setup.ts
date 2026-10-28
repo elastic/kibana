@@ -30,8 +30,7 @@ import {
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
 import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
-import { registerAlertActionTelemetryEvents } from '../lib/telemetry/alert_action_ebt_event';
-import { registerTelemetryEvents } from '../lib/telemetry/register_rule_ebt_events';
+import { registerTelemetryEvents } from '../lib/telemetry/register_ebt_events';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
@@ -61,9 +60,8 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     registerAlertingAdvancedSettings(uiSettingsSetup);
 
     // Event types must be registered during setup, before the first `reportEvent`.
-    const analytics = container.get(CoreSetup('analytics'));
-    registerTelemetryEvents(analytics);
-    registerAlertActionTelemetryEvents(analytics);
+    const analyticsSetup = container.get(CoreSetup('analytics'));
+    registerTelemetryEvents(analyticsSetup);
 
     const eventLogService = container.get(
       PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')
