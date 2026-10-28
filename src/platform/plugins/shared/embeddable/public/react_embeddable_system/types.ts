@@ -99,11 +99,12 @@ export interface EmbeddablePublicDefinition<
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 
   /**
-   * Compares two serialized states without building the embeddable, so a container can compare
-   * panels that have not loaded. Returns `true` when they are equal. Use the same comparators as
-   * the embeddable's `initializeStateApi`, so loaded and unloaded panels are compared the same way.
+   * A required function that compares two serialized states without building the embeddable, so a
+   * container can compare panels that have not loaded. Returns `true` when they are equal. Use the
+   * same comparators and default state as the embeddable's `initializeStateApi`, so loaded and
+   * unloaded panels are compared the same way.
    */
-  compareSerializedState?: (
+  compareSerializedState: (
     baseline: Partial<SerializedState> | undefined,
     current: Partial<SerializedState> | undefined
   ) => boolean;

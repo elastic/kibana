@@ -14,7 +14,6 @@ import {
   logStateDiff,
   shouldLogStateDiff,
 } from '@kbn/presentation-publishing';
-import deepEqual from 'fast-deep-equal';
 import { isDashboardSection } from '../../common';
 import { isDevMode } from '../services/dev_mode';
 import { deserializeLayout } from './layout_manager/deserialize_layout';
@@ -48,7 +47,6 @@ export interface PanelTypeComparers {
 
 // Panel configs keep their identity until the panel changes, so a compare result is reused while
 // the comparer, the baseline config and the current config are the same objects.
-const DEEP_EQUAL = {};
 const panelCompareCache = new WeakMap<object, WeakMap<object, WeakMap<object, boolean>>>();
 
 const getCachedPanelChange = (
@@ -127,16 +125,16 @@ const diffLayout = (
           )
       );
     }
-    // a panel that has not loaded is compared with its type's comparer, when the type has one
+    // a panel that has not loaded is compared with its type's comparer
     const typeComparer = currentType ? panelTypeComparers?.[currentType] : undefined;
+    // Until the comparer loads there is nothing to compare with, and loading it re-compares. A type
+    // with no definition renders an error panel, whose config cannot change.
+    if (!typeComparer) return false;
     return getCachedPanelChange(
-      typeComparer ?? DEEP_EQUAL,
+      typeComparer,
       baselinePanel,
       currentConfigs[panelId],
-      () =>
-        typeComparer
-          ? !typeComparer(baselinePanel, currentPanel)
-          : !deepEqual(baselinePanel, currentPanel)
+      () => !typeComparer(baselinePanel, currentPanel)
     );
   };
 

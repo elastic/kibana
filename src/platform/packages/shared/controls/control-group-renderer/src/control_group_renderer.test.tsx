@@ -40,6 +40,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 const getTestEmbeddableFactory = () =>
   Promise.resolve({
     type: 'test_control',
+    compareSerializedState: () => true,
     buildEmbeddable: async ({ initialState, finalizeApi }) => {
       const api = finalizeApi({
         serializeState: () => ({

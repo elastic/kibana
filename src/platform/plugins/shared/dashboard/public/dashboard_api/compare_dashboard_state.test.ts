@@ -156,7 +156,9 @@ describe('diffDashboardStates', () => {
       ],
     });
 
-    expect(diffDashboardStates(baseline, current)).toEqual({ panels: current.panels });
+    expect(diffDashboardStates(baseline, current, {}, { lens: () => false })).toEqual({
+      panels: current.panels,
+    });
     expect(
       diffDashboardStates(baseline, current, {
         'panel-1': {
@@ -216,9 +218,16 @@ describe('diffDashboardStates', () => {
       });
 
       expect(diffDashboardStates(baseline, current, {}, { lens: () => true })).toEqual({});
-      expect(diffDashboardStates(baseline, current, {}, { visualization: () => true })).toEqual({
+      expect(diffDashboardStates(baseline, current, {}, { lens: () => false })).toEqual({
         panels: current.panels,
       });
+    });
+
+    it('reports no config change for a panel whose type comparer has not loaded', () => {
+      const baseline = state({ panels: [lensPanel({ id: 'panel-1' })] });
+      const current = state({ panels: [lensPanel({ id: 'panel-1', config: { title: 'Sum' } })] });
+
+      expect(diffDashboardStates(baseline, current)).toEqual({});
     });
 
     it('prefers a loaded panel comparator over its type comparer', () => {
@@ -263,9 +272,16 @@ describe('diffDashboardStates', () => {
         const baseline = panelsState({ title: 'Count' });
         const current = panelsState({ title: 'Count', description: '' });
 
-        expect(diffDashboardStates(baseline, current)).toEqual({ panels: current.panels });
+        expect(diffDashboardStates(baseline, current, {}, { lens: () => false })).toEqual({
+          panels: current.panels,
+        });
         expect(
-          diffDashboardStates(baseline, current, { 'panel-1': { type: 'lens', ...ignoreConfig } })
+          diffDashboardStates(
+            baseline,
+            current,
+            { 'panel-1': { type: 'lens', ...ignoreConfig } },
+            { lens: () => false }
+          )
         ).toEqual({});
       });
     });

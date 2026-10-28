@@ -127,11 +127,13 @@ export function initializeLayoutManager(
   const loadPanelTypeComparer = async (type: string) => {
     try {
       const definition = await embeddableService.getEmbeddableDefinition(type);
-      const compareSerializedState = definition?.compareSerializedState;
-      if (!compareSerializedState) return;
-      panelTypeComparers$.next({ ...panelTypeComparers$.value, [type]: compareSerializedState });
+      if (!definition) return;
+      panelTypeComparers$.next({
+        ...panelTypeComparers$.value,
+        [type]: definition.compareSerializedState,
+      });
     } catch {
-      // an unknown panel type renders an error panel and is compared with deep equality
+      // an unknown panel type renders an error panel, whose config cannot change
     }
   };
   const panelTypeComparersSubscription = layout$.subscribe(({ panels, pinnedPanels }) => {

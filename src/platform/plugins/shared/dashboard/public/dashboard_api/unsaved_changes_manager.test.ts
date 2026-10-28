@@ -26,7 +26,9 @@ const layoutManagerMock = {
     children$: new BehaviorSubject<DashboardChildren>({}),
   },
   internalApi: {
-    panelTypeComparers$: new BehaviorSubject({}),
+    panelTypeComparers$: new BehaviorSubject({
+      testType: (a?: { a?: number }, b?: { a?: number }) => a?.a === b?.a,
+    }),
     setLastSavedState: jest.fn(),
   },
 } as unknown as ReturnType<typeof initializeLayoutManager>;

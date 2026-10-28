@@ -17,6 +17,7 @@ const phaseTracker = new PhaseTracker(performance.now());
 
 const testEmbeddableFactory: EmbeddablePublicDefinition<{ name: string; bork: string }> = {
   type: 'test',
+  compareSerializedState: () => true,
   buildEmbeddable: async ({ initialState, finalizeApi }) => {
     const api = finalizeApi({
       serializeState: () => ({
