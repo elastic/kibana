@@ -24,6 +24,7 @@ import {
 } from '@kbn/workflows';
 import type { SearchWorkflowExecutionsParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
+import { resolveExecutedByProfiles } from '../utils/resolve_executed_by_profiles';
 import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
@@ -42,7 +43,13 @@ const executionTypeSchema = schema.oneOf(
 
 const EXECUTION_QUERY_PARAM_AVAILABILITY = { stability: 'stable', since: '9.5.0' } as const;
 
-export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: RouteDependencies) {
+export function registerGetWorkflowExecutionsRoute({
+  router,
+  api,
+  spaces,
+  workflowsService,
+  logger,
+}: RouteDependencies) {
   router.versioned
     .get({
       path: '/api/workflows/workflow/{workflowId}/executions',
@@ -248,8 +255,15 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             sortOrder: request.query.sortOrder,
             searchAfter,
           };
+          const executions = await api.getWorkflowExecutions({ ...params, request }, spaceId);
           return response.ok({
-            body: await api.getWorkflowExecutions({ ...params, request }, spaceId),
+            body: {
+              ...executions,
+              results: await resolveExecutedByProfiles(
+                { workflowsService, logger },
+                executions.results
+              ),
+            },
           });
         } catch (error) {
           return handleRouteError(response, error);

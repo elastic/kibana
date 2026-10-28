@@ -7,18 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import { useKibana } from '../../../hooks/use_kibana';
-
-const USER_PROFILES_STALE_TIME = 60 * 1000;
-
-const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfileWithAvatar> =>
-  profiles.reduce<Map<string, UserProfileWithAvatar>>((acc, profile) => {
-    acc.set(profile.uid, profile);
-    return acc;
-  }, new Map<string, UserProfileWithAvatar>());
+import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 
 const USER_PROFILE_UID_PREFIX = 'u_';
 /** Same sentinel as `UNKNOWN_EXECUTION_IDENTITY` on the execution document. */
@@ -54,18 +45,16 @@ export const getExecutedByLabel = (
   return getUserDisplayName(profile.user) || fallbackLabel;
 };
 
-export const useUserProfilesByUid = ({ enabled, uids }: { enabled: boolean; uids: string[] }) => {
-  const { userProfile } = useKibana().services;
-
-  return useQuery<UserProfileWithAvatar[], Error, Map<string, UserProfileWithAvatar>>(
-    ['workflowsExecutionListExecutedByUserProfiles', ...uids],
-    () => userProfile.bulkGet({ uids: new Set(uids), dataPath: 'avatar' }),
-    {
-      enabled: enabled && uids.length > 0,
-      keepPreviousData: true,
-      retry: false,
-      select: profilesToMap,
-      staleTime: USER_PROFILES_STALE_TIME,
-    }
+/** Indexes the profiles the server resolved for each execution's `executedBy`. */
+export const getExecutedByProfiles = (
+  executions: Array<Pick<WorkflowExecutionListItemDto, 'executedBy' | 'executedByProfile'>>
+): Map<string, UserProfileWithAvatar> =>
+  executions.reduce<Map<string, UserProfileWithAvatar>>(
+    (acc, { executedBy, executedByProfile }) => {
+      if (executedBy && executedByProfile) {
+        acc.set(executedBy, executedByProfile);
+      }
+      return acc;
+    },
+    new Map<string, UserProfileWithAvatar>()
   );
-};
