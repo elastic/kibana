@@ -41,7 +41,6 @@ export function SloEditFormObjectiveSection() {
     setValue,
     formState: { defaultValues },
   } = useFormContext<CreateSLOForm>();
-  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
   const formState = useFormState({ control, name: 'objective.target' });
   const { isServerless } = usePluginContext();
 

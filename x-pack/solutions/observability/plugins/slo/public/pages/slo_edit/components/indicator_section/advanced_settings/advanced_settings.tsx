@@ -26,7 +26,6 @@ import { SyncFieldSelector } from './sync_field_selector';
 
 export function AdvancedSettings() {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
-  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
   const formState = useFormState({
     control,
     name: ['settings.syncDelay', 'settings.frequency', 'settings.preventInitialBackfill'],

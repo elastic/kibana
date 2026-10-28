@@ -25,7 +25,6 @@ import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardina
 export function ApmLatencyIndicatorTypeForm() {
   const { control, getFieldState } =
     useFormContext<CreateSLOForm<APMTransactionDurationIndicator>>();
-  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
   const formState = useFormState({ control, name: 'indicator.params.threshold' });
   const {
     data: { metric: apmIndex },

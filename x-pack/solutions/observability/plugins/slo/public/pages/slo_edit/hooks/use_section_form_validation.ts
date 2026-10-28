@@ -13,20 +13,20 @@ import {
   timesliceMetricBasicMetricWithField,
   timesliceMetricPercentileMetric,
 } from '@kbn/slo-schema';
-import { get, isEmpty, isObject } from 'lodash';
+import { isEmpty, isObject } from 'lodash';
 import type { FieldPath } from 'react-hook-form';
 import { useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { CreateSLOForm } from '../types';
 
 export function useSectionFormValidation() {
-  const { control, getValues } = useFormContext<CreateSLOForm>();
+  const { control, getFieldState, getValues } = useFormContext<CreateSLOForm>();
   // Subscribes this component (not the form root) to the values and errors read below.
   const [indicatorType] = useWatch({
     control,
     name: ['indicator.type', 'indicator.params', 'name'],
   });
-  const { errors } = useFormState({ control });
-  const isInvalid = (field: FieldPath<CreateSLOForm>) => Boolean(get(errors, field));
+  const formState = useFormState({ control });
+  const isInvalid = (field: FieldPath<CreateSLOForm>) => getFieldState(field, formState).invalid;
 
   let isIndicatorSectionValid: boolean = false;
 

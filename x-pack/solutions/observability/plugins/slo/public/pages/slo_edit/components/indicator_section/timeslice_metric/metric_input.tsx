@@ -50,10 +50,12 @@ export function MetricInput({
   indexFields,
 }: MetricInputProps) {
   const { control } = useFormContext<CreateSLOForm>();
-  const metric = useWatch({ control, name: `indicator.params.metric.metrics.${index}` });
-  const metricAggregation = useWatch({
+  const [metricName, metricAggregation] = useWatch({
     control,
-    name: `indicator.params.metric.metrics.${index}.aggregation`,
+    name: [
+      `indicator.params.metric.metrics.${index}.name`,
+      `indicator.params.metric.metrics.${index}.aggregation`,
+    ],
   });
 
   const [metricFields, setMetricFields] = useState(
@@ -89,7 +91,7 @@ export function MetricInput({
               fullWidth
               label={
                 <span>
-                  {aggregationLabel} {metric.name}
+                  {aggregationLabel} {metricName}
                 </span>
               }
               isInvalid={fieldState.invalid}
@@ -161,7 +163,7 @@ export function MetricInput({
                     {i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.percentileLabel', {
                       defaultMessage: 'Percentile',
                     })}{' '}
-                    {metric.name}
+                    {metricName}
                   </span>
                 }
               >
@@ -198,7 +200,7 @@ export function MetricInput({
                 isInvalid={fieldState.invalid}
                 label={
                   <span>
-                    {fieldLabel} {metric.name} {fieldTooltip}
+                    {fieldLabel} {metricName} {fieldTooltip}
                   </span>
                 }
               >

@@ -16,27 +16,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useFormContext, useWatch } from 'react-hook-form';
 import { IndexAndTimestampField } from '../custom_common/index_and_timestamp_field';
-import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 import { GroupByField } from '../../common/group_by_field';
-import type { CreateSLOForm } from '../../../types';
 import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';
-import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
+import { useIndicatorDataView } from '../custom_common/use_indicator_data_view';
 import { HistogramIndicator } from './histogram_indicator';
 
 export function HistogramIndicatorTypeForm() {
-  const { control, getValues } = useFormContext<CreateSLOForm>();
-  // `useWatch` only triggers the re-render; the value is read with `getValues` so that a `setValue` made by a
-  // child effect during the first mount (IndexSelection resolving the data view id) is not missed.
-  useWatch({ control, name: ['indicator.params.index', DATA_VIEW_FIELD] });
-  const [index, dataViewId] = getValues(['indicator.params.index', DATA_VIEW_FIELD]);
-
-  const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
-    indexPatternString: index,
-    dataViewId,
-  });
+  const { dataView, loading: isIndexFieldsLoading } = useIndicatorDataView();
 
   const histogramFields = dataView?.fields.filter((field) => field.type === 'histogram');
 

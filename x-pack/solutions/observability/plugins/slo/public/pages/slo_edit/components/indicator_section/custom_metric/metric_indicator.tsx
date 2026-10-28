@@ -93,7 +93,6 @@ export function MetricIndicator({
   dataView,
 }: MetricIndicatorProps) {
   const { control, setValue, register, getFieldState, getValues } = useFormContext<CreateSLOForm>();
-  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
   const formState = useFormState({ control, name: `indicator.params.${type}.metrics` });
   const [options, setOptions] = useState<Option[]>(createOptionsFromFields(metricFields));
   const [aggregationOptions, setAggregationOptions] = useState(CUSTOM_METRIC_AGGREGATION_OPTIONS);

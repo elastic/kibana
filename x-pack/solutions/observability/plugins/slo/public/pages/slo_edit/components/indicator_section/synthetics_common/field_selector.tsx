@@ -52,7 +52,6 @@ export function FieldSelector({
 }: Props) {
   const { control, getFieldState } =
     useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
-  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
   const formState = useFormState({ control, name });
   const [search, setSearch] = useState<string>('');
 

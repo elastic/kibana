@@ -25,7 +25,6 @@ const SETTINGS_SYNC_FIELD = 'settings.syncField';
 
 export function IndexSelection({ selectedDataView }: { selectedDataView?: DataView }) {
   const { control, getFieldState, setValue } = useFormContext<CreateSLOForm>();
-  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
   const formState = useFormState({ control, name: [INDEX_FIELD, DATA_VIEW_FIELD] });
   const { dataViews: dataViewsService, dataViewFieldEditor } =
     useKibana<SLOPublicPluginsStart>().services;

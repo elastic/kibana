@@ -13,7 +13,6 @@ import type { CreateSLOForm } from '../types';
 
 export function SloEditFormObjectiveSectionTimeslices() {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
-  // Subscribes this component to the errors it renders (the form root does not re-render on validation).
   const formState = useFormState({
     control,
     name: ['objective.timesliceTarget', 'objective.timesliceWindow'],
