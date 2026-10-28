@@ -724,6 +724,18 @@ For each connector it:
 
 Each connector in the JSON report gets a `verdict`: `healthy`, `vendor-drift` (the actions pass against the snapshots but not the latest specs), `kibana-regression` (they fail against the snapshots already) or `unknown` (a spec didn't load). Its `outcome` says what to do: `none`, `refresh` (only non-breaking changes, or the actions now call other operations, and everything passes; a run with `--refresh` updates the artifacts) or `issue` (anything breaking, deprecated, unreachable, unclassified without `oasdiff`, failing, or a stale overlay action). A new `info.version` alone changes nothing, since some vendors bump it on every deploy.
 
+A connector the check can't run on at all is reported with an `error` instead.
+
+`--surface` turns a report into GitHub issues, with `gh` and its `GITHUB_TOKEN`:
+
+```bash
+node scripts/connector_vendor_api --surface --report target/drift.json --github-repo elastic/kibana --dry-run
+```
+
+Each connector whose outcome is `issue` gets one issue labelled `connector-validation`, found again on later runs by a marker in its body. The issue reports the two-mock result, the classified changes, the problems and the stale overlay actions, and mentions the CODEOWNERS of the connector's folder. A later run updates it when the findings change, reopens it when the connector drifts again, and closes it once the connector is healthy. The summary (`--summary`, default `target/connector_vendor_api/drift_summary.json`) lists the connectors to refresh, with the body of the refresh PR. `--dry-run` reads the issues but only logs what it would write.
+
+The `kibana / connector vendor API drift` Buildkite pipeline (`.buildkite/pipelines/connector_vendor_api_drift.yml`) runs both weekly, and refreshes the artifacts of the `refresh` connectors in a single bot PR. Start a build by hand to check now; set `CONNECTOR_VENDOR_API_CONNECTOR` on the build to check one connector. `CONNECTOR_VENDOR_API_GITHUB_REPO` in its resource definition switches it from a dry run (empty) to a sandbox repository or to `elastic/kibana`.
+
 ### Running a connector in Kibana against its contract mock
 
 `node scripts/connector_emulate` serves a connector's contract mock as an HTTP forward proxy (see the server mode section of `@kbn/connector-emulate`'s README), so a running Kibana can execute the connector without vendor credentials:

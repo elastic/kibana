@@ -67,6 +67,15 @@ export interface ConnectorDrift {
   readonly outcome: DriftOutcome;
 }
 
+/** A connector the check couldn't run on at all. */
+export interface FailedDrift {
+  readonly connector: string;
+  readonly error: string;
+}
+
+/** An entry of the `--drift` report. */
+export type DriftReportEntry = ConnectorDrift | FailedDrift;
+
 export interface DetectDriftOptions {
   readonly connector: ConnectorSpec;
   /** The connector's `vendor_api` folder, which is only read. */

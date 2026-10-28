@@ -3948,6 +3948,11 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/pipelines/report_flaky_tests.yml @elastic/appex-qa @elastic/kibana-operations
 /.buildkite/scripts/steps/report_flaky_tests.sh @elastic/appex-qa @elastic/kibana-operations
 
+# Connector vendor API drift pipeline (kibana / connector vendor API drift)
+/.buildkite/pipeline-resource-definitions/kibana-connector-vendor-api-drift.yml @elastic/workflows-eng @elastic/kibana-operations
+/.buildkite/pipelines/connector_vendor_api_drift.yml @elastic/workflows-eng @elastic/kibana-operations
+/.buildkite/scripts/steps/connector_vendor_api_drift.sh @elastic/workflows-eng @elastic/kibana-operations
+
 # Evals (Buildkite + scripts)
 /.buildkite/pipelines/evals/ @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
 /.buildkite/scripts/steps/evals/ @elastic/nightshift-context-and-research-team @elastic/security-generative-ai
