@@ -8,6 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
+import { omit } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { PrivilegeType } from '@kbn/apm-types';
 
@@ -172,7 +173,6 @@ export async function getFullAgentPolicy(
       packageInfoCache.set(pkgKey, packageInfo);
     })
   );
-  const bootstrapOutputConfig = generateFleetServerOutputSSLConfig(fleetServerHost);
 
   logger.debug(() => `Fetching agent inputs for policy [${id}]`);
 
@@ -229,6 +229,21 @@ export async function getFullAgentPolicy(
     });
   }
 
+  const fullPolicyOutputs = outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
+    acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
+      output,
+      isBeatsOutput(output) && output.proxy_id
+        ? proxies.find((proxy) => output.proxy_id === proxy.id)
+        : undefined,
+      standalone,
+      redactProxySecrets
+    );
+    return acc;
+  }, {});
+
+  // outputs generated for the fleet-server input from the ES SSL settings of the fleet server host
+  const bootstrapOutputs: FullAgentPolicy['outputs'] = {};
+
   const inputs = agentInputs
     // filter out the otelcol inputs, they will be added at the root of the policy
     .filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE)
@@ -239,16 +254,16 @@ export async function getFullAgentPolicy(
         input.use_output = getOutputIdForAgentPolicy(output);
       }
       if (input.type === 'fleet-server' && fleetServerHost) {
-        const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
-        if (sslInputConfig) {
-          input = {
-            ...input,
-            ...sslInputConfig,
-            ...(bootstrapOutputConfig
-              ? { use_output: `fleetserver-output-${fleetServerHost.id}` }
-              : {}),
-          };
-        }
+        const bootstrapOutput = generateFleetServerOutputSSLConfig(
+          fleetServerHost,
+          input.use_output ? fullPolicyOutputs[input.use_output] : undefined
+        );
+        input = {
+          ...input,
+          ...generateSSLConfigForFleetServerInput(fleetServerHost),
+          ...(bootstrapOutput ? { use_output: Object.keys(bootstrapOutput)[0] } : {}),
+        };
+        Object.assign(bootstrapOutputs, bootstrapOutput);
       }
       return input;
     });
@@ -313,18 +328,8 @@ export async function getFullAgentPolicy(
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
-      ...(bootstrapOutputConfig ? bootstrapOutputConfig : {}),
-      ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
-        acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
-          output,
-          isBeatsOutput(output) && output.proxy_id
-            ? proxies.find((proxy) => output.proxy_id === proxy.id)
-            : undefined,
-          standalone,
-          redactProxySecrets
-        );
-        return acc;
-      }, {}),
+      ...bootstrapOutputs,
+      ...fullPolicyOutputs,
     },
     inputs,
     ...(otelcolConfig ? otelcolConfig : {}),
@@ -845,37 +850,66 @@ export function transformOutputToFullPolicyOutput(
 // Generate the SSL configs for fleet server connection to ES
 // Corresponding to --fleet-server-es-ca, --fleet-server-es-cert, --fleet-server-es-cert-key cli options
 // This function generates a `bootstrap output` to be sent directly to elastic-agent
-export function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost | undefined):
+//
+// The output is only generated when at least one ES SSL setting is set on the fleet server host.
+// When the output used by the fleet-server input is an elasticsearch output (`baseOutput`), the bootstrap
+// output is a copy of it with the ES SSL settings layered on top, so that the hosts configured on the
+// policy's output are not lost. Otherwise it only contains the ES SSL settings and elastic-agent/fleet-server
+// fill the remaining attributes from the bootstrap configuration.
+export function generateFleetServerOutputSSLConfig(
+  fleetServerHost: FleetServerHost | undefined,
+  baseOutput?: FullAgentPolicyOutput
+):
   | {
       [key: string]: FullAgentPolicyOutput;
     }
   | undefined {
-  if (!fleetServerHost || (!fleetServerHost?.ssl && !fleetServerHost.secrets)) return undefined;
+  if (!fleetServerHost) return undefined;
 
-  const outputConfig: FullAgentPolicyOutput = { type: 'elasticsearch' };
-  if (fleetServerHost?.ssl) {
-    outputConfig.ssl = {
-      ...(fleetServerHost.ssl.es_certificate_authorities && {
-        certificate_authorities: fleetServerHost.ssl.es_certificate_authorities,
+  const esSecretKey = fleetServerHost.secrets?.ssl?.es_key;
+  const esSsl = {
+    ...(fleetServerHost.ssl?.es_certificate_authorities && {
+      certificate_authorities: fleetServerHost.ssl.es_certificate_authorities,
+    }),
+    ...(fleetServerHost.ssl?.es_certificate && {
+      certificate: fleetServerHost.ssl.es_certificate,
+    }),
+    // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
+    ...(fleetServerHost.ssl?.es_key &&
+      !esSecretKey && {
+        key: fleetServerHost.ssl.es_key,
       }),
-      ...(fleetServerHost.ssl.es_certificate && {
-        certificate: fleetServerHost.ssl.es_certificate,
-      }),
-      ...(fleetServerHost.ssl.es_key &&
-        !fleetServerHost?.secrets?.ssl?.es_key && {
-          key: fleetServerHost.ssl.es_key,
-        }),
-    };
+  };
+
+  if (Object.keys(esSsl).length === 0 && !esSecretKey) return undefined;
+
+  const {
+    secrets: baseSecrets,
+    ssl: baseSsl,
+    ...baseRest
+  } = baseOutput?.type === 'elasticsearch' ? baseOutput : ({} as Partial<FullAgentPolicyOutput>);
+  const outputConfig: FullAgentPolicyOutput = { ...baseRest, type: 'elasticsearch' };
+
+  // the ES key of the fleet server host replaces the key of the base output, whether plain or secret
+  const ssl: Record<string, any> = { ...baseSsl, ...esSsl };
+  if (esSecretKey) delete ssl.key;
+  if (Object.keys(ssl).length > 0) {
+    outputConfig.ssl = ssl;
   }
-  // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
-  if (fleetServerHost?.secrets?.ssl?.es_key) {
-    outputConfig.secrets = {
-      ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
-    };
+
+  const secrets: Record<string, any> = { ...baseSecrets };
+  if (esSecretKey) {
+    secrets.ssl = { ...secrets.ssl, key: esSecretKey };
+  } else if (esSsl.key && secrets.ssl?.key) {
+    secrets.ssl = omit(secrets.ssl, 'key');
+    if (Object.keys(secrets.ssl).length === 0) delete secrets.ssl;
+  }
+  if (Object.keys(secrets).length > 0) {
+    outputConfig.secrets = secrets;
   }
 
   return {
-    [`fleetserver-output-${fleetServerHost?.id}`]: outputConfig,
+    [`fleetserver-output-${fleetServerHost.id}`]: outputConfig,
   };
 }
 
