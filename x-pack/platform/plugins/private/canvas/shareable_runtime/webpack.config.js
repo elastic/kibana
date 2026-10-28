@@ -131,14 +131,7 @@ module.exports = {
               sourceMap: !isProd,
             },
           },
-          {
-            loader: 'postcss-loader',
-            options: {
-              postcssOptions: {
-                config: require.resolve('@kbn/optimizer/postcss.config'),
-              },
-            },
-          },
+          { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
           {
             loader: 'sass-loader',
             options: {
