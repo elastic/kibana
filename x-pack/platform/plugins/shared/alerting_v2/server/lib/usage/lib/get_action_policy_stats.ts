@@ -12,8 +12,10 @@ import { TERMS_SIZE, bucketsToArray } from './constants';
 import type { ActionPolicyStatsAggregations, ActionPolicyStatsResults } from './types';
 
 export async function getActionPolicyStats(
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  now: Date = new Date()
 ): Promise<ActionPolicyStatsResults> {
+  const nowMs = now.getTime();
   const response = await esClient.search({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     size: 0,
@@ -83,6 +85,74 @@ export async function getActionPolicyStats(
                 }
               }
             }
+          `,
+        },
+      },
+      // `disabled` = !enabled; `snoozed` = enabled and snoozedUntil > now; `enabled` otherwise.
+      ap_status: {
+        type: 'keyword',
+        script: {
+          params: { now: nowMs },
+          source: `
+            def ap = params._source['${ACTION_POLICY_SAVED_OBJECT_TYPE}'];
+            if (ap == null) return;
+            if (ap['enabled'] != true) {
+              emit('disabled');
+              return;
+            }
+            def snoozedUntil = ap['snoozedUntil'];
+            if (snoozedUntil != null) {
+              long snoozedUntilMs = ZonedDateTime.parse(snoozedUntil).toInstant().toEpochMilli();
+              if (snoozedUntilMs > params.now) {
+                emit('snoozed');
+                return;
+              }
+            }
+            emit('enabled');
+          `,
+        },
+      },
+      // Absent grouping means the default, `per_alert`.
+      ap_grouping_mode: {
+        type: 'keyword',
+        script: {
+          source: `
+            def ap = params._source['${ACTION_POLICY_SAVED_OBJECT_TYPE}'];
+            if (ap == null) return;
+            def grouping = ap['grouping'];
+            if (grouping != null && grouping['mode'] != null) {
+              emit(grouping['mode']);
+            } else {
+              emit('per_alert');
+            }
+          `,
+        },
+      },
+      // `none` when the policy sets no throttle, or a throttle block without a strategy
+      // (which the API reads as no throttle).
+      ap_throttle_strategy: {
+        type: 'keyword',
+        script: {
+          source: `
+            def ap = params._source['${ACTION_POLICY_SAVED_OBJECT_TYPE}'];
+            if (ap == null) return;
+            def throttle = ap['throttle'];
+            if (throttle != null && throttle['strategy'] != null) {
+              emit(throttle['strategy']);
+            } else {
+              emit('none');
+            }
+          `,
+        },
+      },
+      ap_destinations_count: {
+        type: 'long',
+        script: {
+          source: `
+            def ap = params._source['${ACTION_POLICY_SAVED_OBJECT_TYPE}'];
+            if (ap == null) return;
+            def destinations = ap['destinations'];
+            emit(destinations == null ? 0L : (long) destinations.size());
           `,
         },
       },
