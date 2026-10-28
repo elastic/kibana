@@ -32,7 +32,7 @@ export const DashboardChangeHistoryProvider = ({
   const dashboardId = dashboardApi.savedObjectId$.getValue() ?? dashboardApi.uuid;
 
   const { analytics } = coreServices;
-  const [isComparing, setIsComparing] = useState<boolean>(false);
+  const [isComparingToPrevious, setIsComparingToPrevious] = useState<boolean>(false);
   const ignoreEventPropogation = useRef<boolean>(false);
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
@@ -68,7 +68,7 @@ export const DashboardChangeHistoryProvider = ({
     NonNullable<ChangeHistoryProviderProps['onSelectChange']>
   >(() => {
     if (!ignoreEventPropogation.current) {
-      setIsComparing(false);
+      setIsComparingToPrevious(false);
     }
     ignoreEventPropogation.current = false;
   }, []);
@@ -85,7 +85,7 @@ export const DashboardChangeHistoryProvider = ({
           flush={'both'}
           onClick={() => {
             ignoreEventPropogation.current = true; // if clicking the nChanges button, ignore propogation up to `onSelectChange`
-            setIsComparing(true);
+            setIsComparingToPrevious(true);
           }}
         >
           {nChanges}
@@ -94,17 +94,17 @@ export const DashboardChangeHistoryProvider = ({
     []
   );
 
-  // renders the dashboard preview and/or the JSON comparison mode, depending on isComparing
+  // renders the dashboard preview and/or the JSON comparison mode, depending on isComparingToPrevious
   const renderPreview = useCallback<NonNullable<ChangeHistoryProviderProps['renderPreview']>>(
     (props) => (
       <DashboardChangeHistoryView
         previewProps={props}
         setPreviewTitle={setPreviewTitle}
-        isComparing={isComparing}
+        isComparingToPrevious={isComparingToPrevious}
         inheritedTimeRange={dashboardApi?.timeRange$.getValue()}
       />
     ),
-    [isComparing, dashboardApi]
+    [isComparingToPrevious, dashboardApi]
   );
 
   return (
