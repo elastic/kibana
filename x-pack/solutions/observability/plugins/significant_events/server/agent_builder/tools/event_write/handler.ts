@@ -29,6 +29,7 @@ import {
   fetchInactiveEventsForReuse,
   fetchLiveEventsForDedup,
   markDuplicateKeys,
+  competingInactiveHeads,
   reopenMatchingInactiveSeries,
   resolveDedupSkips,
 } from './dedup';
@@ -108,7 +109,18 @@ export async function eventsWriteBulkHandler({
     dedupCandidates: unskipped.filter((c): c is DedupCandidate => c.mode === 'dedup'),
     inactiveLookbackMs,
   });
-  const toWrite = reopenMatchingInactiveSeries(unskipped, inactiveEvents);
+  const competing = competingInactiveHeads(unskipped, inactiveEvents);
+  // Which closed series an operator deactivated only matters when several compete for one batch;
+  // otherwise the single match wins and the hold stage below does its own lookup.
+  const deactivatedGroupHashes =
+    competing.length === 0
+      ? new Set<string>()
+      : new Set((await eventSearchClient.findOperatorDeactivations({ heads: competing })).keys());
+  const toWrite = reopenMatchingInactiveSeries({
+    candidates: unskipped,
+    inactive: inactiveEvents,
+    deactivatedGroupHashes,
+  });
 
   const eventHistory = await loadHistory({ eventSearchClient, candidates: toWrite });
   const known = keepKnownEvents({ candidates: eventHistory, enabled: rejectUnknownEventIds });

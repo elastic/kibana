@@ -1656,4 +1656,72 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
       expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('held_by_deactivation'));
     });
   });
+
+  describe('when several closed series match the batch', () => {
+    const older = makeStoredEvent('series-older', {
+      status: 'inactive',
+      '@timestamp': '2026-10-27T01:00:00.000Z',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+    });
+    const newer = makeStoredEvent('series-newer', {
+      status: 'inactive',
+      '@timestamp': '2026-10-28T01:00:00.000Z',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+    });
+    const heads = [
+      { eventId: 'series-older', groupHash: 'group-older', episodeId: 'episode-older' },
+      { eventId: 'series-newer', groupHash: 'group-newer', episodeId: 'episode-newer' },
+    ];
+    const clientWithTwo = (findOperatorDeactivations: jest.Mock) =>
+      makeEventSearchClient({
+        findLatestInactiveByIdentity: jest.fn().mockResolvedValue({ hits: [newer, older], heads }),
+        findByEventId: jest.fn().mockImplementation(async (eventId: string) => ({
+          hits: [eventId === 'series-older' ? older : newer],
+        })),
+        findOperatorDeactivations,
+      });
+
+    it('holds the series an operator deactivated, not the newer one', async () => {
+      const findOperatorDeactivations = jest.fn().mockResolvedValue(
+        new Map([
+          [
+            'group-older',
+            {
+              groupHash: 'group-older',
+              episodeId: 'episode-older',
+              reason: 'known noise',
+              deactivatedAt: '2026-10-27T02:00:00.000Z',
+            },
+          ],
+        ])
+      );
+
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWithTwo(findOperatorDeactivations),
+        inputs: [breachFor('rule-a')],
+      });
+
+      expect(findOperatorDeactivations).toHaveBeenNthCalledWith(1, { heads: expect.any(Array) });
+      expect(findOperatorDeactivations.mock.calls[0][0].heads).toHaveLength(2);
+      expect(results[0]).toMatchObject({
+        reason: 'held_by_deactivation',
+        existing_event_id: 'series-older',
+        deactivation_reason: 'known noise',
+      });
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('reopens the newest one when none was deactivated', async () => {
+      const findOperatorDeactivations = jest.fn().mockResolvedValue(new Map());
+
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWithTwo(findOperatorDeactivations),
+        inputs: [breachFor('rule-a')],
+      });
+
+      expect(results[0]).toMatchObject({ written: true, event_id: 'series-newer' });
+      // One lookup chooses between the two series, one decides whether to hold the chosen one.
+      expect(findOperatorDeactivations).toHaveBeenCalledTimes(2);
+    });
+  });
 });

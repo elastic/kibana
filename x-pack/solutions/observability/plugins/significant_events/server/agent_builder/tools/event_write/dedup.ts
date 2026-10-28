@@ -255,43 +255,92 @@ const identityOfEvent = (ev: SignificantEvent, confirmedOnly: boolean): string =
   });
 
 /**
+ * The closed series that exactly match a dedup candidate's identity, newest first. It expects
+ * `series` already paired with their latest episode (see `seriesWithHeads`).
+ */
+const exactInactiveMatches = ({
+  candidate,
+  series,
+}: {
+  candidate: WriteCandidate;
+  series: Array<{ event: SignificantEvent; head: InactiveSeriesHead }>;
+}): Array<{ event: SignificantEvent; head: InactiveSeriesHead }> => {
+  if (candidate.mode !== 'dedup' || candidate.ruleUuids.length === 0) return [];
+
+  const identity = makeIdentity({
+    sourceIds: candidate.input.source_ids,
+    ruleUuids: candidate.ruleUuids,
+  });
+  return series.filter(
+    ({ event }) =>
+      event.status === ALERT_EPISODE_STATUS.INACTIVE &&
+      identityOfEvent(event, candidate.confirmedOnly) === identity
+  );
+};
+
+/**
+ * Closed series paired with their latest episode, newest first. A series whose latest episode is
+ * unknown is omitted: a deactivation cannot be looked up for it, so it is never reopened.
+ */
+const seriesWithHeads = ({
+  events,
+  heads,
+}: InactiveSeries): Array<{ event: SignificantEvent; head: InactiveSeriesHead }> =>
+  events.toSorted(newestFirst).flatMap((event) => {
+    const head = heads.find(({ eventId }) => eventId === event.event_id);
+    return head === undefined ? [] : [{ event, head }];
+  });
+
+/**
+ * The latest episodes of the closed series that compete for one candidate: two or more exact
+ * matches. Only then does the choice between them need to know which one an operator deactivated,
+ * so this limits the deactivation lookup to those series (merged across candidates, by `event_id`).
+ */
+export const competingInactiveHeads = (
+  candidates: WriteCandidate[],
+  inactive: InactiveSeries
+): InactiveSeriesHead[] => {
+  const series = seriesWithHeads(inactive);
+  const competing = candidates
+    .map((candidate) => exactInactiveMatches({ candidate, series }))
+    .filter((matches) => matches.length > 1)
+    .flat()
+    .map(({ head }) => head);
+  return [...new Map(competing.map((head) => [head.eventId, head])).values()];
+};
+
+/**
  * Turns each dedup candidate whose identity exactly matches a closed series into a continuation of
  * that series: it keeps the series' `event_id`, so the write opens a new episode under it. A
  * partial overlap never reopens a closed series, and a candidate that no closed series matches stays
- * a new event. When several closed series match, the newest one is reopened.
+ * a new event. When several closed series match, the one an operator deactivated is reopened, so
+ * the hold applies to it; otherwise the newest one.
  */
-export const reopenMatchingInactiveSeries = (
-  candidates: WriteCandidate[],
-  { events, heads }: InactiveSeries
-): WriteCandidate[] => {
-  const newestInactive = events.toSorted(newestFirst);
+export const reopenMatchingInactiveSeries = ({
+  candidates,
+  inactive,
+  deactivatedGroupHashes = new Set(),
+}: {
+  candidates: WriteCandidate[];
+  inactive: InactiveSeries;
+  /** The `group_hash` of the closed series an operator deactivated; it needs to cover only the competing ones. */
+  deactivatedGroupHashes?: ReadonlySet<string>;
+}): WriteCandidate[] => {
+  const series = seriesWithHeads(inactive);
 
   return candidates.map((candidate): WriteCandidate => {
-    if (candidate.mode !== 'dedup' || candidate.ruleUuids.length === 0) return candidate;
-
-    const identity = makeIdentity({
-      sourceIds: candidate.input.source_ids,
-      ruleUuids: candidate.ruleUuids,
-    });
-    const closed = newestInactive.find(
-      (ev) =>
-        ev.event_id !== undefined &&
-        ev.status === ALERT_EPISODE_STATUS.INACTIVE &&
-        identityOfEvent(ev, candidate.confirmedOnly) === identity
-    );
-    if (closed?.event_id === undefined) return candidate;
-
-    // Without the series' latest episode a deactivation cannot be looked up, so the series is
-    // not reopened: the batch stays a new event.
-    const head = heads.find(({ eventId }) => eventId === closed.event_id);
-    if (head === undefined) return candidate;
+    const matches = exactInactiveMatches({ candidate, series });
+    const chosen =
+      matches.find(({ head }) => deactivatedGroupHashes.has(head.groupHash)) ?? matches[0];
+    // `event_id` is optional on the type; every paired series has one.
+    if (chosen?.event.event_id === undefined) return candidate;
 
     return {
       mode: 'snapshot',
       index: candidate.index,
-      input: { ...candidate.input, event_id: closed.event_id },
-      eventId: closed.event_id,
-      reopensSeries: { groupHash: head.groupHash, episodeId: head.episodeId },
+      input: { ...candidate.input, event_id: chosen.event.event_id },
+      eventId: chosen.event.event_id,
+      reopensSeries: { groupHash: chosen.head.groupHash, episodeId: chosen.head.episodeId },
     };
   });
 };

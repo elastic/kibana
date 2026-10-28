@@ -13,6 +13,7 @@ import {
   fetchLiveEventsForDedup,
   markDuplicateKeys,
   reopenMatchingInactiveSeries,
+  competingInactiveHeads,
   resolveDedupSkips,
 } from './dedup';
 import type {
@@ -487,8 +488,14 @@ describe('reopenMatchingInactiveSeries', () => {
   const reopen = (
     inputs: EventsWriteInput[],
     events: SignificantEvent[],
-    heads: InactiveSeriesHead[] = headsOf(events)
-  ) => reopenMatchingInactiveSeries(buildWriteCandidates(inputs), { events, heads });
+    heads: InactiveSeriesHead[] = headsOf(events),
+    deactivatedGroupHashes: ReadonlySet<string> = new Set()
+  ) =>
+    reopenMatchingInactiveSeries({
+      candidates: buildWriteCandidates(inputs),
+      inactive: { events, heads },
+      deactivatedGroupHashes,
+    });
 
   it('reuses the event_id of a closed series with the exact same identity', () => {
     const [candidate] = reopen([makeInput()], [makeInactiveEvent()]);
@@ -545,16 +552,52 @@ describe('reopenMatchingInactiveSeries', () => {
     expect(candidate.mode).toBe('dedup');
   });
 
-  it('reopens the newest closed series when several match', () => {
-    const [candidate] = reopen(
-      [makeInput()],
-      [
-        makeInactiveEvent({ event_id: 'older', '@timestamp': '2026-10-27T01:00:00.000Z' }),
-        makeInactiveEvent({ event_id: 'newer', '@timestamp': '2026-10-28T01:00:00.000Z' }),
-      ]
-    );
+  it('reopens the series an operator deactivated, even when a newer one also matches', () => {
+    const older = makeInactiveEvent({
+      event_id: 'older',
+      '@timestamp': '2026-10-27T01:00:00.000Z',
+    });
+    const newer = makeInactiveEvent({
+      event_id: 'newer',
+      '@timestamp': '2026-10-28T01:00:00.000Z',
+    });
+
+    const [candidate] = reopen([makeInput()], [older, newer], undefined, new Set(['group-older']));
+
+    expect(candidate).toMatchObject({
+      eventId: 'older',
+      reopensSeries: { groupHash: 'group-older' },
+    });
+  });
+
+  it('reopens the newest matching series when no match was deactivated', () => {
+    const older = makeInactiveEvent({
+      event_id: 'older',
+      '@timestamp': '2026-10-27T01:00:00.000Z',
+    });
+    const newer = makeInactiveEvent({
+      event_id: 'newer',
+      '@timestamp': '2026-10-28T01:00:00.000Z',
+    });
+
+    const [candidate] = reopen([makeInput()], [older, newer], undefined, new Set(['group-other']));
 
     expect(candidate.eventId).toBe('newer');
+  });
+
+  it('ignores a newer matching series that has no head and reopens the older one', () => {
+    const older = makeInactiveEvent({
+      event_id: 'older',
+      '@timestamp': '2026-10-27T01:00:00.000Z',
+    });
+    const newer = makeInactiveEvent({
+      event_id: 'newer',
+      '@timestamp': '2026-10-28T01:00:00.000Z',
+    });
+
+    const [candidate] = reopen([makeInput()], [older, newer], headsOf([older]));
+
+    expect(candidate.eventId).toBe('older');
   });
 
   it('compares confirmed rules only when the candidate has confirmed rules', () => {
@@ -574,5 +617,54 @@ describe('reopenMatchingInactiveSeries', () => {
 
     expect(results.map((c) => c.mode)).toEqual(['snapshot', 'dedup']);
     expect(results[0].eventId).toBe('explicit-id');
+  });
+});
+
+describe('competingInactiveHeads', () => {
+  const closed = (eventId: string, overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
+    makeActiveEvent({ status: 'inactive', event_id: eventId, ...overrides });
+  const head = (eventId: string): InactiveSeriesHead => ({
+    eventId,
+    groupHash: `group-${eventId}`,
+    episodeId: `episode-${eventId}`,
+  });
+
+  it('returns the heads of the series that compete for one candidate', () => {
+    const events = [closed('a'), closed('b')];
+
+    const heads = competingInactiveHeads(buildWriteCandidates([makeInput()]), {
+      events,
+      heads: [head('a'), head('b')],
+    });
+
+    expect(heads.map(({ eventId }) => eventId).sort()).toEqual(['a', 'b']);
+  });
+
+  it('ignores candidates that carry no rules or name an event_id themselves', () => {
+    const heads = competingInactiveHeads(
+      buildWriteCandidates([makeInput({ signals: [] }), makeInput({ event_id: 'explicit-id' })]),
+      { events: [closed('a'), closed('b')], heads: [head('a'), head('b')] }
+    );
+
+    expect(heads).toEqual([]);
+  });
+
+  it('leaves out a matching series with no known head', () => {
+    const heads = competingInactiveHeads(buildWriteCandidates([makeInput()]), {
+      events: [closed('a'), closed('b')],
+      heads: [head('a')],
+    });
+
+    expect(heads).toEqual([]);
+  });
+
+  it('returns nothing when each candidate matches at most one series', () => {
+    const heads = competingInactiveHeads(buildWriteCandidates([makeInput()]), {
+      // `b` covers another source, so only `a` matches the default `makeInput()` identity.
+      events: [closed('a'), closed('b', { source_ids: ['logs.cart'] })],
+      heads: [head('a'), head('b')],
+    });
+
+    expect(heads).toEqual([]);
   });
 });
