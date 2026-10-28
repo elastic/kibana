@@ -61,6 +61,55 @@ describe('initializeSettingsManager', () => {
   });
 });
 
+describe('hasUnsavedChanges$', () => {
+  const timeRange = { from: '2026-10-01T00:00:00.000Z', to: '2026-10-02T00:00:00.000Z' };
+  const panel = {
+    id: 'panel-1',
+    type: 'testPanelType',
+    grid: { x: 0, y: 0, w: 12, h: 8 },
+    config: { title: 'Logs' },
+  };
+  const savedState: DashboardState = {
+    ...DEFAULT_DASHBOARD_STATE,
+    time_range: timeRange,
+    panels: [panel],
+  };
+
+  test.each<[string, (dashboardApi: DashboardApi) => void]>([
+    ['the title', (dashboardApi) => dashboardApi.setSettings({ title: 'Errors' })],
+    ['time restore', (dashboardApi) => dashboardApi.setSettings({ time_restore: false })],
+    ['the tags', (dashboardApi) => dashboardApi.setTags(['logs'])],
+    [
+      'the time range',
+      (dashboardApi) =>
+        dashboardApi.setTimeRange({ from: '2026-09-01T00:00:00.000Z', to: timeRange.to }),
+    ],
+    [
+      'the query',
+      (dashboardApi) => dashboardApi.setQuery({ query: 'status:500', language: 'kuery' }),
+    ],
+    [
+      'the filters',
+      (dashboardApi) =>
+        dashboardApi.setFilters([{ meta: { alias: null, disabled: false, negate: false } }]),
+    ],
+    ['ES|QL approximation', (dashboardApi) => dashboardApi.setEsqlApproximation(true)],
+    ['the layout', (dashboardApi) => dashboardApi.removePanel(panel.id)],
+  ])('turns true after changing %s', async (_, change) => {
+    const { api: dashboardApi, cleanup } = getDashboardApi({
+      incomingEmbeddables: [],
+      initialState: savedState,
+      readResult: { data: savedState, meta: { managed: false } } as DashboardReadResponseBody,
+    });
+    await waitFor(() => expect(dashboardApi.hasUnsavedChanges$.value).toBe(false));
+
+    change(dashboardApi);
+
+    await waitFor(() => expect(dashboardApi.hasUnsavedChanges$.value).toBe(true));
+    cleanup();
+  });
+});
+
 describe('diffStates', () => {
   const { api } = getDashboardApi({
     incomingEmbeddables: [],
