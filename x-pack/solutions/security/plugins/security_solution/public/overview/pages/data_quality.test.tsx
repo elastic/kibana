@@ -265,6 +265,12 @@ describe('DataQuality', () => {
       expect(screen.getByTestId('ecsDataQualityDashboardLoader')).toBeInTheDocument();
     });
 
+    test('it keeps the app header mounted', () => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        DATA_QUALITY_TITLE
+      );
+    });
+
     test('it does NOT render the data quality panel content', () => {
       expect(screen.queryByTestId('dataQualitySummary')).not.toBeInTheDocument();
     });
@@ -347,6 +353,13 @@ describe('DataQuality', () => {
         DATA_QUALITY_TITLE
       );
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toBeInTheDocument();
+    });
+
+    test('it renders the data view picker so users can switch to another data view', () => {
+      expect(screen.getByTestId('mockDataViewPicker')).toHaveAttribute(
+        'data-scope',
+        PageScope.default
+      );
     });
   });
 

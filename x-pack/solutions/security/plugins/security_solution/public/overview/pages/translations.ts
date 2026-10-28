@@ -35,7 +35,7 @@ export const DATE_PICKER_TOOLTIP = i18n.translate(
 export const DATA_QUALITY_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.dataQualityDashboard.pageDescription',
   {
-    defaultMessage: 'Check that index mappings and values are compatible with ECS.',
+    defaultMessage: 'Check index mappings and values against the Elastic Common Schema (ECS).',
   }
 );
 

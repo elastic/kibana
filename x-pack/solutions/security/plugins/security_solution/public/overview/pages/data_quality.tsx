@@ -106,12 +106,15 @@ const DataQualityComponent: React.FC = () => {
     [getSecuritySolutionUrl]
   );
 
+  const dataViewPicker = useMemo(
+    () => <DataViewPicker scope={PageScope.default} compressed={false} />,
+    []
+  );
+
   const summaryFilters = useMemo(
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <DataViewPicker scope={PageScope.default} compressed={false} />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{dataViewPicker}</EuiFlexItem>
         {!isILMAvailable && startDate && endDate && (
           <EuiFlexItem grow={false}>
             <EuiToolTip content={i18n.DATE_PICKER_TOOLTIP}>
@@ -128,7 +131,7 @@ const DataQualityComponent: React.FC = () => {
         )}
       </EuiFlexGroup>
     ),
-    [isILMAvailable, startDate, endDate, onTimeChange]
+    [dataViewPicker, isILMAvailable, startDate, endDate, onTimeChange]
   );
 
   const [lastChecked, setLastChecked] = useLocalStorage<string>({
@@ -171,13 +174,52 @@ const DataQualityComponent: React.FC = () => {
     [telemetry]
   );
 
-  if (status === 'loading' || isSignalIndexNameLoading) {
-    return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
-  }
-
   if (status === 'pristine') {
     return <PageLoader />;
   }
+
+  const renderContent = () => {
+    if (status === 'loading' || isSignalIndexNameLoading) {
+      return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
+    }
+
+    if (!indicesExist) {
+      return (
+        <>
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>{dataViewPicker}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EmptyPrompt />
+        </>
+      );
+    }
+
+    return (
+      <DataQualityPanel
+        baseTheme={baseTheme}
+        canUserCreateAndReadCases={canUserCreateAndReadCases}
+        defaultBytesFormat={defaultBytesFormat}
+        defaultNumberFormat={defaultNumberFormat}
+        endDate={endDate}
+        reportDataQualityCheckAllCompleted={reportDataQualityCheckAllCompleted}
+        reportDataQualityIndexChecked={reportDataQualityIndexChecked}
+        httpFetch={httpFetch}
+        isAssistantEnabled={isAssistantEnabled}
+        isILMAvailable={isILMAvailable}
+        lastChecked={lastChecked}
+        openCreateCaseFlyout={openCreateCaseFlyout}
+        patterns={alertsAndSelectedPatterns}
+        setLastChecked={setLastChecked}
+        startDate={startDate}
+        summaryFilters={summaryFilters}
+        theme={theme}
+        toasts={toasts}
+        defaultStartTime={DEFAULT_START_TIME}
+        defaultEndTime={DEFAULT_END_TIME}
+      />
+    );
+  };
 
   return (
     <>
@@ -189,36 +231,12 @@ const DataQualityComponent: React.FC = () => {
           spacing="largeBleed"
           back={back}
           docLink={docLinks.links.siem.dataQualityPage}
-          // Empty items still count as a menu, so the legacy data view picker is not remounted.
+          // Pass a menu even with no items so AppHeader doesn't fall back to the legacy action menu,
+          // which would render a second data view picker.
           menu={{ items: [] }}
         />
         <EuiSpacer size="m" />
-        {indicesExist ? (
-          <DataQualityPanel
-            baseTheme={baseTheme}
-            canUserCreateAndReadCases={canUserCreateAndReadCases}
-            defaultBytesFormat={defaultBytesFormat}
-            defaultNumberFormat={defaultNumberFormat}
-            endDate={endDate}
-            reportDataQualityCheckAllCompleted={reportDataQualityCheckAllCompleted}
-            reportDataQualityIndexChecked={reportDataQualityIndexChecked}
-            httpFetch={httpFetch}
-            isAssistantEnabled={isAssistantEnabled}
-            isILMAvailable={isILMAvailable}
-            lastChecked={lastChecked}
-            openCreateCaseFlyout={openCreateCaseFlyout}
-            patterns={alertsAndSelectedPatterns}
-            setLastChecked={setLastChecked}
-            startDate={startDate}
-            summaryFilters={summaryFilters}
-            theme={theme}
-            toasts={toasts}
-            defaultStartTime={DEFAULT_START_TIME}
-            defaultEndTime={DEFAULT_END_TIME}
-          />
-        ) : (
-          <EmptyPrompt />
-        )}
+        {renderContent()}
       </SecuritySolutionPageWrapper>
 
       <SpyRoute pageName={SecurityPageName.dataQuality} />

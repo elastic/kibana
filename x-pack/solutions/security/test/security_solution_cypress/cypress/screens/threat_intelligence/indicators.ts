@@ -122,7 +122,6 @@ export const DEFAULT_LAYOUT_TITLE = getDataTestSubjectSelector('appHeaderTitle')
 export const BREADCRUMBS = getDataTestSubjectSelector('breadcrumbs');
 export const LEADING_BREADCRUMB = getDataTestSubjectSelector('breadcrumb first');
 export const ENDING_BREADCRUMB = getDataTestSubjectSelector('breadcrumb last');
-export const INDICATORS_SEARCH_BAR = getDataTestSubjectSelector('tiIndicatorsSearchBar');
 export const TIME_RANGE_PICKER = getDataTestSubjectSelector('superDatePickerToggleQuickMenuButton');
 export const QUERY_INPUT = getDataTestSubjectSelector('queryInput');
 export const EMPTY_STATE = getDataTestSubjectSelector('tiIndicatorsTableEmptyState');

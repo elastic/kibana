@@ -142,4 +142,10 @@ describe('DataQualitySummary', () => {
 
     expect(screen.queryByTestId('dataQualitySummaryFilters')).not.toBeInTheDocument();
   });
+
+  test('it does not render the filters row when summary filters is false and ILM is not available', () => {
+    renderSummary({ isILMAvailable: false, summaryFilters: false });
+
+    expect(screen.queryByTestId('dataQualitySummaryFilters')).not.toBeInTheDocument();
+  });
 });

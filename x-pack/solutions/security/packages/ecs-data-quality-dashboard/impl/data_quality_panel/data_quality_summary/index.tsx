@@ -56,7 +56,7 @@ const DataQualitySummaryComponent: React.FC<Props> = ({ summaryFilters }) => {
   const { isILMAvailable } = useDataQualityContext();
   const { totalIndices, totalDocsCount, totalIndicesChecked, totalIncompatible, totalSizeInBytes } =
     useResultsRollupContext();
-  const hasSummaryFilters = summaryFilters != null;
+  const hasSummaryFilters = summaryFilters != null && typeof summaryFilters !== 'boolean';
 
   return (
     <EuiPanel paddingSize="l" data-test-subj="dataQualitySummary" hasShadow={true}>

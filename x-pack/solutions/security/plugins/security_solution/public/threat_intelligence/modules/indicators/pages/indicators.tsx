@@ -26,8 +26,6 @@ import { UpdateStatus } from '../../../components/update_status';
 import { ScreenReaderAnnouncementsProvider } from '../containers/screen_reader_a11y';
 import { useKibana } from '../../../../common/lib/kibana';
 import { INDICATORS } from '../../../constants/translations';
-import { SEARCH_BAR_TEST_ID } from './test_ids';
-
 const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <ScreenReaderAnnouncementsProvider>
     <IndicatorsFilters>
@@ -79,12 +77,7 @@ const IndicatorsPageContent: FC = () => {
 
   return (
     <DefaultPageLayout pageTitle={INDICATORS}>
-      <SiemSearchBar
-        dataTestSubj={SEARCH_BAR_TEST_ID}
-        dataView={dataView}
-        displayStyle="inPage"
-        id={InputsModelId.global}
-      />
+      <SiemSearchBar dataView={dataView} displayStyle="inPage" id={InputsModelId.global} />
       <EuiSpacer size="m" />
       <UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />
       <EuiSpacer size="l" />
