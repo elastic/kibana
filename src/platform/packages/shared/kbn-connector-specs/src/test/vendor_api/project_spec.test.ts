@@ -37,7 +37,15 @@ const document = {
     },
     '/pets/{id}': {
       get: {
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            'x-ms-skip-url-encoding': true,
+            schema: { type: 'string' },
+          },
+        ],
         responses: {
           '200': ok({ $ref: '#/components/schemas/Pet/properties/owner' }),
           '404': { $ref: '#/components/responses/NotFound' },
@@ -104,7 +112,15 @@ describe('projectSpec', () => {
         },
         '/pets/{id}': {
           get: {
-            parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+            parameters: [
+              {
+                name: 'id',
+                in: 'path',
+                required: true,
+                'x-ms-skip-url-encoding': true,
+                schema: { type: 'string' },
+              },
+            ],
             responses: {
               '200': okProjected({ $ref: '#/components/schemas/Pet/properties/owner' }),
               '404': { $ref: '#/components/responses/NotFound' },
@@ -133,6 +149,13 @@ describe('projectSpec', () => {
         responses: { NotFound: okProjected({ $ref: '#/components/schemas/Error' }) },
         securitySchemes: { 'x-key': { type: 'apiKey', in: 'header', name: 'x-key' } },
       },
+    });
+  });
+
+  it('keeps the components that the given refs point to, and what they reference', () => {
+    const { components } = projectSpec(document, operations, ['#/components/schemas/Unused']);
+    expect((components as { schemas: Record<string, unknown> }).schemas.Unused).toEqual({
+      type: 'object',
     });
   });
 

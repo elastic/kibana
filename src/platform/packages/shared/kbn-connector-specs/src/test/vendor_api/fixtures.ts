@@ -33,6 +33,8 @@ const actionFixtureSchema = z
   .object({
     /** Merged into each generated input. */
     input: z.record(z.string(), z.unknown()).optional(),
+    /** Merged into the connector config, e.g. to set an optional setting the action needs. */
+    config: z.record(z.string(), z.unknown()).optional(),
     /**
      * Operations a `read` scoped action may call with a method other than `GET`, `HEAD` or
      * `OPTIONS`, because they only query, e.g. a search sent as `POST`.
@@ -43,7 +45,7 @@ const actionFixtureSchema = z
   })
   .strict();
 
-/** `vendor_api/fixtures.json`: per-action inputs, query operations and response overrides. */
+/** `vendor_api/fixtures.json`: per-action inputs, config, query operations and response overrides. */
 export const vendorApiFixturesSchema = z.record(z.string(), actionFixtureSchema);
 
 export type ActionFixture = z.infer<typeof actionFixtureSchema>;

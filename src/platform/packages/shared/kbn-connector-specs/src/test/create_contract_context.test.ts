@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Readable } from 'stream';
+import { z } from '@kbn/zod/v4';
 import { FirecrawlConnector } from '../specs/firecrawl/firecrawl';
 import { FigmaConnector } from '../specs/figma/figma';
 import { createContractContext } from './create_contract_context';
@@ -159,6 +161,62 @@ describe('createContractContext', () => {
     ]);
   });
 
+  it('sends FormData as multipart, as the http adapter does', async () => {
+    const uploadSpec = {
+      ...figmaSpec,
+      paths: {
+        '/v1/files': {
+          post: {
+            requestBody: {
+              required: true,
+              content: { 'multipart/form-data': { schema: { type: 'object' } } },
+            },
+            responses: { '200': { description: 'ok' } },
+          },
+        },
+      },
+    };
+    const { runAction, mock } = await createContractContext({
+      connector: {
+        ...FigmaConnector,
+        actions: {
+          upload: {
+            isTool: false,
+            scope: 'write',
+            input: z.object({}),
+            handler: async ({ client }) => {
+              const form = new FormData();
+              form.append('file', new Blob(['contents']), 'notes.txt');
+              return (await client.post('https://api.figma.com/v1/files', form)).status;
+            },
+          },
+        },
+      },
+      authType: 'api_key_header',
+      specs: [uploadSpec],
+    });
+
+    expect(await runAction('upload', {})).toBe(200);
+    expect(mock.calls[0].requestViolations).toEqual([]);
+  });
+
+  it('answers stream responses with Node streams, as the http adapter does', async () => {
+    const { ctx } = await createContractContext({
+      connector: FigmaConnector,
+      authType: 'api_key_header',
+      specs: [figmaSpec],
+    });
+
+    const { data } = await ctx.client.get('https://api.figma.com/v1/me', {
+      responseType: 'stream',
+    });
+
+    expect(data).toBeInstanceOf(Readable);
+    expect(JSON.parse(Buffer.concat(await data.toArray()).toString())).toEqual(
+      expect.objectContaining({ handle: 'string' })
+    );
+  });
+
   it('reports requests the vendor spec rejects', async () => {
     const { runAction, mock } = await createContractContext({
       connector: FirecrawlConnector,
@@ -183,6 +241,45 @@ describe('createContractContext', () => {
     await expect(runAction('scrape', { url: 42 })).rejects.toThrow();
     await expect(runAction('missing', {})).rejects.toThrow('.firecrawl has no action missing');
     expect(mock.calls).toEqual([]);
+  });
+
+  it('parses the config with the connector schema, applying its defaults', async () => {
+    const { ctx } = await createContractContext({
+      connector: {
+        ...FigmaConnector,
+        schema: z.object({ apiUrl: z.string().default('https://api.figma.com'), team: z.string() }),
+      },
+      config: { team: 'design' },
+      specs: [figmaSpec],
+    });
+
+    expect(ctx.config).toEqual({ apiUrl: 'https://api.figma.com', team: 'design' });
+  });
+
+  it('fills enum secrets and secrets that must be PEM private keys', async () => {
+    const { ctx } = await createContractContext({
+      connector: {
+        ...FigmaConnector,
+        auth: { types: ['oauth_client_credentials_private_key_jwt'] },
+      },
+      specs: [figmaSpec],
+    });
+
+    expect(ctx.secrets).toMatchObject({
+      clientId: 'contract-mock-clientId',
+      algorithm: 'PS256',
+      certificateBinding: 'x5t#S256',
+      privateKey: expect.stringContaining('-----BEGIN PRIVATE KEY-----'),
+    });
+  });
+
+  it('fills Azure shared keys with base64, as the signer decodes them', async () => {
+    const { ctx } = await createContractContext({
+      connector: { ...FigmaConnector, auth: { types: ['azure_shared_key'] } },
+      specs: [figmaSpec],
+    });
+
+    expect(atob(String(ctx.secrets?.accountKey))).toBe('contract-mock-accountKey');
   });
 
   it('rejects auth types the connector does not declare', async () => {
