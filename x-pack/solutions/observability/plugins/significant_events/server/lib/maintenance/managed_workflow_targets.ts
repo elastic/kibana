@@ -7,13 +7,13 @@
 
 import type { SpaceId } from '@kbn/core-spaces-common';
 import {
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW_ID,
@@ -22,7 +22,10 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
+import {
+  LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
+  LEGACY_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+} from '../../../common/constants';
 
 /**
  * Global-scope workflows installed by `install_workflows` (always-on core set).
@@ -55,11 +58,11 @@ export const SCHEDULED_DISCOVERY_WORKFLOW_IDS = [
 ] as const;
 
 /**
- * Per-space scheduled knowledge indicator workflows. The sync is bound to the space's service
- * account, so disabling or enabling it needs `manage_security`.
+ * Per-space scheduled knowledge indicator workflows, bound to the space's service account, so
+ * disabling or enabling them needs `manage_security`.
  */
 export const KNOWLEDGE_INDICATOR_SCHEDULED_WORKFLOW_IDS = [
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
 ] as const;
 
@@ -84,7 +87,7 @@ export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
  * https://github.com/elastic/kibana/issues/294271
  */
 export const LEGACY_DEFAULT_SPACE_WORKFLOW_IDS: readonly string[] = [
-  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  LEGACY_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
 ];
 

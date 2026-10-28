@@ -9,8 +9,11 @@ import { isBoom } from '@hapi/boom';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
+import { OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED } from '@kbn/management-settings-ids';
 import {
+  getNightshiftBoundKiContinuousOnboardingWorkflowId,
   getNightshiftBoundKiSyncWorkflowId,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -33,6 +36,13 @@ import type { SignificantEventsMaintenanceSummary } from '../../../common/mainte
 export interface DetectionEngineServiceAccountIds {
   detectionEngine: string;
 }
+
+/** Every workflow the setup binds to the space's account, installed per space. */
+const BOUND_WORKFLOW_IDS = [
+  NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+] as const;
 
 const canManageSecurity = async (core: CoreStart, request: KibanaRequest): Promise<boolean> => {
   const { has_all_requested: allowed } = await core.elasticsearch.client
@@ -101,6 +111,45 @@ export const createServiceAccountSetupService = ({
     await assertSpaceExists({ spaces, request, spaceId });
   };
 
+  /** Enables an installed workflow that is off. */
+  const switchOn = async ({
+    management,
+    request,
+    spaceId,
+    workflowId,
+  }: {
+    management: WorkflowsServerPluginSetup['management'];
+    request: KibanaRequest;
+    spaceId: string;
+    workflowId: string;
+  }): Promise<void> => {
+    const workflow = await management.getWorkflow(workflowId, spaceId, request);
+    if (workflow?.enabled === false) {
+      await management.updateWorkflow(workflowId, { enabled: true }, spaceId, request);
+    }
+  };
+
+  /** Waits until a workflow has no run going: a bound workflow cannot be deleted while it runs. */
+  const waitForNoRuns = ({
+    management,
+    request,
+    spaceId,
+    workflowId,
+  }: {
+    management: WorkflowsServerPluginSetup['management'];
+    request: KibanaRequest;
+    spaceId: string;
+    workflowId: string;
+  }): Promise<unknown> =>
+    pollUntil(
+      () =>
+        management.getWorkflowExecutions(
+          { workflowId, request, statuses: [...NonTerminalExecutionStatuses] },
+          spaceId
+        ),
+      ({ total }) => total === 0
+    );
+
   const enable = async ({
     request,
     spaceId,
@@ -121,22 +170,34 @@ export const createServiceAccountSetupService = ({
     // The space's bound workflows, installed with the caller's request: binding a workflow to the
     // account needs it. Installing again with another account rebinds them.
     const client = await workflowsExtensions.getClient(request);
-    for (const id of [
-      NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
-      NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
-    ]) {
+    for (const id of BOUND_WORKFLOW_IDS) {
       await client.managedWorkflows.install(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER, id, {
         spaceId,
         workflowIdSuffix: spaceId,
         values: { serviceAccountId: serviceAccountIds.detectionEngine },
       });
     }
-    // A new sync is installed off. An installed one keeps its state, so a paused space keeps it off
-    // until Resume.
-    const syncId = getNightshiftBoundKiSyncWorkflowId(spaceId);
-    const sync = await workflowsManagement.getWorkflow(syncId, spaceId, request);
-    if (sync?.enabled === false && (await maintenanceService.getState({ request })) !== 'paused') {
-      await workflowsManagement.updateWorkflow(syncId, { enabled: true }, spaceId, request);
+    // The scheduled workflows are installed off. An installed one keeps its state, so a paused space
+    // keeps them off until Resume. The sync runs whenever the space is not paused; continuous
+    // onboarding also needs its setting on.
+    if ((await maintenanceService.getState({ request })) !== 'paused') {
+      await switchOn({
+        management: workflowsManagement,
+        request,
+        spaceId,
+        workflowId: getNightshiftBoundKiSyncWorkflowId(spaceId),
+      });
+      const { uiSettingsClient } = await getScopedClients({ request });
+      if (
+        await uiSettingsClient.get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
+      ) {
+        await switchOn({
+          management: workflowsManagement,
+          request,
+          spaceId,
+          workflowId: getNightshiftBoundKiContinuousOnboardingWorkflowId(spaceId),
+        });
+      }
     }
     // What the detection engine does outside workflow runs, such as turning rules on, runs as the
     // account too. Binding again with another account rebinds it.
@@ -176,20 +237,14 @@ export const createServiceAccountSetupService = ({
     });
     // A workflow bound to a service account cannot be deleted while it runs.
     await onboardingClient.stopEntryPointRuns({ request });
-    const syncId = getNightshiftBoundKiSyncWorkflowId(spaceId);
-    await pollUntil(
-      () =>
-        workflowsManagement.getWorkflowExecutions(
-          { workflowId: syncId, request, statuses: [...NonTerminalExecutionStatuses] },
-          spaceId
-        ),
-      ({ total }) => total === 0
-    );
-    const client = await workflowsExtensions.getClient(request);
-    for (const id of [
-      NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
-      NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
+    for (const workflowId of [
+      getNightshiftBoundKiSyncWorkflowId(spaceId),
+      getNightshiftBoundKiContinuousOnboardingWorkflowId(spaceId),
     ]) {
+      await waitForNoRuns({ management: workflowsManagement, request, spaceId, workflowId });
+    }
+    const client = await workflowsExtensions.getClient(request);
+    for (const id of BOUND_WORKFLOW_IDS) {
       await client.managedWorkflows.uninstall(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER, id, {
         spaceId,
         workflowIdSuffix: spaceId,

@@ -497,7 +497,6 @@ export class SignificantEventsPlugin
           logger: this.logger,
           managementApi,
           streamsKIsOnboardingClient,
-          getManagedWorkflowsClient,
         });
       }
 
@@ -511,7 +510,6 @@ export class SignificantEventsPlugin
       // https://github.com/elastic/kibana/issues/294271
       this.removeLegacyWorkflows = () =>
         removeLegacyDefaultSpaceWorkflows({
-          getManagedWorkflowsClient,
           managementApi,
           logger: this.logger,
         });

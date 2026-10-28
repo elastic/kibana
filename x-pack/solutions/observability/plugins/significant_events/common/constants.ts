@@ -46,6 +46,12 @@ export const SIGNIFICANT_EVENT_TIERED_FEATURES = [SIGNIFICANT_EVENTS_TIERED_FEAT
 export const LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID =
   'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
 
+// The unbound continuous onboarding workflow, replaced by the copy bound to the space's service
+// account. The workflows platform deletes its documents; old pause snapshots may still name it.
+// TODO: remove with the legacy default-space cleanup.
+// https://github.com/elastic/kibana/issues/294271
+export const LEGACY_CONTINUOUS_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-continuous-onboarding';
+
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.
 //

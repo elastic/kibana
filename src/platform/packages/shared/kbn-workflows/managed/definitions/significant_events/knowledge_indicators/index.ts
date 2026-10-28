@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import CONTINUOUS_ONBOARDING_YAML from './continuous_onboarding.yaml';
 import FEATURES_IDENTIFICATION_YAML from './features_identification.yaml';
 import ONBOARDING_YAML from './onboarding.yaml';
 import QUERIES_GENERATION_YAML from './queries_generation.yaml';
@@ -19,8 +18,6 @@ export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
 export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID =
   'system-streams-ki-queries-generation';
 export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-onboarding';
-export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID =
-  'system-streams-ki-continuous-onboarding';
 
 // lifecycle: 'static' — definition is fixed in code, not user-editable.
 // versionStrategy: 'auto' — version bumps are handled automatically on install.
@@ -29,18 +26,6 @@ const SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT = {
   lifecycle: 'static',
   versionStrategy: 'auto',
   enablement: 'enforced',
-} as const;
-
-// The continuous onboarding and sync workflows are installed per space on
-// demand, with the space id as the workflow id suffix.
-// lifecycle: 'dynamic' — instances are created and removed at runtime, so
-// startup never treats them as orphans.
-// enablement: 'restorable' — the enabled/disabled choice is preserved across
-// upgrades instead of being reset from the YAML.
-const SIGNIFICANT_EVENTS_KI_PER_SPACE_WORKFLOW_MANAGEMENT = {
-  lifecycle: 'dynamic',
-  versionStrategy: 'auto',
-  enablement: 'restorable',
 } as const;
 
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW = {
@@ -68,15 +53,6 @@ export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
   billable: false,
   yaml: ONBOARDING_YAML,
   management: SIGNIFICANT_EVENTS_KI_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition;
-
-export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
-  id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-  pluginId: 'significantEvents',
-  version: 4,
-  billable: false,
-  yaml: CONTINUOUS_ONBOARDING_YAML,
-  management: SIGNIFICANT_EVENTS_KI_PER_SPACE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
 /** Durable cleanup and onboarding scheduling after source catalog changes. */

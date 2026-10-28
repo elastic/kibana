@@ -15,11 +15,11 @@
 # constants in significant_events/common/constants.ts, see
 # continuous_onboarding_workflow.test.ts.
 #
-# This is a per-space managed workflow installed by the significant_events
-# plugin. It is installed when continuous onboarding is first enabled in a space
-# and only disabled when it is turned off, so its execution history is kept.
-# Every request is prefixed with the space the
-# workflow runs in.
+# Installed per space, bound to the detection engine service account
+# (`system-sources-ki-continuous-onboarding-bound`), by the space's service
+# account setup. The continuous onboarding setting and Pause/Resume enable and
+# disable it. The onboarding runs it starts inherit its service account. Every
+# request is prefixed with the space the workflow runs in.
 
 version: '1'
 name: 'Continuous KI Onboarding'
@@ -35,6 +35,8 @@ consts:
   maxScheduledStreams: 5
   lookbackHours: 24
 settings:
+  # Rendered with the detection engine service account of the space.
+  run_as: __SERVICE_ACCOUNT_ID__
   # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
   timeout: '34m'
   # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
@@ -95,6 +97,8 @@ steps:
             type: workflow.executeAsync
             with:
               workflow-id: 'system-streams-ki-onboarding'
+              # Onboarding runs as the service account this workflow is bound to.
+              run-as-mode: inherit
               inputs:
                 sourceId: '${{ foreach.item.sourceId }}'
                 sourceSlug: '${{ foreach.item.sourceSlug }}'
