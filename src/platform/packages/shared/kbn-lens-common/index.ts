@@ -326,7 +326,6 @@ export {
   LENS_RANGE_MODES,
   staticValueOperationName,
 } from './datasources/constants';
-export { isValidNumber } from './datasources/number_validation';
 export {
   LENS_UNKNOWN_VIS,
   LENS_CATEGORY_DISPLAY,

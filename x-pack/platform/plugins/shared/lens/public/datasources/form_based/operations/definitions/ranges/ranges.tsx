@@ -21,13 +21,13 @@ import type {
   IndexPattern,
   IndexPatternField,
 } from '@kbn/lens-common';
-import { toEsqlRegistry, RANGE_ID, isValidNumber } from '@kbn/lens-common';
+import { toEsqlRegistry, RANGE_ID } from '@kbn/lens-common';
 import { RangeEditor } from './range_editor';
 import type { OperationDefinition } from '..';
 import { updateColumnParam } from '../../layer_helpers';
 import { supportedFormats } from '../../../../../../common/expressions/defs/format_column/supported_formats';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
-import { getInvalidFieldMessage } from '../helpers';
+import { getInvalidFieldMessage, isValidNumber } from '../helpers';
 
 export type RangeColumnParams = RangeIndexPatternColumn['params'];
 export type UpdateParamsFnType = <K extends keyof RangeColumnParams>(

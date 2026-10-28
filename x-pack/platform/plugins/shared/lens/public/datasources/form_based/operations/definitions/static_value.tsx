@@ -13,14 +13,9 @@ import type {
   StaticValueIndexPatternColumn,
   IndexPattern,
 } from '@kbn/lens-common';
-import {
-  DEFAULT_STATIC_VALUE,
-  ofNameStaticValue,
-  staticValueLabelDefault,
-  isValidNumber,
-} from '@kbn/lens-common';
+import { DEFAULT_STATIC_VALUE, ofNameStaticValue, staticValueLabelDefault } from '@kbn/lens-common';
 import type { OperationDefinition } from '.';
-import { getFormatFromPreviousColumn } from './helpers';
+import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';
 import { STATIC_VALUE_NOT_VALID_NUMBER } from '../../../../user_messages_ids';
 

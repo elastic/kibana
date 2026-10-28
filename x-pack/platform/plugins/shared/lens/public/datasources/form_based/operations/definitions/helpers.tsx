@@ -126,6 +126,31 @@ export const generateMissingFieldMessage = (
   ],
 });
 
+function areDecimalsValid(inputValue: string | number, digits: number) {
+  const [, decimals = ''] = `${inputValue}`.split('.');
+  return decimals.length <= digits;
+}
+
+export function isValidNumber(
+  inputValue: string | number | null | undefined,
+  integer?: boolean,
+  upperBound?: number,
+  lowerBound?: number,
+  digits: number = 2
+) {
+  const inputValueAsNumber = Number(inputValue);
+  return (
+    inputValue !== '' &&
+    inputValue != null &&
+    !Number.isNaN(inputValueAsNumber) &&
+    Number.isFinite(inputValueAsNumber) &&
+    (!integer || Number.isInteger(inputValueAsNumber)) &&
+    (upperBound === undefined || inputValueAsNumber <= upperBound) &&
+    (lowerBound === undefined || inputValueAsNumber >= lowerBound) &&
+    areDecimalsValid(inputValue, integer ? 0 : digits)
+  );
+}
+
 /**
  * Checks if partial column hints match a specific operation type.
  * Use this in `buildColumn` implementations when working with `previousColumn`

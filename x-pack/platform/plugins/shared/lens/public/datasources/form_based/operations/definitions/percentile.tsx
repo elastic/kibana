@@ -24,12 +24,12 @@ import {
   ALLOWED_DECIMAL_DIGITS,
   getSafeName,
   percentileEsqlMeta,
-  isValidNumber,
 } from '@kbn/lens-common';
 import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
+  isValidNumber,
   getFilter,
   hasOperationType,
   getNumberParam,
