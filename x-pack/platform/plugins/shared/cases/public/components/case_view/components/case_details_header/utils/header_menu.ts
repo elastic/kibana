@@ -6,6 +6,7 @@
  */
 
 import type { AppHeaderMenu } from '@kbn/app-header';
+import type { AppMenuRunActionParams } from '@kbn/core-chrome-app-menu-components';
 import type { CasesPermissions } from '../../../../../../common';
 import * as i18n from '../../../translations';
 import * as commonI18n from '../../../../../common/translations';
@@ -17,25 +18,18 @@ interface ExternalIncident {
   externalTitle?: string | null;
 }
 
-export interface CaseSettingToggle {
-  id: string;
-  label: string;
-  checked: boolean;
-  onToggle: () => void;
-  testId: string;
-}
-
 interface GetMenuArgs {
   permissions: CasesPermissions;
   /**
-   * Case settings enabled by the current solution (alert syncing, observable extraction, or
-   * metrics). When empty the settings item is omitted entirely.
+   * Whether the current solution enables any case setting (alert syncing, observable extraction, or
+   * metrics). When false the settings popover would be empty, so the button is omitted entirely.
    */
-  settingToggles: CaseSettingToggle[];
+  hasCaseSettings: boolean;
   caseId: string;
   currentExternalIncident: ExternalIncident | null;
   chat: { addToChat: () => void; summarizeCase: () => void; isAddToChatAvailable: boolean };
   onRefresh: () => void;
+  onOpenSettings: (anchor: HTMLElement) => void;
   onCopyId: () => Promise<void>;
   onOpenDeleteModal: () => void;
   /** When provided, adds a "Run workflow" item gated on `canRunWorkflow`. */
@@ -44,11 +38,12 @@ interface GetMenuArgs {
 
 export const getMenu = ({
   permissions,
-  settingToggles,
+  hasCaseSettings,
   caseId,
   chat,
   currentExternalIncident,
   onRefresh,
+  onOpenSettings,
   onCopyId,
   onOpenDeleteModal,
   runWorkflow,
@@ -74,21 +69,18 @@ export const getMenu = ({
           },
         ]
       : []),
-    ...(permissions.update && settingToggles.length > 0
+    ...(permissions.update && hasCaseSettings
       ? [
           {
             id: 'caseSettings',
             label: i18n.CASE_SETTINGS,
             iconType: 'gear' as const,
-            items: settingToggles.map(({ id, label, checked, onToggle, testId }) => ({
-              id,
-              label,
-              iconType: checked ? 'check' : 'empty',
-              run: onToggle,
-              testId,
-            })),
+            run: (params?: AppMenuRunActionParams) => {
+              if (params?.triggerElement) {
+                onOpenSettings(params.triggerElement);
+              }
+            },
             testId: 'case-settings-button',
-            popoverTestId: 'case-settings-popover',
             order: 200,
           },
         ]

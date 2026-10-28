@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
 import type { CaseSeverity, CaseStatuses } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import type { OnUpdateFields } from '../../../types';
@@ -27,21 +28,37 @@ import {
   CREATED_ON,
   UNKNOWN_REPORTER,
   EDIT_CASE_NAME_ARIA,
-  SHOW_METRICS,
-  SYNC_ALERTS,
 } from '../../../translations';
 import { getBadges } from '../utils/header_badges';
-import { getMenu, type CaseSettingToggle } from '../utils/header_menu';
+import { getMenu } from '../utils/header_menu';
 import { useRunCaseWorkflow } from '../../../../workflows/use_run_case_workflow';
 import { RunCaseWorkflowModal } from '../../../../workflows/run_case_workflow_modal';
+
+/**
+ * Returns an element that stays mounted while the settings popover is open. When the settings item
+ * is rendered inside the app menu "More" popover, its trigger is unmounted as soon as that popover
+ * closes, so the settings popover is anchored to the "More" button instead.
+ */
+const getSettingsAnchor = (triggerElement: HTMLElement): HTMLElement => {
+  const isInOverflowMenu =
+    triggerElement.closest(`[data-test-subj="${APP_MENU_TEST_SUBJECTS.popover}"]`) !== null;
+
+  if (!isInOverflowMenu) {
+    return triggerElement;
+  }
+
+  return (
+    document.querySelector<HTMLElement>(
+      `[data-test-subj="${APP_MENU_TEST_SUBJECTS.overflowButton}"]`
+    ) ?? triggerElement
+  );
+};
 
 interface UseCaseViewHeaderArgs {
   caseData: CaseUI;
   onStatusChanged: (status: CaseStatuses) => void;
   onSeverityChanged: (severity: CaseSeverity) => void;
   onUpdateField: (args: OnUpdateFields) => void;
-  showMetrics: boolean;
-  onShowMetricsChange: (enabled: boolean) => void;
 }
 
 export const useCaseViewHeader = ({
@@ -49,16 +66,9 @@ export const useCaseViewHeader = ({
   onStatusChanged,
   onSeverityChanged,
   onUpdateField,
-  showMetrics,
-  onShowMetricsChange,
 }: UseCaseViewHeaderArgs) => {
   const { permissions } = useCasesContext();
-  const {
-    isSyncAlertsEnabled,
-    observablesAuthorized,
-    isExtractObservablesEnabled,
-    metricsFeatures,
-  } = useCasesFeatures();
+  const { hasCaseSettings } = useCasesFeatures();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { showSuccessToast, showErrorToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -79,6 +89,8 @@ export const useCaseViewHeader = ({
   } = useRunCaseWorkflow({ caseData });
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsAnchor, setSettingsAnchor] = useState<HTMLElement | null>(null);
 
   const shouldDisableStatusFn = useShouldDisableStatus();
   const isStatusMenuDisabled = useMemo(() => {
@@ -167,63 +179,10 @@ export const useCaseViewHeader = ({
     [caseConnectors, caseData.connector.id]
   );
 
-  const settingToggles = useMemo((): CaseSettingToggle[] => {
-    const { settings } = caseData;
-    const extractObservables = settings.extractObservables ?? false;
-
-    return [
-      ...(isSyncAlertsEnabled
-        ? [
-            {
-              id: 'caseSettingsSyncAlerts',
-              label: SYNC_ALERTS,
-              checked: settings.syncAlerts,
-              onToggle: () =>
-                onUpdateField({
-                  key: 'settings',
-                  value: { ...settings, syncAlerts: !settings.syncAlerts },
-                }),
-              testId: 'case-settings-sync-alerts',
-            },
-          ]
-        : []),
-      ...(observablesAuthorized && isExtractObservablesEnabled
-        ? [
-            {
-              id: 'caseSettingsExtractObservables',
-              label: commonI18n.EXTRACT_OBSERVABLES_LABEL,
-              checked: extractObservables,
-              onToggle: () =>
-                onUpdateField({
-                  key: 'settings',
-                  value: { ...settings, extractObservables: !extractObservables },
-                }),
-              testId: 'case-settings-extract-observables',
-            },
-          ]
-        : []),
-      ...(metricsFeatures.length > 0
-        ? [
-            {
-              id: 'caseSettingsShowMetrics',
-              label: SHOW_METRICS,
-              checked: showMetrics,
-              onToggle: () => onShowMetricsChange(!showMetrics),
-              testId: 'case-settings-show-metrics',
-            },
-          ]
-        : []),
-    ];
-  }, [
-    caseData,
-    isSyncAlertsEnabled,
-    observablesAuthorized,
-    isExtractObservablesEnabled,
-    metricsFeatures,
-    showMetrics,
-    onShowMetricsChange,
-    onUpdateField,
-  ]);
+  const onOpenSettings = useCallback((triggerElement: HTMLElement) => {
+    setSettingsAnchor(getSettingsAnchor(triggerElement));
+    setIsSettingsOpen((prev) => !prev);
+  }, []);
 
   const onCopyId = useCallback(async () => {
     try {
@@ -242,7 +201,7 @@ export const useCaseViewHeader = ({
     () =>
       getMenu({
         permissions,
-        settingToggles,
+        hasCaseSettings,
         caseId: caseData.id,
         chat: {
           addToChat,
@@ -251,6 +210,7 @@ export const useCaseViewHeader = ({
         },
         currentExternalIncident,
         onRefresh: refreshCaseViewPage,
+        onOpenSettings,
         onCopyId,
         onOpenDeleteModal,
         runWorkflow: { canRunWorkflow, onOpen: openRunWorkflowModal },
@@ -262,10 +222,11 @@ export const useCaseViewHeader = ({
       summarizeCase,
       isAddToChatAvailable,
       permissions,
-      settingToggles,
+      hasCaseSettings,
       caseData.id,
       currentExternalIncident,
       refreshCaseViewPage,
+      onOpenSettings,
       onCopyId,
       onOpenDeleteModal,
     ]
@@ -301,5 +262,8 @@ export const useCaseViewHeader = ({
     isDeleteModalVisible,
     setIsDeleteModalVisible,
     onConfirmDeletion,
+    isSettingsOpen,
+    setIsSettingsOpen,
+    settingsAnchor,
   };
 };

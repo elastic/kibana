@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
 
 import { useCaseViewHeader } from './use_case_view_header';
 import { basicCase } from '../../../../../containers/mock';
@@ -15,15 +16,8 @@ import { useGetCaseConnectors } from '../../../../../containers/use_get_case_con
 import { useDeleteCases } from '../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../actions/status/use_should_disable_status';
 import { useCasesConfig } from '../../../../../common/lib/kibana';
-import { useLicense } from '../../../../../common/use_license';
 import type { CaseUI } from '../../../../../../common';
-import { CaseMetricsFeature } from '../../../../../../common/types/api';
 
-const { useLicense: actualUseLicense } = jest.requireActual('../../../../../common/use_license');
-
-jest.mock('../../../../../common/use_license', () => ({
-  useLicense: jest.fn(jest.requireActual('../../../../../common/use_license').useLicense),
-}));
 jest.mock('../../../../../containers/use_get_case_connectors');
 jest.mock('../../../../../containers/use_delete_cases');
 jest.mock('../../../../actions/status/use_should_disable_status');
@@ -44,7 +38,6 @@ jest.mock('@kbn/workflows-ui', () => {
   };
 });
 
-const useLicenseMock = useLicense as jest.Mock;
 const mockDeleteCases = jest.fn();
 const mockOnStatusChanged = jest.fn();
 const mockOnSeverityChanged = jest.fn();
@@ -58,14 +51,11 @@ const wrapper = ({ children }: { children: React.ReactNode }) =>
 
 describe('useCaseViewHeader', () => {
   const onUpdateField = jest.fn();
-  const onShowMetricsChange = jest.fn();
   const defaultArgs = {
     caseData: basicCase,
     onUpdateField,
     onStatusChanged: mockOnStatusChanged,
     onSeverityChanged: mockOnSeverityChanged,
-    showMetrics: true,
-    onShowMetricsChange,
   };
 
   beforeEach(() => {
@@ -381,100 +371,51 @@ describe('useCaseViewHeader', () => {
     );
   });
 
-  describe('case settings items', () => {
+  it('toggles settings open state when settings action is triggered', () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    expect(result.current.isSettingsOpen).toBe(false);
+
+    const mockElement = document.createElement('button');
+
+    act(() => {
+      const settingsItem = result.current.menu.items!.find((item) => item.id === 'caseSettings');
+      settingsItem?.run?.({ triggerElement: mockElement, returnFocus: jest.fn() });
+    });
+
+    expect(result.current.isSettingsOpen).toBe(true);
+    expect(result.current.settingsAnchor).toBe(mockElement);
+  });
+
+  describe('when the settings item is rendered in the app menu overflow popover', () => {
+    const overflowButton = document.createElement('button');
+    const overflowPopover = document.createElement('div');
+    const overflowMenuItem = document.createElement('button');
+
+    beforeEach(() => {
+      overflowButton.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.overflowButton);
+      overflowPopover.setAttribute('data-test-subj', APP_MENU_TEST_SUBJECTS.popover);
+      overflowPopover.appendChild(overflowMenuItem);
+      document.body.append(overflowButton, overflowPopover);
+    });
+
     afterEach(() => {
-      useLicenseMock.mockImplementation(actualUseLicense);
+      overflowButton.remove();
+      overflowPopover.remove();
     });
 
-    const metricsWrapper = ({ children }: { children: React.ReactNode }) =>
-      React.createElement(
-        TestProviders,
-        { features: { metrics: [CaseMetricsFeature.ALERTS_COUNT] } } as React.ComponentProps<
-          typeof TestProviders
-        >,
-        children
-      );
-
-    const getSettingItem = (menu: ReturnType<typeof useCaseViewHeader>['menu'], testId: string) =>
-      menu
-        .items!.find((item) => item.id === 'caseSettings')
-        ?.items?.find((settingItem) => settingItem.testId === testId);
-
-    it('marks enabled settings with a check icon', () => {
-      const { result } = renderHook(
-        () => useCaseViewHeader({ ...defaultArgs, showMetrics: false }),
-        { wrapper: metricsWrapper }
-      );
-
-      expect(getSettingItem(result.current.menu, 'case-settings-sync-alerts')).toEqual(
-        expect.objectContaining({ iconType: basicCase.settings.syncAlerts ? 'check' : 'empty' })
-      );
-      expect(getSettingItem(result.current.menu, 'case-settings-show-metrics')).toEqual(
-        expect.objectContaining({ iconType: 'empty' })
-      );
-    });
-
-    it('toggles sync alerts when its item is clicked', () => {
+    it('anchors the settings popover to the overflow button', () => {
       const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
 
       act(() => {
-        getSettingItem(result.current.menu, 'case-settings-sync-alerts')?.run?.();
+        const settingsItem = result.current.menu.items!.find((item) => item.id === 'caseSettings');
+        settingsItem?.run?.({ triggerElement: overflowMenuItem, returnFocus: jest.fn() });
       });
 
-      expect(onUpdateField).toHaveBeenCalledWith({
-        key: 'settings',
-        value: { ...basicCase.settings, syncAlerts: !basicCase.settings.syncAlerts },
-      });
-    });
-
-    it('omits the show metrics item when no metrics features are configured', () => {
-      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
-
-      expect(getSettingItem(result.current.menu, 'case-settings-show-metrics')).toBeUndefined();
-    });
-
-    it('omits the extract observables item without a platinum+ license', () => {
-      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
-
-      expect(
-        getSettingItem(result.current.menu, 'case-settings-extract-observables')
-      ).toBeUndefined();
-    });
-
-    it('toggles extract observables when its item is clicked', () => {
-      useLicenseMock.mockReturnValue({
-        isAtLeast: () => true,
-        isAtLeastPlatinum: () => true,
-        isAtLeastGold: () => true,
-        isAtLeastEnterprise: () => true,
-        getLicense: () => null,
-      });
-
-      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), { wrapper });
-
-      act(() => {
-        getSettingItem(result.current.menu, 'case-settings-extract-observables')?.run?.();
-      });
-
-      expect(onUpdateField).toHaveBeenCalledWith({
-        key: 'settings',
-        value: {
-          ...basicCase.settings,
-          extractObservables: !(basicCase.settings.extractObservables ?? false),
-        },
-      });
-    });
-
-    it('toggles show metrics when its item is clicked', () => {
-      const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
-        wrapper: metricsWrapper,
-      });
-
-      act(() => {
-        getSettingItem(result.current.menu, 'case-settings-show-metrics')?.run?.();
-      });
-
-      expect(onShowMetricsChange).toHaveBeenCalledWith(false);
+      expect(result.current.isSettingsOpen).toBe(true);
+      expect(result.current.settingsAnchor).toBe(overflowButton);
     });
   });
 

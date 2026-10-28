@@ -33,6 +33,15 @@ jest.mock('../../../confirm_delete_case', () => ({
   ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
 }));
 
+jest.mock('./case_settings_popover', () => ({
+  CaseSettingsPopover: ({ anchorElement }: { anchorElement: HTMLElement }) => (
+    <div
+      data-test-subj="case-settings-popover"
+      data-anchor-test-subj={anchorElement.getAttribute('data-test-subj')}
+    />
+  ),
+}));
+
 (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
 (useDeleteCases as jest.Mock).mockReturnValue({ mutate: jest.fn() });
 (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
@@ -132,19 +141,20 @@ describe('CaseDetailsAppHeader', () => {
     });
   });
 
-  it('toggles a case setting from the case settings submenu in the overflow menu', async () => {
+  it('anchors the settings popover to the overflow button when opened from the overflow menu', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
     await userEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
-    fireEvent.click(await screen.findByTestId('case-settings-button'));
+    fireEvent.click(
+      within(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.popover)).getByTestId(
+        'case-settings-button'
+      )
+    );
 
-    const settingsPanel = await screen.findByTestId('case-settings-popover');
-    fireEvent.click(within(settingsPanel).getByTestId('case-settings-sync-alerts'));
-
-    expect(onUpdateField).toHaveBeenCalledWith({
-      key: 'settings',
-      value: { ...basicCase.settings, syncAlerts: !basicCase.settings.syncAlerts },
-    });
+    expect(await screen.findByTestId('case-settings-popover')).toHaveAttribute(
+      'data-anchor-test-subj',
+      APP_MENU_TEST_SUBJECTS.overflowButton
+    );
   });
 
   it('adds the case to chat from the chat actions dropdown', async () => {

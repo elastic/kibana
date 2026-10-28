@@ -22,7 +22,7 @@ export interface UseCasesFeatures {
   isExtractObservablesEnabled: boolean;
   /**
    * True when at least one case setting is available to toggle (alert syncing, observable
-   * extraction, or metrics). Mirrors the settings in the case view header menu. When false
+   * extraction, or metrics). Mirrors the switches rendered by `CaseSettingsPopover`. When false
    * (e.g. Observability and Stack, which enable none of these), the case settings button and its
    * tour step have nothing to show and should be hidden.
    */
