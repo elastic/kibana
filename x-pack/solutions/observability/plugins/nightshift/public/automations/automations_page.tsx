@@ -12,9 +12,9 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
+import { useRunQuotas } from '../data/run_quotas/use_significant_events_run_quotas';
 import { useKibana } from '../hooks/use_kibana';
 import { useInvestigatorServiceAccount } from '../service_account/use_investigator_service_account';
-import { useRunQuotas } from '../settings/hooks/use_significant_events_run_quotas';
 import {
   MANAGE_SECURITY_REQUIRED_BODY,
   MANAGE_SECURITY_REQUIRED_REASON,

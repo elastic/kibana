@@ -63,11 +63,13 @@ const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 describe('subscribeToDualProcessFlag', () => {
   let stop$: Subject<void>;
   let logger: ReturnType<typeof loggerMock.create>;
+  let isNonPriorityTaskScheduled: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     stop$ = new Subject<void>();
     logger = loggerMock.create();
+    isNonPriorityTaskScheduled = jest.fn().mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -86,7 +88,7 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
       await flushPromises();
 
       expect(mockUpdate).toHaveBeenCalledWith(
@@ -111,7 +113,7 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
       await flushPromises();
 
       expect(mockUpdate).toHaveBeenCalledWith(
@@ -119,6 +121,70 @@ describe('subscribeToDualProcessFlag', () => {
         expect.stringContaining('user'),
         expect.objectContaining({ nonPriorityStatus: ENGINE_STATUS.STARTED }),
         expect.objectContaining({ namespace: 'default' })
+      );
+      expect(isNonPriorityTaskScheduled).toHaveBeenCalledWith('user', 'default');
+    });
+
+    it('does not resume a stopped engine whose non-priority task was removed by an operator', async () => {
+      const flagSubject = new Subject<boolean>();
+      const soRow = makeEngineDescriptorSo('user', 'default', {
+        nonPriorityStatus: ENGINE_STATUS.STOPPED,
+      });
+      const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] }, true);
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
+      isNonPriorityTaskScheduled.mockResolvedValue(false);
+
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
+      await flushPromises();
+
+      expect(mockUpdate).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('was stopped by an operator, not resuming')
+      );
+    });
+
+    it('resumes an engine in error state even when its non-priority task is missing', async () => {
+      const flagSubject = new Subject<boolean>();
+      const soRow = makeEngineDescriptorSo('user', 'default', {
+        nonPriorityStatus: ENGINE_STATUS.ERROR,
+      });
+      const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] }, true);
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
+      isNonPriorityTaskScheduled.mockResolvedValue(false);
+
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
+      await flushPromises();
+
+      expect(isNonPriorityTaskScheduled).not.toHaveBeenCalled();
+      expect(mockUpdate).toHaveBeenCalledWith(
+        EngineDescriptorTypeName,
+        expect.stringContaining('user'),
+        expect.objectContaining({ nonPriorityStatus: ENGINE_STATUS.STARTED }),
+        expect.objectContaining({ namespace: 'default' })
+      );
+    });
+
+    it('does not resume and logs an error when the task check fails', async () => {
+      const flagSubject = new Subject<boolean>();
+      const soRow = makeEngineDescriptorSo('user', 'default', {
+        nonPriorityStatus: ENGINE_STATUS.STOPPED,
+      });
+      const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] }, true);
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
+      isNonPriorityTaskScheduled.mockRejectedValue(new Error('Task Manager unavailable'));
+
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
+      await flushPromises();
+
+      expect(mockUpdate).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Dual-process startup reconciliation failed')
       );
     });
   });
@@ -132,7 +198,7 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
 
       flagSubject.next(true);
       flagSubject.next(false);
@@ -158,7 +224,7 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
 
       flagSubject.next(true);
       flagSubject.next(false);
@@ -180,7 +246,7 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
 
       flagSubject.next(true);
       flagSubject.next(false);
@@ -201,7 +267,7 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
 
       flagSubject.next(false);
       flagSubject.next(true);
@@ -215,6 +281,26 @@ describe('subscribeToDualProcessFlag', () => {
       );
     });
 
+    it('skips a stopped engine whose non-priority task was removed by an operator', async () => {
+      const flagSubject = new Subject<boolean>();
+      const soRow = makeEngineDescriptorSo('user', 'default', {
+        nonPriorityStatus: ENGINE_STATUS.STOPPED,
+      });
+      const coreStart = buildCoreStart(flagSubject, { saved_objects: [soRow] });
+      const mockUpdate = (
+        coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
+      ).update;
+      isNonPriorityTaskScheduled.mockResolvedValue(false);
+
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
+
+      flagSubject.next(false);
+      flagSubject.next(true);
+      await flushPromises();
+
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
     it('skips engines where nonPriorityStatus is already started', async () => {
       const flagSubject = new Subject<boolean>();
       const soRow = makeEngineDescriptorSo('user', 'default', {
@@ -225,7 +311,7 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
 
       flagSubject.next(false);
       flagSubject.next(true);
@@ -245,7 +331,7 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
 
       flagSubject.next(false);
       flagSubject.next(true);
@@ -264,7 +350,7 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
 
       flagSubject.next(true);
       flagSubject.next(true);
@@ -281,7 +367,7 @@ describe('subscribeToDualProcessFlag', () => {
         coreStart.savedObjects.createInternalRepository() as unknown as { update: jest.Mock }
       ).update;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
 
       stop$.next();
       stop$.complete();
@@ -329,7 +415,7 @@ describe('subscribeToDualProcessFlag', () => {
         },
       } as unknown as CoreStart;
 
-      subscribeToDualProcessFlag({ coreStart, logger, stop$ });
+      subscribeToDualProcessFlag({ coreStart, logger, stop$, isNonPriorityTaskScheduled });
 
       // Emit all three values synchronously - concatMap must serialise them.
       flagSubject.next(true);

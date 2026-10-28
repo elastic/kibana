@@ -320,6 +320,9 @@ export const isInjectedContextStep = (step: ConversationRoundStep): step is Inje
   return step.type === ConversationRoundStepType.injectedContext;
 };
 
+/** Registration id of the skill pre-selection cycle hook; its `injected_context` steps carry it. */
+export const relevantSkillsHookId = 'relevant-skills';
+
 export type BackgroundAgentCompleteStep = ConversationRoundStepMixin<
   ConversationRoundStepType.backgroundAgentComplete,
   BackgroundExecutionState

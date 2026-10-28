@@ -8,6 +8,7 @@
 import type {
   CloudOnboardingDeployment,
   CloudOnboardingDeploymentAuthMethod,
+  CloudOnboardingInstance,
   CloudProvider,
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
@@ -24,6 +25,8 @@ export interface CreateCloudOnboardingDeploymentRequest {
     globalRegion?: string;
     /** Global data stream namespace from the Service settings step. */
     namespace?: string;
+    /** The service instances (originals and duplicates) being deployed. */
+    instances?: CloudOnboardingInstance[];
     dataFormat?: 'ecs' | 'otel';
     authMethod?: CloudOnboardingDeploymentAuthMethod;
     agentPolicyIds?: string[];
@@ -53,6 +56,8 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     namespace?: string | null;
     services?: string[];
     serviceVars?: Record<string, Record<string, unknown>>;
+    /** Replaces the stored list of service instances. */
+    instances?: CloudOnboardingInstance[];
     attemptCount?: number;
     authMethod?: CloudOnboardingDeploymentAuthMethod | null;
     agentPolicyIds?: string[];

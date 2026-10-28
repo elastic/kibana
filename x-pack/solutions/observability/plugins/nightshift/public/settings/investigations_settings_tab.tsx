@@ -58,6 +58,7 @@ export const InvestigationsSettingsTab = ({
         <RunLimitsSection
           groups={INVESTIGATION_RUN_LIMIT_GROUPS}
           form={runLimits}
+          exhaustionCallouts="automations"
           description={i18n.translate(
             'xpack.nightshift.settings.investigationRunLimitsDescription',
             {
