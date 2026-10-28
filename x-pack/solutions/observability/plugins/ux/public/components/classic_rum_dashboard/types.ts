@@ -12,6 +12,8 @@ export interface ClassicRumTimeRange {
 
 export interface ClassicRumDashboardProps {
   serviceName: string;
+  /** Environment selected in the host app when the dashboard opens; all environments when unset. */
+  environment?: string;
   /** Time range owned by the host app; the dashboard falls back to the global timefilter. */
   timeRange?: ClassicRumTimeRange;
   /** Called when the user changes the time range from the dashboard's own date picker. */
