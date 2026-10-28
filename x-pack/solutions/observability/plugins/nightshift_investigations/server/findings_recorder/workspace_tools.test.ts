@@ -125,6 +125,16 @@ describe('createRecorderWorkspace', () => {
     expect(text).toContain('read on with offset 32000');
   });
 
+  it('fetches and redacts a file once, however many pages are read', async () => {
+    const { workspace, session } = setup({ files: { '/workspace/a.txt': '0123456789' } });
+
+    await workspace.readFile({ path: '/workspace/a.txt', offset: 0, length: 4 });
+    await workspace.readFile({ path: '/workspace/a.txt', offset: 4, length: 4 });
+    await workspace.readFile({ path: '/workspace/a.txt', offset: 8, length: 4 });
+
+    expect(session.readFiles).toHaveBeenCalledTimes(1);
+  });
+
   it('redacts secrets from what it returns', async () => {
     const { workspace } = setup({
       files: { '/workspace/a.txt': 'key=sk-very-secret-value ok' },

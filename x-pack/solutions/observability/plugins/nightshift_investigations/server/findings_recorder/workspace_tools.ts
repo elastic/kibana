@@ -84,51 +84,77 @@ export const createRecorderWorkspace = ({
 }: {
   session: SandboxSession;
   redactor: OutputRedactor;
-}): RecorderWorkspace => ({
-  writeResults: async (files) => {
-    if (files.length === 0) return;
-    // A resolved call can still report that a path was not written, so each flag is checked.
-    const made = await session.mkdirs([RECORDER_RESULTS_DIR]);
-    if (!made.every(Boolean)) throw new Error(`Could not create ${RECORDER_RESULTS_DIR}.`);
-    const written = await session.writeFiles(
-      files.map(({ path, content }) => ({ path, content: Buffer.from(content, 'utf8') }))
-    );
-    const failed = files.filter((_, index) => !written[index]?.success).map(({ path }) => path);
-    if (failed.length > 0) throw new Error(`Could not write ${failed.join(', ')}.`);
-  },
+}): RecorderWorkspace => {
+  // A pass reads a file in pages, so the redacted file is kept for the pass instead of fetching
+  // and redacting it again for every page.
+  const redactedFiles = new Map<string, Promise<{ bytes: Buffer; cutAtLimit: boolean }>>();
 
-  readFile: async ({ path: rawPath, offset, length }) => {
-    const resolved = resolveWorkspacePath(rawPath);
-    if (!resolved.ok) return `Error: ${resolved.reason}`;
-    const { path } = resolved;
+  const loadRedacted = (path: string, size: number) => {
+    const cached = redactedFiles.get(path);
+    if (cached) return cached;
+    const loading = (async () => {
+      const [result] = await session.readFiles([
+        { path, maxReadBytes: Math.min(size, RECORDER_FILE_MAX_BYTES) },
+      ]);
+      if (!result?.success) throw new Error(`${path} could not be read.`);
+      return {
+        bytes: Buffer.from(redactor.redact(result.content.toString('utf8')), 'utf8'),
+        cutAtLimit: size > RECORDER_FILE_MAX_BYTES,
+      };
+    })();
+    redactedFiles.set(path, loading);
+    // A failed read is not kept, so a later page can try again.
+    loading.catch(() => redactedFiles.delete(path));
+    return loading;
+  };
 
-    const [stat] = await session.statFiles([path]);
-    if (!stat?.exists) return `Error: ${path} does not exist.`;
-    if (stat.is_dir) return `Error: ${path} is a directory, not a file.`;
+  return {
+    writeResults: async (files) => {
+      if (files.length === 0) return;
+      // A resolved call can still report that a path was not written, so each flag is checked.
+      const made = await session.mkdirs([RECORDER_RESULTS_DIR]);
+      if (!made.every(Boolean)) throw new Error(`Could not create ${RECORDER_RESULTS_DIR}.`);
+      const written = await session.writeFiles(
+        files.map(({ path, content }) => ({ path, content: Buffer.from(content, 'utf8') }))
+      );
+      const failed = files.filter((_, index) => !written[index]?.success).map(({ path }) => path);
+      if (failed.length > 0) throw new Error(`Could not write ${failed.join(', ')}.`);
+    },
 
-    // The file is read and redacted whole, then paged. Redacting a page on its own would miss a
-    // secret that crosses the page boundary, and two reads could put its halves together.
-    const [result] = await session.readFiles([
-      { path, maxReadBytes: Math.min(stat.size, RECORDER_FILE_MAX_BYTES) },
-    ]);
-    if (!result?.success) return `Error: ${path} could not be read.`;
-    const redacted = Buffer.from(redactor.redact(result.content.toString('utf8')), 'utf8');
-    const cutAtLimit = stat.size > RECORDER_FILE_MAX_BYTES;
-    const readable = cutAtLimit
-      ? redacted.subarray(0, Math.max(0, redacted.length - RECORDER_REDACTION_MARGIN_BYTES))
-      : redacted;
+    readFile: async ({ path: rawPath, offset, length }) => {
+      const resolved = resolveWorkspacePath(rawPath);
+      if (!resolved.ok) return `Error: ${resolved.reason}`;
+      const { path } = resolved;
 
-    // Offsets count bytes of the redacted text, which is what the model is shown.
-    const start = toInt(offset, 0, 0, Number.MAX_SAFE_INTEGER);
-    const count = toInt(length, RECORDER_READ_DEFAULT_BYTES, 1, RECORDER_READ_MAX_BYTES);
-    const slice = readable.subarray(start, start + count);
-    const end = start + slice.length;
-    const more =
-      end < readable.length
-        ? `\n[bytes ${start}-${end} of ${readable.length}; read on with offset ${end}]`
-        : cutAtLimit
-        ? `\n[bytes ${start}-${end}; the file is longer than can be read]`
-        : '';
-    return `${slice.toString('utf8')}${more}`;
-  },
-});
+      const [stat] = await session.statFiles([path]);
+      if (!stat?.exists) return `Error: ${path} does not exist.`;
+      if (stat.is_dir) return `Error: ${path} is a directory, not a file.`;
+
+      // The file is read and redacted whole, then paged. Redacting a page on its own would miss a
+      // secret that crosses the page boundary, and two reads could put its halves together.
+      let loaded: { bytes: Buffer; cutAtLimit: boolean };
+      try {
+        loaded = await loadRedacted(path, stat.size);
+      } catch {
+        return `Error: ${path} could not be read.`;
+      }
+      const { bytes: redacted, cutAtLimit } = loaded;
+      const readable = cutAtLimit
+        ? redacted.subarray(0, Math.max(0, redacted.length - RECORDER_REDACTION_MARGIN_BYTES))
+        : redacted;
+
+      // Offsets count bytes of the redacted text, which is what the model is shown.
+      const start = toInt(offset, 0, 0, Number.MAX_SAFE_INTEGER);
+      const count = toInt(length, RECORDER_READ_DEFAULT_BYTES, 1, RECORDER_READ_MAX_BYTES);
+      const slice = readable.subarray(start, start + count);
+      const end = start + slice.length;
+      const more =
+        end < readable.length
+          ? `\n[bytes ${start}-${end} of ${readable.length}; read on with offset ${end}]`
+          : cutAtLimit
+          ? `\n[bytes ${start}-${end}; the file is longer than can be read]`
+          : '';
+      return `${slice.toString('utf8')}${more}`;
+    },
+  };
+};
