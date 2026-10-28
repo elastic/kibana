@@ -96,26 +96,27 @@ export const clickDisableRuleSwitch = () => {
   });
 };
 
-const clickRuleStateAction = (action: string) => {
+export const expectRuleEnabledOnDetailsPage = (enabled: boolean) => {
+  cy.get(RULE_ENABLED_BADGE).should('contain.text', enabled ? 'Enabled' : 'Disabled');
+};
+
+// The badge menu closes by itself once the badge label changes, so wait for the new label.
+const clickRuleStateAction = (action: string, enabled: boolean) => {
   cy.get(RULE_ENABLED_BADGE).should('be.visible');
   cy.get(RULE_ENABLED_BADGE).click();
   cy.get(action).click();
-  cy.focused().type('{esc}');
+  expectRuleEnabledOnDetailsPage(enabled);
 };
 
 /**
  * Enables a disabled rule from the rule details header "Disabled" badge menu.
  */
-export const enableRuleOnDetailsPage = () => clickRuleStateAction(RULE_ENABLE_ACTION);
+export const enableRuleOnDetailsPage = () => clickRuleStateAction(RULE_ENABLE_ACTION, true);
 
 /**
  * Disables an enabled rule from the rule details header "Enabled" badge menu.
  */
-export const disableRuleOnDetailsPage = () => clickRuleStateAction(RULE_DISABLE_ACTION);
-
-export const expectRuleEnabledOnDetailsPage = (enabled: boolean) => {
-  cy.get(RULE_ENABLED_BADGE).should('contain.text', enabled ? 'Enabled' : 'Disabled');
-};
+export const disableRuleOnDetailsPage = () => clickRuleStateAction(RULE_DISABLE_ACTION, false);
 
 export const addsFieldsToTimeline = (search: string, fields: string[]) => {
   cy.get(FIELDS_BROWSER_BTN).click();
