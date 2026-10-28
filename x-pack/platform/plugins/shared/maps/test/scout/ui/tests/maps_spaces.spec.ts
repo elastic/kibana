@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ApiServicesFixture } from '@kbn/scout';
 import { ContentListWrapper, test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -14,15 +15,7 @@ test.describe('Maps - spaces feature controls', { tag: '@local-stateful-classic'
   const spaceIds: string[] = [];
 
   const createSpace = async (
-    apiServices: {
-      spaces: {
-        create: (space: {
-          id: string;
-          name: string;
-          disabledFeatures: string[];
-        }) => Promise<unknown>;
-      };
-    },
+    apiServices: ApiServicesFixture,
     parallelIndex: number,
     disabledFeatures: string[]
   ) => {

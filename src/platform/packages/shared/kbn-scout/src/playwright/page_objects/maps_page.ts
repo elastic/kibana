@@ -489,6 +489,8 @@ export class MapsPage {
     );
     await queryInput.clear();
     await queryInput.pressSequentially(query);
+    // Dismiss any open autocomplete dropdown before clicking submit.
+    await queryInput.press('Escape');
     await this.page.testSubj.click('mapFilterEditorSubmitButton');
     await this.waitForLayersToLoad();
   }
