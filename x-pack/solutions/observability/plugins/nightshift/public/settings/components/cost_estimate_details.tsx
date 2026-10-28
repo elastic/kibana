@@ -178,7 +178,7 @@ export const TokenTrackingSwitch = ({
         disabled={!canSaveAdvancedSettings || isUpdatingTracking}
         onChange={(event) => onChange(event.target.checked)}
         label={i18n.translate('xpack.nightshift.settings.costEstimate.enableTrackingButtonLabel', {
-          defaultMessage: 'Enable token tracking in this space',
+          defaultMessage: 'Enable token tracking for all spaces',
         })}
         aria-busy={isUpdatingTracking}
         data-test-subj="nightshiftTokenTrackingSwitch"

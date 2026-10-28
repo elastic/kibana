@@ -57,6 +57,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   private readonly instanceUuid: string;
   private savedObjectsClient?: ISavedObjectsRepository;
   private uiSettingsClient?: IUiSettingsClient;
+  private globalUiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
   private coreUsageData?: CoreUsageDataStart;
   private eventLoopUsageCounter?: UsageCounter;
@@ -96,6 +97,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.savedObjectsClient = savedObjects.createInternalRepository([SAVED_OBJECTS_DAILY_TYPE]);
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+    this.globalUiSettingsClient = uiSettings.globalAsScopedToClient(savedObjectsClient);
     this.subscriptions.push(core.metrics.getOpsMetrics$().subscribe(this.metric$));
     this.coreUsageData = core.coreUsageData;
     startTrackingEventLoopDelaysUsage(
@@ -129,6 +131,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   ) {
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
+    const getGlobalUiSettingsClient = () => this.globalUiSettingsClient;
     const getCoreUsageDataService = () => this.coreUsageData!;
 
     registerUiCountersUsageCollector(usageCollection, this.logger);
@@ -164,7 +167,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       getAllSavedObjectTypes,
       getSoClientWithHiddenIndices
     );
-    registerManagementUsageCollector(usageCollection, getUiSettingsClient);
+    registerManagementUsageCollector(
+      usageCollection,
+      getUiSettingsClient,
+      getGlobalUiSettingsClient
+    );
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(
       this.logger.get('application-usage'),

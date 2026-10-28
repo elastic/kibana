@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger, PluginInitializerContext } from '@kbn/core/server';
 import {
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
@@ -17,6 +18,7 @@ import {
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { registerServerRoutes } from './routes/register_routes';
+import { migrateTokenUsageTrackingToGlobal } from './migrate_token_usage_tracking_to_global';
 import type {
   GenAiSettingsPluginSetupDependencies,
   GenAiSettingsPluginStartDependencies,
@@ -164,6 +166,15 @@ export class GenAiSettingsPlugin
   }
 
   public start(core: CoreStart): GenAiSettingsPluginStart {
+    const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    migrateTokenUsageTrackingToGlobal({
+      savedObjectsClient,
+      globalUiSettingsClient: core.uiSettings.globalAsScopedToClient(savedObjectsClient),
+      logger: this.logger,
+    }).catch((e) => {
+      this.logger.error(`Failed to migrate token usage tracking to a global setting: ${e.message}`);
+    });
+
     return {};
   }
 
