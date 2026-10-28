@@ -156,7 +156,7 @@ describe('sessions transform spec', () => {
   });
 
   it('stamps managed_by and version so setup and health checks can find it', () => {
-    const meta = { managed_by: SESSIONS_MANAGED_BY, version: SESSIONS_VERSION };
+    const meta = { managed: true, managed_by: SESSIONS_MANAGED_BY, version: SESSIONS_VERSION };
     expect(transform._meta).toEqual({ ...meta, partition: 0, partitions: 1 });
     expect(sessionsDestPipeline._meta).toEqual(meta);
     expect(sessionsIndexTemplate._meta).toEqual(meta);

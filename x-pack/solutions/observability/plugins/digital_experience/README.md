@@ -65,8 +65,12 @@ indexed, with the failure in `error.message`.
 ### Enabling sessions
 
 Sessions are set up by an explicit action, `POST /internal/digital_experience/sessions/enable`,
-which requires the `manage_digital_experience` privilege. The transform, its destination ingest
-pipeline, and the destination index template are created **with the enabling user's credentials**
+which requires the `manage_digital_experience_sessions` API privilege. Only the **Sessions → Set up
+and update session summaries** sub-feature privilege grants it. It is not part of **All**, as setting
+sessions up runs the transforms with the user's data access for every reader, and it can only be
+granted in all spaces, as the transforms and index serve every space. The transform, its
+destination ingest pipeline, and the destination index template are created **with the enabling
+user's credentials**
 (secondary authorization, like SLO transforms), never as the Kibana internal user. The user also
 needs these Elasticsearch privileges; when any is missing the request fails with a 403 listing them,
 before anything is written:
@@ -78,6 +82,11 @@ before anything is written:
 Enabling again is safe. It refreshes the transforms' stored credentials to the enabling user,
 restarts failed transforms, replaces transforms left over from a previous version, and applies a
 changed `frequency` or partition count.
+
+The transforms, pipeline and index template are marked `managed`, so the Transforms and Index
+Management UIs warn before anyone edits or deletes them there. There is no disable action in
+Digital Experience; a user with Elasticsearch's `manage_transform` privilege can still stop or
+delete the transforms directly.
 
 ### Scaling and freshness
 
@@ -101,7 +110,7 @@ xpack.digital_experience.sessions:
   changing the count rewrites documents in place without emptying the list. EDOT Browser session
   ids are random UUIDs, so the slices are even.
 
-Settings changes take effect after a user with `manage_digital_experience` enables sessions again.
+Settings changes take effect after a user with that privilege enables sessions again.
 The status route reports the drift until then.
 
 A background task (`digital_experience:sessions-health`, every 5 minutes) only reads transform

@@ -105,7 +105,9 @@ describe('sessions health task', () => {
 
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('manage_digital_experience privilege must enable sessions again')
+      expect.stringContaining(
+        '"Set up and update session summaries" privilege must enable sessions again'
+      )
     );
   });
 

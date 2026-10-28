@@ -76,7 +76,7 @@ export interface SessionsStatus {
   state: string | null;
   installedVersion: number | null;
   currentVersion: number;
-  /** True when a user with manage_digital_experience must enable sessions again. */
+  /** True when a user with the manage sessions privilege must enable sessions again. */
   needsUpdate: boolean;
   reason: string | null;
   /** Largest freshness lag across partitions, in seconds. */

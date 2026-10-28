@@ -87,7 +87,7 @@ describe('sessions routes', () => {
 
   it.each<[Method, string, string]>([
     ['get', `${SESSIONS_API_BASE_PATH}/sessions/status`, 'read_digital_experience'],
-    ['post', `${SESSIONS_API_BASE_PATH}/sessions/enable`, 'manage_digital_experience'],
+    ['post', `${SESSIONS_API_BASE_PATH}/sessions/enable`, 'manage_digital_experience_sessions'],
     [
       'get',
       `${SESSIONS_API_BASE_PATH}/applications/{serviceName}/sessions`,

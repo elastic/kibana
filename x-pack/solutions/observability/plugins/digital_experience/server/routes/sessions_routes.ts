@@ -70,7 +70,7 @@ const readSecurity = {
   authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.read] },
 };
 const manageSecurity = {
-  authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manage] },
+  authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] },
 };
 
 const serviceParams = schema.object({ serviceName: boundedString(1024) });

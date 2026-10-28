@@ -60,7 +60,7 @@ export const registerSessionsHealthTask = ({
           }
           if (status.needsUpdate) {
             logger.warn(
-              `${status.reason} A user with the manage_digital_experience privilege must enable sessions again.`
+              `${status.reason} A user with the Digital Experience "Set up and update session summaries" privilege must enable sessions again.`
             );
           }
           return { state: {} };

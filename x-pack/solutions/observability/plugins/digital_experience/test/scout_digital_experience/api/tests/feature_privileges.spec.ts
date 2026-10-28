@@ -14,24 +14,29 @@ const { COMMON_HEADERS, createRole } = testData;
 
 interface CapabilitiesResponse {
   navLinks: Record<string, boolean>;
-  digital_experience: { show: boolean; save: boolean };
+  digital_experience: { show: boolean; save: boolean; manageSessions: boolean };
 }
 
 const CAPABILITY_CASES = [
   {
-    title: 'resolves show and save for the all privilege',
+    title: 'resolves show and save, but not managing sessions, for the all privilege',
     role: createRole({ digital_experience: ['all'] }),
-    expected: { navLink: true, show: true, save: true },
+    expected: { navLink: true, show: true, save: true, manageSessions: false },
   },
   {
     title: 'resolves show only for the read privilege',
     role: createRole({ digital_experience: ['read'] }),
-    expected: { navLink: true, show: true, save: false },
+    expected: { navLink: true, show: true, save: false, manageSessions: false },
+  },
+  {
+    title: 'resolves managing sessions only with the manage_sessions sub-feature privilege',
+    role: createRole({ digital_experience: ['read', 'manage_sessions'] }),
+    expected: { navLink: true, show: true, save: false, manageSessions: true },
   },
   {
     title: 'resolves no access without the digital_experience privilege',
     role: createRole({ apm: ['read'] }),
-    expected: { navLink: false, show: false, save: false },
+    expected: { navLink: false, show: false, save: false, manageSessions: false },
   },
 ] as const;
 
@@ -60,6 +65,24 @@ apiTest.describe('Digital Experience feature privileges', { tag: DIGITAL_EXPERIE
           ui: ['show'],
         },
       },
+      subFeatures: [
+        {
+          requireAllSpaces: true,
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'manage_sessions',
+                  includeIn: 'none',
+                  api: ['manage_digital_experience_sessions'],
+                  ui: ['manageSessions'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
   });
 
@@ -76,7 +99,11 @@ apiTest.describe('Digital Experience feature privileges', { tag: DIGITAL_EXPERIE
       expect(response).toHaveStatusCode(200);
       const { navLinks, digital_experience: capabilities } = response.body as CapabilitiesResponse;
       expect(navLinks.digital_experience).toBe(expected.navLink);
-      expect(capabilities).toStrictEqual({ show: expected.show, save: expected.save });
+      expect(capabilities).toStrictEqual({
+        show: expected.show,
+        save: expected.save,
+        manageSessions: expected.manageSessions,
+      });
     });
   }
 });

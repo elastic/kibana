@@ -36,7 +36,8 @@ import {
 } from '../../common/sessions';
 import { partitionFilters, type SessionsPartition } from './partitions';
 
-const SESSIONS_META = { managed_by: SESSIONS_MANAGED_BY, version: SESSIONS_VERSION };
+// `managed` makes the Transforms and Index Management UIs warn before editing or deleting these.
+const SESSIONS_META = { managed: true, managed_by: SESSIONS_MANAGED_BY, version: SESSIONS_VERSION };
 
 const anyOf = (...clauses: QueryDslQueryContainer[]): QueryDslQueryContainer => ({
   bool: { should: clauses, minimum_should_match: 1 },
