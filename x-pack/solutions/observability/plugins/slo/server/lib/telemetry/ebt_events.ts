@@ -8,20 +8,16 @@
 import type { EventTypeOpts, RootSchema, SchemaObject } from '@kbn/core/server';
 import type { EventOrigin } from './event_origin';
 import type {
-  SloBulkDeletedEbtData,
   SloDefinitionEbtData,
   SloDeletedEbtData,
   SloEbtEventMap,
   SloEbtEventType,
-  SloRollupDataPurgedEbtData,
   SloUpdatedEbtData,
 } from './ebt_event_types';
 import {
-  SLO_BULK_DELETED_EBT_EVENT_TYPE,
   SLO_CREATED_EBT_EVENT_TYPE,
   SLO_DELETED_EBT_EVENT_TYPE,
   SLO_RESET_EBT_EVENT_TYPE,
-  SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE,
   SLO_UPDATED_EBT_EVENT_TYPE,
 } from './ebt_event_types';
 
@@ -185,40 +181,6 @@ const sloDeletedEbtSchema: RootSchema<WithOrigin<SloDeletedEbtData>> = {
   },
 };
 
-const sloBulkDeletedEbtSchema: RootSchema<WithOrigin<SloBulkDeletedEbtData>> = {
-  requested_count: {
-    type: 'long',
-    _meta: { description: 'The number of SLOs requested for deletion.' },
-  },
-  succeeded_count: {
-    type: 'long',
-    _meta: { description: 'The number of SLOs deleted successfully.' },
-  },
-  failed_count: {
-    type: 'long',
-    _meta: { description: 'The number of SLOs that failed to be deleted.' },
-  },
-  origin: eventOriginEbtSchema,
-};
-
-const sloRollupDataPurgedEbtSchema: RootSchema<WithOrigin<SloRollupDataPurgedEbtData>> = {
-  slo_count: {
-    type: 'long',
-    _meta: { description: 'The number of SLOs whose rollup data is purged.' },
-  },
-  purge_policy_type: {
-    type: 'keyword',
-    _meta: { description: 'The purge policy: `fixed_age` or `fixed_time`.' },
-  },
-  force: {
-    type: 'boolean',
-    _meta: {
-      description: 'Whether the purge bypassed the validation against the SLO time windows.',
-    },
-  },
-  origin: eventOriginEbtSchema,
-};
-
 export const sloCreatedEbtEvent: SloEbtEventTypeOpts<typeof SLO_CREATED_EBT_EVENT_TYPE> = {
   eventType: SLO_CREATED_EBT_EVENT_TYPE,
   schema: sloDefinitionEbtSchema,
@@ -237,16 +199,4 @@ export const sloDeletedEbtEvent: SloEbtEventTypeOpts<typeof SLO_DELETED_EBT_EVEN
 export const sloResetEbtEvent: SloEbtEventTypeOpts<typeof SLO_RESET_EBT_EVENT_TYPE> = {
   eventType: SLO_RESET_EBT_EVENT_TYPE,
   schema: sloDefinitionEbtSchema,
-};
-
-export const sloBulkDeletedEbtEvent: SloEbtEventTypeOpts<typeof SLO_BULK_DELETED_EBT_EVENT_TYPE> = {
-  eventType: SLO_BULK_DELETED_EBT_EVENT_TYPE,
-  schema: sloBulkDeletedEbtSchema,
-};
-
-export const sloRollupDataPurgedEbtEvent: SloEbtEventTypeOpts<
-  typeof SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE
-> = {
-  eventType: SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE,
-  schema: sloRollupDataPurgedEbtSchema,
 };

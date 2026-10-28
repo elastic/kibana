@@ -109,7 +109,6 @@ export class BulkDeleteTask {
                   rulesClient,
                   logger: this.logger,
                   signal,
-                  telemetry,
                 });
 
                 return {

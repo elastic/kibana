@@ -6,21 +6,23 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { SLO_BULK_DELETED_EBT_EVENT_TYPE } from './ebt_event_types';
+import { createSLO } from '../../services/fixtures/slo';
+import { toSloDefinitionEbtData } from './build_slo_ebt_data';
+import { SLO_RESET_EBT_EVENT_TYPE } from './ebt_event_types';
 import type { EventOrigin } from './event_origin';
 import { SloTelemetryService } from './slo_telemetry_service';
 
 const origin: EventOrigin = { actor: 'user', channel: 'ui', app: 'slo' };
-const data = { requested_count: 3, succeeded_count: 2, failed_count: 1 };
+const data = toSloDefinitionEbtData(createSLO());
 
 describe('SloTelemetryService', () => {
   it('reports the event with the origin of the reporter', () => {
     const analytics = { reportEvent: jest.fn() };
     const service = new SloTelemetryService(analytics, loggingSystemMock.createLogger());
 
-    service.getReporter(origin).report(SLO_BULK_DELETED_EBT_EVENT_TYPE, () => data);
+    service.getReporter(origin).report(SLO_RESET_EBT_EVENT_TYPE, () => data);
 
-    expect(analytics.reportEvent).toHaveBeenCalledWith(SLO_BULK_DELETED_EBT_EVENT_TYPE, {
+    expect(analytics.reportEvent).toHaveBeenCalledWith(SLO_RESET_EBT_EVENT_TYPE, {
       ...data,
       origin,
     });
@@ -36,11 +38,9 @@ describe('SloTelemetryService', () => {
     const service = new SloTelemetryService(analytics, logger);
 
     expect(() =>
-      service.getReporter(origin).report(SLO_BULK_DELETED_EBT_EVENT_TYPE, () => data)
+      service.getReporter(origin).report(SLO_RESET_EBT_EVENT_TYPE, () => data)
     ).not.toThrow();
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(SLO_BULK_DELETED_EBT_EVENT_TYPE)
-    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(SLO_RESET_EBT_EVENT_TYPE));
   });
 
   it('logs and swallows a failure to build the event data', () => {
@@ -49,7 +49,7 @@ describe('SloTelemetryService', () => {
     const service = new SloTelemetryService(analytics, logger);
 
     expect(() =>
-      service.getReporter(origin).report(SLO_BULK_DELETED_EBT_EVENT_TYPE, () => {
+      service.getReporter(origin).report(SLO_RESET_EBT_EVENT_TYPE, () => {
         throw new Error('invalid definition');
       })
     ).not.toThrow();

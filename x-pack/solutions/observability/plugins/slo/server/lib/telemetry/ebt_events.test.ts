@@ -6,11 +6,9 @@
  */
 
 import {
-  sloBulkDeletedEbtEvent,
   sloCreatedEbtEvent,
   sloDeletedEbtEvent,
   sloResetEbtEvent,
-  sloRollupDataPurgedEbtEvent,
   sloUpdatedEbtEvent,
 } from './ebt_events';
 import { registerSloEbtEvents } from './register_slo_ebt_events';
@@ -21,14 +19,7 @@ interface SchemaNode {
   items?: SchemaNode;
 }
 
-const sloEbtEvents = [
-  sloCreatedEbtEvent,
-  sloUpdatedEbtEvent,
-  sloDeletedEbtEvent,
-  sloResetEbtEvent,
-  sloBulkDeletedEbtEvent,
-  sloRollupDataPurgedEbtEvent,
-];
+const sloEbtEvents = [sloCreatedEbtEvent, sloUpdatedEbtEvent, sloDeletedEbtEvent, sloResetEbtEvent];
 
 const findNodesWithoutDescription = (node: SchemaNode, path: string): string[] => {
   const missing = node._meta?.description ? [] : [path];

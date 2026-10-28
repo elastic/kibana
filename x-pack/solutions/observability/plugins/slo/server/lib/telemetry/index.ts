@@ -7,11 +7,9 @@
 
 export { getChangedFields, toSloDefinitionEbtData } from './build_slo_ebt_data';
 export {
-  SLO_BULK_DELETED_EBT_EVENT_TYPE,
   SLO_CREATED_EBT_EVENT_TYPE,
   SLO_DELETED_EBT_EVENT_TYPE,
   SLO_RESET_EBT_EVENT_TYPE,
-  SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE,
   SLO_UPDATED_EBT_EVENT_TYPE,
 } from './ebt_event_types';
 export type { EventOrigin } from './event_origin';

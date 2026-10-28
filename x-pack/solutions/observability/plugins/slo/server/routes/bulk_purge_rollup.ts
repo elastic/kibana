@@ -21,15 +21,8 @@ export const bulkPurgeRollupRoute = createSloServerRoute({
   handler: async ({ request, context, params, logger, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { repository, scopedClusterClient, telemetry } = await getScopedClients({
-      request,
-      logger,
-    });
-    const purgeRollupData = new BulkPurgeRollupData(
-      scopedClusterClient.asCurrentUser,
-      repository,
-      telemetry
-    );
+    const { repository, scopedClusterClient } = await getScopedClients({ request, logger });
+    const purgeRollupData = new BulkPurgeRollupData(scopedClusterClient.asCurrentUser, repository);
 
     return purgeRollupData.execute(params.body);
   },

@@ -12,16 +12,10 @@ import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
 import { IllegalArgumentError } from '../errors';
-import type { SloTelemetryReporter } from '../lib/telemetry';
-import { SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE } from '../lib/telemetry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 
 export class BulkPurgeRollupData {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private repository: SLODefinitionRepository,
-    private telemetry: SloTelemetryReporter
-  ) {}
+  constructor(private esClient: ElasticsearchClient, private repository: SLODefinitionRepository) {}
 
   public async execute(params: BulkPurgeRollupParams): Promise<BulkPurgeRollupResponse> {
     const lookback = this.getTimestamp(params.purgePolicy);
@@ -54,12 +48,6 @@ export class BulkPurgeRollupData {
         },
       },
     });
-
-    this.telemetry.report(SLO_ROLLUP_DATA_PURGED_EBT_EVENT_TYPE, () => ({
-      slo_count: slos.length,
-      purge_policy_type: params.purgePolicy.purgeType,
-      force: params.force ?? false,
-    }));
 
     return { taskId: response.task };
   }

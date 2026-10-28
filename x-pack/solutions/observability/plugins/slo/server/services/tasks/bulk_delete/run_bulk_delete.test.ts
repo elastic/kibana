@@ -8,10 +8,7 @@
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SloTelemetryReporter } from '../../../lib/telemetry';
-import {
-  createSloTelemetryReporterMock,
-  getReportedEvents,
-} from '../../../lib/telemetry/slo_telemetry_service.mock';
+import { createSloTelemetryReporterMock } from '../../../lib/telemetry/slo_telemetry_service.mock';
 import { DeleteSLO } from '../../delete_slo';
 import {
   createSLORepositoryMock,
@@ -43,7 +40,7 @@ describe('runBulkDelete', () => {
       );
   });
 
-  it('deletes each SLO as part of a bulk deletion and reports the summary', async () => {
+  it('deletes each SLO as part of a bulk deletion', async () => {
     const results = await runBulkDelete(
       { list: ['slo-1', 'failing-slo', 'slo-2'] },
       {
@@ -52,7 +49,6 @@ describe('runBulkDelete', () => {
         rulesClient: rulesClientMock.create(),
         logger: loggingSystemMock.createLogger(),
         signal: new AbortController().signal,
-        telemetry,
       }
     );
 
@@ -65,15 +61,5 @@ describe('runBulkDelete', () => {
     executeSpy.mock.calls.forEach(([, options]) => {
       expect(options).toEqual({ skipRuleDeletion: true, skipDataDeletion: true, bulk: true });
     });
-    expect(getReportedEvents(telemetry)).toEqual([
-      [
-        'slo_bulk_deleted',
-        {
-          requested_count: 3,
-          succeeded_count: 2,
-          failed_count: 1,
-        },
-      ],
-    ]);
   });
 });
