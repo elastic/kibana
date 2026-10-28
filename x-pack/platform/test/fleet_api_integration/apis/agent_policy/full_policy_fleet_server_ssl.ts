@@ -46,6 +46,8 @@ export default function (providerContext: FtrProviderContext) {
           name: id,
           namespace: 'default',
           has_fleet_server: true,
+          // the fleet_server package of the test registry isn't signed with the key configured in FTR
+          force: true,
           fleet_server_host_id: fleetServerHostId,
           data_output_id: OUTPUT_ID,
           monitoring_output_id: OUTPUT_ID,
@@ -60,8 +62,17 @@ export default function (providerContext: FtrProviderContext) {
       return body.item;
     };
 
-    const getFleetServerInput = (fullPolicy: any) =>
-      fullPolicy.inputs.find((input: any) => input.type === 'fleet-server');
+    const getFleetServerInput = (fullPolicy: any) => {
+      const input = fullPolicy.inputs.find((i: any) => i.type === 'fleet-server');
+      if (!input) {
+        throw new Error(
+          `No fleet-server input in the full policy, got inputs [${fullPolicy.inputs
+            .map((i: any) => i.type)
+            .join(', ')}] and outputs [${Object.keys(fullPolicy.outputs).join(', ')}]`
+        );
+      }
+      return input;
+    };
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -101,6 +112,26 @@ export default function (providerContext: FtrProviderContext) {
 
       await createFleetServerPolicy(ES_SSL_POLICY_ID, ES_SSL_HOST_ID);
       await createFleetServerPolicy(AGENT_SSL_POLICY_ID, AGENT_SSL_HOST_ID);
+
+      // the fleet-server input comes from the fleet_server package policy, make sure it was created
+      for (const policyId of [ES_SSL_POLICY_ID, AGENT_SSL_POLICY_ID]) {
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        const packagePolicies = body.item.package_policies ?? [];
+        if (!packagePolicies.some((pp: any) => pp.package?.name === 'fleet_server')) {
+          throw new Error(
+            `Policy ${policyId} has no fleet_server package policy, got ${JSON.stringify(
+              packagePolicies.map((pp: any) => ({
+                package: pp.package?.name,
+                enabled: pp.enabled,
+                inputs: pp.inputs?.map((i: any) => `${i.type}:${i.enabled}`),
+              }))
+            )}`
+          );
+        }
+      }
     });
 
     after(async () => {
@@ -110,6 +141,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should keep the hosts of the policy output in the bootstrap output and use it in the fleet-server input when the host has es ssl options', async () => {
       const fullPolicy = await getFullPolicy(ES_SSL_POLICY_ID);
       const bootstrapOutputId = `fleetserver-output-${ES_SSL_HOST_ID}`;
+      const fleetServerInput = getFleetServerInput(fullPolicy);
 
       expect(fullPolicy.outputs[bootstrapOutputId]).to.eql({
         ...fullPolicy.outputs[OUTPUT_ID],
@@ -121,7 +153,7 @@ export default function (providerContext: FtrProviderContext) {
           key: 'my-es-key',
         },
       });
-      expect(getFleetServerInput(fullPolicy).use_output).to.eql(bootstrapOutputId);
+      expect(fleetServerInput.use_output).to.eql(bootstrapOutputId);
     });
 
     it('should not generate a bootstrap output when the host has no es ssl options', async () => {
