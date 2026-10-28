@@ -20,13 +20,17 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   RETRY_LOAD: 'retryLoad',
 } as const;
 
+/**
+ * Clicks already carry the app in their `applicationId` context (`digital_experience`), so element
+ * names don't repeat it.
+ */
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
-  APPLICATION_LINK: 'digitalExperienceApplicationLink',
-  DOCS_LINK: 'digitalExperienceApplicationsDocsLink',
-  CLASSIC_DATA_HINT: 'digitalExperienceClassicDataHint',
-  ENVIRONMENT_FILTER: 'digitalExperienceEnvironmentFilter',
-  SOURCE_FILTER: 'digitalExperienceSourceFilter',
-  COLUMN_SELECTOR: 'digitalExperienceColumnSelector',
-  RETRY: 'digitalExperienceApplicationsRetry',
-  SHOW_ALL_ENVIRONMENTS: 'digitalExperienceShowAllEnvironments',
+  APPLICATION_LINK: 'applicationLink',
+  DOCS_LINK: 'applicationsDocsLink',
+  CLASSIC_DATA_HINT: 'classicDataHint',
+  ENVIRONMENT_FILTER: 'environmentFilter',
+  SOURCE_FILTER: 'sourceFilter',
+  COLUMN_SELECTOR: 'columnSelector',
+  RETRY: 'applicationsRetry',
+  SHOW_ALL_ENVIRONMENTS: 'showAllEnvironments',
 } as const;

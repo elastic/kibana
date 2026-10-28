@@ -71,7 +71,7 @@ describe('SourceFilter', () => {
       'openFilter'
     );
     expect(option('classic')).toHaveAttribute('data-ebt-action', 'setFilter');
-    expect(option('classic')).toHaveAttribute('data-ebt-element', 'digitalExperienceSourceFilter');
+    expect(option('classic')).toHaveAttribute('data-ebt-element', 'sourceFilter');
   });
 
   it('shows only the label without a selection', () => {
