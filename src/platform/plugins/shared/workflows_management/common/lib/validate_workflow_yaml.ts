@@ -62,6 +62,11 @@ export interface ValidateWorkflowYamlOptions {
    * differ from the one the workflow runs against. Only reporting callers set it.
    */
   esqlCallbacks?: ESQLCallbacks;
+  /**
+   * How many ES|QL steps the `esql` rule group validates. The rest are listed
+   * in `notChecked`. Unlimited when omitted.
+   */
+  esqlMaxSteps?: number;
 }
 
 export async function validateWorkflowYaml(
@@ -203,7 +208,11 @@ export async function validateWorkflowYaml(
   }
 
   if (options?.esqlCallbacks) {
-    const esqlValidation = await collectEsqlDiagnostics(yaml, options.esqlCallbacks);
+    const esqlValidation = await collectEsqlDiagnostics(
+      yaml,
+      options.esqlCallbacks,
+      options.esqlMaxSteps
+    );
     diagnostics.push(...esqlValidation.diagnostics);
     notChecked.push(...esqlValidation.notChecked);
   }

@@ -32,7 +32,7 @@ export async function deleteAll(
     const attachments = await attachmentService.getter.bulkGetForDeletionByType(attachmentIds);
 
     if (attachments.length <= 0) {
-      throw Boom.notFound(`No comments found for ${caseID}.`);
+      throw Boom.notFound(`No attachments found for case ${caseID}.`);
     }
 
     await deleteCaseAttachments(
@@ -68,7 +68,7 @@ export async function deleteComment(
     const attachments = await attachmentService.getter.bulkGetForDeletion([savedObjectId]);
 
     if (attachments.length <= 0) {
-      throw Boom.notFound(`This comment ${savedObjectId} does not exist anymore.`);
+      throw Boom.notFound(`This attachment ${savedObjectId} does not exist anymore.`);
     }
 
     await deleteCaseAttachments(
@@ -76,7 +76,8 @@ export async function deleteComment(
         caseId: caseID,
         attachments,
         operation: Operations.deleteComment,
-        notInCaseMessage: () => `This comment ${savedObjectId} does not exist in ${caseID}.`,
+        notInCaseMessage: () =>
+          `This attachment ${savedObjectId} does not exist in case ${caseID}.`,
         beforeDelete: (decoded) =>
           deleteRelatedAttachments({ caseId: caseID, attachments: decoded }, clientArgs),
       },
