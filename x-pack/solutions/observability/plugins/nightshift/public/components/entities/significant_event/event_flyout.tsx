@@ -320,6 +320,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
         onClose={onClose}
         size="s"
         type="push"
+        role="region"
         session="start"
         historyKey={EVENT_FLYOUT_HISTORY_KEY}
         resizable

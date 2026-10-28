@@ -304,6 +304,7 @@ export function KnowledgeIndicatorDetailsFlyout({
         onClose={onClose}
         aria-labelledby={flyoutTitleId}
         type="push"
+        role="region"
         ownFocus={false}
         size="40%"
         hideCloseButton

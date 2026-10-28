@@ -73,6 +73,15 @@ const renderFlyout = (canManage: boolean, blocksActivity = false) => {
   );
 };
 
+describe('RuleFlyout accessibility', () => {
+  // EUI renders push flyouts without a role, so the flyout is not a landmark unless the
+  // caller sets one.
+  it('exposes the push flyout as a region landmark', () => {
+    renderFlyout(false);
+    expect(screen.getByTestId('nightshiftRuleFlyout')).toHaveAttribute('role', 'region');
+  });
+});
+
 describe('RuleFlyout actions', () => {
   it('has no delete action for a read-only user', () => {
     renderFlyout(false);
