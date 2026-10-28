@@ -276,13 +276,6 @@ export const CLASSIC_ALERT_DETAILS_TITLE = i18n.translate(
   }
 );
 
-export const CLASSIC_ALERT_DETAILS_VIEW_DETAILS = i18n.translate(
-  'xpack.alertingV2.episodes.classicAlertDetails.viewDetailsButton',
-  {
-    defaultMessage: 'View details',
-  }
-);
-
 export const CLASSIC_ALERT_DETAILS_CLOSE = i18n.translate(
   'xpack.alertingV2.episodes.classicAlertDetails.closeButton',
   {
