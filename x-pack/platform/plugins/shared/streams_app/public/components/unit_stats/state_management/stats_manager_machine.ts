@@ -6,7 +6,16 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import type { MappedStatsResponse, StatsWindow } from '../../../services/unit_stats_client/types';
+import type { Observable } from 'rxjs';
+import { map } from 'rxjs';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
+import { fromCallback, fromEventObservable, setup } from 'xstate';
+import type {
+  MappedStatsResponse,
+  StatsWindow,
+  UnitStatsClient,
+} from '../../../services/unit_stats_client/types';
+import { STATS_BATCH_DEBOUNCE_MS, STATS_POLL_INTERVAL_MS } from './constants';
 import type { StatsBatch, StatsComponents } from './types';
 
 export interface StatsManagerInput {
@@ -63,11 +72,6 @@ export interface StatsWindowChangedEvent {
   type: 'stats.windowChanged';
 }
 
-export interface StatsVisibilityChangeEvent {
-  type: 'visibility.change';
-  visible: boolean;
-}
-
 // Sent by a fetch actor
 
 export interface StatsFetchDoneEvent {
@@ -88,6 +92,96 @@ export type StatsManagerEvent =
   | StatsRefreshEvent
   | StatsUnitPersistedEvent
   | StatsWindowChangedEvent
-  | StatsVisibilityChangeEvent
   | StatsFetchDoneEvent
   | StatsFetchFailedEvent;
+
+// Actors
+
+export interface FetchStatsInput {
+  requestId: string;
+  batch: StatsBatch;
+}
+
+const toFailureReason = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+/**
+ * Runs one request. The machine stops the actor when it no longer wants the result, which runs
+ * the cleanup and aborts the request. Nothing is sent after an abort, so an abort is never a failure.
+ */
+export const createFetchStatsActor = ({ client }: { client: UnitStatsClient }) =>
+  fromCallback<StatsFetchDoneEvent | StatsFetchFailedEvent, FetchStatsInput>(
+    ({ input: { requestId, batch }, sendBack }) => {
+      const controller = new AbortController();
+
+      client
+        .fetchStats(
+          { components: batch.components, window: batch.window },
+          { signal: controller.signal }
+        )
+        .then((response) => {
+          if (controller.signal.aborted) return;
+          sendBack({ type: 'stats.fetch.done', requestId, response });
+        })
+        .catch((error: unknown) => {
+          if (controller.signal.aborted) return;
+          sendBack({ type: 'stats.fetch.failed', requestId, reason: toFailureReason(error) });
+        });
+
+      return () => controller.abort();
+    }
+  );
+
+/**
+ * Turns a change of the shared time state into an event. A view without a picker, such as the
+ * Map, passes an observable that never emits.
+ */
+export const createTimeUpdatesActor = ({ timeState$ }: { timeState$: Observable<unknown> }) =>
+  fromEventObservable(() =>
+    timeState$.pipe(map((): StatsWindowChangedEvent => ({ type: 'stats.windowChanged' })))
+  );
+
+// Machine
+
+export const statsManagerMachine = setup({
+  types: {
+    input: {} as StatsManagerInput,
+    context: {} as StatsManagerContext,
+    events: {} as StatsManagerEvent,
+  },
+  actors: {
+    fetchStats: getPlaceholderFor(createFetchStatsActor),
+    timeUpdates: getPlaceholderFor(createTimeUpdatesActor),
+  },
+  delays: {
+    batchDebounce: STATS_BATCH_DEBOUNCE_MS,
+    pollInterval: STATS_POLL_INTERVAL_MS,
+  },
+}).createMachine({
+  id: 'statsManager',
+  context: ({ input }) => ({
+    getWindow: input.getWindow,
+    components: { destination: {}, processor: {} },
+    requests: {},
+    requestSequence: 0,
+    consecutiveFailures: 0,
+  }),
+  invoke: { id: 'timeUpdates', src: 'timeUpdates' },
+  type: 'parallel',
+  states: {
+    // Joins registrations that arrive close together into one request.
+    batching: {
+      initial: 'idle',
+      states: {
+        idle: {},
+      },
+    },
+    // Refreshes on an interval, and stops after repeated failures until the user refreshes.
+    polling: {
+      initial: 'active',
+      states: {
+        active: {},
+      },
+    },
+  },
+});
