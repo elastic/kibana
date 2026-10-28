@@ -641,6 +641,49 @@ export const isolateSourceLine = (
   };
 };
 
+/** Condition of the placeholder rule {@link addTestRoutingToLine} creates. */
+export const TEST_ROUTING_CONDITION = 'true';
+
+/**
+ * Testing aid: routes one drawn line through a routing node with a single
+ * placeholder rule. A source line is first moved onto a pipeline of its own; a
+ * processing line is only routed when it is its pipeline's one destination.
+ * Returns `unit` unchanged when the line cannot be routed.
+ */
+export const addTestRoutingToLine = (
+  unit: Unit,
+  origin: UnitConnectionOrigin,
+  destinationId: string
+): Unit => {
+  let routable = unit;
+  let pipelineIndex: number;
+  if (origin.kind === GRAPH_ENDPOINT_KIND.source) {
+    const isolated = isolateSourceLine(unit, origin.id, destinationId);
+    if (!isolated) {
+      return unit;
+    }
+    routable = isolated.unit;
+    pipelineIndex = findPipelineIndex(routable, isolated.pipelineId);
+  } else {
+    pipelineIndex = findWirableProcessingPipelineIndex(unit, origin.ref);
+  }
+  const pipeline = routable.unit.pipelines[pipelineIndex];
+  if (
+    !pipeline ||
+    pipelineUsesRoutes(pipeline) ||
+    !isEqual(readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations), [destinationId])
+  ) {
+    return unit;
+  }
+  return writePipeline(
+    routable,
+    pipelineIndex,
+    withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), [
+      { when: TEST_ROUTING_CONDITION, destinations: [destinationId] },
+    ])
+  );
+};
+
 /**
  * Only pipeline processing can start a line. A route's branch targets belong to
  * its routing node, so its processing node does not add to them.

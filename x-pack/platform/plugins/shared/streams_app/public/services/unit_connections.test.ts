@@ -7,6 +7,7 @@
 
 import { createDefaultUnit, type Unit } from './unit_repository';
 import {
+  addTestRoutingToLine,
   canConnectSourceToDestination,
   canConnectToDestination,
   canDisconnectFromDestination,
@@ -1090,5 +1091,43 @@ describe('routing rule connections', () => {
       })
     ).toBe(routed);
     expect(canConnectRouteToTarget(routed, mainRule, pipelineTarget('main'))).toBe(false);
+  });
+});
+
+describe('addTestRoutingToLine', () => {
+  it('moves a shared source line onto a routing pipeline with one placeholder rule', () => {
+    const unit = unitWith([sharedPipeline()]);
+    const next = addTestRoutingToLine(unit, source('otlp-input'), 'es-logs');
+
+    expect(pipelineConfig(next, 'p-otlp-input-2')).toEqual([
+      { name: 'sources', value: ['otlp-input'] },
+      { name: 'routes', value: [{ when: 'true', destinations: ['es-logs'] }] },
+    ]);
+    expect(getUnitConnections(next, configuredSources, configuredDestinations)).toEqual(
+      expect.arrayContaining([
+        { sourceId: 'otlp-input', destinationId: 'es-logs', forwarding: 'route' },
+        { sourceId: 'otlp-input', destinationId: 'es-metrics', forwarding: 'direct' },
+        { sourceId: 'bulk-input', destinationId: 'es-logs', forwarding: 'direct' },
+        { sourceId: 'bulk-input', destinationId: 'es-metrics', forwarding: 'direct' },
+      ])
+    );
+  });
+
+  it("routes a processing line that is its pipeline's only destination", () => {
+    const unit = processedUnit(['es-logs']);
+    const next = addTestRoutingToLine(unit, processing('main'), 'es-logs');
+
+    expect(next.unit.pipelines.find(({ id }) => id === 'main')?.config).toEqual([
+      { name: 'sources', value: ['otlp-input'] },
+      { name: 'processors', value: ['tag'] },
+      { name: 'routes', value: [{ when: 'true', destinations: ['es-logs'] }] },
+    ]);
+  });
+
+  it('leaves lines it cannot route as they are', () => {
+    const fanOut = processedUnit(['es-logs', 'es-metrics']);
+
+    expect(addTestRoutingToLine(fanOut, processing('main'), 'es-logs')).toBe(fanOut);
+    expect(addTestRoutingToLine(fanOut, source('otlp-input'), 'es-traces')).toBe(fanOut);
   });
 });

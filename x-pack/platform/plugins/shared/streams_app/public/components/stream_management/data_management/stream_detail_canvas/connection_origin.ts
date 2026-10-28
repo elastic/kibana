@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 import {
+  addTestRoutingToLine,
   canMoveUnitConnection,
   connectRouteToTarget,
   connectToDestination,
@@ -102,6 +103,17 @@ const toUnitConnectionOrigin = (origin: ConnectionOrigin): UnitConnectionOrigin 
     case 'route':
       return undefined;
   }
+};
+
+/**
+ * Testing aid: routes a source or processing line through a routing node with
+ * one placeholder rule. Returns `unit` unchanged for other lines. TO BE REMOVED
+ */
+export const addTestRouting = (unit: Unit, origin: ConnectionOrigin, target: RouteTarget): Unit => {
+  const unitOrigin = toUnitConnectionOrigin(origin);
+  return unitOrigin && target.kind === 'destination'
+    ? addTestRoutingToLine(unit, unitOrigin, target.id)
+    : unit;
 };
 
 export const canConnectOrigin = (

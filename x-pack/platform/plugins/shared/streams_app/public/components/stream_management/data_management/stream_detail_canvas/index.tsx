@@ -113,6 +113,7 @@ import {
   removeComponentFromPipelines,
 } from '../../../../services/unit_connections';
 import {
+  addTestRouting,
   canConnectOrigin,
   canMoveOriginConnection,
   connectOrigin,
@@ -198,6 +199,7 @@ function StreamsCanvasInner() {
     saveUnit,
     changeUnitConnection,
     openProcessingFlyout,
+    closeRoutingFlyout,
   } = useCanvasEvents();
   const unitDefinition = useCanvasUnitDefinition();
   const hasUnsavedChanges = useCanvasHasUnsavedChanges();
@@ -582,6 +584,31 @@ function StreamsCanvasInner() {
     [changeUnitConnection, readConnectionOrigin, readConnectionTarget, record, unitDefinition]
   );
 
+  // Testing aid for the routing flyout: unset when the line cannot be routed. TO BE REMOVED
+  const createTestRouting = useMemo(() => {
+    const edge = routingFlyout ? graph.edges.find(({ id }) => id === routingFlyout) : undefined;
+    const origin = edge ? readConnectionOrigin(edge.source, edge.sourceHandle) : undefined;
+    const target = edge ? readConnectionTarget(edge.target) : undefined;
+    const next = origin && target ? addTestRouting(unitDefinition, origin, target) : unitDefinition;
+    if (next === unitDefinition) {
+      return undefined;
+    }
+    return () => {
+      record();
+      changeUnitConnection(next);
+      closeRoutingFlyout();
+    };
+  }, [
+    changeUnitConnection,
+    closeRoutingFlyout,
+    graph.edges,
+    readConnectionOrigin,
+    readConnectionTarget,
+    record,
+    routingFlyout,
+    unitDefinition,
+  ]);
+
   const onNodesDelete = useCallback<OnNodesDelete<ClassicCanvasNode>>(
     (deletedNodes) => {
       const removedSourceIds: string[] = [];
@@ -858,7 +885,9 @@ function StreamsCanvasInner() {
               onClose={closeCreateDestinationModal}
             />
           )}
-          {routingFlyout && mode === 'routing' ? <RoutingFlyout edge={routingFlyout} /> : null}
+          {routingFlyout && mode === 'routing' ? (
+            <RoutingFlyout edge={routingFlyout} onCreateTestRouting={createTestRouting} />
+          ) : null}
           {processingFlyout ? (
             <ProcessingFlyout key={processingFlyout.ref.sessionId} flyout={processingFlyout} />
           ) : null}
