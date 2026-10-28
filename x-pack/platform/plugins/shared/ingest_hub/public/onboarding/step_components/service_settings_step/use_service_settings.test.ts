@@ -175,31 +175,63 @@ describe('useServiceSettings — namespace', () => {
     } as unknown as ReturnType<typeof useOnboardingFlow>);
   });
 
-  it('persists the namespace alongside the instance vars', () => {
+  it('persists the namespace of a duplicate alongside its instance vars', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
-    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
-    expect(result.current.getServiceVars('svc_a').namespace).toBe('prod');
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', filledVars, ['svc_a']));
+    act(() =>
+      result.current.setServiceFieldsAndInputs('svc_a__dup-1', filledVars, ['svc_a'], 'prod')
+    );
+    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('prod');
   });
 
   it('copies the source namespace onto a duplicate when none is given', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
-    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
-    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, []));
-    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('prod');
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, [], 'prod'));
+    act(() => result.current.addDuplicate('svc_a__dup-1', 'svc_a [Duplicate 2]', {}, []));
+    expect(result.current.getServiceVars('svc_a__dup-2').namespace).toBe('prod');
   });
 
   it('uses the namespace given for a duplicate over the source one', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
-    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
-    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, [], 'staging'));
-    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('staging');
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, [], 'prod'));
+    act(() =>
+      result.current.addDuplicate('svc_a__dup-1', 'svc_a [Duplicate 2]', {}, [], 'staging')
+    );
+    expect(result.current.getServiceVars('svc_a__dup-2').namespace).toBe('staging');
   });
 
-  it('marks an instance incomplete when its namespace is invalid', () => {
+  it('renames an instance in the same update when a new name is given', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.addDuplicate('svc_a', 'aws-1-staging [Duplicate]', {}, [], 'staging'));
+    act(() =>
+      result.current.setServiceFieldsAndInputs(
+        'svc_a__dup-1',
+        filledVars,
+        ['svc_a'],
+        'qa',
+        'aws-1-qa [Duplicate]'
+      )
+    );
+    expect(result.current.instances.find((i) => i.instanceId === 'svc_a__dup-1')?.name).toBe(
+      'aws-1-qa [Duplicate]'
+    );
+    expect(result.current.getServiceVars('svc_a__dup-1').namespace).toBe('qa');
+  });
+
+  it('never keeps a namespace on an original, which follows the global one', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'prod'));
+    expect(result.current.getServiceVars('svc_a').namespace).toBeUndefined();
+  });
+
+  it('marks a duplicate incomplete when its namespace is invalid', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
-    act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], 'Prod'));
-    expect(result.current.incompleteInstanceIds.has('svc_a')).toBe(true);
+    act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', filledVars, ['svc_a']));
+    act(() =>
+      result.current.setServiceFieldsAndInputs('svc_a__dup-1', filledVars, ['svc_a'], 'Prod')
+    );
+    expect(result.current.incompleteInstanceIds.has('svc_a__dup-1')).toBe(true);
     expect(result.current.isReady).toBe(false);
   });
 
@@ -210,6 +242,29 @@ describe('useServiceSettings — namespace', () => {
     act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], ''));
     expect(result.current.incompleteInstances).toHaveLength(0);
     expect(result.current.isReady).toBe(true);
+  });
+
+  describe('global namespace', () => {
+    it('starts empty and stores the namespace that is set', () => {
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      expect(result.current.namespace).toBe('');
+      act(() => result.current.setNamespace('prod'));
+      expect(result.current.namespace).toBe('prod');
+      expect(result.current.namespaceError).toBeUndefined();
+    });
+
+    it('is not ready with an invalid global namespace', () => {
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      act(() => result.current.setGlobalRegion('us-east-1'));
+      act(() => result.current.setIntegrationName('my-aws'));
+      act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a']));
+      expect(result.current.isReady).toBe(true);
+
+      act(() => result.current.setNamespace('Prod'));
+
+      expect(result.current.namespaceError).toBeDefined();
+      expect(result.current.isReady).toBe(false);
+    });
   });
 });
 
@@ -982,6 +1037,17 @@ describe('useServiceSettings — integration name and description', () => {
         description: 'Production',
       });
       expect(onContinue).toHaveBeenCalled();
+    });
+
+    it('leaves the namespace to the deploy, so a change is still detected as drift', async () => {
+      withDeployment('dep-1');
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      act(() => result.current.setNamespace('prod'));
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment.mock.calls[0][1]).not.toHaveProperty('namespace');
     });
 
     it('writes nothing before the first deploy has created the record', async () => {

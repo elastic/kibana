@@ -175,7 +175,9 @@ export const DiscoverSessionSaveModalContainer = ({
               })
             : undefined;
 
-          services.locator.navigate({
+          // Close the modal only once the URL points at the saved session, since a reload of the
+          // draft URL after local tabs are stored for the new session would open a default tab.
+          await services.locator.navigate({
             savedSearchId: response.discoverSession.id,
             ...(response?.nextSelectedTabId ? { tab: { id: response.nextSelectedTabId } } : {}),
             ...(profileState ? { profileState } : {}),

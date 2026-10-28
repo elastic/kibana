@@ -237,6 +237,7 @@ function emitTokenCountEvent(
   let inputTokenCount = 0;
   let outputTokenCount = 0;
   let cachedTokenCount: number | undefined;
+  let cacheWriteTokenCount: number | undefined;
   // Response from BedRock Invoke API
   if (isMessageStopChunk(chunk)) {
     inputTokenCount = chunk['amazon-bedrock-invocationMetrics'].inputTokenCount;
@@ -253,6 +254,7 @@ function emitTokenCountEvent(
     inputTokenCount = inputTokens + (cacheReadInputTokens ?? 0) + (cacheWriteInputTokens ?? 0);
     outputTokenCount = outputTokens;
     cachedTokenCount = cacheReadInputTokens;
+    cacheWriteTokenCount = cacheWriteInputTokens;
   }
 
   subscriber.next({
@@ -262,6 +264,7 @@ function emitTokenCountEvent(
       prompt: inputTokenCount,
       total: inputTokenCount + outputTokenCount,
       ...(cachedTokenCount !== undefined ? { cached: cachedTokenCount } : {}),
+      ...(cacheWriteTokenCount !== undefined ? { cacheWrite: cacheWriteTokenCount } : {}),
     },
     ...(model ? { model } : {}),
   });

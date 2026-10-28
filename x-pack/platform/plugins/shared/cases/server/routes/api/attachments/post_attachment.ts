@@ -15,7 +15,11 @@ import {
 } from '../../../../common/types/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import { createZodRouteValidation, getAttachmentRequestType } from '../utils';
+import {
+  createZodRouteValidation,
+  getAttachmentRequestType,
+  throwIfFileAttachment,
+} from '../utils';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { pickCreatedOrExistingAttachment } from '../../../client/attachments/add';
 import { toUnifiedAttachment } from '../../../services/attachments/operations/utils';
@@ -43,6 +47,8 @@ export const postAttachmentRoute = createCasesRoute<
   },
   handler: async ({ context, request, response, incrementAttachmentTypeCounters }) => {
     try {
+      throwIfFileAttachment(request.body);
+
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
