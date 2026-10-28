@@ -22,6 +22,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Document } from 'yaml';
 import { type ChangeHistoryCompareMode } from '@kbn/change-history-ui';
 import { monaco } from '@kbn/code-editor';
+import { getWorkflowValidationDisplayOptions } from '@kbn/workflows-ui';
 import { validationResultsFingerprint, type YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   applyValidationHighlightsToEditor,
@@ -166,11 +167,7 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
 
   const syncValidationDisplay = useCallback(
     (highlight: boolean) => {
-      // Read-only editors hide validation squiggles and hovers unless explicitly enabled.
-      const displayOptions = {
-        renderValidationDecorations: highlight ? 'on' : 'off',
-        hover: { enabled: highlight ? 'on' : 'off' },
-      } as const;
+      const displayOptions = getWorkflowValidationDisplayOptions(highlight);
 
       if (editorRef.current) {
         editorRef.current.updateOptions(displayOptions);

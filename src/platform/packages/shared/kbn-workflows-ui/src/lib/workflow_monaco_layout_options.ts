@@ -36,3 +36,11 @@ export const WORKFLOW_MONACO_LAYOUT_OPTIONS: monaco.editor.IStandaloneEditorCons
     bottom: 16,
   },
 };
+
+/** Read-only editors need explicit squiggle + hover options; Monaco defaults hide them when readOnly. */
+export const getWorkflowValidationDisplayOptions = (
+  highlightValidationErrors: boolean
+): monaco.editor.IEditorOptions => ({
+  renderValidationDecorations: highlightValidationErrors ? 'on' : 'off',
+  hover: { enabled: highlightValidationErrors ? 'on' : 'off' },
+});
