@@ -13,6 +13,7 @@
 const fs = require('fs');
 const path = require('path');
 const v8 = require('node:v8');
+const { walkMainArenaHeap } = require('./malloc_arena_walk');
 
 const MIB_PER_KIB = 1 / 1024;
 const SIXTY_FOUR_MIB = 64 * 1024 * 1024;
@@ -179,6 +180,14 @@ const buildSummary = ({ status, memoryUsage, heapStatistics, heapCodeStatistics 
 
 const resolveSide = (cwd) => (/[\\/]baseline([\\/]|$)/.test(cwd) ? 'baseline' : 'target');
 
+const walkMainArenaSafely = () => {
+  try {
+    return walkMainArenaHeap();
+  } catch (error) {
+    return { ok: false, reason: `error: ${error.message}` };
+  }
+};
+
 const collectRssBreakdown = (label) => {
   const statusText = fs.readFileSync('/proc/self/status', 'utf8');
   const status = {
@@ -211,6 +220,7 @@ const collectRssBreakdown = (label) => {
     smaps,
     threadsByName: countThreadsByName(),
     activeResources: countActiveResources(),
+    mainArena: walkMainArenaSafely(),
   };
 };
 

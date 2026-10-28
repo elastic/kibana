@@ -86,13 +86,10 @@ if compgen -G "${KBN_BENCH_RSS_BREAKDOWN_DIR}/*.json" > /dev/null; then
   buildkite-agent artifact upload "target/rss_breakdown/*.json" || echo "Warning: failed to upload RSS breakdown"
   for f in "${KBN_BENCH_RSS_BREAKDOWN_DIR}"/*.json; do
     echo "RSSDIAG $(basename "$f")"
-    jq -c '{
+    jq -cM '{
       label,
-      cwd,
-      nodeOptions,
-      mallocArenaMax,
-      ldPreload,
       summary,
+      mainArena,
       heapSpacesPhysicalMiB: (.heapSpaces | map_values((.physical_space_size / 1048576 * 10 | round) / 10)),
       executableAnonRssMiB: ((.smaps.totals.executableAnonRssKib / 1024 * 10 | round) / 10),
       topGroups: [.smaps.groups[:14][] | {category, mappings, rssMiB}],
