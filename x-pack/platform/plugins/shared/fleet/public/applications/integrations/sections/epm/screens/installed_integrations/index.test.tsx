@@ -138,6 +138,14 @@ describe('InstalledIntegrationsPage', () => {
     expect(screen.queryByTestId('instancesPanel')).not.toBeInTheDocument();
   });
 
+  it('still opens the instances, named after the package, when the package cannot be read', () => {
+    mockUseViewInstances.mockReturnValue({ selectedPackageViewInstances: 'aws_bedrock' });
+    mockUseGetPackageInfo.mockReturnValue({ data: undefined, isError: true });
+    render();
+
+    expect(screen.getByTestId('instancesPanel')).toHaveTextContent('aws_bedrock (2)');
+  });
+
   it('opens no panel without a selected package', () => {
     render();
 

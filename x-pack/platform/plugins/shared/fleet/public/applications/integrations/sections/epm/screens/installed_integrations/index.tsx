@@ -81,18 +81,32 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
   // A link from outside, like Finish in the AWS onboarding flow, can name a package that is not on
   // the current page of the table: read its title and icon from the package itself. The instances
   // come from the full list either way.
-  const { data: instancesPackageInfo } = useGetPackageInfoByKeyQuery(
-    selectedPackageViewInstances ?? '',
-    undefined,
-    undefined,
-    { enabled: !!selectedPackageViewInstances && !instancesItemOnPage }
-  );
+  const { data: instancesPackageInfo, isError: isInstancesPackageInfoError } =
+    useGetPackageInfoByKeyQuery(selectedPackageViewInstances ?? '', undefined, undefined, {
+      enabled: !!selectedPackageViewInstances && !instancesItemOnPage,
+    });
   const instancesSelectedItem: PanelPackage | undefined = useMemo(() => {
     if (instancesItemOnPage) return instancesItemOnPage;
+    if (!selectedPackageViewInstances) return;
     const item = instancesPackageInfo?.item;
-    if (!selectedPackageViewInstances || item?.name !== selectedPackageViewInstances) return;
-    return { name: item.name, title: item.title, version: item.version, icons: item.icons };
-  }, [instancesItemOnPage, instancesPackageInfo, selectedPackageViewInstances]);
+    if (item?.name === selectedPackageViewInstances) {
+      return { name: item.name, title: item.title, version: item.version, icons: item.icons };
+    }
+    // The package info is only for the title: without it, still show the instances, named after
+    // the package (its icon falls back to a logo for the package name, or a generic icon).
+    if (isInstancesPackageInfoError) {
+      return {
+        name: selectedPackageViewInstances,
+        title: selectedPackageViewInstances,
+        version: '',
+      };
+    }
+  }, [
+    instancesItemOnPage,
+    instancesPackageInfo,
+    isInstancesPackageInfoError,
+    selectedPackageViewInstances,
+  ]);
 
   const instanceCounts = useMemo(
     () =>
