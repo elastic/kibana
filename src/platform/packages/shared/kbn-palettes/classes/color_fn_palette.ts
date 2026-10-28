@@ -8,15 +8,11 @@
  */
 
 import type { Optional } from 'utility-types';
-import { EUI_VIS_COLOR_STORE } from '@elastic/eui';
-import { LRUCache } from 'lru-cache';
 import type { KbnBasePaletteConfig } from './palette';
 import { KbnBasePalette } from './palette';
 import type { IKbnPalette, KbnPaletteType } from './types';
 
 const DEFAULT_COLOR_COUNT = 10;
-// Palettes are long-lived singletons and requested counts can be data-dependent, so bound the cache
-const MAX_CACHED_COLOR_COUNTS = 16;
 
 export interface KbnColorFnPaletteConfig extends Optional<KbnBasePaletteConfig, 'colorCount'> {
   type: KbnPaletteType;
@@ -34,10 +30,6 @@ export class KbnColorFnPalette extends KbnBasePalette implements IKbnPalette {
 
   #colorFn: (n: number) => string[];
   #defaultNumberOfColors: number;
-  // Generated colors per requested count; EUI palette functions read the current theme's vis colors,
-  // so the cache is only valid for the vis colors it was built with
-  #colorsByCount = new LRUCache<number, string[]>({ max: MAX_CACHED_COLOR_COUNTS });
-  #cachedVisColors = EUI_VIS_COLOR_STORE.visColors;
 
   constructor({
     type,
@@ -54,26 +46,7 @@ export class KbnColorFnPalette extends KbnBasePalette implements IKbnPalette {
     this.#defaultNumberOfColors = defaultNumberOfColors ?? colorCount;
   }
 
-  #cachedColors(n: number = this.#defaultNumberOfColors): string[] {
-    const count = n === undefined ? n : Math.max(1, n);
-    if (this.#cachedVisColors !== EUI_VIS_COLOR_STORE.visColors) {
-      this.#cachedVisColors = EUI_VIS_COLOR_STORE.visColors;
-      this.#colorsByCount.clear();
-    }
-    let colors = this.#colorsByCount.get(count);
-    if (!colors) {
-      colors = this.#colorFn(count);
-      this.#colorsByCount.set(count, colors);
-    }
-    return colors;
-  }
-
-  // Copy so callers can't mutate the cached colors
-  public colors = (n?: number) => [...this.#cachedColors(n)];
-
-  // Hot path (one call per chart series): read from the cache without copying
-  public getColor = (colorIndex: number, numberOfColors?: number) => {
-    const colors = this.#cachedColors(numberOfColors);
-    return colors[colorIndex % colors.length];
+  public colors = (n: number = this.#defaultNumberOfColors) => {
+    return this.#colorFn(n === undefined ? n : Math.max(1, n));
   };
 }

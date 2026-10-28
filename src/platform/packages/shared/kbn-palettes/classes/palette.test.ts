@@ -82,7 +82,6 @@ describe('KbnColorFnPalette', () => {
     const { palette } = createColorFnPalette(5);
     palette.colors().reverse();
     expect(palette.colors()[0]).toBe('#c5-0');
-    expect(palette.getColor(0)).toBe('#c5-0');
   });
 });
 
@@ -104,52 +103,5 @@ describe('elasticPalette', () => {
     const after = elasticPalette.getColor(0);
     expect(after).not.toBe(before);
     expect(after).toBe(euiPaletteColorBlind({ rotations: 3 })[0]);
-  });
-});
-
-describe('KbnColorFnPalette color reuse', () => {
-  const originalVisColors = EUI_VIS_COLOR_STORE.visColors;
-  afterEach(() => EUI_VIS_COLOR_STORE.setVisColors(originalVisColors));
-
-  it('does not regenerate colors on subsequent getColor calls', () => {
-    const { palette, colorFn } = createColorFnPalette(5);
-    for (let i = 0; i < 100; i++) {
-      palette.getColor(i);
-    }
-    expect(colorFn).toHaveBeenCalledTimes(1);
-  });
-
-  it('generates colors once per requested number of colors', () => {
-    const { palette, colorFn } = createColorFnPalette(5);
-    palette.getColor(0, 5);
-    palette.getColor(0, 7);
-    palette.getColor(1, 5);
-    palette.getColor(1, 7);
-    expect(colorFn).toHaveBeenCalledTimes(2);
-  });
-
-  it('keeps a bounded number of color counts, evicting the least recently used', () => {
-    const { palette, colorFn } = createColorFnPalette(5);
-    for (let n = 1; n <= 100; n++) {
-      palette.getColor(0, n);
-      palette.getColor(0, 1); // keep count 1 recently used
-    }
-    colorFn.mockClear();
-
-    palette.getColor(0, 1);
-    palette.getColor(0, 100);
-    expect(colorFn).not.toHaveBeenCalled();
-
-    palette.getColor(0, 2);
-    expect(colorFn).toHaveBeenCalledTimes(1);
-  });
-
-  it('regenerates colors after EUI vis colors change', () => {
-    const { palette, colorFn } = createColorFnPalette(5);
-    palette.getColor(0);
-    EUI_VIS_COLOR_STORE.setVisColors({ ...originalVisColors, euiColorVis0: '#123456' });
-    palette.getColor(0);
-    palette.getColor(1);
-    expect(colorFn).toHaveBeenCalledTimes(2);
   });
 });
