@@ -8,7 +8,7 @@ import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { RawRule, IntervalSchedule } from '../../../../types';
+import type { RawRule, IntervalSchedule, RuleTypeParams } from '../../../../types';
 import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -22,7 +22,7 @@ import {
   scheduleTask,
   bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
-import { validateRuleTypeParams, authorizeRuleTypeParams } from '../../../../lib';
+import { authorizeRuleTypeParams } from '../../../../lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
@@ -117,12 +117,13 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   // Re-authorize the persisted params against the acting user's privileges before
   // activating them. A disabled rule's params may have been written through a path
   // that stores them without running the rule type's authorizer (for example Saved
-  // Objects import), so create/update authorization cannot be assumed here.
-  const validatedRuleTypeParams = validateRuleTypeParams(
-    attributes.params,
-    ruleType.validate.params
-  );
-  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+  // Objects import), so create/update authorization cannot be assumed here. These
+  // params come straight off the saved object, the post-reference-extraction form
+  // (e.g. a data view's index), so the authorizer only inspects specific fields
+  // (e.g. responseActions) rather than requiring a schema-valid object. Endpoint
+  // response actions are only ever read from `params.responseActions` by the rule
+  // executors.
+  await authorizeRuleTypeParams(attributes.params as RuleTypeParams, ruleType.authorize?.params, {
     request: context.request,
   });
 

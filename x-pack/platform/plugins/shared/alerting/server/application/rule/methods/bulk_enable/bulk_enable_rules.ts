@@ -24,13 +24,9 @@ import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import type { RawRule } from '../../../../types';
+import type { RawRule, RuleTypeParams } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
-import {
-  convertRuleIdsToKueryNode,
-  validateRuleTypeParams,
-  authorizeRuleTypeParams,
-} from '../../../../lib';
+import { convertRuleIdsToKueryNode, authorizeRuleTypeParams } from '../../../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   retryIfBulkOperationConflicts,
@@ -231,14 +227,15 @@ const bulkEnableRulesWithOCC = async (
             // before activating them. A disabled rule's params may have been written
             // through a path that stores them without running the rule type's
             // authorizer (for example Saved Objects import), so create/update
-            // authorization cannot be assumed here.
-            const validatedRuleTypeParams = validateRuleTypeParams(
-              rule.attributes.params,
-              ruleType.validate.params
+            // authorization cannot be assumed here. These params come straight off
+            // the saved object, the post-reference-extraction form (e.g. a data
+            // view's index), so the authorizer only inspects specific fields (e.g.
+            // responseActions) rather than requiring a schema-valid object.
+            await authorizeRuleTypeParams(
+              rule.attributes.params as RuleTypeParams,
+              ruleType.authorize?.params,
+              { request: context.request }
             );
-            await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
-              request: context.request,
-            });
 
             if (scheduleValidationError) {
               throw Error(scheduleValidationError);
