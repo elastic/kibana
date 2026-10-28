@@ -12,6 +12,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { runBackfillTask, scheduleAlertEntityIdBackfill } from '.';
 import {
   BackfillRequestFailedError,
+  buildBackfillQuery,
+  buildUnstampedAlertsQuery,
   cancelBackfill,
   countPendingAlerts,
   pollBackfill,
@@ -57,7 +59,6 @@ interface SpaceFixture {
   spaceId: string;
   /** What the Entity Analytics toggle has done to the risk score maintainer here. */
   riskScoring?: 'started' | 'stopped' | 'never_started';
-  range?: { start: string; end: string };
 }
 
 const reportEventMock = jest.fn();
@@ -71,9 +72,9 @@ const createCoreStart = (spaces: SpaceFixture[]) =>
       createInternalRepository: () => ({
         find: jest.fn().mockResolvedValue({
           total: spaces.length,
-          saved_objects: spaces.map(({ spaceId, range = { start: 'now-30d', end: 'now' } }) => ({
+          saved_objects: spaces.map(({ spaceId }) => ({
             namespaces: [spaceId],
-            attributes: { range },
+            attributes: {},
           })),
         }),
       }),
@@ -859,26 +860,40 @@ describe('runBackfillTask', () => {
       jest.useRealTimers();
     });
 
-    it('resolves the configured range to absolute timestamps', async () => {
+    it('resolves the last 60 days to absolute timestamps', async () => {
       // Stored absolute: left as date math the window would slide forward as the backfill ran,
       // and one full pass over it would never mean anything.
-      const result = await runTask([
-        { spaceId: 'default', range: { start: 'now-10d', end: 'now' } },
-      ]);
+      const result = await runTask([{ spaceId: 'default' }]);
 
       expect(stateOf(result).spaces.default.window).toEqual({
-        start: '2026-09-28T00:00:00.000Z',
+        start: '2026-08-09T00:00:00.000Z',
         end: '2026-10-08T00:00:00.000Z',
       });
     });
 
-    it('clamps a range reaching further back than the maximum lookback', async () => {
-      // `configuration.range` has no upper bound in the API, so a space could ask for a year.
-      const result = await runTask([
-        { spaceId: 'default', range: { start: 'now-1y', end: 'now' } },
-      ]);
+    it('keeps the window stored by an earlier run instead of resolving a new one', async () => {
+      // The window is pinned when the space starts. Recomputing it on a later run would slide it
+      // forward and change which alerts the reissued requests match.
+      const window = { start: '2026-08-01T00:00:00.000Z', end: '2026-09-15T00:00:00.000Z' };
+      const state = {
+        spaces: {
+          default: {
+            window,
+            done: false,
+            failures: 0,
+            conflictReissues: 0,
+            stamped: 500_000,
+          },
+        },
+        runs: 2,
+      };
 
-      expect(stateOf(result).spaces.default.window?.start).toBe('2026-09-08T00:00:00.000Z');
+      const result = await runTask([{ spaceId: 'default' }], state);
+
+      expect(stateOf(result).spaces.default.window).toEqual(window);
+      expect(startBackfillMock).toHaveBeenCalledTimes(1);
+      expect(buildBackfillQuery).toHaveBeenCalledWith(window, expect.anything());
+      expect(buildUnstampedAlertsQuery).toHaveBeenCalledWith(window);
     });
   });
 

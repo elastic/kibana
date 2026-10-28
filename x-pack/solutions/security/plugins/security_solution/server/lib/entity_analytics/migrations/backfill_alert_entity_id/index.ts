@@ -17,7 +17,6 @@ import type { Range } from '../../../../../common/entity_analytics/risk_engine';
 import { RISK_SCORE_MAINTAINER_ID } from '../../../../../common/entity_analytics/risk_score/constants';
 import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import { riskEngineConfigurationTypeName } from '../../risk_engine/saved_object';
-import { convertRangeToISO } from '../../risk_score/tasks/helpers';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 import { ALERT_ENTITY_ID_BACKFILL_COMPLETED_EVENT } from '../../../telemetry/event_based/events/entity_analytics';
 import {
@@ -30,7 +29,7 @@ import {
   RUN_INTERVAL_MS,
   TARGET_ALERTS_PER_SECOND,
   LOGGER_NAME,
-  MAX_LOOKBACK_MS,
+  BACKFILL_LOOKBACK_MS,
   TASK_ID,
   TASK_SCOPE,
   TASK_TIMEOUT,
@@ -56,11 +55,8 @@ import {
   type SpaceProgress,
 } from './state';
 
-const DEFAULT_RANGE: Range = { start: 'now-30d', end: 'now' };
-
 interface ConfiguredSpace {
   spaceId: string;
-  range: Range;
 }
 
 /**
@@ -82,7 +78,7 @@ const nextPollDelayMs = ({ total, updated }: BackfillProgress): number => {
 };
 
 /**
- * Every space with a risk engine configuration, each with the scoring window it specifies.
+ * Every space with a risk engine configuration.
  *
  * A candidate list only — nothing is filtered here. Whether risk scoring actually runs in a space
  * is decided by {@link advanceSpace} when that space takes its turn, because the maintainer status
@@ -111,36 +107,26 @@ const findSpacesRiskEngineConfig = async (
     if (spaceId === undefined) {
       return [];
     }
-    return [{ spaceId, range: savedObject.attributes.range ?? DEFAULT_RANGE }];
+    return [{ spaceId }];
   });
 };
 
 /**
- * Resolves the configured risk engine range to absolute timestamps and clamps its start to `maxLookback`.
+ * Resolves the backfill window to absolute timestamps: the last `lookbackMs` up to `now`.
  *
  * Absolute because the result is stored and reused for the whole of a space's backfill. Left as
- * date math, `now-30d` would resolve afresh on every request,.
- *
- * `configuration.range` has no upper bound in the API, so the clamp keeps the amount of data a
- * backfill touches predictable regardless of how a space is configured.
+ * date math, `now-60d` would resolve afresh on every request.
  */
 const resolveBackfillWindow = ({
-  range,
-  maxLookbackMs,
+  lookbackMs,
   now,
 }: {
-  range: Range;
-  maxLookbackMs: number;
+  lookbackMs: number;
   now: number;
-}): Range => {
-  const absolute = convertRangeToISO(range);
-  const earliest = new Date(now - maxLookbackMs).toISOString();
-
-  return {
-    start: absolute.start < earliest ? earliest : absolute.start,
-    end: absolute.end,
-  };
-};
+}): Range => ({
+  start: new Date(now - lookbackMs).toISOString(),
+  end: new Date(now).toISOString(),
+});
 
 /**
  * Decides what one space needs next and does it: start its update-by-query, or report on the one
@@ -502,7 +488,7 @@ export const runBackfillTask = async ({
   const queue = first ? [first, ...pending.filter((space) => space !== first)] : pending;
   let nextPollMs = RUN_INTERVAL_MS;
 
-  for (const { spaceId, range } of queue) {
+  for (const { spaceId } of queue) {
     if (signal.aborted) {
       break;
     }
@@ -512,7 +498,7 @@ export const runBackfillTask = async ({
     // begins rather than whenever this task first ran.
     const window =
       progress.window ??
-      resolveBackfillWindow({ range, maxLookbackMs: MAX_LOOKBACK_MS, now: startedAt });
+      resolveBackfillWindow({ lookbackMs: BACKFILL_LOOKBACK_MS, now: startedAt });
 
     try {
       const advanced = await advanceSpace({
