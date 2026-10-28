@@ -147,6 +147,8 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     registerSkills(agentBuilder, {
       logger: agentBuilderLogger,
       getRulesClient: ({ request }) => resolveRequestScoped(getInjection(), request, RulesClient),
+      getActionPolicyClient: ({ request }) =>
+        resolveRequestScoped(getInjection(), request, ActionPolicyClient),
       getPrivilegeChecker: ({ request }) =>
         resolveRequestScoped(getInjection(), request, PrivilegeChecker),
       getWorkflowClient: (request) => workflowsManagementApi.getClient(request),
