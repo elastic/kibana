@@ -15,6 +15,7 @@ import {
   shouldLogStateDiff,
 } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
+import { isDashboardSection } from '../../common';
 import { deserializeLayout } from './layout_manager/deserialize_layout';
 import { getLayoutChanges } from './layout_manager/get_layout_changes';
 import { diffApproximationState } from './approximation_manager';
@@ -36,6 +37,43 @@ const getBaselineLayout = (baseline: DashboardState) => {
   return baselineLayout;
 };
 
+// Panel configs keep their identity until the panel changes, so a compare result is reused while
+// the child, the baseline config and the current config are the same objects.
+const NO_CHILD = {};
+const panelCompareCache = new WeakMap<object, WeakMap<object, WeakMap<object, boolean>>>();
+
+const getCachedPanelChange = (
+  child: object | undefined,
+  baselineConfig: object | undefined,
+  currentConfig: object | undefined,
+  compare: () => boolean
+) => {
+  if (!baselineConfig || !currentConfig || shouldLogStateDiff()) return compare();
+  const childKey = child ?? NO_CHILD;
+  const byBaseline = panelCompareCache.get(childKey) ?? new WeakMap();
+  panelCompareCache.set(childKey, byBaseline);
+  const byCurrent = byBaseline.get(baselineConfig) ?? new WeakMap();
+  byBaseline.set(baselineConfig, byCurrent);
+  const cached = byCurrent.get(currentConfig);
+  if (cached !== undefined) return cached;
+  const isChanged = compare();
+  byCurrent.set(currentConfig, isChanged);
+  return isChanged;
+};
+
+// deserializeLayout copies each panel config, so read the original objects for the cache.
+const getPanelConfigs = ({ panels, pinned_panels: pinnedPanels }: DashboardState) => {
+  const configs: { [id: string]: object | undefined } = {};
+  const addPanel = ({ id, config }: { id?: string; config?: object }) => {
+    if (id) configs[id] = config;
+  };
+  panels?.forEach((widget) =>
+    isDashboardSection(widget) ? widget.panels.forEach(addPanel) : addPanel(widget)
+  );
+  pinnedPanels?.forEach(addPanel);
+  return configs;
+};
+
 const diffLayout = (
   baseline: DashboardState,
   current: DashboardState,
@@ -43,6 +81,7 @@ const diffLayout = (
 ): Partial<Pick<DashboardState, 'panels' | 'pinned_panels'>> => {
   const baselineLayout = getBaselineLayout(baseline);
   const currentLayout = deserializeLayout(current.panels, current.pinned_panels);
+  const currentConfigs = getPanelConfigs(current);
 
   const getPanelType = ({ layout }: typeof baselineLayout, panelId: string) =>
     (layout.panels[panelId] ?? layout.pinnedPanels[panelId])?.type;
@@ -55,13 +94,20 @@ const diffLayout = (
     // live panel comparators skip ref_id since it is fixed for a loaded panel
     if (getRefId(baselinePanel) !== getRefId(currentPanel)) return true;
     const child = children?.[panelId];
-    return apiComparesSerializedState(child) && apiHasType(child) && child.type === currentType
-      ? !child.compareSerializedState(
-          baselinePanel,
-          currentPanel,
-          (key) => `panel: ${panelId}, key: ${key}`
-        )
-      : !deepEqual(baselinePanel, currentPanel);
+    const compare = () =>
+      apiComparesSerializedState(child) && apiHasType(child) && child.type === currentType
+        ? !child.compareSerializedState(
+            baselinePanel,
+            currentPanel,
+            (key) => `panel: ${panelId}, key: ${key}`
+          )
+        : !deepEqual(baselinePanel, currentPanel);
+    return getCachedPanelChange(
+      typeof child === 'object' && child !== null ? child : undefined,
+      baselinePanel,
+      currentConfigs[panelId],
+      compare
+    );
   };
 
   const { hasPanelChanges, hasPinnedPanelChanges } = getLayoutChanges(
