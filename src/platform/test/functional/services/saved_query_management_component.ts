@@ -110,8 +110,7 @@ export class SavedQueryManagementComponentService extends FtrService {
     await this.testSubjects.click(`~load-saved-query-${title}-button`);
     await this.retry.waitFor('delete saved query', async () => {
       await this.testSubjects.click(`delete-saved-query-button`);
-      const exists = await this.testSubjects.exists('confirmModalTitleText');
-      return exists === true;
+      return await this.testSubjects.waitForExists('confirmModalTitleText', { timeout: 2000 });
     });
     await this.common.clickConfirmOnModal();
   }
@@ -131,7 +130,16 @@ export class SavedQueryManagementComponentService extends FtrService {
     includeTimeFilter: boolean
   ) {
     if (title) {
-      await this.testSubjects.setValue('saveQueryFormTitle', title);
+      // Re-type until the value lands: the popover's focus trap can swallow keystrokes sent to `activeElement()`.
+      await this.retry.try(async () => {
+        await this.testSubjects.setValue('saveQueryFormTitle', title, { clearWithKeyboard: true });
+        const currentTitle = await this.testSubjects.getAttribute('saveQueryFormTitle', 'value');
+        if (currentTitle !== title) {
+          throw new Error(
+            `Failed to set saved query title to ${title}, instead it is ${currentTitle}`
+          );
+        }
+      });
     }
 
     const currentIncludeFiltersValue =
@@ -161,7 +169,7 @@ export class SavedQueryManagementComponentService extends FtrService {
   async savedQueryExist(title: string) {
     await this.openSavedQueryManagementComponent();
     await this.testSubjects.click('saved-query-management-load-button');
-    const exists = await this.testSubjects.exists(`~load-saved-query-${title}-button`);
+    const exists = await this.testSubjects.waitForExists(`~load-saved-query-${title}-button`);
     await this.closeSavedQueryManagementComponent();
     return exists;
   }
@@ -201,10 +209,13 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async openSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.exists('queryBarMenuPanel');
+    const isOpenAlready = await this.testSubjects.waitForExists('queryBarMenuPanel', {
+      timeout: 500,
+    });
     if (isOpenAlready) return;
 
     await this.testSubjects.click('showQueryBarMenu');
+    await this.testSubjects.existOrFail('queryBarMenuPanel');
   }
 
   async closeSavedQueryManagementComponent() {

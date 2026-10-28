@@ -108,4 +108,40 @@ describe('getTransformOut', () => {
 
     expect(result.title).toEqual('Attributes title');
   });
+
+  describe('BWC: by-ref panels missing their savedObjectRef reference', () => {
+    // See https://github.com/elastic/kibana/issues/285475
+
+    it('returns ref_id from legacy savedObjectId when no savedObjectRef reference exists', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const transformOut = getTransformOut(builder, transformDrilldownsOut, false);
+
+      const storedState: LensByValueSerializedState = {
+        // @ts-expect-error - testing legacy savedObjectId
+        savedObjectId: 'legacy-saved-object-id',
+      };
+
+      const result = transformOut(storedState, []) as { ref_id?: string };
+
+      expect(result.ref_id).toEqual('legacy-saved-object-id');
+    });
+
+    it('falls through to by-value when savedObjectId is present alongside attributes (hybrid state)', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const transformOut = getTransformOut(builder, transformDrilldownsOut, true);
+
+      const storedState: LensByValueSerializedState = {
+        // @ts-expect-error - testing legacy savedObjectId
+        savedObjectId: 'legacy-saved-object-id',
+        attributes: simpleMetricAttributes,
+        references: [],
+      };
+
+      // Should not throw and should not return the savedObjectId as ref_id —
+      // the embedded attributes take precedence for hybrid panels.
+      const result = transformOut(storedState, []) as { ref_id?: string };
+
+      expect(result.ref_id).toBeUndefined();
+    });
+  });
 });

@@ -1,8 +1,7 @@
 {
-  "sha1": "79103f8ce518f2fb2831c46ccacaa90ea9ddb943",
+  "sha1": "b6c5f0bdf92d9e7ef7f29f9079dc06be7363442c",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -211,7 +210,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 31,
-        "column": 7
+        "column": 12
       }
     },
     {
@@ -225,7 +224,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 38,
-        "column": 7
+        "column": 12
       }
     },
     {
@@ -239,7 +238,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 45,
-        "column": 7
+        "column": 12
       }
     },
     {
@@ -253,7 +252,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 52,
-        "column": 7
+        "column": 12
       }
     },
     {
@@ -267,7 +266,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
         "line": 59,
-        "column": 7
+        "column": 12
       }
     },
     {
@@ -280,8 +279,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 71,
+        "column": 12
       }
     },
     {
@@ -294,8 +293,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
-        "line": 77,
-        "column": 7
+        "line": 78,
+        "column": 12
       }
     },
     {
@@ -308,8 +307,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/global_search/test/scout/ui/tests/global_search_providers.spec.ts",
-        "line": 86,
-        "column": 7
+        "line": 88,
+        "column": 12
       }
     }
   ]

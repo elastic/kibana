@@ -19,6 +19,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
 
+  const expectListText = async (selector: string, expected: string) => {
+    await retry.try(async () => {
+      expect(await testSubjects.getVisibleText(selector)).to.be(expected);
+    });
+  };
+
   describe('Configure', function () {
     before(async () => {
       await cases.navigation.navigateToConfigurationPage();
@@ -48,7 +54,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Connectors', function () {
       it('defaults the connector to none correctly', async () => {
-        expect(await testSubjects.exists('dropdown-connector-no-connector-label')).to.be(true);
+        await testSubjects.existOrFail('dropdown-connector-no-connector-label', { timeout: 5000 });
       });
 
       it('opens and closes the connectors flyout correctly', async () => {
@@ -93,7 +99,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('custom-fields-list');
 
-        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary\nText');
+        await expectListText('custom-fields-list', 'Summary\nText');
       });
 
       it('edits a custom field', async () => {
@@ -111,7 +117,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('custom-fields-list');
 
-        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Summary!!!\nText');
+        await expectListText('custom-fields-list', 'Summary!!!\nText');
       });
 
       it('deletes a custom field', async () => {
@@ -144,7 +150,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('custom-fields-list');
 
-        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Count\nNumber');
+        await expectListText('custom-fields-list', 'Count\nNumber');
       });
 
       it('edits a number custom field', async () => {
@@ -163,7 +169,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('custom-fields-list');
 
-        expect(await testSubjects.getVisibleText('custom-fields-list')).to.be('Count!\nNumber');
+        await expectListText('custom-fields-list', 'Count!\nNumber');
       });
 
       it('deletes a number custom field', async () => {
@@ -229,7 +235,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           return await testSubjects.exists('templates-list');
         });
 
-        expect(await testSubjects.getVisibleText('templates-list')).to.be('Template name\ntag-t1');
+        await expectListText('templates-list', 'Template name\ntag-t1');
       });
 
       it('updates a template', async () => {
@@ -260,9 +266,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           return await testSubjects.exists('templates-list');
         });
 
-        expect(await testSubjects.getVisibleText('templates-list')).to.be(
-          'Updated template name!\ntag-t1'
-        );
+        await expectListText('templates-list', 'Updated template name!\ntag-t1');
       });
 
       it('deletes a template', async () => {

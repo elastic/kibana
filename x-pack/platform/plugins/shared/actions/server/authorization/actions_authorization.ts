@@ -7,7 +7,10 @@
 
 import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
+import { fromKueryExpression, nodeBuilder, type KueryNode } from '@kbn/es-query';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -16,6 +19,7 @@ import {
 export interface ConstructorOptions {
   request: KibanaRequest;
   authorization?: SecurityPluginSetup['authz'];
+  spaces?: SpacesServiceSetup;
 }
 
 const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz']) => string[]> = {
@@ -31,10 +35,12 @@ const operationAlias: Record<string, (authorization: SecurityPluginSetup['authz'
 export class ActionsAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginSetup['authz'];
+  private readonly spaces?: SpacesServiceSetup;
 
-  constructor({ request, authorization }: ConstructorOptions) {
+  constructor({ request, authorization, spaces }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
+    this.spaces = spaces;
   }
 
   public async ensureAuthorized({
@@ -63,5 +69,62 @@ export class ActionsAuthorization {
         );
       }
     }
+  }
+
+  public async getFindAuthorizationFilter({
+    namespaces,
+  }: {
+    namespaces?: Array<string | undefined>;
+  }): Promise<{ filter: KueryNode }> {
+    const spaces =
+      namespaces && namespaces.length > 0
+        ? namespaces.map((space) => (space === undefined ? DEFAULT_SPACE_ID : space))
+        : [this.spaces?.getSpaceId(this.request) ?? DEFAULT_SPACE_ID];
+
+    if (!this.authorization?.mode?.useRbacForRequest(this.request)) {
+      return { filter: this.buildFilterForAuthorizedNamespaces(spaces) };
+    }
+
+    const privilege = this.authorization.actions.savedObject.get(ACTION_SAVED_OBJECT_TYPE, 'get');
+
+    const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+    const { privileges, hasAllRequested } = await checkPrivileges.atSpaces(spaces, {
+      kibana: [privilege],
+    });
+
+    const authorizedSpaces = [
+      ...new Set(
+        privileges.kibana.flatMap((entry) =>
+          entry.authorized && entry.privilege === privilege && entry.resource
+            ? [entry.resource]
+            : []
+        )
+      ),
+    ];
+
+    const unauthorizedSpaces = spaces.filter((spaceId) => !authorizedSpaces.includes(spaceId));
+    if (unauthorizedSpaces.length > 0 || !hasAllRequested) {
+      throw Boom.forbidden(
+        `Unauthorized to get actions. Validate that you have permissions to access spaces: ${(unauthorizedSpaces.length >
+        0
+          ? unauthorizedSpaces
+          : spaces
+        ).join(', ')}.`
+      );
+    }
+
+    if (authorizedSpaces.length === 0) {
+      throw Boom.forbidden('Unauthorized to get actions.');
+    }
+
+    return { filter: this.buildFilterForAuthorizedNamespaces(authorizedSpaces) };
+  }
+
+  private buildFilterForAuthorizedNamespaces(spaces?: string[]): KueryNode {
+    if (!spaces || spaces.length === 0) {
+      return fromKueryExpression('*');
+    }
+
+    return nodeBuilder.or(spaces.map((spaceId) => nodeBuilder.is('kibana.space_ids', spaceId)));
   }
 }

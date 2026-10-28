@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIALIZE_SECURITY_SOLUTION_URL } from '@kbn/security-solution-plugin/common/api/initialization';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { getDiscoverESQLState } from './utils';
 import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
@@ -26,15 +28,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
   const queryBar = getService('queryBar');
   const retry = getService('retry');
+  const roleScopedSupertest = getService('roleScopedSupertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/237709
-  describe.skip('default State', () => {
+  describe('default State', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('platform_engineer');
-      // creates security data view if it does not exist
-      await PageObjects.common.navigateToApp('security', {
-        path: 'alerts',
+
+      // Create the "Security solution default" data view via the API and await it, so it is a
+      // confirmed precondition rather than the unawaited side effect of loading the Security app,
+      // which let Discover open before the data view committed and timed out the switcher (#237709).
+      const adminSupertest = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        useCookieHeader: true,
+        withInternalHeaders: true,
       });
+      await adminSupertest
+        .post(INITIALIZE_SECURITY_SOLUTION_URL)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .send({ flows: ['security-data-views'] })
+        .expect(200);
     });
 
     describe('ES|QL mode', () => {

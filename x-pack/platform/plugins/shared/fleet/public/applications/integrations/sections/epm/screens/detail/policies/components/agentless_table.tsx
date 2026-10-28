@@ -21,6 +21,8 @@ import type {
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../../../../../../../common/constants';
 import type { usePagination } from '../../../../../../hooks';
 import { useLink, sendGetAgents, useAuthz, useStartServices } from '../../../../../../hooks';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../../../../common/services';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../../../../common/services/version_specific_policies_utils';
 import {
   Loading,
   PackagePolicyActionsMenu,
@@ -61,16 +63,21 @@ export const AgentlessPackagePoliciesTable = ({
   const [agentsByPolicyId, setAgentsByPolicyId] = useState<Record<string, Agent>>({});
   const canReadAgents = authz.fleet.readAgents;
 
-  // Kuery for all agents enrolled into the agent policies associated with the package policies
-  // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies
-  // Maximum # of agent policies is 50, based on the max page size in UI
+  // Kuery for all agents enrolled into the agent policies associated with the package policies.
+  // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies.
+  // Maximum # of agent policies is 50, based on the max page size in UI.
+  // Uses policy_base_id (with policy_id fallback) so that agents on version-specific variants
+  // of these policies are included.
   const agentsKuery = useMemo(() => {
-    return packagePolicies
-      .reduce((policyIds, { agentPolicies }) => {
-        return [...policyIds, ...(agentPolicies[0] ? [agentPolicies[0]?.id] : [])];
-      }, [] as string[])
-      .map((policyId) => `${AGENTS_PREFIX}.policy_id: "${policyId}"`)
-      .join(' or ');
+    const policyIds = packagePolicies.reduce<string[]>(
+      (ids, { agentPolicies: aps }) => (aps[0] ? [...ids, aps[0].id] : ids),
+      []
+    );
+    return buildPolicyBaseIdsWithFallbackKuery(
+      policyIds,
+      `${AGENTS_PREFIX}.policy_base_id`,
+      `${AGENTS_PREFIX}.policy_id`
+    );
   }, [packagePolicies]);
 
   // Fetch agents using above kuery, if the user has access to read agents
@@ -85,7 +92,9 @@ export const AgentlessPackagePoliciesTable = ({
       setAgentsByPolicyId(
         (agentsData?.items || []).reduce((acc, agent) => {
           if (agent.policy_id) {
-            acc[agent.policy_id] = agent;
+            // Key by the base policy id so the lookup at `agentsByPolicyId[agentPolicy.id]`
+            // resolves correctly for agents on version-specific variants.
+            acc[removeVersionSuffixFromPolicyId(agent.policy_id)] = agent;
           }
           return acc;
         }, {} as Record<string, Agent>)

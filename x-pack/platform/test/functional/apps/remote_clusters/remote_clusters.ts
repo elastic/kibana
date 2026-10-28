@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should add a remote cluster', async () => {
-      expect(await testSubjects.exists('remoteClusterDetailsFlyoutTitle')).to.be(true);
+      expect(await testSubjects.waitForExists('remoteClusterDetailsFlyoutTitle')).to.be(true);
       expect(await testSubjects.getVisibleText('remoteClusterDetailsFlyoutTitle')).to.be(
         REMOTE_CLUSTER_NAME
       );

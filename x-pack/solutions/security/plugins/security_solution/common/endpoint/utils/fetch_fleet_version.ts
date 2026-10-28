@@ -12,7 +12,7 @@
 import type { KbnClient } from '@kbn/test';
 import { AGENT_API_ROUTES } from '@kbn/fleet-plugin/common';
 import type { GetAvailableVersionsResponse } from '@kbn/fleet-plugin/common/types';
-import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../format_http_error';
 
 export const fetchFleetLatestAvailableAgentVersion = async (
   kbnClient: KbnClient
@@ -26,5 +26,5 @@ export const fetchFleetLatestAvailableAgentVersion = async (
       },
     })
     .then((response) => response.data.items[0])
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 };

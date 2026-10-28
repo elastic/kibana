@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { screen, render, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen, render, fireEvent } from '@testing-library/react';
 import { Priority } from './priority';
 
 describe('Priority', () => {
@@ -26,18 +25,16 @@ describe('Priority', () => {
     expect(screen.getByTestId('jsm-prioritySelect')).toBeInTheDocument();
   });
 
-  it('calls onChange when P1 is selected', async () => {
+  it('calls onChange when P1 is selected', () => {
     render(<Priority {...options} />);
 
-    await userEvent.selectOptions(screen.getByTestId('jsm-prioritySelect'), 'P1');
+    fireEvent.change(screen.getByTestId('jsm-prioritySelect'), { target: { value: 'P1' } });
 
-    await waitFor(() =>
-      expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          "priority",
-          "P1",
-        ]
-      `)
-    );
+    expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "priority",
+        "P1",
+      ]
+    `);
   });
 });

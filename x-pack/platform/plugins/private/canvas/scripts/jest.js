@@ -11,7 +11,7 @@ process.argv.push('--config', resolve(__dirname, '../jest.config.js'));
 console.log(`
 A helper proxying to the following command:
 
-  yarn jest --config x-pack/platform/plugins/private/canvas/jest.config.js
+  node scripts/jest --config x-pack/platform/plugins/private/canvas/jest.config.js
 `);
 
 if (process.env.NODE_ENV == null) {

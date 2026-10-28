@@ -23,6 +23,8 @@ export interface DiscoveredModel {
   };
 }
 
+const EXCLUDED_EIS_PROPERTIES = new Set(['efficient', 'ocr-only']);
+
 export const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
   if (!existsSync(EIS_MODELS_PATH)) {
     return [];
@@ -30,9 +32,10 @@ export const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
   try {
     const data = JSON.parse(readFileSync(EIS_MODELS_PATH, 'utf8'));
     const models: DiscoveredModel[] = data.models || [];
-    // 'efficient' is a heuristic property that indicates whether the model is efficient for reasoning and using tools
-    // we exclude models that are not efficient for reasoning and using tools from running in our test suite.
-    return models.filter((model) => !model.metadata?.heuristics?.properties?.includes('efficient'));
+    return models.filter(
+      (model) =>
+        !model.metadata?.heuristics?.properties?.some((p) => EXCLUDED_EIS_PROPERTIES.has(p))
+    );
   } catch {
     return [];
   }

@@ -355,7 +355,7 @@ export async function _packagePoliciesBulkUpgrade({
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   ids: string[];
-  options?: { user?: AuthenticatedUser; force?: boolean };
+  options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number };
   pkgVersion?: string;
 }): Promise<UpgradePackagePolicyResponse> {
   // Bulk upgrade packages policies
@@ -365,7 +365,10 @@ export async function _packagePoliciesBulkUpgrade({
   // 4. bulkUpdate policies
   return runWithCache(async () => {
     const result: UpgradePackagePolicyResponse = [];
-    for (const chunkedIds of chunk(MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, ids)) {
+    for (const chunkedIds of chunk(
+      options?.batchSize ?? MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+      ids
+    )) {
       const { packagePoliciesById, packagePolicies, packageVersionMap } =
         await getPackagePoliciesWithRelatedPackageVersionForUpgrade({
           soClient,

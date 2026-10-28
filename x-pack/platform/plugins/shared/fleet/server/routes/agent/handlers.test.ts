@@ -918,7 +918,7 @@ describe('Handlers', () => {
           mockResponse
         );
 
-        // With the flag off, otelDataStreams stays empty, so the gate never looks up the agent.
+        // With the flag off, manifestOtelDataStreams stays empty, so the gate never looks up the agent.
         expect(mockGetByIds).not.toHaveBeenCalled();
         expect(agentPolicyService.getByIds).not.toHaveBeenCalled();
         expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
@@ -1046,6 +1046,119 @@ describe('Handlers', () => {
         // The agent lookup went through fleetContext.agentClient, which runs its own authz
         // preflight, rather than a direct query against the hidden .fleet-agents index.
         expect(mockGetByIds).toHaveBeenCalledWith(['agent-1'], { ignoreMissing: true });
+      });
+    });
+
+    describe('identity-free gate for input-only OTel packages', () => {
+      const inputOtelPackageInfo = {
+        type: 'input',
+        name: 'aws_cloudwatch_input_otel',
+        version: '0.6.0',
+        policy_templates: [
+          {
+            name: 'aws.ec2',
+            title: 'AWS EC2 OpenTelemetry Metrics',
+            type: 'metrics',
+            input: 'otelcol',
+            template_path: 'input.yml.hbs',
+          },
+        ],
+      };
+
+      const agentlessPolicyWith = (packagePolicy: any) => [
+        {
+          id: 'policy-1',
+          namespace: 'default',
+          supports_agentless: true,
+          package_policies: [packagePolicy],
+        },
+      ];
+
+      const inputPackagePolicy = {
+        package: { name: 'aws_cloudwatch_input_otel', version: '0.6.0' },
+        namespace: 'production',
+        inputs: [
+          {
+            type: 'otelcol',
+            streams: [
+              {
+                data_stream: { type: 'metrics' },
+                vars: {
+                  'data_stream.dataset': { value: 'aws_cloudwatch_input_otel.aws.ec2' },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      beforeEach(() => {
+        (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+          enableOtelIntegrations: true,
+        });
+      });
+
+      it('derives the dataset from the package policy and queries the namespaced .otel pattern', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(inputOtelPackageInfo);
+        mockGetByIds.mockResolvedValue([{ id: 'agent-1', policy_id: 'policy-1' }]);
+        (agentPolicyService.getByIds as jest.Mock).mockResolvedValue(
+          agentlessPolicyWith(inputPackagePolicy)
+        );
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'aws_cloudwatch_input_otel',
+              pkgVersion: '0.6.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByAgentsId).not.toHaveBeenCalled();
+        expect(getIncomingDataByDataStreams).toHaveBeenCalledWith(
+          expect.objectContaining({
+            agentId: 'agent-1',
+            dataStreamPattern: 'metrics-aws_cloudwatch_input_otel.aws.ec2.otel-production',
+          })
+        );
+      });
+
+      it('does not open the gate for a non-OTel input package (no agent/policy lookups)', async () => {
+        (getPackageInfo as jest.Mock).mockResolvedValue({
+          type: 'input',
+          name: 'custom_logs',
+          version: '1.0.0',
+          policy_templates: [
+            {
+              name: 'logs',
+              title: 'Custom logs',
+              type: 'logs',
+              input: 'logfile',
+              template_path: 'input.yml.hbs',
+            },
+          ],
+        });
+
+        await getAgentDataHandler(
+          mockContext,
+          {
+            query: {
+              agentsIds: ['agent-1'],
+              pkgName: 'custom_logs',
+              pkgVersion: '1.0.0',
+              previewData: false,
+            },
+          } as any,
+          mockResponse
+        );
+
+        expect(getIncomingDataByDataStreams).not.toHaveBeenCalled();
+        expect(mockGetByIds).not.toHaveBeenCalled();
+        expect(getIncomingDataByAgentsId).toHaveBeenCalled();
       });
     });
   });

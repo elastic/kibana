@@ -60,7 +60,7 @@ export PATH=$HOME/chromium/depot_tools:$PATH
 mkdir ~/chromium && cd ~/chromium
 
 # Copy the scripts from the Kibana team's GCS bucket
-gsutil cp -r gs://headless_shell_staging/build_chromium .
+gcloud storage cp --recursive gs://headless_shell_staging/build_chromium .
 
 # Install the OS packages, configure the environment, download the chromium source (25GB)
 python3 ./build_chromium/init.py
@@ -117,14 +117,14 @@ $ export VM_NAME=pmuellr-rd-build-chromium-linux-20250918-203527
 $ export VM_PATH=/home/pmuellr/chromium/chromium/src/out/headless
 $ gcloud compute scp --zone "us-central1-a" --project "elastic-kibana-184716" $VM_NAME:$VM_PATH/chromium-"*" .
 ...
-$ gsutil cp chromium-* gs://headless_shell_staging
+$ gcloud storage cp chromium-* gs://headless_shell_staging
 ...
 ```
 
 When all the artifacts are in the staging bucket, you copy them all to the `headless_shell` bucket.
 
 ```sh
-gsutil cp gs://headless_shell_staging/chromium-67649b1-* gs://headless_shell/
+gcloud storage cp gs://headless_shell_staging/chromium-67649b1-* gs://headless_shell/
 ```
 
 IMPORTANT: Do not replace builds in the `headless_shell` bucket that are referenced in an active Kibana branch. CI tests on that branch will fail since the archive checksum no longer matches the original version.
@@ -164,11 +164,11 @@ $ nvm install 20.18.2
 $ nvm use 20.18.2
 ```
 
-From the branch on your local laptop, find the relevant ES build via  yarn es snapshot
+From the branch on your local laptop, find the relevant ES build via  pnpm es snapshot
 
 ```sh
-$ yarn es snapshot 
-yarn run v1.22.22
+$ pnpm es snapshot 
+pnpm run v1.22.22
 _ node scripts/es snapshot --license trial
  info Installing from snapshot
  info version: 9.1.0

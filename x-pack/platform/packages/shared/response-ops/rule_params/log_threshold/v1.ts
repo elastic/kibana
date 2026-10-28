@@ -60,7 +60,8 @@ const criterionSchema = schema.object(
 );
 
 const countCriteriaSchema = schema.arrayOf(criterionSchema);
-const ratioCriteriaSchema = schema.arrayOf(countCriteriaSchema);
+// Ratio rules require exactly two criterion groups (numerator and denominator).
+const ratioCriteriaSchema = schema.arrayOf(countCriteriaSchema, { minSize: 2, maxSize: 2 });
 
 const timeUnitSchema = schema.oneOf([
   schema.literal('s'),

@@ -944,6 +944,11 @@ Object {
       "required": false,
       "type": "date_range",
     },
+    "kibana.alert.tracked": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.updated_at": Object {
       "array": false,
       "required": false,
@@ -2105,6 +2110,11 @@ Object {
       "format": "epoch_millis||strict_date_optional_time",
       "required": false,
       "type": "date_range",
+    },
+    "kibana.alert.tracked": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.updated_at": Object {
       "array": false,
@@ -3396,6 +3406,11 @@ Object {
       "required": false,
       "type": "date_range",
     },
+    "kibana.alert.tracked": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.updated_at": Object {
       "array": false,
       "required": false,
@@ -4685,6 +4700,11 @@ Object {
       "format": "epoch_millis||strict_date_optional_time",
       "required": false,
       "type": "date_range",
+    },
+    "kibana.alert.tracked": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.updated_at": Object {
       "array": false,
@@ -5976,6 +5996,11 @@ Object {
       "required": false,
       "type": "date_range",
     },
+    "kibana.alert.tracked": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.updated_at": Object {
       "array": false,
       "required": false,
@@ -7265,6 +7290,11 @@ Object {
       "format": "epoch_millis||strict_date_optional_time",
       "required": false,
       "type": "date_range",
+    },
+    "kibana.alert.tracked": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.updated_at": Object {
       "array": false,
@@ -8562,6 +8592,11 @@ Object {
       "required": false,
       "type": "date_range",
     },
+    "kibana.alert.tracked": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.updated_at": Object {
       "array": false,
       "required": false,
@@ -9851,6 +9886,11 @@ Object {
       "format": "epoch_millis||strict_date_optional_time",
       "required": false,
       "type": "date_range",
+    },
+    "kibana.alert.tracked": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.updated_at": Object {
       "array": false,
@@ -11142,6 +11182,11 @@ Object {
       "required": false,
       "type": "date_range",
     },
+    "kibana.alert.tracked": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.updated_at": Object {
       "array": false,
       "required": false,
@@ -12020,6 +12065,11 @@ Object {
       "format": "epoch_millis||strict_date_optional_time",
       "required": false,
       "type": "date_range",
+    },
+    "kibana.alert.tracked": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.updated_at": Object {
       "array": false,
