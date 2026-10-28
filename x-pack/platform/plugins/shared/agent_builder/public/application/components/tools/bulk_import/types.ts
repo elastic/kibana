@@ -7,7 +7,7 @@
 
 export interface McpToolField {
   name: string;
-  description: string;
+  description?: string;
 }
 
 export interface BulkImportMcpToolsFormData {

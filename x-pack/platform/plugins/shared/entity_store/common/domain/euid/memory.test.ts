@@ -517,7 +517,6 @@ describe('definition type', () => {
       ...getBuiltInEntityDefinition('service'),
       type: 'k8s.pod',
       identityField: { singleField: 'k8s.pod.uid' },
-      fields: [],
     };
 
     const euid = getEuidFromObject(definition, { k8s: { pod: { uid: 'pod-1' } } });

@@ -111,8 +111,8 @@ dependsOn:
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/ui-callout'
   - '@kbn/alerting-v2-utils'
-  - '@kbn/alerting-v2-constants'
   - '@kbn/user-profile-components'
+  - '@kbn/alerting-v2-constants'
 tags:
   - plugin
   - prod
@@ -127,6 +127,4 @@ fileGroups:
     - common/**/*
     - config.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

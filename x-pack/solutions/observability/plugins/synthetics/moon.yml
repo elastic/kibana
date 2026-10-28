@@ -99,7 +99,6 @@ dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/dashboard-plugin'
   - '@kbn/search-types'
-  - '@kbn/slo-schema'
   - '@kbn/alerting-types'
   - '@kbn/swc-register'
   - '@kbn/slo-plugin'
@@ -143,6 +142,8 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/app-header'
   - '@kbn/app-menu'
+  - '@kbn/config'
+  - '@kbn/slo-constants'
 tags:
   - plugin
   - prod
@@ -157,9 +158,8 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
+    - test/agent_image/**/*
     - test/scout_synthetics_agent_e2e/**/*
     - test/scenarios/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

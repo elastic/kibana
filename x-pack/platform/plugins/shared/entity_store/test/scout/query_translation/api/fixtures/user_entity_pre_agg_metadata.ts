@@ -43,11 +43,11 @@ export function deriveUserEntityPreAggMetadata(hit: { _source?: unknown }): {
   if (identityEvaluations.length > 0) {
     Object.assign(doc, applyFieldEvaluations(doc, identityEvaluations));
   }
-  if (def.whenConditionTrueSetFieldsPreAgg?.length) {
-    applyWhenConditionTrueSetFields(doc, def.whenConditionTrueSetFieldsPreAgg);
+  if (def.extraction.whenConditionTrueSetFieldsPreAgg?.length) {
+    applyWhenConditionTrueSetFields(doc, def.extraction.whenConditionTrueSetFieldsPreAgg);
   }
-  if (def.whenConditionTrueSetFieldsAfterStats?.length) {
-    applyWhenConditionTrueSetFields(doc, def.whenConditionTrueSetFieldsAfterStats);
+  if (def.extraction.whenConditionTrueSetFieldsAfterStats?.length) {
+    applyWhenConditionTrueSetFields(doc, def.extraction.whenConditionTrueSetFieldsAfterStats);
   }
   return {
     namespace: doc['entity.namespace'] as string | undefined,

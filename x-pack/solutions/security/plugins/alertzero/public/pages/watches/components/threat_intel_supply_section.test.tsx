@@ -15,6 +15,7 @@ const baseStatus = (): HuntThreatIntelSupplyStatus => ({
   huntEnabled: true,
   drift: false,
   hardGate: { ok: true, reasonCodes: [] },
+  modelTiers: [],
   workflows: [
     {
       key: 'ingest',

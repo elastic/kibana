@@ -27,55 +27,55 @@ export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tu
 export const ALERTZERO_RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
 
 export const ALERTZERO_COVERAGE_REVIEW_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 5,
+  version: 7,
   yaml: COVERAGE_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_COVERAGE_WORKER_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 6,
   yaml: COVERAGE_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_RULE_PREVIEW_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  version: 4,
   yaml: RULE_PREVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_RULE_TUNING_WORKER_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 29,
+  version: 31,
   yaml: RULE_TUNING_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 32,
+  version: 34,
   yaml: RULE_TUNING_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const ALERTZERO_RULE_CREATION_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 5,
   yaml: RULE_CREATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;

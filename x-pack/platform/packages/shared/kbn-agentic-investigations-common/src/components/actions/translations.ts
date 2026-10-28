@@ -31,6 +31,9 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     close: i18n.translate('xpack.alertzero.baseActions.closeInvestigation', {
       defaultMessage: 'Close investigation',
     }),
+    reopen: i18n.translate('xpack.alertzero.baseActions.reopenInvestigation', {
+      defaultMessage: 'Open investigation',
+    }),
   },
   tooltips: {
     linkCopied: i18n.translate('xpack.alertzero.baseActions.tooltips.linkCopied', {
@@ -42,5 +45,19 @@ export const ACTIONS_TRANSLATIONS = Object.freeze({
     openInChat: i18n.translate('xpack.alertzero.baseActions.tooltips.openInChat', {
       defaultMessage: 'Open in chat',
     }),
+    proposalsAgentBuilderPrivilegeRequired: i18n.translate(
+      'xpack.alertzero.baseActions.tooltips.proposalsAgentBuilderPrivilegeRequired',
+      {
+        defaultMessage:
+          'You need the Agent Builder Kibana privilege to execute actions and view investigations or chats.',
+      }
+    ),
+    escalationsAgentBuilderPrivilegeRequired: i18n.translate(
+      'xpack.alertzero.baseActions.tooltips.escalationsAgentBuilderPrivilegeRequired',
+      {
+        defaultMessage:
+          'You need the Agent Builder Kibana privilege to view linked investigations.',
+      }
+    ),
   },
 });

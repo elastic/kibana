@@ -10,6 +10,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { BehaviorSubject } from 'rxjs';
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -36,6 +37,7 @@ const setup = ({
   contextEnabled = true,
   discoveryEnabled = true,
   analysisEnabled = true,
+  serverBasePath = '/kbn',
   spaceBasePath = '/s/analyst',
 } = {}) => {
   const core = coreMock.createStart();
@@ -54,7 +56,11 @@ const setup = ({
       ? analysisSetting
       : discoverySetting
   );
-  jest.spyOn(core.http.basePath, 'get').mockReturnValue(spaceBasePath);
+  // `serverBasePath` is a readonly string, so swap in a mock base path whose `get` carries the
+  // space prefix the way a real non-default space does.
+  const mockBasePath = httpServiceMock.createBasePath({ serverBasePath });
+  mockBasePath.get.mockReturnValue(spaceBasePath);
+  core.http.basePath = mockBasePath as unknown as typeof core.http.basePath;
   (core.http.get as jest.Mock).mockImplementation(async (path: string) =>
     path === '/internal/kibana/settings'
       ? {
@@ -270,7 +276,8 @@ describe('WorkerDependenciesCallout', () => {
     });
     expect(screen.getByTestId('alertZeroWorkerDependency-contextEngine')).toBeInTheDocument();
     expect(screen.getByTestId('alertZeroWorkerDependency-threatEnrich')).toBeInTheDocument();
-    expect(core.http.post).toHaveBeenCalledWith('/api/workflows/mget', {
+    expect(core.http.post).toHaveBeenCalledWith('/kbn/api/workflows/mget', {
+      prependBasePath: false,
       version: '2023-10-31',
       body: JSON.stringify({
         ids: THREAT_REPORT_WORKFLOWS.map(({ id }) => id),
@@ -299,12 +306,12 @@ describe('WorkerDependenciesCallout', () => {
     const unverified = screen.getByTestId('alertZeroWorkerDependency-threatEnrich');
     expect(within(unverified).getByRole('link', { name: /^Open Workflows/ })).toHaveAttribute(
       'href',
-      '/s/analyst/app/workflows'
+      '/kbn/app/workflows'
     );
     expect(within(unverified).queryByRole('button', { name: /^Enable/ })).toBeNull();
   });
 
-  it('enables each disabled global threat workflow with an enablement-only update', async () => {
+  it('enables each disabled threat workflow in the default space with an enablement-only update', async () => {
     const { core, renderCallouts } = setup();
     const [ingest, enrich] = THREAT_REPORT_WORKFLOWS;
     core.http.post
@@ -323,7 +330,8 @@ describe('WorkerDependenciesCallout', () => {
     renderCallouts([worker(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID)]);
     fireEvent.click(await screen.findByRole('button', { name: 'Enable Ingest threat feeds' }));
     await waitFor(() => {
-      expect(core.http.put).toHaveBeenCalledWith(`/api/workflows/workflow/${ingest.id}`, {
+      expect(core.http.put).toHaveBeenCalledWith(`/kbn/api/workflows/workflow/${ingest.id}`, {
+        prependBasePath: false,
         version: '2023-10-31',
         body: JSON.stringify({ enabled: true }),
       });
@@ -334,7 +342,8 @@ describe('WorkerDependenciesCallout', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: 'Enable Enrich threat report' }));
     await waitFor(() => {
-      expect(core.http.put).toHaveBeenCalledWith(`/api/workflows/workflow/${enrich.id}`, {
+      expect(core.http.put).toHaveBeenCalledWith(`/kbn/api/workflows/workflow/${enrich.id}`, {
+        prependBasePath: false,
         version: '2023-10-31',
         body: JSON.stringify({ enabled: true }),
       });
@@ -363,7 +372,7 @@ describe('WorkerDependenciesCallout', () => {
     // The per-workflow link returns as a fallback beside the retry-able Enable button.
     expect(within(item).getByRole('link', { name: /^Open workflow/ })).toHaveAttribute(
       'href',
-      `/s/analyst/app/workflows/${THREAT_REPORT_WORKFLOWS[0].id}`
+      `/kbn/app/workflows/${THREAT_REPORT_WORKFLOWS[0].id}`
     );
     expect(
       within(item).getByRole('button', { name: 'Enable Ingest threat feeds' })
@@ -387,6 +396,55 @@ describe('WorkerDependenciesCallout', () => {
     const item = await screen.findByTestId('alertZeroWorkerDependency-threatIngest');
     expect(within(item).queryByRole('button', { name: 'Enable Ingest threat feeds' })).toBeNull();
     expect(within(item).getByRole('link', { name: /^Open workflow/ })).toBeInTheDocument();
+  });
+
+  describe('from a non-default space', () => {
+    const renderHuntFromSpace = async () => {
+      const result = setup({ serverBasePath: '/kbn', spaceBasePath: '/kbn/s/foo' });
+      result.core.http.post.mockResolvedValue(
+        THREAT_REPORT_WORKFLOWS.map(({ id }) => ({ id, enabled: false }))
+      );
+      result.renderCallouts([worker(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID)]);
+      await screen.findByTestId('alertZeroWorkerDependency-threatIngest');
+      return result;
+    };
+
+    it('returns the workflows check against the server base path', async () => {
+      const { core } = await renderHuntFromSpace();
+
+      expect(core.http.post).toHaveBeenCalledWith(
+        '/kbn/api/workflows/mget',
+        expect.objectContaining({ prependBasePath: false })
+      );
+    });
+
+    it('returns the enable request against the server base path', async () => {
+      const { core } = await renderHuntFromSpace();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable Ingest threat feeds' }));
+
+      await waitFor(() => {
+        expect(core.http.put).toHaveBeenCalledWith(
+          `/kbn/api/workflows/workflow/${THREAT_REPORT_WORKFLOWS[0].id}`,
+          expect.objectContaining({ prependBasePath: false })
+        );
+      });
+    });
+
+    it('returns an Open workflow link without the space prefix', async () => {
+      const { core } = await renderHuntFromSpace();
+      core.http.put.mockRejectedValue(new Error('Forbidden'));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable Ingest threat feeds' }));
+
+      const item = screen.getByTestId('alertZeroWorkerDependency-threatIngest');
+      await waitFor(() => {
+        expect(within(item).getByRole('link', { name: /^Open workflow/ })).toHaveAttribute(
+          'href',
+          `/kbn/app/workflows/${THREAT_REPORT_WORKFLOWS[0].id}`
+        );
+      });
+    });
   });
 
   it('checks configured Defend policies, then retries a failed check', async () => {

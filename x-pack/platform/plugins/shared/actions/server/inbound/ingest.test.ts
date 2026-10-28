@@ -5,13 +5,21 @@
  * 2.0.
  */
 
+import { Socket } from 'node:net';
+
 import { errors } from '@elastic/elasticsearch';
 import type { DiagnosticResult, TransportResult } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { CLOUD_SERVICE_ACCOUNT_REALM_TYPE } from '@kbn/core-security-common';
+import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  isExternalUiamCredential,
+} from '@kbn/core-security-server';
 import { z } from '@kbn/zod/v4';
 import {
   buildEventId,
@@ -59,7 +67,7 @@ describe('ingestInboundEvent', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const getUnsecuredSavedObjectsClient = jest.fn().mockResolvedValue(unsecuredSavedObjectsClient);
   const emitConnectorEvents = jest
-    .fn<Promise<DispatchConnectorEventsResult>, []>()
+    .fn<Promise<DispatchConnectorEventsResult>, [ConnectorEventEmitParams]>()
     .mockResolvedValue({ ok: true });
   const storedApiKey = encodeApiKey('es-id', 'es-secret')!;
   const getDecryptedConnectorAttributes = jest.fn<Promise<RawAction>, [string, string]>();
@@ -71,7 +79,7 @@ describe('ingestInboundEvent', () => {
   const connectorId = 'connector-1';
   const credentialId = 'cred-1';
   const token = composeIngestToken(credentialId, 'ingest-token-value');
-  const spaceId = 'default';
+  const spaceId = DEFAULT_SPACE_ID;
   const ingestTokenHash = computeIngestTokenHash({
     connectorId,
     spaceId,
@@ -172,7 +180,7 @@ describe('ingestInboundEvent', () => {
     maxBodyBytes?: number;
     connectorTypeId?: string;
     connectorId?: string;
-    spaceId?: string;
+    spaceId?: SpaceId;
     query?: Record<string, unknown>;
     headers?: Record<string, string>;
     emit?: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
@@ -182,14 +190,24 @@ describe('ingestInboundEvent', () => {
     rateLimiter?: InboundEventRateLimiter;
   }) => {
     const response = httpServerMock.createResponseFactory();
+    const headers = overrides?.headers ?? {};
+    const query = overrides?.query ?? { token };
+    const body = { hello: 'world' };
+    const socket = new Socket();
+    if (!overrides?.omitRemoteAddress) {
+      const address = overrides?.remoteAddress ?? '203.0.113.4';
+      Object.defineProperty(socket, 'remoteAddress', { get: () => address });
+    }
     const result = await ingestInboundEvent({
       connectorTypeId: overrides?.connectorTypeId ?? 'myConnector',
       connectorId: overrides?.connectorId ?? connectorId,
       spaceId: overrides?.spaceId ?? spaceId,
-      requestId: 'req-1',
-      headers: overrides?.headers ?? {},
-      query: (overrides?.query ?? { token }) as { token?: string },
-      body: { hello: 'world' },
+      request: httpServerMock.createKibanaRequest({
+        headers,
+        query,
+        body,
+        socket,
+      }),
       inboundEventsEnabled: overrides?.enabled ?? true,
       isActionTypeEnabled: overrides?.isActionTypeEnabled ?? (() => true),
       maxEmitted: overrides?.maxEmitted ?? INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
@@ -201,9 +219,6 @@ describe('ingestInboundEvent', () => {
       getElasticsearchClient,
       getKibanaRequestAccess,
       inMemoryConnectors: overrides?.inMemoryConnectors ?? [],
-      remoteAddress: overrides?.omitRemoteAddress
-        ? undefined
-        : overrides?.remoteAddress ?? '203.0.113.4',
       rateLimiter: overrides?.rateLimiter ?? rateLimiter,
     });
     mapIngestResultToResponse(result, response);
@@ -339,6 +354,86 @@ describe('ingestInboundEvent', () => {
         }),
       })
     );
+  });
+
+  it('emits for an in-memory connector when a service-account bearer is accepted', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const authorization = 'Bearer essu_exchange';
+    const clientAuthentication = 'gateway-secret';
+    const eventId = buildEventId('.myConnector', 'received');
+    elasticsearchClient.asScoped().asCurrentUser.security.authenticate.mockResolvedValueOnce({
+      username: 'sa-id',
+      authentication_realm: {
+        name: CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
+        type: CLOUD_SERVICE_ACCOUNT_REALM_TYPE,
+      },
+    } as never);
+    const handleEvents = jest.fn().mockResolvedValue({
+      type: 'emit',
+      events: [{ eventId, correlationKey: 'corr-1', payload: { body: { hello: 'world' } } }],
+    });
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run({
+      query: {},
+      headers: {
+        authorization,
+        [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
+      },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(elasticsearchClient.asScoped).toHaveBeenCalledWith(
+      expect.objectContaining({ isFakeRequest: false })
+    );
+    expect(getDecryptedConnectorAttributes).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventId,
+        request: expect.objectContaining({
+          isFakeRequest: true,
+          headers: expect.objectContaining({
+            authorization,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
+          }),
+        }),
+      })
+    );
+    const emitted = emitConnectorEvents.mock.calls[0]?.[0];
+    if (!emitted) {
+      throw new Error('expected emitConnectorEvents to be called');
+    }
+    expect(isExternalUiamCredential(emitted.request)).toBe(false);
+  });
+
+  it('returns 404 and does not emit when the bearer is not a service account', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    elasticsearchClient.asScoped().asCurrentUser.security.authenticate.mockResolvedValueOnce({
+      username: 'user',
+      authentication_realm: { name: 'cloud', type: 'cloud' },
+    } as never);
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+
+    const { response: res } = await run({
+      query: {},
+      headers: {
+        authorization: 'Bearer essu_user',
+        [ES_CLIENT_AUTHENTICATION_HEADER]: 'gateway-secret',
+      },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+
+    expect(res.notFound).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expect(getKibanaRequestAccess).not.toHaveBeenCalled();
+    expectOutcome('debug', 'auth_fail');
   });
 
   it('returns 404 when Elasticsearch rejects the ApiKey', async () => {
@@ -608,11 +703,15 @@ describe('ingestInboundEvent', () => {
       createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
     );
 
+    const authenticate = elasticsearchClient.asScoped().asCurrentUser.security.authenticate;
     const { response: res } = await run({
       query: {},
       headers: { authorization: `Bearer ${token}` },
     });
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+    expect(authenticate).not.toHaveBeenCalled();
+    expect(getKibanaRequestAccess).not.toHaveBeenCalled();
+    expect(getDecryptedConnectorAttributes).toHaveBeenCalled();
     expect(emitConnectorEvents).toHaveBeenCalled();
   });
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import pMap from 'p-map';
-import { escapeQuotes } from '@kbn/es-query';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -42,7 +42,7 @@ const locationHasOutdatedMwAgent = async (
         showInactive: false,
         perPage: PER_PAGE,
         page,
-        kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
+        kuery: buildPolicyBaseIdWithFallbackKuery(agentPolicyId),
       });
     total = totalAgents ?? agents.length;
     fetched += agents.length;

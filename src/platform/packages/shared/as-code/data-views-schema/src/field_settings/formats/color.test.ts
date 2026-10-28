@@ -73,6 +73,39 @@ describe('formatSchema', () => {
       });
     });
 
+    it('accepts a numeral pattern for number field type', () => {
+      const result = formatSchema.safeParse({
+        type: 'color',
+        params: {
+          field_type: 'number',
+          pattern: '0,0.00',
+          colors: [
+            {
+              range: '0:100',
+              text: '#FFFFFF',
+              background: '#000000',
+            },
+          ],
+        },
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        type: 'color',
+        params: {
+          field_type: 'number',
+          pattern: '0,0.00',
+          colors: [
+            {
+              range: '0:100',
+              text: '#FFFFFF',
+              background: '#000000',
+            },
+          ],
+        },
+      });
+    });
+
     it('is valid for boolean field type', () => {
       const result = formatSchema.safeParse({
         type: 'color',

@@ -15,6 +15,6 @@ import { internals } from '../internals';
  */
 export class Lazy<T> extends Type<T> {
   constructor(id: string) {
-    super(internals.link(`#${id}`));
+    super(() => internals.link(`#${id}`));
   }
 }

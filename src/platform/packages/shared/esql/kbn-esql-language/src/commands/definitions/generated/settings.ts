@@ -11,6 +11,7 @@
 export enum EsqlSettingNames {
   APPROXIMATION = 'approximation',
   COLUMN_METADATA = 'column_metadata',
+  EXEMPLARS = 'exemplars',
   PROJECT_ROUTING = 'project_routing',
   TIME_ZONE = 'time_zone',
   UNMAPPED_FIELDS = 'unmapped_fields',
@@ -42,6 +43,19 @@ const columnMetadata = {
   ignoreAsSuggestion: false,
 };
 
+const exemplars = {
+  name: EsqlSettingNames.EXEMPLARS,
+  type: ['boolean', 'map_param'],
+  description:
+    'When enabled, the provided `TS ... | STATS` or `PROMQL` query is not executed. Instead, exemplars considered relevant to the query are returned based on heuristics that take the selected metrics and series into account.',
+  serverlessOnly: false,
+  preview: false,
+  snapshotOnly: true,
+  mapParams:
+    "{name='limit', values=[], description='Maximum number of exemplars to return. Without it the default limit of a regular query applies.', type=[integer]}",
+  ignoreAsSuggestion: true,
+};
+
 const projectRouting = {
   name: EsqlSettingNames.PROJECT_ROUTING,
   type: ['keyword'],
@@ -68,7 +82,7 @@ const unmappedFields = {
   name: EsqlSettingNames.UNMAPPED_FIELDS,
   type: ['keyword'],
   description:
-    "Determines how unmapped fields are treated.\nFor a conceptual overview and use cases, including performance considerations, refer to\n[Unmapped fields](https://www.elastic.co/docs/reference/query-languages/esql/esql-unmapped-fields).\n\nPossible values are:\n\n- `DEFAULT` : Standard ESQL queries fail when referencing unmapped fields.\n- `NULLIFY` : Treats referenced unmapped fields as null values. Fully unmapped fields that are never mentioned do not\n  appear in the output.\n- `LOAD` : Loads referenced fully unmapped fields from the stored\n  [`_source`](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-source-field) with type `keyword`. Or nullifies them if\n  absent from `_source`. Also loads partially mapped fields from `_source` where they are unmapped.\n\n\n[`PROMQL`](https://www.elastic.co/docs/reference/query-languages/esql/commands/promql) queries have their own specific semantics for unmapped fields.\n\nSpecial notes about the `LOAD` option:\n- [`PROMQL`](https://www.elastic.co/docs/reference/query-languages/esql/commands/promql) is not supported with `LOAD`.\n- Referencing subfields of `flattened` parents is not supported.\n- [Full-text search functions](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/search-functions) are supported,\n  although unmapped fields cannot be loaded without an explicit invocation of `to_text`.\n  \n  - Full-text search functions are not supported anywhere in the query. \n- Partially unmapped non-`keyword` fields can be used in expressions. If the field is mapped to a single type and there's an\n  available conversion from `keyword` to that type, the implicit conversion is applied. If there's no available conversion\n  (for example `text`, `aggregate_metric_double`, or `dense_vector`), and an explicit one has not been provided by the user,\n  values retain the mapped type but are `null` for rows from indices where the field is unmapped.\n  \n  - Partially unmapped non-`keyword` fields must be referenced inside a cast or conversion function (e.g. `::TYPE` or\n    `TO_TYPE`), unless referenced in `KEEP` or `DROP`. \n\nThe default itself is configurable. If a query does not specify a value, the\n`esql.query.settings.unmapped_fields` cluster setting supplies it. If that cluster setting is not configured\neither, the value is `DEFAULT`.\n\n",
+    "Determines how unmapped fields are treated.\nFor a conceptual overview and use cases, including performance considerations, refer to\n[Unmapped fields](https://www.elastic.co/docs/reference/query-languages/esql/esql-unmapped-fields).\n\nAn unmapped field is present in documents but not defined in the index mapping. Across the queried indices, a field is:\n\n- *fully unmapped* if none of the queried indices map it.\n- *partially mapped* (also called *partially unmapped*) if some of the queried indices map it and others don't.\n  In the indices that don't map it, its values are `null` unless they are loaded with `LOAD`.\n\nPossible values are:\n\n- `DEFAULT` : Standard ESQL queries fail when referencing fully unmapped fields.\n- `NULLIFY` : Treats referenced unmapped fields as null values. Fully unmapped fields that are never mentioned do not\n  appear in the output.\n- `LOAD` : Loads referenced fully unmapped fields from the stored\n  [`_source`](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-source-field) with type `keyword`. Or nullifies them if\n  absent from `_source`. Also loads partially mapped fields from `_source` in the indices where they are unmapped,\n  even if the query doesn't reference them.\n\n\n[`PROMQL`](https://www.elastic.co/docs/reference/query-languages/esql/commands/promql) queries have their own specific semantics for unmapped fields.\n\nSpecial notes about the `LOAD` option:\n- [`PROMQL`](https://www.elastic.co/docs/reference/query-languages/esql/commands/promql) is not supported with `LOAD`.\n- Referencing subfields of `flattened` parents is not supported.\n- [Full-text search functions](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/search-functions) are supported,\n  although unmapped fields cannot be loaded without an explicit invocation of `to_text`.\n  \n  - Full-text search functions are not supported anywhere in the query. \n- Partially unmapped non-`keyword` fields can be used in expressions. If the field is mapped to a single type and there's an\n  available conversion from `keyword` to that type, the implicit conversion is applied. If there's no available conversion\n  (for example `text`, `aggregate_metric_double`, or `dense_vector`), and an explicit one has not been provided by the user,\n  values retain the mapped type but are `null` for rows from indices where the field is unmapped.\n  \n  - Partially unmapped non-`keyword` fields must be referenced inside a cast or conversion function (e.g. `::TYPE` or\n    `TO_TYPE`), unless referenced in `KEEP` or `DROP`. \n\nThe default itself is configurable. If a query does not specify a value, the\n`esql.query.settings.unmapped_fields` cluster setting supplies it. If that cluster setting is not configured\neither, the value is `DEFAULT`.\n\n",
   serverlessOnly: false,
   preview: false,
   snapshotOnly: false,
@@ -100,6 +114,7 @@ const wildcardsMatchViews = {
 export const settings = [
   approximation,
   columnMetadata,
+  exemplars,
   projectRouting,
   timeZone,
   unmappedFields,

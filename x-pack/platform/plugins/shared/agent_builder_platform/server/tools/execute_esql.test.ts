@@ -9,6 +9,7 @@ import { platformCoreTools, ToolResultType } from '@kbn/agent-builder-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { executeEsqlTool } from './execute_esql';
+import { resolveToolSchema } from './test_utils';
 
 jest.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => {
   const actual = jest.requireActual('@kbn/agent-builder-genai-utils/tools/utils/esql');
@@ -58,6 +59,7 @@ describe('executeEsqlTool', () => {
         query: 'FROM logs | STATS c = COUNT(*)',
         time_range: { from: 'now-24h', to: 'now' },
         limit: 100,
+        include_frozen: false,
       },
       createHandlerContext() as any
     )) as ToolHandlerStandardReturn;
@@ -79,6 +81,7 @@ describe('executeEsqlTool', () => {
         query: 'PROMQL index=metrics step=1m load=(avg by (instance) (node_load1))',
         time_range: { from: 'now-24h', to: 'now' },
         limit: 100,
+        include_frozen: false,
       },
       createHandlerContext() as any
     )) as ToolHandlerStandardReturn;
@@ -93,7 +96,7 @@ describe('executeEsqlTool', () => {
   it('omits time_range from results when query has no placeholders and no explicit time_range', async () => {
     const tool = executeEsqlTool();
     const result = (await tool.handler(
-      { query: 'FROM logs | STATS c = COUNT(*)', limit: 100 },
+      { query: 'FROM logs | STATS c = COUNT(*)', limit: 100, include_frozen: false },
       createHandlerContext() as any
     )) as ToolHandlerStandardReturn;
 
@@ -112,6 +115,7 @@ describe('executeEsqlTool', () => {
           'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS c = COUNT(*)',
         time_range: timeRange,
         limit: 100,
+        include_frozen: false,
       },
       createHandlerContext() as any
     )) as ToolHandlerStandardReturn;
@@ -136,6 +140,7 @@ describe('executeEsqlTool', () => {
         query:
           'FROM logs | WHERE @timestamp >= "2026-07-06T20:00:00Z" AND @timestamp <= NOW() | LIMIT 1',
         limit: 100,
+        include_frozen: false,
       },
       createHandlerContext() as any
     )) as ToolHandlerStandardReturn;
@@ -146,22 +151,46 @@ describe('executeEsqlTool', () => {
   });
 
   describe('include_frozen', () => {
+    const getSchema = (includeFrozenByDefault: boolean) =>
+      resolveToolSchema(executeEsqlTool(), includeFrozenByDefault);
+
     it('excludes frozen tier indices by default', async () => {
+      const schema = await getSchema(false);
+
       await executeEsqlTool().handler(
-        { query: 'FROM logs', limit: 100 },
+        schema.parse({ query: 'FROM logs' }),
         createHandlerContext() as any
       );
 
       expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: false });
     });
 
-    it('includes frozen tier indices when opted in', async () => {
+    it('includes frozen tier indices by default when the space setting is enabled', async () => {
+      const schema = await getSchema(true);
+
       await executeEsqlTool().handler(
-        { query: 'FROM logs', limit: 100, include_frozen: true },
+        schema.parse({ query: 'FROM logs' }),
         createHandlerContext() as any
       );
 
       expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: true });
+    });
+
+    it('lets the agent override the default', async () => {
+      const schema = await getSchema(true);
+
+      await executeEsqlTool().handler(
+        schema.parse({ query: 'FROM logs', include_frozen: false }),
+        createHandlerContext() as any
+      );
+
+      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: false });
+    });
+
+    it('reuses the same schema instance for a given default', async () => {
+      expect(await getSchema(true)).toBe(await getSchema(true));
+      expect(await getSchema(false)).toBe(await getSchema(false));
+      expect(await getSchema(true)).not.toBe(await getSchema(false));
     });
 
     it('describes how to opt in to the frozen tier', () => {
@@ -174,7 +203,10 @@ describe('executeEsqlTool', () => {
       const tool = executeEsqlTool();
       const filter = { term: { status: 'open' } };
 
-      await tool.handler({ query: 'FROM logs', limit: 100, filter }, createHandlerContext() as any);
+      await tool.handler(
+        { query: 'FROM logs', limit: 100, include_frozen: false, filter },
+        createHandlerContext() as any
+      );
 
       expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ filter });
     });
@@ -182,7 +214,10 @@ describe('executeEsqlTool', () => {
     it('passes no filter when the caller omits one', async () => {
       const tool = executeEsqlTool();
 
-      await tool.handler({ query: 'FROM logs', limit: 100 }, createHandlerContext() as any);
+      await tool.handler(
+        { query: 'FROM logs', limit: 100, include_frozen: false },
+        createHandlerContext() as any
+      );
 
       expect(executeEsqlMock.mock.calls[0][0].filter).toBeUndefined();
     });
@@ -196,6 +231,7 @@ describe('executeEsqlTool', () => {
           query: 'FROM logs | WHERE host == ?host',
           params: { host: 'server-1' },
           limit: 100,
+          include_frozen: false,
           filter,
         },
         createHandlerContext() as any
@@ -210,18 +246,19 @@ describe('executeEsqlTool', () => {
       expect((query?.data as { esql: string }).esql).not.toContain('range');
     });
 
-    it('accepts a verbose filter that stays under the size limit', () => {
+    it('accepts a verbose filter that stays under the size limit', async () => {
       const filter = {
         bool: {
           should: Array.from({ length: 500 }, (_, i) => ({ term: { host: `server-${i}` } })),
           minimum_should_match: 1,
         },
       };
+      const schema = await resolveToolSchema(executeEsqlTool(), false);
 
-      expect(executeEsqlTool().schema.safeParse({ query: 'FROM logs', filter }).success).toBe(true);
+      expect(schema.safeParse({ query: 'FROM logs', filter }).success).toBe(true);
     });
 
-    it('rejects a filter that exceeds the size limit once serialized', () => {
+    it('rejects a filter that exceeds the size limit once serialized', async () => {
       const filter = {
         bool: {
           should: Array.from({ length: 5000 }, (_, i) => ({ term: { host: `server-${i}` } })),
@@ -230,7 +267,8 @@ describe('executeEsqlTool', () => {
       };
       expect(JSON.stringify(filter).length).toBeGreaterThan(100_000);
 
-      const result = executeEsqlTool().schema.safeParse({ query: 'FROM logs', filter });
+      const schema = await resolveToolSchema(executeEsqlTool(), false);
+      const result = schema.safeParse({ query: 'FROM logs', filter });
 
       expect(result.success).toBe(false);
       expect(result.error?.issues[0].message).toContain('at most 100000 characters');
@@ -242,7 +280,7 @@ describe('executeEsqlTool', () => {
 
       await expect(
         tool.handler(
-          { query: 'FROM logs', limit: 100, filter: { nope: {} } },
+          { query: 'FROM logs', limit: 100, include_frozen: false, filter: { nope: {} } },
           createHandlerContext() as any
         )
       ).rejects.toThrow('parsing_exception');

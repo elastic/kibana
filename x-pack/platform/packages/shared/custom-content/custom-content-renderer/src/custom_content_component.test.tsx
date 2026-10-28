@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useCustomContentHtml } from './use_custom_content_html';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { CustomContentComponent } from './custom_content_component';
 import type { CustomContentRendererServices } from './types';
 
@@ -65,15 +66,41 @@ describe('CustomContentComponent', () => {
     expect(onLoadingChange).toHaveBeenCalledWith(true);
   });
 
-  it('renders the template in a fully sandboxed iframe', () => {
+  it('sandboxes the iframe so that only user-initiated top navigation is allowed', () => {
     const { container } = render(<CustomContentComponent {...defaultProps} />);
 
     const iframe = container.querySelector('iframe');
     expect(iframe).not.toBeNull();
-    expect(iframe!.getAttribute('sandbox')).toBe('');
+    expect(iframe!.getAttribute('sandbox')).toBe('allow-top-navigation-by-user-activation');
   });
 
-  it('sandboxes the preview iframe too', () => {
+  it('blocks all navigation from the iframe in a non-interactive view', () => {
+    const { container } = render(
+      <CustomContentComponent {...defaultProps} isInteractive={false} />
+    );
+
+    expect(container.querySelector('iframe')!.getAttribute('sandbox')).toBe('');
+  });
+
+  it('passes the interactive flag to the HTML hook', () => {
+    render(<CustomContentComponent {...defaultProps} isInteractive={false} />);
+
+    expect(mockUseCustomContentHtml).toHaveBeenCalledWith(
+      expect.objectContaining({ isInteractive: false })
+    );
+  });
+
+  it('passes the request adapter to the HTML hook', () => {
+    const requestAdapter = new RequestAdapter();
+
+    render(<CustomContentComponent {...defaultProps} requestAdapter={requestAdapter} />);
+
+    expect(mockUseCustomContentHtml).toHaveBeenCalledWith(
+      expect.objectContaining({ requestAdapter })
+    );
+  });
+
+  it('keeps the preview iframe fully sandboxed so a click cannot navigate away from the editor', () => {
     mockUseCustomContentHtml.mockReturnValue({
       html: '',
       isLoading: false,

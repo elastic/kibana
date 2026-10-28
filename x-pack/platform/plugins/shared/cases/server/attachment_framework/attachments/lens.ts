@@ -8,7 +8,7 @@
 import {
   LensAttachmentPayloadSchema,
   LensSavedObjectAttachmentPayloadSchema,
-} from '../../../common/types/domain_zod/attachment/lens/v2';
+} from '../../../common/types/domain/attachment/lens/v2';
 import type { UnifiedAttachmentTypeSetup } from '../types';
 import { LENS_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 

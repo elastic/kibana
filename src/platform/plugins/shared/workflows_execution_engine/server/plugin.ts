@@ -22,6 +22,7 @@ import type {
 import {
   ExecutionStatus,
   isTerminalStatus,
+  isWorkflowStepTriggered,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
 } from '@kbn/workflows';
@@ -58,6 +59,10 @@ import {
 import { getAuthenticatedUser } from './lib/get_user';
 import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
+import {
+  bulkScheduleRunTasksOrMarkFailed,
+  scheduleRunTaskOrMarkFailed,
+} from './lib/schedule_workflow_run_task';
 import {
   failExecutionMissingIdentity,
   markScheduledExecutionFailedAfterTaskError,
@@ -278,7 +283,8 @@ export class WorkflowsExecutionEnginePlugin
     initializeTriggerEventsDataStream(core.dataStreams);
 
     this.dataClientBundle = createDataClientBundle({
-      source: 'system_index',
+      source: config.storage.source,
+      dataRetention: config.storage.dataRetention,
       logger: this.logger,
     });
     void this.dataClientBundle.initSetup(core);
@@ -329,6 +335,7 @@ export class WorkflowsExecutionEnginePlugin
               const queueDelayMs = scheduledAt ? now - scheduledAt : null;
 
               const { default: apm } = await import('elastic-apm-node');
+
               const currentTransaction = apm.currentTransaction;
               if (currentTransaction) {
                 if (queueDelayMs !== null) {
@@ -1330,7 +1337,7 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
       originalRequest: KibanaRequest,
-      options: { refresh: boolean | 'wait_for' } = { refresh: false }
+      options: { refresh: boolean | 'wait_for'; authenticatedUser?: string } = { refresh: false }
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
@@ -1356,11 +1363,9 @@ export class WorkflowsExecutionEnginePlugin
         await ensureInheritedBindingCurrent(coreStart, inheritedIdentity, spaceId);
       }
 
-      const authenticatedUser = await getAuthenticatedUser(
-        request,
-        coreStart.security,
-        coreStart.elasticsearch.client
-      );
+      const authenticatedUser =
+        options.authenticatedUser ??
+        (await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client));
 
       const workflowExecution = await buildExecutionDocument({
         workflow,
@@ -1422,6 +1427,12 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
+    const scheduleDeps = {
+      taskManager: plugins.taskManager,
+      workflowExecutionRepository,
+      logger: this.logger,
+    };
+
     const executeWorkflow: ExecuteWorkflow = async (workflow, context, originalRequest) => {
       const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
@@ -1435,7 +1446,7 @@ export class WorkflowsExecutionEnginePlugin
       // Child executions (triggered by a workflow step) must always be scheduled in their own task,
       // never run inline in the parent's task. Otherwise the parent's runtime is blocked until the
       // child becomes idle, and cancel/timeout on the parent cannot take effect until then.
-      const isChildExecution = (context.triggeredBy as string | undefined) === 'workflow-step';
+      const isChildExecution = isWorkflowStepTriggered(context.triggeredBy as string | undefined);
 
       if (!isRunningInTaskManager && !request) {
         throw new Error('Workflows cannot be executed without the user context');
@@ -1527,10 +1538,7 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await plugins.taskManager.schedule(taskInstance, {
-          request: request as KibanaRequest,
-          cloneApiKey: true,
-        });
+        await scheduleRunTaskOrMarkFailed(scheduleDeps, taskInstance, request as KibanaRequest);
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
             isChildExecution ? ' (child execution)' : ''
@@ -1543,7 +1551,12 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    const scheduleWorkflow: ScheduleWorkflow = async (workflow, context, originalRequest) => {
+    const scheduleWorkflow: ScheduleWorkflow = async (
+      workflow,
+      context,
+      originalRequest,
+      options
+    ) => {
       const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
 
@@ -1552,7 +1565,7 @@ export class WorkflowsExecutionEnginePlugin
         context,
         'alert',
         request,
-        { refresh: 'wait_for' }
+        { refresh: 'wait_for', authenticatedUser: options?.authenticatedUser }
       );
 
       if (workflowExecution.status === ExecutionStatus.FAILED) {
@@ -1587,7 +1600,7 @@ export class WorkflowsExecutionEnginePlugin
         generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
       );
 
-      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
+      await scheduleRunTaskOrMarkFailed(scheduleDeps, taskInstance, request);
       this.logger.debug(
         `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
       );
@@ -1802,7 +1815,16 @@ export class WorkflowsExecutionEnginePlugin
             generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
           )
         );
-        await plugins.taskManager.bulkSchedule(tasks, { request, cloneApiKey: true });
+        const { failedExecutionIds, message } = await bulkScheduleRunTasksOrMarkFailed(
+          scheduleDeps,
+          tasks,
+          request
+        );
+        for (const { idx, workflowExecution } of toSchedule) {
+          if (failedExecutionIds.has(workflowExecution.id as string)) {
+            results[idx] = { status: 'error', error: { message } };
+          }
+        }
         this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
       }
 
@@ -1865,7 +1887,7 @@ export class WorkflowsExecutionEnginePlugin
       this.logger.debug(
         `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
       );
-      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
+      await scheduleRunTaskOrMarkFailed(scheduleDeps, taskInstance, request);
 
       return {
         workflowExecutionId: workflowExecution.id as string,

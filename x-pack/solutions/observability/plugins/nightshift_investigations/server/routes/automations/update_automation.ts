@@ -12,6 +12,7 @@ import { createNightshiftInvestigationsServerRoute } from '../create_server_rout
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import { automationCompletionSchema, promptTemplateSchema } from '../../lib/automations/schemas';
 import { generateWorkflowYaml } from '../../lib/automations/generate_workflow_yaml';
+import { validateScheduledAutomation } from '../../lib/automations/validate_scheduled_automation';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
 import { triggerRowSchema } from './trigger_row_schema';
 
@@ -43,7 +44,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       description: z.string().max(5000).nullable().optional(),
       tags: z.array(z.string().max(32)).max(50).optional(),
       isEnabled: z.boolean().optional(),
-      trigger: z.object({ rows: z.array(triggerRowSchema).min(1) }).optional(),
+      trigger: z.object({ rows: z.array(triggerRowSchema).min(1).max(100) }).optional(),
       execution: z
         .object({
           promptTemplate: promptTemplateSchema.nullable().optional(),
@@ -55,7 +56,7 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
       completions: z.array(automationCompletionSchema).max(10).optional(),
       runtime: z
         .object({
-          dailyDispatchLimit: z.number().int().min(0).nullable().optional(),
+          dailyDispatchLimit: z.number().int().min(1).nullable().optional(),
           timeoutSeconds: z.number().int().min(1).optional(),
           dedupeWindowSeconds: z.number().int().min(0).optional(),
           overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
@@ -96,13 +97,14 @@ export const updateAutomationRoute = createNightshiftInvestigationsServerRoute({
     if (!completions.success) throw badRequest(completions.error.message);
     merged.completions = completions.data;
 
+    validateScheduledAutomation(merged);
+
     // Update the workflow first — if it fails, the SO is left unchanged so reads stay consistent.
     if (existing.attributes.workflowId) {
       try {
-        const yaml = generateWorkflowYaml(params.path.id, merged);
         await workflowsManagement.management.updateWorkflow(
           existing.attributes.workflowId,
-          { yaml },
+          { yaml: generateWorkflowYaml({ automationId: params.path.id, automation: merged }) },
           spaceId,
           request
         );

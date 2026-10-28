@@ -14,7 +14,9 @@ describe('ENTITY_FIELDS', () => {
     'keeps only the %s identity fields that its entity definition stores',
     (type) => {
       const definition = getBuiltInEntityDefinition(type);
-      const storedFields = new Set(definition.fields.map(({ destination }) => destination));
+      const storedFields = new Set(
+        definition.extraction.fields.map(({ destination }) => destination)
+      );
       const keptIdentityFields = getEuidSourceFields(definition).identitySourceFields.filter(
         (field) => (ENTITY_FIELDS as readonly string[]).includes(field)
       );

@@ -808,6 +808,8 @@ Services generated:
 - `genai-maxlen-service` — every message's serialized JSON is exactly 1024 characters, the largest value Elasticsearch still indexes.
 - `genai-overlimit-service` — messages well over 1024 characters. Elasticsearch drops them from the index; only a `_source` fallback can surface the conversation.
 - `genai-partial-service` — mixed short and over-limit messages in the same array. `ignore_above` drops only the long elements, so the indexed value is a non-null **partial** array. Recovery must replace the whole field, not skip it because a value is present.
+- `genai-reasoning-service` — OpenRouter-style output with a `reasoning` part followed by a `text` part (single serialized `parts` array). The reasoning must render as plain text inside a collapsed accordion.
+- `genai-reasoning-markdown-service` — same `reasoning` + `text` parts, but the reasoning uses rich markdown (heading, lists, table, code block, blockquote) to check how formatting renders.
 
 **Usage:**
 

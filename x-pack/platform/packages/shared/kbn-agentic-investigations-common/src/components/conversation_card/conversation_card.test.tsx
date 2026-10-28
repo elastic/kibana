@@ -16,7 +16,6 @@ const investigation: Investigation = {
   template_id: 'investigation',
   title: 'Impossible travel — exec account',
   createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
   worker_execution_ids: ['exec-1'],
   pendingProposalCount: 0,
   assignees: [],
@@ -59,6 +58,31 @@ describe('ConversationCard', () => {
     expect(onClickCard).toHaveBeenCalledWith('inv-1');
   });
 
+  describe.each([
+    { canOpenInvestigationDetails: true, expectedAssignees: 1 },
+    { canOpenInvestigationDetails: false, expectedAssignees: 0 },
+  ])(
+    'with canOpenInvestigationDetails $canOpenInvestigationDetails',
+    ({ canOpenInvestigationDetails, expectedAssignees }) => {
+      it(`renders ${expectedAssignees} assignee control`, () => {
+        renderWithKibanaRenderContext(
+          <ConversationCard
+            investigation={investigation}
+            canOpenInvestigationDetails={canOpenInvestigationDetails}
+            onClickCard={jest.fn()}
+            onClickAction={jest.fn()}
+            onCopyLink={jest.fn()}
+            onOpenChat={jest.fn()}
+            onClickRecommendedAction={jest.fn()}
+            renderAssignees={() => <span>Assignees</span>}
+          />
+        );
+
+        expect(screen.queryAllByText('Assignees')).toHaveLength(expectedAssignees);
+      });
+    }
+  );
+
   it('marks the card as current while its flyout is open', () => {
     renderCard(true);
 
@@ -80,7 +104,7 @@ describe('ConversationCard', () => {
     const createdAt = new Date(Date.now() - 26 * 60 * 1000).toISOString();
     renderWithKibanaRenderContext(
       <ConversationCard
-        investigation={{ ...investigation, createdAt, updatedAt: new Date().toISOString() }}
+        investigation={{ ...investigation, createdAt }}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
         onCopyLink={jest.fn()}
@@ -90,7 +114,6 @@ describe('ConversationCard', () => {
       />
     );
 
-    // `updatedAt` is now, so anything reading that field would say "in 0 seconds".
     expect(screen.getByText('26 minutes ago')).toBeInTheDocument();
   });
 

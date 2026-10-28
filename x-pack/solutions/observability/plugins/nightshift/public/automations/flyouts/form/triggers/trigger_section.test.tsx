@@ -10,7 +10,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationTriggerSection } from './trigger_section';
 import type { TriggerFormValues } from '../automation_form_values';
-import { toEveryCron } from '../to_automation_request';
+import { toPresetSchedule } from '../automation_form_values';
 
 const defaultCatalog = {
   data: [
@@ -24,13 +24,21 @@ const mockUseRuleCatalog = jest.fn();
 jest.mock('../../../../hooks/use_rule_catalog', () => ({
   useRuleCatalog: () => mockUseRuleCatalog(),
 }));
+jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../../settings/components/apps_section/use_relay_app_bindings'),
+  useAllRelayAppBindings: () => ({
+    bindings: [],
+    isLoading: false,
+    isError: false,
+    isComplete: true,
+  }),
+}));
 
 const legacyPatternTrigger: TriggerFormValues = {
   kind: 'alert',
   ruleNamePattern: 'cpu',
   ruleNames: [],
   ruleTags: [],
-  alertStatus: 'any',
 };
 
 const onTriggerChange = jest.fn();
@@ -76,7 +84,7 @@ describe('AutomationTriggerSection', () => {
     expect(await screen.findByText('Elastic')).toBeInTheDocument();
     expect(screen.getByText('Scheduled')).toBeInTheDocument();
     expect(screen.getByText('Every…')).toBeInTheDocument();
-    expect(screen.getByText('Custom cron…')).toBeInTheDocument();
+    expect(screen.queryByText('Custom cron…')).not.toBeInTheDocument();
     expect(screen.getByText('Slack')).toBeInTheDocument();
     expect(screen.getByText('New message in channel')).toBeInTheDocument();
   });
@@ -124,14 +132,8 @@ describe('AutomationTriggerSection', () => {
     fireEvent.click(await screen.findByText('CPU usage high'));
     expect(lastTrigger()).toMatchObject({ kind: 'alert', ruleNames: ['CPU usage high'] });
     expect(screen.getByTestId('automationRulePicker')).toHaveTextContent('CPU usage high');
-
-    fireEvent.click(screen.getByTestId('automationStatusPicker'));
-    fireEvent.click(await screen.findByText('Recovered'));
-    expect(lastTrigger()).toMatchObject({ alertStatus: 'inactive' });
-    expect(screen.getByTestId('automationStatusPicker')).toHaveTextContent('Recovered');
-
-    fireEvent.click(screen.getByText('Active'));
-    expect(lastTrigger()).toMatchObject({ alertStatus: 'any' });
+    expect(screen.getByText('changes to')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
   });
 
   it('selects rules and tags in the rule picker', async () => {
@@ -191,7 +193,7 @@ describe('AutomationTriggerSection', () => {
     expect(end).toHaveAttribute('step', '3600');
     expect(start).toHaveValue('09:00');
     expect(end).toHaveValue('17:00');
-    expect(toEveryCron(lastTrigger())).toBe('0 9-17 * * *');
+    expect(toPresetSchedule(lastTrigger())).toMatchObject({ hourWindow: { start: 9, end: 17 } });
   });
 
   it('configures a weekly schedule', async () => {
@@ -213,24 +215,10 @@ describe('AutomationTriggerSection', () => {
     expect(lastTrigger()).toMatchObject({ daysOfWeek: [2, 3, 4, 5, 0] });
   });
 
-  it('describes a custom cron and hides the daily limit', async () => {
-    render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Custom cron…');
-
-    expect(screen.queryByTestId('automationDailyLimit')).not.toBeInTheDocument();
-    expect(screen.getByTestId('automationCronDescription')).toHaveTextContent('At 09:00 AM (UTC)');
-
-    fireEvent.change(screen.getByTestId('automationCronExpression'), {
-      target: { value: 'bad cron' },
-    });
-    expect(screen.getByTestId('automationCronDescription')).toHaveTextContent(
-      'Fix the cron expression to save'
-    );
-  });
-
   it('lists IANA timezones with their offset', async () => {
     render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Custom cron…');
+    await selectTrigger('automationAddTrigger', 'Every…');
+    fireEvent.click(screen.getByLabelText('between hours'));
 
     fireEvent.click(screen.getByTestId('automationTimezone'));
     fireEvent.change(await screen.findByPlaceholderText('City or timezone…'), {
@@ -238,21 +226,7 @@ describe('AutomationTriggerSection', () => {
     });
     expect(await screen.findByText('GMT+9')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Asia/Tokyo'));
-    expect(lastTrigger()).toMatchObject({ kind: 'cron', timezone: 'Asia/Tokyo' });
-  });
-
-  it('restores the previous values when switching back to a trigger type', async () => {
-    render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Custom cron…');
-    fireEvent.change(screen.getByTestId('automationCronExpression'), {
-      target: { value: '0 7 * * *' },
-    });
-
-    await selectTrigger('automationChangeTrigger', 'Alert triggered');
-    expect(lastTrigger()).toMatchObject({ kind: 'alert' });
-
-    await selectTrigger('automationChangeTrigger', 'Custom cron…');
-    expect(screen.getByTestId('automationCronExpression')).toHaveValue('0 7 * * *');
+    expect(lastTrigger()).toMatchObject({ kind: 'every', timezone: 'Asia/Tokyo' });
   });
 
   it('flags an invalid daily limit', async () => {

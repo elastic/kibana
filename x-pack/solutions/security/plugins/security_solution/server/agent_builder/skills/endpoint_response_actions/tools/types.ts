@@ -5,23 +5,33 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
+import type { Logger } from '@kbn/logging';
+import type { RunContext } from '@kbn/agent-builder-server';
+import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES } from '../../../../../common/endpoint/service/response_actions/constants';
-import type { HostInfo } from '../../../../../common/endpoint/types';
+import type { HostInfo, ActionDetails } from '../../../../../common/endpoint/types';
+import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
+import { getActionDetailsById } from '../../../../endpoint/services/actions';
 
 export type { HostInfo };
 
 /**
  * Schema bounds shared across the response-action tools. These limits keep
- * user/LLM input from generating oversized KQL queries or chat responses while
- * staying generous enough for real hostnames.
+ * user/LLM input from generating oversized KQL queries, action payloads, or
+ * chat responses while staying generous enough for real hostnames and paths.
  */
 export const MAX_HOSTNAME_LENGTH = 256;
 export const MAX_HOSTNAME_FILTER_LENGTH = 256;
 /** Fleet agent IDs are UUIDs/ULIDs; generous bound for schema validation. */
 export const MAX_AGENT_ID_LENGTH = 64;
+/** Bounds file/directory path arguments (e.g. execute, runscript). */
+export const MAX_FILE_PATH_LENGTH = 4096;
+/** Bounds the free-text comment recorded on dispatched response actions. */
+export const MAX_ACTION_COMMENT_LENGTH = 2048;
 
 /**
  * Endpoints returned per page by `list_endpoints`. The tool exposes a `page`
@@ -118,6 +128,16 @@ export const MAX_OUTPUT_TOTAL_CHARS = 64_000;
 export const GET_RESPONSE_ACTION_STATUS_MAX_RESULT_TOKENS = 60_000;
 
 /**
+ * Tool-result token budget for `get_running_processes`. The result carries only
+ * `outputs` (held to `MAX_OUTPUT_TOTAL_CHARS`, 64k chars = 16k tokens) and the
+ * bounded `hosts` map for a single dispatched endpoint, so 30_000 tokens
+ * (120k chars) leaves room for the envelope and `hosts` without letting the
+ * platform's truncated preview replace the structured truncation counters the
+ * model relies on.
+ */
+export const RUNNING_PROCESSES_MAX_RESULT_TOKENS = 30_000;
+
+/**
  * Typed error codes for all response-action tools. Keeping a closed union lets
  * the AI agent branch on the failure cause and gives the frontend a stable
  * contract instead of free-text messages.
@@ -154,18 +174,47 @@ export function responseActionErrorResult(
 
 /**
  * Standard tool result returned when the caller lacks the endpoint privilege
- * required to read response-action state. The agent-dispatched path reuses the
- * platform's internal (automated) response-actions client, which does not run
- * the per-user privilege checks the HTTP routes enforce — so each tool must
+ * required to dispatch or read response-action state. The agent-dispatched path
+ * goes through the platform's internal response-actions client, which does not
+ * run the per-user privilege checks the HTTP routes enforce — so each tool must
  * assert the caller's endpoint authz (via `getEndpointAuthz(request)`) itself
  * and return this when the privilege is absent, mirroring the route's
- * `withEndpointAuthz(...)` gate.
+ * `withEndpointAuthz(...)` gate. (The client itself is no longer automated or
+ * unsecured: it is built with `isAutomated: false` for chat-dispatched actions,
+ * and the username comes from the caller's request.)
  */
 export function insufficientPrivilegesResult(privilege: string) {
   return responseActionErrorResult(
     'insufficient_privileges',
     `Insufficient privileges: this action requires the '${privilege}' endpoint privilege. Ask an administrator to grant it, or perform the action from the Security UI.`,
     { privilege }
+  );
+}
+
+/**
+ * Error result for a dispatching tool whose handler threw.
+ *
+ * `dispatchAttempted` marks the point where the response-actions client was
+ * called. The client sends the command through Fleet before it writes the
+ * action request document, so a throw from there on (a failed write, a failed
+ * follow-up read) does NOT mean nothing was sent. The result then says so and
+ * tells the model to check the action status instead of retrying, which would
+ * dispatch a second action. Before that point nothing was sent and a retry is
+ * safe.
+ */
+export function dispatchErrorResult(
+  verb: string,
+  error: unknown,
+  { dispatchAttempted }: { dispatchAttempted: boolean }
+) {
+  const detail = error instanceof Error ? error.message : String(error);
+
+  return responseActionErrorResult(
+    'unknown_error',
+    dispatchAttempted
+      ? `Error ${verb}: ${detail}. The action may already have been sent to the endpoint. Do NOT retry the call; it could dispatch a second action. Check the Response Actions history (get_response_action_status) for the host before doing anything else.`
+      : `Error ${verb}: ${detail}`,
+    dispatchAttempted ? { actionMayHaveBeenSent: true } : undefined
   );
 }
 
@@ -747,4 +796,135 @@ export function resolveAgentTypeFromPackages(packages: string[] = []): ResponseA
   }
 
   return 'endpoint';
+}
+
+/**
+ * Builds the comment recorded on a dispatched response action so its entry in
+ * the Response Actions audit log links back to the originating agent
+ * conversation. The conversation id (falling back to the always-present run id
+ * used for tracing) is the correlation anchor; the endpoint action document has
+ * no structured "source conversation" field, so the free-text comment — the
+ * established place for analyst context — carries it.
+ *
+ * The conversation id lives on the agent entry of the run-context stack, so it
+ * is resolved via `getAgentFromRunContext`. An analyst-supplied comment is
+ * preserved and the anchor is appended to it.
+ */
+export function buildResponseActionComment(
+  defaultComment: string,
+  runContext: RunContext,
+  analystComment?: string
+): string {
+  const base = analystComment ?? defaultComment;
+  const correlationId = getAgentFromRunContext(runContext)?.conversationId ?? runContext.runId;
+  return correlationId ? `${base} [AI agent conversation: ${correlationId}]` : base;
+}
+
+/**
+ * Retry/timeout budget for {@link waitForActionCompletion}. Elastic Defend
+ * dispatches a fleet action and returns immediately — the endpoint agent
+ * typically takes anywhere from a few seconds up to ~90s to check in, execute
+ * the action, and write its response back. Without polling, a tool returns
+ * whatever status was true the instant the action document was written
+ * (almost always `pending`), which is what the chat UI showed for
+ * `running-processes`, `isolate`, `unisolate`, and `scan` before this fix.
+ *
+ * 300ms → 480ms → 768ms → ... doubling, capped at 5s, for up to ~85s total —
+ * long enough to observe real completions without holding the agent turn
+ * open indefinitely (the agent-builder execution runner's own idle/overall
+ * timeouts, `FOLLOW_EXECUTION_IDLE_TIMEOUT_MS` / `FOLLOW_EXECUTION_TIMEOUT_MS`,
+ * are both several minutes, so this budget sits comfortably inside them).
+ */
+const ACTION_COMPLETION_POLL_CONFIG = {
+  retries: 20,
+  minTimeout: 300,
+  maxTimeout: 5000,
+  factor: 1.6,
+};
+
+/**
+ * Polls `getActionDetailsById` until the dispatched response action reaches
+ * a terminal state (`successful`, `failed`, or `canceled`) or the retry
+ * budget is exhausted, then returns whatever the latest fetch produced.
+ *
+ * This mirrors the polling pattern the Microsoft Defender for Endpoint
+ * client already uses (`p-retry` in `ms_defender_endpoint_actions_client.ts`)
+ * and the polling the console UI does client-side via
+ * `useConsoleActionSubmitter` (`ACTION_DETAILS_REFRESH_INTERVAL`) — the agent
+ * tools had neither, so they surfaced the action's write-time snapshot
+ * instead of its outcome.
+ *
+ * Never throws when a snapshot of the action is available: on error or
+ * exhausted retries it returns the last known `ActionDetails` (still
+ * `pending`) so the tool can report an honest, non-final status rather than
+ * failing the whole tool call. When no poll ever succeeded and no
+ * `dispatchedFallback` was supplied it rethrows — a caller with no snapshot at
+ * all has nothing truthful to report.
+ */
+export async function waitForActionCompletion<T extends ActionDetails = ActionDetails>(
+  endpointAppContextService: EndpointAppContextService,
+  spaceId: string,
+  actionId: string,
+  logger: Logger,
+  /**
+   * The dispatch response for `actionId`, used when no completion read ever
+   * succeeds.
+   *
+   * Dispatching the action is the write; polling is a best-effort read of its
+   * outcome. A monitoring outage must not be reported as a failed dispatch —
+   * without this fallback the tool returns `unknown_error` and drops the
+   * action ID, so a queued (and possibly executing) action looks like one that
+   * never happened and invites a duplicate re-issue. The snapshot carries the
+   * action ID and its write-time status, so the model can report "dispatched,
+   * completion unknown" and re-check with `get_response_action_status`.
+   */
+  dispatchedFallback?: T
+): Promise<T> {
+  let lastKnown: T | undefined;
+
+  try {
+    return await pRetry(
+      async () => {
+        const actionDetails = await getActionDetailsById<T>(
+          endpointAppContextService,
+          spaceId,
+          actionId,
+          // bypassSpaceValidation is safe here: the action was already
+          // validated to be in the caller's space before dispatch (see
+          // endpoint_lookup.ts -> ensureInCurrentSpace). Polling just reads
+          // back the action we already dispatched.
+          { bypassSpaceValidation: true }
+        );
+        lastKnown = actionDetails;
+
+        if (!actionDetails.isCompleted) {
+          throw new Error(`Action [${actionId}] is still pending`);
+        }
+
+        return actionDetails;
+      },
+      {
+        ...ACTION_COMPLETION_POLL_CONFIG,
+        onFailedAttempt: ({ attemptNumber, retriesLeft }) => {
+          logger.debug(
+            `Waiting for action [${actionId}] to complete (attempt ${attemptNumber}, ${retriesLeft} retries left)`
+          );
+        },
+      }
+    );
+  } catch (error) {
+    if (lastKnown) {
+      return lastKnown;
+    }
+
+    if (dispatchedFallback) {
+      logger.warn(
+        `Could not read completion status for dispatched action [${actionId}]; returning the dispatch snapshot: ${error.message}`
+      );
+      return dispatchedFallback;
+    }
+
+    logger.error(`Failed to fetch completion status for action [${actionId}]: ${error.message}`);
+    throw error;
+  }
 }
