@@ -56,3 +56,4 @@ export const plugin: PluginInitializer<
 };
 
 export { config } from './config';
+export type { EvalsMode } from './config';
