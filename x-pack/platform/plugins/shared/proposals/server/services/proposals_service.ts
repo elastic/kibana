@@ -1742,7 +1742,7 @@ const findWaitingGateStepId = (
     status: string;
     startedAt: string;
     finishedAt?: string;
-    hitl?: { respondedAt?: string };
+    hitl?: { respondedAt?: string } | null;
   }>
 ): string | undefined =>
   stepExecutions
