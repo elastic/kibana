@@ -247,13 +247,20 @@ const defaultSizeOf = (size: Parameter | undefined): { defaultSize?: number } =>
 const firstPageOf = ({ schema }: Parameter): { firstPage?: number } =>
   [schema.default, schema.minimum, schema.example].includes(0) ? { firstPage: 0 } : {};
 
-const byRole = (parameters: readonly Parameter[]): Partial<Record<Role, Parameter>> =>
-  Object.fromEntries(
-    parameters.flatMap((parameter) => {
-      const role = roleOf(parameter);
-      return role ? [[role, parameter]] : [];
-    })
-  );
+const byRole = (parameters: readonly Parameter[]): Partial<Record<Role, Parameter>> => {
+  const roles: Partial<Record<Role, Parameter>> = {};
+  parameters.forEach((parameter) => {
+    const role = roleOf(parameter);
+    if (role && !roles[role]) roles[role] = parameter;
+  });
+  return roles;
+};
+
+/** Two parameters, such as a query `page` and a body `pagination.page`, share a role. */
+const hasAmbiguousRole = (parameters: readonly Parameter[]): boolean => {
+  const found = parameters.flatMap((parameter) => roleOf(parameter) ?? []);
+  return new Set(found).size < found.length;
+};
 
 /** A query parameter selecting the page, for styles whose next page is a URL. */
 const nextUrlRequestOf = (roles: Partial<Record<Role, Parameter>>) => {
@@ -323,12 +330,13 @@ const fromSpeakeasy = (
       ...defaultSizeOf(size),
     };
   }
-  const request = nextUrlRequestOf(byRole(parameters));
+  const request = hasAmbiguousRole(parameters) ? undefined : nextUrlRequestOf(byRole(parameters));
   if (extension.type === 'url' && typeof outputs.nextUrl === 'string' && request) {
     return {
       style: 'next_url',
       request,
       response: { itemsPath, nextPath: fromJsonPath(outputs.nextUrl) },
+      ...defaultSizeOf(size),
     };
   }
   return undefined;
@@ -344,7 +352,7 @@ const fromMsPageable = (
   if (typeof extension.nextLinkName !== 'string') {
     return undefined;
   }
-  const request = nextUrlRequestOf(byRole(parameters));
+  const request = hasAmbiguousRole(parameters) ? undefined : nextUrlRequestOf(byRole(parameters));
   const itemName = typeof extension.itemName === 'string' ? extension.itemName : 'value';
   return {
     style: 'next_url',
@@ -463,7 +471,7 @@ export const assessPagination = (
 
   const roles = byRole(parameters);
   const { size, ...selectors } = roles;
-  const names = Object.values(roles).map(({ name }) => name);
+  const names = parameters.filter((parameter) => roleOf(parameter)).map(({ name }) => name);
   // A size alone, such as a crawl's page limit, only signals a collection next to one.
   const reason =
     Object.keys(selectors).length > 0 || (size && itemsPath !== undefined)
@@ -474,7 +482,10 @@ export const assessPagination = (
   if (!reason) {
     return { listLike: false };
   }
-  const pagination = fromNames(document, roles, response, itemsPath);
+  // With two candidates for a role we can't tell which one pages, so the operation must declare it.
+  const pagination = hasAmbiguousRole(parameters)
+    ? undefined
+    : fromNames(document, roles, response, itemsPath);
   return {
     listLike: true,
     reason,

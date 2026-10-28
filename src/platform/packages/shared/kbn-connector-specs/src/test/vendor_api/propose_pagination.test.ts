@@ -196,6 +196,49 @@ describe('assessPagination', () => {
     });
   });
 
+  it('keeps the default size on a Speakeasy next URL', () => {
+    expect(
+      proposalOf({
+        parameters: [query('cursor'), query('limit', { type: 'integer', default: 25 })],
+        'x-speakeasy-pagination': {
+          type: 'url',
+          inputs: [{ name: 'limit', in: 'parameters', type: 'limit' }],
+          outputs: { results: '$.items', nextUrl: '$.next' },
+        },
+        responses: json({ type: 'object' }),
+      })?.pagination
+    ).toEqual({
+      style: 'next_url',
+      request: { cursorParam: 'cursor', sizeParam: 'limit' },
+      response: { itemsPath: 'items', nextPath: 'next' },
+      defaultSize: 25,
+    });
+  });
+
+  it('does not propose pagination when two parameters share a role', () => {
+    const operation = {
+      parameters: [query('page', { type: 'integer' })],
+      requestBody: {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                pagination: { type: 'object', properties: { page: { type: 'integer' } } },
+              },
+            },
+          },
+        },
+      },
+      responses: json({ type: 'object', properties: { items: { type: 'array', items: {} } } }),
+    };
+
+    expect(assess(operation, {}, 'post')).toEqual({
+      listLike: true,
+      reason: 'it takes page, pagination.page',
+    });
+  });
+
   it('flags collections it cannot propose pagination for', () => {
     expect(assess({ responses: json({ type: 'array', items: {} }) })).toEqual({
       listLike: true,
