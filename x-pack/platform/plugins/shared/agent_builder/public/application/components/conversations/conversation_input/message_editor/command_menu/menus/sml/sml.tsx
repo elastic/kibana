@@ -53,18 +53,20 @@ const getResultsPreferExactMatch = (
   };
 };
 
-/** The longest prefix, ignoring case, that all of the strings start with. */
+/** The longest prefix, ignoring case, that all of the strings start with, by whole characters. */
 const getCommonPrefix = (strings: readonly string[]): string =>
   strings.reduce((prefix, text) => {
+    const prefixCharacters = Array.from(prefix);
+    const textCharacters = Array.from(text);
     let length = 0;
     while (
-      length < prefix.length &&
-      length < text.length &&
-      prefix[length].toLowerCase() === text[length].toLowerCase()
+      length < prefixCharacters.length &&
+      length < textCharacters.length &&
+      prefixCharacters[length].toLowerCase() === textCharacters[length].toLowerCase()
     ) {
       length++;
     }
-    return prefix.slice(0, length);
+    return prefixCharacters.slice(0, length).join('');
   });
 
 /**

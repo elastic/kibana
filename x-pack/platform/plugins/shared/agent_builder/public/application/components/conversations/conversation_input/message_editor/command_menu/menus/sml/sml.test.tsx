@@ -372,6 +372,12 @@ describe('Sml', () => {
       expect(pressTab('dashboard/da').onReplaceText).toHaveBeenCalledWith('dashboard/dashboard_');
     });
 
+    it('completes whole characters, not half of one', () => {
+      setResults(['dashboard', '\u{1F600} A'], ['dashboard', '\u{1F601} B']);
+
+      expect(pressTab('dashboard/').onReplaceText).not.toHaveBeenCalled();
+    });
+
     it('does not pick a result when there are several and nothing more to complete', () => {
       setResults(['dashboard', 'dashboard_A'], ['dashboard', 'dashboard_B']);
 
