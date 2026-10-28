@@ -36,6 +36,7 @@ type KibanaApi = Pick<StepHandlerContext['contextManager'], 'callKibanaApi'>;
 const SIGNALS_SEARCH_PATH = '/api/detection_engine/signals/search';
 const SIGNALS_TAGS_PATH = '/api/detection_engine/signals/tags';
 const SIGNALS_STATUS_PATH = '/api/detection_engine/signals/status';
+const NOTE_PATH = '/api/note';
 
 const WORKFLOW_RUN_TASK_TYPE = 'workflow:run';
 
@@ -396,6 +397,35 @@ const updateAlertStatus = async (
       }, conflicts: ${body.version_conflicts ?? 0}, failures: ${failureCount})`
     );
   }
+};
+
+/**
+ * Writes the same note on each alert, `concurrency` at a time, because the notes route takes one
+ * note per call. Never throws: returns the ids that did not get a note.
+ */
+export const writeAlertNotes = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[],
+  note: string,
+  concurrency: number
+): Promise<string[]> => {
+  const failed: string[] = [];
+  for (let from = 0; from < alertIds.length; from += concurrency) {
+    const ids = alertIds.slice(from, from + concurrency);
+    const results = await Promise.allSettled(
+      ids.map((eventId) =>
+        callKibanaApi({
+          method: 'PATCH',
+          path: NOTE_PATH,
+          body: { note: { eventId, timelineId: '', note } },
+        })
+      )
+    );
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') failed.push(ids[index]);
+    });
+  }
+  return failed;
 };
 
 /**

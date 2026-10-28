@@ -525,6 +525,11 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
       .number()
       .describe('Matches left for the normal path because the decision reached its daily cap.'),
     close_failures: z.number().describe('Decisions whose alerts could not all be closed.'),
+    notes_missing: z
+      .number()
+      .describe(
+        'Alerts a decision closed or skipped that have no note: a failed write, or past the sweep limit.'
+      ),
     excluded_by_severity: z
       .number()
       .describe('Matches the severity guard keeps with a human, not tagged.'),
