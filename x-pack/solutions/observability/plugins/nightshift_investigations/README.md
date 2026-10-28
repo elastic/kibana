@@ -217,7 +217,8 @@ The `nightshift.sendNotifications` step validates the persisted workflow executi
 When the global investigation quota denies an automatic start from a Slack trigger,
 `nightshift.triggerInvestigation` skips the start with `investigation_limit` and replies in the
 triggering Slack thread, once per Slack channel and UTC day. The reply says the limit was reached
-and where to raise it. The once-a-day marker is claimed before posting, so a failed post is not
+and links the Nightshift settings in the workflow's space for an admin to raise it, or omits the
+link when no Kibana URL is known. The once-a-day marker is claimed before posting, so a failed post is not
 retried. Alert, schedule, and manual runs post nothing.
 
 ### Workflow failures

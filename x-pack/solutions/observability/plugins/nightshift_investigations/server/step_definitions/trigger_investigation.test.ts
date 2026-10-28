@@ -33,7 +33,10 @@ const createContext = (input: Record<string, unknown>) =>
     logger,
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue(request),
-      getContext: jest.fn().mockReturnValue({ workflow: { id: 'wf-1', spaceId: 'test-space' } }),
+      getContext: jest.fn().mockReturnValue({
+        workflow: { id: 'wf-1', spaceId: 'test-space' },
+        kibanaUrl: 'https://kibana.example.com',
+      }),
     },
   } as never);
 
@@ -45,6 +48,7 @@ const createDefinition = (start: jest.Mock, soClient = savedObjectsClientMock.cr
   const getAlertsClient = jest.fn().mockResolvedValue({});
   const getEpisodeLookup = jest.fn().mockReturnValue({ spaceId: 'test-space' });
   const getActions = jest.fn().mockReturnValue(undefined);
+  const settingsLocator = { getRedirectUrl: jest.fn() } as never;
   return {
     getAutomationsSoClient,
     getAlertsClient,
@@ -54,7 +58,8 @@ const createDefinition = (start: jest.Mock, soClient = savedObjectsClientMock.cr
       getAutomationsSoClient,
       getAlertsClient,
       getEpisodeLookup,
-      getActions
+      getActions,
+      settingsLocator
     ),
     getActions,
     getInvestigationsClient,
@@ -369,7 +374,12 @@ describe('investigation quota notice', () => {
 
     const [params] = jest.mocked(notifyInvestigationQuotaReached).mock.calls[0];
     expect(params).toEqual(
-      expect.objectContaining({ getActions, spaceId: 'test-space', slackThread })
+      expect.objectContaining({
+        getActions,
+        spaceId: 'test-space',
+        slackThread,
+        kibanaUrl: 'https://kibana.example.com',
+      })
     );
     expect(params.getSoClient()).toBe(soClient);
   });

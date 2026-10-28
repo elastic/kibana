@@ -8,6 +8,7 @@
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { NightshiftSettingsLocator } from '../../../common/locators';
 import { consumeAutomationBudget } from '../automations/automation_budget';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from '../automations/generate_workflow_yaml';
 
@@ -15,8 +16,34 @@ import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from '../automations/generate_workflo
 export const getQuotaNoticeId = (channel: string): string =>
   `investigation-quota-notice:${channel}`;
 
-export const INVESTIGATION_QUOTA_REACHED_MESSAGE =
-  'The daily limit for automatic investigations has been reached. Raise the limit in the Nightshift settings.';
+const QUOTA_REACHED = 'The daily limit for automatic investigations has been reached.';
+
+/** Readers may lack the privilege to change settings, so the text addresses an admin. */
+export const getInvestigationQuotaReachedMessage = (settingsUrl?: string): string =>
+  settingsUrl
+    ? `${QUOTA_REACHED} An admin can raise the limit in <${settingsUrl}|Nightshift settings>.`
+    : `${QUOTA_REACHED} An admin can raise the limit in the Nightshift settings.`;
+
+/** Absolute settings URL in the workflow's space, or undefined when it can't be built. */
+export const getNightshiftSettingsUrl = ({
+  locator,
+  spaceId,
+  kibanaUrl,
+}: {
+  locator: Pick<NightshiftSettingsLocator, 'getRedirectUrl'>;
+  spaceId: string;
+  kibanaUrl?: string;
+}): string | undefined => {
+  if (!kibanaUrl) return undefined;
+  try {
+    return new URL(
+      locator.getRedirectUrl({ tab: 'investigations' }, { spaceId }),
+      kibanaUrl
+    ).toString();
+  } catch {
+    return undefined;
+  }
+};
 
 /**
  * Replies in the Slack thread once per channel and UTC day. Never throws, so a failed post cannot
@@ -28,6 +55,8 @@ export const notifyInvestigationQuotaReached = async ({
   request,
   spaceId,
   slackThread,
+  settingsLocator,
+  kibanaUrl,
   signal,
   logger,
 }: {
@@ -36,6 +65,8 @@ export const notifyInvestigationQuotaReached = async ({
   request: KibanaRequest;
   spaceId: string;
   slackThread: { channel: string; thread_ts: string };
+  settingsLocator: Pick<NightshiftSettingsLocator, 'getRedirectUrl'>;
+  kibanaUrl?: string;
   signal: AbortSignal;
   logger: Pick<Logger, 'warn'>;
 }): Promise<void> => {
@@ -63,7 +94,9 @@ export const notifyInvestigationQuotaReached = async ({
         subAction: 'sendMessage',
         subActionParams: {
           channel: slackThread.channel,
-          text: INVESTIGATION_QUOTA_REACHED_MESSAGE,
+          text: getInvestigationQuotaReachedMessage(
+            getNightshiftSettingsUrl({ locator: settingsLocator, spaceId, kibanaUrl })
+          ),
           threadTs: slackThread.thread_ts,
         },
       },

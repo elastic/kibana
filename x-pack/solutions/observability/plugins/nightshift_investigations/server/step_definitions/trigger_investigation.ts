@@ -17,6 +17,7 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { serverUnavailable } from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { NightshiftSettingsLocator } from '../../common/locators';
 import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
 import {
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
@@ -186,7 +187,8 @@ export const triggerInvestigationStepDefinition = (
   getAutomationsSoClient: GetAutomationsSoClient,
   getAlertsClient: GetAlertsClient,
   getEpisodeLookup: GetEpisodeLookup,
-  getActions: () => ActionsPluginStart | undefined
+  getActions: () => ActionsPluginStart | undefined,
+  settingsLocator: NightshiftSettingsLocator
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
@@ -215,7 +217,7 @@ export const triggerInvestigationStepDefinition = (
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const { workflow } = context.contextManager.getContext();
+      const { workflow, kibanaUrl } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
       const subjectId = toSubjectId(input);
@@ -289,6 +291,8 @@ export const triggerInvestigationStepDefinition = (
               request,
               spaceId,
               slackThread: input.slack_thread,
+              settingsLocator,
+              kibanaUrl,
               signal: context.abortSignal,
               logger: context.logger,
             });

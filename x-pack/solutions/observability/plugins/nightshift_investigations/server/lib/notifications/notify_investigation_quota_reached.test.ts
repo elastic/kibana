@@ -9,11 +9,17 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
-  INVESTIGATION_QUOTA_REACHED_MESSAGE,
+  getInvestigationQuotaReachedMessage,
+  getNightshiftSettingsUrl,
   getQuotaNoticeId,
   notifyInvestigationQuotaReached,
 } from './notify_investigation_quota_reached';
 
+const settingsLocator = {
+  getRedirectUrl: jest.fn().mockReturnValue('/app/r?l=NIGHTSHIFT_SETTINGS_LOCATOR'),
+};
+const kibanaUrl = 'https://kibana.example.com';
+const settingsUrl = 'https://kibana.example.com/app/r?l=NIGHTSHIFT_SETTINGS_LOCATOR';
 const today = new Date().toISOString().slice(0, 10);
 const noticeId = getQuotaNoticeId('C1');
 const marker = (id: string, date: string) =>
@@ -44,6 +50,8 @@ describe('notifyInvestigationQuotaReached', () => {
         request,
         spaceId: 'default',
         slackThread: { channel, thread_ts: '1700000000.000100' },
+        settingsLocator,
+        kibanaUrl,
         signal,
         logger,
       });
@@ -69,11 +77,26 @@ describe('notifyInvestigationQuotaReached', () => {
         subAction: 'sendMessage',
         subActionParams: {
           channel: 'C1',
-          text: INVESTIGATION_QUOTA_REACHED_MESSAGE,
+          text: getInvestigationQuotaReachedMessage(settingsUrl),
           threadTs: '1700000000.000100',
         },
       },
     });
+  });
+
+  it('links the settings page in the workflow space for an admin to follow', async () => {
+    const { execute, run } = setup();
+
+    await run();
+
+    expect(settingsLocator.getRedirectUrl).toHaveBeenCalledWith(
+      { tab: 'investigations' },
+      { spaceId: 'default' }
+    );
+    const { text } = execute.mock.calls[0][0].params.subActionParams;
+    expect(text).toBe(
+      `The daily limit for automatic investigations has been reached. An admin can raise the limit in <${settingsUrl}|Nightshift settings>.`
+    );
   });
 
   it('posts once per channel and day', async () => {
@@ -125,6 +148,8 @@ describe('notifyInvestigationQuotaReached', () => {
         request,
         spaceId: 'default',
         slackThread: { channel: 'C1', thread_ts: '1700000000.000100' },
+        settingsLocator,
+        kibanaUrl,
         signal,
         logger,
       })
@@ -138,5 +163,19 @@ describe('notifyInvestigationQuotaReached', () => {
 
     await expect(run()).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalled();
+  });
+});
+
+describe('getNightshiftSettingsUrl', () => {
+  it('leaves the link out when no Kibana URL is known or the URL is unusable', () => {
+    expect(
+      getNightshiftSettingsUrl({ locator: settingsLocator, spaceId: 'default' })
+    ).toBeUndefined();
+    expect(
+      getNightshiftSettingsUrl({ locator: settingsLocator, spaceId: 'default', kibanaUrl: 'nope' })
+    ).toBeUndefined();
+    expect(getInvestigationQuotaReachedMessage()).toBe(
+      'The daily limit for automatic investigations has been reached. An admin can raise the limit in the Nightshift settings.'
+    );
   });
 });
