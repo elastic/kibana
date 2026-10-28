@@ -22,6 +22,7 @@ import {
   PostBulkAgentUpgradeRequestSchema,
   PostBulkRemoveCollectorsRequestSchema,
   PostBulkRequestDiagnosticsActionRequestSchema,
+  PostAgentRestartRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
   UpdateAgentRequestSchema,
 } from './agent';
@@ -196,5 +197,20 @@ describe('reporting mode string fields', () => {
         policy_id: 'a'.repeat(1000),
       })
     ).not.toThrow();
+  });
+});
+
+describe('PostAgentRestartRequestSchema', () => {
+  // This agentId keeps its existing enforced limit rather than reporting mode.
+  it('accepts an agentId at exactly 512 characters', () => {
+    expect(() =>
+      PostAgentRestartRequestSchema.params.validate({ agentId: 'a'.repeat(512) })
+    ).not.toThrow();
+  });
+
+  it('rejects an agentId over 512 characters', () => {
+    expect(() =>
+      PostAgentRestartRequestSchema.params.validate({ agentId: 'a'.repeat(513) })
+    ).toThrow();
   });
 });

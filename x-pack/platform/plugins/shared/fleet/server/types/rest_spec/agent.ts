@@ -1210,9 +1210,7 @@ export const PostBulkAgentRollbackRequestSchema = {
 
 export const PostAgentRestartRequestSchema = {
   params: schema.object({
-    agentId: schema.savedObjectId.warn({
-      minLength: 0,
-      label: 'fleet.agents.post_agent_restart.agentId',
+    agentId: schema.string({
       maxLength: 512,
       meta: { description: 'The agent ID to restart' },
     }),
