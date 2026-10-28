@@ -19,7 +19,7 @@ import { deriveCausalConfirmed } from '../decision_trees/turn';
 import { withToolResults } from '../investigation_round';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { createInvestigationUsageTelemetry } from '../lib/investigation_usage_telemetry';
-import { renderMemoryTranscript } from '../memory/transcript';
+import { renderMemoryTranscript, stepsFromToolCalls } from '../memory/transcript';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
 const MAX_INPUT_CHARS = 100_000;
@@ -146,6 +146,7 @@ export const decisionTreePrepareStepDefinition = ({
       const workflowContext = context.contextManager.getContext();
       const { spaceId } = workflowContext.workflow;
       const investigatorToolCalls = (toolCalls ?? []) as InvestigationToolCall[];
+      const toolCallsWithResults = withToolResults(investigatorToolCalls, toolResults ?? []);
       const answer = response;
 
       // Whether a cause was confirmed needs ground truth, and a first round has none: only a
@@ -179,6 +180,8 @@ export const decisionTreePrepareStepDefinition = ({
               transcript: renderMemoryTranscript({
                 task: prompt ?? '',
                 answer,
+                // The check needs what each query returned, not only the queries.
+                investigation: stepsFromToolCalls(toolCallsWithResults),
                 toolCalls: investigatorToolCalls,
               }),
             });
@@ -200,7 +203,7 @@ export const decisionTreePrepareStepDefinition = ({
         esClient: context.contextManager.getScopedEsClient(),
         logger,
         spaceId,
-        toolCalls: withToolResults(investigatorToolCalls, toolResults ?? []),
+        toolCalls: toolCallsWithResults,
       });
 
       return {

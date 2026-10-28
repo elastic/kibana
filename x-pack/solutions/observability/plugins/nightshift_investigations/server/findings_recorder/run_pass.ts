@@ -23,6 +23,7 @@ import {
 } from './messages';
 import {
   FINDINGS_JSON_SCHEMA,
+  entityIdFor,
   findingsOutputSchema,
   limitFindings,
   type FindingsRecord,
@@ -297,7 +298,7 @@ export const runFindingsPass = async (
     if (output.impact_summary) {
       const {
         impact_summary: impactSummary,
-        impact_entities: entities = [],
+        impact_entities: entities,
         impact_evidence: impactEvidence,
       } = output;
       writes.push([
@@ -306,12 +307,22 @@ export const runFindingsPass = async (
           writer.setImpact({
             conversationId,
             summary: impactSummary,
-            ...(impactEvidence ? { evidence: impactEvidence } : {}),
-            // The entity form is only for two or more entities affected in different ways.
-            entities:
-              entities.length >= 2
-                ? entities.map(({ name, type }) => ({ id: name, name, ...(type ? { type } : {}) }))
-                : [],
+            // Omitted keeps the stored evidence; `null` removes it.
+            ...(impactEvidence !== undefined ? { evidence: impactEvidence } : {}),
+            // Omitted keeps the stored entities. The entity form is only for two or more entities
+            // affected in different ways, so a shorter list clears it.
+            ...(entities !== undefined
+              ? {
+                  entities:
+                    entities.length >= 2
+                      ? entities.map(({ name, type }) => ({
+                          id: entityIdFor(name),
+                          name,
+                          ...(type ? { type } : {}),
+                        }))
+                      : [],
+                }
+              : {}),
           }),
       ]);
     }

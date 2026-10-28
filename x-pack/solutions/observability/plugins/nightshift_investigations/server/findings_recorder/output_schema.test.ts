@@ -12,6 +12,7 @@ import {
 import {
   FINDINGS_JSON_SCHEMA,
   findingsOutputSchema,
+  entityIdFor,
   limitEvidence,
   limitFindings,
 } from './output_schema';
@@ -104,6 +105,30 @@ describe('evidence', () => {
     expect(kept?.chart?.series[0].points).toHaveLength(100);
   });
 
+  it('thins an oversized series across the whole window, keeping the first and last point', () => {
+    const many = Array.from({ length: 300 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
+    const [{ points: kept }] = limitEvidence({ chart: chart(many) })?.chart?.series ?? [];
+    expect(kept).toHaveLength(100);
+    expect(kept[0]).toEqual(many[0]);
+    expect(kept[99]).toEqual(many[299]);
+  });
+
+  it('keeps every point of a series that fits', () => {
+    const exact = Array.from({ length: 100 }, (_, i) => ({ x: `2026-08-09T01:${i}`, y: i }));
+    expect(limitEvidence({ chart: chart(exact) })?.chart?.series[0].points).toEqual(exact);
+  });
+
+  it('lets a record retract the impact evidence with null, and keeps omission distinct', () => {
+    const base = { summary: 's', impact_summary: 'x', hypotheses: [] };
+    const retract = findingsOutputSchema.safeParse({ ...base, impact_evidence: null });
+    expect(retract.success).toBe(true);
+    if (!retract.success) return;
+    expect(limitFindings(retract.data).impact_evidence).toBeNull();
+    const omit = findingsOutputSchema.safeParse(base);
+    if (!omit.success) throw new Error('expected a valid record');
+    expect(limitFindings(omit.data).impact_evidence).toBeUndefined();
+  });
+
   it('carries evidence through the record, keeping at most two items per hypothesis', () => {
     const parsed = findingsOutputSchema.safeParse({
       summary: 's',
@@ -123,5 +148,20 @@ describe('evidence', () => {
     const record = limitFindings(parsed.data);
     expect(record.impact_evidence?.chart?.series[0].points).toHaveLength(3);
     expect(record.hypotheses[0].evidence).toHaveLength(2);
+  });
+});
+
+describe('entityIdFor', () => {
+  it('uses the name when it fits the id limit', () => {
+    expect(entityIdFor('checkout')).toBe('checkout');
+    expect(entityIdFor('a'.repeat(256))).toBe('a'.repeat(256));
+  });
+
+  it('bounds a longer name, stably, and keeps names with the same start apart', () => {
+    const first = `${'a'.repeat(300)}-one`;
+    const second = `${'a'.repeat(300)}-two`;
+    expect(entityIdFor(first).length).toBeLessThanOrEqual(256);
+    expect(entityIdFor(first)).toBe(entityIdFor(first));
+    expect(entityIdFor(first)).not.toBe(entityIdFor(second));
   });
 });

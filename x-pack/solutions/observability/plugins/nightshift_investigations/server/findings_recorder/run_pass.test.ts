@@ -295,6 +295,53 @@ describe('runFindingsPass', () => {
     });
   });
 
+  it('keeps the stored entities and evidence when a pass leaves them out', async () => {
+    const { impact_entities: _omitted, ...withoutEntities } = output;
+    const { deps, writer, memory } = setup({ answers: [answerWith(withoutEntities)] });
+
+    await run(deps, memory);
+
+    const [params] = writer.setImpact.mock.calls[0];
+    expect(params).not.toHaveProperty('entities');
+    expect(params).not.toHaveProperty('evidence');
+  });
+
+  it('clears the stored entities when a pass sends an empty list', async () => {
+    const { deps, writer, memory } = setup({
+      answers: [answerWith({ ...output, impact_entities: [] })],
+    });
+
+    await run(deps, memory);
+
+    expect(writer.setImpact).toHaveBeenCalledWith(expect.objectContaining({ entities: [] }));
+  });
+
+  it('removes the stored impact evidence when a pass retracts it with null', async () => {
+    const { deps, writer, memory } = setup({
+      answers: [answerWith({ ...output, impact_evidence: null })],
+    });
+
+    await run(deps, memory);
+
+    expect(writer.setImpact).toHaveBeenCalledWith(expect.objectContaining({ evidence: null }));
+  });
+
+  it('gives an entity with a long name an id within the store limit', async () => {
+    const longName = 'x'.repeat(400);
+    const { deps, writer, memory } = setup({
+      answers: [
+        answerWith({ ...output, impact_entities: [{ name: longName }, { name: 'checkout' }] }),
+      ],
+    });
+
+    await run(deps, memory);
+
+    const [{ entities }] = writer.setImpact.mock.calls[0];
+    expect(entities[0].name).toBe(longName);
+    expect(entities[0].id.length).toBeLessThanOrEqual(256);
+    expect(entities[1]).toEqual({ id: 'checkout', name: 'checkout' });
+  });
+
   it('keeps its answer in the conversation for the next pass', async () => {
     const { deps, memory } = setup();
 

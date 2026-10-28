@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'node:crypto';
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
   EVIDENCE_CHART_TYPES,
@@ -77,7 +78,9 @@ export const findingsOutputSchema = lazySchema(() => {
     verdict: z.string().optional(),
     severity: z.enum(FINDINGS_SEVERITIES).optional(),
     impact_summary: z.string().min(1).optional(),
-    impact_evidence: evidenceSchema.optional(),
+    // `null` retracts the stored impact evidence; omitting the field keeps it.
+    impact_evidence: evidenceSchema.nullable().optional(),
+    // Omitting the field keeps the stored entities; an empty list clears them.
     impact_entities: z
       .array(
         z.object({
@@ -97,6 +100,29 @@ const truncate = (text: string, max: number): string =>
 
 type RawEvidence = NonNullable<FindingsOutput['impact_evidence']>;
 
+/** At most `max` items spread evenly over the whole list, always including the first and last. */
+const spreadEvenly = <T>(items: readonly T[], max: number): T[] =>
+  items.length <= max
+    ? [...items]
+    : Array.from(
+        { length: max },
+        (_, i) => items[Math.round((i * (items.length - 1)) / (max - 1))]
+      );
+
+const ENTITY_ID_PREFIX_LENGTH = 200;
+
+/**
+ * A stable id for an entity. The name when it fits the id limit; otherwise its start plus a hash
+ * of the whole name, so two long names with the same start still get different ids.
+ */
+export const entityIdFor = (name: string): string =>
+  name.length <= MAX_ENTITY_ID_LENGTH
+    ? name
+    : `${name.slice(0, ENTITY_ID_PREFIX_LENGTH)}-${createHash('sha256')
+        .update(name)
+        .digest('hex')
+        .slice(0, 12)}`;
+
 /**
  * Trims evidence to what the stores accept. A chart is only the model's reading of numbers in the
  * conversation, so a chart that does not fit (no usable points, or a shape the schema rejects) is
@@ -112,10 +138,11 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
     .slice(0, MAX_EVIDENCE_CHART_SERIES)
     .map(({ name, points }) => ({
       name: label(name),
-      points: points
-        .filter(({ x, y }) => x !== '' && Number.isFinite(y))
-        .slice(0, MAX_EVIDENCE_CHART_POINTS)
-        .map(({ x, y }) => ({ x: label(x), y })),
+      // An oversized series is thinned over its whole window, so an event near the end stays.
+      points: spreadEvenly(
+        points.filter(({ x, y }) => x !== '' && Number.isFinite(y)),
+        MAX_EVIDENCE_CHART_POINTS
+      ).map(({ x, y }) => ({ x: label(x), y })),
     }))
     .filter(({ points }) => points.length > 0);
   const chart =
@@ -156,7 +183,8 @@ export const limitEvidence = (raw: RawEvidence): InvestigationEvidence | undefin
 
 /** A parsed record with its evidence trimmed to what the stores accept. */
 export type FindingsRecord = Omit<FindingsOutput, 'impact_evidence' | 'hypotheses'> & {
-  impact_evidence?: InvestigationEvidence;
+  /** `null` retracts the stored evidence. */
+  impact_evidence?: InvestigationEvidence | null;
   hypotheses: Array<
     Omit<FindingsOutput['hypotheses'][number], 'evidence'> & { evidence?: InvestigationEvidence[] }
   >;
@@ -164,7 +192,9 @@ export type FindingsRecord = Omit<FindingsOutput, 'impact_evidence' | 'hypothese
 
 /** Trims a parsed record to the sizes the metadata, hypotheses and impact stores accept. */
 export const limitFindings = (output: FindingsOutput): FindingsRecord => {
-  const impactEvidence = output.impact_evidence ? limitEvidence(output.impact_evidence) : undefined;
+  const impactEvidence = output.impact_evidence
+    ? limitEvidence(output.impact_evidence)
+    : output.impact_evidence;
   return {
     ...output,
     impact_evidence: impactEvidence,
@@ -307,14 +337,14 @@ export const FINDINGS_JSON_SCHEMA = {
         'The business consequence in one or two plain sentences: who or what was affected, how badly, for how long, how broadly, with measured numbers. Omit when the evidence shows no impact yet. Under 500 characters.',
     },
     impact_evidence: {
-      ...EVIDENCE_JSON_SCHEMA,
+      anyOf: [EVIDENCE_JSON_SCHEMA, { type: 'null' }],
       description:
-        'Evidence of the impact: for example a chart of the error rate or request volume over the window. Omit when the conversation holds no numbers for it.',
+        'Evidence of the impact: for example a chart of the error rate or request volume over the window. Omit to keep the stored evidence, or when the conversation holds no numbers for it. Use null only to retract evidence you now know is wrong.',
     },
     impact_entities: {
       type: 'array',
       description:
-        'Only when two or more services or components were affected in different ways, grouped at service level. At most 5.',
+        'Only when two or more services or components were affected in different ways, grouped at service level. At most 5. Omit to keep the stored entities; an empty list removes them.',
       items: {
         type: 'object',
         properties: {

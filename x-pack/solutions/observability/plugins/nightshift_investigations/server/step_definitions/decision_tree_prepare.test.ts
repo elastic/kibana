@@ -157,6 +157,26 @@ describe('decisionTreePrepareStepDefinition', () => {
       );
     });
 
+    it('gives the check what the queries returned, not only the queries', async () => {
+      jest.mocked(checkCausalConfirmation).mockResolvedValue(undefined);
+
+      await runWithModel({
+        tool_calls: [
+          { tool_id: 'nightshift_sandbox_bash', tool_call_id: 't1', params: { command: 'curl q' } },
+        ],
+        tool_results: [
+          {
+            tool_call_id: 't1',
+            results: [{ type: 'other', data: { stdout: 'memory_working_set 1.0 of limit 1.0' } }],
+          },
+        ],
+      } as never);
+
+      const { transcript } = jest.mocked(checkCausalConfirmation).mock.calls[0][0];
+      expect(transcript).toContain('## Investigation');
+      expect(transcript).toContain('memory_working_set 1.0 of limit 1.0');
+    });
+
     it('keeps the text match when the check says no, so a stated confirmation is not lost', async () => {
       jest.mocked(checkCausalConfirmation).mockResolvedValue({
         isFeedbackMessage: false,
