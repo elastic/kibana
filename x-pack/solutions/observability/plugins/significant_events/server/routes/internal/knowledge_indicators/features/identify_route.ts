@@ -190,7 +190,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         filtersCapped: z.boolean(),
         hasFilteredDocuments: z.boolean(),
       }),
-      maxExcludedFeaturesInPrompt: z.number().optional(),
+      maxExcludedFeaturesInPrompt: z.number().int().min(0).max(50),
       maxPreviouslyIdentifiedFeatures: z.number().optional(),
     }),
   }),
@@ -205,8 +205,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     maintenanceService,
   }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, sourcesClient, inferenceClient, tuningConfig, licensing } =
-      scopedClients;
+    const { scopedClusterClient, sourcesClient, inferenceClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -220,7 +219,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       iteration,
       documents,
       samplingTelemetry,
-      maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
+      maxExcludedFeaturesInPrompt,
       maxPreviouslyIdentifiedFeatures,
     } = params.body;
     const resolvedRunId = runId?.trim() || uuidv4();
@@ -266,7 +265,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         hasFilteredDocuments,
         iteration,
         tuning: {
-          max_excluded_features_in_prompt: maxExcludedFeaturesInPrompt,
+          maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
         },
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),

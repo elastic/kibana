@@ -82,6 +82,7 @@ const createInferredParams = (
       filtersCapped: false,
       hasFilteredDocuments: false,
     },
+    maxExcludedFeaturesInPrompt: 10,
   },
 });
 
@@ -303,6 +304,23 @@ describe('feature identification route schemas', () => {
     ).toBe(false);
   });
 
+  it('requires maxExcludedFeaturesInPrompt on the inferred route', () => {
+    const params = createInferredParams([{ _id: '1', fields: { message: 'ok' } }]);
+    expect(inferredRoute.params.safeParse(params).success).toBe(true);
+    expect(
+      inferredRoute.params.safeParse({
+        ...params,
+        body: { ...params.body, maxExcludedFeaturesInPrompt: undefined },
+      }).success
+    ).toBe(false);
+    expect(
+      inferredRoute.params.safeParse({
+        ...params,
+        body: { ...params.body, maxExcludedFeaturesInPrompt: 51 },
+      }).success
+    ).toBe(false);
+  });
+
   it('enforces the compact inference document contract', () => {
     expect(
       inferredRoute.params.safeParse(
@@ -415,7 +433,7 @@ describe('inferred feature identification route', () => {
         filtersCapped: false,
         hasFilteredDocuments: true,
         tuning: {
-          max_excluded_features_in_prompt: 5,
+          maxExcludedFeaturesInPrompt: 5,
           maxPreviouslyIdentifiedFeatures: 6,
         },
         trackFeaturesIdentified: expect.any(Function),
