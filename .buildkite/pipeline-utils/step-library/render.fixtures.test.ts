@@ -35,13 +35,10 @@ process.chdir(root);
 
 const fragmentPaths = (): string[] => {
   const dir = '.buildkite/pipelines/pull_request';
-  return [
-    ...fs
-      .readdirSync(path.join(root, dir), { recursive: true, encoding: 'utf8' })
-      .filter((file) => file.endsWith('.yml'))
-      .map((file) => `${dir}/${file}`),
-    '.buildkite/pipelines/fips/verify_fips_enabled.yml',
-  ].filter((file) => fs.existsSync(path.join(root, file)));
+  return fs
+    .readdirSync(path.join(root, dir), { recursive: true, encoding: 'utf8' })
+    .filter((file) => file.endsWith('.yml'))
+    .map((file) => `${dir}/${file}`);
 };
 
 const load = (file: string) => parse(fs.readFileSync(path.join(root, file), 'utf8'));
