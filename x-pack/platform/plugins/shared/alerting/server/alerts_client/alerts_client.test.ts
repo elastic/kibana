@@ -6,6 +6,8 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
@@ -2308,10 +2310,11 @@ describe('Alerts Client', () => {
 
           await alertsClient.initializeExecution(defaultExecutionOpts);
 
-          // Report 2 new alerts
+          // Report 3 new alerts
           const alertExecutorService = alertsClient.factory();
           alertExecutorService.create('1').scheduleActions('default');
           alertExecutorService.create('2').scheduleActions('default');
+          alertExecutorService.create('3').scheduleActions('default');
 
           await alertsClient.processAlerts();
           alertsClient.determineFlappingAlerts();
@@ -2320,7 +2323,7 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          expect(clusterClient.bulk).toHaveBeenCalled();
+          expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
           expect(logger.error).toHaveBeenCalledWith(
             `Error writing alerts ${ruleInfo}: 1 successful, 0 conflicts, 2 errors: Validation Failed: 1: index is missing;2: type is missing;; failed to parse field [process.command_line] of type [wildcard] in document with id 'f0c9805be95fedbc3c99c663f7f02cc15826c122'.`,
             { tags: ['test.rule-type', '1', 'resolve-alert-conflicts'] }
@@ -2547,6 +2550,240 @@ describe('Alerts Client', () => {
           await expect(alertsClient.persistAlerts()).rejects.toThrow(
             'index [.internal.alerts-default.alerts-default-000001] blocked by: [FORBIDDEN/8/index write (api)];'
           );
+        });
+
+        test('should retry the bulk request if it fails with a transient error', async () => {
+          jest.spyOn(Math, 'random').mockReturnValue(0);
+          clusterClient.bulk.mockRejectedValueOnce(
+            new EsErrors.ResponseError(
+              elasticsearchClientMock.createApiResponse({ statusCode: 429 })
+            )
+          );
+          clusterClient.bulk.mockResponseOnce({ errors: false, took: 1, items: [] });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          const persistPromise = alertsClient.persistAlerts();
+          await jest.runAllTimersAsync();
+          await persistPromise;
+
+          expect(clusterClient.bulk).toHaveBeenCalledTimes(2);
+          expect(logger.warn).toHaveBeenCalledWith(
+            expect.stringContaining('Retrying Elasticsearch operation')
+          );
+        });
+
+        test('should retry alerts that failed with a retryable error', async () => {
+          jest.spyOn(Math, 'random').mockReturnValue(0);
+          clusterClient.bulk.mockResponseOnce({
+            errors: true,
+            took: 1,
+            items: [
+              {
+                create: {
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  status: 201,
+                  _seq_no: 0,
+                  _primary_term: 1,
+                },
+              },
+              {
+                create: {
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  status: 429,
+                  error: {
+                    type: 'es_rejected_execution_exception',
+                    reason: 'rejected execution of coordinating operation',
+                  },
+                },
+              },
+            ],
+          });
+          clusterClient.bulk.mockResponseOnce({
+            errors: false,
+            took: 1,
+            items: [
+              {
+                create: {
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  status: 201,
+                  _seq_no: 1,
+                  _primary_term: 1,
+                },
+              },
+            ],
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+          alertExecutorService.create('2').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          const persistPromise = alertsClient.persistAlerts();
+          await jest.runAllTimersAsync();
+          await persistPromise;
+
+          const { rawActiveAlerts } = alertsClient.getRawAlertInstancesForState();
+          const uuid2 = rawActiveAlerts['2'].meta?.uuid;
+
+          expect(clusterClient.bulk).toHaveBeenCalledTimes(2);
+          expect(clusterClient.bulk).toHaveBeenNthCalledWith(2, {
+            index: '.alerts-test.alerts-default',
+            refresh: 'wait_for',
+            require_alias: !useDataStreamForAlerts,
+            operations: [
+              {
+                create: { _id: uuid2, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
+              },
+              getNewIndexedAlertDoc({ [ALERT_UUID]: uuid2, [ALERT_INSTANCE_ID]: '2' }),
+            ],
+          });
+        });
+
+        test('should throw if alerts still fail with a retryable error after all retries', async () => {
+          jest.spyOn(Math, 'random').mockReturnValue(0);
+          clusterClient.bulk.mockResponse({
+            errors: true,
+            took: 1,
+            items: [
+              {
+                create: {
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  status: 429,
+                  error: {
+                    type: 'circuit_breaking_exception',
+                    reason: '[parent] Data too large',
+                  },
+                },
+              },
+            ],
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          const persistExpectation = expect(alertsClient.persistAlerts()).rejects.toThrow(
+            'Failed to write 1 of 1 alerts: 1 circuit_breaking_exception'
+          );
+          await jest.runAllTimersAsync();
+          await persistExpectation;
+
+          expect(clusterClient.bulk).toHaveBeenCalledTimes(4);
+          expect(logger.error).toHaveBeenCalledWith(
+            `Error writing 1 alerts to .alerts-test.alerts-default ${ruleInfo} - Failed to write 1 of 1 alerts: 1 circuit_breaking_exception`,
+            logTags
+          );
+        });
+
+        test('should throw if alert conflicts are still unresolved after all retries', async () => {
+          jest.spyOn(Math, 'random').mockReturnValue(0);
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 1 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+              ],
+            },
+          });
+          clusterClient.bulk.mockResponse({
+            errors: true,
+            took: 1,
+            items: [
+              {
+                index: {
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _id: 'abc',
+                  status: 409,
+                  error: {
+                    type: 'version_conflict_engine_exception',
+                    reason: '[abc]: version conflict',
+                  },
+                },
+              },
+            ],
+          });
+          for (let mgetCall = 0; mgetCall < 3; mgetCall++) {
+            clusterClient.mget.mockResponseOnce({
+              docs: [
+                {
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _id: 'abc',
+                  _seq_no: 42,
+                  _primary_term: 665,
+                  found: true,
+                  _source: {},
+                },
+              ],
+            });
+          }
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: { '1': trackedAlert1Raw },
+          });
+
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          await alertsClient.processAlerts();
+          alertsClient.determineFlappingAlerts();
+          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.logAlerts(logAlertsOpts);
+
+          const persistExpectation = expect(alertsClient.persistAlerts()).rejects.toThrow(
+            'Failed to write 1 of 1 alerts: 1 version_conflict_engine_exception'
+          );
+          await jest.runAllTimersAsync();
+          await persistExpectation;
+
+          expect(clusterClient.mget).toHaveBeenCalledTimes(3);
+          expect(clusterClient.bulk).toHaveBeenCalledTimes(4);
         });
       });
 

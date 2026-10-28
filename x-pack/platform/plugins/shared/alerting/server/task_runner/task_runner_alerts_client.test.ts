@@ -116,6 +116,7 @@ import {
 } from './maintenance_windows/maintenance_windows_service.mock';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import { EVENT_LOG_ACTIONS } from '../plugin';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 jest.mock('uuid', () => ({
@@ -748,6 +749,161 @@ describe('Task Runner', () => {
             },
           ],
         });
+        spy.mockRestore();
+      });
+
+      test('should keep the task state and skip alert events and actions when alert documents fail to write', async () => {
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        const alertsService = new AlertsService({
+          logger,
+          pluginStop$: new ReplaySubject(1),
+          kibanaVersion: '8.8.0',
+          elasticsearchClientPromise: Promise.resolve(clusterClient),
+          dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
+          elasticsearchAndSOAvailability$,
+          isServerless: false,
+        });
+        elasticsearchAndSOAvailability$.next(true);
+
+        const spy = jest
+          .spyOn(alertsService, 'getContextInitializationPromise')
+          .mockResolvedValue({ result: true });
+
+        taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+        taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+        ruleTypeWithAlerts.executor.mockResolvedValue({ state: {} });
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+        const alertIndex = '.internal.alerts-test.alerts-default-000001';
+        clusterClient.search.mockResolvedValue({
+          took: 10,
+          timed_out: false,
+          _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+          hits: {
+            total: { relation: 'eq', value: 1 },
+            hits: [
+              {
+                _id: 'abc',
+                _index: alertIndex,
+                _seq_no: 41,
+                _primary_term: 665,
+                _source: {
+                  [TIMESTAMP]: DATE_1970,
+                  [EVENT_ACTION]: 'open',
+                  [EVENT_KIND]: 'signal',
+                  [ALERT_ACTION_GROUP]: 'default',
+                  [ALERT_DURATION]: 0,
+                  [ALERT_FLAPPING]: false,
+                  [ALERT_FLAPPING_HISTORY]: [true],
+                  [ALERT_INSTANCE_ID]: '1',
+                  [ALERT_RULE_CATEGORY]: 'My test rule',
+                  [ALERT_RULE_CONSUMER]: 'bar',
+                  [ALERT_RULE_EXECUTION_UUID]: RULE_EXECUTION_UUID,
+                  [ALERT_RULE_NAME]: 'rule-name',
+                  [ALERT_RULE_PARAMETERS]: { bar: true },
+                  [ALERT_RULE_PRODUCER]: 'alerts',
+                  [ALERT_RULE_REVISION]: 0,
+                  [ALERT_RULE_TYPE_ID]: 'test',
+                  [ALERT_RULE_TAGS]: ['rule-', '-tags'],
+                  [ALERT_RULE_UUID]: '1',
+                  [ALERT_START]: DATE_1970,
+                  [ALERT_STATUS]: 'active',
+                  [ALERT_TIME_RANGE]: { gte: DATE_1970 },
+                  [ALERT_TRACKED]: true,
+                  [ALERT_UUID]: 'abc',
+                  [ALERT_WORKFLOW_STATUS]: 'open',
+                  [SPACE_IDS]: ['default'],
+                  [VERSION]: '8.8.0',
+                  [TAGS]: ['rule-', '-tags'],
+                },
+              },
+            ],
+          },
+        });
+
+        const taskInstance = {
+          ...mockedTaskInstance,
+          state: {
+            ...mockedTaskInstance.state,
+            alertInstances: {
+              '1': {
+                meta: {
+                  uuid: 'abc',
+                  flappingHistory: [true],
+                  lastScheduledActions: { group: 'default', date: DATE_1970 },
+                },
+                state: { start: DATE_1970, duration: '0' },
+              },
+            },
+          },
+        };
+
+        // the alert recovers, but writing its recovered document keeps failing
+        clusterClient.bulk.mockResponse({
+          errors: true,
+          took: 1,
+          items: [
+            {
+              index: {
+                _index: alertIndex,
+                _id: 'abc',
+                status: 429,
+                error: { type: 'circuit_breaking_exception', reason: '[parent] Data too large' },
+              },
+            },
+          ],
+        });
+
+        const failedRun = createTaskRunner({
+          taskInstance,
+          context: { ...taskRunnerFactoryInitializerParams, alertsService },
+        }).run();
+        await jest.runAllTimersAsync();
+        const failedRunResult = await failedRun;
+
+        expect(clusterClient.bulk).toHaveBeenCalledTimes(4);
+        expect(failedRunResult.state).toEqual(taskInstance.state);
+        expect(failedRunResult.taskRunError?.message).toBe(
+          'Failed to write 1 of 1 alerts: 1 circuit_breaking_exception'
+        );
+        expect(alertingEventLogger.logAlert).not.toHaveBeenCalled();
+        expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+
+        // the next run writes the recovered document and reports the recovery once
+        clusterClient.bulk.mockClear();
+        clusterClient.bulk.mockResponse({
+          errors: false,
+          took: 1,
+          items: [
+            {
+              index: {
+                _index: alertIndex,
+                _id: 'abc',
+                status: 200,
+                _seq_no: 42,
+                _primary_term: 665,
+              },
+            },
+          ],
+        });
+
+        const recoveredRun = createTaskRunner({
+          taskInstance: { ...taskInstance, state: failedRunResult.state },
+          context: { ...taskRunnerFactoryInitializerParams, alertsService },
+        }).run();
+        await jest.runAllTimersAsync();
+        await recoveredRun;
+
+        expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
+        expect(alertingEventLogger.logAlert).toHaveBeenCalledTimes(1);
+        expect(alertingEventLogger.logAlert).toHaveBeenCalledWith(
+          expect.objectContaining({ action: EVENT_LOG_ACTIONS.recoveredInstance, id: '1' })
+        );
+        expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+
+        taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReset();
+        taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReset();
         spy.mockRestore();
       });
 
