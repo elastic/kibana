@@ -23,7 +23,8 @@ Certificates and keys are provided in multiple formats. These can be used by oth
 * `pki_intermediate_ca_2.crt` -- A PEM-formatted X.509 certificate for a second intermediate CA, signed by `pki_intermediate_ca.crt`.
 * `pki_intermediate_client.crt` / `.key` -- A PKI client certificate signed by `pki_intermediate_ca.crt`, and its PKCS #8 private key.
 * `pki_intermediate_2_client.crt` / `.key` -- A PKI client certificate signed by `pki_intermediate_ca_2.crt`, and its PKCS #8 private key.
-* `pki_untrusted_client.crt` / `.key` -- A PKI client certificate signed by a throwaway root CA that nothing trusts, and its PKCS #8 private key.
+* `pki_untrusted_ca.crt` -- A PEM-formatted X.509 certificate for a throwaway root CA that nothing trusts.
+* `pki_untrusted_client.crt` / `.key` -- A PKI client certificate signed by `pki_untrusted_ca.crt`, and its PKCS #8 private key.
 
 ### PKCS #12
 

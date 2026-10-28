@@ -54,6 +54,7 @@ export const PKI_INTERMEDIATE_2_CLIENT_KEY_PATH = resolve(
   __dirname,
   '../certs/pki_intermediate_2_client.key'
 );
+export const PKI_UNTRUSTED_CA_CERT_PATH = resolve(__dirname, '../certs/pki_untrusted_ca.crt');
 export const PKI_UNTRUSTED_CLIENT_CERT_PATH = resolve(
   __dirname,
   '../certs/pki_untrusted_client.crt'

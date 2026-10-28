@@ -22,6 +22,7 @@ import {
   PKI_INTERMEDIATE_CLIENT_KEY_PATH,
   PKI_INTERMEDIATE_2_CLIENT_CERT_PATH,
   PKI_INTERMEDIATE_2_CLIENT_KEY_PATH,
+  PKI_UNTRUSTED_CA_CERT_PATH,
   PKI_UNTRUSTED_CLIENT_CERT_PATH,
   PKI_UNTRUSTED_CLIENT_KEY_PATH,
 } from '@kbn/dev-utils';
@@ -89,9 +90,15 @@ const leafOnlyClient = clientIdentity(
   PKI_INTERMEDIATE_CLIENT_KEY_PATH,
   PKI_INTERMEDIATE_CLIENT_CERT_PATH
 );
+const leafOnlyTwoIntermediatesClient = clientIdentity(
+  PKI_INTERMEDIATE_2_CLIENT_KEY_PATH,
+  PKI_INTERMEDIATE_2_CLIENT_CERT_PATH
+);
+/** Sends a complete chain, so the only thing wrong with it is the root. */
 const untrustedClient = clientIdentity(
   PKI_UNTRUSTED_CLIENT_KEY_PATH,
-  PKI_UNTRUSTED_CLIENT_CERT_PATH
+  PKI_UNTRUSTED_CLIENT_CERT_PATH,
+  PKI_UNTRUSTED_CA_CERT_PATH
 );
 
 const ONE_INTERMEDIATE_CHAIN = ['pki_intermediate_client', INTERMEDIATE_CA_CN, ROOT_CA_CN];
@@ -309,7 +316,7 @@ describe.each<Protocol>(['http1', 'http2'])('TLS client certificate chain (%s)',
 
         for (const response of responses) {
           expect(response.authorized).toBe(false);
-          expect(response.authorizationError).toBe('UNABLE_TO_VERIFY_LEAF_SIGNATURE');
+          expect(response.authorizationError).toBe('SELF_SIGNED_CERT_IN_CHAIN');
         }
       });
     });
@@ -377,6 +384,22 @@ describe.each<Protocol>(['http1', 'http2'])('TLS client certificate chain (%s)',
         }
       });
 
+      it('returns the full chain when a client two intermediates down sends only its leaf certificate', async () => {
+        const responses = await requestChainOverOneConnection({
+          protocol,
+          tlsVersion,
+          ...leafOnlyTwoIntermediatesClient,
+        });
+
+        for (const response of responses) {
+          expect(response).toEqual({
+            authorized: true,
+            chain: TWO_INTERMEDIATES_CHAIN,
+            isChainIncomplete: false,
+          });
+        }
+      });
+
       it('does not authorize a client certificate from an untrusted root CA', async () => {
         const responses = await requestChainOverOneConnection({
           protocol,
@@ -386,7 +409,7 @@ describe.each<Protocol>(['http1', 'http2'])('TLS client certificate chain (%s)',
 
         for (const response of responses) {
           expect(response.authorized).toBe(false);
-          expect(response.authorizationError).toBe('UNABLE_TO_VERIFY_LEAF_SIGNATURE');
+          expect(response.authorizationError).toBe('SELF_SIGNED_CERT_IN_CHAIN');
         }
       });
     });
