@@ -164,7 +164,6 @@
         "playwright",
         "pngjs",
         "rxjs-marbles",
-        "sharp",
         "superagent",
         "supertest"
       ],
