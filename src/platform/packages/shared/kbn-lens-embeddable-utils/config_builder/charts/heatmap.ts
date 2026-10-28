@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CUSTOM_PALETTE, shiftPalette } from '@kbn/coloring';
 import type {
   FormBasedPersistedState,
   HeatmapPalette,
@@ -18,6 +17,7 @@ import type { BuildDependencies, LensAttributes, LensHeatmapConfig } from '../ty
 import { DEFAULT_LAYER_ID } from '../constants';
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
+import { fromColorByValueAPIToLensState } from '../transforms/coloring';
 
 const ACCESSOR = 'metric_formula_accessor';
 
@@ -32,26 +32,28 @@ function buildCellPalette(colors: readonly string[]): HeatmapPalette | undefined
   }
 
   const step = 100 / colors.length;
-  const colorStops = colors.map((color, index) => ({
-    color,
-    stop: index * step,
-  }));
-  const stops = shiftPalette(colorStops, 100);
+  const palette = fromColorByValueAPIToLensState({
+    type: 'dynamic',
+    range: 'percentage',
+    steps: colors.map((color, index) => {
+      const start = index * step;
+      const end = (index + 1) * step;
+      return index === colors.length - 1
+        ? { color, gte: start, lte: end }
+        : { color, gte: start, lt: end };
+    }),
+  });
+
+  if (!palette) {
+    return undefined;
+  }
 
   return {
-    type: 'palette',
-    name: CUSTOM_PALETTE,
+    ...palette,
     accessor: ACCESSOR,
     params: {
-      name: CUSTOM_PALETTE,
-      reverse: false,
-      rangeType: 'percent',
-      rangeMin: 0,
-      rangeMax: 100,
-      continuity: 'all',
-      steps: colors.length,
-      stops,
-      colorStops,
+      ...palette.params,
+      continuity: 'none',
     },
   };
 }

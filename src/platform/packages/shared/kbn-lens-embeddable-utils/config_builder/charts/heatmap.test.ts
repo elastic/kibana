@@ -170,8 +170,7 @@ test('writes a custom percent palette when cell colors are provided', async () =
           rangeType: 'percent',
           rangeMin: 0,
           rangeMax: 100,
-          continuity: 'all',
-          steps: colors.length,
+          continuity: 'none',
           stops: [
             { color: '#d6e8f5', stop: 100 / 3 },
             { color: '#8ec4ea', stop: 200 / 3 },
