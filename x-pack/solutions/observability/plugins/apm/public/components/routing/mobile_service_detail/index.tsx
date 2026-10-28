@@ -202,6 +202,7 @@ export const mobileServiceDetailRoute = {
                   z.object({
                     traceId: z.string().optional(),
                     transactionId: z.string().optional(),
+                    sampleIndex: z.coerce.number().optional(),
                     flyoutDetailTab: z.string().optional(),
                     sampleRangeTo: z.coerce.number().optional(),
                     sampleRangeFrom: z.coerce.number().optional(),

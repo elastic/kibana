@@ -39,7 +39,7 @@ import { useGetErrorMarkerHrefFromRouter } from './waterfall_container/use_get_e
 interface Props<TSample extends {}> {
   traceSamples?: TSample[];
   traceSamplesFetchStatus: FETCH_STATUS;
-  onSampleClick: (sample: TSample) => void;
+  onSampleClick: (sample: TSample, index: number) => void;
   onTabClick: (tab: TransactionTab) => void;
   serviceName?: string;
   waterfallItemId?: string;
@@ -47,6 +47,12 @@ interface Props<TSample extends {}> {
   showCriticalPath: boolean;
   onShowCriticalPathChange: (showCriticalPath: boolean) => void;
   selectedSample?: TSample | null;
+  // In controlled mode, the array position of the selected sample. When
+  // provided it drives the pagination index directly, so samples that share
+  // the same identifiers (e.g. paired `gen_ai.*` docs with identical
+  // traceId/transactionId) can still be navigated individually. Falls back to
+  // `indexOf(selectedSample)` when omitted.
+  selectedSampleIndex?: number;
   logsTableConfig?: SavedSearchTableConfig;
   onLogsTableConfigChange?: (config: SavedSearchTableConfig) => void;
   unifiedWaterfallFetchResult: UnifiedWaterfallFetcherResult;
@@ -67,6 +73,7 @@ export function WaterfallWithSummary<TSample extends {}>({
   showCriticalPath,
   onShowCriticalPathChange,
   selectedSample,
+  selectedSampleIndex,
   logsTableConfig,
   onLogsTableConfigChange,
   unifiedWaterfallFetchResult,
@@ -108,11 +115,22 @@ export function WaterfallWithSummary<TSample extends {}>({
     if (!isControlled) {
       setSampleActivePage(index);
     }
-    onSampleClick(sample);
+    onSampleClick(sample, index);
   };
 
+  // Prefer the explicit index when the parent provides one: two samples that
+  // share the same identifiers would otherwise both resolve to the first match
+  // via `indexOf`, making forward navigation a no-op.
+  const hasSelectedSampleIndex =
+    selectedSampleIndex !== undefined &&
+    !!traceSamples &&
+    selectedSampleIndex >= 0 &&
+    selectedSampleIndex < traceSamples.length;
+
   const samplePageIndex = isControlled
-    ? selectedSample
+    ? hasSelectedSampleIndex
+      ? selectedSampleIndex
+      : selectedSample
       ? traceSamples?.indexOf(selectedSample)
       : 0
     : sampleActivePage;
