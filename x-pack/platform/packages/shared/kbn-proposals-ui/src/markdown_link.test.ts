@@ -59,6 +59,24 @@ describe('resolveAppHref', () => {
     expect(resolveAppHref('/app/security/alerts', bareBasePath)).toBe('/app/security/alerts');
   });
 
+  it('leaves a link core already resolved alone instead of doubling the base path', () => {
+    expect(resolveAppHref('/kbn/s/soc/app/security/rules/id/abc', basePath)).toBe(
+      '/kbn/s/soc/app/security/rules/id/abc'
+    );
+    expect(resolveAppHref('/kbn', basePath)).toBe('/kbn');
+    expect(basePath.prepend).not.toHaveBeenCalled();
+  });
+
+  it('still resolves a path that merely starts with the base path text', () => {
+    expect(resolveAppHref('/kbnapp/app/security', basePath)).toBe('/kbn/s/soc/kbnapp/app/security');
+  });
+
+  it('keeps a query or hash on a space root rather than throwing', () => {
+    expect(resolveAppHref('/s/soc?tab=1', basePath)).toBe('/kbn/s/soc/?tab=1');
+    expect(resolveAppHref('/s/other#top', basePath)).toBe('/kbn/s/other/#top');
+    expect(resolveAppHref('/s/default?tab=1', basePath)).toBe('/kbn/?tab=1');
+  });
+
   it.each(['https://example.com/runbook', '//example.com/x', 'mailto:soc@example.com'])(
     'leaves %s untouched',
     (href) => {
