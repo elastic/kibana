@@ -7,12 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more
- * contributor license agreements. Licensed under Elasticsearch B.V. (the "Elastic License
- * 2.0"); you may not use this file except in compliance with the Elastic License 2.0.
- */
-
 import { parse } from 'yaml';
 import { ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW } from '.';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
@@ -83,13 +77,27 @@ describe('rule_tuning_review oversized exception handling', () => {
     it('renders true when the entry list exceeds max_exception_entries', () => {
       // Regression: pre-fix, the 101st entry (an ANDed constraint) was dropped,
       // silently broadening the exception.
-      expect(renderOverflow(nStrings(MAX_ENTRIES + 1).map((v) => entry([v])))).toContain('true');
+      expect(renderOverflow(nStrings(MAX_ENTRIES + 1).map((v) => entry([v])))).toBe('true');
     });
 
     it('renders true when one entry exceeds max_exception_values', () => {
       // Regression: pre-fix, a sliced is_not_one_of list made the omitted
       // entities eligible for suppression.
-      expect(renderOverflow([entry(nStrings(MAX_VALUES + 1))])).toContain('true');
+      expect(renderOverflow([entry(nStrings(MAX_VALUES + 1))])).toBe('true');
+    });
+
+    // The gate compares the rendered value to 'true', so several violations must
+    // not concatenate into 'truetrue' and skip workflow.fail.
+    it('renders exactly true when two entries each exceed max_exception_values', () => {
+      expect(
+        renderOverflow([entry(nStrings(MAX_VALUES + 1)), entry(nStrings(MAX_VALUES + 1))])
+      ).toBe('true');
+    });
+
+    it('renders exactly true when entries exceed the cap and one entry also exceeds max_exception_values', () => {
+      const entries = nStrings(MAX_ENTRIES + 1).map((v) => entry([v]));
+      entries[0] = entry(nStrings(MAX_VALUES + 1));
+      expect(renderOverflow(entries)).toBe('true');
     });
 
     it('renders empty (no overflow) for an at-cap recommendation', () => {

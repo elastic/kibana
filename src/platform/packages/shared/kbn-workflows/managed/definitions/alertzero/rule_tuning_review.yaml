@@ -673,9 +673,11 @@ steps:
         and steps.fetch_rule.output.enabled == true
         and steps.diagnose_rule.output.structured_output.change_type == 'exception' }}
     with:
-      # Renders "true" when the recommendation exceeds either platform bound.
+      # Renders exactly "true" when the recommendation exceeds either platform
+      # bound, however many violations there are: the gate compares with == 'true',
+      # so per-violation output ("truetrue") would skip the fail-closed gate.
       overflow: >-
-        {% if steps.diagnose_rule.output.structured_output.exception_entries.size > consts.max_exception_entries %}true{% endif %}{% for entry in steps.diagnose_rule.output.structured_output.exception_entries %}{% if entry.values != nil and entry.values.size > consts.max_exception_values %}true{% endif %}{% endfor %}
+        {%- assign entries = steps.diagnose_rule.output.structured_output.exception_entries -%}{%- assign exceeded = false -%}{%- if entries.size > consts.max_exception_entries -%}{%- assign exceeded = true -%}{%- endif -%}{%- for entry in entries -%}{%- if entry.values != nil and entry.values.size > consts.max_exception_values -%}{%- assign exceeded = true -%}{%- endif -%}{%- endfor -%}{%- if exceeded -%}true{%- endif -%}
 
   # Fail-closed: an oversized exception must never reach the filter step, the
   # attachment, the proposal text or the action. The run fails before

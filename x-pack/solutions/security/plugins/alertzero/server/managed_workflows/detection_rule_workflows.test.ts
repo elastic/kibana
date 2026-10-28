@@ -1653,7 +1653,9 @@ describe('detection rule workflows', () => {
           expect(consts.max_exception_values).toBe(1000);
         });
 
-        it('caps oversized exception entries at consts.max_exception_entries', () => {
+        // bound_exception_entries is a backstop: on overflow, reject_oversized_exception
+        // fails the run first, so these truncations are unreachable in a real run.
+        it('backstop bound_exception_entries truncates entries at consts.max_exception_entries', () => {
           const oversized = Array.from({ length: consts.max_exception_entries + 25 }, (_, i) => ({
             field: `host.name.${i}`,
             operator: 'is',
@@ -1667,7 +1669,7 @@ describe('detection rule workflows', () => {
           expect(result[result.length - 1]).toEqual(oversized[consts.max_exception_entries - 1]);
         });
 
-        it('caps oversized values at consts.max_exception_values and keeps the order', () => {
+        it('backstop bound_exception_entries truncates values at consts.max_exception_values, keeping order', () => {
           const values = Array.from(
             { length: consts.max_exception_values + 40 },
             (_, i) => `v${i}`
