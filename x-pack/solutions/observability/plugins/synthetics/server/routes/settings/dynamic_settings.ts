@@ -16,13 +16,15 @@ import {
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { DynamicSettings } from '../../../common/runtime_types';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { DEFAULT_RULE_SETTINGS, SYNTHETICS_API_URLS } from '../../../common/constants';
 import { runRebalanceShardsTaskSoon } from '../../tasks/rebalance_private_location_shards_task';
 import {
   getRebalancePrivateLocationShardsEnabled,
   setRebalancePrivateLocationShardsEnabled,
 } from '../../tasks/rebalance_shards_enabled';
 import { canManageClusterSettings } from './cluster_settings_privileges';
+import { WRITE_SYNTHETICS_SETTINGS_API } from '../../constants/privileges';
+import { WRITE_SYNTHETICS_DEFAULT_RULES_API } from '../../feature';
 
 export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   DynamicSettings
@@ -55,7 +57,24 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
     body: DynamicSettingsSchema,
   },
   writeAccess: true,
+  anyRequiredPrivileges: ['uptime-write', WRITE_SYNTHETICS_SETTINGS_API],
+  extendedPrivileges: [WRITE_SYNTHETICS_DEFAULT_RULES_API],
   handler: async ({ savedObjectsClient, request, response, server }): Promise<DynamicSettings> => {
+    const changesDefaultRules = DEFAULT_RULE_SETTINGS.some((setting) => setting in request.body);
+    const canManageDefaultRules =
+      request.authzResult?.['uptime-write'] === true ||
+      request.authzResult?.[WRITE_SYNTHETICS_DEFAULT_RULES_API] === true;
+
+    if (changesDefaultRules && !canManageDefaultRules) {
+      return response.forbidden({
+        body: {
+          message: i18n.translate('xpack.synthetics.settings.defaultRules.forbidden', {
+            defaultMessage: 'You do not have permission to update Synthetics default rules.',
+          }),
+        },
+      }) as never;
+    }
+
     const {
       privateLocationsSyncInterval: _ignoredSyncInterval,
       rebalancePrivateLocationShardsEnabled,

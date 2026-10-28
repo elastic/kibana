@@ -29,7 +29,6 @@ import {
   getDynamicSettingsAction,
   setDynamicSettingsAction,
 } from '../../../state/settings/actions';
-import type { DynamicSettings } from '../../../../../../common/runtime_types';
 import { useCanManageClusterSettings } from './use_can_manage_cluster_settings';
 
 export const AdvancedSettingsForm = () => {
@@ -41,8 +40,8 @@ export const AdvancedSettingsForm = () => {
     DYNAMIC_SETTINGS_DEFAULTS.rebalancePrivateLocationShardsEnabled ?? true
   );
 
-  const canEdit: boolean =
-    !!useKibana().services?.application?.capabilities.uptime.configureSettings || false;
+  const capabilities = useKibana().services?.application?.capabilities.uptime;
+  const canEdit = Boolean(capabilities?.configureSettings || capabilities?.canManageSettings);
 
   const { canManage: canManageClusterSettings, loading: privilegesLoading } =
     useCanManageClusterSettings();
@@ -71,9 +70,8 @@ export const AdvancedSettingsForm = () => {
     if (settings) {
       dispatch(
         setDynamicSettingsAction.get({
-          ...settings,
           rebalancePrivateLocationShardsEnabled: rebalanceShardsEnabled,
-        } as DynamicSettings)
+        })
       );
     }
   };
