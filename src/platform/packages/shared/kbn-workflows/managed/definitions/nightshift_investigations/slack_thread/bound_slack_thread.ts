@@ -30,7 +30,8 @@ export const renderBoundSlackThreadYaml = ({
 export const NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  // 2: the investigation call inherits the space's agent account (`run-as-mode: inherit`).
+  version: 2,
   billable: false,
   yamlTemplate: renderBoundSlackThreadYaml,
   management: {
