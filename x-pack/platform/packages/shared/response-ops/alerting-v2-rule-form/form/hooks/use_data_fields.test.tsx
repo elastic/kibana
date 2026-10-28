@@ -84,6 +84,32 @@ describe('useDataFields', () => {
     expect(result.current.error).toBeNull();
   });
 
+  it('forwards the project routing to getESQLAdHocDataview', async () => {
+    mockGetESQLAdHocDataview.mockResolvedValue(null as any);
+
+    const http = httpServiceMock.createStartContract();
+    const dataViews = dataViewPluginMocks.createStartContract();
+
+    const { result } = renderHook(
+      () =>
+        useDataFields({
+          query: 'FROM logs-*',
+          http,
+          dataViews,
+          projectRouting: '_alias:*',
+        }),
+      { wrapper: createQueryClientWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+      expect.objectContaining({ projectRouting: '_alias:*' })
+    );
+  });
+
   it('handles errors gracefully', async () => {
     const testError = new Error('Failed to fetch data view');
     mockGetESQLAdHocDataview.mockRejectedValue(testError);
@@ -231,6 +257,35 @@ describe('useDataFields', () => {
 
       expect(mockGetESQLQueryColumnsRaw).toHaveBeenCalledWith(
         expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
+    });
+
+    it('forwards the project routing to getESQLQueryColumnsRaw', async () => {
+      mockGetESQLQueryColumnsRaw.mockResolvedValue([
+        { name: '@timestamp', type: 'date', isNull: false },
+      ] as any);
+
+      const http = httpServiceMock.createStartContract();
+      const dataViews = dataViewPluginMocks.createStartContract();
+
+      const { result } = renderHook(
+        () =>
+          useDataFields({
+            query: 'FROM logs-*',
+            http,
+            dataViews,
+            search: mockSearch as any,
+            projectRouting: '_alias:*',
+          }),
+        { wrapper: createQueryClientWrapper() }
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(mockGetESQLQueryColumnsRaw).toHaveBeenCalledWith(
+        expect.objectContaining({ projectRouting: '_alias:*' })
       );
     });
 

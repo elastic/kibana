@@ -758,6 +758,7 @@ export function ComposeDiscoverFlyout({
     http: baseServices.http,
     dataViews: baseServices.dataViews,
     search: baseServices.data.search.search,
+    projectRouting: baseServices.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   /*

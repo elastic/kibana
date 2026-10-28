@@ -85,6 +85,7 @@ export async function getESQLQueryColumnsRaw({
   timeRange,
   variables,
   includeColumnMetadata,
+  projectRouting,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -94,6 +95,7 @@ export async function getESQLQueryColumnsRaw({
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
   includeColumnMetadata?: boolean;
+  projectRouting?: ProjectRouting;
 }): Promise<ESQLColumn[]> {
   try {
     const namedParams = getNamedParams(esqlQuery, timeRange, variables);
@@ -111,6 +113,7 @@ export async function getESQLQueryColumnsRaw({
         {
           abortSignal: signal,
           strategy: 'esql_async',
+          ...(projectRouting !== undefined ? { projectRouting } : {}),
         }
       )
     );
