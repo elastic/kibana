@@ -79,8 +79,8 @@ export class ApiKeyService implements ApiKeyServiceContract {
       await this.invalidationSavedObjectsClient.bulkCreate(apiKeysToInvalidate);
     } catch (e) {
       this.logger.error(
-        `Failed to bulk mark list of API keys [${apiKeys
-          .map((key) => `"${key}"`)
+        `Failed to bulk mark list of API keys [${apiKeysToInvalidate
+          .map(({ attributes }) => `"${attributes.apiKeyId}"`)
           .join(', ')}] for invalidation: ${(e as Error).message}`,
         {
           error: { stack_trace: (e as Error).stack },

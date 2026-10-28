@@ -14,7 +14,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { DownloadSourceSOAttributes } from '../types';
 import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../constants';
 
-import { downloadSourceService } from './download_source';
+import { downloadSourceService, savedObjectToDownloadSource } from './download_source';
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import {
@@ -1143,6 +1143,93 @@ describe('Download Service', () => {
       );
       expect(soClientMock.delete).toBeCalled();
     });
+
+    describe('cross-space authorization', () => {
+      const mockRequest = {} as any;
+      const mockAtSpaces = jest.fn();
+
+      function mockSecurity(hasAllRequested = true) {
+        mockAtSpaces.mockResolvedValue({ hasAllRequested });
+        mockedAppContextService.getSecurity.mockReturnValue({
+          authz: {
+            mode: { useRbacForRequest: jest.fn().mockReturnValue(true) },
+            actions: { api: { get: (name: string) => `api:${name}` } },
+            checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces: mockAtSpaces }),
+          },
+        } as any);
+      }
+
+      beforeEach(() => {
+        mockAtSpaces.mockReset();
+        mockedAgentPolicyService.getSpacesForPoliciesUsingDownloadSource.mockResolvedValue({
+          spaceIds: new Set(['default']),
+          truncated: false,
+        });
+      });
+
+      it('skips authz check when request is not provided (preconfiguration path)', async () => {
+        mockSecurity(false);
+        getMockedSoClient();
+
+        await downloadSourceService.delete('download-source-test');
+
+        expect(mockAtSpaces).not.toHaveBeenCalled();
+      });
+
+      it('skips space collection and authz check when RBAC is inactive', async () => {
+        mockedAppContextService.getSecurity.mockReturnValue({
+          authz: {
+            mode: { useRbacForRequest: jest.fn().mockReturnValue(false) },
+            actions: { api: { get: (name: string) => `api:${name}` } },
+            checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces: mockAtSpaces }),
+          },
+        } as any);
+        getMockedSoClient();
+
+        await downloadSourceService.delete('download-source-test', { request: mockRequest });
+
+        expect(
+          mockedAgentPolicyService.getSpacesForPoliciesUsingDownloadSource
+        ).not.toHaveBeenCalled();
+        expect(mockAtSpaces).not.toHaveBeenCalled();
+        expect(mockedAgentPolicyService.removeDefaultSourceFromAll).toHaveBeenCalled();
+      });
+
+      it('allows delete when caller holds required privileges in all affected spaces', async () => {
+        mockSecurity(true);
+        getMockedSoClient();
+
+        await expect(
+          downloadSourceService.delete('download-source-test', { request: mockRequest })
+        ).resolves.not.toThrow();
+        expect(mockAtSpaces).toHaveBeenCalled();
+        expect(mockedAgentPolicyService.removeDefaultSourceFromAll).toHaveBeenCalled();
+      });
+
+      it('blocks delete and does not call removeDefaultSourceFromAll when caller lacks privileges', async () => {
+        mockSecurity(false);
+        getMockedSoClient();
+
+        await expect(
+          downloadSourceService.delete('download-source-test', { request: mockRequest })
+        ).rejects.toThrow('Insufficient privileges to delete download source download-source-test');
+        expect(mockedAgentPolicyService.removeDefaultSourceFromAll).not.toHaveBeenCalled();
+      });
+
+      it('throws when policy list is truncated and does not mutate', async () => {
+        mockSecurity(true);
+        mockedAgentPolicyService.getSpacesForPoliciesUsingDownloadSource.mockResolvedValue({
+          spaceIds: new Set(['default']),
+          truncated: true,
+        });
+        getMockedSoClient();
+
+        await expect(
+          downloadSourceService.delete('download-source-test', { request: mockRequest })
+        ).rejects.toThrow(/too many agent policies/);
+        expect(mockedAgentPolicyService.removeDefaultSourceFromAll).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('get', () => {
@@ -1190,6 +1277,59 @@ describe('Download Service', () => {
         async () => await downloadSourceService.requireUniqueName({ name: 'Test' })
       ).not.toThrow();
       expect(soClientMock.find).toBeCalled();
+    });
+  });
+
+  describe('savedObjectToDownloadSource', () => {
+    it('uses canonical source_id over poisoned attributes.id', () => {
+      const so = mockDownloadSourceSO('canonical-id', {
+        id: 'poisoned-id',
+        name: 'Test',
+        host: 'http://test.co',
+        is_default: false,
+      });
+
+      const result = savedObjectToDownloadSource(so as any);
+
+      expect(result.id).toBe('canonical-id');
+    });
+
+    it('uses so.id fallback when source_id absent and attributes.id is poisoned', () => {
+      const so = {
+        id: 'so-uuid-fallback',
+        type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {
+          id: 'poisoned-id',
+          name: 'Test',
+          host: 'http://test.co',
+          is_default: false,
+        },
+      };
+
+      const result = savedObjectToDownloadSource(so as any);
+
+      expect(result.id).toBe('so-uuid-fallback');
+    });
+  });
+
+  describe('update ID stripping', () => {
+    it('does not persist body id to saved object attributes', async () => {
+      const soClientMock = getMockedSoClient();
+
+      await downloadSourceService.update(soClientMock, esClient, 'download-source-test', {
+        id: 'evil-injected-id',
+        name: 'Updated name',
+        host: 'http://test.co',
+        is_default: false,
+      } as any);
+
+      const updateCall = soClientMock.update.mock.calls.find(
+        (call) => call[1] === 'download-source-test'
+      );
+      expect(updateCall).toBeDefined();
+      expect(updateCall![2]).not.toHaveProperty('id');
+      expect(updateCall![2]).toMatchObject({ name: 'Updated name' });
     });
   });
 });

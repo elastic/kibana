@@ -834,6 +834,7 @@ export class ActionsPlugin
     return new ActionsAuthorization({
       request,
       authorization: this.security?.authz,
+      spaces: this.spaces?.spacesService,
     });
   };
 

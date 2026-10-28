@@ -1,3 +1,5 @@
+cbor2
+@launchdarkly/js-client-sdk
 @eslint-community/eslint-plugin-eslint-comments
 @xterm/xterm
 safe-stable-stringify
@@ -60,5 +62,10 @@ redux-thunk-v2
 redux-toolkit-v1
 redux-v4
 reselect-v4
+@swc/jest
+@swc/plugin-emotion
+@ampproject/remapping
+magic-string
 graphql
 @swc/helpers
+bump-cli

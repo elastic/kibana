@@ -7455,7 +7455,6 @@
     "searchConnectors.nativeConnectors.postgresql.configuration.tablesLabel": "Kommagetrennte Liste von Tabellen",
     "searchConnectors.nativeConnectors.postgresql.name": "PostgreSQL",
     "searchConnectors.nativeConnectors.retriesPerRequest.label": "Wiederholungen pro Anfrage",
-    "searchConnectors.nativeConnectors.salesforce.name": "Salesforce",
     "searchConnectors.nativeConnectors.schemaLabel": "Schema",
     "searchConnectors.nativeConnectors.servicenow.configuration.useDocumentLevelSecurityTooltip": "Die Sicherheit auf Dokumentenebene stellt sicher, dass die in ServiceNow festgelegten Identitäten und Berechtigungen in Elasticsearch beibehalten werden. Dies ermöglicht es Ihnen, den Lesezugriff von Nutzern und Gruppen auf Dokumente in diesem Index einzuschränken und zu personalisieren. Synchronisierungen der Zugriffskontrolle stellen sicher, dass diese Metadaten in Ihren Elasticsearch-Dokumenten aktuell bleiben.",
     "searchConnectors.nativeConnectors.servicenow.name": "ServiceNow",

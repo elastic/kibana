@@ -14,6 +14,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import type { AutoAbortedAPMClient } from '../services/rest/create_call_apm_api';
 import { callApmApi } from '../services/rest/create_call_apm_api';
+import { isExpectedTransportFailure } from '../services/rest/report_fetch_error';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -95,7 +96,7 @@ export function useFetcher<TReturn>(
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const {
-    services: { notifications, rendering },
+    services: { notifications, rendering, uiSettings },
   } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
   const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
@@ -165,11 +166,10 @@ export function useFetcher<TReturn>(
           const errorDetails = 'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError && notifications && rendering) {
-            notifications.toasts.addDanger({
+            const toast = {
               title: i18n.translate('xpack.apm.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
-
               text: toMountPoint(
                 <div>
                   <h5>
@@ -182,7 +182,21 @@ export function useFetcher<TReturn>(
                 </div>,
                 rendering
               ),
-            });
+            };
+
+            // `addDanger` always reports to APM RUM via core. For expected transport
+            // failures, use `add` so core does not call `apm.captureError`, and copy
+            // the danger toast's icon and warning lifetime (see kibana#293215).
+            if (isExpectedTransportFailure(err)) {
+              notifications.toasts.add({
+                color: 'danger',
+                iconType: 'error',
+                toastLifeTimeMs: uiSettings?.get('notifications:lifetime:warning') ?? 10000,
+                ...toast,
+              });
+            } else {
+              notifications.toasts.addDanger(toast);
+            }
           }
           setResult({
             data: undefined,

@@ -143,6 +143,19 @@ describe('createPlaywrightConfig', () => {
     expect(config.projects![2].name).toEqual('mki');
   });
 
+  it('mki project has a higher per-project timeout than the global default', () => {
+    const config = createPlaywrightConfig({ testDir: './my_tests' });
+    const mki = config.projects!.find((p) => p.name === 'mki');
+    const ech = config.projects!.find((p) => p.name === 'ech');
+    const local = config.projects!.find((p) => p.name === 'local');
+
+    // Cloud projects (ech/mki) need extra time: cloud SAML auth hits a real service and is slower than the local mock.
+    expect(mki).toHaveProperty('timeout', 90_000);
+    expect(ech).toHaveProperty('timeout', 90_000);
+    // local falls back to the global 60 s default (no per-project override)
+    expect(local).not.toHaveProperty('timeout');
+  });
+
   it('should add global.setup.ts and global.teardown.ts projects when runGlobalSetup is true', () => {
     const testDir = './my_tests';
     const defaultGlobalHookTimeout = 180000;
@@ -181,7 +194,11 @@ describe('createPlaywrightConfig', () => {
 
       expect(main).toBeDefined();
       expect(main).toHaveProperty('dependencies', [`setup-${projectName}`]);
-      expect(main).not.toHaveProperty('timeout');
+      if (projectName === 'mki' || projectName === 'ech') {
+        expect(main).toHaveProperty('timeout', 90_000);
+      } else {
+        expect(main).not.toHaveProperty('timeout');
+      }
 
       expect(teardown).toBeDefined();
       // The teardown project is always emitted; if a plugin doesn't ship `global.teardown.ts`,

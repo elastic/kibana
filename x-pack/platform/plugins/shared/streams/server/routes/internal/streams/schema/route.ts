@@ -12,7 +12,8 @@ import type {
 } from '@kbn/streams-schema';
 import {
   FIELD_DEFINITION_TYPES,
-  namedFieldDefinitionConfigSchema,
+  MAX_STREAM_NAME_LENGTH,
+  boundedNamedFieldDefinitionSchema,
   isDescendantOf,
   Streams,
   LOGS_ROOT_STREAM_NAME,
@@ -40,6 +41,8 @@ import {
   UNMAPPED_SAMPLE_SIZE,
 } from '../../../../lib/streams/helpers/unmapped_fields';
 const FIELD_SIMULATION_TIMEOUT = '1s';
+
+const boundedFieldDefinitionsArray = z.array(boundedNamedFieldDefinitionSchema).max(1000);
 
 const isFieldDefinitionType = (value: unknown): value is FieldDefinitionType =>
   typeof value === 'string' && (FIELD_DEFINITION_TYPES as readonly string[]).includes(value);
@@ -86,7 +89,7 @@ export const unmappedFieldsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ unmappedFields: string[] }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
@@ -120,9 +123,9 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
     body: z.object({
-      field_definitions: z.array(namedFieldDefinitionConfigSchema),
+      field_definitions: boundedFieldDefinitionsArray,
     }),
   }),
   handler: async ({
@@ -296,9 +299,9 @@ export const schemaFieldsConflictsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
     body: z.object({
-      field_definitions: z.array(namedFieldDefinitionConfigSchema),
+      field_definitions: boundedFieldDefinitionsArray,
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {

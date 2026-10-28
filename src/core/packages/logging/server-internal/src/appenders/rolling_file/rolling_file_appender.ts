@@ -9,9 +9,10 @@
 
 import { schema } from '@kbn/config-schema';
 import type { LogRecord, Layout, DisposableAppender } from '@kbn/logging';
-import type { RollingFileAppenderConfig } from '@kbn/core-logging-server';
+import type { RollingFileAppenderPluginConfig } from '@kbn/core-logging-server';
 import { Layouts } from '../../layouts/layouts';
 import { BufferAppender } from '../buffer/buffer_appender';
+import { onWriteErrorSchema } from '../write_error_handler';
 import {
   createTriggeringPolicy,
   triggeringPolicyConfigSchema,
@@ -45,6 +46,14 @@ export class RollingFileAppender implements DisposableAppender {
     retention: schema.maybe(retentionPolicyConfigSchema),
   });
 
+  /**
+   * {@link RollingFileAppender.configSchema} plus the plugin-only `onWriteError` handler; used only
+   * by the {@link LoggingServiceSetup.configure} validation path, never wired into YAML config.
+   */
+  public static runtimeConfigSchema = RollingFileAppender.configSchema.extends({
+    onWriteError: onWriteErrorSchema,
+  });
+
   private isRolling = false;
   private disposed = false;
   private rollingPromise?: Promise<void>;
@@ -57,10 +66,10 @@ export class RollingFileAppender implements DisposableAppender {
   private readonly retentionPolicy: RetentionPolicy;
   private readonly buffer: BufferAppender;
 
-  constructor(config: RollingFileAppenderConfig) {
+  constructor(config: RollingFileAppenderPluginConfig) {
     this.context = new RollingFileContext(config.fileName);
     this.context.refreshFileInfo();
-    this.fileManager = new RollingFileManager(this.context);
+    this.fileManager = new RollingFileManager(this.context, config.onWriteError);
     this.layout = Layouts.create(config.layout);
     this.triggeringPolicy = createTriggeringPolicy(config.policy, this.context);
     this.rollingStrategy = createRollingStrategy(config.strategy, this.context);

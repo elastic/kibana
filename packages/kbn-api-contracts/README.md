@@ -161,16 +161,16 @@ Install oasdiff locally or set `OASDIFF_BIN` to the binary path. In CI, oasdiff 
 ### Type errors or module resolution failures
 
 ```bash
-yarn kbn bootstrap
-yarn test:type_check --project packages/kbn-api-contracts/tsconfig.json
+pnpm kbn bootstrap
+pnpm test:type_check --project packages/kbn-api-contracts/tsconfig.json
 ```
 
 ## Testing
 
 ```bash
 # Unit tests
-yarn test:jest packages/kbn-api-contracts
+pnpm test:jest packages/kbn-api-contracts
 
 # Type check
-yarn test:type_check --project packages/kbn-api-contracts/tsconfig.json
+pnpm test:type_check --project packages/kbn-api-contracts/tsconfig.json
 ```

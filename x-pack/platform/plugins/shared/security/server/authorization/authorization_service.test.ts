@@ -168,12 +168,41 @@ describe('#start', () => {
   it('registers cluster privileges', async () => {
     const retryScheduler = jest.fn();
     statusSubject.next({ scheduleRetry: retryScheduler });
+    await nextTick();
     expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
 
     // New changes still trigger privileges re-registration.
     statusSubject.next({ scheduleRetry: retryScheduler });
+    await nextTick();
     expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(2);
     expect(retryScheduler).not.toHaveBeenCalled();
+  });
+
+  it('waits for an in-flight registration to finish before registering again', async () => {
+    let rejectFirstRun!: (err: Error) => void;
+    mockRegisterPrivilegesWithCluster.mockImplementationOnce(
+      () =>
+        new Promise((resolve, reject) => {
+          rejectFirstRun = reject;
+        })
+    );
+
+    const firstRetryScheduler = jest.fn();
+    statusSubject.next({ scheduleRetry: firstRetryScheduler });
+    await nextTick();
+
+    // A license change arrives while the first registration is still running.
+    const secondRetryScheduler = jest.fn();
+    statusSubject.next({ scheduleRetry: secondRetryScheduler });
+    await nextTick();
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(1);
+
+    rejectFirstRun(new Error('Some error'));
+    await nextTick();
+
+    expect(mockRegisterPrivilegesWithCluster).toHaveBeenCalledTimes(2);
+    expect(firstRetryScheduler).not.toHaveBeenCalled();
+    expect(secondRetryScheduler).not.toHaveBeenCalled();
   });
 
   it('schedules retries if fails to register cluster privileges', async () => {

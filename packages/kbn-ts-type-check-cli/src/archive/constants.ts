@@ -60,7 +60,7 @@ export const TYPE_CHECK_CONFIG_GLOB = '**/tsconfig*.type_check.json';
  * If any of these files change, the cache should be invalidated.
  */
 export const CACHE_INVALIDATION_FILES = [
-  'yarn.lock',
+  'pnpm-lock.yaml',
   '.nvmrc',
   '.node-version',
   'tsconfig.base.json',

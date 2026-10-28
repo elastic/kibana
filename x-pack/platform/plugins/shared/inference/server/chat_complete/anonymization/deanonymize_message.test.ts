@@ -12,11 +12,18 @@ import type {
   AnonymizationOutput,
   AnonymizationRule,
   AssistantMessage,
+  ChatCompleteAPI,
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
   UserMessage,
 } from '@kbn/inference-common';
-import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
+  InferenceConnectorType,
+  MessageRole,
+} from '@kbn/inference-common';
+import { InferenceChatModel } from '@kbn/inference-langchain';
+import type { AIMessageChunk } from '@langchain/core/messages';
 import { deanonymizeMessage } from './deanonymize_message';
 import { chunkEvent, messageEvent, tokensEvent, createMask } from '../../test_utils';
 import { anonymizeMessages } from './anonymize_messages';
@@ -316,6 +323,85 @@ describe('deanonymizeMessage', () => {
         { start: cityStart, end: cityEnd, entity: anonymizations[1].entity },
       ])
     );
+  });
+
+  describe('tool calls', () => {
+    const value = 'jorge@gmail.com';
+    const mask = createMask('EMAIL', value);
+
+    const anonymizationOutput: AnonymizationOutput = {
+      messages: [{ role: MessageRole.User, content: `Email ${mask}` }],
+      anonymizations: [{ entity: { class_name: 'EMAIL', value, mask }, rule: { type: 'RegExp' } }],
+    };
+
+    const createToolCallEvents = () => [
+      chunkEvent('', [
+        {
+          index: 0,
+          toolCallId: 'call-1',
+          function: { name: 'sendEmail', arguments: `{"to":"${mask}"}` },
+        },
+      ]),
+      messageEvent('', [
+        {
+          toolCallId: 'call-1',
+          function: { name: 'sendEmail', arguments: { to: mask } },
+        },
+      ]),
+    ];
+
+    it('preserves tool call ids in the deanonymized chunk and message', async () => {
+      const [chunkOut, msgOut] = (await lastValueFrom(
+        from(createToolCallEvents()).pipe(deanonymizeMessage(anonymizationOutput), toArray())
+      )) as [ChatCompletionChunkEvent, ChatCompletionMessageEvent];
+
+      expect(chunkOut.tool_calls).toEqual([
+        {
+          index: 0,
+          toolCallId: 'call-1',
+          function: { name: 'sendEmail', arguments: JSON.stringify({ to: value }) },
+        },
+      ]);
+      expect(msgOut.toolCalls).toEqual([
+        {
+          toolCallId: 'call-1',
+          function: { name: 'sendEmail', arguments: { to: value } },
+        },
+      ]);
+      expect((msgOut.deanonymized_output?.message as AssistantMessage).toolCalls).toEqual(
+        msgOut.toolCalls
+      );
+    });
+
+    it('produces valid LangChain tool calls', async () => {
+      const chatComplete: ChatCompleteAPI & jest.MockedFn<ChatCompleteAPI> = jest.fn();
+      chatComplete.mockReturnValue(
+        from(createToolCallEvents()).pipe(deanonymizeMessage(anonymizationOutput))
+      );
+
+      const chatModel = new InferenceChatModel({
+        connector: {
+          type: InferenceConnectorType.Inference,
+          connectorId: 'connector-id',
+          name: 'My connector',
+          config: {},
+          capabilities: {},
+          isInferenceEndpoint: false,
+          isPreconfigured: false,
+        },
+        chatComplete,
+      });
+
+      let output: AIMessageChunk | undefined;
+      for await (const chunk of await chatModel.stream('Send an email')) {
+        output = output ? output.concat(chunk) : chunk;
+      }
+
+      expect(output?.tool_calls).toEqual([
+        { id: 'call-1', name: 'sendEmail', args: { to: value }, type: 'tool_call' },
+      ]);
+      expect(output?.invalid_tool_calls).toEqual([]);
+    });
   });
 
   it('emits final-string-valid deanonymization ranges for input/output when regex ordering differs from text ordering', async () => {
