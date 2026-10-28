@@ -1,0 +1,640 @@
+{
+  "id": "vendor_i_alert",
+  "title": "Vendor I alert",
+  "description": "Dataminr Pulse real-time risk alerts as JSON. Each alert has a headline, the public post it was based on, the watchlists it matched, and the location and companies involved.",
+  "cohort": "recent",
+  "format": "json",
+  "samples": [
+    {
+      "line": "{\"headline\":\"Test alert message\",\"alertId\":\"5026527284588218000-1770894234190-2\",\"publicPost\":{\"timestamp\":\"2026-02-12T11:03:54.193Z\",\"channels\":[\"sensor\"],\"href\":\"https://r.dataminr.com/28IJuehlvBfbxqRBTBPK0r\"},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"853036\"],\"subType\":\"DIGITAL_RISK\"}],\"estimatedEventLocation\":{\"name\":\"Mecklenburg County, NC, USA\",\"coordinates\":[35.263265,-80.854384],\"probabilityRadius\":0.1},\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/5026527284588218000-1770894234190-2\",\"alertType\":{\"name\":\"Alert\"},\"alertTopics\":[{\"id\":\"853036\",\"name\":\"Outages & Service Disruptions - Electricity\"}],\"alertTimestamp\":\"2026-02-12T11:04:58.116Z\",\"alertSectors\":[{\"name\":\"Utilities\"}],\"alertCompanies\":[{\"name\":\"Duke Energy Corporation\"}]}",
+      "expected": {
+        "@timestamp": "2026-02-12T11:04:58.116Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "Test alert message",
+        "source": {
+          "geo": {
+            "name": "Mecklenburg County, NC, USA"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "web"
+          ],
+          "created": "2026-02-12T11:03:54.193Z",
+          "id": "5026527284588218000-1770894234190-2",
+          "kind": "alert",
+          "severity": 30,
+          "type": [
+            "info"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/5026527284588218000-1770894234190-2"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"Threat actor defaces example website\",\"alertId\":\"7082842488761385731-1770893196295-1\",\"publicPost\":{\"timestamp\":\"2026-02-12T10:46:36.295Z\",\"channels\":[\"chatter\"],\"href\":\"https://r.dataminr.com/7M6ZZxnPyLakF8sKDRLSIQ\",\"media\":[{\"type\":\"photo\",\"href\":\"https://alertmedia.dataminr.com/test-image.png\"}]},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"963136\",\"962003\"],\"subType\":\"DIGITAL_RISK\"}],\"estimatedEventLocation\":{\"name\":\"Sendai, Miyagi, Japan\",\"coordinates\":[38.268195,140.869418],\"probabilityRadius\":18.9},\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/7082842488761385731-1770893196295-1\",\"alertType\":{\"name\":\"Urgent\"},\"alertTopics\":[{\"id\":\"963136\",\"name\":\"Threat Actors - Hacktivists\"},{\"id\":\"962003\",\"name\":\"Defacement\"}],\"alertTimestamp\":\"2026-02-12T10:47:40.147Z\"}",
+      "expected": {
+        "@timestamp": "2026-02-12T10:47:40.147Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "Threat actor defaces example website",
+        "source": {
+          "geo": {
+            "name": "Sendai, Miyagi, Japan"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "web"
+          ],
+          "created": "2026-02-12T10:46:36.295Z",
+          "id": "7082842488761385731-1770893196295-1",
+          "kind": "alert",
+          "severity": 50,
+          "type": [
+            "info"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/7082842488761385731-1770893196295-1"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"Malware sample detected targeting financial systems\",\"alertId\":\"9999888877776666-1770890000000-1\",\"publicPost\":{\"timestamp\":\"2026-02-12T09:00:00.000Z\",\"channels\":[\"chatter\"],\"href\":\"https://r.dataminr.com/test123\"},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"963155\"],\"subType\":\"DIGITAL_RISK\"}],\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/9999888877776666-1770890000000-1\",\"alertType\":{\"name\":\"Flash\"},\"alertTopics\":[{\"id\":\"963155\",\"name\":\"Data Exposure & Breaches\"}],\"alertTimestamp\":\"2026-02-12T09:01:00.000Z\",\"alertSectors\":[{\"name\":\"Financials\"}],\"alertCompanies\":[{\"name\":\"Example Bank Corp\"}],\"metadata\":{\"cyber\":{\"hashValues\":[{\"type\":\"MD5\",\"value\":\"d41d8cd98f00b204e9800998ecf8427e\"},{\"type\":\"SHA256\",\"value\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\"}]}}}",
+      "expected": {
+        "@timestamp": "2026-02-12T09:01:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "file": {
+          "hash": {
+            "md5": "d41d8cd98f00b204e9800998ecf8427e",
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "message": "Malware sample detected targeting financial systems",
+        "related": {
+          "hash": [
+            "d41d8cd98f00b204e9800998ecf8427e",
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "web"
+          ],
+          "created": "2026-02-12T09:00:00.000Z",
+          "id": "9999888877776666-1770890000000-1",
+          "kind": "alert",
+          "severity": 90,
+          "type": [
+            "info"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/9999888877776666-1770890000000-1"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"Critical RCE vulnerability exploited in the wild\",\"alertId\":\"1111222233334444-1770890000000-1\",\"publicPost\":{\"timestamp\":\"2026-02-12T08:00:00.000Z\",\"channels\":[\"chatter\"],\"href\":\"https://r.dataminr.com/vuln1\"},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"963155\"],\"subType\":\"DIGITAL_RISK\"}],\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/1111222233334444-1770890000000-1\",\"alertType\":{\"name\":\"Flash\"},\"alertTopics\":[{\"id\":\"963155\",\"name\":\"Vulnerability Disclosure\"}],\"alertTimestamp\":\"2026-02-12T08:01:00.000Z\",\"intelAgents\":[{\"summary\":\"CVE-2026-1234 is a critical remote code execution vulnerability in ExampleSoft product.\",\"timestamp\":\"2026-02-12T08:00:30.000Z\",\"version\":\"2.1\",\"discoveredEntities\":[{\"type\":\"vulnerability\",\"name\":\"CVE-2026-1234\",\"cve\":\"CVE-2026-1234\",\"cvss\":9.8,\"summary\":\"Remote code execution in ExampleSoft\",\"publishedDate\":\"2026-02-10T00:00:00.000Z\",\"epssScore\":0.95,\"exploitable\":true},{\"type\":\"threatActor\",\"name\":\"APT-TEST\",\"aliases\":[\"TestGroup\",\"TA-999\"],\"countryOfOrigin\":[\"RU\",\"CN\"]}]}]}",
+      "expected": {
+        "@timestamp": "2026-02-12T08:01:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "Critical RCE vulnerability exploited in the wild",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "framework": "MITRE ATT&CK",
+          "group": {
+            "alias": [
+              "TestGroup",
+              "TA-999"
+            ],
+            "name": "APT-TEST"
+          },
+          "indicator": {
+            "geo": {
+              "country_iso_code": [
+                "RU",
+                "CN"
+              ]
+            }
+          }
+        },
+        "vulnerability": {
+          "description": "Remote code execution in ExampleSoft",
+          "id": "CVE-2026-1234",
+          "score": {
+            "base": 9.8
+          }
+        },
+        "event": {
+          "category": [
+            "vulnerability",
+            "threat"
+          ],
+          "created": "2026-02-12T08:00:00.000Z",
+          "id": "1111222233334444-1770890000000-1",
+          "kind": "alert",
+          "severity": 90,
+          "type": [
+            "info",
+            "indicator"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/1111222233334444-1770890000000-1"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"Suspicious IP scanning critical infrastructure\",\"alertId\":\"5555666677778888-1770895000000-1\",\"publicPost\":{\"timestamp\":\"2026-02-12T09:30:00.000Z\",\"channels\":[\"sensor\"],\"href\":\"https://r.dataminr.com/ip1\"},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"963200\"],\"subType\":\"DIGITAL_RISK\"}],\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/5555666677778888-1770895000000-1\",\"alertType\":{\"name\":\"Urgent\"},\"alertTopics\":[{\"id\":\"963200\",\"name\":\"Network Scanning\"}],\"alertTimestamp\":\"2026-02-12T09:31:00.000Z\",\"intelAgents\":[{\"summary\":\"Multiple IPs observed scanning.\",\"timestamp\":\"2026-02-12T09:30:30.000Z\",\"version\":\"1.0\",\"discoveredEntities\":[{\"type\":\"ipAddress\",\"ip\":\"192[.]168[.]1[.]100\",\"ports\":[443,8080]},{\"type\":\"url\",\"name\":\"hxxps://evil[.]example[.]com/payload\"}]}]}",
+      "expected": {
+        "@timestamp": "2026-02-12T09:31:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "Suspicious IP scanning critical infrastructure",
+        "related": {
+          "ip": [
+            "192.168.1.100"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "enrichments": [
+            {
+              "indicator": {
+                "ip": "192.168.1.100",
+                "name": "192[.]168[.]1[.]100",
+                "port": [
+                  443,
+                  8080
+                ],
+                "type": "ipv4-addr"
+              }
+            },
+            {
+              "indicator": {
+                "name": "hxxps://evil[.]example[.]com/payload",
+                "type": "url",
+                "url": {
+                  "original": "hxxps://evil.example.com/payload"
+                }
+              }
+            }
+          ]
+        },
+        "event": {
+          "category": [
+            "threat"
+          ],
+          "created": "2026-02-12T09:30:00.000Z",
+          "id": "5555666677778888-1770895000000-1",
+          "kind": "alert",
+          "severity": 50,
+          "type": [
+            "indicator"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/5555666677778888-1770895000000-1"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"New ransomware variant targeting enterprise systems\",\"alertId\":\"9999000011112222-1770900000000-1\",\"publicPost\":{\"timestamp\":\"2026-02-12T10:00:00.000Z\",\"channels\":[\"darkweb\"],\"href\":\"https://r.dataminr.com/malware1\"},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"963300\"],\"subType\":\"DIGITAL_RISK\"}],\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/9999000011112222-1770900000000-1\",\"alertType\":{\"name\":\"Alert\"},\"alertTopics\":[{\"id\":\"963300\",\"name\":\"Malware Analysis\"}],\"alertTimestamp\":\"2026-02-12T10:01:00.000Z\",\"intelAgents\":[{\"summary\":\"DarkVortex ransomware targets Windows and Linux systems.\",\"timestamp\":\"2026-02-12T10:00:30.000Z\",\"version\":\"1.0\",\"discoveredEntities\":[{\"type\":\"malware\",\"name\":\"DarkVortex\",\"affectedOperatingSystems\":[\"win\",\"elf\"]}]}]}",
+      "expected": {
+        "@timestamp": "2026-02-12T10:01:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "New ransomware variant targeting enterprise systems",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "software": {
+            "name": "DarkVortex",
+            "platforms": [
+              "Windows",
+              "Linux"
+            ],
+            "type": "Malware"
+          }
+        },
+        "event": {
+          "category": [
+            "malware"
+          ],
+          "created": "2026-02-12T10:00:00.000Z",
+          "id": "9999000011112222-1770900000000-1",
+          "kind": "alert",
+          "severity": 30,
+          "type": [
+            "info"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/9999000011112222-1770900000000-1"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"Comprehensive base field mapping test\",\"alertId\":\"BASE-FIELD-TEST-001\",\"publicPost\":{\"timestamp\":\"2026-03-15T14:30:00.000Z\",\"channels\":[\"chatter\",\"sensor\"],\"href\":\"https://r.dataminr.com/base-test\",\"media\":[{\"type\":\"photo\",\"href\":\"https://alertmedia.dataminr.com/image1.jpg\"},{\"type\":\"video\",\"href\":\"https://alertmedia.dataminr.com/video1.mp4\"}]},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber Security\",\"topicIds\":[\"963155\"],\"subType\":\"DIGITAL_RISK\"},{\"id\":\"4932402\",\"name\":\"Infrastructure\",\"topicIds\":[\"853036\"],\"subType\":\"OPERATIONAL\"}],\"estimatedEventLocation\":{\"name\":\"San Francisco, CA, USA\",\"coordinates\":[37.7749,-122.4194],\"probabilityRadius\":5.2},\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/BASE-FIELD-TEST-001\",\"alertType\":{\"name\":\"Flash\"},\"alertTopics\":[{\"id\":\"963155\",\"name\":\"Data Exposure & Breaches\"},{\"id\":\"963136\",\"name\":\"Threat Actors - Hacktivists\"}],\"alertTimestamp\":\"2026-03-15T14:31:00.000Z\",\"alertSectors\":[{\"name\":\"Technology\"},{\"name\":\"Financials\"}],\"alertCompanies\":[{\"name\":\"Example Corp\"},{\"name\":\"Test Industries\"}],\"intelAgents\":[{\"summary\":\"Intel agent summary for testing\",\"timestamp\":\"2026-03-15T14:30:30.000Z\",\"version\":\"2.1\"}],\"liveBrief\":[{\"summary\":\"Live brief summary for testing\",\"version\":\"1.0\",\"timestamp\":\"2026-03-15T14:30:45.000Z\"}],\"entityType\":\"no-entities\"}",
+      "expected": {
+        "@timestamp": "2026-03-15T14:31:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "Comprehensive base field mapping test",
+        "source": {
+          "geo": {
+            "name": "San Francisco, CA, USA"
+          }
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "web"
+          ],
+          "created": "2026-03-15T14:30:00.000Z",
+          "id": "BASE-FIELD-TEST-001",
+          "kind": "alert",
+          "severity": 90,
+          "type": [
+            "info"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/BASE-FIELD-TEST-001"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"Threat actor ECS mapping test\",\"alertId\":\"THREAT-ACTOR-ECS-001\",\"publicPost\":{\"timestamp\":\"2026-03-15T15:00:00.000Z\",\"channels\":[\"chatter\"],\"href\":\"https://r.dataminr.com/threat-test\"},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"963136\"],\"subType\":\"DIGITAL_RISK\"}],\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/THREAT-ACTOR-ECS-001\",\"alertType\":{\"name\":\"Urgent\"},\"alertTopics\":[{\"id\":\"963136\",\"name\":\"Threat Actors - APT\"}],\"alertTimestamp\":\"2026-03-15T15:01:00.000Z\",\"intelAgents\":[{\"summary\":\"APT group detected\",\"timestamp\":\"2026-03-15T15:00:30.000Z\",\"version\":\"2.1\",\"discoveredEntities\":[{\"type\":\"threatActor\",\"name\":\"APT-TEST-GROUP\",\"aliases\":[\"TestGroup\",\"TG-2026\",\"AlphaTeam\"],\"countryOfOrigin\":[\"CN\",\"RU\"]}]}],\"discovered_entity\":{\"type\":\"threatActor\",\"name\":\"APT-TEST-GROUP\",\"aliases\":[\"TestGroup\",\"TG-2026\",\"AlphaTeam\"],\"countryOfOrigin\":[\"CN\",\"RU\"]},\"discoveredentity_type\":\"threatActor\",\"discoveredentity_value\":\"APT-TEST-GROUP\",\"entityType\":\"threatActor\",\"is_main\":\"yes\"}",
+      "expected": {
+        "@timestamp": "2026-03-15T15:01:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "Threat actor ECS mapping test",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "framework": "MITRE ATT&CK",
+          "group": {
+            "alias": [
+              "TestGroup",
+              "TG-2026",
+              "AlphaTeam"
+            ],
+            "name": "APT-TEST-GROUP"
+          },
+          "indicator": {
+            "geo": {
+              "country_iso_code": [
+                "CN",
+                "RU"
+              ]
+            }
+          }
+        },
+        "event": {
+          "category": [
+            "threat"
+          ],
+          "created": "2026-03-15T15:00:00.000Z",
+          "id": "THREAT-ACTOR-ECS-001",
+          "kind": "alert",
+          "severity": 50,
+          "type": [
+            "indicator"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/THREAT-ACTOR-ECS-001"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"Vulnerability ECS mapping test\",\"alertId\":\"VULN-ECS-001\",\"publicPost\":{\"timestamp\":\"2026-03-15T16:00:00.000Z\",\"channels\":[\"chatter\"],\"href\":\"https://r.dataminr.com/vuln-test\"},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"963155\"],\"subType\":\"DIGITAL_RISK\"}],\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/VULN-ECS-001\",\"alertType\":{\"name\":\"Flash\"},\"alertTopics\":[{\"id\":\"963155\",\"name\":\"Vulnerability Disclosure\"}],\"alertTimestamp\":\"2026-03-15T16:01:00.000Z\",\"intelAgents\":[{\"summary\":\"Critical vulnerability disclosed\",\"timestamp\":\"2026-03-15T16:00:30.000Z\",\"version\":\"2.1\",\"discoveredEntities\":[{\"type\":\"vulnerability\",\"name\":\"CVE-2026-TEST\",\"cve\":\"CVE-2026-TEST\",\"cvss\":9.8,\"summary\":\"Remote code execution vulnerability in test software\",\"publishedDate\":\"2026-03-15T00:00:00.000Z\",\"epssScore\":0.95,\"exploitable\":true}]}],\"discovered_entity\":{\"type\":\"vulnerability\",\"name\":\"CVE-2026-TEST\",\"cve\":\"CVE-2026-TEST\",\"cvss\":9.8,\"summary\":\"Remote code execution vulnerability in test software\",\"publishedDate\":\"2026-03-15T00:00:00.000Z\",\"epssScore\":0.95,\"exploitable\":true},\"discoveredentity_type\":\"vulnerability\",\"discoveredentity_value\":\"CVE-2026-TEST\",\"entityType\":\"vulnerability\",\"is_main\":\"yes\"}",
+      "expected": {
+        "@timestamp": "2026-03-15T16:01:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "Vulnerability ECS mapping test",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "vulnerability": {
+          "description": "Remote code execution vulnerability in test software",
+          "id": "CVE-2026-TEST",
+          "score": {
+            "base": 9.8
+          }
+        },
+        "event": {
+          "category": [
+            "vulnerability"
+          ],
+          "created": "2026-03-15T16:00:00.000Z",
+          "id": "VULN-ECS-001",
+          "kind": "alert",
+          "severity": 90,
+          "type": [
+            "info"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/VULN-ECS-001"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"Malware ECS mapping test\",\"alertId\":\"MALWARE-ECS-001\",\"publicPost\":{\"timestamp\":\"2026-03-15T17:00:00.000Z\",\"channels\":[\"darkweb\"],\"href\":\"https://r.dataminr.com/malware-test\"},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"963300\"],\"subType\":\"DIGITAL_RISK\"}],\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/MALWARE-ECS-001\",\"alertType\":{\"name\":\"Alert\"},\"alertTopics\":[{\"id\":\"963300\",\"name\":\"Malware Analysis\"}],\"alertTimestamp\":\"2026-03-15T17:01:00.000Z\",\"intelAgents\":[{\"summary\":\"New malware variant detected\",\"timestamp\":\"2026-03-15T17:00:30.000Z\",\"version\":\"1.0\",\"discoveredEntities\":[{\"type\":\"malware\",\"name\":\"TestRansomware\",\"affectedOperatingSystems\":[\"win\",\"elf\",\"elf\"]}]}],\"discovered_entity\":{\"type\":\"malware\",\"name\":\"TestRansomware\",\"affectedOperatingSystems\":[\"win\",\"elf\",\"elf\"]},\"discoveredentity_type\":\"malware\",\"discoveredentity_value\":\"TestRansomware\",\"entityType\":\"malware\",\"is_main\":\"yes\"}",
+      "expected": {
+        "@timestamp": "2026-03-15T17:01:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "Malware ECS mapping test",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "software": {
+            "name": "TestRansomware",
+            "platforms": [
+              "Windows",
+              "Linux"
+            ],
+            "type": "Malware"
+          }
+        },
+        "event": {
+          "category": [
+            "malware"
+          ],
+          "created": "2026-03-15T17:00:00.000Z",
+          "id": "MALWARE-ECS-001",
+          "kind": "alert",
+          "severity": 30,
+          "type": [
+            "info"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/MALWARE-ECS-001"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"URL and IP ECS mapping test\",\"alertId\":\"URL-IP-ECS-001\",\"publicPost\":{\"timestamp\":\"2026-03-15T18:00:00.000Z\",\"channels\":[\"sensor\"],\"href\":\"https://r.dataminr.com/url-ip-test\"},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"963200\"],\"subType\":\"DIGITAL_RISK\"}],\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/URL-IP-ECS-001\",\"alertType\":{\"name\":\"Urgent\"},\"alertTopics\":[{\"id\":\"963200\",\"name\":\"Network Activity\"}],\"alertTimestamp\":\"2026-03-15T18:01:00.000Z\",\"intelAgents\":[{\"summary\":\"Malicious infrastructure observed\",\"timestamp\":\"2026-03-15T18:00:30.000Z\",\"version\":\"1.0\",\"discoveredEntities\":[{\"type\":\"ipAddress\",\"ip\":\"192[.]0[.]2[.]100\",\"ports\":[443,8443]},{\"type\":\"ipAddress\",\"ip\":\"2001:0db8:85a3:0000:0000:8a2e:0370:7334\",\"ports\":[80]},{\"type\":\"url\",\"name\":\"hxxps://evil[.]example[.]com/malware[.]exe\"},{\"type\":\"url\",\"name\":\"hxxp://phishing[.]test[.]net/login\"}]}],\"discovered_entity\":{},\"discoveredentity_type\":\"url-ipAddress\",\"discoveredentity_value\":\"\",\"entityType\":\"url-ipAddress\",\"is_main\":\"yes\"}",
+      "expected": {
+        "@timestamp": "2026-03-15T18:01:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "URL and IP ECS mapping test",
+        "related": {
+          "ip": [
+            "192.0.2.100",
+            "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+          ]
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "enrichments": [
+            {
+              "indicator": {
+                "ip": "192.0.2.100",
+                "name": "192[.]0[.]2[.]100",
+                "port": [
+                  443,
+                  8443
+                ],
+                "type": "ipv4-addr"
+              }
+            },
+            {
+              "indicator": {
+                "ip": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+                "name": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+                "port": [
+                  80
+                ],
+                "type": "ipv6-addr"
+              }
+            },
+            {
+              "indicator": {
+                "name": "hxxps://evil[.]example[.]com/malware[.]exe",
+                "type": "url",
+                "url": {
+                  "original": "hxxps://evil.example.com/malware.exe"
+                }
+              }
+            },
+            {
+              "indicator": {
+                "name": "hxxp://phishing[.]test[.]net/login",
+                "type": "url",
+                "url": {
+                  "original": "hxxp://phishing.test.net/login"
+                }
+              }
+            }
+          ]
+        },
+        "event": {
+          "category": [
+            "threat"
+          ],
+          "created": "2026-03-15T18:00:00.000Z",
+          "id": "URL-IP-ECS-001",
+          "kind": "alert",
+          "severity": 50,
+          "type": [
+            "indicator"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/URL-IP-ECS-001"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"Comprehensive platform normalization test\",\"alertId\":\"PLATFORM-NORM-001\",\"publicPost\":{\"timestamp\":\"2026-03-15T19:00:00.000Z\",\"channels\":[\"darkweb\"],\"href\":\"https://r.dataminr.com/platform-test\"},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"963300\"],\"subType\":\"DIGITAL_RISK\"}],\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/PLATFORM-NORM-001\",\"alertType\":{\"name\":\"Alert\"},\"alertTopics\":[{\"id\":\"963300\",\"name\":\"Malware Analysis\"}],\"alertTimestamp\":\"2026-03-15T19:01:00.000Z\",\"intelAgents\":[{\"summary\":\"Multi-platform malware campaign\",\"timestamp\":\"2026-03-15T19:00:30.000Z\",\"version\":\"1.0\",\"discoveredEntities\":[{\"type\":\"malware\",\"name\":\"MultiPlatformTrojan\",\"affectedOperatingSystems\":[\"win\",\"WIN32\",\"elf\",\"LINUX\",\"mac\",\"osx\",\"darwin\",\"aws\",\"azure\",\"Azure AD\",\"gcp\",\"o365\",\"network\",\"SaaS\",\"unknown-platform\"]}]}],\"discovered_entity\":{\"type\":\"malware\",\"name\":\"MultiPlatformTrojan\",\"affectedOperatingSystems\":[\"win\",\"WIN32\",\"elf\",\"LINUX\",\"mac\",\"osx\",\"darwin\",\"aws\",\"azure\",\"Azure AD\",\"gcp\",\"o365\",\"network\",\"SaaS\",\"unknown-platform\"]},\"discoveredentity_type\":\"malware\",\"discoveredentity_value\":\"MultiPlatformTrojan\",\"entityType\":\"malware\",\"is_main\":\"yes\"}",
+      "expected": {
+        "@timestamp": "2026-03-15T19:01:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "Comprehensive platform normalization test",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "software": {
+            "name": "MultiPlatformTrojan",
+            "platforms": [
+              "Windows",
+              "Linux",
+              "macOS",
+              "AWS",
+              "Azure",
+              "Azure AD",
+              "GCP",
+              "Office 365",
+              "Network",
+              "SaaS"
+            ],
+            "type": "Malware"
+          }
+        },
+        "event": {
+          "category": [
+            "malware"
+          ],
+          "created": "2026-03-15T19:00:00.000Z",
+          "id": "PLATFORM-NORM-001",
+          "kind": "alert",
+          "severity": 30,
+          "type": [
+            "info"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/PLATFORM-NORM-001"
+        }
+      }
+    },
+    {
+      "line": "{\"headline\":\"Comprehensive OS normalization test\",\"alertId\":\"OS-NORM-COMPLETE-001\",\"publicPost\":{\"timestamp\":\"2026-03-16T10:00:00.000Z\",\"channels\":[\"darkweb\"],\"href\":\"https://r.dataminr.com/os-test\"},\"listsMatched\":[{\"id\":\"4932401\",\"name\":\"Cyber\",\"topicIds\":[\"963300\"],\"subType\":\"DIGITAL_RISK\"}],\"dataminrAlertUrl\":\"https://app.dataminr.com/#alertDetail/5/OS-NORM-COMPLETE-001\",\"alertType\":{\"name\":\"Alert\"},\"alertTopics\":[{\"id\":\"963300\",\"name\":\"Malware Analysis\"}],\"alertTimestamp\":\"2026-03-16T10:01:00.000Z\",\"intelAgents\":[{\"summary\":\"Testing all OS variant mappings\",\"timestamp\":\"2026-03-16T10:00:30.000Z\",\"version\":\"1.0\",\"discoveredEntities\":[{\"type\":\"malware\",\"name\":\"OmniPlatformMalware\",\"affectedOperatingSystems\":[\"win64\",\"microsoft windows\",\"windows 10\",\"unix\",\"linux ubuntu\",\"macos\",\"os x\",\"mac os x\",\"amazon web services\",\"microsoft azure\",\"azure active directory\",\"azuread\",\"google cloud\",\"google cloud platform\",\"office 365\",\"office365\",\"microsoft 365\",\"m365\",\"software as a service\"]}]}],\"discovered_entity\":{\"type\":\"malware\",\"name\":\"OmniPlatformMalware\",\"affectedOperatingSystems\":[\"win64\",\"microsoft windows\",\"windows 10\",\"unix\",\"linux ubuntu\",\"macos\",\"os x\",\"mac os x\",\"amazon web services\",\"microsoft azure\",\"azure active directory\",\"azuread\",\"google cloud\",\"google cloud platform\",\"office 365\",\"office365\",\"microsoft 365\",\"m365\",\"software as a service\"]},\"discoveredentity_type\":\"malware\",\"discoveredentity_value\":\"OmniPlatformMalware\",\"entityType\":\"malware\",\"is_main\":\"yes\"}",
+      "expected": {
+        "@timestamp": "2026-03-16T10:01:00.000Z",
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "message": "Comprehensive OS normalization test",
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "software": {
+            "name": "OmniPlatformMalware",
+            "platforms": [
+              "Windows",
+              "Linux",
+              "macOS",
+              "AWS",
+              "Azure",
+              "Azure AD",
+              "GCP",
+              "Office 365",
+              "SaaS"
+            ],
+            "type": "Malware"
+          }
+        },
+        "event": {
+          "category": [
+            "malware"
+          ],
+          "created": "2026-03-16T10:00:00.000Z",
+          "id": "OS-NORM-COMPLETE-001",
+          "kind": "alert",
+          "severity": 30,
+          "type": [
+            "info"
+          ],
+          "url": "https://app.dataminr.com/#alertDetail/5/OS-NORM-COMPLETE-001"
+        }
+      }
+    },
+    {
+      "line": "{\"log_type\":\"auth\",\"status\":\"success\",\"client_id\":\"test-client-id\",\"expires_at\":1739361900000,\"http_status_code\":200,\"fetch_timestamp\":\"2026-02-12T11:05:00.000Z\"}",
+      "expected": {
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "web"
+          ],
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"log_type\":\"auth\",\"status\":\"failed\",\"client_id\":\"test-client-id\",\"http_status_code\":401,\"error_message\":\"Authentication failed with HTTP 401\",\"error_code\":401,\"fetch_timestamp\":\"2026-02-12T11:05:00.000Z\",\"response_body\":\"{\\\"errors\\\":[{\\\"code\\\":401,\\\"message\\\":\\\"Authentication failed with HTTP 401\\\"}]}\"}",
+      "expected": {
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "web"
+          ],
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"log_type\":\"alert-fetch\",\"status\":\"success\",\"api_endpoint\":\"https://api.dataminr.com/pulse/v1/alerts?pageSize=40\",\"input_alert_fetch_count\":40,\"next_cursor\":\"/v1/alerts?from=abc123\",\"count_of_alerts\":40,\"http_status_code\":200,\"cursor_used\":\"initial\",\"fetched_alerts\":40,\"fetch_timestamp\":\"2026-02-12T11:05:00.000Z\"}",
+      "expected": {
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "web"
+          ],
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    },
+    {
+      "line": "{\"log_type\":\"alert-fetch\",\"status\":\"failed\",\"api_endpoint\":\"https://api.dataminr.com/pulse/v1/alerts?pageSize=40\",\"input_alert_fetch_count\":40,\"http_status_code\":403,\"error_message\":\"API request failed with HTTP 403\",\"cursor_used\":\"initial\",\"fetched_alerts\":0,\"fetch_timestamp\":\"2026-02-12T11:05:00.000Z\",\"response_body\":\"{\\\"error\\\":\\\"Forbidden\\\"}\"}",
+      "expected": {
+        "ecs": {
+          "version": "8.11.0"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "event": {
+          "category": [
+            "web"
+          ],
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      }
+    }
+  ]
+}

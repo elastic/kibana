@@ -1,0 +1,257 @@
+version: "1"
+name: Attack Discovery attach
+description: >
+  Attaches one Attack Discovery to an Investigation that already describes the
+  same attack. Waits for the review to create that Investigation, then journals
+  the match, the attachments, and any alert tagging. Does not create the
+  Investigation, and does not run FP/TP analysis or the forensics gate.
+enabled: true
+tags:
+  - security
+  - attack-discovery
+settings:
+  timeout: "30m"
+  # One attach of an attack at a time. A second dispatch of the same attack has
+  # nothing to add; the in-flight one is already writing the attachments.
+  concurrency:
+    key: "attack-discovery-attach-{{ inputs.attack_discovery_id }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        attack_discovery_id:
+          type: string
+          maxLength: 512
+          description: Document id of the persisted Attack Discovery being attached.
+        title:
+          type: string
+          maxLength: 1024
+          description: Persisted, anonymized title. Quoted in the match journal. The review writes the Investigation title.
+        alert_ids:
+          type: array
+          maxItems: 1000
+          items:
+            type: string
+            maxLength: 256
+          description: Document ids of the detection alerts the Attack Discovery correlated.
+        summary_markdown:
+          type: string
+          maxLength: 8000
+          description: Persisted, anonymized summary. The review writes the Investigation summary.
+        investigation_id:
+          type: string
+          maxLength: 256
+          description: >
+            Investigation to attach to. This run waits for the review to create it
+            and does not create it itself.
+        tag_correlated_alerts:
+          type: boolean
+          description: >
+            When true, tag the detection alerts `az:ad_correlated`. Set only when
+            the Investigation has already escalated or closed for a reason other
+            than false positive.
+        journal_alerts_retired:
+          type: boolean
+          description: >
+            When true, journal that the correlated alerts were retired. Set only
+            when the Investigation verdict is a handed-off true positive or
+            inconclusive, the same cases the review journals.
+        parent_run_id:
+          type: string
+          maxLength: 128
+          description: Workflow execution id of the runner that launched this attach.
+      required:
+        - attack_discovery_id
+        - title
+        - investigation_id
+      additionalProperties: false
+consts:
+  no_alert_ids: []
+  alerts_per_attachment: 20
+  ad_correlated_tag: az:ad_correlated
+  impact_entity_cap: 50
+steps:
+  # The review creates the Investigation, after it has read the de-anonymized
+  # title. Creating here would win that race and leave the anonymized title in
+  # place, and a create against an Investigation that already exists is logged
+  # as an error. Wait instead. A cross-run attach finds the Investigation on
+  # the first read. A same-run attach, or one whose review has not created the
+  # conversation yet, retries for 15 minutes. That is the same window the
+  # matcher treats the fingerprint as in flight. Generation will not hand this
+  # discovery to a later run, so the wait has to cover that window. Still
+  # missing after that, this run stops.
+  - name: wait_for_investigation
+    type: ai.conversation.metadata.read
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+    on-failure:
+      retry:
+        max-attempts: 30
+        delay: 30s
+
+  # The decision, before any attachment write. Says why this attack did not open
+  # its own Investigation. It does not claim the attachments landed: those writes
+  # are still ahead, and a later note reports them.
+  - name: journal_attach_started
+    type: workflow.execute
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigation_id }}"
+        message: >-
+          Matched Attack Discovery {{ inputs.attack_discovery_id }}
+          ("{{ inputs.title }}") to this Investigation.
+          {{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection alert(s).
+          FP/TP analysis was skipped because this attack matches one already under investigation.
+          Parent run: {{ inputs.parent_run_id }}.
+          This execution: {{ execution.id }}.
+    on-failure:
+      continue: true
+
+  - name: attach_discovery
+    type: ai.attachment.add
+    with:
+      conversation_id: "{{ inputs.investigation_id }}"
+      id: "attack-discovery-{{ inputs.attack_discovery_id }}"
+      type: security.attack_discovery
+      origin: "{{ inputs.attack_discovery_id }}"
+      description: An Attack Discovery attached to this Investigation
+      render_inline: true
+    on-failure:
+      continue: true
+
+  - name: attach_alerts
+    type: foreach
+    foreach: "{{ inputs.alert_ids | default: consts.no_alert_ids | chunk: consts.alerts_per_attachment }}"
+    steps:
+      - name: attach_alert_batch
+        type: ai.attachment.add
+        with:
+          conversation_id: "{{ inputs.investigation_id }}"
+          id: "correlated-alerts-{{ inputs.attack_discovery_id }}-{{ foreach.index }}"
+          type: security.alerts
+          data:
+            alertIds: "${{ foreach.item }}"
+          description: >-
+            Detection alerts correlated by an attached Attack Discovery
+            (batch {{ foreach.index | plus: 1 }} of {{ foreach.total }})
+        on-failure:
+          continue: true
+
+  # After the writes. "Attempted" on purpose: a retry 409s on an attachment that
+  # is already there, and a failed add continues, so the note cannot claim either
+  # one landed. The attachment list is what shows which batches are present.
+  - name: journal_evidence_attached
+    type: workflow.execute
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigation_id }}"
+        message: >-
+          Attempted attachment of Attack Discovery {{ inputs.attack_discovery_id }}
+          and {{ inputs.alert_ids | default: consts.no_alert_ids | size }} correlated detection
+          alert(s). See the attachment list for what landed.
+    on-failure:
+      continue: true
+
+  # A continuation no longer gets its own review, so the hosts and users its alerts
+  # add have to be recorded here. Merged by id onto the impact already stored.
+  - name: collect_impact_entities
+    type: security.getAlertEntities
+    if: "${{ inputs.alert_ids != blank }}"
+    timeout: "60s"
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      max_entities: "${{ consts.impact_entity_cap }}"
+    on-failure:
+      continue: true
+
+  - name: attach_impact
+    type: investigations.attachImpact
+    if: "${{ steps.collect_impact_entities.output.entities != blank }}"
+    with:
+      conversationId: "{{ inputs.investigation_id }}"
+      entities: "${{ steps.collect_impact_entities.output.entities }}"
+    on-failure:
+      continue: true
+
+  - name: journal_impact_recorded
+    type: workflow.execute
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigation_id }}"
+        message: >-
+          {% if steps.attach_impact.output.entities != blank %}Recorded impact:
+          {{ steps.collect_impact_entities.output.entities | size }} host(s) and user(s).{% elsif
+          steps.attach_impact.error != blank %}Could not record impact. See attach execution
+          {{ execution.id }}.{% elsif steps.collect_impact_entities.error != blank %}Could not read
+          the correlated alerts' hosts and users, so no impact was recorded. See attach execution
+          {{ execution.id }}.{% elsif inputs.alert_ids == blank %}No impact recorded: the attach
+          was given no correlated alerts.{% else %}No impact recorded: the correlated alert(s)
+          name no host or user.{% endif %}
+    on-failure:
+      continue: true
+
+  - name: tag_correlated_alerts
+    type: security.setAlertTags
+    if: "${{ inputs.tag_correlated_alerts == true and inputs.alert_ids != blank }}"
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      tags_to_add:
+        - "{{ consts.ad_correlated_tag }}"
+    on-failure:
+      continue: true
+
+  # Same alerts the tag step just marked, and only the ones still open. A by-id
+  # status write has no status condition, so an alert closed while this ran would
+  # be reopened. The query skips those. Same gate as the tag: a closed false
+  # positive does not reach here.
+  - name: acknowledge_correlated_alerts
+    type: kibana.SetAlertsStatus
+    if: "${{ inputs.tag_correlated_alerts == true and inputs.alert_ids != blank }}"
+    timeout: "60s"
+    with:
+      status: acknowledged
+      conflicts: proceed
+      query:
+        bool:
+          filter:
+            - ids:
+                values: "${{ inputs.alert_ids }}"
+            - term:
+                kibana.alert.workflow_status: open
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  # Same gate as the review's `journal_alerts_retired`: a true-positive or
+  # inconclusive verdict. The worker sets the input only when the Investigation
+  # verdict records that handoff. A declined or other close still tags above and
+  # does not get this note. No error message: it would be read back as user input.
+  - name: journal_alerts_retired
+    type: workflow.execute
+    if: "${{ inputs.journal_alerts_retired == true and inputs.alert_ids != blank }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigation_id }}"
+        message: >-
+          {% if steps.tag_correlated_alerts.error == blank %}Tagged
+          {{ inputs.alert_ids | size }} correlated detection alert(s)
+          {{ consts.ad_correlated_tag }}, so later Worker runs skip them.
+          {% if steps.acknowledge_correlated_alerts.error == blank %}Acknowledged the ones that were still open.{% else %}Could not acknowledge the ones that were still open. See attach execution {{ execution.id }}.{% endif %}
+          {% else %}Could not tag the
+          {{ inputs.alert_ids | size }} correlated detection alert(s)
+          {{ consts.ad_correlated_tag }}. Later Worker runs may correlate them again.
+          See attach execution {{ execution.id }}.{% endif %}
+    on-failure:
+      continue: true
