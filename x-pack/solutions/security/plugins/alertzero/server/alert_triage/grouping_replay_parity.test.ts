@@ -96,6 +96,42 @@ describe('the grouping planner matches the offline replay', () => {
   );
 });
 
+// Written by hand, not part of the generated fixture. These two rules only depend on the constants.
+describe('the caps on one proposal', () => {
+  const doc = {
+    'kibana.alert.rule.uuid': 'rule-1',
+    'kibana.alert.rule.revision': 1,
+    host: { os: { type: 'windows' } },
+    process: { executable: 'C:\\a\\run.exe', code_signature: { subject_name: 'Acme' } },
+  };
+  const run = (batchCount: number, perBatch: number) => {
+    const batches = Array.from({ length: batchCount }, (_, i) => ({
+      hours: i,
+      ids: Array.from({ length: perBatch }, (__, j) => `b${i}-${j}`),
+    }));
+    const docs = Object.fromEntries(batches.flatMap(({ ids }) => ids.map((id) => [id, doc])));
+    return replay({ docs, batches });
+  };
+
+  it('holds at most 1,000 alerts', async () => {
+    const { proposals, joined } = await run(12, 100);
+    expect(proposals).toEqual([
+      { hours: 0, size: 1000, revisions: 10 },
+      { hours: 10, size: 200, revisions: 2 },
+    ]);
+    expect(joined).toBe(1000);
+  });
+
+  it('takes at most 19 joins, 20 revisions with the first', async () => {
+    const { proposals, joined } = await run(23, 2);
+    expect(proposals).toEqual([
+      { hours: 0, size: 40, revisions: 20 },
+      { hours: 20, size: 6, revisions: 3 },
+    ]);
+    expect(joined).toBe(42);
+  });
+});
+
 // Written by hand, not part of the generated fixture. A pattern that comes back every 15 minutes
 // fills a proposal (20 revisions) in 5 hours. When proposal ids were numbered 0 to 199 for good, a
 // pattern like this used them all in 42 days and went back to one proposal per batch. The ids now
