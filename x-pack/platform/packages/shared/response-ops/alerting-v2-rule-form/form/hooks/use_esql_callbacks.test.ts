@@ -166,6 +166,31 @@ describe('useEsqlCallbacks', () => {
     );
   });
 
+  it('reads the space default routing when the sources lookup runs', async () => {
+    mockGetESQLSources.mockResolvedValue([]);
+    jest.mocked(getProjectRoutingFromEsqlQuery).mockReturnValue(undefined);
+    const mockGetDefaultProjectRouting = jest.fn().mockReturnValue('_alias:*');
+    const mockCps = {
+      cpsManager: { getDefaultProjectRouting: mockGetDefaultProjectRouting },
+    } as unknown as CPSPluginStart;
+
+    const { result } = renderHook(() =>
+      useEsqlCallbacks({ application, http, search: mockSearch, cps: mockCps })
+    );
+
+    // CPS finishes loading the space default after the hook mounted
+    mockGetDefaultProjectRouting.mockReturnValue('_alias:_origin');
+    await result.current.getSources!();
+
+    expect(mockGetESQLSources).toHaveBeenCalledWith(
+      { application, http },
+      undefined,
+      undefined,
+      undefined,
+      '_alias:_origin'
+    );
+  });
+
   it('memoizes callbacks when dependencies do not change', () => {
     const { result, rerender } = renderHook(() =>
       useEsqlCallbacks({

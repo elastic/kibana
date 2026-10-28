@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { ESQLCallbacks } from '@kbn/esql-types';
@@ -50,11 +50,10 @@ export const useEsqlCallbacks = ({
   cps,
   query,
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
-  // getSources doesn't receive the query, so read its routing from the rule query
-  const sourcesProjectRouting = useMemo(
-    () => getRuleProjectRouting(query ?? '', cps),
-    [query, cps]
-  );
+  // getSources doesn't receive the query, so it reads the rule query from a ref.
+  // The routing is resolved on each call because CPS loads the space default async.
+  const queryRef = useRef(query);
+  queryRef.current = query;
 
   return useMemo<ESQLCallbacks>(
     () => ({
@@ -64,7 +63,7 @@ export const useEsqlCallbacks = ({
           undefined,
           undefined,
           undefined,
-          sourcesProjectRouting
+          getRuleProjectRouting(queryRef.current ?? '', cps)
         ),
       getColumnsFor: async ({ query: columnsQuery }: { query?: string } | undefined = {}) =>
         getEsqlColumns({
@@ -75,6 +74,6 @@ export const useEsqlCallbacks = ({
       getDatasets: async () => getDatasets(http),
       getViews: async () => getViews(http),
     }),
-    [application, http, search, cps, sourcesProjectRouting]
+    [application, http, search, cps]
   );
 };
