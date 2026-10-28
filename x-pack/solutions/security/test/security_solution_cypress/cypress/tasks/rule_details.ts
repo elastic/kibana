@@ -190,7 +190,6 @@ export const removeException = () => {
  * @param ruleName rule's name
  */
 export const waitForPageToBeLoaded = (ruleName: string): void => {
-  cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
   cy.contains(RULE_NAME_HEADER, ruleName).should('be.visible');
   cy.get(PAGE_CONTENT_SPINNER).should('not.exist');
 };
