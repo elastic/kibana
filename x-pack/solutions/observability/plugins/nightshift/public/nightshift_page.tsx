@@ -31,7 +31,6 @@ import { CustomContextFlyout } from './custom_context/custom_context_flyout';
 import { NightshiftOnboarding } from './onboarding/onboarding';
 import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
 import { SettingsPage } from './settings/page';
-import { NightshiftSetupOnboarding } from './onboarding/setup_onboarding';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
@@ -224,8 +223,8 @@ export function NightshiftPage(): React.ReactElement | null {
     return null;
   }
 
-  // Until the space is set up, every page shows onboarding with its "Enable Elastic Nightshift"
-  // step, for everyone: only users with manage_security can complete it.
+  // Until the space is set up, every page shows the regular onboarding, which starts at its
+  // "Enable Elastic Nightshift" step, for everyone: only admins can complete it.
   if (isSetupPending || needsSetup) {
     return (
       <ObservabilityPageTemplate
@@ -236,7 +235,13 @@ export function NightshiftPage(): React.ReactElement | null {
         {/* Nothing behind the header actions works before setup, so the header carries none. */}
         <NightshiftAppHeader page="landing" />
         <EuiPageTemplate.Section component="div" restrictWidth={ONBOARDING_MAX_WIDTH}>
-          <NightshiftSetupOnboarding status={serviceAccount.data} isLoading={isSetupPending} />
+          {isSetupPending ? (
+            <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftSetupLoading">
+              <EuiLoadingSpinner size="xl" />
+            </EuiFlexGroup>
+          ) : (
+            <NightshiftOnboarding onFinish={finishOnboarding} />
+          )}
         </EuiPageTemplate.Section>
       </ObservabilityPageTemplate>
     );

@@ -34,7 +34,10 @@ import {
   type OnboardingStepState,
 } from './onboarding_steps';
 import { NightshiftSetupPrompt } from '../service_account/nightshift_setup_prompt';
-import { useInvestigatorServiceAccount } from '../service_account/use_investigator_service_account';
+import {
+  isNightshiftSetUp,
+  useInvestigatorServiceAccount,
+} from '../service_account/use_investigator_service_account';
 import { OnboardingConnectStep } from './connect_step';
 import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 import { OnboardingAutomationStep } from './automation_step';
@@ -88,8 +91,9 @@ export function NightshiftOnboarding({
   const [stepOverride, setStepOverride] = useState<StepOverride>();
 
   const execution = data?.execution;
-  // Step 1 is done once the investigation agent is installed in the space.
-  const isEnabled = data?.agent_installed === true;
+  // Step 1 is done once the space is bound to its service accounts and the agent is installed:
+  // one click does both, and removing the binding brings the step back.
+  const isEnabled = data?.agent_installed === true && isNightshiftSetUp(serviceAccount.data);
   // Step 2 is done once an exploration run exists.
   const isConnected = execution != null;
 
