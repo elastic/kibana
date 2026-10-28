@@ -81,7 +81,10 @@ export class KibanaClient {
           })
         );
       }
-      return response.json();
+
+      // Some endpoints respond without a body, e.g. with `202 Accepted`.
+      const body = await response.text();
+      return body ? JSON.parse(body) : undefined;
     });
   }
 }
