@@ -31,18 +31,24 @@ export interface RuleDetailsProps {
 export const RuleDetails: FC<RuleDetailsProps> = memo(({ ruleId }) => {
   const { rule, loading, isExistingRule } = useRuleDetails({ ruleId });
 
+  // A deleted rule can still be rebuilt from its alerts, but its details would be stale
+  // and nothing in the flyout can act on it, so it is reported as gone instead.
+  if (!isExistingRule) {
+    return <RuleNotFound />;
+  }
+
   if (loading) {
     return <FlyoutLoading data-test-subj={RULE_DETAILS_LOADING_TEST_ID} />;
   }
 
   if (!rule) {
-    return isExistingRule ? <FlyoutError /> : <RuleNotFound />;
+    return <FlyoutError />;
   }
 
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <Header rule={rule} isSuppressed={!isExistingRule} />
+        <Header rule={rule} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <Content rule={rule} />

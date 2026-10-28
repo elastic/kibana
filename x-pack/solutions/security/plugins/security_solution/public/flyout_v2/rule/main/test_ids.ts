@@ -12,7 +12,6 @@ const RULE_DETAILS_TEST_ID = `${PREFIX}RuleDetails` as const;
 
 export const RULE_DETAILS_TITLE_TEST_ID = `${RULE_DETAILS_TEST_ID}Title` as const;
 export const RULE_DETAILS_TITLE_LINK_TEST_ID = `${RULE_DETAILS_TEST_ID}TitleLink` as const;
-export const RULE_DETAILS_SUPPRESSED_TEST_ID = `${RULE_DETAILS_TEST_ID}Suppressed` as const;
 export const RULE_DETAILS_CREATED_BY_TEST_ID = `${RULE_DETAILS_TEST_ID}CreatedBy` as const;
 export const RULE_DETAILS_UPDATED_BY_TEST_ID = `${RULE_DETAILS_TEST_ID}UpdatedBy` as const;
 
