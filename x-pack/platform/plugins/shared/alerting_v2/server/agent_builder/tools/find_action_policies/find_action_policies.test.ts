@@ -51,8 +51,10 @@ describe('findActionPoliciesTool', () => {
   const firstResult = (result: HandlerResult) =>
     'results' in result ? result.results[0] : undefined;
 
-  const run = (params: { search?: string; page?: number; perPage?: number } = {}, tool = createTool()) =>
-    tool.handler(params, agentBuilderMocks.tools.createHandlerContext());
+  const run = (
+    params: { search?: string; page?: number; perPage?: number } = {},
+    tool = createTool()
+  ) => tool.handler(params, agentBuilderMocks.tools.createHandlerContext());
 
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
