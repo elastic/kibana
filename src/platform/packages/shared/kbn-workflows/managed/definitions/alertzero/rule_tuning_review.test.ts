@@ -276,36 +276,66 @@ describe('rule_tuning_review proposed change', () => {
     }
   });
 
-  it('describes the backtest schedule with the look-back instead of date math', () => {
-    const comment = engine.parseAndRenderSync(commentTemplate, {
-      inputs: { fp_count: 1, alert_ids: ['a'], last_fp_at: '2026-10-01T00:00:00Z' },
-      consts: definition.consts,
-      steps: {
-        diagnose_rule: {
-          output: {
-            structured_output: {
-              change_type: 'schedule',
-              proposed_interval: '5m',
-              proposed_from: 'now-6m',
-            },
+  describe('backtest', () => {
+    const renderBacktest = (
+      structuredOutput: Record<string, unknown>,
+      rule: Record<string, unknown>,
+      lookbacks: string
+    ): string => {
+      const comment = engine.parseAndRenderSync(commentTemplate, {
+        inputs: { fp_count: 1, alert_ids: ['a'], last_fp_at: '2026-10-01T00:00:00Z' },
+        consts: definition.consts,
+        steps: {
+          diagnose_rule: { output: { structured_output: structuredOutput } },
+          fetch_rule: { output: rule },
+          can_preview_query_change: { output: { supported: true } },
+          compute_schedule_lookbacks: { output: { lookbacks } },
+          compute_schedule_preview_runs: { output: { proposed_invocation_count: 1 } },
+          record_preview_outcome: {
+            output: { current_error_text: '', proposed_error_text: '' },
           },
         },
-        fetch_rule: { output: { interval: '5m', from: 'now-65m' } },
-        can_preview_query_change: { output: { supported: true } },
-        compute_schedule_lookbacks: { output: { lookbacks: '1h,1m' } },
-        compute_schedule_preview_runs: { output: { proposed_invocation_count: 2 } },
-      },
+      });
+      return comment.slice(comment.indexOf('**Backtest**')).trim();
+    };
+
+    it('describes the simulated schedule with the look-back instead of date math', () => {
+      const backtest = renderBacktest(
+        { change_type: 'threshold', proposed_threshold_value: 10 },
+        { interval: '5m', from: 'now-6m', threshold: { value: 3 } },
+        '1m,1m'
+      );
+      expect(backtest).toContain(
+        'The backtest ran 2 simulated executions, running every `5m` with `1m` additional look-back time.'
+      );
+      expect(backtest).toContain(
+        'It ends at the newest false positive, October 1, 2026 at 00:00 UTC.'
+      );
     });
-    expect(comment).toContain(
-      'The backtest ran 2 simulated executions, running every `5m` with `1h` additional look-back time.'
-    );
-    expect(comment).toContain(
-      'The proposed schedule ran 2 simulated executions, running every `5m` with `1m` additional look-back time, over the same time span.'
-    );
-    expect(comment).toContain(
-      'It ends at the newest false positive, October 1, 2026 at 00:00 UTC.'
-    );
-    expect(comment).not.toContain('now-65m');
+
+    it('does not repeat the schedules a schedule change already shows', () => {
+      const backtest = renderBacktest(
+        { change_type: 'schedule', proposed_interval: '10m', proposed_from: 'now-11m' },
+        { interval: '5m', from: 'now-65m' },
+        '1h,1m'
+      );
+      expect(backtest).toContain(
+        'The backtest ran 2 simulated executions with the current schedule and 1 with the proposed schedule, over the same time span.'
+      );
+      expect(backtest).not.toMatch(/now-65m|`1h`|`1m`/);
+    });
+
+    it('is one paragraph followed by the alert counts', () => {
+      expect(
+        renderBacktest(
+          { change_type: 'schedule', proposed_interval: '5m', proposed_from: 'now-6m' },
+          { interval: '5m', from: 'now-65m' },
+          '1h,1m'
+        )
+      ).toMatch(
+        /^\*\*Backtest\*\*\nThe backtest ran [^\n]+ over the same time span\. It ends at [^\n]+ UTC\. This time span [^\n]+\n\nAlerts with the current rule: [^\n]*\nAlerts with the proposed change: [^\n]*$/
+      );
+    });
   });
 
   it('computes look-backs as from minus interval, in the largest whole unit', () => {
