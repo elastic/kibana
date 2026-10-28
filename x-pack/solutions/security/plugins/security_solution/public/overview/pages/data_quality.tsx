@@ -6,20 +6,25 @@
  */
 
 import { COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import {
-  DATA_QUALITY_SUBTITLE,
-  DataQualityPanel,
-  ECS_REFERENCE_URL,
-} from '@kbn/ecs-data-quality-dashboard';
+import { DataQualityPanel, ECS_REFERENCE_URL } from '@kbn/ecs-data-quality-dashboard';
 import type { OnTimeChangeProps } from '@elastic/eui';
-import { EuiLink, EuiLoadingSpinner, EuiSuperDatePicker, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useAssistantAvailability } from '../../assistant/use_assistant_availability';
+import { DASHBOARDS } from '../../app/translations';
 import { SecurityPageName } from '../../app/types';
+import { SecurityAppHeader } from '../../common/components/app_header';
 import { useThemes } from '../../common/components/charts/common';
-import { HeaderPage } from '../../common/components/header_page';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
+import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { APP_ID, DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
@@ -34,6 +39,8 @@ import {
 } from '../../common/lib/telemetry';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
+import { DataViewPicker } from '../../data_view_manager/components/data_view_picker';
+import { PageScope } from '../../data_view_manager/constants';
 import { PageLoader } from '../../common/components/page_loader';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
@@ -56,19 +63,19 @@ const DataQualityComponent: React.FC = () => {
   const indicesExist = !!dataView?.matchedIndices?.length;
 
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
-  const { configSettings, cases, telemetry } = useKibana().services;
+  const { configSettings, cases, docLinks, telemetry } = useKibana().services;
   const isILMAvailable = configSettings.ILMEnabled;
 
   const [startDate, setStartTime] = useState<string>();
   const [endDate, setEndTime] = useState<string>();
-  const onTimeChange = ({ start, end, isInvalid }: OnTimeChangeProps) => {
+  const onTimeChange = useCallback(({ start, end, isInvalid }: OnTimeChangeProps) => {
     if (isInvalid) {
       return;
     }
 
     setStartTime(start);
     setEndTime(end);
-  };
+  }, []);
 
   useEffect(() => {
     if (!isILMAvailable) {
@@ -90,16 +97,41 @@ const DataQualityComponent: React.FC = () => {
     [selectedPatterns, signalIndexName]
   );
 
-  const subtitle = useMemo(
-    () => (
-      <EuiText color="subdued" size="s">
-        <span>{DATA_QUALITY_SUBTITLE}</span>{' '}
-        <EuiLink external={true} href={ECS_REFERENCE_URL} rel="noopener noreferrer" target="_blank">
-          {i18n.ELASTIC_COMMON_SCHEMA}
-        </EuiLink>
-      </EuiText>
-    ),
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const back = useMemo(
+    () => ({
+      href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.dashboards }),
+      label: DASHBOARDS,
+    }),
+    [getSecuritySolutionUrl]
+  );
+
+  const dataViewPicker = useMemo(
+    () => <DataViewPicker scope={PageScope.default} compressed={false} />,
     []
+  );
+
+  const summaryFilters = useMemo(
+    () => (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>{dataViewPicker}</EuiFlexItem>
+        {!isILMAvailable && startDate && endDate && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={i18n.DATE_PICKER_TOOLTIP}>
+              <EuiSuperDatePicker
+                start={startDate}
+                end={endDate}
+                onTimeChange={onTimeChange}
+                showUpdateButton={false}
+                isDisabled={true}
+                data-test-subj="dataQualityDatePicker"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ),
+    [dataViewPicker, isILMAvailable, startDate, endDate, onTimeChange]
   );
 
   const [lastChecked, setLastChecked] = useLocalStorage<string>({
@@ -142,58 +174,70 @@ const DataQualityComponent: React.FC = () => {
     [telemetry]
   );
 
-  if (status === 'loading' || isSignalIndexNameLoading) {
-    return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
-  }
-
   if (status === 'pristine') {
     return <PageLoader />;
   }
 
+  const renderContent = () => {
+    if (status === 'loading' || isSignalIndexNameLoading) {
+      return <EuiLoadingSpinner size="l" data-test-subj="ecsDataQualityDashboardLoader" />;
+    }
+
+    if (!indicesExist) {
+      return (
+        <>
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>{dataViewPicker}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EmptyPrompt />
+        </>
+      );
+    }
+
+    return (
+      <DataQualityPanel
+        baseTheme={baseTheme}
+        canUserCreateAndReadCases={canUserCreateAndReadCases}
+        defaultBytesFormat={defaultBytesFormat}
+        defaultNumberFormat={defaultNumberFormat}
+        endDate={endDate}
+        reportDataQualityCheckAllCompleted={reportDataQualityCheckAllCompleted}
+        reportDataQualityIndexChecked={reportDataQualityIndexChecked}
+        httpFetch={httpFetch}
+        isAssistantEnabled={isAssistantEnabled}
+        isILMAvailable={isILMAvailable}
+        lastChecked={lastChecked}
+        openCreateCaseFlyout={openCreateCaseFlyout}
+        patterns={alertsAndSelectedPatterns}
+        setLastChecked={setLastChecked}
+        startDate={startDate}
+        summaryFilters={summaryFilters}
+        theme={theme}
+        toasts={toasts}
+        defaultStartTime={DEFAULT_START_TIME}
+        defaultEndTime={DEFAULT_END_TIME}
+      />
+    );
+  };
+
   return (
     <>
-      {indicesExist ? (
-        <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
-          <HeaderPage subtitle={subtitle} title={i18n.DATA_QUALITY_TITLE}>
-            {!isILMAvailable && startDate && endDate && (
-              <EuiToolTip content={i18n.DATE_PICKER_TOOLTIP}>
-                <EuiSuperDatePicker
-                  start={startDate}
-                  end={endDate}
-                  onTimeChange={onTimeChange}
-                  showUpdateButton={false}
-                  isDisabled={true}
-                  data-test-subj="dataQualityDatePicker"
-                />
-              </EuiToolTip>
-            )}
-          </HeaderPage>
-
-          <DataQualityPanel
-            baseTheme={baseTheme}
-            canUserCreateAndReadCases={canUserCreateAndReadCases}
-            defaultBytesFormat={defaultBytesFormat}
-            defaultNumberFormat={defaultNumberFormat}
-            endDate={endDate}
-            reportDataQualityCheckAllCompleted={reportDataQualityCheckAllCompleted}
-            reportDataQualityIndexChecked={reportDataQualityIndexChecked}
-            httpFetch={httpFetch}
-            isAssistantEnabled={isAssistantEnabled}
-            isILMAvailable={isILMAvailable}
-            lastChecked={lastChecked}
-            openCreateCaseFlyout={openCreateCaseFlyout}
-            patterns={alertsAndSelectedPatterns}
-            setLastChecked={setLastChecked}
-            startDate={startDate}
-            theme={theme}
-            toasts={toasts}
-            defaultStartTime={DEFAULT_START_TIME}
-            defaultEndTime={DEFAULT_END_TIME}
-          />
-        </SecuritySolutionPageWrapper>
-      ) : (
-        <EmptyPrompt />
-      )}
+      <SecuritySolutionPageWrapper data-test-subj="ecsDataQualityDashboardPage">
+        {/* The header must be a direct child of the wrapper, otherwise it does not stay sticky. */}
+        <SecurityAppHeader
+          title={i18n.DATA_QUALITY_TITLE}
+          description={{ text: i18n.DATA_QUALITY_DESCRIPTION, learnMoreUrl: ECS_REFERENCE_URL }}
+          spacing="largeBleed"
+          back={back}
+          docLink={docLinks.links.siem.dataQualityPage}
+          // Pass a menu even with no items so AppHeader doesn't fall back to the legacy action menu,
+          // which would render a second data view picker.
+          menu={{ items: [] }}
+        />
+        <EuiSpacer size="m" />
+        {renderContent()}
+      </SecuritySolutionPageWrapper>
 
       <SpyRoute pageName={SecurityPageName.dataQuality} />
     </>
