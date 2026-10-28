@@ -81,14 +81,16 @@ export interface SourceWithHealth {
   health: SourceHealth;
 }
 
-export const createSourceRequestSchema = z.object({
-  title: sourceTitleSchema,
-  description: sourceDescriptionSchema.optional(),
-  tags: sourceTagsSchema.default([]),
-  esql: sourceEsqlSchema,
-  /** Create only. An update keeps the stored state; `_enable` and `_disable` change it. */
-  enabled: z.boolean().default(true),
-});
+export const createSourceRequestSchema = lazySchema(() =>
+  z.object({
+    title: sourceTitleSchema,
+    description: sourceDescriptionSchema.optional(),
+    tags: sourceTagsSchema.default([]),
+    esql: sourceEsqlSchema,
+    /** Create only. An update keeps the stored state; `_enable` and `_disable` change it. */
+    enabled: z.boolean().default(true),
+  })
+);
 
 /** Wire shape callers send; `tags` may be omitted on create (defaults to `[]`). */
 export type CreateSourceRequest = z.input<typeof createSourceRequestSchema>;
