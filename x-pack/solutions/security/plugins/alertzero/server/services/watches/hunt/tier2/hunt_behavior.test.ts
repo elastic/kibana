@@ -411,6 +411,49 @@ describe('huntBehavior', () => {
     expect(additionalContext).toContain('the report body');
   });
 
+  it('includes an ADJUDICATED OUT block only when excluded_iocs is non-empty', async () => {
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: REPORT_TEXT, iocs: [{ type: 'ip', value: '203.0.113.7' }] },
+      esClient
+    );
+    expect(generateEsqlMock.mock.calls[0][0].additionalContext).not.toContain('ADJUDICATED OUT');
+
+    generateEsqlMock.mockClear();
+    generateByTechnique({ 'T1078.004': GROUNDED_ESQL });
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      {
+        text: REPORT_TEXT,
+        iocs: [{ type: 'hash', value: 'abc12345' }],
+        excluded_iocs: [{ type: 'ip', value: '169.254.169.254' }],
+      },
+      esClient
+    );
+    const { additionalContext } = generateEsqlMock.mock.calls[0][0];
+    expect(additionalContext).toContain('--- ADJUDICATED OUT (do not hunt these values) ---');
+    expect(additionalContext).toContain('ip: 169.254.169.254');
+  });
+
+  it('caps the ADJUDICATED OUT block at 30 excluded IOCs', async () => {
+    const excludedIocs = Array.from({ length: 40 }, (_, i) => ({
+      type: 'ip',
+      value: `203.0.113.${i}`,
+    }));
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: REPORT_TEXT, excluded_iocs: excludedIocs },
+      esClient
+    );
+    const { additionalContext } = generateEsqlMock.mock.calls[0][0];
+    expect(additionalContext).toContain('ip: 203.0.113.0');
+    expect(additionalContext).toContain('ip: 203.0.113.29');
+    expect(additionalContext).not.toContain('ip: 203.0.113.30');
+  });
+
   it('bounds the sample-events section in aggregate at the schema max of 50 events', async () => {
     // Each event is independently capped at 2048 chars by the schema (`max_tier2_sample_events`'s
     // own ceiling); unbounded in aggregate, 50 of them is ~100 KB repeated into every one of up
@@ -936,6 +979,59 @@ describe('huntBehavior', () => {
       expect(executeEsqlMock).not.toHaveBeenCalled();
     });
 
+    it('retries and discards a query that filters on an excluded IOC', async () => {
+      const excluded = '169.254.169.254';
+      const excludedQuery = `FROM logs-aws.*\n| WHERE source.ip == "${excluded}"\n| LIMIT 10`;
+      generateEsqlMock
+        .mockResolvedValueOnce({ query: excludedQuery })
+        .mockResolvedValueOnce({ query: excludedQuery });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        {
+          ...executeParams,
+          text: `${REPORT_TEXT} Metadata ${excluded} appeared in the article.`,
+          excluded_iocs: [{ type: 'ip', value: excluded }],
+        },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(generateEsqlMock.mock.calls[1][0].additionalInstructions).toEqual(
+        expect.stringContaining('query filters on a value intel review rejected')
+      );
+      expect(result.behaviors[0].execution?.inconclusive_reason).toBe('query_ungrounded');
+      expect(result.incomplete).toContainEqual(
+        expect.objectContaining({
+          reason: 'query_ungrounded',
+          detail: expect.stringContaining('query filters on a value intel review rejected'),
+        })
+      );
+      expect(executeEsqlMock).not.toHaveBeenCalled();
+    });
+
+    it('publishes a query that uses a field whose name collides with an excluded value', async () => {
+      const fieldCollisionQuery = 'FROM logs-aws.*\n| WHERE process.name == "whoami"\n| LIMIT 10';
+      generateEsqlMock.mockResolvedValueOnce({ query: fieldCollisionQuery });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        {
+          ...executeParams,
+          text: `${REPORT_TEXT} whoami was observed on the host.`,
+          excluded_iocs: [{ type: 'domain', value: 'process.name' }],
+        },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(1);
+      expect(result.behaviors[0].validated_esql).toContain(fieldCollisionQuery);
+      expect(result.behaviors[0].execution?.inconclusive_reason).not.toBe('query_ungrounded');
+      expect(executeEsqlMock).toHaveBeenCalledTimes(1);
+    });
+
     it('keeps the placeholder as query_ungrounded, not generation_failed, when the retry call errors', async () => {
       generateEsqlMock
         .mockResolvedValueOnce({ query: UNGROUNDED_ESQL })
@@ -1127,6 +1223,39 @@ describe('huntBehavior', () => {
       expect(survivor?.execution?.inconclusive_reason).toBe('generation_failed');
       expect(sibling?.validated_esql).toContain(COVERING_ESQL);
       expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+    });
+
+    it('discards a second-wave query that filters on an excluded IOC', async () => {
+      // The survivor grounds on `AssumeRole`, so the sibling generates on its own in the second
+      // wave. Generation-time and publish-time grounding both read the denylist (the first drives
+      // the retry, the second discards), so the sibling keeps the placeholder and never executes.
+      const excluded = '169.254.169.254';
+      const EXCLUDED_ESQL = `FROM logs-aws.cloudtrail-*\n| WHERE source.ip == "${excluded}"\n| LIMIT 10`;
+      generateByTechnique({ 'T1078.004': GROUNDED_ESQL, T1566: EXCLUDED_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel(sharedCandidates),
+        logger,
+        {
+          ...executeParams,
+          text: `${COLLAPSE_TEXT} The metadata endpoint ${excluded} appeared in the article.`,
+          iocs: [sharedIoc],
+          excluded_iocs: [{ type: 'ip', value: excluded }],
+        },
+        esClient
+      );
+
+      const sibling = result.behaviors.find((b) => b.technique_id === 'T1566');
+      expect(sibling?.execution?.inconclusive_reason).toBe('query_ungrounded');
+      expect(sibling?.validated_esql).not.toContain(EXCLUDED_ESQL);
+      expect(result.incomplete).toContainEqual(
+        expect.objectContaining({
+          reason: 'query_ungrounded',
+          detail: expect.stringContaining('intel review rejected'),
+        })
+      );
+      // Only the survivor executed.
+      expect(executeEsqlMock).toHaveBeenCalledTimes(1);
     });
 
     it('charges uncovered siblings to the generation budget when the first wave used it all', async () => {

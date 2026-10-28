@@ -22,6 +22,7 @@ describe('Overview - Upgrade Step', () => {
         cloud: {
           isCloudEnabled: true,
           deploymentUrl: DEPLOYMENT_URL,
+          deploymentUpgradeUrl: `${DEPLOYMENT_URL}?show_upgrade=true#uTargetOrganizationId=org1`,
         },
       },
     });
@@ -54,7 +55,9 @@ describe('Overview - Upgrade Step', () => {
       expect(screen.getByTestId('upgradeSetupDocsLink')).toBeInTheDocument();
       const cloudLink = screen.getByTestId('upgradeSetupCloudLink');
       expect(cloudLink).toBeInTheDocument();
-      expect(cloudLink.getAttribute('href')).toBe(`${DEPLOYMENT_URL}?show_upgrade=true`);
+      expect(cloudLink.getAttribute('href')).toBe(
+        `${DEPLOYMENT_URL}?show_upgrade=true#uTargetOrganizationId=org1`
+      );
     });
 
     test('When not ready for upgrade, the CTA button is disabled', async () => {

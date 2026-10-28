@@ -24,7 +24,8 @@
       "streams",
       "observabilityAIAssistant",
       "workflowsManagement",
-      "profiling"
+      "profiling",
+      "entityInventoryApp"
     ],
     "requiredBundles": ["significantEvents"]
   }
