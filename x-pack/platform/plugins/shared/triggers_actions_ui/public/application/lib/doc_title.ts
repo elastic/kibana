@@ -16,6 +16,11 @@ export const getCurrentDocTitle = (page: string): string => {
         defaultMessage: 'Logs',
       });
       break;
+    case 'settings':
+      updatedTitle = i18n.translate('xpack.triggersActionsUI.rulesSettings.breadcrumbTitle', {
+        defaultMessage: 'Settings',
+      });
+      break;
     case 'connectors':
       updatedTitle = i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
         defaultMessage: 'Connectors',

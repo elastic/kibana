@@ -29,6 +29,7 @@ import type { AlertActionEvent } from '../alert_action_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
 import type { RuleExecutorEvent } from '../rule_executor_event_publisher/events';
 import type { AlertStatusChangedEvent } from '../alert_status_changed_event_publisher/events';
+import type { ActionPolicyEvent } from '../action_policy_event_publisher/events';
 
 export type {
   AlertActionEvent,
@@ -93,6 +94,24 @@ export {
 export type { AlertStatusChangedEvent } from '../alert_status_changed_event_publisher/events';
 export { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../alert_status_changed_event_publisher/events';
 
+export type {
+  ActionPolicyCreatedEvent,
+  ActionPolicyDeletedEvent,
+  ActionPolicyDisabledEvent,
+  ActionPolicyEnabledEvent,
+  ActionPolicyEvent,
+  ActionPolicyEventPayload,
+  ActionPolicyUpdatedEvent,
+  BaseActionPolicyEvent,
+} from '../action_policy_event_publisher/events';
+export {
+  ACTION_POLICY_CREATED_EVENT_TYPE,
+  ACTION_POLICY_DELETED_EVENT_TYPE,
+  ACTION_POLICY_DISABLED_EVENT_TYPE,
+  ACTION_POLICY_ENABLED_EVENT_TYPE,
+  ACTION_POLICY_UPDATED_EVENT_TYPE,
+} from '../action_policy_event_publisher/events';
+
 /**
  * Discriminated union of every domain event the alerting framework publishes
  * on its event bus.
@@ -105,7 +124,8 @@ export type AlertingDomainEvent =
   | AlertActionEvent
   | RuleEvent
   | RuleExecutorEvent
-  | AlertStatusChangedEvent;
+  | AlertStatusChangedEvent
+  | ActionPolicyEvent;
 
 /**
  * Publisher-side context threaded through every alerting bus publish call.

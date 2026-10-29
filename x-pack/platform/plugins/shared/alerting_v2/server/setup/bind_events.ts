@@ -19,6 +19,8 @@ import { RuleExecutorEventPublisher } from '../lib/events/rule_executor_event_pu
 import { RuleExecutorWorkflowSubscriber } from '../lib/events/rule_executor_workflow_subscriber/rule_executor_workflow_subscriber';
 import { AlertStatusChangedEventPublisher } from '../lib/events/alert_status_changed_event_publisher/alert_status_changed_event_publisher';
 import { AlertStatusChangedWorkflowSubscriber } from '../lib/events/alert_status_changed_workflow_subscriber/alert_status_changed_workflow_subscriber';
+import { ActionPolicyEventPublisher } from '../lib/events/action_policy_event_publisher/action_policy_event_publisher';
+import { ActionPolicyTelemetrySubscriber } from '../lib/events/action_policy_telemetry_subscriber/action_policy_telemetry_subscriber';
 
 /**
  * DI bindings for the in-process event subsystem.
@@ -60,4 +62,10 @@ export const bindEvents = ({ bind }: ContainerModuleLoadOptions) => {
   bind(AlertStatusChangedEventPublisher).toSelf().inRequestScope();
   bind(AlertStatusChangedWorkflowSubscriber).toSelf().inSingletonScope();
   bind(AlertStatusChangedOptIns).toSelf().inSingletonScope();
+
+  /**
+   * Action policy event publishers and subscribers.
+   */
+  bind(ActionPolicyEventPublisher).toSelf().inSingletonScope();
+  bind(ActionPolicyTelemetrySubscriber).toSelf().inSingletonScope();
 };

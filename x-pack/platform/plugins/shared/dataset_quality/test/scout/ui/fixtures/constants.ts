@@ -46,6 +46,12 @@ export const QUALITY_ISSUE_COLUMNS = {
  */
 export const METERING_CACHE_TIMEOUT_MS = 120_000;
 
+/** Test timeout for size assertions: the metering poll plus the navigation around it. */
+export const METERING_TEST_TIMEOUT_MS = METERING_CACHE_TIMEOUT_MS + 30_000;
+
+/** How long the list page's stats requests can take on a busy cluster. */
+export const STATS_LOAD_TIMEOUT_MS = 30_000;
+
 export const TEXTS = {
   noActivity: 'No activity in the selected timeframe',
   qualityPoor: 'Poor',
