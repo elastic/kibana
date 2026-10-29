@@ -1166,6 +1166,29 @@ describe('Agent policy', () => {
       expect(mockedPackagePolicyService.bulkUpdate).not.toHaveBeenCalled();
     });
 
+    it('should set updated_by to system on shared package policies when no user is passed', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          version: 'WzEsMV0=',
+          policy_ids: ['policy_1', 'int_policy_2'],
+        },
+      ] as any);
+      mockedPackagePolicyService.bulkUpdatePartial.mockResolvedValue({
+        updatedPolicies: [{ id: 'package-1' }] as any,
+        failedPolicies: [],
+      });
+
+      await agentPolicyService.delete(soClient, esClient, 'policy_1');
+
+      expect(mockedPackagePolicyService.bulkUpdatePartial).toHaveBeenCalledWith(expect.anything(), [
+        expect.objectContaining({
+          id: 'package-1',
+          attributes: expect.objectContaining({ updated_by: 'system' }),
+        }),
+      ]);
+    });
+
     it('should remove the agent policy from shared package policies before deleting the others', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
