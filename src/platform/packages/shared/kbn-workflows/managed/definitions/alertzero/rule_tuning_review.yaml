@@ -1192,7 +1192,7 @@ steps:
         {%- assign proposal = steps.diagnose_rule.output.structured_output -%}
         {%- assign outcome = steps.record_preview_outcome.output -%}
         {%- assign lookbacks = steps.compute_schedule_lookbacks.output.lookbacks | split: "," -%}
-        {%- assign end_day = inputs.last_fp_at | date: "%B %-d, %Y", "UTC" -%}
+        {%- assign end_day = inputs.last_fp_at | date: "%B %-d", "UTC" -%}
         {%- if steps.can_preview_query_change.output.supported %}
         **Backtest**
         {%- if lookbacks.size == 4 %}
@@ -1201,12 +1201,12 @@ steps:
         {%- for window in lookbacks offset: 2 %}
         {%- assign seconds = window | plus: 0 %}
         {%- assign start = end_seconds | minus: seconds %}
-        {%- assign start_day = start | date: "%B %-d, %Y", "UTC" %}
+        {%- assign start_day = start | date: "%B %-d", "UTC" %}
         {%- if seconds < 120 %}{% assign length = seconds | append: " seconds" %}
         {%- elsif seconds < 7200 %}{% assign length = seconds | divided_by: 60 | floor | append: " minutes" %}
         {%- else %}{% assign length = seconds | divided_by: 3600 | floor | append: " hours" %}
         {%- endif %}
-        {%- capture range %}{% if start_day == end_day %}{{ start | date: "%H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%H:%M", "UTC" }} UTC on {{ end_day }}{% else %}{{ start | date: "%B %-d, %Y at %H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%B %-d, %Y at %H:%M", "UTC" }} UTC{% endif %} ({{ length }}){% endcapture %}
+        {%- capture range %}{% if start_day == end_day %}{{ start | date: "%H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%H:%M", "UTC" }} UTC on {{ end_day }}{% else %}{{ start | date: "%B %-d at %H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%B %-d at %H:%M", "UTC" }} UTC{% endif %} ({{ length }}){% endcapture %}
         {%- assign ranges = ranges | append: range | append: "|" %}
         {%- endfor %}
         {%- assign ranges = ranges | split: "|" %}
@@ -1216,7 +1216,7 @@ steps:
         The backtest replayed the rule from {{ ranges[0] }}, ending at the newest false positive.
         {%- endif %}
         {%- else %}
-        The backtest ends at the newest false positive, {{ inputs.last_fp_at | date: "%B %-d, %Y at %H:%M UTC", "UTC" }}.
+        The backtest ends at the newest false positive, {{ inputs.last_fp_at | date: "%B %-d at %H:%M UTC", "UTC" }}.
         {%- endif %}
 
         Alerts with the current rule: {% if outcome.current_succeeded and outcome.current_is_aborted == false %}{{ outcome.current_alert_count }}{% else %}inconclusive{% endif %}
