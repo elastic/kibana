@@ -72,7 +72,10 @@ export const readHeldExecution = async ({
   return executionClient.peek(heldExecutionId);
 };
 
-/** True when an execution's record is gone, it finished, or its heartbeat went quiet. */
+/**
+ * True when an execution's record is gone, it completed or failed, or its heartbeat went quiet. An
+ * aborted execution keeps running until it records its interruption, so only its heartbeat counts.
+ */
 export const isExecutionStale = (execution?: ExecutionPeek, now = Date.now()): boolean => {
   if (!execution) {
     return true;
@@ -80,7 +83,7 @@ export const isExecutionStale = (execution?: ExecutionPeek, now = Date.now()): b
 
   const { status, lastHeartbeat } = execution;
 
-  if (status !== ExecutionStatus.scheduled && status !== ExecutionStatus.running) {
+  if (status === ExecutionStatus.completed || status === ExecutionStatus.failed) {
     return true;
   }
 

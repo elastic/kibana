@@ -118,7 +118,7 @@ describe('isExecutionStale', () => {
     expect(isExecutionStale(undefined, NOW)).toBe(true);
   });
 
-  it.each([ExecutionStatus.completed, ExecutionStatus.failed, ExecutionStatus.aborted])(
+  it.each([ExecutionStatus.completed, ExecutionStatus.failed])(
     'is stale once the execution is %s',
     (status) => {
       expect(isExecutionStale({ status, eventCount: 0, lastHeartbeat: secondsAgo(0) }, NOW)).toBe(
@@ -158,6 +158,24 @@ describe('isExecutionStale', () => {
     expect(
       isExecutionStale(
         { status: ExecutionStatus.scheduled, eventCount: 0, lastHeartbeat: secondsAgo(6 * 60) },
+        NOW
+      )
+    ).toBe(true);
+  });
+
+  it('is live while an aborted execution winds down with a fresh heartbeat', () => {
+    expect(
+      isExecutionStale(
+        { status: ExecutionStatus.aborted, eventCount: 0, lastHeartbeat: secondsAgo(5) },
+        NOW
+      )
+    ).toBe(false);
+  });
+
+  it('is stale when an aborted execution stops its heartbeat', () => {
+    expect(
+      isExecutionStale(
+        { status: ExecutionStatus.aborted, eventCount: 0, lastHeartbeat: secondsAgo(90) },
         NOW
       )
     ).toBe(true);
