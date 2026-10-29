@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { BasicPrettyPrinter, Parser, Walker, type ESQLFunction } from '@elastic/esql';
+import { BasicPrettyPrinter } from '@elastic/esql';
+import { getQuerySummary } from '@kbn/esql-utils';
 import type { EsqlQueryRunner } from '../../evaluators/esql_query_runner';
 import { skippedResult } from '../../evaluator_utils';
 import type { CustomContentEvaluator } from '../types';
@@ -16,8 +17,8 @@ export const CUSTOM_CONTENT_EDIT_APPLIED_EVALUATOR_NAME = 'Custom Content Data E
 const simplify = (text: string): string => text.replace(/[\s`]/g, '').toLowerCase();
 
 /**
- * Where the measure written as `measure` is in a query. `computed` is whether the query computes
- * it at all, and `returned` the columns of the result that hold it: the name given in an
+ * Where the measure written as `measure` is in a query. `computed` is whether a STATS command
+ * computes it, and `returned` the columns of the result that hold it: the name given in an
  * assignment (`avg_bytes = AVG(bytes)`) or, with no name, the expression itself (`AVG(bytes)`).
  * It is found from the measure, not from the column names, so a column the edit renamed is not
  * mistaken for the measure it added.
@@ -28,26 +29,14 @@ export const findMeasureColumns = (
   columns: string[]
 ): { computed: boolean; returned: string[] } => {
   const wanted = simplify(measure);
-  const aliases: string[] = [];
-  let computed = false;
+  const names = [...(getQuerySummary(query).aggregates ?? [])]
+    .filter(({ arg }) => simplify(BasicPrettyPrinter.print(arg)).includes(wanted))
+    .map(({ field }) => simplify(field));
 
-  Walker.walk(Parser.parse(query).root, {
-    visitFunction: (fn: ESQLFunction) => {
-      if (!simplify(BasicPrettyPrinter.expression(fn)).includes(wanted)) {
-        return;
-      }
-      computed = true;
-      const [alias] = fn.args;
-      if (fn.name === '=' && !Array.isArray(alias) && alias.type === 'column') {
-        aliases.push(alias.name);
-      }
-    },
-  });
-
-  const returned = columns.filter(
-    (column) => aliases.includes(column) || simplify(column).includes(wanted)
-  );
-  return { computed: computed || returned.length > 0, returned };
+  return {
+    computed: names.length > 0,
+    returned: columns.filter((column) => names.includes(simplify(column))),
+  };
 };
 
 /**
