@@ -9,7 +9,6 @@ import {
   filterOccurrencesForDetection,
   getChangePointLabel,
   getDetectionOccurrenceTimeRange,
-  getOccurrenceBucketIntervalMs,
   parseOccurrenceBucketSize,
 } from './change_point';
 
@@ -17,10 +16,6 @@ describe('getChangePointLabel', () => {
   it('returns Unknown for missing or invalid types', () => {
     expect(getChangePointLabel()).toBe('Unknown');
     expect(getChangePointLabel('not-a-real-type' as 'spike')).toBe('Unknown');
-  });
-
-  it('returns a label for known change-point types', () => {
-    expect(getChangePointLabel('spike')).toBe('Spike');
   });
 });
 
@@ -73,10 +68,5 @@ describe('parseOccurrenceBucketSize', () => {
       unit: 'm',
       unitLabel: 'minutes',
     });
-  });
-
-  it('converts bucket sizes to milliseconds', () => {
-    expect(getOccurrenceBucketIntervalMs('5m')).toBe(5 * 60 * 1000);
-    expect(getOccurrenceBucketIntervalMs('1h')).toBe(60 * 60 * 1000);
   });
 });

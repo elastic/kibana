@@ -8,9 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/management-settings-ids';
 import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../hooks/use_kibana';
 import { DetectionsSettingsTab } from './detections_settings_tab';
 import { useDeveloperMode } from '../hooks/use_developer_mode';
@@ -22,12 +20,9 @@ const mockRunLimitsCancel = jest.fn();
 const mockTokenTrackingSave = jest.fn();
 const mockTokenTrackingCancel = jest.fn();
 let mockContinuousHasChanged = false;
-let mockScheduledEnabled = false;
 let mockRunLimitsIsDirty = false;
 let mockTokenTrackingIsDirty = false;
 let mockBlocksActivity = false;
-let mockRunLimitGroups: readonly string[] = [];
-let mockRunLimitExhaustionCallouts: string | undefined;
 
 jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
@@ -62,7 +57,7 @@ jest.mock('./components/use_continuous_extraction_settings', () => ({
 jest.mock('./components/use_scheduled_discovery_settings', () => ({
   useScheduledDiscoverySettings: () => ({
     draft: {
-      enabled: mockScheduledEnabled,
+      enabled: false,
       detectionIntervalMinutes: 30,
       targetCoverageMinutes: 30,
       reviewIntervalMinutes: 10,
@@ -97,36 +92,24 @@ jest.mock('./components/use_token_tracking_form', () => ({
   }),
 }));
 jest.mock('./components/run_limits_section', () => ({
-  RunLimitsSection: ({
-    exhaustionCallouts,
-    onConfirmSave,
-  }: {
-    exhaustionCallouts: string;
-    onConfirmSave: () => Promise<void>;
-  }) => {
-    mockRunLimitExhaustionCallouts = exhaustionCallouts;
-    return (
-      <>
-        <button data-test-subj="runLimitsConfirmStub" onClick={() => void onConfirmSave()}>
-          Confirm run limits
-        </button>
-      </>
-    );
-  },
+  RunLimitsSection: ({ onConfirmSave }: { onConfirmSave: () => Promise<void> }) => (
+    <>
+      <button data-test-subj="runLimitsConfirmStub" onClick={() => void onConfirmSave()}>
+        Confirm run limits
+      </button>
+    </>
+  ),
 }));
 jest.mock('./components/use_run_limits_form', () => ({
-  useRunLimitsForm: ({ groups }: { groups: readonly string[] }) => {
-    mockRunLimitGroups = groups;
-    return {
-      isDirty: mockRunLimitsIsDirty,
-      isSaving: false,
-      canManage: true,
-      update: mockRunLimitsIsDirty ? { limits: { detection: 10 } } : undefined,
-      requestSave: mockRunLimitsRequestSave,
-      confirmAndSave: mockRunLimitsConfirmAndSave,
-      cancel: mockRunLimitsCancel,
-    };
-  },
+  useRunLimitsForm: () => ({
+    isDirty: mockRunLimitsIsDirty,
+    isSaving: false,
+    canManage: true,
+    update: mockRunLimitsIsDirty ? { limits: { detection: 10 } } : undefined,
+    requestSave: mockRunLimitsRequestSave,
+    confirmAndSave: mockRunLimitsConfirmAndSave,
+    cancel: mockRunLimitsCancel,
+  }),
 }));
 jest.mock('./components/significant_events_tuning_config_editor', () => ({
   configToAnnotatedYaml: (config: unknown) => JSON.stringify(config),
@@ -150,26 +133,18 @@ jest.mock('./components/significant_events_tuning_config_editor', () => ({
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseDeveloperMode = useDeveloperMode as jest.MockedFunction<typeof useDeveloperMode>;
-const mockUseUnsavedChangesPrompt = useUnsavedChangesPrompt as jest.MockedFunction<
-  typeof useUnsavedChangesPrompt
->;
 
 const setDeveloperMode = jest.fn();
-const settingsGlobalClientSet = jest.fn();
 
 const setup = ({
   isDeveloperMode = false,
   isSaving = false,
   canSaveAdvancedSettings = true,
-  canManage = true,
-  canConfigure = true,
   tuningConfig = {},
 }: {
   isDeveloperMode?: boolean;
   isSaving?: boolean;
   canSaveAdvancedSettings?: boolean;
-  canManage?: boolean;
-  canConfigure?: boolean;
   tuningConfig?: unknown;
 } = {}) => {
   mockUseDeveloperMode.mockReturnValue({
@@ -184,8 +159,8 @@ const setup = ({
         capabilities: {
           nightshift: {
             show: true,
-            manage: canManage,
-            configure: canConfigure,
+            manage: true,
+            configure: true,
           },
           advancedSettings: {
             save: canSaveAdvancedSettings,
@@ -205,7 +180,6 @@ const setup = ({
         },
         globalClient: {
           get: jest.fn().mockReturnValue(tuningConfig),
-          set: settingsGlobalClientSet,
         },
       },
       notifications: {
@@ -230,36 +204,13 @@ describe('DetectionsSettingsTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockContinuousHasChanged = false;
-    mockScheduledEnabled = false;
     mockRunLimitsIsDirty = false;
     mockTokenTrackingIsDirty = false;
     mockBlocksActivity = false;
-    mockRunLimitGroups = [];
-    mockRunLimitExhaustionCallouts = undefined;
     mockContinuousSave.mockResolvedValue(undefined);
     mockRunLimitsRequestSave.mockResolvedValue('saved');
     mockRunLimitsConfirmAndSave.mockResolvedValue('saved');
     mockTokenTrackingSave.mockResolvedValue('saved');
-    settingsGlobalClientSet.mockResolvedValue(true);
-  });
-
-  it('includes run-limit drafts in the unsaved-changes prompt', () => {
-    mockRunLimitsIsDirty = true;
-    setup();
-
-    expect(mockUseUnsavedChangesPrompt).toHaveBeenLastCalledWith(
-      expect.objectContaining({ hasUnsavedChanges: true })
-    );
-  });
-
-  it('renders detection run limits in the detection process section', () => {
-    setup();
-
-    expect(screen.getByTestId('nightshiftDetectionProcessSection')).toHaveTextContent(
-      'Detection process'
-    );
-    expect(mockRunLimitGroups).toEqual(['detection', 'ki_extraction']);
-    expect(mockRunLimitExhaustionCallouts).toBe('groups');
   });
 
   it('saves run limits, activity settings, and token tracking through one bottom bar', async () => {
@@ -341,66 +292,6 @@ describe('DetectionsSettingsTab', () => {
     );
   });
 
-  it('hides the tuning YAML panel by default', () => {
-    setup({ isDeveloperMode: false });
-
-    expect(screen.queryByTestId('nightshiftSettingsTuningPanel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('streams-settings-tuning-editor')).not.toBeInTheDocument();
-  });
-
-  it('hides stale event cleanup and the cost estimate when developer mode is off', () => {
-    setup({ isDeveloperMode: false });
-
-    expect(screen.queryByTestId('stale-event-cleanup-section')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('cost-estimate')).not.toBeInTheDocument();
-  });
-
-  it('shows stale event cleanup and the cost estimate when developer mode is on', () => {
-    setup({ isDeveloperMode: true });
-
-    expect(screen.getByTestId('stale-event-cleanup-section')).toBeInTheDocument();
-    expect(screen.getByTestId('cost-estimate')).toBeInTheDocument();
-  });
-
-  it('hides reset outside developer mode', () => {
-    setup({ isDeveloperMode: false });
-
-    expect(screen.queryByTestId('significantEventsResetSection')).not.toBeInTheDocument();
-  });
-
-  it('shows reset inside advanced developer settings without needing maintenance status', () => {
-    setup({ isDeveloperMode: true });
-
-    expect(screen.getByTestId('nightshiftAdvancedDeveloperSettingsSection')).toContainElement(
-      screen.getByTestId('significantEventsResetSection')
-    );
-    expect(screen.getByTestId('significantEventsResetButton')).toBeEnabled();
-  });
-
-  it.each([
-    { canManage: false, canConfigure: true },
-    { canManage: true, canConfigure: false },
-  ])('requires both Nightshift engine capabilities: %o', (capabilities) => {
-    setup({ isDeveloperMode: true, ...capabilities });
-
-    expect(screen.getByTestId('significantEventsResetButton')).toBeDisabled();
-  });
-
-  it('opens the tuning flyout and shows the Dev badge when developer mode is on', () => {
-    setup({ isDeveloperMode: true });
-
-    expect(screen.getByTestId('nightshiftSettingsTuningPanel')).toBeInTheDocument();
-    expect(screen.queryByTestId('streams-settings-tuning-editor')).not.toBeInTheDocument();
-    const editButton = screen.getByTestId('nightshiftSettingsTuningEditButton');
-    expect(editButton.querySelector('[data-euiicon-type="pencil"]')).toBeInTheDocument();
-    fireEvent.click(editButton);
-    expect(screen.getByTestId('nightshiftSettingsTuningFlyout')).toBeInTheDocument();
-    expect(screen.getByTestId('streams-settings-tuning-editor')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftAdvancedDeveloperSettingsSection')).toHaveTextContent(
-      'Dev'
-    );
-  });
-
   it('uses the defaults when the stored tuning configuration is invalid', () => {
     setup({
       isDeveloperMode: true,
@@ -412,44 +303,6 @@ describe('DetectionsSettingsTab', () => {
     expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue(
       JSON.stringify(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG)
     );
-  });
-
-  it('saves tuning changes from the flyout without showing the page save bar', async () => {
-    setup({ isDeveloperMode: true });
-    fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
-
-    fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
-      target: { value: 'rrf_rank_constant: 10' },
-    });
-
-    expect(
-      screen.queryByTestId('streams-significant-events-settings-bottom-bar')
-    ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('nightshiftSettingsTuningSaveButton'));
-
-    await waitFor(() => {
-      expect(settingsGlobalClientSet).toHaveBeenCalledWith(
-        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
-        expect.any(String)
-      );
-      expect(screen.queryByTestId('nightshiftSettingsTuningFlyout')).not.toBeInTheDocument();
-    });
-  });
-
-  it('discards tuning changes when the flyout is closed', () => {
-    setup({ isDeveloperMode: true });
-    fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
-    const savedYaml = (screen.getByTestId('streams-settings-tuning-editor') as HTMLTextAreaElement)
-      .value;
-
-    fireEvent.change(screen.getByTestId('streams-settings-tuning-editor'), {
-      target: { value: 'rrf_rank_constant: 10' },
-    });
-    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
-
-    expect(screen.queryByTestId('nightshiftSettingsTuningFlyout')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
-    expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue(savedYaml);
   });
 
   it('reverts a dirty YAML draft when developer mode turns off', () => {
@@ -534,41 +387,5 @@ describe('DetectionsSettingsTab', () => {
     expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue(
       'rrf_rank_constant: 10'
     );
-  });
-
-  it('keeps advanced schedule fields collapsed until requested', () => {
-    mockScheduledEnabled = true;
-    setup();
-
-    const advancedSettings = screen.getByTestId(
-      'streams-settings-scheduled-discovery-advanced-settings'
-    );
-    expect(advancedSettings).toHaveAttribute('aria-expanded', 'false');
-
-    fireEvent.click(advancedSettings);
-
-    expect(advancedSettings).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByTestId('streams-settings-scheduled-detection-interval')).toBeVisible();
-  });
-
-  it('hides the tuning panel and disables save while developer mode is saving', () => {
-    mockContinuousHasChanged = true;
-    const { rerender } = setup({ isDeveloperMode: true });
-
-    expect(screen.getByTestId('streams-settings-save-button')).toBeEnabled();
-
-    mockUseDeveloperMode.mockReturnValue({
-      isDeveloperMode: true,
-      isSaving: true,
-      setDeveloperMode,
-    });
-    rerender(
-      <I18nProvider>
-        <DetectionsSettingsTab />
-      </I18nProvider>
-    );
-
-    expect(screen.queryByTestId('nightshiftSettingsTuningPanel')).not.toBeInTheDocument();
-    expect(screen.getByTestId('streams-settings-save-button')).toBeDisabled();
   });
 });

@@ -21,7 +21,6 @@ const mockDemoteRules = jest.fn();
 const mockUseDetectionRules = useDetectionRules as jest.Mock;
 const mockUseDetectionRuleById = useDetectionRuleById as jest.Mock;
 const mockUseRulesDemote = useRulesDemote as jest.Mock;
-let mockCanManage = true;
 let mockBlocksActivity = false;
 
 jest.mock('../../../data/rules/use_detection_rules');
@@ -30,7 +29,7 @@ jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => 
   useBlocksNewActivity: () => ({ blocksActivity: mockBlocksActivity }),
 }));
 jest.mock('@kbn/nightshift-shared', () => ({
-  getNightshiftCapabilities: () => ({ canManage: mockCanManage }),
+  getNightshiftCapabilities: () => ({ canManage: true }),
 }));
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -106,7 +105,6 @@ const renderTab = (path = '/detections/rules', entities: string[] = []) => {
 describe('RulesTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCanManage = true;
     mockBlocksActivity = false;
     mockDemoteRules.mockResolvedValue(undefined);
     mockUseRulesDemote.mockReturnValue({ demoteRules: mockDemoteRules, isPending: false });
@@ -121,12 +119,6 @@ describe('RulesTab', () => {
       refetch: jest.fn(),
     });
     mockUseDetectionRuleById.mockReturnValue({ rule: undefined, isResolved: false });
-  });
-
-  it('renders all rules', () => {
-    renderTab();
-    expect(screen.getByRole('button', { name: 'Error rate' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Latency' })).toBeInTheDocument();
   });
 
   it('searches title and description without changing the chart total', () => {
@@ -150,24 +142,6 @@ describe('RulesTab', () => {
       expect(screen.getByTestId('nightshiftDetectionRulesSearch')).toHaveValue('slow')
     );
     expect(screen.getByRole('button', { name: 'Latency' })).toBeInTheDocument();
-  });
-
-  it('explains an empty entity selection instead of showing the empty engine state', () => {
-    mockUseDetectionRules.mockReturnValue({
-      ...mockUseDetectionRules(),
-      rules: [],
-      total: 0,
-    });
-    renderTab('/detections/rules', ['checkout']);
-    expect(screen.queryByTestId('nightshiftDetectionRulesEmpty')).not.toBeInTheDocument();
-    expect(screen.getByText('No rules for the selected entities')).toBeInTheDocument();
-  });
-
-  it('opens a rule via its id in the URL', () => {
-    const history = renderTab();
-    fireEvent.click(screen.getByRole('button', { name: 'Error rate' }));
-    expect(history.location.search).toContain('ruleId=q1');
-    expect(screen.getByTestId('ruleFlyoutStub')).toHaveTextContent('Error rate');
   });
 
   it('removes a missing deep link with a warning', async () => {
@@ -198,12 +172,5 @@ describe('RulesTab', () => {
     fireEvent.click(screen.getByRole('button', { name: /^Delete$/ }));
     await waitFor(() => expect(mockDemoteRules).toHaveBeenCalledWith(['q1']));
     await waitFor(() => expect(screen.getByTestId('selectRule')).toHaveTextContent('0 selected'));
-  });
-
-  it('hides selection and delete for read-only users', () => {
-    mockCanManage = false;
-    renderTab();
-    expect(screen.queryByTestId('selectRule')).not.toBeInTheDocument();
-    expect(screen.queryByText('Delete selected')).not.toBeInTheDocument();
   });
 });

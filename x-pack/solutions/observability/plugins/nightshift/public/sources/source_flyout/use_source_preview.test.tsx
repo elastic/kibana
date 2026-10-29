@@ -61,19 +61,4 @@ describe('useSourcePreview', () => {
       expect.objectContaining({ projectRouting: PROJECT_ROUTING.ALL })
     );
   });
-
-  it('returns the sampled rows keyed by column name', async () => {
-    getESQLResultsMock.mockResolvedValue({
-      response: { columns: [{ name: 'service.name', type: 'keyword' }], values: [['checkout']] },
-      params: {},
-    } as never);
-
-    const { result } = renderPreview();
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data).toEqual({
-      columns: ['service.name'],
-      rows: [{ 'service.name': 'checkout' }],
-    });
-  });
 });

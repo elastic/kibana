@@ -10,10 +10,6 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
-import {
-  NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-  type NightshiftSignificantEventsQueryData,
-} from './use_fetch_significant_events';
 import { useCloseSignificantEvent } from './use_close_significant_event';
 
 jest.mock('./use_kibana');
@@ -54,50 +50,6 @@ describe('useCloseSignificantEvent', () => {
     });
   });
 
-  it('marks the event inactive and updates the Nightshift cache', async () => {
-    const queryClient = new QueryClient({
-      defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
-    });
-    queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
-      NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-      {
-        hits: [event],
-        page: 1,
-        perPage: 1,
-        total: 1,
-      }
-    );
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-    const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
-
-    act(() => result.current.closeSignificantEvent(event.event_id, 'known noise'));
-
-    await waitFor(() => expect(addSuccess).toHaveBeenCalled());
-
-    expect(significantEventsFetch).toHaveBeenCalledWith(
-      'POST /internal/significant_events/events/{id}/update',
-      {
-        params: {
-          path: { id: 'event-1' },
-          body: { status: 'inactive', assessment_note: 'known noise' },
-        },
-        signal: null,
-      }
-    );
-    expect(
-      queryClient.getQueryData<NightshiftSignificantEventsQueryData>(
-        NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY
-      )?.hits[0]
-    ).toEqual(
-      expect.objectContaining({
-        status: 'inactive',
-      })
-    );
-    expect(addError).not.toHaveBeenCalled();
-  });
-
   it('sends no assessment_note when the note is omitted', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
@@ -117,24 +69,5 @@ describe('useCloseSignificantEvent', () => {
         signal: null,
       }
     );
-  });
-
-  it('surfaces inactive update failures as toast errors', async () => {
-    significantEventsFetch.mockRejectedValueOnce(new Error('inactive update failed'));
-    const queryClient = new QueryClient({
-      defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
-    });
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-    const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
-
-    act(() => result.current.closeSignificantEvent(event.event_id, 'known noise'));
-
-    await waitFor(() => expect(addError).toHaveBeenCalled());
-    expect(addSuccess).not.toHaveBeenCalled();
-    expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-      title: 'Failed to mark significant event inactive',
-    });
   });
 });

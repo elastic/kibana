@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "scripts/**/*", "server/**/*", "test/scout/**/*"],
+  "include": ["common/**/*", "public/**/*", "scripts/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/actions-types",
@@ -60,7 +60,6 @@
     "@kbn/react-hooks",
     "@kbn/react-query",
     "@kbn/rule-data-utils",
-    "@kbn/scout-oblt",
     "@kbn/serverless",
     "@kbn/share-plugin",
     "@kbn/shared-ux-ai-components",

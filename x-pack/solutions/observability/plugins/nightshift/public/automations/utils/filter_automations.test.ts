@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
 import type { Automation } from '../hooks/use_automations';
 import {
   countFilterValues,
@@ -12,9 +13,30 @@ import {
   getAutomationFacets,
   hasActiveFilters,
   isAutomationRateLimited,
+  isGlobalInvestigationLimitReached,
   matchesFilters,
   STATUS_ORDER,
 } from './filter_automations';
+
+const quotas = ({
+  enabled = true,
+  limit = 3,
+  used = 3,
+}: {
+  enabled?: boolean;
+  limit?: number;
+  used?: number;
+}): RunQuotasResponse => ({
+  enabled,
+  limits: { detection: 0, ki_extraction: 0, investigation: limit },
+  counts: { detection: 0, ki_extraction: 0, investigation: used },
+  window: {
+    start: '2026-09-03T00:00:00.000Z',
+    resetsAt: '2026-09-04T00:00:00.000Z',
+    timezone: 'UTC',
+  },
+  canManage: true,
+});
 
 const buildAutomation = (overrides: Partial<Automation> = {}): Automation => ({
   id: 'automation-1',
@@ -84,5 +106,15 @@ describe('filter automations', () => {
         triggers: ['New message in channel'],
       })
     ).toBe(true);
+  });
+});
+
+describe('isGlobalInvestigationLimitReached', () => {
+  it.each([
+    [quotas({ used: 3 }), true],
+    [quotas({ limit: 0, used: 5 }), false],
+    [quotas({ enabled: false }), false],
+  ])('%j -> %s', (input, expected) => {
+    expect(isGlobalInvestigationLimitReached(input)).toBe(expected);
   });
 });

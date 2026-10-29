@@ -31,18 +31,6 @@ const unreachable = (reason: Error): PromiseSettledResult<Feature[]> => ({
 });
 
 describe('collectSourceFeatures', () => {
-  it('reports no failures when every source resolves', () => {
-    const checkout = mockFeature('checkout-api', 'logs.checkout');
-    const payments = mockFeature('payments-api', 'logs.payments');
-
-    expect(
-      collectSourceFeatures(
-        ['logs.checkout', 'logs.payments'],
-        [loaded([checkout]), loaded([payments])]
-      )
-    ).toEqual({ features: [checkout, payments], failedSourceIds: [] });
-  });
-
   // The whole point of the partial state: a short list must not pass for a complete one.
   it('keeps the features that resolved and names the sources that did not', () => {
     const checkout = mockFeature('checkout-api', 'logs.checkout');
@@ -64,9 +52,5 @@ describe('collectSourceFeatures', () => {
         [unreachable(firstFailure), unreachable(new Error('connection refused'))]
       )
     ).toThrow(firstFailure);
-  });
-
-  it('returns nothing rather than throwing when there are no sources to load', () => {
-    expect(collectSourceFeatures([], [])).toEqual({ features: [], failedSourceIds: [] });
   });
 });

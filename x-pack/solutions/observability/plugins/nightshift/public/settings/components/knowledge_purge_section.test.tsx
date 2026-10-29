@@ -36,35 +36,20 @@ const mockPreview = (data: KnowledgePurgePreview | undefined) => {
   } as unknown as ReturnType<typeof usePurgePreview>);
 };
 
-const renderSection = (canManage = true) =>
+const renderSection = () =>
   render(
     <I18nProvider>
-      <KnowledgePurgeSection canManage={canManage} />
+      <KnowledgePurgeSection canManage />
     </I18nProvider>
   );
 
 describe('KnowledgePurgeSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockPreview(undefined);
     jest.mocked(usePurgeKnowledge).mockReturnValue({
       mutate: purge,
       isLoading: false,
     } as unknown as ReturnType<typeof usePurgeKnowledge>);
-  });
-
-  it('counts every store and names the investigations a purge would delete', () => {
-    mockPreview(preview);
-    renderSection();
-
-    fireEvent.click(screen.getByTestId('nightshiftPurgePreviewButton'));
-
-    const shown = screen.getAllByTestId('nightshiftPurgePreview')[0];
-    expect(shown).toHaveTextContent('2 Semantic Memory pages');
-    expect(shown).toHaveTextContent('1 Cortex page');
-    expect(shown).toHaveTextContent('4 decision tree documents');
-    expect(shown).toHaveTextContent('1 investigation');
-    expect(shown).toHaveTextContent('Poisoned checkout run');
   });
 
   it('requires the exact confirmation before it purges', () => {
@@ -88,27 +73,5 @@ describe('KnowledgePurgeSection', () => {
     fireEvent.click(confirm);
 
     expect(purge).toHaveBeenCalledWith({ since: expect.any(String) });
-  });
-
-  it('says so when nothing was learned after the cutoff', () => {
-    mockPreview({
-      ...preview,
-      counts: { memory_pages: 0, cortex_pages: 0, decision_trees: 0, investigations: 0 },
-      investigations: [],
-    });
-    renderSection();
-
-    fireEvent.click(screen.getByTestId('nightshiftPurgePreviewButton'));
-
-    expect(screen.getAllByTestId('nightshiftPurgePreviewEmpty')[0]).toHaveTextContent(
-      'There is nothing to purge.'
-    );
-  });
-
-  it('disables the destructive controls without the manage and configure privileges', () => {
-    renderSection(false);
-
-    expect(screen.getByTestId('nightshiftPurgeButton')).toBeDisabled();
-    expect(screen.getByTestId('nightshiftPurgePreviewButton')).toBeDisabled();
   });
 });

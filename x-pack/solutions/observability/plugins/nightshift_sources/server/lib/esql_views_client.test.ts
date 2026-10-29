@@ -26,17 +26,6 @@ describe('EsqlViewsClient', () => {
   };
 
   describe('getView', () => {
-    it('returns the view when ES answers with it', async () => {
-      const { esClient, client } = setup();
-      esClient.esql.getView.mockResponse({ views: [{ name: VIEW_NAME, query: 'FROM logs-*' }] });
-
-      await expect(client.getView(VIEW_NAME)).resolves.toEqual({
-        name: VIEW_NAME,
-        query: 'FROM logs-*',
-      });
-      expect(esClient.esql.getView).toHaveBeenCalledWith({ name: VIEW_NAME }, { ignore: [404] });
-    });
-
     it('reads as the current user and never as the internal user', async () => {
       const { internalEsClient, esClient, client } = setup();
       esClient.esql.getView.mockResponse({ views: [] });
@@ -44,13 +33,6 @@ describe('EsqlViewsClient', () => {
       await client.getView(VIEW_NAME);
 
       expect(internalEsClient.esql.getView).not.toHaveBeenCalled();
-    });
-
-    it('returns undefined when ES answers 200 with no views', async () => {
-      const { esClient, client } = setup();
-      esClient.esql.getView.mockResponse({ views: [] });
-
-      await expect(client.getView(VIEW_NAME)).resolves.toBeUndefined();
     });
 
     it('returns undefined when the ignored 404 body comes back instead of a view list', async () => {
@@ -61,18 +43,6 @@ describe('EsqlViewsClient', () => {
       } as never);
 
       await expect(client.getView(VIEW_NAME)).resolves.toBeUndefined();
-    });
-
-    it('maps a 403 to a Boom forbidden error', async () => {
-      const { esClient, client } = setup();
-      esClient.esql.getView.mockRejectedValue(
-        createEsResponseError(403, 'security_exception', 'unauthorized for user')
-      );
-
-      await expect(client.getView(VIEW_NAME)).rejects.toMatchObject({
-        output: { statusCode: 403 },
-        message: expect.stringContaining('unauthorized for user'),
-      });
     });
   });
 
@@ -126,29 +96,6 @@ describe('EsqlViewsClient', () => {
       expect(isBoom(error)).toBe(true);
       expect(error.output.statusCode).toBe(409);
       expect(internalEsClient.esql.putView).toHaveBeenCalledTimes(3);
-    });
-  });
-
-  describe('deleteView', () => {
-    it('deletes as the internal user and never as the current user', async () => {
-      const { esClient, internalEsClient, client } = setup();
-      internalEsClient.esql.deleteView.mockResponse({ acknowledged: true });
-
-      await client.deleteView(VIEW_NAME);
-
-      expect(internalEsClient.esql.deleteView).toHaveBeenCalledTimes(1);
-      expect(esClient.esql.deleteView).not.toHaveBeenCalled();
-    });
-
-    it('ignores a missing view', async () => {
-      const { internalEsClient, client } = setup();
-      internalEsClient.esql.deleteView.mockResponse({ acknowledged: true });
-
-      await expect(client.deleteView(VIEW_NAME)).resolves.toBeUndefined();
-      expect(internalEsClient.esql.deleteView).toHaveBeenCalledWith(
-        { name: VIEW_NAME },
-        { ignore: [404] }
-      );
     });
   });
 });

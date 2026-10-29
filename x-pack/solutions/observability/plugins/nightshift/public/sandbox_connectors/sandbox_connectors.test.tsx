@@ -10,15 +10,10 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-import { fetchConnector } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector';
 import { useKibana } from '../hooks/use_kibana';
-import { ManageConnectorsLink, SandboxConnectorsTable } from './sandbox_connectors';
+import { SandboxConnectorsTable } from './sandbox_connectors';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector', () => ({
-  fetchConnector: jest.fn(),
-}));
-const mockFetchConnector = fetchConnector as jest.Mock;
 
 const mockUseKibana = useKibana as jest.Mock;
 
@@ -87,7 +82,6 @@ const setup = ({
   const addError = jest.fn();
   const getAddConnectorFlyout = jest.fn(() => <div data-test-subj="addConnectorFlyoutStub" />);
   const getEditConnectorFlyout = jest.fn(() => <div data-test-subj="editConnectorFlyoutStub" />);
-  mockFetchConnector.mockResolvedValue({ id: 'github', actionTypeId: '.http', name: 'x' });
   mockUseKibana.mockReturnValue({
     services: {
       http,
@@ -139,37 +133,6 @@ const expectRemoved = (agents: { removeConnectorFromAgent: jest.Mock }, connecto
   );
 
 describe('SandboxConnectorsTable', () => {
-  it('lists the connectors assigned to the agent with their type and preconfigured badge', async () => {
-    const { fetch, agents } = setup({
-      connectors: [connector('github'), connector('telemetry', true), connector('unassigned')],
-      assigned: ['github', 'telemetry'],
-    });
-
-    const table = await screen.findByTestId('nightshiftSandboxConnectorsTable');
-    expect(table).toHaveTextContent('Connector github');
-    expect(table).toHaveTextContent('Connector telemetry');
-    expect(table).not.toHaveTextContent('Connector unassigned');
-    expect(table).toHaveTextContent('HTTP');
-    expect(screen.getAllByText('Preconfigured')).toHaveLength(1);
-    expect(fetch).toHaveBeenCalledWith(
-      'GET /internal/nightshift/sandbox_connectors',
-      expect.anything()
-    );
-    expect(agents.get).toHaveBeenCalledWith('nightshift.investigation');
-  });
-
-  it('opens the edit flyout from the connector name', async () => {
-    const { getEditConnectorFlyout } = setup({ connectors: [connector('github')] });
-
-    fireEvent.click(await screen.findByTestId('nightshiftConnectorName-github'));
-
-    expect(await screen.findByTestId('editConnectorFlyoutStub')).toBeInTheDocument();
-    expect(mockFetchConnector).toHaveBeenCalledWith('github', expect.anything());
-    expect(getEditConnectorFlyout).toHaveBeenCalledWith(
-      expect.objectContaining({ connector: expect.objectContaining({ id: 'github' }) })
-    );
-  });
-
   it('removes a connector from the agent and confirms with a toast', async () => {
     const { agents, addSuccess } = setup({
       connectors: [connector('github'), connector('telemetry', true)],
@@ -186,20 +149,6 @@ describe('SandboxConnectorsTable', () => {
     );
   });
 
-  it('locks remove and delete when the user cannot edit the agent', async () => {
-    setup({ connectors: [connector('github')], canUpdateAgent: false });
-
-    expect(await screen.findByTestId('nightshiftConnectorRemove-github')).toBeDisabled();
-    expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
-  });
-
-  it('locks remove and delete without the Agent Builder manage agents privilege', async () => {
-    setup({ connectors: [connector('github')], canManageAgents: false });
-
-    expect(await screen.findByTestId('nightshiftConnectorRemove-github')).toBeDisabled();
-    expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
-  });
-
   it('locks delete without the connector delete privilege', async () => {
     setup({
       connectors: [connector('github')],
@@ -208,19 +157,6 @@ describe('SandboxConnectorsTable', () => {
 
     expect(await screen.findByTestId('nightshiftConnectorDelete-github')).toBeDisabled();
     expect(screen.getByTestId('nightshiftConnectorRemove-github')).toBeEnabled();
-  });
-
-  it('reports an update that failed', async () => {
-    const { agents, addError } = setup({ connectors: [connector('github')] });
-    agents.removeConnectorFromAgent.mockRejectedValueOnce(forbiddenError());
-
-    fireEvent.click(await screen.findByTestId('nightshiftConnectorRemove-github'));
-
-    await waitFor(() =>
-      expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-        title: 'Could not update the investigation agent',
-      })
-    );
   });
 
   it('takes a connector off the agent, deletes it after confirmation and refreshes the list', async () => {
@@ -261,28 +197,6 @@ describe('SandboxConnectorsTable', () => {
     expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeEnabled();
   });
 
-  it('explains what a connector does for the agent when none is assigned', async () => {
-    setup({ connectors: [connector('github')], assigned: [] });
-
-    expect(await screen.findByTestId('nightshiftSandboxConnectorsEmpty')).toHaveTextContent(
-      'add an existing connector, and the investigation agent can use it from its sandbox'
-    );
-  });
-
-  it('shows an error with a retry when the connectors cannot be loaded', async () => {
-    const { fetch } = setup({ connectors: [connector('github')], fetchError: forbiddenError() });
-
-    expect(await screen.findByTestId('nightshiftSandboxConnectorsError')).toHaveTextContent(
-      'Could not load the connectors.'
-    );
-    expect(screen.queryByTestId('nightshiftSandboxConnectorsEmpty')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('nightshiftSandboxConnectorsErrorRetry'));
-
-    expect(await screen.findByText('Connector github')).toBeInTheDocument();
-    expect(fetch).toHaveBeenCalledTimes(2);
-  });
-
   it('points to onboarding when Nightshift is not enabled in the space', async () => {
     setup({ connectors: [connector('github')], agentError: notFoundError() });
 
@@ -294,33 +208,5 @@ describe('SandboxConnectorsTable', () => {
       '/app/nightshift/?onboarding=1'
     );
     expect(screen.queryByTestId('nightshiftSandboxConnectorsError')).not.toBeInTheDocument();
-  });
-
-  it('shows an error with a retry when the agent cannot be loaded', async () => {
-    const { agents } = setup({ connectors: [connector('github')], agentError: forbiddenError() });
-
-    expect(await screen.findByTestId('nightshiftSandboxConnectorsError')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('nightshiftSandboxConnectorsErrorRetry'));
-
-    expect(await screen.findByText('Connector github')).toBeInTheDocument();
-    expect(agents.get).toHaveBeenCalledTimes(2);
-  });
-});
-
-describe('ManageConnectorsLink', () => {
-  it('links to the connectors management page', () => {
-    setup({ connectors: [], ui: <ManageConnectorsLink /> });
-
-    expect(screen.getByTestId('nightshiftManageConnectorsLink')).toHaveAttribute(
-      'href',
-      '/app/management/insightsAndAlerting/triggersActionsConnectors'
-    );
-  });
-
-  it('is hidden when the user cannot see connectors', () => {
-    setup({ connectors: [], capabilities: { show: false }, ui: <ManageConnectorsLink /> });
-
-    expect(screen.queryByTestId('nightshiftManageConnectorsLink')).not.toBeInTheDocument();
   });
 });

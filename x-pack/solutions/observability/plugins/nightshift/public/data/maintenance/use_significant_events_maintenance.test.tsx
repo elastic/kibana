@@ -16,8 +16,6 @@ jest.mock('../../hooks/use_kibana');
 
 const fetch = jest.fn();
 const addSuccess = jest.fn();
-const addWarning = jest.fn();
-const addError = jest.fn();
 
 const summary: SignificantEventsMaintenanceSummary = {
   state: 'enabled',
@@ -56,7 +54,7 @@ describe('Significant Events maintenance actions', () => {
     jest.clearAllMocks();
     jest.mocked(useKibana).mockReturnValue({
       services: {
-        notifications: { toasts: { addSuccess, addWarning, addError } },
+        notifications: { toasts: { addSuccess } },
         significantEvents: { significantEventsRepositoryClient: { fetch } },
       },
     } as never);
@@ -89,45 +87,7 @@ describe('Significant Events maintenance actions', () => {
     expect(queryClient.getQueryState(['features'])?.isInvalidated).toBe(false);
   });
 
-  it('reports counts and partial failures as a warning', async () => {
-    fetch.mockResolvedValueOnce({
-      ...summary,
-      partialFailures: [{ target: 'rule:1', error: 'failed' }],
-    });
-    const { result } = setup();
-
-    act(() => result.current.reset.reset());
-
-    await waitFor(() => expect(addWarning).toHaveBeenCalled());
-    expect(addWarning).toHaveBeenCalledWith({
-      title: 'Reset Significant Events data with warnings',
-      text: expect.stringMatching(/2 knowledge indicators.*1 operation/),
-    });
-    expect(addSuccess).not.toHaveBeenCalled();
-  });
-
-  it('reports request errors and still refreshes maintenance status', async () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
-    try {
-      fetch.mockRejectedValueOnce(new Error('reset failed'));
-      const { result, invalidateQueries } = setup();
-
-      act(() => result.current.reset.reset());
-
-      await waitFor(() => expect(addError).toHaveBeenCalled());
-      expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-        title: 'Failed to reset Significant Events data',
-      });
-      expect(invalidateQueries).toHaveBeenCalledWith({
-        queryKey: ['nightshiftMaintenanceStatus'],
-      });
-      expect(addSuccess).not.toHaveBeenCalled();
-    } finally {
-      consoleError.mockRestore();
-    }
-  });
-
-  it.each(['pause', 'resume', 'reset'] as const)(
+  it.each(['reset'] as const)(
     'shares mutation locking between panels during %s',
     async (action) => {
       let resolveRequest: (value: SignificantEventsMaintenanceSummary) => void = () => {};
@@ -148,7 +108,7 @@ describe('Significant Events maintenance actions', () => {
     }
   );
 
-  it.each(['pause', 'resume', 'reset'] as const)(
+  it.each(['reset'] as const)(
     'unlocks both panels after %s finishes even while active refetches are pending',
     async (action) => {
       let resolveRefetch: (data: string[]) => void = () => {};

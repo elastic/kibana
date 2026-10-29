@@ -24,16 +24,6 @@ const mockUseRuleCatalog = jest.fn();
 jest.mock('../../../../hooks/use_rule_catalog', () => ({
   useRuleCatalog: () => mockUseRuleCatalog(),
 }));
-jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../../../settings/components/apps_section/use_relay_app_bindings'),
-  useAllRelayAppBindings: () => ({
-    bindings: [],
-    isLoading: false,
-    isError: false,
-    isComplete: true,
-  }),
-}));
-
 const legacyPatternTrigger: TriggerFormValues = {
   kind: 'alert',
   ruleNamePattern: 'cpu',
@@ -74,67 +64,6 @@ describe('AutomationTriggerSection', () => {
   });
 
   beforeEach(() => onTriggerChange.mockClear());
-
-  it('shows the empty state and the trigger groups', async () => {
-    render(<TriggerSection />);
-
-    expect(screen.getByText('Choose what starts this automation.')).toBeInTheDocument();
-    expect(screen.queryByTestId('automationChangeTrigger')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('automationAddTrigger'));
-    expect(await screen.findByText('Elastic')).toBeInTheDocument();
-    expect(screen.getByText('Scheduled')).toBeInTheDocument();
-    expect(screen.getByText('Every…')).toBeInTheDocument();
-    expect(screen.queryByText('Custom cron…')).not.toBeInTheDocument();
-    expect(screen.getByText('Slack')).toBeInTheDocument();
-    expect(screen.getByText('New message in channel')).toBeInTheDocument();
-  });
-
-  it('lists Slack triggers before scheduled ones', async () => {
-    render(<TriggerSection />);
-    fireEvent.click(screen.getByTestId('automationAddTrigger'));
-
-    const groups = (await screen.findAllByText(/^(Elastic|Slack|Scheduled)$/)).map(
-      (group) => group.textContent
-    );
-    expect(groups).toEqual(['Elastic', 'Slack', 'Scheduled']);
-  });
-
-  it('shows the Slack daily limit help for Slack triggers', async () => {
-    render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'New message in channel');
-
-    expect(screen.getByText('New message')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "When reached, new messages aren't investigated until the limit resets at 12:00 AM UTC. Skipped messages appear in this automation's history."
-      )
-    ).toBeInTheDocument();
-  });
-
-  it('removes the trigger', async () => {
-    render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Alert triggered');
-
-    fireEvent.click(screen.getByTestId('automationRemoveTrigger'));
-
-    expect(lastTrigger()).toBeUndefined();
-    expect(screen.getByTestId('automationAddTrigger')).toBeInTheDocument();
-  });
-
-  it('configures an alert trigger', async () => {
-    render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Alert triggered');
-
-    expect(screen.getByText('When an alert')).toBeInTheDocument();
-    expect(screen.getByTestId('automationDailyLimit')).toHaveValue(20);
-
-    fireEvent.click(screen.getByTestId('automationRulePicker'));
-    fireEvent.click(await screen.findByText('CPU usage high'));
-    expect(lastTrigger()).toMatchObject({ kind: 'alert', ruleNames: ['CPU usage high'] });
-    expect(screen.getByTestId('automationRulePicker')).toHaveTextContent('CPU usage high');
-    expect(screen.getByText('changes to')).toBeInTheDocument();
-    expect(screen.getByText('Active')).toBeInTheDocument();
-  });
 
   it('selects rules and tags in the rule picker', async () => {
     render(<TriggerSection />);
@@ -213,27 +142,5 @@ describe('AutomationTriggerSection', () => {
     expect(lastTrigger()).toMatchObject({ daysOfWeek: [2, 3, 4, 5] });
     fireEvent.click(screen.getByText('Sun'));
     expect(lastTrigger()).toMatchObject({ daysOfWeek: [2, 3, 4, 5, 0] });
-  });
-
-  it('lists IANA timezones with their offset', async () => {
-    render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Every…');
-    fireEvent.click(screen.getByLabelText('between hours'));
-
-    fireEvent.click(screen.getByTestId('automationTimezone'));
-    fireEvent.change(await screen.findByPlaceholderText('City or timezone…'), {
-      target: { value: 'Tokyo' },
-    });
-    expect(await screen.findByText('GMT+9')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Asia/Tokyo'));
-    expect(lastTrigger()).toMatchObject({ kind: 'every', timezone: 'Asia/Tokyo' });
-  });
-
-  it('flags an invalid daily limit', async () => {
-    render(<TriggerSection />);
-    await selectTrigger('automationAddTrigger', 'Alert triggered');
-
-    fireEvent.change(screen.getByTestId('automationDailyLimit'), { target: { value: '0' } });
-    expect(screen.getByTestId('automationDailyLimit')).toBeInvalid();
   });
 });

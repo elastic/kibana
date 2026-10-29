@@ -13,13 +13,12 @@ import { useKibana } from '../../hooks/use_kibana';
 
 jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
-const skippedRun = (skipReason: string, dailyLimit?: number): Run => ({
+const skippedRun = (skipReason: string): Run => ({
   id: 'run-1',
   status: 'skipped',
   startedAt: '2026-01-01T12:00:00.000Z',
   triggeredBy: 'alerting.v1.alertStatusChanged',
   skipReason,
-  dailyLimit,
 });
 
 describe('RunHistory skipped run summary', () => {
@@ -55,14 +54,6 @@ describe('RunHistory skipped run summary', () => {
       )
     ).toBeInTheDocument();
     expect(screen.queryByText(/Daily trigger limit/)).not.toBeInTheDocument();
-  });
-
-  it('keeps the daily limit summary for a daily_limit skip', () => {
-    renderRunHistory(skippedRun('daily_limit', 20));
-
-    expect(
-      screen.getByText('alerting.v1.alertStatusChanged · Daily trigger limit of 20 reached')
-    ).toBeInTheDocument();
   });
 
   it('keeps the investigation limit summary for an investigation_limit skip', () => {

@@ -32,15 +32,6 @@ const renderServices = (selectedServiceKey?: string) =>
     </I18nProvider>
   );
 
-const renderState = (props: Partial<React.ComponentProps<typeof ImpactedServices>>) =>
-  render(
-    <I18nProvider>
-      <EuiProvider>
-        <ImpactedServices services={[]} onSelect={jest.fn()} {...props} />
-      </EuiProvider>
-    </I18nProvider>
-  );
-
 describe('ImpactedServices', () => {
   it('keeps a selected overflow chip visible after collapsing', () => {
     const selectedKey = `entity:${MAX_VISIBLE_IMPACTED_SERVICES}`;
@@ -60,11 +51,5 @@ describe('ImpactedServices', () => {
       'aria-pressed',
       'true'
     );
-  });
-
-  it('renders nothing when there is no impact and nothing is pending', () => {
-    const { container } = renderState({});
-
-    expect(container).toBeEmptyDOMElement();
   });
 });

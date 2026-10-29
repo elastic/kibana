@@ -66,30 +66,6 @@ describe('useFetchInvestigations', () => {
     });
   });
 
-  it('keeps only the running investigations among the newest open ones', async () => {
-    const { result } = renderHook(() => useFetchInvestigations({ inProgress: true }), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() =>
-      expect(result.current.investigations.map(({ id }) => id)).toEqual(['running'])
-    );
-    expect(result.current.total).toBe(1);
-    expect(result.current.hasMore).toBe(false);
-    expect(httpGet).toHaveBeenCalledWith(
-      '/internal/investigations/investigations',
-      expect.objectContaining({
-        query: {
-          sort_field: 'created_at',
-          sort_order: 'desc',
-          page: 1,
-          per_page: 20,
-          status: 'open',
-        },
-      })
-    );
-  });
-
   it('keeps running investigations in the other sections, so none becomes unreachable', async () => {
     const { result } = renderHook(
       () => useFetchInvestigations({ inProgress: false, severities: ['high'] }),

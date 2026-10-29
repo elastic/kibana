@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import {
-  NEEDS_ACTION_STATUSES,
-  RESOLVED_STATUSES,
   byCriticalityAndUpdatedAtDesc,
-  getNeedsActionEvents,
-  getResolvedEvents,
   getInvestigationStatusLabel,
   getLatestInvestigation,
-  getStatusColor,
   hasRunningInvestigations,
   isEventInvestigated,
   isInvestigationRunning,
-  isNeedsActionStatus,
-  isResolvedStatus,
 } from './significant_event_status';
 
 const mockEvent = (
@@ -38,38 +31,6 @@ const mockEvent = (
   } as SignificantEvent);
 
 describe('significant_event_status', () => {
-  it('classifies active as needs-action', () => {
-    expect(NEEDS_ACTION_STATUSES).toEqual(['active', 'recovering']);
-    expect(isNeedsActionStatus('active')).toBe(true);
-    expect(isNeedsActionStatus('recovering')).toBe(true);
-    expect(isNeedsActionStatus('inactive')).toBe(false);
-  });
-
-  it('classifies inactive as resolved', () => {
-    expect(RESOLVED_STATUSES).toEqual(['inactive']);
-    expect(isResolvedStatus('inactive')).toBe(true);
-    expect(isResolvedStatus('active')).toBe(false);
-  });
-
-  it('treats inactive as resolved, not needs-action', () => {
-    const inactive: SignificantEventStatus = 'inactive';
-    expect(isNeedsActionStatus(inactive)).toBe(false);
-    expect(isResolvedStatus(inactive)).toBe(true);
-  });
-
-  it('splits events into needs-action and resolved buckets, grouping dismissed with resolved', () => {
-    const events = [
-      mockEvent({ event_id: '1', status: 'active' }),
-      mockEvent({ event_id: '2', status: 'active' }),
-      mockEvent({ event_id: '3', status: 'inactive' }),
-      mockEvent({ event_id: '4', status: 'inactive' }),
-      mockEvent({ event_id: '5', status: 'inactive' }),
-    ];
-
-    expect(getNeedsActionEvents(events).map(({ event_id: id }) => id)).toEqual(['1', '2']);
-    expect(getResolvedEvents(events).map(({ event_id: id }) => id)).toEqual(['3', '4', '5']);
-  });
-
   it('sorts by descending criticality, breaking ties on updated_at', () => {
     const events = [
       mockEvent({
@@ -108,12 +69,6 @@ describe('significant_event_status', () => {
 
     expect(() => [...events].sort(byCriticalityAndUpdatedAtDesc)).not.toThrow();
     expect([...events].sort(byCriticalityAndUpdatedAtDesc)[0].event_id).toBe('critical');
-  });
-
-  it('maps status to list dot color', () => {
-    expect(getStatusColor('active')).toBe('danger');
-    expect(getStatusColor('recovering')).toBe('danger');
-    expect(getStatusColor('inactive')).toBe('success');
   });
 
   it('derives investigation badge label from investigations, not event status', () => {

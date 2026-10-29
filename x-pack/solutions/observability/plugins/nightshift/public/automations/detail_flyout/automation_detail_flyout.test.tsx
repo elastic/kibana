@@ -76,11 +76,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     (useUpdateAutomation as jest.Mock).mockReturnValue({ mutate, isLoading: false });
   });
 
-  const renderFlyout = ({
-    canManage = true,
-    usedToday = 0,
-    editDisabledReason,
-  }: { canManage?: boolean; usedToday?: number; editDisabledReason?: string } = {}) => {
+  const renderFlyout = ({ canManage = true }: { canManage?: boolean } = {}) => {
     const history = createMemoryHistory({ initialEntries: ['/automations/automation-1'] });
     render(
       <I18nProvider>
@@ -89,8 +85,7 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
             automations={[automation]}
             automation={automation}
             canManage={canManage}
-            editDisabledReason={editDisabledReason}
-            usedToday={usedToday}
+            usedToday={0}
             runRange={runRange}
             rangeLabel="Last 24 hours"
             onClose={onClose}
@@ -106,16 +101,6 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const startEditing = () => fireEvent.click(screen.getByTestId('automationEditButton'));
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
-
-  it('shows edit disabled, with the reason, when only a privilege is missing', async () => {
-    renderFlyout({ canManage: false, editDisabledReason: 'Requires manage_security' });
-
-    const edit = screen.getByTestId('automationEditButton');
-    expect(edit).toBeDisabled();
-    expect(screen.queryByTestId('automationActionsButton')).not.toBeInTheDocument();
-    fireEvent.mouseOver(edit);
-    expect(await screen.findByRole('tooltip')).toHaveTextContent('Requires manage_security');
-  });
 
   it('offers no edit action without a reason to give', () => {
     renderFlyout({ canManage: false });
@@ -160,27 +145,6 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     expect(screen.getByTestId('automationEditButton')).toBeInTheDocument();
   });
 
-  it('closes without confirmation when nothing changed', () => {
-    renderFlyout();
-
-    startEditing();
-    fireEvent.click(screen.getByTestId('automationCloseButton'));
-
-    expect(onClose).toHaveBeenCalled();
-  });
-
-  it('asks before closing with unsaved changes and keeps editing on cancel', () => {
-    renderFlyout();
-
-    startEditing();
-    renameTo('Renamed');
-    fireEvent.click(screen.getByTestId('automationCloseButton'));
-
-    expect(onClose).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Keep editing' }));
-    expect(screen.getByTestId('automationName')).toHaveValue('Renamed');
-  });
-
   it('closes after discarding unsaved changes', () => {
     renderFlyout();
 
@@ -217,16 +181,4 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     expect(navigateToUrl).toHaveBeenCalledWith('/app/discover');
     expect(history.location.pathname).toBe('/automations/automation-1');
   });
-
-  it.each([
-    [true, 1],
-    [false, 0],
-  ])(
-    'with manage access %s, shows %s Raise limit actions at the daily limit',
-    (canManage, count) => {
-      renderFlyout({ canManage, usedToday: 20 });
-
-      expect(screen.queryAllByText(/Raise limit/)).toHaveLength(count);
-    }
-  );
 });

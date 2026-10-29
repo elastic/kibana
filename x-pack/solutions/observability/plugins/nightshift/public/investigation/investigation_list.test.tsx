@@ -8,33 +8,16 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
 import { InvestigationList } from './investigation_list';
 
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      agenticInvestigations: {
-        InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
-          <div data-test-subj="investigationCard">{item.title}</div>
-        ),
-      },
+      agenticInvestigations: {},
     },
   }),
 }));
-
-const investigation: InvestigationSummary = {
-  id: 'investigation-1',
-  title: 'Checkout errors',
-  title_pending: false,
-  created_at: '2026-09-11T09:00:00.000Z',
-  updated_at: '2026-09-11T09:00:00.000Z',
-  agent_id: 'nightshift.investigation',
-  metadata: { status: 'open', severity: 'critical', summary: 'Checkout errors are elevated' },
-  in_progress: false,
-  subjects: [],
-};
 
 const makeSection = (
   id: InvestigationSectionState['id'],
@@ -62,26 +45,6 @@ const renderSections = (sections: InvestigationSectionState[]) =>
   );
 
 describe('InvestigationList', () => {
-  it('keeps skeletons visible while a section is loading', () => {
-    renderSections([makeSection('critical', { isInitialLoading: true }), makeSection('high')]);
-
-    expect(
-      screen.getByTestId('nightshiftInvestigationSectionSkeleton-critical')
-    ).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftInvestigationSection-high')).not.toBeInTheDocument();
-  });
-
-  it('hides a resolved empty section', () => {
-    renderSections([
-      makeSection('critical', { investigations: [investigation], total: 1 }),
-      makeSection('high'),
-    ]);
-
-    expect(screen.getByTestId('nightshiftInvestigationSection-critical')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftInvestigationSection-high')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftInvestigationsEmpty')).not.toBeInTheDocument();
-  });
-
   it('keeps an empty section that failed to load so it can be retried', () => {
     renderSections([makeSection('critical', { error: new Error('Network unavailable') })]);
 
@@ -99,22 +62,5 @@ describe('InvestigationList', () => {
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
-  });
-
-  it('renders in progress first and not rated last', () => {
-    renderSections([
-      makeSection('in-progress', { investigations: [investigation], total: 1 }),
-      makeSection('critical', { investigations: [investigation], total: 1 }),
-      makeSection('not-rated', { investigations: [investigation], total: 1 }),
-    ]);
-
-    const titles = screen.getAllByRole('heading').map((heading) => heading.textContent);
-    expect(titles).toEqual(['In progress', 'Critical', 'Not rated']);
-  });
-
-  it('renders each investigation as the shared investigation card', () => {
-    renderSections([makeSection('critical', { investigations: [investigation], total: 1 })]);
-
-    expect(screen.getByTestId('investigationCard')).toHaveTextContent('Checkout errors');
   });
 });

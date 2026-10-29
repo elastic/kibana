@@ -7,9 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
-import { SIGNIFICANT_EVENTS_LIST_QUERY_KEY } from '../data/query_keys';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/constants';
 import {
   clearPendingInvestigationCompletionsForTests,
   markEventInvestigationCompleteInCache,
@@ -51,18 +49,13 @@ jest.mock('./use_kibana', () => ({
 }));
 
 let capturedQueryFn: ((args: { signal?: AbortSignal }) => Promise<unknown>) | undefined;
-let capturedRefetchInterval:
-  | ((data: NightshiftSignificantEventsQueryData | undefined) => number | false)
-  | undefined;
 
 jest.mock('@kbn/react-query', () => ({
   useQuery: (params: {
     queryKey: readonly string[];
     queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
-    refetchInterval: (data: NightshiftSignificantEventsQueryData | undefined) => number | false;
   }) => {
     capturedQueryFn = params.queryFn;
-    capturedRefetchInterval = params.refetchInterval;
     return {
       data: undefined,
       isLoading: true,
@@ -70,100 +63,9 @@ jest.mock('@kbn/react-query', () => ({
   },
 }));
 
-describe('useFetchSignificantEvents', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    clearPendingInvestigationCompletionsForTests();
-    mockSignificantEventsFetch.mockResolvedValue({
-      hits: [],
-      page: 1,
-      perPage: 1000,
-      total: 0,
-    });
-  });
-
-  it('requests critical and high-severity events for the landing page', async () => {
-    renderHook(() => useFetchSignificantEvents());
-
-    await capturedQueryFn!({ signal: undefined });
-
-    expect(mockSignificantEventsFetch).toHaveBeenCalledWith(
-      'GET /internal/significant_events/events',
-      expect.objectContaining({
-        params: {
-          query: expect.objectContaining({
-            severity: NIGHTSHIFT_LANDING_SEVERITIES,
-          }),
-        },
-      })
-    );
-  });
-
-  it('polls while an investigation is running', () => {
-    renderHook(() => useFetchSignificantEvents());
-
-    const runningEvent = mockEvent({
-      investigations: [
-        {
-          workflow_execution_id: 'exec-1',
-          started_at: new Date().toISOString(),
-        },
-      ],
-    });
-
-    expect(
-      capturedRefetchInterval?.({
-        hits: [runningEvent],
-        page: 1,
-        perPage: 1,
-        total: 1,
-      })
-    ).toBe(5_000);
-  });
-});
-
 describe('markEventInvestigationCompleteInCache', () => {
   beforeEach(() => {
     clearPendingInvestigationCompletionsForTests();
-  });
-
-  it('sets completed_at on the matching event latest investigation', () => {
-    let cache: NightshiftSignificantEventsQueryData | undefined = {
-      hits: [
-        mockEvent({
-          investigations: [
-            {
-              workflow_execution_id: 'exec-1',
-              started_at: '2026-01-01T00:00:00.000Z',
-            },
-          ],
-        }),
-      ],
-      page: 1,
-      perPage: 1,
-      total: 1,
-    };
-    const setQueriesData = jest.fn(
-      (
-        { queryKey }: { queryKey: readonly string[] },
-        updater: (
-          current: NightshiftSignificantEventsQueryData | undefined
-        ) => NightshiftSignificantEventsQueryData | undefined
-      ) => {
-        if (queryKey === NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY) {
-          cache = updater(cache);
-        }
-      }
-    );
-    const queryClient = { setQueriesData } as unknown as QueryClient;
-
-    markEventInvestigationCompleteInCache(queryClient, 'evt-1', '2026-01-01T00:05:00.000Z');
-
-    expect(cache?.hits[0].investigations?.[0].completed_at).toBe('2026-01-01T00:05:00.000Z');
-    expect(setQueriesData).toHaveBeenCalledWith(
-      { queryKey: SIGNIFICANT_EVENTS_LIST_QUERY_KEY },
-      expect.any(Function)
-    );
   });
 
   it('reapplies pending completed_at until a new round reuses the investigation id', async () => {

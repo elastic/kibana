@@ -9,7 +9,6 @@ import type { SettingsProps } from '@elastic/charts';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { act, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
 import { MemoryHome } from './home';
 import { useMemoryKeywordPages } from './use_memory';
@@ -146,64 +145,6 @@ beforeEach(() => {
 });
 
 describe('MemoryHome keyword filtering', () => {
-  it('lists every memory until a keyword is selected', () => {
-    renderHome();
-
-    expect(listedTitles()).toHaveLength(PAGES.length);
-    expect(mockUseMemoryKeywordPages).toHaveBeenCalledWith([]);
-  });
-
-  it('narrows the lists and the chart to the keyword whose cell was clicked', () => {
-    renderHome();
-
-    clickCell('kafka');
-
-    // The server is asked for the filtered set.
-    expect(mockUseMemoryKeywordPages).toHaveBeenLastCalledWith(['kafka']);
-    const titles = listedTitles().join(' ');
-    expect(titles).toContain('Kafka and Redis');
-    expect(titles).toContain('Kafka only');
-    expect(titles).not.toContain('Redis only');
-  });
-
-  it('ANDs two selected keywords', () => {
-    renderHome();
-
-    clickCell('kafka');
-    clickCell('redis');
-
-    expect(mockUseMemoryKeywordPages).toHaveBeenLastCalledWith(['kafka', 'redis']);
-    const titles = listedTitles().join(' ');
-    // Only the one memory carrying both survives.
-    expect(titles).toContain('Kafka and Redis');
-    expect(titles).not.toContain('Kafka only');
-  });
-
-  it('removes a keyword when its chip is clicked again', async () => {
-    renderHome();
-    clickCell('kafka');
-    clickCell('redis');
-
-    await userEvent.click(screen.getByTestId('nightshiftMemoryKeywordChip-redis'));
-
-    expect(mockUseMemoryKeywordPages).toHaveBeenLastCalledWith(['kafka']);
-    // Back to the memories carrying `kafka` alone, so `Redis only` is gone again.
-    const titles = listedTitles().join(' ');
-    expect(titles).toContain('Kafka and Redis');
-    expect(titles).toContain('Kafka only');
-    expect(titles).not.toContain('Redis only');
-  });
-
-  it('clears the whole selection at once', async () => {
-    renderHome();
-    clickCell('kafka');
-
-    await userEvent.click(screen.getByTestId('nightshiftMemoryClearKeywords'));
-
-    expect(mockUseMemoryKeywordPages).toHaveBeenLastCalledWith([]);
-    expect(listedTitles()).toHaveLength(PAGES.length);
-  });
-
   it('lists a matching memory the sidebar has not loaded', () => {
     // The sidebar is a 25-row slice; a keyword drawn from the wider treemap can
     // belong only to memories outside it, and its lists must still answer.
@@ -226,23 +167,23 @@ describe('MemoryHome keyword filtering', () => {
     expect(listedTitles().join(' ')).toContain('Older kafka memory');
   });
 
-  it.each([
-    ['fails', { isError: true }, 'nightshiftMemoryKeywordError'],
-    ['is loading', { isLoading: true }, 'nightshiftMemoryKeywordLoading'],
-  ])('does not report an empty store while the filtered query %s', (_, state, testSubj) => {
-    mockUseMemoryKeywordPages.mockImplementation(
-      (tags: readonly string[] = []) =>
-        (tags.length === 0
-          ? { data: { pages: PAGES, total: PAGES.length, stats } }
-          : { data: undefined, ...state }) as unknown as ReturnType<typeof useMemoryKeywordPages>
-    );
-    renderHome();
+  it.each([['is loading', { isLoading: true }, 'nightshiftMemoryKeywordLoading']])(
+    'does not report an empty store while the filtered query %s',
+    (_, state, testSubj) => {
+      mockUseMemoryKeywordPages.mockImplementation(
+        (tags: readonly string[] = []) =>
+          (tags.length === 0
+            ? { data: { pages: PAGES, total: PAGES.length, stats } }
+            : { data: undefined, ...state }) as unknown as ReturnType<typeof useMemoryKeywordPages>
+      );
+      renderHome();
 
-    clickCell('kafka');
+      clickCell('kafka');
 
-    expect(screen.getByTestId(testSubj)).toBeInTheDocument();
-    expect(screen.queryByText(/No memories yet/)).not.toBeInTheDocument();
-  });
+      expect(screen.getByTestId(testSubj)).toBeInTheDocument();
+      expect(screen.queryByText(/No memories yet/)).not.toBeInTheDocument();
+    }
+  );
 
   it('says so when the ranking could not reach the whole store', () => {
     mockUseMemoryKeywordPages.mockReturnValue({

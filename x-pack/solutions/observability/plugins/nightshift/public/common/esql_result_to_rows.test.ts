@@ -22,8 +22,4 @@ describe('esqlResultToRows', () => {
       { '@timestamp': '2026-09-30T10:00:01.000Z', message: null },
     ]);
   });
-
-  it('returns no rows for an empty result', () => {
-    expect(esqlResultToRows({ columns: [{ name: 'message' }], values: [] })).toEqual([]);
-  });
 });

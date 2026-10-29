@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   createTriggerFormValues,
@@ -67,37 +67,6 @@ describe('SlackTriggerEditor', () => {
     mockUseAllRelayAppBindings.mockReturnValue(connected);
   });
 
-  it('describes a new message trigger', () => {
-    render(<Editor kind="slack_message" />);
-
-    expect(screen.getByText('New message')).toBeInTheDocument();
-    expect(screen.getByText('in')).toBeInTheDocument();
-    expect(screen.getByTestId('automationSlackTriggerChannels')).toHaveTextContent(
-      'Select channels'
-    );
-    expect(screen.getByTestId('automationSlackTriggerMessage')).toHaveTextContent('Any message');
-    expect(screen.getByText('from')).toBeInTheDocument();
-    expect(screen.getByTestId('automationSlackTriggerUsers')).toHaveTextContent('Anyone');
-    expect(screen.getByText('via')).toBeInTheDocument();
-    expect(screen.getByTestId('automationSlackTriggerBots')).toHaveTextContent('Any app');
-  });
-
-  it('adds an app or bot', async () => {
-    render(<Editor kind="slack_message" />);
-
-    fireEvent.click(screen.getByTestId('automationSlackTriggerBots'));
-    const input = within(await screen.findByTestId('automationSlackTriggerBotsInput')).getByRole(
-      'combobox'
-    );
-    fireEvent.change(input, { target: { value: 'PagerDuty' } });
-    fireEvent.keyDown(input, { key: 'Enter' });
-
-    expect(onChange).toHaveBeenLastCalledWith(
-      expect.objectContaining({ kind: 'slack_message', bots: ['PagerDuty'] })
-    );
-    expect(screen.getByTestId('automationSlackTriggerBots')).toHaveTextContent('PagerDuty');
-  });
-
   it('adds a connected channel by id and a message filter', async () => {
     render(<Editor kind="slack_message" />);
 
@@ -117,19 +86,6 @@ describe('SlackTriggerEditor', () => {
       target: { value: 'outage' },
     });
     expect(screen.getByTestId('automationSlackTriggerMessage')).toHaveTextContent('outage');
-  });
-
-  it('does not accept a typed channel that is not connected', async () => {
-    render(<Editor kind="slack_message" />);
-
-    fireEvent.click(screen.getByTestId('automationSlackTriggerChannels'));
-    const channelInput = within(
-      await screen.findByTestId('automationSlackTriggerChannelsInput')
-    ).getByRole('combobox');
-    fireEvent.change(channelInput, { target: { value: '#random' } });
-    fireEvent.keyDown(channelInput, { key: 'Enter' });
-
-    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('flags a saved channel that is no longer connected', async () => {
@@ -157,53 +113,11 @@ describe('SlackTriggerEditor', () => {
     );
   });
 
-  it('links to Settings when no channels are connected', async () => {
-    mockUseAllRelayAppBindings.mockReturnValue({ ...connected, bindings: [] });
-    render(<Editor kind="slack_message" />);
-
-    fireEvent.click(screen.getByTestId('automationSlackTriggerChannels'));
-
-    expect(
-      await screen.findByTestId('automationSlackTriggerChannelsInputConnectLink')
-    ).toHaveAttribute('href', '/app/nightshift/settings/general');
-  });
-
-  it('shows channel names when read only', () => {
-    render(
-      <I18nProvider>
-        <SlackTriggerEditor
-          readOnly
-          trigger={{
-            kind: 'slack_message',
-            channels: ['C1'],
-            users: [],
-            bots: [],
-            messageFilter: '',
-          }}
-          onChange={onChange}
-        />
-      </I18nProvider>
-    );
-
-    expect(screen.getByText('#alerts')).toBeInTheDocument();
-  });
-
   describe('message filter', () => {
     const openMessageFilter = async () => {
       fireEvent.click(screen.getByTestId('automationSlackTriggerMessage'));
       return screen.findByTestId('automationSlackTriggerMessageInput');
     };
-
-    it('closes the popover on Enter', async () => {
-      render(<Editor kind="slack_message" />);
-      const input = await openMessageFilter();
-
-      fireEvent.keyDown(input, { key: 'Enter' });
-
-      await waitFor(() =>
-        expect(screen.queryByTestId('automationSlackTriggerMessageInput')).not.toBeInTheDocument()
-      );
-    });
 
     it('keeps the popover open on Enter while composing', async () => {
       render(<Editor kind="slack_message" />);

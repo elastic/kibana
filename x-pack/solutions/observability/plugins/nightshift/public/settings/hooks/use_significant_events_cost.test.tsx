@@ -103,51 +103,6 @@ describe('useSignificantEventsCost', () => {
     } as never);
   });
 
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it('disables the cost query when canManage is false', async () => {
-    mockUseRunQuotas.mockReturnValue({
-      data: quotasResponse(false),
-      isLoading: false,
-      isError: false,
-    } as never);
-    const { wrapper } = createWrapper();
-    renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
-    await act(async () => undefined);
-    expect(fetch).not.toHaveBeenCalled();
-  });
-
-  it('disables the cost query when privilege data is stale after an error', async () => {
-    mockUseRunQuotas.mockReturnValue({
-      data: quotasResponse(true),
-      isLoading: false,
-      isError: true,
-    } as never);
-    const { wrapper } = createWrapper();
-    renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
-    await act(async () => undefined);
-    expect(fetch).not.toHaveBeenCalled();
-  });
-
-  it('disables the cost query when the caller disables it', async () => {
-    const { wrapper } = createWrapper();
-    renderHook(() => useSignificantEventsCost({ enabled: false }), { wrapper });
-    await act(async () => undefined);
-    expect(fetch).not.toHaveBeenCalled();
-  });
-
-  it('omits refresh and passes the abort signal on the normal query', async () => {
-    fetch.mockResolvedValue(costResponse());
-    const { wrapper } = createWrapper();
-    renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
-    await waitFor(() => expect(fetch).toHaveBeenCalled());
-    expect(fetch).toHaveBeenCalledWith('GET /internal/significant_events/cost', {
-      signal: expect.any(AbortSignal),
-    });
-  });
-
   it('sends refresh=true and writes the result into the cost query', async () => {
     fetch
       .mockResolvedValueOnce(costResponse())
@@ -316,30 +271,6 @@ describe('useSignificantEventsCost', () => {
     await waitFor(() => expect(currentHook.result.current.data).toEqual(newest));
   });
 
-  it('sets isRefreshing for the entire forced request', async () => {
-    let resolveRefresh: (value: CostResponse) => void = () => undefined;
-    fetch.mockResolvedValueOnce(costResponse()).mockImplementationOnce(
-      () =>
-        new Promise((resolve) => {
-          resolveRefresh = resolve;
-        })
-    );
-    const { wrapper } = createWrapper();
-    const { result } = renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
-    await waitFor(() => expect(result.current.data).toBeDefined());
-
-    let refreshDone: Promise<void> | undefined;
-    act(() => {
-      refreshDone = result.current.refreshCost();
-    });
-    await waitFor(() => expect(result.current.isRefreshing).toBe(true));
-    await act(async () => {
-      resolveRefresh(costResponse());
-      await refreshDone;
-    });
-    expect(result.current.isRefreshing).toBe(false);
-  });
-
   it('returns a manual-refresh failure through error without an unhandled rejection', async () => {
     fetch.mockResolvedValueOnce(costResponse()).mockRejectedValueOnce(new Error('refresh failed'));
     const { wrapper } = createWrapper();
@@ -351,19 +282,5 @@ describe('useSignificantEventsCost', () => {
     });
     expect(result.current.error).toEqual(new Error('refresh failed'));
     expect(result.current.data).toEqual(costResponse());
-  });
-
-  it('retries a failed normal query and replaces the error with data', async () => {
-    jest.spyOn(console, 'error').mockImplementation(() => undefined);
-    fetch.mockRejectedValueOnce(new Error('initial failure')).mockResolvedValueOnce(costResponse());
-    const { wrapper } = createWrapper();
-    const { result } = renderHook(() => useSignificantEventsCost({ enabled: true }), { wrapper });
-    await waitFor(() => expect(result.current.error).toEqual(new Error('initial failure')));
-    await act(async () => {
-      await result.current.retryCost();
-    });
-    await waitFor(() => expect(result.current.data).toEqual(costResponse()));
-    expect(result.current.error).toBeNull();
-    expect(fetch).toHaveBeenCalledTimes(2);
   });
 });

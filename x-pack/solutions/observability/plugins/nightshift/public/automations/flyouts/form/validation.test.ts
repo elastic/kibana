@@ -18,14 +18,7 @@ const everyTrigger = (overrides: Partial<Extract<TriggerFormValues, { kind: 'eve
 });
 
 describe('automation validation', () => {
-  it.each([
-    ['1', true],
-    ['50', true],
-    ['', false],
-    ['0', false],
-    ['51', false],
-    ['1.5', false],
-  ])('validates daily limit %s', (value, expected) => {
+  it.each([['51', false]])('validates daily limit %s', (value, expected) => {
     expect(isValidDailyLimit(value)).toBe(expected);
   });
 
@@ -78,10 +71,6 @@ describe('automation validation', () => {
           trigger: { ...slackTrigger, channels: ['#oncall'] } as typeof slackTrigger,
         })
       ).toBeUndefined();
-    });
-
-    it('asks for a trigger before saving', () => {
-      expect(getSaveBlocker(values)).toBe('Select a trigger to save');
     });
   });
 

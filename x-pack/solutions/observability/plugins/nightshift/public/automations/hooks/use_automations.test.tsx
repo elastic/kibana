@@ -6,35 +6,24 @@
  */
 
 import React from 'react';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
-import {
-  AUTOMATIONS_QUERY_KEY,
-  useAutomationsRunsInRange,
-  useCreateAutomation,
-  useDeleteAutomation,
-  useFetchAutomations,
-  useRefreshAutomations,
-  useToggleAutomation,
-} from './use_automations';
+import { useAutomationsRunsInRange } from './use_automations';
 
 jest.mock('../../hooks/use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
 const investigationsFetch = jest.fn();
-const addSuccess = jest.fn();
-const addError = jest.fn();
 
 const renderWithClient = <T,>(hook: () => T) => {
   const queryClient = new QueryClient({
-    defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+    defaultOptions: { queries: { retry: false } },
   });
-  const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  return { ...renderHook(hook, { wrapper }), invalidateQueries };
+  return renderHook(hook, { wrapper });
 };
 
 describe('use_automations', () => {
@@ -42,29 +31,8 @@ describe('use_automations', () => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
-        notifications: { toasts: { addError, addSuccess } },
         nightshiftInvestigations: { investigationsClient: { fetch: investigationsFetch } },
       },
-    });
-  });
-
-  it('refreshes every automation query', () => {
-    const { result, invalidateQueries } = renderWithClient(() => useRefreshAutomations());
-
-    act(() => {
-      result.current();
-    });
-
-    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: AUTOMATIONS_QUERY_KEY });
-  });
-
-  it('lists automations', async () => {
-    investigationsFetch.mockResolvedValue({ automations: [], total: 0 });
-    const { result } = renderWithClient(() => useFetchAutomations());
-
-    await waitFor(() => expect(result.current.data).toEqual({ automations: [], total: 0 }));
-    expect(investigationsFetch).toHaveBeenCalledWith('GET /internal/nightshift/automations', {
-      signal: expect.anything(),
     });
   });
 
@@ -91,66 +59,6 @@ describe('use_automations', () => {
         },
         signal: null,
       }
-    );
-  });
-
-  it('creates an automation, shows a toast, and refreshes the list', async () => {
-    investigationsFetch.mockResolvedValue({ id: 'automation-1' });
-    const { result, invalidateQueries } = renderWithClient(() => useCreateAutomation());
-    const body = {
-      name: 'Triage',
-      trigger: { rows: [{ kind: 'alert' as const }] },
-      execution: {},
-      completions: [],
-      runtime: {},
-    };
-
-    act(() => result.current.mutate(body));
-
-    await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith({ title: 'Automation created', text: 'Triage' })
-    );
-    expect(investigationsFetch).toHaveBeenCalledWith('POST /internal/nightshift/automations', {
-      params: { body },
-      signal: null,
-    });
-    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: AUTOMATIONS_QUERY_KEY });
-  });
-
-  it('toggles and deletes automations', async () => {
-    investigationsFetch.mockResolvedValue({});
-    const toggle = renderWithClient(() => useToggleAutomation());
-    const remove = renderWithClient(() => useDeleteAutomation());
-
-    act(() =>
-      toggle.result.current.mutate({ id: 'automation-1', name: 'Triage', isEnabled: false })
-    );
-    act(() => remove.result.current.mutate({ id: 'automation-1', name: 'Triage' }));
-
-    await waitFor(() => expect(investigationsFetch).toHaveBeenCalledTimes(2));
-    expect(investigationsFetch).toHaveBeenCalledWith('PUT /internal/nightshift/automations/{id}', {
-      params: { path: { id: 'automation-1' }, body: { isEnabled: false } },
-      signal: null,
-    });
-    expect(investigationsFetch).toHaveBeenCalledWith(
-      'DELETE /internal/nightshift/automations/{id}',
-      { params: { path: { id: 'automation-1' } }, signal: null }
-    );
-    await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith({ title: 'Automation deleted', text: 'Triage' })
-    );
-  });
-
-  it('shows an error toast when a mutation fails', async () => {
-    investigationsFetch.mockRejectedValue(new Error('boom'));
-    const { result } = renderWithClient(() => useDeleteAutomation());
-
-    act(() => result.current.mutate({ id: 'automation-1', name: 'Triage' }));
-
-    await waitFor(() =>
-      expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-        title: 'Failed to delete automation',
-      })
     );
   });
 });

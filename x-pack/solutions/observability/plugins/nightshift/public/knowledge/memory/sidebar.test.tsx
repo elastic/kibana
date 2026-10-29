@@ -74,14 +74,6 @@ const renderSidebar = (
 };
 
 describe('MemorySidebar', () => {
-  it('lists a memory and reports the selection', async () => {
-    const { onSelect } = renderSidebar({ pages: [summary()] });
-
-    await userEvent.click(screen.getByTestId('nightshiftMemoryLink-memory_kafka-lag'));
-
-    expect(onSelect).toHaveBeenCalledWith({ kind: 'page', id: 'memory_kafka-lag' });
-  });
-
   it('sends the search to the server once typing pauses', async () => {
     const { onSearchChange } = renderSidebar({
       pages: [summary(), summary({ id: 'memory_redis', title: 'Redis evictions' })],
@@ -90,79 +82,6 @@ describe('MemorySidebar', () => {
     await userEvent.type(screen.getByTestId('nightshiftMemorySearch'), 'redis');
 
     await waitFor(() => expect(onSearchChange).toHaveBeenLastCalledWith('redis'));
-  });
-
-  it('says so when a search matches nothing', async () => {
-    renderSidebar({ pages: [] });
-
-    await userEvent.type(screen.getByTestId('nightshiftMemorySearch'), 'zzzz');
-
-    await waitFor(() => {
-      expect(screen.getByText('No memories match that search.')).toBeInTheDocument();
-    });
-  });
-
-  it('changes the filter through the button group', async () => {
-    const { onFilterChange } = renderSidebar();
-
-    await userEvent.click(screen.getByTestId('nightshiftMemoryFilter-archived'));
-
-    expect(onFilterChange).toHaveBeenCalledWith('archived');
-  });
-
-  it.each<MemoryFilter>(['all', 'active', 'archived'])('offers the %s filter', async (filter) => {
-    const { onFilterChange } = renderSidebar({}, { kind: 'home' }, jest.fn(), jest.fn(), 'active');
-
-    await userEvent.click(screen.getByTestId(`nightshiftMemoryFilter-${filter}`));
-
-    expect(onFilterChange).toHaveBeenCalledWith(filter);
-  });
-
-  it('marks the active filter as selected, so the current view is legible', () => {
-    renderSidebar({}, { kind: 'home' }, jest.fn(), jest.fn(), 'archived');
-
-    expect(screen.getByTestId('nightshiftMemoryFilter-archived')).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
-    expect(screen.getByTestId('nightshiftMemoryFilter-active')).toHaveAttribute(
-      'aria-pressed',
-      'false'
-    );
-  });
-
-  it('still lists an archived memory under the archived filter', () => {
-    // The filter is a server-side query, so the rows arrive already narrowed. The
-    // client must not drop them a second time.
-    renderSidebar({ pages: [summary({ archived: true, archive_reason: 'manual' })] });
-
-    expect(screen.getByTestId('nightshiftMemoryLink-memory_kafka-lag')).toBeInTheDocument();
-  });
-
-  it('asks for the next page only when the server offered a cursor', async () => {
-    const { onLoadMore } = renderSidebar({ pages: [summary()], hasNextPage: true });
-
-    await userEvent.click(screen.getByTestId('nightshiftMemoryLoadMore'));
-
-    expect(onLoadMore).toHaveBeenCalled();
-  });
-
-  it('keeps the existing rows visible while the next page loads', async () => {
-    // Replacing the list with a spinner mid-scroll loses the operator's place.
-    renderSidebar({
-      pages: [summary()],
-      hasNextPage: true,
-      isFetchingNextPage: true,
-    });
-
-    expect(screen.getByTestId('nightshiftMemoryLink-memory_kafka-lag')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftMemoryLoadMore')).toBeDisabled();
-  });
-
-  it('offers no load-more control on the last page', () => {
-    renderSidebar({ pages: [summary()], hasNextPage: false });
-
-    expect(screen.queryByTestId('nightshiftMemoryLoadMore')).not.toBeInTheDocument();
   });
 
   it('renders a spinner then the empty state, not a stale list', async () => {

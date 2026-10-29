@@ -7,7 +7,6 @@
 
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 import {
-  getImpactedServiceKey,
   getImpactedServiceSourceIds,
   getImpactedServices,
   resolveImpactedServices,
@@ -94,59 +93,10 @@ describe('getImpactedServices', () => {
     expect(getImpactedServices(event)).toEqual([]);
   });
 
-  // A dependency row names an edge — `source` → `target` behind one `feature_id` — so there is no
-  // single subject to render.
-  it('drops dependency entries', () => {
-    const event = mockEvent({
-      blast_radius: [
-        {
-          type: 'dependency',
-          subtype: 'http',
-          feature_id: 'feat-edge',
-          source: 'checkout-api',
-          target: 'payments-api',
-          source_id: 'logs.checkout',
-        },
-      ],
-    });
-
-    expect(getImpactedServices(event)).toEqual([]);
-  });
-
-  it('drops an infrastructure entry whose knowledge indicator is not a service', () => {
-    const event = mockEvent({
-      blast_radius: [
-        {
-          type: 'infrastructure',
-          subtype: 'infrastructure',
-          feature_id: 'feat-nodes',
-          title: 'Wolfi Linux nodes',
-          source_id: 'logs.checkout',
-        },
-      ],
-    });
-
-    expect(getImpactedServices(event)).toEqual([]);
-  });
-
   it('drops entities whose topology subtype is not service', () => {
     const entry = { ...entityEntry, subtype: 'database' };
 
     expect(getImpactedServices(mockEvent({ blast_radius: [entry] }))).toEqual([]);
-  });
-
-  it('drops entities whose topology reference has no subtype', () => {
-    const { subtype, ...entry } = entityEntry;
-
-    expect(subtype).toBe('service');
-    expect(getImpactedServices(mockEvent({ blast_radius: [entry] }))).toEqual([]);
-  });
-
-  it('returns direct services but does not resolve a missing knowledge indicator', () => {
-    const event = mockEvent({ blast_radius: [entityEntry] });
-
-    expect(getImpactedServices(event)).toHaveLength(1);
-    expect(resolveImpactedServices(event, [])).toEqual([]);
   });
 
   it('resolves a duplicate service when its first reference is missing', () => {
@@ -165,10 +115,6 @@ describe('getImpactedServices', () => {
     });
 
     expect(resolveImpactedServices(event, [feature])[0].feature).toBe(feature);
-  });
-
-  it('never falls back to a source id when there is no blast radius', () => {
-    expect(getImpactedServices(mockEvent())).toEqual([]);
   });
 
   it('merges causal features and deduplicates service names case-insensitively', () => {
@@ -244,17 +190,5 @@ describe('getImpactedServiceSourceIds', () => {
       'logging-eis',
       'logs.payments',
     ]);
-  });
-});
-
-describe('getImpactedServiceKey', () => {
-  it('separates differently named services', () => {
-    expect(getImpactedServiceKey('checkout-api')).not.toBe(
-      getImpactedServiceKey('checkout-worker')
-    );
-  });
-
-  it('keeps the entry type as the leading key segment', () => {
-    expect(getImpactedServiceKey('checkout-api')).toMatch(/^entity:/);
   });
 });

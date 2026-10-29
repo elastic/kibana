@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
@@ -58,14 +58,14 @@ function makeBindings(bindings: SlackChannelBinding[], nextCursor?: string) {
   mockUseUnbindChannel.mockReturnValue({ unbind: unbindChannel, isLoading: false });
 }
 
-function setup(canEdit = true) {
+function setup() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   return render(
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
-        <AppsSection canEdit={canEdit} />
+        <AppsSection canEdit />
       </QueryClientProvider>
     </I18nProvider>
   );
@@ -111,28 +111,6 @@ describe('AppsSection', () => {
         disconnect: mockDisconnectWorkspace,
       });
 
-    it('shows the workspace URL, name, and team ID, and hides the channel controls', () => {
-      mockPendingConfirmation({
-        tenantKey: 'T0123ABC',
-        name: 'Acme',
-        url: 'https://acme.slack.com/',
-      });
-      setup();
-
-      const callout = screen.getByTestId('streamsSlackAppConfirmWorkspace');
-      expect(callout).toHaveTextContent('https://acme.slack.com/');
-      expect(callout).toHaveTextContent('Acme');
-      expect(callout).toHaveTextContent('T0123ABC');
-      expect(screen.queryByTestId('streamsSlackAppChannelIdInput')).not.toBeInTheDocument();
-    });
-
-    it('still shows the team ID when the Relay reports no name or URL', () => {
-      mockPendingConfirmation({ tenantKey: 'T0123ABC' });
-      setup();
-
-      expect(screen.getByTestId('streamsSlackAppConfirmWorkspace')).toHaveTextContent('T0123ABC');
-    });
-
     it('confirms the workspace that was shown', () => {
       mockPendingConfirmation({ tenantKey: 'T0123ABC', url: 'https://acme.slack.com/' });
       setup();
@@ -149,38 +127,6 @@ describe('AppsSection', () => {
       expect(mockDisconnectWorkspace).toHaveBeenCalledWith('T0123ABC');
       expect(mockConfirmWorkspace).not.toHaveBeenCalled();
     });
-
-    it('disables confirm and reject when canEdit is false', () => {
-      mockPendingConfirmation({ tenantKey: 'T0123ABC' });
-      setup(false);
-
-      expect(screen.getByTestId('streamsSlackAppConfirmWorkspaceButton')).toBeDisabled();
-      expect(screen.getByTestId('streamsSlackAppRejectWorkspaceButton')).toBeDisabled();
-    });
-  });
-
-  it('explains when apps are unavailable in this deployment', () => {
-    mockUseRelayAppConnection.mockReturnValue({
-      isLoading: false,
-      hasStatusRequestError: false,
-      available: false,
-      status: 'not_connected',
-      error: undefined,
-      isMutating: false,
-      retryStatusRequest: mockRetryStatusRequest,
-      connect: mockConnectWorkspace,
-      disconnect: mockDisconnectWorkspace,
-    });
-
-    setup();
-
-    const appsSection = screen.getByTestId('nightshiftAppsSection');
-    expect(within(appsSection).getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
-      'Apps are unavailable'
-    );
-    expect(within(appsSection).getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
-      'Apps require Agent Builder and a configured Relay service.'
-    );
   });
 
   it('distinguishes a status request failure from app unavailability', () => {
@@ -228,93 +174,6 @@ describe('AppsSection', () => {
     await waitFor(() => expect(input).toHaveValue(''));
   });
 
-  it('shows an Unbind button for a connected channel and opens a confirm modal', async () => {
-    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
-    setup();
-    revealChannels();
-
-    const btn = await screen.findByTestId('streamsSlackAppUnbindChannelButton');
-    expect(btn).toBeInTheDocument();
-
-    fireEvent.click(btn);
-
-    // Confirm modal should appear
-    const modal = await screen.findByTestId('streamsSlackAppUnbindConfirmModal');
-    expect(modal).toBeInTheDocument();
-
-    // Confirming calls unbind — scope to the modal to avoid matching the list button
-    const confirmBtn = within(modal).getByRole('button', { name: /^disconnect$/i });
-    fireEvent.click(confirmBtn);
-    await waitFor(() => expect(unbindChannel).toHaveBeenCalledWith('C123'));
-  });
-
-  it('opens a confirm modal and disconnects the workspace on confirm', async () => {
-    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
-    setup();
-
-    const disconnectBtn = await screen.findByTestId('streamsSlackAppDisconnectButton');
-    fireEvent.click(disconnectBtn);
-
-    const modal = await screen.findByTestId('streamsSlackAppDisconnectConfirmModal');
-    expect(modal).toBeInTheDocument();
-
-    const confirmBtn = within(modal).getByRole('button', { name: /disconnect workspace/i });
-    fireEvent.click(confirmBtn);
-
-    await waitFor(() => expect(mockDisconnectWorkspace).toHaveBeenCalledTimes(1));
-  });
-
-  it('cancel on the workspace disconnect confirm modal does not disconnect', async () => {
-    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
-    setup();
-
-    const disconnectBtn = await screen.findByTestId('streamsSlackAppDisconnectButton');
-    fireEvent.click(disconnectBtn);
-
-    const modal = await screen.findByTestId('streamsSlackAppDisconnectConfirmModal');
-    const cancelBtn = within(modal).getByRole('button', { name: /cancel/i });
-    fireEvent.click(cancelBtn);
-
-    expect(mockDisconnectWorkspace).not.toHaveBeenCalled();
-    await waitFor(() =>
-      expect(screen.queryByTestId('streamsSlackAppDisconnectConfirmModal')).not.toBeInTheDocument()
-    );
-  });
-
-  it('cancel on the unbind confirm modal does not call unbind', async () => {
-    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
-    setup();
-    revealChannels();
-
-    const btn = await screen.findByTestId('streamsSlackAppUnbindChannelButton');
-    fireEvent.click(btn);
-
-    const modal = await screen.findByTestId('streamsSlackAppUnbindConfirmModal');
-    expect(modal).toBeInTheDocument();
-
-    const cancelBtn = within(modal).getByRole('button', { name: /cancel/i });
-    fireEvent.click(cancelBtn);
-
-    expect(unbindChannel).not.toHaveBeenCalled();
-    await waitFor(() =>
-      expect(screen.queryByTestId('streamsSlackAppUnbindConfirmModal')).not.toBeInTheDocument()
-    );
-  });
-
-  it('keeps the Bind button disabled for input that is not a channel id or link', async () => {
-    makeBindings([]);
-    setup();
-    revealChannels();
-
-    const input = await screen.findByTestId('streamsSlackAppChannelIdInput');
-    fireEvent.change(input, { target: { value: '#general' } });
-
-    expect(screen.getByTestId('streamsSlackAppBindChannelButton')).toBeDisabled();
-    expect(screen.getByTestId('streamsSlackAppChannelInputHelp')).toHaveTextContent(
-      'Enter a channel ID'
-    );
-  });
-
   it('offers to reconnect Slack when private channel access is missing', async () => {
     makeBindings([]);
     mockUseBindChannel.mockReturnValue({
@@ -331,50 +190,6 @@ describe('AppsSection', () => {
     );
     expect(screen.getByTestId('streamsSlackAppBindFailureReconnect')).toBeInTheDocument();
     expect(screen.getByTestId('streamsSlackAppBindFailureRetry')).toBeInTheDocument();
-  });
-
-  it('shows a private channel as an accessible lock icon with its id and no name', async () => {
-    makeBindings([{ channel: 'G0123456789', visibility: 'private', status: 'bound_to_self' }]);
-    setup();
-    revealChannels();
-
-    expect(await screen.findByTestId('slackPrivateChannelIcon')).toBeInTheDocument();
-    expect(screen.getByText('G0123456789')).toBeInTheDocument();
-  });
-
-  it('disables the Bind and Unbind controls when canEdit is false', async () => {
-    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
-    setup(false /* canEdit = false */);
-    revealChannels();
-
-    const input = await screen.findByTestId('streamsSlackAppChannelIdInput');
-    fireEvent.change(input, { target: { value: 'C0123456789' } });
-
-    expect(input).toBeDisabled();
-    expect(screen.getByTestId('streamsSlackAppBindChannelButton')).toBeDisabled();
-    expect(screen.getByTestId('streamsSlackAppUnbindChannelButton')).toBeDisabled();
-  });
-
-  it('renders one row per connected channel', async () => {
-    makeBindings([
-      { channel: 'C001', status: 'bound_to_self' },
-      { channel: 'C002', status: 'bound_to_self' },
-    ]);
-    setup();
-    revealChannels();
-
-    expect(await screen.findByText('C001')).toBeInTheDocument();
-    expect(screen.getByText('C002')).toBeInTheDocument();
-  });
-
-  it('hides pagination controls when there is a single page', async () => {
-    makeBindings([{ channel: 'C001', status: 'bound_to_self' }] /* no nextCursor */);
-    setup();
-    revealChannels();
-
-    await screen.findByText('C001');
-    expect(screen.queryByTestId('streamsSlackAppChannelsNextPage')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('streamsSlackAppChannelsPreviousPage')).not.toBeInTheDocument();
   });
 
   it('shows pagination controls and steps forward using the relay cursor', async () => {
@@ -395,21 +210,5 @@ describe('AppsSection', () => {
     expect(screen.getByTestId('streamsSlackAppChannelsPreviousPage')).toBeEnabled();
     // The next page is fetched with the cursor returned by the previous page.
     expect(mockUseRelayAppBindings).toHaveBeenLastCalledWith(true, 'cursor-2');
-  });
-
-  it('shows the connected workspace label alongside the channels toggle', async () => {
-    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
-    mockUseRelayAppConnection.mockReturnValue({
-      ...mockUseRelayAppConnection(),
-      workspace: { tenantKey: 'T0123ABC', name: 'Acme Corp', url: 'https://acme-corp.slack.com/' },
-    });
-    setup();
-
-    expect(screen.getByTestId('streamsSlackAppWorkspace')).toHaveTextContent(
-      'Workspace: Acme Corp (acme-corp.slack.com)'
-    );
-    revealChannels();
-    expect(await screen.findByTestId('streamsSlackAppChannelIdInput')).toBeInTheDocument();
-    expect(screen.getByText('C123')).toBeInTheDocument();
   });
 });

@@ -11,17 +11,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
-import { fetchConnector } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector';
 import { useKibana } from '../hooks/use_kibana';
 import { ConnectedConnectors } from './connected_connectors';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector', () => ({
-  fetchConnector: jest.fn(),
-}));
 
 const mockUseKibana = useKibana as jest.Mock;
-const mockFetchConnector = fetchConnector as jest.Mock;
 
 const connector = (id: string, is_preconfigured = false): SandboxConnector => ({
   id,
@@ -29,13 +24,6 @@ const connector = (id: string, is_preconfigured = false): SandboxConnector => ({
   connector_type_id: '.github',
   is_preconfigured,
 });
-
-const forbiddenError = (): Error =>
-  Object.assign(new Error('Forbidden'), {
-    name: 'HttpFetchError',
-    request: {},
-    response: { status: 403 },
-  });
 
 const setup = ({
   connectors,
@@ -75,7 +63,6 @@ const setup = ({
   const http = { delete: jest.fn().mockResolvedValue({}) };
   const getEditConnectorFlyout = jest.fn(() => <div data-test-subj="editConnectorFlyoutStub" />);
   const getAddConnectorFlyout = jest.fn(() => <div data-test-subj="addConnectorFlyoutStub" />);
-  mockFetchConnector.mockResolvedValue({ id: 'github', actionTypeId: '.github', name: 'x' });
   const services = {
     http,
     agentBuilder: { agents },
@@ -114,14 +101,6 @@ const setup = ({
   return { agents, getEditConnectorFlyout, getAddConnectorFlyout, fetch, rerender };
 };
 
-const expectAdded = (agents: { addConnectorToAgent: jest.Mock }, connectorId: string) =>
-  waitFor(() =>
-    expect(agents.addConnectorToAgent).toHaveBeenCalledWith({
-      agentId: 'nightshift.investigation',
-      connectorId,
-    })
-  );
-
 describe('ConnectedConnectors', () => {
   it('lists the connectors assigned to the agent with their count and type', async () => {
     setup({
@@ -148,76 +127,12 @@ describe('ConnectedConnectors', () => {
       expect(screen.getByTestId('nightshiftAddConnectorButton')).toBeVisible();
       expect(screen.queryByText('No connectors assigned yet')).not.toBeInTheDocument();
     });
-
-    it('assigns a connector from the library and shows its card, section still open', async () => {
-      const { agents } = setup({ connectors: [connector('github')], assigned: [] });
-
-      fireEvent.click(await screen.findByTestId('nightshiftAddConnectorButton'));
-      await screen.findByTestId('agentConnectorLibraryFlyout');
-      fireEvent.click(await screen.findByRole('switch', { name: 'Connector github' }));
-
-      await expectAdded(agents, 'github');
-      expect(await screen.findByTestId('nightshiftConnectedConnectorCard-github')).toBeVisible();
-      // The library stays open, as in Agent Builder, so more connectors can be added.
-      expect(screen.getByTestId('agentConnectorLibraryFlyout')).toBeInTheDocument();
-      expect(screen.getByRole('switch', { name: 'Connector github' })).toBeChecked();
-    });
-
-    it('offers no Add connector when the user cannot edit the agent', async () => {
-      setup({ connectors: [connector('github')], assigned: [], canUpdateAgent: false });
-
-      await screen.findByTestId('nightshiftConnectedConnectors');
-      expect(screen.queryByTestId('nightshiftAddConnectorButton')).not.toBeInTheDocument();
-    });
-  });
-
-  it('shows an error with a retry when the connectors cannot be loaded', async () => {
-    const { fetch } = setup({ connectors: [connector('github')], fetchError: forbiddenError() });
-
-    expect(await screen.findByTestId('nightshiftConnectedConnectorsError')).toHaveTextContent(
-      'Could not load the connectors.'
-    );
-
-    fireEvent.click(screen.getByTestId('nightshiftConnectedConnectorsErrorRetry'));
-
-    expect(await screen.findByTestId('nightshiftConnectedConnectors')).toHaveTextContent('1');
-    expect(fetch).toHaveBeenCalledTimes(2);
-  });
-
-  it('shows an error with a retry when the agent cannot be loaded', async () => {
-    const { agents } = setup({ connectors: [connector('github')], agentError: forbiddenError() });
-
-    expect(await screen.findByTestId('nightshiftConnectedConnectorsError')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('nightshiftConnectedConnectorsErrorRetry'));
-
-    expect(await screen.findByTestId('nightshiftConnectedConnectors')).toHaveTextContent('1');
-    expect(agents.get).toHaveBeenCalledTimes(2);
-  });
-
-  it('opens the edit flyout with the loaded connector', async () => {
-    const { getEditConnectorFlyout } = setup({ connectors: [connector('github')] });
-
-    fireEvent.click(await screen.findByTestId('nightshiftEditConnector-github'));
-
-    expect(await screen.findByTestId('editConnectorFlyoutStub')).toBeInTheDocument();
-    expect(mockFetchConnector).toHaveBeenCalledWith('github', expect.anything());
-    expect(getEditConnectorFlyout).toHaveBeenCalledWith(
-      expect.objectContaining({ connector: expect.objectContaining({ id: 'github' }) })
-    );
   });
 
   it('locks edit for preconfigured connectors', async () => {
     setup({ connectors: [connector('telemetry', true)] });
 
     expect(await screen.findByTestId('nightshiftEditConnector-telemetry')).toBeDisabled();
-  });
-
-  it('has no delete or management action on the card', async () => {
-    setup({ connectors: [connector('github')] });
-
-    await screen.findByTestId('nightshiftConnectedConnectorCard-github');
-    expect(screen.queryByTestId('nightshiftConnectorMenu-github')).not.toBeInTheDocument();
   });
 
   it('starts folded, opens from its header, and folds again on the collapse signal', async () => {

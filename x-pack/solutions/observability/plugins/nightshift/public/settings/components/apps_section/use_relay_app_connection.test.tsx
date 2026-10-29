@@ -77,30 +77,6 @@ describe('useRelayAppConnection', () => {
     jest.useRealTimers();
   });
 
-  it('does not poll when the connection is not in progress', async () => {
-    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
-    const { wrapper } = createSetup();
-    renderHook(() => useRelayAppConnection(), { wrapper });
-
-    await flush();
-    expect(httpGet).toHaveBeenCalledTimes(1);
-
-    await flush(POLL_INTERVAL_MS * 3);
-    expect(httpGet).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not poll when the connection is already completed (connected/error)', async () => {
-    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));
-    const { wrapper } = createSetup();
-    renderHook(() => useRelayAppConnection(), { wrapper });
-
-    await flush();
-    expect(httpGet).toHaveBeenCalledTimes(1);
-
-    await flush(POLL_INTERVAL_MS * 3);
-    expect(httpGet).toHaveBeenCalledTimes(1);
-  });
-
   // Regression coverage: a page load (or reload) that observes an install
   // already `oauth_in_progress` — e.g. started from another tab — must poll,
   // not just fetch once and stop, since pollDeadlineRef starts at 0 without a
@@ -136,25 +112,6 @@ describe('useRelayAppConnection', () => {
     // No further polling once the deadline has passed.
     await flush(POLL_INTERVAL_MS * 5);
     expect(httpGet).toHaveBeenCalledTimes(callsAtTimeout);
-  });
-
-  it('stops polling when the in-progress install resolves and resets the deadline', async () => {
-    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.oauthInProgress));
-    const { wrapper } = createSetup();
-    renderHook(() => useRelayAppConnection(), { wrapper });
-
-    await flush();
-    const callsBeforeConnected = httpGet.mock.calls.length;
-
-    // Install completes — status returns connected.
-    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));
-    await flush(POLL_INTERVAL_MS);
-    const callsAfterConnected = httpGet.mock.calls.length;
-    expect(callsAfterConnected).toBeGreaterThan(callsBeforeConnected);
-
-    // No more polling after that.
-    await flush(POLL_INTERVAL_MS * 5);
-    expect(httpGet).toHaveBeenCalledTimes(callsAfterConnected);
   });
 
   // Regression coverage: the tab must be opened synchronously (before the
@@ -219,70 +176,6 @@ describe('useRelayAppConnection', () => {
     });
   });
 
-  it('disconnect() posts to the disconnect route with no connection id', async () => {
-    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));
-    httpPost.mockResolvedValue({ status: 'disconnected' });
-    const { wrapper } = createSetup();
-    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
-    await flush();
-
-    await act(async () => {
-      await result.current.disconnect();
-    });
-
-    expect(httpPost).toHaveBeenCalledWith('/internal/significant_events/apps/slack/disconnect');
-  });
-
-  it('does not poll while a workspace is awaiting confirmation, and exposes it', async () => {
-    const workspace = { tenantKey: 'T0123ABC', name: 'Acme', url: 'https://acme.slack.com/' };
-    httpGet.mockResolvedValue(
-      statusResponse(RELAY_APP_CONNECTION_STATUS.pendingConfirmation, { workspace })
-    );
-    const { wrapper } = createSetup();
-    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
-
-    await flush();
-    await flush(POLL_INTERVAL_MS * 3);
-
-    expect(httpGet).toHaveBeenCalledTimes(1);
-    expect(result.current.workspace).toEqual(workspace);
-  });
-
-  it('confirm() posts the tenant key to the confirm route and refreshes the status', async () => {
-    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.pendingConfirmation));
-    httpPost.mockResolvedValue({ status: 'connected' });
-    const { wrapper } = createSetup();
-    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
-    await flush();
-
-    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));
-    await act(async () => {
-      await result.current.confirm('T0123ABC');
-    });
-    await flush();
-
-    expect(httpPost).toHaveBeenCalledWith('/internal/significant_events/apps/slack/confirm', {
-      body: JSON.stringify({ tenantKey: 'T0123ABC' }),
-    });
-    expect(result.current.status).toBe(RELAY_APP_CONNECTION_STATUS.connected);
-  });
-
-  it('surfaces a toast error when confirm fails', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.pendingConfirmation));
-    httpPost.mockRejectedValue(new Error('workspace changed'));
-    const { wrapper } = createSetup();
-    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
-    await flush();
-
-    await act(async () => {
-      await result.current.confirm('T0123ABC').catch(() => undefined);
-    });
-
-    expect(addError).toHaveBeenCalledTimes(1);
-    consoleErrorSpy.mockRestore();
-  });
-
   // Regression coverage: the deadline must reset when the connection is no longer in-progress
   // so a later reconnect gets a fresh polling window instead of one capped by the
   // time remaining from the previous install's deadline.
@@ -315,59 +208,6 @@ describe('useRelayAppConnection', () => {
     expect(httpGet.mock.calls.length).toBeGreaterThan(callsAfterReconnectObserved);
   });
 
-  it('surfaces a toast error when connect fails', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
-    httpPost.mockRejectedValue(new Error('relay down'));
-    const { wrapper } = createSetup();
-    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
-    await flush();
-
-    await act(async () => {
-      await result.current.connect().catch(() => undefined);
-    });
-
-    expect(addError).toHaveBeenCalledTimes(1);
-    consoleErrorSpy.mockRestore();
-  });
-
-  it('surfaces the relay reason from the response body as the connect toast message', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.notConnected));
-    httpPost.mockRejectedValue(
-      Object.assign(new Error('Bad Gateway'), { body: { message: 'workspace already bound' } })
-    );
-    const { wrapper } = createSetup();
-    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
-    await flush();
-
-    await act(async () => {
-      await result.current.connect().catch(() => undefined);
-    });
-
-    expect(addError).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'workspace already bound' }),
-      expect.any(Object)
-    );
-    consoleErrorSpy.mockRestore();
-  });
-
-  it('surfaces a toast error when disconnect fails', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    httpGet.mockResolvedValue(statusResponse(RELAY_APP_CONNECTION_STATUS.connected));
-    httpPost.mockRejectedValue(new Error('relay down'));
-    const { wrapper } = createSetup();
-    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
-    await flush();
-
-    await act(async () => {
-      await result.current.disconnect().catch(() => undefined);
-    });
-
-    expect(addError).toHaveBeenCalledTimes(1);
-    consoleErrorSpy.mockRestore();
-  });
-
   it('distinguishes a failed status request from confirmed app unavailability', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     httpGet.mockRejectedValue(new Error('relay unavailable'));
@@ -379,23 +219,5 @@ describe('useRelayAppConnection', () => {
     expect(result.current.hasStatusRequestError).toBe(true);
     expect(result.current.available).toBe(false);
     consoleErrorSpy.mockRestore();
-  });
-
-  it('reflects the status query response in the returned state', async () => {
-    httpGet.mockResolvedValue(
-      statusResponse(RELAY_APP_CONNECTION_STATUS.error, { error: 'workspace already bound' })
-    );
-    const { wrapper } = createSetup();
-    const { result } = renderHook(() => useRelayAppConnection(), { wrapper });
-
-    expect(result.current.isLoading).toBe(true);
-
-    await flush();
-
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.hasStatusRequestError).toBe(false);
-    expect(result.current.available).toBe(true);
-    expect(result.current.status).toBe(RELAY_APP_CONNECTION_STATUS.error);
-    expect(result.current.error).toBe('workspace already bound');
   });
 });

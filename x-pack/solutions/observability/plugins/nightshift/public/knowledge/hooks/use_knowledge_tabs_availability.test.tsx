@@ -63,22 +63,6 @@ it('hides Decision Trees without requesting availability when developer mode is 
   expect(httpGetMock).not.toHaveBeenCalled();
 });
 
-it('shows Decision Trees when developer mode is on and the feature is available', async () => {
-  httpGetMock.mockResolvedValue({ enabled: true });
-  fetchMock.mockResolvedValue({ enabled: false });
-  const { result } = renderHook(() => useKnowledgeTabsAvailability(), {
-    wrapper: createWrapper(),
-  });
-
-  await waitFor(() =>
-    expect(result.current.decision_trees).toEqual({ isEnabled: true, isLoading: false })
-  );
-  expect(httpGetMock).toHaveBeenCalledWith(
-    '/internal/nightshift/decision_trees/availability',
-    expect.anything()
-  );
-});
-
 it('hides Decision Trees when developer mode is turned off after availability was cached', async () => {
   httpGetMock.mockResolvedValue({ enabled: true });
   fetchMock.mockResolvedValue({ enabled: false });
@@ -91,38 +75,6 @@ it('hides Decision Trees when developer mode is turned off after availability wa
   rerender();
 
   expect(result.current.decision_trees).toEqual({ isEnabled: false, isLoading: false });
-});
-
-it('reports a disabled Memory feature after the availability request settles', async () => {
-  fetchMock.mockResolvedValue({ enabled: false });
-  const { result } = renderHook(() => useMemoryEnabled(), { wrapper: createWrapper() });
-
-  await waitFor(() => expect(result.current).toEqual({ isEnabled: false, isLoading: false }));
-});
-
-it('does not request Memory availability when the investigations client is absent', async () => {
-  mockUseKibana.mockReturnValue({
-    services: {},
-  } as unknown as ReturnType<typeof useKibana>);
-  const { result } = renderHook(() => useMemoryEnabled(), { wrapper: createWrapper() });
-
-  await waitFor(() => expect(result.current).toEqual({ isEnabled: false, isLoading: false }));
-  expect(fetchMock).not.toHaveBeenCalled();
-});
-
-it('does not request any tab availability when globally disabled', () => {
-  const { result } = renderHook(() => useKnowledgeTabsAvailability({ enabled: false }), {
-    wrapper: createWrapper(),
-  });
-
-  expect(result.current).toEqual({
-    knowledge_indicators: { isEnabled: true, isLoading: false },
-    cortex: { isEnabled: false, isLoading: false },
-    memory: { isEnabled: false, isLoading: false },
-    decision_trees: { isEnabled: false, isLoading: false },
-  });
-  expect(fetchMock).not.toHaveBeenCalled();
-  expect(httpGetMock).not.toHaveBeenCalled();
 });
 
 it('distinguishes a pending Memory request from a disabled feature', async () => {

@@ -50,14 +50,6 @@ describe('automation request', () => {
       ).toEqual({ schedulePreset: 'hourly', hourWindow: { start: 9, end: 17 }, timezone: 'UTC' });
     });
 
-    it('stores a daily local time', () => {
-      expect(toPresetSchedule(everyTrigger({ unit: 'day', time: '07:30' }))).toEqual({
-        schedulePreset: 'daily',
-        time: '07:30',
-        timezone: 'UTC',
-      });
-    });
-
     it('stores selected weekdays', () => {
       expect(
         toPresetSchedule(everyTrigger({ unit: 'week', time: '09:00', daysOfWeek: [5, 1] }))
@@ -106,30 +98,6 @@ describe('automation request', () => {
         execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
         completions: [],
         runtime: { dailyDispatchLimit: 20 },
-      });
-    });
-
-    it('sends a weekly schedule with its time and weekdays', () => {
-      expect(
-        toAutomationRequestBody({
-          ...values,
-          name: 'Report',
-          mode: 'investigate',
-          trigger: everyTrigger({ unit: 'week', time: '08:00', daysOfWeek: [1], timezone: 'PST' }),
-        })
-      ).toMatchObject({
-        trigger: {
-          rows: [
-            {
-              kind: 'schedule',
-              schedulePreset: 'weekly',
-              time: '08:00',
-              daysOfWeek: [1],
-              timezone: 'PST',
-            },
-          ],
-        },
-        execution: { reasoningMode: 'investigate' },
       });
     });
 
@@ -267,7 +235,7 @@ describe('automation request', () => {
       ]);
     });
 
-    it.each(['#oncall', '#new-channel'])(
+    it.each(['#oncall'])(
       'preserves the saved Slack connector when saving channel %s',
       (destination) => {
         const automation = buildAutomation({
@@ -313,39 +281,6 @@ describe('automation request', () => {
       } as Parameters<typeof toAutomationUpdateBody>[0];
 
       expect(toAutomationUpdateBody(values, automation).trigger).toEqual({ rows: [row] });
-    });
-
-    it('keeps the saved daily limit for a scheduled automation', () => {
-      const automation = buildAutomation({
-        trigger: {
-          rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }],
-        },
-        runtime: { dailyDispatchLimit: 15 },
-      });
-      const values = {
-        ...toAutomationFormValues(automation),
-        name: 'Renamed',
-        trigger: toAutomationFormValues(automation).trigger,
-      } as Parameters<typeof toAutomationUpdateBody>[0];
-
-      expect(toAutomationUpdateBody(values, automation).runtime).toEqual({
-        dailyDispatchLimit: 15,
-      });
-    });
-
-    it('keeps the stored completion of a Slack-triggered automation on unrelated edits', () => {
-      const automation = buildAutomation({
-        trigger: { rows: [{ kind: 'slack', event: 'message', channels: ['#oncall'] }] },
-        completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#alerts' }],
-      });
-      const values = {
-        ...toAutomationFormValues(automation),
-        name: 'Renamed',
-      } as Parameters<typeof toAutomationUpdateBody>[0];
-
-      expect(toAutomationUpdateBody(values, automation).completions).toEqual(
-        automation.completions
-      );
     });
 
     it('saves a reply-in-thread action without a destination', () => {

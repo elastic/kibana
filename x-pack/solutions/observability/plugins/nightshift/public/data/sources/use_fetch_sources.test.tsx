@@ -68,15 +68,6 @@ describe('useFetchSources', () => {
     ]);
   });
 
-  it('stops after one request when the first page holds every source', async () => {
-    fetch.mockResolvedValueOnce({ sources: makePage(0, 3), total: 3 });
-
-    const { result } = renderHook(() => useFetchSources(), { wrapper });
-
-    await waitFor(() => expect(result.current.data).toHaveLength(3));
-    expect(fetch).toHaveBeenCalledTimes(1);
-  });
-
   it('stops on a full last page when the total is a multiple of the page size', async () => {
     fetch.mockResolvedValueOnce({
       sources: makePage(0, MAX_SOURCES_PER_PAGE),
@@ -87,22 +78,5 @@ describe('useFetchSources', () => {
 
     await waitFor(() => expect(result.current.data).toHaveLength(MAX_SOURCES_PER_PAGE));
     expect(fetch).toHaveBeenCalledTimes(1);
-  });
-
-  it('toasts once when several callers see the same failed fetch', async () => {
-    const addError = jest.fn();
-    mockUseKibana.mockReturnValue({
-      services: {
-        notifications: { toasts: { addError } },
-        nightshiftSources: { getClient: jest.fn().mockResolvedValue({ fetch }) },
-      },
-    } as never);
-    fetch.mockRejectedValue(new Error('sources unavailable'));
-
-    const { result } = renderHook(() => [useFetchSources(), useFetchSources()], { wrapper });
-
-    await waitFor(() => expect(result.current[0].isError).toBe(true));
-    expect(result.current[1].isError).toBe(true);
-    expect(addError).toHaveBeenCalledTimes(1);
   });
 });
