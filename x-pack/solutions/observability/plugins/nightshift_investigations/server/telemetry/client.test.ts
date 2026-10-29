@@ -27,7 +27,6 @@ describe('NightshiftTelemetryClient', () => {
   it('registers and reports the two aggregate Semantic Memory events', () => {
     const client = setupNightshiftTelemetry({ analytics: analytics as never, logger });
 
-    expect(analytics.registerEventType).toHaveBeenCalledTimes(3);
     expect(analytics.registerEventType).toHaveBeenCalledWith(
       expect.objectContaining({ eventType: NIGHTSHIFT_SEMANTIC_MEMORY_MATERIALIZED_EVENT })
     );

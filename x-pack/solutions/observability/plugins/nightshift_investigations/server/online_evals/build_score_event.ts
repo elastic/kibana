@@ -120,6 +120,7 @@ export const buildOnlineEvalScoreEvent = ({
 }): OnlineEvalScoreEvent => {
   const errors = toErrors(results);
   const skippedCount = errors.filter(({ code }) => code === 'evidence_unmet').length;
+  // Online evals run every judge on one fixed model, so one value covers the event.
   const judgeModel = results.find(({ evaluator }) => evaluator.model)?.evaluator.model?.id;
 
   return fitToSizeLimit({
