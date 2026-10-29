@@ -10,4 +10,9 @@ import { EuiFlexItem } from '@elastic/eui';
 
 export const SideBarColumn = styled(EuiFlexItem)`
   max-width: 160px;
+
+  // Matches the fixed width of the header icon panel so content never slides under it
+  @media (min-width: 768px) {
+    flex: 0 0 160px;
+  }
 `;
