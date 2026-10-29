@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { EpisodeDataSource } from '../types/episode_data_source';
@@ -44,5 +45,7 @@ export const useConditionFieldNames = ({
     refetchOnWindowFocus: false,
   });
 
-  return { fieldNames: data ?? [], isLoading: fetchSearchFields != null && isLoading };
+  const fieldNames = useMemo(() => data ?? [], [data]);
+
+  return { fieldNames, isLoading: fetchSearchFields != null && isLoading };
 };
