@@ -55,6 +55,8 @@ export const useRuleChangeHistoryModal = ({
   const queryClient = useQueryClient();
   const adapter = createRuleChangeHistoryAdapter(api, {
     onRestored: (rule) => {
+      // Keeps the open modal's title in sync with the restored rule's name.
+      setTarget((current) => current && { ...current, name: rule.metadata.name });
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.ruleChangeHistory.restoreSuccessToast', {
           defaultMessage: 'Rule "{ruleName}" restored as version {version}',

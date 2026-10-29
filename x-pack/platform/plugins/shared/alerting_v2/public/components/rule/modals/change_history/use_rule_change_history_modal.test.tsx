@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import type { ChangeHistoryAdapter } from '@kbn/change-history-ui';
 import { ruleKeys } from '../../../../hooks/query_key_factory';
 import { useRuleChangeHistoryModal } from './use_rule_change_history_modal';
@@ -177,5 +177,22 @@ describe('useRuleChangeHistoryModal', () => {
     expect(mockNotificationsStub.toasts.addSuccess).toHaveBeenCalledWith(
       'Rule "Rule A" restored as version 4'
     );
+  });
+
+  it('retitles the open modal with the restored rule name', async () => {
+    mockApiStub.restoreRuleChange.mockResolvedValueOnce({
+      id: 'a',
+      version: 4,
+      metadata: { name: 'Rule A before rename' },
+    });
+    render(<Harness canRestore />);
+
+    fireEvent.click(screen.getByTestId('openA'));
+    await act(() =>
+      lastProviderRender().adapter.restoreChange?.({ objectId: 'a', changeId: 'evt-1' })
+    );
+
+    expect(lastProviderRender().ruleName).toBe('Rule A before rename');
+    expect(mockOpenModal).toHaveBeenCalledTimes(1);
   });
 });
