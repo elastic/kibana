@@ -16,6 +16,7 @@ import {
   DELETE_SOURCE_ACTION_DESCRIPTION,
   DELETE_SOURCE_ACTION_LABEL,
   ENABLE_SOURCE_TO_ONBOARD_TOOLTIP,
+  ONBOARDING_STARTING_TOOLTIP,
   RUN_SOURCE_ONBOARDING_BUTTON_LABEL,
   STOP_SOURCE_ONBOARDING_BUTTON_LABEL,
 } from './translations';
@@ -26,7 +27,7 @@ interface SourceActionsColumnProps {
   onboardingStatus?: SignificantEventsWorkflowStatusResult['status'];
   /** Global pause or unknown activity status: onboarding cannot start. */
   blocksActivity: boolean;
-  /** Schedule accepted or in flight; the row stays disabled until that fails or status takes over. */
+  /** Run expected but not reported yet: a schedule in flight or a just-created or edited source. */
   isOnboardPending: boolean;
   onboardTooltip: string;
   onOnboard: (sourceId: string) => void;
@@ -55,6 +56,11 @@ export function SourceActionsColumn({
     setIsStopPending(false);
   }
 
+  const isRunActive = isOnboardingInProgress(onboardingStatus);
+  // Pending covers the gap before status reports the run, e.g. a just-created source whose run the
+  // server has not started yet. There is nothing to cancel then, so Stop shows but stays disabled.
+  const isRunStarting = isOnboardPending && !isRunActive;
+
   const handleStopOnboarding = async () => {
     setIsStopPending(true);
     try {
@@ -73,14 +79,21 @@ export function SourceActionsColumn({
       wrap={false}
     >
       <EuiFlexItem grow={false}>
-        {isOnboardingInProgress(onboardingStatus) ? (
-          <EuiToolTip content={STOP_SOURCE_ONBOARDING_BUTTON_LABEL} disableScreenReaderOutput>
+        {isRunActive || isRunStarting ? (
+          <EuiToolTip
+            content={
+              isRunStarting ? ONBOARDING_STARTING_TOOLTIP : STOP_SOURCE_ONBOARDING_BUTTON_LABEL
+            }
+            disableScreenReaderOutput
+          >
             <EuiButtonIcon
               data-test-subj="significantEventsAppSourcesTableStopButton"
               iconType="stop"
               aria-label={STOP_SOURCE_ONBOARDING_BUTTON_LABEL}
               isDisabled={
-                isStopPending || onboardingStatus === SignificantEventsWorkflowStatus.BeingCanceled
+                isRunStarting ||
+                isStopPending ||
+                onboardingStatus === SignificantEventsWorkflowStatus.BeingCanceled
               }
               onClick={() => {
                 void handleStopOnboarding();
@@ -93,9 +106,8 @@ export function SourceActionsColumn({
               data-test-subj="significantEventsAppSourcesTableOnboardButton"
               iconType="radar"
               aria-label={RUN_SOURCE_ONBOARDING_BUTTON_LABEL}
-              // The onboarding route rejects disabled sources. Pending covers the gap before status
-              // reports in progress, including a schedule that has been accepted but not polled yet.
-              isDisabled={!source.enabled || blocksActivity || isOnboardPending}
+              // The onboarding route rejects disabled sources.
+              isDisabled={!source.enabled || blocksActivity}
               onClick={() => onOnboard(source.id)}
             />
           </EuiToolTip>

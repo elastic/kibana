@@ -98,6 +98,9 @@ describe('floor_alert_triage — the scheduled sweep', () => {
         expect.objectContaining({
           budget_per_hour: '${{ consts.worker_settings.extras.budgetPerHour }}',
           lookback_hours: '${{ consts.worker_settings.extras.lookbackHours }}',
+          min_severity: '${{ consts.worker_settings.extras.minSeverity }}',
+          exclude_building_blocks: '${{ consts.worker_settings.extras.excludeBuildingBlocks }}',
+          excluded_rule_tags: '${{ consts.worker_settings.extras.excludedRuleTags }}',
           interval_minutes: '${{ consts.schedule_interval_minutes }}',
           headroom: '${{ steps.read_headroom.output }}',
         })

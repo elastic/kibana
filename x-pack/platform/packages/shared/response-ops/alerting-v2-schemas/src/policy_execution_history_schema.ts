@@ -81,7 +81,7 @@ export const listPolicyExecutionHistoryRequestSchema = lazySchema(() =>
       from: isoDateTime()
         .optional()
         .describe(
-          'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.'
+          'Inclusive ISO datetime lower bound on the event timestamp. Defaults to 24 hours before `to`, or before the request when `to` is omitted. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.'
         ),
       to: isoDateTime()
         .optional()
@@ -176,15 +176,23 @@ export const policyExecutionHistoryItemSchema = lazySchema(() =>
         .optional()
         .describe('Failure details. Omitted when the dispatch did not fail.'),
     })
-    .meta({ id: 'alerting_policy_execution_history_item' })
+    .meta({ id: 'alerting_action_policy_execution_history_item' })
 );
 
 export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;
 
 export const searchMatchCountsSchema = lazySchema(() =>
   z.object({
-    policies: z.number().describe(`Policies matching the search. ${ESTIMATED_COUNT_NOTE}`),
-    rules: z.number().describe(`Rules matching the search. ${ESTIMATED_COUNT_NOTE}`),
+    policy_count: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe(`The number of action policies matching the search. ${ESTIMATED_COUNT_NOTE}`),
+    rule_count: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe(`The number of rules matching the search. ${ESTIMATED_COUNT_NOTE}`),
     is_truncated: z
       .boolean()
       .describe('True when the server filter cap was reached and results may be truncated.'),
@@ -209,7 +217,7 @@ export const listPolicyExecutionHistoryResponseSchema = lazySchema(() =>
           'Per-type match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.'
         ),
     })
-    .meta({ id: 'alerting_policy_execution_history_response' })
+    .meta({ id: 'alerting_action_policy_execution_history_response' })
 );
 
 export type ListPolicyExecutionHistoryResponse = z.infer<

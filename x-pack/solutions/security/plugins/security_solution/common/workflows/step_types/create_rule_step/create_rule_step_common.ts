@@ -29,7 +29,8 @@ export const createRuleStepCommonDefinition: BaseStepDefinition<
     defaultMessage: 'Create Detection Rule',
   }),
   description: i18n.translate('xpack.securitySolution.workflows.steps.createRule.description', {
-    defaultMessage: 'Create a new, disabled detection rule from a rule object.',
+    defaultMessage:
+      'Create a new detection rule from a rule object, disabled unless "rule.enabled" is true.',
   }),
   category: StepCategory.KibanaSecurity,
   inputSchema: createRuleInputSchema,
@@ -39,7 +40,7 @@ export const createRuleStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.createRule.documentation.details',
       {
         defaultMessage:
-          'Creates a detection rule in current space via Create Detection Rule API endpoint. The rule object is passed under the "rule" property and must match the request body of that endpoint; see: https://www.elastic.co/docs/api/doc/kibana/operation/operation-createrule for the fields of each rule type. The rule is always created disabled, so "rule.enabled" is ignored. Add a "security.enableRule" step to activate it.',
+          'Creates a detection rule in current space via Create Detection Rule API endpoint. The rule object is passed under the "rule" property and must match the request body of that endpoint; see: https://www.elastic.co/docs/api/doc/kibana/operation/operation-createrule for the fields of each rule type. The rule is created disabled unless "rule.enabled" is true, in which case it starts running on its schedule as the user who ran the workflow.',
       }
     ),
     examples: [
@@ -56,6 +57,21 @@ export const createRuleStepCommonDefinition: BaseStepDefinition<
       query: FROM logs-endpoint.events.process-* | WHERE process.name == "powershell.exe"
       severity: high
       risk_score: 73
+\`\`\``,
+      `## Create an ES|QL rule that starts running right away
+\`\`\`yaml
+- name: create_enabled_rule
+  type: security.createRule
+  with:
+    rule:
+      type: esql
+      language: esql
+      name: Suspicious PowerShell Execution
+      description: Detects suspicious PowerShell activity
+      query: FROM logs-endpoint.events.process-* | WHERE process.name == "powershell.exe"
+      severity: high
+      risk_score: 73
+      enabled: true
 \`\`\``,
     ],
   },

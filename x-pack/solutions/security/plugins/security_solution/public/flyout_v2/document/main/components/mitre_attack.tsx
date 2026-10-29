@@ -11,6 +11,7 @@ import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { THREAT_FIELD_LABEL } from '../../../../detection_engine/rule_management/components/rule_details/translations';
 import { buildThreatDescription } from '../../../../detection_engine/rule_creation_ui/components/description_step/helpers';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 
@@ -28,7 +29,7 @@ const getMitreComponentParts = (hit: DataTableRecord) => {
 
   const threats: Threats = Array.isArray(threat) ? (threat as Threats) : ([threat] as Threats);
   return buildThreatDescription({
-    label: threats[0].framework,
+    label: THREAT_FIELD_LABEL,
     threat: threats,
   });
 };
@@ -41,7 +42,7 @@ export interface MitreAttackProps {
 }
 
 /**
- * Displays MITRE ATT&CK tactics and techniques extracted from the alert rule parameters.
+ * Displays threat mappings (MITRE ATT&CK, MITRE ATLAS) extracted from the alert rule parameters.
  * Returns null when no threat data is available.
  */
 export const MitreAttack: FC<MitreAttackProps> = ({ hit }) => {

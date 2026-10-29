@@ -26,6 +26,29 @@ import { useKibana } from '../../hooks/use_kibana';
 import { SectionHeader } from '../flyouts/form/section_header';
 import { RunStatusIndicator, type Run } from './run_history';
 
+const getSkipReasonDescription = ({ skipReason, dailyLimit }: Run) => {
+  if (skipReason === 'investigation_limit') {
+    return i18n.translate('xpack.nightshift.automations.detail.investigationLimitReason', {
+      defaultMessage:
+        'The deployment-wide investigation limit was already reached, so this trigger did not start a run.',
+    });
+  }
+  if (skipReason === 'daily_limit') {
+    return i18n.translate('xpack.nightshift.automations.detail.dailyLimitReason', {
+      defaultMessage:
+        'Daily trigger limit of {limit} was already reached, so this trigger did not start a run.',
+      values: { limit: dailyLimit ?? '—' },
+    });
+  }
+  if (skipReason === 'no_open_investigation') {
+    return i18n.translate('xpack.nightshift.automations.detail.noOpenInvestigationReason', {
+      defaultMessage:
+        'The alert recovered, but no open investigation holds it, so there was nothing to follow up on.',
+    });
+  }
+  return '—';
+};
+
 const labels = {
   automationRun: i18n.translate('xpack.nightshift.automations.detail.automationRun', {
     defaultMessage: 'Automation run',
@@ -131,14 +154,7 @@ export const RunDetail = ({
                 { title: labels.message, description: run.message ?? '—' },
                 {
                   title: labels.reason,
-                  description:
-                    run.skipReason === 'daily_limit'
-                      ? i18n.translate('xpack.nightshift.automations.detail.dailyLimitReason', {
-                          defaultMessage:
-                            'Daily trigger limit of {limit} was already reached, so this trigger did not start a run.',
-                          values: { limit: run.dailyLimit ?? '—' },
-                        })
-                      : '—',
+                  description: getSkipReasonDescription(run),
                 },
                 { title: labels.automation, description: automationName },
               ]}

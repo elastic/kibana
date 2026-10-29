@@ -5,34 +5,42 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTitle, EuiCodeBlock } from '@elastic/eui';
+import { EuiCodeBlock } from '@elastic/eui';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
+import type { ReactElement } from 'react';
+import React, { useMemo } from 'react';
 import type { Span } from '../../../../typings/es_schemas/ui/span';
 
-interface Props {
-  spanDb?: NonNullable<Span['span']>['db'];
-}
+const DATABASE_STATEMENT_TITLE = i18n.translate(
+  'xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle',
+  { defaultMessage: 'Database statement' }
+);
 
-export function SpanDatabase({ spanDb }: Props) {
-  if (!spanDb || !spanDb.statement) {
-    return null;
-  }
+/**
+ * Resolves the database statement as a `Body.Section` for directly under `Body`, where it renders
+ * above the tab panels and stays mounted on every tab.
+ */
+export function useSpanDatabaseSection(
+  spanDb?: NonNullable<Span['span']>['db']
+): ReactElement | null {
+  const statement = spanDb?.statement || undefined;
 
-  return (
-    <Fragment>
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle', {
-            defaultMessage: 'Database statement',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiCodeBlock language="sql" fontSize="m" paddingSize="m" overflowHeight={150}>
-        {spanDb.statement}
-      </EuiCodeBlock>
-      <EuiSpacer size="m" />
-    </Fragment>
-  );
+  return useMemo(() => {
+    if (!statement) {
+      return null;
+    }
+
+    return (
+      <FlyoutTemplate.Body.Section
+        id="databaseStatement"
+        title={DATABASE_STATEMENT_TITLE}
+        data-test-subj="spanFlyoutDatabaseSection"
+      >
+        <EuiCodeBlock language="sql" fontSize="m" paddingSize="m" overflowHeight={150}>
+          {statement}
+        </EuiCodeBlock>
+      </FlyoutTemplate.Body.Section>
+    );
+  }, [statement]);
 }

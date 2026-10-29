@@ -83,6 +83,7 @@ export const createConnectorTypeFromSpec = (
 
   const executor = hasExecutableActions
     ? generateExecutorFunction({
+        connectorTypeId: spec.metadata.id,
         actions: executableActions,
         getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
         getCredential: actions.getCredential,

@@ -27,7 +27,7 @@ export const getCanvasSearchPath = (
     { ...defaultCanvasUrlState, query },
     { useHash: false, storeInHashQuery: false },
     streamsAppRouter.link('/new-experience/{tab}', {
-      path: { tab: 'canvas' },
+      path: { tab: 'map' },
       query: { rangeFrom, rangeTo },
     })
   );

@@ -330,6 +330,7 @@ export const validateCaseExtendedFields = async ({
   fieldDefinitionsService,
   owner,
   partial = false,
+  touchedKeys,
   preResolvedTemplateFields,
   fieldDefinitions: preloadedFieldDefinitions,
 }: {
@@ -344,6 +345,11 @@ export const validateCaseExtendedFields = async ({
   /** Pass `true` for update paths where only a subset of fields may be present. */
   partial?: boolean;
   /**
+   * When set, `extendedFields` is the full post-merge map (so field conditions see stored
+   * values) and only these keys are validated.
+   */
+  touchedKeys?: ReadonlySet<string>;
+  /**
    * The template's already-resolved inline fields, when the caller fetched and parsed the
    * template earlier in the same request (e.g. server-side template expansion on create) —
    * skips a duplicate SO fetch + parse.
@@ -357,7 +363,10 @@ export const validateCaseExtendedFields = async ({
   if (!templateId) {
     // No template — only global field keys are permitted. validateExtendedFields reports any
     // other key as unknown, pointing at the exact key to use where one can be derived.
-    const globalErrors = validateExtendedFields(extendedFields, globalFields, { partial });
+    const globalErrors = validateExtendedFields(extendedFields, globalFields, {
+      partial,
+      touchedKeys,
+    });
     if (globalErrors.length) {
       throw Boom.badRequest(`Invalid extended_fields: ${globalErrors.join('; ')}`);
     }
@@ -409,6 +418,7 @@ export const validateCaseExtendedFields = async ({
   const templateErrors = validateExtendedFields(templateOnlyFields, templateNonGlobalFields, {
     partial,
     hintFields: globalFields,
+    touchedKeys,
   });
   if (templateErrors.length) {
     throw Boom.badRequest(`Invalid extended_fields: ${templateErrors.join('; ')}`);
@@ -420,7 +430,10 @@ export const validateCaseExtendedFields = async ({
   const globalOnlyFields = Object.fromEntries(
     Object.entries(extendedFields).filter(([k]) => globalKeySet.has(k))
   );
-  const globalErrors = validateExtendedFields(globalOnlyFields, globalFields, { partial });
+  const globalErrors = validateExtendedFields(globalOnlyFields, globalFields, {
+    partial,
+    touchedKeys,
+  });
   if (globalErrors.length) {
     throw Boom.badRequest(`Invalid extended_fields: ${globalErrors.join('; ')}`);
   }

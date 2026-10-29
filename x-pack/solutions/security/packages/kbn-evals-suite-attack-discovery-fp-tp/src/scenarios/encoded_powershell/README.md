@@ -11,7 +11,7 @@ There is one authored discovery and one alert set. Two worlds sit around them:
 
 If an analyst (or the analysis workflow) sees only the alerts plus the discovery, both twins look like a real attack. The entity store and raw events are what flip the FP twin.
 
-`examples.ts` derives the eval's evidence-state examples (missing entities on either twin, missing events, mixed world, and both failure paths) from these two twins.
+`examples.ts` derives the eval's evidence-state examples (missing entities on either twin, missing events, mixed world, truncated events on the FP twin, and both failure paths) from these two twins.
 
 ## Layout
 

@@ -12,9 +12,9 @@ import {
   ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
+import { buildProposalSubjectKey } from '../../../proposals/dedup';
 import {
   buildActionInput,
-  buildProposalSubjectKey,
   buildProposalSummaryBullets,
   canFillRespondAction,
   collectSubjects,
@@ -30,6 +30,7 @@ import type { CurrentRunHost, CurrentRunState, ProcessSelector, Subject } from '
 // selection table does not name.
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
   impact: 'high',
@@ -44,6 +45,7 @@ const isolateHost: ActionCatalogEntry = {
 
 const killProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-kill-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
   impact: 'high',
@@ -59,6 +61,7 @@ const killProcess: ActionCatalogEntry = {
 
 const suspendProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-suspend-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
   impact: 'high',
@@ -75,6 +78,7 @@ const suspendProcess: ActionCatalogEntry = {
 /** Required field `buildActionInput` has no way to supply — neither endpoint_ids nor parameters. */
 const quarantineFileWithJustification: ActionCatalogEntry = {
   workflowId: 'system-security-action-quarantine-file',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Quarantine file',
   category: 'respond',
   impact: 'medium',
@@ -90,6 +94,7 @@ const quarantineFileWithJustification: ActionCatalogEntry = {
 
 const configureAction: ActionCatalogEntry = {
   workflowId: 'system-security-action-configure-something',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Configure',
   category: 'configure',
   inputSchema: {
@@ -105,6 +110,7 @@ const configureAction: ActionCatalogEntry = {
 // was removed. Packaging must never fill it: criticality is the customer's to set.
 const staleSetAssetCriticality: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-set-asset-criticality',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Set asset criticality',
   category: 'respond',
   impact: 'low',
@@ -124,6 +130,7 @@ const hostSchema = isolateHost.inputSchema;
 const processSchema = killProcess.inputSchema;
 const defendIsolate: ActionCatalogEntry = {
   workflowId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
   impact: 'high',
@@ -131,6 +138,7 @@ const defendIsolate: ActionCatalogEntry = {
 };
 const defendKill: ActionCatalogEntry = {
   workflowId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
   impact: 'high',
@@ -138,6 +146,7 @@ const defendKill: ActionCatalogEntry = {
 };
 const defendSuspend: ActionCatalogEntry = {
   workflowId: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
   impact: 'medium',
@@ -145,6 +154,7 @@ const defendSuspend: ActionCatalogEntry = {
 };
 const defendMemoryDump: ActionCatalogEntry = {
   workflowId: ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
   name: 'Dump memory of process',
   category: 'investigate',
   impact: 'low',
@@ -155,6 +165,7 @@ const defendCatalog = [defendIsolate, defendKill, defendSuspend, defendMemoryDum
 /** The forensics handoff: `investigate`, no `endpoint_ids`, required ids of its own. */
 const forensicsHandoff: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-handoff-to-forensics',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Run a deep forensics investigation',
   category: 'investigate',
   impact: 'medium',
@@ -172,8 +183,9 @@ const forensicsHandoff: ActionCatalogEntry = {
 const enrolledHost = (
   name: string,
   agentId: string,
-  capabilities: string[] = ['isolation']
-): CurrentRunHost => ({ name, enrolled: true, agentId, capabilities });
+  capabilities: string[] = ['isolation'],
+  capabilitiesSource: CurrentRunHost['capabilitiesSource'] = 'reported'
+): CurrentRunHost => ({ name, enrolled: true, agentId, capabilities, capabilitiesSource });
 
 const selector = (
   overrides: Partial<ProcessSelector> & Pick<ProcessSelector, 'processKey' | 'processName'>
@@ -289,6 +301,21 @@ describe('decidePackageReport', () => {
     expect(result.proposals[0].comment).toContain('ghost');
   });
 
+  it('mints no executable action for a run whose evidence is all on a remote cluster', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hosts: [{ name: 'ubuntu', enrolled: false, capabilities: [] }],
+        allEventsActionable: false,
+        hasProcessBearingEvent: false,
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(1);
+    expect(result.proposals[0].actionWorkflowId).toBeUndefined();
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
+  });
+
   it('mints executable plus a recommendation when some hosts are unenrolled (trigger: partial enrollment)', () => {
     const result = decidePackageReport({
       conversationId,
@@ -307,6 +334,52 @@ describe('decidePackageReport', () => {
     expect(recommendation).toBeDefined();
     expect(recommendation?.comment).toContain('ghost');
     expect(recommendation?.comment).toContain('not enrolled');
+  });
+
+  it('packages a remote-only host as a recommendation naming its cluster, beside the local host action', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hosts: [
+          enrolledHost('host-a', 'agent-a'),
+          { name: 'ubuntu', enrolled: false, capabilities: [], remoteClusters: ['infosec_zocalo'] },
+        ],
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+
+    expect(result.proposals.map((p) => p.title).sort()).toEqual([
+      'Analyst recommendation',
+      'Isolate host host-a',
+    ]);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation?.comment).toContain(
+      "Host ubuntu (infosec_zocalo) was seen only on a remote cluster, so response actions from this deployment can't reach it."
+    );
+    // It was never looked up in local Fleet, so "not enrolled" would be unchecked.
+    expect(recommendation?.comment).not.toContain('not enrolled');
+  });
+
+  it('names local unenrolled and remote-only hosts on separate lines', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hosts: [
+          { name: 'ghost', enrolled: false, capabilities: [] },
+          { name: 'ubuntu', enrolled: false, capabilities: [], remoteClusters: ['b', 'c'] },
+          { name: 'db-1', enrolled: false, capabilities: [], remoteClusters: ['d'] },
+        ],
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+
+    const [recommendation] = result.proposals;
+    expect(recommendation.comment).toContain(
+      'Host ghost is not enrolled, so no Defend action reaches it.'
+    );
+    expect(recommendation.comment).toContain(
+      "Hosts ubuntu (b, c), db-1 (d) were seen only on a remote cluster, so response actions from this deployment can't reach them."
+    );
   });
 
   it('mints a recommendation when the catalog errors (trigger: no executable proposal at all)', () => {
@@ -349,7 +422,13 @@ describe('decidePackageReport', () => {
           kind: 'host',
           value: 'host-a',
           reachable: true,
-          host: { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
+          host: {
+            name: 'host-a',
+            enrolled: true,
+            agentId: 'agent-a',
+            capabilities: [],
+            capabilitiesSource: 'reported',
+          },
         },
       })
     ).toBe(false);
@@ -502,7 +581,13 @@ describe('decidePackageReport', () => {
     kind: 'process',
     value: processSelector.processName,
     reachable: true,
-    host: { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
+    host: {
+      name: 'host-a',
+      enrolled: true,
+      agentId: 'agent-a',
+      capabilities: [],
+      capabilitiesSource: 'reported',
+    },
     processSelector,
   });
 
@@ -625,29 +710,6 @@ describe('decidePackageReport', () => {
     expect(byWorkflow.get(isolateHost.workflowId)).toBe('6f30494e-d19c-51d9-94b3-da6a6e4a17fd');
     // uuidv5(`agent-a|system-security-action-kill-process|entity:ent-4242`).
     expect(byWorkflow.get(killProcess.workflowId)).toBe('e7f4d23d-c0a4-57a8-804e-a1cbca13bc1c');
-  });
-
-  it('builds stable subject keys for the same host × action × process', () => {
-    const key = {
-      subjectId: 'e',
-      actionWorkflowId: 'a',
-      processKey: 'p',
-    };
-
-    expect(buildProposalSubjectKey(key)).toBe(buildProposalSubjectKey({ ...key }));
-  });
-
-  it('builds different subject keys for a different host, action or process', () => {
-    const key = { subjectId: 'e', actionWorkflowId: 'a', processKey: 'p' };
-    const keys = [
-      buildProposalSubjectKey(key),
-      buildProposalSubjectKey({ ...key, subjectId: 'e2' }),
-      buildProposalSubjectKey({ ...key, actionWorkflowId: 'a2' }),
-      buildProposalSubjectKey({ ...key, processKey: 'p2' }),
-      buildProposalSubjectKey({ subjectId: 'e', actionWorkflowId: 'a' }),
-    ];
-
-    expect(new Set(keys).size).toBe(keys.length);
   });
 
   describe('which Investigation raised a proposal', () => {
@@ -788,7 +850,13 @@ describe('decidePackageReport', () => {
       const subjects = collectSubjects(
         baseHitState({
           hosts: [
-            { name: 'host-a', enrolled: true, agentId: 'agent-a', capabilities: [] },
+            {
+              name: 'host-a',
+              enrolled: true,
+              agentId: 'agent-a',
+              capabilities: [],
+              capabilitiesSource: 'reported',
+            },
             { name: 'ghost', enrolled: false, capabilities: [] },
           ],
           processSelectors: [
@@ -885,6 +953,34 @@ describe('decidePackageReport', () => {
       );
       expect(result.proposals.find((p) => !p.actionWorkflowId)?.comment).toContain(
         'does not report isolation'
+      );
+    });
+
+    it('says the capabilities could not be read, not that the endpoint lacks them, when the metadata was unavailable', () => {
+      const result = decidePackageReport({
+        conversationId,
+        state: baseHitState({
+          hosts: [enrolledHost('host-a', 'agent-a', [], 'unavailable')],
+          processSelectors: [ps1, rundll],
+        }),
+        catalog: { ok: true, actions: defendCatalog },
+      });
+      const executable = result.proposals.filter((p) => p.actionWorkflowId);
+      expect(kinds(executable)).toEqual([
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+        ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+      ]);
+      expect(
+        executable.every((p) =>
+          p.comment.includes(
+            "the endpoint's capabilities could not be read (memdump_process is not assumed)"
+          )
+        )
+      ).toBe(true);
+      const recommendation = result.proposals.find((p) => !p.actionWorkflowId);
+      expect(recommendation?.comment).toContain('**Held back**');
+      expect(recommendation?.comment).toContain(
+        "the endpoint's capabilities could not be read (isolation is not assumed)"
       );
     });
 

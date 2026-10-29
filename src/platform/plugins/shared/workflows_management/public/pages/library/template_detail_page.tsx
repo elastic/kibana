@@ -23,10 +23,9 @@ import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
-const libraryBreadcrumbLabel = i18n.translate(
-  'workflowsManagement.libraryTemplatePage.libraryBreadcrumb',
-  { defaultMessage: 'Template Library' }
-);
+const libraryBreadcrumbLabel = i18n.translate('workflows.libraryTemplatePage.libraryBreadcrumb', {
+  defaultMessage: 'Template library',
+});
 
 type LibraryTemplateDetailPageProps = RouteComponentProps<{ slug: string }>;
 
@@ -36,7 +35,7 @@ interface TemplateBreadcrumb {
 }
 
 /**
- * Workflow Template Library template detail page (`/app/workflows/library/:slug`).
+ * Workflow Template library template detail page (`/app/workflows/library/:slug`).
  * Fills the available height like the workflow editor so the read-only preview
  * grows with the viewport. The route is always registered (see `routes.tsx`);
  * this page redirects to the workflows list when the library is disabled.

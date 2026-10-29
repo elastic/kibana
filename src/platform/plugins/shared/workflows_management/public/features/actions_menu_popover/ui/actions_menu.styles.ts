@@ -29,6 +29,12 @@ export const componentStyles = {
       padding: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.m}`,
       borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
+  // Clears the absolute modal close button so the title doesn't sit under it;
+  // search below stays full-width to the menu edge padding.
+  headerTitle: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingInlineEnd: euiTheme.size.xl,
+    }),
   body: css({
     height: 'min(520px, calc(100vh - 160px))',
     overflow: 'hidden',
@@ -41,25 +47,24 @@ export const componentStyles = {
       overflow: 'hidden',
       borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
-  listFill: css({
-    flex: 1,
-    minHeight: 0,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-    '& > *': {
+  listFill: ({ euiTheme }: UseEuiTheme) =>
+    css({
       flex: 1,
       minHeight: 0,
-    },
-    // Square rows; own padding lives on optionPad (EUI list items add their own).
-    '.euiSelectableListItem': {
-      borderRadius: 0,
-      padding: 0,
-    },
-    '.euiSelectableListItem__text': {
-      padding: 0,
-    },
-  }),
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      '& > *': {
+        flex: 1,
+        minHeight: 0,
+      },
+      // Own className on options (EUI merges it onto the list item).
+      '.actionsMenuOption': {
+        borderRadius: 0,
+        padding: 0,
+        borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+      },
+    }),
   optionInfo: css({
     flex: 1,
     minWidth: 0,
@@ -90,8 +95,31 @@ export const componentStyles = {
   optionPad: ({ euiTheme }: UseEuiTheme) =>
     css({
       width: '100%',
-      padding: euiTheme.size.base,
+      // Cancel EUI list-item text vertical padding (xs + xxs); horizontal is cleared via
+      // actionsMenuOption padding: 0. Intentional inset stays on this pad.
+      marginBlock: `calc(-1 * (${euiTheme.size.xs} + ${euiTheme.size.xxs}))`,
+      paddingBlock: euiTheme.size.m,
+      paddingInline: euiTheme.size.base,
       boxSizing: 'border-box',
+      // Opaque fill covers EUI list-item interactive hover; hover/keyboard use subdued.
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      '&:hover, &.actionsMenu-keyboardActive': {
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      },
+    }),
+  // Applied via EuiSelectable option `css` (public API).
+  groupLabel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingInline: euiTheme.size.base,
+      borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+      // Match EUI's &:not(:first-child)::before specificity so the top rule is removed.
+      '&:not(:first-child)': {
+        paddingBlockStart: euiTheme.size.s,
+        '&::before': {
+          content: 'none',
+          borderTop: 'none',
+        },
+      },
     }),
   shortcutContainer: (euiThemeContext: UseEuiTheme) => {
     const { euiTheme } = euiThemeContext;

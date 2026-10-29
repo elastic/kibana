@@ -24,6 +24,7 @@
     "@kbn/esql-language",
     "@kbn/esql-types",
     "@kbn/esql-utils",
+    "@kbn/esql-server-utils",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -139,6 +140,7 @@
     "@kbn/test-es-server",
     "@kbn/core-security-common",
     "@kbn/core-http-browser-mocks",
+    "@kbn/core-spaces-common",
   ],
   "exclude": ["target/**/*"]
 }
