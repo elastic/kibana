@@ -576,7 +576,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Display `(null)` values as `-` in Discover and table visualizations [#290109]({{kib-pull}}290109).
 * Support {{esql}} variables in Vega visualizations [#285778]({{kib-pull}}285778).
 * Support filtering by {{esql}} views on dashboards [#293464]({{kib-pull}}293464).
-* Show information about the projects that {{kib}} queried in the inspector flyout when cross-project search has linked projects [#287597]({{kib-pull}}287597).
 * Highlight only the matched part of a metric name in search results [#284603]({{kib-pull}}284603).
 * Add a **Cancel** button for loading dashboards, and cancel in-progress searches when you leave a dashboard [#283781]({{kib-pull}}283781), [#281168]({{kib-pull}}281168).
 * Improve the **Ignore timeout for results** setting [#283726]({{kib-pull}}283726).
@@ -747,7 +746,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix rules and background tasks silently stopping for several minutes when a concurrent update prevents a completed run from being recorded [#295415]({{kib-pull}}295415).
 * Fix a request to run a rule immediately, or a schedule change, being discarded when it arrives while the rule is finishing a run [#293492]({{kib-pull}}293492).
 * Fix a task state that falls out of sync with the tracked alert documents at the start of a run [#293521]({{kib-pull}}293521).
-* Fix API key tags missing from Elastic Cloud rules not being removed or migrated after a rule receives a valid key [#292364]({{kib-pull}}292364).
 * Fix the missing auto-push checkbox in the rule action when templates v2 is turned on [#292187]({{kib-pull}}292187).
 * Fix the `manageTemplates` privilege causing the read-only permissions check to pass [#291719]({{kib-pull}}291719).
 * Fix borrowed API key declarations not being honored in the rules client [#291318]({{kib-pull}}291318).
@@ -757,7 +755,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Limit the concurrency of alerts-as-data resource installation to cap peak heap usage [#287643]({{kib-pull}}287643).
 * Add `auto_expand_replicas` to the `.rule-events` and `.alert-actions` data streams [#287544]({{kib-pull}}287544).
 * Fix context variables not working in the **Additional fields** of the ServiceNow ITSM, ServiceNow SecOps, and Jira connectors [#286578]({{kib-pull}}286578).
-* Fix stored UIAM task API keys being presented in a form that rules can't use [#285163]({{kib-pull}}285163).
 * Fix bulk-disabling alerting v2 rules marking them as disabled while their background tasks keep running [#281468]({{kib-pull}}281468).
 * Fix removing all tags from an alerting v2 rule not saving [#288962]({{kib-pull}}288962).
 * Fix the alerting v2 query sandbox timestamp not changing from the first selected option [#281854]({{kib-pull}}281854).
@@ -766,7 +763,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the **Disk Usage** rule to ignore frozen nodes [#278374]({{kib-pull}}278374).
 * Fix cross-space writes when you update tags in the rule registry [#285874]({{kib-pull}}285874).
 * Fix task and connector failures that aren't `Error` objects being logged as `[object Object]` [#276782]({{kib-pull}}276782).
-* Fix an organization-level API key causing a generic parse failure when you create or enable a rule, by returning a clear `400` error [#282287]({{kib-pull}}282287).
 * Fix signal rule updates not persisting `query.format: composed` [#283754]({{kib-pull}}283754).
 * Fix the cases **Settings** page, case views, and templates after changes to global fields, including default values of global fields not being applied to cases created through the API or workflow steps [#283185]({{kib-pull}}283185).
 * Fix the **All cases** list and case activity, including column and template activity, user activity, and the case list metrics bar [#282870]({{kib-pull}}282870), [#282129]({{kib-pull}}282129), [#280576]({{kib-pull}}280576).
@@ -869,7 +865,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Stop rounding relative time ranges, such as **Last 15 minutes**, by default in the time range selector. You can turn rounding on again in the time range selector settings [#280105]({{kib-pull}}280105).
 * Fix `MV_CONTAINS`, invalid casts when filtering, autocomplete for nested function expressions, and PromQL variables, columns, and `TS_INFO` and `METRICS_INFO` columns in {{esql}} [#288972]({{kib-pull}}288972), [#287416]({{kib-pull}}287416), [#284277]({{kib-pull}}284277), [#281437]({{kib-pull}}281437), [#280538]({{kib-pull}}280538), [#280524]({{kib-pull}}280524).
 * Hide filter actions for ignored values [#287807]({{kib-pull}}287807).
-* Support project routing when Discover resolves {{esql}} time fields [#287482]({{kib-pull}}287482).
 * Fix search highlighting corrupting markers when the search term is a substring of a marker [#283345]({{kib-pull}}283345).
 * Fix field formatters, including `alwaysShowSign` on values that round to zero, percent format with `fractional: false` rendering `NaN`, the Short Dots transform dropping single-character segments, the Base64 Decode transform, the Date Nanos formatter ignoring `dateFormat` for numeric values, Geo point DMS output near zero coordinates, and highlighting when a string formatter applies case transforms [#282919]({{kib-pull}}282919), [#282915]({{kib-pull}}282915), [#281930]({{kib-pull}}281930), [#281366]({{kib-pull}}281366), [#281343]({{kib-pull}}281343), [#281336]({{kib-pull}}281336), [#281098]({{kib-pull}}281098).
 * Recreate the server date converter cache when the time zone or pattern changes, and align its `null` label with the client [#282501]({{kib-pull}}282501), [#281367]({{kib-pull}}281367).
@@ -901,7 +896,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 **{{kib}} platform**:
 * Fix the date range picker ignoring time zone and day-of-week settings [#299851]({{kib-pull}}299851).
 * Hide **Ingest your data** for users who can't add data [#297717]({{kib-pull}}297717).
-* Fix `ApiKey` credentials being forwarded with the wrong scheme [#297713]({{kib-pull}}297713).
 * Fix the OpenTelemetry process resource including CLI arguments, which now records how many arguments were present instead [#295796]({{kib-pull}}295796).
 * Fix duplicate user profile activations during page rendering for requests that use basic credentials, which could log `version_conflict_engine_exception` errors [#291066]({{kib-pull}}291066).
 * Fix Search apps, such as Search Home, Getting Started, and Playground, appearing in Observability spaces through global search and direct URLs [#290553]({{kib-pull}}290553).
@@ -935,8 +929,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix adding a geo job chart from Anomaly Explorer to a case staying in the loading state [#289363]({{kib-pull}}289363).
 * Block {{infer}} calls to non-default endpoints when default-only is set [#288107]({{kib-pull}}288107).
 * Fix streams that never close from blocking the {{kib}} event loop [#286849]({{kib-pull}}286849).
-* Pass the selected project routing to the data visualizer chart [#286647]({{kib-pull}}286647).
-* Fix the event rate chart in the anomaly detection wizard [#286639]({{kib-pull}}286639).
 * Fix the data frame analytics results explorer not updating when the job ID changes [#284964]({{kib-pull}}284964).
 * Fix file upload analysis for large NDJSON files [#284960]({{kib-pull}}284960).
 * Fix permissions for trained model testing, and the trained model ID check [#282002]({{kib-pull}}282002), [#280511]({{kib-pull}}280511).
@@ -1041,6 +1033,16 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Fix **Associated users** and **Associated hosts** metrics not including entity attachments [#283036]({{kib-pull}}283036).
 % * Fix saved visualizations not appearing in case attachments, and add helper text to the case Markdown editor [#286164]({{kib-pull}}286164).
 % * Fix the case feature settings so non-security owners don't get alert sync turned on by default when you create a case through a workflow or from a v2 template [#286670]({{kib-pull}}286670).
+
+% Removed from 9.6.0: Serverless-only. The CPS (cpsEnabled) and UIAM (xpack.security.uiam) settings exist only for the serverless offering.
+% * Show information about the projects that {{kib}} queried in the inspector flyout when cross-project search has linked projects [#287597]({{kib-pull}}287597).
+% * Fix API key tags missing from Elastic Cloud rules not being removed or migrated after a rule receives a valid key [#292364]({{kib-pull}}292364).
+% * Fix stored UIAM task API keys being presented in a form that rules can't use [#285163]({{kib-pull}}285163).
+% * Fix an organization-level API key causing a generic parse failure when you create or enable a rule, by returning a clear `400` error [#282287]({{kib-pull}}282287).
+% * Support project routing when Discover resolves {{esql}} time fields [#287482]({{kib-pull}}287482).
+% * Fix `ApiKey` credentials being forwarded with the wrong scheme [#297713]({{kib-pull}}297713).
+% * Pass the selected project routing to the data visualizer chart [#286647]({{kib-pull}}286647).
+% * Fix the event rate chart in the anomaly detection wizard [#286639]({{kib-pull}}286639).
 
 ## 9.5.0 [kibana-9.5.0-release-notes]
 
