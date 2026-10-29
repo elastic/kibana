@@ -28,6 +28,10 @@ jest.mock('../lens_ui_telemetry', () => ({
   trackCreateUiCounterEvents: jest.fn(),
 }));
 
+jest.mock('../lazy_builder', () => ({
+  getLensBuilder: jest.fn(() => null),
+}));
+
 describe('runSaveLensVisualization', () => {
   // Need to call reset here as makeDefaultServices() reuses some mocks from core
   const resetMocks = () =>
