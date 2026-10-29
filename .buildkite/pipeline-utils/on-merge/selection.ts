@@ -12,18 +12,18 @@ export const ON_MERGE_SELECTION_METADATA_KEY = 'on-merge-selection';
 const ON_MERGE_SELECTIVE_MODES = ['off', 'shadow'] as const;
 export type OnMergeSelectiveMode = (typeof ON_MERGE_SELECTIVE_MODES)[number];
 
-export const ON_MERGE_SUITES = ['scout', 'jestUnit', 'jestIntegration', 'ftr'] as const;
-export type OnMergeSuite = (typeof ON_MERGE_SUITES)[number];
+export const ON_MERGE_TEST_TYPES = ['scout', 'jestUnit', 'jestIntegration', 'ftr'] as const;
+export type OnMergeTestType = (typeof ON_MERGE_TEST_TYPES)[number];
 
-export type OnMergeSuiteDecision = { mode: 'selective' } | { mode: 'full'; reason: string };
+export type OnMergeTestTypeDecision = { mode: 'selective' } | { mode: 'full'; reason: string };
 
-/** Commit range covered by an on-merge build and, per suite, whether tests may be selected from it. */
+/** Commit range covered by an on-merge build and, per test type, whether tests may be selected from it. */
 export interface OnMergeSelection {
   commit: string;
   base: string | null;
   baseSource: 'github-activity' | 'merge-queue' | 'direct-push' | null;
   commitCount: number | null;
-  suites: Record<OnMergeSuite, OnMergeSuiteDecision>;
+  testTypes: Record<OnMergeTestType, OnMergeTestTypeDecision>;
 }
 
 /**
@@ -46,13 +46,13 @@ export const parseOnMergeSelectiveMode = (raw: string | undefined): OnMergeSelec
   return value as OnMergeSelectiveMode;
 };
 
-/** Selection where every suite runs in full for the same reason. */
+/** Selection where every test type runs in full for the same reason. */
 export const fullSelection = (commit: string, reason: string): OnMergeSelection => ({
   commit,
   base: null,
   baseSource: null,
   commitCount: null,
-  suites: {
+  testTypes: {
     scout: { mode: 'full', reason },
     jestUnit: { mode: 'full', reason },
     jestIntegration: { mode: 'full', reason },
@@ -60,19 +60,16 @@ export const fullSelection = (commit: string, reason: string): OnMergeSelection 
   },
 });
 
-const isSuiteDecision = (decision: OnMergeSuiteDecision | undefined): boolean =>
-  decision?.mode === 'selective' ||
-  (decision?.mode === 'full' && typeof decision.reason === 'string');
-
-/** Parses the meta-data value; returns null for missing or malformed input. */
+/**
+ * Parses the meta-data value; returns null when it is missing or not valid JSON.
+ *
+ * The shape is not validated: Pre-Build writes it from a typed `OnMergeSelection` in the same
+ * build and commit, so readers can never see a different schema.
+ */
 export const parseOnMergeSelection = (raw: string | null): OnMergeSelection | null => {
   if (!raw) return null;
   try {
-    const parsed = JSON.parse(raw);
-    const isValid =
-      typeof parsed?.commit === 'string' &&
-      ON_MERGE_SUITES.every((suite) => isSuiteDecision(parsed.suites?.[suite]));
-    return isValid ? parsed : null;
+    return JSON.parse(raw) as OnMergeSelection;
   } catch {
     return null;
   }

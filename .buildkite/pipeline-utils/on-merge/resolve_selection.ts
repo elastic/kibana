@@ -10,15 +10,19 @@
 import type { Build } from '../buildkite/types/build.ts';
 import type { Job } from '../buildkite/types/job.ts';
 import { STEP_KEYS } from '../ci-stats/pick_test_group_run_order/const.ts';
-import type { OnMergeSelection, OnMergeSuite, OnMergeSuiteDecision } from './selection.ts';
-import { ON_MERGE_SUITES, fullSelection } from './selection.ts';
+import type { OnMergeSelection, OnMergeTestType, OnMergeTestTypeDecision } from './selection.ts';
+import { ON_MERGE_TEST_TYPES, fullSelection } from './selection.ts';
 
 const MAX_COMMITS = 30;
 const FULL_SHA = /^[0-9a-f]{40}$/i;
 const NULL_SHA = /^0{40}$/;
 
-const ES_DEPENDENT_SUITES: ReadonlySet<OnMergeSuite> = new Set(['scout', 'jestIntegration', 'ftr']);
-// A job that never ran is not evidence the suite passed, and this build's range won't cover
+const ES_DEPENDENT_TEST_TYPES: ReadonlySet<OnMergeTestType> = new Set([
+  'scout',
+  'jestIntegration',
+  'ftr',
+]);
+// A job that never ran is not evidence the test type passed, and this build's range won't cover
 // the commits it skipped. `broken` = a dependency failed, `canceled` = build stopped part-way.
 const UNPROVEN_JOB_STATES: ReadonlySet<string> = new Set([
   'failed',
@@ -28,7 +32,7 @@ const UNPROVEN_JOB_STATES: ReadonlySet<string> = new Set([
   'canceled',
 ]);
 
-const SUITE_STEP_KEY_MATCHERS: Record<OnMergeSuite, (stepKey: string) => boolean> = {
+const TEST_TYPE_STEP_KEY_MATCHERS: Record<OnMergeTestType, (stepKey: string) => boolean> = {
   scout: (stepKey) => stepKey.startsWith('scout_test_lane_'),
   jestUnit: (stepKey) => stepKey === STEP_KEYS.JEST_UNIT,
   jestIntegration: (stepKey) => stepKey === STEP_KEYS.JEST_INTEGRATION,
@@ -92,24 +96,25 @@ const resolveBase = async ({
 const isUnprovenJob = (job: Job): boolean =>
   job.type === 'script' && !job.retried && !job.soft_failed && UNPROVEN_JOB_STATES.has(job.state);
 
-const decideSuite = (
-  suite: OnMergeSuite,
+const decideTestType = (
+  testType: OnMergeTestType,
   previousBuild: Build,
   esSnapshotChanged: boolean
-): OnMergeSuiteDecision => {
+): OnMergeTestTypeDecision => {
   const unprovenInPreviousBuild = previousBuild.jobs?.some(
-    (job) => job.step_key && SUITE_STEP_KEY_MATCHERS[suite](job.step_key) && isUnprovenJob(job)
+    (job) =>
+      job.step_key && TEST_TYPE_STEP_KEY_MATCHERS[testType](job.step_key) && isUnprovenJob(job)
   );
   if (unprovenInPreviousBuild) {
     return { mode: 'full', reason: `did not pass in previous build #${previousBuild.number}` };
   }
-  if (esSnapshotChanged && ES_DEPENDENT_SUITES.has(suite)) {
+  if (esSnapshotChanged && ES_DEPENDENT_TEST_TYPES.has(testType)) {
     return { mode: 'full', reason: 'ES snapshot changed' };
   }
   return { mode: 'selective' };
 };
 
-/** Resolves the commit range an on-merge build covers and which suites may select tests from it. */
+/** Resolves the commit range an on-merge build covers and which test types may select tests from it. */
 export const resolveOnMergeSelection = async (
   deps: OnMergeSelectionDeps
 ): Promise<OnMergeSelection> => {
@@ -157,9 +162,12 @@ export const resolveOnMergeSelection = async (
     previousBuild.meta_data?.ES_SNAPSHOT_MANIFEST_DEFAULT;
   const esSnapshotChanged =
     !deps.esSnapshotManifest || deps.esSnapshotManifest !== previousManifest;
-  const suites = Object.fromEntries(
-    ON_MERGE_SUITES.map((suite) => [suite, decideSuite(suite, previousBuild, esSnapshotChanged)])
-  ) as OnMergeSelection['suites'];
+  const testTypes = Object.fromEntries(
+    ON_MERGE_TEST_TYPES.map((testType) => [
+      testType,
+      decideTestType(testType, previousBuild, esSnapshotChanged),
+    ])
+  ) as OnMergeSelection['testTypes'];
 
-  return { commit, base, baseSource, commitCount, suites };
+  return { commit, base, baseSource, commitCount, testTypes };
 };

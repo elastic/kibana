@@ -37,12 +37,12 @@ const CONFIGS = {
   ftrConfigCount: 10,
 };
 
-const selection = (overrides: Partial<OnMergeSelection['suites']> = {}): OnMergeSelection => ({
+const selection = (overrides: Partial<OnMergeSelection['testTypes']> = {}): OnMergeSelection => ({
   commit: COMMIT,
   base: BASE,
   baseSource: 'github-activity',
   commitCount: 2,
-  suites: {
+  testTypes: {
     scout: { mode: 'selective' },
     jestUnit: { mode: 'selective' },
     jestIntegration: { mode: 'selective' },
@@ -59,7 +59,7 @@ describe('computeOnMergeShadow', () => {
     mockResolveSelectiveTestingContext.mockResolvedValue({});
   });
 
-  it('reports the selected configs for selective suites', async () => {
+  it('reports the selected configs for selective test types', async () => {
     const result = await computeOnMergeShadow(selection(), CONFIGS);
 
     expect(mockResolveSelectiveTestingChanges).toHaveBeenCalledWith(BASE, 'on-merge');
@@ -71,7 +71,7 @@ describe('computeOnMergeShadow', () => {
     });
   });
 
-  it('only narrows suites whose decision is selective', async () => {
+  it('only narrows test types whose decision is selective', async () => {
     const result = await computeOnMergeShadow(
       selection({
         jestIntegration: { mode: 'full', reason: 'ES snapshot changed' },

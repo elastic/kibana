@@ -104,10 +104,10 @@ resolve_on_merge_shadow_scope() {
     return 0
   fi
 
-  mode="$(jq -r '.suites.scout.mode // empty' <<<"$selection")" || return 1
+  mode="$(jq -r '.testTypes.scout.mode // empty' <<<"$selection")" || return 1
   base="$(jq -r '.base // empty' <<<"$selection")" || return 1
   if [[ "$mode" != "selective" || -z "$base" ]]; then
-    reason="$(jq -r '.suites.scout.reason // "no base"' <<<"$selection")" || return 1
+    reason="$(jq -r '.testTypes.scout.reason // "no base"' <<<"$selection")" || return 1
     echo "Scout shadow scope: full ($reason)"
     echo "On-merge selective testing (shadow) for Scout: full ($reason)" |
       buildkite-agent annotate --context on-merge-selective-shadow-scout --style info || return 1

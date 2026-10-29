@@ -85,7 +85,7 @@ describe('resolveOnMergeSelection', () => {
       base: BASE,
       baseSource: 'github-activity',
       commitCount: 3,
-      suites: allSelective,
+      testTypes: allSelective,
     });
     expect(deps.getMergeQueueBase).not.toHaveBeenCalled();
   });
@@ -99,7 +99,7 @@ describe('resolveOnMergeSelection', () => {
       base: PARENT,
       baseSource: 'github-activity',
       commitCount: 1,
-      suites: allSelective,
+      testTypes: allSelective,
     });
   });
 
@@ -140,7 +140,7 @@ describe('resolveOnMergeSelection', () => {
     });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
       base: null,
-      suites: allFull('cannot resolve base (commit has 2 parents)'),
+      testTypes: allFull('cannot resolve base (commit has 2 parents)'),
     });
   });
 
@@ -151,14 +151,14 @@ describe('resolveOnMergeSelection', () => {
     const deps = createDeps({ findPushActivity: jest.fn().mockResolvedValue(activity) });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
       base: null,
-      suites: allFull(reason),
+      testTypes: allFull(reason),
     });
   });
 
   it('runs everything in full when forced', async () => {
     const deps = createDeps({ forceFull: true });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
-      suites: allFull('forced full run'),
+      testTypes: allFull('forced full run'),
     });
     expect(deps.findPushActivity).not.toHaveBeenCalled();
   });
@@ -169,7 +169,7 @@ describe('resolveOnMergeSelection', () => {
       getMergeQueueBase: jest.fn().mockResolvedValue('main'),
     });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
-      suites: allFull('base main from merge-queue is not a full SHA'),
+      testTypes: allFull('base main from merge-queue is not a full SHA'),
     });
   });
 
@@ -192,7 +192,7 @@ describe('resolveOnMergeSelection', () => {
   ])('runs everything in full when %s', async (_, gitOverrides, reason) => {
     const deps = createDeps({ git: { ...createDeps().git, ...gitOverrides } });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
-      suites: allFull(reason),
+      testTypes: allFull(reason),
     });
   });
 
@@ -200,11 +200,11 @@ describe('resolveOnMergeSelection', () => {
     const deps = createDeps({ getPreviousFinishedBuild: jest.fn().mockResolvedValue(null) });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
       base: BASE,
-      suites: allFull('no previous finished build'),
+      testTypes: allFull('no previous finished build'),
     });
   });
 
-  it('runs only the suites that failed in the previous build in full', async () => {
+  it('runs only the test types that failed in the previous build in full', async () => {
     const deps = createDeps({
       getPreviousFinishedBuild: jest.fn().mockResolvedValue(
         previousBuild({
@@ -218,7 +218,7 @@ describe('resolveOnMergeSelection', () => {
       ),
     });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
-      suites: {
+      testTypes: {
         ...allSelective,
         ftr: { mode: 'full', reason: 'did not pass in previous build #99' },
       },
@@ -226,7 +226,7 @@ describe('resolveOnMergeSelection', () => {
   });
 
   it.each(['broken', 'canceled'] as const)(
-    'runs a suite in full when its previous job was %s',
+    'runs a test type in full when its previous job was %s',
     async (state) => {
       const deps = createDeps({
         getPreviousFinishedBuild: jest.fn().mockResolvedValue(
@@ -241,7 +241,7 @@ describe('resolveOnMergeSelection', () => {
         ),
       });
       await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
-        suites: {
+        testTypes: {
           ...allSelective,
           ftr: { mode: 'full', reason: 'did not pass in previous build #99' },
         },
@@ -249,10 +249,10 @@ describe('resolveOnMergeSelection', () => {
     }
   );
 
-  it('runs ES-dependent suites in full when the ES snapshot changed', async () => {
+  it('runs ES-dependent test types in full when the ES snapshot changed', async () => {
     const deps = createDeps({ esSnapshotManifest: 'https://example.com/new.json' });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
-      suites: {
+      testTypes: {
         jestUnit: { mode: 'selective' },
         scout: { mode: 'full', reason: 'ES snapshot changed' },
         jestIntegration: { mode: 'full', reason: 'ES snapshot changed' },
@@ -270,6 +270,6 @@ describe('resolveOnMergeSelection', () => {
           previousBuild({ env: { ES_SNAPSHOT_MANIFEST: 'https://example.com/custom.json' } })
         ),
     });
-    await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({ suites: allSelective });
+    await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({ testTypes: allSelective });
   });
 });

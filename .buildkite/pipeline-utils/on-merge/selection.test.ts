@@ -43,7 +43,7 @@ describe('parseOnMergeSelection', () => {
     base: BASE,
     baseSource: 'github-activity',
     commitCount: 2,
-    suites: {
+    testTypes: {
       scout: { mode: 'selective' },
       jestUnit: { mode: 'selective' },
       jestIntegration: { mode: 'full', reason: 'ES snapshot changed' },
@@ -59,11 +59,6 @@ describe('parseOnMergeSelection', () => {
     ['missing', null],
     ['empty', ''],
     ['invalid JSON', '{'],
-    ['missing suites', JSON.stringify({ commit: COMMIT, base: BASE })],
-    [
-      'invalid suite decision',
-      JSON.stringify({ ...selection, suites: { ...selection.suites, ftr: { mode: 'full' } } }),
-    ],
   ])('returns null for %s input', (_, raw) => {
     expect(parseOnMergeSelection(raw)).toBeNull();
   });

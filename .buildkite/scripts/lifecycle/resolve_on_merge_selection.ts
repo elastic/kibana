@@ -11,7 +11,7 @@ import type { OnMergeSelection } from '#pipeline-utils';
 import {
   BuildkiteClient,
   ON_MERGE_SELECTION_METADATA_KEY,
-  ON_MERGE_SUITES,
+  ON_MERGE_TEST_TYPES,
   createDefaultOnMergeSelectionDeps,
   fullSelection,
   getRequiredEnv,
@@ -34,12 +34,14 @@ const formatAnnotation = (selection: OnMergeSelection): string => {
         selection.commitCount
       } commit(s), from ${selection.baseSource})`
     : 'unresolved';
-  const suites = ON_MERGE_SUITES.map((suite) => {
-    const decision = selection.suites[suite];
-    return `- ${suite}: ${decision.mode}${decision.mode === 'full' ? ` (${decision.reason})` : ''}`;
+  const testTypes = ON_MERGE_TEST_TYPES.map((testType) => {
+    const decision = selection.testTypes[testType];
+    return `- ${testType}: ${decision.mode}${
+      decision.mode === 'full' ? ` (${decision.reason})` : ''
+    }`;
   }).join('\n');
 
-  return `On-merge selective testing (shadow): range ${range}\n\n${suites}`;
+  return `On-merge selective testing (shadow): range ${range}\n\n${testTypes}`;
 };
 
 (async () => {

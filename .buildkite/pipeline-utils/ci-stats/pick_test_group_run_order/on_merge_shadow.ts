@@ -10,7 +10,7 @@
 import * as Fs from 'fs';
 
 import type { BuildkiteClient } from '../../buildkite/index.ts';
-import type { OnMergeSelection, OnMergeSuiteDecision } from '../../on-merge/selection.ts';
+import type { OnMergeSelection, OnMergeTestTypeDecision } from '../../on-merge/selection.ts';
 import {
   ON_MERGE_SELECTION_METADATA_KEY,
   parseOnMergeSelection,
@@ -26,8 +26,8 @@ import {
 
 export const ON_MERGE_SHADOW_ARTIFACT = 'on_merge_selection_shadow_jest_ftr.json';
 
-interface ShadowSuiteResult {
-  decision: OnMergeSuiteDecision;
+interface ShadowTestTypeResult {
+  decision: OnMergeTestTypeDecision;
   total: number;
   selected: number;
 }
@@ -36,9 +36,9 @@ export interface OnMergeShadowResult {
   commit: string;
   base: string | null;
   changedFiles: number | null;
-  jestUnit: ShadowSuiteResult & { selectedConfigs: string[] };
-  jestIntegration: ShadowSuiteResult & { selectedConfigs: string[] };
-  ftr: ShadowSuiteResult & { skipModules: string[] | null };
+  jestUnit: ShadowTestTypeResult & { selectedConfigs: string[] };
+  jestIntegration: ShadowTestTypeResult & { selectedConfigs: string[] };
+  ftr: ShadowTestTypeResult & { skipModules: string[] | null };
 }
 
 interface ShadowConfigs {
@@ -52,10 +52,10 @@ export async function computeOnMergeShadow(
   selection: OnMergeSelection,
   { jestUnitConfigs, jestIntegrationConfigs, ftrConfigCount }: ShadowConfigs
 ): Promise<OnMergeShadowResult> {
-  const { base, suites } = selection;
-  const unitSelective = suites.jestUnit.mode === 'selective';
-  const integrationSelective = suites.jestIntegration.mode === 'selective';
-  const ftrSelective = suites.ftr.mode === 'selective';
+  const { base, testTypes } = selection;
+  const unitSelective = testTypes.jestUnit.mode === 'selective';
+  const integrationSelective = testTypes.jestIntegration.mode === 'selective';
+  const ftrSelective = testTypes.ftr.mode === 'selective';
 
   const changedFiles =
     base && (unitSelective || integrationSelective || ftrSelective)
@@ -96,19 +96,19 @@ export async function computeOnMergeShadow(
     base,
     changedFiles: changedFiles?.length ?? null,
     jestUnit: {
-      decision: suites.jestUnit,
+      decision: testTypes.jestUnit,
       total: jestUnitConfigs.length,
       selected: selectedUnit.length,
       selectedConfigs: selectedUnit,
     },
     jestIntegration: {
-      decision: suites.jestIntegration,
+      decision: testTypes.jestIntegration,
       total: jestIntegrationConfigs.length,
       selected: selectedIntegration.length,
       selectedConfigs: selectedIntegration,
     },
     ftr: {
-      decision: suites.ftr,
+      decision: testTypes.ftr,
       total: ftrConfigCount,
       selected: ftrSkipModules === null ? ftrConfigCount : 0,
       skipModules: ftrSkipModules,
@@ -116,7 +116,10 @@ export async function computeOnMergeShadow(
   };
 }
 
-const formatSuite = (name: string, { decision, total, selected }: ShadowSuiteResult): string =>
+const formatTestType = (
+  name: string,
+  { decision, total, selected }: ShadowTestTypeResult
+): string =>
   `- ${name}: ${selected}/${total} configs${
     decision.mode === 'full' ? ` (full: ${decision.reason})` : ''
   }`;
@@ -144,9 +147,9 @@ export async function recordOnMergeShadow(
           result.changedFiles ?? 'n/a'
         } changed file(s); all configs still run:`,
         '',
-        formatSuite('Jest unit', result.jestUnit),
-        formatSuite('Jest integration', result.jestIntegration),
-        formatSuite('FTR', result.ftr),
+        formatTestType('Jest unit', result.jestUnit),
+        formatTestType('Jest integration', result.jestIntegration),
+        formatTestType('FTR', result.ftr),
       ].join('\n')
     );
   } catch (error) {
