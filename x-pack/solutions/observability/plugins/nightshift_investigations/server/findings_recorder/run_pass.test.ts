@@ -63,6 +63,7 @@ describe('runFindingsPass', () => {
     answers = [answerWith(output)] as unknown[],
     earlier = [] as never[],
     events = [] as Array<Record<string, unknown>>,
+    rounds = [] as unknown[],
     workspace = undefined as unknown,
     proposals = undefined as unknown,
   } = {}) => {
@@ -85,7 +86,7 @@ describe('runFindingsPass', () => {
           conversations: {
             getScopedClient: async () => ({
               patchMetadata,
-              get: async () => ({ template_id: 'investigation', events }),
+              get: async () => ({ template_id: 'investigation', events, rounds }),
             }),
           },
         } as never),
@@ -303,6 +304,23 @@ describe('runFindingsPass', () => {
       hypotheses: output.hypotheses,
     });
     expect(writer.setImpact).not.toHaveBeenCalled();
+  });
+
+  it('leaves the hypotheses of a follow-up to the final pass, and still refreshes the summary', async () => {
+    const { deps, writer, patchMetadata, memory } = setup({ rounds: [{}] });
+
+    await expect(run(deps, memory)).resolves.toBe(true);
+
+    expect(patchMetadata).toHaveBeenCalledWith('c1', { summary: output.summary });
+    expect(writer.setHypotheses).not.toHaveBeenCalled();
+  });
+
+  it('still writes the hypotheses of a follow-up from the final pass', async () => {
+    const { deps, writer, memory } = setup({ rounds: [{}] });
+
+    await run(deps, memory, { answer: 'Done.' });
+
+    expect(writer.setHypotheses).toHaveBeenCalled();
   });
 
   it('writes the summary, severity, verdict, hypotheses and impact from the final pass', async () => {

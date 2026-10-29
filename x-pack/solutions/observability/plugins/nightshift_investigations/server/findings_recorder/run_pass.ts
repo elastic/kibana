@@ -155,6 +155,8 @@ interface ConversationEventLike {
 interface ConversationLike {
   /** Set to the investigation template for an investigation. Ask mode has none. */
   template_id?: string;
+  /** The rounds already finished. A run that starts with some is a follow-up. */
+  rounds?: unknown[];
   events?: ConversationEventLike[];
   metadata?: { summary?: unknown; severity?: unknown; verdict?: unknown };
 }
@@ -531,6 +533,9 @@ export const runFindingsPass = async (
           hypotheses: output.hypotheses.map((hypothesis) => omit(hypothesis, 'evidence')),
         }
       : output;
+  // A follow-up already has hypotheses with evidence. A live pass is too thin to revise them
+  // faithfully, so it only refreshes the summary and the final pass updates the hypotheses.
+  const keepHypotheses = !final && (conversation.rounds?.length ?? 0) > 0;
 
   const writer = agenticInvestigations.getFindingsWriter(request);
   const conversations = await agentBuilder.conversations.getScopedClient({ request });
@@ -563,7 +568,7 @@ export const runFindingsPass = async (
         }),
     ],
   ];
-  if (record) {
+  if (record && !keepHypotheses) {
     writes.push([
       'hypotheses',
       () =>

@@ -16,7 +16,7 @@ const ROLE = `You keep the written record of an SRE investigation that another a
 
 Use only what the transcript shows. Do not invent services, numbers, timings or causes. When the evidence is thin, say so and keep confidence low.
 
-Every value is plain text: no markdown, no line breaks and no double quotes inside any value (use single quotes when you must quote something).`;
+Every value is plain text: no markdown, no line breaks and no double quotes inside any value (use single quotes when you must quote something). Two things are exempt: an evidence query is copied exactly as the agent wrote it, quotes and line breaks included, and a proposal comment is markdown and may hold line breaks and code.`;
 
 const HYPOTHESES = `- hypotheses: every candidate cause the agent considered, as a snapshot that replaces the stored list.
   - status is investigating while open, dismissed once ruled out, confirmed for the root cause.
