@@ -27,6 +27,9 @@ export interface HashiCorpVaultConfig {
   tlsSkipVerify?: boolean;
   // approle: the role id is not a secret (the secret_id is).
   roleId?: string;
+  // Hosts that monitors using this connection may connect to. Delivered to Heartbeat as
+  // `allowed_hosts`; empty or omitted means any host. Not the Vault server allow-list.
+  allowedMonitorHosts?: string[];
 }
 
 /** Secret, provider-specific settings. Encrypted at rest as one blob. */

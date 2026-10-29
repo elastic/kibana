@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { isIP } from 'net';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { validateVaultAddress } from './address_guard';
 import { SECRET_CONNECTION_NAME_REGEX } from '../../../../common/lib/vault_reference';
+import {
+  isAllowedMonitorHostShape,
+  MAX_ALLOWED_MONITOR_HOSTS,
+} from '../../../../common/lib/allowed_monitor_hosts';
 
 // Upper bound for any single connection string; these flow into SO docs and the
 // delivered policy blob, so keep them bounded (AGENTS.md).
@@ -24,6 +29,18 @@ export const HashiCorpVaultConfigSchema = schema.object({
   kvMount: schema.maybe(schema.string({ maxLength: MAX_LEN })),
   tlsSkipVerify: schema.maybe(schema.boolean()),
   roleId: schema.maybe(schema.string({ maxLength: MAX_LEN })),
+  allowedMonitorHosts: schema.maybe(
+    schema.arrayOf(
+      schema.string({
+        maxLength: 253,
+        validate: (host) =>
+          isAllowedMonitorHostShape(host) && (!host.includes(':') || isIP(host) !== 0)
+            ? undefined
+            : 'must be a host name or IP address, without scheme, port, path or wildcard',
+      }),
+      { maxSize: MAX_ALLOWED_MONITOR_HOSTS }
+    )
+  ),
 });
 
 export const HashiCorpVaultSecretsSchema = schema.object({
