@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createRequire } from 'node:module';
 import type { DummyRuleMap } from 'oxlint';
 
+// Spread so rules added to the EUI preset turn on with the plugin upgrade. The package's ESM
+// types are empty, hence `require` with an explicit shape.
+const {
+  configs: { recommended },
+}: { configs: { recommended: { rules: DummyRuleMap } } } = createRequire(import.meta.url)(
+  '@elastic/eslint-plugin-eui'
+);
+
 export const euiRules: DummyRuleMap = {
-  // `plugin:@elastic/eui/recommended`
-  '@elastic/eui/button-group-no-invalid-children': 'error',
-  '@elastic/eui/button-group-selection-require-id': 'error',
-  '@elastic/eui/href-or-on-click': 'warn',
-  '@elastic/eui/no-css-color': 'warn',
-  '@elastic/eui/no-deprecated-icon-aliases': 'warn',
-  '@elastic/eui/no-nested-copy-tooltip': 'warn',
-  '@elastic/eui/no-nested-interactive-element': 'warn',
-  '@elastic/eui/no-static-z-index': 'warn',
-  '@elastic/eui/prefer-tooltip-trigger-focus-test-utility': 'warn',
-  '@elastic/eui/require-href-for-link': 'warn',
+  ...recommended.rules,
 
   /**
    * EUI Team rules
