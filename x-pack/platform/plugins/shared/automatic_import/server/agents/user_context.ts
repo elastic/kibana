@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { MAX_USER_CONTEXT_DESCRIPTION_LENGTH } from '../../common';
+
 export interface UserProvidedContext {
   readonly integrationDescription?: string;
   readonly dataStreamDescription?: string;
@@ -16,6 +18,12 @@ const USER_CONTEXT_PREAMBLE =
 const escapeXml = (text: string): string =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+const formatDescription = (tag: string, description: string): string => {
+  const truncated = description.length > MAX_USER_CONTEXT_DESCRIPTION_LENGTH;
+  const value = escapeXml(description.slice(0, MAX_USER_CONTEXT_DESCRIPTION_LENGTH));
+  return `<${tag}${truncated ? ' truncated="true"' : ''}>${value}</${tag}>`;
+};
+
 export const formatUserContextBlock = (context?: UserProvidedContext): string => {
   const integrationDescription = context?.integrationDescription?.trim();
   const dataStreamDescription = context?.dataStreamDescription?.trim();
@@ -26,14 +34,10 @@ export const formatUserContextBlock = (context?: UserProvidedContext): string =>
 
   const lines = ['<user_provided_context>', USER_CONTEXT_PREAMBLE];
   if (integrationDescription) {
-    lines.push(
-      `<integration_description>${escapeXml(integrationDescription)}</integration_description>`
-    );
+    lines.push(formatDescription('integration_description', integrationDescription));
   }
   if (dataStreamDescription) {
-    lines.push(
-      `<data_stream_description>${escapeXml(dataStreamDescription)}</data_stream_description>`
-    );
+    lines.push(formatDescription('data_stream_description', dataStreamDescription));
   }
   lines.push('</user_provided_context>');
 

@@ -43,6 +43,41 @@ describe('formatUserContextBlock', () => {
     expect(block.match(/<\/user_provided_context>/g)).toHaveLength(1);
   });
 
+  it('truncates descriptions at 2,000 characters and marks them as truncated', () => {
+    const block = formatUserContextBlock({
+      integrationDescription: 'a'.repeat(10_000),
+    });
+
+    expect(block).toContain(
+      `<integration_description truncated="true">${'a'.repeat(2_000)}</integration_description>`
+    );
+    expect(block).not.toContain('a'.repeat(2_001));
+  });
+
+  it('does not mark descriptions at the limit as truncated', () => {
+    const block = formatUserContextBlock({
+      dataStreamDescription: 'a'.repeat(2_000),
+    });
+
+    expect(block).toContain(
+      `<data_stream_description>${'a'.repeat(2_000)}</data_stream_description>`
+    );
+    expect(block).not.toContain('truncated="true"');
+  });
+
+  it('escapes descriptions after truncating them', () => {
+    const block = formatUserContextBlock({
+      dataStreamDescription: `${'a'.repeat(1_999)}&ignored`,
+    });
+
+    expect(block).toContain(
+      `<data_stream_description truncated="true">${'a'.repeat(
+        1_999
+      )}&amp;</data_stream_description>`
+    );
+    expect(block).not.toContain('ignored');
+  });
+
   it('returns an empty string when there are no descriptions', () => {
     expect(formatUserContextBlock()).toBe('');
     expect(formatUserContextBlock({})).toBe('');
