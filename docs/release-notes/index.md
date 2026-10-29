@@ -494,7 +494,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Add a **View change history** option to the alerting v2 rule details menu and rule row actions to browse previous versions of a rule [#284942]({{kib-pull}}284942).
 * Show alerting v1 rules and alerting v2 rules on the same page [#289314]({{kib-pull}}289314).
 * Add severity configuration to the alerting v2 threshold rule builder [#288657]({{kib-pull}}288657).
-* Support federated data sources in the alerting v2 threshold rule builder [#279142]({{kib-pull}}279142).
 * Add **Create** and **AI Agent** options to the empty state of the alerting v2 action policy page [#285856]({{kib-pull}}285856).
 * Add a channel selector to the Slack action in the alerting v2 rule form, with the option to enter a channel that is not in the list [#278778]({{kib-pull}}278778).
 * Use the Slack v2 connector for new Slack actions in the alerting v2 rule form [#278451]({{kib-pull}}278451).
@@ -616,7 +615,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Group integration packages that share a group identifier into a single collection tile in the integrations catalog [#287372]({{kib-pull}}287372), [#283107]({{kib-pull}}283107).
 * Open the **Add integration** page when you select an integration tile that has something to configure [#299010]({{kib-pull}}299010).
 * Hide integrations that aren't FIPS compatible from the integrations catalog, and prevent installing them or creating policies for them, when {{kib}} runs in FIPS mode [#294706]({{kib-pull}}294706).
-* Detect and update out-of-date CloudFormation templates for federated identity [#291272]({{kib-pull}}291272).
 * Add the `policy_namespace` field to agent status change events [#287194]({{kib-pull}}287194).
 * Add an allow list for the cluster privileges that package manifests declare [#286084]({{kib-pull}}286084).
 * Support package spec version 3.7 [#298093]({{kib-pull}}298093).
@@ -625,11 +623,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 
 **Data management**:
 * Add an **{{esql}} Views** management page to create, edit, preview, and delete {{esql}} views. To use the page, you need the `read_view_metadata` index privilege [#297834]({{kib-pull}}297834).
-* Move {{esql}} Data Federation to technical preview [#296656]({{kib-pull}}296656).
-* Add the `dataFederation:enabled` advanced setting to hide the {{esql}} Data Federation management UI without turning off the service [#295062]({{kib-pull}}295062).
-* Add an **Open in Discover** action to each dataset in the Data Federation datasets table [#294551]({{kib-pull}}294551).
-* Add CloudFormation authentication for S3 federated identity, change the S3 federated identity options to manual setup commands, and mark federated identity as recommended with a description for each method [#292695]({{kib-pull}}292695), [#291964]({{kib-pull}}291964), [#291726]({{kib-pull}}291726).
-* Add the ability to define {{esql}} data source privileges in the **Roles** management page [#288519]({{kib-pull}}288519).
 
 **Developer tools**:
 * Generate request body autocomplete rules in Console from the {{es}} specification [#278510]({{kib-pull}}278510).
@@ -669,7 +662,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Support `??` parameters in PromQL [#281486]({{kib-pull}}281486).
 * Persist whether a Discover session tab uses {{esql}} approximation [#282776]({{kib-pull}}282776).
 * Update the height of the {{esql}} editor after an LLM inserts content [#279712]({{kib-pull}}279712).
-* Skip the no data screen in Discover and Dashboards when a federated data source exists [#279421]({{kib-pull}}279421).
 
 **{{product.observability}} solution**:
 For the {{product.observability}} 9.6.0 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
@@ -775,7 +767,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 
 **Alerting and cases**:
 * Fix a large alerting v2 alerts list overloading the browser and causing freezing, reloading, or lag [#297528]({{kib-pull}}297528).
-* Fix the **Elasticsearch query** rule {{esql}} time field selector not listing the timestamp fields of federated datasets [#296021]({{kib-pull}}296021).
 * Fix a rule running again for the same occurrence when Task Manager claims it before its `runAt` time [#297486]({{kib-pull}}297486).
 * Fix rules and background tasks silently stopping for several minutes when a concurrent update prevents a completed run from being recorded [#295415]({{kib-pull}}295415).
 * Fix a request to run a rule immediately, or a schedule change, being discarded when it arrives while the rule is finishing a run [#293492]({{kib-pull}}293492).
@@ -940,7 +931,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the region count text in the **Manage region preferences** modal not expanding or collapsing the zone when you select it, and the modal shrinking when you dismiss the model availability notice [#280253]({{kib-pull}}280253), [#280242]({{kib-pull}}280242).
 
 **{{esql}} editor**:
-* Hide the Data Federation UI unless the license is Enterprise in stateful deployments [#294697]({{kib-pull}}294697).
 
 **{{kib}} platform**:
 * Fix the date range picker ignoring time zone and day-of-week settings [#299851]({{kib-pull}}299851).
@@ -1044,6 +1034,18 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Consolidate {{fleet}} agent bulk-action KQL field validation [#299837]({{kib-pull}}299837).
 % * Unenroll inactive agents with a stale `unenrolled_at` in the scheduled unenrollment task [#300148]({{kib-pull}}300148).
 % * Fix gaps that anonymization QA found [#300154]({{kib-pull}}300154).
+
+% Removed from 9.6.0: Data Federation is not announced yet. Add these back when the feature is announced.
+% * Support federated data sources in the alerting v2 threshold rule builder [#279142]({{kib-pull}}279142).
+% * Detect and update out-of-date CloudFormation templates for federated identity [#291272]({{kib-pull}}291272).
+% * Move {{esql}} Data Federation to technical preview [#296656]({{kib-pull}}296656).
+% * Add the `dataFederation:enabled` advanced setting to hide the {{esql}} Data Federation management UI without turning off the service [#295062]({{kib-pull}}295062).
+% * Add an **Open in Discover** action to each dataset in the Data Federation datasets table [#294551]({{kib-pull}}294551).
+% * Add CloudFormation authentication for S3 federated identity, change the S3 federated identity options to manual setup commands, and mark federated identity as recommended with a description for each method [#292695]({{kib-pull}}292695), [#291964]({{kib-pull}}291964), [#291726]({{kib-pull}}291726).
+% * Add the ability to define {{esql}} data source privileges in the **Roles** management page [#288519]({{kib-pull}}288519).
+% * Skip the no data screen in Discover and Dashboards when a federated data source exists [#279421]({{kib-pull}}279421).
+% * Fix the **Elasticsearch query** rule {{esql}} time field selector not listing the timestamp fields of federated datasets [#296021]({{kib-pull}}296021).
+% * Hide the Data Federation UI unless the license is Enterprise in stateful deployments [#294697]({{kib-pull}}294697).
 
 ## 9.5.0 [kibana-9.5.0-release-notes]
 
