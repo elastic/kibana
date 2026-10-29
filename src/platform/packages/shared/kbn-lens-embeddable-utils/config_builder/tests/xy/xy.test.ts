@@ -175,28 +175,6 @@ describe('XY', () => {
     });
 
     describe('Annotations', () => {
-      it('rejects ES|QL annotations instead of serializing them as manual points', () => {
-        const attributes = structuredClone(annotationXY);
-        const visualization = attributes.state.visualization as XYVisualizationState;
-        const layer = visualization.layers.find(({ layerType }) => layerType === 'annotations');
-        if (layer?.layerType !== 'annotations')
-          throw new Error('Annotation fixture is missing its layer');
-        layer.annotations = [
-          {
-            id: 'deployments',
-            type: 'esql',
-            query: { esql: 'FROM deployments | KEEP time' },
-            timeColumn: 'time',
-            key: { type: 'point_in_time' },
-            label: 'Deployments',
-          },
-        ];
-
-        expect(() => new LensConfigBuilder(undefined, true).toAPIFormat(attributes)).toThrow(
-          'ES|QL annotations are not supported by the configuration API yet.'
-        );
-      });
-
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for an annotation with a ${type} chart`, () => {
           validator.xy.fromState(setSeriesType(annotationXY, type));
@@ -597,6 +575,129 @@ describe('XY', () => {
             ],
           });
           expect(result.success).toBe(false);
+        });
+
+        const esqlAnnotationLayer = {
+          type: 'annotations' as const,
+          ignore_global_filters: true,
+          events: [
+            {
+              type: 'point' as const,
+              label: 'Alert fired',
+              timestamp: '2026-07-15T14:00:00.000Z',
+            },
+            {
+              type: 'esql' as const,
+              data_source: {
+                type: 'esql' as const,
+                query: 'FROM deployments | KEEP @timestamp, version, service',
+              },
+              time_column: '@timestamp',
+              time_field: '@timestamp',
+              label: 'Deployments',
+              text: { visible: true, column: 'version' },
+              extra_columns: ['service'],
+              icon: 'flag' as const,
+              line: { stroke_width: 2, stroke_dash: 'dashed' as const },
+              color: { type: 'static' as const, color: '#e5281e' },
+            },
+            {
+              type: 'esql' as const,
+              data_source: {
+                type: 'esql' as const,
+                query: 'FROM maintenance | KEEP start, end, reason',
+              },
+              time_column: 'start',
+              end_time_column: 'end',
+              label: 'Maintenance',
+              text: { column: 'reason' },
+              fill: 'outside' as const,
+              visible: false,
+            },
+          ],
+        };
+
+        it('should round-trip ES|QL point and range annotations next to manual annotations', () => {
+          validator.xy.fromApi({
+            type: 'xy',
+            title: 'ES|QL chart with ES|QL annotations',
+            layers: [esqlDataLayer, esqlAnnotationLayer],
+          });
+        });
+
+        it('should round-trip ES|QL annotation state through the API', () => {
+          const builder = new LensConfigBuilder(undefined, true);
+          const state = builder.fromAPIFormat({
+            type: 'xy',
+            title: 'ES|QL chart with ES|QL annotations',
+            layers: [esqlDataLayer, esqlAnnotationLayer],
+          });
+          validator.xy.fromState(state);
+
+          const annotationLayer = (state.state.visualization as XYVisualizationState).layers.find(
+            ({ layerType }) => layerType === 'annotations'
+          );
+          expect(
+            annotationLayer && 'annotations' in annotationLayer && annotationLayer.annotations
+          ).toEqual([
+            expect.objectContaining({ type: 'manual' }),
+            expect.objectContaining({
+              type: 'esql',
+              query: { esql: 'FROM deployments | KEEP @timestamp, version, service' },
+              key: { type: 'point_in_time' },
+              timeColumn: '@timestamp',
+              timeField: '@timestamp',
+              textColumn: 'version',
+              textVisibility: true,
+              extraColumns: ['service'],
+              icon: 'flag',
+              lineWidth: 2,
+              lineStyle: 'dashed',
+              color: '#e5281e',
+            }),
+            expect.objectContaining({
+              type: 'esql',
+              key: { type: 'range' },
+              timeColumn: 'start',
+              endTimeColumn: 'end',
+              textColumn: 'reason',
+              outside: true,
+              isHidden: true,
+            }),
+          ]);
+        });
+
+        it('should reject point-only styling on ES|QL range annotations', () => {
+          const [, , range] = esqlAnnotationLayer.events;
+          const result = xyConfigSchema.safeParse({
+            type: 'xy',
+            title: 'ES|QL range with an icon',
+            layers: [
+              esqlDataLayer,
+              { ...esqlAnnotationLayer, events: [{ ...range, icon: 'flag' }] },
+            ],
+          });
+          expect(result.success).toBe(false);
+        });
+
+        it('should reject ES|QL annotations on DSL charts', () => {
+          const dslDataLayer = {
+            type: 'bar',
+            data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'logs-*' },
+            ignore_global_filters: false,
+            sampling: 1,
+            y: [{ operation: 'count' }],
+          };
+          const [manualEvent, esqlEvent] = esqlAnnotationLayer.events;
+          const parse = (events: Array<typeof manualEvent | typeof esqlEvent>) =>
+            xyConfigSchema.safeParse({
+              type: 'xy',
+              title: 'DSL chart with annotations',
+              layers: [dslDataLayer, { ...esqlAnnotationLayer, events }],
+            }).success;
+
+          expect(parse([manualEvent])).toBe(true);
+          expect(parse([esqlEvent])).toBe(false);
         });
 
         it('should reject by-reference annotation groups on ES|QL charts', () => {
