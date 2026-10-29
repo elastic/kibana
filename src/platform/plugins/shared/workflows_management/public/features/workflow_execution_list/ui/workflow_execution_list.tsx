@@ -36,7 +36,7 @@ import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_
 import {
   executedByFallbackLabel,
   getExecutedByLabel,
-  useUserProfilesByUid,
+  getExecutedByProfiles,
 } from '../../../entities/user_profiles';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -97,10 +97,13 @@ export const WorkflowExecutionList = ({
     return Array.from(uniqueUsers).sort();
   }, [executions, filters.executedBy]);
 
-  const { data: executedByUserProfiles = EMPTY_EXECUTED_BY_USER_PROFILES } = useUserProfilesByUid({
-    enabled: showExecutor,
-    uids: executedByValuesToResolve,
-  });
+  const executedByUserProfiles = useMemo(
+    () =>
+      showExecutor
+        ? getExecutedByProfiles(executions?.results ?? [])
+        : EMPTY_EXECUTED_BY_USER_PROFILES,
+    [executions, showExecutor]
+  );
 
   const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
     const options = executedByValuesToResolve.flatMap((executedBy) => {

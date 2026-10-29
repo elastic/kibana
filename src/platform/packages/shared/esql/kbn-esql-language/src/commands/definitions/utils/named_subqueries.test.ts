@@ -21,7 +21,7 @@ const parse = (query: string): ESQLAstQueryExpression => Parser.parse(query).roo
 const getSource = (query: string): ESQLSource => {
   const source = parse(query).commands[0].args.find(isSource);
 
-  if (!source) {
+  if (!source || !isSource(source)) {
     throw new Error(`Expected a source in query: ${query}`);
   }
 

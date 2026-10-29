@@ -120,6 +120,7 @@ export async function runDockerGenerator(
     imageTag,
     dockerBuildDir,
     dockerTargetFilename,
+    skipDockerImageArchive: config.shouldSkipDockerImageArchive(),
     dockerPush,
     dockerTag,
     dockerTagQualifier,
