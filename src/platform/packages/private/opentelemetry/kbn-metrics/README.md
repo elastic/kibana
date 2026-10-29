@@ -6,7 +6,7 @@ It is intended to be used by the package `@kbn/telemetry`.
 
 ### Enable OTel Metrics
 
-For now, only the `gRPC` and `http` exporters are supported. To enable OTel Metrics, add the following configuration in the `kibana.yml`:
+For now, only the `grpc`, `http` (OTLP/HTTP JSON), and `proto` (OTLP/HTTP protobuf) exporters are supported. To enable OTel Metrics, add the following configuration in the `kibana.yml`:
 
 ```yaml
 telemetry.metrics:
@@ -22,6 +22,50 @@ telemetry.metrics:
 #### Special case: Monitoring Collection
 
 This package also takes care of initializing the metric exporters defined in the Monitoring Collection plugin. Refer to the [plugin's docs](../../../../../../x-pack/platform/plugins/private/monitoring_collection/README.md) for more info about those exporters.
+
+#### Test locally
+
+To see the documents your metrics produce, export them directly to a local Elasticsearch, which accepts OTLP metrics at `/_otlp/v1/metrics`. Use the `proto` exporter: the endpoint only accepts protobuf, so the `http` (JSON) exporter will not work, and `grpc` needs a collector in between.
+
+1. Start Elasticsearch:
+
+   ```bash
+   yarn es snapshot
+   ```
+
+2. Add the following to `config/kibana.dev.yml`:
+
+   ```yaml
+   telemetry.metrics:
+     enabled: true
+     interval: 10s
+     exporters:
+       - proto:
+           url: http://localhost:9200/_otlp/v1/metrics
+           # `delta` is the default; use `cumulative` to check how your metrics behave with exporters
+           # that require it (e.g. Prometheus)
+           temporalityPreference: cumulative
+           headers:
+             # base64 of the dev default credentials elastic:changeme
+             authorization: "Basic ZWxhc3RpYzpjaGFuZ2VtZQ=="
+   ```
+
+3. Start Kibana:
+
+   ```bash
+   yarn start
+   ```
+
+4. After an export interval or two, query the documents in Discover, filtering by your meter's scope:
+
+   ```esql
+   FROM metrics-generic.otel-*
+   | WHERE scope.name == "kibana.my_area"
+   | SORT @timestamp DESC
+   | LIMIT 100
+   ```
+
+If the export fails, Kibana logs the error. 
 
 ### Instrument your code with metrics
 
