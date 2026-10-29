@@ -172,7 +172,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           viewType: latest.view_type,
           isEsqlEnabled: deps.uiSettings.get(ENABLE_ESQL),
           query: latest.query,
-          hasDataView: Boolean(dataViews$.getValue()?.length),
+          hasDataView: Boolean(dataSources$.getValue()?.length),
         });
         if (skipsFetch) {
           // No stats request will run. Clear loading or dashboard Refresh stays on Cancel.
