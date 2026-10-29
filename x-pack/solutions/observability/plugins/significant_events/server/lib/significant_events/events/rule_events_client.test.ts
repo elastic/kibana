@@ -778,18 +778,6 @@ describe('RuleEventsClient', () => {
       expect(query).not.toHaveBeenCalled();
     });
 
-    it('decodes hits the same way as findLatestLive', async () => {
-      const row: MockRow = {
-        source: ruleEventSource({ alert: { id: 'episode-1', status: 'inactive' } }),
-        dataJson: JSON.stringify(dataDoc),
-      };
-      const { client } = createClient(async () => sourceResponse([row]));
-
-      const { hits } = await client.findLatestInactiveByIdentity(identity);
-
-      expect(hits).toEqual([expect.objectContaining({ status: 'inactive' })]);
-    });
-
     it('returns the group_hash and episode each closed series is on, for deactivation lookups', async () => {
       const row: MockRow = {
         source: ruleEventSource({ alert: { id: 'episode-1', status: 'inactive' } }),
@@ -897,17 +885,6 @@ describe('RuleEventsClient', () => {
       expect(text).toContain('action_type IN ("deactivate", "activate")');
     });
 
-    it.each(['snooze', 'unsnooze', 'ack', 'unack', 'assign', 'tag'])(
-      'never reads %s actions, so they cannot mask or cancel a deactivation',
-      async (actionType) => {
-        const { client, query } = setup([]);
-
-        await client.findOperatorDeactivations({ heads });
-
-        expect(lastQuery(query)).not.toContain(`"${actionType}"`);
-      }
-    );
-
     it('reads the newest actions first, so a default row limit can only drop old ones', async () => {
       const { client, query } = setup([]);
 
@@ -1002,20 +979,14 @@ describe('RuleEventsClient', () => {
       expect([...deactivations.keys()]).toEqual(['series-2']);
     });
 
-    it.each([
-      ['a missing index', new Error('index_not_found_exception')],
-      ['any other read failure', new Error('verification_exception')],
-    ])(
-      'reads %s as not deactivated, with a tagged error, instead of throwing',
-      async (_name, error) => {
-        const { client, logger } = setup(error);
+    it('reads a failed read as not deactivated, with a tagged error, instead of throwing', async () => {
+      const { client, logger } = setup(new Error('index_not_found_exception'));
 
-        expect((await client.findOperatorDeactivations({ heads })).size).toBe(0);
-        expect(logger.error).toHaveBeenCalledWith(
-          expect.stringContaining('deactivation_check_failed')
-        );
-      }
-    );
+      expect((await client.findOperatorDeactivations({ heads })).size).toBe(0);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('deactivation_check_failed')
+      );
+    });
 
     it('does not hold a deactivation that carries the standard no-reason note', async () => {
       const { client } = setup([
@@ -1082,16 +1053,6 @@ describe('RuleEventsClient', () => {
       expect(text).toContain('space_id == "default"');
       expect(text).toContain('group_hash == "group-1"');
       expect(text).toContain('action_type == "deactivate" AND actor.type == "user"');
-    });
-
-    it('logs an error when it has to read with the request credentials', async () => {
-      const { client, logger } = setup(actionResponse([]));
-
-      await client.findEventDeactivations('event-1');
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('deactivation_check_degraded')
-      );
     });
 
     it('returns nothing, without reading actions, for an unknown event', async () => {

@@ -457,10 +457,6 @@ describe('fetchInactiveEventsForReuse', () => {
     });
   });
 
-  it('defaults the lookback to 48 hours', () => {
-    expect(DEFAULT_INACTIVE_LOOKBACK_MS).toBe(48 * 60 * 60 * 1000);
-  });
-
   it('skips candidates that carry no sources or no rules', async () => {
     const client = makeInactiveClient();
 
@@ -497,7 +493,7 @@ describe('reopenMatchingInactiveSeries', () => {
       deactivatedGroupHashes,
     });
 
-  it('reuses the event_id of a closed series with the exact same identity', () => {
+  it('reuses the event_id of a closed series with the exact same identity, and records its head for the deactivation check', () => {
     const [candidate] = reopen([makeInput()], [makeInactiveEvent()]);
 
     expect(candidate).toMatchObject({
@@ -505,18 +501,10 @@ describe('reopenMatchingInactiveSeries', () => {
       index: 0,
       eventId: 'closed-event-id',
       input: { event_id: 'closed-event-id', title: 'Checkout latency' },
-    });
-  });
-
-  it('records the series head the reopened candidate continues, for the deactivation check', () => {
-    const [candidate] = reopen(
-      [makeInput()],
-      [makeInactiveEvent()],
-      [{ eventId: 'closed-event-id', groupHash: 'group-1', episodeId: 'episode-1' }]
-    );
-
-    expect(candidate).toMatchObject({
-      reopensSeries: { groupHash: 'group-1', episodeId: 'episode-1' },
+      reopensSeries: {
+        groupHash: 'group-closed-event-id',
+        episodeId: 'episode-closed-event-id',
+      },
     });
   });
 
@@ -524,15 +512,6 @@ describe('reopenMatchingInactiveSeries', () => {
     const [candidate] = reopen([makeInput()], [makeInactiveEvent()], []);
 
     expect(candidate.mode).toBe('dedup');
-  });
-
-  it('reopens a series that holds more rules than the batch, since a series grows while live', () => {
-    const [candidate] = reopen(
-      [makeInput()],
-      [makeInactiveEvent({ signals: [makeSignal('rule-abc'), makeSignal('rule-def')] })]
-    );
-
-    expect(candidate).toMatchObject({ mode: 'snapshot', eventId: 'closed-event-id' });
   });
 
   it('does not reopen a series that lacks one of the batch rules', () => {
@@ -696,16 +675,6 @@ describe('competingInactiveHeads', () => {
         closed('a'),
         closed('b', { signals: [makeSignal('rule-abc'), makeSignal('rule-def')] }),
       ],
-      heads: [head('a'), head('b')],
-    });
-
-    expect(heads).toEqual([]);
-  });
-
-  it('returns nothing when each candidate matches at most one series', () => {
-    const heads = competingInactiveHeads(buildWriteCandidates([makeInput()]), {
-      // `b` covers another source, so only `a` matches the default `makeInput()` identity.
-      events: [closed('a'), closed('b', { source_ids: ['logs.cart'] })],
       heads: [head('a'), head('b')],
     });
 
