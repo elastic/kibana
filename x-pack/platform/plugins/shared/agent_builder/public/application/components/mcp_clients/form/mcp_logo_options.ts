@@ -111,17 +111,13 @@ export const LOGO_OPTIONS: Readonly<Record<string, LogoOption>> = {
         ({ default: url }) => url
       ),
   },
-  aws: {
-    label: i18n.translate('xpack.agentBuilder.mcpClients.form.logoOption.aws', {
-      defaultMessage: 'AWS',
+  amazon_bedrock_agentcore: {
+    label: i18n.translate('xpack.agentBuilder.mcpClients.form.logoOption.amazonBedrockAgentCore', {
+      defaultMessage: 'Amazon Bedrock AgentCore',
     }),
     loadIconUrl: () =>
-      import(/* webpackChunkName: "mcpClientLogos" */ './assets/logos/aws.png').then(
-        ({ default: url }) => url
-      ),
-    loadIconUrlDark: () =>
-      import(/* webpackChunkName: "mcpClientLogos" */ './assets/logos/aws_dark.png').then(
-        ({ default: url }) => url
-      ),
+      import(
+        /* webpackChunkName: "mcpClientLogos" */ './assets/logos/amazon_bedrock_agentcore.png'
+      ).then(({ default: url }) => url),
   },
 };
