@@ -193,7 +193,7 @@ export const DEPRECATION_CALLOUT_ENABLE_ALERTZERO = i18n.translate(
 export const DEPRECATION_CALLOUT_ADJUST_TRIAGE_WORKER = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutAdjustTriageWorker',
   {
-    defaultMessage: 'Adjust your AlertZero Triage Worker settings here',
+    defaultMessage: 'Adjust your AlertZero Triage Worker settings',
   }
 );
 
