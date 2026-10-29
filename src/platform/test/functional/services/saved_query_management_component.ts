@@ -228,11 +228,11 @@ export class SavedQueryManagementComponentService extends FtrService {
   }
 
   async closeSavedQueryManagementComponent() {
-    const isOpenAlready = await this.testSubjects.exists('queryBarMenuPanel');
-    if (!isOpenAlready) return;
-
     await this.retry.try(async () => {
-      await this.testSubjects.click('showQueryBarMenu');
+      // Re-read inside the retry: a single probe can catch the panel mid-re-render and skip the close.
+      if (await this.testSubjects.exists('queryBarMenuPanel')) {
+        await this.testSubjects.click('showQueryBarMenu');
+      }
       await this.testSubjects.missingOrFail('queryBarMenuPanel');
     });
   }
