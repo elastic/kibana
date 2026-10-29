@@ -46525,7 +46525,6 @@
     "xpack.securitySolution.flyout.panelAriaLabel.userPreview": "ユーザープレビュー",
     "xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityFindings": "脆弱性の詳細",
     "xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityFindingsPreview": "脆弱性プレビュー",
-    "xpack.securitySolution.flyout.panelAriaLabel.watchlists": "ウォッチリスト",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnCountLabel": "カウント",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnLabel": "アラート",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnTooltip": "同じフィールド値のペアを持つアラートの総数。",
