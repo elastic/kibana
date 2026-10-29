@@ -18,10 +18,7 @@ export interface LeadingMention {
 const isMentionKind = (kind: string | undefined): kind is MentionKind =>
   kind === 'user' || kind === 'agent';
 
-/**
- * Returns the mention a serialized message starts with, if any. Spaces and empty lines before it
- * don't matter. Typed `@name` text is not a mention, only a picked one (a chip) is.
- */
+/** Returns the mention chip a serialized message starts with, ignoring whitespace before it. */
 export const getLeadingMention = (content: string): LeadingMention | undefined => {
   const firstSegment = deserializeInputSegments(content).find(
     (segment) => segment.type !== 'text' || stripZeroWidthSpaces(segment.value).trim() !== ''

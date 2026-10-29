@@ -32,7 +32,6 @@ interface InputActionsProps {
   showTriggerModeSelector: boolean;
   triggerMode: ChatTriggerMode;
   onTriggerModeChange: (mode: ChatTriggerMode) => void;
-  /** Shows the mention button when set. */
   onMentionClick?: () => void;
 }
 

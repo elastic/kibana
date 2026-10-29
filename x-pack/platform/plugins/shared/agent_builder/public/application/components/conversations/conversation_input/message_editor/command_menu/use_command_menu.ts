@@ -25,7 +25,7 @@ interface CommandMenuState {
 interface UseCommandMenuOptions {
   /** Whether command detection is enabled. Defaults to true. */
   readonly enabled?: boolean;
-  /** Commands that are not detected, even when they are otherwise available. */
+  /** Commands to ignore, even when they are available. */
   readonly excludedCommandIds?: readonly CommandId[];
 }
 

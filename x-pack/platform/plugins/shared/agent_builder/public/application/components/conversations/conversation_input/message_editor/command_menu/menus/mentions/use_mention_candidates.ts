@@ -31,7 +31,7 @@ const getChatPersonIds = (conversation: Conversation | undefined, isPublic: bool
   }
   const ids = [conversation.user.id];
   if (isPublic) {
-    // Authors from an external system are identified by that system, not by a profile uid.
+    // Authors from an external system (`origin` set) have no profile uid
     conversation.rounds.forEach(({ author, origin }) => {
       if (author && !origin) {
         ids.push(author.id);
@@ -61,9 +61,8 @@ const byName = (first: UserMentionCandidate, second: UserMentionCandidate): numb
   first.name.localeCompare(second.name);
 
 /**
- * Who can be mentioned in the current chat, in menu order: the chat's agent, the people in this
- * chat, then (public chats only) everyone else in the space. Nobody is listed twice, and the
- * current user is never listed.
+ * Who can be mentioned, in menu order: the agent, people in the chat, then (public chats only)
+ * the rest of the space.
  */
 export const useMentionCandidates = (
   query: string
@@ -99,7 +98,7 @@ export const useMentionCandidates = (
     const lowerQuery = query.toLowerCase();
     const result: MentionCandidate[] = [];
 
-    // The agent row only shows when it matches, else Enter on a name search would pick the agent
+    // Hide the agent when it does not match, else Enter on a name search picks the agent
     if (agent && (!lowerQuery || agent.name.toLowerCase().includes(lowerQuery))) {
       result.push({ kind: 'agent', id: agent.id, name: agent.name, agent });
     }

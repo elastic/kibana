@@ -59,10 +59,9 @@ const publicAccess: ConversationAccessControl = {
 };
 
 interface MentionsStoryOptions {
-  // Each story needs its own conversation id, so drafts and cached data don't leak between stories
   conversationId: string;
   accessControl: ConversationAccessControl;
-  // Public conversations list everyone in the space the user suggestions return
+  // When false, the user suggestions return nobody
   hasSpaceTeammates?: boolean;
 }
 
@@ -94,9 +93,8 @@ const withConversation = ({
   ];
 };
 
-// Until the conversation loads (its title is in the editor label), it isn't known to be shared
-// and `@` opens no menu. `userEvent.type` skips `contenteditable="plaintext-only"`, so the text
-// is inserted the way the browser does it for real typing.
+// `@` opens a menu only after the conversation loads (its title is in the editor label).
+// `userEvent.type` skips `contenteditable="plaintext-only"`, so insert text like the browser does.
 const openMentionsMenu = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
   const editor = await within(canvasElement).findByLabelText(
     `${CONVERSATION_TITLE} conversation, Message input`
@@ -112,7 +110,7 @@ const meta: Meta<typeof ConversationInput> = {
     onSubmitOverride: fn(),
   },
   beforeEach: () => {
-    // A draft saved by an earlier visit would be restored into the input before the play types
+    // Remove drafts from earlier visits, else they fill the input before the play types
     Object.keys(sessionStorage)
       .filter((key) => key.startsWith('agent-builder:draft:'))
       .forEach((key) => sessionStorage.removeItem(key));
@@ -151,7 +149,6 @@ export const PrivateTenPeople: Story = {
   }),
 };
 
-/** Not shared with anyone: no `@` button, and `@` opens no menu. */
 export const PrivateNoPeople: Story = {
   name: 'Private conversation - not shared',
   decorators: withConversation({

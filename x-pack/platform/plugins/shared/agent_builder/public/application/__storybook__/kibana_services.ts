@@ -32,7 +32,7 @@ const getUiSetting = (key: string) =>
 /** The user the stories act as. Matches the actor id of the user message event factory. */
 export const STORYBOOK_CURRENT_USER_ID = 'user-1';
 
-/** Teammates that user profile lookups and suggestions return, e.g. for `@` mentions. */
+/** People that user profile lookups and suggestions return. */
 export const STORYBOOK_TEAMMATES = [
   { uid: 'user-bran', fullName: 'Bran Castellano' },
   { uid: 'user-brian', fullName: 'Brian Pierce' },

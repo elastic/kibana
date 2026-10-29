@@ -9,13 +9,10 @@ import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import type { LeadingMention } from './mentions/get_leading_mention';
 
 export interface TriggerModeState {
-  /** The chat this state belongs to. The input stays mounted across chats. */
   conversationId?: string;
-  /** Picked by hand, or kept after a send. */
   selected: ChatTriggerMode;
-  /** Set by a mention at the start of the message. Wins over `selected` while it is set. */
+  /** Set by a mention at the start of the message. Wins over `selected`. */
   auto?: ChatTriggerMode;
-  /** The user flipped the toggle by hand in this message, so mentions no longer switch it. */
   isManualOverride: boolean;
 }
 
@@ -33,7 +30,6 @@ export type TriggerModeAction =
     }
   | { type: 'manualChange'; conversationId?: string; mode: ChatTriggerMode }
   | { type: 'sent'; conversationId?: string; mode: ChatTriggerMode }
-  /** The message was dropped without being sent, e.g. by switching chat. */
   | { type: 'cleared' }
   | { type: 'reset' };
 
@@ -42,9 +38,7 @@ const forConversation = (state: TriggerModeState, conversationId?: string): Trig
     ? state
     : { ...INITIAL_TRIGGER_MODE_STATE, conversationId };
 
-/**
- * A choice only applies to the chat it was made in, and is dropped once the toggle is not offered.
- */
+/** A choice only counts in the chat it was made in, and only while the toggle is shown. */
 export const getTriggerMode = (
   state: TriggerModeState,
   { conversationId, isSelectable }: { conversationId?: string; isSelectable: boolean }

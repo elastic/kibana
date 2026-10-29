@@ -50,7 +50,6 @@ export interface MessageEditorController {
   getContent: () => string;
   setContent: (text: string) => void;
   clear: () => void;
-  /** Types text at the caret, like the user would, so command menus open. */
   insertText: (text: string) => void;
   isEmpty: boolean;
   getPlaceholderNames: () => string[];
@@ -188,7 +187,6 @@ const useMessageEditorController = ({
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
-  /** Runs what an input event runs, for changes made by code. */
   notifyInput: () => void;
   isEmpty: boolean;
 }): MessageEditorController => {
@@ -249,7 +247,7 @@ const useMessageEditorController = ({
 
         const range = sel.getRangeAt(0);
         range.deleteContents();
-        // A command only opens after whitespace, so the text must not stick to the word before it
+        // A command menu only opens after whitespace, so add a space if needed
         const previousChar = getTextBeforeCursor(editor).slice(-1);
         const needsSpace =
           previousChar !== '' && previousChar !== ZERO_WIDTH_SPACE && !/\s/.test(previousChar);
@@ -293,7 +291,6 @@ export const useMessageEditor = (
     onEditorFocus?: () => void;
     onContentChange?: () => void;
     maxLength?: number;
-    /** Commands whose menu must not open, e.g. because the chat does not support them. */
     excludedCommandIds?: readonly CommandId[];
   } = {}
 ): {
@@ -329,7 +326,7 @@ export const useMessageEditor = (
     onContentChange,
     excludedCommandIds,
   });
-  // Read through a ref so a changing `instance` does not change the controller's identity
+  // A ref keeps the controller stable when `instance` changes
   const onChangeRef = useRef(instance.onChange);
   onChangeRef.current = instance.onChange;
   const notifyInput = useCallback(() => onChangeRef.current(), []);
