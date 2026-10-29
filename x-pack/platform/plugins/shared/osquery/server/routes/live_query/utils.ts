@@ -41,6 +41,7 @@ export const getActionResponses = (
             aggs: {
               responses_by_action_id: estypes.AggregationsSingleBucketAggregateBase & {
                 rows_count: estypes.AggregationsSumAggregate;
+                responding_agents?: estypes.AggregationsCardinalityAggregate;
                 responses: {
                   buckets: Array<{
                     key: string;
@@ -79,7 +80,11 @@ export const getActionResponses = (
           val.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
         const successful = aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0;
         const failed = aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0;
-        const pending = agentsCount - responded;
+        // A duplicate response must not stand in for an agent that has not answered: `pending`
+        // counts distinct agents, falling back to documents when the aggregation is absent.
+        const respondingAgents =
+          val.rawResponse?.aggregations?.aggs.responses_by_action_id?.responding_agents?.value;
+        const pending = agentsCount - (respondingAgents ?? responded);
 
         return of({
           action_id: actionId,

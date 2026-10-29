@@ -26,6 +26,10 @@ import {
   QUERY_NOT_PROVIDED,
 } from '../../../common/translations/errors';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import {
+  agentLimitMessage,
+  NO_AGENTS_FOUND_MESSAGE,
+} from '../../../common/workflows/contract/route_messages';
 import type { DispatchEntryPoint } from './dispatch_source';
 import { resolveRuleRunDispatchSource } from './dispatch_source';
 
@@ -92,12 +96,12 @@ export const createActionHandler = async (
   );
 
   if (!selectedAgents.length) {
-    throw new CustomHttpRequestError('No agents found for selection', 400);
+    throw new CustomHttpRequestError(NO_AGENTS_FOUND_MESSAGE, 400);
   }
 
   if (options.maxAgents !== undefined && selectedAgents.length > options.maxAgents) {
     throw new CustomHttpRequestError(
-      `The selection matches ${selectedAgents.length} agents, above the limit of ${options.maxAgents}. Narrow it down.`,
+      agentLimitMessage(selectedAgents.length, options.maxAgents),
       400
     );
   }

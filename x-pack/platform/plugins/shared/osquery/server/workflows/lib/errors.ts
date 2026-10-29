@@ -10,6 +10,10 @@ import type { z } from '@kbn/zod/v4';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { PreDispatchErrorCode } from '../../../common/workflows/contract/error_codes';
 import type { PreDispatchErrorCodeValue } from '../../../common/workflows/contract/error_codes';
+import {
+  AGENT_LIMIT_MESSAGE_PATTERN,
+  NO_AGENTS_FOUND_MESSAGE,
+} from '../../../common/workflows/contract/route_messages';
 
 /** Raised before dispatch: `details.code` is the contract's error code. */
 export const stepError = (
@@ -65,11 +69,11 @@ export const toDispatchRejection = (error: unknown): ExecutionError | undefined 
     );
   }
 
-  if (error.status === 400 && /above the limit of \d+/i.test(message)) {
+  if (error.status === 400 && AGENT_LIMIT_MESSAGE_PATTERN.test(message)) {
     return stepError(PreDispatchErrorCode.TARGET_LIMIT_EXCEEDED, message);
   }
 
-  if (error.status === 400 && /No agents found for selection/i.test(message)) {
+  if (error.status === 400 && message.includes(NO_AGENTS_FOUND_MESSAGE)) {
     return stepError(
       PreDispatchErrorCode.AGENTS_NOT_IN_SPACE,
       'No agents found for the selection: the agents are not in this space, or none of them is online.'

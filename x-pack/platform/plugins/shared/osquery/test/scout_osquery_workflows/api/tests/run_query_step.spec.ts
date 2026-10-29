@@ -278,6 +278,44 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
   );
 
   apiTest(
+    'success with the minimal role: the step runs as the calling user, not as an admin',
+    async ({ apiClient, esClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        osqueryRole([
+          'minimal_read',
+          'run_saved_queries',
+          'saved_queries_read',
+          'live_queries_read',
+        ])
+      );
+      const workflows = workflowsClient(apiClient, apiKeyHeader);
+      const workflowId = await workflows.create(
+        'osq-wf-minimal-role',
+        runQueryStep(`agent_ids: ["${AGENT_A.id}"]`)
+      );
+      const executionId = await workflows.run(workflowId);
+      const state = await workflows.waitForDispatch(executionId, 'q');
+
+      await answerQuery(esClient, {
+        queryActionId: state.queries[0].action_id,
+        agent: AGENT_A,
+        rows: [{ pid: '1', name: 'systemd' }],
+        ecsMapping: { 'process.name': 'name' },
+      });
+
+      const execution = await workflows.waitForEnd(executionId);
+      expect(execution.status).toBe('completed');
+      expect(stepOf(execution, 'q').output).toMatchObject({
+        status: 'success',
+        agents: { total: 1, responded: 1, pending: 0, failed: 0 },
+        row_count: 1,
+        truncated: false,
+      });
+      await workflows.delete(workflowId);
+    }
+  );
+
+  apiTest(
     'MISSING_PRIVILEGE without run_saved_queries, before anything is dispatched',
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(

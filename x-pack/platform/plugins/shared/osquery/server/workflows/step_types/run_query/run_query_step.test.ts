@@ -8,6 +8,10 @@
 import type { ExecutionError } from '@kbn/workflows/server';
 import { OSQUERY_MAX_AGENTS_HEADER } from '../../../../common/constants';
 import { TARGET_AGENT_LIMIT } from '../../../../common/workflows/contract/budget';
+import {
+  agentLimitMessage,
+  NO_AGENTS_FOUND_MESSAGE,
+} from '../../../../common/workflows/contract/route_messages';
 import { runQueryStepDefinition } from './run_query_step';
 import { apiError, createContextManager, createLogger, resultEdges } from '../../test_helpers';
 
@@ -239,18 +243,14 @@ describe('osquery.runQuery step', () => {
 
     it('maps the route agent ceiling to TARGET_LIMIT_EXCEEDED', async () => {
       const { result } = start({
-        [POST]: () =>
-          apiError(
-            400,
-            'The selection matches 1001 agents, above the limit of 1000. Narrow it down.'
-          ),
+        [POST]: () => apiError(400, agentLimitMessage(1001, 1000)),
       });
 
       await expect(result).rejects.toMatchObject({ details: { code: 'TARGET_LIMIT_EXCEEDED' } });
     });
 
     it('maps the route 400 "No agents found" to AGENTS_NOT_IN_SPACE naming both causes', async () => {
-      const { result } = start({ [POST]: () => apiError(400, 'No agents found for selection') });
+      const { result } = start({ [POST]: () => apiError(400, NO_AGENTS_FOUND_MESSAGE) });
 
       const error = (await result.catch((e) => e)) as ExecutionError;
 

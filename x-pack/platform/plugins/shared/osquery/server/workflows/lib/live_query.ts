@@ -281,7 +281,7 @@ export const readLiveQuery = async ({
     let rows: ResultRow[] = [];
     if (rowCount > 0) {
       try {
-        rows = await collectResults({
+        const collected = await collectResults({
           contextManager,
           actionId: state.action_id,
           queryActionId: spec.action_id,
@@ -290,6 +290,16 @@ export const readLiveQuery = async ({
           maxRows: state.max_rows,
           budget,
         });
+        rows = collected.rows;
+
+        if (collected.readFailed) {
+          logger.warn(
+            `Live query ${state.action_id} results read failed after ${rows.length} rows`
+          );
+          // The rows were countable a moment ago: read them again on the next poll. After the
+          // deadline there is no next poll, so the rows already read are reported as cut short.
+          if (!deadlinePassed) return pending;
+        }
       } catch (error) {
         if (isForbidden(error)) {
           return { type: 'failed', errorCode: OutputErrorCode.STATUS_UNREADABLE_FORBIDDEN };
@@ -298,7 +308,6 @@ export const readLiveQuery = async ({
         logger.warn(
           `Live query ${state.action_id} results read failed: ${(error as Error).message}`
         );
-        // The rows were countable a moment ago: read them again on the next poll.
         if (!deadlinePassed) return pending;
       }
     }

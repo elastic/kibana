@@ -78,6 +78,7 @@ describe('buildResultsQuery', () => {
               order: 'desc',
             },
           },
+          '_doc',
         ],
       });
     });
@@ -315,6 +316,7 @@ describe('buildResultsQuery', () => {
               order: 'asc',
             },
           },
+          '_doc',
         ],
       });
     });

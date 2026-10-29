@@ -110,11 +110,17 @@ export const buildResultsQuery = ({
     size: querySize,
     track_total_hits: true,
     fields: ['elastic_agent.*', 'agent.*', 'osquery.*'],
-    sort:
-      sort?.map((sortConfig) => ({
-        [sortConfig.field]: {
-          order: sortConfig.direction,
-        },
-      })) ?? [],
+    // `_doc` breaks ties so offset pages stay disjoint when many documents share a sort value
+    // (rows of one bulk request share `event.ingested`).
+    sort: sort?.length
+      ? [
+          ...sort.map((sortConfig) => ({
+            [sortConfig.field]: {
+              order: sortConfig.direction,
+            },
+          })),
+          '_doc',
+        ]
+      : [],
   };
 };

@@ -60,4 +60,32 @@ describe('getActionResponses', () => {
       successful: 1,
     });
   });
+
+  it('counts distinct responding agents, so a duplicate response does not complete the action', async () => {
+    const search = {
+      search: jest.fn().mockReturnValue(
+        of({
+          rawResponse: {
+            aggregations: {
+              aggs: {
+                responses_by_action_id: {
+                  doc_count: 2,
+                  rows_count: { value: 2 },
+                  responding_agents: { value: 1 },
+                  responses: { buckets: [{ key: 'success', doc_count: 2 }] },
+                },
+              },
+            },
+          },
+        })
+      ),
+    } as unknown as IScopedSearchClient;
+
+    const response = await lastValueFrom(
+      getActionResponses(search, 'action-1', 2, undefined, 'default')
+    );
+
+    expect(response.pending).toBe(1);
+    expect(response.responded).toBe(2);
+  });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { RESULTS_MAX_WINDOW, RESULTS_PAGE_SIZE } from '../../../common/workflows/contract/budget';
 import { buildRow } from './build_rows';
 import type { ResultRow } from './build_rows';
@@ -52,10 +53,24 @@ export const countIndexedResults = async ({
   return body.data?.total ?? 0;
 };
 
+/** Smallest page tried after a failed read of a wide page. */
+const MIN_PAGE_SIZE = 25;
+
+export interface CollectedResults {
+  rows: ResultRow[];
+  /** A read failed (not a 401/403): `rows` holds what was read before it. */
+  readFailed: boolean;
+}
+
+const isForbidden = (error: unknown): boolean =>
+  error instanceof KibanaApiCallError && (error.status === 401 || error.status === 403);
+
 /**
  * Reads up to `maxRows` rows page by page. Stops at `rowCount`, at the route's 10k window and
- * when the shared output budget is spent. A read failure ends the loop: the caller decides
- * whether the rows read so far are enough.
+ * when the shared output budget is spent. A failed read halves the page size (a page of wide rows
+ * can exceed the response cap) and retries; once it cannot shrink further the rows read so far
+ * are returned with `readFailed`, so the caller decides whether they are enough. A 401/403 is
+ * thrown: the identity lost read access.
  */
 export const collectResults = async ({
   contextManager,
@@ -73,34 +88,48 @@ export const collectResults = async ({
   rowCount: number;
   maxRows: number;
   budget: OutputBudget;
-}): Promise<ResultRow[]> => {
+}): Promise<CollectedResults> => {
   const rows: ResultRow[] = [];
-  if (budget.exhausted) return rows;
+  if (budget.exhausted) return { rows, readFailed: false };
 
   const path = resultsPath(actionId, queryActionId);
+  let pageSize = RESULTS_PAGE_SIZE;
+  // Always a multiple of `pageSize`: it only grows by whole pages, and the size only halves.
+  let offset = 0;
 
-  for (
-    let page = 0;
+  while (
     rows.length < maxRows &&
     rows.length < rowCount &&
-    (page + 1) * RESULTS_PAGE_SIZE <= RESULTS_MAX_WINDOW;
-    page++
+    offset + pageSize <= RESULTS_MAX_WINDOW
   ) {
-    const { body } = await contextManager.callKibanaApi<ResultsResponse>({
-      method: 'GET',
-      path,
-      query: {
-        page,
-        pageSize: RESULTS_PAGE_SIZE,
-        // A document still arriving during the read (after the deadline) sorts after the pages
-        // already read, instead of shifting them.
-        sort: 'event.ingested',
-        sortOrder: 'asc',
-      },
-      headers: PUBLIC_API_HEADERS,
-    });
-    const edges = body.data?.edges ?? [];
-    if (edges.length === 0) break;
+    let edges: NonNullable<ResultsResponse['data']>['edges'];
+    try {
+      const { body } = await contextManager.callKibanaApi<ResultsResponse>({
+        method: 'GET',
+        path,
+        query: {
+          page: offset / pageSize,
+          pageSize,
+          // A document still arriving during the read (after the deadline) sorts after the pages
+          // already read, instead of shifting them. The route breaks ties on `_doc`.
+          sort: 'event.ingested',
+          sortOrder: 'asc',
+        },
+        headers: PUBLIC_API_HEADERS,
+      });
+      edges = body.data?.edges ?? [];
+    } catch (error) {
+      if (isForbidden(error)) throw error;
+
+      if (pageSize > MIN_PAGE_SIZE) {
+        pageSize = Math.max(MIN_PAGE_SIZE, Math.floor(pageSize / 2));
+        continue;
+      }
+
+      return { rows, readFailed: true };
+    }
+
+    if (edges.length === 0) return { rows, readFailed: false };
 
     for (const edge of edges) {
       if (!edge._source || rows.length >= maxRows) continue;
@@ -109,15 +138,16 @@ export const collectResults = async ({
       if (size > budget.remainingBytes) {
         budget.exhausted = true;
 
-        return rows;
+        return { rows, readFailed: false };
       }
 
       budget.remainingBytes -= size;
       rows.push(row);
     }
 
-    if (edges.length < RESULTS_PAGE_SIZE) break;
+    if (edges.length < pageSize) return { rows, readFailed: false };
+    offset += pageSize;
   }
 
-  return rows;
+  return { rows, readFailed: false };
 };

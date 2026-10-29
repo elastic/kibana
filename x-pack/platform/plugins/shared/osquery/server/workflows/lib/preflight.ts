@@ -9,6 +9,7 @@ import { buildPolicyIdKuery } from '../../../common/utils/build_policy_id_kuery'
 import type { PlatformId } from '../../../common/constants';
 import { PreDispatchErrorCode } from '../../../common/workflows/contract/error_codes';
 import { TARGET_AGENT_LIMIT } from '../../../common/workflows/contract/budget';
+import { agentLimitMessage } from '../../../common/workflows/contract/route_messages';
 import type { TargetInput } from '../../../common/workflows/contract/schemas';
 import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from './api_headers';
 import { stepError, toPreDispatchReadError } from './errors';
@@ -46,7 +47,7 @@ export const matchesPlatformId = (fleetPlatform: string, platformId: PlatformId)
 const tooMany = (total: number) =>
   stepError(
     PreDispatchErrorCode.TARGET_LIMIT_EXCEEDED,
-    `The selection matches ${total} agents, above the limit of ${TARGET_AGENT_LIMIT}. Narrow it down.`
+    agentLimitMessage(total, TARGET_AGENT_LIMIT)
   );
 
 const readAgents = async (

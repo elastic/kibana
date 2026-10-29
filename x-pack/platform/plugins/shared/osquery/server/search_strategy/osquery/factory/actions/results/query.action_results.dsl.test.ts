@@ -87,6 +87,11 @@ describe('buildActionResultsQuery', () => {
                       field: 'action_response.osquery.count',
                     },
                   },
+                  responding_agents: {
+                    cardinality: {
+                      field: 'agent_id',
+                    },
+                  },
                   responses: {
                     terms: {
                       script: {
@@ -362,6 +367,11 @@ describe('buildActionResultsQuery', () => {
                   rows_count: {
                     sum: {
                       field: 'action_response.osquery.count',
+                    },
+                  },
+                  responding_agents: {
+                    cardinality: {
+                      field: 'agent_id',
                     },
                   },
                   responses: {

@@ -142,6 +142,13 @@ export const buildActionResultsQuery = ({
                   field: 'action_response.osquery.count',
                 },
               },
+              // Fleet delivers responses at least once, so `doc_count` can exceed the number of
+              // agents that answered. Completion is decided on distinct agents.
+              responding_agents: {
+                cardinality: {
+                  field: 'agent_id',
+                },
+              },
               responses: {
                 terms: {
                   script: {

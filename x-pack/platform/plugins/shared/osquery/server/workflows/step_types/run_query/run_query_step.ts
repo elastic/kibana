@@ -72,6 +72,8 @@ export const runQueryStepDefinition = createPollServerStepDefinition({
     const { contextManager, logger } = context;
     const input = parseStepInput(runQueryInputSchema, context.input);
 
+    // `start` is not idempotent: the dispatch has no idempotency key, so if the engine re-runs it
+    // after a crash between the POST and the state write, the query is dispatched twice.
     const { target, agentCount } = await resolveTarget(contextManager, input);
     // Fails closed without saved-query read: the step validates the stored SQL (no `{{…}}`
     // placeholders, exactly one match) before anything reaches the agents, and never sends a
