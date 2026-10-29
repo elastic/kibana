@@ -21,18 +21,16 @@ jest.mock('../../../../../../../components', () => ({
     onClick,
     'data-test-subj': dataTestSubj,
   }: {
-    agent: Agent;
+    agent?: Agent;
     onClick?: () => void;
     'data-test-subj'?: string;
   }) =>
     onClick ? (
       <button data-test-subj={dataTestSubj} onClick={onClick}>
-        {agent.id}:{agent.status}
+        {agent ? `${agent.id}:${agent.status}` : 'Pending'}
       </button>
     ) : (
-      <span data-test-subj={dataTestSubj}>
-        {agent.id}:{agent.status}
-      </span>
+      <span data-test-subj={dataTestSubj}>{agent ? `${agent.id}:${agent.status}` : 'Pending'}</span>
     ),
 }));
 
@@ -91,5 +89,32 @@ describe('InstanceStatusCell', () => {
     render([instanceAgent('a', 'online', false)]);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.getByTestId('instanceAgentStatus')).toBeInTheDocument();
+  });
+
+  describe('a managed integration not deployed yet', () => {
+    const pending: InstanceAgent = {
+      agentPolicyId: 'agentless-1',
+      packagePolicy: { id: 'pp1', supports_agentless: true } as PackagePolicy,
+    };
+
+    it('shows Pending and opens its status', async () => {
+      const onOpen = jest.fn();
+      render([pending], onOpen);
+
+      expect(screen.getByTestId('instanceAgentStatus')).toHaveTextContent('Pending');
+      await act(async () => {
+        screen.getByTestId('instanceAgentStatus').click();
+      });
+      expect(onOpen).toHaveBeenCalledWith(pending);
+    });
+
+    it('ranks after unhealthy agents and before healthy ones', () => {
+      const { unmount } = render([instanceAgent('a', 'online'), pending]);
+      expect(screen.getByTestId('instanceAgentStatus')).toHaveTextContent('Pending');
+      unmount();
+
+      render([pending, instanceAgent('b', 'error')]);
+      expect(screen.getByTestId('instanceAgentStatus')).toHaveTextContent('b:error');
+    });
   });
 });

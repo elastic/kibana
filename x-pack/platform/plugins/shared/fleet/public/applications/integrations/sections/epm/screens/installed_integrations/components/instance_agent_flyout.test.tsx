@@ -79,4 +79,16 @@ describe('InstanceAgentFlyout', () => {
     );
     expect(screen.queryByTestId('agentlessEnrollmentFlyout')).not.toBeInTheDocument();
   });
+
+  it('opens the managed integration status of a managed integration not deployed yet', () => {
+    createIntegrationsTestRendererMock().render(
+      <InstanceAgentFlyout
+        agentPolicyId="ap1"
+        packagePolicy={packagePolicy(true)}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('agentlessEnrollmentFlyout')).toHaveTextContent('ap1 aws-1');
+  });
 });
