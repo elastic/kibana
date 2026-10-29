@@ -27,7 +27,6 @@ const createQueryClient = () =>
 
 const defaultKibanaServices = createStorybookKibanaServices();
 const defaultAgentBuilderServices = createStorybookAgentBuilderServices();
-const defaultQueryClient = createQueryClient();
 const storybookStreamService = new ConversationStreamService({
   getChatEvents$: () => NEVER,
   getStreamEnded$: () => NEVER,
@@ -57,8 +56,8 @@ export const AgentBuilderStorybookProvider: React.FC<AgentBuilderStorybookProvid
   const mergedKibanaServices = kibanaServices
     ? { ...defaultKibanaServices, ...kibanaServices }
     : defaultKibanaServices;
-  // Overridden Kibana services return other data under the same query keys, so they get their own cache
-  const [queryClient] = useState(() => (kibanaServices ? createQueryClient() : defaultQueryClient));
+  // One cache per story, so data does not leak between stories
+  const [queryClient] = useState(createQueryClient);
 
   return (
     <QueryClientProvider client={queryClient}>
