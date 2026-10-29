@@ -7,8 +7,8 @@
 import { z } from '@kbn/zod';
 import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { dateType } from '../../schema/zod/common';
-import { durationType } from '../../schema/zod/duration';
+import { dateType } from '../../schema/common';
+import { durationType } from '../../schema/duration';
 
 const fixedAgePurge = z.object({
   purgeType: z.literal('fixed_age'),
