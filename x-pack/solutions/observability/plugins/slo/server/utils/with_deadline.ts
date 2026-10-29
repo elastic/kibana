@@ -27,8 +27,9 @@ export const withTimeoutSignal = async <T>(
   }
 };
 
-const isAbortError = (err: Error): boolean =>
-  err instanceof errors.RequestAbortedError || err.name === 'AbortError';
+export const isAbortError = (err: unknown): boolean =>
+  err instanceof errors.RequestAbortedError ||
+  (typeof err === 'object' && err !== null && 'name' in err && err.name === 'AbortError');
 
 /**
  * Runs an operation with a signal aborted after `ms`; an abort error raised once the deadline is exceeded becomes an SLOOperationTimeout.

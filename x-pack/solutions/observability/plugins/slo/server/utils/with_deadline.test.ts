@@ -57,6 +57,20 @@ describe('withDeadline', () => {
     await expect(promise).rejects.toBeInstanceOf(SLOOperationTimeout);
   });
 
+  it('rethrows a thrown value that is not an Error after the deadline', async () => {
+    const promise = withDeadline(
+      1000,
+      (signal) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener('abort', () => reject(undefined));
+        })
+    );
+
+    jest.advanceTimersByTime(1000);
+
+    await expect(promise).rejects.toBeUndefined();
+  });
+
   it('throws SLOOperationTimeout when an Elasticsearch request is aborted by the deadline', async () => {
     const promise = withDeadline(
       1000,

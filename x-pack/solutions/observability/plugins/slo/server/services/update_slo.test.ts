@@ -25,6 +25,7 @@ import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
+import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import type { SLODefinition } from '../domain/models';
 import { SLOOperationTimeout } from '../errors';
 import { REQUEST_DEADLINE_MS } from '../utils/with_deadline';
@@ -219,6 +220,28 @@ describe('UpdateSLO', () => {
         expectNonBreakingChangeUpdatedResources();
       });
 
+      it('restores the original SLI pipeline instead of deleting it when the summary pipeline update fails', async () => {
+        const slo = createSLO();
+        mockRepository.findById.mockResolvedValueOnce(slo);
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline
+          .mockResolvedValueOnce({ acknowledged: true })
+          .mockRejectedValueOnce(new Error('summary pipeline error'));
+
+        await expect(updateSLO.execute(slo.id, { name: 'updated name' })).rejects.toThrow(
+          'summary pipeline error'
+        );
+
+        expect(
+          mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+        ).not.toHaveBeenCalled();
+        expect(
+          mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline
+        ).toHaveBeenLastCalledWith(getSLIPipelineTemplate(slo, 'some-space'), {
+          signal: expect.any(AbortSignal),
+        });
+        expect(mockRepository.update).toHaveBeenLastCalledWith(slo);
+      });
+
       function expectNonBreakingChangeUpdatedResources() {
         expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalled();
 
@@ -394,6 +417,34 @@ describe('UpdateSLO', () => {
           expect.stringContaining('Failed to clean up resources for previous SLO revision.'),
         ])
       );
+    });
+
+    it('cleans up the previous revision with its own budget once the deadline has passed', async () => {
+      jest.useFakeTimers();
+      try {
+        const slo = createSLO();
+        mockRepository.findById.mockResolvedValueOnce(slo);
+        mockTransformManager.install.mockImplementationOnce(async (updatedSlo) => {
+          await new Promise((resolve) => setTimeout(resolve, REQUEST_DEADLINE_MS - 1));
+          return getSLOTransformId(updatedSlo.id, updatedSlo.revision);
+        });
+        let isCleanupAborted: boolean | undefined;
+        mockTransformManager.uninstall.mockImplementationOnce(async (_transformId, { signal }) => {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          isCleanupAborted = signal.aborted;
+        });
+
+        const promise = updateSLO.execute(slo.id, {
+          indicator: createAPMTransactionErrorRateIndicator(),
+        });
+        await jest.advanceTimersByTimeAsync(REQUEST_DEADLINE_MS + 1000);
+        await promise;
+
+        expect(isCleanupAborted).toBe(false);
+        expectDeletionOfOriginalSLOResources(slo);
+      } finally {
+        jest.useRealTimers();
+      }
     });
   });
 

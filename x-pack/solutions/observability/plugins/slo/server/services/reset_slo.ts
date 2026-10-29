@@ -89,6 +89,10 @@ export class ResetSLO {
       // Delete after we uninstalled the transforms
       await Promise.all([this.deleteRollupData(slo, signal), this.deleteSummaryData(slo, signal)]);
     } catch (err) {
+      if (signal.aborted) {
+        throw err;
+      }
+
       // Any errors here should not prevent moving forward.
       // Worst case we keep rolling up data for the orignal SLO
       this.logger.warn('Deletion of the original SLO resources failed while resetting it.', {

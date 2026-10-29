@@ -24,7 +24,7 @@ export const runRollback = async ({
   onError: (error: Error) => void;
 }): Promise<void> => {
   const results = await withTimeoutSignal(ROLLBACK_DEADLINE_MS, (signal) =>
-    Promise.allSettled(operations.map((operation) => operation(signal)))
+    Promise.allSettled(operations.map(async (operation) => operation(signal)))
   );
 
   results.forEach((result) => {

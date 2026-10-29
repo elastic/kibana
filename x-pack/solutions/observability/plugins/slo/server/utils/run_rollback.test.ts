@@ -97,6 +97,26 @@ describe('runRollback', () => {
     expect(finalOperation).toHaveBeenCalledTimes(1);
   });
 
+  it('reports an operation that throws synchronously and still runs the final operation', async () => {
+    const onError = jest.fn();
+    const syncError = new Error('sync');
+    const finalOperation = jest.fn(async () => {});
+
+    await runRollback({
+      operations: [
+        () => {
+          throw syncError;
+        },
+        async () => {},
+      ],
+      finalOperation,
+      onError,
+    });
+
+    expect(onError).toHaveBeenCalledWith(syncError);
+    expect(finalOperation).toHaveBeenCalledTimes(1);
+  });
+
   it('reports a failure of the final operation', async () => {
     const onError = jest.fn();
     const finalError = new Error('final');

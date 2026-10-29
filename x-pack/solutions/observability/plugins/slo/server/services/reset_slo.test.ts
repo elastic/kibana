@@ -232,6 +232,28 @@ describe('ResetSLO', () => {
       expect(mockScopedClusterClient.asCurrentUser.delete).toHaveBeenCalledTimes(1);
       expect(mockRepository.update).not.toHaveBeenCalled();
     });
+
+    it('throws SLOOperationTimeout without installing when the deadline is exceeded while deleting the original resources', async () => {
+      const slo = createSLO({ id: 'irrelevant', version: 1 });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockTransformManager.uninstall.mockImplementationOnce(
+        (_transformId, { signal }) =>
+          new Promise((_resolve, reject) => {
+            signal.addEventListener('abort', () =>
+              reject(new errors.RequestAbortedError('Request aborted'))
+            );
+          })
+      );
+
+      const assertion = expect(resetSLO.execute(slo.id)).rejects.toBeInstanceOf(
+        SLOOperationTimeout
+      );
+      await jest.advanceTimersByTimeAsync(REQUEST_DEADLINE_MS);
+      await assertion;
+
+      expect(mockTransformManager.install).not.toHaveBeenCalled();
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
   });
 
   function expectDeletionOfOriginalSLOResources(originalSlo: SLODefinition) {

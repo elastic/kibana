@@ -30,8 +30,8 @@ import { SecurityException } from '../errors';
 import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import { REQUEST_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 import type { RollbackOperation } from '../utils/run_rollback';
-import { runRollback } from '../utils/run_rollback';
-import { REQUEST_DEADLINE_MS, withDeadline } from '../utils/with_deadline';
+import { ROLLBACK_DEADLINE_MS, runRollback } from '../utils/run_rollback';
+import { REQUEST_DEADLINE_MS, withDeadline, withTimeoutSignal } from '../utils/with_deadline';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
@@ -95,10 +95,11 @@ export class UpdateSLO {
     if (!requireRevisionBump) {
       // we only have to update the rollup and summary pipelines to include the non-breaking changes (name, desc, tags, ...) in the summary index
       try {
-        await this.createPipeline(getSLIPipelineTemplate(updatedSlo, this.spaceId), signal);
+        // same revision: the pipeline is live, so restore the original one instead of deleting it
         rollbackOperations.push((rollbackSignal) =>
-          this.deletePipeline(getSLOPipelineId(updatedSlo.id, updatedSlo.revision), rollbackSignal)
+          this.createPipeline(getSLIPipelineTemplate(originalSlo, this.spaceId), rollbackSignal)
         );
+        await this.createPipeline(getSLIPipelineTemplate(updatedSlo, this.spaceId), signal);
 
         await this.createPipeline(
           getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath),
@@ -210,7 +211,10 @@ export class UpdateSLO {
       throw err;
     }
 
-    await this.deleteOriginalSLO(originalSlo, signal);
+    // the cleanup gets its own budget so a slow install does not leave the previous revision running
+    await withTimeoutSignal(ROLLBACK_DEADLINE_MS, (cleanupSignal) =>
+      this.deleteOriginalSLO(originalSlo, cleanupSignal)
+    );
 
     return this.toResponse(updatedSlo);
   }
