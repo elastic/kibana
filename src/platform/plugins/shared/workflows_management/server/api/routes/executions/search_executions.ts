@@ -224,7 +224,6 @@ export function registerSearchExecutionsRoute({
                   ...(await withExecutedByDisplayNames({
                     userProfile,
                     results: executionsPage.results,
-                    additionalExecutedBy: params.executedBy,
                     logger,
                   })),
                 }

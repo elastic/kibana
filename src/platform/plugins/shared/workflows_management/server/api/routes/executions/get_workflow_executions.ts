@@ -264,7 +264,6 @@ export function registerGetWorkflowExecutionsRoute({
                   ...(await withExecutedByDisplayNames({
                     userProfile,
                     results: executionsPage.results,
-                    additionalExecutedBy: params.executedBy,
                     logger,
                   })),
                 }

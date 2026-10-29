@@ -483,9 +483,8 @@ describe('Execution Routes', () => {
       ]);
     });
 
-    it('should resolve display names for executedBy filter values missing from the results', async () => {
+    it('should not resolve display names for executedBy filter values missing from the results', async () => {
       mockApi.getWorkflowExecutions.mockResolvedValue({ results: [], total: 0 });
-      mockBulkGet.mockResolvedValue([{ uid: 'u_2', user: { username: 'asmith' } }]);
       const h = handler('GET', path)!;
       const request = {
         params: { workflowId: 'wf-1' },
@@ -494,8 +493,8 @@ describe('Execution Routes', () => {
 
       const result = await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockBulkGet).toHaveBeenCalledWith({ uids: new Set(['u_2']) });
-      expect(result.body.executedByDisplayNames).toEqual({ u_2: 'asmith' });
+      expect(mockBulkGet).not.toHaveBeenCalled();
+      expect(result.body.executedByDisplayNames).toEqual({});
     });
 
     it('should call api.getWorkflowExecutions with search params and space id', async () => {

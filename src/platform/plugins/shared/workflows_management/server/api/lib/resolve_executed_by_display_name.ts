@@ -61,18 +61,16 @@ export const resolveExecutedByDisplayName = async ({
 };
 
 /**
- * Adds `executedByDisplayName` to each execution whose profile could be resolved, and returns the
- * names of `additionalExecutedBy` (e.g. active filter values) that may not appear in `results`.
+ * Adds `executedByDisplayName` to each execution whose profile could be resolved. Only uids found
+ * in `results` are looked up, never caller-supplied filter values.
  */
 export const withExecutedByDisplayNames = async <T extends { executedBy?: string }>({
   userProfile,
   results,
-  additionalExecutedBy = [],
   logger,
 }: {
   userProfile: CoreStart['userProfile'];
   results: T[];
-  additionalExecutedBy?: string[];
   logger: Logger;
 }): Promise<{
   results: Array<T & { executedByDisplayName?: string }>;
@@ -80,7 +78,7 @@ export const withExecutedByDisplayNames = async <T extends { executedBy?: string
 }> => {
   const names = await resolveExecutedByDisplayNames({
     userProfile,
-    executedBy: [...results.map((result) => result.executedBy), ...additionalExecutedBy],
+    executedBy: results.map((result) => result.executedBy),
     logger,
   });
   return {
