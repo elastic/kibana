@@ -240,6 +240,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
       type="push"
+      role="region"
       ownFocus={false}
       size="40%"
       hideCloseButton
