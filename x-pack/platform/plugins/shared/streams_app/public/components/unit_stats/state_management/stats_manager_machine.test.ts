@@ -343,6 +343,58 @@ describe('failures', () => {
   });
 });
 
+describe('a failure report', () => {
+  const startWatching = (client: UnitStatsClient) => {
+    const manager = startManager({ client });
+    const onFetchFailed = jest.fn();
+    manager.actor.on('stats.fetchFailed', onFetchFailed);
+
+    const refresh = async () => {
+      manager.actor.send({ type: 'stats.refresh' });
+      await jest.advanceTimersByTimeAsync(0);
+    };
+    return { ...manager, onFetchFailed, refresh };
+  };
+
+  it('is emitted for a failed request, with the reason', async () => {
+    const { client } = createClientSequence(['failure']);
+    const { register, onFetchFailed } = startWatching(client);
+
+    register(ES_PROD);
+    await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS);
+
+    expect(onFetchFailed).toHaveBeenCalledTimes(1);
+    expect(onFetchFailed).toHaveBeenCalledWith({
+      type: 'stats.fetchFailed',
+      reason: 'Service Unavailable',
+    });
+  });
+
+  it('is not emitted again while requests keep failing', async () => {
+    const { client } = createClientSequence(['failure', 'failure', 'failure']);
+    const { register, refresh, onFetchFailed } = startWatching(client);
+
+    register(ES_PROD);
+    await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS);
+    await refresh();
+    await refresh();
+
+    expect(onFetchFailed).toHaveBeenCalledTimes(1);
+  });
+
+  it('is emitted again for a failure that follows a success', async () => {
+    const { client } = createClientSequence(['failure', 'success', 'failure']);
+    const { register, refresh, onFetchFailed } = startWatching(client);
+
+    register(ES_PROD);
+    await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS);
+    await refresh();
+    await refresh();
+
+    expect(onFetchFailed).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe('polling', () => {
   const POLL_INTERVAL_MS = 1000;
 

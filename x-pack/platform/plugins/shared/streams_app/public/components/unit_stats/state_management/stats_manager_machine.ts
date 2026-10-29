@@ -10,7 +10,7 @@ import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { MachineImplementationsFrom } from 'xstate';
-import { assign, fromEventObservable, fromPromise, raise, setup } from 'xstate';
+import { assign, enqueueActions, fromEventObservable, fromPromise, raise, setup } from 'xstate';
 import type {
   MappedStatsResponse,
   StatsWindow,
@@ -52,6 +52,17 @@ export interface StatsManagerContext {
    */
   request: StatsBatch;
   lastUpdated?: number;
+  /**
+   * Whether the last request failed. It limits `stats.fetchFailed` to the first failure of a run,
+   * so a poll that keeps failing does not report every time. A result resets it.
+   */
+  requestFailed: boolean;
+}
+
+/** Emitted for the first failed request after a start or a success, so the view can tell the user once. */
+export interface StatsFetchFailedEmittedEvent {
+  type: 'stats.fetchFailed';
+  reason: string;
 }
 
 /** A request for no components, which stands for "nothing in flight". */
@@ -169,6 +180,7 @@ export const statsManagerMachine = setup({
     input: {} as StatsManagerInput,
     context: {} as StatsManagerContext,
     events: {} as StatsManagerEvent,
+    emitted: {} as StatsFetchFailedEmittedEvent,
   },
   actors: {
     fetchStats: getPlaceholderFor(createFetchStatsActor),
@@ -196,7 +208,14 @@ export const statsManagerMachine = setup({
       return {
         components: mergeFetchedStats(context.components, context.request, params.response, now),
         lastUpdated: now,
+        requestFailed: false,
       };
+    }),
+    /** Tells the view about the first failure of a run. A failure that follows a failure is silent. */
+    reportFailure: enqueueActions(({ context, enqueue }, params: { reason: string }) => {
+      if (context.requestFailed) return;
+      enqueue.assign({ requestFailed: true });
+      enqueue.emit({ type: 'stats.fetchFailed', reason: params.reason });
     }),
     /** Marks the components of the request as stale or failed. */
     storeFailure: assign(({ context }, params: { reason: string }) => ({
@@ -229,6 +248,7 @@ export const statsManagerMachine = setup({
     pollIntervalMs: input.pollIntervalMs,
     components: { destination: {}, processor: {} },
     request: NO_REQUEST,
+    requestFailed: false,
   }),
   invoke: { id: 'timeUpdates', src: 'timeUpdates' },
   type: 'parallel',
@@ -314,6 +334,10 @@ export const statsManagerMachine = setup({
             onError: {
               target: 'idle',
               actions: [
+                {
+                  type: 'reportFailure',
+                  params: ({ event }) => ({ reason: toFailureReason(event.error) }),
+                },
                 {
                   type: 'storeFailure',
                   params: ({ event }) => ({ reason: toFailureReason(event.error) }),
