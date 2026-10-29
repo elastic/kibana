@@ -18,6 +18,8 @@ import { RuleChangeHistoryProvider } from './rule_change_history_provider';
 export interface RuleChangeHistoryTarget {
   id: string;
   name: string;
+  /** Rule version the host rendered; restores are rejected with a conflict if it changed. */
+  version: number;
 }
 
 export interface UseRuleChangeHistoryModalOptions {
@@ -51,16 +53,19 @@ export const useRuleChangeHistoryModal = ({
   const api = useService(RuleChangeHistoryApi);
   const analytics = useService(CoreStart('analytics'));
   const queryClient = useQueryClient();
+  const [target, setTarget] = useState<RuleChangeHistoryTarget | null>(null);
   const adapter = createRuleChangeHistoryAdapter(api, {
-    onRestored: (ruleId) => {
+    currentVersion: target?.version,
+    onRestored: (rule) => {
+      // Keeps the open modal's conflict guard at the version the restore produced.
+      setTarget((current) => current && { ...current, version: rule.version });
       void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
       queryClient.invalidateQueries(ruleKeys.allTags());
-      queryClient.invalidateQueries(ruleKeys.detail(ruleId));
+      queryClient.invalidateQueries(ruleKeys.detail(rule.id));
     },
   });
 
-  const [target, setTarget] = useState<RuleChangeHistoryTarget | null>(null);
   // Advances on every open request so re-opening the same rule remounts the modal.
   const [openCount, setOpenCount] = useState(0);
 

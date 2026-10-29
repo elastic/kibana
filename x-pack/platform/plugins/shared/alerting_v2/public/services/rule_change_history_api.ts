@@ -51,6 +51,8 @@ export interface GetRuleChangeEventParams {
 export interface RestoreRuleChangeParams {
   /** The change-history event identifier (`event.id`) whose snapshot is restored. */
   eventId: string;
+  /** The rule version the caller last saw; the restore is rejected with a 409 if it changed. */
+  currentVersion?: number;
   signal?: AbortSignal;
 }
 
@@ -86,8 +88,12 @@ export class RuleChangeHistoryApi {
 
   public async restoreRuleChange({
     eventId,
+    currentVersion,
     signal,
   }: RestoreRuleChangeParams): Promise<RuleResponse> {
-    return this.http.post<RuleResponse>(buildRestoreRuleChangePath(eventId), { signal });
+    return this.http.post<RuleResponse>(buildRestoreRuleChangePath(eventId), {
+      query: { current_version: currentVersion },
+      signal,
+    });
   }
 }
