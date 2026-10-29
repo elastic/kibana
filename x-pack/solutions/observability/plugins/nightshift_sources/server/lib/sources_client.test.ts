@@ -409,6 +409,15 @@ describe('SourcesClient', () => {
   });
 
   describe('change notifications', () => {
+    it('reports a created source once its view exists', async () => {
+      const { client, onChange } = setup();
+
+      const source = await client.create({ title: 'nginx errors', tags: [], esql: 'FROM logs-*' });
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith({ type: 'created', source });
+    });
+
     it('does not report a create that was rolled back', async () => {
       const { client, viewsClient, onChange } = setup();
       viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
@@ -420,6 +429,23 @@ describe('SourcesClient', () => {
       expect(onChange).not.toHaveBeenCalled();
     });
 
+    it('reports an update with the source as it was before', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const source = await client.update('source-1', {
+        title: 'nginx 5xx',
+        tags: ['nginx'],
+        esql: makeAttributes().esql,
+      });
+
+      expect(onChange).toHaveBeenCalledWith({
+        type: 'updated',
+        source,
+        previous: makeSource(),
+      });
+    });
+
     it('does not report an enable that changed nothing', async () => {
       const { client, soClient, onChange } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
@@ -427,6 +453,15 @@ describe('SourcesClient', () => {
       await client.setEnabled('source-1', true);
 
       expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('reports a deleted source after its view and saved object are gone', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await client.delete('source-1');
+
+      expect(onChange).toHaveBeenCalledWith({ type: 'deleted', source: makeSource() });
     });
   });
 });

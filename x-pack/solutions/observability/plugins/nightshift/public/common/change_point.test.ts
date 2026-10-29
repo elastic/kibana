@@ -9,6 +9,7 @@ import {
   filterOccurrencesForDetection,
   getChangePointLabel,
   getDetectionOccurrenceTimeRange,
+  getOccurrenceBucketIntervalMs,
   parseOccurrenceBucketSize,
 } from './change_point';
 
@@ -68,5 +69,10 @@ describe('parseOccurrenceBucketSize', () => {
       unit: 'm',
       unitLabel: 'minutes',
     });
+  });
+
+  it('converts bucket sizes to milliseconds', () => {
+    expect(getOccurrenceBucketIntervalMs('5m')).toBe(5 * 60 * 1000);
+    expect(getOccurrenceBucketIntervalMs('1h')).toBe(60 * 60 * 1000);
   });
 });

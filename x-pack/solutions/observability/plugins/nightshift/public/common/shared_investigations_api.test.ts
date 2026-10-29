@@ -9,7 +9,9 @@ import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_SEVERITY_COUNTS_URL,
+  INVESTIGATION_SEVERITIES,
 } from '@kbn/agentic-investigations-plugin/common';
+import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import {
   SHARED_INVESTIGATIONS_API_VERSION,
   SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL,
@@ -21,5 +23,9 @@ describe('shared investigations API', () => {
     expect(SHARED_INVESTIGATIONS_URL).toBe(INVESTIGATIONS_INTERNAL_URL);
     expect(SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL).toBe(INVESTIGATIONS_SEVERITY_COUNTS_URL);
     expect(SHARED_INVESTIGATIONS_API_VERSION).toBe(AGENTIC_INVESTIGATIONS_API_VERSION);
+  });
+
+  it('has a severity tier for every investigation severity', () => {
+    expect([...SEVERITY_OPTIONS].sort()).toEqual([...INVESTIGATION_SEVERITIES].sort());
   });
 });
