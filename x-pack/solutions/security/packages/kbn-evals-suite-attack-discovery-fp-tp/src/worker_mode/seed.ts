@@ -21,7 +21,10 @@ import {
   deleteEntitiesOnHosts,
   deleteEntity,
   ensureFpTpSeedPrerequisites,
+  ensureFpTpRawEventStore,
   kbnErrorMessage,
+  rawEventIndexNames,
+  seededRawEventsInSpaceQuery,
   writeIdentityFields,
   type FpTpLiveKbnRequest,
 } from '../world';
@@ -307,12 +310,14 @@ export const cleanupWorkerModeSpace = async ({
   esClient,
   kbnRequest,
   space,
+  serverless = false,
 }: {
   esClient: EsClient;
   kbnRequest: FpTpLiveKbnRequest;
   space: string;
+  serverless?: boolean;
 }): Promise<WorkerModeCleanupSummary> => {
-  const targets = workerModeCleanupTargets(space);
+  const targets = workerModeCleanupTargets(space, serverless);
   const previous = await esClient.search<{ host?: { id?: unknown } }>({
     index: targets.alertsIndex,
     ignore_unavailable: true,
@@ -338,6 +343,30 @@ export const cleanupWorkerModeSpace = async ({
       allow_no_indices: true,
     });
     await deleteEntitiesOnHosts(esClient, kbnRequest, hostIds, targets.entityReadAlias);
+  }
+  if (serverless) {
+    // A seeder-owned stream DOES index labels.ad_portable_seed (explicit keyword
+    // mapping in the seeder-owned template), so a label sweep catches a crashed
+    // run's leftovers whose host ids the alerts search above cannot name. Prefix,
+    // not term: worker-mode events carry their full run marker, which starts
+    // with the seed label (verified live — a term sweep silently matches 0).
+    // The stream pattern spans every space, so the sweep is held to this namespace.
+    const { data_streams: streams } = await esClient.indices
+      .getDataStream({ name: targets.eventsIndexPattern })
+      .catch((error: { statusCode?: number }) => {
+        if (error?.statusCode !== 404) {
+          throw error;
+        }
+        return { data_streams: [] as Array<{ name: string }> };
+      });
+    for (const index of rawEventIndexNames(streams.map(({ name }) => ({ index: name })))) {
+      await esClient.deleteByQuery({
+        index,
+        query: seededRawEventsInSpaceQuery(space),
+        conflicts: 'proceed',
+        refresh: true,
+      });
+    }
   }
   if (previous.hits.hits.length > 0) {
     await esClient.deleteByQuery({
@@ -406,8 +435,11 @@ export const cleanupWorkerModePlan = async ({
 
 /**
  * Writes the plan's alerts, raw events and entities. Call `ensureWorkerModePrerequisites`
- * and `cleanupWorkerModeSpace` first. A partial seed is removed before the error is
- * rethrown.
+ * and `cleanupWorkerModeSpace` first. A serverless plan's events target seeder-owned
+ * data streams: their store (template, streams, pipeline) must exist before the
+ * bulk, and every event passes the pipeline so `@timestamp` is a real date and
+ * `event.ingested` reflects ingest time. A partial seed is removed before the
+ * error is rethrown.
  */
 export const seedWorkerModePlan = async ({
   esClient,
@@ -426,7 +458,13 @@ export const seedWorkerModePlan = async ({
     if (plan.eventOperations.length > 0) {
       assertBulkOk(
         'events',
-        await esClient.bulk({ refresh: 'wait_for', operations: plan.eventOperations })
+        await esClient.bulk({
+          refresh: 'wait_for',
+          operations: plan.eventOperations,
+          ...(plan.serverless
+            ? { pipeline: await ensureFpTpRawEventStore(esClient, rawEventIndexNames(plan.events)) }
+            : {}),
+        })
       );
     }
     for (const entity of plan.entities) {
