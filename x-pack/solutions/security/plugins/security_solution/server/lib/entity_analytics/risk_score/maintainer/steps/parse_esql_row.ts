@@ -26,13 +26,21 @@ export interface ParsedResolutionScore {
   related_entities: Array<{ entity_id: string; relationship_type: string }>;
 }
 
+export interface ParseEsqlBaseScoreRowOptions {
+  /**
+   * Keep the `index` each input reports from `_index` instead of stamping the queried index on
+   * every input. Needed when one query reads several stores (v1 alerts and `.rule-events`).
+   */
+  preferRowIndex?: boolean;
+}
+
 /**
  * Parses one base-score ES|QL row for maintainer scoring.
  *
  * Parsing is kept local to this path to avoid coupling with legacy flow helpers.
  */
 export const parseEsqlBaseScoreRow =
-  (index: string, sampleSize: number) =>
+  (index: string, sampleSize: number, options: ParseEsqlBaseScoreRowOptions = {}) =>
   (row: unknown[]): ParsedRiskScore => {
     const [count, score, _inputs, entityId] = row as [number, number, string | string[], string];
     const zetaValue = getRiemannZetaValue(sampleSize);
@@ -69,6 +77,8 @@ export const parseEsqlBaseScoreRow =
           'category_b64',
         ]);
 
+        const rowIndex = typeof otherFields.index === 'string' ? otherFields.index : undefined;
+
         return {
           id: parsedRiskInputData.id,
           ...otherFields,
@@ -76,7 +86,7 @@ export const parseEsqlBaseScoreRow =
           category,
           score: value,
           contribution: currentScore / zetaValue,
-          index,
+          index: options.preferRowIndex && rowIndex ? rowIndex : index,
         } as SearchHitRiskInput;
       })
       .filter((riskInput): riskInput is SearchHitRiskInput => riskInput !== null);

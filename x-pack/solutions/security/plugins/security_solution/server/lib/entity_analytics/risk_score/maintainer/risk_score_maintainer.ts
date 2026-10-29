@@ -37,6 +37,7 @@ import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enab
 import { getIndexPatternDataStream } from '../configurations';
 import { resetToZero } from './steps/reset_to_zero';
 import { buildAlertFilters } from './steps/build_alert_filters';
+import { resolveUnifiedAlertSources, RULE_EVENTS_DATA_STREAM } from './steps/alert_sources';
 import { scoreBaseEntities } from './steps/score_base_entities';
 import type { MaintainerErrorKind } from './telemetry_reporter';
 import { createRiskScoreMaintainerTelemetryReporter } from './telemetry_reporter';
@@ -107,6 +108,11 @@ interface LoadedRunConfig {
    * experimental feature flag, so creation can be enabled independently of dual-write.
    */
   createMissingEntitiesEnabled: boolean;
+  /**
+   * Base scoring reads v2 alerts (`.rule-events`) next to v1 alerts through one ES|QL union
+   * (`riskScoreMaintainerV2AlertsEnabled`). Resolution scoring and create-if-missing stay on v1.
+   */
+  v2AlertsEnabled: boolean;
   watchlistConfigs: Awaited<ReturnType<typeof fetchWatchlistConfigs>>;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
   sampleSize: number;
@@ -445,6 +451,7 @@ const loadRunConfiguration = async ({
   const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(uiSettingsClient);
   const createMissingEntitiesEnabled =
     idBasedRiskScoringEnabled && experimentalFeatures.riskScoreCreateMissingEntitiesEnabled;
+  const v2AlertsEnabled = experimentalFeatures.riskScoreMaintainerV2AlertsEnabled;
   const watchlistConfigs = await fetchWatchlistConfigs({
     soClient: internalSoClient,
     esClient,
@@ -466,6 +473,7 @@ const loadRunConfiguration = async ({
     alertsIndex,
     idBasedRiskScoringEnabled,
     createMissingEntitiesEnabled,
+    v2AlertsEnabled,
     watchlistConfigs,
     writer,
     sampleSize,
@@ -525,15 +533,38 @@ const executeEntityTypeRun = async ({
     }
   };
 
-  const alertsIndexExists = await runContext.esClient.indices.exists({
-    index: runConfig.alertsIndex,
-  });
-  if (!alertsIndexExists) {
-    runLogger.warn(
-      `Skipping risk scoring run: alerts index "${runConfig.alertsIndex}" does not exist yet.`
-    );
-    return;
+  // Stage 1 reads every configured alert store; the v1 index is created lazily by the first rule
+  // run and `.rule-events` by the alerting v2 plugin, so a missing store is left out of the union.
+  const unifiedSources = runConfig.v2AlertsEnabled
+    ? await resolveUnifiedAlertSources({
+        esClient: runContext.esClient,
+        configuration: runConfig.configuration,
+        alertsIndex: runConfig.alertsIndex,
+        entityType,
+        spaceId: runContext.namespace,
+        logger: runLogger,
+      })
+    : undefined;
+  if (runConfig.v2AlertsEnabled) {
+    if (!unifiedSources) {
+      runLogger.warn(
+        `Skipping risk scoring run: neither alerts index "${runConfig.alertsIndex}" nor "${RULE_EVENTS_DATA_STREAM}" exists yet.`
+      );
+      return;
+    }
+  } else {
+    const alertsIndexExists = await runContext.esClient.indices.exists({
+      index: runConfig.alertsIndex,
+    });
+    if (!alertsIndexExists) {
+      runLogger.warn(
+        `Skipping risk scoring run: alerts index "${runConfig.alertsIndex}" does not exist yet.`
+      );
+      return;
+    }
   }
+  // Resolution scoring still reads the v1 index directly, so it has nothing to read without it.
+  const resolutionInputsAvailable = unifiedSources === undefined || unifiedSources.v1 !== undefined;
 
   runLogger.debug('starting base scoring/reset pass');
   // Stage 1: score base entity risk and update lookup docs.
@@ -563,6 +594,7 @@ const executeEntityTypeRun = async ({
           idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
           createMissingEntities: runConfig.createMissingEntitiesEnabled,
           writer: runConfig.writer,
+          unifiedSources,
         }),
     });
     runLogger.debug('completed base scoring pass');
@@ -608,7 +640,17 @@ const executeEntityTypeRun = async ({
 
   checkAbortBetweenStages();
 
-  if (!skipRemainingStages) {
+  if (!skipRemainingStages && !resolutionInputsAvailable) {
+    runLogger.warn(
+      `Skipping resolution scoring: it reads v1 alerts only and alerts index "${runConfig.alertsIndex}" does not exist yet.`
+    );
+    frameworkTelemetryStages.push({
+      name: 'resolution',
+      status: 'skipped',
+      durationMs: 0,
+      skipReason: 'v1_alerts_index_missing',
+    });
+  } else if (!skipRemainingStages) {
     // Stage 2: score resolution targets (group scores).
     const resolutionStage = runTelemetry.startResolutionStage();
     const resolutionStartedAtMs = Date.now();

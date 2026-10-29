@@ -56,7 +56,7 @@ type ESQLResults = Array<
 // strings themselves sorts them as text, which puts a score of 100 below 21 and 9 above 80.
 const RISK_INPUTS_TOP = `TOP(risk_score, ${MAX_INPUTS_COUNT}, "desc", input)`;
 
-const escapeEsqlStringLiteral = (value: string): string =>
+export const escapeEsqlStringLiteral = (value: string): string =>
   value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
 // Chars that cannot be safely interpolated into an ES|QL double-quoted literal
@@ -569,6 +569,27 @@ export interface EuidCompositeAggregation {
 }
 
 /**
+ * Prefers the pre-stamped EUID over the EVAL-derived `entity_id`. The stamped array holds at most
+ * one EUID per entity type (host/user/service), so at most 3 elements. Scans all positions with
+ * MV_SLICE so multi-entity alerts are handled regardless of write order, mirroring the Painless
+ * loop in buildEuidRuntimeMappingWithStoredFieldFastPath. `field` is the column holding the
+ * stamped array: the alert field itself, or the projected column of a unified alert source.
+ */
+const buildStoredEuidCoalesceClause = (
+  entityType: EntityType,
+  field: string = ALERT_ENTITY_ID
+): string => {
+  const p = `"${entityType}:"`;
+  return (
+    `| EVAL entity_id = CASE(` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${field}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${field}, 0, 0)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${field}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${field}, 1, 1)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${field}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${field}, 2, 2)), ` +
+    `entity_id)`
+  );
+};
+
+/**
  * Returns an ES|QL query that:
  * 1. Filters documents where the entity has an identifiable EUID
  * 2. Uses the entity store EUID evaluation logic to compute entity_id
@@ -613,18 +634,7 @@ export const getBaseScoreESQL = (
     : undefined;
   const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
 
-  // Prefer the pre-stamped field over the EVAL-derived value. The array holds at most one EUID
-  // per entity type (host/user/service), so at most 3 elements. Scan all positions with
-  // MV_SLICE so multi-entity alerts are handled regardless of write order, mirroring the
-  // Painless loop in buildEuidRuntimeMappingWithStoredFieldFastPath.
-  const f = ALERT_ENTITY_ID;
-  const p = `"${entityType}:"`;
-  const storedEuidCoalesceClause =
-    `| EVAL entity_id = CASE(` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${f}, 0, 0)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${f}, 1, 1)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
-    `entity_id)`;
+  const storedEuidCoalesceClause = buildStoredEuidCoalesceClause(entityType);
 
   // Filter on entity_id (computed from cheap field evals) BEFORE the
   // CONCAT/base64 builders run, so non-matching alerts skip the per-row
@@ -658,6 +668,139 @@ export const getBaseScoreESQL = (
   `;
 
   return query;
+};
+
+/**
+ * Column projected by every arm of a unified alert source that holds the stamped EUID array
+ * (`kibana.alert.entity.id` on v1 alerts, the same key inside `data` on v2 rule events).
+ */
+export const UNIFIED_STAMPED_ENTITY_ID_COLUMN = 'stamped_entity_id';
+
+/**
+ * Stages shared by every query over a unified alert source: the type's contains-id gate, field
+ * evaluations, EUID derivation and the stamped-EUID override, all over the arms' common row.
+ */
+const buildUnifiedEuidStages = (entityType: EntityType): string => {
+  const definition = getBuiltInEntityDefinition(entityType);
+  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(definition);
+  const fieldEvals = euid.esql.getFieldEvaluations(definition);
+  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
+  const euidEvalClause = `| EVAL ${euid.esql.getEuidEvaluation(definition, 'entity_id', {
+    withTypeId: true,
+  })}`;
+
+  return [
+    `| WHERE (${containsIdFilter})`,
+    fieldEvalsClause,
+    euidEvalClause,
+    buildStoredEuidCoalesceClause(entityType, UNIFIED_STAMPED_ENTITY_ID_COLUMN),
+  ]
+    .filter(Boolean)
+    .join('\n    ');
+};
+
+/**
+ * Serializes one risk input as JSON from the unified source's common row. Unlike the per-store
+ * builders above it records `source_kind`, so a score document can say which store each input
+ * came from, and reads `_index` from the row so v2 inputs point at `.rule-events`.
+ */
+const buildUnifiedRiskInputClause = (): string => {
+  const fields: ReadonlyArray<readonly [key: string, expression: string]> = [
+    ['risk_score', 'risk_score::keyword'],
+    ['time', 'time::keyword'],
+    ['index', '_index'],
+    ['source_kind', 'source_kind'],
+    ['rule_name_b64', 'rule_name_b64'],
+    ['category_b64', 'category_b64'],
+    ['id', 'alert_id'],
+  ];
+  const body = fields
+    .map(
+      ([key, expression], i) => `"${i === 0 ? '{' : ', '}\\"${key}\\": \\"", ${expression}, "\\""`
+    )
+    .join(', ');
+  return `| EVAL input = CONCAT(${body}, "}")`;
+};
+
+/**
+ * Base scoring over a unified alert source (see `buildUnifiedAlertSourceEsql`): the same STATS as
+ * `getBaseScoreESQL`, over the common row the source's arms project instead of raw alert fields.
+ * Every filter lives inside the source's arms, so callers pass no request-level `filter`.
+ *
+ * Column order: [alert_count, scores, risk_inputs, entity_id], as `parseEsqlBaseScoreRow` expects.
+ */
+export const getUnifiedBaseScoreESQL = (
+  entityType: EntityType,
+  bounds: { lower?: string; upper?: string },
+  sampleSize: number,
+  pageSize: number,
+  sourceEsql: string
+): string => {
+  if (!bounds.lower && !bounds.upper) {
+    throw new Error('Either lower or upper bound must be provided for EUID pagination');
+  }
+  assertEsqlInterpolatableIds(
+    [bounds.lower, bounds.upper].filter((value): value is string => value !== undefined)
+  );
+
+  const lower = bounds.lower ? `entity_id > "${escapeEsqlStringLiteral(bounds.lower)}"` : undefined;
+  const upper = bounds.upper
+    ? `entity_id <= "${escapeEsqlStringLiteral(bounds.upper)}"`
+    : undefined;
+  const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
+
+  // A v2 rule event may carry no rule name or event kind in `data`; a null in CONCAT would drop
+  // the whole input, so default them the way v1 alerts are always populated.
+  return /* esql */ `
+  SET unmapped_fields="nullify";
+  ${sourceEsql}
+    ${buildUnifiedEuidStages(entityType)}
+    | WHERE ${rangeClause}
+    | EVAL rule_name = COALESCE(rule_name, ""),
+           category = COALESCE(category, "signal")
+    | EVAL rule_name_b64 = TO_BASE64(rule_name),
+           category_b64 = TO_BASE64(category)
+    ${buildUnifiedRiskInputClause()}
+    | STATS
+        alert_count = count(risk_score),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
+          sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE
+        }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        risk_inputs = ${RISK_INPUTS_TOP}
+        BY entity_id
+    | SORT scores DESC
+    | LIMIT ${pageSize}
+  `;
+};
+
+/**
+ * One page of EUID keys over a unified alert source, in ascending order, starting after
+ * `afterKey` (or at the type prefix on the first page). Replaces the DSL composite aggregation
+ * the v1-only path pages with, which cannot see rule events: it reads nothing but the keys, so a
+ * page's scoring query can be bounded to `(previous upper, this upper]` as before.
+ *
+ * Column order: [entity_id].
+ */
+export const getUnifiedEuidKeysESQL = (
+  entityType: EntityType,
+  afterKey: string | undefined,
+  pageSize: number,
+  sourceEsql: string
+): string => {
+  if (afterKey !== undefined) {
+    assertEsqlInterpolatableIds([afterKey]);
+  }
+  const lowerBound = escapeEsqlStringLiteral(afterKey ?? `${entityType}:`);
+
+  return /* esql */ `
+  SET unmapped_fields="nullify";
+  ${sourceEsql}
+    ${buildUnifiedEuidStages(entityType)}
+    | WHERE entity_id > "${lowerBound}"
+    | STATS BY entity_id
+    | SORT entity_id ASC
+    | LIMIT ${pageSize}
+  `;
 };
 
 export const getResolutionCompositeQuery = (
@@ -807,14 +950,7 @@ const buildResolutionScoreESQL = ({
     withTypeId: true,
   })}`;
 
-  const f = ALERT_ENTITY_ID;
-  const p = `"${entityType}:"`;
-  const storedEuidCoalesceClause =
-    `| EVAL entity_id = CASE(` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${f}, 0, 0)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${f}, 1, 1)), ` +
-    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
-    `entity_id)`;
+  const storedEuidCoalesceClause = buildStoredEuidCoalesceClause(entityType);
 
   // Compute entity_id (cheap), then override with the pre-stamped field when present,
   // then LOOKUP JOIN to recover resolution_target_id, then filter on resolution_target_id
