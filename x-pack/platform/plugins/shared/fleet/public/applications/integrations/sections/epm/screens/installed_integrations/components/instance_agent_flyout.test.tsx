@@ -18,12 +18,14 @@ jest.mock('../../../../../../../components', () => ({
   AgentlessEnrollmentFlyout: ({
     policyId,
     policyName,
+    agentPolicy,
   }: {
     policyId: string;
     policyName: string;
+    agentPolicy?: AgentPolicy;
   }) => (
     <div data-test-subj="agentlessEnrollmentFlyout">
-      {policyId} {policyName}
+      {policyId} {policyName} agent policy {agentPolicy?.id}
     </div>
   ),
   AgentlessStatusDetailsFlyout: ({
@@ -67,7 +69,10 @@ describe('InstanceAgentFlyout', () => {
   it('opens the agentless enrollment flyout for a managed integration policy', () => {
     render(true);
 
-    expect(screen.getByTestId('agentlessEnrollmentFlyout')).toHaveTextContent('ap1 aws-1');
+    // The agent policy is what makes the flyout show the health of each component.
+    expect(screen.getByTestId('agentlessEnrollmentFlyout')).toHaveTextContent(
+      'ap1 aws-1 agent policy ap1'
+    );
     expect(screen.queryByTestId('agentlessStatusDetailsFlyout')).not.toBeInTheDocument();
   });
 

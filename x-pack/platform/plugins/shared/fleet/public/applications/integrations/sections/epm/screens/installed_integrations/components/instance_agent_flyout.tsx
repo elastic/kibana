@@ -50,6 +50,8 @@ const AgentlessStatusFlyout: React.FunctionComponent<InstanceAgentFlyoutProps> =
     // package is always set for agentless policies (createAgentlessPolicy).
     packageInfo={{ name: packagePolicy.package!.name, version: packagePolicy.package!.version }}
     selectedInput={getSelectedInput(packagePolicy)}
+    // Needed, with the package policy, for the health of each component. Only the id is used.
+    agentPolicy={{ id: agentPolicyId } as AgentPolicy}
     packagePolicy={packagePolicy}
     connectors={getConnectorsFromPackagePolicy(packagePolicy)}
   />
