@@ -6,6 +6,7 @@ on:
       - opened
       - labeled
       - unlabeled
+      - ready_for_review
 
 jobs:
   comment:
