@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/jest',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-management'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-management/autoops_promotion_callout'],
 };
