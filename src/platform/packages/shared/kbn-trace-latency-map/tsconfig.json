@@ -5,5 +5,5 @@
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/i18n", "@kbn/charts-theme"]
+  "kbn_references": ["@kbn/i18n", "@kbn/charts-theme", "@kbn/ui-callout"]
 }

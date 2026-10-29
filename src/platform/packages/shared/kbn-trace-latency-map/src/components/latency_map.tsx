@@ -11,7 +11,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent, ReactNode } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiLoadingChart,
   EuiScreenReaderOnly,
@@ -20,6 +19,7 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type {
   DurationStats,
   LatencyMapCell,
@@ -368,10 +368,8 @@ export function LatencyMap({
   let body: ReactNode;
   if (error) {
     body = (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
-        color="danger"
-        iconType="error"
         size="s"
         title={i18n.translate('traceLatencyMap.error', {
           defaultMessage: 'The latency map could not be loaded',
@@ -379,7 +377,7 @@ export function LatencyMap({
         data-test-subj="traceLatencyMapError"
       >
         {error.message}
-      </EuiCallOut>
+      </KbnDangerCallout>
     );
   } else if (isEmpty) {
     body = (
