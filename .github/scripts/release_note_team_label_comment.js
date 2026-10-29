@@ -41,7 +41,7 @@ module.exports = async ({ github, context }) => {
 
   const body =
     `@${pr.user.login}, this PR has a \`release_note:*\` label that will include it in the release notes, ` +
-    `but it's missing a \`Team:*\` or \`Feature:*\` label needed to categorize the entry.\n\n` +
+    `but it's missing a \`Feature:*\` label needed to categorize the entry.\n\n` +
     `Please add the appropriate \`Team:*\` or \`Feature:*\` label so the release note can be filed under the right section. ` +
     `You can browse available labels at https://github.com/elastic/kibana/labels.\n\n` +
     `${MARKER}`;
