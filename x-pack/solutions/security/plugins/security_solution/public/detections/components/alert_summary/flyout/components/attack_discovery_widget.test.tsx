@@ -12,11 +12,11 @@ import {
   ATTACK_DISCOVERY_NO_RESULTS_TEST_ID,
   AttackDiscoveryWidget,
 } from './attack_discovery_widget';
-import { TestProviders } from '../../../common/mock';
-import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import { TestProviders } from '../../../../../common/mock';
+import { useFindAttackDiscoveries } from '../../../../../attack_discovery/pages/use_find_attack_discoveries';
 import type { AttackDiscoveryPanelProps } from './attack_discovery_panel';
 
-jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
+jest.mock('../../../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
   useFindAttackDiscoveries: jest.fn(),
 }));
 jest.mock('./attack_discovery_panel', () => ({

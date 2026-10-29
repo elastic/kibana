@@ -28,9 +28,6 @@ import {
 } from './entity_details/generic_details_left';
 import type { GenericEntityPanelExpandableFlyoutProps } from './entity_details/generic_right';
 import { GenericEntityPanel } from './entity_details/generic_right';
-import type { EaseDetailsProps } from './ease/types';
-import { EaseDetailsProvider } from './ease/context';
-import { EasePanel } from './ease';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
@@ -82,7 +79,6 @@ import {
   DOCUMENT_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_RIGHT_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_SESSION_VIEW_PANEL_ARIA_LABEL,
-  EASE_PANEL_ARIA_LABEL,
   GENERIC_ENTITY_DETAILS_PANEL_ARIA_LABEL,
   GENERIC_ENTITY_PANEL_ARIA_LABEL,
   GRAPH_GROUPED_NODE_PREVIEW_PANEL_ARIA_LABEL,
@@ -112,7 +108,6 @@ import {
   MisconfigurationFindingsPreviewPanelKey,
 } from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
-import { EasePanelKey } from './ease/constants/panel_keys';
 import {
   VulnerabilityFindingsPanelKey,
   VulnerabilityFindingsPreviewPanelKey,
@@ -343,15 +338,6 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
       />
     ),
     'aria-label': MISCONFIGURATION_PANEL_ARIA_LABEL,
-  },
-  {
-    key: EasePanelKey,
-    component: (props) => (
-      <EaseDetailsProvider {...(props as EaseDetailsProps).params}>
-        <EasePanel />
-      </EaseDetailsProvider>
-    ),
-    'aria-label': EASE_PANEL_ARIA_LABEL,
   },
   {
     key: AttackDetailsRightPanelKey,
