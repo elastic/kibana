@@ -257,8 +257,9 @@ steps:
                 kibana.alert.rule.uuid: "${{ steps.resolve_active_rules.output.rule_uuids | default: consts.no_rows }}"
       query: |-
         FROM .alerts-security.alerts-{{ workflow.spaceId }}
-        | EVAL is_fp = `kibana.alert.workflow_status` == "closed"
-            AND `kibana.alert.workflow_reason` == "false_positive"
+        | EVAL is_fp = (`kibana.alert.workflow_status` == "closed"
+            AND `kibana.alert.workflow_reason` == "false_positive")
+            OR MV_CONTAINS(`kibana.alert.workflow_tags`, "az:model_fp")
         | STATS total_count = COUNT(*),
             fp_count = COUNT(*) WHERE is_fp,
             untagged_fp_count = COUNT(*) WHERE is_fp AND NOT MV_CONTAINS(`kibana.alert.workflow_tags`, "{{ consts.reviewed_tag }}"),
@@ -309,10 +310,17 @@ steps:
             - range:
                 "@timestamp":
                   gte: "now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"
-            - term:
-                kibana.alert.workflow_status: closed
-            - term:
-                kibana.alert.workflow_reason: false_positive
+            - bool:
+                minimum_should_match: 1
+                should:
+                  - bool:
+                      filter:
+                        - term:
+                            kibana.alert.workflow_status: closed
+                        - term:
+                            kibana.alert.workflow_reason: false_positive
+                  - term:
+                      kibana.alert.workflow_tags: "az:model_fp"
             - terms:
                 kibana.alert.rule.uuid: "${{ steps.resolve_screened_rules.output.rows | map: '0' }}"
           must_not:
