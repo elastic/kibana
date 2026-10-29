@@ -101,40 +101,54 @@ export interface DispatcherEventStatsAggregations {
   };
 }
 
-/** Per-policy aggregations through the nested `kibana.saved_objects` refs. */
-export interface DispatcherPolicyBucket extends TermsBucket {
+/**
+ * Per-policy aggregations through the nested `kibana.saved_objects` refs, plus the distinct rules
+ * referenced by `unmatched` events.
+ */
+export interface DispatcherPolicyActivityBucket extends TermsBucket {
   events: {
     doc_count: number;
-    dispatched: {
-      doc_count: number;
-      action_groups: ValueAggregation;
-      alerts: ValueAggregation;
-      workflow_executions: ValueAggregation;
-    };
+    dispatched: { doc_count: number; action_groups: ValueAggregation };
     throttled: { doc_count: number; action_groups: ValueAggregation };
     dispatch_failed: { doc_count: number };
-    throttle_ratio: ValueAggregation;
+    /** Absent when the policy has neither dispatched nor throttled groups. */
+    throttle_ratio?: ValueAggregation;
+  };
+}
+export interface DispatcherPolicyDispatchBucket extends TermsBucket {
+  events: {
+    doc_count: number;
+    action_groups: ValueAggregation;
+    alerts: ValueAggregation;
+    workflow_executions: ValueAggregation;
   };
 }
 export interface DispatcherPolicyStatsAggregations {
   policy_refs: {
     policies: {
-      by_policy: { buckets: DispatcherPolicyBucket[] };
-      action_groups_percentiles: PercentilesAggregation;
-      action_groups_avg: ValueAggregation;
-      alerts_percentiles: PercentilesAggregation;
-      alerts_avg: ValueAggregation;
-      workflow_executions_percentiles: PercentilesAggregation;
-      workflow_executions_avg: ValueAggregation;
+      by_policy: { buckets: DispatcherPolicyActivityBucket[] };
       throttle_ratio_percentiles: PercentilesAggregation;
       throttle_ratio_avg: ValueAggregation;
     };
   };
-}
-
-/** Distinct rules referenced by `unmatched` events. */
-export interface DispatcherUncoveredRulesAggregations {
-  rule_refs: { rules: { uncovered_rules: ValueAggregation } };
+  dispatched_events: {
+    doc_count: number;
+    policy_refs: {
+      policies: {
+        by_policy: { buckets: DispatcherPolicyDispatchBucket[] };
+        action_groups_percentiles: PercentilesAggregation;
+        action_groups_avg: ValueAggregation;
+        alerts_percentiles: PercentilesAggregation;
+        alerts_avg: ValueAggregation;
+        workflow_executions_percentiles: PercentilesAggregation;
+        workflow_executions_avg: ValueAggregation;
+      };
+    };
+  };
+  unmatched_events: {
+    doc_count: number;
+    rule_refs: { rules: { uncovered_rules: ValueAggregation } };
+  };
 }
 
 export type DispatcherStatsResults = Pick<

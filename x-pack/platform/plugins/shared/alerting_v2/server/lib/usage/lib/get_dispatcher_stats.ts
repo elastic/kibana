@@ -6,19 +6,27 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsAggregationContainer,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { DispatchFailureReason } from '@kbn/alerting-v2-schemas';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../../dispatcher/steps/constants';
-import { bucketsToRecord } from './constants';
+import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { TERMS_SIZE, bucketsToRecord } from './constants';
 import type {
   DispatcherActionBucket,
   DispatcherEventStatsAggregations,
+  DispatcherPolicyActivityBucket,
+  DispatcherPolicyStatsAggregations,
   DispatcherStatsResults,
+  PercentilesAggregation,
   ValueAggregation,
 } from './types';
+import type { DispatcherPolicyActivity, Distribution } from '../types';
 
 const EVENT_LOG_INDEX = '.kibana-event-log-*';
 const DISPATCHER_FIELDS = 'kibana.alerting_v2.dispatcher';
@@ -41,21 +49,42 @@ const dispatcherEventsFilter: QueryDslQueryContainer[] = [
   { range: { '@timestamp': { gte: WINDOW } } },
 ];
 
+const SAVED_OBJECTS_PATH = 'kibana.saved_objects';
+
+type Aggregations = Record<string, AggregationsAggregationContainer>;
+const PERCENTS = [50, 99];
+
 const cardinality = (field: string, precisionThreshold = CARDINALITY_PRECISION) => ({
   cardinality: { field: `${DISPATCHER_FIELDS}.${field}`, precision_threshold: precisionThreshold },
+});
+
+const sum = (field: string) => ({ sum: { field: `${DISPATCHER_FIELDS}.${field}` } });
+
+const actionFilter = (action: string) => ({ term: { 'event.action': action } });
+
+/** Sibling pipeline aggregations giving p50 / p99 / avg of a metric across the `by_policy` buckets. */
+const distributionOf = (name: string, metricPath: string): Aggregations => ({
+  [`${name}_percentiles`]: {
+    percentiles_bucket: { buckets_path: `by_policy>${metricPath}`, percents: PERCENTS },
+  },
+  [`${name}_avg`]: { avg_bucket: { buckets_path: `by_policy>${metricPath}` } },
 });
 
 export async function getDispatcherStats(
   esClient: ElasticsearchClient
 ): Promise<DispatcherStatsResults> {
-  const [eventStats] = await Promise.all([searchEventStats(esClient)]);
+  const [eventStats, policyStats] = await Promise.all([
+    searchEventStats(esClient),
+    searchPolicyStats(esClient),
+  ]);
 
   return {
     ...eventStats,
+    ...policyStats,
   };
 }
 
-/** Query A: sums per outcome, cardinalities over `dispatched` events and failures by reason. */
+/** Sums per outcome, cardinalities over `dispatched` events and failures by reason. */
 async function searchEventStats(esClient: ElasticsearchClient) {
   const response = await esClient.search({
     index: EVENT_LOG_INDEX,
@@ -118,6 +147,150 @@ async function searchEventStats(esClient: ElasticsearchClient) {
     ),
   };
 }
+
+/**
+ * Per-policy activity and distributions, through the nested policy refs, plus the distinct rules on
+ * `unmatched` events. Bounded to the `TERMS_SIZE` policies with most events.
+ */
+async function searchPolicyStats(esClient: ElasticsearchClient) {
+  const policyRefs = (aggs: Aggregations): AggregationsAggregationContainer => ({
+    nested: { path: SAVED_OBJECTS_PATH },
+    aggs: {
+      policies: {
+        filter: { term: { [`${SAVED_OBJECTS_PATH}.type`]: ACTION_POLICY_SAVED_OBJECT_TYPE } },
+        aggs,
+      },
+    },
+  });
+  const byPolicy = (eventAggs: Aggregations): AggregationsAggregationContainer => ({
+    terms: { field: `${SAVED_OBJECTS_PATH}.id`, size: TERMS_SIZE },
+    aggs: { events: { reverse_nested: {}, aggs: eventAggs } },
+  });
+
+  const response = await esClient.search({
+    index: EVENT_LOG_INDEX,
+    size: 0,
+    ignore_unavailable: true,
+    query: { bool: { filter: dispatcherEventsFilter } },
+    aggs: {
+      // Every event of the policy: activity flags and throttle ratio.
+      policy_refs: policyRefs({
+        by_policy: byPolicy({
+          dispatched: {
+            filter: actionFilter(DISPATCHED),
+            aggs: { action_groups: sum('action_group_count') },
+          },
+          throttled: {
+            filter: actionFilter(THROTTLED),
+            aggs: { action_groups: sum('action_group_count') },
+          },
+          dispatch_failed: { filter: actionFilter(DISPATCH_FAILED) },
+          throttle_ratio: {
+            bucket_script: {
+              buckets_path: {
+                throttled: 'throttled>action_groups',
+                dispatched: 'dispatched>action_groups',
+              },
+              // null skips the bucket, so policies with no groups do not count as ratio 0.
+              script:
+                'params.throttled + params.dispatched > 0 ? params.throttled / (params.throttled + params.dispatched) : null',
+            },
+          },
+        }),
+        ...distributionOf('throttle_ratio', 'events>throttle_ratio'),
+      }),
+      // Only `dispatched` events: what each notifying policy delivered.
+      dispatched_events: {
+        filter: actionFilter(DISPATCHED),
+        aggs: {
+          policy_refs: policyRefs({
+            by_policy: byPolicy({
+              action_groups: sum('action_group_count'),
+              alerts: sum('alert_count'),
+              workflow_executions: cardinality('workflow_execution_ids'),
+            }),
+            ...distributionOf('action_groups', 'events>action_groups'),
+            ...distributionOf('alerts', 'events>alerts'),
+            ...distributionOf('workflow_executions', 'events>workflow_executions'),
+          }),
+        },
+      },
+      unmatched_events: {
+        filter: actionFilter(UNMATCHED),
+        aggs: {
+          rule_refs: {
+            nested: { path: SAVED_OBJECTS_PATH },
+            aggs: {
+              rules: {
+                filter: { term: { [`${SAVED_OBJECTS_PATH}.type`]: RULE_SAVED_OBJECT_TYPE } },
+                aggs: {
+                  uncovered_rules: {
+                    cardinality: {
+                      field: `${SAVED_OBJECTS_PATH}.id`,
+                      precision_threshold: CARDINALITY_PRECISION,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const aggs = response.aggregations as unknown as DispatcherPolicyStatsAggregations | undefined;
+  const activity = aggs?.policy_refs.policies;
+  const dispatched = aggs?.dispatched_events.policy_refs.policies;
+
+  return {
+    dispatcher_policies_count_by_activity_24hr: countByActivity(activity?.by_policy.buckets ?? []),
+    dispatcher_action_groups_dispatched_per_policy_24hr: toDistribution(
+      dispatched?.action_groups_percentiles,
+      dispatched?.action_groups_avg
+    ),
+    dispatcher_alerts_dispatched_per_policy_24hr: toDistribution(
+      dispatched?.alerts_percentiles,
+      dispatched?.alerts_avg
+    ),
+    dispatcher_workflow_executions_per_policy_24hr: toDistribution(
+      dispatched?.workflow_executions_percentiles,
+      dispatched?.workflow_executions_avg
+    ),
+    dispatcher_throttle_ratio_per_policy_24hr: toDistribution(
+      activity?.throttle_ratio_percentiles,
+      activity?.throttle_ratio_avg
+    ),
+    dispatcher_uncovered_rules_count_24hr:
+      aggs?.unmatched_events.rule_refs.rules.uncovered_rules.value ?? 0,
+  };
+}
+
+/** Policies with at least one event of each kind; `broken` = failing with nothing dispatched. */
+const countByActivity = (
+  buckets: DispatcherPolicyActivityBucket[]
+): Record<DispatcherPolicyActivity, number> =>
+  buckets.reduce(
+    (acc, { events }) => {
+      const hasDispatched = events.dispatched.doc_count > 0;
+      const hasFailed = events.dispatch_failed.doc_count > 0;
+      if (hasDispatched) acc.dispatched += 1;
+      if (events.throttled.doc_count > 0) acc.throttled += 1;
+      if (hasFailed) acc.failing += 1;
+      if (hasFailed && !hasDispatched) acc.broken += 1;
+      return acc;
+    },
+    { dispatched: 0, throttled: 0, failing: 0, broken: 0 }
+  );
+
+const toDistribution = (
+  percentiles: PercentilesAggregation | undefined,
+  avg: ValueAggregation | undefined
+): Distribution => ({
+  p50: percentiles?.values['50.0'] ?? null,
+  p99: percentiles?.values['99.0'] ?? null,
+  avg: avg?.value ?? null,
+});
 
 /** Picks the summed value of the buckets whose key is one of `keys`; absent keys stay undefined. */
 const sumsByKey = <K extends string>(
