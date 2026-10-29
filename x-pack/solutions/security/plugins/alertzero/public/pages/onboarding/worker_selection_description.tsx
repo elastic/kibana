@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FeatureSettingsLink } from '../watches/components/feature_settings_link';
 import { ONBOARDING_READ_MORE_URL_PLACEHOLDER } from './constants';
 import * as i18n from './translations';
 
@@ -22,11 +21,8 @@ export const WorkerSelectionDescription: React.FC<Props> = ({ isSaving, onWatchS
     <p>
       <FormattedMessage
         id="xpack.alertzero.onboarding.subtitle"
-        defaultMessage="A Watch is a small team of Workers focused on one job, such as triaging alerts or hunting for threats. Workers use the AI models configured in {featureSettingsLink}, and by default they propose actions for you to approve or decline. Choose which Workers to turn on. You can change their settings later in {watchSettingsLink}."
+        defaultMessage="Turn on Workers to triage alerts, investigate potential attacks, hunt for threats, and improve your detection rules. By default, they propose actions for you to approve or decline. You can change this later in {watchSettingsLink}."
         values={{
-          featureSettingsLink: (
-            <FeatureSettingsLink data-test-subj="alertZeroOnboardingFeatureSettingsLink" />
-          ),
           watchSettingsLink: (
             <EuiLink
               onClick={onWatchSettingsClick}

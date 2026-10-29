@@ -20,7 +20,7 @@ export const ONBOARDING_GREETING = i18n.translate('xpack.alertzero.onboarding.gr
 });
 
 export const ONBOARDING_TITLE = i18n.translate('xpack.alertzero.onboarding.title', {
-  defaultMessage: 'Ready to turn on your Watches?',
+  defaultMessage: "Let's get AlertZero working for you!",
 });
 
 export const ONBOARDING_DOC_TITLE = i18n.translate('xpack.alertzero.onboarding.docTitle', {
@@ -33,13 +33,13 @@ export const ONBOARDING_INTRO_GREETING = i18n.translate(
 );
 
 export const ONBOARDING_INTRO_HEADING = i18n.translate('xpack.alertzero.onboarding.intro.heading', {
-  defaultMessage: 'Ready to add your data?',
+  defaultMessage: "Let's add your data!",
 });
 
 export const ONBOARDING_WATCHES_HEADING = i18n.translate(
   'xpack.alertzero.onboarding.introHeading',
   {
-    defaultMessage: 'Watches are how AlertZero works for you',
+    defaultMessage: 'Choose your Workers',
   }
 );
 

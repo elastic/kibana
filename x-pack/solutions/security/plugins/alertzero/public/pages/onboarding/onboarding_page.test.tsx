@@ -251,7 +251,7 @@ describe('OnboardingPage', () => {
 
       fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
 
-      expect(screen.getByText('Ready to turn on your Watches?')).toBeInTheDocument();
+      expect(screen.getByText("Let's get AlertZero working for you!")).toBeInTheDocument();
       expect(screen.getAllByRole('switch').length).toBeGreaterThan(0);
     });
   });
@@ -304,7 +304,7 @@ describe('OnboardingPage', () => {
       renderPage({ serverWorkers: NO_MODEL_WORKERS_RESPONSE });
 
       const callout = screen.getByTestId('alertZeroOnboardingNoModelCallout');
-      const intro = screen.getByText(/A Watch is a small team of Workers/);
+      const intro = screen.getByText(/Turn on Workers to triage alerts/);
       const firstToggle = screen.getAllByRole('switch')[0];
       expect(intro.compareDocumentPosition(callout)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
       expect(callout.compareDocumentPosition(firstToggle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
@@ -329,21 +329,17 @@ describe('OnboardingPage', () => {
         `alertZeroOnboardingWorkerToggle-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
       )
     ).toBeEnabled();
-    expect(screen.getByTestId('alertZeroOnboardingFeatureSettingsLink')).toHaveAttribute(
-      'href',
-      FEATURE_SETTINGS_URL
-    );
   });
 
   it('renders the title', () => {
     renderPage({ canWrite: true });
-    expect(screen.getByText('Ready to turn on your Watches?')).toBeInTheDocument();
+    expect(screen.getByText("Let's get AlertZero working for you!")).toBeInTheDocument();
   });
 
   describe('with write capability', () => {
     it('renders the subtitle', () => {
       renderPage({ canWrite: true });
-      expect(screen.getByText(/A Watch is a small team of Workers/)).toBeInTheDocument();
+      expect(screen.getByText(/Turn on Workers to triage alerts/)).toBeInTheDocument();
     });
 
     it('renders worker toggle rows', () => {
