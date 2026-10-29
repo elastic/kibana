@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useContext, useCallback, useEffect } from 'react';
+import React, { useState, useContext, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import { merge } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,9 +22,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
-  EuiDelayRender,
-  EuiScreenReaderOnly,
-  htmlIdGenerator,
   useEuiTheme,
   EuiText,
 } from '@elastic/eui';
@@ -51,8 +49,7 @@ const defaultClusterValues: ClusterPayload = {
   proxySocketConnections: 18,
   serverName: '',
 };
-const ERROR_TITLE_ID = 'removeClustersErrorTitle';
-const ERROR_LIST_ID = 'removeClustersErrorList';
+const ERROR_FOCUS_DELAY_MS = 100;
 interface Props {
   confirmFormAction: (cluster: ClusterPayload) => void;
   onBack?: () => void;
@@ -97,7 +94,11 @@ export const RemoteClusterForm: React.FC<Props> = ({
   );
   const [areErrorsVisible, setAreErrorsVisible] = useState(false);
   const [formHasBeenSubmited, setFormHasBeenSubmited] = useState(false);
-  const generateId = htmlIdGenerator();
+  const formRef = useRef<HTMLDivElement>(null);
+  const focusInvalidFieldTimeoutRef = useRef<number | undefined>(undefined);
+  const errorTitle = i18n.translate('xpack.remoteClusters.remoteClusterForm.errorTitle', {
+    defaultMessage: 'Some fields require your attention.',
+  });
   const getCluster = useCallback((): ClusterPayload => {
     const {
       name,
@@ -133,7 +134,13 @@ export const RemoteClusterForm: React.FC<Props> = ({
 
   const handleNext = () => {
     if (hasErrors()) {
-      setAreErrorsVisible(true);
+      flushSync(() => setAreErrorsVisible(true));
+      focusInvalidFieldTimeoutRef.current = window.setTimeout(() => {
+        focusInvalidFieldTimeoutRef.current = undefined;
+        const firstInvalidField =
+          formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]');
+        firstInvalidField?.focus();
+      }, ERROR_FOCUS_DELAY_MS);
       return;
     }
     setFormHasBeenSubmited(true);
@@ -196,6 +203,15 @@ export const RemoteClusterForm: React.FC<Props> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fields]);
+
+  useEffect(
+    () => () => {
+      if (focusInvalidFieldTimeoutRef.current !== undefined) {
+        window.clearTimeout(focusInvalidFieldTimeoutRef.current);
+      }
+    },
+    []
+  );
 
   const onSkipUnavailableChange = useCallback(
     (e: EuiSwitchEvent) => {
@@ -284,68 +300,17 @@ export const RemoteClusterForm: React.FC<Props> = ({
   };
 
   const renderErrors = () => {
-    const {
-      name: errorClusterName,
-      seeds: errorsSeeds,
-      proxyAddress: errorProxyAddress,
-    } = fieldsErrors;
     if (!areErrorsVisible || !hasErrors()) {
       return null;
     }
-    const errorExplanations = [];
-    if (errorClusterName) {
-      errorExplanations.push({
-        key: 'nameExplanation',
-        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputNameErrorMessage', {
-          defaultMessage: 'The "Name" field is invalid.',
-        }),
-        error: errorClusterName,
-      });
-    }
-    if (errorsSeeds) {
-      errorExplanations.push({
-        key: 'seedsExplanation',
-        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputSeedsErrorMessage', {
-          defaultMessage: 'The "Seed nodes" field is invalid.',
-        }),
-        error: errorsSeeds,
-      });
-    }
-    if (errorProxyAddress) {
-      errorExplanations.push({
-        key: 'proxyAddressExplanation',
-        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputProxyErrorMessage', {
-          defaultMessage: 'The "Proxy address" field is invalid.',
-        }),
-        error: errorProxyAddress,
-      });
-    }
-    const messagesToBeRendered = errorExplanations.length && (
-      <EuiScreenReaderOnly>
-        <dl id={generateId(ERROR_LIST_ID)} aria-labelledby={generateId(ERROR_TITLE_ID)}>
-          {errorExplanations.map(({ key, field, error }) => (
-            <div key={key}>
-              <dt>{field}</dt>
-              <dd>{error}</dd>
-            </div>
-          ))}
-        </dl>
-      </EuiScreenReaderOnly>
-    );
     return (
       <>
         <KbnDangerCallout
-          title={
-            <span id={generateId(ERROR_TITLE_ID)}>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.errorTitle"
-                defaultMessage="Some fields require your attention."
-              />
-            </span>
-          }
+          announceOnMount
+          title={errorTitle}
+          data-test-subj="remoteClusterFormGlobalError"
         />
-        <EuiDelayRender>{messagesToBeRendered}</EuiDelayRender>
-        <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
+        <EuiSpacer size="m" />
       </>
     );
   };
@@ -354,7 +319,7 @@ export const RemoteClusterForm: React.FC<Props> = ({
     <>
       {saveError && <SaveError saveError={saveError} />}
       {renderErrors()}
-      <EuiForm data-test-subj="remoteClusterForm">
+      <EuiForm ref={formRef} data-test-subj="remoteClusterForm">
         <EuiDescribedFormGroup
           title={
             <EuiTitle size="s">

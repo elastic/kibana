@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { screen, within, waitFor, fireEvent } from '@testing-library/react';
+import { screen, within, waitFor, fireEvent, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiComboBoxTestHarness } from '@kbn/test-eui-helpers';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -142,10 +143,34 @@ describe('Create Remote cluster', () => {
 
         await user.click(nextButton);
 
-        expect(await screen.findByTestId('remoteClusterFormGlobalError')).toBeInTheDocument();
+        const globalError = await screen.findByTestId('remoteClusterFormGlobalError');
+        expect(
+          within(globalError).getByText('Some fields require your attention.', { selector: 'p' })
+        ).toBeInTheDocument();
         expect(screen.getByText('Name is required.')).toBeInTheDocument();
         expect(screen.getByText('At least one seed node is required.')).toBeInTheDocument();
         expect(screen.getByTestId('remoteClusterFormNextButton')).toBeDisabled();
+      });
+
+      test('should announce form errors when clicking "next" without filling the form', async () => {
+        await goToFormStep({ securityModel: 'api' });
+
+        jest.useFakeTimers();
+        try {
+          const userWithFakeTimers = userEvent.setup({
+            delay: null,
+            advanceTimers: jest.advanceTimersByTime,
+          });
+          await userWithFakeTimers.click(screen.getByTestId('remoteClusterFormNextButton'));
+          act(() => jest.advanceTimersByTime(100));
+
+          const globalError = screen.getByTestId('remoteClusterFormGlobalError');
+          expect(within(globalError).getByRole('status')).toHaveTextContent(
+            'Some fields require your attention.'
+          );
+        } finally {
+          jest.useRealTimers();
+        }
       });
 
       test('renders no switch for cloud advanced options', async () => {
