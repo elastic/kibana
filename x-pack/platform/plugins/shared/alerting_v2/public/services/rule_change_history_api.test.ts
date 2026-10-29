@@ -137,4 +137,33 @@ describe('RuleChangeHistoryApi', () => {
       await expect(api.getRuleChangeEvent({ eventId: 'evt-1' })).rejects.toThrow('nope');
     });
   });
+
+  describe('restoreRuleChange', () => {
+    it('POSTs to the encoded restore path of the change and forwards the abort signal', async () => {
+      const { api, http } = buildApi();
+      const signal = new AbortController().signal;
+
+      await api.restoreRuleChange({ eventId: 'c/d', signal });
+
+      expect(http.post).toHaveBeenCalledWith(
+        '/internal/alerting/v2/change_history/rules/c%2Fd/_restore',
+        { signal }
+      );
+    });
+
+    it('returns the restored rule from http.post', async () => {
+      const { api, http } = buildApi();
+      const rule = { id: 'rule-1', version: 3 };
+      http.post.mockResolvedValueOnce(rule);
+
+      await expect(api.restoreRuleChange({ eventId: 'evt-1' })).resolves.toEqual(rule);
+    });
+
+    it('propagates errors from http.post', async () => {
+      const { api, http } = buildApi();
+      http.post.mockRejectedValueOnce(new Error('conflict'));
+
+      await expect(api.restoreRuleChange({ eventId: 'evt-1' })).rejects.toThrow('conflict');
+    });
+  });
 });
