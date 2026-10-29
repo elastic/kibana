@@ -9,6 +9,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
+  ALERT_RULE_TYPE,
+  ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
@@ -131,6 +133,7 @@ export async function getApmServiceSummary({
     apmAlertsClient.search({
       size: 100,
       track_total_hits: false,
+      _source: [ALERT_RULE_TYPE, ALERT_START],
       query: {
         bool: {
           filter: [
