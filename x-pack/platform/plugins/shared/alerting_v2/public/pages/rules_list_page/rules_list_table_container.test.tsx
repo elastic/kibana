@@ -13,6 +13,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RulesListTableContainer } from './rules_list_table_container';
+import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
+
+const mockRuleSummaryFlyout = ({ rule }: { rule: { id: string } }) => (
+  <div data-test-subj="ruleSummaryFlyout">{rule.id}</div>
+);
+
+jest.mock('../../components/rule/flyouts', () => ({
+  RuleSummaryFlyout: (props: { rule: { id: string } }) => mockRuleSummaryFlyout(props),
+}));
 
 const mockNavigateToUrl = jest.fn();
 
@@ -94,7 +103,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
   {
     id: 'rule-2',
@@ -102,7 +111,7 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+    query: { base: 'FROM metrics-*' },
   },
 ] as RuleApiResponse[];
 
@@ -117,31 +126,36 @@ const toListItem = (rule: RuleApiResponse) => ({
 const mockOnEditInFlyout = jest.fn();
 const mockOnCloneInFlyout = jest.fn();
 
-const renderContainer = ({ total = mockRules.length }: { total?: number } = {}) => {
+const renderContainer = ({
+  total = mockRules.length,
+  locators,
+}: { total?: number; locators?: ReturnType<typeof createMockLocators> } = {}) => {
   return render(
-    <I18nProvider>
-      <ContentListProvider
-        id="rules-list-table-container-test"
-        labels={{ entity: 'rule', entityPlural: 'rules' }}
-        dataSource={{
-          findItems: async () => ({
-            items: mockRules.map(toListItem),
-            total,
-          }),
-        }}
-        features={{
-          sorting: { initialSort: { field: 'name', direction: 'asc' } },
-          pagination: { initialPageSize: 20 },
-          search: true,
-          selection: false,
-        }}
-      >
-        <RulesListTableContainer
-          onEditInFlyout={mockOnEditInFlyout}
-          onCloneInFlyout={mockOnCloneInFlyout}
-        />
-      </ContentListProvider>
-    </I18nProvider>
+    <MockLocatorProvider locators={locators}>
+      <I18nProvider>
+        <ContentListProvider
+          id="rules-list-table-container-test"
+          labels={{ entity: 'rule', entityPlural: 'rules' }}
+          dataSource={{
+            findItems: async () => ({
+              items: mockRules.map(toListItem),
+              total,
+            }),
+          }}
+          features={{
+            sorting: { initialSort: { field: 'name', direction: 'asc' } },
+            pagination: { initialPageSize: 20 },
+            search: true,
+            selection: false,
+          }}
+        >
+          <RulesListTableContainer
+            onEditInFlyout={mockOnEditInFlyout}
+            onCloneInFlyout={mockOnCloneInFlyout}
+          />
+        </ContentListProvider>
+      </I18nProvider>
+    </MockLocatorProvider>
   );
 };
 
@@ -215,6 +229,38 @@ describe('RulesListTableContainer', () => {
       fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
 
       expect(mockOnCloneInFlyout).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('links the row View details action to the rule details page', async () => {
+      const locators = createMockLocators();
+      renderContainer({ locators });
+      await waitForRules();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+      const viewDetails = await screen.findByTestId('viewRuleDetails-rule-1');
+
+      expect(viewDetails).toHaveAttribute('href', '/mock-locator-url');
+      expect(locators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+      expect(screen.queryByTestId('ruleSummaryFlyout')).not.toBeInTheDocument();
+      expect(locators.rulesLocators.navigateSync).not.toHaveBeenCalled();
+
+      fireEvent.click(viewDetails);
+
+      expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+      expect(screen.queryByTestId('ruleSummaryFlyout')).not.toBeInTheDocument();
+    });
+
+    it('opens the rule summary flyout when the rule name is clicked', async () => {
+      const locators = createMockLocators();
+      renderContainer({ locators });
+      await waitForRules();
+
+      expect(screen.queryByTestId('expandRule-rule-1')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
+
+      expect(await screen.findByTestId('ruleSummaryFlyout')).toHaveTextContent('rule-1');
+      expect(locators.rulesLocators.navigateSync).not.toHaveBeenCalled();
     });
   });
 
@@ -859,39 +905,41 @@ describe('RulesListTableContainer', () => {
         {
           ...mockRules[0],
           id: 'rule-3',
-          metadata: { name: 'Rule Three', tags: [], version: 1 },
+          metadata: { name: 'Rule Three', tags: [] },
         },
         {
           ...mockRules[1],
           id: 'rule-4',
-          metadata: { name: 'Rule Four', tags: [], version: 1 },
+          metadata: { name: 'Rule Four', tags: [] },
         },
       ] as RuleApiResponse[];
 
       render(
-        <I18nProvider>
-          <ContentListProvider
-            id="rules-list-selection-page-test"
-            labels={{ entity: 'rule', entityPlural: 'rules' }}
-            dataSource={{
-              findItems: async ({ page }) => ({
-                items: (page.index === 0 ? page1 : page2).map(toListItem),
-                total: 40,
-              }),
-            }}
-            features={{
-              sorting: { initialSort: { field: 'name', direction: 'asc' } },
-              pagination: { initialPageSize: 2 },
-              search: true,
-              selection: false,
-            }}
-          >
-            <RulesListTableContainer
-              onEditInFlyout={mockOnEditInFlyout}
-              onCloneInFlyout={mockOnCloneInFlyout}
-            />
-          </ContentListProvider>
-        </I18nProvider>
+        <MockLocatorProvider>
+          <I18nProvider>
+            <ContentListProvider
+              id="rules-list-selection-page-test"
+              labels={{ entity: 'rule', entityPlural: 'rules' }}
+              dataSource={{
+                findItems: async ({ page }) => ({
+                  items: (page.index === 0 ? page1 : page2).map(toListItem),
+                  total: 40,
+                }),
+              }}
+              features={{
+                sorting: { initialSort: { field: 'name', direction: 'asc' } },
+                pagination: { initialPageSize: 2 },
+                search: true,
+                selection: false,
+              }}
+            >
+              <RulesListTableContainer
+                onEditInFlyout={mockOnEditInFlyout}
+                onCloneInFlyout={mockOnCloneInFlyout}
+              />
+            </ContentListProvider>
+          </I18nProvider>
+        </MockLocatorProvider>
       );
 
       await waitFor(() => {

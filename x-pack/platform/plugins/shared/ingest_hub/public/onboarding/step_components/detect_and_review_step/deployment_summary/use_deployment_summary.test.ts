@@ -8,6 +8,18 @@
 import { renderHook } from '@testing-library/react';
 
 jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
+
+// Mock use_agent_policy_summary to prevent useQuery from being called without a QueryClientProvider.
+// useDeploymentSummary calls useAgentPolicySummary unconditionally (it's a no-op when agentPolicyId
+// is absent), but the hook internally calls useGetEnrollmentAPIKeysQuery which requires @tanstack/react-query.
+jest.mock('./use_agent_policy_summary', () => ({
+  useAgentPolicySummary: () => ({
+    agentPolicyName: undefined,
+    enrollmentToken: undefined,
+    agentCount: undefined,
+  }),
+}));
+
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useDeploymentSummary } from './use_deployment_summary';
 import type { PersistedEcfLaunchStep } from '../../ecf_deployment_section';

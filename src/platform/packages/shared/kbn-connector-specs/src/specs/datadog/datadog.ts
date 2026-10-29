@@ -10,12 +10,20 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError } from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
+import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
+import {
+  DATADOG_ALERT_EVENT_ID,
+  DATADOG_ALERT_EVENT_KEY,
+  DATADOG_CONNECTOR_TYPE_ID,
+} from './constants';
 import {
   CancelDowntimeInputSchema,
   CreateIncidentInputSchema,
   DATADOG_SITE_API_URLS,
   DATADOG_SITES,
+  DatadogReceivedEventSchema,
   GetAlertEventsInputSchema,
   GetMonitorInputSchema,
   ListMonitorsInputSchema,
@@ -112,11 +120,41 @@ function formatDatadogError(action: string, error: unknown): Error {
 const joinCsv = (values: string[] | undefined): string | undefined =>
   values && values.length > 0 ? values.join(',') : undefined;
 
+const hasAlertIdentity = (
+  rawBody: unknown
+): rawBody is Record<'monitor_id' | 'scopes', unknown> => {
+  if (typeof rawBody !== 'object' || rawBody === null || Array.isArray(rawBody)) {
+    return false;
+  }
+
+  const { monitor_id: monitorId, scopes } = rawBody as Record<string, unknown>;
+  return monitorId !== undefined && monitorId !== null && scopes !== undefined && scopes !== null;
+};
+
+const handleDatadogEvents = async (ctx: ConnectorIngressContext): Promise<HandleEventsResult> => {
+  if (!hasAlertIdentity(ctx.rawBody)) {
+    return { type: 'emit', events: [] };
+  }
+
+  return {
+    type: 'emit',
+    events: [
+      {
+        eventId: DATADOG_ALERT_EVENT_ID,
+        correlationKey: uuidv4(),
+        payload: {
+          body: ctx.rawBody,
+        },
+      },
+    ],
+  };
+};
+
 export const Datadog: ConnectorSpec = {
   metadata: {
-    id: '.datadog',
+    id: DATADOG_CONNECTOR_TYPE_ID,
     displayName: 'Datadog',
-    description: i18n.translate('core.kibanaConnectorSpecs.datadog.metadata.description', {
+    description: i18n.translate('connectorSpecs.datadog.metadata.description', {
       defaultMessage:
         'List and mute monitors, manage downtimes and incidents, post events, and query metrics and logs in Datadog',
     }),
@@ -131,30 +169,27 @@ export const Datadog: ConnectorSpec = {
         type: 'basic',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.datadog.auth.basic.label', {
+          label: i18n.translate('connectorSpecs.datadog.auth.basic.label', {
             defaultMessage: 'API and Application keys',
           }),
           meta: {
             username: {
-              label: i18n.translate('core.kibanaConnectorSpecs.datadog.auth.apiKey.label', {
+              label: i18n.translate('connectorSpecs.datadog.auth.apiKey.label', {
                 defaultMessage: 'API Key',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.datadog.auth.apiKey.helpText', {
+              helpText: i18n.translate('connectorSpecs.datadog.auth.apiKey.helpText', {
                 defaultMessage:
                   'Datadog API key from Organization Settings > API Keys. Required together with an Application Key for monitor, downtime, incident, event, metric, and log actions.',
               }),
             },
             password: {
-              label: i18n.translate('core.kibanaConnectorSpecs.datadog.auth.applicationKey.label', {
+              label: i18n.translate('connectorSpecs.datadog.auth.applicationKey.label', {
                 defaultMessage: 'Application Key',
               }),
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.datadog.auth.applicationKey.helpText',
-                {
-                  defaultMessage:
-                    'Datadog application key from Organization Settings > Application Keys. Required together with an API Key for monitor, downtime, incident, event, metric, and log actions.',
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.datadog.auth.applicationKey.helpText', {
+                defaultMessage:
+                  'Datadog application key from Organization Settings > Application Keys. Required together with an API Key for monitor, downtime, incident, event, metric, and log actions.',
+              }),
             },
           },
         },
@@ -175,10 +210,10 @@ export const Datadog: ConnectorSpec = {
           'Datadog site (region) where the account lives. Maps to the regional API host, e.g. datadoghq.com → api.datadoghq.com.'
         )
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.datadog.config.site.label', {
+          label: i18n.translate('connectorSpecs.datadog.config.site.label', {
             defaultMessage: 'Datadog site',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.datadog.config.site.helpText', {
+          helpText: i18n.translate('connectorSpecs.datadog.config.site.helpText', {
             defaultMessage:
               'Select the Datadog site shown in your Datadog URL (for example datadoghq.com for US1, datadoghq.eu for EU1, us3.datadoghq.com for US3). Requests go to the matching api.* host.',
           }),
@@ -562,6 +597,23 @@ export const Datadog: ConnectorSpec = {
         }
       },
     },
+  },
+
+  events: {
+    definitions: {
+      [DATADOG_ALERT_EVENT_KEY]: {
+        eventId: DATADOG_ALERT_EVENT_ID,
+        title: i18n.translate('connectorSpecs.datadog.events.alert.title', {
+          defaultMessage: 'Alert',
+        }),
+        description: i18n.translate('connectorSpecs.datadog.events.alert.description', {
+          defaultMessage:
+            'A Datadog alert webhook payload was accepted on the connector ingest URL.',
+        }),
+        eventSchema: DatadogReceivedEventSchema,
+      },
+    },
+    handleEvents: handleDatadogEvents,
   },
 
   skill: [

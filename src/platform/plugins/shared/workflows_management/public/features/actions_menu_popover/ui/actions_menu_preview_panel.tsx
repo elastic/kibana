@@ -10,16 +10,26 @@
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCode,
+  EuiCodeBlock,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiImage,
+  EuiLink,
   EuiMarkdownFormat,
   EuiNotificationBadge,
+  EuiPanel,
+  EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiText,
+  EuiTitle,
   EuiToolTip,
+  getDefaultEuiMarkdownProcessingPlugins,
+  useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -27,12 +37,8 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getBaseConnectorType } from '@kbn/workflows-ui';
-import {
-  defaultPanelStyles,
-  panelStyles,
-  previewStepRowStyles,
-  resourceCardStyles,
-} from './actions_menu_preview_panel.styles';
+import { getActionIconTileVariantStyle } from './action_icon_tile.styles';
+import { panelStyles, previewStepRowStyles } from './actions_menu_preview_panel.styles';
 import { ActionsMenuAiIcon } from './ai_icon_tile';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -51,6 +57,47 @@ import {
 
 type TabId = 'inputs' | 'outputs' | 'examples';
 
+type MarkdownComponentProps = React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode };
+
+// A div with heading semantics: EuiText (which wraps EuiMarkdownFormat) restyles h1-h6 tags.
+const ExampleHeading = ({ children }: MarkdownComponentProps) => (
+  <>
+    <EuiTitle size="xxxs">
+      <div role="heading" aria-level={4}>
+        {children}
+      </div>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+  </>
+);
+
+/** Markdown renderer for step examples: compact headings and small copyable code blocks. */
+const exampleProcessingPlugins = (() => {
+  const plugins = getDefaultEuiMarkdownProcessingPlugins();
+  const [, rehypeReactConfig] = plugins[1];
+  // Typed as ComponentType, but EUI defines it as a plain function that picks EuiCode or EuiCodeBlock.
+  const renderDefaultCode = rehypeReactConfig.components.code as (
+    props: MarkdownComponentProps
+  ) => React.ReactElement;
+  rehypeReactConfig.components = {
+    ...rehypeReactConfig.components,
+    h1: ExampleHeading,
+    h2: ExampleHeading,
+    h3: ExampleHeading,
+    h4: ExampleHeading,
+    h5: ExampleHeading,
+    h6: ExampleHeading,
+    // Inline code renders as EuiCode, which would pass fontSize to the DOM.
+    code: (props: MarkdownComponentProps) => {
+      const element = renderDefaultCode(props);
+      return element.type === EuiCodeBlock
+        ? React.cloneElement(element, { fontSize: 's' })
+        : element;
+    },
+  };
+  return plugins;
+})();
+
 interface ActionsMenuPreviewPanelProps {
   hoveredOption: ActionOptionData | null;
   hoveredJumpEntry?: JumpToStepEntry | null;
@@ -58,6 +105,7 @@ interface ActionsMenuPreviewPanelProps {
   onAddStep?: (action: ActionOptionData) => void;
   onPinPreview?: (action: ActionOptionData, parentSection?: ActionOptionData) => void;
 }
+
 export function ActionsMenuPreviewPanel({
   hoveredOption,
   hoveredJumpEntry,
@@ -127,7 +175,7 @@ export function ActionsMenuPreviewPanel({
 }
 
 function DefaultPanel() {
-  const styles = useMemoCss(defaultPanelStyles);
+  const styles = useMemoCss(panelStyles);
   const { http, notifications } = useKibana().services;
   const { jsonSchema } = useWorkflowJsonSchema({ loose: false });
   const illustrationUrl = http?.basePath.prepend(
@@ -157,126 +205,133 @@ function DefaultPanel() {
   }, [jsonSchema, notifications]);
 
   return (
-    <div css={styles.root}>
-      <div css={styles.hero}>
-        <EuiImage
-          src={illustrationUrl ?? ''}
-          alt=""
-          css={styles.illustration}
-          width={128}
-          height={128}
-        />
-        <p css={styles.heroText}>
-          <FormattedMessage
-            id="workflows.actionsMenu.preview.selectStep"
-            defaultMessage="Select a step to get started"
-          />
-          <br />
-          <FormattedMessage
-            id="workflows.actionsMenu.preview.selectStepDesc"
-            defaultMessage="Choose an action from the list to see its description and configuration."
-          />
-        </p>
-      </div>
-      <div css={styles.cardsSection}>
-        <ResourceCard
-          title={i18n.translate('workflows.actionsMenu.preview.documentation', {
-            defaultMessage: 'Documentation',
-          })}
-          description={i18n.translate('workflows.actionsMenu.preview.documentationDesc', {
-            defaultMessage: 'Learn how workflows steps work',
-          })}
-          iconType="external"
-          href={WORKFLOWS_DOCUMENTATION_URL}
-        />
-        <ResourceCard
-          title={i18n.translate('workflows.actionsMenu.preview.downloadSchema', {
-            defaultMessage: 'Download schema',
-          })}
-          description={i18n.translate('workflows.actionsMenu.preview.downloadSchemaDesc', {
-            defaultMessage: 'Download the full JSON schema',
-          })}
-          iconType="download"
-          onClick={handleDownloadSchema}
-        />
-      </div>
-    </div>
-  );
-}
-function ResourceCard({
-  title,
-  description,
-  iconType,
-  href,
-  onClick,
-}: {
-  title: string;
-  description: string;
-  iconType: string;
-  href?: string;
-  onClick?: () => void;
-}) {
-  const styles = useMemoCss(resourceCardStyles);
-  const content = (
-    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+    <EuiFlexGroup direction="column" gutterSize="none" css={styles.fill} responsive={false}>
       <EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
-            <EuiText size="s">
-              <strong>{title}</strong>
+        <EuiEmptyPrompt
+          paddingSize="m"
+          icon={<EuiImage src={illustrationUrl ?? ''} alt="" width={128} height={128} />}
+          title={
+            <h3>
+              <FormattedMessage
+                id="workflows.actionsMenu.preview.selectStep"
+                defaultMessage="Select a step to get started"
+              />
+            </h3>
+          }
+          titleSize="xs"
+          body={
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="workflows.actionsMenu.preview.selectStepDesc"
+                defaultMessage="Choose an action from the list to see its description and configuration."
+              />
             </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="xs" color="subdued">
-              {description}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          }
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type={iconType} color="primary" size="m" aria-hidden />
+        <EuiPanel
+          hasBorder
+          hasShadow={false}
+          paddingSize="none"
+          borderRadius="m"
+          css={styles.resourceInset}
+        >
+          <EuiLink
+            href={WORKFLOWS_DOCUMENTATION_URL}
+            target="_blank"
+            external={false}
+            css={styles.resourceRow}
+            aria-label={i18n.translate('workflows.actionsMenu.preview.documentation', {
+              defaultMessage: 'Documentation',
+            })}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate('workflows.actionsMenu.preview.documentation', {
+                      defaultMessage: 'Documentation',
+                    })}
+                  </strong>
+                </EuiText>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('workflows.actionsMenu.preview.documentationDesc', {
+                    defaultMessage: 'Learn how workflows steps work',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="external" color="subdued" size="m" aria-hidden />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiLink>
+          <EuiHorizontalRule margin="none" />
+          <button
+            type="button"
+            onClick={handleDownloadSchema}
+            css={styles.resourceRow}
+            aria-label={i18n.translate('workflows.actionsMenu.preview.downloadSchema', {
+              defaultMessage: 'Download schema',
+            })}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate('workflows.actionsMenu.preview.downloadSchema', {
+                      defaultMessage: 'Download schema',
+                    })}
+                  </strong>
+                </EuiText>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('workflows.actionsMenu.preview.downloadSchemaDesc', {
+                    defaultMessage: 'Download the full JSON schema',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="download" color="primary" size="m" aria-hidden />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </button>
+        </EuiPanel>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-
-  if (href) {
-    return (
-      <a css={styles.row} href={href} target="_blank" rel="noopener noreferrer" aria-label={title}>
-        {content}
-      </a>
-    );
-  }
-
-  return (
-    <button type="button" css={styles.row} onClick={onClick} aria-label={title}>
-      {content}
-    </button>
   );
 }
 
 function JumpStepPanel({ entry }: { entry: JumpToStepEntry }) {
   const styles = useMemoCss(panelStyles);
   return (
-    <div css={styles.panel}>
-      <div css={styles.titleBlock}>
-        <p css={styles.titleBlockText}>{entry.id}</p>
-        <p css={styles.descriptionText}>
-          <FormattedMessage
-            id="workflows.actionsMenu.preview.jumpStep.subtitle"
-            defaultMessage="Existing step in this workflow"
-          />
-        </p>
-      </div>
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      paddingSize="m"
+      color="transparent"
+      css={styles.scroll}
+    >
+      <EuiTitle size="xs">
+        <h3>{entry.id}</h3>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiText size="xs" color="subdued">
+        <FormattedMessage
+          id="workflows.actionsMenu.preview.jumpStep.subtitle"
+          defaultMessage="Existing step in this workflow"
+        />
+      </EuiText>
       {entry.yaml && (
-        <div css={styles.tabsAndFields}>
-          <div css={styles.fieldList}>
-            <div css={styles.yamlPreview}>
-              <pre css={styles.codeText}>{entry.yaml}</pre>
-            </div>
-          </div>
-        </div>
+        <>
+          <EuiSpacer size="m" />
+          <EuiPanel hasBorder hasShadow={false} paddingSize="none" borderRadius="m">
+            <EuiCodeBlock language="yaml" fontSize="s" paddingSize="m" isCopyable={false}>
+              {entry.yaml}
+            </EuiCodeBlock>
+          </EuiPanel>
+        </>
       )}
-    </div>
+    </EuiPanel>
   );
 }
 
@@ -305,23 +360,40 @@ function SectionPreviewPanel({
   }, [section]);
 
   return (
-    <div css={styles.sectionPanel}>
-      <div css={styles.sectionTitle}>
-        <p css={styles.titleBlockText}>{section.label}</p>
-        {section.description && <p css={styles.descriptionText}>{section.description}</p>}
+    <div css={styles.fill}>
+      <div css={styles.sectionHeader}>
+        <EuiTitle size="xs">
+          <h3>{section.label}</h3>
+        </EuiTitle>
+        {section.description && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText size="xs" color="subdued">
+              {section.description}
+            </EuiText>
+          </>
+        )}
       </div>
       <div css={styles.stepListScroll}>
-        <div css={styles.stepList}>
-          {steps.map((step) => (
-            <PreviewStepRow
-              key={step.id}
-              step={step}
-              onClick={() => onStepSelected(step)}
-              onAdd={onAddStep ? () => onAddStep(step) : undefined}
-              onPinPreview={onPinPreview ? () => onPinPreview(step, section) : undefined}
-            />
+        <EuiPanel
+          hasBorder
+          hasShadow={false}
+          paddingSize="none"
+          borderRadius="m"
+          css={styles.stepListPanel}
+        >
+          {steps.map((step, idx) => (
+            <React.Fragment key={step.id}>
+              {idx > 0 && <EuiHorizontalRule margin="none" />}
+              <PreviewStepRow
+                step={step}
+                onClick={() => onStepSelected(step)}
+                onAdd={onAddStep ? () => onAddStep(step) : undefined}
+                onPinPreview={onPinPreview ? () => onPinPreview(step, section) : undefined}
+              />
+            </React.Fragment>
           ))}
-        </div>
+        </EuiPanel>
       </div>
     </div>
   );
@@ -350,6 +422,7 @@ function StepDetailPanel({
   onAdd: () => void;
   styles: ReturnType<typeof useMemoCss<typeof panelStyles>>;
 }) {
+  const requiredFont = useEuiFontSize('xxs');
   const displayTitle = step.label || step.id;
   const displayDescription =
     step.description && step.description !== step.id && step.description !== displayTitle
@@ -357,158 +430,233 @@ function StepDetailPanel({
       : null;
 
   return (
-    <div css={styles.panel}>
-      <div css={styles.titleBlock}>
-        <p css={styles.titleBlockText}>{displayTitle}</p>
-        {displayDescription && <p css={styles.descriptionText}>{displayDescription}</p>}
-        <EuiFlexGroup alignItems="center" gutterSize="m" css={styles.detailActions}>
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      paddingSize="m"
+      color="transparent"
+      css={styles.scroll}
+    >
+      <EuiTitle size="xs">
+        <h3>{displayTitle}</h3>
+      </EuiTitle>
+      {displayDescription && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            {displayDescription}
+          </EuiText>
+        </>
+      )}
+      <EuiSpacer size="s" />
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="plus"
+            flush="left"
+            onClick={onAdd}
+            data-test-subj="actionsMenuPreviewAdd"
+          >
+            <FormattedMessage id="workflows.actionsMenu.preview.add" defaultMessage="Add" />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        {docUrl && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
-              iconType="plus"
+              href={docUrl}
+              target="_blank"
+              iconType="external"
+              iconSide="right"
               flush="left"
-              onClick={onAdd}
-              data-test-subj="actionsMenuPreviewAdd"
+              data-test-subj="actionsMenuPreviewDocumentation"
             >
-              <FormattedMessage id="workflows.actionsMenu.preview.add" defaultMessage="Add" />
+              <FormattedMessage
+                id="workflows.actionsMenu.preview.documentationLink"
+                defaultMessage="Documentation"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {docUrl && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                href={docUrl}
-                target="_blank"
-                iconType="external"
-                iconSide="right"
-                flush="left"
-                data-test-subj="actionsMenuPreviewDocumentation"
-              >
-                <FormattedMessage
-                  id="workflows.actionsMenu.preview.documentationLink"
-                  defaultMessage="Documentation"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </div>
-
-      <div css={styles.tabsAndFields}>
-        <EuiTabs size="s" css={styles.tabs}>
-          <EuiTab isSelected={activeTab === 'inputs'} onClick={() => onTabChange('inputs')}>
-            <FormattedMessage id="workflows.actionsMenu.preview.inputs" defaultMessage="Inputs" />
-            {inputCount > 0 && (
-              <EuiNotificationBadge color="subdued" size="m" css={styles.tabCount}>
-                {inputCount}
-              </EuiNotificationBadge>
-            )}
-          </EuiTab>
-          <EuiTab isSelected={activeTab === 'outputs'} onClick={() => onTabChange('outputs')}>
-            <FormattedMessage id="workflows.actionsMenu.preview.outputs" defaultMessage="Outputs" />
-            {outputCount > 0 && (
-              <EuiNotificationBadge color="subdued" size="m" css={styles.tabCount}>
-                {outputCount}
-              </EuiNotificationBadge>
-            )}
-          </EuiTab>
-          <EuiTab isSelected={activeTab === 'examples'} onClick={() => onTabChange('examples')}>
-            <FormattedMessage
-              id="workflows.actionsMenu.preview.examples"
-              defaultMessage="Examples"
-            />
-          </EuiTab>
-        </EuiTabs>
-
-        {activeTab === 'examples' ? (
-          <div css={styles.fieldList}>
-            {examples.length === 0 ? (
-              <div css={styles.emptyFields}>
-                <EuiText size="xs" color="subdued">
-                  <FormattedMessage
-                    id="workflows.actionsMenu.preview.noExamples"
-                    defaultMessage="No examples available."
-                  />
-                </EuiText>
-              </div>
-            ) : (
-              examples.map((example, idx) => (
-                <div key={idx} css={styles.yamlPreview}>
-                  <EuiMarkdownFormat textSize="xs">{example}</EuiMarkdownFormat>
-                </div>
-              ))
-            )}
-          </div>
-        ) : (
-          <div css={styles.fieldList}>
-            {fields.length === 0 ? (
-              <div css={styles.emptyFields}>
-                <EuiText size="xs" color="subdued">
-                  <FormattedMessage
-                    id="workflows.actionsMenu.preview.noFields"
-                    defaultMessage="No fields available."
-                  />
-                </EuiText>
-              </div>
-            ) : (
-              fields.map((field, idx) => (
-                <React.Fragment key={field.name}>
-                  {idx > 0 && <div css={styles.fieldDivider} />}
-                  <div css={styles.fieldRow}>
-                    <div css={styles.fieldLabelRow}>
-                      <EuiText size="xs" css={styles.fieldName}>
-                        {field.name}
-                      </EuiText>
-                      <span css={styles.typeBadge}>{field.typeName}</span>
-                      {field.required && (
-                        <span css={styles.requiredBadge}>
-                          <FormattedMessage
-                            id="workflows.actionsMenu.preview.required"
-                            defaultMessage="Required"
-                          />
-                        </span>
-                      )}
-                    </div>
-                    {field.description && (
-                      <EuiText size="xs" color="subdued" css={styles.fieldDescription}>
-                        {field.description}
-                      </EuiText>
-                    )}
-                  </div>
-                </React.Fragment>
-              ))
-            )}
-          </div>
         )}
-      </div>
-    </div>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+      <EuiTabs size="s">
+        <EuiTab isSelected={activeTab === 'inputs'} onClick={() => onTabChange('inputs')}>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage id="workflows.actionsMenu.preview.inputs" defaultMessage="Inputs" />
+            </EuiFlexItem>
+            {inputCount > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiNotificationBadge color="subdued" size="m">
+                  {inputCount}
+                </EuiNotificationBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiTab>
+        <EuiTab isSelected={activeTab === 'outputs'} onClick={() => onTabChange('outputs')}>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="workflows.actionsMenu.preview.outputs"
+                defaultMessage="Outputs"
+              />
+            </EuiFlexItem>
+            {outputCount > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiNotificationBadge color="subdued" size="m">
+                  {outputCount}
+                </EuiNotificationBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiTab>
+        <EuiTab isSelected={activeTab === 'examples'} onClick={() => onTabChange('examples')}>
+          <FormattedMessage id="workflows.actionsMenu.preview.examples" defaultMessage="Examples" />
+        </EuiTab>
+      </EuiTabs>
+
+      <EuiSpacer size="s" />
+      <EuiPanel hasBorder hasShadow={false} paddingSize="none" css={styles.fieldList}>
+        {activeTab === 'examples' ? (
+          examples.length === 0 ? (
+            <EuiPanel
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="m"
+              color="transparent"
+              borderRadius="none"
+            >
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="workflows.actionsMenu.preview.noExamples"
+                  defaultMessage="No examples available."
+                />
+              </EuiText>
+            </EuiPanel>
+          ) : (
+            examples.map((example, idx) => (
+              <React.Fragment key={idx}>
+                {idx > 0 && <EuiHorizontalRule margin="none" />}
+                <EuiPanel
+                  hasBorder={false}
+                  hasShadow={false}
+                  paddingSize="m"
+                  color="transparent"
+                  borderRadius="none"
+                >
+                  <EuiMarkdownFormat
+                    textSize="xs"
+                    processingPluginList={exampleProcessingPlugins}
+                    css={styles.exampleMarkdown}
+                  >
+                    {example}
+                  </EuiMarkdownFormat>
+                </EuiPanel>
+              </React.Fragment>
+            ))
+          )
+        ) : fields.length === 0 ? (
+          <EuiPanel
+            hasBorder={false}
+            hasShadow={false}
+            paddingSize="m"
+            color="transparent"
+            borderRadius="none"
+          >
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="workflows.actionsMenu.preview.noFields"
+                defaultMessage="No fields available."
+              />
+            </EuiText>
+          </EuiPanel>
+        ) : (
+          fields.map((field, idx) => (
+            <React.Fragment key={field.name}>
+              {idx > 0 && <EuiHorizontalRule margin="none" />}
+              <EuiPanel
+                hasBorder={false}
+                hasShadow={false}
+                paddingSize="m"
+                color="transparent"
+                borderRadius="none"
+              >
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <strong>{field.name}</strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <EuiCode>{field.typeName}</EuiCode>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  {field.required && (
+                    <EuiFlexItem grow={false}>
+                      <EuiText color="danger" css={requiredFont}>
+                        <FormattedMessage
+                          id="workflows.actionsMenu.preview.required"
+                          defaultMessage="Required"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+                {field.description && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <EuiText size="xs" color="subdued" className="eui-textTruncate">
+                      {field.description}
+                    </EuiText>
+                  </>
+                )}
+              </EuiPanel>
+            </React.Fragment>
+          ))
+        )}
+      </EuiPanel>
+    </EuiPanel>
   );
 }
 
-function getPreviewIconContainerStyle(
-  step: ActionOptionData,
-  styles: ReturnType<typeof useMemoCss<typeof previewStepRowStyles>>
-) {
-  const { iconVariant } = step;
-  switch (iconVariant) {
-    case 'trigger':
-      return styles.iconContainerTrigger;
-    case 'external':
-    case 'neutral':
-      return styles.iconContainerAppLogo;
-    case 'flowControl':
-      return styles.iconContainerFlowControl;
-    case 'dataTransformation':
-      return styles.iconContainerDataTransformation;
-    case 'platform':
-      return styles.iconContainerPlatform;
-    case undefined:
-      return styles.iconContainerPlatform;
-    default: {
-      const exhaustiveCheck: never = iconVariant;
-      return exhaustiveCheck;
-    }
+function PreviewStepIcon({
+  step,
+  glyphColor,
+}: {
+  step: ActionOptionData;
+  glyphColor: string | undefined;
+}): React.ReactNode {
+  const iconType = 'iconType' in step ? step.iconType : undefined;
+
+  if (iconType === 'sparkles') {
+    return <ActionsMenuAiIcon />;
   }
+  if (iconType === 'database' || iconType === 'branch') {
+    return <EuiIcon type={iconType} size="m" color={glyphColor} aria-hidden />;
+  }
+  if (isActionConnectorGroup(step) || isActionConnectorOption(step)) {
+    return (
+      <StepIcon stepType={getBaseConnectorType(step.connectorType)} executionStatus={undefined} />
+    );
+  }
+  if (isActionGroup(step) || isActionOption(step)) {
+    return <EuiIcon type={step.iconType} size="m" color={glyphColor} aria-hidden />;
+  }
+  return null;
 }
 
 function PreviewStepRow({
@@ -525,12 +673,9 @@ function PreviewStepRow({
   const styles = useMemoCss(previewStepRowStyles);
   const { euiTheme } = useEuiTheme();
   const isGroup = isActionGroup(step) || isActionConnectorGroup(step);
-  const iconType = 'iconType' in step ? step.iconType : undefined;
   const glyphColor =
     getIconGlyphColor(step.iconVariant, euiTheme) ??
     ('iconColor' in step ? step.iconColor : undefined);
-  const preferMenuIcon =
-    iconType === 'sparkles' || iconType === 'database' || iconType === 'branch';
   const showLeafActions = !isGroup && (onAdd || onPinPreview);
   const viewDetailsLabel = i18n.translate('workflows.actionsMenu.viewDetails', {
     defaultMessage: 'View details',
@@ -542,53 +687,39 @@ function PreviewStepRow({
   return (
     <div css={styles.row}>
       <button type="button" css={styles.rowMain} onClick={onClick}>
-        <span css={[styles.iconContainer, getPreviewIconContainerStyle(step, styles)]}>
-          {preferMenuIcon && iconType === 'sparkles' ? (
-            <ActionsMenuAiIcon />
-          ) : preferMenuIcon && iconType ? (
-            <EuiIcon type={iconType} size="m" color={glyphColor} aria-hidden />
-          ) : isActionConnectorGroup(step) || isActionConnectorOption(step) ? (
-            <StepIcon
-              stepType={getBaseConnectorType(step.connectorType)}
-              executionStatus={undefined}
-            />
-          ) : isActionGroup(step) || isActionOption(step) ? (
-            step.iconType === 'sparkles' ? (
-              <ActionsMenuAiIcon />
-            ) : (
-              <EuiIcon type={step.iconType} size="m" color={glyphColor} aria-hidden />
-            )
-          ) : null}
-        </span>
-        <span css={styles.info}>
-          <span css={styles.labelText}>{step.label}</span>
-          {step.description && (
-            <EuiText size="xs" color="subdued" css={styles.description}>
-              {step.description}
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <span css={[styles.tile, getActionIconTileVariantStyle(step.iconVariant, styles)]}>
+              <PreviewStepIcon step={step} glyphColor={glyphColor} />
+            </span>
+          </EuiFlexItem>
+          <EuiFlexItem grow css={styles.truncate}>
+            <EuiText size="xs" className="eui-textTruncate">
+              <strong>{step.label}</strong>
             </EuiText>
+            {step.description && (
+              <EuiText size="xs" color="subdued" className="eui-textTruncate">
+                {step.description}
+              </EuiText>
+            )}
+          </EuiFlexItem>
+          {isGroup && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="chevronSingleRight" size="s" color="subdued" aria-hidden />
+            </EuiFlexItem>
           )}
-        </span>
-        {isGroup && (
-          <EuiIcon
-            type="chevronSingleRight"
-            size="s"
-            color="subdued"
-            aria-hidden
-            css={styles.chevron}
-          />
-        )}
+        </EuiFlexGroup>
       </button>
       {showLeafActions && (
-        <span className="rowActions" css={styles.rowActions}>
+        <div data-row-actions="" css={styles.rowActions}>
           {onPinPreview && (
             <EuiToolTip content={viewDetailsLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="info"
-                size="m"
+                size="s"
                 iconSize="m"
                 color="text"
                 display="empty"
-                css={styles.rowActionButton}
                 aria-label={viewDetailsLabel}
                 data-test-subj="actionsMenuPreviewItemInfo"
                 onClick={onPinPreview}
@@ -599,18 +730,17 @@ function PreviewStepRow({
             <EuiToolTip content={addStepLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="plusCircle"
-                size="m"
+                size="s"
                 iconSize="m"
                 color="text"
                 display="base"
-                css={styles.rowActionButton}
                 aria-label={addStepLabel}
                 data-test-subj="actionsMenuPreviewItemAdd"
                 onClick={onAdd}
               />
             </EuiToolTip>
           )}
-        </span>
+        </div>
       )}
     </div>
   );

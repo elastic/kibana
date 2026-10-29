@@ -1,0 +1,41 @@
+# DEDUP
+
+`DEDUP` removes duplicate rows from a result set, keeping only one row per unique combination of values across all columns. It compares all columns currently in scope and discards any row that is an exact duplicate of a previously seen row. Null values are treated as equal for deduplication.
+
+`DEDUP` is equivalent to `LIMIT 1 BY <all columns>`.
+
+## Syntax
+
+`DEDUP`
+
+### Parameters
+
+`DEDUP` takes no parameters.
+
+## Examples
+
+Selects the gender values for a small set of employees, removes duplicate genders, and sorts the remaining values:
+
+```esql
+FROM employees
+| WHERE emp_no IN (10001, 10002, 10003, 10005, 10006)
+| KEEP gender
+| DEDUP
+| SORT gender
+```
+
+Selects gender and language values for a small set of employees, removes rows with duplicate combinations, and sorts the unique results:
+
+```esql
+FROM employees
+| WHERE emp_no IN (10001, 10002, 10010, 10011)
+| KEEP gender, languages
+| DEDUP
+| SORT gender NULLS LAST, languages
+```
+
+## Limitations
+
+`DEDUP` cannot be used when any column in scope has one of the following types: `aggregate_metric_double`, counter types (`counter_long`, `counter_integer`, `counter_double`), or `date_range`. Attempting to do so results in a validation error.
+
+Full-text search functions, such as `MATCH` or `KQL`, cannot appear after `DEDUP` in the same pipeline.

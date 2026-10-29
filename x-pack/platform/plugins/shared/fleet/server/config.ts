@@ -31,7 +31,7 @@ const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
-const REGISTRY_SPEC_MAX_VERSION = '3.6';
+const REGISTRY_SPEC_MAX_VERSION = '3.7';
 
 export const DEFAULT_PRODUCT_VERSIONS_TIMEOUT_MS = 60 * 1000;
 
@@ -50,9 +50,6 @@ export const config: PluginConfigDescriptor = {
       customIntegrations: {
         enabled: true,
       },
-    },
-    iacProvisioner: {
-      enabled: true,
     },
     enableExperimental: true,
     experimentalFeatures: true,
@@ -281,7 +278,6 @@ export const config: PluginConfigDescriptor = {
       ),
       iacProvisioner: schema.maybe(
         schema.object({
-          enabled: schema.boolean({ defaultValue: false }),
           api: schema.maybe(
             schema.object({
               url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
@@ -390,8 +386,9 @@ export const config: PluginConfigDescriptor = {
           })
         ),
         retrySetupOnBoot: schema.boolean({ defaultValue: true }),
-        // Test/development escape hatch that skips all package upload validation, e.g. for
-        // uploading packages whose names exist in EPR or as bundled packages.
+        // Test/development escape hatch: skips package upload validation (name/version checks,
+        // bundled-package guards) AND asset privilege authz. Do not set in production deployments —
+        // it disables the security checks that prevent unprivileged users from uploading gated assets.
         skipUploadPackageValidation: schema.boolean({ defaultValue: false }),
         // Injected by project-controller/kibana-controller when PrivateLink is enabled for this project.
         privateFleetServerHost: schema.maybe(schema.uri({ scheme: ['https'] })),
@@ -501,6 +498,7 @@ export const config: PluginConfigDescriptor = {
       versionSpecificPolicyAssignment: schema.maybe(
         schema.object({
           taskInterval: schema.maybe(schema.string()),
+          orphanSweepIntervalMs: schema.maybe(schema.number({ min: 0 })),
         })
       ),
       unenrollInactiveAgents: schema.maybe(

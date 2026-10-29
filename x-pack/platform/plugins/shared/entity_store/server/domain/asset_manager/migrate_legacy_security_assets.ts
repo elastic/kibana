@@ -39,10 +39,6 @@ import { getLegacySecurityMetadataIndexTemplateId } from './metadata_index_templ
 import { getLegacySecurityMetadataIndexIngestPipelineId } from './metadata_index_ingest_pipeline';
 import { getLegacySecurityUpdatesIndexTemplateId } from './updates_data_stream';
 import { getLegacySecurityHistorySnapshotIndexTemplateId } from './history_snapshot_index_template';
-import {
-  getLegacySecurityHistorySnapshotIndexPattern,
-  toNeutralHistorySnapshotIndexName,
-} from './history_snapshot_index';
 import { getLegacySecurityUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import {
   getMetadataEntitiesDataStreamName,
@@ -73,25 +69,29 @@ const getLegacyLatestCompatibilityAlias = (namespace: string) =>
  */
 const getCollidingNeutralNamespace = (namespace: string) => `security_${namespace}`;
 
-const resolveLegacyHistorySnapshotIndices = async (
+async function entityAliasExists(
   esClient: ElasticsearchClient,
-  namespace: string
-): Promise<string[]> => {
-  const pattern = getLegacySecurityHistorySnapshotIndexPattern(namespace);
+  alias: string,
+  signal?: AbortSignal,
+  strict?: boolean
+): Promise<boolean> {
   try {
-    const resolved = await esClient.indices.resolveIndex({ name: pattern });
-    return resolved.indices.map((index) => index.name);
-  } catch {
-    return [];
-  }
-};
-
-async function entityAliasExists(esClient: ElasticsearchClient, alias: string): Promise<boolean> {
-  try {
-    await esClient.indices.getAlias({ name: alias });
+    await esClient.indices.getAlias({ name: alias }, { signal });
     return true;
-  } catch {
-    return false;
+  } catch (err) {
+    if (!strict) {
+      return false;
+    }
+    // In strict mode only swallow genuine 404s; rethrow everything else so the
+    // caller can decide whether to skip the operation rather than risk touching
+    // indices in another space.
+    const status =
+      (err as { statusCode?: number })?.statusCode ??
+      (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+    if (status === 404) {
+      return false;
+    }
+    throw err;
   }
 }
 
@@ -99,10 +99,16 @@ async function entityAliasExists(esClient: ElasticsearchClient, alias: string): 
  * True when space `security_{namespace}` already owns Entity Store assets under the
  * names this migration would treat as legacy for `namespace`. Matching is via the
  * colliding space's `entities-{dataset}-security_{namespace}` aliases.
+ *
+ * When `strict` is true, non-404 alias-lookup failures are rethrown instead of
+ * silently treated as "alias absent". Use this when incorrectly assuming no
+ * collision could touch indices in another space (e.g. unattended deletion tasks).
  */
 export async function hasCollidingNeutralNamespaceAssets(
   esClient: ElasticsearchClient,
-  namespace: string
+  namespace: string,
+  signal?: AbortSignal,
+  strict?: boolean
 ): Promise<boolean> {
   const collidingNamespace = getCollidingNeutralNamespace(namespace);
   const collidingAliases = [
@@ -111,7 +117,7 @@ export async function hasCollidingNeutralNamespaceAssets(
     getEntitiesAlias(ENTITY_METADATA, collidingNamespace),
   ];
   for (const alias of collidingAliases) {
-    if (await entityAliasExists(esClient, alias)) {
+    if (await entityAliasExists(esClient, alias, signal, strict)) {
       return true;
     }
   }
@@ -169,8 +175,7 @@ export async function hasLegacySecurityAssets(
       return true;
     }
   }
-  const legacyHistory = await resolveLegacyHistorySnapshotIndices(esClient, namespace);
-  return legacyHistory.length > 0;
+  return false;
 }
 
 /**
@@ -221,7 +226,6 @@ export async function migrateLegacySecurityAssets({
   await migrateLatestIndex({ esClient, logger: log, namespace });
   await migrateUpdatesDataStream({ esClient, logger: log, namespace });
   await migrateMetadataDataStream({ esClient, logger: log, namespace });
-  await migrateHistorySnapshotIndices({ esClient, logger: log, namespace });
   await cleanupLegacyTemplatesAndPipelines({ esClient, logger: log, namespace });
 
   log.info(`Finished migrating legacy security-scoped entity store assets in ${namespace}`);
@@ -412,35 +416,6 @@ async function migrateMetadataDataStream({
 
   // Alias name equals the former data-stream name — only safe after delete.
   await addAliasIfMissing(esClient, newStream, legacyStream, logger);
-}
-
-async function migrateHistorySnapshotIndices({
-  esClient,
-  logger,
-  namespace,
-}: MigrateLegacySecurityAssetsOptions): Promise<void> {
-  const legacyIndices = await resolveLegacyHistorySnapshotIndices(esClient, namespace);
-  if (legacyIndices.length === 0) {
-    return;
-  }
-
-  for (const legacyIndex of legacyIndices) {
-    const newIndex = toNeutralHistorySnapshotIndexName(legacyIndex, namespace);
-    await createIndex(esClient, newIndex, { throwIfExists: false });
-    const reindexResult = await reindex(esClient, {
-      source: { index: legacyIndex },
-      dest: { index: newIndex },
-      waitForTask: {
-        logger,
-        minTimeout: REINDEX_POLL_MIN_INTERVAL_MS,
-        maxTimeout: REINDEX_POLL_MAX_INTERVAL_MS,
-        forever: true,
-      },
-    });
-    assertReindexSucceeded(reindexResult, `History migration ${legacyIndex} → ${newIndex}`);
-    await deleteIndex(esClient, legacyIndex);
-    logger.info(`Migrated history snapshot ${legacyIndex} → ${newIndex}`);
-  }
 }
 
 async function cleanupLegacyTemplatesAndPipelines({

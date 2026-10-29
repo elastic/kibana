@@ -17,7 +17,12 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
-import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  getEditRuleRoute,
+  getRuleDetailsRoute,
+  getTriggersActionsManagementPath,
+} from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
@@ -131,10 +136,10 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
       }
 
       navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+        path: getTriggersActionsManagementPath(getEditRuleRoute(rule.id)),
         state: {
           returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+          returnPath: getTriggersActionsManagementPath(getRuleDetailsRoute(rule.id)),
         },
       });
     };

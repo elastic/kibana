@@ -223,8 +223,8 @@ apiTest.describe(
         toUpdate,
         { statusCode: 400 }
       );
-      expect((res.body as { message: string }).message).toBe(
-        'Monitor type cannot be changed from http to invalid-data-steam.'
+      expect((res.body as { message: string }).message).toMatch(
+        /Invalid value "invalid-data-steam" supplied to "type"/
       );
     });
 

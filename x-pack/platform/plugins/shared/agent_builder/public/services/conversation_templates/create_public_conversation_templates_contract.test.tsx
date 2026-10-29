@@ -7,7 +7,10 @@
 
 import React, { useState } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { ConversationWithoutRoundsWithPermissions } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
 import type {
   ConversationTemplateUIContext,
   ConversationTemplateTabDefinition,
@@ -20,6 +23,11 @@ import { createPublicConversationTemplatesContract } from './create_public_conve
 const conversation = {
   id: 'conversation-a',
   agent_id: 'agent-a',
+} as Conversation;
+
+const conversationRow = {
+  id: 'conversation-a',
+  agent_id: 'agent-a',
 } as ConversationWithoutRoundsWithPermissions;
 
 describe('createPublicConversationTemplatesContract', () => {
@@ -28,6 +36,7 @@ describe('createPublicConversationTemplatesContract', () => {
       attachmentsService: agentBuilderMocks.createStart().attachments,
       openSidebarConversation: jest.fn(),
       openFullscreenConversation: jest.fn().mockResolvedValue(undefined),
+      getConversationUrl: jest.fn(),
     };
     return {
       context,
@@ -96,7 +105,8 @@ describe('createPublicConversationTemplatesContract', () => {
     const TabContent = contract.getTab('overview')?.content;
     if (!TabContent) throw new Error('Expected a registered tab');
     const props = {
-      conversation: { ...conversation, rounds: [] },
+      isOpenedFromChat: false,
+      conversation,
     };
     const { rerender } = render(<TabContent {...props} />);
     fireEvent.click(screen.getByText('Open sidebar'));
@@ -154,15 +164,15 @@ describe('createPublicConversationTemplatesContract', () => {
     contract.registerTemplateUIDefinition('investigation', createDefinition);
     const BriefCard = contract.getTemplateUIDefinition('investigation')?.briefCard;
     if (!BriefCard) throw new Error('Expected a registered brief card');
-    const { rerender } = render(<BriefCard conversation={conversation} />);
+    const { rerender } = render(<BriefCard conversation={conversationRow} />);
     fireEvent.click(screen.getByText('Open sidebar'));
     fireEvent.click(screen.getByText('Open fullscreen'));
-    rerender(<BriefCard conversation={conversation} />);
+    rerender(<BriefCard conversation={conversationRow} />);
     expect(screen.getByText('Opened sidebar')).toBeTruthy();
-    expect(context.openSidebarConversation).toHaveBeenCalledWith(conversation.id);
+    expect(context.openSidebarConversation).toHaveBeenCalledWith(conversationRow.id);
     expect(context.openFullscreenConversation).toHaveBeenCalledWith({
-      conversationId: conversation.id,
-      agentId: conversation.agent_id,
+      conversationId: conversationRow.id,
+      agentId: conversationRow.agent_id,
     });
     expect(createDefinition).toHaveBeenCalledTimes(1);
     expect(createDefinition).toHaveBeenCalledWith(context);

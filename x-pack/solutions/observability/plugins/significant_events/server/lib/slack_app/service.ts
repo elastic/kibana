@@ -1,0 +1,833 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { randomUUID } from 'crypto';
+import type {
+  KibanaRequest,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isAgentNotFoundError, isAgentUnavailableError } from '@kbn/agent-builder-common';
+import type { AgentRegistry } from '@kbn/agent-builder-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import {
+  NIGHTSHIFT_ASSISTANT_AGENT_ID,
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+} from '@kbn/nightshift-investigations-plugin/server';
+import {
+  RelayRequestError,
+  type InMemoryConnector,
+  type RelayClientContract,
+} from '@kbn/actions-plugin/server';
+import { RELAY_AUTH_ID } from '@kbn/connector-specs';
+import type { SignificantEventsServer } from '../../types';
+import type {
+  SlackAppBindingsResponse,
+  SlackAppConfirmResponse,
+  SlackAppConnectResponse,
+  SlackAppDisconnectResponse,
+  SlackAppStatusResponse,
+  SlackAppWorkspace,
+} from '../../../common/slack_app/types';
+import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
+import { isSignificantEventsFeatureFlagEnabled } from '../feature_flags/is_significant_events_feature_flag_enabled';
+import {
+  RELAY_APP_CONNECTION_SO_ID,
+  RELAY_APP_CONNECTION_SO_TYPE,
+  type RelayAppConnectionAttributes,
+} from './saved_object';
+import { StatusError } from '../errors/status_error';
+import { SlackAppUnavailableError } from './errors';
+import { getKibanaUrl } from './get_kibana_url';
+
+/**
+ * One instance per deployment, under a stable id: rules and workflows reference it directly, so it
+ * must survive restarts and reconnects unchanged.
+ */
+export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
+
+/** The Elastic Slack app is not its own connector type — it is the `relay` auth method on this one. */
+const ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID = '.slack2';
+
+const ELASTIC_APPS_SLACK_CONNECTOR_NAME = 'Slack (Elastic app)';
+
+const RELAY_SERVICE_ACCOUNT_NAME_PREFIX = 'nightshift-relay-agent-builder';
+
+const RELAY_SERVICE_ACCOUNT_ROLES = ['_nightshift_agent'];
+
+/** Agents that answer Slack turns, in order of preference. */
+const SLACK_AGENT_IDS = [NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID] as const;
+
+/**
+ * Selects the server-owned Relay platform assumer. The id (`relay-service`) is
+ * resolved inside the security plugin; this call cannot name another principal.
+ */
+const RELAY_PLATFORM_ASSUMERS = ['relay'] as const;
+
+const buildConnector = (tenantKey: string): InMemoryConnector => ({
+  id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+  actionTypeId: ELASTIC_APPS_SLACK_CONNECTOR_TYPE_ID,
+  name: ELASTIC_APPS_SLACK_CONNECTOR_NAME,
+  // The Relay holds the Slack credentials, so naming the workspace is all this needs. `config`
+  // mirrors the auth type in plaintext, as `ensureConfigAuthType` does for saved connectors.
+  config: { authType: RELAY_AUTH_ID },
+  secrets: { authType: RELAY_AUTH_ID, tenantKey },
+  isMissingSecrets: false,
+  isPreconfigured: true,
+  isDeprecated: false,
+  isSystemAction: false,
+  isConnectorTypeDeprecated: false,
+  // Events are on for this connector.
+  isInboundEventsEnabled: true,
+});
+
+interface MintedRelayCredential {
+  installAuth: { kibana_api_key: string } | { uiam_service_account_id: string };
+  stored:
+    | { apiKeyId: string; serviceAccountId: null }
+    | { apiKeyId: null; serviceAccountId: string };
+  resolveAgentId(): Promise<string | undefined>;
+  revoke(context: string): Promise<void>;
+}
+
+/**
+ * Stored as `oauth_in_progress` with a tenant key rather than a status of its own, so older Kibana
+ * versions can still read the document during a rolling upgrade or rollback.
+ */
+const isAwaitingConfirmation = ({ status, tenantKey }: RelayAppConnectionAttributes): boolean =>
+  status === RELAY_APP_CONNECTION_STATUS.oauthInProgress && Boolean(tenantKey);
+
+const toWorkspace = (connection: RelayAppConnectionAttributes): SlackAppWorkspace | undefined => {
+  const { status, tenantKey, tenantName, tenantUrl } = connection;
+  const hasWorkspace =
+    isAwaitingConfirmation(connection) || status === RELAY_APP_CONNECTION_STATUS.connected;
+  if (!hasWorkspace || !tenantKey) {
+    return undefined;
+  }
+  return {
+    tenantKey,
+    ...(tenantName ? { name: tenantName } : {}),
+    ...(tenantUrl ? { url: tenantUrl } : {}),
+  };
+};
+
+const toWorkspaceDetails = (
+  connection: RelayAppConnectionAttributes
+): Pick<SlackAppStatusResponse, 'workspace' | 'createdBy' | 'createdAt'> => {
+  const workspace = toWorkspace(connection);
+  if (!workspace) {
+    return {};
+  }
+  const { createdBy, createdAt } = connection;
+  return {
+    workspace,
+    ...(createdBy ? { createdBy } : {}),
+    ...(createdAt ? { createdAt } : {}),
+  };
+};
+
+/** Pagination options for a single page of connected channels. */
+export interface ListBindingsOptions {
+  /** Opaque cursor from a previous page's `nextCursor`; omit for the first page. */
+  cursor?: string;
+  /** Max entries to return in this page. */
+  perPage?: number;
+}
+
+export class SlackAppService {
+  private readonly logger: Logger;
+
+  /**
+   * An id collision clears only by editing `kibana.yml` and restarting, so the reconcile loop would
+   * otherwise repeat the warning every interval for the life of the process.
+   */
+  private idTakenWarned = false;
+
+  constructor(private readonly server: SignificantEventsServer) {
+    this.logger = server.logger.get('slack-app');
+  }
+
+  private async getRelayClient(): Promise<RelayClientContract | undefined> {
+    const { relayClient, agentBuilder } = this.server;
+    if (!relayClient || !agentBuilder) {
+      return undefined;
+    }
+    const enabled = await isSignificantEventsFeatureFlagEnabled(this.server.core.featureFlags);
+    return enabled ? relayClient : undefined;
+  }
+
+  private getSoClient(request: KibanaRequest): SavedObjectsClientContract {
+    return this.server.core.savedObjects.getScopedClient(request, {
+      includedHiddenTypes: [RELAY_APP_CONNECTION_SO_TYPE],
+    });
+  }
+
+  /**
+   * Unregisters first because `registerDynamicConnector` is a no-op when the id is taken, so a
+   * reconnect to a different workspace would otherwise keep serving the previous tenant key.
+   *
+   * When the id is held by a connector this app does not own (a preconfigured `elastic-apps-slack`
+   * in `kibana.yml`) the unregister leaves it in place and the register is refused, so the call must
+   * not be treated as having taken effect.
+   */
+  private publishConnector(tenantKey: string): void {
+    this.server.actions.unregisterDynamicConnector(ELASTIC_APPS_SLACK_CONNECTOR_ID);
+
+    if (this.server.actions.registerDynamicConnector(buildConnector(tenantKey))) {
+      this.logger.debug(`Registered the ${ELASTIC_APPS_SLACK_CONNECTOR_ID} connector`);
+      this.idTakenWarned = false;
+      return;
+    }
+
+    if (!this.idTakenWarned) {
+      this.idTakenWarned = true;
+      this.logger.warn(
+        `Could not register the "${ELASTIC_APPS_SLACK_CONNECTOR_ID}" connector: a connector with that id already exists and is not managed by the Elastic Slack app. Remove it from your Kibana configuration so the Elastic Slack app can own the id.`
+      );
+    }
+  }
+
+  private withdrawConnector(): void {
+    if (this.server.actions.unregisterDynamicConnector(ELASTIC_APPS_SLACK_CONNECTOR_ID)) {
+      this.logger.debug(`Unregistered the ${ELASTIC_APPS_SLACK_CONNECTOR_ID} connector`);
+    }
+  }
+
+  /**
+   * Lets a reconcile tell "already correct" from "registered for the wrong workspace". Matches on
+   * `isDynamic` as well as the id, because only dynamic connectors are ones this app registered and
+   * can unregister: a foreign connector squatting the id must never read as already correct.
+   */
+  private getRegisteredTenantKey(): string | undefined {
+    const connector = this.server.actions.inMemoryConnectors.find(
+      ({ id, isDynamic }) => id === ELASTIC_APPS_SLACK_CONNECTOR_ID && isDynamic === true
+    );
+    const tenantKey = (connector?.secrets as { tenantKey?: unknown } | undefined)?.tenantKey;
+    return typeof tenantKey === 'string' ? tenantKey : undefined;
+  }
+
+  /**
+   * Brings this process's connector in line with the stored connection. In-memory connectors are
+   * per-process, so a connect handled by another node only reaches here. Safe to call repeatedly.
+   */
+  async reconcileConnector(soClient: SavedObjectsClientContract): Promise<void> {
+    // Gated like every request, so disabling the app also withdraws the connector rather than
+    // leaving one that can only fail.
+    const available = await this.getRelayClient();
+    const connection = available ? await this.readConnection(soClient) : undefined;
+    const desiredTenantKey =
+      connection?.status === RELAY_APP_CONNECTION_STATUS.connected
+        ? connection.tenantKey ?? undefined
+        : undefined;
+
+    if (desiredTenantKey === this.getRegisteredTenantKey()) {
+      return;
+    }
+    if (!desiredTenantKey) {
+      this.withdrawConnector();
+      return;
+    }
+    this.publishConnector(desiredTenantKey);
+  }
+
+  private async readConnectionObject(
+    soClient: SavedObjectsClientContract
+  ): Promise<SavedObject<RelayAppConnectionAttributes> | undefined> {
+    try {
+      return await soClient.get<RelayAppConnectionAttributes>(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        RELAY_APP_CONNECTION_SO_ID
+      );
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+        return undefined;
+      }
+      throw error;
+    }
+  }
+
+  private async readConnection(
+    soClient: SavedObjectsClientContract
+  ): Promise<RelayAppConnectionAttributes | undefined> {
+    return (await this.readConnectionObject(soClient))?.attributes;
+  }
+
+  /** Pass the `version` that was read to fail with a conflict if another request wrote in between. */
+  private async writeConnection(
+    soClient: SavedObjectsClientContract,
+    attributes: Omit<RelayAppConnectionAttributes, 'updatedAt'>,
+    version?: string
+  ): Promise<void> {
+    await soClient.create<RelayAppConnectionAttributes>(
+      RELAY_APP_CONNECTION_SO_TYPE,
+      { ...attributes, updatedAt: new Date().toISOString() },
+      { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true, ...(version ? { version } : {}) }
+    );
+  }
+
+  /** Best-effort key invalidation: never blocks the caller, only logs on failure. */
+  private async invalidateApiKey(apiKeyId: string, context: string): Promise<void> {
+    await this.server.security.authc.apiKeys
+      .invalidateAsInternalUser({ ids: [apiKeyId] })
+      .catch((error) => {
+        this.logger.warn(`Failed to invalidate API key ${apiKeyId} ${context}: ${error.message}`);
+      });
+  }
+
+  private async revokeServiceAccount(
+    request: KibanaRequest,
+    serviceAccountId: string,
+    context: string
+  ): Promise<void> {
+    await this.server.core.security.serviceAccounts
+      .delete(request, serviceAccountId, {
+        force: true,
+      })
+      .catch((error) => {
+        this.logger.warn(
+          `Failed to revoke service account ${serviceAccountId} ${context}: ${error.message}`
+        );
+      });
+  }
+
+  private async revokeStoredCredentials(
+    request: KibanaRequest,
+    connection: RelayAppConnectionAttributes | undefined,
+    context: string
+  ): Promise<void> {
+    if (connection?.apiKeyId) {
+      await this.invalidateApiKey(connection.apiKeyId, context);
+    }
+    if (connection?.serviceAccountId) {
+      await this.revokeServiceAccount(request, connection.serviceAccountId, context);
+    }
+  }
+
+  private async mintApiKeyCredential(request: KibanaRequest): Promise<MintedRelayCredential> {
+    // Mint a managed, least-privilege ES API key for the agent, matching the
+    // `_nightshift_agent` predefined role. The key
+    // is granted on behalf of the connecting user but survives their deletion (ES keys
+    // outlive their owner). Because the grant intersects with the owner's privileges, the
+    // connecting user must themselves hold every privilege below or the key is silently
+    // under-privileged.
+    //
+    // - Observability signals get direct ES read: the obs agent tools query them as this key
+    //   (asCurrentUser). Broad conventional patterns cover APM/OTel logs, metrics and traces
+    //   without regenerating the key when new data is onboarded.
+    // - Nightshift gets `minimal_all`, not `read`, because the sandbox tools require
+    //   `manage_nightshift`. `configure_nightshift` stays out. Connectors/LLM go through
+    //   `actions` (read) via the internal Kibana client, so no grants on system/dot indices
+    //   (unsupported in serverless) are needed.
+    // - The agent's before/after workflows read and write the Cortex, memory and
+    //   decision-tree AI indices as the caller.
+    const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
+      name: 'nightshift-relay-agent-builder',
+      metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
+      kibana_role_descriptors: {
+        nightshift_relay_agent_builder: {
+          elasticsearch: {
+            cluster: ['monitor_inference'],
+            indices: [
+              {
+                names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+              {
+                names: [
+                  'ai-index-idx-nightshift-cortex',
+                  'ai-index-idx-nightshift-semantic-memory',
+                  'ai-index-idx-nightshift-decision-trees',
+                ],
+                privileges: ['read', 'view_index_metadata', 'write', 'auto_configure'],
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [
+            {
+              spaces: ['*'],
+              feature: {
+                nightshift: ['minimal_all'],
+                agentBuilder: ['minimal_all'],
+                actions: ['read'],
+                workflowsManagement: ['read'],
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    if (!apiKeyResult) {
+      throw new Error('Unable to create an API key (API keys are disabled)');
+    }
+
+    const encodedApiKey = Buffer.from(`${apiKeyResult.id}:${apiKeyResult.api_key}`).toString(
+      'base64'
+    );
+
+    return {
+      installAuth: { kibana_api_key: encodedApiKey },
+      stored: { apiKeyId: apiKeyResult.id, serviceAccountId: null },
+      resolveAgentId: () => this.resolveSlackAgentId(encodedApiKey),
+      revoke: (context) => this.invalidateApiKey(apiKeyResult.id, context),
+    };
+  }
+
+  private async mintServiceAccountCredential(
+    request: KibanaRequest
+  ): Promise<MintedRelayCredential> {
+    if (!this.server.isServerless) {
+      throw new SlackAppUnavailableError(
+        'Relay UIAM install is not supported on this distribution. `xpack.actions.relay.uiam.enabled` is Serverless-only.'
+      );
+    }
+
+    const serviceAccounts = this.server.core.security.serviceAccounts;
+
+    if (!serviceAccounts.isEnabled()) {
+      throw new SlackAppUnavailableError(
+        'Relay UIAM install requires UIAM service accounts. Enable `xpack.security.serviceAccounts` and configure `xpack.security.uiam`.'
+      );
+    }
+
+    const { id: serviceAccountId } = await serviceAccounts.create(request, {
+      name: `${RELAY_SERVICE_ACCOUNT_NAME_PREFIX}-${randomUUID()}`, // Add an uuid as name could collide even after a deletion
+      roles: RELAY_SERVICE_ACCOUNT_ROLES,
+      platformAssumers: RELAY_PLATFORM_ASSUMERS,
+    });
+
+    return {
+      installAuth: { uiam_service_account_id: serviceAccountId },
+      stored: { apiKeyId: null, serviceAccountId },
+      // TODO: use resolveSlackAgentId once Relay is space aware
+      resolveAgentId: async () => {
+        if (!this.server.agentBuilder) {
+          return undefined;
+        }
+        return this.server.nightshiftInvestigations?.isAssistantEnabled()
+          ? NIGHTSHIFT_ASSISTANT_AGENT_ID
+          : NIGHTSHIFT_INVESTIGATION_AGENT_ID;
+      },
+      revoke: (context) => this.revokeServiceAccount(request, serviceAccountId, context),
+    };
+  }
+
+  private mintCredential(
+    request: KibanaRequest,
+    relayClient: RelayClientContract
+  ): Promise<MintedRelayCredential> {
+    return relayClient.uiamEnabled
+      ? this.mintServiceAccountCredential(request)
+      : this.mintApiKeyCredential(request);
+  }
+
+  private toErrorMessage(error: unknown): string {
+    if (error instanceof RelayRequestError) {
+      return error.relayMessage ?? error.message;
+    }
+    if (error instanceof Error && error.cause instanceof Error) {
+      return `${error.message} cause: ${error.cause.message}`;
+    }
+    return error instanceof Error ? error.message : String(error);
+  }
+
+  /**
+   * Relay posts every turn to `kibana_url`, which has no space prefix, so turns run in the default
+   * space whatever space Connect was clicked from. Agent Builder accepts an unknown agent id and
+   * only fails the run, so the first of `SLACK_AGENT_IDS` that exists and is available is declared,
+   * checked with the minted key because that is the credential Relay presents.
+   */
+  private async resolveSlackAgentId(encodedApiKey: string): Promise<string | undefined> {
+    const { agentBuilder } = this.server;
+    if (!agentBuilder) {
+      return undefined;
+    }
+    const request = kibanaRequestFactory({
+      headers: { authorization: `ApiKey ${encodedApiKey}` },
+      path: '/',
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    try {
+      const registry = await agentBuilder.agents.getRegistry({ request });
+      const isAssistantEnabled =
+        this.server.nightshiftInvestigations?.isAssistantEnabled() ?? false;
+      for (const agentId of SLACK_AGENT_IDS) {
+        // A persisted assistant outlives its disabled type, and `get` accepts it without a gate.
+        if (agentId === NIGHTSHIFT_ASSISTANT_AGENT_ID && !isAssistantEnabled) {
+          continue;
+        }
+        if (await this.isAgentAvailable(registry, agentId)) {
+          return agentId;
+        }
+      }
+      this.logger.debug('No Nightshift agent is available, Slack turns will use the default agent');
+    } catch (error) {
+      this.logger.warn(
+        `Failed to look up the Nightshift agents, Slack turns will use the default agent: ${this.toErrorMessage(
+          error
+        )}`
+      );
+    }
+    return undefined;
+  }
+
+  private async isAgentAvailable(registry: AgentRegistry, agentId: string): Promise<boolean> {
+    try {
+      // `get` rather than `has`: only `get` runs the agent's availability gate, which rejects runs
+      // the same way Relay's turns would be rejected.
+      await registry.get(agentId);
+      return true;
+    } catch (error) {
+      if (isAgentNotFoundError(error) || isAgentUnavailableError(error)) {
+        this.logger.debug(`${agentId} is not available in the default space for Slack turns`);
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  async connect(request: KibanaRequest): Promise<SlackAppConnectResponse> {
+    const relayClient = await this.getRelayClient();
+    if (!relayClient) {
+      throw new SlackAppUnavailableError(
+        'The Elastic Slack App is not available on this deployment'
+      );
+    }
+
+    const soClient = this.getSoClient(request);
+    const now = new Date().toISOString();
+    const existingConnection = await this.readConnection(soClient);
+    const credential = await this.mintCredential(request, relayClient);
+
+    const username = this.server.security.authc.getCurrentUser(request)?.username;
+
+    let installResponse;
+    try {
+      // Falls back to 'basic' in the (practically unreachable) case where no
+      // license doc exists on the cluster at all, so the required field always
+      // has a valid LicenseType value.
+      const license = await this.server.licensing.getLicense();
+      const agentId = await credential.resolveAgentId();
+
+      installResponse = await relayClient.startInstall({
+        ...credential.installAuth,
+        kibana_url: getKibanaUrl(this.server.core, this.server.cloud),
+        kibana_version: this.server.kibanaVersion,
+        license_info: license.type ?? 'basic',
+        ...(username ? { created_by_user_key: username } : {}),
+        ...(agentId ? { agent_id: agentId } : {}),
+      });
+    } catch (error) {
+      this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);
+      await credential.revoke('after Relay install error');
+      throw error;
+    }
+
+    // A prior connection may already hold a live credential. Revoke it only after
+    // startInstall succeeds — revoking up front would brick a working connection
+    // if startInstall then failed, since the SO write also only happens on success.
+    await this.revokeStoredCredentials(request, existingConnection, 'after successful reconnect');
+
+    await this.writeConnection(soClient, {
+      status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+      ...credential.stored,
+      claimId: installResponse.claim_id,
+      tenantKey: null,
+      surface: 'slack',
+      createdBy: username,
+      createdAt: now,
+    });
+
+    // The install may land on a different workspace, so any leftover connector now carries a stale
+    // tenant key. Republished once the claim completes.
+    this.withdrawConnector();
+
+    return { authorizeUrl: installResponse.authorize_url };
+  }
+
+  private async failInProgressInstall(
+    request: KibanaRequest,
+    soClient: SavedObjectsClientContract,
+    connection: RelayAppConnectionAttributes,
+    error: RelayRequestError
+  ): Promise<SlackAppStatusResponse> {
+    await this.revokeStoredCredentials(request, connection, 'after install failure');
+
+    const message = this.toErrorMessage(error);
+    this.logger.warn(`Slack app install failed terminally: ${message}`);
+    await this.writeConnection(soClient, {
+      ...connection,
+      status: RELAY_APP_CONNECTION_STATUS.error,
+      apiKeyId: null,
+      serviceAccountId: null,
+      error: message,
+    });
+    this.withdrawConnector();
+
+    return { available: true, status: RELAY_APP_CONNECTION_STATUS.error, error: message };
+  }
+
+  async getStatus(request: KibanaRequest): Promise<SlackAppStatusResponse> {
+    const soClient = this.getSoClient(request);
+    const [relayClient, connection] = await Promise.all([
+      this.getRelayClient(),
+      this.readConnection(soClient),
+    ]);
+
+    if (!relayClient) {
+      return { available: false, status: RELAY_APP_CONNECTION_STATUS.notConnected };
+    }
+
+    if (!connection) {
+      return { available: true, status: RELAY_APP_CONNECTION_STATUS.notConnected };
+    }
+
+    // While an install is in progress, poll the Relay for claim fulfillment (the Slack
+    // OAuth callback lands on the Relay, not Kibana). The Relay resolves the pending
+    // claim from the transport-level deployment identity.
+    if (
+      connection.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress &&
+      !connection.tenantKey
+    ) {
+      // An in-progress install without a claim id cannot be polled: fail it terminally.
+      if (!connection.claimId) {
+        return this.failInProgressInstall(
+          request,
+          soClient,
+          connection,
+          new RelayRequestError('/v1/slack/install/claim', 400, 'missing claim id')
+        );
+      }
+      try {
+        const claim = await relayClient.fetchClaim(connection.claimId);
+        if (claim.status === 'complete') {
+          if (!claim.tenant_key) {
+            return this.failInProgressInstall(
+              request,
+              soClient,
+              connection,
+              new RelayRequestError(
+                '/v1/slack/install/claim',
+                502,
+                'completed claim has no tenant key'
+              )
+            );
+          }
+          // A forwarded install link can register someone else's workspace, so it stays unusable until
+          // the admin confirms. No claim id makes an older Kibana fail the install, not connect it.
+          const pending: RelayAppConnectionAttributes = {
+            ...connection,
+            claimId: undefined,
+            tenantKey: claim.tenant_key,
+            tenantName: claim.tenant_name,
+            tenantUrl: claim.tenant_url,
+          };
+          await this.writeConnection(soClient, pending);
+          return {
+            available: true,
+            status: RELAY_APP_CONNECTION_STATUS.pendingConfirmation,
+            ...toWorkspaceDetails(pending),
+          };
+        }
+      } catch (error) {
+        if (error instanceof RelayRequestError && error.isTerminal) {
+          return this.failInProgressInstall(request, soClient, connection, error);
+        }
+        this.logger.warn(`Failed to poll Relay install claim: ${this.toErrorMessage(error)}`);
+      }
+    }
+
+    return {
+      available: true,
+      status: isAwaitingConfirmation(connection)
+        ? RELAY_APP_CONNECTION_STATUS.pendingConfirmation
+        : connection.status,
+      ...(connection.error ? { error: connection.error } : {}),
+      ...toWorkspaceDetails(connection),
+    };
+  }
+
+  /**
+   * Accepts the workspace the install registered. `tenantKey` is the one the admin was shown, so a
+   * reconnect that landed in between cannot be confirmed by a stale dialog.
+   */
+  async confirm(request: KibanaRequest, tenantKey: string): Promise<SlackAppConfirmResponse> {
+    const relayClient = await this.getRelayClient();
+    if (!relayClient) {
+      throw new SlackAppUnavailableError(
+        'The Elastic Slack App is not available on this deployment'
+      );
+    }
+
+    const soClient = this.getSoClient(request);
+    const saved = await this.readConnectionObject(soClient);
+    const connection = saved?.attributes;
+    if (!saved || !connection?.tenantKey || !isAwaitingConfirmation(connection)) {
+      throw new SlackAppUnavailableError('No Slack workspace is awaiting confirmation');
+    }
+    const workspaceChanged = new StatusError(
+      'The Slack workspace awaiting confirmation has changed. Review it and confirm again.',
+      409
+    );
+    if (connection.tenantKey !== tenantKey) {
+      throw workspaceChanged;
+    }
+
+    try {
+      await this.writeConnection(
+        soClient,
+        { ...connection, status: RELAY_APP_CONNECTION_STATUS.connected },
+        saved.version
+      );
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isConflictError(error as Error)) {
+        throw workspaceChanged;
+      }
+      throw error;
+    }
+    this.publishConnector(connection.tenantKey);
+    return { status: RELAY_APP_CONNECTION_STATUS.connected };
+  }
+
+  async listBindings(
+    request: KibanaRequest,
+    options: ListBindingsOptions = {}
+  ): Promise<SlackAppBindingsResponse> {
+    const soClient = this.getSoClient(request);
+    const [relayClient, connection] = await Promise.all([
+      this.getRelayClient(),
+      this.readConnection(soClient),
+    ]);
+
+    if (!relayClient) {
+      return { bindings: [] };
+    }
+
+    if (connection?.status !== RELAY_APP_CONNECTION_STATUS.connected || !connection.tenantKey) {
+      return { bindings: [] };
+    }
+
+    let page;
+    try {
+      page = await relayClient.listBindings(connection.tenantKey, {
+        cursor: options.cursor,
+        limit: options.perPage,
+      });
+    } catch (error) {
+      this.logger.warn(`Failed to list bindings from Relay: ${this.toErrorMessage(error)}`);
+      throw error;
+    }
+
+    // The Relay returns only this deployment's own SUB bindings (the connected channels),
+    // each carrying its persisted display snapshot, so no additional Slack call is needed.
+    const bindings: SlackAppBindingsResponse['bindings'] = [];
+    for (const entry of page.bindings) {
+      if (entry.scope_id == null) {
+        continue;
+      }
+      const binding: SlackAppBindingsResponse['bindings'][number] = {
+        channel: entry.scope_id,
+        status: 'bound_to_self',
+      };
+      if (entry.display_name != null) {
+        binding.displayName = entry.display_name;
+      }
+      if (entry.visibility != null) {
+        binding.visibility = entry.visibility;
+      }
+      bindings.push(binding);
+    }
+
+    return { bindings, nextCursor: page.nextCursor };
+  }
+
+  private async requireConnectedTenant(
+    request: KibanaRequest
+  ): Promise<{ relayClient: RelayClientContract; tenantKey: string }> {
+    const soClient = this.getSoClient(request);
+    const [relayClient, connection] = await Promise.all([
+      this.getRelayClient(),
+      this.readConnection(soClient),
+    ]);
+    if (!relayClient) {
+      throw new SlackAppUnavailableError(
+        'The Elastic Slack App is not available on this deployment'
+      );
+    }
+    if (connection?.status !== RELAY_APP_CONNECTION_STATUS.connected || !connection.tenantKey) {
+      throw new SlackAppUnavailableError('Connection is not in a connected state');
+    }
+    return { relayClient, tenantKey: connection.tenantKey };
+  }
+
+  async bindChannel(request: KibanaRequest, channelId: string): Promise<void> {
+    const { relayClient, tenantKey } = await this.requireConnectedTenant(request);
+    await relayClient.bind(tenantKey, channelId);
+  }
+
+  async unbindChannel(request: KibanaRequest, channelId: string): Promise<void> {
+    const { relayClient, tenantKey } = await this.requireConnectedTenant(request);
+    await relayClient.unbindChannel(tenantKey, channelId);
+  }
+
+  /** With `tenantKey`, refuses to tear down any workspace other than the one the caller was shown. */
+  async disconnect(
+    request: KibanaRequest,
+    tenantKey?: string
+  ): Promise<SlackAppDisconnectResponse> {
+    const soClient = this.getSoClient(request);
+    const [relayClient, connection] = await Promise.all([
+      this.getRelayClient(),
+      this.readConnection(soClient),
+    ]);
+
+    if (!connection) {
+      return { status: 'disconnected' };
+    }
+    if (tenantKey && connection.tenantKey !== tenantKey) {
+      throw new StatusError('The Slack workspace has changed. Review it and try again.', 409);
+    }
+
+    // Up front, not on the success path: a failed unbind below leaves the connection in `error` for
+    // the user to retry, and rules must not keep posting through a connection being torn down.
+    this.withdrawConnector();
+
+    await this.revokeStoredCredentials(request, connection, 'on disconnect');
+
+    if (relayClient && connection.tenantKey) {
+      try {
+        await relayClient.unbind(connection.tenantKey);
+      } catch (error) {
+        const message = this.toErrorMessage(error);
+        this.logger.warn(`Failed to unbind from Relay on disconnect: ${message}`);
+        await this.writeConnection(soClient, {
+          ...connection,
+          status: RELAY_APP_CONNECTION_STATUS.error,
+          apiKeyId: null,
+          serviceAccountId: null,
+          error: message,
+        });
+        throw error;
+      }
+    }
+
+    const { error: _staleError, ...retainedConnection } = connection;
+    await this.writeConnection(soClient, {
+      ...retainedConnection,
+      status: RELAY_APP_CONNECTION_STATUS.notConnected,
+      apiKeyId: null,
+      serviceAccountId: null,
+      tenantKey: null,
+    });
+
+    return { status: 'disconnected' };
+  }
+}

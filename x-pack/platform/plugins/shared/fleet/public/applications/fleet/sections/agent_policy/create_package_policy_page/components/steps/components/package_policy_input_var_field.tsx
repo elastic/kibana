@@ -362,7 +362,7 @@ function getInputComponent({
       return (
         <EuiSwitch
           label={fieldLabel}
-          checked={value}
+          checked={Boolean(value)}
           showLabel={false}
           onChange={(e) => onChange(e.target.checked)}
           onBlur={() => setIsDirty(true)}

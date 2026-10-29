@@ -10,6 +10,7 @@ import type { ApiClientFixture } from '@kbn/scout';
 import {
   INTERNAL_HEADERS,
   GET_NOTIFICATIONS_PATH,
+  GET_UNREAD_STATUS_PATH,
   MARK_READ_PATH,
   MARK_ALL_READ_PATH,
   NOTIFICATION_DATA_STREAM_NAME,
@@ -46,9 +47,12 @@ export const makeDoc = (id: string, overrides: Partial<NotificationDoc> = {}): N
  * Append notifications directly to the backing data stream and wait for them to become
  * searchable. Mirrors how the plugin writes (append-only `create`), so the GET route sees
  * them exactly as produced notifications.
+ *
+ * Takes the `systemEsClient` fixture: the stream is a system data stream and Scout's `esClient`
+ * cannot write it.
  */
-export const seedNotifications = async (esClient: Client, docs: NotificationDoc[]) => {
-  await esClient.bulk({
+export const seedNotifications = async (systemEsClient: Client, docs: NotificationDoc[]) => {
+  await systemEsClient.bulk({
     refresh: true,
     operations: docs.flatMap((doc) => [{ create: { _index: NOTIFICATION_DATA_STREAM_NAME } }, doc]),
   });
@@ -85,6 +89,12 @@ export const createHelpers = (authHeaderGetter: () => Record<string, string>) =>
   return {
     getNotifications: (apiClient: ApiClientFixture, params?: QueryParams) =>
       apiClient.get(withQuery(GET_NOTIFICATIONS_PATH, params), {
+        headers: headers(),
+        responseType: 'json',
+      }),
+
+    getUnreadStatus: (apiClient: ApiClientFixture) =>
+      apiClient.get(GET_UNREAD_STATUS_PATH, {
         headers: headers(),
         responseType: 'json',
       }),

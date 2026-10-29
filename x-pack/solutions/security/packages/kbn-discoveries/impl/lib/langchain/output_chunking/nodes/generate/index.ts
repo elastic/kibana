@@ -18,6 +18,7 @@ import { getCombined } from '../helpers/get_combined';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
+import type { AttackDiscoveryTemplateCompletion } from '../../../../../attack_discovery/graphs/template_completion';
 
 export const getGenerateNode = <T extends GraphInsightTypes>({
   llm,
@@ -25,6 +26,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
   getCombinedPromptFn,
   responseIsHallucinated,
   generationSchema,
+  completeWithTemplate,
 }: {
   llm: BaseLLM;
   logger?: Logger;
@@ -36,6 +38,7 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
   }) => string;
   responseIsHallucinated: (response: string) => boolean;
   generationSchema: ZodType<{ insights: T[] }>;
+  completeWithTemplate?: AttackDiscoveryTemplateCompletion;
 }): ((state: BaseGraphState<T>) => Promise<BaseGraphState<T>>) => {
   const generate = async (state: BaseGraphState<T>): Promise<BaseGraphState<T>> => {
     logger?.debug(() => `---GENERATE---`);
@@ -75,10 +78,16 @@ export const getGenerateNode = <T extends GraphInsightTypes>({
       );
 
       // LOCAL MUTATION:
-      rawResponse = await chain.invoke({
-        format_instructions: formatInstructions,
-        query,
-      });
+      rawResponse = completeWithTemplate
+        ? await completeWithTemplate({
+            alerts: anonymizedDocs,
+            phase: combinedGenerations ? 'continue' : 'generate',
+            ...(combinedGenerations ? { partial: combinedGenerations } : {}),
+          })
+        : await chain.invoke({
+            format_instructions: formatInstructions,
+            query,
+          });
 
       // LOCAL MUTATION:
       partialResponse = extractJson(rawResponse); // remove the surrounding ```json```

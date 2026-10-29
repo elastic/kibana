@@ -1,3 +1,5 @@
+import jQuery from 'jquery';
+
 /* Flot plugin for selecting regions of a plot.
 
 Copyright (c) 2007-2014 IOLA and Ole Laursen.

@@ -59,7 +59,6 @@ import {
 } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../common/constants/epm';
 
 import {
@@ -115,10 +114,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     hideInVarGroupOptions,
   }) => {
     const { docLinks, cloud } = useStartServices();
-    const { enableVarGroups } = ExperimentalFeaturesService.get();
-
-    const varGroups =
-      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
+    const varGroups = packageInfo.var_groups;
 
     const isAgentless =
       (isEditPage || isAgentlessSelected) && Boolean(packagePolicy.supports_agentless);
@@ -212,7 +208,28 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       isLoading: isOutputsLoading,
       canUseOutputPerIntegration,
       allowedOutputs,
-    } = useOutputs(packagePolicy, packageInfo.name);
+      inheritedOutputName,
+    } = useOutputs(packagePolicy, packageInfo.name, agentPolicies);
+
+    // An unset output_id means "use the output of the parent agent policy". EuiSelect cannot
+    // hold null, so that state is represented by an empty value — label it explicitly, since
+    // an unlabelled option reads as "no output configured".
+    const inheritedOutputText = useMemo(
+      () =>
+        inheritedOutputName
+          ? i18n.translate(
+              'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInheritedWithNameOption',
+              {
+                defaultMessage: 'Inherited from agent policy (currently {outputName})',
+                values: { outputName: inheritedOutputName },
+              }
+            )
+          : i18n.translate(
+              'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyOutputInheritedOption',
+              { defaultMessage: 'Inherited from agent policy' }
+            ),
+      [inheritedOutputName]
+    );
 
     const { data: epmDatastreamsRes } = useGetEpmDatastreams();
 
@@ -672,7 +689,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           options={[
                             {
                               value: '',
-                              text: '',
+                              text: inheritedOutputText,
                             },
                             ...allowedOutputs.map((output) => ({
                               value: output.id,

@@ -53,6 +53,7 @@ export interface EmitEventParams {
   triggerId: string;
   payload: Record<string, unknown>;
   request: KibanaRequest;
+  authenticatedUser?: string;
 }
 
 export type EmitEvent = (params: EmitEventParams) => Promise<void>;
@@ -114,6 +115,10 @@ function warnOnEmitterDepthHeaderPersistedMismatch(params: {
 
 function isWorkflowSourcedChainContext(context: EventChainContext | undefined): boolean {
   return context !== undefined;
+}
+
+function isConnectorSourcedEvent(payload: Record<string, unknown>): boolean {
+  return typeof payload.connectorId === 'string' && payload.connectorId.length > 0;
 }
 
 function getMatchingTriggerOn(
@@ -193,7 +198,7 @@ export class TriggerEventHandler {
       );
       return;
     }
-    const { triggerId, payload, request } = params;
+    const { triggerId, payload, request, authenticatedUser } = params;
 
     const spaceId = this.spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
@@ -246,7 +251,17 @@ export class TriggerEventHandler {
     }
 
     let scheduleStats: TriggerEventScheduleStats;
-    if (this.config.enabled && workflows.length > 0) {
+    if (
+      this.config.enabled &&
+      workflows.length > 0 &&
+      isConnectorSourcedEvent(payload) &&
+      !request.headers?.authorization
+    ) {
+      this.logger.warn(
+        `Skipping schedule for connector event ${triggerId}: request has no Authorization header`
+      );
+      scheduleStats = createEmptyTriggerScheduleStats();
+    } else if (this.config.enabled && workflows.length > 0) {
       const eventParams: ScheduleEventParams = {
         payload,
         timestamp,
@@ -255,7 +270,12 @@ export class TriggerEventHandler {
         eventChainContext,
         triggerId,
       };
-      scheduleStats = await this.scheduleMatchingWorkflows(workflows, request, eventParams);
+      scheduleStats = await this.scheduleMatchingWorkflows(
+        workflows,
+        request,
+        eventParams,
+        authenticatedUser
+      );
       this.logger.trace(
         `Workflows trigger schedule outcomes: triggerId=${triggerId} ${JSON.stringify(
           scheduleStats
@@ -277,8 +297,8 @@ export class TriggerEventHandler {
   }
 
   /**
-   * Ensures the trigger is registered and, when defined, `eventSchema` matches the same event object
-   * used for KQL resolution and scheduling (`timestamp`, `spaceId`, `eventChainDepth` included).
+   * Ensures the trigger is registered and validates the raw emitted payload against `eventSchema`.
+   * Runtime context fields are added only after validation for KQL resolution and scheduling.
    */
   private validateTrigger(
     triggerId: string,
@@ -500,7 +520,8 @@ export class TriggerEventHandler {
   private async scheduleMatchingWorkflows(
     workflows: WorkflowDetailDto[],
     request: KibanaRequest,
-    eventParams: ScheduleEventParams
+    eventParams: ScheduleEventParams,
+    authenticatedUser?: string
   ): Promise<TriggerEventScheduleStats> {
     if (workflows.length === 0) {
       return createEmptyTriggerScheduleStats();
@@ -544,7 +565,11 @@ export class TriggerEventHandler {
                 eventId: eventParams.eventId,
               },
             };
-            await this.scheduleWorkflow(workflowToRun, context, request);
+            if (authenticatedUser) {
+              await this.scheduleWorkflow(workflowToRun, context, request, { authenticatedUser });
+            } else {
+              await this.scheduleWorkflow(workflowToRun, context, request);
+            }
             return 'success';
           } catch (reason) {
             const message = reason instanceof Error ? reason.message : String(reason);

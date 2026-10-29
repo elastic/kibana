@@ -6,6 +6,7 @@
  */
 
 import React, { Suspense, lazy, type ComponentType } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   CommonAttachmentListViewProps,
   UnifiedReferenceAttachmentViewProps,
@@ -23,6 +24,7 @@ import {
   DELETE_EVENTS_SUCCESS_TOAST,
   EVENT_COMMENT_LABEL_TITLE,
   EVENT_DISPLAY_NAME,
+  EVENTS_COUNT,
   MULTIPLE_EVENTS_COMMENT_LABEL_TITLE,
   REMOVED_EVENT_LABEL_TITLE,
   REMOVED_EVENTS_LABEL_TITLE,
@@ -96,6 +98,7 @@ export const getEventType = () =>
   defineAttachment({
     id: SECURITY_EVENT_ATTACHMENT_TYPE,
     getLabel: () => EVENT_DISPLAY_NAME,
+    getCountLabel: ({ count }) => EVENTS_COUNT(count),
     getIcon: () => 'bell',
     schema: SecurityEventAttachmentPayloadSchema,
     getCreationActivity,
@@ -103,4 +106,27 @@ export const getEventType = () =>
     getAttachmentList: () => ({
       children: EventTabContentWrapper,
     }),
+    workflow: {
+      getActivityLabel: ({ workflowName, count }) => (
+        <FormattedMessage
+          id="xpack.securitySolution.cases.eventAttachment.workflowActivityLabel"
+          defaultMessage="ran {name} on {count, plural, =0 {an event} one {# event} other {# events}}"
+          values={{ name: workflowName, count: count ?? 0 }}
+        />
+      ),
+    },
+    getDocumentAction: ({ id, documentId, index }) => {
+      const documentIndex = getNonEmptyField(index);
+      return documentIndex
+        ? {
+            type: AttachmentActionType.CUSTOM as const,
+            isPrimary: true,
+            render: () => (
+              <Suspense fallback={null}>
+                <ShowEventButton id={id} eventId={documentId} index={documentIndex} />
+              </Suspense>
+            ),
+          }
+        : null;
+    },
   });

@@ -54,7 +54,7 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
         box-shadow: 0 0 0 ${euiTheme.border.width.thin}
           ${isHighlighted
             ? euiTheme.colors.borderStrongPrimary
-            : isHovered
+            : canRemoveAttachment && isHovered
             ? euiTheme.colors.borderBasePrimary
             : euiTheme.colors.borderBaseSubdued};
         overflow: hidden;
@@ -87,7 +87,7 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
           position: absolute;
           inset: 0;
           background-color: ${euiTheme.colors.backgroundLightPrimary};
-          opacity: ${isHovered ? 0.75 : 0};
+          opacity: ${canRemoveAttachment && isHovered ? 0.75 : 0};
           pointer-events: none;
         `}
       />

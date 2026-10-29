@@ -98,7 +98,6 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           enableSloTemplates: true,
           enableVersionSpecificPolicies: true,
           enableOpAMP: true,
-          enableCloudOnboardingDeployments: true,
           installIntegrationsKnowledge: false,
           // Keep the legacy agentless APIs enabled here so the base suite exercises legacy behavior;
           // config.agentless_legacy_disabled.ts overrides this to true for the rejection tests.
@@ -121,8 +120,11 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
             appenders: ['default'],
           },
         ])}`,
+        // Background tasks that mutate the .fleet-agents and .fleet-policies documents these suites
+        // seed; their own coverage lives in x-pack/platform/test/fleet_tasks
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
           'fleet:agent-status-change-task',
+          'fleet:version-specific-policy-assignment-task',
         ])} `,
       ],
     },

@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen } from '@testing-library/react';
 import { renderWithReduxStore } from '../../../mocks';
 import { FlyoutWrapper } from './flyout_wrapper';
 import type { FlyoutWrapperProps } from './types';
@@ -89,7 +88,7 @@ describe('Flyout wrapper', () => {
     it('should call onCancel when the header close button is clicked', async () => {
       const { onCancel } = mountFlyoutWrapper();
 
-      await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
 
       expect(onCancel).toHaveBeenCalledTimes(1);
     });

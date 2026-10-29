@@ -15,27 +15,22 @@ import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
 
 // Mock CodeEditor
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: (props: any) => (
-    <textarea
-      data-test-subj={props.dataTestSubj || 'code-editor'}
-      value={props.value}
-      onChange={(e) => props.onChange?.(e.target.value)}
-      readOnly={props.options?.readOnly}
-      aria-label={props['aria-label']}
-    />
-  ),
-  monaco: {
-    languages: {
-      json: {
-        jsonDefaults: {
-          setDiagnosticsOptions: jest.fn(),
-        },
-      },
-    },
-    editor: {},
-  },
-}));
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    CodeEditor: (props: any) => (
+      <textarea
+        data-test-subj={props.dataTestSubj || 'code-editor'}
+        value={props.value}
+        onChange={(e) => props.onChange?.(e.target.value)}
+        readOnly={props.options?.readOnly}
+        aria-label={props['aria-label']}
+      />
+    ),
+  };
+});
 
 // Mock input validation callout
 jest.mock('./input_validation_callout', () => ({
@@ -245,7 +240,7 @@ describe('WorkflowExecuteManualForm', () => {
         } as JsonModelSchemaType)
       ).toEqual({
         notificationGroup: {
-          episodes: [],
+          alerts: [],
         },
       });
     });
@@ -272,13 +267,13 @@ describe('WorkflowExecuteManualForm', () => {
         id: INPUT_STRING_PLACEHOLDER,
         policyId: INPUT_STRING_PLACEHOLDER,
         groupKey: {},
-        episodes: [
+        alerts: [
           {
             last_event_timestamp: INPUT_STRING_PLACEHOLDER,
             rule_id: INPUT_STRING_PLACEHOLDER,
             group_hash: INPUT_STRING_PLACEHOLDER,
-            episode_id: INPUT_STRING_PLACEHOLDER,
-            episode_status: INPUT_STRING_PLACEHOLDER,
+            alert_id: INPUT_STRING_PLACEHOLDER,
+            alert_status: INPUT_STRING_PLACEHOLDER,
           },
         ],
       });

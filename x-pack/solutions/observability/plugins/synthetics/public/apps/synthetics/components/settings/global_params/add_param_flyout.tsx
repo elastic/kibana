@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import {
   EuiFlyout,
@@ -24,8 +24,10 @@ import { FormProvider } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import { isEmpty } from 'lodash';
-import { NoPermissionsTooltip } from '../../common/components/permissions';
+import {
+  CANNOT_PERFORM_ACTION_SYNTHETICS,
+  NoPermissionsTooltip,
+} from '../../common/components/permissions';
 import {
   ADD_PARAM_SUCCESS_MESSAGE,
   EDIT_PARAM_SUCCESS_MESSAGE,
@@ -36,9 +38,37 @@ import {
 } from '../../../state/global_params';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type { ListParamItem } from './params_list';
-import type { SyntheticsParams } from '../../../../../../common/runtime_types';
+import type { SyntheticsParamRequest } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
+import type { ParamFormData } from './add_param_form';
+import {
+  buildVaultReference,
+  parseVaultReference,
+} from '../../../../../../common/lib/vault_reference';
+import {
+  useHasSettingsHeaderAction,
+  useRegisterSettingsHeaderAction,
+} from '../settings_header_action';
+
+const toFormData = (item: ListParamItem | null): ParamFormData => {
+  if (!item) {
+    return {
+      key: '',
+      tags: [],
+      description: '',
+      value: '',
+      sourceType: 'value',
+      source: { path: '', field: '', connection: '' },
+    };
+  }
+  const { id: _id, ...rest } = item;
+  const reference = parseVaultReference(item.value);
+  if (!reference) {
+    return { ...rest, sourceType: 'value', source: { path: '', field: '', connection: '' } };
+  }
+  return { ...rest, value: '', sourceType: 'vault', source: reference };
+};
 
 export const AddParamFlyout = ({
   items,
@@ -51,28 +81,23 @@ export const AddParamFlyout = ({
 }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
+  const { id } = isEditingItem ?? {};
+
   // Announced by screen readers when a param is saved, since the toast that carries the
   // success message is not reliably announced once the flyout closes and focus moves.
   const [announcement, setAnnouncement] = useState('');
 
-  const { id, ...dataToSave } = isEditingItem ?? {};
-
-  const form = useFormWrapped<SyntheticsParams>({
+  const form = useFormWrapped<ParamFormData>({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     shouldFocusError: true,
-    defaultValues: dataToSave ?? {
-      key: '',
-      tags: [],
-      description: '',
-      value: '',
-    },
+    defaultValues: toFormData(isEditingItem),
   });
 
   const closeFlyout = useCallback(() => {
     setIsFlyoutVisible(false);
     setIsEditingItem(null);
-    form.reset({ key: '', tags: [], description: '', value: '' });
+    form.reset(toFormData(null));
     // no need to add form value, it keeps changing on reset
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setIsEditingItem]);
@@ -80,38 +105,52 @@ export const AddParamFlyout = ({
   const { application } = useKibana<ClientPluginsStart>().services;
 
   const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
+  const isHeaderAction = useHasSettingsHeaderAction();
+  const openFlyout = useCallback(() => setIsFlyoutVisible(true), []);
+  const createParamAction = useMemo(
+    () => ({
+      id: 'createParameter',
+      label: CREATE_PARAM,
+      iconType: 'plusCircle',
+      testId: 'syntheticsAddParamFlyoutButton',
+      disableButton: !canSave,
+      tooltipContent: !canSave ? CANNOT_PERFORM_ACTION_SYNTHETICS : undefined,
+      run: openFlyout,
+    }),
+    [canSave, openFlyout]
+  );
+  useRegisterSettingsHeaderAction(createParamAction);
 
   const dispatch = useDispatch();
 
   const { isSaving, savedData } = useSelector(selectGlobalParamState);
   const wasSavingRef = useRef(false);
 
-  const onSubmit = (formData: SyntheticsParams) => {
-    const { namespaces, ...paramRequest } = formData;
+  const onSubmit = (formData: ParamFormData) => {
+    const { namespaces, sourceType, source, value, key, description, tags } = formData;
     const shareAcrossSpaces = namespaces?.includes(ALL_SPACES_ID);
-    const newParamData = {
-      ...paramRequest,
+
+    const paramRequest: SyntheticsParamRequest = {
+      key,
+      description,
+      tags,
+      // An empty value on edit keeps the stored one (editGlobalParam omits it).
+      value:
+        sourceType === 'vault'
+          ? buildVaultReference({
+              connection: source?.connection ?? '',
+              path: source?.path ?? '',
+              field: source?.field ?? '',
+            })
+          : value ?? '',
     };
 
     if (isEditingItem && id) {
-      // omit value if it's empty
-      if (isEmpty(newParamData.value)) {
-        // @ts-ignore this is a valid check
-        delete newParamData.value;
-      }
-    }
-
-    if (isEditingItem && id) {
-      dispatch(
-        editGlobalParamAction.get({
-          id,
-          paramRequest,
-        })
-      );
+      dispatch(editGlobalParamAction.get({ id, paramRequest }));
     } else {
       dispatch(
         addNewGlobalParamAction.get({
-          ...newParamData,
+          ...paramRequest,
           share_across_spaces: shareAcrossSpaces,
         })
       );
@@ -145,9 +184,8 @@ export const AddParamFlyout = ({
 
   useEffect(() => {
     if (isEditingItem) {
-      const { id: _id, ...dataToEdit } = isEditingItem;
       setIsFlyoutVisible(true);
-      form.reset(dataToEdit);
+      form.reset(toFormData(isEditingItem));
     }
     // no need to add form value, it keeps changing on reset
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -209,18 +247,20 @@ export const AddParamFlyout = ({
 
   return (
     <div>
-      <NoPermissionsTooltip canEditSynthetics={canSave}>
-        <EuiButton
-          data-test-subj="syntheticsAddParamFlyoutButton"
-          fill
-          iconType="plusCircle"
-          iconSide="left"
-          onClick={() => setIsFlyoutVisible(true)}
-          isDisabled={!canSave}
-        >
-          {CREATE_PARAM}
-        </EuiButton>
-      </NoPermissionsTooltip>
+      {!isHeaderAction ? (
+        <NoPermissionsTooltip canEditSynthetics={canSave}>
+          <EuiButton
+            data-test-subj="syntheticsAddParamFlyoutButton"
+            fill
+            iconType="plusCircle"
+            iconSide="left"
+            onClick={openFlyout}
+            isDisabled={!canSave}
+          >
+            {CREATE_PARAM}
+          </EuiButton>
+        </NoPermissionsTooltip>
+      ) : null}
       {flyout}
       <EuiScreenReaderLive>{announcement}</EuiScreenReaderLive>
     </div>

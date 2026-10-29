@@ -13,8 +13,53 @@ export const PLUGIN_NAME = 'Workflows';
 export const WORKFLOWS_INDEX = '.workflows-workflows';
 export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
+export const WORKFLOWS_EXECUTIONS_DATA_STREAM = '.workflows-executions-data-stream';
+export const WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM = '.workflows-step-executions-data-stream';
+
+export const WORKFLOWS_EXECUTIONS_DATA_VIEW_TITLE = `${WORKFLOWS_EXECUTIONS_DATA_STREAM},${WORKFLOWS_EXECUTIONS_INDEX}`;
+export const WORKFLOWS_STEP_EXECUTIONS_DATA_VIEW_TITLE = `${WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM},${WORKFLOWS_STEP_EXECUTIONS_INDEX}`;
 
 export const WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW = 10_000;
+
+/** Max `size` for GET .../executions/{id}/steps. */
+export const WORKFLOW_EXECUTION_STEPS_MAX_PAGE_SIZE = 5000;
+
+/** Max step executions embedded on GET .../executions/{id}. */
+export const WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT = 5000;
+
+/** Page size the execution-detail UI requests. */
+export const WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE = 5000;
+
+/**
+ * Pages fitting the 10000-step automatic budget. Also the hard limit for legacy runs without
+ * `stepExecutionIds`, whose search fallback is bounded by Elasticsearch's `max_result_window`.
+ */
+export const WORKFLOW_EXECUTION_STEPS_MAX_PAGE_COUNT =
+  10_000 / WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE;
+
+/** Count of steps past the pages loaded so far. Ignores transient mget gaps on a loaded page. */
+export const getOmittedStepExecutionsCount = (
+  stepExecutionsTotal: number,
+  loadedPageCount = 1
+): number =>
+  Math.max(0, stepExecutionsTotal - loadedPageCount * WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE);
+
+/**
+ * True when the server reported steps but none loaded, and that is not an
+ * in-progress mget gap on a single page (those use the skeleton tree).
+ */
+export const areStepExecutionsUnavailable = ({
+  stepExecutionsTotal,
+  loadedCount,
+  isInProgress,
+}: {
+  stepExecutionsTotal: number;
+  loadedCount: number;
+  isInProgress: boolean;
+}): boolean =>
+  loadedCount === 0 &&
+  stepExecutionsTotal > 0 &&
+  (!isInProgress || stepExecutionsTotal > WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE);
 
 export const WORKFLOWS_DOCUMENTATION_URL = 'https://ela.st/workflows-docs';
 

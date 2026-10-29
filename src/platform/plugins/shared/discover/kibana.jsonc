@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/discover-plugin",
   "owner": [
-    "@elastic/kibana-data-discovery"
+    "@elastic/kibana-discover"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -53,7 +53,8 @@
       "fileUpload",
       "cps",
       "alertingVTwo",
-      "feedback"
+      "feedback",
+      "searchSessionsManagement"
     ],
     "requiredBundles": [
       "kibanaUtils",

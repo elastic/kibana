@@ -8,16 +8,20 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
+import { ALERT_END, ALERT_RULE_TYPE_ID, ALERT_START, ApmRuleType } from '@kbn/rule-data-utils';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { BehaviorSubject } from 'rxjs';
 import {
+  ANOMALY_TIMESTAMP,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import type { ServiceFlyoutOptions } from '../../../shared/service_flyout/types';
 import type { EmbeddableDeps } from '../../../../embeddable/types';
 import type { AlertDetailsAppSectionProps } from '../alert_details_app_section/types';
 import { AlertDetailsServiceMapSection } from '.';
@@ -34,8 +38,12 @@ jest.mock('../../../../embeddable/embeddable_context', () => ({
   ApmEmbeddableContext: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+const mockServiceMapEmbeddable = jest.fn((_props: unknown) => (
+  <div data-test-subj="mockServiceMapEmbeddable" />
+));
+
 jest.mock('../../../../embeddable/service_map/service_map_embeddable', () => ({
-  ServiceMapEmbeddable: () => <div data-test-subj="mockServiceMapEmbeddable" />,
+  ServiceMapEmbeddable: (props: unknown) => mockServiceMapEmbeddable(props as never),
 }));
 
 jest.mock('../../../../embeddable/service_map/get_service_map_url', () => ({
@@ -84,7 +92,8 @@ function createMockDeps(
 }
 
 function makeProps(
-  alert: AlertDetailsAppSectionProps['alert'] = makeAlert()
+  alert: AlertDetailsAppSectionProps['alert'] = makeAlert(),
+  ruleParams: Partial<AlertDetailsAppSectionProps['rule']['params']> = {}
 ): AlertDetailsAppSectionProps {
   return {
     alert,
@@ -94,6 +103,7 @@ function makeProps(
         aggregationType: 'avg',
         windowSize: 1,
         windowUnit: TIME_UNITS.MINUTE,
+        ...ruleParams,
       },
     } as AlertDetailsAppSectionProps['rule'],
     timeZone: 'UTC',
@@ -103,15 +113,24 @@ function makeProps(
 
 function renderComponent(
   alert: AlertDetailsAppSectionProps['alert'] = makeAlert(),
-  deps: EmbeddableDeps | null = createMockDeps()
+  deps: EmbeddableDeps | null = createMockDeps(),
+  ruleParams: Partial<AlertDetailsAppSectionProps['rule']['params']> = {}
 ) {
   mockUseApmEmbeddableDeps.mockReturnValue(deps);
 
   return render(
     <EuiProvider>
-      <AlertDetailsServiceMapSection {...makeProps(alert)} />
+      <AlertDetailsServiceMapSection {...makeProps(alert, ruleParams)} />
     </EuiProvider>
   );
+}
+
+function getEmbeddableFlyoutOptions() {
+  expect(mockServiceMapEmbeddable).toHaveBeenCalled();
+  const [props] = mockServiceMapEmbeddable.mock.calls.at(-1) as unknown as [
+    { flyoutOptions: ServiceFlyoutOptions }
+  ];
+  return props.flyoutOptions;
 }
 
 describe('AlertDetailsServiceMapSection', () => {
@@ -190,5 +209,58 @@ describe('AlertDetailsServiceMapSection', () => {
     renderComponent(makeAlert({ [ALERT_START]: undefined }));
 
     expect(screen.queryByTestId('apmAlertDetailsServiceMapSection')).not.toBeInTheDocument();
+  });
+
+  describe('flyoutOptions', () => {
+    const alertStart = '2024-01-15T13:00:00.000Z';
+    const alertEnd = '2024-01-15T13:05:00.000Z';
+
+    it('inherits the rule latency aggregation type and the alert transaction type', () => {
+      renderComponent(makeAlert(), createMockDeps(), { aggregationType: '95th' });
+
+      expect(getEmbeddableFlyoutOptions()).toEqual(
+        expect.objectContaining({
+          latencyAggregationType: LatencyAggregationType.p95,
+          transactionType: 'request',
+        })
+      );
+    });
+
+    it('defaults to average latency when the rule has no aggregation type', () => {
+      renderComponent(makeAlert(), createMockDeps(), { aggregationType: undefined });
+
+      expect(getEmbeddableFlyoutOptions().latencyAggregationType).toBe(LatencyAggregationType.avg);
+    });
+
+    it('pads the range from the alert start for non-anomaly alerts', () => {
+      renderComponent();
+
+      const expected = getPaddedAlertTimeRange(alertStart, alertEnd);
+      expect(getEmbeddableFlyoutOptions()).toEqual(
+        expect.objectContaining({ rangeFrom: expected.from, rangeTo: expected.to })
+      );
+    });
+
+    it('anchors the padded range on the anomaly timestamp for anomaly alerts', () => {
+      const anomalyTimestamp = '2024-01-15T12:30:00.000Z';
+      renderComponent(
+        makeAlert({
+          [ALERT_RULE_TYPE_ID]: ApmRuleType.Anomaly,
+          [ANOMALY_TIMESTAMP]: anomalyTimestamp,
+        })
+      );
+
+      const expected = getPaddedAlertTimeRange(anomalyTimestamp, alertEnd);
+      expect(getEmbeddableFlyoutOptions()).toEqual(
+        expect.objectContaining({ rangeFrom: expected.from, rangeTo: expected.to })
+      );
+    });
+
+    it('ignores the anomaly timestamp for non-anomaly alerts', () => {
+      renderComponent(makeAlert({ [ANOMALY_TIMESTAMP]: '2024-01-15T12:30:00.000Z' }));
+
+      const expected = getPaddedAlertTimeRange(alertStart, alertEnd);
+      expect(getEmbeddableFlyoutOptions().rangeFrom).toBe(expected.from);
+    });
   });
 });

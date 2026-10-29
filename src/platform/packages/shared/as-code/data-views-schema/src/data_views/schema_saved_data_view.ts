@@ -20,7 +20,7 @@ import {
   savedCompositeRuntimeFieldSchema,
   savedPrimitiveRuntimeFieldSchema,
 } from '../runtime_fields/schema_saved_runtime_fields';
-import { fieldSettingsWithPopularitySchema } from '../schema_field_settings';
+import { fieldSettingsWithPopularitySchema } from '../field_settings/schema_field_settings';
 
 export const savedFieldSettingsSchema = z
   .union([
@@ -47,7 +47,14 @@ export const savedDataViewSpecSchema = z
     field_filters: fieldFiltersSchema,
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
-    field_settings: z.record(fieldSettingsFieldNameSchema, savedFieldSettingsSchema).optional(),
+    field_settings: z
+      .record(fieldSettingsFieldNameSchema, savedFieldSettingsSchema)
+      .optional()
+      .meta({
+        title: 'Field settings',
+        description:
+          'Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.',
+      }),
   })
   .strict()
   .meta({

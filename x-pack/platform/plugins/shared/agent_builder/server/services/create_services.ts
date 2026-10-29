@@ -22,6 +22,10 @@ import { ConversationServiceImpl } from './conversation';
 import { createWorkspaceService } from './workspaces';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { type RendererService, createRendererService } from './renderers';
+import {
+  type ConversationEventsService,
+  createConversationEventsService,
+} from './conversation_events';
 import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
@@ -35,6 +39,7 @@ import {
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
+import { SurfacesServiceImpl } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
@@ -42,6 +47,7 @@ interface ServiceInstances {
   agents: AgentsService;
   attachments: AttachmentService;
   renderers: RendererService;
+  conversationEvents: ConversationEventsService;
   hooks: HooksService;
   skills: SkillService;
   plugins: PluginsService;
@@ -73,6 +79,7 @@ export class ServiceManager {
       agents: new AgentsService(),
       attachments: createAttachmentService(),
       renderers: createRendererService(),
+      conversationEvents: createConversationEventsService(),
       hooks: new HooksService(),
       skills: createSkillService(),
       plugins: createPluginsService(),
@@ -82,7 +89,10 @@ export class ServiceManager {
         logger: logger.get('metering'),
       }),
       consumption: createConsumptionService(),
-      callbackDelivery: new CallbackDeliveryService({ actions }),
+      callbackDelivery: new CallbackDeliveryService({
+        actions,
+        logger: logger.get('callbacks'),
+      }),
       conversationTemplates: new ConversationTemplatesService(),
     };
 
@@ -97,11 +107,13 @@ export class ServiceManager {
       agents: this.services.agents.setup({ logger: logger.get('agents') }),
       attachments: this.services.attachments.setup(),
       renderers: this.services.renderers.setup(),
+      conversationEvents: this.services.conversationEvents.setup(),
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
       skills: skillsSetup,
       plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
       conversationTemplates: this.services.conversationTemplates.setup(),
+      callbacks: this.services.callbackDelivery.setup(),
     };
 
     return this.internalSetup;
@@ -123,6 +135,10 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
+    licensing,
+    deploymentInfo,
+    deductiveRegister,
+    isomer,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
@@ -155,6 +171,8 @@ export class ServiceManager {
     });
 
     const renderers = this.services.renderers.start();
+
+    const conversationEvents = this.services.conversationEvents.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -196,6 +214,11 @@ export class ServiceManager {
       trackingService,
     });
 
+    const auditLogService = new AuditLogService({
+      security,
+      logger: logger.get('audit'),
+    });
+
     const conversations = new ConversationServiceImpl({
       logger: logger.get('conversations'),
       security,
@@ -203,6 +226,9 @@ export class ServiceManager {
       spaces,
       agents,
       eventBus: conversationEventBus,
+      conversationEvents,
+      auditLogService,
+      analyticsService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -220,6 +246,7 @@ export class ServiceManager {
       conversationService: conversations,
       attachmentsService: attachments,
       renderersService: renderers,
+      conversationEventsService: conversationEvents,
       skillServiceStart: skillsServiceStart,
       pluginsServiceStart: plugins,
       trackingService,
@@ -228,6 +255,9 @@ export class ServiceManager {
       getExecutionService,
       searchInferenceEndpoints,
       conversationTemplates: conversationTemplatesStart,
+      licensing,
+      deploymentInfo,
+      deductiveRegister,
     });
     runner = runnerFactory.getRunner();
 
@@ -238,14 +268,16 @@ export class ServiceManager {
       conversations,
     });
 
-    const auditLogService = new AuditLogService({
-      security,
-      logger: logger.get('audit'),
+    const surfaces = new SurfacesServiceImpl({
+      attachmentsService: attachments,
+      isomer,
+      logger: logger.get('surfaces'),
     });
 
     const taskHandler = createTaskHandler({
       logger: logger.get('task-handler'),
       elasticsearch,
+      security,
       inference,
       conversationService: conversations,
       agentService: agents,
@@ -258,11 +290,13 @@ export class ServiceManager {
       meteringService: this.services.metering,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      surfacesService: surfaces,
     });
 
     executionService = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
+      security,
       taskManager,
       spaces,
       inference,
@@ -276,6 +310,7 @@ export class ServiceManager {
       analyticsService,
       meteringService: this.services.metering,
       searchInferenceEndpoints,
+      callbackDeliveryService: this.services.callbackDelivery,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
@@ -287,6 +322,7 @@ export class ServiceManager {
       agents,
       attachments,
       renderers,
+      conversationEvents,
       skills: skillsServiceStart,
       conversations,
       workspaces,
@@ -302,6 +338,7 @@ export class ServiceManager {
       plugins,
       consumption,
       searchInferenceEndpoints,
+      inference,
       callbackDeliveryService: this.services.callbackDelivery,
       spaceSettings,
       conversationTemplates: conversationTemplatesStart,

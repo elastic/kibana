@@ -19,9 +19,8 @@ export default function (providerContext: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     const retry = getService('retry');
     const logger = getService('log');
-    const RETRY_COUNT = 5;
     const RETRY_DELAY = 1000;
-    const retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY };
+    const retryOptions = { retryDelay: RETRY_DELAY };
     const kibanaServer = getService('kibanaServer');
 
     before(async () => {
@@ -36,25 +35,27 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('CNVM AWS', () => {
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
-        await retry.tryWithRetries(
-          'waiting for loading indicator to be hidden',
+        await retry.try(
           async () => {
             await cisIntegration.navigateToAddIntegrationCnvmPage();
             await cisIntegration.inputUniqueIntegrationName();
             await pageObjects.header.waitUntilLoadingHasFinished();
             await cisIntegration.clickSaveButton();
-            await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+            await cisIntegration.waitForPostInstallModal();
             expect(
               (await cisIntegration.getUrlOnPostInstallModal()) ===
                 'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
             );
             return true;
           },
-          retryOptions,
-          async () => {
-            // Log the error or handle it in some way
-            logger.debug('Failed while waiting for loading indicator');
-            return true;
+          {
+            ...retryOptions,
+            description: 'waiting for loading indicator to be hidden',
+            onFailureBlock: async () => {
+              // Log the error or handle it in some way
+              logger.debug('Failed while waiting for loading indicator');
+              return true;
+            },
           }
         );
       });

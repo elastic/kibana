@@ -13,7 +13,7 @@ import type {
   Plugin as CorePlugin,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { from, map } from 'rxjs';
+import { from, map, switchMap } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
@@ -34,7 +34,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
-import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import { triggersActionsRoute, TRIGGERS_ACTIONS_RULES_CAPABILITY_ID } from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -78,20 +78,14 @@ import type { AlertSummaryWidgetDependencies } from './application/sections/aler
 import type { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 import type { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
 
-import {
-  ALERTS_PAGE_ID,
-  CONNECTORS_PLUGIN_ID,
-  PLUGIN_ID,
-  RULES_CAPABILITY_ID,
-} from './common/constants';
+import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID, PLUGIN_ID } from './common/constants';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
-import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
-import { getRulesAppUpdate } from './get_rules_app_update';
+import { getRulesAppUpdate, getRulesManagementVisibleIn$ } from './get_rules_app_update';
 
 import type {
   ActionTypeModel,
@@ -111,7 +105,6 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
-import type { RuleSettingsLinkProps } from './application/components/rules_setting/rules_settings_link';
 import type { UntrackAlertsModalProps } from './application/sections/common/components/untrack_alerts_modal';
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
@@ -166,7 +159,6 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAlertSummaryWidget: (props: AlertSummaryWidgetProps) => ReactElement<AlertSummaryWidgetProps>;
   getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
   getUntrackModal: (props: UntrackAlertsModalProps) => ReactElement<UntrackAlertsModalProps>;
-  getRulesSettingsLink: (props: RuleSettingsLinkProps) => ReactElement<RuleSettingsLinkProps>;
   getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
     isRuleSnoozed: boolean;
     getNextRuleSnoozeSchedule: {
@@ -260,6 +252,7 @@ export class Plugin
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
       isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
+      isInboundEventsEnabled: plugins.actions.isInboundEventsEnabled,
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
@@ -353,8 +346,11 @@ export class Plugin
       plugins.management.sections.section.insightsAndAlerting.registerApp({
         id: PLUGIN_ID,
         title: featureTitle,
-        capabilitiesId: RULES_CAPABILITY_ID,
+        capabilitiesId: TRIGGERS_ACTIONS_RULES_CAPABILITY_ID,
         order: 1,
+        visibleIn$: from(core.getStartServices()).pipe(
+          switchMap(([coreStart]) => getRulesManagementVisibleIn$(coreStart))
+        ),
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,
@@ -467,6 +463,10 @@ export class Plugin
         title: alertsFeatureTitle,
         capabilitiesId: ALERTS_PAGE_ID,
         order: 0,
+        // Keep the deep link for project side nav. `hideFromGlobalSearch` drops the
+        // entire deep link, which also hides the page from Search/ES and VectorDB
+        // nav trees that reference `management:triggersActionsAlerts`.
+        visibleIn: ['projectSideNav'],
         async mount(params: ManagementAppMountParams) {
           const { renderApp } = await import('./application/alerts_app');
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
@@ -662,9 +662,6 @@ export class Plugin
       },
       getUntrackModal: (props: UntrackAlertsModalProps) => {
         return getUntrackModalLazy(props);
-      },
-      getRulesSettingsLink: (props: RuleSettingsLinkProps) => {
-        return getRulesSettingsLinkLazy(props);
       },
       getRuleHelpers: (rule: Rule<RuleTypeParams>) => {
         return {

@@ -11,8 +11,8 @@ import { ActionPolicySavedObjectServiceInternalToken } from '../../services/acti
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
-import { DEFAULT_GROUPING_MODE } from '../constants';
-import { PolicyCatalog } from '../state';
+import { DEFAULT_GROUPING } from '../constants';
+import { AlertTriage, PolicyCatalog } from '../state';
 import type {
   ActionPolicy,
   ActionPolicyId,
@@ -31,11 +31,19 @@ export class FetchPoliciesStep implements DispatcherStep {
   ) {}
 
   public async execute(
-    _state: Readonly<DispatcherPipelineState>,
+    state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
+    const { triage = AlertTriage.empty() } = state;
+
+    if (!triage.hasDispatchable()) {
+      return { type: 'continue', data: { policies: PolicyCatalog.empty() } };
+    }
+
+    const spaceIds = [...new Set(triage.dispatchable.map(({ space_id: spaceId }) => spaceId))];
     const result = await this.actionPolicySavedObjectService.findAllDecrypted({
       filter: { enabled: true },
+      spaceIds,
     });
 
     const policies = new Map<ActionPolicyId, ActionPolicy>();
@@ -58,9 +66,7 @@ export class FetchPoliciesStep implements DispatcherStep {
         enabled: doc.attributes.enabled,
         destinations: doc.attributes.destinations ?? [],
         matcher: doc.attributes.matcher ?? undefined,
-        groupBy: doc.attributes.groupBy ?? [],
-        tags: doc.attributes.tags ?? [],
-        groupingMode: doc.attributes.groupingMode ?? DEFAULT_GROUPING_MODE,
+        grouping: doc.attributes.grouping ?? DEFAULT_GROUPING,
         throttle: doc.attributes.throttle ?? undefined,
         snoozedUntil: doc.attributes.snoozedUntil ?? null,
         apiKey: doc.attributes.apiKey,

@@ -55,6 +55,8 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/cps'
   - '@kbn/core-ui-settings-browser-mocks'
+  - '@kbn/ui-callout'
+  - '@kbn/zod'
 tags:
   - shared-browser
   - package
@@ -69,6 +71,4 @@ fileGroups:
     - .storybook/**/*.ts
     - .storybook/**/*.tsx
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

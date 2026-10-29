@@ -7,13 +7,13 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { useQueryClient } from '@kbn/react-query';
-import { EisCloudConnectPromoCallout, useCloudConnectStatus } from '@kbn/search-api-panels';
+import { EisCloudConnectPromoCallout } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../../common/constants';
 import { useEisModels } from '../../hooks/use_eis_models';
+import type { EisPageState } from '../../hooks/use_eis_page_state';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
 import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 import { useKibana } from '../../hooks/use_kibana';
@@ -21,16 +21,26 @@ import { groupEndpointsByModel } from '../../utils/eis_utils';
 import { ModelDetailFlyout } from '../model_detail_flyout/model_detail_flyout';
 import { DeleteAction } from '../all_inference_endpoints/render_table_columns/render_actions/actions/delete/delete_action';
 import { EisModelsListingProvider } from './eis_models_listing_provider';
+import { EisSelfManagedEmptyPrompt } from './eis_self_managed_empty_prompt';
+import { EisServiceDisabledCallout } from './eis_service_disabled_callout';
+import { EisUnavailablePrompt } from './eis_unavailable_prompt';
 
-export const ElasticInferenceServiceModelsPage = () => {
+interface ElasticInferenceServiceModelsPageProps {
+  pageState: EisPageState;
+  isCloudConnectPromoVisible: boolean;
+  onManageRegions?: () => void;
+}
+
+export const ElasticInferenceServiceModelsPage = ({
+  pageState,
+  isCloudConnectPromoVisible,
+  onManageRegions,
+}: ElasticInferenceServiceModelsPageProps) => {
   const {
-    services: { application, cloud, cloudConnect },
+    services: { application, cloud },
   } = useKibana();
-  const { isLoading: isCloudConnectStatusLoading, isCloudConnected } = useCloudConnectStatus(
-    cloudConnect?.hooks.useCloudConnectStatus
-  );
   const queryClient = useQueryClient();
-  const { data: endpoints, isLoading, isError } = useEisModels();
+  const { data: endpoints, error, isFetching, refetch } = useEisModels();
   const { canManage } = useInferenceCapabilities();
   const {
     showDeleteAction,
@@ -47,39 +57,41 @@ export const ElasticInferenceServiceModelsPage = () => {
 
   const models = useMemo(() => (endpoints ? groupEndpointsByModel(endpoints) : []), [endpoints]);
 
-  if (isLoading) {
-    return <EuiLoadingSpinner size="l" />;
+  const openCloudConnect = useCallback(() => {
+    application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true });
+  }, [application]);
+
+  const retry = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  if (pageState === 'loading') {
+    return <EuiLoadingSpinner size="l" data-test-subj="eisModelsLoadingSpinner" />;
   }
 
-  if (isError) {
-    return (
-      <EuiEmptyPrompt
-        iconType="warning"
-        title={
-          <h2>
-            {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.error.title', {
-              defaultMessage: 'Unable to load models',
-            })}
-          </h2>
-        }
-        body={i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.error.body', {
-          defaultMessage: 'An error occurred while fetching model data.',
-        })}
-      />
-    );
+  if (pageState === 'unavailable') {
+    return <EisUnavailablePrompt error={error} isRetrying={isFetching} onRetry={retry} />;
+  }
+
+  if (pageState === 'selfManagedEmpty') {
+    return <EisSelfManagedEmptyPrompt onConnectCluster={openCloudConnect} />;
   }
 
   return (
     <>
-      {!isCloudConnectStatusLoading && !isCloudConnected && (
+      {isCloudConnectPromoVisible && (
         <EisCloudConnectPromoCallout
           promoId="elasticInferencePage"
           isSelfManaged={!cloud?.isCloudEnabled}
-          navigateToApp={() =>
-            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-          }
+          navigateToApp={openCloudConnect}
           addSpacer="top"
         />
+      )}
+      {pageState === 'serviceDisabled' && (
+        <>
+          <EuiSpacer size="l" />
+          <EisServiceDisabledCallout onOpenCloudConnect={openCloudConnect} />
+        </>
       )}
       <EuiSpacer size="l" />
       <EisModelsListingProvider
@@ -102,6 +114,7 @@ export const ElasticInferenceServiceModelsPage = () => {
           onDeleteEndpoint={canManage ? displayDeleteActionItem : undefined}
           onCopyEndpointId={copyContent}
           canManage={canManage}
+          onManageRegions={onManageRegions}
         />
       )}
     </>

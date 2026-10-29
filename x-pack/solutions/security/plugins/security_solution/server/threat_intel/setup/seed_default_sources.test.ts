@@ -6,12 +6,15 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { GLOBAL_SPACE_ID, CATALOG_SOURCE_URLS } from '../../../common/threat_intel';
 import {
-  DEFAULT_SOURCES,
-  LEGACY_SOURCE_DISABLE_PAGE_SIZE,
-  seedDefaultSources,
-} from './seed_default_sources';
+  APPROVED_CATALOG_SOURCE_IDS,
+  APPROVED_SOURCE_IDS,
+  GLOBAL_SPACE_ID,
+  CATALOG_SOURCE_URLS,
+  THREAT_INTEL_SOURCES_INDEX,
+  resolveCatalogSourceUrl,
+} from '../../../common/threat_intel';
+import { DEFAULT_SOURCES, seedDefaultSources } from './seed_default_sources';
 
 const TOTAL = DEFAULT_SOURCES.length;
 
@@ -53,59 +56,61 @@ const successfulBulkResponse = (operations: Array<Record<string, unknown>>) => (
 const run = async ({
   documents = missingDocuments(),
   bulkImpl = successfulBulkResponse,
+  updateByQueryImpl = () => ({ updated: 0, version_conflicts: 0 }),
 }: {
   documents?: Array<Record<string, unknown>>;
   bulkImpl?: (operations: Array<Record<string, unknown>>) => unknown;
+  updateByQueryImpl?: () => Record<string, unknown>;
 } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.mget.mockResolvedValue({ docs: documents } as never);
-  esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
-  esClient.update.mockResolvedValue({} as never);
   esClient.bulk.mockImplementation((async ({
     operations,
   }: {
     operations?: Array<Record<string, unknown>>;
   }) => bulkImpl(operations ?? [])) as never);
+  esClient.updateByQuery.mockImplementation(updateByQueryImpl as never);
   const logger = loggingSystemMock.createLogger();
   const result = await seedDefaultSources({ esClient, logger });
   return { esClient, logger, result };
 };
 
 describe('DEFAULT_SOURCES approved catalog', () => {
-  const ENABLED_ENDPOINTS: Record<string, string> = {
-    'kev:cisa-known-exploited-vulnerabilities':
-      'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
+  const APPROVED_ENDPOINTS: Record<string, string> = {
     'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
-    'rss:mandiant-research': 'https://cloud.google.com/security/blog/threat-intelligence/rss',
-    'rss:unit42': 'https://unit42.paloaltonetworks.com/feed/',
-    'rss:talos': 'https://blog.talosintelligence.com/rss/',
-    'rss:crowdstrike': 'https://www.crowdstrike.com/blog/feed/',
     'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
-    'text_indicator_list:maltrail-cobaltstrike':
-      'https://raw.githubusercontent.com/stamparm/maltrail/master/trails/static/malware/cobaltstrike.txt',
+    'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/news-rss-feed.xml',
+    'rss:cert-fr-alerts': 'https://cert.cyber.gouv.fr/alerte/feed/',
+    'rss:cert-fr-threats': 'https://cert.cyber.gouv.fr/cti/feed/',
+    'rss:cert-eu-advisories': 'https://cert.europa.eu/publications/security-advisories-rss',
+    'rss:cert-eu-threat-intelligence':
+      'https://cert.europa.eu/publications/threat-intelligence-rss',
   };
 
-  const DISABLED_ENDPOINTS: Record<string, string> = {
-    'rss:aws-security': 'https://aws.amazon.com/blogs/security/feed/',
-    'rss:aws-security-bulletins': 'https://aws.amazon.com/security/security-bulletins/rss/feed/',
-    'rss:fortiguard-advisories': 'https://filestore.fortinet.com/fortiguard/rss/ir.xml',
-    'rss:fortiguard-threat-signal':
-      'https://filestore.fortinet.com/fortiguard/rss/threatsignal.xml',
-  };
-
-  it('contains only the twelve approved source IDs and URLs', () => {
-    expect(CATALOG_SOURCE_URLS).toEqual({
-      ...ENABLED_ENDPOINTS,
-      ...DISABLED_ENDPOINTS,
-    });
+  it('contains only the approved source IDs and URLs', () => {
+    expect(CATALOG_SOURCE_URLS).toEqual(APPROVED_ENDPOINTS);
   });
 
-  it('ships exactly eight sources enabled', () => {
-    expect(DEFAULT_SOURCES.filter(({ enabled }) => enabled)).toHaveLength(8);
+  it('ships exactly seven sources enabled', () => {
+    expect(DEFAULT_SOURCES).toHaveLength(7);
+    expect(DEFAULT_SOURCES.every(({ enabled }) => enabled)).toBe(true);
   });
 
-  it('ships exactly four sources disabled', () => {
-    expect(DEFAULT_SOURCES.filter(({ enabled }) => !enabled)).toHaveLength(4);
+  // Product decision for MVP: Continuous Threat Hunt cannot act on pure vulnerability
+  // intel yet, so KEV is out of the catalog until a CVE hunt path exists.
+  it('does not seed or resolve a URL for CISA KEV', () => {
+    expect(DEFAULT_SOURCES.some(({ adapter_type }) => adapter_type === 'kev')).toBe(false);
+    expect(APPROVED_SOURCE_IDS.has('kev:cisa-known-exploited-vulnerabilities')).toBe(false);
+    expect(resolveCatalogSourceUrl('kev:cisa-known-exploited-vulnerabilities')).toBeUndefined();
+  });
+
+  // The list route and the PATCH route only admit approved ids, and reconciliation
+  // disables everything else, so an approved id that is never seeded is invisible
+  // and a seeded id outside the approved list is disabled again on every boot.
+  it('seeds every approved catalog id exactly once', () => {
+    expect(DEFAULT_SOURCES.map(({ id }) => id).sort()).toEqual(
+      [...APPROVED_CATALOG_SOURCE_IDS].sort()
+    );
   });
 
   it('dispatches Elastic Security Labs through the RSS adapter while preserving its stable ID', () => {
@@ -285,61 +290,112 @@ describe('seedDefaultSources', () => {
     );
   });
 
-  it('pages through all enabled legacy sources with search_after', async () => {
-    const firstPage = Array.from({ length: LEGACY_SOURCE_DISABLE_PAGE_SIZE }, (_, index) => ({
-      _id: `legacy:page1-${index}`,
-      sort: [`legacy:page1-${index}`],
-      _source: { enabled: true },
-    }));
-    const secondPage = [
-      {
-        _id: 'legacy:page2-0',
-        sort: ['legacy:page2-0'],
-        _source: { enabled: true },
-      },
-    ];
-
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.mget.mockResolvedValue({ docs: currentDocuments() } as never);
-    esClient.search
-      .mockResolvedValueOnce({ hits: { hits: firstPage } } as never)
-      .mockResolvedValueOnce({ hits: { hits: secondPage } } as never);
-    esClient.update.mockResolvedValue({} as never);
-
-    const result = await seedDefaultSources({
-      esClient,
-      logger: loggingSystemMock.createLogger(),
+  it('disables legacy sources outside the approved catalog with updateByQuery', async () => {
+    const { esClient, result } = await run({
+      documents: currentDocuments(),
+      updateByQueryImpl: () => ({ updated: 5, version_conflicts: 0 }),
     });
 
-    expect(esClient.search).toHaveBeenCalledTimes(2);
-    expect(esClient.search.mock.calls[1][0]).toEqual(
+    expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+    expect(esClient.updateByQuery.mock.calls[0][0]).toEqual(
       expect.objectContaining({
-        search_after: ['legacy:page1-999'],
+        index: THREAT_INTEL_SOURCES_INDEX,
+        refresh: false,
+        conflicts: 'proceed',
+        wait_for_completion: true,
+        query: {
+          bool: {
+            filter: [{ term: { enabled: true } }],
+            must_not: [{ ids: { values: expect.arrayContaining([...APPROVED_SOURCE_IDS]) } }],
+          },
+        },
+        script: expect.objectContaining({
+          source: expect.stringContaining('ctx._source.enabled = false'),
+          lang: 'painless',
+          params: { now: expect.any(String) },
+        }),
       })
     );
-    expect(esClient.update).toHaveBeenCalledTimes(LEGACY_SOURCE_DISABLE_PAGE_SIZE + 1);
-    expect(result.updated).toBe(LEGACY_SOURCE_DISABLE_PAGE_SIZE + 1);
-    expect(result.failed).toBe(0);
+    expect(result).toEqual(
+      expect.objectContaining({ total: TOTAL, created: 0, updated: 5, skipped: TOTAL, failed: 0 })
+    );
   });
 
-  it('counts a failed legacy-source disable so bootstrap can retry', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.mget.mockResolvedValue({ docs: currentDocuments() } as never);
-    esClient.search.mockResolvedValue({
-      hits: {
-        hits: [
-          { _id: 'legacy:custom-feed', sort: ['legacy:custom-feed'], _source: { enabled: true } },
-        ],
-      },
-    } as never);
-    esClient.update.mockRejectedValue(new Error('version_conflict_engine_exception'));
+  /**
+   * A non-zero `failed` makes bootstrap retry and eventually reject, which
+   * gates every threat intel route behind a 503 and leaves both tasks
+   * unscheduled. Only a real per-document failure is worth that.
+   */
+  describe('legacy-source disable outcomes', () => {
+    // Under `conflicts: 'proceed'` a conflict means an operator wrote to the
+    // source between the scan and the update. The row is skipped, still matches
+    // the same query, and is disabled on the next boot, so counting it as
+    // `failed` let a benign write race fail bootstrap.
+    it('does not count a version conflict as failed', async () => {
+      const { result } = await run({
+        documents: currentDocuments(),
+        updateByQueryImpl: () => ({ updated: 0, version_conflicts: 3 }),
+      });
 
-    const result = await seedDefaultSources({
-      esClient,
-      logger: loggingSystemMock.createLogger(),
+      expect(result).toEqual(
+        expect.objectContaining({ total: TOTAL, created: 0, updated: 0, skipped: TOTAL, failed: 0 })
+      );
     });
 
-    expect(result.updated).toBe(0);
-    expect(result.failed).toBe(1);
+    it('logs a version conflict at debug, not warn', async () => {
+      const { logger } = await run({
+        documents: currentDocuments(),
+        updateByQueryImpl: () => ({ updated: 0, version_conflicts: 3 }),
+      });
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    // The other half of the same bug: `failures[]` was read by nothing at all,
+    // so a source that could not be disabled stayed eligible for fetch and the
+    // run reported clean.
+    it('counts a per-document failure as failed', async () => {
+      const { result } = await run({
+        documents: currentDocuments(),
+        updateByQueryImpl: () => ({
+          updated: 0,
+          version_conflicts: 0,
+          failures: [{ id: 'rss:legacy', status: 403 }],
+        }),
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({ total: TOTAL, created: 0, updated: 0, skipped: TOTAL, failed: 1 })
+      );
+    });
+
+    it('warns that a failed source is still eligible for fetch', async () => {
+      const { logger } = await run({
+        documents: currentDocuments(),
+        updateByQueryImpl: () => ({
+          updated: 0,
+          version_conflicts: 0,
+          failures: [{ id: 'rss:legacy', status: 403 }],
+        }),
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('still eligible for fetch'));
+    });
+  });
+
+  it('counts an updateByQuery failure as a failed legacy-source disable', async () => {
+    const { logger, result } = await run({
+      documents: currentDocuments(),
+      updateByQueryImpl: () => {
+        throw new Error('cluster_block_exception');
+      },
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({ total: TOTAL, created: 0, updated: 0, skipped: TOTAL, failed: 1 })
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to disable legacy sources')
+    );
   });
 });

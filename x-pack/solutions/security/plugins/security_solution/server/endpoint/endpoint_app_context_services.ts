@@ -27,7 +27,12 @@ import type {
   FleetStartContract,
   MessageSigningServiceInterface,
 } from '@kbn/fleet-plugin/server';
-import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type {
+  AlertingAuthorization,
+  AlertingServerStart,
+  RulesClient as RulesClientApi,
+} from '@kbn/alerting-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
@@ -150,6 +155,34 @@ export interface ScopedEndpointServices {
   /** Resolves the active space, rejecting when it does not exist on this project */
   getSpace: () => Promise<Space>;
 }
+
+/**
+ * Options for {@link EndpointAppContextService#getInternalResponseActionsClient}.
+ *
+ * The option set is a discriminated union on `isAutomated` so that the two usage modes are
+ * each enforced by construction instead of by review discipline:
+ *  - `isAutomated: true` (or omitted) — system/rule-triggered actions (detection-rule response
+ *    actions, the pending-actions task runner). Username defaults to the internal `'elastic'`
+ *    system user, exactly as before this option existed.
+ *  - `isAutomated: false` — analyst/user-initiated actions (e.g. AI Agent skill tools gated
+ *    behind HITL confirmation). A `request` is REQUIRED: the username is derived from the
+ *    authenticated user so the audit trail never silently attributes a manual action to the
+ *    system user. The internal client performs no authz and skips the Enterprise license gate
+ *    (manual actions are not Enterprise-gated), so callers MUST still enforce endpoint
+ *    privileges via `getEndpointAuthz(request)` with the same privilege the equivalent HTTP
+ *    route requires (`withEndpointAuthz(...)`), which carries the license floor.
+ */
+export type GetInternalResponseActionsClientOptions = {
+  spaceId: string;
+  agentType?: ResponseActionAgentType;
+  /** Used with background task and needed for `UnsecuredActionsClient`  */
+  taskId?: string;
+  /** Used with background task and needed for `UnsecuredActionsClient`  */
+  taskType?: string;
+} & (
+  | { isAutomated?: true; username?: string; request?: undefined }
+  | { isAutomated: false; request: KibanaRequest; username?: undefined }
+);
 
 /**
  * A singleton that holds shared services that are initialized during the start up phase
@@ -470,6 +503,17 @@ export class EndpointAppContextService {
     return this.setupDependencies.loggerFactory.get(...contextParts);
   }
 
+  /**
+   * Username of the authenticated user for a request, or `'unknown'` when the user cannot be
+   * resolved (unauthenticated request, security plugin absent, or service not started) — matching
+   * the `user?.username || 'unknown'` convention of the response actions HTTP routes. Used to
+   * attribute agent-dispatched response actions to the initiating analyst for the audit trail;
+   * never returns the system user (`'elastic'`) for an unresolved caller.
+   */
+  public getCurrentUsername(request: KibanaRequest): string {
+    return this.security?.authc.getCurrentUser(request)?.username ?? 'unknown';
+  }
+
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     if (!this.startDependencies?.productFeaturesService) {
       throw new EndpointAppContentServicesNotStartedError();
@@ -520,11 +564,50 @@ export class EndpointAppContextService {
     return this.startDependencies.licenseService;
   }
 
+  public getProductFeaturesService(): ProductFeaturesService {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.productFeaturesService;
+  }
+
+  public getCloudSetup(): CloudSetup {
+    if (!this.setupDependencies?.cloud) {
+      throw new EndpointAppContentServicesNotSetUpError();
+    }
+
+    return this.setupDependencies.cloud;
+  }
+
+  public getTelemetryConfigProvider(): TelemetryConfigProvider {
+    if (!this.startDependencies?.telemetryConfigProvider) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.telemetryConfigProvider;
+  }
+
   public async getCasesClient(req: KibanaRequest): Promise<CasesClient> {
     if (this.startDependencies?.cases == null) {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies.cases.getCasesClientWithRequest(req);
+  }
+
+  public async getRulesClient(req: KibanaRequest): Promise<RulesClientApi> {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.alerting.getRulesClientWithRequest(req);
+  }
+
+  public async getAlertingAuthorization(
+    req: KibanaRequest
+  ): Promise<PublicMethodsOf<AlertingAuthorization>> {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.alerting.getAlertingAuthorizationWithRequest(req);
   }
 
   public getFeatureUsageService(): FeatureUsageService {
@@ -581,15 +664,9 @@ export class EndpointAppContextService {
     taskId,
     taskType,
     spaceId,
-  }: {
-    spaceId: string;
-    agentType?: ResponseActionAgentType;
-    username?: string;
-    /** Used with background task and needed for `UnsecuredActionsClient`  */
-    taskId?: string;
-    /** Used with background task and needed for `UnsecuredActionsClient`  */
-    taskType?: string;
-  }): ResponseActionsClient {
+    isAutomated = true,
+    request,
+  }: GetInternalResponseActionsClientOptions): ResponseActionsClient {
     if (!this.startDependencies?.esClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
@@ -597,9 +674,9 @@ export class EndpointAppContextService {
     return getResponseActionsClient(agentType, {
       endpointService: this,
       esClient: this.startDependencies.esClient,
-      username,
+      username: isAutomated ? username : this.getCurrentUsername(request as KibanaRequest),
       spaceId,
-      isAutomated: true,
+      isAutomated,
       connectorActions: new NormalizedExternalConnectorClient(
         this.startDependencies.connectorActions.getUnsecuredActionsClient(),
         this.createLogger('responseActions'),

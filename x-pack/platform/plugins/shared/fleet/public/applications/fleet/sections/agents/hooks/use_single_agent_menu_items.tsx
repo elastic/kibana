@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import React from 'react';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -17,12 +18,13 @@ import {
   isAgentEligibleForMigration,
   isAgentEligibleForPrivilegeLevelChange,
   isAgentRequestDiagnosticsSupported,
+  isAgentRestartSupported,
   isAgentUpgrading,
 } from '../../../../../../common/services';
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
 
 import type { Agent, AgentPolicy } from '../../../types';
-import { useAuthz, useLicense } from '../../../hooks';
+import { useAuthz, useLicense, useRestartAgentAction } from '../../../hooks';
 import { ExperimentalFeaturesService, isAgentUpgradeable } from '../../../services';
 
 import type { MenuItem } from '../components/hierarchical_actions_menu';
@@ -44,6 +46,7 @@ export interface SingleAgentMenuCallbacks {
   onUnenrollClick: () => void;
   onUninstallClick: () => void;
   onRollbackClick: () => void;
+  onRestartClick: () => void;
   onRemoveCollectorClick?: () => void;
 }
 
@@ -64,7 +67,9 @@ export function useSingleAgentMenuItems({
 }: UseSingleAgentMenuItemsOptions): MenuItem[] {
   const authz = useAuthz();
   const licenseService = useLicense();
+  const { isRestartAgentActionEnabled } = useRestartAgentAction();
 
+  const isAgentless = agentPolicy?.supports_agentless === true;
   const isUnenrolling = agent.status === 'unenrolling';
   const isAgentUpdating = isStuckInUpdating(agent);
   const hasFleetAllPrivileges = authz.fleet.allAgents;
@@ -135,6 +140,11 @@ export function useSingleAgentMenuItems({
       });
     }
 
+    // Agentless agents are managed by Elastic: no action is available for them
+    if (isAgentless) {
+      return items;
+    }
+
     // Top-level (common-use) items (only if has privileges and not managed)
     if (hasFleetAllPrivileges && !agentPolicy?.is_managed) {
       items.push(
@@ -162,7 +172,7 @@ export function useSingleAgentMenuItems({
             />
           ),
           icon: 'pencil',
-          disabled: (!agent.active && !agentPolicy) || agentPolicy?.supports_agentless === true,
+          disabled: !agent.active && !agentPolicy,
           onClick: () => {
             callbacks.onReassignClick();
           },
@@ -176,12 +186,38 @@ export function useSingleAgentMenuItems({
             />
           ),
           icon: 'refresh',
-          disabled: !isAgentUpgradeable(agent) || agentPolicy?.supports_agentless === true,
+          disabled: !isAgentUpgradeable(agent),
           onClick: () => {
             callbacks.onUpgradeClick();
           },
           'data-test-subj': 'upgradeBtn',
-        }
+        },
+        ...(isRestartAgentActionEnabled
+          ? [
+              {
+                id: 'restart',
+                name: (
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.restartOneButton"
+                        defaultMessage="Restart agent"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBetaBadge label="Beta" size="s" />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+                icon: 'refresh',
+                disabled: !isAgentRestartSupported(agent),
+                onClick: () => {
+                  callbacks.onRestartClick();
+                },
+                'data-test-subj': 'agentRestartBtn',
+              } as MenuItem,
+            ]
+          : [])
       );
     }
 
@@ -352,7 +388,7 @@ export function useSingleAgentMenuItems({
         ),
         icon: 'trash',
         iconColor: 'danger',
-        disabled: !agent.active || agentPolicy?.supports_agentless === true,
+        disabled: !agent.active,
         onClick: () => {
           callbacks.onUnenrollClick();
         },
@@ -360,7 +396,7 @@ export function useSingleAgentMenuItems({
       });
 
       // Uninstall agent
-      if (agent.policy_id && !agentPolicy?.supports_agentless) {
+      if (agent.policy_id) {
         securityChildren.push({
           id: 'uninstall',
           name: (
@@ -398,6 +434,7 @@ export function useSingleAgentMenuItems({
   }, [
     callbacks,
     hasFleetAllPrivileges,
+    isAgentless,
     agentPolicy,
     agent,
     authz.fleet.allAgents,
@@ -409,6 +446,7 @@ export function useSingleAgentMenuItems({
     licenseService,
     isUnenrolling,
     authz.fleet.readAgentPolicies,
+    isRestartAgentActionEnabled,
   ]);
 
   return menuItems;

@@ -10,11 +10,10 @@ import {
   ALERT_LAST_DETECTED,
   ALERT_START,
   ALERT_INTENDED_TIMESTAMP,
-  ALERT_RULE_TAGS,
   CPS_SCOPE_EXPRESSION,
   CPS_SCOPE_LINKED_PROJECTS,
 } from '@kbn/rule-data-utils';
-import { stripMissingUiamApiKeyTag } from '../missing_uiam_api_key_tag';
+import { stripMissingUiamApiKeyTagFromAlert } from '../missing_uiam_api_key_tag';
 
 export const removeRandomValuedPropertiesFromAlert = (alert: DetectionAlert | undefined) => {
   if (!alert) {
@@ -36,10 +35,6 @@ export const removeRandomValuedPropertiesFromAlert = (alert: DetectionAlert | un
     [CPS_SCOPE_EXPRESSION]: cpsExpression,
     [CPS_SCOPE_LINKED_PROJECTS]: cpsLinkedProjects,
     ...restOfAlert
-  } = alert;
-  const ruleTags = restOfAlert[ALERT_RULE_TAGS];
-  return {
-    ...restOfAlert,
-    ...(Array.isArray(ruleTags) ? { [ALERT_RULE_TAGS]: stripMissingUiamApiKeyTag(ruleTags) } : {}),
-  };
+  } = stripMissingUiamApiKeyTagFromAlert(alert);
+  return restOfAlert;
 };

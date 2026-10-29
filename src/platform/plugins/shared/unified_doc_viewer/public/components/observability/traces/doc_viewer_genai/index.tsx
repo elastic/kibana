@@ -32,7 +32,6 @@ import { useGenAiData } from './use_genai_data';
 export function DocViewerObsTracesGenAi({
   hit,
   dataView,
-  columnsMeta,
   textBasedHits,
   filter,
   onAddColumn,
@@ -42,7 +41,11 @@ export function DocViewerObsTracesGenAi({
 }: DocViewRenderProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const isEsqlMode = Array.isArray(textBasedHits);
-  const { genAi, loading, unrecoverableLongFields } = useGenAiData({ hit, isEsqlMode });
+  const { genAi, loading, unrecoverableLongFields } = useGenAiData({
+    hit,
+    isEsqlMode,
+    indexPattern: dataView?.getIndexPattern(),
+  });
 
   const containerHeight = containerRef
     ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
@@ -135,7 +138,6 @@ export function DocViewerObsTracesGenAi({
             <GenAiDetailsTable
               hit={hit}
               dataView={dataView}
-              columnsMeta={columnsMeta}
               textBasedHits={textBasedHits}
               filter={filter}
               onAddColumn={onAddColumn}

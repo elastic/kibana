@@ -34,7 +34,6 @@ import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
 } from './no_data/dashboard_app_no_data';
-import { PrettifyDashboardButton } from './prettify/prettify_dashboard_button';
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
 import type { DashboardRedirect } from './types';
 import { type DashboardEmbedSettings } from './types';
@@ -47,7 +46,6 @@ export interface DashboardAppProps {
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
   expandedPanelId?: string;
-  setDashboardAppApi: (api: DashboardApi | undefined) => void;
 }
 
 export function DashboardApp({
@@ -56,7 +54,6 @@ export function DashboardApp({
   redirectTo,
   history,
   expandedPanelId,
-  setDashboardAppApi,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
@@ -195,7 +192,6 @@ export function DashboardApp({
             dashboardApi={dashboardApi}
             dashboardInternalApi={dashboardInternalApi}
           />
-          <PrettifyDashboardButton dashboardApi={dashboardApi} />
         </>
       )}
 
@@ -203,8 +199,8 @@ export function DashboardApp({
       <DashboardRenderer
         key={regenerateId}
         locator={locator}
+        publishAsAppClientApi
         onApiAvailable={(dashboard, dashboardInternal) => {
-          setDashboardAppApi(dashboard);
           if (dashboard && dashboard.uuid !== dashboardApi?.uuid) {
             setDashboardApi(dashboard);
             setDashboardInternalApi(dashboardInternal);
@@ -212,9 +208,6 @@ export function DashboardApp({
               dashboard?.expandPanel(expandedPanelId);
             }
           }
-        }}
-        onApiCleanup={() => {
-          setDashboardAppApi(undefined);
         }}
         dashboardRedirect={redirectTo}
         savedObjectId={savedDashboardId}

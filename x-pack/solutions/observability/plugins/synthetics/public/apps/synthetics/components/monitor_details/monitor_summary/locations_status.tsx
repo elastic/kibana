@@ -6,19 +6,24 @@
  */
 import React from 'react';
 import { LocationStatusBadges } from '../../common/components/location_status_badges';
-import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../common/runtime_types';
+import type {
+  EncryptedSyntheticsSavedMonitor,
+  MonitorOrigin,
+} from '../../../../../../common/runtime_types';
 import { useStatusByLocation } from '../../../hooks/use_status_by_location';
 
 export const LocationsStatus = ({
   configId,
   monitorLocations,
   spaces,
+  origin,
 }: {
   configId: string;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
   spaces?: string[];
+  origin?: MonitorOrigin;
 }) => {
-  const { locations, loading } = useStatusByLocation({ configId, monitorLocations });
+  const { locations, loading } = useStatusByLocation({ configId, monitorLocations, origin });
 
   return (
     <LocationStatusBadges

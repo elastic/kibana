@@ -9,14 +9,13 @@
 
 jest.mock('#pipeline-utils', () => ({
   upsertComment: jest.fn(),
-  BuildkiteClient: jest.fn(),
 }));
 
 import {
   buildCiStatsMetrics,
   buildCommentBody,
   type WarmStartMemoryReport,
-} from './notify_warm_start_memory';
+} from './notify_warm_start_memory.ts';
 
 const MIB = 1024 * 1024;
 

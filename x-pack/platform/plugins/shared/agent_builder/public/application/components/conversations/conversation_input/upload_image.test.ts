@@ -121,7 +121,10 @@ describe('processImageFile', () => {
       },
     ]);
     expect(addErrorToast).not.toHaveBeenCalled();
-    expect(reportEvent).not.toHaveBeenCalled();
+    expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.ImageUploadSucceeded, {
+      mime_type: 'image/png',
+      file_size: 100,
+    });
     expect(result).toBe(true);
   });
 

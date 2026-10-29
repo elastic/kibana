@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import moment from 'moment';
 
-import rison from '@kbn/rison';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
@@ -21,9 +21,12 @@ import type { AiOpsIndexBasedAppState } from '../../application/url_state/common
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 export function useDiscoverLinks() {
-  const {
-    http: { basePath },
-  } = useAiopsAppContext();
+  const { share } = useAiopsAppContext();
+
+  const discoverLocator = useMemo(
+    () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
+    [share?.url.locators]
+  );
 
   const openInDiscoverWithFilter = (
     index: string,
@@ -33,30 +36,35 @@ export function useDiscoverLinks() {
     timefilterActiveBounds: TimeRangeBounds,
     mode: QueryMode,
     category?: Category,
-    additionalField?: { name: string; value: string }
+    additionalField?: { name: string; value: string },
+    /** Full ES|QL query to open, which switches Discover to ES|QL mode. */
+    esqlQuery?: string
   ) => {
-    const _g = rison.encode({
-      time: {
-        from: moment(timefilterActiveBounds.min?.valueOf()).toISOString(),
-        to: moment(timefilterActiveBounds.max?.valueOf()).toISOString(),
-      },
-    });
+    if (discoverLocator === undefined) {
+      throw new Error('Discover locator is unavailable');
+    }
 
-    const _a = rison.encode({
-      filters: [
-        ...aiopsListState.filters,
-        createFilter(index, field, selection, mode, category, additionalField),
-      ],
-      index,
-      interval: 'auto',
-      query: {
-        language: aiopsListState.searchQueryLanguage,
-        query: aiopsListState.searchString,
-      },
-    });
-
-    const path = `${basePath.get()}/app/discover#/?_g=${_g}&_a=${encodeURIComponent(_a)}`;
-    window.open(path, '_blank');
+    const timeRange = {
+      from: moment(timefilterActiveBounds.min?.valueOf()).toISOString(),
+      to: moment(timefilterActiveBounds.max?.valueOf()).toISOString(),
+    };
+    const url = discoverLocator.getRedirectUrl(
+      esqlQuery !== undefined
+        ? { query: { esql: esqlQuery }, timeRange }
+        : {
+            indexPatternId: index,
+            timeRange,
+            filters: [
+              ...aiopsListState.filters,
+              createFilter(index, field, selection, mode, category, additionalField),
+            ],
+            query: {
+              language: aiopsListState.searchQueryLanguage,
+              query: aiopsListState.searchString,
+            },
+          }
+    );
+    window.open(url, '_blank');
   };
 
   return { openInDiscoverWithFilter };

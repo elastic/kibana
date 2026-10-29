@@ -32,6 +32,7 @@ Non-markdown and dot-prefixed files and directories are ignored. Markdown files 
 | `description` | Yes | What the skill does and when to use it. Max 1024 characters. |
 | `id` | No | Stable unique identifier. Defaults to `name`. Must additionally start and end with a letter or number. |
 | `experimental` | No | When `true`, the skill is only available with experimental features enabled. |
+| `uiSettingRequired` | No | ID of a boolean UI setting. The skill is only available in spaces where that setting is `true`. |
 
 ## Errors
 

@@ -12,26 +12,6 @@
 // "areas" entries must each be one of @kbn/code-owners CODE_OWNER_AREAS.
 [
   {
-    "id": "actionable-obs",
-    "name": "Obs UX: Actionable Obs",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/actionable-obs-team",
-      "label": "Team:actionable-obs"
-    },
-    "responsibilities": [
-      "Observability Alerts",
-      "SLOs",
-      "Observability Cases",
-      "Exploratory view",
-      "Synthetics",
-      "Uptime",
-      "User Experience Dashboard"
-    ]
-  },
-  {
     "id": "apm-ui",
     "name": "Apm Ui",
     "github": {
@@ -101,6 +81,16 @@
     ],
     "github": {
       "team": "elastic/context-eng"
+    }
+  },
+  {
+    "id": "alertzero-common-layer",
+    "name": "AlertZero Common Layer",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/alertzero-common-layer"
     }
   },
   {
@@ -359,6 +349,16 @@
     ]
   },
   {
+    "id": "apps-dx",
+    "name": "Apps DX",
+    "github": {
+      "team": "elastic/apps-dx"
+    },
+    "responsibilities": [
+      "GitHub workflow scripts"
+    ]
+  },
+  {
     "id": "kibana-performance-testing",
     "name": "Kibana Performance Testing",
     "areas": [
@@ -497,6 +497,18 @@
     }
   },
   {
+    "id": "nightshift",
+    "name": "Nightshift",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift",
+      "label": "Team:nightshift"
+    },
+    "responsibilities": [
+      "Nightshift"
+    ]
+  },
+  {
     "id": "nightshift-context-and-research",
     "name": "Nightshift Context & Research",
     "areas": [
@@ -514,6 +526,15 @@
       "Observability observed asset model",
       "Evals"
     ]
+  },
+  {
+    "id": "nightshift-investigations",
+    "name": "Nightshift Investigations",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/nightshift-investigations-team",
+      "label": "Team:nightshift-investigations"
+    }
   },
   {
     "id": "nightshift-sre-agent",
@@ -579,21 +600,6 @@
     }
   },
   {
-    "id": "obs-onboarding",
-    "name": "Obs UX: Obs Onboarding",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-onboarding-team",
-      "label": "Team:obs-onboarding"
-    },
-    "responsibilities": [
-      "Observability onboarding",
-      "Streams"
-    ]
-  },
-  {
     "id": "obs-signals-metrics",
     "name": "Observability signals: Metrics",
     "areas": ["observability"],
@@ -606,6 +612,20 @@
       "Hosts UI",
       "Metrics Explorer",
       "Metrics Experience"
+    ]
+  },
+  {
+    "id": "obs-signals-rum",
+    "name": "Obs UX: Signals & RUM",
+    "areas": ["observability"],
+    "github": {
+      "team": "elastic/obs-signals-rum-team",
+      "label": "Team:obs-signals-rum"
+    },
+    "responsibilities": [
+      "User Experience / Digital Experience app",
+      "Real User Monitoring (RUM, EDOT Browser, EDOT React Native)",
+      "Sessions and Session Replay"
     ]
   },
   {
@@ -644,24 +664,13 @@
     ]
   },
   {
-    "id": "obs-ux-management-team",
-    "name": "Obs Ux Management Team",
-    "areas": [
-      "observability"
-    ],
-    "github": {
-      "team": "elastic/obs-ux-management-team",
-      "label": "Team:obs-ux-management"
-    }
-  },
-  {
     "id": "observability-bi",
     "name": "Observability Bi",
     "areas": [
       "observability"
     ],
     "github": {
-      "team": "elastic/observability-bi"
+      "team": "elastic/obs-bi-team"
     }
   },
   {
@@ -760,7 +769,6 @@
     "name": "Search & ML UX",
     "areas": [
       "search",
-      "workplaceai",
       "vectordb",
       "platform"
     ],
@@ -769,6 +777,20 @@
       "team": "elastic/search-ml-ux",
       "label": "Team:Search & ML UX"
     }
+  },
+  {
+    "id": "automatic-migrations",
+    "name": "Automatic Migrations",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/automatic-migrations",
+      "label": "Team:Automatic Migrations"
+    },
+    "responsibilities": [
+      "SIEM rule and dashboard automatic migrations"
+    ]
   },
   {
     "id": "security-data-engineering",
@@ -823,17 +845,8 @@
       "security"
     ],
     "github": {
-      "team": "elastic/security-detection-engineering"
-    }
-  },
-  {
-    "id": "security-detection-platform",
-    "name": "Security Detection Platform",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-detection-platform"
+      "team": "elastic/security-detection-engineering",
+      "label": "Team:Detection Engineering"
     }
   },
   {
@@ -870,16 +883,6 @@
     "responsibilities": [
       "Entity Analytics features in Kibana: Entity Risk Scoring, Privileged User monitoring, Explore pages, Asset Criticality"
     ]
-  },
-  {
-    "id": "security-genai-research-and-development",
-    "name": "Security Genai Research And Development",
-    "areas": [
-      "security"
-    ],
-    "github": {
-      "team": "elastic/security-genai-research-and-development"
-    }
   },
   {
     "id": "security-generative-ai",
@@ -1002,7 +1005,7 @@
     "id": "workchat-eng",
     "name": "Agent Builder",
     "areas": [
-      "workplaceai"
+      "platform"
     ],
     "github": {
       "team": "elastic/workchat-eng",
@@ -1134,6 +1137,17 @@
     "github": {
       "team": "elastic/threat-research-and-detection-engineering",
       "label": "Team:TRaDE"
+    }
+  },
+  {
+    "id": "security-investigations",
+    "name": "Security Investigations",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/security-investigations",
+      "label": "Team:Security Investigations"
     }
   }
 ]

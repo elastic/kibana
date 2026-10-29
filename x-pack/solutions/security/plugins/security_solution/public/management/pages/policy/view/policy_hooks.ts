@@ -17,6 +17,7 @@ import {
 } from '../../../common/constants';
 import {
   getPolicyBlocklistsPath,
+  getPolicyCustomYaraSignaturesPath,
   getPolicyDetailsArtifactsListPath,
   getPolicyEndpointExceptionsPath,
   getPolicyEventFiltersPath,
@@ -66,6 +67,11 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
         });
       } else if (listId === ENDPOINT_ARTIFACT_LISTS.blocklists.id) {
         return getPolicyBlocklistsPath(policyId, {
+          ...location,
+          ...args,
+        });
+      } else if (listId === ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id) {
+        return getPolicyCustomYaraSignaturesPath(policyId, {
           ...location,
           ...args,
         });

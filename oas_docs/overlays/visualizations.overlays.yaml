@@ -17,6 +17,16 @@ actions:
         - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards by referencing their ID from the [Dashboards API](dashboards#tag/Dashboards/operation/create-dashboard).
         - Use the [Dashboards API](dashboards#tag/Dashboards/operation/create-dashboard) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
 
+        ## Stability
+
+        | 9.4 | 9.5 | Serverless |
+        | --- | --- | --- |
+        | Experimental | Generally available ¹ | Generally available ² |
+
+        ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
+
+        ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
+
         ## Get started
 
         Before you begin:
@@ -93,36 +103,3 @@ actions:
         description: Visualizations documentation
         url: https://www.elastic.co/docs/explore-analyze/visualize/lens
       x-displayName: Visualizations
-
-  # ──────────────────────────────────────────────
-  # Operation IDs
-  # ──────────────────────────────────────────────
-  # Pin every operationId to a stable, human-readable name.
-  #
-  # Without these actions the router generates the ID from the method and the
-  # path, which produces names like `put-visualizations-id`. Those names ship to
-  # SDK and CLI code generators, where they become command and method names.
-  #
-  # These pins must survive the retirement of the bump-slim overlay. See
-  # https://github.com/elastic/kibana/issues/266195. The bump-slim overlay sets
-  # the same IDs today. Keep the two files in agreement until it is retired.
-  - target: "$.paths['/api/visualizations'].get"
-    description: "Pin operationId for GET /api/visualizations"
-    update:
-      operationId: search-visualizations
-  - target: "$.paths['/api/visualizations'].post"
-    description: "Pin operationId for POST /api/visualizations"
-    update:
-      operationId: create-visualization
-  - target: "$.paths['/api/visualizations/{id}'].get"
-    description: "Pin operationId for GET /api/visualizations/{id}"
-    update:
-      operationId: get-visualization
-  - target: "$.paths['/api/visualizations/{id}'].put"
-    description: "Pin operationId for PUT /api/visualizations/{id}"
-    update:
-      operationId: upsert-visualization
-  - target: "$.paths['/api/visualizations/{id}'].delete"
-    description: "Pin operationId for DELETE /api/visualizations/{id}"
-    update:
-      operationId: delete-visualization

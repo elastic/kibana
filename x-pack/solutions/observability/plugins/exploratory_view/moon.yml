@@ -59,12 +59,15 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/chart-expressions-common'
   - '@kbn/scout-oblt'
+  - '@kbn/app-header'
+  - '@kbn/event-annotation-common'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -73,6 +76,4 @@ fileGroups:
     - public/**/*.json
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

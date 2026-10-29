@@ -8,6 +8,7 @@
  */
 
 import { fireEvent, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { WorkflowExecutionsGroupedView } from './workflow_executions_grouped_view';
@@ -35,10 +36,14 @@ const createExecution = (
   ...overrides,
 });
 
-const renderGroupedView = (executions: WorkflowExecutionListItemDto[]) =>
+const renderGroupedView = (
+  executions: WorkflowExecutionListItemDto[],
+  totalHits: number = executions.length
+) =>
   render(
     <WorkflowExecutionsGroupedView
       executions={executions}
+      totalHits={totalHits}
       groupBy="workflow"
       onOpenExecution={jest.fn()}
     />,
@@ -66,6 +71,24 @@ describe('WorkflowExecutionsGroupedView', () => {
     );
     expect(within(alphaGroup).getByTestId('executionsTableGroupCount')).toHaveTextContent('2');
     expect(screen.queryByText('Alpha', { selector: 'td' })).not.toBeInTheDocument();
+  });
+
+  it('labels the summary and badge tooltip as current-page counts when more results exist', async () => {
+    const executions = [
+      createExecution({ id: '1', workflowId: 'wf-a', workflowName: 'Alpha' }),
+      createExecution({ id: '2', workflowId: 'wf-a', workflowName: 'Alpha' }),
+      createExecution({ id: '3', workflowId: 'wf-b', workflowName: 'Beta' }),
+    ];
+
+    renderGroupedView(executions, 12);
+
+    expect(screen.getByTestId('executionsTableGroupSummary')).toHaveTextContent(
+      '3 executions on this page | 2 groups'
+    );
+
+    const alphaGroup = screen.getByTestId('executionsTableGroup-wf-a');
+    await userEvent.hover(within(alphaGroup).getByTestId('executionsTableGroupCount'));
+    expect(await screen.findByText('2 executions on this page')).toBeInTheDocument();
   });
 
   it('expands one group at a time and mounts the nested table only when open', () => {

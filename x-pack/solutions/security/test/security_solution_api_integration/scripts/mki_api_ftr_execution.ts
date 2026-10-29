@@ -176,7 +176,7 @@ export const cli = () => {
         const FORMATTED_ES_URL = project.es_url.replace('https://', '');
         const FORMATTED_KB_URL = project.kb_url.replace('https://', '');
 
-        const command = `yarn run ${process.env.TARGET_SCRIPT}`;
+        const command = `pnpm run ${process.env.TARGET_SCRIPT}`;
         const testCloud = 1;
         const testEsUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_ES_URL}`;
         const testKibanaUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_KB_URL}`;

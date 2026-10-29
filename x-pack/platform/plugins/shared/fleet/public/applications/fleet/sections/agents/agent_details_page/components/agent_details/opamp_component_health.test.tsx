@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import userEvent from '@testing-library/user-event';
+import { fireEvent } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { ComponentHealth } from '../../../../../types';
@@ -54,7 +54,7 @@ describe('OpAMPComponentHealth', () => {
     expect(component.getByText('Unhealthy: Unit failed')).toBeInTheDocument();
   });
 
-  it('renders nested component health in the components tree', async () => {
+  it('renders nested component health in the components tree', () => {
     const component = renderComponent({
       healthy: true,
       status: 'Healthy',
@@ -72,7 +72,7 @@ describe('OpAMPComponentHealth', () => {
       },
     });
 
-    await userEvent.click(component.getByRole('button', { name: 'Components' }));
+    fireEvent.click(component.getByRole('button', { name: 'Components' }));
     expect(component.getByText('Input: logs')).toBeInTheDocument();
   });
 });

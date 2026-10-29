@@ -21,7 +21,7 @@ import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 import { bootstrapBuildkite } from './buildkite.mjs';
 
-const IS_CI = process.env.CI?.match(/(1|true)/i);
+const IS_CI = !!process.env.CI?.match(/(1|true)/i);
 
 /** @type {import('../../lib/command').Command} */
 export const command = {
@@ -49,6 +49,8 @@ export const command = {
     --no-prebuilt        Skip building shared webpack bundles (ui-shared-deps, monaco). Use when a
                           subsequent distribution build will rebuild them in production mode anyway.
                           Also settable via KBN_BOOTSTRAP_NO_PREBUILT=true.
+    --no-frozen-lockfile Skip the frozen lockfile check. This is useful when you want to force a clean install
+                          of dependencies.
     --allow-root         Required supplementary flag if you're running bootstrap as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
@@ -66,6 +68,8 @@ export const command = {
     }
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
+    const frozenLockfileFlag = args.getBooleanValue('frozen-lockfile');
+    const frozenLockfile = !!(frozenLockfileFlag ?? IS_CI);
     const vscodeConfig =
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
     let forceInstall = args.getBooleanValue('force-install');
@@ -112,7 +116,7 @@ export const command = {
         offline,
         quiet,
         force: forceInstall,
-        frozenLockfile: !!IS_CI,
+        frozenLockfile,
       });
     });
 

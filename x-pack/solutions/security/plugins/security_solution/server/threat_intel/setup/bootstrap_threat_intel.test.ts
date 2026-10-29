@@ -19,6 +19,7 @@
  *   on every boot, including when the source index is already populated.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ensureThreatIntelBootstrap } from './bootstrap_threat_intel';
 import * as indexTemplatesModule from './index_templates';
 import * as seedDefaultSourcesModule from './seed_default_sources';
@@ -48,19 +49,21 @@ const makeEsClient = (sourceCount: number): jest.Mocked<ElasticsearchClient> => 
   return {
     count: jest.fn().mockResolvedValue({ count: sourceCount }),
     indices: {
-      getFieldMapping: jest.fn().mockResolvedValue({
+      // Serverless answers 410 api_not_available_exception for this API.
+      getFieldMapping: jest
+        .fn()
+        .mockRejectedValue(
+          new EsErrors.ResponseError({ statusCode: 410, meta: {} as never, warnings: [] })
+        ),
+      getMapping: jest.fn().mockResolvedValue({
         [THREAT_REPORTS_INDEX]: {
           mappings: {
-            'content.title': {
-              full_name: 'content.title',
-              mapping: {
-                title: { type: 'semantic_text', inference_id: '.default-embedding' },
-              },
-            },
-            'content.body_text': {
-              full_name: 'content.body_text',
-              mapping: {
-                body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
+            properties: {
+              content: {
+                properties: {
+                  title: { type: 'semantic_text', inference_id: '.default-embedding' },
+                  body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
+                },
               },
             },
           },
@@ -171,6 +174,36 @@ describe('ensureThreatIntelBootstrap', () => {
     });
   });
 
+  it('skips the semantic_text endpoint check when the reports index does not exist yet', async () => {
+    const esClient = makeEsClient(0);
+    const notFound = new EsErrors.ResponseError({
+      statusCode: 404,
+      meta: {} as never,
+      warnings: [],
+    });
+    (esClient.indices.getMapping as jest.Mock).mockRejectedValue(notFound);
+
+    // Bootstrap must resolve — the 404 is not retried and seeding continues.
+    await expect(
+      ensureThreatIntelBootstrap({ esClient, logger: makeLogger() })
+    ).resolves.toBeDefined();
+    expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call getFieldMapping, which serverless rejects with 410', async () => {
+    const esClient = makeEsClient(12);
+
+    await expect(
+      ensureThreatIntelBootstrap({ esClient, logger: makeLogger() })
+    ).resolves.toBeDefined();
+
+    expect(esClient.indices.getFieldMapping).not.toHaveBeenCalled();
+    expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: THREAT_REPORTS_INDEX });
+    expect(esClient.inference.get).toHaveBeenCalledWith({
+      inference_id: '.default-embedding',
+    });
+  });
+
   it('validates the effective semantic_text endpoint from the installed mapping', async () => {
     const esClient = makeEsClient(12);
 
@@ -200,17 +233,15 @@ describe('ensureThreatIntelBootstrap', () => {
 
     it('fails readiness when a required field has no effective endpoint', async () => {
       const esClient = makeEsClient(12);
-      (esClient.indices.getFieldMapping as jest.Mock).mockResolvedValue({
+      (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
         [THREAT_REPORTS_INDEX]: {
           mappings: {
-            'content.title': {
-              full_name: 'content.title',
-              mapping: { title: { type: 'semantic_text' } },
-            },
-            'content.body_text': {
-              full_name: 'content.body_text',
-              mapping: {
-                body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
+            properties: {
+              content: {
+                properties: {
+                  title: { type: 'semantic_text' },
+                  body_text: { type: 'semantic_text', inference_id: '.default-embedding' },
+                },
               },
             },
           },

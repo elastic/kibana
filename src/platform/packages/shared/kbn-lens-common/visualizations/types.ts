@@ -23,10 +23,12 @@ import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
   MultiClickTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { LENS_COLLAPSE_FUNCTIONS } from './constants';
+import type { LensDatasourceId } from '../embeddable/types';
 import {
   type LENS_CATEGORY_DISPLAY,
   type LENS_LEGEND_DISPLAY,
@@ -106,6 +108,9 @@ interface AddLayerButtonProps<T> {
   ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
   registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
   isInlineEditing?: boolean;
+  /** Hides annotation library options (used for ES|QL charts where library groups are data-view-based) */
+  hideAnnotationLibrary?: boolean;
+  isEsqlChart?: boolean;
 }
 
 interface VisualizationStateFromContextChangeProps<T = unknown> {
@@ -115,9 +120,12 @@ interface VisualizationStateFromContextChangeProps<T = unknown> {
 
 export type AddLayerFunction<T = unknown> = (
   layerType: LensLayerType,
-  extraArg?: T,
-  ignoreInitialValues?: boolean,
-  seriesType?: SeriesType
+  options?: {
+    extraArg?: T;
+    ignoreInitialValues?: boolean;
+    seriesType?: SeriesType;
+    datasourceId?: LensDatasourceId;
+  }
 ) => void;
 
 export interface VisualizationLayerDescription {
@@ -159,6 +167,11 @@ export interface LensEditContextMapping {
 
 export type LensEditSupportedActions = keyof LensEditContextMapping;
 
+/** Consumer defaults per visualization id, used only when the visualization has no current state. */
+export interface DefaultVisualizationOverrides {
+  lnsXY?: Pick<Partial<XYVisualizationState>, 'legend'>;
+}
+
 export type LensEditPayload<T extends LensEditSupportedActions> = {
   action: T;
 } & LensEditContextMapping[T];
@@ -184,6 +197,7 @@ export type TriggerEvent =
   | BrushTriggerEvent
   | ClickTriggerEvent
   | MultiClickTriggerEvent
+  | AnnotationClickTriggerEvent
   | LensTableRowContextMenuEvent
   | LensAlertRulesEvent;
 
@@ -197,6 +211,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
     event:
       | ClickTriggerEvent
       | BrushTriggerEvent
+      | AnnotationClickTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
       | ChartSizeEvent
@@ -313,7 +328,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     state: T,
     setState: StateSetter<T>,
     registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction,
-    isSaveable?: boolean
+    isSaveable?: boolean,
+    framePublicAPI?: Pick<FramePublicAPI, 'datasourceLayers'>
   ) => LayerAction[];
 
   /**
@@ -361,7 +377,12 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     props: VisualizationLayerWidgetProps<T>
   ) => undefined | ReactElement<VisualizationLayerWidgetProps<T>>;
 
-  getSubtypeSwitch?: (props: VisualizationLayerWidgetProps<T>) => (() => JSX.Element) | null;
+  /**
+   * Stacking (subtype) control rendered next to the chart switch in the layer header.
+   * Returns an element (not a component) so the header can render it in place and React
+   * preserves its state (e.g. an open popover) across header re-renders.
+   */
+  getSubtypeSwitch?: (props: VisualizationLayerWidgetProps<T>) => ReactElement | null;
 
   /**
    * Layer panel content rendered. This can be used to render a custom content below the title,

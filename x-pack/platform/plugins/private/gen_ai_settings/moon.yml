@@ -53,7 +53,6 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/agent-builder-browser'
   - '@kbn/zod'
-  - '@kbn/core-http-browser'
   - '@kbn/agent-builder-platform-plugin'
   - '@kbn/dashboard-plugin'
 tags:
@@ -62,6 +61,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -69,6 +69,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

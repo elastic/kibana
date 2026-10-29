@@ -35,6 +35,7 @@ export interface NewAgentPolicy {
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
   download_source_id?: string | null;
+  download_source_ids?: string[];
   fleet_server_host_id?: string | null;
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
@@ -102,11 +103,20 @@ export interface AgentPolicyAgentVersionCondition {
   version_condition: string;
 }
 
+export interface AgentPolicyPackagePoliciesSummary {
+  count: number;
+  has_fleet_server: boolean;
+  has_managed: boolean;
+  has_root_integrations: boolean;
+  has_shared: boolean;
+}
+
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   space_ids?: string[] | undefined;
   status: ValueOf<AgentPolicyStatus>;
   package_policies?: PackagePolicy[];
+  package_policies_summary?: AgentPolicyPackagePoliciesSummary;
   is_managed: boolean; // required for created policy
   created_at?: string;
   updated_at: string;
@@ -228,6 +238,7 @@ export interface FullAgentPolicyDownloadSecrets extends BaseSSLSecrets {
 
 export interface FullAgentPolicyDownload {
   sourceURI: string;
+  sources?: string[];
   ssl?: BaseSSLConfig;
   auth?: FullAgentPolicyDownloadAuth;
   secrets?: FullAgentPolicyDownloadSecrets;

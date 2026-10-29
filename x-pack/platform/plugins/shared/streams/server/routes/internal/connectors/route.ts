@@ -22,7 +22,7 @@ export const getConnectorByIdRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ connectorId: z.string() }),
+    path: z.object({ connectorId: z.string().max(256) }),
   }),
   handler: async ({ request, params, server }) => {
     return server.inference.getConnectorById(params.path.connectorId, request);

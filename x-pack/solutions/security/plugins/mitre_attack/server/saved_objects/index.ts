@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MITRE_ATTACK_ENTITY_SO_TYPE, mitreAttackEntityType } from './mitre_attack_entity_type';
+export { mitreAttackEntityType } from './mitre_attack_entity_type';

@@ -17,8 +17,11 @@ import type {
   AttachmentFrameworkSchema,
   AttachmentTypeStatsSchema,
   CustomFieldsSolutionTelemetrySchema,
+  FieldLibrarySolutionTelemetrySchema,
   ObservablesSchema,
   TemplatesSolutionTelemetrySchema,
+  WorkflowsSolutionTelemetrySchema,
+  UserActionsSourceTelemetrySchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -73,6 +76,29 @@ const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
       items: {
         count: long,
         name: string,
+      },
+    },
+  },
+};
+
+const userActionsSourceSchema: UserActionsSourceTelemetrySchema = {
+  bySource: {
+    type: 'array',
+    items: {
+      source: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Source of the user action (e.g. user, api, agent, workflow, rule, attack). User actions without a source are reported as unknown',
+        },
+      },
+      type: {
+        type: 'keyword',
+        _meta: { description: 'User action type (e.g. comment, status, assignees)' },
+      },
+      total: {
+        type: 'long',
+        _meta: { description: 'Total number of user actions with this source and type' },
       },
     },
   },
@@ -144,6 +170,30 @@ const latestDatesSchema: LatestDatesSchema = {
   createdAt: string,
   updatedAt: string,
   closedAt: string,
+};
+
+const fieldLibrarySolutionTelemetrySchema: FieldLibrarySolutionTelemetrySchema = {
+  total: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of field definitions in the Field Library for this scope. The all scope spans every owner, including owners outside the three reported solutions, so the solution scopes need not sum to it.',
+    },
+  },
+  totalGlobal: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of field definitions applied to every case. Includes the global definitions created by the templates v1 to v2 migration to mirror pre-existing custom fields, which cannot be distinguished from author-created ones.',
+    },
+  },
+  totalReusable: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of field definitions available to be referenced by a template rather than applied to every case. Counts availability, not actual template references.',
+    },
+  },
 };
 
 const templatesSolutionTelemetrySchema: TemplatesSolutionTelemetrySchema = {
@@ -290,6 +340,89 @@ const templatesSolutionTelemetrySchema: TemplatesSolutionTelemetrySchema = {
   },
 };
 
+const workflowsSolutionTelemetrySchema: WorkflowsSolutionTelemetrySchema = {
+  runs: {
+    total: {
+      type: 'long',
+      _meta: { description: 'Total number of workflow runs recorded on cases' },
+    },
+    monthly: {
+      type: 'long',
+      _meta: { description: 'Number of workflow runs recorded on cases in the last month' },
+    },
+    weekly: {
+      type: 'long',
+      _meta: { description: 'Number of workflow runs recorded on cases in the last week' },
+    },
+    daily: {
+      type: 'long',
+      _meta: { description: 'Number of workflow runs recorded on cases in the last day' },
+    },
+  },
+  totalCasesWithRuns: {
+    type: 'long',
+    _meta: { description: 'Number of distinct cases that have had at least one workflow run' },
+  },
+  totalUniqueUsers: {
+    type: 'long',
+    _meta: {
+      description: 'Cardinality of distinct usernames that have triggered a workflow from a case',
+    },
+  },
+  byOriginType: {
+    case: {
+      type: 'long',
+      _meta: { description: 'Runs triggered from the case detail page' },
+    },
+    observable: {
+      type: 'long',
+      _meta: { description: 'Runs triggered from the observables table for a single observable' },
+    },
+    observables: {
+      type: 'long',
+      _meta: {
+        description: 'Runs triggered from the observables table with a multi-observable selection',
+      },
+    },
+    attachment: {
+      type: 'long',
+      _meta: {
+        description:
+          'Runs triggered from a single attachment row (for example an alert or event) in a case',
+      },
+    },
+    attachments: {
+      type: 'long',
+      _meta: {
+        description:
+          'Runs triggered from a bulk attachment selection (for example alerts) in a case',
+      },
+    },
+    unattributed: {
+      type: 'long',
+      _meta: {
+        description: 'Runs carrying no single-case origin, such as cases-list bulk runs',
+      },
+    },
+  },
+  byAttachmentType: {
+    DYNAMIC_KEY: {
+      type: 'long',
+      _meta: {
+        description:
+          'Attachment-origin runs triggered from this attachment type, keyed by type name with `.` replaced by `_` (for example `security_alert`)',
+      },
+    },
+  },
+  configurationsWithWorkflowTags: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of case configurations that have at least one workflow tag set. Tag values are never reported.',
+    },
+  },
+};
+
 export const casesSchema: CasesTelemetrySchema = {
   cases: {
     all: {
@@ -323,7 +456,12 @@ export const casesSchema: CasesTelemetrySchema = {
     obs: solutionTelemetry,
     main: solutionTelemetry,
   },
-  userActions: { all: { ...countSchema, maxOnACase: long } },
+  userActions: {
+    all: { ...countSchema, maxOnACase: long, ...userActionsSourceSchema },
+    sec: userActionsSourceSchema,
+    obs: userActionsSourceSchema,
+    main: userActionsSourceSchema,
+  },
   comments: { all: { ...countSchema, maxOnACase: long } },
   alerts: {
     all: { ...countSchema, maxOnACase: long },
@@ -404,16 +542,21 @@ export const casesSchema: CasesTelemetrySchema = {
     totalRules: long,
   },
   templates: {
-    featureEnabled: {
-      type: 'boolean',
-      _meta: {
-        description:
-          'Whether xpack.cases.templates.enabled is on. When it is off the template counts are not queried and report zero',
-      },
-    },
     all: templatesSolutionTelemetrySchema,
     sec: templatesSolutionTelemetrySchema,
     obs: templatesSolutionTelemetrySchema,
     main: templatesSolutionTelemetrySchema,
+  },
+  fieldLibrary: {
+    all: fieldLibrarySolutionTelemetrySchema,
+    sec: fieldLibrarySolutionTelemetrySchema,
+    obs: fieldLibrarySolutionTelemetrySchema,
+    main: fieldLibrarySolutionTelemetrySchema,
+  },
+  workflows: {
+    all: workflowsSolutionTelemetrySchema,
+    sec: workflowsSolutionTelemetrySchema,
+    obs: workflowsSolutionTelemetrySchema,
+    main: workflowsSolutionTelemetrySchema,
   },
 };

@@ -6,17 +6,17 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { isResponseError } from '@kbn/es-errors';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
+import { softDeleteKi } from '../ai_indices/ki_write';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
-  findKiBackingIndex,
-  kiNotFoundError,
+  kiWriterFromContext,
   resolveAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
+import { toStepError } from './to_step_error';
 
 export const getDeleteKiStepDefinition = ({
   getAiIndexService,
@@ -28,49 +28,39 @@ export const getDeleteKiStepDefinition = ({
   createServerStepDefinition({
     ...deleteKiStepCommonDefinition,
     handler: async (context) => {
-      const request = context.contextManager.getFakeRequest();
-      await assertContextEngineEnabled(isContextEngineEnabled, request);
+      try {
+        const request = context.contextManager.getFakeRequest();
+        const spaceId = context.contextManager.getContext().workflow.spaceId;
+        await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId } = context.input;
-      return withKiWriteTelemetry({
-        action: 'delete',
-        aiIndexId,
-        analyticsService,
-        logger,
-        run: async (setManaged) => {
-          await assertKiWritePrivilege(checkWritePrivilege, request);
+        const { ai_index_id: aiIndexId, ki_id: kiId, refresh = false } = context.input;
+        return await withKiWriteTelemetry({
+          action: 'delete',
+          aiIndexId,
+          analyticsService,
+          logger,
+          run: async (setManaged) => {
+            await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
 
-          const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId);
-          setManaged(managed);
-          const esClient = context.contextManager.getScopedEsClient();
+            const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId, spaceId);
+            setManaged(managed);
+            const esClient = context.contextManager.getScopedEsClient();
+            const writer = kiWriterFromContext(context.contextManager.getContext());
 
-          const backingIndex = await findKiBackingIndex({
-            esClient,
-            aiIndexId,
-            destValue: dest.value,
-            kiId,
-            abortSignal: context.abortSignal,
-          });
-
-          await esClient
-            .delete(
-              {
-                index: backingIndex,
-                id: kiId,
-                refresh: 'wait_for',
-              },
-              { signal: context.abortSignal }
-            )
-            .catch((error) => {
-              // The KI (or its backing index) may have been removed concurrently.
-              if (isResponseError(error) && error.statusCode === 404) {
-                throw kiNotFoundError(aiIndexId, kiId);
-              }
-              throw error;
+            const result = await softDeleteKi(esClient, {
+              aiIndexId,
+              dest,
+              kiId,
+              writer,
+              refresh,
+              abortSignal: context.abortSignal,
             });
 
-          return { output: { id: kiId } };
-        },
-      });
+            return { output: result };
+          },
+        });
+      } catch (error) {
+        throw toStepError(error, 'Failed to delete knowledge indicator');
+      }
     },
   });

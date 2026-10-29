@@ -22,11 +22,11 @@ import {
   type EuiFlyoutProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { hasGenAiData } from '@kbn/genai-common';
 import {
   GenAiTabImpression,
   GenAiTechnicalPreviewBadge,
   GENAI_EBT_CLICK_ACTIONS,
-  hasGenAiData,
 } from '@kbn/apm-ui-shared';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -193,6 +193,7 @@ export interface Props {
   children: React.ReactNode;
   skipNextEventReport?: boolean;
   size?: EuiFlyoutProps['size'];
+  historyKey?: symbol;
 }
 
 export function WaterfallFlyout({
@@ -208,6 +209,7 @@ export function WaterfallFlyout({
   flyoutContentId,
   skipNextEventReport,
   size = 's',
+  historyKey,
 }: Props) {
   const { analytics } = getUnifiedDocViewerServices();
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
@@ -251,6 +253,8 @@ export function WaterfallFlyout({
       aria-labelledby={flyoutTitleId}
       id={flyoutId}
       hasAnimation={hasAnimation}
+      session={historyKey ? 'inherit' : undefined}
+      historyKey={historyKey}
     >
       <EuiFlyoutHeader>
         <EuiSkeletonTitle isLoading={loading}>

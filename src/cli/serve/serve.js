@@ -272,7 +272,7 @@ export default function (program) {
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
       )
       .option(
-        '--serverless [oblt|security|es|workplaceai|vectordb]',
+        '--serverless [oblt|security|es|vectordb]',
         'Start Kibana in a specific serverless project mode. ' +
           'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );
@@ -298,17 +298,14 @@ export default function (program) {
         'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
       )
       .option(
-        '--extended-stack-trace',
-        'Collect more complete stack traces. See src/cli/dev.js for explanation.'
-      )
-      .option(
         '--no-uiam',
         'Prevents configuring Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
       )
       .option(
         '--eis',
         'Auto-discover EIS inference endpoints and configure preconfigured connectors (requires ES running with --eis). ' +
-          'Override ES credentials via KBN_EIS_ES_USERNAME (default: elastic) and KBN_EIS_ES_PASSWORD (default: changeme).'
+          'Override ES connection via KBN_EIS_ES_HOST, KBN_EIS_ES_USERNAME, and KBN_EIS_ES_PASSWORD. ' +
+          'In serverless mode, defaults to https://localhost:9200 as elastic_serverless/changeme.'
       );
   }
 
@@ -339,7 +336,7 @@ export default function (program) {
       runExamples: !!opts.runExamples,
       // We want to run without base path when the `--run-examples` flag is given so that we can use local
       // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
-      // We can tell users they only have to run with `yarn start --run-examples` to get those
+      // We can tell users they only have to run with `pnpm start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.
       // Serverless Kibana does not support a custom `server.basePath`, so we also disable the
@@ -507,12 +504,20 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   if (opts.uiam !== false && DEV_UTILS_SUPPORTED) {
     // Ensure the key/cert pair is loaded dynamically to exclude it from the production build.
     // eslint-disable-next-line import/no-dynamic-require
-    const { KBN_CERT_PATH, KBN_KEY_PATH } = require(DEV_UTILS_PATH);
+    const { getKbnServerlessUiamCert } = require(DEV_UTILS_PATH);
+
+    // UIAM reads Kibana's project type from the client certificate, and refuses what Kibana does
+    // on behalf of the project when the certificate names another type: listing service accounts
+    // comes back empty, and assuming one is denied. So the certificate has to match
+    // `xpack.cloud.serverless.project_type`, which the project's config file sets.
+    const { certPath, keyPath } = getKbnServerlessUiamCert(
+      _.get(rawConfig, 'xpack.cloud.serverless.project_type')
+    );
 
     console.info('Kibana will be configured to support UIAM.');
     lodashSet(rawConfig, 'xpack.security.uiam.enabled', true);
-    lodashSet(rawConfig, 'xpack.security.uiam.ssl.certificate', KBN_CERT_PATH);
-    lodashSet(rawConfig, 'xpack.security.uiam.ssl.key', KBN_KEY_PATH);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.certificate', certPath);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.key', keyPath);
     lodashSet(rawConfig, 'xpack.security.uiam.ssl.verificationMode', 'none');
     lodashSet(rawConfig, 'mockIdpPlugin.uiam.enabled', true);
 

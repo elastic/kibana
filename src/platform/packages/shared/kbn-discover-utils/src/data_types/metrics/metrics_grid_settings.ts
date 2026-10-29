@@ -11,18 +11,17 @@ import { FunctionNames } from '@kbn/esql-language';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 /**
- * Derived from `@kbn/esql-language`'s `FunctionNames` enum (rather than a
- * hand-rolled string union) so this type tracks the canonical ES|QL function
- * names. Using a template-literal type (instead of the enum members
- * themselves) keeps the resulting type a plain string literal union --
- * assignable from either `FunctionNames.AVG` or the literal `'avg'` -- since
- * TypeScript string enums are otherwise nominally typed.
+ * Aggregations supported by the metrics grid.
+ * Values come from ES|QL's FunctionNames enum and are converted to plain string literals.
  */
-export type SimpleAggregation =
-  | `${FunctionNames.AVG}`
-  | `${FunctionNames.SUM}`
-  | `${FunctionNames.MIN}`
-  | `${FunctionNames.MAX}`;
+export const METRICS_GRID_SIMPLE_AGGREGATIONS = [
+  `${FunctionNames.AVG}`,
+  `${FunctionNames.SUM}`,
+  `${FunctionNames.MIN}`,
+  `${FunctionNames.MAX}`,
+] as const;
+
+export type SimpleAggregation = (typeof METRICS_GRID_SIMPLE_AGGREGATIONS)[number];
 
 export enum HistogramPercentileValue {
   P50 = 'p50',
@@ -33,6 +32,25 @@ export enum HistogramPercentileValue {
 }
 
 /**
+ * How a histogram metric is drawn. Values match the Lens saved-object
+ * `visualizationType` for the same graph. Add a member here to offer another
+ * choice. Keep these values aligned with `METRICS_GRID_HISTOGRAM_VISUALIZATIONS`
+ * in `@kbn/discover-session-constants`, which the session API validates.
+ */
+export enum HistogramVisualizationValue {
+  LnsXY = 'lnsXY',
+  LnsHeatmap = 'lnsHeatmap',
+}
+
+export const METRICS_GRID_HISTOGRAM_PERCENTILES = [
+  `${HistogramPercentileValue.P50}`,
+  `${HistogramPercentileValue.P75}`,
+  `${HistogramPercentileValue.P90}`,
+  `${HistogramPercentileValue.P95}`,
+  `${HistogramPercentileValue.P99}`,
+] as const;
+
+/**
  * Which percentile bucket to use when the metric's aggregation is
  * `PERCENTILE(field, N)`. There is no per-percentile ES|QL function name to
  * derive this from (only `FunctionNames.PERCENTILE` itself, which names the
@@ -40,12 +58,28 @@ export enum HistogramPercentileValue {
  * literal union; the function name itself is sourced from `FunctionNames`
  * wherever it's used to build the aggregation expression.
  */
-export type HistogramPercentile = `${HistogramPercentileValue}`;
+export type HistogramPercentile = (typeof METRICS_GRID_HISTOGRAM_PERCENTILES)[number];
+
+export const METRICS_GRID_HISTOGRAM_VISUALIZATIONS = [
+  `${HistogramVisualizationValue.LnsXY}`,
+  `${HistogramVisualizationValue.LnsHeatmap}`,
+] as const;
+
+export type HistogramVisualization = (typeof METRICS_GRID_HISTOGRAM_VISUALIZATIONS)[number];
+
+export const isHistogramVisualization = (value: unknown): value is HistogramVisualization =>
+  typeof value === 'string' &&
+  (METRICS_GRID_HISTOGRAM_VISUALIZATIONS as readonly string[]).includes(value);
+
+/** True when this visualization draws a heatmap instead of the percentile series. */
+export const isHistogramHeatmapVisualization = (visualization: HistogramVisualization): boolean =>
+  visualization === 'lnsHeatmap';
 
 export interface MetricsGridSettings extends SerializableRecord {
   counterAggregation: SimpleAggregation;
   gaugeAggregation: SimpleAggregation;
   histogramPercentile: HistogramPercentile;
+  histogramVisualization: HistogramVisualization;
   dimensions: string[];
   searchTerm: string;
 }
@@ -54,6 +88,8 @@ export const METRICS_GRID_SETTINGS_DEFAULTS: MetricsGridSettings = {
   counterAggregation: FunctionNames.SUM,
   gaugeAggregation: FunctionNames.AVG,
   histogramPercentile: 'p95',
+  // Heatmaps stay opt-in until observability.metricsHeatmapsEnabled is on by default.
+  histogramVisualization: 'lnsXY',
   dimensions: [],
   searchTerm: '',
 };

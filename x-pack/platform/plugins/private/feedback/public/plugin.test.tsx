@@ -61,7 +61,7 @@ describe('Feedback Plugin', () => {
 
   const getAppDetailsFromModal = () => {
     isOptedIn$.next(true);
-    const [handler] = coreStartMock.chrome.next.registerFeedbackHandler.mock.calls[0];
+    const [handler] = coreStartMock.chrome.help.registerFeedbackHandler.mock.calls[0];
     handler();
     const getAppDetails = findGetAppDetails(lastMounted);
     if (!getAppDetails) {
@@ -89,18 +89,18 @@ describe('Feedback Plugin', () => {
 
     startPlugin();
 
-    expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
+    expect(coreStartMock.chrome.help.registerFeedbackHandler).not.toHaveBeenCalled();
   });
 
   it('registers the feedback handler only once opt-in resolves to true', () => {
     enableFeedback();
     startPlugin();
 
-    expect(coreStartMock.chrome.next.registerFeedbackHandler).not.toHaveBeenCalled();
+    expect(coreStartMock.chrome.help.registerFeedbackHandler).not.toHaveBeenCalled();
 
     isOptedIn$.next(true);
 
-    expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledWith(
+    expect(coreStartMock.chrome.help.registerFeedbackHandler).toHaveBeenCalledWith(
       expect.any(Function)
     );
   });
@@ -108,12 +108,12 @@ describe('Feedback Plugin', () => {
   it('unregisters the feedback handler when opt-in becomes false', () => {
     enableFeedback();
     const unregister = jest.fn();
-    coreStartMock.chrome.next.registerFeedbackHandler.mockReturnValue(unregister);
+    coreStartMock.chrome.help.registerFeedbackHandler.mockReturnValue(unregister);
 
     startPlugin();
 
     isOptedIn$.next(true);
-    expect(coreStartMock.chrome.next.registerFeedbackHandler).toHaveBeenCalledTimes(1);
+    expect(coreStartMock.chrome.help.registerFeedbackHandler).toHaveBeenCalledTimes(1);
 
     isOptedIn$.next(false);
     expect(unregister).toHaveBeenCalled();

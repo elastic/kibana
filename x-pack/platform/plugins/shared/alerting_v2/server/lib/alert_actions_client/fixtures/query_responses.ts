@@ -6,6 +6,7 @@
  */
 
 import type { EsqlQueryResponse, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import { encodeSeriesId } from '@kbn/alerting-v2-utils';
 import type { RawAlertEventRow } from '../types';
 
 /**
@@ -52,10 +53,11 @@ const toAlertEventRow = (record: Partial<RawAlertEventRow>): FieldValue[] => [
  * (`RawAlertEventRow`). One function covers every alert-event loader in
  * the client:
  *
- * - Single-route path (`loadLastAlertEventOrThrow`): pass one record (or
- *   omit the argument to accept defaults).
- * - Batched paths (`loadLatestAlertEvents`, `bulkLoadLatestAlertEvents`):
- *   pass an array — one entry per returned row.
+ * - Single-route paths (`loadLastSeriesAlertEventOrThrow`,
+ *   `loadLastEpisodeAlertEventOrThrow`): pass one record (or omit the
+ *   argument to accept defaults).
+ * - Batched paths (`loadLatestAlertEventsByEpisodeId`): pass an array — one entry per
+ *   returned row.
  * - "No matches" case: pass an empty array.
  */
 export const getAlertEventESQLResponse = (
@@ -65,7 +67,102 @@ export const getAlertEventESQLResponse = (
   values: records.map(toAlertEventRow),
 });
 
+/**
+ * Mocks an ES|QL response for the by-series projection
+ * (`loadLatestAlertEventsBySeries`): the alert-event columns plus the
+ * `series_id` each row was grouped under. Unless a record names one, it is
+ * derived from the record's own owner, space and hash, as the ES|QL
+ * expression does.
+ */
+export const getSeriesEventESQLResponse = (
+  records: ReadonlyArray<Partial<RawAlertEventRow> & { series_id?: string | null }> = [{}]
+): EsqlQueryResponse => ({
+  columns: [...ALERT_EVENT_COLUMNS, { name: 'series_id', type: 'keyword' }],
+  values: records.map((record) => {
+    const row = toAlertEventRow(record);
+    const [, groupHash, , , , ruleId, , spaceId, , source] = row;
+    return [
+      ...row,
+      record.series_id === undefined
+        ? encodeSeriesId({
+            space_id: String(spaceId),
+            group_hash: String(groupHash),
+            rule_id: ruleId == null ? null : String(ruleId),
+            source: source == null ? null : String(source),
+          })
+        : record.series_id,
+    ];
+  }),
+});
+
 export const getEmptyESQLResponse = (): EsqlQueryResponse => ({
   columns: [],
   values: [],
+});
+
+/**
+ * Column order of the action-state projection in
+ * `context_loaders/load_alert_action_states.ts`.
+ */
+const ALERT_ACTION_STATE_COLUMNS: ReadonlyArray<{ name: string; type: string }> = [
+  { name: 'alert_id', type: 'keyword' },
+  { name: 'last_ack_action', type: 'keyword' },
+  { name: 'last_assignee_uid', type: 'keyword' },
+  { name: 'last_tags', type: 'keyword' },
+];
+
+/** One action-state row as the loader reads it; omitted columns are null. */
+export interface AlertActionStateRowOverrides {
+  alert_id?: string;
+  last_ack_action?: 'ack' | 'unack' | null;
+  last_assignee_uid?: string | null;
+  last_tags?: string | string[] | null;
+}
+
+/**
+ * `FieldValue` has no array variant, but a multi-valued ES|QL column does
+ * come back as a nested array — which is what `last_tags` carries.
+ */
+type EsqlCell = FieldValue | FieldValue[];
+
+const toAlertActionStateRow = (row: AlertActionStateRowOverrides): EsqlCell[] => [
+  row.alert_id ?? 'episode-1',
+  row.last_ack_action ?? null,
+  row.last_assignee_uid ?? null,
+  row.last_tags ?? null,
+];
+
+export const getAlertActionStateESQLResponse = (
+  rows: readonly AlertActionStateRowOverrides[] = []
+): EsqlQueryResponse => ({
+  columns: [...ALERT_ACTION_STATE_COLUMNS],
+  values: rows.map(toAlertActionStateRow) as EsqlQueryResponse['values'],
+});
+
+/**
+ * Column order of the series-state projection in
+ * `context_loaders/load_series_action_states.ts`.
+ */
+const SERIES_ACTION_STATE_COLUMNS: ReadonlyArray<{ name: string; type: string }> = [
+  { name: 'series_id', type: 'keyword' },
+  { name: 'last_snooze_action', type: 'keyword' },
+  { name: 'snoozed_until', type: 'date' },
+];
+
+/** One series-state row as the loader reads it; omitted columns are null. */
+export interface SeriesActionStateRowOverrides {
+  series_id?: string;
+  last_snooze_action?: 'snooze' | 'unsnooze' | null;
+  snoozed_until?: string | null;
+}
+
+export const getSeriesActionStateESQLResponse = (
+  rows: readonly SeriesActionStateRowOverrides[] = []
+): EsqlQueryResponse => ({
+  columns: [...SERIES_ACTION_STATE_COLUMNS],
+  values: rows.map((row) => [
+    row.series_id ?? 'series-1',
+    row.last_snooze_action ?? null,
+    row.snoozed_until ?? null,
+  ]),
 });

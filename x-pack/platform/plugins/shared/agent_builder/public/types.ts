@@ -39,7 +39,7 @@ export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   ConversationSidebarRef,
-  ConversationTemplateTabRenderProps,
+  ConversationTemplateDetailsFlyoutRenderProps,
   ConversationTemplateTabDefinition,
   ConversationTemplateUIDefinition,
   ConversationTemplateBriefCardRenderProps,

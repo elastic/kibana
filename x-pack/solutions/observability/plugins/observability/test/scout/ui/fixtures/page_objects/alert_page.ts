@@ -27,6 +27,14 @@ export class AlertPage {
     await this.page.testSubj.click('alertDetailsInvestigate');
   }
 
+  async clickViewInvestigation() {
+    await this.page.testSubj.click('alertDetailsViewInvestigation');
+  }
+
+  async viewStartedInvestigation() {
+    await this.page.testSubj.click('alertInvestigationStartedViewLink');
+  }
+
   async gotoAlertByRuleId(rulesPage: RulesPage, ruleId: string) {
     await rulesPage.goto(ruleId);
 

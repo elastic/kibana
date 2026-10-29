@@ -141,6 +141,7 @@ async function registerAiIndex(
       dest: { type: destType, value: destValue },
       automations: [],
       sources: [{ type: 'esql', value: `FROM ${destValue} | LIMIT 100` }],
+      traces: [],
     }
   );
 

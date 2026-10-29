@@ -8,8 +8,7 @@
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { schema } from '@kbn/config-schema';
-
-export const MITRE_ATTACK_ENTITY_SO_TYPE = 'mitre-attack-entity';
+import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
 
 const mitreAttackEntityAttributesSchemaV1 = schema.object({
   framework: schema.string(),
@@ -31,6 +30,8 @@ const mitreAttackEntityAttributesSchemaV1 = schema.object({
   technique_id: schema.maybe(schema.string()),
 });
 
+// The saved object id is `{framework}:{framework_version}:{id}` and `framework` is an
+// indexed attribute, so additional frameworks (e.g. ATLAS) need no mapping change.
 export const mitreAttackEntityType: SavedObjectsType = {
   name: MITRE_ATTACK_ENTITY_SO_TYPE,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
@@ -43,12 +44,13 @@ export const mitreAttackEntityType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      framework: { type: 'keyword' },
+      framework: { type: 'keyword', ignore_above: 1024 },
       framework_version: { type: 'version' },
-      id: { type: 'keyword' },
-      type: { type: 'keyword' },
+      id: { type: 'keyword', ignore_above: 1024 },
+      type: { type: 'keyword', ignore_above: 1024 },
       name: {
         type: 'keyword',
+        ignore_above: 1024,
         fields: {
           text: { type: 'text' },
         },
@@ -57,8 +59,8 @@ export const mitreAttackEntityType: SavedObjectsType = {
       revoked: { type: 'boolean' },
       deprecated: { type: 'boolean' },
       position: { type: 'integer' },
-      tactic_ids: { type: 'keyword' },
-      technique_id: { type: 'keyword' },
+      tactic_ids: { type: 'keyword', ignore_above: 1024 },
+      technique_id: { type: 'keyword', ignore_above: 1024 },
     },
   },
   modelVersions: {

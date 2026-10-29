@@ -33,12 +33,12 @@ tags:
   - shared-server
   - package
   - dev
-  - group-undefined
+  - group-platform
+  - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - src/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

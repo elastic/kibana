@@ -6,10 +6,11 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
-import { CoreStart, useService } from '@kbn/core-di-browser';
+import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { paths } from '../../../constants';
+import { useAlertingLocators } from '../../../application/locator_context';
 import { EntityNotFoundFlyout } from '../../entity_not_found_flyout';
 import { LoadingFlyout } from '../../loading_flyout';
 import { useCreateActionPolicy } from '../../../hooks/use_create_action_policy';
@@ -28,11 +29,19 @@ import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 interface Props {
   policyId: string;
   onClose: () => void;
+  /** Managed-flyout session. Use `inherit` when this flyout opens on top of another. */
+  session?: EuiFlyoutProps['session'];
+  /** Use a size distinct from the parent flyout's when `session` is `inherit`. */
+  size?: EuiFlyoutProps['size'];
 }
 
-export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props) => {
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
+export const ActionPolicyDetailsFlyoutContainer = ({
+  policyId,
+  onClose,
+  session = 'start',
+  size = 'm',
+}: Props) => {
+  const { actionPolicyLocators } = useAlertingLocators();
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
 
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
@@ -57,28 +66,17 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
 
   const navigateToEdit = (id: string) => {
     onClose();
-    navigateToUrl(basePath.prepend(paths.actionPolicyEdit(id)));
+    actionPolicyLocators.navigateSync({ page: 'edit', actionPolicyId: id });
   };
 
   const clonePolicy = (source: ActionPolicyResponse) => {
-    const {
-      name,
-      description,
-      destinations,
-      matcher,
-      group_by: groupBy,
-      throttle,
-      tags,
-      grouping_mode: groupingMode,
-    } = source;
+    const { name, description, destinations, matcher, grouping, throttle } = source;
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
       destinations,
-      grouping_mode: groupingMode ?? 'per_episode',
-      ...(tags != null && { tags }),
+      grouping: grouping ?? { mode: 'per_alert' },
       ...(matcher != null && { matcher }),
-      ...(groupBy != null && { group_by: groupBy }),
       ...(throttle != null && { throttle }),
     };
     createActionPolicy(data);
@@ -86,12 +84,15 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
   };
 
   if (isLoading) {
-    return <LoadingFlyout onClose={onClose} />;
+    return <LoadingFlyout type="overlay" session={session} ownFocus={false} onClose={onClose} />;
   }
 
   if (isError || !policy) {
     return (
       <EntityNotFoundFlyout
+        type="overlay"
+        session={session}
+        ownFocus={false}
         title={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.notFoundTitle', {
           defaultMessage: 'Action policy not found',
         })}
@@ -129,9 +130,9 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
             (isDisabling && disableVariables === policy.id)
           }
           isSnoozeLoading={isSnoozing || isUnsnoozing}
-          session={'start'}
+          session={session}
           ownFocus={false}
-          hasAnimation={false}
+          size={size}
         />
       )}
       {policyToDelete && (
