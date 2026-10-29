@@ -717,6 +717,31 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
           ).resolves.toBeUndefined();
         });
 
+        it('should retrieve accessible spaces only once per validator instance', async () => {
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+
+          await validator._validateImportOwnerSpaceIds(exceptionLikeItem);
+          await validator._validateImportOwnerSpaceIds(exceptionLikeItem);
+
+          expect(endpointAppContextServices.getAccessibleSpaces).toHaveBeenCalledTimes(1);
+        });
+
+        it('should retrieve accessible spaces again after a failed attempt', async () => {
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+          (endpointAppContextServices.getAccessibleSpaces as jest.Mock).mockRejectedValueOnce(
+            new Error('spaces unavailable')
+          );
+
+          await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+            'spaces unavailable'
+          );
+          await expect(
+            validator._validateImportOwnerSpaceIds(exceptionLikeItem)
+          ).resolves.toBeUndefined();
+
+          expect(endpointAppContextServices.getAccessibleSpaces).toHaveBeenCalledTimes(2);
+        });
+
         it('should error when owner space is not accessible', async () => {
           setArtifactOwnerSpaceId(exceptionLikeItem, 'inaccessible-space');
 
