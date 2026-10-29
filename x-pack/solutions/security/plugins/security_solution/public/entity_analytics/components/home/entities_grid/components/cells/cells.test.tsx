@@ -162,13 +162,13 @@ describe('cells with a click handler', () => {
 });
 
 describe('RowActionsCell', () => {
-  const renderActions = ({ canAddToChat = true } = {}) => {
+  const renderActions = ({ canAddToChat = true, canInvestigateInTimeline = true } = {}) => {
     const onInvestigateInTimeline = jest.fn();
     const onOpenEntityGraph = jest.fn();
     const onAddToChat = jest.fn();
     renderInProviders(
       <RowActionsCell
-        onInvestigateInTimeline={onInvestigateInTimeline}
+        onInvestigateInTimeline={canInvestigateInTimeline ? onInvestigateInTimeline : undefined}
         onOpenEntityGraph={onOpenEntityGraph}
         onAddToChat={canAddToChat ? onAddToChat : undefined}
       />
@@ -207,6 +207,13 @@ describe('RowActionsCell', () => {
   it('hides the more actions menu without the agent chat', () => {
     renderActions({ canAddToChat: false });
     expect(screen.queryByRole('button', { name: 'More actions' })).not.toBeInTheDocument();
+  });
+
+  it('hides "Investigate in timeline" without Timeline read privileges', () => {
+    renderActions({ canInvestigateInTimeline: false });
+    expect(
+      screen.queryByRole('button', { name: 'Investigate in timeline' })
+    ).not.toBeInTheDocument();
   });
 });
 
