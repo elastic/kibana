@@ -77,7 +77,7 @@ const withConversation = ({
         conversationId={conversation.id}
         services={{
           conversationsService: { get: () => Promise.resolve(conversation) } as never,
-          agentService: { ...defaultAgentService, get: () => Promise.resolve(storyAgent) },
+          agentService: { ...defaultAgentService, get: () => Promise.resolve(storyAgent) } as never,
         }}
         kibanaServices={
           hasSpaceTeammates
