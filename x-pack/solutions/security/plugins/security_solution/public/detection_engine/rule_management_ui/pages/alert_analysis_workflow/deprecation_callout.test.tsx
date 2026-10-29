@@ -46,6 +46,7 @@ describe('AlertAnalysisWorkflowDeprecationCallout', () => {
     renderComponent({ isDeclared: false });
 
     expect(screen.getByTestId('alertAnalysisWorkflowDeprecationCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('alertAnalysisWorkflowDeprecationLearnMore')).toBeInTheDocument();
     expect(
       screen.queryByTestId('alertAnalysisWorkflowDeprecationEnableAlertZero')
     ).not.toBeInTheDocument();
@@ -57,15 +58,22 @@ describe('AlertAnalysisWorkflowDeprecationCallout', () => {
   it('links to the advanced setting when AlertZero is available but disabled', () => {
     renderComponent({ isDeclared: true, isEnabled: false });
 
+    expect(screen.getByTestId('alertAnalysisWorkflowDeprecationLearnMore')).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/security-labs/blog/ai-soc-automation-alertzero'
+    );
     expect(screen.getByTestId('alertAnalysisWorkflowDeprecationEnableAlertZero')).toHaveAttribute(
       'href',
       `/app/management/kibana/settings?query=${encodeURIComponent(ALERTZERO_ENABLED_SETTING_ID)}`
     );
   });
 
-  it('links to the AlertZero Watch when AlertZero is enabled', () => {
+  it('links to the Triage Worker settings without the learn more link when AlertZero is enabled', () => {
     renderComponent({ isDeclared: true, isEnabled: true });
 
+    expect(
+      screen.queryByTestId('alertAnalysisWorkflowDeprecationLearnMore')
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('alertAnalysisWorkflowDeprecationGoToAlertZero')).toHaveAttribute(
       'href',
       '/app/alertzero/watches/system-security-watch-floor'

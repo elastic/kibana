@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiLink } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import {
   ALERTZERO_APP_ID,
@@ -14,6 +15,9 @@ import {
 } from '@kbn/alertzero-common';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as translations from './translations';
+
+const ALERTZERO_LEARN_MORE_URL =
+  'https://www.elastic.co/security-labs/blog/ai-soc-automation-alertzero';
 
 export const AlertAnalysisWorkflowDeprecationCallout: React.FC = () => {
   const {
@@ -42,7 +46,7 @@ export const AlertAnalysisWorkflowDeprecationCallout: React.FC = () => {
     }
 
     return {
-      children: translations.DEPRECATION_CALLOUT_GO_TO_ALERTZERO,
+      children: translations.DEPRECATION_CALLOUT_ADJUST_TRIAGE_WORKER,
       href: application.getUrlForApp(ALERTZERO_APP_ID, {
         path: `/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`,
       }),
@@ -55,7 +59,24 @@ export const AlertAnalysisWorkflowDeprecationCallout: React.FC = () => {
       announceOnMount={false}
       data-test-subj="alertAnalysisWorkflowDeprecationCallout"
       title={translations.DEPRECATION_CALLOUT_TITLE}
-      text={<p>{translations.DEPRECATION_CALLOUT_BODY}</p>}
+      text={
+        <p>
+          {translations.DEPRECATION_CALLOUT_BODY}
+          {!isAlertZeroEnabled && (
+            <>
+              {' '}
+              <EuiLink
+                data-test-subj="alertAnalysisWorkflowDeprecationLearnMore"
+                href={ALERTZERO_LEARN_MORE_URL}
+                target="_blank"
+                external
+              >
+                {translations.DEPRECATION_CALLOUT_LEARN_MORE}
+              </EuiLink>
+            </>
+          )}
+        </p>
+      }
       actionProps={{ primary: getPrimaryAction() }}
     />
   );
