@@ -106,8 +106,6 @@ For the {{elastic-sec}} 9.5.5 release information, refer to [{{elastic-sec}} Sol
 
 **Workflows**:
 * Fix the `elasticsearch.indices.exists` workflow step crashing the workflow or returning an output you can't use in conditions [#289580]({{kib-pull}}289580).
-% !!DEFERRED!! Not on the 9.5 branch (backport missing as of 2026-10-01). Re-verify against the next BC before publishing.
-% * Add a `cases.extendedFieldsUpdated` workflow trigger that fires when extended-field values change on a case, including changes from a linked custom-field patch [#287043]({{kib-pull}}287043).
 
 ## 9.5.4 [kibana-9.5.4-release-notes]
 
@@ -580,6 +578,8 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Support package spec version 3.7 [#298093]({{kib-pull}}298093).
 * Add the `allow_outdated_version` flag to the package registry install endpoints, so you can install a pinned package version that is older than the latest [#280316]({{kib-pull}}280316).
 * Add error categories to {{fleet}} connection errors to the Elastic Package Registry, with a type (`timeout`, `dns`, `connection`, `http`, or `unknown`) and a reason in server logs and API error responses [#279533]({{kib-pull}}279533).
+* Validate the `agents` KQL string of every {{fleet}} bulk agent action API against the agent field mappings, and limit it to 500,000 characters and each agent ID to 512 characters [#299837]({{kib-pull}}299837).
+% Consider whether #299837 needs a breaking change entry: bulk routes that skipped KQL validation before now return a validation error for fields outside the agent mappings. The PR is not labeled breaking and its API contracts check calls the schema diff a false positive, so it stays an enhancement.
 
 **Data management**:
 * Add an **{{esql}} Views** management page to create, edit, preview, and delete {{esql}} views. To use the page, you need the `read_view_metadata` index privilege [#297834]({{kib-pull}}297834).
@@ -704,6 +704,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the `execute_esql` tool refusing to run queries that the `generate_esql` tool didn't produce [#300045]({{kib-pull}}300045).
 * Fix MCP tool arguments that `additionalProperties` defines being stripped before execution [#287815]({{kib-pull}}287815).
 * Fix attachment-producing tools appearing in the MCP server [#291274]({{kib-pull}}291274).
+* Fix the bulk import of MCP tools that have no description, which disabled the import button without an explanation [#300886]({{kib-pull}}300886).
 * Fix the PagerDuty MCP connector to work with the new consolidated `browse_*` and `manage_*` tools that PagerDuty provides [#295823]({{kib-pull}}295823).
 * Fix cases tools being registered in Serverless project types and in Elasticsearch solution spaces where the Cases feature isn't available [#291268]({{kib-pull}}291268), [#287633]({{kib-pull}}287633).
 * Fix the **Tool Success Rate** panel in the Agent Builder overview dashboard truncating {{esql}} results [#282026]({{kib-pull}}282026).
@@ -730,6 +731,8 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the `FormatDate` mustache lambda rejecting epoch-millisecond values that arrive as strings, for example from nested templates that use the `x` format [#277391]({{kib-pull}}277391).
 * Fix context variables not working in the **Additional fields** of the ServiceNow ITSM, ServiceNow SecOps, and Jira connectors [#286578]({{kib-pull}}286578).
 * Fix updating alert tags in one space also changing alerts in other spaces [#285874]({{kib-pull}}285874).
+* Fix rules that you created with your own API key failing with an `api key has been invalidated` error after a workflow edits them [#300667]({{kib-pull}}300667).
+* Fix workflows that an alerting v2 action policy dispatches in a non-default space failing with `Connector <id> not found` for connectors that exist only in that space [#300939]({{kib-pull}}300939).
 * Fix out-of-memory failures when Reporting generates wide PNG and PDF reports, by sizing the screenshot to the dashboard width instead of the browser window width [#289062]({{kib-pull}}289062).
 * Fix the **Auto-push case to connected external system** option missing from the Cases rule action when case templates are enabled [#292187]({{kib-pull}}292187).
 * Fix the **Read only** badge appearing on the case templates pages for users who have read access to Cases and the case templates management privilege [#291719]({{kib-pull}}291719).
@@ -745,6 +748,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 **Dashboards and Visualizations**:
 * Fix the Dashboards API dropping {{esql}} panels whose color mapping assigns colors to `boolean`, `null`, multi-value, or open-ended range values [#298850]({{kib-pull}}298850).
 * Fix visualizations created or updated through the Visualizations API, so terms columns ranked by a custom `last_value` metric keep their sort field, `showArrayValues` and `multi_value` apply the right defaults, trendline breakdowns rank by their own metric, histogram `granularity` keeps the target bar count, `duration` formats keep `decimals` and `compact` unless `to` is `auto-approximate`, terms keep `parentFormat`, `format`, and numeric include and exclude values, and annotation layers and ad hoc data views keep their data view and custom name [#292378]({{kib-pull}}292378), [#292864]({{kib-pull}}292864), [#283159]({{kib-pull}}283159), [#283058]({{kib-pull}}283058), [#282815]({{kib-pull}}282815), [#282760]({{kib-pull}}282760), [#282752]({{kib-pull}}282752), [#281079]({{kib-pull}}281079), [#280546]({{kib-pull}}280546).
+* Fix range columns losing open bounds, which are ranges with no lower bound, no upper bound, or neither, when you create or update visualizations through the Visualizations API [#300099]({{kib-pull}}300099).
 * Fix the dashboards list endpoint to return results sorted by `updated_at` in descending order, and fix the dashboards listing page failing to load when the `savedObjects:listingLimit` advanced setting is greater than `1000` [#282363]({{kib-pull}}282363), [#282100]({{kib-pull}}282100).
 * Fix by-reference panels that are missing their `savedObjectRef` reference being removed when the dashboard loads [#285476]({{kib-pull}}285476).
 * Fix the dashboard top menu and **Edit** button not appearing in embedded dashboards when `show-top-menu=true` is set [#299599]({{kib-pull}}299599).
@@ -786,6 +790,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix uploading an integration package being rejected with `429 Too Many Requests` when no other upload happened [#295479]({{kib-pull}}295479).
 * Fix bundled packages matching by name when the package registry is unreachable [#285279]({{kib-pull}}285279).
 * Fix the {{fleet}} integration sync task running intensive searches when no follower index exists [#285526]({{kib-pull}}285526).
+* Fix {{fleet}} setup failing repeatedly with a circuit breaker error on deployments with large `.fleet-policies` documents, by running the `policy_base_id` backfill in bounded batches in a background task instead of in the setup request [#300777]({{kib-pull}}300777).
 * Fix deleting a package policy waiting on a full, synchronous agent policy deploy [#282580]({{kib-pull}}282580).
 * Fix false-positive errors when you delete an OpenTelemetry input policy with a shared dataset, and policies that fail on a non-string agent condition [#291679]({{kib-pull}}291679), [#290497]({{kib-pull}}290497).
 * Fix agentless policies that use dynamic dataset streams, including Okta, Active Directory, and Microsoft Entra ID Entity Analytics, incorrectly showing `0` throughput [#286758]({{kib-pull}}286758).
@@ -795,9 +800,12 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the version-specific policy message showing in the **Agents** list for agents that meet the integration version requirements [#287504]({{kib-pull}}287504).
 * Fix version-specific agent policies not matching in the agent policy filter and in the check for Fleet Servers, and fix adding and removing agent tags from the tag list [#281195]({{kib-pull}}281195), [#281092]({{kib-pull}}281092), [#279874]({{kib-pull}}279874).
 * Fix the {{fleet}} output flyout freezing when thousands of agent policies use the default output, speed up fetching outputs, and remove the proxy setting from Kafka outputs [#291972]({{kib-pull}}291972), [#287113]({{kib-pull}}287113), [#282313]({{kib-pull}}282313).
+* Fix updating an output or a {{fleet}} Server host through the API deleting secrets that the update doesn't mention or that it sends as plain text, such as the `ssl.key` of an output and Kafka passwords [#299235]({{kib-pull}}299235).
 * Fix the **Agent policies** page failing or timing out for agent policies with thousands of integration policies [#297979]({{kib-pull}}297979).
 * Fix the agent policy YAML download failing with `Unresolved alias` when a policy reuses an object by reference [#280669]({{kib-pull}}280669).
+* Fix deleting an agent policy succeeding when {{fleet}} can't remove it from integration policies that other agent policies share. That left the integration policies pointing to a deleted agent policy and made the **Edit integration** page fail with `Agent policies not found`. The delete now fails with an error that lists each integration policy that failed [#300189]({{kib-pull}}300189).
 * Fix agent actions and tasks, including bulk upgrades, agent upgrade requests hanging when the product versions API stops responding, the agent status change task, enrollment API key invalidation, and orphan agents [#282829]({{kib-pull}}282829), [#292788]({{kib-pull}}292788), [#292736]({{kib-pull}}292736), [#286324]({{kib-pull}}286324), [#287252]({{kib-pull}}287252), [#283071]({{kib-pull}}283071).
+* Fix {{fleet}} not deactivating inactive agents that have a stale `unenrolled_at` value, which left them active with their API keys unrevoked [#300148]({{kib-pull}}300148).
 * Fix {{fleet}} agent API handlers so they respect spaces, deployment of policies in non-default spaces, and the **Expired** status of enrollment tokens [#284936]({{kib-pull}}284936), [#293010]({{kib-pull}}293010), [#284280]({{kib-pull}}284280).
 * Fix the {{fleet}} agent CSV export failing with a `parsing_exception` error when `xpack.reporting.csv.scroll.strategy: scroll` is configured [#286119]({{kib-pull}}286119).
 * Fix the offline agent CPU and memory metrics tooltip, the Linux aarch64 install command indentation, long policy names in the **Assign to new policy** combobox, the order of policies in the **Assign new agent policy** modal, and the YAML field code editor border [#286386]({{kib-pull}}286386), [#286353]({{kib-pull}}286353), [#286381]({{kib-pull}}286381), [#296067]({{kib-pull}}296067), [#286360]({{kib-pull}}286360).
@@ -831,6 +839,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the cascade UI appearing for more than one breakdown, regardless of a filter after the breakdown [#291115]({{kib-pull}}291115).
 * Fix a background search rename or a search session expiration extension being silently reverted by a concurrent status update [#296401]({{kib-pull}}296401).
 * Fix creating two ad hoc data views that share the same custom ID [#292738]({{kib-pull}}292738).
+* Fix the Discover field list showing stale field type icons after an index is recreated with a different mapping type for an existing field [#301198]({{kib-pull}}301198).
 * Fix exiting inline editing mode of a Discover embeddable on a dashboard when a search error occurs [#289918]({{kib-pull}}289918).
 * Fix filter actions appearing in the data table for values that were ignored because they exceed `ignore_above` [#287807]({{kib-pull}}287807).
 * Fix search highlighting corrupting markers when the search term is a substring of a marker [#283345]({{kib-pull}}283345).
@@ -874,7 +883,9 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix API keys appearing on more than one page, or not at all, when you page through the API keys list [#296117]({{kib-pull}}296117), [#294059]({{kib-pull}}294059).
 * Fix {{kib}} crashing when it can't write audit logs, by reporting a degraded state and turning the audit logger off on a mid-write failure or a misconfigured file appender [#287360]({{kib-pull}}287360), [#282347]({{kib-pull}}282347).
 * Fix audit log records omitting the client IP address for requests over HTTP/2 [#285344]({{kib-pull}}285344).
+* Fix {{kib}} adding the `report-to` parameter of the `Permissions-Policy` headers to only the last directive, so violation reports for the other directives now reach your reporting endpoint [#299786]({{kib-pull}}299786).
 * Fix the OpenTelemetry process resource including CLI arguments, which now records how many arguments were present instead [#295796]({{kib-pull}}295796).
+* Fix {{kib}} failing to start with the error `APM is disabled, but context propagation is enabled` when OpenTelemetry tracing is on, `elastic.apm.active` is `false`, and `elastic.apm.contextPropagationOnly` isn't set [#300651]({{kib-pull}}300651).
 
 **Machine learning and {{infer}}**:
 * Fix token usage tracking for chat completions that are retried [#282747]({{kib-pull}}282747).
@@ -884,6 +895,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix special tokens in prompts causing AI features to fail or crash, and fix empty text content blocks for Claude models [#283177]({{kib-pull}}283177).
 * Fix streams that never close from blocking the {{kib}} event loop [#286849]({{kib-pull}}286849).
 * Fix tool schemas for Google Vertex AI {{infer}} endpoints [#284810]({{kib-pull}}284810).
+* Fix Agent Builder requests that use tools failing with an `INVALID_ARGUMENT` error when the Gemini connector sends them to Google Vertex AI [#300040]({{kib-pull}}300040).
 * Fix tools that reuse a shared schema failing because `$defs` was dropped when converting tool schemas [#295880]({{kib-pull}}295880).
 * Fix Anthropic `chat_completion` endpoints for Agent Builder and Attack Discovery [#281179]({{kib-pull}}281179).
 * Fix workflow auto-complete suggesting only connectors. It now also suggests {{infer}} endpoints that you set in feature settings [#292431]({{kib-pull}}292431).
@@ -905,6 +917,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 
 **Workflows**:
 * Fix YAML comments and formatting being stripped when an agent edits a workflow [#288075]({{kib-pull}}288075).
+* Fix the `generate_workflow` tool timing out when it edits large workflows, and fix edits to steps nested in `if` or `foreach` steps failing [#299949]({{kib-pull}}299949).
 * Fix the **Workflows** editor flagging valid Liquid map lookups with a variable key, such as `{{ inputs.payload.rules[ep.rule_id].name }}`, as invalid [#289418]({{kib-pull}}289418).
 * Fix false variable validation errors in the YAML editor, and `foreach` collection types that Workflows can't prove [#295421]({{kib-pull}}295421), [#283360]({{kib-pull}}283360).
 * Fix the actions menu and editing shortcuts showing in read-only mode of the workflow editor, and the graph view controls and settings [#289510]({{kib-pull}}289510), [#289079]({{kib-pull}}289079).
@@ -917,17 +930,23 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix unsaved workflow tests appearing in the execution history of a saved workflow with the same ID [#293652]({{kib-pull}}293652).
 * Fix large workflow executions failing to open or showing only their first 1,000 steps. {{kib}} now loads steps separately, loads up to 10,000 automatically, and shows **Show more** when more remain [#292678]({{kib-pull}}292678), [#288622]({{kib-pull}}288622).
 * Fix the execution flyout, including human-in-the-loop resume and nested run links, re-running opening the inputs modal, the **Executions** button closing the open flyout, canceling a running execution, and re-running a test execution when the workflow is turned off [#290910]({{kib-pull}}290910), [#290872]({{kib-pull}}290872), [#290779]({{kib-pull}}290779), [#290778]({{kib-pull}}290778), [#290780]({{kib-pull}}290780).
+* Fix the workflow execution view repeatedly polling for an execution that doesn't exist, by stopping after a `404` response and backing off after `500` and network errors [#299548]({{kib-pull}}299548).
 * Fix a crash in trigger execution details [#282920]({{kib-pull}}282920).
 * Fix the **Test workflow** modal flagging required inputs that have defaults as missing [#299799]({{kib-pull}}299799).
 * Fix the `run` step ignoring default values when the provided values are falsy [#299064]({{kib-pull}}299064).
 * Fix a retried execution create that already landed being reported as failed [#297308]({{kib-pull}}297308).
 * Fix overlapping parent runners when child workflows finish at the same time, and fail an execution when its resume task can't be scheduled [#290913]({{kib-pull}}290913), [#293658]({{kib-pull}}293658).
+* Fix a workflow that waits for input or approval staying stuck when {{kib}} can't hand your response to Task Manager. {{kib}} now retries the hand-off and, if it still fails, takes your response back so you can answer again [#300207]({{kib-pull}}300207).
+* Fix the resume API accepting a step that belongs to a different execution than the one in the request. The API now returns a `409` error [#299264]({{kib-pull}}299264).
 * Fix execution log writes blocking the next step [#293892]({{kib-pull}}293892).
 * Fix `on-failure` handling on human-in-the-loop and `workflow.execute` steps [#291974]({{kib-pull}}291974).
 * Fix version conflicts on execution and step document updates by retrying [#283735]({{kib-pull}}283735).
 * Fix execution indices turning yellow on single-node clusters [#290445]({{kib-pull}}290445).
 * Fix `variables` from the context override not merging in a single step run [#287347]({{kib-pull}}287347).
+* Fix one workflow validation request with many {{esql}} steps sending thousands of requests to {{es}} and blocking {{kib}}. A validation now checks at most 100 {{esql}} steps and reports the rest as not checked [#300477]({{kib-pull}}300477).
 * Fix input validation corrupting caller-provided values that contain Liquid-like text. Provided values stay literal unless they use the explicit `${{ ... }}` whole-expression form [#280311]({{kib-pull}}280311).
+* Fix values that you insert with `{{ }}` into `if`, `while`, `retry`, `continue`, `data.filter`, and `data.find` conditions being read as KQL syntax. {{kib}} now compares inserted values as literal text, so `*` no longer acts as a wildcard and leading and trailing spaces are no longer trimmed [#299558]({{kib-pull}}299558).
+% Consider moving #299558 to breaking changes: values that contain KQL syntax, such as `*`, or an empty or missing variable, now behave differently in workflow conditions. The PR describes it as a behavior change and a security fix, but its labels are release_note:fix only.
 * Fix `data.map` reusing the rendering context [#290833]({{kib-pull}}290833).
 * Fix `{{ now }}` not being formatted in generated {{es}} documents [#291211]({{kib-pull}}291211).
 * Fix the output of `elasticsearch.index.exist` [#289580]({{kib-pull}}289580).
@@ -940,19 +959,14 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix legacy workflow inputs missing from tool schemas [#285149]({{kib-pull}}285149).
 * Fix executing a workflow requiring the `read` privilege [#284822]({{kib-pull}}284822).
 
-% !!DEFERRED!! The following entries are not in build candidate 9.6.0-87116d76 (Kibana commit fe9184e8eead). Re-check them against the next build candidate.
+% !!DEFERRED!! The following entries are not in build candidate 9.6.0-8ac1386b (Kibana commit 1e39c53eb9ac). Re-check them against the next build candidate.
 % * Fix the metric background trendline for {{esql}} queries that use `EVAL` to alias or overwrite a time-bucket column [#299104]({{kib-pull}}299104).
-% * Fix open bounds being lost on range columns when you use the Visualizations API [#300099]({{kib-pull}}300099).
-% * Fix `liquidjs` values in `if` and `while` KQL conditions [#299558]({{kib-pull}}299558).
-% * Fix `generate_workflow` timing out on large workflow edits [#299949]({{kib-pull}}299949).
-% * Add a link to alert details in alerting v2 action policy notifications [#300017]({{kib-pull}}300017).
-% * Fix tool schemas for Vertex AI in the Gemini connector adapter [#300040]({{kib-pull}}300040).
-% * Fix Permissions Policy violation reports reaching the reporting endpoint for only the `web-share` directive [#299786]({{kib-pull}}299786).
-% * Fix {{kib}} failing to start when OpenTelemetry tracing is turned on and `elastic.apm.active` is `false` [#300651]({{kib-pull}}300651).
-% * Fix multi-select extended fields accepting non-array values in cases [#299407]({{kib-pull}}299407).
-% * Consolidate {{fleet}} agent bulk-action KQL field validation [#299837]({{kib-pull}}299837).
-% * Unenroll inactive agents with a stale `unenrolled_at` in the scheduled unenrollment task [#300148]({{kib-pull}}300148).
-% * Fix gaps that anonymization QA found [#300154]({{kib-pull}}300154).
+% * Fix creating and fetching data views with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist, which returned a `400` error while still saving the data view [#299790]({{kib-pull}}299790).
+% * Fix the {{es}} output on a Fleet Server agent policy being replaced when the Fleet Server host has SSL settings [#301068]({{kib-pull}}301068).
+% * Add an `alert_url` field, a link to the alert details page, to each alert in the payload of alerting v2 action policy workflows [#300017]({{kib-pull}}300017).
+% Not on the 9.6 branch yet (backport missing). The release note in the PR calls it an addition, so the type may need to change to an enhancement.
+% * Show a waiting `waitForInput` step in the workflow execution flyout with a **Provide action** link instead of a banner, and make the execution flyout resizable [#294078]({{kib-pull}}294078).
+% Not on the 9.6 branch (backport:skip, merged to main on Oct 28 with a v9.6.0 label). Check the label before you keep it.
 
 % Removed from 9.6.0: Data Federation is not announced yet. Add these back when the feature is announced.
 % * Support federated data sources in the alerting v2 threshold rule builder [#279142]({{kib-pull}}279142).
@@ -984,6 +998,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Add column customization to the **Similar cases** table [#295985]({{kib-pull}}295985).
 % * Add a source filter to the case activity feed, and record the source of case user actions [#291285]({{kib-pull}}291285), [#287149]({{kib-pull}}287149).
 % * Add an **Anonymization** page under **{{stack-manage-app}}** → **AI** to choose which sensitive values, such as email addresses, IP addresses, host and account names, and custom patterns, {{kib}} anonymizes before it sends AI requests. The page adds a master switch, built-in rules, and a pattern tester, and replaces the `ai:anonymizationSettings` advanced setting [#295895]({{kib-pull}}295895), [#295894]({{kib-pull}}295894), [#297148]({{kib-pull}}297148), [#293633]({{kib-pull}}293633).
+% Consider restoring the Anonymization entries (#295895, #295894, #297148, #293633, #300154). The page lives under **Stack Management** → **AI**, replaces the `ai:anonymizationSettings` advanced setting, and applies to every solution, so it is not Security-only. It stays out because Team:Security Investigations owns it and the feature might not be announced yet.
 % (partial: 283072,288636,287308,283922,287306,287327) * Fix the cases **Settings** page, case views, and templates after changes to global fields, including default values of global fields not being applied to cases created through the API or workflow steps [#283185]({{kib-pull}}283185), [#283072]({{kib-pull}}283072), [#288636]({{kib-pull}}288636), [#287308]({{kib-pull}}287308), [#283922]({{kib-pull}}283922), [#287306]({{kib-pull}}287306), [#287327]({{kib-pull}}287327).
 % (partial: 287945,283645,284940,284475) * Fix the **All cases** list and case activity, including column and template activity, user activity, and the case list metrics bar [#282870]({{kib-pull}}282870), [#282129]({{kib-pull}}282129), [#280576]({{kib-pull}}280576), [#287945]({{kib-pull}}287945), [#283645]({{kib-pull}}283645), [#284940]({{kib-pull}}284940), [#284475]({{kib-pull}}284475).
 % (partial: 284310,284035) * Fix duplicate and wrong case activity when you set, link, or change legacy custom fields, templates, and assignees [#282813]({{kib-pull}}282813), [#282772]({{kib-pull}}282772), [#284310]({{kib-pull}}284310), [#284035]({{kib-pull}}284035).
@@ -994,6 +1009,9 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Fix **Associated users** and **Associated hosts** metrics not including entity attachments [#283036]({{kib-pull}}283036).
 % * Fix saved visualizations not appearing in case attachments, and add helper text to the case Markdown editor [#286164]({{kib-pull}}286164).
 % * Fix the case feature settings so non-security owners don't get alert sync turned on by default when you create a case through a workflow or from a v2 template [#286670]({{kib-pull}}286670).
+% * Flip the Cases attachments API to public and add OpenAPI docs [#294886]({{kib-pull}}294886).
+% * Reject non-array values for multi-select extended fields in cases [#299407]({{kib-pull}}299407).
+% * Fix the gaps that anonymization QA found, including the built-in account rule, RE2 custom patterns, and a new IPv6 rule [#300154]({{kib-pull}}300154).
 
 % Removed from 9.6.0: Serverless-only. The CPS (cpsEnabled) and UIAM (xpack.security.uiam) settings exist only for the serverless offering, and 284524 only changes config/serverless.es.yml.
 % * Restore anomaly detection and data frame analytics in Serverless Search [#284524]({{kib-pull}}284524).
@@ -1018,6 +1036,15 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % Removed from 9.6.0: Nightshift-labelled PRs that don't add a new Kibana connector. Nightshift routes to the Observability notes.
 % * Make the Kubernetes connector available in workflows [#280854]({{kib-pull}}280854).
 % * Add a public-conversation option to the `ai.agent` workflow step [#280364]({{kib-pull}}280364).
+
+% Removed from 9.6.0: AlertZero (Security) owns #300500, and #301460 is internal to a fix that is already listed.
+% * Fix retried approvals in workflows running as the first approver instead of the current approver [#300500]({{kib-pull}}300500).
+% * Handle non-Error rejections when {{fleet}} updates package policies in bulk [#301460]({{kib-pull}}301460).
+% Consider #300500: the engine change is generic, but the bug (a retried proposal action) is specific to AlertZero proposals and the PR carries Team: SecuritySolution. It also depends on #300827, which is release_note:skip.
+
+% Consider adding these two PRs. Their authors labeled them release_note:skip, but the PR description contains user-facing text.
+% * Stop the default `Permissions-Policy` header from blocking the Maps starting location, the Canvas `location()` function, and fullscreen for Vidyard embeds [#299876]({{kib-pull}}299876).
+% * Return an error when an Agent Builder MCP server tool call has arguments with more than 10,000 array elements [#300541]({{kib-pull}}300541).
 
 % Folded into the single Kibana Universal Alerting entry for 9.6.0. Add these back only if you want separate entries.
 % * Add quick-fix code actions, a **Prettify** shortcut, live validation, inline completions, and an {{esql}} help menu with recommended queries to the {{esql}} query sandbox in the alerting v2 rule editor [#289736]({{kib-pull}}289736), [#289532]({{kib-pull}}289532), [#290863]({{kib-pull}}290863).
