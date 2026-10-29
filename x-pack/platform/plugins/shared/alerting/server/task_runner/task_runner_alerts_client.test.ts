@@ -907,6 +907,193 @@ describe('Task Runner', () => {
         spy.mockRestore();
       });
 
+      test('should delete the alert documents it created when other alert documents fail to write, so the next run reports those alerts as new', async () => {
+        jest.spyOn(Math, 'random').mockReturnValue(0);
+        const alertsService = new AlertsService({
+          logger,
+          pluginStop$: new ReplaySubject(1),
+          kibanaVersion: '8.8.0',
+          elasticsearchClientPromise: Promise.resolve(clusterClient),
+          dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
+          elasticsearchAndSOAvailability$,
+          isServerless: false,
+        });
+        elasticsearchAndSOAvailability$.next(true);
+
+        const spy = jest
+          .spyOn(alertsService, 'getContextInitializationPromise')
+          .mockResolvedValue({ result: true });
+
+        taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+        taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+        ruleTypeWithAlerts.executor.mockImplementation(
+          async ({
+            services: executorServices,
+          }: RuleExecutorOptions<
+            RuleTypeParams,
+            RuleTypeState,
+            AlertInstanceState,
+            AlertInstanceContext,
+            string,
+            RuleAlertData
+          >) => {
+            executorServices.alertsClient?.report({ id: '1', actionGroup: 'default' });
+            executorServices.alertsClient?.report({ id: '2', actionGroup: 'default' });
+            return { state: {} };
+          }
+        );
+        mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+        const alertIndex = '.internal.alerts-test.alerts-default-000001';
+        const newAlertUuid = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
+        clusterClient.search.mockResolvedValue({
+          took: 10,
+          timed_out: false,
+          _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+          hits: {
+            total: { relation: 'eq', value: 1 },
+            hits: [
+              {
+                _id: 'abc',
+                _index: alertIndex,
+                _seq_no: 41,
+                _primary_term: 665,
+                _source: {
+                  [ALERT_INSTANCE_ID]: '1',
+                  [ALERT_RULE_UUID]: '1',
+                  [ALERT_START]: DATE_1970,
+                  [ALERT_STATUS]: 'active',
+                  [ALERT_TRACKED]: true,
+                  [ALERT_UUID]: 'abc',
+                },
+              },
+            ],
+          },
+        });
+
+        const taskInstance = {
+          ...mockedTaskInstance,
+          state: {
+            ...mockedTaskInstance.state,
+            alertInstances: {
+              '1': {
+                meta: {
+                  uuid: 'abc',
+                  flappingHistory: [true],
+                  lastScheduledActions: { group: 'default', date: DATE_1970 },
+                },
+                state: { start: DATE_1970, duration: '0' },
+              },
+            },
+          },
+        };
+
+        // the new alert 2 is created, but updating the tracked alert 1 keeps failing
+        const failedUpdate = {
+          index: {
+            _index: alertIndex,
+            _id: 'abc',
+            status: 429,
+            error: { type: 'circuit_breaking_exception', reason: '[parent] Data too large' },
+          },
+        };
+        clusterClient.bulk
+          .mockResponseOnce({
+            errors: true,
+            took: 1,
+            items: [
+              failedUpdate,
+              {
+                create: {
+                  _index: alertIndex,
+                  _id: newAlertUuid,
+                  status: 201,
+                  _seq_no: 0,
+                  _primary_term: 1,
+                },
+              },
+            ],
+          })
+          .mockResponseOnce({ errors: true, took: 1, items: [failedUpdate] })
+          .mockResponseOnce({ errors: true, took: 1, items: [failedUpdate] })
+          .mockResponseOnce({ errors: true, took: 1, items: [failedUpdate] })
+          .mockResponseOnce({
+            errors: false,
+            took: 1,
+            items: [{ delete: { _index: alertIndex, _id: newAlertUuid, status: 200 } }],
+          });
+
+        const failedRun = createTaskRunner({
+          taskInstance,
+          context: { ...taskRunnerFactoryInitializerParams, alertsService },
+        }).run();
+        await jest.runAllTimersAsync();
+        const failedRunResult = await failedRun;
+
+        expect(clusterClient.bulk).toHaveBeenCalledTimes(5);
+        expect(clusterClient.bulk).toHaveBeenLastCalledWith({
+          refresh: 'wait_for',
+          operations: [{ delete: { _id: newAlertUuid, _index: alertIndex } }],
+        });
+        expect(failedRunResult.state).toEqual(taskInstance.state);
+        expect(failedRunResult.taskRunError?.message).toBe(
+          'Failed to write 1 of 2 alerts: 1 circuit_breaking_exception'
+        );
+        expect(alertingEventLogger.logAlert).not.toHaveBeenCalled();
+        expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+
+        // with the document of alert 2 deleted, the next run creates it again as a new alert
+        clusterClient.bulk.mockClear();
+        clusterClient.bulk.mockResponseOnce({
+          errors: false,
+          took: 1,
+          items: [
+            {
+              index: {
+                _index: alertIndex,
+                _id: 'abc',
+                status: 200,
+                _seq_no: 42,
+                _primary_term: 665,
+              },
+            },
+            {
+              create: {
+                _index: alertIndex,
+                _id: newAlertUuid,
+                status: 201,
+                _seq_no: 1,
+                _primary_term: 1,
+              },
+            },
+          ],
+        });
+
+        const nextRun = createTaskRunner({
+          taskInstance: { ...taskInstance, state: failedRunResult.state },
+          context: { ...taskRunnerFactoryInitializerParams, alertsService },
+        }).run();
+        await jest.runAllTimersAsync();
+        await nextRun;
+
+        expect(clusterClient.bulk).toHaveBeenCalledTimes(1);
+        expect(clusterClient.bulk.mock.calls[0][0]).toEqual(
+          expect.objectContaining({
+            body: expect.arrayContaining([
+              { create: expect.objectContaining({ _id: newAlertUuid }) },
+            ]),
+          })
+        );
+        expect(alertingEventLogger.logAlert).toHaveBeenCalledWith(
+          expect.objectContaining({ action: EVENT_LOG_ACTIONS.newInstance, id: '2' })
+        );
+
+        taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReset();
+        taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReset();
+        spy.mockRestore();
+      });
+
       test('should default to legacy alerts client if error creating alerts client', async () => {
         const spy1 = jest
           .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')

@@ -677,6 +677,147 @@ describe('alert_conflict_resolver', () => {
       );
     });
   });
+
+  describe('deletes the alerts it created', () => {
+    const stillRejected = (id: number) => ({
+      errors: true,
+      took: 0,
+      items: [getResponseItem('index', id, true, 429, 'es_rejected_execution_exception')],
+    });
+
+    test('when other writes still fail after all retries', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('c cc cr ir');
+
+      esClient.bulk
+        .mockResolvedValueOnce({
+          errors: true,
+          took: 0,
+          items: [
+            getResponseItem('create', 3, false, 201),
+            getResponseItem('index', 4, true, 429, 'es_rejected_execution_exception'),
+          ],
+        })
+        .mockResolvedValueOnce(stillRejected(4))
+        .mockResolvedValueOnce(stillRejected(4))
+        .mockResolvedValueOnce({
+          errors: false,
+          took: 0,
+          items: [
+            getResponseItem('delete', 1, false, 200),
+            getResponseItem('delete', 2, false, 200),
+            getResponseItem('delete', 3, false, 200),
+          ],
+        });
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result).toEqual({
+        unresolvedCount: 1,
+        permanentCount: 0,
+        unresolvedErrorTypes: { es_rejected_execution_exception: 1 },
+      });
+      expect(esClient.bulk).toHaveBeenCalledTimes(4);
+      expect(esClient.bulk.mock.calls[3][0]).toEqual({
+        refresh: 'wait_for',
+        operations: [getDeleteOp(1), getDeleteOp(2), getDeleteOp(3)],
+      });
+      expect(logger.info).toHaveBeenLastCalledWith(
+        `Deleted 3 alerts created by this run so the next run reports them as new ${ruleInfo}`,
+        logTags
+      );
+    });
+
+    test('when a retry throws', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('c ir');
+
+      esClient.bulk.mockRejectedValueOnce(new Error('bulk failed')).mockResolvedValueOnce({
+        errors: false,
+        took: 0,
+        items: [getResponseItem('delete', 1, false, 200)],
+      });
+
+      await expect(
+        resolveAlertConflicts({
+          logger,
+          esClient,
+          bulkRequest,
+          bulkResponse,
+          ruleId,
+          ruleName,
+          ruleType,
+        })
+      ).rejects.toThrowError('bulk failed');
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+      expect(esClient.bulk.mock.calls[1][0]).toEqual({
+        refresh: 'wait_for',
+        operations: [getDeleteOp(1)],
+      });
+    });
+
+    test('and logs the alerts it could not delete', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('c ir');
+
+      esClient.bulk
+        .mockResolvedValueOnce(stillRejected(2))
+        .mockResolvedValueOnce(stillRejected(2))
+        .mockResolvedValueOnce(stillRejected(2))
+        .mockResolvedValueOnce({
+          errors: true,
+          took: 0,
+          items: [getResponseItem('delete', 1, true, 500, 'illegal_state_exception')],
+        });
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result.unresolvedCount).toBe(1);
+      expect(logger.warn).toHaveBeenLastCalledWith(
+        `Failed to delete 1 of 1 alerts created by this run ${ruleInfo}, the next run reports them as ongoing: 1 illegal_state_exception`,
+        logTags
+      );
+    });
+
+    test('and logs when the delete request fails', async () => {
+      const { bulkRequest, bulkResponse } = getReqRes('c ir');
+
+      esClient.bulk
+        .mockResolvedValueOnce(stillRejected(2))
+        .mockResolvedValueOnce(stillRejected(2))
+        .mockResolvedValueOnce(stillRejected(2))
+        .mockRejectedValueOnce(new Error('delete failed'));
+
+      const result = await resolveAlertConflicts({
+        logger,
+        esClient,
+        bulkRequest,
+        bulkResponse,
+        ruleId,
+        ruleName,
+        ruleType,
+      });
+
+      expect(result.unresolvedCount).toBe(1);
+      expect(logger.warn).toHaveBeenLastCalledWith(
+        `Error deleting 1 alerts created by this run ${ruleInfo}, the next run reports them as ongoing - delete failed`,
+        logTags
+      );
+    });
+  });
 });
 
 function getBulkResItem(id: number) {

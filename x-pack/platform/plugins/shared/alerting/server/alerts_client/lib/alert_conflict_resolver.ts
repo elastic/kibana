@@ -25,7 +25,7 @@ import {
   ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
 
-import { zip, get } from 'lodash';
+import { zip, get, countBy } from 'lodash';
 import { sanitizeBulkErrorResponse } from '../..';
 import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 
@@ -75,7 +75,15 @@ interface BulkItemAttempt {
 
 type BulkItemOutcome = 'success' | 'conflict' | 'alreadyWritten' | 'retryable' | 'permanent';
 
-/** Retries alert writes that failed with a conflict or a retryable error and reports the ones that still failed. */
+interface AlertDocRef {
+  _id: string;
+  _index: string;
+}
+
+/**
+ * Retries alert writes that failed with a conflict or a retryable error and reports the ones that still failed.
+ * If any still fail or a retry throws, the alerts this request created are deleted.
+ */
 export async function resolveAlertConflicts(
   params: ResolveAlertConflictsParams
 ): Promise<ResolveAlertConflictsResult> {
@@ -107,37 +115,54 @@ export async function resolveAlertConflicts(
   let permanentCount = outcomes.permanent.length;
   logAlreadyWritten(logger, logTags, ruleInfoMessage, outcomes.alreadyWritten);
 
-  for (let retry = 1; retry <= MAX_RETRIES; retry++) {
-    const toRetry = [...outcomes.conflict, ...outcomes.retryable];
-    if (toRetry.length === 0) break;
+  const createdAlerts = getCreatedAlerts(outcomes);
+  const deleteCreated = () =>
+    deleteCreatedAlerts({
+      esClient,
+      logger,
+      logTags,
+      ruleInfoMessage,
+      refresh: bulkRequest.refresh,
+      createdAlerts,
+    });
 
-    if (outcomes.conflict.length > 0) {
-      const conflictRequest = outcomes.conflict.map(({ req }) => req);
-      logBulkWriteConflicts(logger, logTags, ruleInfoMessage, conflictRequest);
+  try {
+    for (let retry = 1; retry <= MAX_RETRIES; retry++) {
+      const toRetry = [...outcomes.conflict, ...outcomes.retryable];
+      if (toRetry.length === 0) break;
 
-      // get the fresh versions of those docs
-      const freshDocs = await getFreshDocs(esClient, conflictRequest);
+      if (outcomes.conflict.length > 0) {
+        const conflictRequest = outcomes.conflict.map(({ req }) => req);
+        logBulkWriteConflicts(logger, logTags, ruleInfoMessage, conflictRequest);
 
-      // update the OCC and refresh-able fields
-      await updateOCC(conflictRequest, freshDocs);
-      await refreshFieldsInDocs(conflictRequest, freshDocs);
+        // get the fresh versions of those docs
+        const freshDocs = await getFreshDocs(esClient, conflictRequest);
+
+        // update the OCC and refresh-able fields
+        await updateOCC(conflictRequest, freshDocs);
+        await refreshFieldsInDocs(conflictRequest, freshDocs);
+      }
+
+      if (outcomes.retryable.length > 0) {
+        await delay(getRetryDelayMs(retry));
+      }
+
+      logger.info(
+        `Retrying bulk update of ${toRetry.length} alerts (retry ${retry} of ${MAX_RETRIES}): ${outcomes.conflict.length} conflicts, ${outcomes.retryable.length} retryable errors ${ruleInfoMessage}`,
+        logTags
+      );
+      const retryRequest = toRetry.map(({ req }) => req);
+      const retryResponse = await makeBulkRequest(esClient, logger, bulkRequest, retryRequest);
+
+      outcomes = groupByOutcome(pairRequestsWithResponses(retryRequest, retryResponse.items));
+      createdAlerts.push(...getCreatedAlerts(outcomes));
+      permanentCount += outcomes.permanent.length;
+      logAlreadyWritten(logger, logTags, ruleInfoMessage, outcomes.alreadyWritten);
+      logRetryResult(logger, logTags, ruleInfoMessage, retryRequest.length, outcomes);
     }
-
-    if (outcomes.retryable.length > 0) {
-      await delay(getRetryDelayMs(retry));
-    }
-
-    logger.info(
-      `Retrying bulk update of ${toRetry.length} alerts (retry ${retry} of ${MAX_RETRIES}): ${outcomes.conflict.length} conflicts, ${outcomes.retryable.length} retryable errors ${ruleInfoMessage}`,
-      logTags
-    );
-    const retryRequest = toRetry.map(({ req }) => req);
-    const retryResponse = await makeBulkRequest(esClient, logger, bulkRequest, retryRequest);
-
-    outcomes = groupByOutcome(pairRequestsWithResponses(retryRequest, retryResponse.items));
-    permanentCount += outcomes.permanent.length;
-    logAlreadyWritten(logger, logTags, ruleInfoMessage, outcomes.alreadyWritten);
-    logRetryResult(logger, logTags, ruleInfoMessage, retryRequest.length, outcomes);
+  } catch (err) {
+    await deleteCreated();
+    throw err;
   }
 
   const unresolved = [...outcomes.conflict, ...outcomes.retryable];
@@ -151,6 +176,7 @@ export async function resolveAlertConflicts(
       )}`,
       logTags
     );
+    await deleteCreated();
   }
 
   return { unresolvedCount: unresolved.length, permanentCount, unresolvedErrorTypes };
@@ -214,6 +240,68 @@ function countErrorTypes(attempts: BulkItemAttempt[]): Record<string, number> {
     counts[type] = (counts[type] ?? 0) + 1;
   }
   return counts;
+}
+
+// includes creates that conflicted because an earlier attempt of this request already wrote them
+function getCreatedAlerts(outcomes: Record<BulkItemOutcome, BulkItemAttempt[]>): AlertDocRef[] {
+  return [...outcomes.success, ...outcomes.alreadyWritten].flatMap(({ res }) =>
+    res.create?._id && res.create._index ? [{ _id: res.create._id, _index: res.create._index }] : []
+  );
+}
+
+// The caller fails the run and keeps the previous task state when writes stay unresolved. The
+// next run would put docs missing from that state back as ongoing alerts, losing their new-alert
+// events and notifications, so the docs this request created are deleted to make them new again.
+async function deleteCreatedAlerts({
+  esClient,
+  logger,
+  logTags,
+  ruleInfoMessage,
+  refresh,
+  createdAlerts,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  logTags: { tags: string[] };
+  ruleInfoMessage: string;
+  refresh: BulkRequest['refresh'];
+  createdAlerts: AlertDocRef[];
+}): Promise<void> {
+  if (createdAlerts.length === 0) return;
+
+  try {
+    const response = await retryTransientEsErrors(
+      () =>
+        esClient.bulk({
+          refresh,
+          operations: createdAlerts.map((alert) => ({ delete: alert })),
+        }),
+      { logger }
+    );
+    const failedErrorTypes = response.items.flatMap(({ delete: item }) =>
+      item?.error ? [item.error.type] : []
+    );
+    if (failedErrorTypes.length > 0) {
+      logger.warn(
+        `Failed to delete ${failedErrorTypes.length} of ${
+          createdAlerts.length
+        } alerts created by this run ${ruleInfoMessage}, the next run reports them as ongoing: ${formatErrorTypeCounts(
+          countBy(failedErrorTypes)
+        )}`,
+        logTags
+      );
+      return;
+    }
+    logger.info(
+      `Deleted ${createdAlerts.length} alerts created by this run so the next run reports them as new ${ruleInfoMessage}`,
+      logTags
+    );
+  } catch (err) {
+    logger.warn(
+      `Error deleting ${createdAlerts.length} alerts created by this run ${ruleInfoMessage}, the next run reports them as ongoing - ${err.message}`,
+      logTags
+    );
+  }
 }
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
