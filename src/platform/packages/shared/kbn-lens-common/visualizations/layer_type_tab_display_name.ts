@@ -17,7 +17,7 @@ export const lensLayerTypeTabDisplayNames = {
     defaultMessage: 'Data layer',
   }),
   referenceLine: i18n.translate('xpack.lens.layerTypes.tabDisplayName.referenceLine', {
-    defaultMessage: 'Reference line',
+    defaultMessage: 'Reference lines',
   }),
   annotations: i18n.translate('xpack.lens.layerTypes.tabDisplayName.annotations', {
     defaultMessage: 'Annotation',

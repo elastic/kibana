@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-solution'
   sourceRoot: x-pack/solutions/security/plugins/alertzero
 dependsOn:
+  - '@kbn/securitysolution-alerts-page-url'
+  - '@kbn/std'
   - '@kbn/security-plugin-types-server'
   - '@kbn/security-plugin'
   - '@kbn/agentic-investigations-common'
@@ -77,6 +79,7 @@ dependsOn:
   - '@kbn/security-mitre-attack-common'
   - '@kbn/security-mitre-attack-mocks'
   - '@kbn/inference-plugin'
+  - '@kbn/inference-common'
   - '@kbn/fleet-plugin'
   - '@kbn/mitre-attack-plugin'
   - '@kbn/management-settings-ids'
@@ -89,12 +92,14 @@ dependsOn:
   - '@kbn/telemetry-plugin'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/core-elasticsearch-server-mocks'
+  - '@kbn/core-test-helpers-kbn-server'
 tags:
   - plugin
   - prod
   - group-security
   - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - common/**/*

@@ -16,6 +16,9 @@ export const deployCloudSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/cloud/build_cloud_image.sh',
     label: 'Build Cloud Image',
     key: 'build_cloud_image',
+    // Shared with kibana-deploy-cloud-from-pr so both pipelines never build or deploy the same PR at once
+    concurrency: 1,
+    concurrency_group: 'kibana/cloud-image/pr-${GITHUB_PR_NUMBER}',
     agents: preemptibleAgent('n2-standard-16'),
     timeout_in_minutes: 60,
     retry: retry.agentLoss,
@@ -24,6 +27,8 @@ export const deployCloudSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/cloud/deploy.sh',
     label: 'Deploy to Cloud',
     key: 'deploy_cloud',
+    concurrency: 1,
+    concurrency_group: 'kibana/cloud-deploy/pr-${GITHUB_PR_NUMBER}',
     agents: preemptibleAgent('n2-standard-2'),
     depends_on: ['build_cloud_image'],
     timeout_in_minutes: 30,

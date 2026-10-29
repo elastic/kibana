@@ -127,12 +127,12 @@ export const triggerLabels = {
     used > limit
       ? i18n.translate('xpack.nightshift.automations.flyout.dailyLimitReachedOverBody', {
           defaultMessage:
-            'This automation has handled {used} triggers today (limit of {limit}; {over} above the limit {over, plural, one {was} other {were}} not addressed). Additional triggers are throttled until midnight (UTC).',
+            'This automation has handled {used} triggers today (limit of {limit}), {over} above the limit {over, plural, one {was} other {were}} not addressed. Further triggers will be skipped until the limit resets at midnight (UTC).',
           values: { used, limit, over: used - limit },
         })
       : i18n.translate('xpack.nightshift.automations.flyout.dailyLimitReachedBody', {
           defaultMessage:
-            'This automation has handled {used} triggers today (limit of {limit}). Additional triggers are throttled until midnight (UTC).',
+            'This automation has handled {used} triggers today (limit of {limit}). Further triggers will be skipped until the limit resets at midnight (UTC).',
           values: { used, limit },
         }),
   dailyLimitApproaching: i18n.translate(
@@ -144,7 +144,7 @@ export const triggerLabels = {
   getDailyLimitApproachingBody: (used: number, limit: number) =>
     i18n.translate('xpack.nightshift.automations.flyout.dailyLimitApproachingBody', {
       defaultMessage:
-        'This automation has handled {used} of {limit} triggers today. Once it reaches the limit, additional triggers are throttled until midnight (UTC).',
+        'This automation has handled {used} of {limit} triggers today. Once it reaches the limit, further triggers will be skipped until the limit resets at midnight (UTC).',
       values: { used, limit },
     }),
   highDailyLimit: i18n.translate('xpack.nightshift.automations.flyout.highDailyLimit', {
