@@ -208,6 +208,94 @@ describe('AgentlessEnrollmentFlyout', () => {
       });
     });
 
+    it('shows a successful deployment when the agent is degraded only outside the integration', async () => {
+      mockUseGetAgentsQuery.mockReturnValue({
+        data: {
+          data: {
+            items: [
+              {
+                status: 'degraded',
+                last_checkin_message: 'monitoring failed',
+                components: [
+                  {
+                    id: 'c1',
+                    type: 'aws-s3',
+                    status: 'HEALTHY',
+                    units: [{ id: 'input-1', type: 'input', status: 'HEALTHY', message: '' }],
+                  },
+                  {
+                    id: 'monitoring',
+                    type: 'http/metrics',
+                    status: 'FAILED',
+                    units: [
+                      { id: 'monitoring-unit', type: 'input', status: 'FAILED', message: '' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
+
+      const renderer = createIntegrationsTestRendererMock();
+      const { getByText, getByTestId, queryByText } = renderer.render(
+        <AgentlessEnrollmentFlyout
+          {...baseProps}
+          agentPolicy={{ id: 'ap1', name: 'AP' } as any}
+          packagePolicy={{ id: 'pp1', name: 'pp', inputs: [{ id: 'input-1' }] } as any}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByText('Managed integration deployment was successful')).toBeInTheDocument();
+        expect(queryByText('Managed integration deployment failed')).not.toBeInTheDocument();
+        expect(getByTestId('agentlessFailingElsewhere')).toHaveTextContent('monitoring failed');
+        expect(getByText('Step 1 is complete')).toBeInTheDocument();
+        expect(getByText('Step 2 is loading')).toBeInTheDocument();
+        expect(getByTestId('agentDetailsIntegration')).toBeInTheDocument();
+      });
+    });
+
+    it('shows a failed deployment when the agent is degraded and does not run the integration', async () => {
+      mockUseGetAgentsQuery.mockReturnValue({
+        data: {
+          data: {
+            items: [
+              {
+                status: 'degraded',
+                components: [
+                  {
+                    id: 'monitoring',
+                    type: 'http/metrics',
+                    status: 'FAILED',
+                    units: [
+                      { id: 'monitoring-unit', type: 'input', status: 'FAILED', message: '' },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
+
+      const renderer = createIntegrationsTestRendererMock();
+      const { getByText, queryByTestId } = renderer.render(
+        <AgentlessEnrollmentFlyout
+          {...baseProps}
+          agentPolicy={{ id: 'ap1', name: 'AP' } as any}
+          packagePolicy={{ id: 'pp1', name: 'pp', inputs: [{ id: 'input-1' }] } as any}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByText('Managed integration deployment failed')).toBeInTheDocument();
+        expect(getByText('Step 1 has errors')).toBeInTheDocument();
+        expect(queryByTestId('agentlessFailingElsewhere')).not.toBeInTheDocument();
+      });
+    });
+
     it('stops polling once online without a package policy, keeps polling to refresh component health with one', async () => {
       mockUseGetAgentsQuery.mockReturnValue({
         data: { data: { items: [{ status: 'online' }] } },

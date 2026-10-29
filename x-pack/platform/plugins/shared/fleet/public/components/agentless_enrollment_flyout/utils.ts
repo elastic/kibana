@@ -5,7 +5,43 @@
  * 2.0.
  */
 
+import type { Agent, PackagePolicy } from '../../types';
+import {
+  getComponentAlertLevel,
+  getPackagePolicyUnitSummary,
+} from '../agentless_status_details_flyout/component_alert_level';
+
 import type { AgentlessEnrollmentSelectedInput } from './types';
+
+export type AgentlessEnrollmentState = 'pending' | 'success' | 'failure';
+
+/**
+ * Whether the managed integration was deployed. With the package policy known, it is judged by the
+ * units of that package policy, like the component health shown below it: an agent in error or
+ * degraded only because of something else it runs, like its monitoring, still runs the integration.
+ */
+export const getAgentlessEnrollmentState = (
+  agent?: Agent,
+  packagePolicy?: PackagePolicy
+): AgentlessEnrollmentState => {
+  if (!agent) return 'pending';
+  const { status } = agent;
+  const isFailing = status === 'error' || status === 'degraded';
+  if (status !== 'online' && !isFailing) return 'pending';
+  if (!packagePolicy) return isFailing ? 'failure' : 'success';
+
+  const alertLevel = getComponentAlertLevel(agent, packagePolicy);
+  if (alertLevel === 'failed') return 'failure';
+  if (!isFailing) return 'success';
+  const units = getPackagePolicyUnitSummary(agent, packagePolicy);
+  const runsIntegration = units.total > units.stopped;
+  return runsIntegration && !alertLevel ? 'success' : 'failure';
+};
+
+/** The agent reports a problem, but not with the units of the managed integration. */
+export const isAgentFailingElsewhere = (agent?: Agent, packagePolicy?: PackagePolicy): boolean =>
+  (agent?.status === 'error' || agent?.status === 'degraded') &&
+  getAgentlessEnrollmentState(agent, packagePolicy) === 'success';
 
 /** Minimal shape needed from the package's policy templates to resolve a title. */
 interface IntegrationTitleSource {
