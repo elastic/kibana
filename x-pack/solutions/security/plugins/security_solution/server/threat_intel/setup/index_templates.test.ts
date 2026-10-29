@@ -61,8 +61,16 @@ const fullyMigratedReportMappings = () => ({
       },
     },
     lineage: { properties: { content_scrubbed_at: {} } },
-    // v30: evidence is a space-keyed nested array; the guard checks the leaf.
-    evidence: { properties: { space_id: {} } },
+    // v30: evidence is a space-keyed nested array; the guard checks the leaf. The hunt
+    // coverage ledger leaves are patched in place by their own migration.
+    evidence: {
+      properties: {
+        space_id: {},
+        hunted_technique_ids: {},
+        pending_technique_ids: {},
+        coverage_pending: {},
+      },
+    },
     extracted: {
       properties: {
         core: {
@@ -308,6 +316,51 @@ describe('index_templates — migrations', () => {
     const { patchedPaths } = await runMigrations({ reportMappings: mappings });
 
     expect(patchedPaths).toContain('content.published_at');
+  });
+
+  describe('hunt coverage ledger on evidence', () => {
+    it.each(['hunted_technique_ids', 'pending_technique_ids', 'coverage_pending'])(
+      'adds evidence.%s when absent',
+      async (field) => {
+        const mappings = fullyMigratedReportMappings();
+        delete (mappings.properties.evidence.properties as Record<string, unknown>)[field];
+
+        const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+        expect(patchedPaths).toContain(`evidence.${field}`);
+      }
+    );
+
+    // Elasticsearch defaults an omitted `type` on a mapping-update fragment to `object` and
+    // rejects merging that into the existing `nested` evidence field, which would keep
+    // threat-intel bootstrap unready on every restart.
+    it('declares evidence nested when it patches the ledger fields', async () => {
+      const mappings = fullyMigratedReportMappings();
+      delete (mappings.properties.evidence.properties as Record<string, unknown>)
+        .hunted_technique_ids;
+
+      const { putMappingArgs } = await runMigrations({ reportMappings: mappings });
+
+      const evidenceFragment = putMappingArgs
+        .map((arg) => (arg.properties as { evidence?: { type?: string } })?.evidence)
+        .find((evidence): evidence is { type?: string } => evidence !== undefined);
+
+      expect(evidenceFragment?.type).toBe('nested');
+    });
+
+    it('leaves an index without evidence alone, so the stale-index check reports it', async () => {
+      const mappings = fullyMigratedReportMappings() as {
+        properties: Record<string, unknown>;
+      };
+      delete mappings.properties.evidence;
+
+      const { patchedPaths, verificationError } = await runMigrations({
+        reportMappings: mappings,
+      });
+
+      expect(patchedPaths.some((p) => p.startsWith('evidence'))).toBe(false);
+      expect(verificationError?.message).toMatch(/evidence\.space_id/);
+    });
   });
 
   it('repairs a partial Diamond context mapping missing char leaves', async () => {
@@ -680,6 +733,35 @@ describe('index_templates — mapping coverage guard', () => {
     );
   });
 
+  it('evidence declares the hunt coverage ledger: searched and pending technique ids and a pending flag', async () => {
+    const { byIndex } = await runInstall();
+
+    const properties = (
+      byIndex(THREAT_REPORTS_INDEX)?.template?.mappings as {
+        properties: Record<string, unknown>;
+      }
+    ).properties;
+
+    expect((properties.evidence as { properties: Record<string, unknown> }).properties).toEqual(
+      expect.objectContaining({
+        hunted_technique_ids: { type: 'keyword' },
+        pending_technique_ids: { type: 'keyword' },
+        coverage_pending: { type: 'boolean' },
+      })
+    );
+  });
+
+  it.each([
+    'evidence.hunted_technique_ids',
+    'evidence.pending_technique_ids',
+    'evidence.coverage_pending',
+  ])(
+    '%s is a required report field so a half-applied migration fails bootstrap loudly',
+    (requiredPath) => {
+      expect(src).toContain(`{ path: '${requiredPath}' }`);
+    }
+  );
+
   it('evidence.space_id is a required report field so a stale index fails bootstrap loudly', () => {
     // v30 flipped attribution/feedback into evidence, object -> nested,
     // which cannot be applied to an existing index. This entry is the only
@@ -733,6 +815,16 @@ describe('index_templates — post-migration schema check', () => {
     const { verificationError } = await runMigrations({ reportMappings: mappings });
 
     expect(verificationError?.message).toMatch(/content\.published_at/);
+  });
+
+  it('fails when a hunt coverage ledger field is still missing after migrating', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.evidence.properties as Record<string, unknown>).coverage_pending;
+
+    const { verificationError } = await runMigrations({ reportMappings: mappings });
+
+    expect(verificationError?.message).toMatch(/evidence\.coverage_pending/);
+    expect(verificationError?.message).toMatch(/Bootstrap is not ready/);
   });
 
   it('declares content.published_at as a date in the reports template', () => {
