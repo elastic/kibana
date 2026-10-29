@@ -41,6 +41,7 @@ const ALL_FRAMEWORKS = TEST_FRAMEWORKS.join(',');
 const ALL_CLASSIFICATIONS = FLAKY_TEST_CLASSIFICATIONS.join(',');
 const DEFAULT_MIN_BUILDS = defaults.thresholds.minBuilds;
 const DEFAULT_MIN_FAILED_BUILDS = defaults.thresholds.minFailedBuilds;
+const DEFAULT_MIN_FAIL_RATE = defaults.thresholds.minFailRate;
 const DEFAULT_MAX_TESTS = defaults.thresholds.maxTests;
 const DEFAULT_SAMPLES_PER_TEST = defaults.samplesPerTest;
 // Only affects the printed summary; the JSON report is bounded by --maxTests
@@ -87,6 +88,9 @@ export const discoverFlakyTests: Command<void> = {
   Aggregate Scout test events (Jest, FTR, Cypress, Playwright) from Elasticsearch into a
   flaky test report and store it locally under ${SCOUT_FLAKY_TESTS_PATH}. Read-only.
 
+  The build thresholds apply per branch: a test qualifies when one branch clears all of them
+  on its own, so a clean branch cannot dilute a flaky one.
+
   Examples:
     # Last ${DEFAULT_LOOKBACK_DAYS} days of ${DEFAULT_PIPELINES}, all frameworks
     node scripts/scout discover-flaky-tests
@@ -115,6 +119,7 @@ export const discoverFlakyTests: Command<void> = {
       'classifications',
       'minBuilds',
       'minFailedBuilds',
+      'minFailRate',
       'maxTests',
       'samplesPerTest',
       'outputPath',
@@ -132,28 +137,30 @@ export const discoverFlakyTests: Command<void> = {
       classifications: ALL_CLASSIFICATIONS,
       minBuilds: String(DEFAULT_MIN_BUILDS),
       minFailedBuilds: String(DEFAULT_MIN_FAILED_BUILDS),
+      minFailRate: String(DEFAULT_MIN_FAIL_RATE),
       maxTests: String(DEFAULT_MAX_TESTS),
       samplesPerTest: String(DEFAULT_SAMPLES_PER_TEST),
       outputPath: SCOUT_FLAKY_TESTS_PATH,
       summaryLimit: String(DEFAULT_SUMMARY_LIMIT),
     },
     help: `
-    --esURL            (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
-    --esAPIKey         (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
-    --esMaxRetries     (optional)  How many times should Elasticsearch API requests be retried [default: 1]
-    --verifyTLSCerts   (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
-    --lookbackDays     (optional)  How many days to look back when aggregating [default: ${DEFAULT_LOOKBACK_DAYS}]
-    --pipelines        (optional)  Comma-separated Buildkite pipeline slugs [default: ${DEFAULT_PIPELINES}]
-    --branches         (optional)  Comma-separated branches; no filter when omitted
-    --frameworks       (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
-    --classifications  (optional)  Comma-separated subset of ${ALL_CLASSIFICATIONS} [default: all]
-    --minBuilds        (optional)  Ignore tests seen in fewer builds [default: ${DEFAULT_MIN_BUILDS}]
-    --minFailedBuilds  (optional)  Ignore tests that failed in fewer builds [default: ${DEFAULT_MIN_FAILED_BUILDS}]
-    --maxTests         (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
-    --samplesPerTest   (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
-    --outputPath       (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
-    --summaryLimit     (optional)  Tests shown in the summary table; 0 hides it [default: ${DEFAULT_SUMMARY_LIMIT}]
-    --summaryWidth     (optional)  Columns the summary table may use [default: terminal width, or ${DEFAULT_TERMINAL_WIDTH} when not a terminal]
+    --esURL              (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
+    --esAPIKey           (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
+    --esMaxRetries       (optional)  How many times should Elasticsearch API requests be retried [default: 1]
+    --verifyTLSCerts     (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
+    --lookbackDays       (optional)  How many days to look back when aggregating [default: ${DEFAULT_LOOKBACK_DAYS}]
+    --pipelines          (optional)  Comma-separated Buildkite pipeline slugs [default: ${DEFAULT_PIPELINES}]
+    --branches           (optional)  Comma-separated branches; no filter when omitted
+    --frameworks         (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
+    --classifications    (optional)  Comma-separated subset of ${ALL_CLASSIFICATIONS} [default: all]
+    --minBuilds          (optional)  Builds a branch must have run the test in to qualify it [default: ${DEFAULT_MIN_BUILDS}]
+    --minFailedBuilds    (optional)  Builds a branch must have failed the test in to qualify it [default: ${DEFAULT_MIN_FAILED_BUILDS}]
+    --minFailRate        (optional)  Fraction (0-1) of its builds a branch must have failed the test in to qualify it; 0 disables [default: ${DEFAULT_MIN_FAIL_RATE}, i.e. 3%]
+    --maxTests           (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
+    --samplesPerTest     (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
+    --outputPath         (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
+    --summaryLimit       (optional)  Tests shown in the summary table; 0 hides it [default: ${DEFAULT_SUMMARY_LIMIT}]
+    --summaryWidth       (optional)  Columns the summary table may use [default: terminal width, or ${DEFAULT_TERMINAL_WIDTH} when not a terminal]
     `,
   },
   run: async ({ flagsReader, log }) => {
@@ -171,6 +178,10 @@ export const discoverFlakyTests: Command<void> = {
     const lookbackDays = flagsReader.requiredNumber('lookbackDays');
     if (!Number.isInteger(lookbackDays) || lookbackDays < 1) {
       throw createFlagError('--lookbackDays must be a positive integer');
+    }
+    const minFailRate = flagsReader.requiredNumber('minFailRate');
+    if (!(minFailRate >= 0 && minFailRate <= 1)) {
+      throw createFlagError('--minFailRate must be a number between 0 and 1');
     }
     const summaryLimit = flagsReader.requiredNumber('summaryLimit');
     if (!Number.isInteger(summaryLimit) || summaryLimit < 0) {
@@ -204,6 +215,7 @@ export const discoverFlakyTests: Command<void> = {
         thresholds: {
           minBuilds: flagsReader.requiredNumber('minBuilds'),
           minFailedBuilds: flagsReader.requiredNumber('minFailedBuilds'),
+          minFailRate,
           maxTests: flagsReader.requiredNumber('maxTests'),
         },
         samplesPerTest: flagsReader.requiredNumber('samplesPerTest'),

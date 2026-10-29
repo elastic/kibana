@@ -11,6 +11,35 @@ import { z } from '@kbn/zod/v4';
 import { getSchemaForAuthType } from './get_schema_for_auth_type';
 
 describe('getSchemaForAuthType()', () => {
+  test('applies field schemas while preserving validation metadata and other auth types', () => {
+    const { schema } = getSchemaForAuthType({
+      type: 'oauth_client_credentials',
+      defaults: { tokenType: 'Bearer' },
+      overrides: {
+        fields: { tokenUrl: z.url({ protocol: /^https$/ }).max(2048) },
+        meta: { tokenUrl: { helpText: 'HTTPS required' } },
+      },
+    });
+    expect(schema.shape.tokenUrl.safeParse('http://identity.example.com/token').success).toBe(
+      false
+    );
+    expect(schema.shape.tokenUrl.meta()).toMatchObject({
+      label: 'Token URL',
+      validate: { allowedHosts: true },
+      helpText: 'HTTPS required',
+    });
+    expect(schema.shape.tokenType.parse(undefined)).toBe('Bearer');
+    expect(z.toJSONSchema(schema).properties?.tokenUrl).toMatchObject({
+      format: 'uri',
+      maxLength: 2048,
+    });
+    const original = getSchemaForAuthType('oauth_client_credentials');
+    expect(
+      original.schema.shape.tokenUrl.safeParse('http://identity.example.com/token').success
+    ).toBe(true);
+    expect(original.schema.shape.tokenType.parse(undefined)).toBeUndefined();
+  });
+
   test('correctly returns schema for auth type definition when only type ID is provided', () => {
     const { schema } = getSchemaForAuthType('basic');
     expect(z.toJSONSchema(schema)).toMatchSnapshot();
@@ -73,6 +102,26 @@ describe('getSchemaForAuthType()', () => {
     const { schema } = getSchemaForAuthType({ type: 'basic', defaults: {} });
 
     expect(schema.meta()).not.toHaveProperty('isKibanaManaged');
+  });
+
+  test('surfaces supportsSandbox in schema meta when set on the auth type def', () => {
+    const { schema } = getSchemaForAuthType({
+      type: 'bearer',
+      supportsSandbox: true,
+      defaults: {},
+    });
+
+    expect(schema.meta()).toEqual(
+      expect.objectContaining({
+        supportsSandbox: true,
+      })
+    );
+  });
+
+  test('omits supportsSandbox from schema meta when unset on the auth type def', () => {
+    const { schema } = getSchemaForAuthType({ type: 'bearer', defaults: {} });
+
+    expect(schema.meta()).not.toHaveProperty('supportsSandbox');
   });
 
   test('ignores defaults for key that is not in auth type schema', () => {

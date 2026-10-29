@@ -9,19 +9,25 @@ import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { ContentListProvider } from '@kbn/content-list-provider';
+import type { EisViewMode } from '../../types';
 import {
   DEFAULT_EIS_DISPLAY_OPTIONS,
   getProviderOptions,
+  getRegionOptions,
   type GroupedModel,
 } from '../../utils/eis_utils';
 import {
   createEisFieldDefinitions,
   createEisFindItems,
+  EIS_END_OF_LIFE_SORT_FIELD,
   EIS_NAME_SORT_FIELD,
   EIS_PROVIDER_FILTER_ID,
+  EIS_RELEASED_SORT_FIELD,
+  EIS_TYPE_SORT_FIELD,
 } from '../../utils/eis_content_list_utils';
 import { EisModelsListing } from './eis_models_listing';
 import { ModelFamilyOptionsProvider } from './eis_model_filters';
+import { RegionOptionsProvider } from './region_filter';
 
 interface EisModelsListingProviderProps {
   models: GroupedModel[];
@@ -51,9 +57,27 @@ const SORT_FIELDS = [
     }),
   },
   {
+    field: EIS_TYPE_SORT_FIELD,
+    name: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.sort.type', {
+      defaultMessage: 'Type',
+    }),
+  },
+  {
     field: EIS_PROVIDER_FILTER_ID,
     name: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.sort.provider', {
       defaultMessage: 'Provider',
+    }),
+  },
+  {
+    field: EIS_RELEASED_SORT_FIELD,
+    name: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.sort.released', {
+      defaultMessage: 'Released',
+    }),
+  },
+  {
+    field: EIS_END_OF_LIFE_SORT_FIELD,
+    name: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.sort.endOfLife', {
+      defaultMessage: 'End of Life',
     }),
   },
 ];
@@ -64,13 +88,18 @@ export const EisModelsListingProvider = ({
   onViewModelDetails,
 }: EisModelsListingProviderProps) => {
   const [displayOptions, setDisplayOptions] = useState(DEFAULT_EIS_DISPLAY_OPTIONS);
+  const [viewMode, setViewMode] = useState<EisViewMode>('card');
   const dataSource = useMemo(
-    () => ({ findItems: createEisFindItems(models, displayOptions) }),
-    [models, displayOptions]
+    () => ({ findItems: createEisFindItems(models, displayOptions, viewMode === 'table') }),
+    [models, displayOptions, viewMode]
   );
   const fields = useMemo(() => createEisFieldDefinitions(models), [models]);
   const modelFamilyOptions = useMemo(() => getProviderOptions(models), [models]);
-  const queryKeyScope = `eis-models-listing-${Number(
+  const regionOptions = useMemo(
+    () => getRegionOptions(models.flatMap((model) => model.endpoints)),
+    [models]
+  );
+  const queryKeyScope = `eis-models-listing-${viewMode}-${Number(
     displayOptions.showOutsideRegionPreferences
   )}-${Number(displayOptions.showEndOfLifeModels)}-${Number(displayOptions.showPreviewModels)}`;
   const hasBlockedModels = useMemo(
@@ -80,15 +109,16 @@ export const EisModelsListingProvider = ({
       ),
     [models]
   );
-
   const features = useMemo(
     () => ({
       sorting: {
         initialSort: { field: EIS_NAME_SORT_FIELD, direction: 'asc' as const },
         fields: SORT_FIELDS,
       },
-      // Every EIS model is fetched in one request and rendered as a card grid.
-      pagination: false as const,
+      pagination: {
+        initialPageSize: 25,
+        pageSizeOptions: [10, 25, 50, 100],
+      },
       search: true,
       // No bulk actions: endpoints are deleted one at a time from the detail flyout.
       selection: false as const,
@@ -106,10 +136,14 @@ export const EisModelsListingProvider = ({
       {...{ dataSource, features }}
     >
       <ModelFamilyOptionsProvider value={modelFamilyOptions}>
-        <EisModelsListing
-          {...{ onViewModelDetails, displayOptions, hasBlockedModels }}
-          onApplyDisplayOptions={setDisplayOptions}
-        />
+        <RegionOptionsProvider value={regionOptions}>
+          <EisModelsListing
+            {...{ onViewModelDetails, displayOptions, hasBlockedModels, viewMode }}
+            catalogTotal={models.length}
+            onApplyDisplayOptions={setDisplayOptions}
+            onViewModeChange={setViewMode}
+          />
+        </RegionOptionsProvider>
       </ModelFamilyOptionsProvider>
     </ContentListProvider>
   );

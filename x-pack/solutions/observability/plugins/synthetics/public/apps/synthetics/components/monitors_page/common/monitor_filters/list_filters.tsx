@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FilterGroup } from './filter_group';
+import { SelectedFilterPills } from './selected_filter_pills';
 import { SearchField } from '../search_field';
 import type { SyntheticsMonitorFilterChangeHandler } from '../../../../utils/filters/filter_fields';
 
@@ -18,13 +19,21 @@ export const ListFilters = function ({
   handleFilterChange: SyntheticsMonitorFilterChangeHandler;
 }) {
   return (
-    <EuiFlexGroup gutterSize="s" wrap={true}>
-      <EuiFlexItem grow={2}>
-        <SearchField />
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <FilterGroup handleFilterChange={handleFilterChange} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup gutterSize="s" wrap={true}>
+        <EuiFlexItem grow={2}>
+          <SearchField />
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <FilterGroup handleFilterChange={handleFilterChange} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <SelectedFilterPills
+        handleFilterChange={handleFilterChange}
+        excludeFields={['remoteNames']}
+        includeStatusFilter={false}
+        includeConfigIds
+      />
+    </>
   );
 };

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { MAX_AI_INDEX_ID_LENGTH } from '../constants';
+import { z, isoDateTime } from '@kbn/zod/v4';
+import { MAX_AI_INDEX_ID_LENGTH, MAX_KI_CONTENT_LENGTH } from '../constants';
 
 export const MAX_KI_ID_LENGTH = 512;
 export const MAX_KI_TYPE_LENGTH = 256;
 export const MAX_KI_TITLE_LENGTH = 512;
 export const MAX_KI_DESCRIPTION_LENGTH = 2048;
-export const MAX_KI_CONTENT_LENGTH = 65536;
 export const MAX_KI_TAG_LENGTH = 256;
 export const MAX_KI_TAGS = 100;
 export const MAX_KI_ATTRIBUTE_KEY_LENGTH = 256;
@@ -25,7 +24,7 @@ export const MAX_KI_REFERENCE_URI_LENGTH = 2048;
 export const MAX_KI_REFERENCE_DESCRIPTION_LENGTH = 2048;
 
 export const KI_REFERENCE_RELATIONS = ['derived_from', 'relates_to', 'supersedes'] as const;
-export const KI_LIFECYCLE_STATUSES = ['active', 'deleted'] as const;
+export const KI_LIFECYCLE_STATUSES = ['active', 'deleted', 'verification_failed'] as const;
 
 export const aiIndexIdSchema = z
   .string()
@@ -64,6 +63,42 @@ export const kiReferenceSchema = z.object({
     .describe('Why this reference exists'),
 });
 
+type KiAttributeValue = string | number | boolean | string[];
+
+const omitNullAttributes = (
+  attributes: Record<string, KiAttributeValue | null>
+): Record<string, KiAttributeValue> =>
+  Object.fromEntries(
+    Object.entries(attributes).filter(
+      (entry): entry is [string, KiAttributeValue] => entry[1] !== null
+    )
+  );
+
+/**
+ * Drops attributes whose value is `null`, the workflow convention for "omit this attribute"
+ * (`${{ value | default: nil }}`), and the `attributes` key itself when nothing is left. The
+ * schema's transform does the same, but the workflow engine hands step handlers the rendered
+ * input without parsing it, so the KI steps call this themselves. Other fields are untouched: a
+ * null `expires_at` on update still clears the expiry.
+ */
+export const omitNullKiAttributes = <
+  T extends { [field: string]: unknown; attributes?: Record<string, KiAttributeValue | null> }
+>(
+  ki: T
+): T => {
+  const { attributes } = ki;
+  if (!attributes) {
+    return ki;
+  }
+  const kept = omitNullAttributes(attributes);
+  if (Object.keys(attributes).length > 0 && Object.keys(kept).length === 0) {
+    const withoutAttributes = { ...ki };
+    delete withoutAttributes.attributes;
+    return withoutAttributes;
+  }
+  return { ...ki, attributes: kept };
+};
+
 /**
  * A Knowledge Indicator (KI) document. Fields mirror the base AI index
  * mappings (`ai-index@mappings`).
@@ -98,20 +133,25 @@ export const kiFieldsSchema = z.object({
         z.number(),
         z.boolean(),
         z.array(z.string().max(MAX_KI_ATTRIBUTE_VALUE_LENGTH)).max(MAX_KI_ATTRIBUTE_ARRAY_VALUES),
+        // A `null` value omits the attribute, so a workflow can write `${{ value | default: nil }}`
+        // for an attribute that only sometimes applies (an `esql` list that came back empty).
+        z.null(),
       ])
     )
     .refine((attrs) => Object.keys(attrs).length <= MAX_KI_ATTRIBUTES, {
       message: `attributes must have at most ${MAX_KI_ATTRIBUTES} entries`,
     })
+    .transform(omitNullAttributes)
     .optional()
-    .describe('Arbitrary key-value attributes attached to the KI'),
+    .describe(
+      'Arbitrary key-value attributes attached to the KI. A null value omits the attribute.'
+    ),
   references: z
     .array(kiReferenceSchema)
     .max(MAX_KI_REFERENCES)
     .optional()
     .describe('URIs this KI relates to'),
-  expires_at: z.iso
-    .datetime({ offset: true })
+  expires_at: isoDateTime({ offset: true })
     .optional()
     .describe('Expiry date in ISO 8601. Leave unset and the KI never expires'),
 });

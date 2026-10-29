@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import {
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  ALERTZERO_THREAT_INTEL_EXTRACT_DIAMOND_TELEMETRY_PLUGIN_ID,
+} from '@kbn/alertzero-common';
 import {
   EXTRACT_DIAMOND_API_PATH,
-  THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
+  extractDiamondBodySchema,
+  extractDiamondResponseSchema,
+  EXTRACT_DIAMOND_MAX_BODY_BYTES,
 } from '../../../common/threat_intel';
 import { extractDiamond } from '../services';
 import { resolveScopedModel } from './lib/scoped_model';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
 import type { RouteRegistrationDeps } from '.';
-
-const extractDiamondBodySchema = schema.object({
-  text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
-  report_id: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
-});
-
-const EXTRACT_DIAMOND_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 export const registerExtractDiamondRoute = ({
   router,
@@ -43,7 +41,10 @@ export const registerExtractDiamondRoute = ({
     .addVersion(
       {
         version: '1',
-        validate: { request: { body: extractDiamondBodySchema } },
+        validate: {
+          request: { body: extractDiamondBodySchema },
+          response: { 200: { body: () => extractDiamondResponseSchema } },
+        },
       },
       async (context, request, response) => {
         const core = await context.core;
@@ -53,7 +54,8 @@ export const registerExtractDiamondRoute = ({
           searchInferenceEndpoints: getSearchInferenceEndpoints(),
           request,
           uiSettingsClient: core.uiSettings.client,
-          featureId: THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID,
+          featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+          telemetryPluginId: ALERTZERO_THREAT_INTEL_EXTRACT_DIAMOND_TELEMETRY_PLUGIN_ID,
           logger,
         });
         if (!modelOutcome.ok) {

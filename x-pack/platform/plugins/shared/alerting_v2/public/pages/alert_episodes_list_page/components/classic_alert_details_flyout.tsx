@@ -6,33 +6,22 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiDescriptionList,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiHorizontalRule,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  EuiToolTip,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiDescriptionList, EuiEmptyPrompt } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
+import { FlyoutTemplate, type FlyoutTabBarProps, type FlyoutTabProps } from '@kbn/flyout-template';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
-import { formatMetadataListDuration } from '@kbn/alerting-v2-episodes-ui/components/details/translations';
+import {
+  FLYOUT_TAKE_ACTION,
+  formatMetadataListDuration,
+} from '@kbn/alerting-v2-episodes-ui/components/details/translations';
+import { buildEpisodeMenuPanels } from '@kbn/alerting-v2-episodes-ui/components/details/build_episode_menu_panels';
+import { AlertEpisodeDescriptionListSkeleton } from '@kbn/alerting-v2-episodes-ui/components/details/section_skeletons';
+import { useAlertDetailsFlyoutWidth } from '@kbn/alerting-v2-episodes-ui/components/details/use_alert_details_flyout_width';
+import {
+  CLASSIC_SOURCE_LABEL,
+  ELASTIC_SOURCE_ICON,
+} from '@kbn/alerting-v2-episodes-ui/source_labels';
 import {
   ALERT_DURATION,
   ALERT_REASON,
@@ -46,10 +35,15 @@ import {
   STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import { mapClassicAlertToEpisode } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
+import type { ClassicAlertSource } from '@kbn/alerting-v2-episodes-ui/classic_alerts/utils/map_alert';
+import { CLASSIC_EPISODE_SOURCE_ID } from '@kbn/alerting-v2-episodes-ui/classic_alerts/constants';
 import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
+import { enrichClassicEpisodesWithSnoozeState } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes';
 import type { ClassicAlertFields } from '@kbn/alerting-v2-episodes-ui/classic_alerts/types';
 import { classicAlertQueryKeys } from '@kbn/alerting-v2-episodes-ui/classic_alerts/query_keys';
-import { CLASSIC_ALERT_RULE_TYPE_IDS } from '../../../episode_sources';
+import { CLASSIC_ALERT_RULE_TYPE_IDS } from '../../../alert_sources';
 import * as i18n from '../translations';
 
 /**
@@ -65,10 +59,30 @@ const toAlertFieldsTableAlert = (fields: ClassicAlertFields): AlertFieldsTableAl
 
 type TabId = 'overview' | 'fields';
 
+const TABS: FlyoutTabProps[] = [
+  {
+    id: 'overview',
+    label: i18n.CLASSIC_ALERT_DETAILS_OVERVIEW_TAB,
+    'data-test-subj': 'classicAlertEpisodeOverviewTab',
+  },
+  {
+    id: 'fields',
+    label: i18n.CLASSIC_ALERT_DETAILS_FIELDS_TAB,
+    'data-test-subj': 'classicAlertEpisodeFieldsTab',
+  },
+];
+
+const TAB_BAR_PROPS: FlyoutTabBarProps = { 'data-test-subj': 'classicAlertEpisodeDetailsTabs' };
+
+/** Matches the Overview tab's field count, so the skeleton has the shape of the loaded list. */
+const OVERVIEW_ROW_COUNT = 8;
+
 export interface ClassicAlertDetailsFlyoutProps {
   alertId: string;
   onClose: () => void;
   services: { http: HttpStart };
+  actions?: EpisodeAction[];
+  onSuccess?: () => void;
 }
 
 /**
@@ -124,33 +138,61 @@ const formatDurationUs = (value: unknown): string => {
 };
 
 /**
- * Classic alert details flyout. Chrome (push size, header/footer/tabs) matches
- * the v2 episode flyout so rows in the unified table feel consistent; content stays
- * classic-alert specific (overview fields + fields table).
+ * Classic alert details flyout. Built on `FlyoutTemplate` like the v2 episode flyout, so rows in
+ * the unified table open with the same chrome; content stays classic-alert specific (overview
+ * fields + fields table).
  */
 export const ClassicAlertDetailsFlyout = ({
   alertId,
   onClose,
   services,
+  actions,
+  onSuccess,
 }: ClassicAlertDetailsFlyoutProps) => {
-  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'classicAlertDetailsFlyout' });
   const [selectedTabId, setSelectedTabId] = useState<TabId>('overview');
+  const initialWidth = useAlertDetailsFlyoutWidth();
 
-  const {
-    data: alert,
-    isLoading,
-    isError,
-  } = useQuery<ClassicAlertFields, Error>({
+  const { data, isLoading, isError } = useQuery({
     queryKey: classicAlertQueryKeys.alert(alertId),
-    queryFn: ({ signal }) =>
-      fetchClassicAlertById({
+    queryFn: async ({ signal }) => {
+      const fetched = await fetchClassicAlertById({
         ruleTypeIds: CLASSIC_ALERT_RULE_TYPE_IDS,
         id: alertId,
         services,
         abortSignal: signal,
-      }),
+      });
+      const mapped = {
+        ...mapClassicAlertToEpisode(
+          fetched as unknown as ClassicAlertSource,
+          typeof fetched._index === 'string' ? fetched._index : ''
+        ),
+        source_id: CLASSIC_EPISODE_SOURCE_ID,
+      };
+      // The alert document does not store snooze state. Apply the same enrichment as the table.
+      const [episode] = await enrichClassicEpisodesWithSnoozeState([mapped], services.http, signal);
+      return { alert: fetched, episode };
+    },
     enabled: Boolean(alertId),
   });
+
+  const alert = data?.alert;
+  // A failed refetch keeps the previous data, so `alert` alone does not mean it loaded. Only
+  // loaded data feeds the tabs and the actions; the title may keep the last known rule name.
+  const isLoaded = !isLoading && !isError;
+  const loadedAlert = isLoaded ? alert : undefined;
+  const loadedEpisode = isLoaded ? data?.episode : undefined;
+  const episodes = useMemo(() => (loadedEpisode ? [loadedEpisode] : []), [loadedEpisode]);
+  // Keep actions the table shows while disabled, such as Unresolve on a resolved classic alert.
+  const menuActions = useMemo(
+    () =>
+      actions && episodes.length
+        ? actions.filter(
+            (action) =>
+              action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
+          )
+        : [],
+    [actions, episodes]
+  );
 
   const title = useMemo(() => {
     const fetchedName = alert ? asDisplayValue(alert[ALERT_RULE_NAME]) : undefined;
@@ -200,100 +242,58 @@ export const ClassicAlertDetailsFlyout = ({
   }, [alert]);
 
   const alertDetailsHref = useMemo(
-    () => (alert ? resolveAlertDetailsHref(alertId, alert, services.http) : null),
-    [alert, alertId, services.http]
+    () => (loadedAlert ? resolveAlertDetailsHref(alertId, loadedAlert, services.http) : null),
+    [loadedAlert, alertId, services.http]
+  );
+
+  const takeActionPanels = useMemo(
+    () =>
+      buildEpisodeMenuPanels({
+        actions: menuActions,
+        episodes,
+        viewDetailsHref: alertDetailsHref,
+        onSuccess,
+      }),
+    [menuActions, episodes, alertDetailsHref, onSuccess]
   );
 
   return (
-    <EuiFlyout
-      type="push"
-      hasAnimation
-      hideCloseButton
+    <FlyoutTemplate
+      type="overlay"
+      ownFocus={false}
+      resizable
+      // The header title starts as a fallback and becomes the rule name, which would make the
+      // flyout reopen on first load. A constant menu title keeps its registration stable.
+      flyoutMenuProps={{ title: i18n.CLASSIC_ALERT_DETAILS_TITLE }}
+      size={initialWidth}
       onClose={onClose}
-      pushMinBreakpoint="m"
-      paddingSize="none"
-      size="35%"
-      aria-labelledby={flyoutTitleId}
       data-test-subj="classicAlertEpisodeDetailsFlyout"
+      tabs={loadedAlert ? TABS : undefined}
+      tabBarProps={TAB_BAR_PROPS}
+      selectedTabId={selectedTabId}
+      onTabChange={(tabId) => setSelectedTabId(tabId as TabId)}
     >
-      <EuiPanel
-        paddingSize="xs"
-        hasShadow={false}
-        hasBorder={false}
-        borderRadius="none"
-        color="transparent"
-      >
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          gutterSize="s"
-          responsive={false}
-          alignItems="center"
+      <FlyoutTemplate.Header title={title} isLoading={isLoading}>
+        <FlyoutTemplate.Header.Badge
+          color="hollow"
+          iconType={ELASTIC_SOURCE_ICON}
+          data-test-subj="classicAlertEpisodeSourceBadge"
         >
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.CLASSIC_ALERT_DETAILS_CLOSE} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                onClick={onClose}
-                aria-label={i18n.CLASSIC_ALERT_DETAILS_CLOSE}
-                data-test-subj="classicAlertEpisodeDetailsCloseIcon"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiHorizontalRule margin="none" />
-      <EuiFlyoutHeader hasBorder>
-        <EuiPanel
-          paddingSize="m"
-          hasShadow={false}
-          hasBorder={false}
-          borderRadius="none"
-          color="transparent"
-          css={css`
-            padding-block-end: 0;
-          `}
-        >
-          <EuiTitle size="s">
-            <h2 id={flyoutTitleId}>{title}</h2>
-          </EuiTitle>
-          {!isLoading && !isError && alert ? (
-            <>
-              <EuiSpacer size="s" />
-              <EuiTabs bottomBorder={false} data-test-subj="classicAlertEpisodeDetailsTabs">
-                <EuiTab
-                  isSelected={selectedTabId === 'overview'}
-                  onClick={() => setSelectedTabId('overview')}
-                  data-test-subj="classicAlertEpisodeOverviewTab"
-                >
-                  {i18n.CLASSIC_ALERT_DETAILS_OVERVIEW_TAB}
-                </EuiTab>
-                <EuiTab
-                  isSelected={selectedTabId === 'fields'}
-                  onClick={() => setSelectedTabId('fields')}
-                  data-test-subj="classicAlertEpisodeFieldsTab"
-                >
-                  {i18n.CLASSIC_ALERT_DETAILS_FIELDS_TAB}
-                </EuiTab>
-              </EuiTabs>
-            </>
-          ) : null}
-        </EuiPanel>
-      </EuiFlyoutHeader>
-      {isLoading ? (
-        <EuiFlyoutBody>
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner
-                size="xl"
-                aria-label={i18n.CLASSIC_ALERT_DETAILS_LOADING}
-                data-test-subj="classicAlertEpisodeDetailsLoading"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutBody>
-      ) : isError || !alert ? (
-        <EuiFlyoutBody>
+          {CLASSIC_SOURCE_LABEL}
+        </FlyoutTemplate.Header.Badge>
+      </FlyoutTemplate.Header>
+
+      <FlyoutTemplate.Body>
+        {isLoading ? (
+          // The skeleton has no accessible name of its own, so the wrapper announces what loads.
+          <div
+            role="progressbar"
+            aria-label={i18n.CLASSIC_ALERT_DETAILS_LOADING}
+            data-test-subj="classicAlertEpisodeDetailsLoading"
+          >
+            <AlertEpisodeDescriptionListSkeleton rows={OVERVIEW_ROW_COUNT} />
+          </div>
+        ) : !loadedAlert ? (
           <EuiEmptyPrompt
             iconType="alert"
             color="danger"
@@ -301,25 +301,10 @@ export const ClassicAlertDetailsFlyout = ({
             body={<p>{i18n.CLASSIC_ALERT_DETAILS_ERROR_BODY}</p>}
             data-test-subj="classicAlertEpisodeDetailsError"
           />
-        </EuiFlyoutBody>
-      ) : (
-        <EuiFlyoutBody
-          css={
-            selectedTabId === 'fields'
-              ? css`
-                  [class*='euiFlyoutBody__overflowContent'] {
-                    padding: 0;
-                  }
-                `
-              : undefined
-          }
-        >
-          {selectedTabId === 'overview' ? (
-            <EuiPanel
-              hasShadow={false}
-              hasBorder={false}
-              paddingSize="m"
-              color="transparent"
+        ) : (
+          <>
+            <FlyoutTemplate.Body.TabPanel
+              tabId="overview"
               data-test-subj="classicAlertEpisodeOverviewTabPanel"
             >
               <EuiDescriptionList
@@ -328,55 +313,30 @@ export const ClassicAlertDetailsFlyout = ({
                 columnWidths={[1, 3]}
                 compressed
               />
-            </EuiPanel>
-          ) : (
-            <EuiPanel
-              hasShadow={false}
-              hasBorder={false}
-              paddingSize="m"
-              color="transparent"
+            </FlyoutTemplate.Body.TabPanel>
+            <FlyoutTemplate.Body.TabPanel
+              tabId="fields"
               data-test-subj="classicAlertEpisodeFieldsTabPanel"
             >
-              <AlertFieldsTable alert={toAlertFieldsTableAlert(alert)} />
-            </EuiPanel>
-          )}
-        </EuiFlyoutBody>
-      )}
-      <EuiFlyoutFooter>
-        <EuiPanel
-          paddingSize="m"
-          hasShadow={false}
-          hasBorder={false}
-          borderRadius="none"
-          color="transparent"
-        >
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={onClose}
-                flush="left"
-                data-test-subj="classicAlertEpisodeDetailsCloseButton"
-              >
-                {i18n.CLASSIC_ALERT_DETAILS_CLOSE}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            {alertDetailsHref ? (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  href={alertDetailsHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  iconType="eye"
-                  data-test-subj="classicAlertEpisodeDetailsViewDetailsButton"
-                >
-                  {i18n.CLASSIC_ALERT_DETAILS_VIEW_DETAILS}
-                </EuiButton>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+              <AlertFieldsTable alert={toAlertFieldsTableAlert(loadedAlert)} />
+            </FlyoutTemplate.Body.TabPanel>
+          </>
+        )}
+      </FlyoutTemplate.Body>
+
+      <FlyoutTemplate.Footer>
+        <FlyoutTemplate.Footer.SecondaryAction
+          label={i18n.CLASSIC_ALERT_DETAILS_CLOSE}
+          onClick={onClose}
+          data-test-subj="classicAlertEpisodeDetailsCloseButton"
+        />
+        <FlyoutTemplate.Footer.PrimaryActionMenu
+          label={FLYOUT_TAKE_ACTION}
+          aria-label={FLYOUT_TAKE_ACTION}
+          panels={takeActionPanels}
+          data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
+        />
+      </FlyoutTemplate.Footer>
+    </FlyoutTemplate>
   );
 };

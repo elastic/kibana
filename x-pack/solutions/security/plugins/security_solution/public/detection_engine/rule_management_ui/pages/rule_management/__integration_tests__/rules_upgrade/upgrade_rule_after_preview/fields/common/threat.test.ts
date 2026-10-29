@@ -11,7 +11,7 @@ import { assertRuleUpgradeAfterReview } from '../../../test_utils/assert_rule_up
 describe('Upgrade diffable rule "threat" (query rule type) after preview in flyout', () => {
   const ruleType = 'query';
   const fieldName = 'threat';
-  const humanizedFieldName = 'MITRE ATT&CK\u2122';
+  const humanizedFieldName = 'Threat mappings';
   const initial = [
     {
       framework: 'MITRE ATT&CK',

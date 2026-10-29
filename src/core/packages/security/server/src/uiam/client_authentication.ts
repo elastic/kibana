@@ -1,0 +1,98 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { timingSafeEqual } from 'crypto';
+
+import type { Headers } from '@kbn/core-http-server';
+import type { HTTPAuthorizationHeader } from '../authentication';
+import {
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+  deriveInternalCallerAttestation,
+} from './attestation';
+import { isUiamCredential } from './utils';
+
+/**
+ * The credential and its source used by {@link resolveUiamClientAuthentication}.
+ */
+export type UiamClientAuthenticationParams =
+  | {
+      /** Kibana minted or stored the credential itself, so nothing has to vouch for it. */
+      credentialSource: 'internal';
+      /** The credential that will be sent to Elasticsearch or UIAM. */
+      credential: HTTPAuthorizationHeader;
+    }
+  | {
+      /**
+       * The credential is a user-created (external) UIAM API key. UIAM rejects external keys
+       * presented with client authentication, so the shared secret must never be attached to it.
+       * Consumers signal this by marking the fake request that carries the credential with
+       * `markExternalUiamCredential` from `@kbn/core-security-server`.
+       */
+      credentialSource: 'external';
+      /** The credential that will be sent to Elasticsearch or UIAM. */
+      credential: HTTPAuthorizationHeader;
+    }
+  | {
+      /** The credential rode in over HTTP, so the request has to vouch for it. */
+      credentialSource: 'inbound';
+      /** The credential that will be sent to Elasticsearch or UIAM. */
+      credential: HTTPAuthorizationHeader;
+      /**
+       * The client authentication already resolved for the credential, either relayed by the
+       * upstream caller or chosen by the authentication provider that produced the credential.
+       * Read from the same headers as the credential, not from the raw request: a provider may
+       * have set it without it ever riding in on the wire.
+       */
+      relayedClientAuthentication: string | string[] | undefined;
+      /**
+       * Raw inbound request headers, carrying the attestation that proves an attacker-reachable
+       * request nonetheless came from a trusted loopback caller. Nothing in here is trustworthy
+       * until the attestation has been verified.
+       */
+      requestHeaders: Headers;
+    };
+
+const constantTimeEqual = (a: string, b: string): boolean => {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
+};
+
+/** Resolves the client authentication to attach to a UIAM credential based on its source. */
+export const resolveUiamClientAuthentication = (
+  sharedSecret: string,
+  params: UiamClientAuthenticationParams
+): string | string[] | undefined => {
+  if (!isUiamCredential(params.credential)) {
+    return;
+  }
+
+  if (params.credentialSource === 'external') {
+    return;
+  }
+
+  if (params.credentialSource === 'inbound') {
+    // The token may be bound to another client, so whatever already speaks for it is never
+    // replaced by Kibana's own secret. Checked ahead of the attestation so that, should a
+    // caller ever present both, the outcome is its own secret and never Kibana's.
+    if (params.relayedClientAuthentication !== undefined) {
+      return params.relayedClientAuthentication;
+    }
+
+    // The attestation is bound to the credential it rides with, so one captured from another
+    // request (or another credential) does not validate here.
+    const expected = deriveInternalCallerAttestation(sharedSecret, params.credential);
+    const presented = params.requestHeaders[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER];
+    if (typeof presented !== 'string' || !constantTimeEqual(presented, expected)) {
+      return;
+    }
+  }
+
+  return sharedSecret;
+};

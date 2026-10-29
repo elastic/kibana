@@ -43,6 +43,7 @@ describe('bindServices - Elasticsearch client routing', () => {
     request = httpServerMock.createKibanaRequest();
 
     container.bind(CoreStart('elasticsearch')).toConstantValue(elasticsearch);
+    container.bind(CoreStart('featureFlags')).toConstantValue(coreMock.createStart().featureFlags);
     container.bind(Request).toConstantValue(request);
     container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
     container

@@ -82,6 +82,15 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof load).to.eql('number');
     });
 
+    it('should include es_backpressure_active stat', async () => {
+      const {
+        value: { es_backpressure_active: esBackpressureActive },
+      } = (await getBackgroundTaskUtilization(true))
+        .stats as MonitoredStat<BackgroundTaskUtilizationStat>;
+      // healthy ES in this suite, so Task Manager should not be applying backpressure
+      expect(esBackpressureActive).to.eql(0);
+    });
+
     it('should return expected fields for internal route', async () => {
       const monitoredStat = (await getBackgroundTaskUtilization(true)).stats;
       expect(monitoredStat?.timestamp).not.to.be(undefined);
@@ -89,6 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(monitoredStat?.value?.adhoc).not.to.be(undefined);
       expect(monitoredStat?.value?.recurring).not.to.be(undefined);
       expect(monitoredStat?.value?.load).not.to.be(undefined);
+      expect(monitoredStat?.value?.es_backpressure_active).not.to.be(undefined);
     });
 
     it('should return expected fields for public route', async () => {
@@ -98,6 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(monitoredStat?.value?.adhoc).to.be(undefined);
       expect(monitoredStat?.value?.recurring).to.be(undefined);
       expect(monitoredStat?.value?.load).not.to.be(undefined);
+      expect(monitoredStat?.value?.es_backpressure_active).not.to.be(undefined);
     });
   });
 }

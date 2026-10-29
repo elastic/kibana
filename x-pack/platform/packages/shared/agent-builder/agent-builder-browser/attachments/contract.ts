@@ -32,7 +32,7 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   isSidebar: boolean;
   /** Data from the screen context attachment, if present in the conversation */
   screenContext?: ScreenContextAttachmentData;
-  /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
+  /** Callback to open the agent builder sidebar with the current conversation loaded. */
   openSidebarConversation?: () => void;
 }
 
@@ -225,6 +225,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Has no effect in sidebar context.
    */
   canvasWidth?: string;
+  /**
+   * When true, the canvas content starts right below the flyout header, with no
+   * top padding. Use it for content that fills the whole body (e.g. a graph).
+   */
+  canvasHideTopPadding?: boolean;
   /**
    * Optional custom content renderer for canvas mode (expanded flyout view).
    * When provided, attachments can be opened in an expanded view via action buttons.

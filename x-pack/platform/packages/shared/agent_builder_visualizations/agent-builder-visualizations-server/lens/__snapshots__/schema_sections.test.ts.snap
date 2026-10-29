@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Lens schema sections keeps the data_table section index 1`] = `
+"- title: string
+- description: string
+- filters: disabled, negate, controlled_by, data_view_id, label, is_multi_index, one of: (type*: condition, condition* (field*, negate, operator*: is|is_one_of|range|exists, value)) | (type*: group, group* (operator*: and|or, conditions*)) | (type*: dsl, dsl*, field, params) | (type*: spatial, dsl*)
+- sampling: number
+- ignore_global_filters: boolean
+- styling: density (mode: compact|default|expanded, height), paging: 10|20|30|50|100, sort_by (column_type*: metric|row|pivoted_metric, index*, direction*: asc|desc, values), row_numbers (visible*)
+- metrics: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), apply_color_to: value|background|badge, visible, width, color (type: dynamic|distributed_palette|legacy_dynamic|auto, range: absolute|percentage, steps, palette, shift, mode: categorical|gradient, mapping, unassigned, sort: asc|desc, gradient), alignment: left|center|right, summary (type*, label)
+- rows: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), apply_color_to: value|background|badge, visible, width, alignment: left|center|right, color (type: dynamic|distributed_palette|legacy_dynamic|auto, range: absolute|percentage, steps, palette, shift, mode: categorical|gradient, mapping, unassigned, sort: asc|desc, gradient), click_filter, collapse_by: avg|sum|max|min
+- split_metrics_by: column*, label, format (type*, decimals, suffix, compact, from, to, pattern)"
+`;
+
+exports[`Lens schema sections keeps the gauge section index 1`] = `
+"- title: string
+- description: string
+- filters: disabled, negate, controlled_by, data_view_id, label, is_multi_index, one of: (type*: condition, condition* (field*, negate, operator*: is|is_one_of|range|exists, value)) | (type*: group, group* (operator*: and|or, conditions*)) | (type*: dsl, dsl*, field, params) | (type*: spatial, dsl*)
+- sampling: number
+- ignore_global_filters: boolean
+- styling: shape (type*: bullet|circle|semi_circle|arc, orientation: horizontal|vertical)
+- metric: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), title (visible, text), subtitle, color (type*, range: absolute|percentage, steps, palette, shift), ticks (visible, mode: auto|bands), min (column*, label), max (column*, label), goal (column*, label)"
+`;
+
+exports[`Lens schema sections keeps the heatmap section index 1`] = `
+"- legend: truncate_after_lines, visibility: visible|hidden, position: top|bottom|left|right, size: auto|s|m|l|xl
+- title: string
+- description: string
+- filters: disabled, negate, controlled_by, data_view_id, label, is_multi_index, one of: (type*: condition, condition* (field*, negate, operator*: is|is_one_of|range|exists, value)) | (type*: group, group* (operator*: and|or, conditions*)) | (type*: dsl, dsl*, field, params) | (type*: spatial, dsl*)
+- sampling: number
+- ignore_global_filters: boolean
+- axis: x (title, labels, sort: asc|desc, scale*: ordinal|temporal|linear), y (title, labels, sort: asc|desc)
+- x: column*, label, format (type*, decimals, suffix, compact, from, to, pattern)
+- y: column*, label, format (type*, decimals, suffix, compact, from, to, pattern)
+- styling: cells (labels)
+- metric: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), color (type*: dynamic|distributed_palette|legacy_dynamic|auto, range: absolute|percentage, steps, palette, shift)"
+`;
+
+exports[`Lens schema sections keeps the metric section index 1`] = `
+"- title: string
+- description: string
+- filters: disabled, negate, controlled_by, data_view_id, label, is_multi_index, one of: (type*: condition, condition* (field*, negate, operator*: is|is_one_of|range|exists, value)) | (type*: group, group* (operator*: and|or, conditions*)) | (type*: dsl, dsl*, field, params) | (type*: spatial, dsl*)
+- sampling: number
+- ignore_global_filters: boolean
+- styling: density: compact|default, icon (name*, alignment: left|right), primary (position: top|middle|bottom, labels, value), secondary (label, value)
+- metrics: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), one of: (type*: primary, subtitle, color (type*, range: absolute|percentage, steps, palette, shift, color), apply_color_to: value|background, background_chart (type*: bar|trend, orientation: horizontal|vertical, max_value)) | (type*: secondary, compare (palette, icon, value, to*: baseline|primary, baseline), color (type*: static|none, color))
+- breakdown_by: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), columns, collapse_by: avg|sum|max|min"
+`;
+
+exports[`Lens schema sections keeps the mosaic section index 1`] = `
+"- title: string
+- description: string
+- filters: disabled, negate, controlled_by, data_view_id, label, is_multi_index, one of: (type*: condition, condition* (field*, negate, operator*: is|is_one_of|range|exists, value)) | (type*: group, group* (operator*: and|or, conditions*)) | (type*: dsl, dsl*, field, params) | (type*: spatial, dsl*)
+- sampling: number
+- ignore_global_filters: boolean
+- legend: nested, truncate_after_lines, visibility: auto|visible|hidden, size: auto|s|m|l|xl, position: top|bottom|left|right
+- styling: values (visible, mode: absolute|percentage, percent_decimals)
+- metric: column*, label, format (type*, decimals, suffix, compact, from, to, pattern)
+- group_by: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), color (mode*: categorical|gradient, palette*, mapping, unassigned, sort: asc|desc, gradient), collapse_by: avg|sum|max|min
+- group_breakdown_by: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), color (mode*: categorical|gradient, palette*, mapping, unassigned, sort: asc|desc, gradient), collapse_by: avg|sum|max|min"
+`;
+
+exports[`Lens schema sections keeps the pie section index 1`] = `
+"- title: string
+- description: string
+- filters: disabled, negate, controlled_by, data_view_id, label, is_multi_index, one of: (type*: condition, condition* (field*, negate, operator*: is|is_one_of|range|exists, value)) | (type*: group, group* (operator*: and|or, conditions*)) | (type*: dsl, dsl*, field, params) | (type*: spatial, dsl*)
+- sampling: number
+- ignore_global_filters: boolean
+- legend: nested, truncate_after_lines, visibility: auto|visible|hidden, size: auto|s|m|l|xl, position: top|bottom|left|right
+- styling: values (visible, mode: absolute|percentage, percent_decimals), labels (visible, position: inside|outside), donut_hole: none|s|m|l
+- metrics: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), color (type*: static|auto, color)
+- group_by: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), color (mode*: categorical|gradient, palette*, mapping, unassigned, sort: asc|desc, gradient), collapse_by: avg|sum|max|min"
+`;
+
+exports[`Lens schema sections keeps the region_map section index 1`] = `
+"- title: string
+- description: string
+- filters: disabled, negate, controlled_by, data_view_id, label, is_multi_index, one of: (type*: condition, condition* (field*, negate, operator*: is|is_one_of|range|exists, value)) | (type*: group, group* (operator*: and|or, conditions*)) | (type*: dsl, dsl*, field, params) | (type*: spatial, dsl*)
+- sampling: number
+- ignore_global_filters: boolean
+- metric: column*, label, format (type*, decimals, suffix, compact, from, to, pattern)
+- region: column*, label, ems (boundaries*, join*)"
+`;
+
+exports[`Lens schema sections keeps the tag_cloud section index 1`] = `
+"- title: string
+- description: string
+- filters: disabled, negate, controlled_by, data_view_id, label, is_multi_index, one of: (type*: condition, condition* (field*, negate, operator*: is|is_one_of|range|exists, value)) | (type*: group, group* (operator*: and|or, conditions*)) | (type*: dsl, dsl*, field, params) | (type*: spatial, dsl*)
+- sampling: number
+- ignore_global_filters: boolean
+- styling: orientation: horizontal|vertical|angled, font_size (min, max), caption (visible)
+- metric: column*, label, format (type*, decimals, suffix, compact, from, to, pattern)
+- tag_by: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), color (mode*: categorical|gradient, palette*, mapping, unassigned, sort: asc|desc, gradient)"
+`;
+
+exports[`Lens schema sections keeps the treemap section index 1`] = `
+"- title: string
+- description: string
+- filters: disabled, negate, controlled_by, data_view_id, label, is_multi_index, one of: (type*: condition, condition* (field*, negate, operator*: is|is_one_of|range|exists, value)) | (type*: group, group* (operator*: and|or, conditions*)) | (type*: dsl, dsl*, field, params) | (type*: spatial, dsl*)
+- sampling: number
+- ignore_global_filters: boolean
+- legend: nested, truncate_after_lines, visibility: auto|visible|hidden, size: auto|s|m|l|xl, position: top|bottom|left|right
+- styling: values (visible, mode: absolute|percentage, percent_decimals), labels (visible)
+- metrics: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), color (type*: static|auto, color)
+- group_by: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), color (mode*: categorical|gradient, palette*, mapping, unassigned, sort: asc|desc, gradient), collapse_by: avg|sum|max|min"
+`;
+
+exports[`Lens schema sections keeps the waffle section index 1`] = `
+"- title: string
+- description: string
+- filters: disabled, negate, controlled_by, data_view_id, label, is_multi_index, one of: (type*: condition, condition* (field*, negate, operator*: is|is_one_of|range|exists, value)) | (type*: group, group* (operator*: and|or, conditions*)) | (type*: dsl, dsl*, field, params) | (type*: spatial, dsl*)
+- sampling: number
+- ignore_global_filters: boolean
+- legend: values: absolute, truncate_after_lines, visibility: auto|visible|hidden, size: auto|s|m|l|xl, position: top|bottom|left|right
+- styling: values (visible, mode: absolute|percentage, percent_decimals)
+- metrics: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), color (type*: static|auto, color)
+- group_by: column*, label, format (type*, decimals, suffix, compact, from, to, pattern), color (mode*: categorical|gradient, palette*, mapping, unassigned, sort: asc|desc, gradient), collapse_by: avg|sum|max|min"
+`;
+
+exports[`Lens schema sections keeps the xy section index 1`] = `
+"- title: string
+- description: string
+- filters: disabled, negate, controlled_by, data_view_id, label, is_multi_index, one of: (type*: condition, condition* (field*, negate, operator*: is|is_one_of|range|exists, value)) | (type*: group, group* (operator*: and|or, conditions*)) | (type*: dsl, dsl*, field, params) | (type*: spatial, dsl*)
+- legend: visibility: auto|visible|hidden, statistics: min|max|avg|median|range|last_value|last_non_null_value|first_value|first_non_null_value|difference|difference_percentage|count|total|standard_deviation|variance|distinct_count|current_and_last_value, series_header (visible, text), one of: (placement: outside, layout (type*: grid|list, truncate), position: top|bottom) | (placement: outside, layout (type*: grid, truncate), position: left|right, size: auto|s|m|l|xl) | (placement*: inside, layout (type*: grid, truncate), columns, position: top_left|top_right|bottom_left|bottom_right)
+- axis: x (title, ticks, grid, labels, scale: ordinal|temporal|linear, domain), y (title, ticks, grid, labels, scale: linear|log|sqrt, domain), y2 (title, ticks, grid, labels, scale: linear|log|sqrt, domain)
+- styling: overlays (partial_buckets, current_time_marker), fitting (type*, emphasize, extend: none|zero|nearest), interpolation: linear|smooth|stepped, points (visibility: auto|visible|hidden), areas (fill_opacity, fill: solid|gradient), bars (minimum_height, data_labels)
+- layers: sampling, ignore_global_filters, type*: area|area_percentage|area_stacked|bar|bar_horizontal|bar_horizontal_stacked|bar_horizontal_percentage|bar_percentage|bar_stacked|line, breakdown_by (column*, label, format, color, collapse_by: avg|sum|max|min), y* (column*, label, format, axis: y|y2, color), x (column*, label, format)"
+`;

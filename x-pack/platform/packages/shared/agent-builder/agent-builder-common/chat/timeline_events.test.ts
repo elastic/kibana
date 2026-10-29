@@ -5,14 +5,31 @@
  * 2.0.
  */
 
+import type { AttachmentTimelineEvent, ConversationEvent } from './timeline_events';
 import {
+  ATTACHMENT_EVENT_FORMAT,
   BUILT_IN_CONVERSATION_EVENT_TYPES,
+  ConversationActivityEventType,
   EventActorType,
   TimelineEventType,
+  answeredPromptRequestIds,
+  assertValidConversationEventType,
+  getEventActorDisplayName,
+  interruptionOfTerminal,
+  isActivityEvent,
   isAttachmentEvent,
   isBuiltInConversationEventType,
+  isCurrentFormatAttachmentEvent,
+  isCustomConversationEvent,
   isExecutionTerminalEvent,
+  isTimelineEvent,
+  lastExecutionTerminal,
+  parseExecutionId,
+  pendingPromptRequest,
+  resumeExecutionId,
+  timelineExecutionId,
 } from './timeline_events';
+import { AgentPromptType } from '../agents/prompts';
 
 describe('isExecutionTerminalEvent', () => {
   it.each([
@@ -57,4 +74,281 @@ describe('attachment timeline events', () => {
       expect(BUILT_IN_CONVERSATION_EVENT_TYPES).toContain(type);
     }
   );
+});
+
+describe('activity events', () => {
+  const actor = { type: EventActorType.user, id: 'u1' };
+  const activityTypes = Object.values(ConversationActivityEventType);
+
+  it.each(activityTypes)('%s is an activity event and a built-in type', (type) => {
+    const event = { id: 'e1', type, data: {}, created_at: 'now', actor };
+    expect(isActivityEvent(event)).toBe(true);
+    expect(isBuiltInConversationEventType(type)).toBe(true);
+    expect(BUILT_IN_CONVERSATION_EVENT_TYPES).toContain(type);
+  });
+
+  it.each(activityTypes)('%s is neither a timeline event nor a custom event', (type) => {
+    const event = { id: 'e1', type, data: {}, created_at: 'now', actor };
+    expect(isTimelineEvent(event)).toBe(false);
+    expect(isCustomConversationEvent(event)).toBe(false);
+  });
+
+  it('classifies timeline, attachment and custom events', () => {
+    const userMessage = { type: TimelineEventType.userMessage };
+    const custom = { type: 'my_custom_event' };
+
+    expect(isActivityEvent(userMessage)).toBe(false);
+    expect(isCustomConversationEvent(userMessage)).toBe(false);
+    expect(isCustomConversationEvent(custom)).toBe(true);
+    expect(isActivityEvent(custom)).toBe(false);
+  });
+
+  it.each([
+    TimelineEventType.attachmentAdded,
+    TimelineEventType.attachmentUpdated,
+    TimelineEventType.attachmentDeleted,
+  ])('%s is both a timeline event and an activity event', (type) => {
+    const event = { id: 'e1', type, data: {}, created_at: 'now', actor };
+    expect(isTimelineEvent(event)).toBe(true);
+    expect(isActivityEvent(event)).toBe(true);
+    expect(isCustomConversationEvent(event)).toBe(false);
+  });
+});
+
+describe('assertValidConversationEventType', () => {
+  it('accepts a valid custom type', () => {
+    expect(() => assertValidConversationEventType('my.custom_event')).not.toThrow();
+    expect(() => assertValidConversationEventType('text_note')).not.toThrow();
+    expect(() => assertValidConversationEventType('a.b.c')).not.toThrow();
+  });
+
+  it('throws when the type contains the id delimiter "::"', () => {
+    expect(() => assertValidConversationEventType('bad::type')).toThrow('must not contain "::"');
+  });
+
+  it('throws when the type is the reserved word "execution"', () => {
+    expect(() => assertValidConversationEventType('execution')).toThrow('reserved');
+  });
+
+  it('throws when the type is the reserved word "step"', () => {
+    expect(() => assertValidConversationEventType('step')).toThrow('reserved');
+  });
+
+  it('throws for every built-in event type', () => {
+    for (const builtInType of BUILT_IN_CONVERSATION_EVENT_TYPES) {
+      expect(() => assertValidConversationEventType(builtInType)).toThrow('built-in event type');
+    }
+  });
+});
+
+const agent = { type: EventActorType.agent, id: 'agent-1' };
+const user = { type: EventActorType.user, id: 'u1' };
+const usage = { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 };
+
+const paused = (id: string, executionId: string): ConversationEvent => ({
+  id,
+  type: TimelineEventType.executionTerminated,
+  created_at: '2026-01-01T00:00:00.000Z',
+  actor: agent,
+  execution_id: executionId,
+  data: {
+    model_usage: usage,
+    time_to_first_token: 1,
+    time_to_last_token: 2,
+    outcome: {
+      type: 'prompt_requested',
+      prompts: [{ id: 'p1', type: AgentPromptType.ask_user_question, questions: [] }],
+    },
+  },
+});
+
+const responded = (id: string, executionId: string): ConversationEvent => ({
+  id,
+  type: TimelineEventType.executionTerminated,
+  created_at: '2026-01-01T00:00:00.000Z',
+  actor: agent,
+  execution_id: executionId,
+  data: {
+    model_usage: usage,
+    time_to_first_token: 1,
+    time_to_last_token: 2,
+    outcome: { type: 'responded', response: { message: 'ok' } },
+  },
+});
+
+const promptResponse = (id: string, answers: string): ConversationEvent => ({
+  id,
+  type: TimelineEventType.promptResponse,
+  created_at: '2026-01-01T00:01:00.000Z',
+  actor: user,
+  data: { prompt_requested_event_id: answers, responses: {} },
+});
+
+const failed = (id: string, executionId: string): ConversationEvent => ({
+  id,
+  type: TimelineEventType.executionFailed,
+  created_at: '2026-01-01T00:02:00.000Z',
+  actor: agent,
+  execution_id: executionId,
+  data: { time_to_last_token: 3, error: { code: 'internalError', message: 'boom' } },
+});
+
+const aborted = (id: string, executionId: string, source?: 'api'): ConversationEvent => ({
+  id,
+  type: TimelineEventType.executionAborted,
+  created_at: '2026-01-01T00:02:00.000Z',
+  actor: agent,
+  execution_id: executionId,
+  data: { time_to_last_token: 3, ...(source ? { aborted_by: { source } } : {}) },
+});
+
+describe('answeredPromptRequestIds', () => {
+  it('is empty without prompt responses', () => {
+    expect(answeredPromptRequestIds([paused('t0', 'r1::execution')])).toEqual(new Set());
+  });
+
+  it('collects one and several answered request ids', () => {
+    expect(
+      answeredPromptRequestIds([paused('t0', 'r1::execution'), promptResponse('pr1', 't0')])
+    ).toEqual(new Set(['t0']));
+    expect(
+      answeredPromptRequestIds([
+        promptResponse('pr1', 't0'),
+        promptResponse('pr2', 't0'),
+        promptResponse('pr3', 't5'),
+      ])
+    ).toEqual(new Set(['t0', 't5']));
+  });
+});
+
+describe('lastExecutionTerminal', () => {
+  it('returns undefined without terminals', () => {
+    expect(lastExecutionTerminal([promptResponse('pr1', 't0')])).toBeUndefined();
+  });
+
+  it('picks an interrupted terminal over an earlier execution_terminated', () => {
+    const events = [paused('t0', 'r1::execution'), failed('f1', 'r1::execution::1')];
+    expect(lastExecutionTerminal(events)?.id).toBe('f1');
+  });
+});
+
+describe('pendingPromptRequest', () => {
+  it('is the unanswered pause', () => {
+    expect(pendingPromptRequest([paused('t0', 'r1::execution')])?.id).toBe('t0');
+  });
+
+  it('is undefined once the pause is answered', () => {
+    expect(
+      pendingPromptRequest([paused('t0', 'r1::execution'), promptResponse('pr1', 't0')])
+    ).toBeUndefined();
+  });
+
+  it('is undefined when the last terminal is interrupted', () => {
+    expect(
+      pendingPromptRequest([
+        paused('t0', 'r1::execution'),
+        promptResponse('pr1', 't0'),
+        failed('f1', 'r1::execution::1'),
+      ])
+    ).toBeUndefined();
+    expect(pendingPromptRequest([aborted('a1', 'r1::execution')])).toBeUndefined();
+  });
+
+  it('is undefined when the last terminal responded', () => {
+    expect(pendingPromptRequest([responded('t0', 'r1::execution')])).toBeUndefined();
+  });
+
+  it('does not mistake an earlier pause for pending behind an interrupted round', () => {
+    expect(
+      pendingPromptRequest([paused('t0', 'r1::execution'), aborted('a2', 'r2::execution')])
+    ).toBeUndefined();
+  });
+});
+
+describe('interruptionOfTerminal', () => {
+  it('maps a failed terminal', () => {
+    expect(interruptionOfTerminal(failed('f1', 'r1::execution') as never)).toEqual({
+      type: 'failed',
+      error: { code: 'internalError', message: 'boom' },
+    });
+  });
+
+  it('maps an aborted terminal with and without aborted_by', () => {
+    expect(interruptionOfTerminal(aborted('a1', 'r1::execution') as never)).toEqual({
+      type: 'aborted',
+    });
+    expect(interruptionOfTerminal(aborted('a1', 'r1::execution', 'api') as never)).toEqual({
+      type: 'aborted',
+      aborted_by: { source: 'api' },
+    });
+  });
+});
+
+describe('attachment events', () => {
+  const restored: AttachmentTimelineEvent = {
+    id: 'e1',
+    type: TimelineEventType.attachmentRestored,
+    created_at: '2026-01-01T00:00:00.000Z',
+    actor: { type: EventActorType.user, id: 'u1' },
+    data: { attachment_id: 'a1', attachment_type: 'text', current_version: 2, source: 'http_api' },
+  };
+
+  it('treats attachment_restored as an attachment event', () => {
+    expect(isAttachmentEvent(restored)).toBe(true);
+  });
+
+  it('tells events written in the current format from older ones', () => {
+    expect(isCurrentFormatAttachmentEvent(restored)).toBe(false);
+    expect(
+      isCurrentFormatAttachmentEvent({
+        ...restored,
+        data: { ...restored.data, format: ATTACHMENT_EVENT_FORMAT },
+      })
+    ).toBe(true);
+  });
+});
+
+describe('timelineExecutionId', () => {
+  it('names the initial run of a round', () => {
+    expect(timelineExecutionId('round-1', 0)).toBe('round-1::execution');
+  });
+
+  it('names a resume the same way resumeExecutionId does', () => {
+    expect(timelineExecutionId('round-1', 2)).toBe(resumeExecutionId('round-1', 2));
+    expect(timelineExecutionId('round-1', 2)).toBe('round-1::execution::2');
+  });
+
+  it('round-trips through parseExecutionId', () => {
+    expect(parseExecutionId(timelineExecutionId('round-1', 0))).toEqual({
+      roundId: 'round-1',
+      index: 0,
+    });
+    expect(parseExecutionId(timelineExecutionId('round-1', 3))).toEqual({
+      roundId: 'round-1',
+      index: 3,
+    });
+  });
+});
+
+describe('getEventActorDisplayName', () => {
+  it('prefers the full name', () => {
+    expect(
+      getEventActorDisplayName({
+        type: EventActorType.user,
+        id: 'u1',
+        username: 'jdoe',
+        full_name: 'Jane Doe',
+      })
+    ).toBe('Jane Doe');
+  });
+
+  it('falls back to the username', () => {
+    expect(
+      getEventActorDisplayName({ type: EventActorType.user, id: 'u1', username: 'jdoe' })
+    ).toBe('jdoe');
+  });
+
+  it('returns undefined when the actor has no name', () => {
+    expect(getEventActorDisplayName({ type: EventActorType.system, id: 'kibana' })).toBeUndefined();
+  });
 });

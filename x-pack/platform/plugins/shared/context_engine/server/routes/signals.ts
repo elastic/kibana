@@ -15,8 +15,8 @@ import {
   MAX_SIGNAL_GROUPS,
   MAX_SIGNALS_PAGE_SIZE,
   SIGNALS_INTERNAL_API_VERSION,
-  signalGroupsPath,
-  signalsPath,
+  SIGNAL_GROUPS_PATH,
+  SIGNALS_PATH,
 } from '../../common/constants';
 import type {
   ListSignalGroupsResponse,
@@ -76,7 +76,7 @@ export const registerSignalRoutes = ({
   // Preaggregated grouped-by-tag list.
   router.versioned
     .get({
-      path: signalGroupsPath,
+      path: SIGNAL_GROUPS_PATH,
       security: READ_SECURITY,
       access: 'internal',
       summary: 'List signal groups',
@@ -102,7 +102,7 @@ export const registerSignalRoutes = ({
   // Per-group signals (paginated).
   router.versioned
     .get({
-      path: signalsPath,
+      path: SIGNALS_PATH,
       security: READ_SECURITY,
       access: 'internal',
       summary: 'List signals for a tag',

@@ -10,48 +10,40 @@ import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../../../../hooks';
+import {
+  AWS_ONBOARDING_PACKAGE_NAME,
+  AWS_TITLE,
+  ONBOARDING_APP_ID,
+  ONBOARDING_AWS_PATH,
+  ONBOARDING_ENABLED_FLAG,
+  getSearchMembers,
+  isHiddenByAwsOnboarding,
+} from '../../../../../../../services/aws_onboarding_override';
 
 import type { IntegrationCardItem } from '..';
 
-// Keep in sync with @kbn/ingest-hub-plugin/common/constants
-const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
-const AWS_TITLE = i18n.translate('xpack.fleet.onboardingOverride.awsTitle', {
-  defaultMessage: 'Amazon Web Services',
-});
 const AWS_DESCRIPTION = i18n.translate('xpack.fleet.onboardingOverride.awsDescription', {
   defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).',
 });
 
-// hiding tiles that are included in the AWS onboarding flow: https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ingest_hub/public/onboarding/aws_service_matrix.ts#L188
-const HIDDEN_TILE_NAMES = new Set([
-  'aws',
-  'aws_bedrock',
-  'aws_bedrock_agentcore',
-  'aws_cloudwatch_input_otel',
-  'aws_logs',
-  'aws_mq',
-  'awsfargate',
-  'awsfirehose',
-  'aws_securityhub',
-  'aws_cloudtrail_otel',
-  'aws_ec2_otel',
-  'aws_ecs_otel',
-  'aws_elb_metrics_otel',
-  'aws_elb_otel',
-  'aws_lambda_otel',
-  'aws_rds_otel',
-  'aws_sqs_otel',
-  'aws_vpcflow_otel',
-  'aws_waf_otel',
-]);
-const HIDDEN_TILE_IDS = new Set(['epr:aws']);
+export { AWS_ONBOARDING_PACKAGE_NAME };
 
 export function useOnboardingOverride() {
   const { featureFlags, application } = useStartServices();
-  const isOnboardingEnabled = featureFlags.getBooleanValue(ONBOARDING_ENABLED_FLAG, false);
+  const isOnboardingEnabled = featureFlags.useBooleanValue(ONBOARDING_ENABLED_FLAG, false);
 
+  const onboardingUrl = useMemo(
+    () => application.getUrlForApp(ONBOARDING_APP_ID, { path: ONBOARDING_AWS_PATH }),
+    [application]
+  );
+
+  // `newSession` makes the onboarding app drop session storage left over from an earlier run.
+  // `returnUrl` is the page the user came from, where cancelling the flow takes them back.
   const navigateToOnboarding = useCallback(() => {
-    application.navigateToApp('onboarding', { path: '/aws', state: { newSession: true } });
+    application.navigateToApp(ONBOARDING_APP_ID, {
+      path: ONBOARDING_AWS_PATH,
+      state: { newSession: true, returnUrl: window.location.href },
+    });
   }, [application]);
 
   const applyOnboardingOverride = useMemo(() => {
@@ -60,26 +52,44 @@ export function useOnboardingOverride() {
         return cards;
       }
 
-      const filtered = cards.filter(
-        (card) => !HIDDEN_TILE_NAMES.has(card.name) && !HIDDEN_TILE_IDS.has(card.id)
-      );
+      const filtered: IntegrationCardItem[] = [];
+      const hidden: IntegrationCardItem[] = [];
+      for (const card of cards) {
+        if (isHiddenByAwsOnboarding(card.name, card.id)) {
+          hidden.push(card);
+        } else {
+          filtered.push(card);
+        }
+      }
+
+      // The hidden tiles are the services the onboarding flow covers. Index their text on the
+      // onboarding tile so searching for a service still finds it.
+      const members = getSearchMembers(hidden);
+      const searchableContent = hidden
+        .flatMap((card) => [card.integration, card.title, card.description])
+        .filter(Boolean)
+        .join(' ');
+      const categories = [...new Set(['aws', ...hidden.flatMap((card) => card.categories)])];
 
       const onboardingAwsTile: IntegrationCardItem = {
         id: 'epr:aws',
         title: AWS_TITLE,
         description: AWS_DESCRIPTION,
         icons: [{ type: 'eui', src: 'logoAWS' }],
-        url: application.getUrlForApp('onboarding', { path: '/aws' }),
+        url: onboardingUrl,
         integration: 'aws',
         name: 'aws-onboarding',
         version: '',
-        categories: ['aws'],
+        categories,
+        searchableContent,
+        searchMembers: members,
+        ...(members.length > 0 ? { collectionSize: members.length } : {}),
         onCardClick: navigateToOnboarding,
       };
 
       return [onboardingAwsTile, ...filtered];
     };
-  }, [isOnboardingEnabled, navigateToOnboarding, application]);
+  }, [isOnboardingEnabled, navigateToOnboarding, onboardingUrl]);
 
-  return { applyOnboardingOverride, isOnboardingEnabled };
+  return { applyOnboardingOverride, isOnboardingEnabled, navigateToOnboarding, onboardingUrl };
 }

@@ -14,6 +14,7 @@ import {
   indexPatternNameForTest,
   setSearchResponseLatency,
   setupEnvironment,
+  spyIndexPatternGetByName,
 } from './helpers';
 import {
   setup,
@@ -21,8 +22,9 @@ import {
   getSearchCallMeta,
   setSearchResponse,
 } from './field_editor_flyout_preview.helpers';
+import { mockDebounce } from './helpers/jest.mocks';
 import { spyGetFieldsForWildcard } from './helpers/setup_environment';
-import { screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 
 describe('Field editor Preview panel', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -306,6 +308,36 @@ describe('Field editor Preview panel', () => {
       ]);
     });
 
+    it('should display all the values when the script emits multiple values', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['a', 'b'] });
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, getRenderedFieldsPreview, toggleFormRow },
+      } = await setup();
+
+      await toggleFormRow('value');
+      await fields.updateName('myRuntimeField');
+      await fields.updateScript("emit('a'); emit('b');");
+      await flushPreviewAndSearchTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: '[a, b]' }]);
+    });
+
+    it('should display "Value not set" when the script emits no value', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: [] });
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, getRenderedFieldsPreview, toggleFormRow },
+      } = await setup();
+
+      await toggleFormRow('value');
+      await fields.updateName('myRuntimeField');
+      await fields.updateScript("if (false) { emit('a'); }");
+      await flushPreviewAndSearchTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'Value not set' },
+      ]);
+    });
+
     describe('read from _source', () => {
       it('should display the _source value when no script is provided and the name matched one of the fields in _source', async () => {
         const {
@@ -352,6 +384,76 @@ describe('Field editor Preview panel', () => {
           { key: 'description', value: 'First doc - description' },
         ]);
       });
+    });
+  });
+
+  describe('custom label', () => {
+    it('should display the custom label in the preview row when set', async () => {
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, getRenderedFieldsPreview, toggleFormRow },
+      } = await setup();
+
+      await toggleFormRow('value');
+      await fields.updateName('myRuntimeField');
+      await fields.updateScript('echo("hello")');
+      await flushPreviewAndSearchTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'mockedScriptValue' },
+      ]);
+
+      await toggleFormRow('customLabel');
+      await fields.updateCustomLabel('My custom label');
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'My custom label', value: 'mockedScriptValue' },
+      ]);
+
+      // Toggling the custom label off falls back to the field name
+      await toggleFormRow('customLabel', 'off');
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'mockedScriptValue' },
+      ]);
+    });
+
+    it('should display the custom label of the field being edited', async () => {
+      const field = {
+        name: 'foo',
+        type: 'keyword' as const,
+        customLabel: 'Foo label',
+        script: {
+          source: 'emit("hello")',
+        },
+      };
+
+      const {
+        actions: { flushPreviewAndSearchTimers, getRenderedFieldsPreview },
+      } = await setup({ fieldToEdit: field });
+
+      await flushPreviewAndSearchTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'Foo label', value: 'mockedScriptValue' },
+      ]);
+    });
+
+    it('should not apply the custom label to composite subfield rows', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: { 'composite_field.a': [1] } });
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, getRenderedFieldsPreview, toggleFormRow },
+      } = await setup();
+
+      await fields.updateName('myComposite');
+      await toggleFormRow('customLabel');
+      await fields.updateCustomLabel('My custom label');
+
+      await fields.updateType('Composite');
+      await fields.updateScript("emit('a',1)");
+      await flushPreviewAndSearchTimers();
+
+      // Composite subfields are identified by "<parent>.<subfield>", the label does not apply
+      expect(getRenderedFieldsPreview()).toEqual([{ key: 'myComposite.a', value: '1' }]);
     });
   });
 
@@ -519,6 +621,137 @@ describe('Field editor Preview panel', () => {
     });
   });
 
+  describe('responses of requests that are no longer current', () => {
+    beforeEach(() => {
+      mockDebounce.useRealImplementation = true;
+    });
+
+    afterEach(() => {
+      mockDebounce.useRealImplementation = false;
+    });
+
+    const advanceDebounce = async () => {
+      await act(async () => {
+        jest.advanceTimersByTime(500);
+      });
+    };
+
+    // Unlike fields.updateScript(), this does not clear the input first, which would temporarily
+    // empty the script and reset the cache of the last _execute params.
+    const replaceScript = async (value: string) => {
+      await act(async () => {
+        fireEvent.change(screen.getByTestId('scriptField'), { target: { value } });
+        jest.advanceTimersByTime(0);
+      });
+    };
+
+    const resolveRequest = async (
+      pending: ReturnType<typeof httpRequestsMockHelpers.deferFieldPreviewResponses>,
+      index: number,
+      body: Record<string, unknown>
+    ) => {
+      await act(async () => {
+        pending.resolveRequest(index, body);
+      });
+    };
+
+    it('should not invalidate the script with the error of a stale request', async () => {
+      const pending = httpRequestsMockHelpers.deferFieldPreviewResponses();
+      const onSave = jest.fn();
+      // The new field name must not clash with the fields of the data view
+      spyIndexPatternGetByName.mockReturnValue(undefined);
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, saveField, toggleFormRow },
+      } = await setup({ onSave });
+
+      await fields.updateName('someName');
+      await toggleFormRow('value');
+      await flushPreviewAndSearchTimers(); // wait for the docs to be fetched
+
+      await fields.updateScript('bad()');
+      await advanceDebounce();
+      expect(pending.getRequestCount()).toBe(1); // request A is in flight
+
+      await fields.updateScript('echo("ok")');
+      const error = createPreviewError({ reason: 'Houston we got a problem' });
+      await resolveRequest(pending, 0, { values: [], error, status: 400 });
+
+      await advanceDebounce();
+      expect(pending.getRequestCount()).toBe(2);
+      await resolveRequest(pending, 1, { values: ['ok'] });
+      await flushPreviewAndSearchTimers();
+
+      expect(screen.queryByText('Invalid Painless script.')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('scriptErrorBadge')).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Save' })).not.toBeDisabled();
+
+      await saveField();
+      await flushPreviewAndSearchTimers();
+      expect(onSave).toHaveBeenCalledTimes(1);
+    });
+
+    it('should issue a new request when the script goes back to the one of the in-flight request', async () => {
+      const pending = httpRequestsMockHelpers.deferFieldPreviewResponses();
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, getRenderedFieldsPreview, toggleFormRow },
+      } = await setup();
+
+      await fields.updateName('myRuntimeField');
+      await toggleFormRow('value');
+      await flushPreviewAndSearchTimers(); // wait for the docs to be fetched
+
+      await fields.updateScript('echo("a")');
+      await advanceDebounce();
+      expect(pending.getRequestCount()).toBe(1); // request A is in flight
+
+      // Change the script and go back to the one of A within the debounce
+      await replaceScript('echo("b")');
+      await replaceScript('echo("a")');
+
+      // The response of A is discarded
+      await resolveRequest(pending, 0, { values: ['stale'] });
+      expect(getRenderedFieldsPreview()).not.toContainEqual({
+        key: 'myRuntimeField',
+        value: 'stale',
+      });
+
+      await advanceDebounce();
+      expect(pending.getRequestCount()).toBe(2);
+
+      await resolveRequest(pending, 1, { values: ['fresh'] });
+      await flushPreviewAndSearchTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField', value: 'fresh' }]);
+      expect(screen.queryByTestId('isUpdatingIndicator')).not.toBeInTheDocument();
+    });
+
+    it('should not issue extra requests when no request is in flight', async () => {
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, toggleFormRow },
+      } = await setup();
+
+      await fields.updateName('myRuntimeField');
+      await toggleFormRow('value');
+      await flushPreviewAndSearchTimers();
+
+      const getRequestCount = () => server.post.mock.calls.length;
+      const initialCount = getRequestCount();
+
+      await fields.updateScript('echo("a")');
+      await flushPreviewAndSearchTimers();
+      expect(getRequestCount()).toBe(initialCount + 1);
+
+      // Not an _execute param
+      await fields.updateName('nameChanged');
+      await flushPreviewAndSearchTimers();
+      expect(getRequestCount()).toBe(initialCount + 1);
+
+      await fields.updateScript('echo("b")');
+      await flushPreviewAndSearchTimers();
+      expect(getRequestCount()).toBe(initialCount + 2);
+    });
+  });
+
   describe('Cluster document load and navigation', () => {
     const docContent = {
       title: 'loaded doc - title',
@@ -650,6 +883,8 @@ describe('Field editor Preview panel', () => {
       expect(screen.queryByTestId('documentsNav')).not.toBeInTheDocument();
       // There should be a link to load back the cluster data
       expect(screen.queryByTestId('loadDocsFromClusterButton')).toBeVisible();
+      // The header indicates that the preview is based on a custom document
+      expect(screen.getByTestId('subTitle')).toHaveTextContent('From: Custom data');
     });
 
     it('should load back the cluster data after providing a custom ID', async () => {
@@ -685,6 +920,132 @@ describe('Field editor Preview panel', () => {
       expect(getRenderedFieldsPreview()).toEqual([
         { key: 'myRuntimeField', value: 'clusterDataDocPreview' },
       ]);
+      // ...and the header points back to the cluster data
+      expect(screen.getByTestId('subTitle')).toHaveTextContent(`From: ${indexPatternNameForTest}`);
+    });
+
+    it('should keep the preview row visible while the cluster documents are being fetched', async () => {
+      const {
+        actions: {
+          fields,
+          flushDocumentsAndPreviewTimers,
+          flushPreviewAndSearchTimers,
+          getRenderedFieldsPreview,
+          setDocumentId,
+          toggleFormRow,
+        },
+      } = await setup();
+
+      await toggleFormRow('value');
+      await fields.updateName('myRuntimeField');
+      await fields.updateScript('echo("hello world")');
+      await flushPreviewAndSearchTimers(); // fetch preview
+
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['loadedDocPreview'] });
+      setSearchResponse([customLoadedDoc]);
+
+      // Load a custom document ID
+      await setDocumentId('123456');
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'loadedDocPreview' },
+      ]);
+
+      // Load back the cluster data, with some latency to observe the state while loading
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['clusterDataDocPreview'] });
+      setSearchResponse(mockDocuments);
+      setSearchResponseLatency(2000);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('loadDocsFromClusterButton'));
+      });
+
+      // While the documents are being fetched the preview row must stay visible,
+      // with the updating indicator in place of the value
+      expect(screen.queryAllByTestId('fieldPreviewItem').length).toBe(1);
+      expect(getRenderedFieldsPreview()[0].key).toBe('myRuntimeField');
+      expect(screen.queryAllByTestId('isUpdatingIndicator').length).toBeGreaterThan(0);
+
+      await flushDocumentsAndPreviewTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'clusterDataDocPreview' },
+      ]);
+    });
+
+    it('should clear the error state when the document ID is cleared', async () => {
+      const {
+        actions: {
+          fields,
+          getRenderedIndexPatternFields,
+          loadDocumentsFromCluster,
+          setDocumentId,
+          toggleFormRow,
+        },
+      } = await setup();
+
+      await fields.updateName('myRuntimeField');
+      await toggleFormRow('value');
+
+      // We will return no document from the search
+      setSearchResponse([]);
+
+      await setDocumentId('wrongID');
+
+      expect(screen.queryByTestId('fetchDocError')).toBeVisible();
+      expect(screen.queryByText('Document ID not found')).toBeVisible();
+
+      // Clear the document ID
+      setSearchResponse(mockDocuments);
+      await setDocumentId('');
+
+      // The error is gone and the field list (of the last loaded documents) is visible again
+      expect(screen.queryByTestId('fetchDocError')).not.toBeInTheDocument();
+      expect(screen.queryByText('Document ID not found')).not.toBeInTheDocument();
+      expect(screen.getByTestId('documentIdField')).toHaveValue('');
+      expect(getRenderedIndexPatternFields()[0]).toEqual({
+        key: 'description',
+        value: 'First doc - description',
+      });
+
+      // We are still in "custom document" mode: no nav buttons, but a link
+      // back to the cluster documents
+      expect(screen.queryByTestId('documentsNav')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('loadDocsFromClusterButton')).toBeVisible();
+
+      await loadDocumentsFromCluster();
+
+      expect(screen.queryByTestId('documentsNav')).toBeVisible();
+      expect(screen.queryByTestId('loadDocsFromClusterButton')).not.toBeInTheDocument();
+    });
+
+    it('should discard a pending document lookup when the ID is cleared', async () => {
+      const {
+        actions: { fields, flushDocumentsAndPreviewTimers, toggleFormRow },
+      } = await setup();
+
+      await fields.updateName('myRuntimeField');
+      await toggleFormRow('value');
+
+      // The next lookup will not find any document and would set an error...
+      setSearchResponse([]);
+      setSearchResponseLatency(2000);
+
+      const input = screen.getByTestId('documentIdField');
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'unknownId' } });
+      });
+
+      // ...but the ID is cleared while the request is in flight
+      await act(async () => {
+        fireEvent.change(input, { target: { value: '' } });
+      });
+
+      await flushDocumentsAndPreviewTimers();
+
+      // The stale "not found" response must not put the preview in an error state
+      expect(screen.queryByTestId('fetchDocError')).not.toBeInTheDocument();
+      expect(screen.queryByText('Document ID not found')).not.toBeInTheDocument();
+      expect(input).toHaveValue('');
     });
 
     it('should not lose the state of single document vs cluster data after toggling on/off the empty prompt', async () => {
@@ -805,6 +1166,32 @@ describe('Field editor Preview panel', () => {
       expect(screen.queryByTestId('compositeEditor')).toBeVisible();
     });
 
+    it('should preserve the script when switching to and from the composite type', async () => {
+      const script = 'emit("bar", 1)';
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, toggleFormRow },
+      } = await setup();
+
+      await toggleFormRow('value');
+      await fields.updateScript(script);
+
+      await fields.updateType('Composite');
+      await flushPreviewAndSearchTimers();
+      expect(screen.getByTestId('compositeEditor')).toBeVisible();
+      expect(screen.getByTestId('scriptField')).toHaveValue(script);
+
+      await fields.updateType('Keyword');
+      await flushPreviewAndSearchTimers();
+      expect(screen.getByRole('switch', { name: 'Set value' })).toBeChecked();
+      expect(screen.getByTestId('scriptField')).toHaveValue(script);
+
+      // a cleared script must not be restored from a previous type switch
+      await fields.updateScript('');
+      await fields.updateType('Composite');
+      await flushPreviewAndSearchTimers();
+      expect(screen.getByTestId('scriptField')).toHaveValue('');
+    });
+
     it('should show composite field types and update appropriately', async () => {
       httpRequestsMockHelpers.setFieldPreviewResponse({ values: { 'composite_field.a': [1] } });
       const {
@@ -833,6 +1220,21 @@ describe('Field editor Preview panel', () => {
       await flushPreviewAndSearchTimers();
       expect(screen.queryByTestId('typeField_0')).toBeVisible();
       expect(screen.queryByTestId('typeField_1')).not.toBeInTheDocument();
+    });
+
+    it('should display all the values of a multi-value subfield and detect its type', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: { 'composite_field.a': [1, 2] } });
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, getRenderedFieldsPreview },
+      } = await setup();
+
+      await fields.updateName('myRuntimeField');
+      await fields.updateType('Composite');
+      await fields.updateScript("emit('a',1); emit('a',2)");
+      await flushPreviewAndSearchTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([{ key: 'myRuntimeField.a', value: '[1, 2]' }]);
+      expect(screen.getByTestId('typeField_0')).toHaveValue('double');
     });
   });
 });

@@ -7,6 +7,9 @@
 
 export const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';
 
+/** Fallback relative window when a visualization has no explicit time range. */
+export const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
+
 /**
  * Upper bound for a serialized Vega/Vega-Lite spec. Generous enough for layered /
  * faceted specs, but bounded so an oversized spec cannot be stored (in a

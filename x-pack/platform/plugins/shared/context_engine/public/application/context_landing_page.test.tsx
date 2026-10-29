@@ -6,7 +6,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { contentListQueryClient } from '@kbn/content-list-provider';
 import { createAppChromeMock } from './test_utils/app_chrome_mock';
@@ -23,6 +23,7 @@ import { AI_INDICES_PER_PAGE } from './utils/ai_index_content_list_utils';
 const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],
@@ -71,25 +72,27 @@ const mockContextEngineHttpGet = (
   });
 };
 
-const renderWithProviders = (core: CoreStart) =>
+const renderWithProviders = (core: ReturnType<typeof createCore>) =>
   render(
-    <I18nProvider>
-      <EuiProvider>
-        <KibanaContextProvider
-          services={{
-            ...core,
-            history: scopedHistoryMock.create(),
-            appChrome: createAppChromeMock(),
-          }}
-        >
-          <QueryClientProvider client={createTestQueryClient()}>
-            <MemoryRouter>
-              <ContextLandingPage />
-            </MemoryRouter>
-          </QueryClientProvider>
-        </KibanaContextProvider>
-      </EuiProvider>
-    </I18nProvider>
+    <MockAppHeaderProvider>
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider
+            services={{
+              ...core,
+              history: scopedHistoryMock.create(),
+              appChrome: createAppChromeMock(),
+            }}
+          >
+            <QueryClientProvider client={createTestQueryClient()}>
+              <MemoryRouter>
+                <ContextLandingPage />
+              </MemoryRouter>
+            </QueryClientProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    </MockAppHeaderProvider>
   );
 
 describe('ContextLandingPage', () => {
@@ -224,9 +227,7 @@ describe('ContextLandingPage', () => {
     expect(await screen.findByTestId('contextAiIndexManagedRowManaged')).toHaveTextContent(
       'Managed'
     );
-    expect(screen.getByTestId('contextAiIndexManagedRowIntegratedVia')).toHaveTextContent(
-      'Elastic (built-in)'
-    );
+    expect(screen.queryByTestId('contextAiIndexManagedRowIntegratedVia')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexCardUpdated')).not.toBeInTheDocument();
   });
 
@@ -282,18 +283,6 @@ describe('ContextLandingPage', () => {
 
       await waitFor(() => expect(cardTitles()).toHaveLength(1));
       expect(cardTitles()[0]).toContain('elastic');
-    });
-
-    it('narrows the cards to the selected type', async () => {
-      await renderWithAiIndexes();
-
-      fireEvent.click(screen.getByTestId('contextAiIndexListTypeFilter'));
-      fireEvent.click(await screen.findByTestId('aiIndexType-searchbar-option-data_stream'));
-
-      await waitFor(() => expect(cardTitles()).toHaveLength(2));
-      expect(cardTitles().some((title) => title?.includes('support-tickets'))).toBe(true);
-      expect(cardTitles().some((title) => title?.includes('elastic'))).toBe(true);
-      expect(cardTitles().every((title) => !title?.includes('logs-index'))).toBe(true);
     });
 
     it('narrows to the intersection when search and filters are combined', async () => {

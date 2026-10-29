@@ -14,7 +14,7 @@ import type {
   AwsPermissionsViewerProps,
   AwsPermissionsViewerService,
 } from './aws_permissions_viewer';
-import { buildIamPolicyDocument } from '../../../common/iam_policy_document';
+import { buildIamPolicyDocument } from '../../../common/providers/aws/iam_policy_document';
 
 const SERVICE_A: AwsPermissionsViewerService = { id: 'service_a', name: 'Service A' };
 const SERVICE_B: AwsPermissionsViewerService = { id: 'service_b', name: 'Service B' };

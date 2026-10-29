@@ -15,7 +15,7 @@ An Encrypted Saved Object (ESO) is a Saved Object type registered with the ESO S
 
 The ESO Service encrypts using the `xpack.encryptedSavedObjects.encryptionKey` Kibana config setting. In development, a static key is auto-configured.
 
-**Definitive reference:** `dev_docs/key_concepts/encrypted_saved_objects.mdx`
+**Definitive reference:** `docs/extend/key-concepts/security/encrypted-saved-objects.md`
 
 ## When to Use ESOs
 
@@ -76,7 +76,22 @@ AAD attributes are **not encrypted** but are cryptographically bound to the encr
 
 **Be conservative:** only include attributes the team is 100% confident should be included. Adding an existing populated attribute to AAD later is **not supported** in Serverless.
 
-**Nested attributes:** When an attribute is included in AAD, all of its subfields are inherently included. For more granular control, use dotted keys like `rule.apiKeyOwner` instead of the entire `rule` object.
+**Nested attributes:** `attributesToEncrypt` and `attributesToIncludeInAAD` accept **top-level attribute names only**. Names are matched against the keys of `attributes` with an exact string comparison — a dot is never interpreted as a path, and nothing traverses into subfields. When an attribute is included in AAD, all of its subfields are inherently included, so cover nested data by naming the top-level attribute that contains it; if only part of an attribute belongs in AAD, restructure the object so that part becomes top-level.
+
+**Enforcement: registering a dotted attribute key throws.** `EncryptedSavedObjectAttributesDefinition` rejects dotted keys in both sets at registration time. The message names the offending set and lists every key in it:
+
+```
+Invalid EncryptedSavedObjectTypeRegistration for type 'my_type'. Attribute keys are matched as flat top-level attribute names, not as nested paths. These dotted attributesToEncrypt keys are not permitted to prevent misuse: auth.apiKey.
+```
+
+This is a runtime check, not a lint rule — there is no comment or config that disables it. Because it runs on the fully resolved sets, it catches keys arriving via enum members, imported constants and spreads. The one gap: a type behind a disabled config never registers, so it is never checked.
+
+**Why it throws rather than warns.** Without the check, a dotted key fails silently in the worst possible way:
+- In `attributesToEncrypt` it matches nothing — the secret is stored **in plaintext** and, because stripping uses the same names, is **not stripped** from `get`/`find` responses. The only signal is a debug-level log.
+- In `attributesToIncludeInAAD` it is silently dropped from AAD, weakening the integrity binding of the encrypted attributes while encryption and decryption both still succeed.
+- Contrast with Core: a model version `data_removal` change's `removedAttributePaths: ['auth.apiKey']` *does* resolve nested paths, but `attributesToEncrypt: ['auth.apiKey']` does not. The two look identical; only one works.
+
+**The only exception is a grandfathered allowlist.** `synthetics-monitor` and `synthetics-monitor-multi-space` genuinely use flat top-level names containing dots, matching the heartbeat config key format (`'service.name'`, `'url.port'`, `'ssl.key'`). Their keys are enumerated in `TYPES_WITH_DOTTED_ATTRIBUTE_KEYS` in the ESO plugin — spelled out per key rather than prefix-matched, and not shared between types, so a new dotted key is rejected even under an already-permitted prefix. **Do not add to this list.** It exists to grandfather in types that predate the check and should only ever shrink; a type that appears to need a new dotted key needs the Kibana Security team, not an allowlist entry.
 
 ## Partial Update Safety
 
@@ -234,7 +249,7 @@ Some changes require **2 Serverless releases**:
 
 Set `unknowns: 'ignore'` in the `forwardCompatibility` schema when the previous version should drop unknown fields. This is helpful if the additional fields are not compatible or problematic in the previous version.
 
-During model version transformation, decryption occurs BEFORE the `forwardCompatibility` schema is applied. This supports hierarchical AAD — when subfields of an AAD attribute are added or removed, the previous version can still successfully construct AAD, ensuring objects can be decrypted before being adapted for the previous version. 
+During model version transformation, decryption occurs BEFORE the `forwardCompatibility` schema is applied. This supports the fact that an AAD attribute covers all of its subfields — when subfields of an AAD attribute are added or removed, the previous version can still successfully construct AAD, ensuring objects can be decrypted before being adapted for the previous version.
 
 ## Quick Change Reference
 
@@ -262,6 +277,7 @@ When working with ESO-related code, verify:
    - [ ] `type` matches the Core Saved Object registration name
    - [ ] `attributesToEncrypt` contains only genuinely sensitive attributes
    - [ ] `attributesToIncludeInAAD` follows the inclusion/exclusion guidelines above
+   - [ ] `attributesToEncrypt` and `attributesToIncludeInAAD` contain top-level attribute names only — no dotted keys (registration throws; only the grandfathered synthetics monitor keys are exempt, and that list must not grow)
    - [ ] `dangerouslyExposeValue` is only used with documented justification
 
 2. **Partial update safety**
@@ -291,8 +307,8 @@ When working with ESO-related code, verify:
 
 ## References
 
-- [Encrypted Saved Objects dev docs](dev_docs/key_concepts/encrypted_saved_objects.mdx)
+- [Encrypted Saved Objects dev docs](docs/extend/key-concepts/security/encrypted-saved-objects.md)
 - [Secure Saved Objects (Elastic docs)](https://www.elastic.co/guide/en/kibana/current/xpack-security-secure-saved-objects.html)
-- [Model Versions tutorial](dev_docs/tutorials/saved_objects.mdx)
+- [Model Versions tutorial](docs/extend/key-concepts/saved-objects/create.md)
 - [ESO Model Version example plugin](examples/eso_model_version_example/server/plugin.ts)
 - ESO plugin source: `x-pack/platform/plugins/shared/encrypted_saved_objects/`

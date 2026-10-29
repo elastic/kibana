@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EventTypeOpts } from '@kbn/core/server';
+import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
+import type { RiskScoreDistribution } from '@kbn/entity-store/common';
 import type { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type { CsvErrorCategory } from '../../entity_analytics/entity_resolution/csv_upload';
@@ -27,6 +28,7 @@ import type {
   HealthDiagnosticQueryStats,
 } from '../diagnostic/health_diagnostic_service.types';
 
+import { ENTITY_ANALYTICS_EVENTS } from './events/entity_analytics';
 import { SIEM_MIGRATIONS_EVENTS } from './events/siem_migrations';
 import type {
   RuleBulkUpgradeTelemetry,
@@ -38,6 +40,7 @@ import type {
 } from '../../detection_engine/rule_management/logic/detection_rules_client/restore_telemetry';
 import type {
   RuleDuplicateTelemetry,
+  RuleImportTelemetry,
   RuleLifecycleTelemetry,
 } from '../../detection_engine/rule_management/logic/detection_rules_client/rule_lifecycle_telemetry';
 import { TRIAL_COMPANION_EVENTS } from '../../trial_companion/telemetry/trial_companion_ebt_events';
@@ -182,9 +185,15 @@ const ruleLifecycleTelemetrySchema = {
   },
 };
 
-export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
+export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleImportTelemetry> = {
   eventType: 'detection_rule_import',
-  schema: ruleLifecycleTelemetrySchema,
+  schema: {
+    ...ruleLifecycleTelemetrySchema,
+    outcome: {
+      type: 'keyword',
+      _meta: { description: 'Result of importing the rule: created, updated or skipped' },
+    },
+  },
 };
 
 export const DETECTION_RULE_REVERT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
@@ -517,6 +526,73 @@ export type RiskScoreMaintainerStageSummaryEvent =
   | Phase2ResolutionScoringSummary
   | ResetToZeroSummary;
 
+type RiskScoreDistributionFieldSchema = RootSchema<{
+  distribution?: RiskScoreDistribution;
+}>['distribution'];
+
+const riskScoreDistributionSchema = (
+  scoreKind: 'base' | 'resolution'
+): RiskScoreDistributionFieldSchema => {
+  const scoreKindLabel = scoreKind === 'base' ? 'Base' : 'Resolution';
+  return {
+    _meta: {
+      optional: true,
+      description: `Distribution of ${scoreKind} scores written in this run by risk band and percentile`,
+    },
+    properties: {
+      critical: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Critical`,
+        },
+      },
+      high: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is High`,
+        },
+      },
+      moderate: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Moderate`,
+        },
+      },
+      low: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Low`,
+        },
+      },
+      unknown: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Unknown, including scores with no band`,
+        },
+      },
+      normP50: {
+        type: 'float',
+        _meta: {
+          optional: true,
+          description: `Median calculated_score_norm of ${scoreKind} scores written in this run`,
+        },
+      },
+      normP90: {
+        type: 'float',
+        _meta: {
+          optional: true,
+          description: `90th percentile calculated_score_norm of ${scoreKind} scores written in this run`,
+        },
+      },
+    },
+  };
+};
+
 export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   namespace: string;
   entityType: string;
@@ -531,6 +607,8 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   pagesProcessed: number;
   lookupPrunedDocs: number;
   idBasedRiskScoringEnabled: boolean;
+  baseScoreDistribution?: RiskScoreDistribution;
+  resolutionScoreDistribution?: RiskScoreDistribution;
 }> = {
   eventType: 'risk_score_maintainer_run_summary',
   schema: {
@@ -571,6 +649,8 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: { description: 'Whether Entity Store dual-write was enabled' },
     },
+    baseScoreDistribution: riskScoreDistributionSchema('base'),
+    resolutionScoreDistribution: riskScoreDistributionSchema('resolution'),
   },
 };
 
@@ -1960,12 +2040,6 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
           description: 'Circuit breaker metrics such as execution time and memory usage.',
         },
       },
-      descriptorVersion: {
-        type: 'integer',
-        _meta: {
-          description: 'Version of the query descriptor that produced this event.',
-        },
-      },
       status: {
         type: 'keyword',
         _meta: {
@@ -2496,6 +2570,7 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
   workflowEnabled: boolean;
   autoCloseEnabled: boolean;
   createConversation: boolean;
+  usePrompt: boolean;
   connectorConfigured: boolean;
   customAgent: boolean;
   autoCloseConfidenceScoreMinThreshold: number;
@@ -2518,6 +2593,12 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
     createConversation: {
       type: 'boolean',
       _meta: { description: 'Whether a new AI conversation is created per alert analysis' },
+    },
+    usePrompt: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the workflow classifies with a single prompt instead of an AI agent',
+      },
     },
     connectorConfigured: {
       type: 'boolean',
@@ -2662,6 +2743,7 @@ export const events = [
   TELEMETRY_INDEX_STATS_EVENT,
   TELEMETRY_INDEX_TEMPLATES_EVENT,
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
+  ...ENTITY_ANALYTICS_EVENTS,
   ...SIEM_MIGRATIONS_EVENTS,
   GAP_DETECTED_EVENT,
   ...TRIAL_COMPANION_EVENTS,

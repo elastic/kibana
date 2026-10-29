@@ -46,7 +46,7 @@ export function useCustomCards(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
-  const isIngestHubOnboardingEnabled = featureFlags.getBooleanValue(
+  const isIngestHubOnboardingEnabled = featureFlags.useBooleanValue(
     INGEST_HUB_ONBOARDING_ENABLED_FLAG,
     false
   );

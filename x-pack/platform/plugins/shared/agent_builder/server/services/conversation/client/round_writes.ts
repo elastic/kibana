@@ -6,20 +6,16 @@
  */
 
 import { isEqual } from 'lodash';
-import type {
-  Conversation,
-  ConversationEvent,
-  ConversationRound,
-  RoundInput,
-} from '@kbn/agent-builder-common';
+import type { Conversation, ConversationEvent, ConversationRound } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_EVENT_ID_DELIMITER,
+  TimelineEventType,
   createAttachmentPermanentDeleteBlockedError,
+  lastExecutionTerminal,
   parseExecutionId,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isAttachmentReferencedInRounds } from '../../attachments/attachment_guards';
-import { eventsToRounds } from './events_to_rounds';
 import { isRoundDerivedEventId, roundToEvents } from './rounds_to_events';
 
 /** True when a round's stored timeline spans more than one execution (a HITL resume). */
@@ -52,45 +48,52 @@ const storedRoundBlocks = (stored: ConversationEvent[]): Map<string, Conversatio
 
 /**
  * The events of a round present in `rounds`: its stored events when the round spans a resume
- * execution (only the `user_message` attachment refs are refreshed — the folded message belongs
- * to the resume, not the original user message), else regenerated from the round.
+ * execution (the stored `user_message` is never rewritten), else regenerated from the round.
  */
 const eventsForKnownRound = (
   round: ConversationRound,
   storedForRound: ConversationEvent[],
   conversation: Conversation
-): ConversationEvent[] => {
-  if (!hasResumeExecution(round.id, storedForRound)) {
-    return roundToEvents(round, conversation);
-  }
-  const userMessageId = `${round.id}${CONVERSATION_EVENT_ID_DELIMITER}user_message`;
-  return storedForRound.map((event) => {
-    if (event.id !== userMessageId || !round.input.attachment_refs) {
-      return event;
-    }
-    const data = event.data as RoundInput;
-    return {
-      ...event,
-      data: { ...data, attachment_refs: round.input.attachment_refs },
-    };
-  });
-};
+): ConversationEvent[] =>
+  hasResumeExecution(round.id, storedForRound)
+    ? storedForRound
+    : roundToEvents(round, conversation);
+
+/**
+ * Whether a stored block absent from the caller's `rounds` was removed on purpose. It was when
+ * the caller could see the round: the stored document already materialised it in its `rounds`
+ * (`storedRoundIds`), or its last execution ended with an outcome (`execution_terminated`, a
+ * completed or paused round — always materialised). Blocks with no terminal (in progress) and
+ * interrupted blocks the stored `rounds` do not know about (a document written before interrupted
+ * executions folded into rounds) are carried through: the caller has never seen them.
+ */
+const isRemovableBlock = (
+  roundId: string,
+  block: ConversationEvent[],
+  storedRoundIds: ReadonlySet<string>
+): boolean =>
+  storedRoundIds.has(roundId) ||
+  lastExecutionTerminal(block)?.type === TimelineEventType.executionTerminated;
 
 /**
  * Rebuilds round-derived events on a rounds-path write, preserving resumed executions, additive
- * events and stored round blocks that cannot be expressed as a round.
+ * events and stored round blocks the caller cannot have removed on purpose.
  *
  * Stored blocks are emitted at their stored position. A block whose round is in `rounds` follows
  * the per-round rule ({@link eventsForKnownRound}). A block whose round is *not* in `rounds` is
- * kept untouched when it does not fold into a round (an in-progress round, or an execution that
- * failed or was aborted before producing an outcome) and dropped when it does fold — the caller's
- * `rounds` is authoritative for rounds it deliberately removed. Rounds with no stored block yet
- * are appended in `rounds` order. Additive events are re-inserted by `created_at`.
+ * dropped only when {@link isRemovableBlock} — the caller's `rounds` is authoritative for the
+ * rounds it could see (`storedRounds`, the document's rounds at write time) — and kept untouched
+ * otherwise. Rounds with no stored block yet are appended in `rounds` order. Additive events are
+ * re-inserted by `created_at`.
  */
-export const reconcileEvents = (merged: Conversation): ConversationEvent[] => {
+export const reconcileEvents = (
+  merged: Conversation,
+  storedRounds: ReadonlyArray<Pick<ConversationRound, 'id'>>
+): ConversationEvent[] => {
   const stored = merged.events ?? [];
   const additive = stored.filter((event) => !isRoundDerivedEventId(event.id));
   const roundsById = new Map(merged.rounds.map((round) => [round.id, round]));
+  const storedRoundIds = new Set(storedRounds.map((round) => round.id));
 
   const roundDerived: ConversationEvent[] = [];
   const blocks = storedRoundBlocks(stored);
@@ -98,7 +101,7 @@ export const reconcileEvents = (merged: Conversation): ConversationEvent[] => {
     const round = roundsById.get(roundId);
     if (round) {
       roundDerived.push(...eventsForKnownRound(round, block, merged));
-    } else if (eventsToRounds(block).length === 0) {
+    } else if (!isRemovableBlock(roundId, block, storedRoundIds)) {
       roundDerived.push(...block);
     }
   }

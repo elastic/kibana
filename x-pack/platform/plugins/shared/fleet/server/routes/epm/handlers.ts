@@ -83,6 +83,7 @@ import {
   getTemplateInputs,
   updateCustomIntegration,
 } from '../../services/epm/packages';
+import { filterOutNonFipsPolicyTemplates } from '../../services/epm/packages/filter_fips_packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import {
   fleetErrorToResponseOptions,
@@ -163,7 +164,10 @@ export const getListHandler: FleetRequestHandler<
     savedObjectsClient,
     ...request.query,
   });
-  const flattenedRes = res
+  const filteredByFips = appContextService.getIsFipsEnabled()
+    ? filterOutNonFipsPolicyTemplates(res)
+    : res;
+  const flattenedRes = filteredByFips
     // exclude the security_ai_prompts package from being shown in Kibana UI
     // https://github.com/elastic/kibana/pull/227308
     .filter((pkg) => pkg.id !== 'security_ai_prompts')
@@ -171,7 +175,7 @@ export const getListHandler: FleetRequestHandler<
 
   if (request.query.withPackagePoliciesCount) {
     const countByPackage = await getPackagePoliciesCountByPackageName(
-      appContextService.getInternalUserSOClientForSpaceId(fleetContext.spaceId)
+      appContextService.getInternalUserSOClientWithoutSpaceExtension()
     );
     for (const item of flattenedRes) {
       item.packagePoliciesInfo = {
@@ -753,6 +757,7 @@ export const deletePackageHandler: FleetRequestHandler<
     pkgVersion,
     esClient,
     force: request.query?.force,
+    request,
   });
   const body: TypeOf<typeof DeletePackageResponseSchema> = {
     items: res,

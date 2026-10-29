@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { Streams } from '@kbn/streams-schema';
 import { isNeverCondition } from '@kbn/streamlang';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
@@ -107,6 +108,22 @@ export const createCreatePartitionTool = ({
 
     try {
       const { streamsClient } = await getScopedClients({ request });
+
+      const parentDefinition = await streamsClient.getStream(parent);
+      if (!Streams.WiredStream.Definition.is(parentDefinition)) {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: `create_partition only works on wired streams. "${parent}" is a ${parentDefinition.type} stream.`,
+                operation: 'create_partition',
+                likely_cause: `The stream "${parent}" is not a wired stream. Only wired streams support child partitions.`,
+              },
+            },
+          ],
+        };
+      }
 
       let parsed: unknown;
       try {

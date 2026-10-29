@@ -20,7 +20,6 @@ import {
   EuiRefreshInterval,
   EuiButton,
   EuiEmptyPrompt,
-  useEuiTheme,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
   type OnRefreshChangeProps,
@@ -36,7 +35,6 @@ const MIN_REFRESH_INTERVAL = 5000;
 
 export const TracingProjectsListPage: React.FC = () => {
   const history = useHistory();
-  const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
@@ -156,7 +154,7 @@ export const TracingProjectsListPage: React.FC = () => {
   };
 
   return (
-    <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+    <EuiPageSection paddingSize="none">
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem>
           <EuiFieldSearch

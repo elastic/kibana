@@ -6,18 +6,28 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
+  RULE_COVERAGE_DEFAULT_EXTRAS,
+  RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   type Worker,
 } from '@kbn/alertzero-common';
+import { ensureWorkerServiceAccounts } from '../service_accounts/ensure_worker_service_accounts';
 import { useWatchSettingsDraft } from './use_watch_settings_draft';
 import { useUpdateWorker } from './use_workers_api';
 
 jest.mock('./use_workers_api');
+jest.mock('../service_accounts/ensure_worker_service_accounts');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
+
+const mockUseKibana = jest.mocked(useKibana);
+const addDanger = jest.fn();
 
 const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
+const mockEnsureWorkerServiceAccounts = jest.mocked(ensureWorkerServiceAccounts);
 
 const createWorker = (overrides: Partial<Worker> & Pick<Worker, 'id' | 'name'>): Worker => ({
   watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
@@ -25,12 +35,17 @@ const createWorker = (overrides: Partial<Worker> & Pick<Worker, 'id' | 'name'>):
   lastRun: null,
   state: 'paused',
   settingsRevision: 1,
+  workflowId: null,
+  blockingReasons: [],
   settings: {
     workerId: overrides.id,
     autonomy: 'manual',
   },
   ...overrides,
 });
+
+/** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
+const RULE_TUNING_EXTRAS = { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 14 };
 
 const ruleTuning = createWorker({
   id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -39,14 +54,27 @@ const ruleTuning = createWorker({
     workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
     autonomy: 'manual',
     scheduleInterval: '2h',
-    extras: { analysisWindowDays: 14 },
+    extras: RULE_TUNING_EXTRAS,
+    serviceAccountId: 'kibana/alertzero_rule_tuning',
   },
 });
 
-const ruleCreation = createWorker({
-  id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
-  name: 'Rule Creation',
+const ruleCoverage = createWorker({
+  id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+  name: 'Rule Coverage',
+  settings: {
+    workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+    autonomy: 'manual',
+    scheduleInterval: '1h',
+    extras: RULE_COVERAGE_DEFAULT_EXTRAS,
+    serviceAccountId: 'kibana/alertzero_rule_coverage',
+  },
 });
+
+const { serviceAccountId: _coverageAccount, ...coverageSettingsWithoutAccount } =
+  ruleCoverage.settings;
+/** A Worker that has never been bound to a service account. */
+const unboundRuleCoverage: Worker = { ...ruleCoverage, settings: coverageSettingsWithoutAccount };
 
 describe('useWatchSettingsDraft', () => {
   const mutateAsync = jest.fn();
@@ -54,20 +82,146 @@ describe('useWatchSettingsDraft', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseUpdateWorker.mockReturnValue({ mutateAsync } as never);
+    mockUseKibana.mockReturnValue({
+      services: { notifications: { toasts: { addDanger } } },
+    } as never);
+    mockEnsureWorkerServiceAccounts.mockImplementation(
+      async (_http, _serviceAccounts, workerIds) =>
+        new Map(
+          workerIds.map((id) => [id, { ok: true as const, serviceAccountId: `kibana/sa-${id}` }])
+        )
+    );
+  });
+
+  describe('prebuilt service account', () => {
+    it('binds the prebuilt account when a Worker without one is turned on', async () => {
+      mutateAsync.mockResolvedValue({ worker: unboundRuleCoverage });
+      const { result } = renderHook(() => useWatchSettingsDraft([unboundRuleCoverage]));
+
+      act(() => {
+        result.current.updateEnabled(unboundRuleCoverage, true);
+      });
+      await act(async () => {
+        await result.current.save();
+      });
+
+      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+        [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID],
+        { isServerless: false }
+      );
+      expect(mutateAsync).toHaveBeenCalledWith({
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+        patch: {
+          enabled: true,
+          settings: {
+            serviceAccountId: `kibana/sa-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`,
+          },
+          settingsRevision: 1,
+        },
+      });
+    });
+
+    it('binds it alongside settings edits, against the revision the edit started from', async () => {
+      mutateAsync.mockResolvedValue({ worker: unboundRuleCoverage });
+      const { result } = renderHook(() => useWatchSettingsDraft([unboundRuleCoverage]));
+
+      act(() => {
+        result.current.updateEnabled(unboundRuleCoverage, true);
+        result.current.updateSettings(unboundRuleCoverage, { autonomy: 'assisted' });
+      });
+      await act(async () => {
+        await result.current.save();
+      });
+
+      expect(mutateAsync).toHaveBeenCalledWith({
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+        patch: {
+          enabled: true,
+          settings: {
+            autonomy: 'assisted',
+            serviceAccountId: `kibana/sa-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`,
+          },
+          settingsRevision: 1,
+        },
+      });
+    });
+
+    it('keeps the Worker off with an error when its account cannot be set up', async () => {
+      mockEnsureWorkerServiceAccounts.mockResolvedValueOnce(
+        new Map([
+          [
+            SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+            { ok: false as const, error: 'Forbidden' },
+          ],
+        ])
+      );
+      const { result } = renderHook(() => useWatchSettingsDraft([unboundRuleCoverage]));
+
+      act(() => {
+        result.current.updateEnabled(unboundRuleCoverage, true);
+      });
+      let savedWorkers: Worker[] = [];
+      await act(async () => {
+        savedWorkers = await result.current.save();
+      });
+
+      expect(savedWorkers).toEqual([]);
+      expect(mutateAsync).not.toHaveBeenCalled();
+      expect(result.current.resolve(unboundRuleCoverage)).toMatchObject({
+        enabled: true,
+        dirty: true,
+        error: 'Forbidden',
+      });
+      expect(addDanger).toHaveBeenCalledTimes(1);
+      expect(addDanger).toHaveBeenCalledWith({
+        title: "Some Worker changes weren't saved",
+        text: "AlertZero couldn't set up their service accounts. Rule Coverage: Forbidden.",
+      });
+    });
+
+    it('does not set up an account for a Worker that keeps its binding or is turned off', async () => {
+      const enabledUnbound: Worker = { ...unboundRuleCoverage, enabled: true };
+      mutateAsync.mockResolvedValue({ worker: ruleTuning });
+      const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, enabledUnbound]));
+
+      act(() => {
+        result.current.updateEnabled(ruleTuning, true);
+        result.current.updateEnabled(enabledUnbound, false);
+      });
+      await act(async () => {
+        await result.current.save();
+      });
+
+      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(undefined, undefined, [], {
+        isServerless: false,
+      });
+      expect(mutateAsync).toHaveBeenCalledWith({
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+        patch: { enabled: true },
+      });
+      expect(mutateAsync).toHaveBeenCalledWith({
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+        patch: { enabled: false },
+      });
+    });
   });
 
   it('does not write on edit and discards unsaved drafts', () => {
-    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCreation]));
+    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCoverage]));
 
     act(() => {
       result.current.updateEnabled(ruleTuning, true);
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      });
     });
 
     expect(result.current.isDirty).toBe(true);
     expect(result.current.resolve(ruleTuning)).toMatchObject({
       enabled: true,
-      settings: { extras: { analysisWindowDays: 7 } },
+      settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
       dirty: true,
     });
     expect(mutateAsync).not.toHaveBeenCalled();
@@ -79,9 +233,37 @@ describe('useWatchSettingsDraft', () => {
     expect(result.current.isDirty).toBe(false);
     expect(result.current.resolve(ruleTuning)).toMatchObject({
       enabled: false,
-      settings: { extras: { analysisWindowDays: 14 } },
+      settings: { extras: RULE_TUNING_EXTRAS },
       dirty: false,
     });
+  });
+
+  it('lists only the Workers with unsaved changes, in the order they were given', () => {
+    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCoverage]));
+
+    expect(result.current.dirtyWorkers).toEqual([]);
+
+    act(() => {
+      result.current.updateEnabled(ruleCoverage, true);
+    });
+    expect(result.current.dirtyWorkers).toEqual([ruleCoverage]);
+
+    act(() => {
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      });
+    });
+    expect(result.current.dirtyWorkers).toEqual([ruleTuning, ruleCoverage]);
+
+    act(() => {
+      result.current.updateEnabled(ruleCoverage, false);
+    });
+    expect(result.current.dirtyWorkers).toEqual([ruleTuning]);
+
+    act(() => {
+      result.current.discard();
+    });
+    expect(result.current.dirtyWorkers).toEqual([]);
   });
 
   it('diffs and revision-checks against the settings the edit started from, not a later refetch', async () => {
@@ -92,7 +274,9 @@ describe('useWatchSettingsDraft', () => {
     );
 
     act(() => {
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      });
     });
 
     // Someone else saved a new interval while this draft was open.
@@ -111,7 +295,10 @@ describe('useWatchSettingsDraft', () => {
     expect(mutateAsync).toHaveBeenCalledTimes(1);
     expect(mutateAsync).toHaveBeenCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+        settingsRevision: 1,
+      },
     });
   });
 
@@ -120,7 +307,9 @@ describe('useWatchSettingsDraft', () => {
     const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning]));
 
     act(() => {
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      });
     });
     await act(async () => {
       await result.current.save();
@@ -129,7 +318,7 @@ describe('useWatchSettingsDraft', () => {
     expect(result.current.resolve(ruleTuning)).toMatchObject({
       dirty: true,
       error: 'conflict',
-      settings: { extras: { analysisWindowDays: 7 } },
+      settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
     });
 
     // A retry still carries the original revision; nothing is silently re-based.
@@ -139,12 +328,61 @@ describe('useWatchSettingsDraft', () => {
     });
     expect(mutateAsync).toHaveBeenLastCalledWith({
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-      patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+      patch: {
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+        settingsRevision: 1,
+      },
     });
   });
 
+  it('resolves with only the Workers that were written, as the server returned them', async () => {
+    const written: Worker = { ...ruleCoverage, enabled: true, blockingReasons: ['no_model'] };
+    mutateAsync
+      .mockRejectedValueOnce(new Error('patch failed'))
+      .mockResolvedValueOnce({ worker: written });
+    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCoverage]));
+
+    act(() => {
+      result.current.updateEnabled(ruleTuning, true);
+      result.current.updateEnabled(ruleCoverage, true);
+    });
+    let savedWorkers: Worker[] = [];
+    await act(async () => {
+      savedWorkers = await result.current.save();
+    });
+
+    expect(savedWorkers).toEqual([written]);
+  });
+
+  it('drops a pending switch-on once the Worker can no longer be switched on', async () => {
+    const { result, rerender } = renderHook(
+      ({ workers }: { workers: Worker[] }) => useWatchSettingsDraft(workers),
+      { initialProps: { workers: [ruleTuning] } }
+    );
+
+    act(() => {
+      result.current.updateEnabled(ruleTuning, true);
+    });
+    expect(result.current.isDirty).toBe(true);
+
+    const blocked: Worker = { ...ruleTuning, blockingReasons: ['no_model'] };
+    rerender({ workers: [blocked] });
+
+    expect(result.current.resolve(blocked)).toMatchObject({ enabled: false, dirty: false });
+    expect(result.current.isDirty).toBe(false);
+
+    rerender({ workers: [ruleTuning] });
+
+    expect(result.current.resolve(ruleTuning)).toMatchObject({ enabled: false, dirty: false });
+    expect(result.current.isDirty).toBe(false);
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
   it('sends a null revision for a Worker that has not been installed yet', async () => {
-    const uninstalled: Worker = { ...ruleCreation, settingsRevision: null };
+    const uninstalled: Worker = { ...ruleCoverage, settingsRevision: null };
     mutateAsync.mockResolvedValue({ worker: uninstalled });
     const { result } = renderHook(() => useWatchSettingsDraft([uninstalled]));
 
@@ -156,7 +394,7 @@ describe('useWatchSettingsDraft', () => {
     });
 
     expect(mutateAsync).toHaveBeenCalledWith({
-      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
       patch: { settings: { autonomy: 'assisted' }, settingsRevision: null },
     });
   });
@@ -165,19 +403,25 @@ describe('useWatchSettingsDraft', () => {
     const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning]));
 
     act(() => {
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 14 } });
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      });
+      result.current.updateSettings(ruleTuning, {
+        extras: RULE_TUNING_EXTRAS,
+      });
     });
 
     expect(result.current.isDirty).toBe(false);
   });
 
   it('refuses to save while any dirty draft fails its complete schema', async () => {
-    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCreation]));
+    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCoverage]));
 
     act(() => {
-      result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 31 } });
-      result.current.updateEnabled(ruleCreation, true);
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 31 },
+      });
+      result.current.updateEnabled(ruleCoverage, true);
     });
 
     await expect(result.current.save()).rejects.toThrow('invalid');
@@ -190,7 +434,10 @@ describe('useWatchSettingsDraft', () => {
     const persistedRuleTuning: Worker = {
       ...ruleTuning,
       settingsRevision: 2,
-      settings: { ...ruleTuning.settings, extras: { analysisWindowDays: 7 } },
+      settings: {
+        ...ruleTuning.settings,
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      },
     };
     const SAVE_FAILURE = 'Worker settings are temporarily unavailable; try again';
 
@@ -204,12 +451,14 @@ describe('useWatchSettingsDraft', () => {
         .mockRejectedValueOnce(new Error(SAVE_FAILURE));
       const rendered = renderHook(
         ({ workers }: { workers: Worker[] }) => useWatchSettingsDraft(workers),
-        { initialProps: { workers: [ruleTuning, ruleCreation] } }
+        { initialProps: { workers: [ruleTuning, ruleCoverage] } }
       );
 
       act(() => {
-        rendered.result.current.updateSettings(ruleTuning, { extras: { analysisWindowDays: 7 } });
-        rendered.result.current.updateEnabled(ruleCreation, true);
+        rendered.result.current.updateSettings(ruleTuning, {
+          extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+        });
+        rendered.result.current.updateEnabled(ruleCoverage, true);
       });
       await act(async () => {
         await rendered.result.current.save();
@@ -218,14 +467,17 @@ describe('useWatchSettingsDraft', () => {
       expect(mutateAsync).toHaveBeenCalledTimes(2);
       expect(mutateAsync).toHaveBeenNthCalledWith(1, {
         workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
-        patch: { settings: { extras: { analysisWindowDays: 7 } }, settingsRevision: 1 },
+        patch: {
+          settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
+          settingsRevision: 1,
+        },
       });
       expect(mutateAsync).toHaveBeenNthCalledWith(2, {
-        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
         patch: { enabled: true },
       });
 
-      rendered.rerender({ workers: [persistedRuleTuning, ruleCreation] });
+      rendered.rerender({ workers: [persistedRuleTuning, ruleCoverage] });
       return rendered;
     };
 
@@ -233,32 +485,32 @@ describe('useWatchSettingsDraft', () => {
       const { result, rerender } = await saveWithOneFailure();
 
       expect(result.current.resolve(persistedRuleTuning)).toMatchObject({
-        settings: { extras: { analysisWindowDays: 7 } },
+        settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 } },
         dirty: false,
         error: undefined,
       });
-      expect(result.current.resolve(ruleCreation)).toMatchObject({
+      expect(result.current.resolve(ruleCoverage)).toMatchObject({
         enabled: true,
         dirty: true,
         error: SAVE_FAILURE,
       });
-      expect(result.current.dirtyWorkers.map(({ id }) => id)).toEqual([ruleCreation.id]);
+      expect(result.current.dirtyWorkers.map(({ id }) => id)).toEqual([ruleCoverage.id]);
 
-      const persistedRuleCreation: Worker = { ...ruleCreation, enabled: true };
-      mutateAsync.mockResolvedValueOnce({ worker: persistedRuleCreation });
+      const persistedRuleCoverage: Worker = { ...ruleCoverage, enabled: true };
+      mutateAsync.mockResolvedValueOnce({ worker: persistedRuleCoverage });
       await act(async () => {
         await result.current.save();
       });
 
       expect(mutateAsync).toHaveBeenCalledTimes(3);
       expect(mutateAsync).toHaveBeenLastCalledWith({
-        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
         patch: { enabled: true },
       });
 
-      rerender({ workers: [persistedRuleTuning, persistedRuleCreation] });
+      rerender({ workers: [persistedRuleTuning, persistedRuleCoverage] });
       expect(result.current.isDirty).toBe(false);
-      expect(result.current.resolve(persistedRuleCreation)).toMatchObject({
+      expect(result.current.resolve(persistedRuleCoverage)).toMatchObject({
         enabled: true,
         dirty: false,
         error: undefined,
@@ -273,15 +525,136 @@ describe('useWatchSettingsDraft', () => {
       });
 
       expect(result.current.isDirty).toBe(false);
-      expect(result.current.resolve(ruleCreation)).toMatchObject({
+      expect(result.current.resolve(ruleCoverage)).toMatchObject({
         enabled: false,
         dirty: false,
         error: undefined,
       });
       expect(result.current.resolve(persistedRuleTuning).settings.extras).toEqual({
+        ...RULE_TUNING_EXTRAS,
         analysisWindowDays: 7,
       });
       expect(mutateAsync).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('a save that finishes after discard', () => {
+    /** Starts a save whose single write stays pending until the returned settle function runs. */
+    const startPendingSave = (worker: Worker) => {
+      let settle: (outcome: { worker: Worker } | Error) => void = () => {};
+      mutateAsync.mockImplementationOnce(
+        () =>
+          new Promise((resolvePromise, rejectPromise) => {
+            settle = (outcome) =>
+              outcome instanceof Error ? rejectPromise(outcome) : resolvePromise(outcome);
+          })
+      );
+      const rendered = renderHook(() => useWatchSettingsDraft([worker]));
+      act(() => {
+        rendered.result.current.updateEnabled(worker, true);
+      });
+      let saving: Promise<Worker[]> = Promise.resolve([]);
+      act(() => {
+        saving = rendered.result.current.save();
+      });
+      return {
+        ...rendered,
+        saving,
+        settle: (outcome: { worker: Worker } | Error) => settle(outcome),
+      };
+    };
+
+    it('leaves no error and no saving state behind when the write fails', async () => {
+      const { result, saving, settle } = startPendingSave(ruleCoverage);
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(result.current.isSaving).toBe(true);
+
+      act(() => {
+        result.current.discard();
+      });
+      expect(result.current.isSaving).toBe(false);
+
+      await act(async () => {
+        settle(new Error('Worker settings are temporarily unavailable; try again'));
+        await saving;
+      });
+
+      expect(result.current.isSaving).toBe(false);
+      expect(result.current.resolve(ruleCoverage)).toMatchObject({
+        enabled: false,
+        dirty: false,
+        error: undefined,
+      });
+    });
+
+    it('still reports a failed account setup, through a toast only', async () => {
+      let settleAccounts: (
+        accounts: Awaited<ReturnType<typeof ensureWorkerServiceAccounts>>
+      ) => void = () => {};
+      mockEnsureWorkerServiceAccounts.mockImplementationOnce(
+        () =>
+          new Promise((resolvePromise) => {
+            settleAccounts = resolvePromise;
+          })
+      );
+      const { result } = renderHook(() => useWatchSettingsDraft([unboundRuleCoverage]));
+      act(() => {
+        result.current.updateEnabled(unboundRuleCoverage, true);
+      });
+      let saving: Promise<Worker[]> = Promise.resolve([]);
+      act(() => {
+        saving = result.current.save();
+      });
+
+      act(() => {
+        result.current.discard();
+      });
+      await act(async () => {
+        settleAccounts(
+          new Map([
+            [
+              SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+              { ok: false as const, error: 'Forbidden' },
+            ],
+          ])
+        );
+        await saving;
+      });
+
+      expect(mutateAsync).not.toHaveBeenCalled();
+      expect(addDanger).toHaveBeenCalledWith({
+        title: "Some Worker changes weren't saved",
+        text: "AlertZero couldn't set up their service accounts. Rule Coverage: Forbidden.",
+      });
+      expect(result.current.resolve(unboundRuleCoverage)).toMatchObject({
+        enabled: false,
+        dirty: false,
+        error: undefined,
+      });
+    });
+
+    it('keeps an edit made after discard when the earlier write succeeds', async () => {
+      const { result, saving, settle } = startPendingSave(ruleCoverage);
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      act(() => {
+        result.current.discard();
+        result.current.updateSettings(ruleCoverage, { autonomy: 'assisted' });
+      });
+      await act(async () => {
+        settle({ worker: { ...ruleCoverage, enabled: true } });
+        await saving;
+      });
+
+      expect(result.current.isSaving).toBe(false);
+      expect(result.current.resolve(ruleCoverage)).toMatchObject({
+        settings: { autonomy: 'assisted' },
+        dirty: true,
+      });
     });
   });
 });

@@ -12,6 +12,7 @@ import type {
   DeleteOutputRequestSchema,
   GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
+  GetOutputAgentPolicyCountRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
@@ -134,7 +135,7 @@ export const deleteOutputHandler: RequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>
 > = async (context, request, response) => {
   try {
-    await outputService.delete(request.params.outputId);
+    await outputService.delete(request.params.outputId, { request });
 
     const body: DeleteOutputResponse = {
       id: request.params.outputId,
@@ -175,4 +176,27 @@ export const getLatestOutputHealth: RequestHandler<
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const outputHealth = await outputService.getLatestOutputHealth(esClient, request.params.outputId);
   return response.ok({ body: outputHealth });
+};
+
+export const getOutputAgentPolicyCountHandler: RequestHandler<
+  TypeOf<typeof GetOutputAgentPolicyCountRequestSchema.params>,
+  TypeOf<typeof GetOutputAgentPolicyCountRequestSchema.query>
+> = async (context, request, response) => {
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  try {
+    const output = await outputService.get(request.params.outputId);
+    // Apply pending flyout values so counts reflect state after save, not before.
+    const { isDefault, isDefaultMonitoring } = request.query;
+    if (isDefault !== undefined) output.is_default = isDefault;
+    if (isDefaultMonitoring !== undefined) output.is_default_monitoring = isDefaultMonitoring;
+    const counts = await outputService.getAgentAndPolicyCountForOutput(esClient, output);
+    return response.ok({ body: counts });
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Output ${request.params.outputId} not found` },
+      });
+    }
+    throw error;
+  }
 };

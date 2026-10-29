@@ -29,8 +29,15 @@ describe('getAiIndicesInstructions', () => {
     expect(render({ enabled: false })).toBe('');
   });
 
-  it('renders nothing for an agent with an empty catalog', () => {
-    expect(render({ catalog: [] })).toBe('');
+  it('renders the section for an empty catalog, telling the agent to ask the user to assign some', () => {
+    const instructions = render({ catalog: [] });
+
+    expect(instructions).toContain('## AI INDICES');
+    expect(instructions).toContain('No AI Indices are assigned to this agent');
+    expect(instructions).toContain('Do not look for other AI Indices');
+    expect(instructions).toContain('ask the user to assign it to this agent');
+    expect(instructions).not.toContain('`ki-retrieval`');
+    expect(instructions).not.toContain('Available to this agent:');
   });
 
   it('explains what an AI Index is and how it is named', () => {
@@ -55,12 +62,12 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('continue with other relevant data or tools');
   });
 
-  it('renders each catalog entry with its id, ES|QL target and description', () => {
+  it('renders each catalog entry with its registry ID, ES|QL target, and description', () => {
     const instructions = render();
 
     expect(instructions).toContain('Available to this agent:');
     expect(instructions).toContain(
-      '- `elastic` (FROM `sml-main`) — Summaries of Kibana resources such as dashboards and connectors.'
+      '- Registry ID: `elastic`; ES|QL target: sml-main — Summaries of Kibana resources such as dashboards and connectors.'
     );
   });
 
@@ -72,15 +79,17 @@ describe('getAiIndicesInstructions', () => {
       ],
     });
 
-    expect(instructions).toContain('- `elastic` (FROM `sml-main`)');
-    expect(instructions).toContain('- `my-custom` (FROM `ai-index-idx-custom`) — Support tickets.');
+    expect(instructions).toContain('- Registry ID: `elastic`; ES|QL target: sml-main');
+    expect(instructions).toContain(
+      '- Registry ID: `my-custom`; ES|QL target: ai-index-idx-custom — Support tickets.'
+    );
   });
 
   it('omits entries with no ES|QL target from the available list, keeping the resolved ones', () => {
     const instructions = render({ catalog: [...defaultCatalog, { id: 'unresolved-custom' }] });
 
     expect(instructions).toContain('Available to this agent:');
-    expect(instructions).toContain('- `elastic` (FROM `sml-main`)');
+    expect(instructions).toContain('- Registry ID: `elastic`; ES|QL target: sml-main');
     expect(instructions).not.toContain('unresolved-custom');
   });
 
@@ -88,43 +97,48 @@ describe('getAiIndicesInstructions', () => {
     const instructions = render({ catalog: [{ id: 'unresolved-custom' }] });
 
     expect(instructions).toContain('## AI INDICES');
-    expect(instructions).toContain('`list_ai_indices`');
+    expect(instructions).toContain('`ki-retrieval`');
     expect(instructions).not.toContain('Available to this agent:');
     expect(instructions).not.toContain('unresolved-custom');
   });
 
-  it('renders an entry without a description with no trailing dash', () => {
+  it('renders both identifiers for an entry without a description', () => {
     const instructions = render({ catalog: [{ id: 'bare-id', esqlTarget: 'bare-target' }] });
 
-    expect(instructions).toContain('- `bare-id` (FROM `bare-target`)');
-    expect(instructions).not.toContain('(FROM `bare-target`) —');
+    expect(instructions).toContain('- Registry ID: `bare-id`; ES|QL target: bare-target');
+    expect(instructions).not.toContain('bare-target —');
   });
 
-  it('points at list -> describe -> query and away from execute_esql', () => {
+  it('points at the ki-retrieval skill by name, leaving the path to the SKILLS section', () => {
     const instructions = render();
 
-    expect(instructions).toContain('1. `list_ai_indices`');
-    expect(instructions).toContain('2. `describe_ai_index`');
-    expect(instructions).toContain('3. `query_ai_indices`');
-    expect(instructions).toContain('Do not query AI Indices with `execute_esql`');
+    expect(instructions).toContain('Load the `ki-retrieval` skill before');
+    expect(instructions).toContain('carries the AI Index tools');
+    expect(instructions).not.toContain('/skills/');
+  });
+
+  it('leaves the list/describe/query guidance to the skill', () => {
+    const instructions = render();
+
+    expect(instructions).not.toContain('list_ai_indices');
+    expect(instructions).not.toContain('describe_ai_index');
+    expect(instructions).not.toContain('query_ai_indices');
     expect(instructions).not.toContain('sml_');
   });
 
-  it('describes describe_ai_index as a context block to read and copy ES|QL from', () => {
+  it("routes everything other than AI Indices to the agent's other data tools", () => {
     const instructions = render();
 
-    expect(instructions).toContain('context block');
-    expect(instructions).toContain('example ES|QL queries you can read and copy');
-    expect(instructions).not.toContain('suggested_queries');
-    expect(instructions).not.toContain('query_templates');
+    expect(instructions).toContain('Query everything else');
+    expect(instructions).toContain('including a source a KI points you to');
+    expect(instructions).toContain('`generate_esql`');
+    expect(instructions).toContain('`execute_esql`');
   });
 
-  it('names the space the conversation runs in and leaves scoping to the tool', () => {
+  it('names the space the conversation runs in', () => {
     const instructions = render({ spaceId: 'marketing' });
 
     expect(instructions).toContain('This conversation runs in the space `marketing`');
-    expect(instructions).toContain('applies that scoping server-side');
-    expect(instructions).toContain('Never write a space condition in ES|QL');
   });
 
   it('carries no space filter for the agent to copy', () => {

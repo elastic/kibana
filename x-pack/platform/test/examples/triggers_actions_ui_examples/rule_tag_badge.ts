@@ -35,10 +35,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should open and display tags', async () => {
       await testSubjects.click('ruleTagBadge');
-      expect(await testSubjects.exists('ruleTagBadgeItem-tag1')).to.be(true);
-      expect(await testSubjects.exists('ruleTagBadgeItem-tag2')).to.be(true);
-      expect(await testSubjects.exists('ruleTagBadgeItem-tag3')).to.be(true);
-      expect(await testSubjects.exists('ruleTagBadgeItem-tag4')).to.be(true);
+      await testSubjects.existOrFail('ruleTagBadgeItem-tag1', { timeout: 5000 });
+      await testSubjects.existOrFail('ruleTagBadgeItem-tag2', { timeout: 5000 });
+      await testSubjects.existOrFail('ruleTagBadgeItem-tag3', { timeout: 5000 });
+      await testSubjects.existOrFail('ruleTagBadgeItem-tag4', { timeout: 5000 });
     });
   });
 };

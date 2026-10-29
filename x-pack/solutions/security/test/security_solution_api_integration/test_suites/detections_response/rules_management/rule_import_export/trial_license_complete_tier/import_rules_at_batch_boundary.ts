@@ -9,12 +9,14 @@ import expect from 'expect';
 import { range } from 'lodash';
 import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { getCustomQueryRuleParams, importRules, importRulesWithSuccess } from '../../../utils';
+import {
+  assertNoRuleTask,
+  getCustomQueryRuleParams,
+  importRules,
+  importRulesWithSuccess,
+} from '../../../utils';
 
-/**
- * Sized above current import chunking on main (50) and any bulk rewrite batch
- * size still under discussion, so create + overwrite both span multiple chunks.
- */
+// Sized to span at least two full import batches (current batch size: 200).
 const RULE_COUNT = 501;
 const EXISTING_COUNT = 251;
 
@@ -53,8 +55,13 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      const priorIds = new Map<string, string>(
-        beforeOverwrite.data.map((rule: { rule_id: string; id: string }) => [rule.rule_id, rule.id])
+      expect(beforeOverwrite.total).toBe(EXISTING_COUNT);
+
+      const priorByRuleId = new Map<string, { id: string; revision: number }>(
+        beforeOverwrite.data.map((rule: { rule_id: string; id: string; revision: number }) => [
+          rule.rule_id,
+          { id: rule.id, revision: rule.revision },
+        ])
       );
 
       const rules = allIds.map((ruleId) =>
@@ -93,15 +100,27 @@ export default ({ getService }: FtrProviderContext): void => {
       const foundIds = body.data.map((rule: { rule_id: string }) => rule.rule_id).sort();
       expect(foundIds).toEqual([...allIds].sort());
 
-      // Spot-check overwrite targets keep SO id; a pure create gets the imported name.
-      const sampleRuleIds = ['batch-rule-0', 'batch-rule-250', 'batch-rule-500'];
+      // Spot-check overwrite targets keep SO id and bump revision; a create is new.
+      const sampleRuleIds = ['batch-rule-0', 'batch-rule-250', 'batch-rule-251', 'batch-rule-500'];
       for (const ruleId of sampleRuleIds) {
         const found = body.data.find(
-          (rule: { rule_id: string; id: string; name: string }) => rule.rule_id === ruleId
+          (rule: { rule_id: string; id: string; name: string; revision: number }) =>
+            rule.rule_id === ruleId
         );
         expect(found?.name).toBe(`Imported ${ruleId}`);
-        if (priorIds.has(ruleId)) {
-          expect(found?.id).toBe(priorIds.get(ruleId));
+        const prior = priorByRuleId.get(ruleId);
+        if (prior) {
+          expect(found?.id).toBe(prior.id);
+          expect(found?.revision).toBe(prior.revision + 1);
+        } else {
+          expect(found?.revision).toBe(0);
+          if (!found) {
+            throw new Error(`Missing rule ${ruleId} after import`);
+          }
+          await assertNoRuleTask({
+            getService,
+            ruleId: found.id,
+          });
         }
       }
     });

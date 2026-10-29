@@ -26,7 +26,11 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LatencyAggregationType } from '@kbn/apm-types';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
-import { TRANSACTIONS_TABLE_EBT_ACTIONS, TRANSACTIONS_TABLE_EBT_ELEMENTS } from './ebt_constants';
+import {
+  TRANSACTIONS_TABLE_EBT_ACTIONS,
+  TRANSACTIONS_TABLE_EBT_DETAILS,
+  TRANSACTIONS_TABLE_EBT_ELEMENTS,
+} from './ebt_constants';
 import { asMillisecondDuration, asTransactionRate } from '../../utils/formatters/duration';
 import { asPercent } from '../../utils/formatters/numeric';
 import { Sparkline } from '../sparkline';
@@ -259,11 +263,13 @@ export function getBuiltInColumns({
           );
         }
         const nameHref = nameInteraction?.href?.(item);
-        const ebtNameProps = getEbtProps({
-          action: TRANSACTIONS_TABLE_EBT_ACTIONS.VIEW_TRANSACTION_GROUP,
-          element: nameInteraction?.ebt?.element ?? TRANSACTIONS_TABLE_EBT_ELEMENTS.ROW_NAME,
-        });
+        const ebtElement =
+          nameInteraction?.ebt?.element ?? TRANSACTIONS_TABLE_EBT_ELEMENTS.ROW_NAME;
         if (nameHref) {
+          const ebtNameProps = getEbtProps({
+            action: TRANSACTIONS_TABLE_EBT_ACTIONS.VIEW_TRANSACTION_GROUP,
+            element: ebtElement,
+          });
           return (
             <div style={outerStyle}>
               <EuiToolTip content={item.name} display="block">
@@ -276,6 +282,13 @@ export function getBuiltInColumns({
         }
         if (nameInteraction?.onClick) {
           const isExpanded = nameInteraction.isExpanded?.(item) ?? false;
+          const ebtNameProps = getEbtProps({
+            action: TRANSACTIONS_TABLE_EBT_ACTIONS.VIEW_TRANSACTION_GROUP,
+            element: ebtElement,
+            detail: isExpanded
+              ? TRANSACTIONS_TABLE_EBT_DETAILS.CLOSE
+              : TRANSACTIONS_TABLE_EBT_DETAILS.OPEN,
+          });
           const expandLabel = isExpanded
             ? i18n.translate('apmUiShared.transactionsTable.collapseTransactionAriaLabel', {
                 defaultMessage: 'Close transaction details',

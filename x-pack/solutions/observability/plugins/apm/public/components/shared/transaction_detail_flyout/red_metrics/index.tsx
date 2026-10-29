@@ -267,6 +267,7 @@ function TransactionDetailFlyoutEsqlRedMetrics({
     filters,
     schema,
     indices,
+    refreshToken,
   } = useTransactionDetailFlyoutContext();
   const projectRouting = useProjectRouting();
   const secondaryChartsGridCss = useSecondaryChartsGridCss();
@@ -340,8 +341,9 @@ function TransactionDetailFlyoutEsqlRedMetrics({
       title={chart.title}
       titleAction={chart.titleAction}
       config={chart.config}
-      rangeFrom={filters.rangeFrom}
-      rangeTo={filters.rangeTo}
+      rangeFrom={filters.start}
+      rangeTo={filters.end}
+      refreshToken={refreshToken}
       dataTestSubjPrefix="transactionDetailFlyoutLensChart"
       embeddableIdPrefix="transaction-detail-flyout"
       executionContextDescription="apm transaction detail flyout chart data"

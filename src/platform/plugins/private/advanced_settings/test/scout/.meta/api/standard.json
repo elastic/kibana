@@ -1,5 +1,5 @@
 {
-  "sha1": "03b2e088bec1bf0eb74166935f582c6540a2efc3",
+  "sha1": "aa67ce73afb07aa9ad96c7a35875f2c50cf34410",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 178,
+        "line": 183,
         "column": 71
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 187,
+        "line": 192,
         "column": 15
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 204,
+        "line": 209,
         "column": 5
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 206,
+        "line": 211,
         "column": 13
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 217,
+        "line": 222,
         "column": 4
       }
     },
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/advanced_settings/test/scout/api/tests/feature_controls.spec.ts",
-        "line": 227,
+        "line": 232,
         "column": 14
       }
     }

@@ -29,10 +29,12 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
   let authTypeId: string | undefined;
   let defaults: Record<string, unknown> | undefined;
   let meta: Record<string, Record<string, unknown>> | undefined;
+  let fields: Record<string, z.ZodType> | undefined;
 
   let labelOverride: string | undefined;
   let isRecommendedOverride: boolean | undefined;
   let isLegacyOverride: boolean | undefined;
+  let supportsSandboxOverride: boolean | undefined;
 
   if (isString(authTypeDef)) {
     authTypeId = authTypeDef as string;
@@ -41,9 +43,11 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     authTypeId = def.type;
     defaults = def.defaults;
     meta = def?.overrides?.meta;
+    fields = def.overrides?.fields;
     labelOverride = def.overrides?.label;
     isRecommendedOverride = def.isRecommended;
     isLegacyOverride = def.isLegacy;
+    supportsSandboxOverride = def.supportsSandbox;
   }
 
   if (!authTypeId) {
@@ -76,6 +80,17 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     schemaToUse = authType.normalizeSchema(defaults);
   }
 
+  if (fields) {
+    for (const [key, fieldSchema] of Object.entries(fields)) {
+      if (schemaToUse.shape[key]) {
+        schemaToUse.shape[key] = fieldSchema.meta({
+          ...schemaToUse.shape[key].meta(),
+          ...fieldSchema.meta(),
+        });
+      }
+    }
+  }
+
   if (meta) {
     Object.keys(meta).forEach((key) => {
       if (schemaToUse.shape[key]) {
@@ -96,6 +111,7 @@ export const getSchemaForAuthType = (authTypeDef: string | AuthTypeDef) => {
     ...(labelOverride !== undefined ? { label: labelOverride } : {}),
     ...(isRecommendedOverride !== undefined ? { isRecommended: isRecommendedOverride } : {}),
     ...(isLegacyOverride !== undefined ? { isLegacy: isLegacyOverride } : {}),
+    ...(supportsSandboxOverride !== undefined ? { supportsSandbox: supportsSandboxOverride } : {}),
     ...(isKibanaManagedAuthTypeId(authTypeId) ? { isKibanaManaged: true } : {}),
   };
 

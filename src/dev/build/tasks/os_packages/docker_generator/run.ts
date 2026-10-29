@@ -19,6 +19,7 @@ import type { Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import type { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
+import { FIPS_BASE_IMAGE } from '../../../lib/fips_config';
 
 const accessAsync = promisify(access);
 const linkAsync = promisify(link);
@@ -44,14 +45,14 @@ export async function runDockerGenerator(
   let baseImageName = '';
   if (flags.baseImage === 'ubi') baseImageName = 'redhat/ubi9-minimal:latest';
   /**
-   * Renovate config contains a regex manager to automatically update both Chainguard references
+   * Renovate config contains a regex manager to automatically update the Chainguard reference
    *
    * If this logic moves to another file or under another name, then the Renovate regex manager
    * for automatic Chainguard updates will break.
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:a4e6bb74199419ada6a0c0cdfc0c0fe05a34e733b0fc9054a070c1743ab5c3ed';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:2d801f293fbadcae67ee4491c3191ec0670b09a6bdd4606998383e0d80dabec2';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
@@ -60,8 +61,7 @@ export async function runDockerGenerator(
   if (flags.serverless) imageFlavor += '-serverless';
   if (flags.fips) {
     imageFlavor += '-fips';
-    baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:f911251e69719da5eabb1b724ff8c7e71c8646fc8ad83ee067ea885335c3af40';
+    baseImageName = FIPS_BASE_IMAGE;
   }
 
   // General docker var config
@@ -77,6 +77,7 @@ export async function runDockerGenerator(
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
   let artifactVariant = '';
   if (flags.serverless) artifactVariant = '-serverless';
+  if (flags.cloud && !flags.fips) artifactVariant = '-cloud';
   const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
   const tarExt = config.getTarZstd() ? 'tar.zst' : 'tar.gz';
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.${tarExt}`;

@@ -15,8 +15,9 @@ import { createBulkEpisodeActionRouteForType } from './create_bulk_episode_actio
 export const BulkDeactivateEpisodeActionRoute = createBulkEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
   pathSuffix: '_bulk_deactivate',
-  summary: 'Bulk deactivate alert episodes',
+  summary: 'Bulk deactivate alerts',
   bodySchema: bulkDeactivateEpisodeActionBodySchema,
   oasOperationObject: bulkDeactivateEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
 });

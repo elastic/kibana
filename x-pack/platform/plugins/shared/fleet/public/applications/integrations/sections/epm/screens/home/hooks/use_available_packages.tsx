@@ -13,6 +13,7 @@ import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import {
+  useAuthz,
   useGetPackagesQuery,
   useGetCategoriesQuery,
   useGetAppendCustomIntegrationsQuery,
@@ -30,6 +31,7 @@ import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   filterPolicyTemplatesTiles,
+  shouldAddIntegrationFromCatalog,
 } from '../../../../../../../../common/services';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
@@ -114,6 +116,9 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
         })
       : [];
 
+    // Classify before `policy_templates` is stripped from the tiles above
+    const addIntegrationFromCatalog = shouldAddIntegrationFromCatalog(pkg);
+
     const tiles = filterPolicyTemplatesTiles<PackageListItem>(
       pkg.policy_templates_behavior,
       topPackage,
@@ -122,6 +127,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       return {
         ...tile,
         supportsAgentless: isAgentlessIntegration(pkg, tile.integration || tile.name),
+        addIntegrationFromCatalog,
       };
     });
 
@@ -224,6 +230,9 @@ export const useAvailablePackages = ({
     );
 
   const { enableIntegrationCollectionTiles } = ExperimentalFeaturesService.get();
+  // `authz` is not provided when the hook is used outside of Fleet (e.g. Observability onboarding),
+  // where the privileges are enforced by the destination page.
+  const canAddIntegration = useAuthz()?.integrations?.all ?? true;
 
   // All cards before any filter (no agentless filter, no category filter).
   // Used by useBrowseIntegrationHook which applies both filters from the live URL.
@@ -240,6 +249,7 @@ export const useAvailablePackages = ({
         getAbsolutePath,
         addBasePath,
         packageVerificationKeyId,
+        canAddIntegration,
       });
       itemsToMap = ungroupedItems;
       extraCards = collectionCards;
@@ -256,6 +266,7 @@ export const useAvailablePackages = ({
           item,
           addBasePath,
           packageVerificationKeyId,
+          canAddIntegration,
         })
       ),
     ].sort((a, b) => a.title.localeCompare(b.title));
@@ -264,6 +275,7 @@ export const useAvailablePackages = ({
   }, [
     addBasePath,
     appendCustomIntegrations,
+    canAddIntegration,
     applyOnboardingOverride,
     enableCollectionGrouping,
     enableIntegrationCollectionTiles,
@@ -275,28 +287,73 @@ export const useAvailablePackages = ({
 
   // Cards with the agentless filter applied (used by the old home page and
   // its category sidebar counts). Derived from allCards so the sort/map work
-  // is not duplicated.
+  // is not duplicated. Re-sorted after filtering because singleton degradation
+  // can change a card's title, shifting its position relative to the allCards sort.
   const cards: IntegrationCardItem[] = useMemo(() => {
-    if (isAgentlessEnabled && onlyAgentlessFilter) {
-      return allCards.filter((item) => item.supportsAgentless === true);
+    if (!isAgentlessEnabled || !onlyAgentlessFilter) return allCards;
+    const agentlessMatch = (c: IntegrationCardItem) => c.supportsAgentless === true;
+    const result: IntegrationCardItem[] = [];
+    for (const card of allCards) {
+      if (!card.isCollectionCard) {
+        if (agentlessMatch(card)) result.push(card);
+        continue;
+      }
+      const filteredMembers = (card.groupMembers ?? []).filter(agentlessMatch);
+      if (filteredMembers.length === 0) continue;
+      if (filteredMembers.length === 1) {
+        result.push(filteredMembers[0]);
+        continue;
+      }
+      const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
+      const filteredSearchableContent = filteredMembers
+        .flatMap((m) => [m.name, m.title, m.description ?? ''])
+        .join(' ');
+      result.push({
+        ...card,
+        groupMembers: filteredMembers,
+        categories: filteredCategories,
+        searchableContent: filteredSearchableContent,
+      });
     }
-    return allCards;
+    return result.sort((a, b) => a.title.localeCompare(b.title));
   }, [allCards, isAgentlessEnabled, onlyAgentlessFilter]);
 
   // Packages to show
-  // Filters out based on selected category and subcategory (if any)
-  const filteredCards = useMemo(
-    () =>
-      cards.filter((c) => {
-        if (selectedCategory === '') {
-          return true;
-        }
-        if (!selectedSubCategory) return c.categories.includes(selectedCategory);
-
-        return c.categories.includes(selectedSubCategory);
-      }),
-    [cards, selectedCategory, selectedSubCategory]
-  );
+  // Filters out based on selected category and subcategory (if any).
+  // For collection cards, filters groupMembers too so badge counts and flyout
+  // variants reflect the active filter state. Re-sorted after filtering because
+  // singleton degradation can change a card's title, shifting its position.
+  const filteredCards = useMemo(() => {
+    if (selectedCategory === '') return cards;
+    const categoryMatch = (c: IntegrationCardItem) =>
+      selectedSubCategory
+        ? c.categories.includes(selectedSubCategory)
+        : c.categories.includes(selectedCategory);
+    const result: IntegrationCardItem[] = [];
+    for (const card of cards) {
+      if (!card.isCollectionCard) {
+        if (categoryMatch(card)) result.push(card);
+        continue;
+      }
+      const filteredMembers = (card.groupMembers ?? []).filter(categoryMatch);
+      if (filteredMembers.length === 0) continue;
+      if (filteredMembers.length === 1) {
+        result.push(filteredMembers[0]);
+        continue;
+      }
+      const filteredCategories = [...new Set(filteredMembers.flatMap((m) => m.categories))];
+      const filteredSearchableContent = filteredMembers
+        .flatMap((m) => [m.name, m.title, m.description ?? ''])
+        .join(' ');
+      result.push({
+        ...card,
+        groupMembers: filteredMembers,
+        categories: filteredCategories,
+        searchableContent: filteredSearchableContent,
+      });
+    }
+    return result.sort((a, b) => a.title.localeCompare(b.title));
+  }, [cards, selectedCategory, selectedSubCategory]);
 
   const {
     data: eprCategoriesRes,
