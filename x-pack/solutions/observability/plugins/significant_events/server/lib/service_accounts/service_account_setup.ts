@@ -9,7 +9,10 @@ import { isBoom } from '@hapi/boom';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+} from '@kbn/management-settings-ids';
 import {
   getNightshiftBoundKiContinuousOnboardingWorkflowId,
   getNightshiftBoundCleanupWorkflowId,
@@ -36,6 +39,7 @@ import type { GetScopedClients } from '../../routes/types';
 import {
   DETECTION_ENGINE_WORKLOAD_ID,
   DETECTION_ENGINE_WORKLOAD_TYPE,
+  getDetectionEngineAccountId,
   reassignRulesToAccount,
 } from './detection_engine_account';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from '../workflows/managed_workflow_owner';
@@ -44,6 +48,7 @@ import type { SignificantEventsScheduledWorkflowsService } from '../workflows/si
 import { resolveStoredScheduledConfig } from '../../routes/internal/scheduled_discovery/route';
 import type { SignificantEventsMaintenanceService } from '../maintenance/maintenance_service';
 import type { SignificantEventsMaintenanceSummary } from '../../../common/maintenance/types';
+import { DETECTION_ENGINE_SERVICE_ACCOUNT_NAME } from '../../../common/service_account';
 
 /** The ids of the accounts a space is set up with, as the service accounts backend assigned them. */
 export interface DetectionEngineServiceAccountIds {
@@ -173,14 +178,50 @@ export const createServiceAccountSetupService = ({
       ({ total }) => total === 0
     );
 
-  const enable = async ({
+  /**
+   * The account the space is already bound to, or a new `nightshift_detection_engine` account. The
+   * account is shared by every space: another space passes its id, because an account of the same
+   * name cannot be created again and there is no way to look one up by name.
+   */
+  const findOrCreateAccountId = async ({
     request,
     spaceId,
-    serviceAccountIds,
   }: {
     request: KibanaRequest;
     spaceId: string;
-    serviceAccountIds: DetectionEngineServiceAccountIds;
+  }): Promise<string> => {
+    const boundAccountId = await getDetectionEngineAccountId({ core, spaceId });
+    if (boundAccountId !== undefined) {
+      return boundAccountId;
+    }
+    try {
+      const account = await core.security.serviceAccounts.create(request, {
+        name: DETECTION_ENGINE_SERVICE_ACCOUNT_NAME,
+        description: 'The service account the Nightshift detection engine runs as.',
+        roles: [DETECTION_ENGINE_SERVICE_ACCOUNT_NAME],
+      });
+      return account.id;
+    } catch (error) {
+      if (isBoom(error) && error.output.statusCode === 409) {
+        throw new StatusError(
+          `A service account named [${DETECTION_ENGINE_SERVICE_ACCOUNT_NAME}] already exists. ` +
+            'Pass its id in serviceAccountIds.detectionEngine: the id is returned by _disable.',
+          409
+        );
+      }
+      throw error;
+    }
+  };
+
+  const enable = async ({
+    request,
+    spaceId,
+    serviceAccountIds: givenServiceAccountIds,
+  }: {
+    request: KibanaRequest;
+    spaceId: string;
+    /** Without it, the account the space is bound to, or a new one, is used. */
+    serviceAccountIds?: DetectionEngineServiceAccountIds;
   }): Promise<{
     spaceId: string;
     serviceAccountIds: DetectionEngineServiceAccountIds;
@@ -190,6 +231,9 @@ export const createServiceAccountSetupService = ({
     if (!workflowsExtensions || !workflowsManagement) {
       throw new StatusError('Workflows are not available', 400);
     }
+    const serviceAccountIds = givenServiceAccountIds ?? {
+      detectionEngine: await findOrCreateAccountId({ request, spaceId }),
+    };
     // What the detection engine does outside workflow runs, such as turning rules on, runs as the
     // account too. Bound first: the workflows a setting installs read the account from it. Binding
     // again with another account rebinds it.
@@ -198,11 +242,21 @@ export const createServiceAccountSetupService = ({
       workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
       workloadId: DETECTION_ENGINE_WORKLOAD_ID,
     });
+    // The workflows of a setting that is on are installed here too, so the space ends up as its
+    // settings say.
+    const { uiSettingsClient } = await getScopedClients({ request });
+    const continuousOnboardingOn = await uiSettingsClient.get<boolean>(
+      OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
+    );
+    const scheduledDiscoveryOn = await uiSettingsClient.get<boolean>(
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+    );
     // The space's bound workflows, installed with the caller's request: binding a workflow to the
     // account needs it. Installing again with another account rebinds them.
     const client = await workflowsExtensions.getClient(request);
     const installedBySetting = await Promise.all(
       SETTING_WORKFLOW_IDS.map(async (id) =>
+        continuousOnboardingOn ||
         (await workflowsManagement.getWorkflow(`${id}-${spaceId}`, spaceId, request))
           ? id
           : undefined
@@ -219,11 +273,11 @@ export const createServiceAccountSetupService = ({
       });
     }
     // The scheduled discovery workflows are installed by their setting, with its intervals.
-    const { uiSettingsClient } = await getScopedClients({ request });
     await scheduledWorkflowsService?.rebind({
       request,
       spaceId,
       config: resolveStoredScheduledConfig(await uiSettingsClient.getAll()),
+      installIfMissing: scheduledDiscoveryOn,
     });
     // An installed workflow keeps its state, so the ones `_disable` switched off are switched back
     // on here. The manually started ones are always on in a set-up space: the routes that start
@@ -258,9 +312,7 @@ export const createServiceAccountSetupService = ({
           enabled: true,
         });
       }
-      if (
-        await uiSettingsClient.get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
-      ) {
+      if (continuousOnboardingOn) {
         await setEnabled({
           management: workflowsManagement,
           request,
@@ -268,6 +320,20 @@ export const createServiceAccountSetupService = ({
           workflowId: getNightshiftBoundKiContinuousOnboardingWorkflowId(spaceId),
           enabled: true,
         });
+      }
+      if (scheduledDiscoveryOn) {
+        for (const workflowId of [
+          getNightshiftBoundScheduledDetectionWorkflowId(spaceId),
+          getNightshiftBoundScheduledReviewWorkflowId(spaceId),
+        ]) {
+          await setEnabled({
+            management: workflowsManagement,
+            request,
+            spaceId,
+            workflowId,
+            enabled: true,
+          });
+        }
       }
     }
     // Rules created before the setup, or under another account, keep their old keys until they are
@@ -289,11 +355,17 @@ export const createServiceAccountSetupService = ({
   }: {
     request: KibanaRequest;
     spaceId: string;
-  }): Promise<{ spaceId: string; pause: SignificantEventsMaintenanceSummary }> => {
+  }): Promise<{
+    spaceId: string;
+    pause: SignificantEventsMaintenanceSummary;
+    /** The account the space was bound to: pass it to `_enable` to set the space up again. */
+    serviceAccountIds?: DetectionEngineServiceAccountIds;
+  }> => {
     await assertCanSetUp(request, spaceId);
     if (!workflowsManagement || !onboardingClient) {
       throw new StatusError('Workflows are not available', 400);
     }
+    const boundAccountId = await getDetectionEngineAccountId({ core, spaceId });
     // Without the account the rules would keep running on its keys, so the space is paused first.
     // Pausing cancels the runs of the bound workflows and switches the scheduled ones off.
     const pause = await maintenanceService.pause({
@@ -332,7 +404,13 @@ export const createServiceAccountSetupService = ({
       workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
       workloadId: DETECTION_ENGINE_WORKLOAD_ID,
     });
-    return { spaceId, pause };
+    return {
+      spaceId,
+      pause,
+      ...(boundAccountId !== undefined && {
+        serviceAccountIds: { detectionEngine: boundAccountId },
+      }),
+    };
   };
 
   return { enable, disable };

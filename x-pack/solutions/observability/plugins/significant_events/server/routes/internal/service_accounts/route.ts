@@ -37,11 +37,15 @@ const enableServiceAccountsRoute = createServerRoute({
   security: DELEGATED_AUTHZ,
   params: lazySchema(() =>
     z.object({
-      body: z.object({
-        serviceAccountIds: z.object({
-          detectionEngine: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
-        }),
-      }),
+      // Without a body, or without the ids, the space's account is used, or a new one is created.
+      body: z
+        .object({
+          serviceAccountIds: z.object({
+            detectionEngine: z.string().min(1).max(SERVICE_ACCOUNT_ID_MAX_LENGTH),
+          }),
+        })
+        .partial()
+        .optional(),
     })
   ),
   handler: async ({
@@ -73,7 +77,7 @@ const enableServiceAccountsRoute = createServerRoute({
     }).enable({
       request,
       spaceId: await getSpaceId(request),
-      serviceAccountIds: params.body.serviceAccountIds,
+      serviceAccountIds: params?.body?.serviceAccountIds,
     });
   },
 });
@@ -94,7 +98,11 @@ const disableServiceAccountsRoute = createServerRoute({
     workflowClients,
     maintenanceService,
     significantEventsScheduledWorkflowsService,
-  }): Promise<{ spaceId: string; pause: SignificantEventsMaintenanceSummary }> => {
+  }): Promise<{
+    spaceId: string;
+    pause: SignificantEventsMaintenanceSummary;
+    serviceAccountIds?: DetectionEngineServiceAccountIds;
+  }> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 

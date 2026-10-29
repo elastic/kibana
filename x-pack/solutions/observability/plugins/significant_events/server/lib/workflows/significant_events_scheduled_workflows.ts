@@ -56,12 +56,14 @@ export interface SignificantEventsScheduledWorkflowsService {
   /**
    * Renders the installed scheduled workflows of a space again with the space's
    * current detection engine account, keeping whether they are enabled. A space
-   * without them is left alone.
+   * without them is left alone, unless `installIfMissing` installs them (off, like
+   * any new install).
    */
   rebind(params: {
     request: KibanaRequest;
     spaceId: string;
     config: SignificantEventsScheduledWorkflowsConfig;
+    installIfMissing?: boolean;
   }): Promise<void>;
 }
 
@@ -293,14 +295,14 @@ export const createSignificantEventsScheduledWorkflowsService = ({
       );
     },
 
-    async rebind({ request, spaceId, config }) {
+    async rebind({ request, spaceId, config, installIfMissing = false }) {
       const installed = await managementApi
         .getClient(request)
         .getWorkflow(
           getWorkflowDocumentId(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID, spaceId),
           spaceId
         );
-      if (installed) {
+      if (installed || installIfMissing) {
         await installOrUpdate({ request, spaceId, config });
       }
     },

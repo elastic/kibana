@@ -513,6 +513,28 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
     });
 
+    it('installs the scheduled workflows of a space that has none when asked to', async () => {
+      const managementApi = createMockManagementApi({
+        getWorkflow: jest.fn().mockResolvedValue(null),
+      });
+      const managedWorkflowsClient = createMockManagedWorkflowsClient();
+      const service = createSignificantEventsScheduledWorkflowsService({
+        logger: loggerMock.create(),
+        managementApi: managementApi as never,
+        server: createServer(managedWorkflowsClient),
+      });
+
+      await service.rebind({
+        request: httpServerMock.createKibanaRequest(),
+        spaceId: 'space-a',
+        config: CONFIG,
+        installIfMissing: true,
+      });
+
+      expect(managedWorkflowsClient.install).toHaveBeenCalledTimes(2);
+      expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
+    });
+
     it('leaves a space without scheduled workflows alone', async () => {
       const managementApi = createMockManagementApi({
         getWorkflow: jest.fn().mockResolvedValue(null),

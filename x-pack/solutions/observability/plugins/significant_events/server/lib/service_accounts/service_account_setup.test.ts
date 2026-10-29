@@ -5,14 +5,23 @@
  * 2.0.
  */
 
+import { conflict } from '@hapi/boom';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import {
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+} from '@kbn/management-settings-ids';
 import {
   getNightshiftBoundCleanupWorkflowId,
   getNightshiftBoundDiscoveryWorkflowId,
+  getNightshiftBoundKiContinuousOnboardingWorkflowId,
   getNightshiftBoundKiOnboardingWorkflowId,
   getNightshiftBoundKiSyncWorkflowId,
+  getNightshiftBoundScheduledDetectionWorkflowId,
+  getNightshiftBoundScheduledReviewWorkflowId,
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_DISCOVERY_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from '../workflows/managed_workflow_owner';
@@ -27,10 +36,17 @@ const setup = ({
   serviceAccountsEnabled = true,
   canManageSecurity = true,
   paused = false,
+  continuousOnboardingOn = false,
+  scheduledDiscoveryOn = false,
+  boundAccountId = ACCOUNT_ID,
 }: {
   serviceAccountsEnabled?: boolean;
   canManageSecurity?: boolean;
   paused?: boolean;
+  continuousOnboardingOn?: boolean;
+  scheduledDiscoveryOn?: boolean;
+  /** The account the space is bound to before the setup, if any. */
+  boundAccountId?: string;
 } = {}) => {
   // What happened, in order, across the services the setup touches.
   const calls: string[] = [];
@@ -44,7 +60,10 @@ const setup = ({
     unbindWorkload: jest.fn(async () => {
       calls.push('unbind');
     }),
-    getWorkloadBinding: jest.fn(async () => ({ serviceAccountId: ACCOUNT_ID })),
+    getWorkloadBinding: jest.fn(async () =>
+      boundAccountId ? { serviceAccountId: boundAccountId } : undefined
+    ),
+    create: jest.fn(async (): Promise<{ id: string }> => ({ id: 'created-account-id' })),
     withScopedRequestForWorkload: jest.fn(
       async (_: unknown, fn: (accountRequest: typeof request) => Promise<unknown>) => fn(request)
     ),
@@ -94,8 +113,23 @@ const setup = ({
       return { state: 'paused' };
     }),
   };
+  const settings: Record<string, boolean> = {
+    [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]: continuousOnboardingOn,
+    [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: scheduledDiscoveryOn,
+  };
+  // The scheduled workflows are installed by their own service, which is mocked here: it installs
+  // them off, as a new install is.
+  const rebind = jest.fn(async ({ spaceId, installIfMissing }) => {
+    if (installIfMissing) {
+      installed.set(getNightshiftBoundScheduledDetectionWorkflowId(spaceId), false);
+      installed.set(getNightshiftBoundScheduledReviewWorkflowId(spaceId), false);
+    }
+  });
   const getScopedClients = jest.fn(async () => ({
-    uiSettingsClient: { getAll: jest.fn(async () => ({})), get: jest.fn(async () => false) },
+    uiSettingsClient: {
+      getAll: jest.fn(async () => ({})),
+      get: jest.fn(async (key: string) => settings[key] ?? false),
+    },
     getSignificantEventsAlertingContext: async () => ({
       rulesClient: { findRuleEnabledStates: jest.fn(async () => new Map()) },
       alertingV2RulesClient: { bulkDisableRules: jest.fn(), bulkEnableRules: jest.fn() },
@@ -111,10 +145,19 @@ const setup = ({
     onboardingClient,
     getScopedClients,
     maintenanceService,
-    scheduledWorkflowsService: { rebind: jest.fn() },
+    scheduledWorkflowsService: { rebind },
   } as never);
 
-  return { service, calls, installed, install, serviceAccounts, management, maintenanceService };
+  return {
+    service,
+    calls,
+    installed,
+    install,
+    rebind,
+    serviceAccounts,
+    management,
+    maintenanceService,
+  };
 };
 
 describe('createServiceAccountSetupService', () => {
@@ -179,6 +222,100 @@ describe('createServiceAccountSetupService', () => {
       expect(fixture.installed.get(getNightshiftBoundCleanupWorkflowId(SPACE_ID))).toBe(false);
     });
 
+    it('installs and switches on the workflows of the settings that are on', async () => {
+      const fixture = setup({ continuousOnboardingOn: true, scheduledDiscoveryOn: true });
+
+      await enable(fixture);
+
+      expect(fixture.install).toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+        NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        expect.anything()
+      );
+      expect(fixture.rebind).toHaveBeenCalledWith(
+        expect.objectContaining({ installIfMissing: true })
+      );
+      for (const id of [
+        getNightshiftBoundKiContinuousOnboardingWorkflowId(SPACE_ID),
+        getNightshiftBoundScheduledDetectionWorkflowId(SPACE_ID),
+        getNightshiftBoundScheduledReviewWorkflowId(SPACE_ID),
+      ]) {
+        expect(fixture.installed.get(id)).toBe(true);
+      }
+    });
+
+    it('installs nothing for the settings that are off', async () => {
+      const fixture = setup();
+
+      await enable(fixture);
+
+      expect(fixture.install).not.toHaveBeenCalledWith(
+        SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+        NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        expect.anything()
+      );
+      expect(fixture.rebind).toHaveBeenCalledWith(
+        expect.objectContaining({ installIfMissing: false })
+      );
+    });
+
+    it('installs the workflows of the settings that are on but keeps them off while paused', async () => {
+      const fixture = setup({
+        paused: true,
+        continuousOnboardingOn: true,
+        scheduledDiscoveryOn: true,
+      });
+
+      await enable(fixture);
+
+      for (const id of [
+        getNightshiftBoundKiContinuousOnboardingWorkflowId(SPACE_ID),
+        getNightshiftBoundScheduledDetectionWorkflowId(SPACE_ID),
+        getNightshiftBoundScheduledReviewWorkflowId(SPACE_ID),
+      ]) {
+        expect(fixture.installed.get(id)).toBe(false);
+      }
+    });
+
+    it('uses the account the space is bound to when none is given', async () => {
+      const fixture = setup({ boundAccountId: 'bound-account-id' });
+
+      const result = await fixture.service.enable({ request, spaceId: SPACE_ID });
+
+      expect(fixture.serviceAccounts.create).not.toHaveBeenCalled();
+      expect(result.serviceAccountIds).toEqual({ detectionEngine: 'bound-account-id' });
+    });
+
+    it('creates the detection engine account when none is given and the space has none', async () => {
+      const fixture = setup({ boundAccountId: '' });
+
+      const result = await fixture.service.enable({ request, spaceId: SPACE_ID });
+
+      expect(fixture.serviceAccounts.create).toHaveBeenCalledWith(
+        request,
+        expect.objectContaining({
+          name: 'nightshift_detection_engine',
+          roles: ['nightshift_detection_engine'],
+        })
+      );
+      expect(fixture.serviceAccounts.bindWorkload).toHaveBeenCalledWith(
+        request,
+        expect.objectContaining({ serviceAccountId: 'created-account-id' })
+      );
+      expect(result.serviceAccountIds).toEqual({ detectionEngine: 'created-account-id' });
+    });
+
+    it('tells to pass the account id when an account of that name already exists', async () => {
+      const fixture = setup({ boundAccountId: '' });
+      fixture.serviceAccounts.create.mockRejectedValue(conflict());
+
+      await expect(fixture.service.enable({ request, spaceId: SPACE_ID })).rejects.toMatchObject({
+        statusCode: 409,
+        message: expect.stringContaining('serviceAccountIds.detectionEngine'),
+      });
+      expect(fixture.serviceAccounts.bindWorkload).not.toHaveBeenCalled();
+    });
+
     it('is refused with a 400 when service accounts are off, and writes nothing', async () => {
       const fixture = setup({ serviceAccountsEnabled: false });
 
@@ -209,6 +346,7 @@ describe('createServiceAccountSetupService', () => {
       const result = await fixture.service.disable({ request, spaceId: SPACE_ID });
 
       expect(result.pause).toEqual({ state: 'paused' });
+      expect(result.serviceAccountIds).toEqual({ detectionEngine: ACCOUNT_ID });
       expect(fixture.calls).toEqual(['pause', 'stopRuns', 'unbind']);
       for (const id of [
         getNightshiftBoundKiOnboardingWorkflowId(SPACE_ID),
