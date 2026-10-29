@@ -9,6 +9,7 @@ export {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+  CUSTOM_CONTENT_MAX_ESQL_QUERIES,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_SCRIPT_PATTERN,
@@ -21,6 +22,7 @@ export {
   customContentStateSchema,
   customContentPanelUpdateSchema,
   readEsqlQuery,
+  readAdditionalEsqlQueries,
   toEsqlQueryState,
 } from './schema';
 export type { CustomContentState } from './schema';

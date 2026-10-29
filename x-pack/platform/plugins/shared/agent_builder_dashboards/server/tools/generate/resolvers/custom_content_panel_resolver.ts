@@ -8,6 +8,7 @@
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
+  readAdditionalEsqlQueries,
   resolveCustomContentQuery,
   toEsqlQueryState,
   type CustomContentState,
@@ -57,13 +58,19 @@ const resolveCustomContentState = async (
     isNewPanel: false,
     generate,
   });
+  // The panel's other queries are kept as they are, but only while it still has a main query.
+  const additionalEsqlQueries = mergedEsqlQuery ? readAdditionalEsqlQueries(existing) : [];
   const { template } = await resolveTemplate({
     prompt: nlQuery ?? '',
     esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
     existingTemplate: existing.template,
     hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
+    additionalEsqlQueries,
   });
-  return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
+  return {
+    esql_query: toEsqlQueryState(mergedEsqlQuery, additionalEsqlQueries),
+    template,
+  };
 };
 
 /**

@@ -143,6 +143,9 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       };
     }
     const { query: resolvedQuery, isChanging: isQueryChanging } = resolved;
+    // The panel's other queries are not changed by this tool, but they go with the main one: without
+    // it there is nothing for them to extend.
+    const additionalEsqlQueries = resolvedQuery ? currentData?.additional_esql_queries ?? [] : [];
 
     let resolvedTemplate: string = currentData?.panel_template ?? '';
     if (prompt !== undefined) {
@@ -153,6 +156,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
           esqlQuery: isQueryChanging ? resolvedQuery : undefined,
           existingTemplate: currentData?.panel_template || undefined,
           hasExistingQuery: !isQueryChanging && !!resolvedQuery,
+          additionalEsqlQueries,
         }));
       } catch (err) {
         logger.error(`custom_content_update_panel: template resolver failed — ${err}`);
@@ -175,6 +179,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
     const newData: CustomContentContextAttachmentData = {
       panel_template: resolvedTemplate,
       esql_query: resolvedQuery,
+      ...(additionalEsqlQueries.length ? { additional_esql_queries: additionalEsqlQueries } : {}),
       panel_title: currentData?.panel_title,
       embeddable_id: currentData?.embeddable_id ?? '',
       // Carried over so a refined version still previews against the range the panel was

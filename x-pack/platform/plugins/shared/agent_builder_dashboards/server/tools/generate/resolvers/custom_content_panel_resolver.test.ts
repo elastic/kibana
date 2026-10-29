@@ -153,9 +153,59 @@ describe('createCustomContentPanelResolver', () => {
         esqlQuery: undefined,
         existingTemplate: '<div>old</div>',
         hasExistingQuery: true,
+        additionalEsqlQueries: [],
       });
       expect(result).toMatchObject({
         panelContent: { config: { esql_query: ['FROM logs-*'], template: '<div>resolved</div>' } },
+      });
+    });
+
+    it('gives the template resolver the additional queries of a multi-query panel', async () => {
+      await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>{{ queries[1].rows.size }}</div>',
+            esql_query: ['FROM logs-*', 'FROM metrics-*'],
+          }),
+          { nlQuery: 'Restyle' }
+        )
+      );
+
+      expect(resolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalEsqlQueries: ['FROM metrics-*'] })
+      );
+    });
+
+    it('drops the additional queries, and does not sample them, when the query is removed', async () => {
+      const result = await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>old</div>',
+            esql_query: ['FROM logs-*', 'FROM metrics-*'],
+          }),
+          { nlQuery: 'Make it static', hasData: false }
+        )
+      );
+
+      expect(resolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalEsqlQueries: [] })
+      );
+      expect(result).toMatchObject({ panelContent: { config: { esql_query: undefined } } });
+    });
+
+    it('keeps the additional queries of a multi-query panel on an edit', async () => {
+      const result = await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>old</div>',
+            esql_query: ['FROM logs-*', 'FROM metrics-*'],
+          }),
+          { nlQuery: 'Updated' }
+        )
+      );
+
+      expect(result).toMatchObject({
+        panelContent: { config: { esql_query: ['FROM logs-*', 'FROM metrics-*'] } },
       });
     });
 

@@ -30,11 +30,17 @@ function isFiniteNumber(value: unknown): value is number {
   return Number.isFinite(value);
 }
 
-export async function fillTemplate(
-  template: string,
-  columns: ESQLColumn[],
-  rows: unknown[][]
-): Promise<string> {
+export interface TemplateDataset {
+  columns: ESQLColumn[];
+  rows: unknown[][];
+}
+
+interface TemplateCell {
+  value: unknown;
+  pct?: number;
+}
+
+const buildTemplateDataset = ({ columns, rows }: TemplateDataset) => {
   const maxValues: Record<string, number> = {};
   columns.forEach((col, i) => {
     let max = -Infinity;
@@ -50,7 +56,7 @@ export async function fillTemplate(
   });
 
   const rowObjects = rows.map((row) => {
-    const obj: Record<string, { value: unknown; pct?: number }> = {};
+    const obj: Record<string, TemplateCell> = {};
     columns.forEach((col, i) => {
       const value = row[i];
       const max = maxValues[col.name];
@@ -65,10 +71,35 @@ export async function fillTemplate(
     return obj;
   });
 
+  return { rows: rowObjects, max: maxValues };
+};
+
+/**
+ * Renders a template against one result set per query. `queries[n]` holds the n-th query's `rows`
+ * and `max`, while the top-level `rows` and `max` stay the first query's, so a single-query
+ * template renders exactly as before.
+ */
+export async function fillTemplateDatasets(
+  template: string,
+  datasets: TemplateDataset[]
+): Promise<string> {
+  const queries = datasets.map(buildTemplateDataset);
+  const [first = { rows: [], max: {} }] = queries;
+
   // Sync is ~1.4x faster for identical output: the async path awaits at every AST node, which only
   // pays off with async filters or file-backed includes, and there are none. Registering either
   // means going back to `parseAndRender` — a sync render does not reject on an async filter, it
   // prints `[object Promise]` into the panel.
   const liquid = await getEngine();
-  return liquid.parseAndRenderSync(template.trim(), { rows: rowObjects, max: maxValues });
+  return liquid.parseAndRenderSync(template.trim(), {
+    rows: first.rows,
+    max: first.max,
+    queries,
+  });
 }
+
+export const fillTemplate = (
+  template: string,
+  columns: ESQLColumn[],
+  rows: unknown[][]
+): Promise<string> => fillTemplateDatasets(template, [{ columns, rows }]);

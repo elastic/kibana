@@ -30,6 +30,8 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
 
 let capturedComponentProps:
   | {
+      esqlQuery?: string;
+      additionalEsqlQueries?: readonly string[];
       isGenerating?: boolean;
       requestAdapter?: unknown;
       onGenerateWithChat?: () => void;
@@ -40,6 +42,7 @@ let capturedComponentProps:
 jest.mock('@kbn/custom-content-renderer', () => ({
   CustomContentComponent: (props: {
     esqlQuery: string | undefined;
+    additionalEsqlQueries?: readonly string[];
     savedTemplate: string | undefined;
     generationVersion: number;
     timeRange: { from: string; to: string } | undefined;
@@ -209,6 +212,34 @@ describe('customContentEmbeddableFactory', () => {
       expect(readEsqlQuery(embeddable.api.serializeState())).toBe(
         'FROM metrics | STATS avg = AVG(value)'
       );
+    });
+  });
+
+  describe('additional queries', () => {
+    const multiQueryState = {
+      ...baseState,
+      esql_query: ['FROM logs | STATS count = COUNT(*)', 'FROM metrics | LIMIT 5'],
+    };
+
+    it('round-trips every query through serializeState', async () => {
+      const { embeddable } = await buildEmbeddable(multiQueryState);
+      expect(embeddable.api.serializeState().esql_query).toEqual(multiQueryState.esql_query);
+    });
+
+    it('hands the queries after the first to the renderer', async () => {
+      const { embeddable } = await buildEmbeddable(multiQueryState);
+      await act(async () => render(<embeddable.Component />));
+
+      expect(capturedComponentProps?.esqlQuery).toBe('FROM logs | STATS count = COUNT(*)');
+      expect(capturedComponentProps?.additionalEsqlQueries).toEqual(['FROM metrics | LIMIT 5']);
+    });
+
+    it('follows the last saved state on reset', async () => {
+      const { embeddable } = await buildEmbeddable(multiQueryState);
+      act(() => {
+        embeddable.api.applySerializedState(baseState);
+      });
+      expect(embeddable.api.serializeState().esql_query).toEqual(baseState.esql_query);
     });
   });
 
@@ -520,6 +551,34 @@ describe('customContentEmbeddableFactory', () => {
       expect(openChat).toHaveBeenCalledWith(expect.objectContaining({ newConversation: true }));
     });
 
+    // The editor does not change the other queries yet, so a refine must not lose them: the agent
+    // hands back whatever the attachment carried.
+    it('sends the additional queries of the panel to the chat', async () => {
+      const openChat = jest.fn();
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null) },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM a', 'FROM b', 'FROM c'],
+      });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
+
+      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('draft', 'FROM a'));
+
+      expect(openChat.mock.calls[0][0].attachments[0].data).toMatchObject({
+        esql_query: 'FROM a',
+        additional_esql_queries: ['FROM b', 'FROM c'],
+      });
+    });
+
     it('clicking "Generate with chat" from the flyout on a new panel does not remove it', async () => {
       const removePanel = jest.fn();
       const openChat = jest.fn();
@@ -549,7 +608,8 @@ describe('customContentEmbeddableFactory', () => {
     const buildUpdateEvent = (
       embeddableId: string,
       panelTemplate: string,
-      customEvent: string = CUSTOM_CONTENT_UPDATED_UI_EVENT
+      customEvent: string = CUSTOM_CONTENT_UPDATED_UI_EVENT,
+      queries: { esql_query?: string; additional_esql_queries?: string[] } = {}
     ) => ({
       type: ChatEventType.toolUi,
       data: {
@@ -558,7 +618,7 @@ describe('customContentEmbeddableFactory', () => {
         custom_event: customEvent,
         data: {
           attachmentId: 'att-1',
-          data: { panel_template: panelTemplate, embeddable_id: embeddableId },
+          data: { panel_template: panelTemplate, embeddable_id: embeddableId, ...queries },
         },
       },
     });
@@ -615,6 +675,34 @@ describe('customContentEmbeddableFactory', () => {
         templateSizeBytes: '<p>mine</p>'.length,
       });
       expectGenerating(false);
+    });
+
+    it('applies the queries of an update, including the additional ones', async () => {
+      const { embeddable, emit } = await renderGeneratingPanel();
+
+      await emit(
+        buildUpdateEvent('test-uuid', '<p>mine</p>', CUSTOM_CONTENT_UPDATED_UI_EVENT, {
+          esql_query: 'FROM a',
+          additional_esql_queries: ['FROM b'],
+        })
+      );
+
+      expect(embeddable.api.serializeState().esql_query).toEqual(['FROM a', 'FROM b']);
+    });
+
+    it('clears the additional queries when the update carries none', async () => {
+      const { embeddable, emit } = await renderGeneratingPanel();
+      act(() => {
+        embeddable.api.applySerializedState({ ...baseState, esql_query: ['FROM a', 'FROM b'] });
+      });
+
+      await emit(
+        buildUpdateEvent('test-uuid', '<p>mine</p>', CUSTOM_CONTENT_UPDATED_UI_EVENT, {
+          esql_query: 'FROM a',
+        })
+      );
+
+      expect(embeddable.api.serializeState().esql_query).toEqual(['FROM a']);
     });
 
     it('applies the update from the first run of a new conversation', async () => {
