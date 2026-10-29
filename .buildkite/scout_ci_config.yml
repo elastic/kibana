@@ -73,6 +73,7 @@ plugins:
     - ml
     - monitoring
     - navigation
+    - nightshift
     - nightshift_investigations
     - nightshift_sources
     - notification_center
