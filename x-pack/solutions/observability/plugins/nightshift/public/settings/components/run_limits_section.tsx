@@ -126,7 +126,7 @@ export const RunLimitsSection = ({
                     {showGroupCallout ? (
                       <>
                         <EuiSpacer size="m" />
-                        <RunQuotaReachedCallout group={group} />
+                        <RunQuotaReachedCallout group={group} limit={response.limits[group]} />
                         <EuiSpacer size="m" />
                       </>
                     ) : null}

@@ -49,6 +49,7 @@ describe('buildHistogramHeatmapConfig', () => {
       palette: {
         colors: cellColors(seriesColor, backgroundColor),
       },
+      ySort: 'desc',
     });
   });
 

@@ -74,4 +74,6 @@ export const buildHistogramHeatmapConfig = ({
   palette: {
     colors: heatmapCellColors(seriesColor, backgroundColor),
   },
+  // Histogram ranges run high to low, matching the previous query sort.
+  ySort: 'desc',
 });

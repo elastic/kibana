@@ -256,6 +256,8 @@ export interface LensHeatmapConfigBase {
   palette?: {
     colors: string[];
   };
+  /** Vertical-axis order. Becomes the heatmap `ySortPredicate`. Omitted keeps datasource order. */
+  ySort?: 'asc' | 'desc';
 }
 
 export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHeatmapConfigBase>;
