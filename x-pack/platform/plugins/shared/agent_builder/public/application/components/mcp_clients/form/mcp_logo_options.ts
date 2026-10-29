@@ -111,4 +111,17 @@ export const LOGO_OPTIONS: Readonly<Record<string, LogoOption>> = {
         ({ default: url }) => url
       ),
   },
+  aws: {
+    label: i18n.translate('xpack.agentBuilder.mcpClients.form.logoOption.aws', {
+      defaultMessage: 'AWS',
+    }),
+    loadIconUrl: () =>
+      import(/* webpackChunkName: "mcpClientLogos" */ './assets/logos/aws.png').then(
+        ({ default: url }) => url
+      ),
+    loadIconUrlDark: () =>
+      import(/* webpackChunkName: "mcpClientLogos" */ './assets/logos/aws_dark.png').then(
+        ({ default: url }) => url
+      ),
+  },
 };
