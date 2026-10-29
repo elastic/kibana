@@ -46161,7 +46161,6 @@
     "xpack.securitySolution.flyout.panelAriaLabel.userPreview": "Aperçu utilisateur",
     "xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityFindings": "Détails de la vulnérabilité",
     "xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityFindingsPreview": "Aperçu des vulnérabilités",
-    "xpack.securitySolution.flyout.panelAriaLabel.watchlists": "Listes de surveillance",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnCountLabel": "nombre",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnLabel": "Alerte",
     "xpack.securitySolution.flyout.prevalence.alertCountColumnTooltip": "Nombre total d'alertes avec des paires de valeurs de champ identiques.",
