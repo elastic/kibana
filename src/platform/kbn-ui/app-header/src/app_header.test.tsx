@@ -63,12 +63,12 @@ describe('AppHeaderView', () => {
     expect(onClick.mock.calls[0][0].triggerElement).toBeUndefined();
   });
 
-  it('uses a custom share label', () => {
+  it('shows the share action with a custom label', () => {
     render(
       <AppHeaderView title="Workflow" share={{ label: 'Access control', onClick: jest.fn() }} />
     );
 
-    expect(screen.getByRole('button', { name: 'Access control' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Access control' })).toBeVisible();
   });
 
   it('does not derive a title share action from a menu share item', async () => {
