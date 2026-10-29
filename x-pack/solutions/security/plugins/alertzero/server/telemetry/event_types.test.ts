@@ -205,10 +205,26 @@ const FIXTURES: {
     verdicts_true_positive: 10,
     worker_id: 'system-security-floor-alert-triage',
   },
+  [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped]: {
+    ...envelope,
+    alerts_joined: 0,
+    alerts_pooled: 0,
+    alerts_with_strict_key: 36,
+    conversation_created: false,
+    fp_candidates_on_fallback: 4,
+    grouping: 'on',
+    proposals_created: 0,
+    strict_keys: 12,
+    strict_keys_single_alert: 5,
+    wide_keys: 8,
+    wide_keys_single_alert: 3,
+    worker_id: 'system-security-floor-alert-triage',
+  },
   [ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved]: {
     ...envelope,
     alerts_proposed: 20,
     alerts_retag_failed: 0,
+    revisions: 1,
     auto_approve_requested: true,
     investigation_id: '5f0c3c8e-2d51-4b8a-9e0f-7c1d2b3a4e5f',
     outcome: 'approved',
@@ -485,7 +501,6 @@ describe('AlertZero telemetry event types', () => {
       [ALERTZERO_TELEMETRY_EVENTS.AdWorkerReviewStarted, 'is_rereview'],
       [ALERTZERO_TELEMETRY_EVENTS.AdWorkerHandoffResolved, 'auto_approve_requested'],
       [ALERTZERO_TELEMETRY_EVENTS.AdWorkerHandoffResolved, 'verdict'],
-      [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified, 'investigation_id'],
       [ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved, 'investigation_id'],
       [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted, 'approved_not_applied'],
       [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted, 'entry_gate'],
@@ -611,6 +626,7 @@ describe('AlertZero telemetry event types', () => {
     it.each([
       [ALERTZERO_TELEMETRY_EVENTS.WorkerRunCompleted],
       [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified],
+      [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchGrouped],
       [ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved],
       [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted],
       [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted],
@@ -626,6 +642,18 @@ describe('AlertZero telemetry event types', () => {
       [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted, 'check_failed'],
       [ALERTZERO_TELEMETRY_EVENTS.HuntReportCompleted, 'run_incomplete'],
     ] as const;
+
+    // A batch has no Investigation of its own: only a new proposal or a failure creates one.
+    it('alertzero_alert_triage_batch_classified accepts a payload without an Investigation id', () => {
+      const analytics = createAnalytics({ isDev: true, logger: loggerMock.create() });
+      registerAlertZeroTelemetryEvents(analytics);
+      const { investigation_id: _omitted, ...payload } =
+        FIXTURES[ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified];
+
+      expect(() =>
+        analytics.reportEvent(ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified, payload)
+      ).not.toThrow();
+    });
 
     it.each(CONDITIONAL_INVESTIGATION_IDS)(
       '%s accepts a payload without its Investigation id',

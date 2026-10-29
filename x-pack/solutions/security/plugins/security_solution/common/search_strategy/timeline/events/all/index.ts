@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+export type { TimelineEventsAllStrategyResponse } from '@kbn/timelines-plugin/common';
 export type {
   TimelineEdges,
   TimelineItem,
   TimelineNonEcsData,
-  TimelineEventsAllStrategyResponse,
-} from '@kbn/timelines-plugin/common';
+} from '@kbn/securitysolution-timeline-common';
