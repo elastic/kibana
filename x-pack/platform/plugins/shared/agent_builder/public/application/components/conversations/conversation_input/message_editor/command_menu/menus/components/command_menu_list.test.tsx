@@ -36,24 +36,10 @@ describe('CommandMenuList', () => {
     const getHintCount = (container: HTMLElement) =>
       container.querySelectorAll('[data-euiicon-type="return"]').length;
 
-    it('is not shown by default', () => {
-      const { container } = renderWithProvider(
-        <CommandMenuList options={mockOptions} isLoading={false} onSelect={jest.fn()} />
-      );
-
-      expect(getHintCount(container)).toBe(0);
-    });
-
     it('is shown on the highlighted row only, and follows the highlight', () => {
       const ref = createRef<CommandMenuHandle>();
       const { container } = renderWithProvider(
-        <CommandMenuList
-          ref={ref}
-          options={mockOptions}
-          isLoading={false}
-          onSelect={jest.fn()}
-          showEnterHint
-        />
+        <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={jest.fn()} />
       );
       const getHintedRowText = () =>
         container.querySelector('[data-euiicon-type="return"]')?.closest('[role="option"]')

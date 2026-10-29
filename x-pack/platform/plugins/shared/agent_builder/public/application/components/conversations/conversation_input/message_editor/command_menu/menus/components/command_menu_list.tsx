@@ -28,9 +28,8 @@ import { i18n } from '@kbn/i18n';
 import type { CommandMenuHandle } from '../../types';
 
 const MENU_WIDTH = 280;
-const MENU_MAX_HEIGHT = 240;
-// EuiSelectable rows are 32px high by default
 const MENU_ROW_HEIGHT = 32;
+const MAX_VISIBLE_ROWS = 7;
 
 const loadingLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.commandMenu.list.loading',
@@ -63,10 +62,6 @@ interface CommandMenuListProps {
   readonly 'data-test-subj'?: string;
   /** When true, Space also selects the highlighted option, like Enter. */
   readonly spaceSelection?: boolean;
-  /** Rows shown before the list scrolls. Defaults to a fixed height of 240px. */
-  readonly maxVisibleRows?: number;
-  /** When true, the highlighted row shows an Enter key hint. */
-  readonly showEnterHint?: boolean;
 }
 
 export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProps>(
@@ -78,8 +73,6 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       width: menuWidth = MENU_WIDTH,
       'data-test-subj': dataTestSubj = 'commandMenuList',
       spaceSelection,
-      maxVisibleRows,
-      showEnterHint,
     },
     ref
   ) => {
@@ -162,9 +155,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     // EuiSelectable caps its own height at 6.5 rows, so a fixed height is needed to show more
     const listHeight =
-      maxVisibleRows && options.length > maxVisibleRows
-        ? maxVisibleRows * MENU_ROW_HEIGHT
-        : undefined;
+      options.length > MAX_VISIBLE_ROWS ? MAX_VISIBLE_ROWS * MENU_ROW_HEIGHT : undefined;
     const activeKey = options[activeIndex]?.key;
 
     const rowStyles = css`
@@ -172,6 +163,16 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       align-items: center;
       justify-content: space-between;
       gap: ${euiTheme.size.s};
+    `;
+    // Long labels end with "…" instead of pushing the Enter icon out of the row
+    const labelStyles = css`
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    `;
+    const enterIconStyles = css`
+      flex-shrink: 0;
     `;
 
     const activeHighlightStyles = css`
@@ -214,15 +215,17 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           singleSelection
           height={listHeight}
           renderOption={(option: CommandMenuListSelectableRow) => {
-            const label = option.renderLabel ?? option.label;
-            if (!showEnterHint) {
-              return label;
-            }
             return (
               <span css={rowStyles}>
-                {label}
+                <span css={labelStyles}>{option.renderLabel ?? option.label}</span>
                 {option.key === activeKey && (
-                  <EuiIcon type="return" size="s" color="subdued" aria-hidden={true} />
+                  <EuiIcon
+                    type="return"
+                    size="s"
+                    color="subdued"
+                    aria-hidden={true}
+                    css={enterIconStyles}
+                  />
                 )}
               </span>
             );
@@ -231,11 +234,6 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
             showIcons: false,
             bordered: false,
             paddingSize: 's',
-            css: maxVisibleRows
-              ? undefined
-              : css`
-                  max-height: ${MENU_MAX_HEIGHT}px;
-                `,
           }}
           onChange={(_newOptions, _event, changedOption) => {
             if (changedOption) {

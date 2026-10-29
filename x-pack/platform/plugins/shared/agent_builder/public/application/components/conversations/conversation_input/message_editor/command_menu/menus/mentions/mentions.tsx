@@ -18,7 +18,6 @@ import type { MentionCandidate } from './types';
 import { useMentionCandidates } from './use_mention_candidates';
 
 const MENTIONS_MENU_WIDTH = 320;
-const MAX_VISIBLE_ROWS = 7;
 
 const getCandidateKey = ({ kind, id }: MentionCandidate): string => `${kind}:${id}`;
 
@@ -60,8 +59,7 @@ export const Mentions = forwardRef<CommandMenuHandle, CommandMenuComponentProps>
       [candidates, rowStyles]
     );
 
-    // Lets the popover stay closed once it's clear there's nothing to show.
-    // Names have spaces, so the query keeps growing past the first word.
+    // Closes the popover when nothing matches. Names have spaces, so queries can be many words.
     const hasVisibleContent = isLoading || options.length > 0;
     useEffect(() => {
       onContentChange?.(hasVisibleContent, query);
@@ -71,7 +69,7 @@ export const Mentions = forwardRef<CommandMenuHandle, CommandMenuComponentProps>
       <CommandMenuList
         ref={ref}
         options={options}
-        // Names that are already found stay on screen while more people are searched
+        // Keep found names on screen while the search runs
         isLoading={isLoading && options.length === 0}
         onSelect={(option: CommandMenuListOption) => {
           const candidate = candidates.find((item) => getCandidateKey(item) === option.key);
@@ -86,8 +84,6 @@ export const Mentions = forwardRef<CommandMenuHandle, CommandMenuComponentProps>
           });
         }}
         width={MENTIONS_MENU_WIDTH}
-        maxVisibleRows={MAX_VISIBLE_ROWS}
-        showEnterHint
         data-test-subj="mentionsMenu"
       />
     );
