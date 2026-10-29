@@ -41,6 +41,7 @@
     "@kbn/nightshift-shared",
     "@kbn/agent-builder-server",
     "@kbn/agentic-investigations-plugin",
+    "@kbn/evals-plugin",
     "@kbn/storage-adapter",
     "@kbn/agent-builder-genai-utils",
     "@kbn/i18n",

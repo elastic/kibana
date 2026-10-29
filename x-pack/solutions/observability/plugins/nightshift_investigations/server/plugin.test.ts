@@ -144,6 +144,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     expect(registerStepDefinition.mock.calls.map(([definition]) => definition.id)).toEqual(
       expect.arrayContaining([
         'nightshift.resolveModel',
+        'nightshift.onlineEvals.classifyRound',
         'nightshift.sendNotifications',
         'nightshift.obtainSandbox',
         'nightshift.cortexHydrate',
