@@ -16,7 +16,7 @@ import {
   type EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { Component } from 'react';
+import React, { Component, createElement } from 'react';
 import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -189,9 +189,13 @@ export class LoginPage extends Component<Props, State> {
 
     return (
       <div data-test-subj="loginForm" css={kbnFullScreenBgCss}>
+        {/* POC: same ambient CE as boot splash (/ui/ambient_bg.js) */}
+        {createElement('elastic-ambient-bg', {
+          'data-test-subj': 'loginAmbientBg',
+        })}
         <div
           css={({ euiTheme }) => css`
-            margin-top: calc(${euiTheme.size.xxl} * 3);
+            margin-top: calc(${euiTheme.size.xxl} * 6);
             position: relative;
             padding: ${euiTheme.size.base};
             z-index: 10;

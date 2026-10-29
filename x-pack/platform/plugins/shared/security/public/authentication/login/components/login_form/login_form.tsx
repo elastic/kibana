@@ -169,11 +169,14 @@ const formMotionCss = (phase: Exclude<MotionPhase, 'gone'>) => css`
   }
 `;
 
+// POC: viewport-center like boot splash (avoid flash high in the form column)
 const loaderRingWrapCss = css`
+  position: fixed;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-block-size: 200px;
+  z-index: 10;
 `;
 
 export class LoginForm extends Component<LoginFormProps, State> {
