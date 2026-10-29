@@ -28,6 +28,12 @@ import {
   createSummaryTransformManagerMock,
   createTransformManagerMock,
 } from './mocks';
+import type { SloTelemetryReporter } from '../lib/telemetry';
+import { hashSloId } from '../lib/telemetry/build_slo_ebt_data';
+import {
+  createSloTelemetryReporterMock,
+  getReportedEvents,
+} from '../lib/telemetry/slo_telemetry_service.mock';
 import { ResetSLO } from './reset_slo';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
@@ -41,6 +47,7 @@ describe('ResetSLO', () => {
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
+  let mockTelemetry: jest.Mocked<SloTelemetryReporter>;
   let resetSLO: ResetSLO;
 
   beforeEach(() => {
@@ -49,6 +56,7 @@ describe('ResetSLO', () => {
     mockTransformManager = createTransformManagerMock();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
+    mockTelemetry = createSloTelemetryReporterMock();
     resetSLO = new ResetSLO(
       mockScopedClusterClient,
       mockRepository,
@@ -56,7 +64,8 @@ describe('ResetSLO', () => {
       mockSummaryTransformManager,
       loggerMock,
       'some-space',
-      httpServiceMock.createStartContract().basePath
+      httpServiceMock.createStartContract().basePath,
+      mockTelemetry
     );
     jest.useFakeTimers().setSystemTime(TEST_DATE);
   });
@@ -93,9 +102,26 @@ describe('ResetSLO', () => {
         updatedAt: expect.anything(),
       });
     });
+
+    it('reports the slo_reset telemetry event', async () => {
+      const slo = createSLO({ id: 'irrelevant', version: 1 });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockRepository.update.mockImplementation((v) => Promise.resolve(v));
+
+      await resetSLO.execute(slo.id);
+
+      expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
+      expect(getReportedEvents(mockTelemetry)).toEqual([
+        ['slo_reset', expect.objectContaining({ slo_id: hashSloId('irrelevant') })],
+      ]);
+    });
   });
 
   describe('unhappy path', () => {
+    afterEach(() => {
+      expect(mockTelemetry.report).not.toHaveBeenCalled();
+    });
+
     beforeEach(() => {
       mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
@@ -113,6 +139,10 @@ describe('ResetSLO', () => {
   });
 
   describe('when resource installation fails', () => {
+    afterEach(() => {
+      expect(mockTelemetry.report).not.toHaveBeenCalled();
+    });
+
     beforeEach(() => {
       mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         application: {},
