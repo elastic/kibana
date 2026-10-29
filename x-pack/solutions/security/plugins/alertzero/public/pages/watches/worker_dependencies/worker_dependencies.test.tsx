@@ -120,6 +120,41 @@ describe('getDisableConfirmation', () => {
   });
 });
 
+describe('getWorkerWarningReasons degraded state', () => {
+  const reasonsFor = (
+    worker: Parameters<typeof getWorkerWarningReasons>[0],
+    includeBlocking: boolean
+  ) => getWorkerWarningReasons(worker, new Map(), { includeBlocking });
+
+  it('adds the degraded reason when state and reason are both set', () => {
+    expect(
+      reasonsFor(
+        { id: HUNT, blockingReasons: [], state: 'degraded', stateReason: 'Last sweep blocked' },
+        true
+      )
+    ).toContainEqual({ id: 'degraded', message: 'Last sweep blocked' });
+  });
+
+  it('adds the degraded reason for a viewer who cannot change workers', () => {
+    expect(
+      reasonsFor(
+        { id: HUNT, blockingReasons: [], state: 'degraded', stateReason: 'Last sweep blocked' },
+        false
+      )
+    ).toContainEqual({ id: 'degraded', message: 'Last sweep blocked' });
+  });
+
+  it('does not add a reason when degraded has no stateReason', () => {
+    expect(reasonsFor({ id: HUNT, blockingReasons: [], state: 'degraded' }, true)).toEqual([]);
+  });
+
+  it('does not add a reason for a worker that is not degraded', () => {
+    expect(
+      reasonsFor({ id: HUNT, blockingReasons: [], state: 'ok', stateReason: 'ignored' }, true)
+    ).toEqual([]);
+  });
+});
+
 describe('getWorkerWarningReasons', () => {
   const warnings = (worker: ReturnType<typeof subject>, state: Map<string, boolean>) =>
     getWorkerWarningReasons(worker, state, { includeBlocking: true });

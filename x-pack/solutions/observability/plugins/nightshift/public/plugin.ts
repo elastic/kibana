@@ -75,6 +75,15 @@ export class NightshiftPlugin
           keywords: ['detections', 'alerts', 'significant events'],
         },
         {
+          id: 'rules' satisfies NightshiftLinkId,
+          title: i18n.translate('xpack.nightshift.rulesDeepLinkTitle', {
+            defaultMessage: 'Rules',
+          }),
+          path: '/detections/rules',
+          visibleIn: [],
+          keywords: ['rules', 'queries', 'significant events'],
+        },
+        {
           id: 'sources' satisfies NightshiftLinkId,
           title: i18n.translate('xpack.nightshift.sourcesDeepLinkTitle', {
             defaultMessage: 'Sources',

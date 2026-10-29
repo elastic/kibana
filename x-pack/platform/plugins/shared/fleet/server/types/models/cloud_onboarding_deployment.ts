@@ -112,9 +112,24 @@ export const CloudOnboardingDeploymentSchemaV4 = CloudOnboardingDeploymentSchema
   namespace: schema.maybe(schema.string({ maxLength: 100 })),
 });
 
-// ── V5: packageNames + serviceNames + updatedBy ─────────────────────────────────────────────
-// packageNames (and provider) are mapped as keyword so deployments can be listed per package.
+// ── V5: instances ────────────────────────────────────────────────────────────
+// The service instances (originals and duplicates) of the last deploy, so a resumed onboarding
+// rebuilds the Service settings rows. Not in mappings.properties (dynamic: false), so no mapping
+// change is needed.
+const PersistedInstanceSchema = schema.object({
+  instanceId: schema.string({ minLength: 1, maxLength: 255 }),
+  serviceId: schema.string({ minLength: 1, maxLength: 255 }),
+  name: schema.string({ maxLength: 255 }),
+  isDuplicate: schema.boolean(),
+});
+
 export const CloudOnboardingDeploymentSchemaV5 = CloudOnboardingDeploymentSchemaV4.extends({
+  instances: schema.maybe(schema.arrayOf(PersistedInstanceSchema, { maxSize: 1000 })),
+});
+
+// ── V6: packageNames + serviceNames + updatedBy ──────────────────────────────
+// packageNames (and provider) are mapped as keyword so deployments can be listed per package.
+export const CloudOnboardingDeploymentSchemaV6 = CloudOnboardingDeploymentSchemaV5.extends({
   packageNames: schema.maybe(schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })),
   serviceNames: schema.maybe(
     schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 256 }))

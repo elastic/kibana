@@ -56,6 +56,7 @@ import type {
 } from '../../common/types/models/cloud_connector';
 import type {
   CloudOnboardingDeploymentAuthMethod,
+  CloudOnboardingInstance,
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
@@ -416,6 +417,8 @@ export interface CloudOnboardingDeploymentSOAttributes {
   description?: string;
   /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
   namespace?: string;
+  /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. */
+  instances?: CloudOnboardingInstance[];
   /** Names of the integration packages this deployment covers. Mapped as keyword so deployments can be listed per package. */
   packageNames?: string[];
   /** Display name of each service as shown in the onboarding flow, by service id. */

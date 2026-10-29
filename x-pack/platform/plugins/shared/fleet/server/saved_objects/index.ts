@@ -64,6 +64,7 @@ import {
   CloudOnboardingDeploymentSchemaV3,
   CloudOnboardingDeploymentSchemaV4,
   CloudOnboardingDeploymentSchemaV5,
+  CloudOnboardingDeploymentSchemaV6,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2212,8 +2213,19 @@ export const getSavedObjectTypes = (
           },
         },
         5: {
-          // Added packageNames + serviceNames + updatedBy. packageNames and provider become queryable keywords so
-          // the list API can filter deployments per package. Existing documents have no
+          // Added instances. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV5.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV5,
+          },
+        },
+        6: {
+          // Added packageNames + serviceNames + updatedBy. packageNames and provider become queryable
+          // keywords so the list API can filter deployments per package. Existing documents have no
           // packageNames and are treated as empty — no data_backfill.
           changes: [
             {
@@ -2225,11 +2237,11 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: CloudOnboardingDeploymentSchemaV5.extends(
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV6.extends(
               {},
               { unknowns: 'ignore' }
             ),
-            create: CloudOnboardingDeploymentSchemaV5,
+            create: CloudOnboardingDeploymentSchemaV6,
           },
         },
       },

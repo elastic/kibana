@@ -68,13 +68,7 @@
         "aws.cloudtrail": "pkg-policy-id-1",
         "aws.vpcflow": "pkg-policy-id-2"
       },
-      "apiKeyId": "api-key-id-1",
-      "packageNames": ["aws"],
-      "serviceNames": {
-        "aws.cloudtrail": "AWS CloudTrail",
-        "aws.vpcflow": "AWS VPC Flow Logs"
-      },
-      "updatedBy": "elastic"
+      "apiKeyId": "api-key-id-1"
     },
     {
       "provider": "aws",
@@ -90,12 +84,7 @@
       "packagePolicyIds": ["pkg-policy-id-3"],
       "policyIdsByInstance": {
         "aws.cloudtrail": "pkg-policy-id-3"
-      },
-      "packageNames": ["aws"],
-      "serviceNames": {
-        "aws.cloudtrail": "AWS CloudTrail"
-      },
-      "updatedBy": "elastic"
+      }
     }
   ]
 }
