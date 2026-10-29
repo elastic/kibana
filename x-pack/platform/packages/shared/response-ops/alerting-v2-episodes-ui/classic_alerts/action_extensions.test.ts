@@ -6,6 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { bulkUpdateAlertWorkflowStatus } from '@kbn/response-ops-alerts-apis/apis/bulk_update_alert_workflow_status';
 import { bulkUpdateAlertTags } from '@kbn/response-ops-alerts-apis/apis/bulk_update_alert_tags';
 import { bulkUntrackAlerts } from '@kbn/response-ops-alerts-apis/apis/bulk_untrack_alerts';
@@ -17,6 +18,7 @@ import { ALERT_EPISODE_ACTION_TYPE, ALERT_EPISODE_STATUS } from '@kbn/alerting-v
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { ClassicAlertActionContext } from './utils/map_alert';
 import { classicActionExtensions } from './action_extensions';
+import { executeCompositeAction } from '../actions/execute_composite_action';
 
 jest.mock('@kbn/response-ops-alerts-apis/apis/bulk_update_alert_workflow_status');
 jest.mock('@kbn/response-ops-alerts-apis/apis/bulk_update_alert_tags');
@@ -374,6 +376,38 @@ describe('classicActionExtensions', () => {
 
       expect(mockedBulkMute).toHaveBeenCalled();
       expect(mockedSnooze).not.toHaveBeenCalled();
+    });
+
+    it('a mixed selection snoozes the already-snoozed episode alongside the unsnoozed one', async () => {
+      const episodes = [
+        makeClassicEpisode('c1', 'open', { instanceId: 'inst-1' }),
+        makeClassicEpisode('c2', 'open', {
+          instanceId: 'inst-2',
+          last_snooze_action: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+          snoozed_until: '2099-01-01T00:00:00.000Z',
+          snooze_conditions: [{ type: 'severity_change' }],
+        }),
+      ];
+
+      await executeCompositeAction({
+        episodes,
+        nativeExecute: async () => null,
+        extension: snoozeExtension,
+        extensionContext: { snoozedUntil: '2030-01-01T00:00:00.000Z' },
+        actionName: 'Snooze',
+        deps: { http, notifications: notificationServiceMock.createStartContract() },
+      });
+
+      expect(mockedSnooze.mock.calls.map(([{ instanceId }]) => instanceId)).toEqual([
+        'inst-1',
+        'inst-2',
+      ]);
+      expect(mockedSnooze).toHaveBeenCalledWith({
+        http,
+        id: 'r1',
+        instanceId: 'inst-2',
+        expiresAt: '2030-01-01T00:00:00.000Z',
+      });
     });
   });
 
