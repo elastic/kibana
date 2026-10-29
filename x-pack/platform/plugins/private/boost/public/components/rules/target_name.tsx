@@ -8,6 +8,7 @@
 import React, { Fragment } from 'react';
 import {
   EuiIcon,
+  EuiIconTip,
   EuiMark,
   EuiScreenReaderOnly,
   EuiToolTip,
@@ -17,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { splitByIndexPattern } from '../../../common/resolution';
 import type { DataSourceType } from '../../../common/types';
-import { DetailsLink } from '../details_link';
 import { HiddenBadge } from '../hidden_data';
 import { IndexManagementLink } from '../index_management_link';
 
@@ -119,6 +119,22 @@ export const getSupersedingDescription = (rule: string): string =>
     values: { rule },
   });
 
+/**
+ * The rule that applies to a target instead, as just its icon, naming the rule in its tooltip, for a
+ * list that leaves out the rule's name to keep to the targets.
+ */
+export const SupersedingRuleTip = ({ rule }: { rule: string }) => (
+  <EuiIconTip
+    type={SUPERSEDING_ICON}
+    color="subdued"
+    content={getSupersedingDescription(rule)}
+    aria-label={SUPERSEDING_LABEL}
+    // A flex anchor sizes to the icon, so it centers on the name beside it.
+    display="flex"
+    anchorProps={{ 'data-test-subj': 'boostSupersedingRule' }}
+  />
+);
+
 interface SupersedingRuleProps {
   rule: string;
   /**
@@ -127,16 +143,10 @@ interface SupersedingRuleProps {
    * meaning as text instead.
    */
   hasTooltip?: boolean;
-  /** Links the rule's name to its details page, outside forms that would lose their changes. */
-  isLinked?: boolean;
 }
 
 /** The rule that applies to a target instead, after an icon for ranking higher. */
-export const SupersedingRule = ({
-  rule,
-  hasTooltip = true,
-  isLinked = false,
-}: SupersedingRuleProps) => {
+export const SupersedingRule = ({ rule, hasTooltip = true }: SupersedingRuleProps) => {
   const { euiTheme } = useEuiTheme();
   const tooltipId = useGeneratedHtmlId();
 
@@ -163,7 +173,7 @@ export const SupersedingRule = ({
           </EuiScreenReaderOnly>
         </>
       )}
-      {isLinked ? <DetailsLink kind="rule" name={rule} /> : rule}
+      {rule}
     </span>
   );
 

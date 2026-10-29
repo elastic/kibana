@@ -16,6 +16,8 @@ interface TableCountProps {
   total: number;
   /** The total with what it counts, such as "7 data streams". */
   formatTotal: (count: number) => string;
+  /** Follows the count after a bullet, such as how many hidden rows the table leaves out. */
+  note?: string;
   'data-test-subj'?: string;
 }
 
@@ -25,6 +27,7 @@ export const TableCount = ({
   pageSize,
   total,
   formatTotal,
+  note,
   'data-test-subj': dataTestSubj,
 }: TableCountProps) => {
   const first = total === 0 ? 0 : pageIndex * pageSize + 1;
@@ -39,6 +42,12 @@ export const TableCount = ({
             total: formatTotal(total),
           },
         })}
+        {note && (
+          <>
+            {' '}
+            <span aria-hidden={true}>•</span> {note}
+          </>
+        )}
       </EuiText>
       {/* As far from the table as the table's other neighbors. */}
       <EuiSpacer size="m" />

@@ -24,7 +24,7 @@ import type { RuleCoverage } from '../../../common/resolution';
 import type { BoostProfileType } from '../../../common/types';
 import { formatDataSourceCount } from '../format';
 import { formatMoreHidden } from '../hidden_data';
-import { SupersedingRule, TargetName } from './target_name';
+import { SupersedingRuleTip, TargetName } from './target_name';
 
 interface RuleMatchesProps {
   patterns: readonly string[];
@@ -175,22 +175,11 @@ export const MatchesPopover = ({
           {shownNames.map((name) => {
             const supersedingRule = supersededBy.get(name);
             return (
-              // A row with any higher-ranked rule on the right.
-              <li
-                key={name}
-                css={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: euiTheme.size.l,
-                }}
-              >
+              // A name, followed by an icon naming any higher-ranked rule in its tooltip. The rule's
+              // details list its matches with the rules that outrank it for them.
+              <li key={name} css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.xs }}>
                 <TargetName name={name} supersededBy={supersedingRule} />
-                {supersedingRule && (
-                  <EuiText size="xs" color="subdued">
-                    <SupersedingRule rule={supersedingRule} isLinked />
-                  </EuiText>
-                )}
+                {supersedingRule && <SupersedingRuleTip rule={supersedingRule} />}
               </li>
             );
           })}

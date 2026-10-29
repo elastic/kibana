@@ -521,19 +521,13 @@ describe('RuleDetailsPage', () => {
     // The rule applies to the hidden index all the same.
     expect(screen.getByTestId('boostRuleUsage')).toHaveTextContent('Applies to2 indices');
     expect(matched.queryByText('.catalog-archive')).not.toBeInTheDocument();
-    // The last row says how many are left out, which the count above doesn't include.
-    expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent('Showing 1–3 of 3 indices');
-    const getLastRow = () => matched.getAllByRole('row').at(-1);
-    expect(getLastRow()).toHaveTextContent('1 hidden index not shown');
-    // However the table is sorted.
-    await userEvent.click(matched.getByRole('button', { name: /^Index/ }));
-    expect(getLastRow()).toHaveTextContent('1 hidden index not shown');
-    await userEvent.click(matched.getByRole('button', { name: /Storage size/ }));
-    expect(getLastRow()).toHaveTextContent('1 hidden index not shown');
+    // The count says how many are left out.
+    expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent(
+      /^Showing 1–3 of 3 indices • 1 hidden index not shown$/
+    );
 
     await userEvent.click(matched.getByTestId('boostMatchedShowHidden'));
 
-    expect(matched.queryByTestId('boostMatchedHiddenNotShown')).not.toBeInTheDocument();
     const row = matched.getByText('.catalog-archive').closest('tr') as HTMLElement;
     expect(within(row).getByTestId('boostHiddenBadge')).toHaveTextContent('Hidden');
     expect(matched.getByTestId('boostMatchedCount')).toHaveTextContent('Showing 1–4 of 4 indices');

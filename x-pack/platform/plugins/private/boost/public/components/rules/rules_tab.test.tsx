@@ -224,16 +224,17 @@ describe('RulesTab matches', () => {
     expect(popover.getByTestId('boostRuleMatchCount')).toHaveTextContent('2 matches, 1 outranked');
     expect(popover.getByText('Using selected indices')).toBeInTheDocument();
     expect(popover.getByTestId('boostSupersededTarget')).toHaveTextContent('products');
-    expect(popover.getByTestId('boostSupersedingRule')).toHaveTextContent('products-first');
+    // The rule's name is left to the icon's tooltip, keeping the list to the targets.
+    expect(popover.queryByText('products-first')).not.toBeInTheDocument();
   });
 
-  it('explains a higher-ranked rule when its name is hovered', async () => {
+  it('names a higher-ranked rule in the tooltip of the icon after its target', async () => {
     renderTab('/rules');
 
     await userEvent.click(getRow('picked').getByTestId('boostRuleMatches'));
     // EUI's popover ignores the pointer until it finishes opening.
     await waitFor(() => expect(screen.getByRole('dialog')).not.toHaveStyle('pointer-events: none'));
-    await userEvent.hover(within(screen.getByRole('dialog')).getByText('products-first'));
+    await userEvent.hover(within(screen.getByRole('dialog')).getByTestId('boostSupersedingRule'));
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
       '"products-first" ranks higher, so it applies instead. To outrank it, increase this rule\'s priority.'
