@@ -57,6 +57,7 @@ describe('Nightshift bound investigation workflow', () => {
     expect(rendered.triggers[0].inputs.properties.timeout_seconds).toEqual({
       type: 'number',
       default: 3600,
+      maximum: 3600,
       description: expect.any(String),
     });
   });
