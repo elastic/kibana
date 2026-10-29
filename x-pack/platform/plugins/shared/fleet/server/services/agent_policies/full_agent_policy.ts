@@ -220,9 +220,7 @@ export async function getFullAgentPolicy(
   }
 
   const getOutputProxy = (output: Output) =>
-    isBeatsOutput(output) && output.proxy_id
-      ? proxies.find((proxy) => output.proxy_id === proxy.id)
-      : undefined;
+    output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined;
 
   const fullPolicyOutputs = outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
     acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(

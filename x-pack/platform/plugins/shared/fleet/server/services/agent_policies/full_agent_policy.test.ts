@@ -1721,14 +1721,12 @@ describe('getFullAgentPolicy', () => {
         proxies,
         dataOutput: output,
         monitoringOutput: output,
-        downloadSources: [
-          {
-            id: 'default-download-source-id',
-            is_default: true,
-            name: 'Default host',
-            host: 'http://default-registry.co',
-          },
-        ],
+        downloadSource: {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
         downloadSourceProxy: undefined,
         fleetServerHost,
       });
