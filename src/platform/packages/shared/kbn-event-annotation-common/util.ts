@@ -51,13 +51,13 @@ export const getPersistedAnnotationColor = (color?: string) => color ?? AUTO_ANN
 export const isRangeAnnotationConfig = (
   annotation?: EventAnnotationConfig
 ): annotation is RangeEventAnnotationConfig => {
-  return Boolean(annotation && annotation?.key.type === 'range');
+  return Boolean(annotation && annotation.type === 'manual' && annotation.key.type === 'range');
 };
 
 export const isManualPointAnnotationConfig = (
   annotation?: EventAnnotationConfig
 ): annotation is PointInTimeEventAnnotationConfig => {
-  return Boolean(annotation && 'timestamp' in annotation?.key);
+  return Boolean(annotation && annotation.type === 'manual' && 'timestamp' in annotation.key);
 };
 
 export const isQueryAnnotationConfig = (
@@ -67,7 +67,7 @@ export const isQueryAnnotationConfig = (
 };
 
 export const isEsqlAnnotationConfig = (
-  annotation?: EventAnnotationConfig | EsqlEventAnnotationConfig
+  annotation?: EventAnnotationConfig
 ): annotation is EsqlEventAnnotationConfig => {
   return annotation?.type === 'esql';
 };

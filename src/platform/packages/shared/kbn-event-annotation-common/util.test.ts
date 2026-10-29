@@ -17,6 +17,9 @@ import {
   getDefaultManualAnnotation,
   getDefaultQueryAnnotation,
   isEsqlAnnotationConfig,
+  isManualPointAnnotationConfig,
+  isRangeAnnotationConfig,
+  isQueryAnnotationConfig,
 } from './util';
 
 describe('isEsqlAnnotationConfig', () => {
@@ -46,6 +49,9 @@ describe('isEsqlAnnotationConfig', () => {
 
   it.each([pointAnnotation, rangeAnnotation])('recognizes $key.type annotations', (annotation) => {
     expect(isEsqlAnnotationConfig(annotation)).toBe(true);
+    expect(isManualPointAnnotationConfig(annotation)).toBe(false);
+    expect(isRangeAnnotationConfig(annotation)).toBe(false);
+    expect(isQueryAnnotationConfig(annotation)).toBe(false);
   });
 
   it.each<{ name: string; annotation?: EventAnnotationConfig }>([

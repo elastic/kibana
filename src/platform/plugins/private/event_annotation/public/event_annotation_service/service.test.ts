@@ -148,6 +148,21 @@ describe('Event Annotation Service', () => {
       expect(eventAnnotationService.toExpression([])).toEqual([]);
     });
 
+    it('rejects ES|QL configs instead of treating them as manual annotations', () => {
+      expect(() =>
+        eventAnnotationService.toExpression([
+          {
+            id: 'deployments',
+            type: 'esql',
+            query: { esql: 'FROM deployments | KEEP time' },
+            timeColumn: 'time',
+            key: { type: 'point_in_time' },
+            label: 'Deployments',
+          },
+        ])
+      ).toThrow('ES|QL annotations are not supported by the legacy annotation expression.');
+    });
+
     it('should process manual point annotations', () => {
       expect(
         eventAnnotationService.toExpression([

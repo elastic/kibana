@@ -9,10 +9,16 @@
 
 import React, { useId } from 'react';
 import type { ReactNode } from 'react';
-import { EuiComboBox, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
+import {
+  defaultAnnotationLabel,
+  defaultRangeAnnotationLabel,
+  toLineAnnotationColor,
+  toRangeAnnotationColor,
+} from './helpers';
 
 interface Props {
   annotation: EsqlEventAnnotationConfig;
@@ -28,6 +34,7 @@ export const ConfigPanelEsqlAnnotation = ({
   queryEditor,
 }: Props) => {
   const tooltipColumnsId = useId();
+  const rangeSwitchId = useId();
   const dateColumns = columns.filter(({ meta }) => meta.type === 'date');
   const extraColumns = annotation.extraColumns ?? [];
   const missingExtraColumns = extraColumns.filter(
@@ -37,6 +44,42 @@ export const ConfigPanelEsqlAnnotation = ({
   return (
     <>
       {queryEditor}
+      <EuiFormRow display="rowCompressed" fullWidth>
+        <EuiSwitch
+          id={rangeSwitchId}
+          labelProps={{ id: `${rangeSwitchId}-label` }}
+          compressed
+          label={i18n.translate('eventAnnotationComponents.esqlAnnotation.timeRangeToggleSwitch', {
+            defaultMessage: 'Time range',
+          })}
+          checked={'endTimeColumn' in annotation}
+          onChange={() => {
+            if ('endTimeColumn' in annotation) {
+              const { endTimeColumn, outside, ...point } = annotation;
+              onChange({
+                ...point,
+                key: { type: 'point_in_time' },
+                color: toLineAnnotationColor(annotation.color),
+                label:
+                  annotation.label === defaultRangeAnnotationLabel
+                    ? defaultAnnotationLabel
+                    : annotation.label,
+              });
+              return;
+            }
+            onChange({
+              ...annotation,
+              key: { type: 'range' },
+              endTimeColumn: '',
+              color: toRangeAnnotationColor(annotation.color),
+              label:
+                annotation.label === defaultAnnotationLabel
+                  ? defaultRangeAnnotationLabel
+                  : annotation.label,
+            });
+          }}
+        />
+      </EuiFormRow>
       <ColumnPicker
         label={i18n.translate('eventAnnotationComponents.esqlAnnotation.timeColumnLabel', {
           defaultMessage: 'Time column',
@@ -63,7 +106,13 @@ export const ConfigPanelEsqlAnnotation = ({
         })}
         columns={columns}
         value={annotation.textColumn ?? ''}
-        onChange={(textColumn) => onChange({ ...annotation, textColumn: textColumn || undefined })}
+        onChange={(textColumn) =>
+          onChange({
+            ...annotation,
+            textColumn: textColumn || undefined,
+            ...(!('endTimeColumn' in annotation) && textColumn ? { textVisibility: true } : {}),
+          })
+        }
       />
       <EuiFormRow
         id={tooltipColumnsId}
