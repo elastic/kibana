@@ -46,6 +46,7 @@ export {
   isRangeAnnotationConfig,
   isManualPointAnnotationConfig,
   isQueryAnnotationConfig,
+  isEsqlAnnotationConfig,
 } from './util';
 
 export type {
@@ -53,6 +54,7 @@ export type {
   AvailableAnnotationIcon,
   PointStyleProps,
   EventAnnotationConfig,
+  EsqlEventAnnotationConfig,
   EventAnnotationGroupConfig,
   RangeStyleProps,
   ManualAnnotationType,
