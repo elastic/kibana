@@ -76,6 +76,40 @@ describe('hydrateOnboardingSession', () => {
     expect(settings).not.toHaveProperty('namespace');
   });
 
+  describe('instances', () => {
+    const readSettings = () =>
+      JSON.parse(sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.serviceSettingsStep`)!);
+    const instances = [
+      { instanceId: 'elb', serviceId: 'elb', name: 'Elastic Load Balancing', isDuplicate: false },
+      { instanceId: 'elb__dup-1', serviceId: 'elb', name: 'ELB prod', isDuplicate: true },
+    ];
+
+    it('restores the saved instances, so a resumed onboarding shows its duplicates', async () => {
+      mockSendGet.mockResolvedValue({
+        item: makeItem({
+          instances,
+          serviceVars: { 'elb__dup-1': { enabledDataStreams: ['elb'], varsByDataStream: {} } },
+        }),
+      });
+
+      await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+
+      expect(readSettings().instances).toEqual(instances);
+    });
+
+    it.each([
+      ['saved without any', undefined],
+      ['saved as an empty list', []],
+    ])('leaves the instances unset for an onboarding %s', async (_label, saved) => {
+      mockSendGet.mockResolvedValue({ item: makeItem({ instances: saved }) });
+
+      await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+
+      // Unset, not `[]`: with the key absent, the duplicates are still recovered from serviceVars.
+      expect(readSettings()).not.toHaveProperty('instances');
+    });
+  });
+
   it('returns false and does not write session storage when fetch fails', async () => {
     mockSendGet.mockRejectedValue(new Error('network error'));
     const result = await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
