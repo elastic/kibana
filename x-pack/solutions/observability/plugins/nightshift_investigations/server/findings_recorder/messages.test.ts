@@ -110,6 +110,24 @@ describe('buildRecorderMessages', () => {
     expect(messages.at(-1)).toMatchObject({ content: LIVE_INSTRUCTION });
   });
 
+  it('replays a tool id with a dot under a name providers accept', () => {
+    const dotted = [
+      ...steps.slice(0, 2),
+      toolStep('g2', 'c9', 'attachments.read', { attachment_id: 'a' }, { text: 'subject' }),
+    ];
+    const messages = buildRecorderMessages({ steps: dotted, turns: [], final: false });
+
+    const calls = messages.flatMap((message) =>
+      message.role === MessageRole.Assistant ? message.toolCalls ?? [] : []
+    );
+    expect(calls.map((call) => call.function.name)).toContain('attachments_read');
+    expect(
+      messages.find((message) => message.role === MessageRole.Tool && message.toolCallId === 'c9')
+    ).toMatchObject({ name: 'attachments_read' });
+    expect(toolNamesToDefine(messages)).toContain('attachments_read');
+    expect(toolNamesToDefine(messages).some((name) => name.includes('.'))).toBe(false);
+  });
+
   it('asks the final question once the agent has finished', () => {
     const messages = buildRecorderMessages({ steps, turns: [], final: true });
 

@@ -111,10 +111,17 @@ export const clippedResultFiles = (
   steps.filter(isToolCallStep).flatMap((call, index) => {
     const content = fullResultText(call);
     if (content.length <= TOOL_RESULT_MAX_CHARS) return [];
-    const toolId = call.tool_id.replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 60);
+    const toolId = replayToolName(call.tool_id).slice(0, 60);
     const path = `${RECORDER_RESULTS_DIR}/${String(index + 1).padStart(3, '0')}-${toolId}.txt`;
     return [{ toolCallId: call.tool_call_id, path, content }];
   });
+
+/**
+ * A tool id as a function name the model providers accept. Agent Builder ids can hold dots
+ * (`attachments.read`), which providers reject in a function name.
+ */
+const replayToolName = (toolId: string): string =>
+  toolId.replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 128);
 
 /** The messages an agent turn produced: what it said and asked for, then each tool's result. */
 const turnMessages = (
@@ -123,7 +130,10 @@ const turnMessages = (
 ): Message[] => {
   const toolCalls: ToolCall[] = calls.map((call) => ({
     toolCallId: call.tool_call_id,
-    function: { name: call.tool_id, arguments: (call.params ?? {}) as Record<string, never> },
+    function: {
+      name: replayToolName(call.tool_id),
+      arguments: (call.params ?? {}) as Record<string, never>,
+    },
   }));
   return [
     {
@@ -134,7 +144,7 @@ const turnMessages = (
     ...calls.map(
       (call): Message => ({
         role: MessageRole.Tool,
-        name: call.tool_id,
+        name: replayToolName(call.tool_id),
         toolCallId: call.tool_call_id,
         response: resultText(call, resultPaths.get(call.tool_call_id)),
       })
