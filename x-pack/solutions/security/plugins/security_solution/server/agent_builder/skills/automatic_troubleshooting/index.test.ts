@@ -215,6 +215,9 @@ describe('createAutomaticTroubleshootingSkill', () => {
       );
       expect(skill.content).not.toContain('- `Elastic Defend custom YARA signatures');
       expect(skill.content).toContain(
+        'managed on the Custom YARA signatures tab of the Artifacts page in Security'
+      );
+      expect(skill.content).toContain(
         'A question about a custom YARA signature alone, without a named host or endpoint, does not involve a specific endpoint.'
       );
       expect(skill.description).toContain('custom YARA signatures');

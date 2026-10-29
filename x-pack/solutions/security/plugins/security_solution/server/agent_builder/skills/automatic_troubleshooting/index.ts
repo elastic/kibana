@@ -62,6 +62,7 @@ const CUSTOM_YARA_SIGNATURES_TEXT: CustomYaraSignaturesText = {
    - A \`not_authorized\` result for \`custom_yara_signatures\` can mean the cluster lacks an Enterprise license or the Endpoint Complete add-on, not only that the user lacks the Custom YARA Signatures privilege.
    - This skill cannot read the \`memory_protection.custom_yara_signatures\` policy setting. A \`memory_protection\` policy response status is not that setting. If the answer depends on whether custom YARA signatures are enabled in the policy, say that this cannot be checked here and ask the user to confirm it in the policy.
    - The Elastic Defend knowledge base has no custom YARA signatures content yet. Knowledge results for these questions describe user artifacts in general, not custom YARA signatures specifically.
+   - Custom YARA signatures are managed on the Custom YARA signatures tab of the Artifacts page in Security. When pointing the user there, name that page and tab instead of a full menu path, because the navigation menus differ between deployments.
    - A question about a custom YARA signature alone, without a named host or endpoint, does not involve a specific endpoint.`,
   description: 'custom YARA signatures, ',
 };
