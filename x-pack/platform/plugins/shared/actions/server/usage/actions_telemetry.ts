@@ -61,6 +61,58 @@ interface ExecutionsPerDayAggregations {
   };
 }
 
+const TYPE_AND_AUTH_SEPARATOR = '||';
+
+function incrementCount(counts: Record<string, number>, key: string, amount = 1): void {
+  counts[key] = (counts[key] || 0) + amount;
+}
+
+function incrementNestedCount(
+  counts: Record<string, Record<string, number>>,
+  outerKey: string,
+  innerKey: string,
+  amount = 1
+): void {
+  counts[outerKey] = counts[outerKey] || {};
+  incrementCount(counts[outerKey], innerKey, amount);
+}
+
+function getConfigAuthType(config: Record<string, unknown> | undefined): string | undefined {
+  const authType = config?.authType;
+  return typeof authType === 'string' && authType.length > 0 ? authType : undefined;
+}
+
+export function getAuthTypeCounts(aggs: Record<string, number>): {
+  countByAuthType: Record<string, number>;
+  countByTypeAndAuthType: Record<string, Record<string, number>>;
+} {
+  const countByAuthType: Record<string, number> = {};
+  const countByTypeAndAuthType: Record<string, Record<string, number>> = {};
+
+  for (const [key, count] of Object.entries(aggs)) {
+    const separatorIndex = key.indexOf(TYPE_AND_AUTH_SEPARATOR);
+    if (separatorIndex === -1) {
+      continue;
+    }
+
+    const actionTypeId = key.slice(0, separatorIndex);
+    const authType = key.slice(separatorIndex + TYPE_AND_AUTH_SEPARATOR.length);
+    if (!authType) {
+      continue;
+    }
+
+    incrementCount(countByAuthType, authType, count);
+    incrementNestedCount(
+      countByTypeAndAuthType,
+      replaceFirstAndLastDotSymbols(actionTypeId),
+      authType,
+      count
+    );
+  }
+
+  return { countByAuthType, countByTypeAndAuthType };
+}
+
 export async function getTotalCount(
   esClient: ElasticsearchClient,
   kibanaIndex: string,
@@ -70,7 +122,10 @@ export async function getTotalCount(
   try {
     const searchResult = await esClient.search<
       unknown,
-      { byActionTypeId: { buckets: ByActionTypeIdAgg[] } }
+      {
+        byActionTypeId: { buckets: ByActionTypeIdAgg[] };
+        byTypeAndAuthType?: { buckets: ByActionTypeIdAgg[] };
+      }
     >({
       index: kibanaIndex,
       size: 0,
@@ -88,6 +143,21 @@ export async function getTotalCount(
             `,
           },
         },
+        calcTypeAndAuthType: {
+          type: 'keyword',
+          script: {
+            source: `
+            if (params._source == null || params._source['action'] == null) {
+              return;
+            }
+            def config = params._source['action']['config'];
+            if (config == null || config['authType'] == null) {
+              return;
+            }
+            emit(doc['action.actionTypeId'].value + "${TYPE_AND_AUTH_SEPARATOR}" + config['authType'].toString());
+            `,
+          },
+        },
       },
       query: {
         bool: {
@@ -100,17 +170,32 @@ export async function getTotalCount(
             field: 'calcActionTypeId',
           },
         },
+        byTypeAndAuthType: {
+          terms: {
+            field: 'calcTypeAndAuthType',
+            size: 200,
+          },
+        },
       },
     });
 
     const aggs = getActionsCount(searchResult.aggregations?.byActionTypeId.buckets);
     const { countGenAiProviderTypes, countByType } = getCounts(aggs);
+    const { countByAuthType, countByTypeAndAuthType } = getAuthTypeCounts(
+      getActionsCount(searchResult.aggregations?.byTypeAndAuthType?.buckets)
+    );
 
     if (inMemoryConnectors && inMemoryConnectors.length) {
       for (const inMemoryConnector of inMemoryConnectors) {
         const actionTypeId = replaceFirstAndLastDotSymbols(inMemoryConnector.actionTypeId);
         countByType[actionTypeId] = countByType[actionTypeId] || 0;
         countByType[actionTypeId]++;
+
+        const authType = getConfigAuthType(inMemoryConnector.config);
+        if (authType) {
+          incrementCount(countByAuthType, authType);
+          incrementNestedCount(countByTypeAndAuthType, actionTypeId, authType);
+        }
       }
     }
 
@@ -123,6 +208,8 @@ export async function getTotalCount(
       countTotal: totals,
       countByType,
       countGenAiProviderTypes,
+      countByAuthType,
+      countByTypeAndAuthType,
     };
   } catch (err) {
     const errorMessage = parseAndLogError(err, `getTotalCount`, logger);
@@ -133,6 +220,8 @@ export async function getTotalCount(
       countTotal: 0,
       countByType: {},
       countGenAiProviderTypes: {},
+      countByAuthType: {},
+      countByTypeAndAuthType: {},
     };
   }
 }
