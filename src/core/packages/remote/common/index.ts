@@ -8,6 +8,8 @@
  */
 
 export { expose, wrapRpcResult } from './src/expose';
+export { recordRemoteHeap } from './src/remote_measurement';
+export { recordSeam } from './src/seam_log';
 export { openPortSession } from './src/message_port_session';
 export { isRemotableInstance, remotable } from './src/remotable';
 export { remoteTokenId } from './src/token_id';

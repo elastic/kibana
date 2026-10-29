@@ -8,10 +8,10 @@
  */
 
 import { inject } from 'inversify';
-import { randomUUID } from 'node:crypto';
 import { isMainThread, threadId } from 'node:worker_threads';
-import { remotable } from '@kbn/core-remote-common';
-import { type EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
+import { recordRemoteHeap, remotable } from '@kbn/core-remote-common';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { runWorkflowEngineInWorker } from './assemble_engine_loop';
 import {
   type WorkflowExecutorApi,
   type WorkflowLogApi,
@@ -21,39 +21,41 @@ import {
   type WorkflowStorageApi,
   WorkflowStorageToken,
 } from './tokens';
-import { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildWorkflowRenderContext } from '../workflow_context_manager/build_workflow_context';
-
-interface RemoteStepContext {
-  readonly attribution?: {
-    readonly type: string;
-    readonly id: string;
-    readonly name: string;
-    readonly runId: string;
-  };
-}
 
 interface ExecutableStep {
   name?: string;
   type?: string;
-  with?: unknown;
-  config?: unknown;
   steps?: unknown;
-  foreach?: unknown;
   branches?: unknown;
 }
 
-const NESTED_KEYS = ['steps', 'foreach', 'branches'] as const;
+/**
+ * Steps that finish inside the current task. `if` and `foreach` are in this set.
+ * A `wait` of at least five seconds parks and comes back through the resume task.
+ */
+const IN_PROCESS_TYPES = new Set(['wait', 'if', 'foreach', 'while', 'switch', 'data.set']);
 
 /**
- * Sequential anchor runner. Graph rendering and step dispatch happen here.
- * Persistence, Cases, and Elasticsearch stay behind injected capabilities.
- * Resume, loops, and steps that are not in the catalogue are explicitly unsupported.
+ * Pauses this proof does not run. They use the same resume entry as a long wait.
+ * Parallel also stores branch progress. Human input also sends a message through
+ * `executeConnector` and reads `resumeInput`.
+ */
+const PARKING_TYPES = new Set([
+  'parallel',
+  'waitForInput',
+  'waitForApproval',
+  'workflow.execute',
+  'workflow.executeAsync',
+]);
+
+/**
+ * Worker entry for one workflow run. The existing step walker runs here.
+ * `CoreStart`, Actions, Task Manager, and Workflows Extensions stay on the coordinator.
+ * Making those constructors remotable later means splitting the parts that should run
+ * in the worker out of the plugin start contracts. This proof does not do that split.
  */
 @remotable()
 export class WorkflowExecutor implements WorkflowExecutorApi {
-  private readonly templating = new WorkflowTemplatingEngine();
-
   constructor(
     @inject(WorkflowStepCatalogToken)
     private readonly steps: WorkflowStepCatalogApi,
@@ -91,61 +93,26 @@ export class WorkflowExecutor implements WorkflowExecutorApi {
       request.workflowRunId,
       request.spaceId
     );
-    const steps = ((execution.workflowDefinition as { steps?: ExecutableStep[] }).steps ??
-      []) as ExecutableStep[];
-    await this.log.info(
-      `Remote workflow ${execution.workflowId} execution ${execution.id} starting with ${steps.length} steps`
-    );
-    const stepOutputs: Record<string, { output: unknown }> = {};
-    const context: RemoteStepContext = {
-      attribution: {
-        type: 'workflow',
-        id: execution.workflowId,
-        name: execution.workflowDefinition?.name ?? '',
-        runId: execution.id,
-      },
-    };
+    if (isTerminalStatus(execution.status)) {
+      return { status: execution.status };
+    }
 
     try {
-      // Reject the whole run before persistence or step side effects. Do not fall back to the
-      // coordinator engine: an unmigrated step is explicitly unsupported in remote mode.
-      this.assertRunnable(steps);
-      await this.storage.markRunning(request.scopeId, execution.id, request.spaceId);
-
-      for (const [index, step] of steps.entries()) {
-        const stepName = step.name ?? step.type ?? `step_${index}`;
-        const stepType = step.type;
-        if (!stepType) {
-          throw new Error(`Remote step "${stepName}" is missing a type`);
-        }
-        const renderContext = {
-          ...buildWorkflowRenderContext(execution),
-          steps: stepOutputs,
-        };
-        const input = {
-          with: this.templating.render(step.with ?? {}, renderContext),
-          config: this.templating.render(step.config ?? {}, renderContext),
-        };
-        const startedAt = new Date();
-        const result = await this.steps.run(stepType, request.scopeId, input, context);
-        const output = unwrapOutput(result);
-        const finishedAt = new Date();
-        stepOutputs[stepName] = { output };
-        await this.storage.recordStep(
-          request.scopeId,
-          stepRecord({
-            execution,
-            stepName,
-            stepType,
-            index,
-            startedAt,
-            finishedAt,
-            input,
-            output,
-            status: ExecutionStatus.COMPLETED,
-          })
-        );
-      }
+      this.assertRunnable(execution.workflowDefinition);
+      const resume =
+        execution.status === ExecutionStatus.WAITING ||
+        execution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+        (execution.status === ExecutionStatus.RUNNING && Boolean(execution.currentNodeId));
+      const status = await runWorkflowEngineInWorker({
+        execution,
+        scopeId: request.scopeId,
+        steps: this.steps,
+        storage: this.storage,
+        log: this.log,
+        resume,
+      });
+      recordRemoteHeap('REMOTE_WORKER_HEAP', status);
+      return { status };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       await this.storage.complete(request.scopeId, {
@@ -154,31 +121,23 @@ export class WorkflowExecutor implements WorkflowExecutorApi {
         error: { type: 'RemoteExecutionError', message },
         startedAt: execution.startedAt,
       });
+      recordRemoteHeap('REMOTE_WORKER_HEAP', 'failed');
       throw error;
     }
-
-    await this.storage.complete(request.scopeId, {
-      id: execution.id,
-      status: ExecutionStatus.COMPLETED,
-      startedAt: execution.startedAt,
-    });
-    return { status: ExecutionStatus.COMPLETED };
   }
 
-  private assertRunnable(steps: readonly ExecutableStep[]): void {
-    for (const [index, step] of steps.entries()) {
-      const stepName = step.name ?? step.type ?? `step_${index}`;
-      for (const key of NESTED_KEYS) {
-        if (step[key] != null) {
-          throw new Error(
-            `Unsupported remote step shape "${key}" on "${stepName}". Loops and branches are not run remotely.`
-          );
-        }
-      }
+  private assertRunnable(definition: { steps?: ExecutableStep[] } | undefined): void {
+    for (const step of walkSteps(definition?.steps)) {
+      const stepName = step.name ?? step.type ?? 'step';
       if (!step.type) {
         throw new Error(`Remote step "${stepName}" is missing a type`);
       }
-      if (!this.steps.supports(step.type)) {
+      if (PARKING_TYPES.has(step.type)) {
+        throw new Error(
+          `Unsupported remote step type "${step.type}". Parallel, human input, polling, and child workflows are not run in this remote proof.`
+        );
+      }
+      if (!IN_PROCESS_TYPES.has(step.type) && !this.steps.supports(step.type)) {
         throw new Error(
           `Unsupported remote step type "${step.type}". Experimental remote execution only runs steps registered for this anchor.`
         );
@@ -187,51 +146,24 @@ export class WorkflowExecutor implements WorkflowExecutorApi {
   }
 }
 
-function unwrapOutput(result: unknown): unknown {
-  if (result && typeof result === 'object' && 'output' in result) {
-    return (result as { output: unknown }).output;
+function walkSteps(steps: unknown): ExecutableStep[] {
+  if (!Array.isArray(steps)) {
+    return [];
   }
-  return result;
-}
-
-function stepRecord({
-  execution,
-  stepName,
-  stepType,
-  index,
-  startedAt,
-  finishedAt,
-  input,
-  output,
-  status,
-}: {
-  execution: { id: string; workflowId: string; spaceId: string; isTestRun?: boolean };
-  stepName: string;
-  stepType: string;
-  index: number;
-  startedAt: Date;
-  finishedAt: Date;
-  input: unknown;
-  output: unknown;
-  status: EsWorkflowStepExecution['status'];
-}): EsWorkflowStepExecution {
-  return {
-    id: randomUUID(),
-    spaceId: execution.spaceId,
-    stepId: stepName,
-    stepType,
-    scopeStack: [],
-    workflowRunId: execution.id,
-    workflowId: execution.workflowId,
-    status,
-    isTestRun: execution.isTestRun,
-    startedAt: startedAt.toISOString(),
-    finishedAt: finishedAt.toISOString(),
-    executionTimeMs: finishedAt.getTime() - startedAt.getTime(),
-    topologicalIndex: index,
-    globalExecutionIndex: index,
-    stepExecutionIndex: 0,
-    input: input as EsWorkflowStepExecution['input'],
-    output: output as EsWorkflowStepExecution['output'],
-  };
+  const found: ExecutableStep[] = [];
+  for (const step of steps) {
+    if (step && typeof step === 'object') {
+      const record = step as ExecutableStep;
+      found.push(record);
+      found.push(...walkSteps(record.steps));
+      if (Array.isArray(record.branches)) {
+        for (const branch of record.branches) {
+          if (branch && typeof branch === 'object') {
+            found.push(...walkSteps((branch as { steps?: unknown }).steps));
+          }
+        }
+      }
+    }
+  }
+  return found;
 }

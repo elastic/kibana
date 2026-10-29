@@ -8,6 +8,7 @@
  */
 
 import { RpcTarget } from 'capnweb';
+import { recordSeam } from './seam_log';
 import { isRemotableInstance } from './remotable';
 
 function isThenable(value: unknown): value is PromiseLike<unknown> {
@@ -47,7 +48,19 @@ export function expose(target: object): RpcTarget {
       if (typeof descriptor?.value !== 'function') continue;
       const method = descriptor.value as (...args: unknown[]) => unknown;
       proto[name] = function (...args: unknown[]) {
-        return wrapRpcResult(method.apply(target, args));
+        const label = `${target.constructor?.name ?? 'remote'}.${name}`;
+        recordSeam(`${label}.request`, args);
+        const result = method.apply(target, args);
+        if (isThenable(result)) {
+          return wrapRpcResult(
+            Promise.resolve(result).then((value) => {
+              recordSeam(`${label}.response`, value);
+              return value;
+            })
+          );
+        }
+        recordSeam(`${label}.response`, result);
+        return wrapRpcResult(result);
       };
     }
     cursor = Object.getPrototypeOf(cursor) as object | null;

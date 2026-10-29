@@ -47,6 +47,38 @@ export interface WorkflowStorageApi {
   ): Promise<EsWorkflowExecution>;
   markRunning(scopeId: string, workflowRunId: string, spaceId: string): Promise<void>;
   recordStep(scopeId: string, step: EsWorkflowStepExecution): Promise<void>;
+  /** Merges a partial execution document. The engine loop persists through this, not `complete`. */
+  updateExecution(
+    scopeId: string,
+    execution: Partial<EsWorkflowExecution> & { id: string }
+  ): Promise<void>;
+  getCancelState(
+    scopeId: string,
+    workflowRunId: string,
+    spaceId: string
+  ): Promise<Pick<EsWorkflowExecution, 'cancelRequested' | 'cancelledAt' | 'cancelledBy'> | null>;
+  upsertSteps(scopeId: string, steps: Array<Partial<EsWorkflowStepExecution>>): Promise<void>;
+  getSteps(
+    scopeId: string,
+    ids: string[],
+    sourceIncludes?: string[],
+    sourceExcludes?: string[]
+  ): Promise<EsWorkflowStepExecution[]>;
+  /** Asks the coordinator to schedule the existing resume task. */
+  scheduleResume(
+    scopeId: string,
+    workflowRunId: string,
+    spaceId: string,
+    resumeAt: string
+  ): Promise<{ taskId: string }>;
+  /**
+   * Asks the coordinator to run a connector with the execution's user.
+   * Present so a later human-input step can send its message without a new protocol.
+   */
+  executeConnector(
+    scopeId: string,
+    params: { connectorType: string; connectorNameOrId: string; input: Record<string, unknown> }
+  ): Promise<unknown>;
   complete(
     scopeId: string,
     update: {
@@ -61,6 +93,8 @@ export interface WorkflowStorageApi {
 
 export interface WorkflowLogApi {
   info(message: string): Promise<void> | void;
+  /** Persists one flush of the engine event queue. */
+  write(events: readonly object[]): Promise<void> | void;
 }
 
 export interface WorkflowExecutorApi {

@@ -16,8 +16,34 @@ import {
   ExecutionStatus,
 } from '@kbn/workflows';
 import type { WorkflowStorageApi, WorkflowThreadIdentity } from './tokens';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type {
+  StepExecutionField,
+  StepExecutionRepository,
+} from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+
+export interface WorkflowStorageCallbacks {
+  scheduleResume(
+    scopeId: string,
+    workflowRunId: string,
+    spaceId: string,
+    resumeAt: string
+  ): Promise<{ taskId: string }>;
+  executeConnector(
+    scopeId: string,
+    params: { connectorType: string; connectorNameOrId: string; input: Record<string, unknown> }
+  ): Promise<unknown>;
+}
+
+const REFRESHED_STATUSES = new Set<EsWorkflowExecution['status']>([
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
+  ExecutionStatus.COMPLETED,
+  ExecutionStatus.FAILED,
+  ExecutionStatus.CANCELLED,
+  ExecutionStatus.TIMED_OUT,
+]);
 
 /**
  * Coordinator-side persistence. The executor decides transitions; this class performs the
@@ -28,7 +54,8 @@ export class WorkflowStorage implements WorkflowStorageApi {
   constructor(
     private readonly workflowExecutionRepository: WorkflowExecutionRepository,
     private readonly stepExecutionRepository: StepExecutionRepository,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly callbacks: WorkflowStorageCallbacks
   ) {}
 
   whereAmI(): WorkflowThreadIdentity {
@@ -59,6 +86,59 @@ export class WorkflowStorage implements WorkflowStorageApi {
 
   async recordStep(_scopeId: string, step: EsWorkflowStepExecution): Promise<void> {
     await this.stepExecutionRepository.bulkUpsert([step]);
+  }
+
+  async updateExecution(
+    _scopeId: string,
+    execution: Partial<EsWorkflowExecution> & { id: string }
+  ): Promise<void> {
+    const refresh =
+      execution.status && REFRESHED_STATUSES.has(execution.status) ? 'wait_for' : false;
+    await this.workflowExecutionRepository.updateWorkflowExecution(execution, { refresh });
+  }
+
+  async getCancelState(
+    _scopeId: string,
+    workflowRunId: string,
+    spaceId: string
+  ): Promise<Pick<EsWorkflowExecution, 'cancelRequested' | 'cancelledAt' | 'cancelledBy'> | null> {
+    return this.workflowExecutionRepository.getWorkflowExecutionCancelState(workflowRunId, spaceId);
+  }
+
+  async upsertSteps(
+    _scopeId: string,
+    steps: Array<Partial<EsWorkflowStepExecution>>
+  ): Promise<void> {
+    await this.stepExecutionRepository.bulkUpsert(steps);
+  }
+
+  async getSteps(
+    _scopeId: string,
+    ids: string[],
+    sourceIncludes?: string[],
+    sourceExcludes?: string[]
+  ): Promise<EsWorkflowStepExecution[]> {
+    return this.stepExecutionRepository.getStepExecutionsByIds(
+      ids,
+      sourceIncludes as StepExecutionField[] | undefined,
+      sourceExcludes as StepExecutionField[] | undefined
+    );
+  }
+
+  async scheduleResume(
+    scopeId: string,
+    workflowRunId: string,
+    spaceId: string,
+    resumeAt: string
+  ): Promise<{ taskId: string }> {
+    return this.callbacks.scheduleResume(scopeId, workflowRunId, spaceId, resumeAt);
+  }
+
+  async executeConnector(
+    scopeId: string,
+    params: { connectorType: string; connectorNameOrId: string; input: Record<string, unknown> }
+  ): Promise<unknown> {
+    return this.callbacks.executeConnector(scopeId, params);
   }
 
   async complete(

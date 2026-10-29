@@ -15,108 +15,182 @@ import {
 import type { WorkflowLogApi, WorkflowStepCatalogApi, WorkflowStorageApi } from './tokens';
 import { WorkflowExecutor } from './workflow_executor';
 
-const execution = {
-  id: 'run-1',
-  workflowId: 'wf-1',
-  spaceId: 'default',
-  isTestRun: false,
-  status: ExecutionStatus.PENDING,
-  startedAt: '2026-01-01T00:00:00.000Z',
-  workflowDefinition: {
-    name: 'anchor',
-    steps: [{ name: 'graph', type: 'security.buildAlertEntityGraph', with: { alertId: 'a-1' } }],
-  },
-  context: { inputs: {} },
-} as unknown as EsWorkflowExecution;
+jest.setTimeout(60_000);
+
+const GRAPH = 'security.buildAlertEntityGraph';
+const CASE = 'cases.createCase';
 
 describe('WorkflowExecutor', () => {
-  const storage: jest.Mocked<WorkflowStorageApi> = {
-    getExecution: jest.fn<Promise<EsWorkflowExecution>, [string, string, string]>(
-      async () => execution
-    ),
-    markRunning: jest.fn<Promise<void>, [string, string, string]>(async () => undefined),
-    recordStep: jest.fn<Promise<void>, [string, EsWorkflowStepExecution]>(async () => undefined),
-    complete: jest.fn<Promise<void>, [string, Parameters<WorkflowStorageApi['complete']>[1]]>(
-      async () => undefined
-    ),
-    whereAmI: jest.fn(async () => ({ threadId: 1, isMainThread: true })),
-  };
-  const log: jest.Mocked<WorkflowLogApi> = { info: jest.fn() };
-  const steps: jest.Mocked<WorkflowStepCatalogApi> = {
-    supports: jest.fn<boolean, [string]>(() => true),
-    run: jest.fn<
-      Promise<unknown>,
-      [string, string, unknown, Parameters<WorkflowStepCatalogApi['run']>[3]]
-    >(async () => ({ output: { nodes: [] } })),
-  };
+  it('parks a long wait and resumes the case from the saved graph output', async () => {
+    const store = createStore(execution());
+    const caseTitles: string[] = [];
+    const steps = catalog(caseTitles);
+    const executor = new WorkflowExecutor(steps, store.storage, log());
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('dispatches rendered steps and stores a completed execution', async () => {
-    const executor = new WorkflowExecutor(steps, storage, log);
-    const result = await executor.run({
-      scopeId: 'scope',
+    const parked = await executor.run({
+      scopeId: 'scope-1',
       workflowRunId: 'run-1',
       spaceId: 'default',
     });
 
-    expect(result.status).toBe(ExecutionStatus.COMPLETED);
-    expect(steps.run).toHaveBeenCalledWith(
-      'security.buildAlertEntityGraph',
-      'scope',
-      expect.objectContaining({ with: { alertId: 'a-1' } }),
-      expect.objectContaining({
-        attribution: expect.objectContaining({ id: 'wf-1', runId: 'run-1' }),
-      })
-    );
-    expect(storage.complete).toHaveBeenCalledWith(
-      'scope',
-      expect.objectContaining({ id: 'run-1', status: ExecutionStatus.COMPLETED })
-    );
+    expect(parked.status).toBe(ExecutionStatus.WAITING);
+    expect(store.scheduled).toHaveLength(1);
+    expect(caseTitles).toEqual([]);
+
+    const continued = await executor.run({
+      scopeId: 'scope-2',
+      workflowRunId: 'run-1',
+      spaceId: 'default',
+    });
+
+    expect(continued.status).toBe(ExecutionStatus.COMPLETED);
+    expect(caseTitles).toEqual(['Graph nodes 2']);
   });
 
-  it('rejects nested steps instead of running them on the coordinator', async () => {
-    storage.getExecution.mockResolvedValueOnce({
-      ...execution,
-      workflowDefinition: {
-        name: 'nested',
-        steps: [{ name: 'loop', type: 'foreach', foreach: '${{inputs.items}}' }],
-      },
-    } as unknown as EsWorkflowExecution);
-    const executor = new WorkflowExecutor(steps, storage, log);
+  it('rejects a parallel step before the run starts', async () => {
+    const store = createStore(
+      execution([{ name: 'branches', type: 'parallel', branches: [{ steps: [] }] }])
+    );
+    const steps = catalog([]);
+    const executor = new WorkflowExecutor(steps, store.storage, log());
 
     await expect(
-      executor.run({ scopeId: 'scope', workflowRunId: 'run-1', spaceId: 'default' })
-    ).rejects.toThrow(/Unsupported remote step shape/);
+      executor.run({ scopeId: 'scope-1', workflowRunId: 'run-1', spaceId: 'default' })
+    ).rejects.toThrow(/Unsupported remote step type "parallel"/);
     expect(steps.run).not.toHaveBeenCalled();
-    expect(storage.markRunning).not.toHaveBeenCalled();
-    expect(storage.complete).toHaveBeenCalledWith(
-      'scope',
-      expect.objectContaining({ status: ExecutionStatus.FAILED })
-    );
   });
 
-  it('rejects an unregistered step before running earlier steps', async () => {
-    storage.getExecution.mockResolvedValueOnce({
-      ...execution,
-      workflowDefinition: {
-        name: 'mixed',
-        steps: [
-          { name: 'graph', type: 'security.buildAlertEntityGraph' },
-          { name: 'other', type: 'console' },
-        ],
-      },
-    } as unknown as EsWorkflowExecution);
-    steps.supports.mockImplementation((stepType: string) => stepType !== 'console');
-    const executor = new WorkflowExecutor(steps, storage, log);
+  it('rejects an unregistered step before earlier steps run', async () => {
+    const store = createStore(
+      execution([
+        { name: 'graph', type: GRAPH, with: { alertId: 'a', alertIndex: 'alerts' } },
+        { name: 'print', type: 'console', with: { message: 'hi' } },
+      ])
+    );
+    const steps = catalog([]);
+    const executor = new WorkflowExecutor(steps, store.storage, log());
 
     await expect(
-      executor.run({ scopeId: 'scope', workflowRunId: 'run-1', spaceId: 'default' })
+      executor.run({ scopeId: 'scope-1', workflowRunId: 'run-1', spaceId: 'default' })
     ).rejects.toThrow(/Unsupported remote step type "console"/);
     expect(steps.run).not.toHaveBeenCalled();
-    expect(storage.markRunning).not.toHaveBeenCalled();
-    expect(storage.recordStep).not.toHaveBeenCalled();
+    expect(store.completed).toEqual([ExecutionStatus.FAILED]);
   });
 });
+
+function log(): WorkflowLogApi {
+  return { info: jest.fn(), write: jest.fn() };
+}
+
+function catalog(caseTitles: string[]): jest.Mocked<WorkflowStepCatalogApi> {
+  return {
+    supports: jest.fn((stepType: string) => stepType === GRAPH || stepType === CASE),
+    run: jest.fn(async (stepType: string, _scopeId: string, input: unknown) => {
+      if (stepType === GRAPH) {
+        return { output: { stats: { nodes: 2 }, alerts: [], nodes: [], edges: [] } };
+      }
+      const title = (input as { with?: { title?: string } }).with?.title ?? '';
+      caseTitles.push(title);
+      return { output: { case: { title } } };
+    }),
+  } as unknown as jest.Mocked<WorkflowStepCatalogApi>;
+}
+
+function execution(stepOverride?: unknown[]): EsWorkflowExecution {
+  return {
+    id: 'run-1',
+    spaceId: 'default',
+    workflowId: 'remote-heap-measurement',
+    status: ExecutionStatus.PENDING,
+    workflowDefinition: {
+      version: '1',
+      name: 'Remote heap measurement',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'graph',
+          type: GRAPH,
+          with: { alertId: 'alert-remote-heap', alertIndex: 'alerts-remote-heap' },
+        },
+        { name: 'pause', type: 'wait', with: { duration: '6s' } },
+        {
+          name: 'case',
+          type: CASE,
+          with: {
+            title: 'Graph nodes {{ steps.graph.output.stats.nodes }}',
+            description: 'Created after the alert graph step',
+            owner: 'securitySolution',
+            severity: 'low',
+          },
+        },
+      ],
+      ...(stepOverride ? { steps: stepOverride } : {}),
+    },
+  } as EsWorkflowExecution;
+}
+
+function createStore(initial: EsWorkflowExecution) {
+  let current = structuredClone(initial);
+  const stepDocs = new Map<string, EsWorkflowStepExecution>();
+  const scheduled: string[] = [];
+  const completed: string[] = [];
+  const storage: WorkflowStorageApi = {
+    getExecution: async () => structuredClone(current),
+    markRunning: async () => {},
+    recordStep: async (_scopeId, step) => {
+      stepDocs.set(step.id, step);
+    },
+    updateExecution: async (_scopeId, partial) => {
+      current = { ...current, ...partial };
+    },
+    getCancelState: async () => null,
+    upsertSteps: async (_scopeId, steps) => {
+      for (const step of steps) {
+        if (step.id) {
+          const previous = stepDocs.get(step.id);
+          stepDocs.set(step.id, { ...previous, ...step } as EsWorkflowStepExecution);
+        }
+      }
+    },
+    getSteps: async (_scopeId, ids, sourceIncludes, sourceExcludes) => {
+      return ids.flatMap((id) => {
+        const step = stepDocs.get(id);
+        if (!step) return [];
+        return [project(step, sourceIncludes, sourceExcludes)];
+      });
+    },
+    scheduleResume: async (_scopeId, _workflowRunId, _spaceId, resumeAt) => {
+      scheduled.push(resumeAt);
+      return { taskId: 'resume-1' };
+    },
+    executeConnector: async () => undefined,
+    complete: async (_scopeId, update) => {
+      completed.push(update.status);
+      current = { ...current, status: update.status };
+    },
+    whereAmI: () => ({ threadId: 0, isMainThread: true }),
+  };
+  return { storage, scheduled, completed };
+}
+
+function project(
+  step: EsWorkflowStepExecution,
+  sourceIncludes?: string[],
+  sourceExcludes?: string[]
+): EsWorkflowStepExecution {
+  const record = { ...step } as Record<string, unknown>;
+  if (sourceExcludes) {
+    for (const field of sourceExcludes) {
+      delete record[field];
+    }
+  }
+  if (sourceIncludes) {
+    const picked: Record<string, unknown> = {};
+    for (const field of sourceIncludes) {
+      if (field in record) picked[field] = record[field];
+    }
+    return picked as unknown as EsWorkflowStepExecution;
+  }
+  return record as unknown as EsWorkflowStepExecution;
+}

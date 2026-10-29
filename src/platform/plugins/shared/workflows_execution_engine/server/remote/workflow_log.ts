@@ -10,13 +10,21 @@
 import { remotable } from '@kbn/core-remote-common';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowLogApi } from './tokens';
+import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
 
 /** Coordinator-side log sink. The worker calls this; it does not construct a Kibana logger. */
 @remotable()
 export class WorkflowLog implements WorkflowLogApi {
-  constructor(private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger, private readonly logsRepository?: LogsRepository) {}
 
   info(message: string): void {
     this.logger.info(message);
+  }
+
+  async write(events: readonly object[]): Promise<void> {
+    if (!this.logsRepository || events.length === 0) {
+      return;
+    }
+    await this.logsRepository.createLogs(events as WorkflowLogEvent[]);
   }
 }

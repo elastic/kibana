@@ -19,6 +19,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { recordRemoteHeap } from '@kbn/core-remote-common';
 import {
   ExecutionStatus,
   isTerminalStatus,
@@ -41,6 +42,7 @@ import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import { maybeDrainConcurrencyQueueBeforeEnqueue } from './concurrency/concurrency_queue_drainer';
 import { handleConcurrencyBlockedExecution } from './concurrency/maybe_schedule_dormant_queued_run';
 import type { WorkflowsExecutionEngineConfig } from './config';
+import { ConnectorExecutor } from './connector_executor';
 import {
   cancelWorkflow,
   checkAndSkipIfExistingScheduledExecution,
@@ -428,6 +430,7 @@ export class WorkflowsExecutionEnginePlugin
                     await session.stub.run({ scopeId, workflowRunId, spaceId });
                   } finally {
                     session.closeScope(scopeId);
+                    recordRemoteHeap('MAIN_HEAP', 'after-remote-run');
                   }
                 } else {
                   const result = await runWorkflow({
@@ -718,22 +721,33 @@ export class WorkflowsExecutionEnginePlugin
               }
 
               try {
-                const { retryAt } = await resumeWorkflow({
-                  workflowExecutionRepository,
-                  stepExecutionRepository,
-                  workflowRunId,
-                  spaceId,
-                  signal: taskAbortController.signal,
-                  config,
-                  logger,
-                  fakeRequest,
-                  dependencies,
-                  workflowsExecutionEngine,
-                  meteringService: this.meteringService,
-                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-                });
+                if (config.remoteExecution.enabled) {
+                  const session = await core.remote.whenReady<WorkflowExecutorApi>('workflows');
+                  const scopeId = session.openScope(fakeRequest);
+                  try {
+                    await session.stub.run({ scopeId, workflowRunId, spaceId });
+                  } finally {
+                    session.closeScope(scopeId);
+                    recordRemoteHeap('MAIN_HEAP', 'after-remote-resume');
+                  }
+                } else {
+                  const { retryAt } = await resumeWorkflow({
+                    workflowExecutionRepository,
+                    stepExecutionRepository,
+                    workflowRunId,
+                    spaceId,
+                    signal: taskAbortController.signal,
+                    config,
+                    logger,
+                    fakeRequest,
+                    dependencies,
+                    workflowsExecutionEngine,
+                    meteringService: this.meteringService,
+                    internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  });
 
-                if (retryAt) return { runAt: retryAt, state: {} };
+                  if (retryAt) return { runAt: retryAt, state: {} };
+                }
 
                 if (taskAbortController.signal.aborted) {
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
@@ -1268,11 +1282,43 @@ export class WorkflowsExecutionEnginePlugin
     );
 
     if (this.config.remoteExecution.enabled && this.coreSetup) {
+      const logsRepository = new LogsRepository(coreStart.dataStreams, this.logger);
+      this.coreSetup.remote.bind(WorkflowStorageToken, (scopes) => {
+        return new WorkflowStorage(
+          workflowExecutionRepository,
+          stepExecutionRepository,
+          this.logger,
+          {
+            scheduleResume: async (scopeId, workflowRunId, spaceId, resumeAt) => {
+              const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+                workflowRunId,
+                spaceId
+              );
+              if (!execution) {
+                throw new Error(`Workflow execution ${workflowRunId} was not found`);
+              }
+              return workflowTaskManager.scheduleResumeTask({
+                workflowExecution: execution,
+                resumeAt: new Date(resumeAt),
+                fakeRequest: scopes.get<KibanaRequest>(scopeId),
+              });
+            },
+            executeConnector: async (scopeId, params) => {
+              const actionsClient = await plugins.actions.getActionsClientWithRequest(
+                scopes.get<KibanaRequest>(scopeId)
+              );
+              return new ConnectorExecutor(actionsClient).execute({
+                ...params,
+                abortController: new AbortController(),
+              });
+            },
+          }
+        );
+      });
       this.coreSetup.remote.bind(
-        WorkflowStorageToken,
-        () => new WorkflowStorage(workflowExecutionRepository, stepExecutionRepository, this.logger)
+        WorkflowLogToken,
+        () => new WorkflowLog(this.logger, logsRepository)
       );
-      this.coreSetup.remote.bind(WorkflowLogToken, () => new WorkflowLog(this.logger));
     }
 
     const dependencies: ContextDependencies = {
