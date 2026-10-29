@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
-import { omit } from 'lodash';
+import { isEmpty, omit, pick } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { PrivilegeType } from '@kbn/apm-types';
 
@@ -858,9 +858,11 @@ const CLIENT_CERTIFICATE_SSL_KEYS = ['certificate', 'key', 'key_passphrase', 'ke
 //
 // The output is only generated when at least one ES SSL setting is set on the fleet server host.
 // When the output used by the fleet-server input is an elasticsearch output (`baseOutput`), the bootstrap
-// output is a copy of it with the ES SSL settings layered on top, so that the hosts configured on the
-// policy's output are not lost. Otherwise it only contains the ES SSL settings and elastic-agent/fleet-server
-// fill the remaining attributes from the bootstrap configuration.
+// output is a copy of it, so that the hosts configured on the policy's output are not lost, and the ES SSL
+// settings of the fleet server host only fill the settings that the output does not set. The precedence is
+// output > fleet server host > install time `--fleet-server-es*` flags (filled in by fleet-server).
+// Otherwise it only contains the ES SSL settings and elastic-agent/fleet-server fill the remaining attributes
+// from the bootstrap configuration.
 export function generateFleetServerOutputSSLConfig(
   fleetServerHost: FleetServerHost | undefined,
   baseOutput?: FullAgentPolicyOutput
@@ -910,28 +912,23 @@ export function generateFleetServerOutputSSLConfig(
 
   const outputConfig: FullAgentPolicyOutput = { ...baseRest, type: 'elasticsearch' };
 
-  // The client certificate and its key (and passphrase) only work as a pair, so they are never mixed between the
-  // base output and the fleet server host: if the host sets the certificate or the key (plain or secret), the
-  // whole group comes from the host and the one of the base output is dropped.
-  const hostSetsClientCertificate = Boolean(esSsl.certificate || esSsl.key || esSecretKey);
+  // The client certificate, its key and its passphrase only work together, so they always come from the same
+  // source: if the output sets any of them, the whole group comes from the output and the one of the fleet
+  // server host is ignored.
+  const baseSetsClientCertificate =
+    !isEmpty(pick(baseSsl, CLIENT_CERTIFICATE_SSL_KEYS)) || Boolean(baseSecrets?.ssl?.key);
 
-  const ssl: OutputSsl = {
-    ...(hostSetsClientCertificate ? omit(baseSsl, CLIENT_CERTIFICATE_SSL_KEYS) : baseSsl),
-    ...esSsl,
-  };
+  // the ssl settings of the output win over the ones of the fleet server host, which only fill the gaps
+  const hostSsl = baseSetsClientCertificate ? omit(esSsl, CLIENT_CERTIFICATE_SSL_KEYS) : esSsl;
+  const ssl: OutputSsl = { ...hostSsl, ...baseSsl };
   if (Object.keys(ssl).length > 0) {
     outputConfig.ssl = ssl;
   }
 
-  const secretsSsl = {
-    ...(hostSetsClientCertificate ? omit(baseSecrets?.ssl, 'key') : baseSecrets?.ssl),
-    ...(esSecretKey ? { key: esSecretKey } : {}),
-  };
-  const secrets: { ssl?: { key?: NonNullable<typeof esSecretKey> } } = {
-    ...baseSecrets,
-    ssl: secretsSsl,
-  };
-  if (Object.keys(secretsSsl).length === 0) delete secrets.ssl;
+  const secrets: { ssl?: { key?: NonNullable<typeof esSecretKey> } } = { ...baseSecrets };
+  if (esSecretKey && !baseSetsClientCertificate) {
+    secrets.ssl = { ...secrets.ssl, key: esSecretKey };
+  }
   if (Object.keys(secrets).length > 0) {
     outputConfig.secrets = secrets;
   }

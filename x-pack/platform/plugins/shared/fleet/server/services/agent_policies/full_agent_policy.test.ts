@@ -2178,11 +2178,15 @@ describe('getFullAgentPolicy', () => {
       expect(Object.keys(agentPolicy?.outputs ?? {})).toEqual(['default']);
     });
 
-    it('should layer the es ssl options on top of the ssl options of the policy output', async () => {
+    it('should prefer the ssl options of the policy output and fill the missing ones from the host', async () => {
       const agentPolicy = await getFleetServerPolicy(
         {
           ...baseFleetServerHost,
-          ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] },
+          ssl: {
+            es_certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+            es_certificate: 'my-es-cert',
+            es_key: 'my-es-key',
+          },
         },
         {
           output: {
@@ -2196,7 +2200,14 @@ describe('getFullAgentPolicy', () => {
         agentPolicy?.outputs['fleetserver-output-93f74c0-e876-11ea-b7d3-8b2acec6f75c']
       ).toMatchObject({
         hosts: ['http://127.0.0.1:9201'],
-        ssl: { certificate_authorities: ['/tmp/ssl/es-ca.crt'], verification_mode: 'full' },
+        ssl: {
+          // set by the output, wins over the CA of the host
+          certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+          verification_mode: 'full',
+          // not set by the output, filled from the host
+          certificate: 'my-es-cert',
+          key: 'my-es-key',
+        },
       });
     });
   });
@@ -3991,16 +4002,15 @@ describe('generateFleetServerOutputSSLConfig', () => {
       type: 'elasticsearch',
       hosts: ['https://es.co:9200'],
       preset: 'balanced',
-      ssl: { certificate_authorities: ['/tmp/ssl/output-ca.crt'], key: 'output-key' },
     };
 
-    it('should keep the attributes of the base output and layer the ES ssl fields on top', () => {
+    it('should keep the attributes of the base output and fill the missing ssl fields from the host', () => {
       const res = generateFleetServerOutputSSLConfig(
         {
           ...baseFleetServerHost,
           ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'], es_certificate: 'my-es-cert' },
         },
-        baseOutput as any
+        { ...baseOutput, ssl: { verification_mode: 'full' } } as any
       );
       expect(res).toEqual({
         [fleetServerOutputId]: {
@@ -4010,95 +4020,94 @@ describe('generateFleetServerOutputSSLConfig', () => {
           ssl: {
             certificate_authorities: ['/tmp/ssl/es-ca.crt'],
             certificate: 'my-es-cert',
+            verification_mode: 'full',
           },
         },
       });
     });
 
-    it('should keep the certificate and the key of the base output if the host only sets the CA', () => {
+    it('should prefer the ssl fields of the base output over the ones of the host', () => {
       const res = generateFleetServerOutputSSLConfig(
         { ...baseFleetServerHost, ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'] } },
+        { ...baseOutput, ssl: { certificate_authorities: ['/tmp/ssl/output-ca.crt'] } } as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+      });
+    });
+
+    it('should use the certificate and the key of the host if the base output sets none of them', () => {
+      const res = generateFleetServerOutputSSLConfig(
         {
-          ...baseOutput,
-          ssl: { certificate: 'output-cert', key: 'output-key', key_passphrase: 'output-pass' },
-        } as any
+          ...baseFleetServerHost,
+          ssl: { es_certificate: 'my-es-cert', es_key: 'my-es-key' },
+        },
+        { ...baseOutput, ssl: { certificate_authorities: ['/tmp/ssl/output-ca.crt'] } } as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+        certificate: 'my-es-cert',
+        key: 'my-es-key',
+      });
+    });
+
+    it('should use the ES secret key of the host if the base output sets no certificate nor key', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        {
+          ...baseFleetServerHost,
+          ssl: { es_certificate: 'my-es-cert' },
+          secrets: { ssl: { es_key: { id: 'my-es-key' } } },
+        },
+        baseOutput as any
+      );
+      expect(res?.[fleetServerOutputId].ssl).toEqual({ certificate: 'my-es-cert' });
+      expect(res?.[fleetServerOutputId].secrets).toEqual({ ssl: { key: { id: 'my-es-key' } } });
+    });
+
+    it.each([
+      ['certificate', { certificate: 'output-cert' }, undefined],
+      ['key', { key: 'output-key' }, undefined],
+      ['passphrase', { key_passphrase: 'output-pass' }, undefined],
+      ['passphrase path', { key_passphrase_path: '/tmp/ssl/pass' }, undefined],
+      ['secret key', {}, { ssl: { key: { id: 'output-secret-key' } } }],
+    ])(
+      'should take the whole certificate, key and passphrase group from the base output if it sets the %s',
+      (_name, outputSsl, outputSecrets) => {
+        const res = generateFleetServerOutputSSLConfig(
+          {
+            ...baseFleetServerHost,
+            ssl: { es_certificate: 'my-es-cert', es_key: 'my-es-key' },
+            secrets: { ssl: { es_key: { id: 'my-es-secret-key' } } },
+          },
+          {
+            ...baseOutput,
+            ...(Object.keys(outputSsl).length > 0 ? { ssl: outputSsl } : {}),
+            ...(outputSecrets ? { secrets: outputSecrets } : {}),
+          } as any
+        );
+        const bootstrapOutput = res?.[fleetServerOutputId];
+        // nothing of the host's certificate and key is used
+        expect(bootstrapOutput?.ssl ?? {}).toEqual(outputSsl);
+        expect(bootstrapOutput?.secrets).toEqual(outputSecrets);
+      }
+    );
+
+    it('should still fill the CA from the host if the base output sets the client certificate', () => {
+      const res = generateFleetServerOutputSSLConfig(
+        {
+          ...baseFleetServerHost,
+          ssl: { es_certificate_authorities: ['/tmp/ssl/es-ca.crt'], es_certificate: 'my-es-cert' },
+        },
+        { ...baseOutput, ssl: { certificate: 'output-cert', key: 'output-key' } } as any
       );
       expect(res?.[fleetServerOutputId].ssl).toEqual({
         certificate_authorities: ['/tmp/ssl/es-ca.crt'],
         certificate: 'output-cert',
         key: 'output-key',
-        key_passphrase: 'output-pass',
       });
     });
 
-    it('should drop the certificate and the passphrase of the base output if the host only sets the key', () => {
-      const res = generateFleetServerOutputSSLConfig(
-        { ...baseFleetServerHost, ssl: { es_key: 'my-es-key' } },
-        {
-          ...baseOutput,
-          ssl: {
-            certificate_authorities: ['/tmp/ssl/output-ca.crt'],
-            certificate: 'output-cert',
-            key: 'output-key',
-            key_passphrase: 'output-pass',
-            key_passphrase_path: '/tmp/ssl/pass',
-          },
-        } as any
-      );
-      expect(res?.[fleetServerOutputId].ssl).toEqual({
-        certificate_authorities: ['/tmp/ssl/output-ca.crt'],
-        key: 'my-es-key',
-      });
-    });
-
-    it('should drop the plain and the secret key of the base output if the host only sets the certificate', () => {
-      const res = generateFleetServerOutputSSLConfig(
-        { ...baseFleetServerHost, ssl: { es_certificate: 'my-es-cert' } },
-        {
-          ...baseOutput,
-          ssl: {
-            certificate_authorities: ['/tmp/ssl/output-ca.crt'],
-            certificate: 'output-cert',
-            key: 'output-key',
-          },
-          secrets: { ssl: { key: { id: 'output-secret-key' } } },
-        } as any
-      );
-      expect(res?.[fleetServerOutputId].ssl).toEqual({
-        certificate_authorities: ['/tmp/ssl/output-ca.crt'],
-        certificate: 'my-es-cert',
-      });
-      expect(res?.[fleetServerOutputId]).not.toHaveProperty('secrets');
-    });
-
-    it('should replace the plain key of the base output with the ES secret key', () => {
-      const res = generateFleetServerOutputSSLConfig(
-        { ...baseFleetServerHost, secrets: { ssl: { es_key: { id: 'my-es-key' } } } },
-        { ...baseOutput, secrets: { ssl: { key: { id: 'output-secret-key' } } } } as any
-      );
-      expect(res?.[fleetServerOutputId].ssl).toEqual({
-        certificate_authorities: ['/tmp/ssl/output-ca.crt'],
-      });
-      expect(res?.[fleetServerOutputId].secrets).toEqual({ ssl: { key: { id: 'my-es-key' } } });
-    });
-
-    it('should replace the secret key of the base output with the plain ES key', () => {
-      const res = generateFleetServerOutputSSLConfig(
-        { ...baseFleetServerHost, ssl: { es_key: 'my-es-key' } },
-        {
-          ...baseOutput,
-          ssl: { certificate_authorities: ['/tmp/ssl/output-ca.crt'] },
-          secrets: { ssl: { key: { id: 'output-secret-key' } } },
-        } as any
-      );
-      expect(res?.[fleetServerOutputId].ssl).toEqual({
-        certificate_authorities: ['/tmp/ssl/output-ca.crt'],
-        key: 'my-es-key',
-      });
-      expect(res?.[fleetServerOutputId]).not.toHaveProperty('secrets');
-    });
-
-    it('should move the dotted ssl keys of the base output (Advanced YAML) into ssl before layering the ES ssl fields', () => {
+    it('should move the dotted ssl keys of the base output (Advanced YAML) into ssl and treat them as set by the output', () => {
       const res = generateFleetServerOutputSSLConfig(
         {
           ...baseFleetServerHost,
@@ -4118,15 +4127,18 @@ describe('generateFleetServerOutputSSLConfig', () => {
           type: 'elasticsearch',
           hosts: ['https://es.co:9200'],
           ssl: {
-            certificate: 'my-es-cert',
-            certificate_authorities: ['/tmp/ssl/es-ca.crt'],
+            certificate: 'output-cert',
+            certificate_authorities: ['/tmp/ssl/output-ca.crt'],
+            key: 'output-key',
             ca_trusted_fingerprint: 'abcdef',
           },
         },
       });
+      expect(res?.[fleetServerOutputId]).not.toHaveProperty(['ssl.certificate']);
+      expect(res?.[fleetServerOutputId]).not.toHaveProperty(['ssl.key']);
     });
 
-    it('should replace a dotted plain ssl.key of the base output with the ES secret key', () => {
+    it('should not use the ES secret key of the host if the base output has a dotted plain ssl.key', () => {
       const res = generateFleetServerOutputSSLConfig(
         { ...baseFleetServerHost, secrets: { ssl: { es_key: { id: 'my-es-key' } } } },
         {
@@ -4136,10 +4148,11 @@ describe('generateFleetServerOutputSSLConfig', () => {
           'ssl.key': 'output-key',
         } as any
       );
-      expect(res?.[fleetServerOutputId]).not.toHaveProperty(['ssl.key']);
-      // the certificate of the output is dropped too, it goes together with the key
-      expect(res?.[fleetServerOutputId]).not.toHaveProperty('ssl');
-      expect(res?.[fleetServerOutputId].secrets).toEqual({ ssl: { key: { id: 'my-es-key' } } });
+      expect(res?.[fleetServerOutputId].ssl).toEqual({
+        certificate: 'output-cert',
+        key: 'output-key',
+      });
+      expect(res?.[fleetServerOutputId]).not.toHaveProperty('secrets');
     });
 
     it('should prefer the nested ssl keys of the base output over the dotted ones', () => {
