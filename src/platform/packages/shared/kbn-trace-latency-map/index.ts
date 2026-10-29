@@ -10,6 +10,7 @@
 export { LatencyMap } from './src/components/latency_map';
 export type { LatencyMapProps } from './src/components/latency_map';
 export { selectionToEsqlCondition } from './src/selection/to_esql';
+export { isSelectionCondition, parseSelectionCondition } from './src/selection/from_esql';
 export { TRACES_INDEX_PATTERN } from './src/query/fields';
 export type {
   DurationStats,
