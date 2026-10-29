@@ -167,6 +167,38 @@ describe(' Filter Group Component ', () => {
       });
     });
 
+    it('should announce the pending changes reminder without moving focus into it', async () => {
+      render(<TestComponent maxControls={4} />);
+
+      updateControlGroupInputMock(initialInputData as ControlGroupRuntimeState);
+
+      await openContextMenu();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_IDS.SAVE_CONTROL)).toBeDisabled();
+      });
+
+      const newInputData = {
+        ...initialInputData,
+        initialChildControlState: {
+          '0': initialInputData.initialChildControlState['0'],
+        },
+      } as ControlGroupRuntimeState;
+
+      updateControlGroupInputMock(newInputData);
+
+      const popoverPanel = await screen.findByTestId(TEST_IDS.SAVE_CHANGE_POPOVER);
+
+      expect(popoverPanel).toHaveAttribute('aria-modal', 'false');
+      expect(popoverPanel).not.toHaveFocus();
+      expect(
+        screen
+          .getAllByRole('status')
+          .some(({ textContent }) => textContent === 'Save pending changes')
+      ).toBe(true);
+    });
+
     it('should open flyout when clicked on ADD', async () => {
       render(<TestComponent maxControls={4} />);
 
