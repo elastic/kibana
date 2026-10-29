@@ -592,6 +592,10 @@ const REVIEW_CHILD_GRACE_MS = 60_000;
  * cancelled by `cancelStaleExecutions`, so anything newer belongs to this fixture — including
  * a child still `pending` with no `startedAt` yet, which the cancel pass would have removed
  * had it predated this run.
+ *
+ * A child with no `startedAt` counts only while it is non-terminal: one cancelled while still
+ * `pending` (e.g. by `cancelStaleExecutions`) never gets a `startedAt`
+ * and would otherwise match every later run on the stack.
  */
 const findReviewChildrenSince = async (
   fetch: HttpHandler,
@@ -606,7 +610,9 @@ const findReviewChildrenSince = async (
       query: { statuses: [...TerminalExecutionStatuses, ...NonTerminalExecutionStatuses] },
     }
   )) as unknown as WorkflowExecutionListDto;
-  return results.filter((r) => !r.startedAt || Date.parse(r.startedAt) >= startedAt);
+  return results.filter((r) =>
+    r.startedAt ? Date.parse(r.startedAt) >= startedAt : !isTerminal(r.status)
+  );
 };
 
 /** The failure text for a sweep that settled without opening a review child. */

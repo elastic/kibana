@@ -77,6 +77,28 @@ describe('soleReviewChild', () => {
     ).rejects.toThrow(/opened no review children/);
   });
 
+  // Observed on a live stack: one cancelled child was reported next to the own child of three
+  // consecutive runs, which only a child with no startedAt can do (cancelled while `pending`).
+  it('ignores a child cancelled before it ever started', async () => {
+    const fetch = listFetch([
+      [
+        { id: 'review-1', status: 'pending' },
+        { id: 'drained-tick', status: 'cancelled' },
+      ],
+    ]);
+
+    const child = await soleReviewChild({
+      fetch,
+      workflowExecutionId: 'worker-1',
+      workerStatus: ExecutionStatus.COMPLETED,
+      workerOutput: { reviews_requested: 1 },
+      startedAt: RUN_STARTED_AT,
+      pollIntervalMs: 1,
+    });
+
+    expect(child?.id).toBe('review-1');
+  });
+
   it('fails without waiting when the worker reported zero requested reviews', async () => {
     const fetch = listFetch([[]]);
 
