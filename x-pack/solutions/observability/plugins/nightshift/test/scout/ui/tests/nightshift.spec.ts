@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { test } from '../fixtures';
+import { mockNightshiftSetUp, test } from '../fixtures';
 
 const NIGHTSHIFT_PAGE_LOAD_TIMEOUT = 60_000;
 
@@ -39,7 +39,8 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth }) => {
+    test.beforeEach(async ({ browserAuth, page }) => {
+      await mockNightshiftSetUp(page);
       await browserAuth.loginAsAdmin();
     });
 
