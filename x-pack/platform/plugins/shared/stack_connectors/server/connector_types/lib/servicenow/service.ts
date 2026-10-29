@@ -46,28 +46,23 @@ interface TableChoice extends ExternalServiceChoices {
 }
 
 /**
- * Choices are fetched from both the parent `task` table and the specific table, and the specific
- * table can override a parent choice. Each (element, value, dependent_value) is kept once, using
- * the specific table's entry when both define it. `dependent_value` is part of the key because
- * dependent choices such as subcategories legitimately repeat a value under different parents.
+ * Choices are fetched from both the parent `task` table and the specific table. ServiceNow does not
+ * merge the two by value: once the specific table defines any choice for a field, the `task` choices
+ * for that field are ignored. The `task` choices are only used for fields the specific table does not define.
  */
-const dedupeChoices = (choices: TableChoice[], table: string): ExternalServiceChoices[] => {
-  const choicesByKey = new Map<string, TableChoice>();
+const selectTableChoices = (choices: TableChoice[], table: string): ExternalServiceChoices[] => {
+  const elementsDefinedByTable = new Set(
+    choices.filter(({ name }) => name === table).map(({ element }) => element)
+  );
 
-  for (const choice of choices) {
-    const key = JSON.stringify([choice.element, choice.value, choice.dependent_value]);
-    const existing = choicesByKey.get(key);
-    if (existing === undefined || (existing.name !== table && choice.name === table)) {
-      choicesByKey.set(key, choice);
-    }
-  }
-
-  return Array.from(choicesByKey.values(), ({ label, value, dependent_value, element }) => ({
-    label,
-    value,
-    dependent_value,
-    element,
-  }));
+  return choices
+    .filter(({ name, element }) => name === table || !elementsDefinedByTable.has(element))
+    .map(({ label, value, dependent_value, element }) => ({
+      label,
+      value,
+      dependent_value,
+      element,
+    }));
 };
 
 export const createExternalService: ServiceFactory = ({
@@ -443,7 +438,7 @@ export const createExternalService: ServiceFactory = ({
         connectorUsageCollector,
       });
       checkInstance(res);
-      return dedupeChoices(res.data.result, table);
+      return selectTableChoices(res.data.result, table);
     } catch (error) {
       throw addServiceMessageToError(error, 'Unable to get choices', TABLE_GET);
     }

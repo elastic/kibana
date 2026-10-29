@@ -1301,59 +1301,69 @@ describe('ServiceNow service', () => {
         return service.getChoices(fields);
       };
 
-      test('it keeps the specific table label for a value both tables define', async () => {
-        const res = await getChoices([
-          choice({ name: 'task', label: '2 - Medium' }),
-          choice({ name: 'incident', label: '2 - High' }),
-        ]);
-
-        expect(res).toEqual([
-          { dependent_value: '', label: '2 - High', value: '2', element: 'impact' },
-        ]);
-      });
-
-      test('it keeps the specific table label regardless of the order of the results', async () => {
-        const res = await getChoices([
-          choice({ name: 'incident', label: '2 - High' }),
-          choice({ name: 'task', label: '2 - Medium' }),
-        ]);
-
-        expect(res).toEqual([
-          { dependent_value: '', label: '2 - High', value: '2', element: 'impact' },
-        ]);
-      });
-
-      test('it keeps choices that are only defined on the task table', async () => {
+      test('it uses only the specific table choices for a field the specific table defines', async () => {
         const res = await getChoices([
           choice({ name: 'task', value: '1', label: '1 - Low' }),
           choice({ name: 'task', value: '2', label: '2 - Medium' }),
+          choice({ name: 'task', value: '3', label: '3 - High' }),
           choice({ name: 'incident', value: '2', label: '2 - High' }),
         ]);
 
         expect(res).toEqual([
-          { dependent_value: '', label: '1 - Low', value: '1', element: 'impact' },
           { dependent_value: '', label: '2 - High', value: '2', element: 'impact' },
         ]);
       });
 
-      test('it keeps the same value for different elements', async () => {
+      test('it uses only the specific table choices regardless of the order of the results', async () => {
+        const res = await getChoices([
+          choice({ name: 'incident', value: '2', label: '2 - High' }),
+          choice({ name: 'task', value: '1', label: '1 - Low' }),
+          choice({ name: 'task', value: '2', label: '2 - Medium' }),
+        ]);
+
+        expect(res).toEqual([
+          { dependent_value: '', label: '2 - High', value: '2', element: 'impact' },
+        ]);
+      });
+
+      test('it uses the task choices for a field the specific table does not define', async () => {
+        const res = await getChoices([
+          choice({ name: 'task', value: '1', label: '1 - Low' }),
+          choice({ name: 'task', value: '2', label: '2 - Medium' }),
+        ]);
+
+        expect(res).toEqual([
+          { dependent_value: '', label: '1 - Low', value: '1', element: 'impact' },
+          { dependent_value: '', label: '2 - Medium', value: '2', element: 'impact' },
+        ]);
+      });
+
+      test('it chooses the table per field', async () => {
         const res = await getChoices(
           [
-            choice({ name: 'task', element: 'impact', label: '2 - Medium' }),
-            choice({ name: 'task', element: 'urgency', label: '2 - Normal' }),
+            choice({ name: 'task', element: 'impact', value: '1', label: '1 - Low' }),
+            choice({ name: 'task', element: 'urgency', value: '1', label: '1 - Urgent' }),
+            choice({ name: 'task', element: 'urgency', value: '2', label: '2 - Normal' }),
+            choice({ name: 'incident', element: 'urgency', value: '1', label: '1 - Critical' }),
           ],
           ['impact', 'urgency']
         );
 
-        expect(res.map(({ element, label }) => [element, label])).toEqual([
-          ['impact', '2 - Medium'],
-          ['urgency', '2 - Normal'],
+        expect(res.map(({ element, value, label }) => [element, value, label])).toEqual([
+          ['impact', '1', '1 - Low'],
+          ['urgency', '1', '1 - Critical'],
         ]);
       });
 
       test('it keeps the same subcategory value under different categories', async () => {
         const res = await getChoices(
           [
+            choice({
+              name: 'task',
+              element: 'subcategory',
+              value: 'other',
+              dependent_value: 'network',
+            }),
             choice({
               name: 'incident',
               element: 'subcategory',
