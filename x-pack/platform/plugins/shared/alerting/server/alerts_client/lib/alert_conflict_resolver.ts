@@ -78,6 +78,8 @@ type BulkItemOutcome = 'success' | 'conflict' | 'alreadyWritten' | 'retryable' |
 interface AlertDocRef {
   _id: string;
   _index: string;
+  if_seq_no: number;
+  if_primary_term: number;
 }
 
 /**
@@ -242,11 +244,21 @@ function countErrorTypes(attempts: BulkItemAttempt[]): Record<string, number> {
   return counts;
 }
 
-// includes creates that conflicted because an earlier attempt of this request already wrote them
+// Creates that conflicted are left out because the existing doc can be from an earlier run. The
+// seq_no and primary_term keep the delete from removing changes users made to the doc since.
 function getCreatedAlerts(outcomes: Record<BulkItemOutcome, BulkItemAttempt[]>): AlertDocRef[] {
-  return [...outcomes.success, ...outcomes.alreadyWritten].flatMap(({ res }) =>
-    res.create?._id && res.create._index ? [{ _id: res.create._id, _index: res.create._index }] : []
-  );
+  return outcomes.success.flatMap(({ res }) => {
+    const created = res.create;
+    if (!created?._id || created._seq_no == null || created._primary_term == null) return [];
+    return [
+      {
+        _id: created._id,
+        _index: created._index,
+        if_seq_no: created._seq_no,
+        if_primary_term: created._primary_term,
+      },
+    ];
+  });
 }
 
 // The caller fails the run and keeps the previous task state when writes stay unresolved. The

@@ -1034,7 +1034,9 @@ describe('Task Runner', () => {
         expect(clusterClient.bulk).toHaveBeenCalledTimes(5);
         expect(clusterClient.bulk).toHaveBeenLastCalledWith({
           refresh: 'wait_for',
-          operations: [{ delete: { _id: newAlertUuid, _index: alertIndex } }],
+          operations: [
+            { delete: { _id: newAlertUuid, _index: alertIndex, if_seq_no: 0, if_primary_term: 1 } },
+          ],
         });
         expect(failedRunResult.state).toEqual(taskInstance.state);
         expect(failedRunResult.taskRunError?.message).toBe(
