@@ -164,10 +164,10 @@ describe('RunLimitsSection', () => {
     const discoveryCallout = screen.getByTestId('nightshiftRunQuotaReached-detection');
     const extractionCallout = screen.getByTestId('nightshiftRunQuotaReached-ki_extraction');
     expect(discoveryCallout).toHaveTextContent(
-      'Discovery reached daily run limit for this deployment'
+      'Discovery reached daily run limit of 100 for this deployment'
     );
     expect(extractionCallout).toHaveTextContent(
-      'Knowledge indicators extraction reached daily run limit for this deployment'
+      'Knowledge indicators extraction reached daily run limit of 20 for this deployment'
     );
     expect(
       discoveryCallout.compareDocumentPosition(
