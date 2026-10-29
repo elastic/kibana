@@ -19,6 +19,10 @@ import {
   searchFilter,
   aggregation,
   querySortField,
+  urlString,
+  pemCertificate,
+  version,
+  boundedString,
   unboundedString,
 } from '../..';
 import { reportStringLengthViolation } from '@kbn/schema-string-helpers';
@@ -40,6 +44,9 @@ describe.each([
   ['searchFilter', searchFilter, 0, 10000],
   ['aggregation', aggregation, 0, 100000],
   ['querySortField', querySortField, 0, 256],
+  ['urlString', urlString, 1, 2048],
+  ['pemCertificate', pemCertificate, 1, 262144],
+  ['version', version, 1, 256],
 ] as const)('%s', (name, helper, minLength, maxLength) => {
   test('enforces the default boundaries and string type', () => {
     const strict = helper();
@@ -159,4 +166,52 @@ test('exports accurate OpenAPI length metadata in both modes', () => {
   expect(reporting.metas).not.toEqual(
     expect.arrayContaining([{ [metaFields.META_FIELD_X_OAS_MAX_LENGTH]: 512 }])
   );
+});
+
+describe('boundedString', () => {
+  test('enforces the required maximum and defaults the minimum to zero', () => {
+    const strict = boundedString({ maxLength: 4 });
+    expect(strict.validate('four')).toBe('four');
+    expect(strict.validate('')).toBe('');
+    expect(() => strict.validate('fives')).toThrow();
+    expect(() => boundedString({ minLength: 2, maxLength: 4 }).validate('a')).toThrow();
+    expect(reportStringLengthViolation).not.toHaveBeenCalled();
+  });
+
+  test('reports values above the maximum under the boundedString helper name', () => {
+    const reporting = boundedString.warn({ maxLength: 4, label: 'fleet.output.ca_file' });
+    expect(reporting.validate('four')).toBe('four');
+    expect(reportStringLengthViolation).not.toHaveBeenCalled();
+    expect(reporting.validate('fives')).toBe('fives');
+    expect(reportStringLengthViolation).toHaveBeenCalledWith({
+      helper: 'boundedString',
+      library: 'config-schema',
+      maxLength: 4,
+      length: 5,
+      label: 'fleet.output.ca_file',
+    });
+  });
+
+  test.each([undefined, NaN, Infinity, -1, 1.5])(
+    'rejects an invalid maximum %s at definition time',
+    (maxLength) => {
+      expect(() => boundedString({ maxLength: maxLength as number })).toThrow(
+        'boundedString() requires'
+      );
+    }
+  );
+
+  test('rejects a maximum above the ceiling at definition time', () => {
+    expect(() => boundedString({ maxLength: 1_048_576 })).not.toThrow();
+    expect(() => boundedString({ maxLength: 1_048_577 })).toThrow('maxLength <= 1048576');
+    expect(() => boundedString.warn({ maxLength: 1_048_577, label: 'test' })).toThrow(
+      'maxLength <= 1048576'
+    );
+  });
+
+  test.each(['', '  '])('requires a non-empty label %j in reporting mode', (label) => {
+    expect(() => boundedString.warn({ maxLength: 4, label })).toThrow(
+      'boundedString.warn() requires a non-empty label'
+    );
+  });
 });

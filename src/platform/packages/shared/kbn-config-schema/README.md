@@ -147,6 +147,8 @@ schema.object({
   panelId: savedObjectId.warn({ label: 'dashboard.panelId' }),
   // optional field
   description: schema.maybe(schema.description()),
+  // no semantic helper fits: explicit limit required
+  keyFile: schema.boundedString({ maxLength: 4096 }),
   // explicit opt-out, reason required
   blob: schema.unboundedString({ reason: 'Size is enforced upstream' }),
 });

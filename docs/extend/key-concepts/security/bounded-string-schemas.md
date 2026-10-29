@@ -26,6 +26,11 @@ Both libraries export the same helpers with the same defaults, sourced from [`@k
 | `searchFilter` | 0 | 10,000 |
 | `aggregation` | 0 | 100,000 |
 | `querySortField` | 0 | 256 |
+| `urlString` | 1 | 2,048 |
+| `pemCertificate` | 1 | 262,144 |
+| `version` | 1 | 256 |
+
+When none of these fits a field, use [`boundedString`](#fields-no-helper-fits) with an explicit limit.
 
 ```typescript
 // @kbn/config-schema — available on `schema` and as named exports
@@ -52,6 +57,8 @@ const params = z.object({
 Lengths count UTF-16 code units, matching JavaScript `string.length`. These are input size bounds, not byte limits or format validation.
 
 The saved object defaults follow [`saved_objects_length_limits.ts`](https://github.com/elastic/kibana/blob/main/src/core/packages/saved-objects/server/src/saved_objects_length_limits.ts); Elasticsearch still enforces its own separate byte limit on the combined document ID. `description` and `querySortField` have no counterpart there — they are new bounds for request fields that solution teams were already bounding inconsistently.
+
+`urlString`, `pemCertificate` and `version` bound length only: `urlString` (any URL or URI, sized to the conventional 2,048 limit) does not check syntax or scheme, `pemCertificate` (PEM-encoded certificates, private keys and CA bundles, sized to fit a full public CA bundle) does not parse PEM, and `version` (semver and other version strings, matching node-semver's 256 limit) does not validate the format. Add a `validate` function, or Zod refinements, when the format matters. `version` is for software and package versions; use `savedObjectVersion` for a saved object's concurrency token. The URL helper is named `urlString` so that it does not shadow Zod's own `url()` format validator, which `@kbn/zod` re-exports.
 
 Helpers with a minimum of zero allow empty strings. To allow an *absent* field, use the library's optional wrapper (`schema.maybe()` / `.optional()`).
 
@@ -85,10 +92,10 @@ Each overlong validation records the string's length in the histogram `kibana.sc
 
 | Attribute | Value |
 | --- | --- |
-| `schema.helper` | The helper name, for example `savedObjectId` |
+| `schema.helper` | The helper name, for example `savedObjectId`, or `boundedString` for the generic helper |
 | `schema.library` | `config-schema` or `zod` |
 | `schema.max_length` | The threshold that was exceeded |
-| `schema.label` | Optional caller-supplied field identifier |
+| `schema.label` | Caller-supplied field identifier: optional for semantic helpers, required for `boundedString.warn()` |
 
 :::{warning}
 `label` must be a **static field identifier** chosen by the route author — never a request value, user ID, or anything else derived from input. It becomes a metric attribute, so request-derived values would both explode cardinality and leak input into telemetry. This is a convention, not a runtime-enforced constraint.
@@ -104,6 +111,25 @@ Reporting uses the existing OTel provider and exporters. Without a configured pr
 
 Calling `.warn()` does not enable exporters and does not impose a maximum length. Switch to the strict helper once the observed bounds have been reviewed.
 
+## Fields no helper fits
+
+Prefer a semantic helper whenever one matches the field's meaning: it carries a reviewed default and reports under a name that makes the telemetry readable. When no semantic helper fits, for example file paths, credentials, opaque cursors or configuration blobs, use `boundedString` with an explicit limit:
+
+```typescript
+// @kbn/config-schema — also available as schema.boundedString
+boundedString({ maxLength: 4096 });
+boundedString.warn({ maxLength: 4096, label: 'fleet.outputs.ssl.key_file' });
+
+// @kbn/zod
+boundedString({ maxLength: 4096 }).optional();
+```
+
+- `maxLength` is required and has no default. It must be an integer no greater than 1,048,576; larger limits throw at schema definition time. Use `unboundedString` with a reason for fields that need more.
+- `minLength` defaults to 0, so empty strings stay valid unless you set one.
+- `boundedString.warn()` requires a non-empty `label`. Every generic field reports under the same `schema.helper` value, so the label is the only way to tell them apart in the histogram.
+
+If a kind of field keeps needing `boundedString` across plugins, propose a semantic helper for it instead.
+
 ## Intentionally unbounded strings
 
 Some fields genuinely cannot carry a maximum. Declare that explicitly:
@@ -114,10 +140,11 @@ unboundedString({ reason: 'Size is enforced upstream by the ingest pipeline' });
 
 The reason is required and must be non-empty; it is checked at schema definition time and the type excludes a maximum-length option entirely. The reason documents the call site and is **not** sent to telemetry.
 
-CodeQL recognizes this escape hatch and the helpers' explicit `.warn()` mode. Ordinary unbounded string schemas remain subject to the rule.
+CodeQL recognizes this escape hatch and the helpers' explicit `.warn()` mode, including `boundedString.warn()`. Ordinary unbounded string schemas remain subject to the rule.
 
 ## Adopting the helpers
 
 - Adopt helpers in team-owned route changes, preserving stricter bounds and existing format validation as needed.
+- Pick a semantic helper first; fall back to `boundedString` only when none fits.
 - Replace justified `codeql[...]` string suppressions with `unboundedString({ reason: ... })`.
 - Reach for `.warn()` when an existing route's real-world bounds are unknown, and follow up with the strict helper once the histogram has data.

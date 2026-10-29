@@ -8,12 +8,19 @@
  */
 
 import {
+  assertBoundedStringLabel,
   assertUnboundedStringReason,
   assertValidMinLength,
+  BOUNDED_STRING_HELPER,
+  getBoundedStringLimits,
   getStringHelperLimits,
   reportStringLengthViolation,
 } from '@kbn/schema-string-helpers';
-import type { StringHelperName } from '@kbn/schema-string-helpers';
+import type {
+  ReportedStringHelperName,
+  StringHelperLimits,
+  StringHelperName,
+} from '@kbn/schema-string-helpers';
 import type { StringOptions } from '../types/string_type';
 import { StringType } from '../types/string_type';
 import type { Type } from '../types/type';
@@ -33,30 +40,36 @@ export interface SchemaHelper {
   warn(options?: StringWarnOptions): Type<string>;
 }
 
+// Accepts overlong input and records a violation instead of rejecting it.
+const reportingString = (
+  helper: ReportedStringHelperName,
+  { minLength, maxLength }: StringHelperLimits,
+  { label, validate, ...options }: StringWarnOptions
+): Type<string> =>
+  new StringType({
+    ...options,
+    minLength,
+    maxLength: undefined,
+    validate: (value) => {
+      if (value.length > maxLength) {
+        reportStringLengthViolation({
+          helper,
+          library: 'config-schema',
+          maxLength,
+          length: value.length,
+          label,
+        });
+      }
+      return validate?.(value);
+    },
+  });
+
 const makeHelper = (helper: StringHelperName): SchemaHelper => {
   const strict = (options: StringOptions = {}): Type<string> =>
     new StringType({ ...options, ...getStringHelperLimits(helper, options) });
 
-  const warn = ({ label, validate, ...options }: StringWarnOptions = {}): Type<string> => {
-    const { minLength, maxLength } = getStringHelperLimits(helper, options);
-    return new StringType({
-      ...options,
-      minLength,
-      maxLength: undefined,
-      validate: (value) => {
-        if (value.length > maxLength) {
-          reportStringLengthViolation({
-            helper,
-            library: 'config-schema',
-            maxLength,
-            length: value.length,
-            label,
-          });
-        }
-        return validate?.(value);
-      },
-    });
-  };
+  const warn = (options: StringWarnOptions = {}): Type<string> =>
+    reportingString(helper, getStringHelperLimits(helper, options), options);
 
   return Object.assign(strict, { warn });
 };
@@ -70,6 +83,42 @@ export const description = makeHelper('description');
 export const searchFilter = makeHelper('searchFilter');
 export const aggregation = makeHelper('aggregation');
 export const querySortField = makeHelper('querySortField');
+export const urlString = makeHelper('urlString');
+export const pemCertificate = makeHelper('pemCertificate');
+export const version = makeHelper('version');
+
+export type BoundedStringOptions = StringOptions & { maxLength: number };
+
+export type BoundedStringWarnOptions = BoundedStringOptions & {
+  /**
+   * Required static field identifier for the violation metric, never derived from request.
+   * Every boundedString() field reports under the same helper name, so the label is the only
+   * way to tell them apart.
+   *
+   * @see https://www.elastic.co/docs/extend/kibana/key-concepts/security/bounded-string-schemas
+   */
+  label: string;
+};
+
+export interface BoundedStringHelper {
+  (options: BoundedStringOptions): Type<string>;
+  warn(options: BoundedStringWarnOptions): Type<string>;
+}
+
+/**
+ * Creates a string with an explicit, required maximum length. Use it only when no semantic
+ * helper fits the field.
+ */
+export const boundedString: BoundedStringHelper = Object.assign(
+  (options: BoundedStringOptions): Type<string> =>
+    new StringType({ ...options, ...getBoundedStringLimits(options) }),
+  {
+    warn: (options: BoundedStringWarnOptions): Type<string> => {
+      assertBoundedStringLabel(options.label);
+      return reportingString(BOUNDED_STRING_HELPER, getBoundedStringLimits(options), options);
+    },
+  }
+);
 
 export type UnboundedStringOptions = Omit<StringOptions, 'maxLength'> & { reason: string };
 

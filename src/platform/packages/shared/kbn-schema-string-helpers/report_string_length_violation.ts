@@ -9,7 +9,7 @@
 
 import { metrics, ValueType } from '@opentelemetry/api';
 import type { Histogram, MeterProvider } from '@opentelemetry/api';
-import type { StringHelperName } from './limits';
+import type { ReportedStringHelperName } from './limits';
 
 const histograms = new WeakMap<MeterProvider, Histogram>();
 
@@ -46,7 +46,7 @@ export const reportStringLengthViolation = ({
   length,
   label,
 }: {
-  helper: StringHelperName;
+  helper: ReportedStringHelperName;
   library: 'config-schema' | 'zod';
   maxLength: number;
   length: number;
