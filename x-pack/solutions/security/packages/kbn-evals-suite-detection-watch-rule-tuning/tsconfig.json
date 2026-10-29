@@ -12,6 +12,6 @@
     "@kbn/tooling-log",
     "@kbn/workflows",
     "@kbn/core",
-    "@kbn/alertzero-plugin"
+    "@kbn/alertzero-common"
   ]
 }

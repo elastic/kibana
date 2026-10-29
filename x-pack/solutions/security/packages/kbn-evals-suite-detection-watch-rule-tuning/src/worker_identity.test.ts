@@ -21,9 +21,11 @@ const WORKFLOW_ID = `${RULE_TUNING_WORKER_ID}-default`;
 const stackFetch = ({
   honorsBinding,
   enabled = false,
+  reservedRole = true,
 }: {
   honorsBinding: boolean;
   enabled?: boolean;
+  reservedRole?: boolean;
 }) => {
   const worker = {
     id: RULE_TUNING_WORKER_ID,
@@ -36,7 +38,12 @@ const stackFetch = ({
   const calls: Array<{
     method: string;
     url: string;
-    body?: { name?: string; enabled?: boolean; settings?: { serviceAccountId?: string } };
+    body?: {
+      name?: string;
+      roles?: string[];
+      enabled?: boolean;
+      settings?: { serviceAccountId?: string };
+    };
   }> = [];
 
   const fetch = jest.fn(async (url: string, options: { method?: string; body?: string } = {}) => {
@@ -48,7 +55,10 @@ const stackFetch = ({
         ? { serviceAccounts: [] }
         : { id: 'sa-1', name: body.name, enabled: true, assumable: true };
     }
-    if (url.startsWith('/api/security/role/')) return {};
+    if (url.startsWith('/api/security/role/') && method === 'GET') {
+      if (!reservedRole) throw Object.assign(new Error('Not Found'), { status: 404 });
+      return { metadata: { _reserved: true } };
+    }
     if (url === '/internal/alertzero/workers' && method === 'GET') return { workers: [worker] };
     if (url === `/internal/alertzero/workers/${RULE_TUNING_WORKER_ID}` && method === 'PATCH') {
       worker.enabled = body.enabled;
@@ -79,6 +89,19 @@ describe('bindRuleTuningWorker', () => {
       settingsRevision: 3,
       settings: { serviceAccountId: 'sa-1', extras: { fpCountThreshold: 2 } },
     });
+    expect(
+      calls.find(({ method, url }) => method === 'POST' && url.includes('service_account'))?.body
+    ).toMatchObject({ name: 'alertzero_rule_tuning', roles: ['alertzero_rule_tuning'] });
+    expect(calls.some(({ method }) => method === 'PUT')).toBe(false);
+  });
+
+  it('refuses to create the account when Elasticsearch has no built-in worker role', async () => {
+    const { fetch, calls } = stackFetch({ honorsBinding: true, reservedRole: false });
+
+    await expect(bindRuleTuningWorker(fetch)).rejects.toThrow(
+      /no built-in "alertzero_rule_tuning" role/
+    );
+    expect(calls.some(({ method }) => method === 'POST')).toBe(false);
   });
 
   it('reports the bind as not enabling when the worker was already enabled', async () => {
