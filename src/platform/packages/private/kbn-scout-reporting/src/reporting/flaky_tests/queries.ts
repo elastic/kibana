@@ -270,8 +270,7 @@ export const buildTestMetadataQuery = (
   [
     `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
     `WHERE ${[...scopeClauses(scope), anyFailureFilter(frameworks)].join(' AND ')}`,
-    // The text field: not every index has the `.keyword` sub-field
-    'STATS title = MAX(test.title),' +
+    'STATS title = MAX(test.title.keyword),' +
       ' suite_title = MAX(suite.title.keyword),' +
       ' file_path = MAX(test.file.path),' +
       ' config_path = MAX(test_run.config.file.path),' +
