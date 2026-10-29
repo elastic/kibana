@@ -288,8 +288,15 @@ export class DashboardApp {
   /**
    * Clicks the cancel button to exit edit mode without saving.
    */
-  async clickCancelOutOfEditMode() {
+  async clickCancelOutOfEditMode(options?: { discardChanges?: boolean }) {
     await this.appMenu.clickItem(this.viewOnlyModeButton);
+    if (options?.discardChanges) {
+      // The dashboard can flag unsaved changes on its own, which opens a "Reset dashboard?" modal
+      const confirmDiscardButton = this.page.testSubj.locator('confirmModalConfirmButton');
+      await confirmDiscardButton.click({ timeout: 2_000 }).catch(() => {
+        // No unsaved changes, so there is nothing to confirm
+      });
+    }
     await this.waitForViewMode('view');
   }
 
@@ -1131,14 +1138,17 @@ export class DashboardApp {
    * fills in the new title, and confirms.
    */
   async saveDashboardAsCopy(dashboardTitle?: string) {
-    await this.quickSaveSecondaryButton.click();
-    await this.interactiveSaveMenuItem.isVisible();
     // The dashboard sometimes flags spurious unsaved changes on initial layout,
     // which triggers a continuous toolbar re-render that nudges the popover by a
     // pixel each frame and defeats Playwright's stability check. The menu item
-    // is visibly clickable; bypass actionability to land the click.
-    await this.interactiveSaveMenuItem.click({ force: true });
-    await expect(this.savedObjectTitleInput).toBeVisible();
+    // is visibly clickable, so bypass actionability and retry until the modal opens.
+    await expect(async () => {
+      if (!(await this.interactiveSaveMenuItem.isVisible())) {
+        await this.quickSaveSecondaryButton.click();
+      }
+      await this.interactiveSaveMenuItem.click({ force: true, timeout: 2_000 });
+      await expect(this.savedObjectTitleInput).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 20_000 });
 
     if (dashboardTitle !== undefined) {
       await this.savedObjectTitleInput.fill(dashboardTitle);
@@ -1185,6 +1195,10 @@ export class DashboardApp {
   // ============================================================
   // Fullscreen
   // ============================================================
+
+  async hasFullscreenMenuItem(): Promise<boolean> {
+    return this.appMenu.hasItem('dashboardFullScreenMode');
+  }
 
   async enterFullscreen() {
     await this.appMenu.clickItem('dashboardFullScreenMode');

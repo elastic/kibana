@@ -90,6 +90,26 @@ export class AppMenu {
   }
 
   /**
+   * Returns whether a menu item is available, inline or in the overflow popover.
+   * Waits for the menu to finish loading before checking.
+   */
+  async hasItem(item: Locator | string): Promise<boolean> {
+    const locator = this.toLocator(item);
+    await this.loadingSkeleton.waitFor({ state: 'hidden', timeout: 30_000 });
+    if (await locator.isVisible()) {
+      return true;
+    }
+    if (!(await this.overflowButton.isVisible())) {
+      return false;
+    }
+    await this.openOverflow();
+    const found = await locator.isVisible();
+    await this.overflowButton.click();
+    await this.popover.waitFor({ state: 'hidden' });
+    return found;
+  }
+
+  /**
    * Clicks a menu item, opening overflow first when the item is not inline.
    * Accepts a locator or a `data-test-subj` string.
    */
