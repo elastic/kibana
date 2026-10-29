@@ -52,6 +52,7 @@ import {
   getRuleAlreadyExistsMessage,
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
+  type RuleValidationContext,
 } from '../errors/rule_error_messages';
 import {
   bulkScheduleRuleExecutorTasks,
@@ -114,6 +115,7 @@ import {
   bulkErrorCodeForStatus,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
+  toRestoreRuleData,
 } from './utils';
 
 const withApm = withApmDecorator('RulesClient');
@@ -350,11 +352,7 @@ export class RulesClient {
     }
   }
 
-  private parseRuleData<T>(
-    schema: z.ZodType<T>,
-    data: unknown,
-    context: 'create' | 'update' | 'upsert'
-  ): T {
+  private parseRuleData<T>(schema: z.ZodType<T>, data: unknown, context: RuleValidationContext): T {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
       throw Boom.badRequest(getInvalidRuleDataMessage(context, stringifyZodError(parsed.error)), {
@@ -1941,6 +1939,39 @@ export class RulesClient {
       return { rule, created: true };
     }
 
+    const rule = await this.replaceExistingRule({ id, parsed });
+    return { rule, created: false };
+  }
+
+  /**
+   * Replaces the rule's configuration with a change-history snapshot. The
+   * current `enabled` state is kept and the version is bumped.
+   */
+  @withApm
+  public async restoreRule({
+    id,
+    snapshot,
+    expectedVersion,
+  }: {
+    id: string;
+    snapshot: Record<string, unknown>;
+    expectedVersion?: number;
+  }): Promise<RuleResponse> {
+    const parsed = this.parseRuleData(putRuleDataSchema, toRestoreRuleData(snapshot), 'restore');
+    this.artifactTypeRegistry.validate(parsed.artifacts);
+
+    return this.replaceExistingRule({ id, parsed, expectedVersion });
+  }
+
+  private async replaceExistingRule({
+    id,
+    parsed,
+    expectedVersion,
+  }: {
+    id: string;
+    parsed: PutRuleData;
+    expectedVersion?: number;
+  }): Promise<RuleResponse> {
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
@@ -1949,6 +1980,13 @@ export class RulesClient {
       version: existingVersion,
       references: existingReferences,
     } = await this.getExistingRule(id);
+
+    if (expectedVersion !== undefined && expectedVersion !== existingAttrs.version) {
+      throw Boom.conflict(getRuleVersionConflictMessage(id), {
+        code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT,
+        details: { rule_id: id },
+      });
+    }
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
@@ -2001,6 +2039,6 @@ export class RulesClient {
         templateId: nextAttrs.metadata.template?.id,
       },
     ]);
-    return { rule, created: false };
+    return rule;
   }
 }

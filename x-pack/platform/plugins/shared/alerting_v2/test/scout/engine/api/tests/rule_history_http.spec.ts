@@ -10,14 +10,22 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import type {
   ListRuleChangeHistoryResponse,
   RuleChangeHistoryDetail,
+  RuleResponse,
 } from '@kbn/alerting-v2-schemas';
 import { RuleChangesHistoryAction } from '../../../../../server/lib/rule_changes_history/audit_actions';
-import { ALERTING_V2_RULES_READ_ROLE, apiTest, buildCreateRuleData, testData } from '../fixtures';
+import {
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
+  apiTest,
+  buildCreateRuleData,
+  testData,
+} from '../fixtures';
 
 const CHANGE_HISTORY_URL = testData.INTERNAL_CHANGE_HISTORY_RULES_API_PATH;
 
 apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_TAG }, () => {
   let readerHeaders: Record<string, string>;
+  let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
     await apiServices.alertingV2.rules.cleanUp();
@@ -26,6 +34,11 @@ apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_T
       ALERTING_V2_RULES_READ_ROLE
     );
     readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
+
+    const writerCredentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
+      ALERTING_V2_RULES_ALL_ROLE
+    );
+    writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
@@ -165,6 +178,125 @@ apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_T
         id: created.id,
         metadata: expect.objectContaining({ name: 'change-history-http-detail-original' }),
       });
+    }
+  );
+
+  apiTest(
+    'restore: applies an earlier snapshot as a new version and keeps the current enabled state',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'change-history-http-restore-original' },
+          schedule: { every: '1d' },
+        })
+      );
+
+      await apiServices.alertingV2.ruleChangesHistory.waitForAtLeast(1, {
+        ruleId: created.id,
+        action: RuleChangesHistoryAction.ruleCreate,
+      });
+
+      await apiServices.alertingV2.rules.upsert(
+        created.id,
+        buildCreateRuleData({
+          metadata: { name: 'change-history-http-restore-renamed' },
+          schedule: { every: '1d' },
+        })
+      );
+      const disabled = await apiServices.alertingV2.rules.disable(created.id);
+
+      const listResponse = await apiClient.get(
+        `${CHANGE_HISTORY_URL}?rule_id=${encodeURIComponent(created.id)}`,
+        { headers: readerHeaders }
+      );
+
+      expect(listResponse).toHaveStatusCode(200);
+
+      const list: ListRuleChangeHistoryResponse = listResponse.body;
+      const createItem = list.items.find(
+        ({ action }) => action === RuleChangesHistoryAction.ruleCreate
+      );
+
+      expect(createItem).toBeDefined();
+
+      const restoreResponse = await apiClient.post(
+        `${CHANGE_HISTORY_URL}/${encodeURIComponent(createItem?.id ?? '')}/_restore`,
+        { headers: writerHeaders }
+      );
+
+      expect(restoreResponse).toHaveStatusCode(200);
+
+      const restored: RuleResponse = restoreResponse.body;
+
+      expect(restored).toMatchObject({
+        id: created.id,
+        version: disabled.version + 1,
+        enabled: false,
+        metadata: expect.objectContaining({ name: 'change-history-http-restore-original' }),
+      });
+
+      const fetched = await apiServices.alertingV2.rules.get(created.id);
+
+      expect(fetched).toStrictEqual(restored);
+
+      await apiServices.alertingV2.ruleChangesHistory.waitForAtLeast(2, {
+        ruleId: created.id,
+        action: RuleChangesHistoryAction.ruleUpdate,
+      });
+    }
+  );
+
+  apiTest(
+    'restore: rejects stale expected_version, read-only callers and unknown changes',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'change-history-http-restore-guards' },
+          schedule: { every: '1d' },
+        })
+      );
+
+      await apiServices.alertingV2.ruleChangesHistory.waitForAtLeast(1, {
+        ruleId: created.id,
+        action: RuleChangesHistoryAction.ruleCreate,
+      });
+
+      const listResponse = await apiClient.get(
+        `${CHANGE_HISTORY_URL}?rule_id=${encodeURIComponent(created.id)}`,
+        { headers: readerHeaders }
+      );
+
+      expect(listResponse).toHaveStatusCode(200);
+
+      const list: ListRuleChangeHistoryResponse = listResponse.body;
+      const restoreUrl = `${CHANGE_HISTORY_URL}/${encodeURIComponent(list.items[0].id)}/_restore`;
+
+      const staleResponse = await apiClient.post(restoreUrl, {
+        headers: writerHeaders,
+        body: { expected_version: created.version + 1 },
+      });
+
+      expect(staleResponse).toHaveStatusCode(409);
+      expect(staleResponse.body).toMatchObject({ code: 'RULE_VERSION_CONFLICT' });
+
+      const readerResponse = await apiClient.post(restoreUrl, {
+        headers: readerHeaders,
+        body: { expected_version: created.version },
+      });
+
+      expect(readerResponse).toHaveStatusCode(403);
+
+      const missingResponse = await apiClient.post(
+        `${CHANGE_HISTORY_URL}/missing-change/_restore`,
+        { headers: writerHeaders }
+      );
+
+      expect(missingResponse).toHaveStatusCode(404);
+      expect(missingResponse.body).toMatchObject({ code: 'RULE_CHANGE_NOT_FOUND' });
+
+      const unchanged = await apiServices.alertingV2.rules.get(created.id);
+
+      expect(unchanged.version).toBe(created.version);
     }
   );
 });
