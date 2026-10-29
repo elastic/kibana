@@ -1058,6 +1058,7 @@ describe('ConversationClient', () => {
         space: testSpace,
         logger: loggerMock.create(),
         esClient: mockRawEsClient as unknown as ElasticsearchClient,
+        executionClient: mockExecutionClient as unknown as AgentExecutionClient,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
         conversationEvents: mockConversationEvents,
         user: { id: 'user-1', username: 'test-user', isAdmin: false },
