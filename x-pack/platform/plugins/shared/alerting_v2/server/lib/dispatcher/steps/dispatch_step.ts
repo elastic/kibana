@@ -42,7 +42,6 @@ import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicyDestination,
-  ActionPolicyWorkflowPayload,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -50,6 +49,7 @@ import type {
 } from '../types';
 import { AlertTriage, DispatchOutcome, DispatchPlan, PolicyCatalog, RuleCatalog } from '../state';
 import { withDispatcherSpan } from '../with_dispatcher_span';
+import { toWorkflowPayload } from '../workflow_payload';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 import { toNotifiedActions } from './utils/action_documents';
@@ -515,18 +515,10 @@ export class DispatchStep implements DispatcherStep {
       definition: workflow.definition ?? undefined,
       yaml: workflow.yaml,
     };
-    const payload: ActionPolicyWorkflowPayload = {
-      id: group.id,
-      policyId: group.policyId,
-      groupKey: group.groupKey,
-      alerts: group.alerts,
-      rules: group.rules,
-    };
-
     return {
       workflow: model,
       spaceId: group.spaceId,
-      inputs: { payload },
+      inputs: { payload: toWorkflowPayload(group) },
       triggeredBy: ACTION_POLICY_TRIGGER,
     };
   }
