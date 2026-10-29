@@ -8,6 +8,7 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import { euiSelectors } from '@kbn/scout';
+import { escapeRegExp } from 'lodash';
 import moment from 'moment';
 import {
   AppMenu,
@@ -191,8 +192,8 @@ export class StreamsApp {
     await this.page.gotoApp(`streams`);
   }
 
-  async gotoStreamManagementTab(streamName: string, tabName: string) {
-    await this.page.gotoApp(`streams/${streamName}/management/${tabName}`);
+  async gotoStreamManagementTab(streamName: string, tabName: string, readyWhen?: Locator) {
+    await this.page.gotoApp(`streams/${streamName}/management/${tabName}`, { readyWhen });
   }
 
   async gotoPartitioningTab(streamName: string) {
@@ -208,7 +209,11 @@ export class StreamsApp {
   }
 
   async gotoOverviewTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'overview');
+    await this.gotoStreamManagementTab(
+      streamName,
+      'overview',
+      this.page.getByTestId('streamsAppManagementTab-overview')
+    );
   }
 
   async gotoProcessingTab(streamName: string) {
@@ -435,47 +440,11 @@ export class StreamsApp {
   }
 
   async verifyDiscoverButtonLink(streamName: string, sourceCommand: 'FROM' | 'TS' = 'FROM') {
-    const locator = this.page.locator(
-      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
-    );
-    await locator.waitFor();
-
-    const href = await locator.getAttribute('href');
-    if (!href) {
-      throw new Error(`Missing href for Discover action button of stream ${streamName}`);
-    }
-
-    // Expect encoded ESQL snippet to appear (basic validation)
-    // '<sourceCommand> <streamName>' should appear URL-encoded
+    // The '<sourceCommand> <streamName>' ES|QL snippet reaches the href URL-encoded.
     const expectedFragment = encodeURIComponent(`${sourceCommand} ${streamName}`);
-    if (!href.includes(expectedFragment)) {
-      throw new Error(
-        `Href for ${streamName} did not contain expected ESQL fragment. href=${href} expectedFragment=${expectedFragment}`
-      );
-    }
-  }
-
-  async getDiscoverButtonLinkSourceCommand(streamName: string): Promise<'FROM' | 'TS' | null> {
-    const locator = this.page.locator(
-      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
-    );
-    await locator.waitFor();
-
-    const href = await locator.getAttribute('href');
-    if (!href) {
-      return null;
-    }
-
-    // Check which source command is used in the URL
-    const fromFragment = encodeURIComponent(`FROM ${streamName}`);
-    const tsFragment = encodeURIComponent(`TS ${streamName}`);
-
-    if (href.includes(tsFragment)) {
-      return 'TS';
-    } else if (href.includes(fromFragment)) {
-      return 'FROM';
-    }
-    return null;
+    await expect(
+      this.page.getByTestId(`streamsDiscoverActionButton-${streamName}`)
+    ).toHaveAttribute('href', new RegExp(escapeRegExp(expectedFragment)));
   }
 
   /**
