@@ -8,46 +8,32 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { ActivityEvent } from '@kbn/agent-builder-common';
 import { EventSentence } from './event_sentence';
 import { ParticipantList } from './participant_list';
 import { getEventParticipants } from './to_activity_items';
 
-const EventTimestamp = ({ value, timeZone }: { value: string; timeZone?: string }) => (
-  <FormattedMessage
-    id="xpack.agentBuilder.activityLog.timestamp"
-    defaultMessage="{date} at {time}"
-    values={{
-      date: (
-        <FormattedDate
-          value={value}
-          month="short"
-          day="2-digit"
-          year="numeric"
-          timeZone={timeZone}
-        />
-      ),
-      time: (
-        <FormattedTime
-          value={value}
-          hour="2-digit"
-          minute="2-digit"
-          hourCycle="h23"
-          timeZone={timeZone}
-        />
-      ),
-    }}
-  />
-);
+const EventTimestamp = ({ value }: { value: string }) => {
+  const time = moment(value).locale(i18n.getLocale());
+
+  return (
+    <>
+      {i18n.translate('xpack.agentBuilder.activityLog.timestamp', {
+        defaultMessage: '{date} at {time}',
+        values: { date: time.format('MMM DD, YYYY'), time: time.format('HH:mm') },
+      })}
+    </>
+  );
+};
 
 interface ActivityLogRowProps {
   event: ActivityEvent;
   actorLabel: string;
   templateName?: string;
   attachmentName?: string;
-  timeZone?: string;
   profiles: Map<string, UserProfileWithAvatar>;
 }
 
@@ -56,7 +42,6 @@ export const ActivityLogRow: React.FC<ActivityLogRowProps> = ({
   actorLabel,
   templateName,
   attachmentName,
-  timeZone,
   profiles,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -95,7 +80,7 @@ export const ActivityLogRow: React.FC<ActivityLogRowProps> = ({
             color: ${euiTheme.colors.textDisabled};
           `}
         >
-          <EventTimestamp value={event.created_at} timeZone={timeZone} />
+          <EventTimestamp value={event.created_at} />
         </EuiText>
       </EuiFlexItem>
       {participants.length > 0 && (

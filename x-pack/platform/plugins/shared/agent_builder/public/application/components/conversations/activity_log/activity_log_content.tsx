@@ -25,14 +25,12 @@ import { useConversation } from '../../../hooks/use_conversation';
 import { useUserProfiles } from '../../../hooks/use_user_profiles';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { useKibana } from '../../../hooks/use_kibana';
 import { ActivityLogRow } from './activity_log_row';
 import { getAttachmentName } from './get_attachment_name';
 import {
   findTriggeringUser,
   getEventParticipants,
   getTemplateDisplayName,
-  resolveTimeZone,
   toActivityItems,
 } from './to_activity_items';
 
@@ -53,9 +51,6 @@ const EVENT_ICONS: Record<string, string> = {
 export const ActivityLogContent: React.FC = () => {
   const { conversation } = useConversation();
   const { attachmentsService, conversationTemplatesService } = useAgentBuilderServices();
-  const {
-    services: { settings },
-  } = useKibana();
 
   const allEvents = conversation?.events;
   const rows = useMemo(
@@ -68,7 +63,6 @@ export const ActivityLogContent: React.FC = () => {
   );
   const { agents } = useAgentBuilderAgents({ includeHidden: true });
 
-  const timeZone = resolveTimeZone(settings?.client.get<string>('dateFormat:tz'));
   const agentNames = useMemo(() => new Map(agents.map(({ id, name }) => [id, name])), [agents]);
 
   const uids = useMemo(
@@ -133,7 +127,6 @@ export const ActivityLogContent: React.FC = () => {
               getLabel: (attachment) =>
                 attachmentsService.getAttachmentUiDefinition(attachment.type)?.getLabel(attachment),
             })}
-            timeZone={timeZone}
             profiles={profiles}
           />
         ),
@@ -146,7 +139,6 @@ export const ActivityLogContent: React.FC = () => {
     conversationTemplatesService,
     attachmentsService,
     conversation?.attachments,
-    timeZone,
   ]);
 
   if (isInitialLoading) {

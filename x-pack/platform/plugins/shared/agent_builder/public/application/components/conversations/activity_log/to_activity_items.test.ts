@@ -17,7 +17,6 @@ import {
   getEventParticipants,
   getTemplateDisplayName,
   isListedActivityEvent,
-  resolveTimeZone,
   toActivityItems,
 } from './to_activity_items';
 
@@ -233,22 +232,5 @@ describe('getTemplateDisplayName', () => {
   it('makes the id readable when no name is registered', () => {
     expect(getTemplateDisplayName('escalation')).toBe('Escalation');
     expect(getTemplateDisplayName('network_incident-review')).toBe('Network incident review');
-  });
-});
-
-describe('resolveTimeZone', () => {
-  it('returns undefined when nothing is configured or the browser timezone is', () => {
-    expect(resolveTimeZone(undefined)).toBeUndefined();
-    expect(resolveTimeZone('')).toBeUndefined();
-    expect(resolveTimeZone('Browser')).toBeUndefined();
-  });
-
-  it('returns a timezone the browser knows', () => {
-    expect(resolveTimeZone('UTC')).toBe('UTC');
-    expect(resolveTimeZone('Europe/Kyiv')).toBe('Europe/Kyiv');
-  });
-
-  it('falls back to the browser timezone for an unknown name', () => {
-    expect(resolveTimeZone('Mars/Base')).toBeUndefined();
   });
 });
