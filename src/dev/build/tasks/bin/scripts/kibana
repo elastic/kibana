@@ -25,11 +25,10 @@ test_node() {
 }
 
 NODE="${DIR}/node/default/bin/node"
-
+{{#linux}}
 if [ -n "$KBN_NODE_HOME" ]; then
   NODE="${KBN_NODE_HOME}/bin/node"
 else
-  {{#linux}}
   if ! "$NODE" --version >/dev/null 2>&1; then
     NODE="${DIR}/node/glibc-217/bin/node"
   fi
