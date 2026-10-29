@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, renderHook } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { GET_WATCHLISTS_QUERY_KEY } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { createReactQueryWrapper } from '../../../../common/mock/create_react_query_wrapper';
 import { useCreateWatchlist } from './use_create_watchlist';
 
@@ -45,5 +48,22 @@ describe('useCreateWatchlist', () => {
         id: 'watchlist_create',
       },
     });
+  });
+
+  it('invalidates the watchlists list query on success so the filter refetches', async () => {
+    const queryClient = new QueryClient();
+    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(() => useCreateWatchlist({ watchlist, spaceId: 'default' }), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await result.current.mutateAsync();
+    });
+
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: GET_WATCHLISTS_QUERY_KEY });
   });
 });

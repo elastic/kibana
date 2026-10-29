@@ -7,7 +7,13 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiSelectableProps, FilterChecked } from '@elastic/eui';
-import { EuiButton, EuiFilterButton, EuiPopover, EuiSelectable, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFilterButton,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiSelectable,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -133,11 +139,10 @@ export const EntityFiltersBarWatchlist: React.FC<EntityFiltersBarWatchlistProps>
             >
               {list}
             </div>
-            <EuiSpacer size="s" />
+            <EuiHorizontalRule margin="s" />
             <EuiButton
-              fill
               fullWidth
-              iconType="plusInCircle"
+              iconType="plusCircle"
               aria-label={CREATE_WATCHLIST_LABEL}
               data-test-subj="entityFiltersBarCreateWatchlist"
               isDisabled={!canCreateWatchlist}
