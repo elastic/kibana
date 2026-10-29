@@ -42,24 +42,20 @@ jest.mock('./hooks/use_installed_integrations_actions', () => ({
   })),
 }));
 jest.mock('./components/installed_integrations_table', () => ({
-  InstalledIntegrationsTable: () => <div data-test-subj="installedIntegrationsTable" />,
+  InstalledIntegrationsTable: ({ instanceCounts }: { instanceCounts: Map<string, number> }) => (
+    <div data-test-subj="installedIntegrationsTable">
+      {[...instanceCounts].map(([name, count]) => `${name}=${count}`).join(',')}
+    </div>
+  ),
 }));
 jest.mock('./components/installed_integrations_search_bar', () => ({
   InstalledIntegrationsSearchBar: () => null,
 }));
 jest.mock('./components/package_policies_panel', () => ({ PackagePoliciesPanel: () => null }));
 jest.mock('./components/instances_panel', () => ({
-  InstancesPanel: ({
-    installedPackage,
-    instances,
-    isLoading,
-  }: {
-    installedPackage: PanelPackage;
-    instances: unknown[];
-    isLoading?: boolean;
-  }) => (
+  InstancesPanel: ({ installedPackage }: { installedPackage: PanelPackage }) => (
     <div data-test-subj="instancesPanel">
-      {installedPackage.title} ({instances.length}){isLoading ? ' loading' : ''}
+      {installedPackage.name}: {installedPackage.title}
     </div>
   ),
 }));
@@ -84,9 +80,8 @@ describe('InstalledIntegrationsPage', () => {
     mockUseInstances.mockReturnValue({
       isEnabled: true,
       isLoading: false,
-      instancesByPackage: new Map([['aws_bedrock', [{ id: 'd1' }, { id: 'd2' }]]]),
+      instanceCounts: new Map([['aws_bedrock', 2]]),
       isError: false,
-      isTruncated: false,
       refetch: jest.fn(),
     });
     // Page 1 only holds aws.
@@ -110,15 +105,14 @@ describe('InstalledIntegrationsPage', () => {
     mockUseInstances.mockReturnValue({
       isEnabled: true,
       isLoading: false,
-      instancesByPackage: new Map([['aws', [{ id: 'd1' }]]]),
+      instanceCounts: new Map([['aws', 1]]),
       isError: false,
-      isTruncated: false,
       refetch: jest.fn(),
     });
     mockUseViewInstances.mockReturnValue({ selectedPackageViewInstances: 'aws' });
     render();
 
-    expect(screen.getByTestId('instancesPanel')).toHaveTextContent('AWS (1)');
+    expect(screen.getByTestId('instancesPanel')).toHaveTextContent('aws: AWS');
     expect(mockUseGetPackageInfo).toHaveBeenCalledWith('aws', undefined, undefined, {
       enabled: false,
     });
@@ -134,7 +128,7 @@ describe('InstalledIntegrationsPage', () => {
     expect(mockUseGetPackageInfo).toHaveBeenCalledWith('aws_bedrock', undefined, undefined, {
       enabled: true,
     });
-    expect(screen.getByTestId('instancesPanel')).toHaveTextContent('Amazon Bedrock (2)');
+    expect(screen.getByTestId('instancesPanel')).toHaveTextContent('aws_bedrock: Amazon Bedrock');
   });
 
   it('waits for the package before opening a panel for a package off the current page', () => {
@@ -149,31 +143,15 @@ describe('InstalledIntegrationsPage', () => {
     mockUseGetPackageInfo.mockReturnValue({ data: undefined, isError: true });
     render();
 
-    expect(screen.getByTestId('instancesPanel')).toHaveTextContent('aws_bedrock (2)');
-  });
-
-  it('passes the loading state of the instances to the panel', () => {
-    mockUseInstances.mockReturnValue({
-      isEnabled: true,
-      isLoading: true,
-      instancesByPackage: new Map(),
-      isError: false,
-      isTruncated: false,
-      refetch: jest.fn(),
-    });
-    mockUseViewInstances.mockReturnValue({ selectedPackageViewInstances: 'aws' });
-    render();
-
-    expect(screen.getByTestId('instancesPanel')).toHaveTextContent('AWS (0) loading');
+    expect(screen.getByTestId('instancesPanel')).toHaveTextContent('aws_bedrock: aws_bedrock');
   });
 
   it('opens no panel and fetches nothing when instances are not enabled', () => {
     mockUseInstances.mockReturnValue({
       isEnabled: false,
       isLoading: false,
-      instancesByPackage: new Map(),
+      instanceCounts: new Map(),
       isError: false,
-      isTruncated: false,
       refetch: jest.fn(),
     });
     mockUseViewInstances.mockReturnValue({ selectedPackageViewInstances: 'aws_bedrock' });
@@ -183,6 +161,12 @@ describe('InstalledIntegrationsPage', () => {
     expect(mockUseGetPackageInfo).toHaveBeenCalledWith('aws_bedrock', undefined, undefined, {
       enabled: false,
     });
+  });
+
+  it('passes the instance counts to the table', () => {
+    render();
+
+    expect(screen.getByTestId('installedIntegrationsTable')).toHaveTextContent('aws_bedrock=2');
   });
 
   it('opens no panel without a selected package', () => {
@@ -198,27 +182,12 @@ describe('InstalledIntegrationsPage', () => {
     mockUseInstances.mockReturnValue({
       isEnabled: true,
       isLoading: false,
-      instancesByPackage: new Map(),
+      instanceCounts: new Map(),
       isError: true,
-      isTruncated: false,
       refetch: jest.fn(),
     });
     render();
 
     expect(screen.getByTestId('instancesLoadError')).toBeInTheDocument();
-  });
-
-  it('warns when there were too many instances to load them all', () => {
-    mockUseInstances.mockReturnValue({
-      isEnabled: true,
-      isLoading: false,
-      instancesByPackage: new Map(),
-      isError: false,
-      isTruncated: true,
-      refetch: jest.fn(),
-    });
-    render();
-
-    expect(screen.getByTestId('instancesTruncated')).toBeInTheDocument();
   });
 });

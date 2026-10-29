@@ -657,6 +657,78 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('GET /internal/fleet/cloud_onboarding_deployments/counts', () => {
+      const COUNTS_URL = '/internal/fleet/cloud_onboarding_deployments/counts';
+      const TEST_SPACE = 'test-cloud-onboarding-counts-space';
+      const packageA = 'counts-test-package-a';
+      const packageB = 'counts-test-package-b';
+      const createdIds: Array<{ id: string; urlPrefix: string }> = [];
+
+      const getCounts = (query: Record<string, string> = {}, urlPrefix = '') =>
+        supertest
+          .get(`${urlPrefix}${COUNTS_URL}`)
+          .set('elastic-api-version', '1')
+          .set('x-elastic-internal-origin', 'kibana')
+          .query(query);
+
+      const create = async (body: Record<string, unknown>, urlPrefix = '') => {
+        const { body: created } = await supertest
+          .post(`${urlPrefix}${BASE_URL}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ mechanisms: ['ecf'], services: ['cloudtrail'], ...body })
+          .expect(200);
+        createdIds.push({ id: created.item.id, urlPrefix });
+      };
+
+      before(async () => {
+        await kibanaServer.spaces.create({ id: TEST_SPACE, name: TEST_SPACE }).catch(() => {});
+        await create({ provider: 'aws', packageNames: [packageA] });
+        await create({ provider: 'aws', packageNames: [packageA, packageB] });
+        await create({ provider: 'azure', packageNames: [packageA] });
+        await create({ provider: 'aws', packageNames: [packageB] }, `/s/${TEST_SPACE}`);
+      });
+
+      after(async () => {
+        for (const { id, urlPrefix } of createdIds) {
+          await supertest
+            .delete(`${urlPrefix}${BASE_URL}/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .catch(() => {});
+        }
+        await kibanaServer.spaces.delete(TEST_SPACE).catch(() => {});
+      });
+
+      it('counts the deployments of every package they cover', async () => {
+        const { body } = await getCounts().expect(200);
+
+        expect(body.counts[packageA]).to.equal(3);
+        expect(body.counts[packageB]).to.equal(1);
+      });
+
+      it('filters by provider', async () => {
+        const { body } = await getCounts({ provider: 'aws' }).expect(200);
+
+        expect(body.counts[packageA]).to.equal(2);
+        expect(body.counts[packageB]).to.equal(1);
+      });
+
+      it('only counts the deployments of the space', async () => {
+        const { body } = await getCounts({}, `/s/${TEST_SPACE}`).expect(200);
+
+        expect(body.counts[packageA]).to.be(undefined);
+        expect(body.counts[packageB]).to.equal(1);
+      });
+
+      it('forbids a user without Fleet access', async () => {
+        await supertestWithoutAuth
+          .get(COUNTS_URL)
+          .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
+          .set('elastic-api-version', '1')
+          .set('x-elastic-internal-origin', 'kibana')
+          .expect(403);
+      });
+    });
+
     describe('GET /api/fleet/cloud_onboarding_deployments agent counts', () => {
       const PACKAGE_NAME = 'agent-count-test-package';
       // Stored agent policy ids are client-supplied: one the request's saved objects client cannot

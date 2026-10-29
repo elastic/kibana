@@ -228,6 +228,62 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
+  describe('getCountsByPackage', () => {
+    const findResult = (buckets: Array<{ key: string; doc_count: number }>) =>
+      ({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 0,
+        aggregations: { by_package: { buckets } },
+      } as any);
+
+    it('counts the deployments of each package with a terms aggregation and no documents', async () => {
+      soClient.find.mockResolvedValue(
+        findResult([
+          { key: 'aws', doc_count: 3 },
+          { key: 'aws_bedrock', doc_count: 1 },
+        ])
+      );
+
+      const counts = await cloudOnboardingDeploymentService.getCountsByPackage(soClient);
+
+      expect(counts).toEqual({ aws: 3, aws_bedrock: 1 });
+      const options = soClient.find.mock.calls[0][0];
+      expect(options).toEqual(
+        expect.objectContaining({
+          type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          perPage: 0,
+          aggs: {
+            by_package: {
+              terms: {
+                field: `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.packageNames`,
+                size: 1000,
+              },
+            },
+          },
+        })
+      );
+      expect(options.filter).toBeUndefined();
+    });
+
+    it('filters by provider', async () => {
+      soClient.find.mockResolvedValue(findResult([]));
+
+      await cloudOnboardingDeploymentService.getCountsByPackage(soClient, { provider: 'aws' });
+
+      expect(JSON.stringify(soClient.find.mock.calls[0][0].filter)).toContain(
+        `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.provider`
+      );
+    });
+
+    it('returns no counts without deployments', async () => {
+      soClient.find.mockResolvedValue({ ...findResult([]), aggregations: undefined });
+
+      expect(await cloudOnboardingDeploymentService.getCountsByPackage(soClient)).toEqual({});
+    });
+  });
+
   describe('getByConnectorId', () => {
     it('returns all deployments for a connector using soClient PIT finder', async () => {
       const attrs1 = makeAttributes({ mechanisms: ['managed_integration'] });

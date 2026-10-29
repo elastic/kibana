@@ -1,0 +1,135 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { act, screen } from '@testing-library/react';
+
+import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
+import { useGetCloudOnboardingDeploymentsQuery } from '../../../../../../../hooks';
+
+import { InstancesPanel } from './instances_panel';
+
+jest.mock('../../../../../../../hooks', () => ({
+  ...jest.requireActual('../../../../../../../hooks'),
+  useGetCloudOnboardingDeploymentsQuery: jest.fn(),
+}));
+jest.mock('../hooks/use_url_filters', () => ({
+  useViewInstances: jest.fn(() => ({ addViewInstances: jest.fn() })),
+}));
+jest.mock('./instances_table', () => ({
+  InstancesTable: ({
+    instances,
+    packageName,
+    isLoading,
+    error,
+    pagination,
+    onPageChange,
+  }: {
+    instances: Array<{ id: string }>;
+    packageName: string;
+    isLoading: boolean;
+    error?: string;
+    pagination: { pageIndex: number; pageSize: number; totalItemCount: number };
+    onPageChange: (pageIndex: number) => void;
+  }) => (
+    <div data-test-subj="instancesTable">
+      {packageName} {instances.map((i) => i.id).join(',')} page {pagination.pageIndex} of{' '}
+      {pagination.totalItemCount} by {pagination.pageSize}
+      {isLoading ? ' loading' : ''}
+      {error ? ` error: ${error}` : ''}
+      <button data-test-subj="nextPage" onClick={() => onPageChange(pagination.pageIndex + 1)} />
+    </div>
+  ),
+}));
+
+const mockQuery = useGetCloudOnboardingDeploymentsQuery as jest.Mock;
+
+const installedPackage = { name: 'aws_bedrock', title: 'Amazon Bedrock', version: '1.0.0' };
+
+describe('InstancesPanel', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockQuery.mockReturnValue({
+      data: { items: [{ id: 'd1' }, { id: 'd2' }], total: 25, page: 1, perPage: 20 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+    });
+  });
+
+  const render = () =>
+    createIntegrationsTestRendererMock().render(
+      <InstancesPanel installedPackage={installedPackage} />
+    );
+
+  it('loads the first page of the instances of its package', () => {
+    render();
+
+    expect(mockQuery).toHaveBeenCalledWith({
+      provider: 'aws',
+      packageName: 'aws_bedrock',
+      page: 1,
+      perPage: 20,
+    });
+    expect(screen.getByTestId('instancesTable')).toHaveTextContent(
+      'aws_bedrock d1,d2 page 0 of 25 by 20'
+    );
+  });
+
+  it('loads the next page when the table changes page', async () => {
+    render();
+
+    await act(async () => {
+      screen.getByTestId('nextPage').click();
+    });
+
+    expect(mockQuery).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2, perPage: 20 }));
+  });
+
+  it('goes back a page when its page became empty, e.g. after a delete', async () => {
+    render();
+    // Page 2 comes back empty, as when its last instance was deleted.
+    mockQuery.mockReturnValue({
+      data: { items: [], total: 20, page: 2, perPage: 20 },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+    });
+
+    await act(async () => {
+      screen.getByTestId('nextPage').click();
+    });
+
+    expect(mockQuery).toHaveBeenLastCalledWith(expect.objectContaining({ page: 1 }));
+  });
+
+  it('shows the loading state while a page loads', () => {
+    mockQuery.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isFetching: true,
+      isError: false,
+    });
+    render();
+
+    expect(screen.getByTestId('instancesTable')).toHaveTextContent('loading');
+  });
+
+  it('shows an error when the instances cannot be loaded', () => {
+    mockQuery.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+    });
+    render();
+
+    expect(screen.getByTestId('instancesTable')).toHaveTextContent(
+      'error: Could not load the instances of this integration.'
+    );
+  });
+});

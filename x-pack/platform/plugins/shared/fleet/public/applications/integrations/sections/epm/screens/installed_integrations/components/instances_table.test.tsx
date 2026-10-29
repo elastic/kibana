@@ -91,9 +91,21 @@ const makeInstance = (
 });
 
 describe('InstancesTable', () => {
-  const renderTable = (instances: CloudOnboardingDeploymentListItem[], packageName = 'aws') =>
+  const renderTable = (
+    instances: CloudOnboardingDeploymentListItem[],
+    packageName = 'aws',
+    {
+      totalItemCount = instances.length,
+      onPageChange = jest.fn(),
+    }: { totalItemCount?: number; onPageChange?: (pageIndex: number) => void } = {}
+  ) =>
     createIntegrationsTestRendererMock().render(
-      <InstancesTable instances={instances} packageName={packageName} />
+      <InstancesTable
+        instances={instances}
+        packageName={packageName}
+        pagination={{ pageIndex: 0, pageSize: 20, totalItemCount }}
+        onPageChange={onPageChange}
+      />
     );
 
   beforeEach(() => {
@@ -421,6 +433,19 @@ describe('InstancesTable', () => {
       renderTable([makeInstance({ agentCount: 0 })]);
 
       expect(screen.queryByTestId('instanceAgentsLink')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('pagination', () => {
+    it('asks for another page from the pagination controls', async () => {
+      const onPageChange = jest.fn();
+      renderTable([makeInstance()], 'aws', { totalItemCount: 25, onPageChange });
+
+      await act(async () => {
+        screen.getByTestId('pagination-button-1').click();
+      });
+
+      expect(onPageChange).toHaveBeenCalledWith(1);
     });
   });
 });

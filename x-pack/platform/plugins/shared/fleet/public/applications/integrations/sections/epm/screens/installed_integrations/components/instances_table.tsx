@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiCallOut,
@@ -105,7 +106,18 @@ export const InstancesTable: React.FunctionComponent<{
   /** The package being viewed, whose deployed version the Version column shows. */
   packageName: string;
   isLoading?: boolean;
-}> = ({ instances, packageName, isLoading = false }) => {
+  error?: string;
+  /** Server-side pagination: `instances` is the page at `pageIndex`. */
+  pagination: { pageIndex: number; pageSize: number; totalItemCount: number };
+  onPageChange: (pageIndex: number) => void;
+}> = ({
+  instances,
+  packageName,
+  isLoading = false,
+  error: loadError,
+  pagination,
+  onPageChange,
+}) => {
   const { application, notifications } = useStartServices();
   const authz = useAuthz();
   const { getHref } = useLink();
@@ -333,6 +345,11 @@ export const InstancesTable: React.FunctionComponent<{
       <EuiBasicTable
         items={instances}
         loading={isLoading}
+        error={loadError}
+        pagination={{ ...pagination, showPerPageOptions: false }}
+        onChange={({ page }: CriteriaWithPagination<CloudOnboardingDeploymentListItem>) =>
+          onPageChange(page.index)
+        }
         itemId="id"
         columns={columns}
         tableCaption={i18n.translate(
