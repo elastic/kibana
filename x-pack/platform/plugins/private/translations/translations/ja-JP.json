@@ -49122,8 +49122,6 @@
     "xpack.securitySolution.timeline.kpis.sourceIpKpiTitle": "ソース IP",
     "xpack.securitySolution.timeline.kpis.userKpiTitle": "ユーザー",
     "xpack.securitySolution.timeline.modal.attachToCaseButtonLabel": "ケースに関連付ける",
-    "xpack.securitySolution.timeline.modal.attachToExistingCaseButtonLabel": "既存のケースに添付",
-    "xpack.securitySolution.timeline.modal.attachToNewCaseButtonLabel": "新しいケースに添付",
     "xpack.securitySolution.timeline.modal.newTimeline": "新規タイムライン",
     "xpack.securitySolution.timeline.modal.newTimelineBtn": "新規",
     "xpack.securitySolution.timeline.modal.newTimelineTemplate": "新規タイムラインテンプレート",
