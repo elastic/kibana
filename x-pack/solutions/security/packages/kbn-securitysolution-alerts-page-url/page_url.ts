@@ -10,10 +10,15 @@ import { encode } from '@kbn/rison';
 const WINDOW_BEFORE_CREATION_MS = 28 * 24 * 60 * 60 * 1000;
 const WINDOW_AFTER_NOW_MS = 60 * 60 * 1000;
 
+/** The time range around `createdAt` that page links use: 28 days before, up to now. */
+export const getPageTimerangeBounds = (createdAt: string): { from: string; to: string } => ({
+  from: new Date(new Date(createdAt).getTime() - WINDOW_BEFORE_CREATION_MS).toISOString(),
+  to: new Date(Date.now() + WINDOW_AFTER_NOW_MS).toISOString(),
+});
+
 /** Rison-encoded global and timeline time range around `createdAt`: 28 days before, up to now. */
 export const buildPageTimerange = (createdAt: string): string => {
-  const from = new Date(new Date(createdAt).getTime() - WINDOW_BEFORE_CREATION_MS).toISOString();
-  const to = new Date(Date.now() + WINDOW_AFTER_NOW_MS).toISOString();
+  const { from, to } = getPageTimerangeBounds(createdAt);
   return encode({
     global: { linkTo: [], timerange: { from, kind: 'absolute', to } },
     timeline: { linkTo: [], timerange: { from, kind: 'absolute', to } },

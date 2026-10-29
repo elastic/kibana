@@ -7,7 +7,39 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { decode } from '@kbn/rison';
-import { buildAlertsPagePath } from './build_alerts_page_path';
+import { buildAlertsPagePath, buildAlertsSelectionQuery } from './build_alerts_page_path';
+
+const decodeFilters = (path: string) =>
+  decode(new URLSearchParams(path).get('filters') ?? '') as Array<{
+    meta: { alias: string };
+    query: { bool: { filter: unknown } };
+  }>;
+
+describe('buildAlertsSelectionQuery', () => {
+  it('matches the alerts by id when there are no tags', () => {
+    expect(buildAlertsSelectionQuery({ alertIds: ['a', 'b'] })).toEqual({
+      ids: { values: ['a', 'b'] },
+    });
+  });
+
+  it('matches the alerts carrying any of the tags when there are no ids', () => {
+    expect(buildAlertsSelectionQuery({ tags: ['az:proposal:p1', 'other'] })).toEqual({
+      terms: { 'kibana.alert.workflow_tags': ['az:proposal:p1', 'other'] },
+    });
+  });
+
+  it('matches an alert listed by id or carrying a tag when there are both', () => {
+    expect(buildAlertsSelectionQuery({ alertIds: ['a'], tags: ['az:proposal:p1'] })).toEqual({
+      bool: {
+        should: [
+          { ids: { values: ['a'] } },
+          { terms: { 'kibana.alert.workflow_tags': ['az:proposal:p1'] } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+});
 
 describe('buildAlertsPagePath', () => {
   it('keeps ids with reserved characters inside their own parameter', () => {
@@ -36,5 +68,50 @@ describe('buildAlertsPagePath', () => {
       query: { bool: { filter: { ids: { values: string[] } } } };
     }>;
     expect(filter.query.bool.filter.ids.values).toEqual(['a', 'b']);
+  });
+
+  it('keeps the ids-only filter as it was before tags existed', () => {
+    const filters = decode(
+      new URLSearchParams(buildAlertsPagePath(['a'], '2026-09-01T00:00:00.000Z')).get('filters') ??
+        ''
+    );
+
+    expect(filters).toEqual([
+      {
+        meta: { alias: 'Alert Ids', negate: false, disabled: false, type: 'custom' },
+        query: { bool: { filter: { ids: { values: ['a'] } } } },
+        $state: { store: 'appState' },
+      },
+    ]);
+  });
+
+  it('filters by tag when the selection has only tags', () => {
+    const [filter, ...rest] = decodeFilters(
+      buildAlertsPagePath([], '2026-09-01T00:00:00.000Z', ['az:proposal:p1'])
+    );
+
+    expect(rest).toHaveLength(0);
+    expect(filter.meta.alias).toBe('Alert tags');
+    expect(filter.query.bool.filter).toEqual({
+      terms: { 'kibana.alert.workflow_tags': ['az:proposal:p1'] },
+    });
+  });
+
+  it('applies ids and tags as one filter, so an alert matching either is shown', () => {
+    const [filter, ...rest] = decodeFilters(
+      buildAlertsPagePath(['a'], '2026-09-01T00:00:00.000Z', ['az:proposal:p1'])
+    );
+
+    expect(rest).toHaveLength(0);
+    expect(filter.meta.alias).toBe('Alert Ids or tags');
+    expect(filter.query.bool.filter).toEqual(
+      buildAlertsSelectionQuery({ alertIds: ['a'], tags: ['az:proposal:p1'] })
+    );
+  });
+
+  it('keeps a tag-only link small, whatever the number of alerts carrying the tag', () => {
+    const path = buildAlertsPagePath([], '2026-09-01T00:00:00.000Z', [`az:proposal:${uuidv4()}`]);
+
+    expect(path.length).toBeLessThan(1500);
   });
 });
