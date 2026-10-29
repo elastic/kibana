@@ -42,6 +42,11 @@ jest.mock('@kbn/esql/public', () => ({
   },
 }));
 
+interface FetchResult {
+  columns: DatatableColumn[];
+  timeField?: string;
+}
+
 const columns: DatatableColumn[] = [
   { id: 'time-id', name: 'time', meta: { type: 'date' } },
   { id: 'version-id', name: 'version', meta: { type: 'string' } },
@@ -66,8 +71,8 @@ const submitQuery = () => {
 
 const renderControls = () => {
   const fetchColumns = jest
-    .fn<Promise<DatatableColumn[]>, [typeof annotation.query, AbortSignal]>()
-    .mockResolvedValue(columns);
+    .fn<Promise<FetchResult>, [typeof annotation.query, AbortSignal]>()
+    .mockResolvedValue({ columns, timeField: '@timestamp' });
   const onChange = jest.fn();
   const props = { annotation, onChange, fetchColumns };
   const rendered = render(<EsqlAnnotationControls {...props} />);
@@ -90,7 +95,7 @@ describe('EsqlAnnotationControls', () => {
   it('commits a submitted query only after success and preserves edits made while loading', async () => {
     const { props, fetchColumns, onChange, rerender } = renderControls();
     await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
-    let resolveColumns = (result: DatatableColumn[]) => {};
+    let resolveColumns = (result: FetchResult) => {};
     fetchColumns.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
@@ -103,12 +108,13 @@ describe('EsqlAnnotationControls', () => {
     rerender(
       <EsqlAnnotationControls {...props} annotation={{ ...annotation, label: 'New label' }} />
     );
-    await act(async () => resolveColumns(columns));
+    await act(async () => resolveColumns({ columns, timeField: '@timestamp' }));
 
     expect(onChange).toHaveBeenCalledWith({
       ...annotation,
       label: 'New label',
       query: { esql: nextQuery },
+      timeField: '@timestamp',
     });
   });
 
@@ -130,7 +136,7 @@ describe('EsqlAnnotationControls', () => {
   it('does not commit a cancelled query even if its request resolves', async () => {
     const { fetchColumns, onChange } = renderControls();
     await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
-    let resolveColumns = (result: DatatableColumn[]) => {};
+    let resolveColumns = (result: FetchResult) => {};
     fetchColumns.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
@@ -141,7 +147,7 @@ describe('EsqlAnnotationControls', () => {
     submitQuery();
     fireEvent.click(screen.getByText('Cancel'));
     expect(fetchColumns.mock.calls[1][1].aborted).toBe(true);
-    await act(async () => resolveColumns(columns));
+    await act(async () => resolveColumns({ columns, timeField: '@timestamp' }));
 
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.queryByText('Loading')).not.toBeInTheDocument();
@@ -151,7 +157,7 @@ describe('EsqlAnnotationControls', () => {
     const { props, rerender } = renderControls();
     await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
     fireEvent.change(screen.getByLabelText('Query'), { target: { value: nextQuery } });
-    const fetchColumns = jest.fn().mockResolvedValue(columns);
+    const fetchColumns = jest.fn().mockResolvedValue({ columns, timeField: '@timestamp' });
 
     rerender(<EsqlAnnotationControls {...props} fetchColumns={fetchColumns} />);
     await waitFor(() => expect(screen.queryByText('Loading')).not.toBeInTheDocument());
@@ -162,7 +168,7 @@ describe('EsqlAnnotationControls', () => {
 
   it('aborts metadata requests when the annotation editor unmounts', () => {
     const fetchColumns = jest
-      .fn<Promise<DatatableColumn[]>, [typeof annotation.query, AbortSignal]>()
+      .fn<Promise<FetchResult>, [typeof annotation.query, AbortSignal]>()
       .mockImplementation(() => new Promise(() => {}));
     const { unmount } = render(
       <EsqlAnnotationControls

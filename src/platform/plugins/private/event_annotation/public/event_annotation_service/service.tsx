@@ -386,6 +386,7 @@ const annotationsToExpression = (annotations: EventAnnotationConfig[]) => {
             arguments: {
               id: [annotation.id],
               query: [annotation.query.esql],
+              timeField: annotation.timeField ? [annotation.timeField] : [],
               timeColumn: [annotation.timeColumn],
               endTimeColumn: isRange ? [annotation.endTimeColumn] : [],
               textColumn: annotation.textColumn ? [annotation.textColumn] : [],

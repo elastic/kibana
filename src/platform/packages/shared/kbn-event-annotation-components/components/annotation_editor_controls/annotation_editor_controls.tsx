@@ -294,10 +294,28 @@ const AnnotationEditorControls = ({
               customIconSet={annotationsIconSet}
             />
             <TextDecorationSetting
+              // ES|QL text bindings are edited in the placement section; remount to reflect them.
+              key={
+                isEsqlBased
+                  ? `${currentAnnotation.textVisibility}-${currentAnnotation.textColumn}`
+                  : undefined
+              }
               idPrefix={idPrefix}
-              setConfig={update}
-              currentConfig={currentAnnotation}
-              isQueryBased={isQueryBased}
+              setConfig={
+                isEsqlBased
+                  ? ({ textVisibility, textField }) =>
+                      update<EsqlEventAnnotationConfig>({ textVisibility, textColumn: textField })
+                  : update
+              }
+              currentConfig={
+                isEsqlBased
+                  ? {
+                      textVisibility: currentAnnotation.textVisibility,
+                      textField: currentAnnotation.textColumn,
+                    }
+                  : currentAnnotation
+              }
+              isQueryBased={isQueryBased || isEsqlBased}
             >
               {(textDecorationSelected) => {
                 if (textDecorationSelected !== 'field' || !dataView) {

@@ -245,6 +245,7 @@ describe('Event Annotation Service', () => {
               arguments: {
                 id: ['deployments'],
                 query: ['FROM deployments | KEEP time, version'],
+                timeField: [],
                 timeColumn: ['time'],
                 endTimeColumn: [],
                 textColumn: ['version'],
@@ -279,6 +280,7 @@ describe('Event Annotation Service', () => {
       expect(expression.chain[0].arguments).toEqual({
         id: ['maintenance'],
         query: ['FROM maintenance | KEEP start, end'],
+        timeField: [],
         timeColumn: ['start'],
         endTimeColumn: ['end'],
         textColumn: [],

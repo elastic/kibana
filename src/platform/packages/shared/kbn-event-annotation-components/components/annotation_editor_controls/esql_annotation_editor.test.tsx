@@ -113,6 +113,22 @@ describe('ES|QL annotation editor', () => {
     });
   });
 
+  it('reflects the text column in text decoration and clears it when switching to name', () => {
+    const onChange = renderEditor({ ...annotation, textVisibility: true });
+
+    expect(screen.getByTestId('lnsXY_textVisibility_field')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    fireEvent.click(screen.getByTestId('lnsXY_textVisibility_name'));
+
+    expect(onChange).toHaveBeenCalledWith({
+      ...annotation,
+      textVisibility: true,
+      textColumn: undefined,
+    });
+  });
+
   it('keeps query and column bindings when editing appearance', async () => {
     const onChange = renderEditor();
 
