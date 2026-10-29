@@ -428,9 +428,10 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
   /**
-   * The self-imposed tick deadline (TICK_DEADLINE_MS) fired before the pipeline
-   * completed. The pipeline was aborted cooperatively; the returned watermark is
-   * safe. This is expected under sustained high load — it is not an error.
+   * The self-imposed tick deadline (15s before
+   * `xpack.alerting_v2.dispatcher.run.timeout`) fired before the pipeline
+   * completed. The pipeline was aborted cooperatively; the returned watermark
+   * is safe. This is expected under sustained high load — it is not an error.
    */
   DISPATCHER_TICK_DEADLINE_EXCEEDED: 'DISPATCHER_TICK_DEADLINE_EXCEEDED',
   /**
@@ -476,6 +477,14 @@ export const ALERTING_LOG_CODES = {
    * the dispatcher README for the recovery timeline.
    */
   DISPATCHER_INLINE_STATS_TOO_LARGE: 'DISPATCHER_INLINE_STATS_TOO_LARGE',
+  /**
+   * `xpack.alerting_v2.dispatcher.paused` is true: every dispatcher tick is a
+   * no-op and the watermark is held, so no alerting v2 notification is sent.
+   * The backlog is dispatched late once the setting is removed, except events
+   * older than the cold-start seed when no watermark was persisted yet.
+   * Logged once per Kibana start; remove the override after the incident.
+   */
+  DISPATCHER_PAUSED: 'DISPATCHER_PAUSED',
 
   // ────────────────────────────── Director ───────────────────────────
   /**

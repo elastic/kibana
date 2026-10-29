@@ -35,6 +35,7 @@ export {
 } from './src/queries';
 
 export type {
+  EventDeactivation,
   EventLifecycleResponse,
   GeneratedSignificantEventQuery,
   LifecycleDetection,
@@ -134,6 +135,9 @@ export {
   significantEventStatusSchema,
   significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
+  operatorFallbackAssessmentNote,
+  MAX_DEACTIVATION_REASON_LENGTH,
+  INACTIVE_SERIES_LOOKBACK_HOURS,
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
   resolveSignificantEventsTuningConfig,
@@ -146,6 +150,8 @@ export {
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
   ASSESSMENT_NOTE_ROLE_RULE,
+  NARRATIVE_AGREEMENT_RULE,
+  DISCOVERY_SEVERITY_APPLICATION_RULE,
   NO_RAW_SENSITIVE_VALUES_RULE,
   SUMMARY_ROLE_RULE,
   SYMPTOM_HYPOTHESIS_ROLE_RULE,

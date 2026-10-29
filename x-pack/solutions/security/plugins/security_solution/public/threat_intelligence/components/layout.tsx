@@ -5,42 +5,29 @@
  * 2.0.
  */
 
-import { EuiPageHeader, EuiPageHeaderSection, EuiSpacer, EuiText } from '@elastic/eui';
-import type { FC, PropsWithChildren, ReactNode } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { SecurityAppHeader } from '../../common/components/app_header';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { TITLE_TEST_ID } from './test_ids';
+import { useKibana } from '../../common/lib/kibana';
 
 export interface LayoutProps {
-  pageTitle?: string;
-  border?: boolean;
-  subHeader?: ReactNode;
+  pageTitle: string;
 }
 
-export const DefaultPageLayout: FC<PropsWithChildren<LayoutProps>> = ({
-  children,
-  pageTitle,
-  border = true,
-  subHeader,
-}) => {
+export const DefaultPageLayout: FC<PropsWithChildren<LayoutProps>> = ({ children, pageTitle }) => {
+  const { docLinks } = useKibana().services;
+
   return (
     <SecuritySolutionPageWrapper>
-      <EuiPageHeader alignItems="center" bottomBorder={border}>
-        <EuiPageHeaderSection>
-          {pageTitle && (
-            <EuiText>
-              <h2 data-test-subj={TITLE_TEST_ID}>{pageTitle}</h2>
-            </EuiText>
-          )}
-          {subHeader ? (
-            <>
-              <EuiSpacer size="m" />
-              {subHeader}
-            </>
-          ) : null}
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiSpacer size="l" />
+      {/* The header must be a direct child of the wrapper, otherwise it does not stay sticky. */}
+      <SecurityAppHeader
+        title={pageTitle}
+        spacing="largeBleed"
+        docLink={docLinks.links.siem.indicatorsPage}
+      />
+      <EuiSpacer size="m" />
       {children}
     </SecuritySolutionPageWrapper>
   );
