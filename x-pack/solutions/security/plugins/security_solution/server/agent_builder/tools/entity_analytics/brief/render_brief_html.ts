@@ -7,8 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { clamp, escape, once } from 'lodash';
-import moment from 'moment';
+import { clamp, escape, once, upperFirst } from 'lodash';
 import Mustache from 'mustache';
 import { CUSTOM_CONTENT_MAX_HEIGHT, CUSTOM_CONTENT_MIN_HEIGHT } from '@kbn/custom-content-common';
 import { formatCount, formatStoredValue } from './describe_scope';
@@ -18,9 +17,9 @@ import type { BriefViewModel } from './view_model';
 import {
   MAX_WATCHLIST_PILLS,
   NO_PRIORITIES_LINE,
-  getNotes,
+  getHeaderRows,
   getShownCounts,
-  getTitleParts,
+  getTitle,
   hasPrioritiesSection,
 } from './view_model';
 
@@ -51,20 +50,17 @@ const describeChange = (delta: number | undefined): { change: string; changeClas
 /** What the template shows: the view model's words and numbers, as the text the card prints. */
 const buildContext = (viewModel: BriefViewModel, css: string) => {
   const { scope, summary, recommendation, priorities } = viewModel;
-  const scopeLine = getTitleParts(viewModel).join(' · ');
-  const captured = moment.utc(scope.capturedAt).format('D MMM YYYY, HH:mm [UTC]');
   return {
     css,
-    title: viewModel.title ?? scopeLine,
-    // The scope line is the title when the model wrote none, and sits under its title when it did.
-    meta: [...(viewModel.title ? [scopeLine] : []), `Captured ${captured}`].join(' · '),
-    notes: getNotes(viewModel),
+    title: getTitle(viewModel),
+    headerRows: getHeaderRows(viewModel),
     summary,
     periodLabel: scope.periodLabel,
     hasCounts: getShownCounts(viewModel).length > 0,
-    counts: getShownCounts(viewModel).map(({ tileId, title, value, delta }) => ({
+    counts: getShownCounts(viewModel).map(({ tileId, title, description, value, delta }) => ({
       tileId,
       title,
+      description,
       value: value === 0 ? '—' : formatCount(value),
       ...describeChange(delta),
     })),
@@ -74,7 +70,8 @@ const buildContext = (viewModel: BriefViewModel, css: string) => {
     noPrioritiesLine: NO_PRIORITIES_LINE,
     priorities: priorities.map((priority) => ({
       ...priority,
-      meta: `${priority.type}${priority.firstSeen ? ` · first seen ${priority.firstSeen}` : ''}`,
+      typeLabel: upperFirst(priority.type),
+      meta: priority.firstSeen && `First seen ${priority.firstSeen}`,
       risk: priority.risk && {
         ...priority.risk,
         score: formatCount(priority.risk.score),

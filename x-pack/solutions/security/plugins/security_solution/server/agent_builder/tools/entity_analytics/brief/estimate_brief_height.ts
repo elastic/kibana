@@ -8,26 +8,29 @@
 import { sum, sumBy } from 'lodash';
 import { MIN_CHART_POINTS } from './risk_history_chart';
 import type { BriefViewModel } from './view_model';
-import { MAX_WATCHLIST_PILLS, getNotes, getShownCounts, hasPrioritiesSection } from './view_model';
+import {
+  MAX_WATCHLIST_PILLS,
+  getHeaderRows,
+  getShownCounts,
+  hasPrioritiesSection,
+} from './view_model';
 
 // The card needs its height up front, so it is estimated from rounded sizes, measured in Chromium at the
 // card's 832 px width with the system font the sandbox falls back to. The margin covers a wider font.
 
 const MARGIN = 30;
-const CHARACTERS_PER_LINE = { prose: 76, wide: 100, note: 120 };
+const CHARACTERS_PER_LINE = { prose: 90, wide: 100, note: 120 };
 const HEIGHTS = {
-  /** The padding around the brief, its header, and the gap below. */
-  header: 115,
+  /** The padding around the brief, its header without the rows under the title, and the gap below. */
+  header: 106,
   /** A line of text. */
   line: 21,
   /** A section's heading and the gap above the section. */
-  section: 45,
-  /** A line of notes under the header. */
-  note: 17,
-  /** The counts. */
-  counts: 100,
-  /** A priority's padding and title row, and the gaps between its blocks, on top of its lines. */
-  priority: 100,
+  section: 57,
+  /** A line of a row under the title, with the gap above it. */
+  note: 20,
+  /** A priority's padding, title row, next-step heading, and the gaps between its blocks, on top of its lines. */
+  priority: 128,
   /** The risk history with its chart, or with the caption alone. */
   chart: 140,
   caption: 40,
@@ -35,10 +38,11 @@ const HEIGHTS = {
 
 /** The title row is 666 px wide. Pills sit beside the title when they leave it 12 characters (about 92 px) and the gap. */
 const TITLE_ROW = { width: 666, gap: 12, minTitle: 92, nameCharacter: 9.5, nameLine: 21 };
-/** The widths of the pills, from measurements: the risk and criticality pills, and a character of a watchlist name. */
+/** The widths of the pills, from measurements: the type, risk and criticality badges, and a character of a watchlist name. */
 const PILL_WIDTHS = {
+  type: 60,
   risk: 115,
-  criticality: 125,
+  criticality: 110,
   more: 85,
   watchlistCharacter: 6.6,
   watchlistPadding: 18,
@@ -46,6 +50,13 @@ const PILL_WIDTHS = {
 /** A watchlist pill shows at most 40 characters of its name. */
 const MAX_WATCHLIST_CHARACTERS = 40;
 const PILL_ROW = { height: 24, gap: 6 };
+/** The counts sit in a grid of tiles at least 160 px wide, so four fit in a row of the 736 px brief. */
+const COUNT_GRID = { perRow: 4, rowHeight: 162, gap: 8 };
+
+const countsHeight = (count: number): number => {
+  const rows = Math.ceil(count / COUNT_GRID.perRow);
+  return rows * COUNT_GRID.rowHeight + Math.max(0, rows - 1) * COUNT_GRID.gap;
+};
 
 const countLines = (text: string, charactersPerLine = CHARACTERS_PER_LINE.wide): number =>
   Math.ceil(text.length / charactersPerLine);
@@ -63,6 +74,7 @@ export const estimateBriefHeight = (viewModel: BriefViewModel): number => {
     watchlists,
   }: BriefViewModel['priorities'][number]): number => {
     const widths = [
+      PILL_WIDTHS.type,
       ...(risk ? [PILL_WIDTHS.risk] : []),
       ...(assetCriticality ? [PILL_WIDTHS.criticality] : []),
       ...watchlists
@@ -103,11 +115,13 @@ export const estimateBriefHeight = (viewModel: BriefViewModel): number => {
     MARGIN +
     HEIGHTS.header +
     sumBy(
-      getNotes(viewModel),
-      (note) => countLines(note, CHARACTERS_PER_LINE.note) * HEIGHTS.note
+      getHeaderRows(viewModel),
+      ({ key, value }) => countLines(`${key}: ${value}`, CHARACTERS_PER_LINE.note) * HEIGHTS.note
     ) +
     prose(summary) +
-    (getShownCounts(viewModel).length > 0 ? HEIGHTS.section + HEIGHTS.counts : 0) +
+    (getShownCounts(viewModel).length > 0
+      ? HEIGHTS.section + countsHeight(getShownCounts(viewModel).length)
+      : 0) +
     prose(recommendation) +
     (hasPrioritiesSection(viewModel) ? HEIGHTS.section : 0) +
     (priorities.length === 0 && hasPrioritiesSection(viewModel) ? HEIGHTS.line : 0) +

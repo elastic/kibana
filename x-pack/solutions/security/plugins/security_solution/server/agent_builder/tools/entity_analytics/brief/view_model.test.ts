@@ -170,8 +170,8 @@ describe('buildViewModel', () => {
   });
 
   it('notes the flagged entities the Entity Store did not have', () => {
-    expect(build({ entities: { ...entities, notFoundCount: 2 } }).notes).toContain(
-      '2 flagged entities were not found in the Entity Store.'
+    expect(build({ entities: { ...entities, notFoundCount: 2 } }).notChecked.notFound).toBe(
+      '2 flagged entities not found in the Entity Store'
     );
   });
 
@@ -247,18 +247,16 @@ describe('buildViewModel', () => {
   });
 
   it('notes that the alerts could not be read', () => {
-    expect(build({ alertsFailed: true }).notes).toContain("Alert details couldn't be read.");
+    expect(build({ alertsFailed: true }).notChecked.unreadable).toContain('alert details');
   });
 
   it('notes the tiles whose data could not be read', () => {
-    expect(build().notes).toEqual([
-      "Not checked, because the data couldn't be read: Entities with anomalies.",
-    ]);
+    expect(build().notChecked).toEqual({ unreadable: ['Entities with anomalies'] });
   });
 
   it('states that the brief covers a sample when a tile sent fewer entities than it counts', () => {
     expect(build().scope.sample).toBe(
-      'Based on the 2 highest-ranked of at least 14 flagged entities.'
+      'Based on the 2 highest-ranked of at least 14 flagged entities'
     );
   });
 

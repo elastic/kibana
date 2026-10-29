@@ -76,6 +76,8 @@ export function buildThemeCss(
   // to avoid. A dropped token makes `var()` resolve to the property's initial value instead.
   const vars: Array<[string, string | number | undefined]> = [
     ['--cc-color-text', c.textParagraph],
+    ['--cc-color-text-heading', c.textHeading],
+    ['--cc-color-text-subdued', c.textSubdued],
     ['--cc-color-background', isDark ? c.emptyShade : 'transparent'],
     ['--cc-color-surface', isDark ? c.lightestShade : c.emptyShade],
     ['--cc-color-primary', c.primary],
@@ -83,6 +85,17 @@ export function buildThemeCss(
     ['--cc-color-accent-2', c.accent],
     ['--cc-color-warning', c.warning],
     ['--cc-color-danger', c.danger],
+    ['--cc-color-text-success', c.textSuccess],
+    ['--cc-color-text-danger', c.textDanger],
+    ['--cc-color-text-risk', c.textRisk],
+    ['--cc-color-text-warning', c.textWarning],
+    ['--cc-color-text-neutral', c.textNeutral],
+    ['--cc-color-background-success', c.backgroundLightSuccess],
+    ['--cc-color-background-danger', c.backgroundLightDanger],
+    ['--cc-color-background-risk', c.backgroundLightRisk],
+    ['--cc-color-background-warning', c.backgroundLightWarning],
+    ['--cc-color-background-neutral', c.backgroundBaseNeutral],
+    ['--cc-color-background-subdued', c.backgroundBaseSubdued],
     ['--cc-color-border', c.borderBasePlain],
   ];
   // Spacing, radius and type come from the same theme as the colors so generated markup can match
@@ -96,6 +109,7 @@ export function buildThemeCss(
     ['--cc-space-xl', t.size.l],
     ['--cc-radius', t.border.radius.medium],
     ['--cc-radius-s', t.border.radius.small],
+    ['--cc-radius-panel', t.border.radius.panel],
     ['--cc-font-family', t.font.family],
     ['--cc-motion-fast', t.animation.fast],
     ['--cc-motion-normal', t.animation.normal],

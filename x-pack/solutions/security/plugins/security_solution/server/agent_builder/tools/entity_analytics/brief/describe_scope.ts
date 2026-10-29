@@ -79,7 +79,7 @@ export const describeSample = (
   const total = Math.max(readCount, ...available.map(({ value }) => value));
   return `Based on the ${formatCount(candidates.length)} highest-ranked of ${
     isSampled ? 'at least ' : ''
-  }${formatCountOf(total, 'flagged entity', 'flagged entities')}.`;
+  }${formatCountOf(total, 'flagged entity', 'flagged entities')}`;
 };
 
 /** The captured view for the agent's follow-up questions, without the entity ids. */

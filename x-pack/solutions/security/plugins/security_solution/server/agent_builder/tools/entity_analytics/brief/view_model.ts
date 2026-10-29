@@ -6,6 +6,7 @@
  */
 
 import { compact } from 'lodash';
+import moment from 'moment';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
@@ -27,6 +28,9 @@ import type { VerifiedBrief } from './verify_draft';
 import { JOB_MENTION_PATTERN, MENTION_PATTERN, RULE_MENTION_PATTERN } from './verify_draft';
 
 export const QUIET_LINE = 'Nothing in this view is flagged as needing attention.';
+/** The titles when the model wrote none: nothing flagged, or nothing with enough evidence to prioritize. */
+export const QUIET_TITLE = 'All clear: nothing needs immediate attention';
+export const NO_PRIORITIES_TITLE = 'Nothing to prioritize right now';
 /** The watchlists shown as pills, and the rest counted. */
 export const MAX_WATCHLIST_PILLS = 3;
 export const NO_PRIORITIES_LINE = 'No entity in this view has enough evidence to prioritize.';
@@ -58,8 +62,11 @@ export const BriefViewModel = lazySchema(() =>
       entityFilters: z.array(z.string()),
       sample: z.string().optional(),
     }),
-    /** What wasn't found or checked. */
-    notes: z.array(z.string()),
+    /** What wasn't checked: what couldn't be read, and the flagged entities the Entity Store didn't have. */
+    notChecked: z.object({
+      unreadable: z.array(z.string()),
+      notFound: z.string().optional(),
+    }),
     /** The model's headline, when there was a model call and it found priorities. */
     title: z.string().optional(),
     summary: z.string().optional(),
@@ -68,6 +75,7 @@ export const BriefViewModel = lazySchema(() =>
       z.object({
         tileId: z.enum(SIGNAL_CARD_IDS),
         title: z.string(),
+        description: z.string().optional(),
         value: z.number().int(),
         delta: z.number().int().optional(),
       })
@@ -189,13 +197,21 @@ export const buildViewModel = ({
       ),
       sample: describeSample(scope, entities),
     },
-    notes: buildNotes(scope, entities, alertsFailed),
+    notChecked: buildNotChecked(scope, entities, alertsFailed),
     title: verified?.title,
     summary: verified ? verified.summary && withNames(verified.summary) : describeQuietView(scope),
     counts: SIGNAL_CARD_IDS.flatMap((tileId) => {
       const tile = tiles[tileId];
       return tile && !tile.unavailable
-        ? [{ tileId, title: tile.title, value: tile.value, delta: tile.delta }]
+        ? [
+            {
+              tileId,
+              title: tile.title,
+              description: tile.description,
+              value: tile.value,
+              delta: tile.delta,
+            },
+          ]
         : [];
     }),
     priorities: (verified?.priorities ?? []).flatMap(
@@ -229,28 +245,26 @@ export const buildViewModel = ({
   };
 };
 
-const buildNotes = (
+const buildNotChecked = (
   scope: EntityAnalyticsScope,
   entities: CandidateEntities,
   alertsFailed: boolean
-): string[] => {
+): BriefViewModel['notChecked'] => {
   const unavailableTitles = SIGNAL_CARD_IDS.flatMap((tileId) => {
     const tile = scope.tiles[tileId];
     return tile?.unavailable ? [tile.title] : [];
   });
-  return compact([
-    entities.notFoundCount > 0
-      ? `${formatCountOf(
-          entities.notFoundCount,
-          'flagged entity was',
-          'flagged entities were'
-        )} not found in the Entity Store.`
-      : undefined,
-    unavailableTitles.length > 0
-      ? `Not checked, because the data couldn't be read: ${unavailableTitles.join(', ')}.`
-      : undefined,
-    alertsFailed ? "Alert details couldn't be read." : undefined,
-  ]);
+  return {
+    unreadable: [...unavailableTitles, ...(alertsFailed ? ['alert details'] : [])],
+    notFound:
+      entities.notFoundCount > 0
+        ? `${formatCountOf(
+            entities.notFoundCount,
+            'flagged entity',
+            'flagged entities'
+          )} not found in the Entity Store`
+        : undefined,
+  };
 };
 
 /** Without a model call: a view is quiet only when nothing it could read is flagged. */
@@ -261,17 +275,37 @@ const describeQuietView = ({ tiles }: EntityAnalyticsScope): string => {
   return isFlagged ? NO_PRIORITIES_LINE : QUIET_LINE;
 };
 
-/** The parts of the card's title: the period, the selected count, the filters and the space. */
-export const getTitleParts = ({ scope }: BriefViewModel): string[] => [
-  `Last ${scope.periodLabel}`,
-  ...(scope.focusTileTitle ? [`Selected: ${scope.focusTileTitle}`] : []),
-  ...scope.entityFilters,
-  ...(scope.spaceId === DEFAULT_SPACE_ID ? [] : [`Space ${scope.spaceId}`]),
-];
+/** The model's title, or a fixed one for a brief without priorities. */
+export const getTitle = ({ title, summary }: BriefViewModel): string =>
+  title ?? (summary === QUIET_LINE ? QUIET_TITLE : NO_PRIORITIES_TITLE);
 
-/** What wasn't found or checked, and that the brief covers a sample. */
-export const getNotes = ({ notes, scope }: BriefViewModel): string[] =>
-  scope.sample ? [...notes, scope.sample] : notes;
+/** The rows under the title. Scope and Not checked appear only when they apply. */
+export const getHeaderRows = ({
+  scope,
+  notChecked,
+}: BriefViewModel): Array<{ key: string; value: string }> => {
+  const timeframe = [
+    `Last ${scope.periodLabel}`,
+    ...scope.entityFilters,
+    ...(scope.focusTileTitle ? [`Selected: ${scope.focusTileTitle}`] : []),
+    ...(scope.spaceId === DEFAULT_SPACE_ID ? [] : [`Space: ${scope.spaceId}`]),
+  ];
+  const { unreadable, notFound } = notChecked;
+  const notCheckedValue = compact([unreadable.join(', '), notFound]).join(' · ');
+  return [
+    { key: 'Generated', value: moment.utc(scope.capturedAt).format('D MMM YYYY, HH:mm [UTC]') },
+    { key: 'Timeframe', value: timeframe.join(' · ') },
+    ...(scope.sample ? [{ key: 'Scope', value: scope.sample }] : []),
+    ...(notCheckedValue
+      ? [
+          {
+            key: unreadable.length > 0 ? "Not checked (the data couldn't be read)" : 'Not checked',
+            value: notCheckedValue,
+          },
+        ]
+      : []),
+  ];
+};
 
 /** A zero that didn't change says nothing, so it gets no count. */
 export const getShownCounts = ({ counts }: BriefViewModel): BriefViewModel['counts'] =>

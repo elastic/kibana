@@ -14,6 +14,7 @@ import { CUSTOM_CONTENT_MAX_HEIGHT } from '@kbn/custom-content-common';
 import { sanitizeHtml } from '@kbn/custom-content-renderer';
 import { renderBriefHtml } from './render_brief_html';
 import type { BriefViewModel } from './view_model';
+import { NO_PRIORITIES_TITLE, QUIET_LINE, QUIET_TITLE } from './view_model';
 
 const fixtureViewModel: BriefViewModel = {
   version: 1,
@@ -24,7 +25,7 @@ const fixtureViewModel: BriefViewModel = {
     spaceId: 'default',
     entityFilters: [],
   },
-  notes: [],
+  notChecked: { unreadable: [] },
   summary:
     'Five entities have alerts this period, including one privileged user newly rated high/critical and on the watchlist, and two hosts seen for the first time in the last few days.',
   counts: [
@@ -159,17 +160,49 @@ describe('renderBriefHtml', () => {
     ).toBeGreaterThan(renderBriefHtml(withWatchlists(['Privileged User'])).height + 30);
   });
 
-  it("heads the card with the model's title and puts the scope line under it, or heads it with the scope", () => {
+  it("heads the card with the model's title, or a fixed one, and lists the view under it", () => {
     const withTitle = renderBriefHtml({
       ...fixtureViewModel,
       title: 'Alerts spread across hosts',
     }).html;
     expect(withTitle).toContain('<h1>Alerts spread across hosts</h1>');
-    expect(withTitle).toContain('Last 7 days · Captured 20 Oct 2026, 10:53 UTC.');
+    expect(withTitle).toContain(
+      '<span class="fact-key">Generated:</span> 20 Oct 2026, 10:53 UTC</p>'
+    );
+    expect(withTitle).toContain('<span class="fact-key">Timeframe:</span> Last 7 days</p>');
+    expect(withTitle).not.toContain('fact-key">Scope');
+    expect(withTitle).not.toContain('fact-key">Not checked');
 
     const withoutTitle = renderBriefHtml(fixtureViewModel).html;
-    expect(withoutTitle).toContain('<h1>Last 7 days</h1>');
-    expect(withoutTitle).toContain('Captured 20 Oct 2026, 10:53 UTC.');
+    expect(withoutTitle).toContain(`<h1>${NO_PRIORITIES_TITLE}</h1>`);
+    const quiet = renderBriefHtml({ ...fixtureViewModel, summary: QUIET_LINE }).html;
+    expect(quiet).toContain(`<h1>${QUIET_TITLE}</h1>`);
+  });
+
+  it('puts the filters, selected tile and space after the timeframe, and shows Scope and Not checked when they apply', () => {
+    const { html } = renderBriefHtml({
+      ...fixtureViewModel,
+      scope: {
+        ...fixtureViewModel.scope,
+        spaceId: 'soc',
+        focusTileTitle: 'Risk movers',
+        entityFilters: ['Risk level: Critical, High'],
+        sample: 'Based on the 25 highest-ranked of at least 2,670 flagged entities',
+      },
+      notChecked: {
+        unreadable: ['Entities with anomalies', 'alert details'],
+        notFound: '3 flagged entities not found in the Entity Store',
+      },
+    });
+    expect(html).toContain(
+      'Timeframe:</span> Last 7 days · Risk level: Critical, High · Selected: Risk movers · Space: soc</p>'
+    );
+    expect(html).toContain(
+      'Scope:</span> Based on the 25 highest-ranked of at least 2,670 flagged entities</p>'
+    );
+    expect(html).toContain(
+      'Not checked (the data couldn&#39;t be read):</span> Entities with anomalies, alert details · 3 flagged entities not found in the Entity Store</p>'
+    );
   });
 
   it('shows only the counts above zero or changed, and says when there is nothing to compare', () => {
