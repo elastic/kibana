@@ -11,8 +11,6 @@ import type { ApprovalProposal, DeclineParams } from '@kbn/proposals-ui';
 import type { Investigation } from '../../types';
 import type { CardActionType } from '../actions/base_actions';
 import type { EscalationModalMode } from './escalation_modal/types';
-import { BaseActionModal } from './base_action_modal';
-import { MODAL_TRANSLATIONS } from './translations';
 
 export interface CloseInvestigationModalRenderProps {
   /** The investigation being closed. Used to access `conversationId` and `status`. */
@@ -36,9 +34,8 @@ export interface InvestigationActionModalsProps<
 > {
   /** Action awaiting confirmation, or `null` when no action modal is open. */
   action: CardActionType | null;
-  recordId: Investigation['recordId'] | null;
   initialAssignee?: string | null;
-  /** Full investigation for actions that need more than recordId (e.g. escalation). */
+  /** The investigation the action applies to. The close and escalation modals need it. */
   investigation?: Investigation;
   /** Proposal awaiting a decision, if any. */
   approvalProposal?: TProposal;
@@ -71,7 +68,6 @@ export interface InvestigationActionModalsProps<
    * Renders the close-investigation confirmation modal for the 'close' action.
    * Receives the full investigation so the modal can key on `conversationId` rather than
    * `recordId` (which is the proposal id and is undefined in the flyout context).
-   * Without it the 'close' action falls back to a rationale-only dismiss modal.
    */
   renderCloseModal?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
   /**
@@ -90,7 +86,6 @@ export interface InvestigationActionModalsProps<
  */
 export const InvestigationActionModals = <TProposal extends ApprovalProposal = ApprovalProposal>({
   action,
-  recordId,
   investigation,
   approvalProposal,
   readOnly,
@@ -124,25 +119,9 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
       />
     ) : null}
 
-    {action === 'close' ? (
-      renderCloseModal && investigation ? (
-        renderCloseModal({ investigation, onClose: onCloseAction })
-      ) : recordId ? (
-        <BaseActionModal
-          type="dismiss"
-          title={MODAL_TRANSLATIONS.dismiss.title}
-          recordId={recordId}
-          onClose={onCloseAction}
-          rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
-          primaryAction={{
-            color: 'danger',
-            label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
-            // TODO: use dismiss action API call hook
-            onClick: onCloseAction,
-          }}
-        />
-      ) : null
-    ) : null}
+    {action === 'close' && renderCloseModal && investigation
+      ? renderCloseModal({ investigation, onClose: onCloseAction })
+      : null}
 
     {(action === 'createEscalation' || action === 'attachToEscalation') && investigation
       ? renderEscalationModal?.({
