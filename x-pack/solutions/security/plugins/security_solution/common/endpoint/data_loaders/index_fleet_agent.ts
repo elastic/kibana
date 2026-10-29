@@ -222,15 +222,15 @@ export const deleteIndexedFleetAgents = async (
         })
         .catch(wrapErrorAndRejectPromise);
 
-    // Fleet rewrites these docs while a test is cleaning up. With
-    // `conflicts: 'proceed'` that rewrite is skipped. When every hit conflicts,
-    // `refresh: true` does not refresh the index, so the next attempt can read
-    // the same version. Refresh the concrete index before retrying.
+    // Fleet rewrites these docs during cleanup. With `conflicts: 'proceed'` that
+    // rewrite is skipped, and when every hit conflicts `refresh: true` does not
+    // refresh the index. Refresh the concrete index before retrying.
     let deleted: DeleteByQueryResponse | undefined;
     for (let attempt = 0; attempt < 5; attempt++) {
       deleted = await esClient
         .deleteByQuery({
           index,
+          allow_no_indices: true,
           wait_for_completion: true,
           conflicts: 'proceed',
           refresh: true,
@@ -251,6 +251,7 @@ export const deleteIndexedFleetAgents = async (
         .refresh({
           index,
           ignore_unavailable: true,
+          allow_no_indices: true,
           expand_wildcards: 'all',
         })
         .catch(() => undefined);
