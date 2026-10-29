@@ -112,14 +112,14 @@ export const eventStatusChangedTriggerCommonDefinition: CommonTriggerDefinition 
       'xpack.significantEvents.workflowTriggers.eventStatusChanged.documentation.details',
       {
         defaultMessage:
-          'Emitted when a significant event moves between statuses. The payload includes event.status and event.previous_status. event.status: "inactive" fires when an event recovers.',
+          'Emitted when a significant event moves between statuses. The payload includes event.status and event.previous_status. event.status: "inactive" fires both when an event recovers and when an operator deactivates it.',
       }
     ),
     examples: [
       i18n.translate(
         'xpack.significantEvents.workflowTriggers.eventStatusChanged.documentation.example',
         {
-          defaultMessage: `## Run when an event becomes inactive (recovery)
+          defaultMessage: `## Run when an event becomes inactive (recovery or operator deactivation)
 \`\`\`yaml
 triggers:
   - type: {triggerId}
