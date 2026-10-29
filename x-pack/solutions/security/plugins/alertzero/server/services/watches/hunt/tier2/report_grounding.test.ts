@@ -65,6 +65,22 @@ describe('isEvidenceQuoteGrounded', () => {
   it('rejects an empty or whitespace-only quote', () => {
     expect(isEvidenceQuoteGrounded('   ', text)).toBe(false);
   });
+
+  it('ignores punctuation and typography differences', () => {
+    const report =
+      'The service stops accepting connections while the device keeps running normally, and the actor’s tool – a loader – retries.';
+    expect(
+      isEvidenceQuoteGrounded(
+        'The service stops accepting connections while the device keeps running normally.',
+        report
+      )
+    ).toBe(true);
+    expect(isEvidenceQuoteGrounded("the actor's tool - a loader - retries", report)).toBe(true);
+  });
+
+  it('rejects a quote with one word changed', () => {
+    expect(isEvidenceQuoteGrounded('called sts.AssumeRole into escalated-group', text)).toBe(false);
+  });
 });
 
 describe('assertEsqlGroundedInReport', () => {
