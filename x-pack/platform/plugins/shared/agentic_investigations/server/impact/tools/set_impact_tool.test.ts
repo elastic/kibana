@@ -131,7 +131,9 @@ describe('agentic_investigations.set_impact', () => {
       active: true,
       hidden: true,
     });
-    expect(attachments.drainChanges()).toEqual([]);
+    expect(attachments.drainChanges()).toEqual([
+      expect.objectContaining({ kind: 'added', attachment_id: IMPACT_ID, hidden: true }),
+    ]);
   });
 
   it('keeps omitted fields, replaces sent ones, and versions the attachment', async () => {

@@ -547,4 +547,18 @@ describe('SublimeSecurityConnector', () => {
       );
     });
   });
+
+  describe('quarantineMessageGroups input bounds', () => {
+    it.each([
+      [10_000, true],
+      [10_001, false],
+    ])('%d message group IDs valid=%s', (count, expected) => {
+      const messageGroupIds = Array.from({ length: count }, (_, i) => `group-${i}`);
+      expect(
+        SublimeSecurityConnector.actions.quarantineMessageGroups.input.safeParse({
+          messageGroupIds,
+        }).success
+      ).toBe(expected);
+    });
+  });
 });

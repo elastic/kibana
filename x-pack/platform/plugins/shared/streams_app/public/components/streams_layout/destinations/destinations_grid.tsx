@@ -16,6 +16,7 @@ import {
   EuiScreenReaderOnly,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import type {
   EuiDataGridColumn,
@@ -33,6 +34,7 @@ import {
   getTargetedIndexCount,
 } from './destination_grid_cell';
 import { DestinationIndicesTable } from './destination_indices_table';
+import { S3DestinationDetails } from './s3_destination_details';
 import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
 import type { DestinationViewModel } from './types';
 import { useDestinationIndexStats } from './use_destination_index_stats';
@@ -92,6 +94,29 @@ interface DestinationsGridProps {
   onShowOnCanvas: (destination: DestinationViewModel) => void;
   onRequestDelete: (destination: DestinationViewModel) => void;
 }
+
+const getExpandAriaLabel = ({ name, type }: DestinationViewModel, isExpanded: boolean) => {
+  if (type === 's3') {
+    return isExpanded
+      ? i18n.translate('xpack.streams.destinations.table.collapseDetailsAriaLabel', {
+          defaultMessage: 'Collapse details for {name}',
+          values: { name },
+        })
+      : i18n.translate('xpack.streams.destinations.table.expandDetailsAriaLabel', {
+          defaultMessage: 'Expand details for {name}',
+          values: { name },
+        });
+  }
+  return isExpanded
+    ? i18n.translate('xpack.streams.destinations.table.collapseRowAriaLabel', {
+        defaultMessage: 'Collapse indices for {name}',
+        values: { name },
+      })
+    : i18n.translate('xpack.streams.destinations.table.expandRowAriaLabel', {
+        defaultMessage: 'Expand indices for {name}',
+        values: { name },
+      });
+};
 
 export const DestinationsGrid = ({
   status,
@@ -182,6 +207,7 @@ const DestinationsGridTable = ({
   onShowOnCanvas,
   onRequestDelete,
 }: Omit<DestinationsGridProps, 'status'>) => {
+  const { euiTheme } = useEuiTheme();
   const [expandedDestinationIds, setExpandedDestinationIds] = useState<Set<string>>(new Set());
   const [statsRequested, setStatsRequested] = useState(false);
   const failureStoreByIndex = useMemo(
@@ -210,14 +236,16 @@ const DestinationsGridTable = ({
     failureStoreByIndex,
   });
 
-  const toggleExpanded = useCallback((destinationId: string) => {
-    setStatsRequested(true);
+  const toggleExpanded = useCallback((destination: DestinationViewModel) => {
+    if (destination.type !== 's3') {
+      setStatsRequested(true);
+    }
     setExpandedDestinationIds((current) => {
       const next = new Set(current);
-      if (next.has(destinationId)) {
-        next.delete(destinationId);
+      if (next.has(destination.id)) {
+        next.delete(destination.id);
       } else {
-        next.add(destinationId);
+        next.add(destination.id);
       }
       return next;
     });
@@ -243,20 +271,12 @@ const DestinationsGridTable = ({
             return null;
           }
           const isExpanded = expandedDestinationIds.has(destination.id);
-          const ariaLabel = isExpanded
-            ? i18n.translate('xpack.streams.destinations.table.collapseRowAriaLabel', {
-                defaultMessage: 'Collapse indices for {name}',
-                values: { name: destination.name },
-              })
-            : i18n.translate('xpack.streams.destinations.table.expandRowAriaLabel', {
-                defaultMessage: 'Expand indices for {name}',
-                values: { name: destination.name },
-              });
+          const ariaLabel = getExpandAriaLabel(destination, isExpanded);
           return (
             <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 color="text"
-                onClick={() => toggleExpanded(destination.id)}
+                onClick={() => toggleExpanded(destination)}
                 aria-label={ariaLabel}
                 iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                 iconSize="m"
@@ -346,12 +366,24 @@ const DestinationsGridTable = ({
                   min-width: 100%;
                 `}
               >
-                <DestinationIndicesTable
-                  indices={resolvedIndicesByDestination[destination.id] ?? []}
-                  status={resolvedIndicesStatus}
-                  error={resolvedIndicesError}
-                  stats={destinationIndexStats}
-                />
+                {destination.type === 's3' ? (
+                  <div
+                    css={css`
+                      padding: ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.m}
+                        ${euiTheme.size.xxl};
+                      background-color: ${euiTheme.colors.backgroundBasePlain};
+                    `}
+                  >
+                    <S3DestinationDetails destination={destination} />
+                  </div>
+                ) : (
+                  <DestinationIndicesTable
+                    indices={resolvedIndicesByDestination[destination.id] ?? []}
+                    status={resolvedIndicesStatus}
+                    error={resolvedIndicesError}
+                    stats={destinationIndexStats}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -369,6 +401,7 @@ const DestinationsGridTable = ({
     [
       destinationIndexStats,
       destinations,
+      euiTheme,
       expandedDestinationIds,
       resolvedIndicesByDestination,
       resolvedIndicesError,
