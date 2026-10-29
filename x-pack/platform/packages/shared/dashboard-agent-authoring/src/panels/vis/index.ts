@@ -9,7 +9,7 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../resolve_panel';
 import { defineRequestPanelKind } from '../panel_kind';
 
@@ -78,24 +78,26 @@ const visPanelContentBaseSchema = z.object({
 });
 
 /** Creates or edits a Lens panel. A new Lens panel requires the caller to choose its chart type. */
-export const lensPanelContentSchema = visPanelContentBaseSchema.extend({
-  renderer: z
-    .literal('lens')
-    .optional()
-    .describe('(optional) Render with Lens. Lens is the default when renderer is omitted.'),
-  chartType: z
-    .nativeEnum(SupportedChartType)
-    .optional()
-    .describe(
-      'The Lens chart type to create. Choose it from the dashboard chart type guidance. Required for new panels. On an existing panel, omit it to keep the chart type, or set it when the request changes the chart family, such as from xy to pie.'
-    ),
-  applyChartRules: z
-    .boolean()
-    .optional()
-    .describe(
-      '(optional) Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
-    ),
-});
+export const lensPanelContentSchema = lazySchema(() =>
+  visPanelContentBaseSchema.extend({
+    renderer: z
+      .literal('lens')
+      .optional()
+      .describe('(optional) Render with Lens. Lens is the default when renderer is omitted.'),
+    chartType: z
+      .nativeEnum(SupportedChartType)
+      .optional()
+      .describe(
+        "The Lens chart type that fits the data's shape and the request. Required for new panels. On an existing panel, omit it to keep the chart type, or set it when the request changes the chart family, such as from xy to pie."
+      ),
+    applyChartRules: z
+      .boolean()
+      .optional()
+      .describe(
+        '(optional) Set true to apply all presentation defaults, replacing custom styling. Omit it to change only the requested settings. Independent of preserveESQL, so enhancement can accompany a query change.'
+      ),
+  })
+);
 
 /** Creates or edits a Vega panel, which may carry the closest Lens chart type as an authoring hint. */
 export const vegaPanelContentSchema = visPanelContentBaseSchema.extend({

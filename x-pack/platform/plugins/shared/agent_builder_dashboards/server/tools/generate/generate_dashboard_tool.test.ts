@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -389,5 +390,53 @@ describe('generateDashboardTool handler', () => {
         },
       });
     });
+  });
+});
+
+describe('generateDashboardTool descriptions', () => {
+  const tool = generateDashboardTool({ getDashboardValidator: jest.fn() });
+
+  interface DescribedNode {
+    description?: string;
+  }
+  const { properties } = z.toJSONSchema(tool.schema, { io: 'input' }) as unknown as {
+    properties: {
+      panels: DescribedNode & { items: { properties: { content: DescribedNode } } };
+      sections: DescribedNode;
+      controls: DescribedNode;
+      description: DescribedNode;
+    };
+  };
+
+  it('keeps the tool description within the 1,024 characters function-calling APIs accept', () => {
+    expect(tool.description.length).toBeLessThanOrEqual(1024);
+    expect(tool.description).toContain("Each field's description says how to use it well");
+  });
+
+  it('says which panels to add and which panel kind to pick', () => {
+    expect(properties.panels.description).toContain('summary metrics');
+    expect(properties.panels.description).toContain('Pick the first panel kind that fits');
+    expect(properties.panels.description).toContain('chartType is required for a new Lens panel');
+  });
+
+  it('says how to edit a panel and which panels cannot be edited', () => {
+    const { description } = properties.panels.items.properties.content;
+    expect(description).toContain('Prefer an edit to removing and re-adding the panel');
+    expect(description).toContain('non-ES|QL Lens panels, and by-reference panels');
+    expect(description).toContain('cannot be edited, only moved, removed, or replaced');
+  });
+
+  it('says when to use sections and how to order them', () => {
+    expect(properties.sections.description).toContain('roughly 6 or more visualization panels');
+    expect(properties.sections.description).toContain('summary metrics, then trends');
+  });
+
+  it('says which controls to add on a new dashboard', () => {
+    expect(properties.controls.description).toContain('3-5 options_list_control dropdowns');
+    expect(properties.controls.description).toContain('cannot back one');
+  });
+
+  it('asks for a description on a new dashboard', () => {
+    expect(properties.description.description).toContain('Set it when creating a dashboard');
   });
 });
