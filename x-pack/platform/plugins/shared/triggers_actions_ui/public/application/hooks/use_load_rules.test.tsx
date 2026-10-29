@@ -533,5 +533,36 @@ describe('useLoadRules', () => {
       expect(result.current.rulesState.data).toEqual([]);
       expect(result.current.rulesState.errors).toEqual(errors);
     });
+
+    it('should not reset the page if a paged response only contains transformation errors', async () => {
+      const errors = [{ message: 'Unable to transform rule', rule: { id: '1', name: 'bad rule' } }];
+      loadRulesWithKueryFilter.mockResolvedValue({ ...MOCK_RULE_DATA, data: [], errors });
+      const params = {
+        page: {
+          index: 1,
+          size: 25,
+        },
+        filters: {
+          searchText: '',
+          types: [],
+          actionTypes: [],
+          ruleExecutionStatuses: [],
+          ruleParams: {},
+          ruleLastRunOutcomes: [],
+          ruleStatuses: [],
+          tags: [],
+        },
+        onPage,
+        enabled: true,
+        sort: { field: 'name', direction: 'asc' },
+      };
+
+      const { result } = renderHook(() => useLoadRules(params), {
+        wrapper,
+      });
+
+      await waitFor(() => expect(result.current.rulesState.errors).toEqual(errors));
+      expect(onPage).not.toHaveBeenCalled();
+    });
   });
 });
