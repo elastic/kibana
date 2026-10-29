@@ -53,13 +53,13 @@ export function ConnectionHandle({
   const className = useMemo(
     () =>
       [
-        isConnectable ? NODE_HANDLE_CLASS : undefined,
+        isConnectable && isConnectableStart ? NODE_HANDLE_CLASS : undefined,
         canTarget || canStart ? CONNECTION_HANDLE_CLASS : undefined,
         highlighted ? 'streamsConnectionTarget' : undefined,
       ]
         .filter((name) => name !== undefined)
         .join(' '),
-    [isConnectable, canTarget, canStart, highlighted]
+    [isConnectable, isConnectableStart, canTarget, canStart, highlighted]
   );
 
   return (
@@ -69,7 +69,7 @@ export function ConnectionHandle({
       position={position}
       isConnectable={isConnectable}
       isConnectableStart={canStart}
-      isConnectableEnd={type === 'target' && isConnectable}
+      isConnectableEnd={canTarget}
       className={className || undefined}
       aria-label={
         type === 'source'

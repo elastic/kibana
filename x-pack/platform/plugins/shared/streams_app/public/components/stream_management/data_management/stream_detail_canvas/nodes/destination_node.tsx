@@ -22,6 +22,7 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
   return (
     <>
       <ConnectionHandle
+        id={data.destinationId}
         type="target"
         position={Position.Left}
         isConnectable={Boolean(data.destinationId)}
