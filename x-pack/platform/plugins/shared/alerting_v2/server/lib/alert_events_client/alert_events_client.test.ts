@@ -238,6 +238,28 @@ describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
     );
   });
 
+  it('writes the rule id on the document when the caller gives a rule_id', async () => {
+    const { client, storageService } = createClient([]);
+
+    await client.createAlertEvent({
+      source: 'datadog',
+      rule_id: 'import-1',
+      fingerprint: 'import-1:monitor-1',
+    });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).toMatchObject({ rule: { id: 'import-1' }, source: 'datadog' });
+  });
+
+  it('writes no rule object when the caller gives no rule_id', async () => {
+    const { client, storageService } = createClient([]);
+
+    await client.createAlertEvent({ source: 'datadog', fingerprint: 'no-rule-fp' });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).not.toHaveProperty('rule');
+  });
+
   it('leaves @timestamp unset when the caller does not supply one', async () => {
     const { client, storageService } = createClient([]);
 

@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   TaskManagerSetupContract,
@@ -114,6 +115,7 @@ export interface AlertingServerSetupDependencies {
 }
 
 export interface AlertingServerStartDependencies {
+  actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
   features: FeaturesPluginStart;
   spaces: SpacesPluginStart;

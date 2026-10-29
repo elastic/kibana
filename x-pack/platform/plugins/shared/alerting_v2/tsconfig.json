@@ -15,6 +15,7 @@
     "test/scout_alerting_v2_custom_config/**/*"
   ],
   "kbn_references": [
+    "@kbn/actions-plugin",
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/core",
     "@kbn/task-manager-plugin",
@@ -162,7 +163,10 @@
     "@kbn/test",
     "@kbn/cloud-plugin",
     "@kbn/announcement-banner",
-    "@kbn/ftr-llm-proxy"
+    "@kbn/ftr-llm-proxy",
+    "@kbn/actions-types",
+    "@kbn/connector-specs",
+    "@kbn/triggers-actions-ui-plugin"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

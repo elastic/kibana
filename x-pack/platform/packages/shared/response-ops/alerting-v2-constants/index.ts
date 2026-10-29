@@ -21,6 +21,8 @@ export const ALERTING_V2_RULES_LOCATOR = 'ALERTING_V2_RULES_LOCATOR';
 export const ALERTING_V2_EPISODES_LOCATOR = 'ALERTING_V2_EPISODES_LOCATOR';
 export const ALERTING_V2_ACTION_POLICIES_LOCATOR = 'ALERTING_V2_ACTION_POLICIES_LOCATOR';
 export const ALERTING_V2_EXECUTION_HISTORY_LOCATOR = 'ALERTING_V2_EXECUTION_HISTORY_LOCATOR';
+/** POC: custom imports page. */
+export const ALERTING_V2_IMPORTS_LOCATOR = 'ALERTING_V2_IMPORTS_LOCATOR';
 export const ALERTING_V2_ACTION_POLICIES_APP_ID = 'action_policies';
 export const ALERTING_V2_EPISODES_APP_ID = 'alerts';
 /** Episodes list status filter value that selects every status, the one the URL carries. */
@@ -55,3 +57,7 @@ export const ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH =
   '/internal/alerting/v2/suggestions/user_profiles' as const;
 export const ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH =
   '/internal/alerting/v2/rule_templates' as const;
+/** POC: custom imports (webhook connector + workflow + config record), see `alerting_import_config`. */
+export const ALERTING_V2_INTERNAL_IMPORT_API_PATH = '/internal/alerting/v2/imports' as const;
+export const ALERTING_V2_INTERNAL_IMPORT_STATS_API_PATH =
+  `${ALERTING_V2_INTERNAL_IMPORT_API_PATH}/_stats` as const;

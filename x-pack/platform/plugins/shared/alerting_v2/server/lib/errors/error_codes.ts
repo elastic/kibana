@@ -137,6 +137,23 @@ export const ALERTING_ERROR_CODES = {
    */
   ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED: 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED',
 
+  // ────────────────────────── Imports ────────────────────────
+  /** A custom import with the given identifier does not exist. */
+  IMPORT_NOT_FOUND: 'IMPORT_NOT_FOUND',
+  /** A custom import was modified by another writer since it was loaded. */
+  IMPORT_VERSION_CONFLICT: 'IMPORT_VERSION_CONFLICT',
+  /**
+   * Creating an import failed part way. `details.step` names the step and
+   * `details.rolled_back` the resources removed again.
+   */
+  IMPORT_SETUP_FAILED: 'IMPORT_SETUP_FAILED',
+  /** The connector's type cannot be used for a managed import. */
+  IMPORT_CONNECTOR_NOT_SUPPORTED: 'IMPORT_CONNECTOR_NOT_SUPPORTED',
+  /** The connector has receiving events turned off, so nothing would reach the import. */
+  IMPORT_CONNECTOR_INBOUND_DISABLED: 'IMPORT_CONNECTOR_INBOUND_DISABLED',
+  /** The connector already has an import. */
+  IMPORT_ALREADY_EXISTS: 'IMPORT_ALREADY_EXISTS',
+
   // ──────────────────────── Alert actions ────────────────────
   /**
    * The supplied `series_id` is not a well-formed series identifier: not
@@ -687,6 +704,13 @@ export const ALERTING_LOG_CODES = {
    * for invalidation remain until the next scheduled run.
    */
   TASKS_API_KEY_INVALIDATION_RUN_FAILED: 'TASKS_API_KEY_INVALIDATION_RUN_FAILED',
+
+  // ────────────────────────────── Imports ──────────────────────────────
+  /**
+   * Creating an import failed and removing a resource it had already created
+   * failed too. The resource is left behind and has to be removed by hand.
+   */
+  IMPORT_ROLLBACK_FAILED: 'IMPORT_ROLLBACK_FAILED',
 
   // ─────────────────────────────── Routes ──────────────────────────────
   /** An alerting v2 HTTP route handler failed with an unexpected 5xx error. */

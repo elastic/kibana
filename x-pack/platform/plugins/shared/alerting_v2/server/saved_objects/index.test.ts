@@ -12,6 +12,7 @@ import { createLoggerService } from '../lib/services/logger_service/logger_servi
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
+  IMPORT_CONFIG_SAVED_OBJECT_TYPE,
   registerSavedObjects,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
@@ -34,17 +35,20 @@ describe('registerSavedObjects', () => {
     };
   };
 
-  it('registers the rule, action policy, API-key, and ESO types', () => {
+  it('registers the rule, action policy, import config, API-key, and ESO types', () => {
     const { logger, savedObjects, encryptedSavedObjects } = createDeps();
 
     registerSavedObjects({ savedObjects, encryptedSavedObjects, logger });
 
-    expect(savedObjects.registerType).toHaveBeenCalledTimes(3);
+    expect(savedObjects.registerType).toHaveBeenCalledTimes(4);
     expect(savedObjects.registerType).toHaveBeenCalledWith(
       expect.objectContaining({ name: RULE_SAVED_OBJECT_TYPE })
     );
     expect(savedObjects.registerType).toHaveBeenCalledWith(
       expect.objectContaining({ name: ACTION_POLICY_SAVED_OBJECT_TYPE })
+    );
+    expect(savedObjects.registerType).toHaveBeenCalledWith(
+      expect.objectContaining({ name: IMPORT_CONFIG_SAVED_OBJECT_TYPE, hidden: true })
     );
     expect(savedObjects.registerType).toHaveBeenCalledWith(
       expect.objectContaining({ name: API_KEY_PENDING_INVALIDATION_TYPE })

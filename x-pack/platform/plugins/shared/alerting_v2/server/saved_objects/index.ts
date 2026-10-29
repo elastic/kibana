@@ -11,16 +11,20 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 import {
   actionPolicyModelVersions,
   apiKeyPendingInvalidationModelVersions,
+  importConfigModelVersions,
   ruleModelVersions,
 } from './model_versions';
 import { apiKeyPendingInvalidationMappings } from './api_key_pending_invalidation_mappings';
 import { actionPolicyMappings } from './action_policy_mappings';
+import { importConfigMappings } from './import_config_mappings';
 import { ruleMappings } from './rule_mappings';
 import type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
+import type { ImportConfigSavedObjectAttributes } from './schemas/import_config_attributes';
 import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
+  IMPORT_CONFIG_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../../common/saved_object_types';
 import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
@@ -30,6 +34,7 @@ export {
   RULE_SAVED_OBJECT_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
+  IMPORT_CONFIG_SAVED_OBJECT_TYPE,
 };
 
 export const ActionPolicyAttributesToEncrypt = ['apiKey'];
@@ -127,6 +132,27 @@ export function registerSavedObjects({
   });
 
   registerType({
+    resource: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+    logger,
+    register: () => {
+      savedObjects.registerType({
+        name: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+        indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        hidden: true,
+        namespaceType: 'multiple-isolated',
+        mappings: importConfigMappings,
+        management: {
+          importableAndExportable: false,
+          getTitle(so: SavedObject<ImportConfigSavedObjectAttributes>) {
+            return `Import: [${so.attributes.name}]`;
+          },
+        },
+        modelVersions: importConfigModelVersions,
+      });
+    },
+  });
+
+  registerType({
     resource: API_KEY_PENDING_INVALIDATION_TYPE,
     logger,
     register: () => {
@@ -157,3 +183,4 @@ export function registerSavedObjects({
 
 export type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
 export type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
+export type { ImportConfigSavedObjectAttributes } from './schemas/import_config_attributes';

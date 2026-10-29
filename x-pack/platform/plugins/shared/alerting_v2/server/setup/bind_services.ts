@@ -28,6 +28,9 @@ import { getKibanaBaseUrl } from '../lib/dispatcher/kibana_base_url';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { DispatcherServiceInternalToken, KibanaBaseUrlToken } from '../lib/dispatcher/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
+import { ImportConfigClient } from '../lib/import_config_client';
+import { ImportStatsClient } from '../lib/import_stats';
+import { ActionsClientToken, ImportSetupService, PublicBaseUrlToken } from '../lib/import_setup';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
 import {
@@ -77,6 +80,12 @@ import {
   ActionPolicySavedObjectServiceInternalToken,
   ActionPolicySavedObjectServiceScopedToken,
 } from '../lib/services/action_policy_saved_object_service/tokens';
+import { ImportConfigSavedObjectService } from '../lib/services/import_config_saved_object_service/import_config_saved_object_service';
+import {
+  ImportConfigSavedObjectsClientToken,
+  ImportConfigSavedObjectServiceInternalToken,
+  ImportConfigSavedObjectServiceScopedToken,
+} from '../lib/services/import_config_saved_object_service/tokens';
 import { EsqlResponseFormatService } from '../lib/services/esql_response_format_service/esql_response_format_service';
 import { EsqlResponseFormatServiceToken } from '../lib/services/esql_response_format_service/tokens';
 import { QueryService } from '../lib/services/query_service/query_service';
@@ -114,6 +123,7 @@ import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_se
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
+  IMPORT_CONFIG_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/saved_object_types';
@@ -152,6 +162,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
+  bind(ImportConfigClient).toSelf().inRequestScope();
+  bind(ImportSetupService).toSelf().inRequestScope();
+  bind(ImportStatsClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
   bind(RuleTemplatesClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClient).toSelf().inRequestScope();
@@ -324,6 +337,29 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
+  bind(ImportConfigSavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({
+          includedHiddenTypes: [IMPORT_CONFIG_SAVED_OBJECT_TYPE],
+        }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
+  bind(ImportConfigSavedObjectService).toSelf().inRequestScope();
+  bind(ImportConfigSavedObjectServiceScopedToken).toService(ImportConfigSavedObjectService);
+  bind(ImportConfigSavedObjectServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+      const internalClient = savedObjects.createInternalRepository([
+        IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+      ]);
+      return new ImportConfigSavedObjectService(internalClient, spaces);
+    })
+    .inSingletonScope();
+
   bind(ApiKeyServiceSavedObjectsClientToken)
     .toDynamicValue(({ get }) => {
       const savedObjects = get(CoreStart('savedObjects'));
@@ -395,6 +431,17 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       return getKibanaBaseUrl(http, cloud);
     })
     .inSingletonScope();
+
+  bind(PublicBaseUrlToken)
+    .toDynamicValue(({ get }) => get(CoreStart('http')).basePath.publicBaseUrl)
+    .inSingletonScope();
+
+  bind(ActionsClientToken)
+    .toResolvedValue(
+      (actions, request) => actions.getActionsClientWithRequest(request),
+      [PluginStart<AlertingServerStartDependencies['actions']>('actions'), Request]
+    )
+    .inRequestScope();
 
   bind(MatcherSuggestionsService).toSelf().inRequestScope();
   bind(PrivilegeChecker).toSelf().inRequestScope();

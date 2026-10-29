@@ -20,6 +20,7 @@ import {
 import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
+  IMPORT_CONFIG_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
   RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from './saved_object_types';
@@ -33,6 +34,11 @@ export const ALERTING_V2_API_PRIVILEGES = {
   rules: {
     read: 'read_alerting-v2-rules',
     write: 'manage_alerting-v2-rules',
+  },
+  // POC: custom imports are granted through the `rules` feature, they have no feature of their own.
+  importConfigs: {
+    read: 'read_alerting-v2-import-configs',
+    write: 'manage_alerting-v2-import-configs',
   },
   alerts: {
     read: 'read_alerting-v2-alerts',
@@ -153,22 +159,31 @@ export const ALERTING_V2_FEATURES = {
     privileges: {
       all: {
         aiIndex: { read: [RULE_KI_TYPE] },
-        api: [ALERTING_V2_API_PRIVILEGES.rules.read, ALERTING_V2_API_PRIVILEGES.rules.write],
+        api: [
+          ALERTING_V2_API_PRIVILEGES.rules.read,
+          ALERTING_V2_API_PRIVILEGES.rules.write,
+          ALERTING_V2_API_PRIVILEGES.importConfigs.read,
+          ALERTING_V2_API_PRIVILEGES.importConfigs.write,
+        ],
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.all, ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
           // Templates are Fleet-installed catalog objects — grant read only so
           // rules.all cannot mutate them through the SO client.
-          all: [RULE_SAVED_OBJECT_TYPE],
+          all: [RULE_SAVED_OBJECT_TYPE, IMPORT_CONFIG_SAVED_OBJECT_TYPE],
           read: [RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         },
       },
       read: {
         aiIndex: { read: [RULE_KI_TYPE] },
-        api: [ALERTING_V2_API_PRIVILEGES.rules.read],
+        api: [ALERTING_V2_API_PRIVILEGES.rules.read, ALERTING_V2_API_PRIVILEGES.importConfigs.read],
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
           all: [],
-          read: [RULE_SAVED_OBJECT_TYPE, RULE_TEMPLATE_SAVED_OBJECT_TYPE],
+          read: [
+            RULE_SAVED_OBJECT_TYPE,
+            RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+            IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+          ],
         },
       },
     },

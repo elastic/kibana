@@ -106,8 +106,10 @@ export class AlertEventsClient {
         ? 1
         : undefined;
 
-    // No `rule` object — no backing rule saved object. A caller-supplied timestamp is
-    // honored as `@timestamp`; otherwise ES sets it at ingest.
+    // There is no backing rule saved object, so `rule` is only set when the caller names an id.
+    // POC marker: for custom imports that id is an import config id, not a rule. The dispatcher
+    // skips alerts whose `rule.id` is not a known rule, so imported alerts do not notify yet.
+    // A caller-supplied timestamp is honored as `@timestamp`; otherwise ES sets it at ingest.
     const doc: AlertEventDocument = {
       ...(event.timestamp != null ? { '@timestamp': event.timestamp } : {}),
       scheduled_timestamp: event.timestamp ?? new Date().toISOString(),
@@ -116,6 +118,7 @@ export class AlertEventsClient {
       status,
       source,
       type: alertEventType.alert,
+      ...(event.rule_id != null ? { rule: { id: event.rule_id } } : {}),
       alert: {
         id: episodeId,
         status: episodeStatus,

@@ -31,7 +31,7 @@ const externalAlertStatusSchema = lazySchema(() =>
 
 const RESERVED_SOURCE_PREFIX = 'elastic';
 
-const sourceSchema = lazySchema(() =>
+export const alertEventSourceSchema = lazySchema(() =>
   z
     .string()
     .min(1)
@@ -110,7 +110,7 @@ const refineIdentityFields = (
 export const createAlertEventDataSchema = lazySchema(() =>
   createAlertEventBodyBaseObjectSchema
     .extend({
-      source: sourceSchema,
+      source: alertEventSourceSchema,
     })
     .strict()
     .superRefine(refineIdentityFields)

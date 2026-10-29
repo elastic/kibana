@@ -65,6 +65,19 @@ describe('Datadog alert translation managed workflow', () => {
     );
   });
 
+  it('stamps the connector id as the rule id, so an import on that connector claims its alerts', () => {
+    expect(workflow.steps[0].with.rule_id).toBe('{{ event.connectorId }}');
+    expect(
+      createWorkflowLiquidEngine().parseAndRenderSync(workflow.steps[0].with.rule_id, {
+        event: { connectorId: 'dd-1' },
+      })
+    ).toBe('dd-1');
+  });
+
+  it('bumps the managed version when the definition changes', () => {
+    expect(DATADOG_ALERT_TRANSLATION_WORKFLOW.version).toBe(2);
+  });
+
   it.each(['Recovered', 'Recovered from Warn', 'Recovered from No Data'])(
     'maps the %s transition to inactive',
     (alertTransition) => {

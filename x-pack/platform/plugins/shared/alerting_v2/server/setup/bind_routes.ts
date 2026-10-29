@@ -75,6 +75,14 @@ import { FindRuleTemplatesRoute } from '../routes/rule_templates/find_rule_templ
 import { GetRuleTemplateTagsRoute } from '../routes/rule_templates/get_rule_template_tags_route';
 import { GetRuleTemplateRoute } from '../routes/rule_templates/get_rule_template_route';
 import { InstallRuleTemplateRoute } from '../routes/rule_templates/install_rule_template_route';
+import { CreateImportRoute } from '../routes/imports/create_import_route';
+import { GetImportRoute } from '../routes/imports/get_import_route';
+import { ListImportsRoute } from '../routes/imports/list_imports_route';
+import { UpdateImportRoute } from '../routes/imports/update_import_route';
+import { DeleteImportRoute } from '../routes/imports/delete_import_route';
+import { RotateImportTokenRoute } from '../routes/imports/rotate_import_token_route';
+import { GetImportStatsRoute } from '../routes/imports/get_import_stats_route';
+import { TestImportRoute } from '../routes/imports/test_import_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
@@ -146,4 +154,12 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(GetRuleTemplateTagsRoute);
   bind(Route).toConstantValue(GetRuleTemplateRoute);
   bind(Route).toConstantValue(InstallRuleTemplateRoute);
+  bind(Route).toConstantValue(CreateImportRoute);
+  bind(Route).toConstantValue(GetImportRoute);
+  bind(Route).toConstantValue(ListImportsRoute);
+  bind(Route).toConstantValue(UpdateImportRoute);
+  bind(Route).toConstantValue(DeleteImportRoute);
+  bind(Route).toConstantValue(RotateImportTokenRoute);
+  bind(Route).toConstantValue(TestImportRoute);
+  bind(Route).toConstantValue(GetImportStatsRoute);
 }
