@@ -568,7 +568,7 @@ export const PagerdutyConnector: ConnectorSpec = {
   skill: [
     '## PagerDuty Connector Usage Guide',
     '',
-    'If the `/connector-pagerduty` skill is available, prefer it for on-call, incident, escalation policy, user and team lookups: it returns compact results that fit the context window. The steps below work without it.',
+    'If the `/connector-pagerduty` skill is available, prefer it for on-call by schedule name, incident, escalation policy and user lookups: its workflows return compact results that fit the context window. The steps below work without it.',
     '',
     '### Identifying the Authenticated User',
     '',

@@ -14,19 +14,24 @@ export const pagerdutySkillFile = buildSkill(({ bt, fence }) => ({
   id: 'connector-pagerduty',
   name: 'connector-pagerduty',
   description:
-    'Access PagerDuty incidents, on-call assignments, schedules, escalation policies, users, and teams.',
+    'Look up who is on call for a named PagerDuty schedule, and list incidents, escalation policies, and users, with compact results.',
   content: `
-**Connector:** Infer the connector from context. If none available, query based on type. Substitute
-the chosen ID for ${bt}<connectorId>${bt} in all commands.
+**Connector:** Infer the connector from context. If none available, query based on type. Use its ID as
+${bt}connector_id${bt}.
 
-In all attached files, running means to execute an action on the connector.  The params table represents
-the set of all possible options, adjust as needed to fit the user's intent.
+Each attached file contains a workflow. To run one, call ${bt}platform.core.execute_workflow${bt} with the workflow YAML as
+${bt}yaml${bt} (it does not need to be saved first) and ${bt}connector_id${bt} plus any inputs from the file's table as ${bt}inputs${bt}.
+The inputs table represents all possible options; use only what the user's request needs. Workflows trim the
+response to what is useful, so prefer them over calling the connector directly for these lookups.
 
 | Intent | Resource |
 |---|---|
-| Get schedule information, including who is on call | ${bt}./resources/oncall.md${bt} |
+| Who is on call for a named schedule | ${bt}./resources/oncall.md${bt} |
 | List incidents and escalation policies | ${bt}./resources/incidents-escalations.md${bt} |
-| Lookup users or teams | ${bt}./resources/users-teams.md${bt} |
+| Look up users | ${bt}./resources/users.md${bt} |
+
+For anything else (who is on call right now, teams, creating or updating incidents), use the connector's own
+guide and actions.
 `.trim(),
   resources: buildPagerdutyResources({ bt, fence }),
 }));

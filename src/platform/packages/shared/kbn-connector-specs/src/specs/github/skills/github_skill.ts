@@ -14,18 +14,23 @@ export const githubSkillFile = buildSkill(({ bt, fence }) => ({
   id: 'connector-github',
   name: 'connector-github',
   description:
-    'Search and list GitHub issues and pull requests with compact, context-friendly results (no bodies, avatars, or URL clutter).',
+    'Search and list GitHub issues and pull requests with compact results (no bodies, avatars, or URL clutter).',
   content: `
-**Connector:** Infer the connector from context. If none available, query based on type. Substitute
-the chosen ID for ${bt}<connectorId>${bt} in all commands.
+**Connector:** Infer the connector from context. If none available, query based on type. Use its ID as
+${bt}connector_id${bt}.
 
-In all attached files, running means to execute an action on the connector.  The params table represents
-the set of all possible options, adjust as needed to fit the user's intent.
+Each attached file contains workflows. To run one, call ${bt}platform.core.execute_workflow${bt} with the workflow YAML as
+${bt}yaml${bt} (it does not need to be saved first) and ${bt}connector_id${bt} plus any inputs from the file's table as ${bt}inputs${bt}.
+The inputs table represents all possible options; use only what the user's request needs. Workflows trim the
+response to what is useful, so prefer them over calling the connector directly for these lookups.
 
 | Intent | Resource |
 |---|---|
 | Search or find issues and pull requests | ${bt}./resources/issues-pull-requests.md${bt} |
 | Browse one repository's issues or pull requests | ${bt}./resources/list-issues-pull-requests.md${bt} |
+
+For anything else (reading an issue's body or comments, commits, files, or creating and updating issues and
+pull requests), use the connector's own guide and actions.
 `.trim(),
   resources: buildGithubResources({ bt, fence }),
 }));
