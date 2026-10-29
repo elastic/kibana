@@ -73,23 +73,15 @@ export const UnifiedAttachmentSchema = UnifiedAttachmentAttributesSchema.and(
 );
 
 /**
- * Partial payload props for patch (reference and value). We define these explicitly because
- * UnifiedReferenceAttachmentPayloadRt and UnifiedValueAttachmentPayloadRt are rt.intersection([...]),
- * so they have no .type.props (only rt.strict() codecs have .props); v1 payloads use rt.strict()
- * so AttachmentPatchAttributesRt can use .type.props there.
+ * Partial payload props for patch (reference and value). `owner` cannot be changed after creation.
  */
-const UnifiedReferenceAttachmentPayloadPartialSchema = z.object({
-  type: z.string().optional(),
-  attachmentId: z.union([z.string(), z.array(z.string())]).optional(),
-  data: z.record(z.string(), jsonValueSchema).nullable().optional(),
-  metadata: z.record(z.string(), jsonValueSchema).nullable().optional(),
-});
+const UnifiedReferenceAttachmentPayloadPartialSchema = UnifiedReferenceAttachmentPayloadSchema.omit(
+  { owner: true }
+).partial();
 
-const UnifiedValueAttachmentPayloadPartialSchema = z.object({
-  type: z.string().optional(),
-  data: z.record(z.string(), jsonValueSchema).optional(),
-  metadata: z.record(z.string(), jsonValueSchema).nullable().optional(),
-});
+const UnifiedValueAttachmentPayloadPartialSchema = UnifiedValueAttachmentPayloadSchema.omit({
+  owner: true,
+}).partial();
 
 export const UnifiedAttachmentPatchAttributesSchema = z
   .union([

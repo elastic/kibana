@@ -51,6 +51,7 @@ const investigationDetails = {
 } satisfies Investigation;
 
 const mockOpenConversationDetails = jest.fn();
+const mockReportEvent = jest.fn();
 
 jest.mock('../../../hooks/use_fetch_investigation_statuses', () => ({
   useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
@@ -112,6 +113,10 @@ jest.mock('../../../hooks/use_fetch_event_lifecycle', () => ({
 }));
 
 const mockOpenChat = jest.fn();
+const mockFocusedSignificantEventService = {
+  setFocusedEvent: jest.fn(),
+  clearFocusedEvent: jest.fn(),
+};
 const mockAddSuccess = jest.fn();
 const mockSignificantEventsFetch = jest.fn();
 let mockCanManage = false;
@@ -127,10 +132,12 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { prepend: (path: string) => path } },
+      analytics: { reportEvent: mockReportEvent },
       agentBuilder: {
         openChat: mockOpenChat,
         openConversationDetails: mockOpenConversationDetails,
       },
+      focusedSignificantEventService: mockFocusedSignificantEventService,
       notifications: {
         toasts: {
           addSuccess: mockAddSuccess,
@@ -185,9 +192,12 @@ describe('EventFlyout', () => {
     queryClient.clear();
     clearPendingInvestigationCompletionsForTests();
     mockOpenChat.mockClear();
+    mockFocusedSignificantEventService.setFocusedEvent.mockClear();
+    mockFocusedSignificantEventService.clearFocusedEvent.mockClear();
     mockAddSuccess.mockClear();
     mockInvestigationRunStatuses = undefined;
     mockOpenConversationDetails.mockClear();
+    mockReportEvent.mockClear();
     mockCanManage = false;
     mockSignificantEventsFetch.mockImplementation((route: string) =>
       route === 'POST /internal/significant_events/events/{id}/investigate'
@@ -228,6 +238,14 @@ describe('EventFlyout', () => {
     expect(screen.getAllByText(/Jul 10, 2026 @ \d{2}:\d{2}:\d{2}/).length).toBeGreaterThan(0);
   });
 
+  it('publishes the focused event and clears it by id on unmount', () => {
+    const { unmount } = renderFlyout();
+
+    expect(mockFocusedSignificantEventService.setFocusedEvent).toHaveBeenCalledWith(mockEvent);
+    unmount();
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).toHaveBeenCalledWith('evt-001');
+  });
+
   it('opens a new chat from the Actions menu', async () => {
     renderFlyout({
       event: {
@@ -249,6 +267,9 @@ describe('EventFlyout', () => {
         newConversation: true,
         initialMessage: expect.stringContaining(mockEvent.title),
       })
+    );
+    expect(mockOpenChat.mock.invocationCallOrder[0]).toBeLessThan(
+      Math.max(...mockFocusedSignificantEventService.setFocusedEvent.mock.invocationCallOrder)
     );
   });
 
@@ -555,6 +576,16 @@ describe('EventFlyout', () => {
     );
     fireEvent.click(screen.getByTestId('nightshiftEventInvestigationCard'));
     expect(mockOpenConversationDetails).toHaveBeenCalledWith({ conversationId: 'conv-1' });
+    // The flyout opens without `?investigationId=`, so this card reports the view itself.
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      'nightshift_investigation_viewed',
+      expect.objectContaining({
+        investigation_id: 'conv-1',
+        source: 'click',
+        status: 'open',
+        in_progress: false,
+      })
+    );
   });
 
   it('renders an unavailable investigation as a non-interactive card', () => {

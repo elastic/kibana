@@ -13,6 +13,7 @@ import {
   MAX_METRICS_TAB_DIMENSIONS,
   MAX_METRICS_TAB_STATE_STRING_LENGTH,
   METRICS_GRID_HISTOGRAM_PERCENTILES,
+  METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
   METRICS_GRID_SORT_DIRECTIONS,
   METRICS_GRID_SORT_FIELDS,
@@ -44,6 +45,10 @@ export const discoverSessionApiMetricsTabTypeStateSchema = z
     }),
     histogram_percentile: z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).meta({
       description: 'Percentile displayed for histogram metric fields.',
+    }),
+    histogram_visualization: z.enum(METRICS_GRID_HISTOGRAM_VISUALIZATIONS).optional().meta({
+      description:
+        'How histogram metrics are drawn. If omitted, Discover uses the percentile chart.',
     }),
     grid_sort_field: z
       .enum(METRICS_GRID_SORT_FIELDS)
