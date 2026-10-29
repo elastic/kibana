@@ -206,7 +206,7 @@ describe('useMessageEditor insertText', () => {
     expect(result.current.messageEditor.commandMatch.isActive).toBe(true);
   });
 
-  it.each(['hello ', 'hello ', `${ZERO_WIDTH_SPACE}`])(
+  it.each(['hello ', 'hello '])(
     'adds no space when the caret follows whitespace (%j)',
     (before) => {
       const { result } = renderHook(() => useMessageEditor());
@@ -221,6 +221,20 @@ describe('useMessageEditor insertText', () => {
       expect(div.textContent).toBe(`${before}@`);
     }
   );
+
+  it('adds a space after a zero-width space, which does not open a command menu', () => {
+    const { result } = renderHook(() => useMessageEditor());
+    attachRef(result.current.messageEditor, div);
+    div.textContent = ZERO_WIDTH_SPACE;
+    setCursorAtEnd(div);
+
+    act(() => {
+      result.current.controller.insertText('@');
+    });
+
+    expect(div.textContent).toBe(`${ZERO_WIDTH_SPACE} @`);
+    expect(result.current.messageEditor.commandMatch.isActive).toBe(true);
+  });
 
   it('puts the text at the end when the caret is outside the editor', () => {
     const { result } = renderHook(() => useMessageEditor());

@@ -21,11 +21,12 @@ import {
   removePlaceholderByName as removePlaceholderByNameFromDom,
 } from './image_placeholder';
 import { getTextBeforeCursor } from './command_menu/utils/get_text_before_cursor';
+import { isAtWordBoundary } from './command_menu/command_matcher';
 import {
-  ZERO_WIDTH_SPACE,
   createCommandRange,
   createTextFragment,
   ensureCaretTargetBeforeFirstBadge,
+  insertNodeAtCursor,
   insertSpaceAfter,
   placeCursorAfter,
   placeCursorAtEnd,
@@ -230,30 +231,18 @@ const useMessageEditorController = ({
       },
       insertText: (text: string) => {
         const editor = ref.current;
-        const sel = window.getSelection();
-        if (!editor || !sel) {
+        if (!editor) {
           return;
         }
         // Checked before focus(), because focus() moves the caret to the start of the editor
-        const isCaretInside = sel.rangeCount > 0 && editor.contains(sel.anchorNode);
+        const isCaretInside = editor.contains(window.getSelection()?.anchorNode ?? null);
         editor.focus();
         if (!isCaretInside) {
-          const endRange = document.createRange();
-          endRange.selectNodeContents(editor);
-          endRange.collapse(false);
-          sel.removeAllRanges();
-          sel.addRange(endRange);
+          placeCursorAtEnd(editor);
         }
-
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
-        // A command menu only opens after whitespace, so add a space if needed
-        const previousChar = getTextBeforeCursor(editor).slice(-1);
-        const needsSpace =
-          previousChar !== '' && previousChar !== ZERO_WIDTH_SPACE && !/\s/.test(previousChar);
-        const textNode = document.createTextNode(`${needsSpace ? ' ' : ''}${text}`);
-        range.insertNode(textNode);
-        placeCursorAfter(textNode, sel);
+        const textBefore = getTextBeforeCursor(editor);
+        const needsSpace = !isAtWordBoundary(textBefore, textBefore.length);
+        insertNodeAtCursor(document.createTextNode(`${needsSpace ? ' ' : ''}${text}`));
         notifyInput();
       },
       getPlaceholderNames: () => (ref.current ? getPlaceholderNamesFromElement(ref.current) : []),
