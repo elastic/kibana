@@ -9,10 +9,10 @@ import pMap from 'p-map';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
-import type { z } from '@kbn/zod/v4';
 import type {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
+  HostOrigin,
   HuntForThreatHit,
   HuntIncompleteness,
   HuntIncompleteReason,
@@ -20,6 +20,7 @@ import type {
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { HuntBehaviorModels } from '../types';
 import { isIndexExclusion } from '../../../../../common/remote_cluster';
+import { originOfIndices } from '../common/host_origin';
 import { buildMatchesRequired } from '../common/matches_required';
 import {
   huntBehaviorLlmExtractionSchema,
@@ -33,6 +34,14 @@ import { getMitreCatalog } from './mitre_catalog';
 import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
 import { scopedEsqlProbeClient } from './scoped_esql_probe_client';
 import { assertEsqlGroundedInReport, isEvidenceQuoteGrounded } from './report_grounding';
+import { invokeHuntStructured } from '../common/invoke_hunt_structured';
+import {
+  HUNT_BEHAVIOR_EXTRACTION_TEMPLATE_ID,
+  HUNT_EXTRACTION_ENVIRONMENT_CONTEXT_MAX_CHARS,
+  HUNT_EXTRACTION_REPORT_TEXT_MAX_CHARS,
+  HUNT_PROMPT_TEMPLATE_VERSION,
+  clampHuntTemplateString,
+} from '../common/hunt_prompt_templates';
 import { prepareEsqlForExecute } from './prepare_esql_for_execute';
 import type {
   BehaviorExecution,
@@ -43,6 +52,8 @@ import type {
 } from './types';
 
 const MAX_AFFECTED_ENTITIES = 20;
+/** `HostOrigin.name` schema cap. */
+const MAX_ORIGIN_NAME_LENGTH = 512;
 /** Cap Tier 2 Discover refs to match SSE `events[]` / `alerts[]` max. */
 const MAX_HITS = 50;
 
@@ -202,6 +213,44 @@ const uniqueTrimmed = (values: unknown[], max: number): { items: string[]; trunc
 };
 
 /**
+ * Where each kept host was seen, from the `_index` of the rows that named it. Every row here
+ * already passed the required-index check, so `_index` is always a string. A name longer than
+ * the origin schema allows gets no origin, which packaging reads as unknown. When the rows hit
+ * the query's cap, a host's local rows may be past it, so only local origins are kept.
+ */
+const hostOriginsOf = (
+  rows: unknown[][],
+  hostCol: number,
+  indexCol: number,
+  hosts: string[],
+  saturated: boolean
+): HostOrigin[] => {
+  const indicesByHost = new Map(
+    hosts
+      .filter((name) => name.length <= MAX_ORIGIN_NAME_LENGTH)
+      .map((name) => [name, new Set<string>()])
+  );
+  for (const row of rows) {
+    const host = row[hostCol];
+    const index = row[indexCol];
+    if (typeof host !== 'string' || typeof index !== 'string') continue;
+    indicesByHost.get(host.trim())?.add(index);
+  }
+  return [...indicesByHost].flatMap(([name, indices]) => {
+    const origin = originOfIndices(indices);
+    return origin && (origin.local || !saturated) ? [{ name, ...origin }] : [];
+  });
+};
+
+/**
+ * The most rows the executed query could return: `executeEsql` keeps `min(N, limit)` for a
+ * trailing `LIMIT N`, and a `LIMIT` earlier in the pipeline caps it too. A `LIMIT` inside a
+ * string literal only lowers the cap, which leaves more origins unknown.
+ */
+const rowCapOf = (query: string, limit: number): number =>
+  Math.min(limit, ...[...query.matchAll(/\bLIMIT\s+(\d+)/gi)].map(([, n]) => Number(n)));
+
+/**
  * Execute a generated query in the hunt window. Hit bar counts only rows
  * whose `_index` matches a required pattern. Per-behavior errors record
  * `executed: false` and do not fail the tier.
@@ -226,6 +275,7 @@ const executeValidatedEsql = async ({
   execution: BehaviorExecution;
   affected_hosts?: string[];
   affected_users?: string[];
+  affected_host_origins?: HostOrigin[];
   affected_hosts_truncated?: boolean;
   affected_users_truncated?: boolean;
   hits?: HuntForThreatHit[];
@@ -298,6 +348,10 @@ const executeValidatedEsql = async ({
             MAX_AFFECTED_ENTITIES
           )
         : undefined;
+    const saturated = values.length >= rowCapOf(prepared, row_limit);
+    const hostOrigins = hosts
+      ? hostOriginsOf(requiredRows, hostCol, indexCol, hosts.items, saturated)
+      : [];
 
     // `prepareEsqlForExecute` injects `METADATA _id`/`_index` but deliberately does
     // not undo a `DROP _id` the model wrote, so a query can keep `_index` — enough to
@@ -344,6 +398,7 @@ const executeValidatedEsql = async ({
       ...(hosts && hosts.items.length > 0
         ? {
             affected_hosts: hosts.items,
+            ...(hostOrigins.length > 0 ? { affected_host_origins: hostOrigins } : {}),
             ...(hosts.truncated ? { affected_hosts_truncated: true } : {}),
           }
         : {}),
@@ -745,13 +800,27 @@ export const huntBehavior = async (
     };
   }
 
-  const structured = models.extraction.chatModel.withStructuredOutput(
-    huntBehaviorLlmExtractionSchema
-  );
   const contextBlock = renderArticleContext(articleContext);
-  const result = (await structured.invoke(
-    `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`
-  )) as z.infer<typeof huntBehaviorLlmExtractionSchema>;
+  const result = await invokeHuntStructured({
+    model: models.extraction,
+    // ES|QL stays on a messages model when extraction's connector requires a
+    // template, so it can take the call if the gateway rejects that template.
+    messagesFallback: models.esql,
+    schema: huntBehaviorLlmExtractionSchema,
+    prompt: `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`,
+    logger,
+    template: {
+      id: HUNT_BEHAVIOR_EXTRACTION_TEMPLATE_ID,
+      version: HUNT_PROMPT_TEMPLATE_VERSION,
+      variables: {
+        environment_context: clampHuntTemplateString(
+          contextBlock,
+          HUNT_EXTRACTION_ENVIRONMENT_CONTEXT_MAX_CHARS
+        ),
+        report_text: clampHuntTemplateString(text, HUNT_EXTRACTION_REPORT_TEXT_MAX_CHARS),
+      },
+    },
+  });
   const candidates = (result.candidates ?? [])
     .map((c) => ({
       technique_id: c.technique_id.toUpperCase().trim(),
@@ -1027,6 +1096,9 @@ export const huntBehavior = async (
         );
       }
       if (executed.affected_hosts) behavior.affected_hosts = executed.affected_hosts;
+      if (executed.affected_host_origins) {
+        behavior.affected_host_origins = executed.affected_host_origins;
+      }
       if (executed.affected_users) behavior.affected_users = executed.affected_users;
       if (executed.affected_hosts_truncated) behavior.affected_hosts_truncated = true;
       if (executed.affected_users_truncated) behavior.affected_users_truncated = true;

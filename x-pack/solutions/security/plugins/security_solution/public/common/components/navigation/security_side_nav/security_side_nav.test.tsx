@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { render } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../../app/types';
@@ -148,7 +147,7 @@ describe('SecuritySideNav', () => {
             position: 'top',
           }),
         ],
-        categories: getNavCategories(AIChatExperience.Classic, true, false),
+        categories: getNavCategories(AIChatExperience.Classic, true),
         tracker: track,
       })
     );
@@ -347,7 +346,7 @@ describe('SecuritySideNav', () => {
       renderNav({ store: createStoreWithAlignment(true) });
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, true, false),
+          categories: getNavCategories(AIChatExperience.Classic, true),
         })
       );
     });
@@ -356,7 +355,7 @@ describe('SecuritySideNav', () => {
       renderNav({ store: createStoreWithAlignment(false) });
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, false),
         })
       );
     });
@@ -386,47 +385,7 @@ describe('SecuritySideNav', () => {
             position: 'top',
           }),
         ],
-        categories: getNavCategories(AIChatExperience.Classic, true, false),
-      })
-    );
-  });
-
-  it('should render agentBuilder external link at top when chat experience is Agent and isAgentBuilderNavAtTop is true', () => {
-    (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
-      new BehaviorSubject(AIChatExperience.Agent).asObservable()
-    );
-    (useKibana().services.featureFlags.useBooleanValue as jest.Mock).mockImplementation(
-      (flag: string) => flag === AGENT_BUILDER_NAV_AT_TOP_FLAG
-    );
-    mockUseNavLinks.mockReturnValue([alertsNavLink]);
-    renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        selectedId: SecurityPageName.alerts,
-        items: [
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkAgentBuilder,
-            label: 'Agents',
-            position: 'top',
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkDiscover,
-            label: 'Discover',
-            position: 'top',
-          }),
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkWorkflows,
-            label: 'Workflows',
-            position: 'top',
-          }),
-          expect.objectContaining({
-            href: '/alerts',
-            id: SecurityPageName.alerts,
-            label: 'alerts',
-            position: 'top',
-          }),
-        ],
-        categories: getNavCategories(AIChatExperience.Agent, true, true),
+        categories: getNavCategories(AIChatExperience.Classic, true),
       })
     );
   });
