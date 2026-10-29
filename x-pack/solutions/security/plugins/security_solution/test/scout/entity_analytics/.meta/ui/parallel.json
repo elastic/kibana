@@ -1,5 +1,5 @@
 {
-  "sha1": "26d935069783262b3831c65879d8bc996d1f4add",
+  "sha1": "7ae78b4502cf8a259c55ade44dd0fd4cd81f66ab",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -103,8 +103,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
-        "line": 92,
-        "column": 26
+        "line": 94,
+        "column": 15
       }
     },
     {
@@ -117,8 +117,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
-        "line": 109,
-        "column": 31
+        "line": 110,
+        "column": 35
       }
     },
     {
