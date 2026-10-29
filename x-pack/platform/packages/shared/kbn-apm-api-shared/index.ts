@@ -28,6 +28,7 @@ export type * from './src/routes/dependencies';
 export type * from './src/routes/transactions';
 export type * from './src/routes/services';
 export type * from './src/routes/service_map';
+export { MAX_CONNECTION_RESOURCES } from './src/routes/service_map';
 export type * from './src/routes/errors';
 export { MAX_UNPROCESSED_OTEL_ERRORS } from './src/routes/errors';
 export type * from './src/routes/infrastructure';

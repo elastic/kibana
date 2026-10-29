@@ -1,5 +1,5 @@
 {
-  "sha1": "4e33b03fb3b207f613c9a5a46ce4b3f51f8a8075",
+  "sha1": "42b1fc5b9cb7e05afa75a9e19b032195faeaedfb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -3109,7 +3109,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
         "line": 151,
-        "column": 18
+        "column": 83
       }
     },
     {

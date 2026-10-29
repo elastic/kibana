@@ -265,6 +265,61 @@ describe('registerRoutes', () => {
       });
     });
 
+    it('increases the attachment type counters by the number of attachments per type', async () => {
+      const { simulateRequest } = initApi([
+        createCasesRoute({
+          method: 'post',
+          path: '/attachments',
+          handler: async ({ incrementAttachmentTypeCounters }) => {
+            incrementAttachmentTypeCounters(['comment', 'security.alert', 'comment']);
+            return response.ok();
+          },
+        }),
+      ]);
+
+      await simulateRequest({ method: 'post', path: '/attachments' });
+
+      expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'POST /attachments',
+        counterType: 'attachment_type.comment',
+        incrementBy: 2,
+      });
+      expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'POST /attachments',
+        counterType: 'attachment_type.security.alert',
+        incrementBy: 1,
+      });
+    });
+
+    it('does not increase the attachment type counters without a usage counter', async () => {
+      response.ok.mockReturnValue({ status: 200, options: {} });
+      registerRoutes({
+        router,
+        logger,
+        routes: [
+          createCasesRoute({
+            method: 'post',
+            path: '/attachments',
+            handler: async ({ incrementAttachmentTypeCounters }) => {
+              incrementAttachmentTypeCounters(['comment']);
+              return response.ok();
+            },
+          }),
+        ],
+        kibanaVersion: '8.2.0',
+      });
+
+      const [[, registeredRouteHandler]] = (router.post as jest.Mock).mock.calls;
+      await registeredRouteHandler(
+        { cases: {} },
+        httpServerMock.createKibanaRequest({ path: '/attachments', method: 'post' }),
+        { customError, badRequest }
+      );
+
+      expect(customError).not.toHaveBeenCalled();
+      expect(telemetryUsageCounter.incrementCounter).not.toHaveBeenCalled();
+    });
+
     it('increases the deprecation counters correctly', async () => {
       await initAndSimulateDeprecationEndpoint();
 

@@ -55,32 +55,22 @@ const customContentUpdateFields = {
     .nullable()
     .optional()
     .describe(
-      'ES|QL query. Omit to keep the existing query. Pass null to remove it entirely. Build it with the generate_esql tool rather than writing it yourself — the server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
+      'An ES|QL query the user supplied verbatim; it replaces the current one. Omit to keep the existing query. Pass null to remove it entirely. Do not write a query yourself: to change the data, set regenerateEsql to true and describe the change in "prompt". The server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
+    ),
+  regenerateEsql: z
+    .boolean()
+    .optional()
+    .describe(
+      'Set true when the edit changes what the panel shows: the server regenerates the ES|QL query from "prompt", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the current query. Requires "prompt".'
+    ),
+  index: z
+    .string()
+    .max(256)
+    .optional()
+    .describe(
+      'Exact index, alias, or data stream to generate the query from. Pass it with regenerateEsql whenever known.'
     ),
 } as const;
-
-export interface ResolvedEsqlQueryEdit {
-  /** The query the panel should end up with. */
-  query: string | undefined;
-  /** True when the edit set or cleared the query; false when it left the existing one alone. */
-  isChanging: boolean;
-}
-
-/**
- * Applies an edit's `esqlQuery` to a panel's current query, resolving the tri-state the field
- * documents: omitted keeps the existing query, `null` clears it, a string replaces it.
- *
- * `isChanging` distinguishes "no query" from "query untouched", which callers need because an
- * unchanged query is passed to the template resolver as `hasExistingQuery` so it refines the
- * existing template instead of re-sampling data that did not change.
- */
-export const resolveEsqlQueryEdit = (
-  edit: string | null | undefined,
-  current: string | undefined
-): ResolvedEsqlQueryEdit =>
-  edit === undefined
-    ? { query: current, isChanging: false }
-    : { query: edit ?? undefined, isChanging: true };
 
 const hasSomethingToChange = ({
   prompt,
@@ -88,9 +78,17 @@ const hasSomethingToChange = ({
 }: {
   prompt?: string;
   esqlQuery?: string | null;
-}) => prompt !== undefined || esqlQuery !== undefined;
+}) => prompt !== undefined || esqlQuery === null || Boolean(esqlQuery?.trim());
 
 const atLeastOneChange = { message: 'At least one of prompt or esqlQuery must be provided.' };
+
+const regenerateNeedsPrompt = {
+  message: 'regenerateEsql requires a prompt describing the change.',
+};
+
+const regenerateExcludesRemoval = {
+  message: 'esqlQuery: null removes the query, so it cannot be combined with regenerateEsql.',
+};
 
 /**
  * Edit input for the chat tool. A conversation can hold one context attachment per panel, so the
@@ -107,6 +105,14 @@ export const customContentPanelUpdateSchema = z
       ),
     ...customContentUpdateFields,
   })
-  .refine(hasSomethingToChange, atLeastOneChange);
+  .refine(hasSomethingToChange, atLeastOneChange)
+  .refine(
+    ({ prompt, regenerateEsql }) => !regenerateEsql || prompt !== undefined,
+    regenerateNeedsPrompt
+  )
+  .refine(
+    ({ esqlQuery, regenerateEsql }) => !(esqlQuery === null && regenerateEsql),
+    regenerateExcludesRemoval
+  );
 
 export type CustomContentPanelUpdate = z.output<typeof customContentPanelUpdateSchema>;
