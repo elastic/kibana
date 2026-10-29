@@ -47,7 +47,7 @@ export const ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW = {
   id: ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 13,
+  version: 14,
   yaml: SKILL_ALERT_RETRIEVAL_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -56,7 +56,7 @@ export const ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW = {
   id: ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: 'discoveries',
-  version: 4,
+  version: 5,
   yaml: SKILL_REPORT_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

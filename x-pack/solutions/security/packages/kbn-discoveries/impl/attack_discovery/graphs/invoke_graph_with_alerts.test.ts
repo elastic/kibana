@@ -99,6 +99,58 @@ describe('invokeAttackDiscoveryGraphWithAlerts', () => {
     });
   });
 
+  it('passes caller-provided telemetryMetadata to the LLM so its calls are attributed', async () => {
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: mockAlerts,
+      insights: [],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts: mockAlerts,
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+      telemetryMetadata: { pluginId: 'some_plugin', aggregateBy: 'some_parent' },
+    });
+
+    expect(ActionsClientLlm).toHaveBeenCalledWith(
+      expect.objectContaining({
+        telemetryMetadata: { pluginId: 'some_plugin', aggregateBy: 'some_parent' },
+      })
+    );
+  });
+
+  it('does not invent telemetryMetadata when the caller provides none', async () => {
+    mockGraphInvoke.mockResolvedValue({
+      anonymizedDocuments: mockAlerts,
+      insights: [],
+      replacements: {},
+    });
+
+    await invokeAttackDiscoveryGraphWithAlerts({
+      actionsClient: mockActionsClient,
+      alerts: mockAlerts,
+      apiConfig: {
+        action_type_id: '.gen-ai',
+        connector_id: 'test-connector',
+      },
+      connectorTimeout: 60000,
+      esClient: mockEsClient,
+      logger: mockLogger,
+      prompts: mockPrompts,
+    });
+
+    const [constructorArgs] = (ActionsClientLlm as unknown as jest.Mock).mock.calls.at(-1) ?? [];
+    expect(constructorArgs.telemetryMetadata).toBeUndefined();
+  });
+
   it('strips leading dot from action_type_id for llmType', async () => {
     mockGraphInvoke.mockResolvedValue({
       anonymizedDocuments: mockAlerts,

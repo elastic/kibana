@@ -28,12 +28,20 @@ import {
 import { getManagedWorkflowDefinition, managedWorkflowDefinitions } from '../..';
 import type { ManagedWorkflowDefinition } from '../../types';
 
+// Mirror ALERTZERO_AD_*_TELEMETRY_PLUGIN_ID and ALERTZERO_INFERENCE_PARENT_FEATURE_ID;
+// @kbn/alertzero-common is a solution package and cannot be imported from here.
+const AD_GATE_PLUGIN_ID = 'alertzero_ad_gate';
+const AD_REPORT_PLUGIN_ID = 'alertzero_ad_report';
+const ALERTZERO_ROLLUP_ID = 'alertzero_parent';
+
 interface ParsedStep {
   name: string;
   type: string;
   'create-conversation'?: boolean;
   'connector-id'?: string;
   'max-step-size'?: string;
+  'plugin-id'?: string;
+  'aggregate-by'?: string;
   'on-failure'?: unknown;
   status?: string;
   with?: Record<string, unknown>;
@@ -74,8 +82,8 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
     expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.pluginId).toBe('discoveries');
   });
 
-  it('bumps the version to 13 for the lowercase display tags', () => {
-    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(13);
+  it('bumps the version to 14 so installed spaces pick up the gate cost attribution', () => {
+    expect(ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW.version).toBe(14);
   });
 
   it('titles the workflow "Security - Attack discovery - Skill"', () => {
@@ -125,6 +133,11 @@ describe('ATTACK_DISCOVERY_SKILL_ALERT_RETRIEVAL_WORKFLOW', () => {
 
     it('persists the conversation via create-conversation', () => {
       expect(step['create-conversation']).toBe(true);
+    });
+
+    it('attributes its model calls to the gate under the AlertZero rollup', () => {
+      expect(step['plugin-id']).toBe(AD_GATE_PLUGIN_ID);
+      expect(step['aggregate-by']).toBe(ALERTZERO_ROLLUP_ID);
     });
 
     it('routes model calls through the connector_id input (Constraint A)', () => {
@@ -318,8 +331,8 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
     expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.pluginId).toBe('discoveries');
   });
 
-  it('bumps the version to 4 for the lowercase display tags', () => {
-    expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.version).toBe(4);
+  it('bumps the version to 5 so installed spaces pick up the report cost attribution', () => {
+    expect(ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW.version).toBe(5);
   });
 
   it('is discoverable from the managed registry by id', () => {
@@ -355,6 +368,11 @@ describe('ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW', () => {
 
     it('does not create a new conversation', () => {
       expect(step['create-conversation']).toBeUndefined();
+    });
+
+    it('attributes its model calls to the report under the AlertZero rollup', () => {
+      expect(step['plugin-id']).toBe(AD_REPORT_PLUGIN_ID);
+      expect(step['aggregate-by']).toBe(ALERTZERO_ROLLUP_ID);
     });
 
     it('mentions the attack-discovery-generator skill', () => {

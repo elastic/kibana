@@ -405,6 +405,14 @@ export const ALERTZERO_THREAT_INTEL_ENRICH_TAXONOMY_TELEMETRY_PLUGIN_ID =
 export const ALERTZERO_THREAT_INTEL_EXTRACT_DIAMOND_TELEMETRY_PLUGIN_ID =
   'alertzero_threat_intel_extract_diamond' as const;
 
+/**
+ * `plugin-id` values for the Attack Discovery skill workflows' `ai.agent` steps. The YAML
+ * definitions carry these as literals (`@kbn/workflows` cannot import this package), so keep
+ * them in sync. Both send `aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID`.
+ */
+export const ALERTZERO_AD_GATE_TELEMETRY_PLUGIN_ID = 'alertzero_ad_gate' as const;
+export const ALERTZERO_AD_REPORT_TELEMETRY_PLUGIN_ID = 'alertzero_ad_report' as const;
+
 /** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_ESCALATION = 'escalation' as const;

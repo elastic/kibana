@@ -63,6 +63,11 @@ steps:
     # generation (Constraint A). When the input is empty/omitted, this renders
     # to undefined and the step falls back to the Agent Builder default model.
     connector-id: '${{ inputs.connector_id }}'
+    # plugin-id / aggregate-by: per-run cost attribution under the AlertZero rollup.
+    # Keep in sync with ALERTZERO_AD_REPORT_TELEMETRY_PLUGIN_ID and
+    # ALERTZERO_INFERENCE_PARENT_FEATURE_ID in @kbn/alertzero-common.
+    plugin-id: alertzero_ad_report
+    aggregate-by: alertzero_parent
     with:
       conversation_id: ${{ inputs.conversation_id }}
       message: >
