@@ -58,12 +58,13 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
             label: data.title,
           }))
         );
-        setIsLoadingOptions(false);
       })
       .catch((err) => {
         if (canceled) return;
-        setIsLoadingOptions(false);
         setError(err.message);
+      })
+      .finally(() => {
+        if (!canceled) setIsLoadingOptions(false);
       });
 
     return () => {
