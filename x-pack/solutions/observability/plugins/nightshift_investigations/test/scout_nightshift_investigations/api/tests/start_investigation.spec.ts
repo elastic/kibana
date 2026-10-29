@@ -8,7 +8,13 @@
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
 import type { KibanaRole } from '@kbn/scout-oblt';
-import { apiTest, COMMON_HEADERS } from '../fixtures';
+import {
+  apiTest,
+  COMMON_HEADERS,
+  startInvestigation,
+  uniqueId,
+  waitForInvestigation,
+} from '../fixtures';
 
 const INVESTIGATIONS_WRITE_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
@@ -93,6 +99,50 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(404);
+      }
+    );
+
+    apiTest(
+      'starts an investigation for a v2 alert without a rule',
+      async ({ apiClient, samlAuth, esClient }) => {
+        const episodeId = uniqueId('episode');
+        const ruleName = `Ad hoc ${episodeId}`;
+        const { _id: docId } = await esClient.index({
+          index: '.rule-events',
+          op_type: 'create',
+          refresh: true,
+          document: {
+            '@timestamp': new Date().toISOString(),
+            scheduled_timestamp: new Date().toISOString(),
+            type: 'alert',
+            source: 'elastic.significant_events',
+            status: 'breached',
+            severity: 'medium',
+            alert: { id: episodeId, status: 'active' },
+            group_hash: episodeId,
+            space_id: 'default',
+            data: { rule_name: ruleName },
+          },
+        });
+        try {
+          const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+          const response = await startInvestigation(apiClient, cookieHeader, {
+            subject: { type: 'alert', ids: [episodeId] },
+          });
+          expect(response).toHaveStatusCode(200);
+          const investigation = await waitForInvestigation(
+            apiClient,
+            cookieHeader,
+            response.body.investigation_id
+          );
+          expect(investigation.subjects[0].snapshot).toMatchObject({
+            alert_version: 'v2',
+            rule_name: ruleName,
+          });
+          expect(investigation.subjects[0].snapshot?.rule_id).toBeUndefined();
+        } finally {
+          await esClient.delete({ index: '.rule-events', id: docId, refresh: true });
+        }
       }
     );
 
