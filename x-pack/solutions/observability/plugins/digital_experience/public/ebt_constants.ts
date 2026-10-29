@@ -68,6 +68,7 @@ export const SESSIONS_EBT_ELEMENTS = {
   ENTRY_PAGE_FILTER: 'sessionsEntryPageFilter',
   CLEAR_FILTERS: 'sessionsClearFilters',
   DOCS_LINK: 'sessionsDocsLink',
+  COLUMN_SELECTOR: 'sessionsColumnSelector',
   SESSION_BACK: 'sessionBack',
   SESSION_NOT_FOUND_BACK: 'sessionNotFoundBack',
   SESSION_ID_COPY: 'sessionIdCopy',

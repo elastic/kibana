@@ -38,13 +38,22 @@ import { EDOT_BROWSER_DOCS_URL } from '../applications_list/applications_list_pa
 import { SessionsFilters } from './components/sessions_filters';
 import { SessionsKpis } from './components/sessions_kpis';
 import { EnableSessionsPrompt, SessionsStatusCallout } from './components/sessions_status_prompts';
-import { SessionsTable } from './components/sessions_table';
+import {
+  SESSIONS_HIDDEN_BY_DEFAULT,
+  SESSIONS_OPTIONAL_COLUMNS,
+  SESSIONS_OPTIONAL_COLUMN_IDS,
+  SessionsTable,
+} from './components/sessions_table';
+import { ColumnSelector } from '../applications_list/components/column_selector';
+import { useVisibleColumns } from '../applications_list/hooks/use_visible_columns';
 import { pickSessionsListQuery, useSessionsListQuery } from './hooks/use_sessions_list_query';
 import { useSessionsStatus } from './hooks/use_sessions_status';
 import { DURATION_BUCKETS } from './utils/sessions_list_query';
 
 /** The attribute EDOT Browser stamps on every span and log of a session. */
 const SESSION_ID_FIELD = 'session.id';
+
+const HIDDEN_COLUMNS_STORAGE_KEY = 'xpack.digitalExperience.sessions.hiddenColumns';
 
 const LOADING_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.loadingMessage', {
   defaultMessage: 'Loading sessions',
@@ -139,6 +148,11 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
   // The list's state goes along to the session, so its Sessions breadcrumb leads back to it.
   const sessionsQuery = pickSessionsListQuery(query);
   const toSessionHref = (sessionId: string) => sessionHref(sessionId, sessionsQuery);
+  const { visibleColumns, setVisibleColumns } = useVisibleColumns({
+    storageKey: HIDDEN_COLUMNS_STORAGE_KEY,
+    columnIds: SESSIONS_OPTIONAL_COLUMN_IDS,
+    hiddenByDefault: SESSIONS_HIDDEN_BY_DEFAULT,
+  });
 
   const {
     value: response,
@@ -236,17 +250,29 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
           <EuiSpacer size="m" />
         </>
       )}
-      <SessionsFilters
-        state={state}
-        facets={response?.facets}
-        sessionsWithErrors={response?.kpis.sessionsWithErrors}
-        hasActiveFilters={hasActiveFilters}
-        isLoading={loading}
-        formatters={formatters}
-        onChange={update}
-        onSearch={setSearch}
-        onClear={clearFilters}
-      />
+      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+        <EuiFlexItem>
+          <SessionsFilters
+            state={state}
+            facets={response?.facets}
+            sessionsWithErrors={response?.kpis.sessionsWithErrors}
+            hasActiveFilters={hasActiveFilters}
+            isLoading={loading}
+            formatters={formatters}
+            onChange={update}
+            onSearch={setSearch}
+            onClear={clearFilters}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ColumnSelector
+            columns={SESSIONS_OPTIONAL_COLUMNS}
+            visibleColumns={visibleColumns}
+            onChange={setVisibleColumns}
+            ebtElement={SESSIONS_EBT_ELEMENTS.COLUMN_SELECTOR}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <SessionsTable
         sessions={response?.sessions ?? []}
@@ -256,6 +282,7 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
         noItemsMessage={getNoItemsMessage()}
         formatters={formatters}
         sessionHref={toSessionHref}
+        visibleColumns={visibleColumns}
         onChange={update}
       />
     </>

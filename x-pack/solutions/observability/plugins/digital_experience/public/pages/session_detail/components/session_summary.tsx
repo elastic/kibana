@@ -20,15 +20,12 @@ import { i18n } from '@kbn/i18n';
 import type { SessionSummary as Session } from '../../../../common/sessions';
 import type { Formatters } from '../../../hooks/use_formatters';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
-import { ANONYMOUS_USER, clientOf } from '../../sessions/components/sessions_table';
-import { WebVitalBadges } from './web_vital_badges';
+import { ANONYMOUS_USER, clientOf, locationOf } from '../../sessions/components/sessions_table';
+import { WebVitalBadges } from '../../../components/web_vital_badges';
 
 const UNKNOWN = i18n.translate('xpack.digitalExperience.sessionDetail.summary.unknownValue', {
   defaultMessage: 'Unknown',
 });
-
-const locationOf = ({ geo }: Pick<Session, 'geo'>): string | null =>
-  [geo.city, geo.region, geo.countryIso].filter(Boolean).join(', ') || null;
 
 /** The session's totals, who and what it ran on, and its Core Web Vitals. */
 export function SessionSummary({

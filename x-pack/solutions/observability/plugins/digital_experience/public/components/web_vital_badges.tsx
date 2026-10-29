@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CoreWebVital, VitalRating } from '../../../../common/core_web_vitals';
-import { CORE_WEB_VITALS, getVitalRating } from '../../../../common/core_web_vitals';
-import type { SessionWebVitals } from '../../../../common/sessions';
+import type { CoreWebVital, VitalRating } from '../../common/core_web_vitals';
+import { CORE_WEB_VITALS, getVitalRating } from '../../common/core_web_vitals';
+import type { SessionWebVitals } from '../../common/sessions';
 
 const RATING_COLORS: Record<VitalRating, 'success' | 'warning' | 'danger'> = {
   good: 'success',
@@ -65,6 +65,34 @@ export const formatVital = (vital: CoreWebVital, value: number): string => {
       });
 };
 
+/** One vital's value, colored by its rating, with the rating in a tooltip. */
+export function WebVitalBadge({
+  vital,
+  value,
+  showLabel = true,
+}: {
+  vital: CoreWebVital;
+  value: number;
+  /** Leaves out the vital's name, e.g. in a column already named after it. */
+  showLabel?: boolean;
+}) {
+  const rating = getVitalRating(vital, value);
+  return (
+    <EuiToolTip content={RATING_LABELS[rating]}>
+      <EuiBadge
+        color={RATING_COLORS[rating]}
+        tabIndex={0}
+        data-test-subj={`digitalExperienceWebVital-${vital}`}
+        data-rating={rating}
+      >
+        {showLabel
+          ? `${VITAL_LABELS[vital]} ${formatVital(vital, value)}`
+          : formatVital(vital, value)}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+}
+
 /** The measured Core Web Vitals, colored by their rating; renders nothing without any. */
 export function WebVitalBadges({
   webVitals,
@@ -75,24 +103,16 @@ export function WebVitalBadges({
 }) {
   const measured = CORE_WEB_VITALS.flatMap((vital) => {
     const value = webVitals[vital];
-    return value === null ? [] : [{ vital, value, rating: getVitalRating(vital, value) }];
+    return value === null ? [] : [{ vital, value }];
   });
   if (measured.length === 0) {
     return null;
   }
   return (
     <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj={dataTestSubj}>
-      {measured.map(({ vital, value, rating }) => (
+      {measured.map(({ vital, value }) => (
         <EuiFlexItem grow={false} key={vital}>
-          <EuiToolTip content={RATING_LABELS[rating]}>
-            <EuiBadge
-              color={RATING_COLORS[rating]}
-              tabIndex={0}
-              data-test-subj={`digitalExperienceWebVital-${vital}`}
-            >
-              {VITAL_LABELS[vital]} {formatVital(vital, value)}
-            </EuiBadge>
-          </EuiToolTip>
+          <WebVitalBadge vital={vital} value={value} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

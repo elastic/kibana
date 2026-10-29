@@ -62,9 +62,11 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 - **Filters:** a debounced search (session ID, user, pages, browser, OS, location), **Has errors**,
   duration ranges, and browser, OS, country and entry page facets with their counts.
 - **Table:** start time, user with browser and OS, journey (entry → number of pages in between →
-  exit), duration, pages, clicks and errors; sortable and paged on the server. The search, filters,
-  sort and page are kept in the URL, and links to a session carry them so its **Sessions** breadcrumb
-  leads back to the same list.
+  exit), duration, pages, clicks and errors; sortable and paged on the server. A column selector,
+  kept in local storage, adds location, entry and exit page, device, session ID, last activity,
+  events, bounced, and LCP / INP / CLS colored by rating. The search, filters, sort and page are
+  kept in the URL, and links to a session carry them so its **Sessions** breadcrumb leads back to
+  the same list.
 - **Empty states:** with no sessions, how they get there; with none matching, a button to clear the
   filters. A callout counts sessions the transform could not summarize.
 

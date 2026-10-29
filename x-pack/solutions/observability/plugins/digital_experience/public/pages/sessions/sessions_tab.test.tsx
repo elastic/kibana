@@ -164,6 +164,8 @@ const searchParams = (history: MemoryHistory) =>
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // The hidden columns are kept in local storage.
+  window.localStorage.clear();
   jest.mocked(useTimeRange).mockReturnValue({
     timeRange: { rangeFrom: 'now-15m', rangeTo: 'now' },
     isTimeRangeInUrl: true,
@@ -362,6 +364,58 @@ describe('SessionsTab', () => {
       fireEvent.click(screen.getByTestId('pagination-button-0'));
     });
     expect(searchParams(history).page).toBeUndefined();
+  });
+
+  it('shows the summary columns by default, and the others on request', async () => {
+    respondWith({
+      list: listResponse({
+        sessions: [session({ webVitals: { ...emptyWebVitals(), lcp: 4800 }, bounced: true })],
+      }),
+    });
+    renderTab();
+
+    const table = await screen.findByTestId('digitalExperienceSessionsTable');
+    const headers = () =>
+      within(table)
+        .getAllByRole('columnheader')
+        .map(({ textContent }) => textContent);
+    expect(headers()).toEqual([
+      'Start time',
+      'User',
+      'Journey',
+      'Duration',
+      'Pages',
+      'Clicks',
+      'Errors',
+    ]);
+    expect(screen.getByTestId('digitalExperienceColumnSelector')).toHaveTextContent('5/16');
+
+    fireEvent.click(screen.getByTestId('digitalExperienceColumnSelector'));
+    fireEvent.click(screen.getByTestId('digitalExperienceColumnSelectorOption-location'));
+    fireEvent.click(screen.getByTestId('digitalExperienceColumnSelectorOption-lcp'));
+    fireEvent.click(screen.getByTestId('digitalExperienceColumnSelectorOption-clicks'));
+
+    expect(headers()).toEqual([
+      'Start time',
+      'User',
+      'Journey',
+      'Duration',
+      'Pages',
+      'Errors',
+      'Location',
+      'LCP',
+    ]);
+    const row = screen.getByTestId('digitalExperienceSessionRow-session-1');
+    expect(row).toHaveTextContent('Amsterdam, NL');
+    expect(within(row).getByTestId('digitalExperienceWebVital-lcp')).toHaveAttribute(
+      'data-rating',
+      'poor'
+    );
+    expect(
+      JSON.parse(
+        window.localStorage.getItem('xpack.digitalExperience.sessions.hiddenColumns') ?? '[]'
+      )
+    ).not.toContain('location');
   });
 
   it('explains how sessions get there when the range has none', async () => {

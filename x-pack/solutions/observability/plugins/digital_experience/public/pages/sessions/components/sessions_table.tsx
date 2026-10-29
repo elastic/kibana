@@ -10,6 +10,7 @@ import type { ReactNode } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiCode,
   EuiLink,
   EuiText,
   EuiTextColor,
@@ -18,7 +19,10 @@ import {
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
+import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
+import type { CoreWebVital } from '../../../../common/core_web_vitals';
 import type { SessionSortField, SessionSummary } from '../../../../common/sessions';
+import { VITAL_LABELS, WebVitalBadge } from '../../../components/web_vital_badges';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { Formatters } from '../../../hooks/use_formatters';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
@@ -58,6 +62,145 @@ export const clientOf = ({ userAgent }: Pick<SessionSummary, 'userAgent'>): stri
     .filter(Boolean)
     .join(' · ');
 
+/** City, region and country, as far as they're known, e.g. "Amsterdam, North Holland, NL". */
+export const locationOf = ({ geo }: Pick<SessionSummary, 'geo'>): string | null =>
+  [geo.city, geo.region, geo.countryIso].filter(Boolean).join(', ') || null;
+
+const VITAL_COLUMNS = ['lcp', 'inp', 'cls'] as const satisfies readonly CoreWebVital[];
+
+export type SessionsOptionalColumnId =
+  | 'journey'
+  | 'duration'
+  | 'pages'
+  | 'clicks'
+  | 'errors'
+  | 'location'
+  | 'entryPage'
+  | 'exitPage'
+  | 'device'
+  | 'sessionId'
+  | 'endTime'
+  | 'events'
+  | 'bounced'
+  | (typeof VITAL_COLUMNS)[number];
+
+const COLUMN_LABELS: Record<SessionsOptionalColumnId, string> = {
+  journey: i18n.translate('xpack.digitalExperience.sessions.table.journeyColumn', {
+    defaultMessage: 'Journey',
+  }),
+  duration: i18n.translate('xpack.digitalExperience.sessions.table.durationColumn', {
+    defaultMessage: 'Duration',
+  }),
+  pages: i18n.translate('xpack.digitalExperience.sessions.table.pagesColumn', {
+    defaultMessage: 'Pages',
+  }),
+  clicks: i18n.translate('xpack.digitalExperience.sessions.table.clicksColumn', {
+    defaultMessage: 'Clicks',
+  }),
+  errors: i18n.translate('xpack.digitalExperience.sessions.table.errorsColumn', {
+    defaultMessage: 'Errors',
+  }),
+  location: i18n.translate('xpack.digitalExperience.sessions.table.locationColumn', {
+    defaultMessage: 'Location',
+  }),
+  entryPage: i18n.translate('xpack.digitalExperience.sessions.table.entryPageColumn', {
+    defaultMessage: 'Entry page',
+  }),
+  exitPage: i18n.translate('xpack.digitalExperience.sessions.table.exitPageColumn', {
+    defaultMessage: 'Exit page',
+  }),
+  device: i18n.translate('xpack.digitalExperience.sessions.table.deviceColumn', {
+    defaultMessage: 'Device',
+  }),
+  sessionId: i18n.translate('xpack.digitalExperience.sessions.table.sessionIdColumn', {
+    defaultMessage: 'Session ID',
+  }),
+  endTime: i18n.translate('xpack.digitalExperience.sessions.table.endTimeColumn', {
+    defaultMessage: 'Last activity',
+  }),
+  events: i18n.translate('xpack.digitalExperience.sessions.table.eventsColumn', {
+    defaultMessage: 'Events',
+  }),
+  bounced: i18n.translate('xpack.digitalExperience.sessions.table.bouncedColumn', {
+    defaultMessage: 'Bounced',
+  }),
+  lcp: VITAL_LABELS.lcp,
+  inp: VITAL_LABELS.inp,
+  cls: VITAL_LABELS.cls,
+};
+
+/** The columns the user can show or hide, in display order; start time and user always show. */
+export const SESSIONS_OPTIONAL_COLUMNS: ReadonlyArray<{
+  id: SessionsOptionalColumnId;
+  label: string;
+}> = (
+  [
+    'journey',
+    'duration',
+    'pages',
+    'clicks',
+    'errors',
+    'location',
+    'entryPage',
+    'exitPage',
+    'device',
+    'sessionId',
+    'endTime',
+    'events',
+    'bounced',
+    ...VITAL_COLUMNS,
+  ] as const
+).map((id) => ({ id, label: COLUMN_LABELS[id] }));
+
+export const SESSIONS_OPTIONAL_COLUMN_IDS = SESSIONS_OPTIONAL_COLUMNS.map(({ id }) => id);
+
+/** Shown until the user picks columns: the summary's counts, not the details. */
+export const SESSIONS_HIDDEN_BY_DEFAULT: readonly SessionsOptionalColumnId[] = [
+  'location',
+  'entryPage',
+  'exitPage',
+  'device',
+  'sessionId',
+  'endTime',
+  'events',
+  'bounced',
+  ...VITAL_COLUMNS,
+];
+
+const YES = i18n.translate('xpack.digitalExperience.sessions.table.yesValue', {
+  defaultMessage: 'Yes',
+});
+const NO = i18n.translate('xpack.digitalExperience.sessions.table.noValue', {
+  defaultMessage: 'No',
+});
+
+/** A page path in code font, truncated with the full path in its title. */
+const renderPage = (page: string | null) =>
+  page ? (
+    <EuiText size="xs" className="eui-textTruncate" title={page}>
+      <EuiCode transparentBackground>{page}</EuiCode>
+    </EuiText>
+  ) : (
+    <EmptyCellValue />
+  );
+
+const renderText = (text: string | null) =>
+  text ? (
+    <span className="eui-textTruncate" title={text}>
+      {text}
+    </span>
+  ) : (
+    <EmptyCellValue />
+  );
+
+/** Right-aligned like APM's lists, on one line so the table scrolls rather than wraps. */
+const numberColumn = (width = '6em') => ({
+  align: RIGHT_ALIGNMENT,
+  width,
+  minWidth: width,
+  className: 'eui-textNoWrap',
+});
+
 export function SessionsTable({
   sessions,
   total,
@@ -66,6 +209,7 @@ export function SessionsTable({
   noItemsMessage,
   formatters: { formatDate, formatNumber },
   sessionHref,
+  visibleColumns,
   onChange,
 }: {
   sessions: SessionSummary[];
@@ -75,6 +219,7 @@ export function SessionsTable({
   noItemsMessage: ReactNode;
   formatters: Formatters;
   sessionHref: (sessionId: string) => string;
+  visibleColumns: ReadonlySet<SessionsOptionalColumnId>;
   onChange: (patch: {
     sortField?: string;
     sortDirection?: string;
@@ -82,8 +227,8 @@ export function SessionsTable({
     perPage?: string;
   }) => void;
 }) {
-  const columns = useMemo<Array<EuiBasicTableColumn<SessionSummary>>>(
-    () => [
+  const columns = useMemo<Array<EuiBasicTableColumn<SessionSummary>>>(() => {
+    const fixedColumns: Array<EuiBasicTableColumn<SessionSummary>> = [
       {
         field: 'startTime',
         name: i18n.translate('xpack.digitalExperience.sessions.table.startTimeColumn', {
@@ -129,51 +274,41 @@ export function SessionsTable({
           );
         },
       },
-      {
+    ];
+
+    const renderCount = (count: number) => formatNumber(count);
+    const optionalColumns: Record<SessionsOptionalColumnId, EuiBasicTableColumn<SessionSummary>> = {
+      journey: {
         field: 'journey',
-        name: i18n.translate('xpack.digitalExperience.sessions.table.journeyColumn', {
-          defaultMessage: 'Journey',
-        }),
+        name: COLUMN_LABELS.journey,
         render: (journey: string[]) => <JourneyTrail journey={journey} />,
       },
-      {
+      duration: {
         field: 'durationMs',
-        name: i18n.translate('xpack.digitalExperience.sessions.table.durationColumn', {
-          defaultMessage: 'Duration',
-        }),
+        name: COLUMN_LABELS.duration,
         sortable: true,
-        align: RIGHT_ALIGNMENT,
-        width: '9em',
+        ...numberColumn('9em'),
         render: (durationMs: number) => formatSessionDuration(durationMs),
       },
-      {
+      pages: {
         field: 'pageViewCount',
-        name: i18n.translate('xpack.digitalExperience.sessions.table.pagesColumn', {
-          defaultMessage: 'Pages',
-        }),
+        name: COLUMN_LABELS.pages,
         sortable: true,
-        align: RIGHT_ALIGNMENT,
-        width: '6em',
-        render: (count: number) => formatNumber(count),
+        ...numberColumn(),
+        render: renderCount,
       },
-      {
+      clicks: {
         field: 'clickCount',
-        name: i18n.translate('xpack.digitalExperience.sessions.table.clicksColumn', {
-          defaultMessage: 'Clicks',
-        }),
+        name: COLUMN_LABELS.clicks,
         sortable: true,
-        align: RIGHT_ALIGNMENT,
-        width: '6em',
-        render: (count: number) => formatNumber(count),
+        ...numberColumn(),
+        render: renderCount,
       },
-      {
+      errors: {
         field: 'errorCount',
-        name: i18n.translate('xpack.digitalExperience.sessions.table.errorsColumn', {
-          defaultMessage: 'Errors',
-        }),
+        name: COLUMN_LABELS.errors,
         sortable: true,
-        align: RIGHT_ALIGNMENT,
-        width: '6em',
+        ...numberColumn(),
         render: (count: number) =>
           count > 0 ? (
             <EuiBadge color="danger" data-test-subj="digitalExperienceSessionErrors">
@@ -183,9 +318,85 @@ export function SessionsTable({
             formatNumber(count)
           ),
       },
-    ],
-    [formatDate, formatNumber, sessionHref]
-  );
+      location: {
+        field: 'geo',
+        name: COLUMN_LABELS.location,
+        width: '14em',
+        render: (_geo: SessionSummary['geo'], session: SessionSummary) =>
+          renderText(locationOf(session)),
+      },
+      entryPage: {
+        field: 'entryPage',
+        name: COLUMN_LABELS.entryPage,
+        width: '12em',
+        render: renderPage,
+      },
+      exitPage: {
+        field: 'exitPage',
+        name: COLUMN_LABELS.exitPage,
+        width: '12em',
+        render: renderPage,
+      },
+      device: {
+        field: 'userAgent',
+        name: COLUMN_LABELS.device,
+        width: '9em',
+        render: ({ device }: SessionSummary['userAgent']) => renderText(device),
+      },
+      sessionId: {
+        field: 'sessionId',
+        name: COLUMN_LABELS.sessionId,
+        width: '12em',
+        render: (sessionId: string) => (
+          <EuiText size="xs" className="eui-textTruncate" title={sessionId}>
+            <EuiCode transparentBackground>{sessionId}</EuiCode>
+          </EuiText>
+        ),
+      },
+      endTime: {
+        field: 'endTime',
+        name: COLUMN_LABELS.endTime,
+        width: '18em',
+        className: 'eui-textNoWrap',
+        render: (endTime: string) => formatDate(endTime),
+      },
+      events: {
+        field: 'eventCount',
+        name: COLUMN_LABELS.events,
+        ...numberColumn(),
+        render: renderCount,
+      },
+      bounced: {
+        field: 'bounced',
+        name: COLUMN_LABELS.bounced,
+        width: '6em',
+        render: (bounced: boolean) => (bounced ? YES : NO),
+      },
+      ...(Object.fromEntries(
+        VITAL_COLUMNS.map((vital) => [
+          vital,
+          {
+            field: `webVitals.${vital}`,
+            name: COLUMN_LABELS[vital],
+            ...numberColumn('7em'),
+            render: (value: number | null) =>
+              value === null ? (
+                <EmptyCellValue />
+              ) : (
+                <WebVitalBadge vital={vital} value={value} showLabel={false} />
+              ),
+          },
+        ])
+      ) as Record<(typeof VITAL_COLUMNS)[number], EuiBasicTableColumn<SessionSummary>>),
+    };
+
+    return [
+      ...fixedColumns,
+      ...SESSIONS_OPTIONAL_COLUMN_IDS.filter((id) => visibleColumns.has(id)).map(
+        (id) => optionalColumns[id]
+      ),
+    ];
+  }, [formatDate, formatNumber, sessionHref, visibleColumns]);
 
   const onTableChange = ({ page, sort }: CriteriaWithPagination<SessionSummary>) => {
     const sortField = sort ? SORT_FIELDS[sort.field as SortableColumn] : undefined;
@@ -212,6 +423,9 @@ export function SessionsTable({
       items={sessions}
       itemId="sessionId"
       columns={columns}
+      // Many columns: they keep their width and the table scrolls sideways instead of squeezing.
+      tableLayout="auto"
+      scrollableInline
       loading={isLoading}
       noItemsMessage={noItemsMessage}
       sorting={{
