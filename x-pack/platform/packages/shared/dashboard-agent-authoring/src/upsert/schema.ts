@@ -12,37 +12,41 @@ import { upsertPanelContentSchema } from '../panels';
 
 const idSchema = z.string().min(1).max(256);
 
-const upsertSectionSchema = z.object({
-  id: idSchema.describe(
-    'Section id. An existing section id updates that section; a new id creates a section with this id. Use a short readable slug for new sections, e.g. "key-metrics".'
-  ),
-  title: z
-    .string()
-    .min(1)
-    .max(256)
-    .optional()
-    .describe('Section title. Required for new sections.'),
-  collapsed: z
-    .boolean()
-    .optional()
-    .describe('Whether the section is collapsed. Defaults to false.'),
-});
+const upsertSectionSchema = lazySchema(() =>
+  z.object({
+    id: idSchema.describe(
+      'Section id. An existing section id updates that section; a new id creates a section with this id. Use a short readable slug for new sections, e.g. "key-metrics".'
+    ),
+    title: z
+      .string()
+      .min(1)
+      .max(256)
+      .optional()
+      .describe('Section title. Required for new sections.'),
+    collapsed: z
+      .boolean()
+      .optional()
+      .describe(
+        "Whether the section is collapsed. New sections default to false; omit it to keep an existing section's state."
+      ),
+  })
+);
 
 const upsertPanelSchema = lazySchema(() =>
   z.object({
     id: idSchema.describe(
-      'Panel id. An existing panel id updates that panel; a new id creates a panel with this id. Use a short readable slug for new panels, e.g. "error-rate-trend". List each panel once; to move and edit a panel, set `section` and `content` in the same item. Ids are handles that never change: read panel titles for what a panel shows.'
+      'Panel id. An existing id updates that panel; a new id creates one, so copy existing ids exactly. Use a short readable slug for new panels, e.g. "error-rate-trend", that no section or control uses; a new id that looks like a uuid is rejected as a miscopy. List each panel once: to move and edit a panel, set `section` and `content` in the same item. An id is a handle, not a description: read titles for what a panel shows.'
     ),
     section: idSchema
       .nullable()
       .optional()
       .describe(
-        'Section id to place the panel in, or null for the top level. Omit to keep an existing panel where it is; new panels go to the top level when omitted.'
+        'Section id to place the panel in, existing or created in `sections` in this call, or null for the top level. Omit it to keep an existing panel where it is; a new panel goes to the top level.'
       ),
     content: upsertPanelContentSchema
       .optional()
       .describe(
-        'Panel content. Required for new panels. For an existing panel, edits it in place and must match its kind. Prefer an edit to removing and re-adding the panel. For a request edit, put only the requested change in query (e.g. "make the error series blue"); unrelated settings are kept. To change the kind, remove the panel and add a new one with a new id. DSL, form-based, and other non-ES|QL Lens panels, and by-reference panels (config.savedObjectId or config.ref_id), cannot be edited, only moved, removed, or replaced with a new panel. A by-reference panel\'s content is unknown; its title is the only hint. Omit to only move the panel.'
+        'Panel content. Required for a new panel; omit it to only move an existing one. On an existing panel it is an edit of the same kind: the same type for source "config", whose config is replaced in full, and the same renderer for source "request" (omit renderer to keep a Lens or Vega panel\'s own; Lens panels have type "vis"). Prefer an edit to removing and re-adding the panel. For a request edit, put only the requested change in query (e.g. "make the error series blue"); unrelated settings are kept. To change the kind, remove the panel and add a new one with a new id. Source "attachment" only adds new panels. Non-ES|QL Lens panels, and panels of types this tool does not create, cannot be edited. Do not edit by-reference panels (config.savedObjectId or config.ref_id) either: their content is unknown, and their title is the only hint. These panels can only be moved, removed, or replaced with a new panel once the user agrees.'
       ),
   })
 );
@@ -59,7 +63,7 @@ export const upsertDashboardSchema = lazySchema(() =>
       .max(256)
       .optional()
       .describe(
-        'Dashboard title. Required for a new dashboard. If the current title is empty, missing, or a placeholder such as "User Dashboard", invent one from the dashboard\'s contents.'
+        'Dashboard title. Required for a new dashboard; omit it to keep the current one. Replace an empty or placeholder title with one that says what the dashboard shows.'
       ),
     description: z
       .string()
@@ -71,42 +75,42 @@ export const upsertDashboardSchema = lazySchema(() =>
     time_range: timeRangeSchema
       .optional()
       .describe(
-        'Override the dashboard time range. ONLY set this when the user explicitly requested a specific time window (e.g. "show the last 7 days", "set time range to May 20–24"). Do NOT set it otherwise — a data-aware default is applied automatically. Convert natural language to Kibana date math or ISO 8601: "last 30 minutes" → { from: "now-30m", to: "now" }, "last 90 days" → { from: "now-90d", to: "now" }, "May 20–24" → { from: "2024-05-20T00:00:00.000Z", to: "2024-05-24T23:59:59.999Z", mode: "absolute" }.'
+        'Dashboard time range. Set it ONLY when the user asks for a specific time window, e.g. "last 7 days" → { from: "now-7d", to: "now" }. Otherwise omit it: a dashboard without a range gets a default chosen from its data, and an existing range is kept.'
       ),
     sections: z
       .array(upsertSectionSchema)
       .max(50)
       .optional()
       .describe(
-        'Sections to create or update. Sections group related panels under a collapsible title. Group panels by purpose, and order sections as summary metrics, then trends, then breakdowns, or use one section per domain with that order inside it. A section holds only panels of its purpose. Use sections for roughly 6 or more visualization panels; keep smaller dashboards flat.'
+        'Sections to create or update: collapsible groups of panels. Put panels in them with `panels[].section`. On a new dashboard, use sections for roughly 6 or more visualization panels and keep smaller dashboards flat; do not regroup an existing dashboard unless asked to reorganize or improve it. Group panels by purpose, ordering sections as summary metrics, then trends, then breakdowns, or one section per domain with that order inside it. A section holds only panels of its purpose.'
       ),
     panels: z
       .array(upsertPanelSchema)
       .max(100)
       .optional()
       .describe(
-        `Panels to create, edit, or move between sections, by id. Panels you leave out stay unchanged.
+        `Panels to create, edit, or move between sections, by id. List only those: panels you leave out stay unchanged, and content sent for an existing panel is applied as an edit.
 On a new dashboard, cover what the data supports: summary metrics (metric or gauge), trends over time (xy line or area), and breakdowns or distributions (xy bar, data_table, pie, treemap, heatmap, tag_cloud). Add as many panels as the data and the request justify, each with a clear purpose. For a vague request, cover the breadth of the mapped fields rather than a minimal set. A markdown panel can add context.
 Pick the first panel kind that fits:
-- Lens (source "request", renderer omitted): metrics, time series, bar, area, pie, and tables. chartType is required for a new Lens panel.
+- Lens (source "request", renderer omitted): metrics and single-number KPIs, time series, bar, area, pie, and tables. chartType is required for a new Lens panel.
 - Vega (source "request", renderer "vega"): scatter or bubble plots, small multiples, layered or combination charts, or when asked for Vega.
-- markdown (source "config"): static text or links with no data.
-- custom content (source "request", renderer "custom_content"): a last resort for HTML layouts that Lens and Vega cannot express, such as status boards or KPI cards with badges, or when asked for custom HTML.
-ML anomaly panels are also authored by value with source "config". Source "attachment" places a visualization already created in the same Agent Builder conversation, by its id.`
+- markdown (source "config", type "markdown"): static text or links with no data.
+- custom content (source "request", renderer "custom_content"): a last resort for HTML layouts that Lens and Vega cannot express, such as status boards or cards that mix values, badges and text, or when asked for custom HTML.
+ML anomaly panels (source "config") need existing anomaly detection job ids. Source "attachment" adds a visualization already created in the same Agent Builder conversation as a new panel; it works only there.`
       ),
     controls: z
       .array(controlInputSchema)
       .max(20)
       .optional()
       .describe(
-        'Controls to add or replace, by id. Controls you leave out stay unchanged. Controls are filters pinned above the panels that let viewers narrow the data without editing queries. On a new dashboard, add 3-5 options_list_control dropdowns on low-cardinality keyword fields the panels group or filter by (e.g. service.name, host.name, region), not identifiers such as trace or request ids. Skip controls when the dashboard covers a single entity, such as one host. Controls query the index directly, so columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back one; add fewer or none when no mapped field fits. Use range_slider_control sparingly, for a numeric field worth filtering across panels. Use time_slider_control for time sub-range filtering, at most one per dashboard.'
+        'Controls to add or replace, by id; controls you leave out stay unchanged. Controls are filters pinned above the panels. On a new dashboard, add 3-5 options_list_control dropdowns on low-cardinality fields the panels group or filter by (e.g. service.name, host.name, region), not identifiers such as trace or request ids. Skip controls when the dashboard covers a single entity, such as one host. Controls query the index directly, so columns created in ES|QL (DISSECT, GROK, EVAL, RENAME) cannot back one; add fewer or none when no mapped field fits. Use range_slider_control sparingly, for a numeric field worth filtering across panels, and time_slider_control for time sub-range filtering, at most one per dashboard. A control that cannot be added, because its field is not mapped on its index or does not suit it, or because it is a second time slider, is left out: silently, unless `user_requested` is true or it replaces an existing control.'
       ),
     remove: z
       .array(idSchema)
       .max(200)
       .optional()
       .describe(
-        'Ids of panels, sections, or controls to remove. Removing a section also removes the panels still in it; to keep some, move them in the same call with `panels[].section` (null for the top level). A section is kept when a panel listed to move out of it cannot be moved.'
+        'Ids of panels, sections, or controls to remove. Removing a section also removes the panels still in it; to keep some, move them in the same call with `panels[].section` (null for the top level). Do not also list a removed id in `panels`, `sections` or `controls`: neither change would be applied.'
       ),
   })
 );

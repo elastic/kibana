@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -51,24 +51,26 @@ const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAtta
   panels.every((widget) => isSection(widget) && widget.panels.length === 0) &&
   (pinnedPanels ?? []).length === 0;
 
-const generateDashboardSchema = z.object({
-  dashboardAttachmentId: z
-    .string()
-    .max(256)
-    .optional()
-    .describe(
-      '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
-    ),
-  ...upsertDashboardSchema.shape,
-  layout: z
-    .string()
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe(
-      'The user\'s own arrangement or size request, in plain words, e.g. "make the table full width". Omit it otherwise: new, moved, and removed panels and sections are placed and sized automatically, so do not describe where your changes go. It arranges panels only within their section or the top level: to move a panel into or out of a section, set its `section` in `panels`.'
-    ),
-});
+const generateDashboardSchema = lazySchema(() =>
+  z.object({
+    dashboardAttachmentId: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'Id of the dashboard attachment to edit, as returned by an earlier call; pass the same id on every later edit. Omit it to create a new dashboard. The current dashboard is read from it, so send only the changes. An unknown id is an error.'
+      ),
+    ...upsertDashboardSchema.shape,
+    layout: z
+      .string()
+      .min(1)
+      .max(1000)
+      .optional()
+      .describe(
+        'Arrangement or size changes the user asked for, in plain words, naming panels by title or id, e.g. "make the table full width" or "re-plan the whole layout". Omit it otherwise: added, moved, and removed panels and sections are placed automatically, so do not describe where your changes go. It can reorder sections and resize or reorder panels within their section or the top level; to move a panel into or out of a section, set its `section` in `panels`.'
+      ),
+  })
+);
 
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' ? value : undefined;
@@ -144,13 +146,11 @@ export const generateDashboardTool = ({
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
-    description: `Create or update a dashboard by describing the desired changes, keyed by id. Everything you leave out stays unchanged. Make all changes in one call when possible.
+    description: `Create or update a dashboard by sending only the changes. Panels, sections and controls are keyed by id: an existing id updates that item, a new id creates it, and everything you leave out stays unchanged. Make all changes in one call when possible. Each field's description says how to use it well.
 
-Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
+Visualization panels are generated server-side from a plain-words \`query\`; do not write ES|QL yourself. Positions and sizes are set automatically.
 
-Set \`title\`, \`description\` and \`time_range\`, create or update \`sections\`, \`panels\` and \`controls\`, and list ids to delete in \`remove\`. Each field's description says how to use it well.
-
-Panel positions and sizes are set automatically after the changes are applied, and the summary shows the resulting \`grid\` of every panel. The result lists the ids the call created, updated and removed, so a mistyped id that created a new panel instead of updating one is visible. A panel only moved or resized by the layout step is not listed as updated.`,
+Persists the dashboard as an attachment and returns its id and version plus a compact summary. Use that id to render the dashboard and to edit it later. Changes are applied one by one: failed ones are listed in \`failures\` with the reason and the rest are kept, so resend only the failed ones (some controls are left out silently, see \`controls\`). A new dashboard needs \`title\`, and nothing is created when none of its requested panels and controls can be added. The result lists the ids created, updated and removed, so a mistyped id that created a new panel is visible.`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, layout, ...upsert },

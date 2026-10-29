@@ -413,6 +413,11 @@ describe('generateDashboardTool descriptions', () => {
     expect(tool.description).toContain("Each field's description says how to use it well");
   });
 
+  it('says that changes apply one by one and failures are listed', () => {
+    expect(tool.description).toContain('Changes are applied one by one');
+    expect(tool.description).toContain('resend only the failed ones');
+  });
+
   it('says which panels to add and which panel kind to pick', () => {
     expect(properties.panels.description).toContain('summary metrics');
     expect(properties.panels.description).toContain('Pick the first panel kind that fits');
@@ -422,8 +427,9 @@ describe('generateDashboardTool descriptions', () => {
   it('says how to edit a panel and which panels cannot be edited', () => {
     const { description } = properties.panels.items.properties.content;
     expect(description).toContain('Prefer an edit to removing and re-adding the panel');
-    expect(description).toContain('non-ES|QL Lens panels, and by-reference panels');
-    expect(description).toContain('cannot be edited, only moved, removed, or replaced');
+    expect(description).toContain('Non-ES|QL Lens panels');
+    expect(description).toContain('Do not edit by-reference panels');
+    expect(description).toContain('can only be moved, removed, or replaced with a new panel');
   });
 
   it('says when to use sections and how to order them', () => {
@@ -434,6 +440,12 @@ describe('generateDashboardTool descriptions', () => {
   it('says which controls to add on a new dashboard', () => {
     expect(properties.controls.description).toContain('3-5 options_list_control dropdowns');
     expect(properties.controls.description).toContain('cannot back one');
+  });
+
+  it('says which controls are left out without a failure', () => {
+    expect(properties.controls.description).toContain(
+      'silently, unless `user_requested` is true or it replaces an existing control'
+    );
   });
 
   it('asks for a description on a new dashboard', () => {
