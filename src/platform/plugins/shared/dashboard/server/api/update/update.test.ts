@@ -36,7 +36,7 @@ const getInitialAttributes = (): DashboardSavedObjectAttributes => ({
 describe('update history sequence', () => {
   let stored: { attributes: DashboardSavedObjectAttributes; version: number };
   let loggedSequences: number[];
-  let requestCtx: RequestHandlerContext;
+  let services: DashboardRequestServices;
   let savedObjectsClient: { get: jest.Mock; update: jest.Mock; changeAccessMode: jest.Mock };
   let supportsAccessControl: boolean;
 
@@ -127,7 +127,7 @@ describe('update history sequence', () => {
   describe('access mode change', () => {
     const saveWithAccessMode = () =>
       update(
-        requestCtx,
+        services,
         getDashboardStateSchema(false),
         ID,
         { ...getState('Second'), access_control: { access_mode: 'write_restricted' } },
