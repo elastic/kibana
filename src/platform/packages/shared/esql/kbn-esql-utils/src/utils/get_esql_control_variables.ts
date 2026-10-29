@@ -9,12 +9,13 @@
 
 import { EsqlControlType } from '@kbn/esql-types';
 import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import { castESQLValue } from './cast_esql_value';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const castOption = (option: string | number): string | number =>
-  typeof option === 'string' && !isNaN(Number(option)) ? Number(option) : option;
+  typeof option === 'string' ? castESQLValue(option) : option;
 
 /** Reads the variables published by ES|QL controls from the `config` of each saved control, for code with no live control. */
 export const getESQLControlVariablesFromState = (
