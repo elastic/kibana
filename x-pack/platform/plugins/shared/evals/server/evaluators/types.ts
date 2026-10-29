@@ -18,7 +18,8 @@ export interface TraceAccessor {
 }
 
 export interface EvaluatorContext<ReferenceData = Record<string, unknown>> {
-  trace: TraceAccessor;
+  /** Absent when the round was passed in memory rather than read from a trace. */
+  trace?: TraceAccessor;
   round: EvidenceRound;
   referenceData?: ReferenceData;
   inferenceClient?: BoundInferenceClient;
@@ -56,6 +57,11 @@ export interface RegisteredEvaluatorDefinition<ReferenceData = Record<string, un
   kind: 'llm' | 'code';
   description: string;
   direction: Direction;
+  /**
+   * What the evaluator reads from `reference_data`: ground truth, or other inputs beyond the
+   * round, such as a transcript. An evaluation whose `reference_data` doesn't match is refused
+   * before any evaluator runs.
+   */
   referenceDataSchema?: z.ZodType<ReferenceData>;
   evidenceSchema?: z.ZodType<Partial<EvidenceRound>>;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;

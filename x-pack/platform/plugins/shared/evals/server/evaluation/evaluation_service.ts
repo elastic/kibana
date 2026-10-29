@@ -15,24 +15,40 @@ import {
   getDuplicateEvaluatorNamesMessage,
 } from '../lib/duplicate_evaluator_names';
 import { EvaluationExecutionError } from './evaluation_execution_error';
-import { executeEvaluators, type ResolvedEvaluator } from './execute_evaluators';
+import {
+  executeEvaluators,
+  type InMemoryEvidence,
+  type ResolvedEvaluator,
+} from './execute_evaluators';
 
 export type EvaluatorSelection = EvaluateRequestBody['evaluators'][number];
 
-export interface EvaluateOptions {
+interface EvaluateBaseOptions {
   request: KibanaRequest;
   /** Space the evaluators are resolved in. */
   spaceId: string;
-  subject: EvaluationSubject;
   evaluators: EvaluatorSelection[];
+}
+
+interface EvaluateTraceOptions extends EvaluateBaseOptions {
+  subject: EvaluationSubject;
   /** Identity the trace and log documents are read under. */
   traceReader: ElasticsearchClient;
+  evidence?: never;
 }
+
+interface EvaluateEvidenceOptions extends EvaluateBaseOptions {
+  evidence: InMemoryEvidence;
+  subject?: never;
+  traceReader?: never;
+}
+
+export type EvaluateOptions = EvaluateTraceOptions | EvaluateEvidenceOptions;
 
 export interface EvaluationService {
   /**
-   * Grades one subject with the selected evaluators. Expects input already validated
-   * against `EvaluateRequestBody`.
+   * Grades a trace, or a round passed in memory, with the selected evaluators. Expects input
+   * already validated.
    */
   evaluate(options: EvaluateOptions): Promise<EvaluateResult[]>;
 }
@@ -49,7 +65,8 @@ export const createEvaluationService = ({
   logger,
   getInferenceStart,
 }: EvaluationServiceDependencies): EvaluationService => ({
-  evaluate: async ({ request, spaceId, subject, evaluators, traceReader }) => {
+  evaluate: async (options) => {
+    const { request, spaceId, evaluators } = options;
     const duplicateEvaluatorNames = findDuplicateEvaluatorNames(evaluators);
     if (duplicateEvaluatorNames.length > 0) {
       throw new EvaluationExecutionError(
@@ -71,13 +88,13 @@ export const createEvaluationService = ({
       resolvedEvaluators.push({ definition, connectorId });
     }
 
-    return executeEvaluators({
-      request,
-      subject,
-      evaluators: resolvedEvaluators,
-      logger,
-      getInferenceStart,
-      traceReader,
-    });
+    const baseOptions = { request, evaluators: resolvedEvaluators, logger, getInferenceStart };
+    return options.evidence
+      ? executeEvaluators({ ...baseOptions, evidence: options.evidence })
+      : executeEvaluators({
+          ...baseOptions,
+          subject: options.subject,
+          traceReader: options.traceReader,
+        });
   },
 });
