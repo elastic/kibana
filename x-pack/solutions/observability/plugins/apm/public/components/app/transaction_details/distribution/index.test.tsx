@@ -69,7 +69,10 @@ function Wrapper({
   history.replace({
     pathname: '/services/the-service-name/transactions/view',
     search: fromQuery({
-      ...toQuery(search),
+      // `search` is a bare query string produced by `fromQuery` (no leading
+      // `?`), while `toQuery` expects a `location.search` value and strips the
+      // first character; prepend `?` so the first key survives the round-trip.
+      ...toQuery(search ? `?${search}` : search),
       transactionName: 'the-transaction-name',
       rangeFrom: 'now-15m',
       rangeTo: 'now',
