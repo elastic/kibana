@@ -437,10 +437,8 @@ export class WorkersService {
     }
 
     try {
-      // Worker workflows run their `ai.agent` steps on the shared thin agent, so the space needs
-      // it before a run can start. An API enable may come before anything has listed the space's
-      // Workers. A failed ensure refuses the enable: a Worker enabled without the agent fails
-      // every run.
+      // An API enable can come before any list ensured the shared agent, and a Worker enabled
+      // without it fails every run, so a failed ensure refuses the enable.
       if (nextEnabled) {
         await this.requireAgent(spaceId);
       }
