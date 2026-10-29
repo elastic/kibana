@@ -100,6 +100,8 @@ export const MAX_AI_INDEX_QUERY_LENGTH = 10000;
 export const MAX_AI_INDEX_QUERY_PARAMS = 100;
 export const MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH = 256;
 export const MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH = 4096;
+/** Bound on the `user_id` a document carries and a read is scoped to. */
+export const MAX_AI_INDEX_USER_ID_LENGTH = 256;
 
 /** Row limit the server always enforces; a larger trailing `LIMIT` in the query is capped to it. */
 export const DEFAULT_AI_INDEX_QUERY_LIMIT = 100;

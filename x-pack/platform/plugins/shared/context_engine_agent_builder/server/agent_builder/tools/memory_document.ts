@@ -33,6 +33,7 @@ interface MemoryGovernance {
 export interface StoredMemoryDocument {
   '@timestamp': string;
   id: string;
+  user_id?: string;
   type: string;
   title: string;
   description: string;

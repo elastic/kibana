@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_AI_INDEX_USER_ID_LENGTH } from '../constants';
 import {
   kiFieldsSchema,
   kiPartialFieldsSchema,
@@ -132,6 +133,18 @@ describe('kiFieldsSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it('accepts an optional bounded user_id', () => {
+    const base = { type: 'index_metadata', title: 'title' };
+
+    expect(kiFieldsSchema.safeParse(base).success).toBe(true);
+    expect(kiFieldsSchema.safeParse({ ...base, user_id: 'alice' }).success).toBe(true);
+    expect(kiFieldsSchema.safeParse({ ...base, user_id: '' }).success).toBe(false);
+    expect(
+      kiFieldsSchema.safeParse({ ...base, user_id: 'u'.repeat(MAX_AI_INDEX_USER_ID_LENGTH + 1) })
+        .success
+    ).toBe(false);
   });
 
   it('accepts an ISO 8601 expires_at', () => {

@@ -34,6 +34,7 @@ import {
   MAX_AI_INDICES,
   MAX_AI_INDEX_TRACES,
   MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
+  MAX_AI_INDEX_USER_ID_LENGTH,
   MAX_KI_SEARCH_QUERY_LENGTH,
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
@@ -923,8 +924,20 @@ describe('ai indices routes', () => {
 
       it('accepts a full body', () => {
         expect(() =>
-          validateBody({ query: 'FROM a', params: { s: 'x', n: 1, b: true }, limit: 5 })
+          validateBody({
+            query: 'FROM a',
+            params: { s: 'x', n: 1, b: true },
+            limit: 5,
+            user_id: 'alice',
+          })
         ).not.toThrow();
+      });
+
+      it('bounds user_id', () => {
+        expect(() => validateBody({ query: 'FROM a', user_id: '' })).toThrow(/user_id/);
+        expect(() =>
+          validateBody({ query: 'FROM a', user_id: 'u'.repeat(MAX_AI_INDEX_USER_ID_LENGTH + 1) })
+        ).toThrow(/user_id/);
       });
 
       it('requires a non-empty query', () => {
@@ -990,8 +1003,19 @@ describe('ai indices routes', () => {
       expect(readServiceParams).toHaveLength(1);
       expect(readServiceParams[0].request).toBe(request);
       expect(readServiceParams[0].esClient).toMatchObject({ search: esSearch, get: esGet });
-      expect(readService.describe).toHaveBeenCalledWith('a');
+      expect(readService.describe).toHaveBeenCalledWith('a', { userId: undefined });
       expect(response.ok).toHaveBeenCalledWith({ body: description });
+    });
+
+    it('passes user_id from the query string to the read service', async () => {
+      readService.describe.mockResolvedValue(description);
+
+      await callRoute('GET', AI_INDEX_DESCRIBE_PATH, {
+        params: { aiIndexId: 'a' },
+        query: { user_id: 'alice' },
+      });
+
+      expect(readService.describe).toHaveBeenCalledWith('a', { userId: 'alice' });
     });
 
     it('returns 404 when the AI Index does not exist', async () => {

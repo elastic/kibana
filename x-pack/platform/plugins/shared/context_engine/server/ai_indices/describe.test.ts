@@ -225,6 +225,14 @@ describe('describeAiIndex', () => {
     expect(response).not.toContain('platform.context_engine.remember');
   });
 
+  it('passes the user scope to the counts', async () => {
+    await describeAiIndex({ ...params, userId: 'alice' });
+
+    expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'marketing', userId: 'alice' })
+    );
+  });
+
   it('omits memory capability when the memory feature flag is disabled', async () => {
     const response = await describeAiIndex({
       ...params,

@@ -16,42 +16,53 @@ import {
   MAX_AI_INDEX_QUERY_PARAMS,
   MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH,
   MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH,
+  MAX_AI_INDEX_USER_ID_LENGTH,
 } from '@kbn/context-engine-plugin/common/constants';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 import { getErrorMessage, type AiIndexToolDeps } from '../ai_index_read_service';
 import { queryAiIndicesHandler } from './handler';
 
-const queryAiIndicesSchema = z.object({
-  query: z
-    .string()
-    .min(1)
-    .max(MAX_AI_INDEX_QUERY_LENGTH)
-    .describe(
-      'The ES|QL query to run. Its FROM decides which indices are read; use the esql_target from the list or describe AI Index tools. Do not add a space condition: the server adds the space filter.'
-    ),
-  params: z
-    .record(
-      z.string().min(1).max(MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH),
-      z.union([z.string().max(MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH), z.number(), z.boolean()])
-    )
-    .refine((params) => Object.keys(params).length <= MAX_AI_INDEX_QUERY_PARAMS, {
-      message: `params must not have more than ${MAX_AI_INDEX_QUERY_PARAMS} entries.`,
-    })
-    .optional()
-    .describe('(Optional) Values for ?named parameters in the query.'),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_AI_INDEX_QUERY_LIMIT)
-    .optional()
-    .default(DEFAULT_AI_INDEX_QUERY_LIMIT)
-    .describe(
-      `(Optional) Maximum rows to return. Defaults to ${DEFAULT_AI_INDEX_QUERY_LIMIT}, at most ${MAX_AI_INDEX_QUERY_LIMIT}. If the query has a smaller LIMIT, that smaller value is used.`
-    ),
-});
+const queryAiIndicesSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .min(1)
+      .max(MAX_AI_INDEX_QUERY_LENGTH)
+      .describe(
+        'The ES|QL query to run. Its FROM decides which indices are read; use the esql_target from the list or describe AI Index tools. Do not add a space condition: the server adds the space filter.'
+      ),
+    params: z
+      .record(
+        z.string().min(1).max(MAX_AI_INDEX_QUERY_PARAM_KEY_LENGTH),
+        z.union([z.string().max(MAX_AI_INDEX_QUERY_PARAM_VALUE_LENGTH), z.number(), z.boolean()])
+      )
+      .refine((params) => Object.keys(params).length <= MAX_AI_INDEX_QUERY_PARAMS, {
+        message: `params must not have more than ${MAX_AI_INDEX_QUERY_PARAMS} entries.`,
+      })
+      .optional()
+      .describe('(Optional) Values for ?named parameters in the query.'),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_AI_INDEX_QUERY_LIMIT)
+      .optional()
+      .default(DEFAULT_AI_INDEX_QUERY_LIMIT)
+      .describe(
+        `(Optional) Maximum rows to return. Defaults to ${DEFAULT_AI_INDEX_QUERY_LIMIT}, at most ${MAX_AI_INDEX_QUERY_LIMIT}. If the query has a smaller LIMIT, that smaller value is used.`
+      ),
+    user_id: z
+      .string()
+      .min(1)
+      .max(MAX_AI_INDEX_USER_ID_LENGTH)
+      .optional()
+      .describe(
+        '(Optional) Limits rows to documents with this user_id and documents with no user_id. Pass it when the application or prompt gives a user id to scope reads to; omit it otherwise.'
+      ),
+  })
+);
 
 export const createQueryAiIndicesTool = (
   deps: AiIndexToolDeps
@@ -72,6 +83,7 @@ export const createQueryAiIndicesTool = (
     Call the describe AI Index tool first: it gives the FROM target, the fields, and example queries to start from.
 
     The server adds the space filter and a row limit (at most ${MAX_AI_INDEX_QUERY_LIMIT}). Do not write a space condition in the query.
+    Pass user_id when the application scopes reads to a user: the server then also hides other users' documents.
     The space comes from the request. Over MCP that is the URL: /api/agent_builder/mcp is the default space, /s/{spaceId}/api/agent_builder/mcp is another space.
     The query's FROM decides which indices are read. It can read more than one AI Index, but only the indices you have Elasticsearch read access to.
     Put time constraints in the ES|QL itself (for example WHERE @timestamp >= NOW() - 24 hours) or in params.
@@ -79,11 +91,11 @@ export const createQueryAiIndicesTool = (
   schema: queryAiIndicesSchema,
   availability: aiIndexToolsAvailability,
   // Not esql_results: the UI re-runs those in Discover and Lens without the server's space filter and limit.
-  handler: async ({ query, params, limit }, context) => {
+  handler: async ({ query, params, limit, user_id: userId }, context) => {
     try {
       const { columns, values } = await queryAiIndicesHandler({
         deps,
-        request: { query, params, limit },
+        request: { query, params, limit, user_id: userId },
         context,
       });
       return { results: [{ type: ToolResultType.other, data: { columns, values } }] };

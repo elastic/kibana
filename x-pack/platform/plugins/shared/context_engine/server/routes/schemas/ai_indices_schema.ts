@@ -28,6 +28,7 @@ import {
   MAX_AI_INDEX_TRACES,
   MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
   MAX_AI_INDEX_TRACE_VALUE_LENGTH,
+  MAX_AI_INDEX_USER_ID_LENGTH,
   MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
   MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH,
   MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
@@ -64,6 +65,21 @@ const aiIndexIdSchema = schema.string({
 
 export const aiIndexIdParamsSchema = schema.object({
   aiIndexId: aiIndexIdSchema,
+});
+
+const userIdFilterSchema = schema.maybe(
+  schema.string({
+    minLength: 1,
+    maxLength: MAX_AI_INDEX_USER_ID_LENGTH,
+    meta: {
+      description:
+        'When set, limits reads to documents with this `user_id` and documents with no `user_id`. When omitted, no user filter is applied.',
+    },
+  })
+);
+
+export const describeAiIndexQuerySchema = schema.object({
+  user_id: userIdFilterSchema,
 });
 
 const signalTimeRangeSchema = schema.oneOf(
@@ -379,6 +395,16 @@ export const updateKiBodySchema = schema.object({
       maxLength: MAX_KI_CONTENT_LENGTH,
       meta: { description: 'The content for the Knowledge Indicator.' },
     }),
+    user_id: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: MAX_AI_INDEX_USER_ID_LENGTH,
+        meta: {
+          description:
+            'The user the Knowledge Indicator is scoped to. Unset means shared with every user.',
+        },
+      })
+    ),
   }),
 });
 
@@ -418,6 +444,7 @@ export const queryAiIndicesBodySchema = schema.object({
       },
     })
   ),
+  user_id: userIdFilterSchema,
 });
 
 export const deleteAiIndexQuerySchema = schema.object({
