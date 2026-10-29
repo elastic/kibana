@@ -20,8 +20,6 @@ import { configure } from '@testing-library/react';
 // instead of default 'data-testid', use kibana's 'data-test-subj'
 configure({ testIdAttribute: 'data-test-subj', asyncUtilTimeout: 4500 });
 
-/* eslint-env jest */
-
 const consoleFilters = [
   /^The above error occurred in the <.*?> component:/, // error boundary output
   /^Error: Uncaught .+/, // jsdom output

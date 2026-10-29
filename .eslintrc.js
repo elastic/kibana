@@ -403,11 +403,7 @@ module.exports = {
         jest: true,
       },
       rules: {
-        complexity: 'warn',
-
         'no-duplicate-imports': 'off',
-        // rely on typescript
-        'no-undef': 'off',
         'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
         'react/no-deprecated': 'error',
@@ -515,7 +511,6 @@ module.exports = {
         jest: true,
       },
       rules: {
-        complexity: 'error',
         'consistent-return': 'error',
         'import/order': [
           'error',
@@ -526,10 +521,7 @@ module.exports = {
         ],
 
         'no-duplicate-imports': 'off',
-        // rely on typescript
-        'no-undef': 'off',
         'require-atomic-updates': 'error',
-        'sort-keys': 'error',
       },
     },
 
@@ -805,11 +797,7 @@ module.exports = {
         jest: true,
       },
       rules: {
-        complexity: 'warn',
-
         'no-duplicate-imports': 'off',
-        // rely on typescript
-        'no-undef': 'off',
         'react/boolean-prop-naming': 'error',
         'react/display-name': 'error',
         'react/no-deprecated': 'error',

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-env jest */
-
 jest.mock('@kbn/i18n-react', () => {
   // We must initialize i18n before using the i18n Provider
   // This is an implementation detail for our package to ensure no re-renders needed

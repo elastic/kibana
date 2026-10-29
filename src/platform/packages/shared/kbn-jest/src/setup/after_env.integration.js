@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-env jest */
-
 /**
  * Set the default timeout for the integration test suite to 10 minutes
  */

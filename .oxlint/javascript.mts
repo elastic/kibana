@@ -115,7 +115,6 @@ export const javascriptRules: DummyRuleMap = {
   // ],
   // 'no-return-assign': 'error',
   'no-script-url': 'error',
-  // 'no-undef': 'error',
   // 'no-undef-init': 'error',
   'no-underscore-dangle': 'off',
   'no-unused-labels': 'error',
@@ -137,7 +136,9 @@ export const javascriptRules: DummyRuleMap = {
 export const javascriptOverrides: OxlintOverride[] = [
   {
     files: ['**/*.js', '**/*.mjs'],
+    env: { browser: true, es6: true, mocha: true, node: true },
     rules: {
+      'no-undef': 'error',
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       'new-cap': ['error', { capIsNewExceptions: ['Private'] }],
       'no-global-assign': 'error',

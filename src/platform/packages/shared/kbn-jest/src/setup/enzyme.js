@@ -12,8 +12,6 @@ import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 
 configure({ adapter: new Adapter() });
 
-/* eslint-env jest */
-
 /**
  * This is a workaround to fix snapshot serialization of emotion classes when rendering React@18 using `import { render } from 'enzyme'`
  * With React@18 emotion uses `useInsertionEffect` to insert styles into the DOM, which enzyme `render` does not trigger because it is using ReactDomServer.renderToString.
