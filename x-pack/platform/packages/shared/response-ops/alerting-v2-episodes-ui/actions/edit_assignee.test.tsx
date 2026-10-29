@@ -18,9 +18,11 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { QueryClient } from '@kbn/react-query';
 
+import * as i18n from './translations';
 import { createEditAssigneeAction } from './edit_assignee';
 import { bulkAssignEpisodeActions } from './bulk_create_alert_actions';
 import { openAssigneeModal } from '../components/assignee_modal';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
 
 jest.mock('./bulk_create_alert_actions');
 jest.mock('../components/assignee_modal');
@@ -120,12 +122,12 @@ describe('createEditAssigneeAction', () => {
       await waitFor(() => expect(onSuccess).toHaveBeenCalled());
       expect(mockBulkCreate).toHaveBeenCalledTimes(1);
       expect(mockBulkCreate).toHaveBeenCalledWith(mockDeps.http, [
-        { episode_id: 'ep-1', assignee_uid: 'uid-picked' },
-        { episode_id: 'ep-2', assignee_uid: 'uid-picked' },
+        { alert_id: 'ep-1', assignee_uid: 'uid-picked' },
+        { alert_id: 'ep-2', assignee_uid: 'uid-picked' },
       ]);
     });
 
-    it('surfaces a danger toast when the bulk request fails', async () => {
+    it('surfaces an expandable error toast when the bulk request fails', async () => {
       mockBulkCreate.mockRejectedValue(new Error('boom'));
       const onSuccess = jest.fn();
       const action = createEditAssigneeAction(mockDeps);
@@ -133,8 +135,29 @@ describe('createEditAssigneeAction', () => {
 
       await userEvent.click(screen.getByTestId('mockPopoverItem'));
 
-      await waitFor(() => expect(mockNotifications.toasts.addDanger).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockNotifications.toasts.addError).toHaveBeenCalledWith(
+          expect.objectContaining({ stack: 'ep-1 — boom' }),
+          expect.objectContaining({ toastMessage: 'boom' })
+        )
+      );
       expect(onSuccess).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getBulkDisabledReason', () => {
+    it('gives a bulk reason when the selection includes a classic alert', () => {
+      const action = createEditAssigneeAction(mockDeps);
+      const classicEpisode = {
+        ...makeEpisode('classic-1'),
+        supports_actions: false,
+        source_id: CLASSIC_EPISODE_SOURCE_ID,
+      };
+
+      expect(action.getBulkDisabledReason!([makeEpisode('universal-1'), classicEpisode])).toBe(
+        i18n.EDIT_ASSIGNEE_NOT_AVAILABLE
+      );
+      expect(action.getBulkDisabledReason!([makeEpisode('universal-1')])).toBeUndefined();
     });
   });
 
@@ -152,7 +175,7 @@ describe('createEditAssigneeAction', () => {
         { assigneeUid: 'uid-joana', episodeCount: 1 }
       );
       expect(mockBulkCreate).toHaveBeenCalledWith(mockDeps.http, [
-        expect.objectContaining({ episode_id: 'ep-1', assignee_uid: 'uid-picked' }),
+        expect.objectContaining({ alert_id: 'ep-1', assignee_uid: 'uid-picked' }),
       ]);
     });
 

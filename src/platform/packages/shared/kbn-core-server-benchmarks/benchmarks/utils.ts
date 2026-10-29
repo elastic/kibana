@@ -11,6 +11,7 @@ import Path from 'path';
 import Fs from 'fs/promises';
 import execa, { type ExecaChildProcess } from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { withTimeout } from '@kbn/std';
 import { getBuildDir } from './get_build_dir';
 
 async function waitForStdout({
@@ -195,12 +196,8 @@ export async function stopGracefully(
       () => true // ignore error rejection caused by signal
     );
 
-    const exited = await Promise.race([
-      waitForProc,
-      new Promise<boolean>((r) => setTimeout(() => r(false), timeout)),
-    ]);
-
-    return exited;
+    const outcome = await withTimeout({ promise: waitForProc, timeoutMs: timeout });
+    return outcome.timedout ? false : outcome.value;
   }
 
   // Already exited?

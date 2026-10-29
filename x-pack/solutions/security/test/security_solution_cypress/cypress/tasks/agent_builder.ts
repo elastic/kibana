@@ -9,10 +9,9 @@ import {
   NEW_AGENT_BUILDER_ATTACHMENT_BUTTON,
   AGENT_BUILDER_CONVERSATION_INPUT_EDITOR,
   AGENT_BUILDER_SIDEBAR_PANEL,
-  CREATE_RULE_BUTTON,
+  CREATE_RULE_MORE_OPTIONS_BUTTON,
   CREATE_RULE_CONTEXT_MENU_POPOVER,
   AI_RULE_CREATION_MENU_ITEM,
-  MANUAL_RULE_CREATION_MENU_ITEM,
 } from '../screens/agent_builder';
 
 export const clickNewAgentBuilderAttachmentButton = () => {
@@ -24,16 +23,12 @@ export const assertAgentBuilderConversationInputEditorContains = (expectedText: 
 };
 
 export const openCreateRuleMenu = () => {
-  cy.get(CREATE_RULE_BUTTON).should('be.visible').click();
+  cy.get(CREATE_RULE_MORE_OPTIONS_BUTTON).should('be.visible').click();
   cy.get(CREATE_RULE_CONTEXT_MENU_POPOVER).should('be.visible');
 };
 
 export const clickAiRuleCreationMenuItem = () => {
   cy.get(AI_RULE_CREATION_MENU_ITEM).should('be.visible').click();
-};
-
-export const clickManualRuleCreationMenuItem = () => {
-  cy.get(MANUAL_RULE_CREATION_MENU_ITEM).should('be.visible').click();
 };
 
 export const assertAgentBuilderSidebarIsOpen = () => {

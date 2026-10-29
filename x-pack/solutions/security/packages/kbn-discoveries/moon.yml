@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/event-log-plugin'
   - '@kbn/workflows-management-plugin'
   - '@kbn/datemath'
+  - '@kbn/core-security-common'
 tags:
   - shared-server
   - package
@@ -56,6 +57,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

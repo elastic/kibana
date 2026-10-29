@@ -15,4 +15,5 @@ export interface ConsoleTutorial {
   hybridSearch: string;
   vectorDatabase: string;
   agentBuilder: string;
+  promql: string;
 }

@@ -70,7 +70,8 @@ const IDENT = String.raw`[a-zA-Z_$][a-zA-Z0-9_$]*`;
  * (`[0]`, `["rule-1"]`, `[ep]`, `[ep.rule_id]`).
  */
 const BRACKET_KEY = String.raw`(?:\d+|"[^"]*"|'[^']*'|${IDENT}(?:\.${IDENT})*)`;
-const PATH_TAIL = String.raw`(?:\.${IDENT}|\[\s*${BRACKET_KEY}\s*\])`;
+/** Liquid also reads a numeric dot segment as an index (`items.0` is `items[0]`). */
+const PATH_TAIL = String.raw`(?:\.(?:${IDENT}|\d+)|\[\s*${BRACKET_KEY}\s*\])`;
 
 export const ALLOWED_KEY_REGEX = new RegExp(String.raw`^${IDENT}${PATH_TAIL}*(?:\s*\|.*)?$`);
 
@@ -141,15 +142,18 @@ export function isVariableValue(value: unknown): boolean {
   return VARIABLE_VALUE_REGEX.test(value);
 }
 
-// Regex to match Liquid tags: {% ... %} or {%- ... -%} (with optional dashes)
-// Matches both single-line and multi-line Liquid tag blocks
-export const LIQUID_TAG_VALUE_REGEX = /\{\%-?\s*[^%]*?\s*-?\%\}/s;
+/**
+ * Matches Liquid tags: {% ... %} or {%- ... -%}, single-line or multi-line. The dashes and
+ * the padding are already matched by `[^%]*`, so the pattern needs no `-?` / `\s*` around it.
+ * Padding it with `\s*` (as an earlier form did) made an unclosed `{%` followed by a
+ * whitespace run cubic, because the engine tried every split of the run (CodeQL
+ * `js/polynomial-redos`).
+ */
+export const LIQUID_TAG_VALUE_REGEX = /\{\%[^%]*\%\}/;
 
 /**
  * Checks if a value contains Liquid tag patterns ({% ... %} or {%- ... -%})
  * Examples: {% if condition %}, {%- if condition -%}, multi-line blocks with Liquid tags
- * Pattern: matches {% or {%- followed by content and %} or -%}
- * The 's' flag allows . to match newlines for multi-line support
  */
 export function isLiquidTagValue(value: unknown): boolean {
   if (typeof value !== 'string') {

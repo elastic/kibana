@@ -8,7 +8,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { getNamedParams, fixESQLQueryWithVariables } from '@kbn/esql-utils';
+import {
+  getNamedParams,
+  fixESQLQueryWithVariables,
+  parseTimeFieldFromESQLQuery,
+} from '@kbn/esql-utils';
 import { ESQLVariableType, SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import { buildEsQuery, getTimeZoneFromSettings } from '@kbn/es-query';
 import { getTime, getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -17,6 +21,7 @@ import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 import { getMaxNestingDepth, MAX_NESTING_DEPTH } from './get_timefield';
 
 const DATE_FORMAT_TZ_SETTING = 'dateFormat:tz';
+const QUERY_ERROR_STATUS_CODES = new Set([400, 404]);
 
 const esqlVariableValueSchema = schema.oneOf([
   schema.string({ maxLength: 10000 }),
@@ -93,9 +98,13 @@ export const registerGetSourceInfoRoute = (
         const dateFormatTZ = await core.uiSettings.client.get<string>(DATE_FORMAT_TZ_SETTING);
         const timeZone = getTimeZoneFromSettings(dateFormatTZ ?? 'UTC');
 
+        // `TBUCKET(<count>)` needs the time range as a filter on @timestamp to run, even with LIMIT 0.
+        // The query can tell the time field (TBUCKET, or the column used with ?_tstart / ?_tend).
+        const timeFilterField =
+          timeFieldName ?? (timeRange ? parseTimeFieldFromESQLQuery(fixedQuery) : undefined);
         const timeFilter =
-          timeRange && timeFieldName
-            ? getTime(undefined, timeRange, { fieldName: timeFieldName })
+          timeRange && timeFilterField
+            ? getTime(undefined, timeRange, { fieldName: timeFilterField })
             : undefined;
         const filter = timeFilter
           ? buildEsQuery(undefined, [], [timeFilter], esQueryConfigs)
@@ -113,13 +122,16 @@ export const registerGetSourceInfoRoute = (
             settings: { column_metadata: true },
           })) as unknown as ESQLSearchResponse;
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          logger.get().error(`Failed to fetch ES|QL source info columns: ${message}`, {
-            tags: ['esql', 'source_info'],
-            error: {
-              stack_trace: error instanceof Error ? error.stack : undefined,
-            },
-          });
+          // Invalid or partial queries (e.g. while typing) are client errors, not worth an error log.
+          if (getErrorStatusCode(error) >= 500) {
+            const message = error instanceof Error ? error.message : String(error);
+            logger.get().error(`Failed to fetch ES|QL source info columns: ${message}`, {
+              tags: ['esql', 'source_info'],
+              error: {
+                stack_trace: error instanceof Error ? error.stack : undefined,
+              },
+            });
+          }
           throw error;
         }
 
@@ -140,12 +152,21 @@ export const registerGetSourceInfoRoute = (
         });
         return response.ok({ body: { columns } });
       } catch (error) {
+        const statusCode = getErrorStatusCode(error);
+        const message = error instanceof Error ? error.message : String(error);
+        // Errors in the query text (invalid or partial query, unknown index) are expected while
+        // typing: answer 200 with no columns and the error, which clients treat as a failure.
+        const isQueryError = QUERY_ERROR_STATUS_CODES.has(statusCode);
         esqlRouteRequestCounter.add(1, {
           route: 'source_info',
           outcome: 'failure',
-          'http.response.status_code': getErrorStatusCode(error),
+          'http.response.status_code': isQueryError ? 200 : statusCode,
+          'error.type': String(statusCode),
         });
-        throw error;
+        if (isQueryError) {
+          return response.ok({ body: { columns: [], error: { statusCode, message } } });
+        }
+        return response.customError({ statusCode, body: { message } });
       }
     }
   );

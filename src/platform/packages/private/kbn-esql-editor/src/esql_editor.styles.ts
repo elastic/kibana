@@ -32,6 +32,10 @@ export const esqlEditorStyles = (
       zIndex: 4,
       height: `${editorHeight}px`,
       border: hasOutline ? euiTheme.border.thin : 'none',
+      // Same radius as the visor controls. Clip Monaco so the fill follows it;
+      // suggestion widgets are portaled, so they stay outside this clip.
+      borderRadius: hasOutline ? euiTheme.border.radius.control : undefined,
+      overflow: hasOutline ? ('hidden' as const) : undefined,
     },
     resizableContainer: {
       display: 'flex',

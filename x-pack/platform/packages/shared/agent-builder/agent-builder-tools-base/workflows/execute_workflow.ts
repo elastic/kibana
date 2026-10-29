@@ -28,6 +28,8 @@ interface ExecuteWorkflowBaseParams {
   waitForCompletion?: boolean;
   completionTimeoutSec?: number;
   metadata?: Record<string, unknown>;
+  /** Recorded as the execution's `triggeredBy`. Defaults to `manual`. */
+  triggeredBy?: string;
 }
 
 export interface ExecuteSavedWorkflowParams extends ExecuteWorkflowBaseParams {
@@ -58,6 +60,7 @@ export const executeWorkflow = async (
     waitForCompletion = true,
     completionTimeoutSec = DEFAULT_COMPLETION_TIMEOUT_SEC,
     metadata,
+    triggeredBy,
   } = params;
 
   const spanLabel = params.workflowId ?? 'ephemeral';
@@ -85,6 +88,7 @@ export const executeWorkflow = async (
               waitForCompletion,
               completionTimeoutSec,
               metadata,
+              triggeredBy,
             }
           : {
               workflowId: params.workflowId,
@@ -94,6 +98,7 @@ export const executeWorkflow = async (
               waitForCompletion,
               completionTimeoutSec,
               metadata,
+              triggeredBy,
             };
 
         const executeResult = await workflowApi.executeWorkflow(apiArgs);

@@ -32,6 +32,8 @@ import type {
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
+import { WorkflowRequiresDelegatedIdentityError } from '../api/workflow_requires_delegated_identity_error';
+import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import { INITIAL_WORKFLOW_VERSION } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
@@ -230,7 +232,16 @@ const createCrudServiceMock = () => {
       async (_id, _spaceId, params: ReadModifyWriteWorkflowDocumentParams) =>
         params.mutate(createWorkflowSource({}))
     ),
-    deleteWorkflows: jest.fn().mockResolvedValue(undefined),
+    deleteWorkflows: jest.fn(
+      async (ids: string[]): Promise<DeleteWorkflowsResponse> => ({
+        total: ids.length,
+        deleted: ids.length,
+        failures: [],
+        successfulIds: ids,
+      })
+    ),
+    deleteManagedOrphan: jest.fn().mockResolvedValue(true),
+    disableManagedOrphan: jest.fn().mockResolvedValue(undefined),
     logWorkflowChangesAfterWrite: jest.fn().mockResolvedValue(undefined),
     prepareWorkflowDocumentForStorage: jest.fn(
       async ({
@@ -460,7 +471,7 @@ describe('ManagedWorkflowsService', () => {
 
       await service.pluginReady(PLUGIN_ID);
 
-      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(crudService.deleteManagedOrphan).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
       );
@@ -507,7 +518,7 @@ describe('ManagedWorkflowsService', () => {
 
       await service.pluginReady(PLUGIN_ID);
 
-      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(crudService.deleteManagedOrphan).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
       );
@@ -566,7 +577,7 @@ describe('ManagedWorkflowsService', () => {
 
       await service.pluginReady(PLUGIN_ID);
 
-      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(crudService.deleteManagedOrphan).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
       );
@@ -601,7 +612,7 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.getManagedWorkflowDocumentsAllSpaces).toHaveBeenCalledWith({
         pluginId: PLUGIN_ID,
       });
-      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(crudService.deleteManagedOrphan).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
       );
@@ -1774,9 +1785,10 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.getManagedWorkflowDocumentsAllSpaces).toHaveBeenCalledWith({
         pluginId: PLUGIN_ID,
       });
-      expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(1);
-      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(['system-orphan'], SPACE_ID, {
-        force: true,
+      expect(crudService.deleteManagedOrphan).toHaveBeenCalledTimes(1);
+      expect(crudService.deleteManagedOrphan).toHaveBeenCalledWith('system-orphan', SPACE_ID, {
+        managedBy: PLUGIN_ID,
+        definitionId: 'system-orphan',
       });
       expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
         id: 'system-orphan',
@@ -1890,7 +1902,7 @@ describe('ManagedWorkflowsService', () => {
       service.markInstallIncomplete(PLUGIN_ID);
       await service.pluginReady(PLUGIN_ID);
 
-      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(crudService.deleteManagedOrphan).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
       );
@@ -1953,7 +1965,7 @@ describe('ManagedWorkflowsService', () => {
 
       await service.pluginReady(PLUGIN_ID);
 
-      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(crudService.deleteManagedOrphan).not.toHaveBeenCalled();
       expect(crudService.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
@@ -2013,7 +2025,7 @@ describe('ManagedWorkflowsService', () => {
       service.markInstallIncomplete(PLUGIN_ID);
       await expect(service.pluginReady(PLUGIN_ID)).resolves.toBeUndefined();
 
-      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(crudService.deleteManagedOrphan).not.toHaveBeenCalled();
       expect(crudService.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
@@ -2184,16 +2196,26 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.getManagedWorkflowDocumentsAllSpaces).toHaveBeenCalledWith({
         includeDeleted: true,
       });
-      expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(2);
-      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
-        ['system-unregistered-owner', 'system-removed-definition'],
+      expect(crudService.deleteManagedOrphan).toHaveBeenCalledTimes(4);
+      expect(crudService.deleteManagedOrphan).toHaveBeenCalledWith(
+        'system-unregistered-owner',
         SPACE_ID,
-        { force: true }
+        { managedBy: 'removedPlugin', definitionId: knownDefinition.id }
       );
-      expect(crudService.deleteWorkflows).toHaveBeenCalledWith(
-        ['system-missing-owner', 'system-missing-definition'],
+      expect(crudService.deleteManagedOrphan).toHaveBeenCalledWith(
+        'system-removed-definition',
+        SPACE_ID,
+        { managedBy: PLUGIN_ID, definitionId: 'system-removed' }
+      );
+      expect(crudService.deleteManagedOrphan).toHaveBeenCalledWith(
+        'system-missing-owner',
         'other-space',
-        { force: true }
+        { managedBy: null, definitionId: knownDefinition.id }
+      );
+      expect(crudService.deleteManagedOrphan).toHaveBeenCalledWith(
+        'system-missing-definition',
+        'other-space',
+        { managedBy: PLUGIN_ID, definitionId: null }
       );
       expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
         id: 'system-missing-owner',
@@ -2213,6 +2235,115 @@ describe('ManagedWorkflowsService', () => {
         spaceId: 'other-space',
         reason: 'orphan_cleanup',
       });
+    });
+
+    it('continues removing orphans when one delete throws', async () => {
+      const knownDefinition = createDefinition({ id: 'system-known' });
+      mockManagedWorkflowDefinitions = [knownDefinition];
+      const { audit, crudService, logger, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: 'system-removed-definition',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+        {
+          id: 'system-unregistered-owner',
+          source: createWorkflowSource({
+            managedBy: 'removedPlugin',
+            originManagedWorkflowId: knownDefinition.id,
+          }),
+        },
+      ]);
+      crudService.deleteManagedOrphan.mockImplementation(async (id: string) => {
+        if (id === 'system-removed-definition') {
+          throw new Error('doc delete failed');
+        }
+        return true;
+      });
+
+      await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
+
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledTimes(1);
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(
+        undefined,
+        expect.objectContaining({ id: 'system-unregistered-owner', reason: 'orphan_cleanup' })
+      );
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('system-removed-definition'),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+      expect(crudService.disableManagedOrphan).toHaveBeenCalledTimes(1);
+      expect(crudService.disableManagedOrphan).toHaveBeenCalledWith(
+        'system-removed-definition',
+        SPACE_ID,
+        { managedBy: PLUGIN_ID, definitionId: 'system-removed' }
+      );
+    });
+
+    it('disables an orphan that is no longer there to delete', async () => {
+      mockManagedWorkflowDefinitions = [];
+      const { audit, crudService, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: 'system-gone-orphan',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+      ]);
+      crudService.deleteManagedOrphan.mockResolvedValue(false);
+
+      await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
+
+      expect(audit.logWorkflowDeleted).not.toHaveBeenCalled();
+      expect(crudService.disableManagedOrphan).toHaveBeenCalledWith(
+        'system-gone-orphan',
+        SPACE_ID,
+        { managedBy: PLUGIN_ID, definitionId: 'system-removed' }
+      );
+    });
+
+    it('keeps sweeping when disabling an undeleted orphan fails', async () => {
+      mockManagedWorkflowDefinitions = [];
+      const { crudService, logger, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: 'system-first',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+        {
+          id: 'system-second',
+          source: createWorkflowSource({
+            managedBy: PLUGIN_ID,
+            originManagedWorkflowId: 'system-removed',
+          }),
+        },
+      ]);
+      crudService.deleteManagedOrphan.mockImplementation(async (id: string) => {
+        if (id === 'system-first') {
+          throw new Error('running executions');
+        }
+        return true;
+      });
+      crudService.disableManagedOrphan.mockRejectedValueOnce(new Error('disable failed'));
+
+      await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
+
+      expect(crudService.deleteManagedOrphan).toHaveBeenCalledWith('system-second', SPACE_ID, {
+        managedBy: PLUGIN_ID,
+        definitionId: 'system-removed',
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining("failed to disable orphaned workflow 'system-first'"),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
     });
 
     it('does not delete managed docs for registered owners with known definitions', async () => {
@@ -2243,7 +2374,7 @@ describe('ManagedWorkflowsService', () => {
 
       await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
 
-      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(crudService.deleteManagedOrphan).not.toHaveBeenCalled();
     });
   });
 
@@ -2292,6 +2423,41 @@ describe('ManagedWorkflowsService', () => {
         },
         request
       );
+    });
+
+    it('refuses a workflow whose identity can only come from a parent', async () => {
+      // This method starts the engine directly, bypassing the runWorkflow standalone
+      // gate, so it must apply the delegated-identity check itself.
+      const definition = createDefinition();
+      const request = {} as KibanaRequest;
+      const { crudService, workflowsExecutionEngine, service } = createService();
+      mockManagedWorkflowDefinitions = [definition];
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          spaceId: '*',
+          definition: {
+            name: 'Managed Workflow',
+            enabled: true,
+            steps: [
+              {
+                id: 'child',
+                type: 'workflow.execute',
+                with: { 'run-as-mode': 'inherit' },
+              },
+            ],
+          } as unknown as WorkflowYaml,
+        })
+      );
+
+      await expect(
+        service.executeManagedWorkflow(
+          WORKFLOW_ID,
+          request,
+          { spaceId: SPACE_ID, inputs: {} },
+          definition.pluginId
+        )
+      ).rejects.toThrow(WorkflowRequiresDelegatedIdentityError);
+      expect(workflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
     });
   });
 });

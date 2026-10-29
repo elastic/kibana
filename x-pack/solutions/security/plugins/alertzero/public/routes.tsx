@@ -8,16 +8,8 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { useAgenticInvestigationsCapabilities } from './hooks/use_agentic_investigations_capabilities';
-import { PlaceholderPage } from './components/placeholder_page';
-import {
-  NAV_ALERTS,
-  NAV_ATTACKS,
-  NAV_STREAMS,
-  NAV_THREAT_HUNT,
-} from './components/app_chrome/translations';
+import { useAlertZeroInvestigationsCapabilities } from './hooks/use_alertzero_investigations_capabilities';
 import { EscalationsPage } from './pages/escalations';
-import { SettingsPage } from './pages/settings';
 import { WatchesRoutes } from './pages/watches/routes';
 import { LandingPage } from './pages/landing_page';
 
@@ -27,7 +19,7 @@ import { LandingPage } from './pages/landing_page';
  * on a page whose list requests would be rejected with 403.
  */
 const EscalationsRoute: React.FC = () => {
-  const { showEscalations } = useAgenticInvestigationsCapabilities();
+  const { showEscalations } = useAlertZeroInvestigationsCapabilities();
   return showEscalations ? <EscalationsPage /> : <Redirect to="/" />;
 };
 
@@ -42,12 +34,8 @@ const EscalationsRoute: React.FC = () => {
 export const AlertZeroRoutes: React.FC = () => (
   <Routes>
     <Route path="/" exact component={LandingPage} />
-    <Route path="/escalations" component={EscalationsRoute} />
-    <Route path="/alerts" render={() => <PlaceholderPage title={NAV_ALERTS} />} />
-    <Route path="/attacks" render={() => <PlaceholderPage title={NAV_ATTACKS} />} />
-    <Route path="/threat-hunt" render={() => <PlaceholderPage title={NAV_THREAT_HUNT} />} />
-    <Route path="/streams" render={() => <PlaceholderPage title={NAV_STREAMS} />} />
+    <Route path="/escalations" exact component={EscalationsRoute} />
     <Route path="/watches" component={WatchesRoutes} />
-    <Route path="/settings" component={SettingsPage} />
+    <Redirect to="/" />
   </Routes>
 );

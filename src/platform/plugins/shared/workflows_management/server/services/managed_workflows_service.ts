@@ -8,8 +8,9 @@
  */
 
 import { createHash } from 'node:crypto';
+import pMap from 'p-map';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
+import { requiresDelegatedIdentity, toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
@@ -30,14 +31,17 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
+import type { ManagedWorkflowOrphan } from './workflow_occ_types';
 import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
 import type { WorkflowManagementAuditLog } from '../api/routes/utils/workflow_audit_logging';
+import { WorkflowRequiresDelegatedIdentityError } from '../api/workflow_requires_delegated_identity_error';
 import { applyWorkflowVersion } from '../lib/workflow_version';
 import { isRetryableWorkflowWriteConflict } from '../lib/workflow_write_conflicts';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
+const ORPHAN_DELETE_CONCURRENCY = 10;
 
 const computeDefinitionHash = (yaml: string): string => {
   return createHash('sha256').update(yaml.trim()).digest('hex');
@@ -159,22 +163,7 @@ export class ManagedWorkflowsService {
           `Managed workflows: removing ${orphanWorkflows.length} hard-orphaned workflow(s) in space '${spaceId}' ` +
             `(unregistered owner or removed definition)`
         );
-        await this.deps.crudService.deleteWorkflows(
-          orphanWorkflows.map(({ id }) => id),
-          spaceId,
-          { force: true }
-        );
-        for (const { id: workflowId, source } of orphanWorkflows) {
-          this.deps.audit?.logWorkflowDeleted(undefined, {
-            id: workflowId,
-            force: true,
-            managed: true,
-            originalWorkflowId: source.originManagedWorkflowId,
-            ownerPlugin: source.managedBy,
-            spaceId,
-            reason: 'orphan_cleanup',
-          });
-        }
+        await this.forceDeleteOrphans(orphanWorkflows, spaceId, 'orphan_cleanup');
       }
     }
   }
@@ -520,6 +509,15 @@ export class ManagedWorkflowsService {
       );
     }
 
+    // This method starts the engine directly (like a parent's `workflow.execute`
+    // step), so it bypasses the `runWorkflow` standalone gate. Refuse here too:
+    // a delegating workflow has no identity of its own to run under.
+    if (requiresDelegatedIdentity(existing)) {
+      throw new WorkflowRequiresDelegatedIdentityError(
+        `Managed workflow '${workflowDocumentId}' delegates its execution identity to a parent workflow and cannot be run standalone.`
+      );
+    }
+
     const context: Record<string, unknown> = {
       spaceId,
       inputs: options.inputs ?? {},
@@ -640,22 +638,7 @@ export class ManagedWorkflowsService {
           `Managed workflows: removing ${orphanWorkflows.length} orphaned static workflow(s) ` +
             `for plugin '${pluginId}' in space '${spaceId}'`
         );
-        await this.deps.crudService.deleteWorkflows(
-          orphanWorkflows.map(({ id }) => id),
-          spaceId,
-          { force: true }
-        );
-        for (const { id: workflowId, source } of orphanWorkflows) {
-          this.deps.audit?.logWorkflowDeleted(undefined, {
-            id: workflowId,
-            force: true,
-            managed: true,
-            originalWorkflowId: source.originManagedWorkflowId,
-            ownerPlugin: source.managedBy,
-            spaceId,
-            reason: 'ready_reconciliation',
-          });
-        }
+        await this.forceDeleteOrphans(orphanWorkflows, spaceId, 'ready_reconciliation');
       }
     }
 
@@ -697,6 +680,69 @@ export class ManagedWorkflowsService {
             `Consider using lifecycle: 'dynamic' or installing during start().`
         );
       }
+    }
+  }
+
+  private async forceDeleteOrphans(
+    orphanWorkflows: Array<{ id: string; source: WorkflowProperties }>,
+    spaceId: string,
+    reason: 'orphan_cleanup' | 'ready_reconciliation'
+  ): Promise<void> {
+    await pMap(
+      orphanWorkflows,
+      ({ id: workflowId, source }) => this.forceDeleteOrphan(workflowId, source, spaceId, reason),
+      { concurrency: ORPHAN_DELETE_CONCURRENCY }
+    );
+  }
+
+  private async forceDeleteOrphan(
+    workflowId: string,
+    source: WorkflowProperties,
+    spaceId: string,
+    reason: 'orphan_cleanup' | 'ready_reconciliation'
+  ): Promise<void> {
+    const orphan: ManagedWorkflowOrphan = {
+      managedBy: source.managedBy ?? null,
+      definitionId: source.originManagedWorkflowId ?? null,
+    };
+    let deleted = false;
+    try {
+      deleted = await this.deps.crudService.deleteManagedOrphan(workflowId, spaceId, orphan);
+    } catch (error) {
+      this.logger.error(
+        `Managed workflows: failed to remove orphaned workflow '${workflowId}' in space '${spaceId}'`,
+        { error }
+      );
+    }
+
+    if (deleted) {
+      this.deps.audit?.logWorkflowDeleted(undefined, {
+        id: workflowId,
+        force: true,
+        managed: true,
+        originalWorkflowId: source.originManagedWorkflowId,
+        ownerPlugin: source.managedBy,
+        spaceId,
+        reason,
+      });
+    } else {
+      await this.disableUndeletedOrphan(workflowId, spaceId, orphan);
+    }
+  }
+
+  /** Stops new runs of an orphan that could not be deleted, so a later sweep can remove it. */
+  private async disableUndeletedOrphan(
+    workflowId: string,
+    spaceId: string,
+    orphan: ManagedWorkflowOrphan
+  ): Promise<void> {
+    try {
+      await this.deps.crudService.disableManagedOrphan(workflowId, spaceId, orphan);
+    } catch (error) {
+      this.logger.error(
+        `Managed workflows: failed to disable orphaned workflow '${workflowId}' in space '${spaceId}'`,
+        { error }
+      );
     }
   }
 

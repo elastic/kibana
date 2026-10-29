@@ -192,6 +192,7 @@ describe('CasesWorkflowRunService', () => {
       inputs: { event: {} },
       request,
       preprocessingContext: context,
+      expandSelections: ['alertIds', 'documentIds'],
       eventOverrides: { caseIds: ['case-1'] },
       metadata: {
         schemaVersion: 1,
@@ -297,6 +298,51 @@ describe('CasesWorkflowRunService', () => {
         preprocessingContext: context,
       })
     );
+  });
+
+  describe('documentIds inputs', () => {
+    const documentIdsBody: RunCaseWorkflowRequest = {
+      caseIds: ['case-1'],
+      inputs: {
+        event: { triggerType: 'document', documentIds: [{ _id: 'event-1', _index: 'logs' }] },
+      },
+      origin: { type: 'cases.case', caseId: 'case-1' },
+    };
+
+    it('forwards documentIds attached to the case for server-side expansion', async () => {
+      casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([
+        { id: 'event-1', index: 'logs', attached_at: '2026-08-26T00:00:00.000Z' },
+      ]);
+
+      await expect(run(documentIdsBody)).resolves.toEqual({
+        workflowExecutionId: 'execution-1',
+        activityStatus: 'succeeded',
+      });
+
+      expect(casesClient.attachments.getAllDocumentsAttachedToCase).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        attachmentTypes: ['event'],
+      });
+      expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
+        expect.objectContaining({
+          inputs: documentIdsBody.inputs,
+          expandSelections: ['alertIds', 'documentIds'],
+        })
+      );
+    });
+
+    // SECURITY REGRESSION TEST: documentIds are expanded by the workflows server, so a case run
+    // must not let them reference documents that are not attached to the case.
+    it('rejects documentIds that are not attached to the case', async () => {
+      casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([
+        { id: 'event-other', index: 'logs', attached_at: '2026-08-26T00:00:00.000Z' },
+      ]);
+
+      await expect(run(documentIdsBody)).rejects.toThrow(
+        'All selected documents must belong to the case.'
+      );
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
   });
 
   describe('bulk runs (no origin)', () => {
@@ -429,6 +475,18 @@ describe('CasesWorkflowRunService', () => {
           inputs: { event: { alertIds: [{ _id: 'a-1', _index: '.alerts' }] } },
         })
       ).rejects.toThrow('Alert inputs can only be used with a single case.');
+      expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
+    });
+
+    it('rejects documentIds inputs when origin is absent', async () => {
+      await expect(
+        run({
+          caseIds: ['case-a', 'case-b'],
+          inputs: {
+            event: { triggerType: 'document', documentIds: [{ _id: 'd-1', _index: 'logs' }] },
+          },
+        })
+      ).rejects.toThrow('Document inputs can only be used with a single case.');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
@@ -831,6 +889,28 @@ describe('CasesWorkflowRunService', () => {
       activityStatus: 'failed',
     });
     expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('propagates the standalone-run refusal of a delegated-identity workflow', async () => {
+    // "Run workflow from a case" goes through runWorkflowWithAlertPreprocessing → runWorkflow,
+    // which refuses workflows that can only execute as a parent's delegated identity
+    // (WorkflowRequiresDelegatedIdentityError, 403-class). Cases must not swallow that
+    // refusal and report the doomed run as started.
+    const refusalMessage =
+      "Workflow 'workflow-1' delegates its execution identity to a parent workflow and cannot be run standalone.";
+    const refusal = new Error(refusalMessage);
+    management.runWorkflowWithAlertPreprocessing.mockRejectedValue(refusal);
+
+    await expect(run()).rejects.toBe(refusal);
+    expect(auditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: { message: refusalMessage },
+        event: expect.objectContaining({
+          action: 'case_workflow_run',
+          outcome: 'failure',
+        }),
+      })
+    );
   });
 
   it('audits execution failures', async () => {

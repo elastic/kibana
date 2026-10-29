@@ -17,6 +17,7 @@ const createTelemetry = (): jest.Mocked<CortexTelemetry> => ({
 
 describe('applyCortexEdits', () => {
   it('upserts, corroborates, and archives proposed pages', async () => {
+    const logger = loggerMock.create();
     const store: CortexPageStore = {
       list: jest.fn().mockResolvedValue({
         pages: [],
@@ -34,7 +35,7 @@ describe('applyCortexEdits', () => {
     await applyCortexEdits({
       store,
       telemetry,
-      logger: loggerMock.create(),
+      logger,
       edits: [
         {
           action: 'upsert',
@@ -67,6 +68,9 @@ describe('applyCortexEdits', () => {
     );
     expect(store.corroborate).toHaveBeenCalledWith('cortex_service_payments');
     expect(store.archive).toHaveBeenCalledWith('cortex_topic_old-note');
+    expect(logger.info.mock.calls.flat().join('\n')).not.toMatch(
+      /checkout|old-note|cortex_service/i
+    );
     expect(telemetry.reportEditsApplied).toHaveBeenCalledWith([
       { action: 'upsert', entityType: 'service' },
       { action: 'corroborate', entityType: 'service' },

@@ -32,36 +32,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('rules-list-clear-filter');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
     }
-    await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+    await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:alerts' });
     await testSubjects.click('manageRulesPageButton');
-  }
-
-  async function failRule({
-    ruleId,
-    intervalMilliseconds,
-    numAttempts,
-  }: {
-    ruleId: string;
-    intervalMilliseconds: number;
-    numAttempts: number;
-  }) {
-    for (let i = 0; i < numAttempts; i++) {
-      await alertingApi.helpers.runRule({ roleAuthc, ruleId });
-      await new Promise((resolve) => setTimeout(resolve, intervalMilliseconds));
-
-      await alertingApi.helpers.disableRule({
-        roleAuthc,
-        ruleId,
-      });
-      await new Promise((resolve) => setTimeout(resolve, intervalMilliseconds));
-
-      await refreshRulesList();
-      const result = await svlTriggersActionsUI.getRulesListWithStatus();
-      const rulesStatuses = result.map((item: { status: string }) => item.status);
-      if (rulesStatuses.includes('Failed')) return;
-
-      await alertingApi.helpers.enableRule({ roleAuthc, ruleId });
-    }
   }
 
   describe('Rules list', () => {
@@ -79,7 +51,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       await svlCommonPage.loginWithPrivilegedRole();
       await svlObltNavigation.navigateToLandingPage();
-      await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:alerts' });
       await testSubjects.click('manageRulesPageButton');
     });
 
@@ -353,8 +325,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('deleteRule');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
+      });
 
       await retry.try(async () => {
         const resultToast = await toasts.getElementByIndex(1);
@@ -381,14 +357,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkDisable');
 
-      await testSubjects.click('confirmModalConfirmButton');
-      await header.waitUntilLoadingHasFinished();
-
-      await retry.try(async () => {
-        const resultToast = await toasts.getElementByIndex(1);
-        const toastText = await resultToast.getVisibleText();
-        expect(toastText).toEqual('Disabled 1 rule');
+      await testSubjects.existOrFail('untrackAlertsModal');
+      // The modal slides in over the still-open bulk action popover, so the first click can miss it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('confirmModalConfirmButton');
+        await testSubjects.missingOrFail('untrackAlertsModal');
       });
+
+      await header.waitUntilLoadingHasFinished();
 
       await svlTriggersActionsUI.ensureRuleActionStatusApplied(
         createdRule1.name,
@@ -472,8 +448,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click(`checkboxSelectRow-${createdRule1.id}`);
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkDelete');
-      await testSubjects.exists('rulesDeleteIdsConfirmation');
-      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.existOrFail('rulesDeleteConfirmation');
+      // The modal animates in, so the first click can land before React is listening for it.
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('rulesDeleteConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('rulesDeleteConfirmation', { timeout: 5000 });
+      });
 
       await retry.try(async () => {
         const resultToast = await toasts.getElementByIndex(1);
@@ -484,164 +464,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlTriggersActionsUI.searchRules(createdRule1.name);
       const searchResultsAfterDelete = await svlTriggersActionsUI.getRulesList();
       expect(searchResultsAfterDelete).toHaveLength(0);
-    });
-
-    it.skip('should filter rules by the status', async () => {
-      const rule1 = await alertingApi.helpers.createAnomalyRule({
-        roleAuthc,
-      });
-
-      const failedRule = await alertingApi.helpers.createAnomalyRule({
-        roleAuthc,
-      });
-
-      ruleIdList = [rule1.id, failedRule.id];
-
-      await refreshRulesList();
-      await testSubjects.click('dataGridColumnSelectorButton');
-      await testSubjects.click('dataGridColumnSelectorShowAllButton');
-
-      await failRule({
-        ruleId: failedRule.id,
-        intervalMilliseconds: 1000,
-        numAttempts: 100,
-      });
-
-      // initialy alert get Pending status, so we need to retry refresh list logic to get the post execution statuses
-      await retry.try(async () => {
-        await refreshRulesList();
-        await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-        const refreshResults = await svlTriggersActionsUI.getRulesListWithStatus();
-        expect(refreshResults.map((item: any) => item.status).sort()).toEqual([
-          'Failed',
-          'Succeeded',
-        ]);
-      });
-
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-      await testSubjects.click('ruleLastRunOutcomeFilterButton');
-      await testSubjects.click('ruleLastRunOutcomefailedFilterOption'); // select Error status filter
-
-      await retry.try(async () => {
-        const filterErrorOnlyResults = await svlTriggersActionsUI.getRulesListWithStatus();
-        expect(filterErrorOnlyResults.length).toEqual(1);
-        expect(filterErrorOnlyResults[0].name).toEqual(`${failedRule.name}APM Anomaly`);
-        expect(filterErrorOnlyResults[0].interval).toEqual('1 min');
-        expect(filterErrorOnlyResults[0].status).toEqual('Failed');
-        expect(filterErrorOnlyResults[0].duration).toMatch(/\d{2,}:\d{2}/);
-      });
-
-      // Clear it again because it is still selected
-      await refreshRulesList();
-      await assertRulesLength(2);
-    });
-
-    it.skip('should display total rules by status and error banner only when exists rules with status error', async () => {
-      const rule1 = await alertingApi.helpers.createAnomalyRule({
-        roleAuthc,
-      });
-
-      await refreshRulesList();
-      await testSubjects.click('dataGridColumnSelectorButton');
-      await testSubjects.click('dataGridColumnSelectorShowAllButton');
-
-      await retry.try(async () => {
-        await refreshRulesList();
-        const refreshResults = await svlTriggersActionsUI.getRulesListWithStatus();
-
-        expect(refreshResults.length).toEqual(1);
-        expect(refreshResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
-        expect(refreshResults[0].interval).toEqual('1 min');
-        expect(refreshResults[0].status).toEqual('Succeeded');
-        expect(refreshResults[0].duration).toMatch(/\d{2,}:\d{2}/);
-      });
-
-      const alertsErrorBannerWhenNoErrors = await find.allByCssSelector(
-        '[data-test-subj="rulesErrorBanner"]'
-      );
-      expect(alertsErrorBannerWhenNoErrors).toHaveLength(0);
-
-      const failedRule = await alertingApi.helpers.createAnomalyRule({
-        roleAuthc,
-      });
-
-      ruleIdList = [rule1.id, failedRule.id];
-
-      await failRule({
-        ruleId: failedRule.id,
-        intervalMilliseconds: 1000,
-        numAttempts: 100,
-      });
-
-      await retry.try(async () => {
-        await refreshRulesList();
-        const alertsErrorBannerExistErrors = await find.allByCssSelector(
-          '[data-test-subj="rulesErrorBanner"]'
-        );
-        expect(alertsErrorBannerExistErrors).toHaveLength(1);
-        expect(
-          await (await alertsErrorBannerExistErrors[0].findByTagName('p')).getVisibleText()
-        ).toEqual(' Error found in 1 rule. Show rule with error');
-      });
-
-      await retry.try(async () => {
-        await refreshRulesList();
-        expect(await testSubjects.getVisibleText('totalRulesCount')).toEqual('2 rules');
-        expect(await testSubjects.getVisibleText('totalSucceededRulesCount')).toEqual(
-          'Succeeded: 1'
-        );
-        expect(await testSubjects.getVisibleText('totalFailedRulesCount')).toEqual('Failed: 1');
-        expect(await testSubjects.getVisibleText('totalWarningRulesCount')).toEqual('Warning: 0');
-      });
-    });
-
-    it.skip('Expand error in rules table when there is rule with an error associated', async () => {
-      const rule1 = await alertingApi.helpers.createAnomalyRule({
-        roleAuthc,
-        name: 'a',
-      });
-
-      await refreshRulesList();
-      await testSubjects.click('dataGridColumnSelectorButton');
-      await testSubjects.click('dataGridColumnSelectorShowAllButton');
-
-      await retry.try(async () => {
-        await refreshRulesList();
-        const refreshResults = await svlTriggersActionsUI.getRulesListWithStatus();
-        expect(refreshResults.length).toEqual(1);
-        expect(refreshResults[0].name).toEqual(`${rule1.name}APM Anomaly`);
-        expect(refreshResults[0].interval).toEqual('1 min');
-        expect(refreshResults[0].status).toEqual('Succeeded');
-        expect(refreshResults[0].duration).toMatch(/\d{2,}:\d{2}/);
-      });
-
-      let expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
-      expect(expandRulesErrorLink).toHaveLength(0);
-
-      const failedRule = await alertingApi.helpers.createAnomalyRule({
-        roleAuthc,
-      });
-
-      ruleIdList = [rule1.id, failedRule.id];
-
-      await failRule({
-        ruleId: failedRule.id,
-        intervalMilliseconds: 1000,
-        numAttempts: 100,
-      });
-
-      await retry.try(async () => {
-        await refreshRulesList();
-        expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
-        expect(expandRulesErrorLink).toHaveLength(1);
-      });
-      await refreshRulesList();
-      await testSubjects.click('expandRulesError');
-      const expandedRow = await find.allByCssSelector('.euiTableRow-isExpandedRow');
-      expect(expandedRow).toHaveLength(1);
-      expect(await (await expandedRow[0].findByTagName('div')).getVisibleText()).toEqual(
-        'Error from last run\nRule failed to execute because rule ran after it was disabled.'
-      );
     });
 
     it('should filter rules by the rule type', async () => {

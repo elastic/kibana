@@ -12,8 +12,8 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
+  savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import { escapeKuery } from '@kbn/es-query';
 import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -54,6 +54,7 @@ const makeAttributes = (
   description: undefined,
   tags: ['nginx'],
   esql: 'FROM logs-nginx-* | WHERE status >= 500',
+  type: 'logs',
   slug: 'nginx-errors',
   view_name: NGINX_VIEW_NAME,
   enabled: true,
@@ -89,30 +90,157 @@ const emptyFind = {
 
 const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
   const soClient = savedObjectsClientMock.create();
+  const serializer = savedObjectsServiceMock.createSerializer();
+  serializer.generateRawId.mockImplementation(
+    (namespace, type, id) => `${namespace ? `${namespace}:` : ''}${type}:${id}`
+  );
   const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
+  const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const viewsClient: jest.Mocked<SourceViewsClient> = {
     putView: jest.fn().mockResolvedValue(undefined),
     getView: jest.fn().mockResolvedValue(undefined),
     deleteView: jest.fn().mockResolvedValue(undefined),
   };
   const logger = loggingSystemMock.createLogger();
+  const onChange = jest.fn().mockResolvedValue(undefined);
 
   const client = new SourcesClient({
     soClient,
+    serializer,
     viewsClient,
     dataEsClient,
+    internalEsClient,
     logger,
     username: 'marco',
     spaceId,
+    onChange,
   });
 
   soClient.find.mockResolvedValue(emptyFind);
   dataEsClient.esql.query.mockResponse(withColumns);
 
-  return { client, soClient, viewsClient, dataEsClient, logger };
+  return {
+    client,
+    soClient,
+    serializer,
+    viewsClient,
+    dataEsClient,
+    internalEsClient,
+    logger,
+    onChange,
+  };
 };
 
+const analyzed = (...tokens: string[]) => ({
+  tokens: tokens.map((token, position) => ({
+    token,
+    position,
+    start_offset: 0,
+    end_offset: 0,
+    type: '<ALPHANUM>',
+  })),
+});
+
 describe('SourcesClient', () => {
+  describe('assertReadable', () => {
+    const hasPrivileges = (client: ReturnType<typeof setup>['dataEsClient'], granted: boolean) =>
+      client.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: granted,
+      } as never);
+
+    it('asks for read on the index patterns of the stored query as the current user', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      hasPrivileges(dataEsClient, true);
+
+      await expect(client.assertReadable('source-1')).resolves.toBeUndefined();
+
+      expect(dataEsClient.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['logs-nginx-*'], privileges: ['read'] }],
+      });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('checks every index of a multi-index source and drops selectors and exclusions', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(
+        makeSavedObject(makeAttributes({ esql: 'FROM logs-a-*::data, logs-b, -logs-a-old' }))
+      );
+      hasPrivileges(dataEsClient, true);
+
+      await client.assertReadable('source-1');
+
+      expect(dataEsClient.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['logs-a-*', 'logs-b'], privileges: ['read'] }],
+      });
+    });
+
+    it('rejects with 403 when the user lacks read on the data', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      hasPrivileges(dataEsClient, false);
+
+      await expect(client.assertReadable('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
+
+    it('fails closed when the privilege check itself fails', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      dataEsClient.security.hasPrivileges.mockRejectedValue(new Error('security unavailable'));
+
+      await expect(client.assertReadable('source-1')).rejects.toThrow('security unavailable');
+    });
+
+    it('trusts a source that only reads another cluster', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(
+        makeSavedObject(makeAttributes({ esql: 'FROM remote:logs-nginx-*' }))
+      );
+
+      await expect(client.assertReadable('source-1')).resolves.toBeUndefined();
+
+      expect(dataEsClient.security.hasPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('checks only the local part of a source that also reads another cluster', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(
+        makeSavedObject(makeAttributes({ esql: 'FROM remote:logs-*, logs-local' }))
+      );
+      hasPrivileges(dataEsClient, true);
+
+      await expect(client.assertReadable('source-1')).resolves.toBeUndefined();
+
+      expect(dataEsClient.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['logs-local'], privileges: ['read'] }],
+      });
+    });
+
+    it('rejects with 403 when the local part of a mixed source is not readable', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(
+        makeSavedObject(makeAttributes({ esql: 'FROM remote:logs-*, logs-local' }))
+      );
+      hasPrivileges(dataEsClient, false);
+
+      await expect(client.assertReadable('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
+
+    it('rejects with 403 when the stored query cannot be parsed', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ esql: 'FROM' })));
+
+      await expect(client.assertReadable('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(dataEsClient.security.hasPrivileges).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getHealth', () => {
     it('is unknown when the view cannot be read', async () => {
       const { client, viewsClient } = setup();
@@ -234,6 +362,36 @@ describe('SourcesClient', () => {
     });
   });
 
+  describe('validateQuery', () => {
+    it('reports whether any index exists yet behind an accepted query', async () => {
+      const { client, dataEsClient } = setup();
+
+      await expect(client.validateQuery({ esql: 'FROM logs-nginx-*' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: true,
+      });
+
+      dataEsClient.esql.query.mockResponseOnce(withoutColumns);
+      await expect(client.validateQuery({ esql: 'FROM logs-none-*' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: false,
+      });
+
+      dataEsClient.esql.query.mockRejectedValueOnce(unknownIndexError());
+      await expect(client.validateQuery({ esql: 'FROM logs-none' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: false,
+      });
+
+      dataEsClient.esql.query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockResponseOnce(withoutColumns);
+      await expect(
+        client.validateQuery({ esql: 'FROM logs-none-* | WHERE status >= 500' })
+      ).resolves.toEqual({ type: 'logs', indexExists: false });
+    });
+  });
+
   describe('create', () => {
     it('validates, writes the saved object with a generated view name, then puts the view', async () => {
       const { client, soClient, viewsClient, dataEsClient } = setup();
@@ -253,6 +411,7 @@ describe('SourcesClient', () => {
       expect(source.enabled).toBe(true);
       expect(source.created_by).toBe('marco');
       expect(source.esql_updated_at).toBe(source.created_at);
+      expect(source.type).toBe('logs');
       expect(soClient.create).toHaveBeenCalledWith(
         NIGHTSHIFT_SOURCE_SO_TYPE,
         expect.objectContaining({ view_name: source.view_name }),
@@ -262,6 +421,25 @@ describe('SourcesClient', () => {
         source.view_name,
         'FROM logs-nginx-* | WHERE status >= 500'
       );
+    });
+
+    it('creates a disabled source, with its view, when asked', async () => {
+      const { client, soClient, viewsClient } = setup();
+
+      const source = await client.create({
+        title: 'nginx errors',
+        tags: [],
+        esql: 'FROM logs-*',
+        enabled: false,
+      });
+
+      expect(source.enabled).toBe(false);
+      expect(soClient.create).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        expect.objectContaining({ enabled: false }),
+        { id: source.id }
+      );
+      expect(viewsClient.putView).toHaveBeenCalledWith(source.view_name, 'FROM logs-*');
     });
 
     it('loads the space view names once, then checks suffixes in memory', async () => {
@@ -372,6 +550,34 @@ describe('SourcesClient', () => {
       await expect(
         client.create({ title: '   ', tags: [], esql: 'FROM logs-*' })
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects a query that mixes types before touching saved objects or ES', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(
+        client.create({ title: 't', tags: [], esql: 'FROM logs-*, traces-*' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('mixes'),
+      });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects an index that matches more than one type before touching saved objects or ES', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(
+        client.create({ title: 't', tags: [], esql: 'FROM logs-traces-*' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('more than one kind'),
+      });
       expect(dataEsClient.esql.query).not.toHaveBeenCalled();
       expect(soClient.create).not.toHaveBeenCalled();
       expect(viewsClient.putView).not.toHaveBeenCalled();
@@ -553,6 +759,58 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
+    it('rejects a query that mixes types without writing', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await expect(
+        client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM logs-*, traces-*',
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('mixes'),
+      });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('keeps the stored type on a title-only save', async () => {
+      const { client, soClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const updated = await client.update('source-1', {
+        title: 'renamed',
+        tags: ['nginx'],
+        esql: 'FROM logs-nginx-* | WHERE status >= 500',
+      });
+
+      expect(updated.type).toBe('logs');
+      expect(updated.title).toBe('renamed');
+    });
+
+    it('recomputes the type when the query changes', async () => {
+      const { client, soClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const updated = await client.update('source-1', {
+        title: 'nginx errors',
+        tags: ['nginx'],
+        esql: 'TS metrics-*',
+      });
+
+      expect(updated.type).toBe('metrics');
+      expect(soClient.update).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'source-1',
+        expect.objectContaining({ type: 'metrics' }),
+        expect.anything()
+      );
+    });
+
     it('rejects an unresolvable field without writing', async () => {
       const { client, soClient, viewsClient, dataEsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
@@ -651,6 +909,28 @@ describe('SourcesClient', () => {
 
       expect(updated.slug).toBe('nginx-errors');
       expect(updated.view_name).toBe(NGINX_VIEW_NAME);
+    });
+
+    it.each([false, true])('keeps the stored enabled state when the body says %s', async (sent) => {
+      const { client, soClient } = setup();
+      const stored = !sent;
+      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ enabled: stored })));
+      const body = {
+        title: 'nginx errors',
+        tags: ['nginx'],
+        esql: makeAttributes().esql,
+        enabled: sent,
+      };
+
+      const updated = await client.update('source-1', body);
+
+      expect(updated.enabled).toBe(stored);
+      expect(soClient.update).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'source-1',
+        expect.objectContaining({ enabled: stored }),
+        expect.anything()
+      );
     });
 
     it('always re-puts the view so PUT doubles as repair', async () => {
@@ -756,19 +1036,77 @@ describe('SourcesClient', () => {
       expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ filter: undefined }));
     });
 
-    it('escapes KQL metacharacters in the title prefix filter', async () => {
-      const { client, soClient } = setup();
-      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
-      const search = 'foo AND "bar"';
+    it('filters on the raw document ids of the space, next to search and enabled', async () => {
+      const { client, soClient, serializer, internalEsClient } = setup({ spaceId: 'marketing' });
+      internalEsClient.indices.analyze.mockResponse(analyzed('alp'));
 
-      await client.list({ page: 1, perPage: 25, search, enabled: true });
+      await client.list({
+        page: 2,
+        perPage: 1,
+        ids: ['alpha', 'we"ird\\ id'],
+        search: 'alp',
+        enabled: true,
+      });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: `nightshift-source.attributes.title: ${escapeKuery(
-            search
-          )}* AND nightshift-source.attributes.enabled: true`,
+          page: 2,
+          perPage: 1,
+          search: 'alp*',
+          searchFields: ['title.text'],
+          filter:
+            '(nightshift-source.id: "marketing:nightshift-source:alpha" OR ' +
+            'nightshift-source.id: "marketing:nightshift-source:we\\"ird\\\\ id") AND ' +
+            'nightshift-source.attributes.enabled: true',
         })
+      );
+      expect(serializer.generateRawId).toHaveBeenCalledWith(
+        'marketing',
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'alpha'
+      );
+    });
+
+    it('builds the raw document ids without a namespace in the default space', async () => {
+      const { client, soClient, serializer } = setup();
+
+      await client.list({ page: 1, perPage: 10, ids: ['alpha'] });
+
+      expect(serializer.generateRawId).toHaveBeenCalledWith(
+        undefined,
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'alpha'
+      );
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ filter: '(nightshift-source.id: "nightshift-source:alpha")' })
+      );
+    });
+
+    it('searches the tokens of the title analyzer, next to the enabled filter', async () => {
+      const { client, soClient, internalEsClient } = setup();
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
+      internalEsClient.indices.analyze.mockResponse(analyzed('nginx', '東', '京', '都'));
+
+      await client.list({ page: 1, perPage: 25, search: 'nginx 東京都', enabled: true });
+
+      expect(internalEsClient.indices.analyze).toHaveBeenCalledWith({
+        analyzer: 'standard',
+        text: 'nginx 東京都',
+      });
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'nginx 東 京 都*',
+          searchFields: ['title.text'],
+          defaultSearchOperator: 'AND',
+          filter: 'nightshift-source.attributes.enabled: true',
+        })
+      );
+
+      internalEsClient.indices.analyze.mockResponse(analyzed());
+      await client.list({ page: 1, perPage: 25, search: ' - " ' });
+
+      expect(soClient.find).toHaveBeenLastCalledWith(
+        expect.not.objectContaining({ search: expect.anything() })
       );
     });
   });
@@ -792,6 +1130,20 @@ describe('SourcesClient', () => {
       expect(soClient.delete).toHaveBeenCalledWith(NIGHTSHIFT_SOURCE_SO_TYPE, 'source-1');
       expect(viewsClient.deleteView).toHaveBeenCalledWith(NGINX_VIEW_NAME);
       expect(callOrder).toEqual(['view', 'so']);
+    });
+
+    it('does not delete the view when the caller cannot write the saved object', async () => {
+      const { client, soClient, viewsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      soClient.update.mockRejectedValue(
+        SavedObjectsErrorHelpers.decorateForbiddenError(new Error('read only'))
+      );
+
+      await expect(client.delete('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(viewsClient.deleteView).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
     });
 
     it('leaves the saved object in place when the view cannot be deleted', async () => {
@@ -827,6 +1179,101 @@ describe('SourcesClient', () => {
       expect(source.enabled).toBe(true);
       expect(source.updated_at).toBe('2026-09-01T00:00:00.000Z');
       expect(soClient.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('change notifications', () => {
+    it('reports a created source once its view exists', async () => {
+      const { client, onChange } = setup();
+
+      const source = await client.create({ title: 'nginx errors', tags: [], esql: 'FROM logs-*' });
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith({ type: 'created', source });
+    });
+
+    it('does not report a create that was rolled back', async () => {
+      const { client, viewsClient, onChange } = setup();
+      viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
+
+      await expect(
+        client.create({ title: 'nginx errors', tags: [], esql: 'FROM logs-*' })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('reports an update with the source as it was before', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const source = await client.update('source-1', {
+        title: 'nginx 5xx',
+        tags: ['nginx'],
+        esql: makeAttributes().esql,
+      });
+
+      expect(onChange).toHaveBeenCalledWith({
+        type: 'updated',
+        source,
+        previous: makeSource(),
+      });
+    });
+
+    it('does not report an update that was restored', async () => {
+      const { client, soClient, viewsClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      soClient.update.mockResolvedValueOnce({ ...makeSavedObject(), version: 'v2' });
+      viewsClient.putView.mockRejectedValue(forbidden('no create_view'));
+
+      await expect(
+        client.update('source-1', { title: 'new', tags: [], esql: 'FROM logs-other-*' })
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('reports a disabled source as an update', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const source = await client.setEnabled('source-1', false);
+
+      expect(onChange).toHaveBeenCalledWith({
+        type: 'updated',
+        source,
+        previous: makeSource(),
+      });
+    });
+
+    it('does not report an enable that changed nothing', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await client.setEnabled('source-1', true);
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('reports a deleted source after its view and saved object are gone', async () => {
+      const { client, soClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await client.delete('source-1');
+
+      expect(onChange).toHaveBeenCalledWith({ type: 'deleted', source: makeSource() });
+    });
+
+    it('does not report a delete whose view could not be removed', async () => {
+      const { client, soClient, viewsClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      viewsClient.deleteView.mockRejectedValue(forbidden('no delete_view'));
+
+      await expect(client.delete('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+
+      expect(onChange).not.toHaveBeenCalled();
     });
   });
 });

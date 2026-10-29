@@ -14,10 +14,13 @@ import type { Logger } from '@kbn/core/server';
 import { featureSchema, type Feature } from '@kbn/significant-events-schema';
 import { decodeFeatureAttachmentOrigin, KI_FEATURE_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients } from '../../routes/types';
+import { canReadSignificantEvents } from '../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../types';
 
 interface CreateSignificantEventFeatureAttachmentTypeOptions {
   logger: Logger;
   getScopedClients: GetScopedClients;
+  server: Pick<SignificantEventsServer, 'security'>;
 }
 
 export const formatFeatureAsText = (feature: Feature): string => {
@@ -25,7 +28,7 @@ export const formatFeatureAsText = (feature: Feature): string => {
   return [
     `Knowledge Indicator feature "${title}"`,
     `Feature ID: ${feature.id}`,
-    `Stream: ${feature.stream_name}`,
+    `Source: ${feature.source_id}`,
     `Type: ${feature.type}${feature.subtype ? ` (${feature.subtype})` : ''}`,
     feature.confidence > 0 ? `Confidence: ${feature.confidence}%` : undefined,
     feature.description ? `Description: ${feature.description}` : undefined,
@@ -37,6 +40,7 @@ export const formatFeatureAsText = (feature: Feature): string => {
 export const createSignificantEventFeatureAttachmentType = ({
   logger,
   getScopedClients,
+  server,
 }: CreateSignificantEventFeatureAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof KI_FEATURE_ATTACHMENT_TYPE,
   Feature
@@ -46,7 +50,7 @@ export const createSignificantEventFeatureAttachmentType = ({
     context: AttachmentResolveContext
   ): Promise<Feature | undefined> => {
     const decoded = decodeFeatureAttachmentOrigin(origin);
-    if (!decoded) {
+    if (!decoded || !(await canReadSignificantEvents({ request: context.request, server }))) {
       return undefined;
     }
 
@@ -54,7 +58,7 @@ export const createSignificantEventFeatureAttachmentType = ({
     const kiClient = await getKnowledgeIndicatorClient();
 
     try {
-      return await kiClient.getFeature(decoded.streamName, decoded.featureId);
+      return await kiClient.getFeature(decoded.sourceId, decoded.featureId);
     } catch (error) {
       logger.warn(`Failed to resolve feature attachment for origin "${origin}": ${String(error)}`);
       return undefined;
@@ -104,7 +108,7 @@ export const createSignificantEventFeatureAttachmentType = ({
       }),
     }),
     getAgentDescription: () =>
-      'A Significant Events knowledge indicator feature attachment represents a discovered entity or operational pattern on a stream. Use it as authoritative context about the attached feature when answering questions.',
+      'A significant events knowledge indicator feature attachment represents a discovered entity or operational pattern on a source. Use it as authoritative context about the attached feature when answering questions.',
     getTools: () => [],
   };
 };

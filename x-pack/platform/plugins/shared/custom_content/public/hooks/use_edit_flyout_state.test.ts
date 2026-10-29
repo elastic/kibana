@@ -15,6 +15,7 @@ jest.mock('@kbn/data-plugin/public', () => ({ getEsQueryConfig: jest.fn() }));
 import type { HttpStart } from '@kbn/core/public';
 import {
   fetchEsqlData,
+  getLinkBasePath,
   fillTemplate,
   sanitizeHtml,
   applyHtmlTheme,
@@ -27,7 +28,8 @@ const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate
 const mockSanitizeHtml = sanitizeHtml as jest.MockedFunction<typeof sanitizeHtml>;
 const mockApplyHtmlTheme = applyHtmlTheme as jest.MockedFunction<typeof applyHtmlTheme>;
 
-const mockHttp = {} as unknown as HttpStart;
+const mockLinkBasePath = { requestBasePath: '/s/my-space', serverBasePath: '' };
+const mockHttp = { basePath: { get: () => '' } } as unknown as HttpStart;
 const mockSearch = jest.fn();
 
 beforeEach(() => {
@@ -39,6 +41,7 @@ beforeEach(() => {
   });
   mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });
   mockFillTemplate.mockResolvedValue('<p>filled</p>');
+  (getLinkBasePath as jest.Mock).mockReturnValue(mockLinkBasePath);
   mockSanitizeHtml.mockImplementation((h) => h);
   mockApplyHtmlTheme.mockReturnValue('<html>prepared</html>');
 });
@@ -176,7 +179,7 @@ describe('useEditFlyoutState', () => {
 
       expect(mockFetchEsqlData).toHaveBeenCalled();
       expect(mockFillTemplate).toHaveBeenCalled();
-      expect(mockSanitizeHtml).toHaveBeenCalledWith('<p>filled</p>');
+      expect(mockSanitizeHtml).toHaveBeenCalledWith('<p>filled</p>', mockLinkBasePath);
       expect(mockApplyHtmlTheme).toHaveBeenCalledWith('<p>filled</p>', 'LIGHT', mockEuiTheme);
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
@@ -192,7 +195,7 @@ describe('useEditFlyoutState', () => {
 
       expect(mockFetchEsqlData).not.toHaveBeenCalled();
       expect(mockFillTemplate).not.toHaveBeenCalled();
-      expect(mockSanitizeHtml).toHaveBeenCalledWith('hello');
+      expect(mockSanitizeHtml).toHaveBeenCalledWith('hello', mockLinkBasePath);
       expect(mockApplyHtmlTheme).toHaveBeenCalledWith('hello', 'LIGHT', mockEuiTheme);
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });

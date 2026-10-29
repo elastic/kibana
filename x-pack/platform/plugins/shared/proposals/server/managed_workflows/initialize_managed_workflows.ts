@@ -6,16 +6,16 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { CREATE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { CREATE_PROPOSAL_WORKFLOW_ID, RESOLVE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { PROPOSALS_MANAGED_WORKFLOW_OWNER_ID } from '../constants';
 
 /**
- * Installs the generic proposal gate globally. It has to be a managed workflow
- * because an unmanaged parent can neither execute a managed child nor see
- * globally-installed definitions.
+ * Installs the generic proposal gate, and the child that resolves its answers,
+ * globally. They have to be managed workflows because an unmanaged parent can
+ * neither execute a managed child nor see globally-installed definitions.
  */
 export const initializeManagedWorkflows = async ({
   workflowsExtensions,
@@ -30,17 +30,19 @@ export const initializeManagedWorkflows = async ({
 
   let canReconcile = true;
 
-  try {
-    await client.install(CREATE_PROPOSAL_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-    });
-  } catch (error) {
-    canReconcile = false;
-    logger.error(
-      `Failed to install managed workflow "${CREATE_PROPOSAL_WORKFLOW_ID}": ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
+  for (const workflowId of [RESOLVE_PROPOSAL_WORKFLOW_ID, CREATE_PROPOSAL_WORKFLOW_ID] as const) {
+    try {
+      await client.install(workflowId, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+    } catch (error) {
+      canReconcile = false;
+      logger.error(
+        `Failed to install managed workflow "${workflowId}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 
   if (canReconcile) {

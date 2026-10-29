@@ -8,7 +8,7 @@
  */
 
 const tsEstree = require('@typescript-eslint/typescript-estree');
-const traverse = require('eslint-traverse');
+const traverse = require('../helpers/traverse');
 const esTypes = tsEstree.AST_NODE_TYPES;
 
 /** @typedef {import("eslint").Rule.RuleModule} Rule */

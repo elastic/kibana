@@ -115,7 +115,27 @@ describe('matchDatasetsDeterministic', () => {
         paloaltonetworks: ['panw'],
         f5: ['f5bigip'],
         vmware: ['vsphere'],
+        amazon: ['aws'],
+        amazonwebservices: ['aws'],
+        fortigate: ['fortinetfortigate'],
       });
+    });
+
+    it('matches the vendor "Amazon" to aws.cloudtrail', () => {
+      expect(matchDatasetsDeterministic({ datasets, vendor: 'Amazon' })).toEqual([awsCloudtrail]);
+    });
+
+    it('matches the vendor "Amazon Web Services" to aws.cloudtrail', () => {
+      expect(matchDatasetsDeterministic({ datasets, vendor: 'Amazon Web Services' })).toEqual([
+        awsCloudtrail,
+      ]);
+    });
+
+    it('matches the product "FortiGate" to fortinet_fortigate.log', () => {
+      const fortigateLog = dataset('fortinet_fortigate.log');
+      expect(
+        matchDatasetsDeterministic({ datasets: [...datasets, fortigateLog], product: 'FortiGate' })
+      ).toEqual([fortigateLog]);
     });
 
     it('matches Palo Alto Networks to panw.panos', () => {
@@ -391,21 +411,17 @@ describe('matchDatasetsWithModel', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connector down'));
   });
 
-  it.each([
-    ['a missing confidence', { datasets: [{ dataset: 'okta.system' }] }],
-    ['a NaN confidence', { datasets: [{ dataset: 'okta.system', confidence: Number.NaN }] }],
-    ['an out-of-range confidence', { datasets: [{ dataset: 'okta.system', confidence: 1.5 }] }],
-    ['a non-array datasets', { datasets: 'okta.system' }],
-    ['bare string items', { datasets: ['okta.system'], confidence: 0.9 }],
-  ])('returns undefined and warns when the model output has %s', async (_label, raw) => {
+  it('returns undefined and warns when structured output parsing fails', async () => {
     const logger = loggerMock.create();
-    const invoke = jest.fn().mockResolvedValue(raw);
+    const invoke = jest.fn().mockRejectedValue(new Error('Failed to parse structured output'));
     const { model } = buildModel(invoke);
 
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
     ).resolves.toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid shape'));
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to parse structured output')
+    );
   });
 
   it('offers the model at most MAX_MODEL_DATASET_OPTIONS datasets and says so', async () => {
@@ -514,5 +530,37 @@ describe('matchDatasetsWithModel', () => {
     expect(prompt).not.toContain('10.0.0.25');
     expect(prompt).toContain('A'.repeat(6000));
     expect(prompt).not.toContain('A'.repeat(6001));
+  });
+
+  it('clamps template variables to the gateway maxLengths', async () => {
+    const chatComplete = jest.fn().mockResolvedValue({
+      content: '{"datasets":[{"dataset":"okta.system","confidence":1}]}',
+    });
+    const model = {
+      chatModel: { withStructuredOutput: jest.fn() },
+      inferenceClient: { chatComplete },
+      connector: {
+        connectorId: 'daybreak',
+        metadata: { capabilities: { templates: { policy: 'required' } } },
+      },
+    } as unknown as ScopedModel;
+
+    await matchDatasetsWithModel({
+      model,
+      datasets,
+      report: {
+        vendor: 'V'.repeat(600),
+        product: 'P'.repeat(600),
+        techniques: ['T1078'],
+        text: 'A'.repeat(7000),
+      },
+    });
+
+    const variables = chatComplete.mock.calls[0][0].template.variables;
+    expect(variables.vendor).toHaveLength(512);
+    expect(variables.product).toHaveLength(512);
+    expect(variables.report_text).toHaveLength(6000);
+    expect(variables.datasets).toContain('okta.system');
+    expect(chatComplete.mock.calls[0][0].template.id).toBe('.hunt-dataset-match');
   });
 });

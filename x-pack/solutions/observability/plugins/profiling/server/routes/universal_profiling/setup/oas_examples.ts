@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ProfilingStatus } from '@kbn/profiling-utils';
+import type { UniversalProfilingStatus } from '@kbn/profiling-utils';
 
-type SetupStatusResponse = ProfilingStatus & { has_required_role: boolean };
+type SetupStatusResponse = UniversalProfilingStatus & { has_required_role: boolean };
 
 const setupStatusExample = (summary: string, description: string, value: SetupStatusResponse) => ({
   summary,

@@ -9,10 +9,10 @@ import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RuleSummaryRunbookCard } from './rule_summary_runbook_card';
-import type { RuleSummarySectionProps } from '../types';
+import { useRuleSummary } from './rule_summary_context';
 
-export const RuleSummaryInvestigationSection: React.FC<RuleSummarySectionProps> = ({ rule }) => {
-  const hasRunbook = Boolean(rule.artifacts?.some((artifact) => artifact.type === 'runbook'));
+export const RuleSummaryInvestigationSection: React.FC = () => {
+  const rule = useRuleSummary();
 
   return (
     <FlyoutAccordion
@@ -20,7 +20,7 @@ export const RuleSummaryInvestigationSection: React.FC<RuleSummarySectionProps> 
         defaultMessage: 'Investigation',
       })}
       hasBorder={false}
-      initialIsOpen={hasRunbook}
+      initialIsOpen
       data-test-subj="ruleSummaryInvestigation"
     >
       <RuleSummaryRunbookCard rule={rule} />

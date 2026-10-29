@@ -22,6 +22,7 @@ import { useIntegrationDisplayNames } from '../../../../hooks/use_integration_di
 import { useDetectionRulesByIntegration } from '../../../../hooks/use_get_detection_rules_by_integration';
 import { IntegrationSelectablePopover } from '../../../components/integrations_selectable_popover';
 import { createIntegrationStatusMapFromSets } from '../create_integration_status_maps';
+import { ruleCoversAttackTactic } from './rule_covers_attack_tactic';
 
 interface DetectionRule {
   rule_id?: string;
@@ -160,10 +161,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
 
     return enabledRules.filter((rule: DetectionRule) =>
       // 2. Return true if ANY threat tactic matches our set
-      rule.threat?.some((threat) => {
-        const name = threat.tactic?.name?.trim().toLowerCase();
-        return name && staticTacticSet.has(name);
-      })
+      ruleCoversAttackTactic(rule.threat, (name) => staticTacticSet.has(name))
     ).length;
   }, [enabledRules]);
 
@@ -172,9 +170,7 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
     return MITRE_TACTICS_LIST.map((tacticName, index) => {
       // Find rules associated with this specific tactic
       const rulesForTactic = enabledRules.filter((rule: DetectionRule) =>
-        rule.threat?.some(
-          (threat: ThreatElement) => threat.tactic?.name?.toLowerCase() === tacticName.toLowerCase()
-        )
+        ruleCoversAttackTactic(rule.threat, (name) => name === tacticName.toLowerCase())
       );
 
       const missingIntegrations = new Set<string>();

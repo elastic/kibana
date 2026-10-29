@@ -48,7 +48,9 @@ test.describe(
         await route.abort();
       });
 
-      await pageObjects.streams.saveStepsListChanges();
+      // The review modal gates the save request, so the save cannot be awaited before it
+      // has been confirmed.
+      await pageObjects.streams.clickSaveStepsListChanges();
       // The review modal may or may not appear depending on whether detected fields
       // have mapping-affecting changes. Use conditional confirmation.
       await pageObjects.streams.confirmChangesInReviewModalIfPresent();
@@ -64,8 +66,9 @@ test.describe(
       await page.route('**/streams/**/_ingest', async (route) => {
         await route.continue();
       });
-      await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.clickSaveStepsListChanges();
       await pageObjects.streams.confirmChangesInReviewModalIfPresent();
+      await pageObjects.streams.waitForStepsListSaveSettled();
 
       // Should succeed
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
@@ -83,10 +86,11 @@ test.describe(
 
       await pageObjects.streams.waitForModifiedFieldsDetection();
 
-      await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.clickSaveStepsListChanges();
       // The review modal may or may not appear depending on whether detected fields
       // have mapping-affecting changes. Use conditional confirmation.
       await pageObjects.streams.confirmChangesInReviewModalIfPresent();
+      await pageObjects.streams.waitForStepsListSaveSettled();
       await pageObjects.toasts.closeAll();
 
       // Edit the processor

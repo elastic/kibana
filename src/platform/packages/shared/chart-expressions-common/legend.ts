@@ -49,7 +49,11 @@ export const LegendSizeToPixels = {
   [LegendSize.EXTRA_LARGE]: 230,
 } as const;
 
+/** Fallback for the shared chart expressions and the legacy Visualize editor when no size is set. */
 export const DEFAULT_LEGEND_SIZE = LegendSize.MEDIUM;
+
+/** Size Lens uses when no legend size is stored in the visualization state. */
+export const LENS_DEFAULT_LEGEND_SIZE = LegendSize.AUTO;
 
 /**
  * This is a shared type between XY Expression and Annotation plugins.

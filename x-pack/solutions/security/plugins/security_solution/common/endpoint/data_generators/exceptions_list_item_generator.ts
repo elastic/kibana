@@ -433,24 +433,21 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     const condition = this.randomChoice([
       'condition: true',
       'condition: false',
-      'strings: $a = "test_string" condition: $a',
-      'strings: $bbb = /00 ae 53 ff/ condition: all of them',
+      'strings: $a = "test_string"\n  condition: $a',
+      'strings: $bbb = /00 ae 53 ff/\n  condition: all of them',
     ]);
 
-    return `
-      rule Generated_Yara_Rule_${this.randomString(5)} {
-        meta:
-          description = "Generated test YARA rule"
-          ${
-            metaScanType.length
-              ? `${YaraMetaKeyOfInterest.SCAN_TYPE} = "${metaScanType.join(', ')}"`
-              : ''
-          }
-          ${metaArch.length ? `${YaraMetaKeyOfInterest.ARCH} = "${metaArch.join(', ')}"` : ''}
-          ${metaOs.length ? `${YaraMetaKeyOfInterest.OS} = "${metaOs.join(', ')}"` : ''}
+    return `rule Generated_Yara_Rule_${this.randomString(5)} {
+  meta:
+    description = "Generated test YARA rule"
+    ${
+      metaScanType.length ? `${YaraMetaKeyOfInterest.SCAN_TYPE} = "${metaScanType.join(', ')}"` : ''
+    }
+    ${metaArch.length ? `${YaraMetaKeyOfInterest.ARCH} = "${metaArch.join(', ')}"` : ''}
+    ${metaOs.length ? `${YaraMetaKeyOfInterest.OS} = "${metaOs.join(', ')}"` : ''}
 
-        ${condition}
-      }`;
+  ${condition}
+}`;
   }
 
   generateMatchingOsTypesAndYaraOsMeta(): {

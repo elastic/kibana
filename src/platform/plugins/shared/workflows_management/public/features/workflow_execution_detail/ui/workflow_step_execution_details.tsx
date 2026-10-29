@@ -32,6 +32,11 @@ import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_b
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
+import {
+  approvalLabelsForStepExecution,
+  resumeMessageForStepExecution,
+  resumeSchemaForStepExecution,
+} from '../model/use_waiting_step_resume';
 
 interface WorkflowStepExecutionDetailsProps {
   workflowExecutionId: string;
@@ -46,7 +51,11 @@ interface WorkflowStepExecutionDetailsProps {
   resumeSchema?: JsonModelSchemaType;
   approvalLabels?: ApprovalLabels;
   shouldAutoResume?: boolean;
+  /** Shared with the tree-row Provide action so one submit disables both. */
+  submitState?: React.ComponentProps<typeof ResumeExecutionButton>['submitState'];
   waitingStepExecutionId?: string;
+  /** Run that owns `stepExecution`. Differs from `workflowExecutionId` for an injected child step. */
+  resumeExecutionId?: string;
   hasResumeError?: boolean;
   onRetryResume?: () => void;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
@@ -69,7 +78,9 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     resumeSchema,
     approvalLabels,
     shouldAutoResume = false,
+    submitState,
     waitingStepExecutionId,
+    resumeExecutionId,
     hasResumeError,
     onRetryResume,
     childWorkflowExecution,
@@ -77,6 +88,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     onSelectStepExecution,
   }) => {
     const isWaitingForInput = stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT;
+    const isOwnWaitingStep = stepExecution?.id === waitingStepExecutionId;
 
     // Show data for terminal steps OR steps paused for input (they have input but no output yet)
     const isFinished = useMemo(
@@ -135,10 +147,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           stepExecution={stepExecution}
           workflowExecutionDuration={workflowExecutionDuration}
           workflowExecutionUsage={workflowExecutionUsage}
-          showResumeUI={
-            workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT &&
-            Boolean(waitingStepExecutionId)
-          }
+          showResumeUI={false}
           executionId={workflowExecutionId}
           resumeMessage={resumeMessage}
           resumeSchema={resumeSchema}
@@ -188,15 +197,28 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                     <EuiFlexItem grow={false}>
                       {isWaitingForInput && (
                         <>
+                          {/* Tree row owns auto-open. This button shares submit state so it cannot open a second modal or resume again. */}
                           <ResumeExecutionButton
-                            executionId={workflowExecutionId}
+                            executionId={resumeExecutionId ?? workflowExecutionId}
                             workflowId={stepExecution?.workflowId}
                             stepStartedAt={stepExecution?.startedAt}
-                            resumeMessage={resumeMessage}
-                            resumeSchema={resumeSchema}
-                            approvalLabels={approvalLabels}
-                            autoOpen={shouldAutoResume}
+                            resumeMessage={
+                              isOwnWaitingStep
+                                ? resumeMessage
+                                : resumeMessageForStepExecution(stepExecution)
+                            }
+                            resumeSchema={
+                              isOwnWaitingStep
+                                ? resumeSchema
+                                : resumeSchemaForStepExecution(stepExecution)
+                            }
+                            approvalLabels={
+                              isOwnWaitingStep
+                                ? approvalLabels
+                                : approvalLabelsForStepExecution(stepExecution) ?? approvalLabels
+                            }
                             waitingStepExecutionId={stepExecution?.id}
+                            submitState={submitState}
                           />
                           <EuiSpacer size="m" />
                         </>
@@ -206,7 +228,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                           <EuiCallOut
                             size="s"
                             title={i18n.translate(
-                              'workflowsManagement.stepExecutionDetails.inputAccessTitle',
+                              'workflows.stepExecutionDetails.inputAccessTitle',
                               {
                                 defaultMessage: 'Access this data in your workflow',
                               }
@@ -215,7 +237,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                             announceOnMount={false}
                           >
                             <FormattedMessage
-                              id="workflowsManagement.stepExecutionDetails.inputAccessDescription"
+                              id="workflows.stepExecutionDetails.inputAccessDescription"
                               defaultMessage="You can reference these values using {code}"
                               values={{
                                 code: (

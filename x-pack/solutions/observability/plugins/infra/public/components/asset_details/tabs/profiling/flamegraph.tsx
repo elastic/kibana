@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { BaseFlameGraph } from '@kbn/profiling-utils';
+import type { BaseFlameGraph, ProfilingSchema } from '@kbn/profiling-utils';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
@@ -22,9 +22,11 @@ import { useRequestObservable } from '../../hooks/use_request_observable';
 
 interface Props {
   kuery: string;
+  /** Undefined until a schema is selected, which the request waits for */
+  schema?: ProfilingSchema;
 }
 
-export function Flamegraph({ kuery }: Props) {
+export function Flamegraph({ kuery, schema }: Props) {
   const { services } = useKibanaContextForPlugin();
   const { entity } = useAssetDetailsRenderPropsContext();
   const { isActiveTab } = useTabSwitcherContext();
@@ -34,19 +36,23 @@ export function Flamegraph({ kuery }: Props) {
 
   const profilingLinkLocator = services.observabilityShared.locators.profiling.flamegraphLocator;
   const profilingLinkLabel = i18n.translate('xpack.infra.flamegraph.profilingAppFlamegraphLink', {
-    defaultMessage: 'Go to Universal Profiling Flamegraph',
+    defaultMessage: 'Go to Profiling Flamegraph',
   });
 
   const params = useMemo(() => ({ kuery, from, to }), [from, kuery, to]);
 
   const { data, status, error } = useFetcher(
     async (callApi) => {
+      if (!schema) {
+        return;
+      }
+
       return callApi<BaseFlameGraph>('/api/infra/profiling/flamegraph', {
         method: 'GET',
-        query: params,
+        query: { ...params, schema },
       });
     },
-    [params],
+    [params, schema],
     {
       requestObservable$: request$,
       autoFetch: isActiveTab('profiling'),
@@ -69,6 +75,7 @@ export function Flamegraph({ kuery }: Props) {
         to={dateRange.to}
         profilingLinkLocator={profilingLinkLocator}
         profilingLinkLabel={profilingLinkLabel}
+        schema={schema}
       />
       <EuiSpacer />
       <EmbeddableFlamegraph data={data} isLoading={isPending(status)} height="60vh" />

@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
+import styled from '@emotion/styled';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -26,7 +27,6 @@ import { createCardLinkClickHandler } from '../actions/card_link_click';
 
 interface EscalationCardProps {
   escalation: EscalationQueueItem;
-  hasBorder: boolean;
   /** Render the assignee widget. Supplied by the page so hook calls stay outside the package. */
   renderAssignees: (escalation: EscalationQueueItem) => React.ReactNode;
   /**
@@ -45,19 +45,64 @@ interface EscalationCardProps {
    * page load.
    */
   href?: string;
+  /** When false the card is inert and has no link, assignees or chevron. Defaults to true. */
+  canOpenInvestigationDetails?: boolean;
 }
+
+interface StyledEuiPanelProps {
+  $isClickable: boolean;
+  $isSelected: boolean;
+  $hasLink: boolean;
+}
+
+const StyledEuiPanel = styled(EuiPanel, {
+  shouldForwardProp: (prop) => !prop.startsWith('$'),
+})<StyledEuiPanelProps>(({ theme: { euiTheme }, $isClickable, $isSelected, $hasLink }) => ({
+  borderRadius: 0,
+  '&:not(:last-child)': {
+    borderBottom: `1px solid ${euiTheme.colors.disabled}`,
+  },
+  // The last row rounds to the queue panel's corners so the hover fill does not
+  // square them off. A footer after the rows keeps it from being the last child.
+  '&:last-child': {
+    borderRadius: `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+  },
+  boxSizing: 'border-box',
+  cursor: $isClickable ? 'pointer' : undefined,
+  backgroundColor: $isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
+  ...($isClickable && {
+    '&:hover': {
+      backgroundColor: $isSelected
+        ? euiTheme.colors.backgroundBaseInteractiveSelect
+        : euiTheme.colors.backgroundBaseSubdued,
+      boxShadow: 'none',
+    },
+    ...(!$hasLink && {
+      '&:focus-visible': {
+        outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
+      },
+    }),
+  }),
+}));
 
 /**
  * One row in the escalation queue.
  */
 export const EscalationCard = memo<EscalationCardProps>(
-  ({ escalation, hasBorder, renderAssignees, onClickCard, isSelected = false, href }) => {
+  ({
+    escalation,
+    renderAssignees,
+    onClickCard,
+    isSelected = false,
+    href,
+    canOpenInvestigationDetails = true,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const isClosed = escalation.status === 'closed';
-    const isClickable = onClickCard !== undefined;
+    const isClickable = canOpenInvestigationDetails && onClickCard !== undefined;
     // A link href promotes the row to a real navigable element; without it, fall back to the
     // button pattern so the card still works for callers that don't supply an href.
-    const hasLink = href !== undefined;
+    const hasLink = canOpenInvestigationDetails && href !== undefined;
 
     const handleClick = useCallback(() => {
       onClickCard?.(escalation);
@@ -84,7 +129,7 @@ export const EscalationCard = memo<EscalationCardProps>(
     );
 
     return (
-      <EuiPanel
+      <StyledEuiPanel
         paddingSize="l"
         borderRadius="none"
         hasBorder={false}
@@ -98,26 +143,9 @@ export const EscalationCard = memo<EscalationCardProps>(
         aria-current={isSelected || undefined}
         onClick={isClickable ? handleClick : undefined}
         onKeyDown={isClickable && !hasLink ? handleKeyDown : undefined}
-        css={{
-          borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-          borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
-          boxSizing: 'border-box',
-          boxShadow: 'none',
-          cursor: isClickable ? 'pointer' : undefined,
-          backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
-          ...(isClickable && {
-            '&:hover': {
-              backgroundColor: isSelected
-                ? euiTheme.colors.backgroundBaseInteractiveSelect
-                : euiTheme.colors.backgroundBaseSubdued,
-            },
-            ...(!hasLink && {
-              '&:focus-visible': {
-                outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
-              },
-            }),
-          }),
-        }}
+        $isClickable={isClickable}
+        $isSelected={isSelected}
+        $hasLink={hasLink}
         data-test-subj={`escalationCard-${escalation.id}`}
       >
         <EuiFlexGroup
@@ -171,7 +199,10 @@ export const EscalationCard = memo<EscalationCardProps>(
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
                 {escalation.linkedInvestigationCount > 0 ? (
-                  <LinkedInvestigationsBadge count={escalation.linkedInvestigationCount} />
+                  <LinkedInvestigationsBadge
+                    count={escalation.linkedInvestigationCount}
+                    isDisabled={!canOpenInvestigationDetails}
+                  />
                 ) : (
                   <EuiText size="xs" color="subdued">
                     {ESCALATION_QUEUE_LABELS.nothingAttached}
@@ -182,26 +213,30 @@ export const EscalationCard = memo<EscalationCardProps>(
                * Stop propagation so interacting with the assignee picker
                * (clicking the + button or selecting a user) does not trigger the row click.
                */}
-              <EuiFlexItem
-                grow={false}
-                onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
-              >
-                {renderAssignees(escalation)}
-              </EuiFlexItem>
+              {canOpenInvestigationDetails && (
+                <EuiFlexItem
+                  grow={false}
+                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                  onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
+                >
+                  {renderAssignees(escalation)}
+                </EuiFlexItem>
+              )}
               {/* Chevron: visual affordance for interactive rows. */}
-              <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type="chevronSingleRight"
-                  color="subdued"
-                  aria-hidden="true"
-                  data-test-subj={`escalationCardChevron-${escalation.id}`}
-                />
-              </EuiFlexItem>
+              {canOpenInvestigationDetails && (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    type="chevronSingleRight"
+                    color="subdued"
+                    aria-hidden="true"
+                    data-test-subj={`escalationCardChevron-${escalation.id}`}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </StyledEuiPanel>
     );
   }
 );

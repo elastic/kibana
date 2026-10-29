@@ -8,11 +8,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { concat, of, shareReplay } from 'rxjs';
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { validateReasoningEffort, type InferenceConnector } from '@kbn/inference-common';
 import type {
   ChatEvent,
   ConverseInput,
@@ -22,9 +24,12 @@ import type {
 import {
   AgentExecutionMode,
   ChatTriggerMode,
+  EventActorType,
   agentBuilderDefaultAgentId,
   createBadRequestError,
   createInternalError,
+  isConversationBusyError,
+  isConversationWriteConflictError,
   isExecutionAbortReason,
   isRequestAbortedError,
   roundUserMessageEventId,
@@ -56,15 +61,21 @@ import {
   collectAndWriteEvents,
   type AgentExecutionDeps,
 } from './execution_runner';
-import { serializeExecutionError } from './utils';
+import {
+  getPendingResumeRound,
+  resolveExecutionConnectorId,
+  serializeExecutionError,
+} from './utils';
 import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
 import type { ConversationClient } from '../conversation';
+import type { AcquireActiveExecution } from '../conversation/client/types';
+import type { CallbackDeliveryService } from './callback';
 import {
   getConversation,
-  isPendingResumeConversation,
   persistUserMessage,
+  releaseActiveExecution,
   type ConversationWithOperation,
 } from './utils/conversations';
 import {
@@ -74,11 +85,17 @@ import {
 } from './utils/events';
 import { userMessageActor } from '../conversation/client/rounds_to_events';
 
+/** The still-recorded parent execution that spawned a sub-agent execution. */
+interface ParentExecution {
+  agentId: string;
+}
+
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
+  callbackDeliveryService: CallbackDeliveryService;
 }
 
 export const createAgentExecutionService = (
@@ -110,18 +127,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       params,
       executionId: providedExecutionId,
       useTaskManager,
+      requestImmediateClaim = false,
       abortSignal,
       metadata,
       interactive,
     } = args;
     const executionId = providedExecutionId ?? uuidv4();
-    const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
     const interactivity = normalizeInteractive(interactive, mode);
-
     const executionClient = this.createExecutionClient();
 
-    const conversationClient = await this.getConversationClient({
+    const { conversationClient, parentExecution } = await this.resolveConversationClient({
       request,
       executionClient,
       parentExecutionId: params.parentExecutionId,
@@ -136,12 +152,28 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             params: args.params,
             request,
             conversationClient,
+            spaceId,
           })
         : undefined;
     const conversationParams = resolvedConversation?.validatedParams;
     const conversation = resolvedConversation?.conversation;
     const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
     const receivedAt = resolvedConversation?.receivedAt ?? new Date();
+    const agentId = conversationParams?.agentId ?? this.requestedAgentId(params);
+
+    if (
+      params.reasoningLevel !== undefined &&
+      !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
+    ) {
+      const connector = await this.resolveExecutionConnector({
+        agentId,
+        connectorId: params.connectorId,
+        request,
+      });
+      if (connector) {
+        validateReasoningEffort(connector, params.reasoningLevel);
+      }
+    }
 
     // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
@@ -153,7 +185,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         executionId,
         agentId,
         spaceId,
-        owner: { id: owner.id, username: owner.username },
+        owner: {
+          id: owner.id,
+          username: owner.username,
+          ...(owner.type ? { type: owner.type } : {}),
+        },
         agentParams:
           conversationParams && conversation
             ? {
@@ -178,16 +214,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             `Duplicate idempotency key detected, returning existing execution ${executionId}`
           );
 
-          // Repairs executions left in `scheduled` when the original delivery
-          // failed before scheduling the task.
+          // Only the original delivery dispatches the run, so a duplicate never starts it before
+          // the conversation is written.
           const existing = await executionClient.peek(executionId);
-
-          if (existing?.status === ExecutionStatus.scheduled) {
-            await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
-              request,
-              cloneApiKey: true,
-            });
-          }
 
           // The replay's own conversation may be an unwritten placeholder.
           return {
@@ -203,25 +232,54 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       throw err;
     }
 
-    // After the record, so an idempotency-key replay is recognised before a second message lands.
-    // A resume continues a round that is already open, so it does not write a new message.
-    if (
-      conversationParams &&
-      conversation &&
-      conversationParams.storeConversation !== false &&
-      !isPendingResumeConversation(conversation)
-    ) {
+    // After the record, so an idempotency-key replay is recognised before a second message lands
+    // or the execution becomes active. A resume continues a round that is already open, so it
+    // sets the active execution without writing a new message.
+    let activeConversationId: string | undefined;
+
+    if (conversationParams && conversation && conversationParams.storeConversation !== false) {
+      const pendingResumeRound = getPendingResumeRound(conversation);
+      const activeExecution: AcquireActiveExecution = { action: 'acquire', executionId };
+
       try {
-        await this.writeUserMessage({
-          conversation,
-          conversationClient,
-          params: conversationParams,
-          request,
-          receivedAt,
-          eventId: roundUserMessageEventId(roundId),
-          mergeAttachments: false,
-        });
+        if (pendingResumeRound) {
+          await conversationClient.update(
+            { id: conversation.id },
+            { source: 'execution', access: 'converse', retryOnConflict: true, activeExecution }
+          );
+        } else {
+          await this.writeUserMessage({
+            conversation,
+            conversationClient,
+            params: conversationParams,
+            request,
+            receivedAt,
+            eventId: roundUserMessageEventId(roundId),
+            mergeAttachments: false,
+            parentExecution,
+            // The run reads the conversation by id (real-time). The conversation is already
+            // listed, so a list search before the next scheduled refresh only sees the previous
+            // `updated_at`.
+            appendRefresh: false,
+            activeExecution,
+          });
+        }
+
+        activeConversationId = conversation.id;
       } catch (err) {
+        // A refused run never started, so it leaves no execution record behind: a keyed
+        // redelivery then starts afresh instead of replaying the refusal.
+        if (isConversationBusyError(err) || isConversationWriteConflictError(err)) {
+          try {
+            await executionClient.delete(executionId);
+          } catch (deleteErr) {
+            this.logger.warn(
+              `Failed to delete execution ${executionId} refused by conversation ${conversation.id}: ${deleteErr.message}`
+            );
+          }
+          throw err;
+        }
+
         try {
           await executionClient.updateStatus(executionId, ExecutionStatus.failed, {
             error: serializeExecutionError(err),
@@ -255,10 +313,35 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
-    const useScheduledTask = await this.shouldUseScheduledTask(request, useTaskManager);
-    const result = useScheduledTask
-      ? await this.executeWithScheduledTask({ executionId, agentId, request })
-      : await this.executeLocally({ execution, request, interactivity });
+    let result: ExecuteAgentResult;
+
+    try {
+      const useScheduledTask = await this.shouldUseScheduledTask(request, useTaskManager);
+      result = useScheduledTask
+        ? await this.executeWithScheduledTask({
+            executionId,
+            agentId,
+            request,
+            requestImmediateClaim,
+          })
+        : await this.executeLocally({ execution, request, interactivity });
+    } catch (err) {
+      // A run that never got dispatched would otherwise stay active until it goes stale.
+      if (activeConversationId) {
+        try {
+          await releaseActiveExecution({
+            conversationClient,
+            conversationId: activeConversationId,
+            executionId,
+          });
+        } catch (releaseErr) {
+          this.logger.warn(
+            `Failed to release conversation ${activeConversationId} after execution ${executionId} failed to start: ${releaseErr.message}`
+          );
+        }
+      }
+      throw err;
+    }
 
     if (!conversation) {
       return result;
@@ -316,6 +399,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       params,
       request,
       conversationClient,
+      spaceId: getCurrentSpaceId({ request, spaces: this.deps.spaces }),
     });
 
     const created = conversation.operation === 'CREATE';
@@ -451,24 +535,56 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     executionId,
     agentId,
     request,
+    requestImmediateClaim,
   }: {
     executionId: string;
     agentId: string;
     request: ExecuteAgentParams['request'];
+    requestImmediateClaim: boolean;
   }): Promise<ExecuteAgentResult> {
-    // ensureScheduled tolerates the task already existing: a concurrent idempotent
-    // replay may have re-issued this schedule while repairing a stuck execution.
-    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
-      request,
-      cloneApiKey: true,
-    });
+    const task = this.buildRunAgentTask(executionId);
+
+    try {
+      await this.deps.taskManager.schedule(task, {
+        request,
+        cloneApiKey: true,
+      });
+    } catch (err) {
+      // No task will ever run this execution: a keyed redelivery, which only follows it, then sees
+      // it failed instead of waiting on it.
+      try {
+        await this.createExecutionClient().updateStatus(executionId, ExecutionStatus.failed, {
+          error: serializeExecutionError(err),
+        });
+      } catch (statusErr) {
+        this.logger.error(
+          `Failed to record status for execution ${executionId} after it failed to schedule: ${statusErr.message}`
+        );
+      }
+
+      throw err;
+    }
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
+
+    if (requestImmediateClaim) {
+      this.requestImmediateClaim(task.id);
+    }
 
     return {
       executionId,
       events$: this.followExecution(executionId),
     };
+  }
+
+  private requestImmediateClaim(taskId: string): void {
+    // Not awaited: regular polling still picks the task up when this fails, including when a
+    // poll claimed the task first and runSoon rejects it as already running.
+    this.deps.taskManager.runSoon(taskId, { requestImmediateClaim: true }).catch((error) => {
+      this.logger.debug(
+        `Could not request an immediate claim for task ${taskId}: ${error.message}`
+      );
+    });
   }
 
   /**
@@ -646,9 +762,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * A sub-agent acts as its parent execution's owner: a Task Manager parent's request resolves to
    * the task's API key, which does not match the owner's id. Trusts `parentExecutionId` to name
-   * the running parent that spawned it.
+   * the running parent that spawned it. The same lookup identifies the parent execution, so the
+   * conversations this execution creates can be attributed to it. The attribution names the
+   * parent agent only: the record id is not a conversation `execution_id`, and the parent round
+   * already points at the child conversation through its sub-agent entry.
    */
-  private async getConversationClient({
+  private async resolveConversationClient({
     request,
     executionClient,
     parentExecutionId,
@@ -656,35 +775,100 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     request: KibanaRequest;
     executionClient: AgentExecutionClient;
     parentExecutionId?: string;
-  }): Promise<ConversationClient> {
+  }): Promise<{ conversationClient: ConversationClient; parentExecution?: ParentExecution }> {
     const { conversationService } = this.deps;
 
     const requestClient = await conversationService.getScopedClient({ request });
 
     if (!parentExecutionId) {
-      return requestClient;
+      return { conversationClient: requestClient };
     }
 
-    const parentOwner = (await executionClient.peek(parentExecutionId))?.owner;
+    const parent = await executionClient.peek(parentExecutionId);
+    const parentExecution = parent?.agentId ? { agentId: parent.agentId } : undefined;
 
-    if (!parentOwner) {
-      return requestClient;
+    if (!parent?.owner) {
+      return { conversationClient: requestClient, parentExecution };
     }
 
-    return conversationService.getScopedClientAsUser({
-      request,
-      user: { ...requestClient.getUser(), ...parentOwner },
-    });
+    return {
+      conversationClient: await conversationService.getScopedClientAsUser({
+        request,
+        user: { ...requestClient.getUser(), ...parent.owner },
+      }),
+      parentExecution,
+    };
   }
 
+  private async isIdempotentReplay({
+    executionClient,
+    executionId,
+    metadata,
+  }: {
+    executionClient: AgentExecutionClient;
+    executionId: string;
+    metadata?: Record<string, string>;
+  }): Promise<boolean> {
+    if (!metadata?.execution_idempotency_key) {
+      return false;
+    }
+    return (await executionClient.peek(executionId)) !== undefined;
+  }
+
+  private async resolveExecutionConnector({
+    agentId,
+    connectorId,
+    request,
+  }: {
+    agentId: string;
+    connectorId?: string;
+    request: KibanaRequest;
+  }): Promise<InferenceConnector | undefined> {
+    const { inference, searchInferenceEndpoints, agentService } = this.deps;
+    const getInferenceFeatureId = async (): Promise<string | undefined> => {
+      if (connectorId !== undefined) {
+        return undefined;
+      }
+      const agentRegistry = await agentService.getRegistry({ request });
+      return (await agentRegistry.get(agentId)).configuration.inference_feature_id;
+    };
+    return (
+      getInferenceFeatureId()
+        .then((inferenceFeatureId) =>
+          resolveExecutionConnectorId({
+            connectorId,
+            inferenceFeatureId,
+            request,
+            searchInferenceEndpoints,
+          })
+        )
+        .then(
+          ({ connectorId: resolvedConnectorId, connector }) =>
+            connector ??
+            (resolvedConnectorId
+              ? inference.getConnectorById(resolvedConnectorId, request)
+              : undefined)
+        )
+        // Leaves resolution failures to the runner, which records them against the execution
+        .catch(() => undefined)
+    );
+  }
+
+  /**
+   * Resolves the conversation a request writes to. A request with an origin and no conversation id
+   * continues the conversation its origin resolves to, if any; otherwise the conversation is the
+   * one it names, or a new one.
+   */
   private async resolveConversationRequest({
     params,
     request,
     conversationClient,
+    spaceId,
   }: {
     params: ConversationExecutionParams;
     request: KibanaRequest;
     conversationClient: ConversationClient;
+    spaceId: string;
   }): Promise<{
     validatedParams: ConversationExecutionParams;
     conversation: ConversationWithOperation;
@@ -692,21 +876,61 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }> {
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
+    const { origin } = validatedParams;
+
+    const resolved = await this.resolveConversation({
+      params: validatedParams,
+      spaceId,
+      request,
+      conversationClient,
+    });
+    const resolvedParams = { ...validatedParams, agentId: resolved.agentId };
 
     const conversation = await getConversation({
-      agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
-      conversationId: validatedParams.conversationId,
-      autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
+      agentId: resolved.agentId,
+      conversationId: resolved.conversationId,
+      autoCreateConversationWithId: resolvedParams.autoCreateConversationWithId,
       conversationClient,
-      accessControl: validatedParams.accessControl,
-      readOnly: validatedParams.readOnly,
-      origin: validatedParams.origin
-        ? { external_conversation_id: validatedParams.origin.external_conversation_id }
-        : undefined,
-      subagentCreation: validatedParams.subagentCreation,
+      accessControl: resolvedParams.accessControl,
+      readOnly: resolvedParams.readOnly,
+      origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
+      subagentCreation: resolvedParams.subagentCreation,
     });
 
-    return { validatedParams, conversation, receivedAt };
+    return { validatedParams: resolvedParams, conversation, receivedAt };
+  }
+
+  /**
+   * The conversation an execution continues and the agent it runs on: the ones it names, else the
+   * ones its origin resolves to. No conversation id starts a new conversation.
+   */
+  private async resolveConversation({
+    params,
+    spaceId,
+    request,
+    conversationClient,
+  }: {
+    params: ConversationExecutionParams;
+    spaceId: string;
+    request: KibanaRequest;
+    conversationClient: ConversationClient;
+  }): Promise<{ conversationId?: string; agentId: string }> {
+    const { conversationId, origin } = params;
+    const agentId = this.requestedAgentId(params);
+
+    if (conversationId || !origin) {
+      return { conversationId, agentId };
+    }
+
+    const resolution = await this.deps.callbackDeliveryService.resolveConversation(
+      { origin, spaceId, request },
+      conversationClient
+    );
+
+    return {
+      conversationId: resolution?.conversationId,
+      agentId: resolution?.agentId ?? agentId,
+    };
   }
 
   private async writeUserMessage({
@@ -717,6 +941,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt,
     eventId,
     mergeAttachments,
+    parentExecution,
+    appendRefresh,
+    activeExecution,
   }: {
     conversation: ConversationWithOperation;
     conversationClient: ConversationClient;
@@ -725,9 +952,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     receivedAt: Date;
     eventId: string;
     mergeAttachments: boolean;
+    parentExecution?: ParentExecution;
+    appendRefresh?: Refresh;
+    activeExecution?: AcquireActiveExecution;
   }): Promise<string> {
-    const { nextInput, origin: requestOrigin } = params;
-    const author = conversationClient.getAuthor(requestOrigin?.author);
+    const { nextInput, origin: requestOrigin, author: requestAuthor } = params;
+    const author = conversationClient.getAuthor(requestOrigin?.author, requestAuthor);
     const origin = requestOrigin ? { type: requestOrigin.type } : undefined;
     const base = {
       conversation,
@@ -735,7 +965,16 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       receivedAt,
       eventId,
       author,
+      appendRefresh,
+      ...(activeExecution ? { activeExecution } : {}),
       ...(origin ? { origin } : {}),
+      ...(parentExecution
+        ? {
+            activity: {
+              actor: { type: EventActorType.agent, id: parentExecution.agentId },
+            },
+          }
+        : {}),
     };
 
     // The round rewrite falls back to the conversation owner, not the requester.
@@ -757,10 +996,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     return persistUserMessage({
       ...base,
       user,
-      input: { message: nextInput.message, attachment_refs: stateManager.getAccessedRefs() },
+      input: { message: nextInput.message },
       additionalEvents: attachmentChangesToEvents(stateManager.drainChanges(), {
         source: 'chat_input',
         actor: userMessageActor({ ...conversation, user }, { author, origin }),
+        trigger_event_id: eventId,
         created_at: receivedAt.toISOString(),
       }),
       attachments: { snapshot, produced: stateManager.getAll() },
@@ -796,5 +1036,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
     });
+  }
+
+  /** The agent a request asks for, or the default agent when it names none. */
+  private requestedAgentId({ agentId }: { agentId?: string }): string {
+    return agentId ?? agentBuilderDefaultAgentId;
   }
 }

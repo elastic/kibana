@@ -32,8 +32,10 @@ import {
 import { appendOverviewStatusAction } from '../../../../../state/overview_status';
 import { getNextOverviewAppendPage } from '../../../../../state/overview_status/window_refresh';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { GroupByState } from '../../../../../state/overview/models';
 import { useInfiniteOverviewTrendsRequests } from '../../../hooks/use_infinite_overview_trends_requests';
 import { useOverviewStatusState } from '../../../hooks/use_overview_status';
+import { monitorsForCardView } from './monitors_for_card_view';
 
 const ITEM_HEIGHT = METRIC_ITEM_HEIGHT + 12;
 const MAX_LIST_HEIGHT = 800;
@@ -48,27 +50,6 @@ const LIST_THRESHOLD = 12;
 // before the user reaches the bottom.
 const PREFETCH_ROWS = 4;
 
-/**
- * The server paginates by monitor, but a card is rendered per location. Split
- * multi-location monitors into one entry per location (matching the shape the
- * non-paginated path produces via `formatStatus`) so each location gets its own
- * card and its own trend sparkline. Single-location monitors pass through
- * untouched, which also makes this a no-op for the already-split legacy path.
- */
-const expandByLocation = (monitors: OverviewStatusMetaData[]): OverviewStatusMetaData[] => {
-  const expanded: OverviewStatusMetaData[] = [];
-  for (const monitor of monitors) {
-    if ((monitor.locations?.length ?? 0) <= 1) {
-      expanded.push(monitor);
-      continue;
-    }
-    for (const location of monitor.locations) {
-      expanded.push({ ...monitor, overallStatus: location.status, locations: [location] });
-    }
-  }
-  return expanded;
-};
-
 const MetricItemPlaceholder = () => (
   <EuiPanel hasShadow={false} hasBorder={true} style={{ height: METRIC_ITEM_HEIGHT }}>
     <EuiFlexGroup css={{ height: '100%' }} alignItems="center" justifyContent="center">
@@ -81,12 +62,16 @@ const MetricItemPlaceholder = () => (
 
 const UnGroupedCardView = ({
   monitorsSortedByStatus,
+  groupField,
   setFlyoutConfigCallback,
   loaded,
+  isInteractive = true,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
+  groupField: GroupByState['field'];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   loaded: boolean;
+  isInteractive?: boolean;
 }) => {
   const dispatch = useDispatch();
   const trendData = useSelector(selectOverviewTrends);
@@ -102,10 +87,9 @@ const UnGroupedCardView = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const rowCountRef = useRef(rowCount);
 
-  // Per-location cards for the monitors currently loaded from the server.
-  const expandedItems = useMemo(
-    () => expandByLocation(monitorsSortedByStatus),
-    [monitorsSortedByStatus]
+  const cardMonitors = useMemo(
+    () => monitorsForCardView(monitorsSortedByStatus, groupField),
+    [groupField, monitorsSortedByStatus]
   );
 
   // Pagination is driven by monitor count (what the server pages on), not the
@@ -114,7 +98,7 @@ const UnGroupedCardView = ({
   const hasMore = typeof total === 'number' && loadedMonitors < total;
 
   useInfiniteOverviewTrendsRequests({
-    monitorsSortedByStatus: expandedItems,
+    monitorsSortedByStatus: cardMonitors,
     sliceToFetch,
     numOfColumns: rowCount,
   });
@@ -172,11 +156,11 @@ const UnGroupedCardView = ({
 
   const listItems: OverviewStatusMetaData[][] = useMemo(() => {
     const acc: OverviewStatusMetaData[][] = [];
-    for (let i = 0; i < expandedItems.length; i += rowCount) {
-      acc.push(expandedItems.slice(i, i + rowCount));
+    for (let i = 0; i < cardMonitors.length; i += rowCount) {
+      acc.push(cardMonitors.slice(i, i + rowCount));
     }
     return acc;
-  }, [expandedItems, rowCount]);
+  }, [cardMonitors, rowCount]);
 
   const loadedRows = listItems.length;
   // Append sentinel rows so the loader has an unloaded region to prefetch into.
@@ -186,7 +170,7 @@ const UnGroupedCardView = ({
   return (
     <>
       <div style={{ height: listHeight, paddingLeft: 5 }}>
-        {loaded && expandedItems.length ? (
+        {loaded && cardMonitors.length ? (
           <EuiAutoSizer>
             {({ width }: EuiAutoSize) => (
               <InfiniteLoader
@@ -257,7 +241,11 @@ const UnGroupedCardView = ({
                                 data-test-subj="syntheticsOverviewGridItem"
                                 key={listIndex * rowCount + idx}
                               >
-                                <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+                                <MetricItem
+                                  monitor={monitor}
+                                  onClick={setFlyoutConfigCallback}
+                                  isInteractive={isInteractive}
+                                />
                               </EuiFlexItem>
                             ))}
                             {row.length % rowCount !== 0 &&
@@ -278,7 +266,7 @@ const UnGroupedCardView = ({
         )}
         <EuiSpacer size="m" />
       </div>
-      <CardsViewFooter monitorsSortedByStatus={expandedItems} currentIndex={currentIndex} />
+      <CardsViewFooter monitorsSortedByStatus={cardMonitors} currentIndex={currentIndex} />
     </>
   );
 };
@@ -287,10 +275,12 @@ export const OverviewCardView = ({
   monitorsSortedByStatus,
   setFlyoutConfigCallback,
   loaded,
+  isInteractive = true,
 }: {
   monitorsSortedByStatus: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   loaded: boolean;
+  isInteractive?: boolean;
 }) => {
   const { field: groupField } = useSelector(selectOverviewGroupBy);
   const view = useSelector(selectOverviewView);
@@ -300,15 +290,21 @@ export const OverviewCardView = ({
     return (
       <UnGroupedCardView
         monitorsSortedByStatus={monitorsSortedByStatus}
+        groupField={groupField}
         setFlyoutConfigCallback={setFlyoutConfigCallback}
         loaded={loaded}
+        isInteractive={isInteractive}
       />
     );
   }
 
   return (
     <>
-      <GridItemsByGroup setFlyoutConfigCallback={setFlyoutConfigCallback} view={view} />
+      <GridItemsByGroup
+        setFlyoutConfigCallback={setFlyoutConfigCallback}
+        view={view}
+        isInteractive={isInteractive}
+      />
       <EuiSpacer size="m" />
     </>
   );

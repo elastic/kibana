@@ -20,8 +20,12 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
+import type {
+  BulkDeleteExceptionListsRequestBodyInput,
+  BulkDeleteExceptionListsResponse,
+} from '@kbn/securitysolution-exceptions-common/api/bulk_delete_exception_list/bulk_delete_exception_list.gen';
 import type {
   CreateExceptionListRequestBodyInput,
   CreateExceptionListResponse,
@@ -117,6 +121,46 @@ export interface ScoutApiRequestOptions<
 }
 
 const securitySolutionScoutApiServiceFactory = (apiClient: ApiClientFixture) => ({
+  /**
+      * Perform a bulk action on exception lists. Currently supports the `delete` action,
+which deletes multiple exception lists by their saved object `id`. Lists that are
+referenced by one or more detection rules cannot be deleted; unlink the list from
+all rules before retrying.
+
+The caller must have detection rule read access. A caller who holds the `exceptions`
+Kibana privilege but lacks detection rule read access will receive a per-list error for
+every list in the request, even when no rules reference those lists. The list is not
+deleted in that case.
+
+The reference check searches only within the caller's current Kibana space. A rule
+in another space that references a space-agnostic list is not detected and does not
+block the deletion. Cross-space reference checking is deferred to a future release.
+
+      */
+  async bulkDeleteExceptionLists<TResponseType extends ScoutResponseType = 'json'>(
+    props: BulkDeleteExceptionListsProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, BulkDeleteExceptionListsResponse>>
+  > {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/api/exception_lists/_bulk_action`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, BulkDeleteExceptionListsResponse>>(
+      path,
+      {
+        headers: {
+          'kbn-xsrf': 'true',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+          ...options.headers,
+        },
+        body: props.body,
+        responseType: options.responseType ?? 'json',
+      }
+    );
+  },
   /**
       * An exception list groups exception items and can be associated with detection rules. You can assign exception lists to multiple detection rules.
 > info
@@ -244,7 +288,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteExceptionListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -269,7 +313,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/items`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteExceptionListItemResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -294,7 +338,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/_duplicate`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, DuplicateExceptionListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -319,7 +363,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/_export`;
 
     return apiClient.post<ScoutResponseBody<TResponseType>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -344,7 +388,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/items/_find`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindExceptionListItemsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -369,7 +413,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/_find`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindExceptionListsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -394,7 +438,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/_import`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, ImportExceptionListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -419,7 +463,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ReadExceptionListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -444,7 +488,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/items`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ReadExceptionListItemResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -471,7 +515,7 @@ an exception list that no longer exists.
     const path = `${basePath}/api/exception_lists/summary`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ReadExceptionListSummaryResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -534,6 +578,9 @@ export function SecuritySolutionScoutApiServiceProvider(apiClient: ApiClientFixt
   return securitySolutionScoutApiServiceFactory(apiClient);
 }
 
+export interface BulkDeleteExceptionListsProps {
+  body: BulkDeleteExceptionListsRequestBodyInput;
+}
 export interface CreateExceptionListProps {
   body: CreateExceptionListRequestBodyInput;
 }

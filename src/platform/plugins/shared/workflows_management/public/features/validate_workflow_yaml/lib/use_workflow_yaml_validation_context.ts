@@ -20,6 +20,7 @@ import { createWorkflowContextRegistry } from '../../../../common/lib/create_wor
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import {
   selectConnectorsLoadState,
+  selectWorkflow,
   selectWorkflows,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -43,6 +44,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
   const connectorsData = useAvailableConnectors();
   const connectorsLoadState = useSelector(selectConnectorsLoadState);
   const workflows = useSelector(selectWorkflows);
+  const isManaged = useSelector(selectWorkflow)?.managed === true;
   const { application, http, data, licensing, featureFlags, workflowsExtensions } =
     useKibana().services;
   const registry = useMemo(
@@ -76,6 +78,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
         absolute: true,
       }),
       workflows,
+      isManaged,
       getPropertyHandler,
       esqlCallbacks: esqlCallbacksRef.current,
       warnIgnoredKibanaFetcher,
@@ -88,6 +91,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
       registry,
       warnIgnoredKibanaFetcher,
       workflows,
+      isManaged,
     ]
   );
 }
@@ -98,7 +102,7 @@ export const getWorkflowYamlValidationContextError = (
 ): Error | null =>
   context.connectorTypes.status === 'failed'
     ? new Error(
-        i18n.translate('workflowsManagement.validation.connectorMetadataUnavailable', {
+        i18n.translate('workflows.validation.connectorMetadataUnavailable', {
           defaultMessage: 'Validation unavailable: connectors failed to load',
         }),
         // The underlying reason is usually generic transport text ("Failed to fetch"), so it

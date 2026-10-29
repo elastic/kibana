@@ -27,8 +27,6 @@ import {
   ADD_FILTER,
   ADD_NOTE_BUTTON,
   ATTACH_TIMELINE_TO_CASE_BUTTON,
-  ATTACH_TIMELINE_TO_EXISTING_CASE_ICON,
-  ATTACH_TIMELINE_TO_NEW_CASE_ICON,
   BOTTOM_BAR_CREATE_NEW_TIMELINE,
   BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE,
   BOTTOM_BAR_TIMELINE_PLUS_ICON,
@@ -58,7 +56,6 @@ import {
   TIMELINE_CORRELATION_INPUT,
   TIMELINE_CORRELATION_TAB,
   TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN,
-  TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
   TIMELINE_DATA_PROVIDER_FIELD,
   TIMELINE_DATA_PROVIDER_OPERATOR,
   TIMELINE_DATA_PROVIDER_VALUE,
@@ -80,7 +77,6 @@ import {
   TIMELINE_PROGRESS_BAR,
   TIMELINE_QUERY,
   TIMELINE_SAVE_MODAL,
-  TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH,
   TIMELINE_SAVE_MODAL_SAVE_BUTTON,
   TIMELINE_SEARCH_OR_FILTER,
   TIMELINE_SHOWQUERYBARMENU_BUTTON,
@@ -137,18 +133,6 @@ export const addNameToTimelineAndSave = (name: string) => {
   typeAndVerifyValue(TIMELINE_TITLE_INPUT, name);
   cy.get(TIMELINE_TITLE_INPUT).type('{enter}');
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
-  cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
-  cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
-};
-
-export const addNameToTimelineAndSaveAsNew = (name: string) => {
-  cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
-  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
-  typeAndVerifyValue(TIMELINE_TITLE_INPUT, name);
-  cy.get(TIMELINE_TITLE_INPUT).type('{enter}');
-  cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
-  cy.get(TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH).should('exist');
-  cy.get(TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH).click();
   cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
@@ -300,14 +284,8 @@ export const addNewCase = () => {
   cy.get(ALL_CASES_CREATE_NEW_CASE_TABLE_BTN).click();
 };
 
-export const attachTimelineToNewCase = () => {
+export const attachTimelineToCase = () => {
   cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click();
-  cy.get(ATTACH_TIMELINE_TO_NEW_CASE_ICON).click();
-};
-
-export const attachTimelineToExistingCase = () => {
-  cy.get(ATTACH_TIMELINE_TO_CASE_BUTTON).click();
-  cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click();
 };
 
 /**
@@ -519,10 +497,6 @@ export const refreshTimelinesUntilTimeLinePresent = (
   cy.get(REFRESH_BUTTON).click();
   cy.get(TIMELINE(id)).should('be.visible');
   return cy.get(TIMELINE(id));
-};
-
-export const clickingOnCreateTimelineFormTemplateBtn = () => {
-  cy.get(TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN).click();
 };
 
 export const clickingOnCreateTemplateFromTimelineBtn = () => {

@@ -7,7 +7,7 @@
 
 import type { HuntBehaviorResponse } from '@kbn/alertzero-common';
 import {
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_HUNT_TIER2_TELEMETRY_PLUGIN_ID,
   API_VERSIONS,
   HuntBehaviorRequestBody,
   INTERNAL_API_ACCESS,
@@ -15,7 +15,10 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_WRITE, HUNT_INTERNAL_ROUTE_BASE } from '../../../common/constants';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
-import { resolveScopedModel } from './lib/scoped_model';
+import { TIER2_MODEL_TIERS } from '../../services/watches/hunt/common/hunt_model_tiers';
+import { selectHuntCallModel } from '../../services/watches/hunt/common/select_hunt_call_model';
+import { mostSevereFailure, resolveHuntModels } from './lib/hunt_models';
+import { resolveHuntUniverse } from './resolve_hunt_universe';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 import type { RouteDependencies } from '../register_routes';
 
@@ -55,42 +58,77 @@ export const registerHuntBehaviorRoute = ({
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const core = await context.core;
-          const { getInference, getSearchInferenceEndpoints } = getHuntServices();
+          const { getInference, getSearchInferenceEndpoints, mitreDataClient } = getHuntServices();
 
-          // Resolved by tier, not the deployment default — see resolveScopedModel's
-          // doc for why that distinction matters.
-          const modelOutcome = await resolveScopedModel({
+          // Resolved by tier, not the deployment default — see resolveScopedModel's doc for
+          // why that distinction matters. Extraction prefers a saved cyber-domain model.
+          // ES|QL generation keeps Frontier when that model requires a prompt template,
+          // so a missing Frontier model still fails the request in that case.
+          const { models, failures } = await resolveHuntModels({
             inference: getInference(),
             searchInferenceEndpoints: getSearchInferenceEndpoints(),
-            featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+            telemetryPluginId: ALERTZERO_HUNT_TIER2_TELEMETRY_PLUGIN_ID,
             request,
             uiSettingsClient: core.uiSettings.client,
             logger,
+            tiers: TIER2_MODEL_TIERS,
+          });
+          const extraction = selectHuntCallModel({
+            tierModel: models.frontier,
+            cyberModel: models.cyber,
+          });
+          const esql = selectHuntCallModel({
+            tierModel: models.frontier,
+            cyberModel: models.cyber,
+            messagesOnly: true,
           });
 
-          if (!modelOutcome.ok) {
+          if (!extraction || !esql) {
+            const failure = mostSevereFailure(failures);
             return response.customError({
-              statusCode: modelOutcome.reason === 'no_inference_plugin' ? 503 : 400,
+              // A resolution that threw is ours to fix, not a missing connector the caller can add.
+              statusCode:
+                failure.reason === 'no_inference_plugin'
+                  ? 503
+                  : failure.reason === 'resolution_error'
+                  ? 500
+                  : 400,
               body: {
-                message: modelOutcome.message,
+                message: failure.message,
                 attributes: {
-                  tier2_skipped_reason:
-                    modelOutcome.reason === 'no_inference_plugin'
-                      ? 'no_inference_plugin'
-                      : 'no_connector',
+                  tier2_skipped_reason: failure.reason,
+                  unavailable_model_tiers: failures.map(({ tier }) => tier),
                 },
               },
             });
           }
 
-          const { text, report_id, llm_confidence_threshold, iocs, article_context } = request.body;
+          const {
+            text,
+            report_id,
+            llm_confidence_threshold,
+            iocs,
+            excluded_iocs,
+            article_context,
+          } = request.body;
           const esClient = core.elasticsearch.client.asCurrentUser;
+          // What the generated query may read: the same default data view Tier 1 searches.
+          const indexPatterns = await resolveHuntUniverse(context, logger);
 
           const body: HuntBehaviorResponse = await huntBehavior(
-            modelOutcome.model,
+            { extraction, esql },
             logger,
-            { text, report_id, llm_confidence_threshold, iocs, article_context },
-            esClient
+            {
+              text,
+              report_id,
+              llm_confidence_threshold,
+              iocs,
+              ...(excluded_iocs !== undefined ? { excluded_iocs } : {}),
+              article_context,
+              allowed_indices: indexPatterns,
+            },
+            esClient,
+            mitreDataClient
           );
 
           return response.ok({ body });

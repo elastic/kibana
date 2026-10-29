@@ -77,6 +77,8 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
       return 'MMM D, YYYY @ HH:mm:ss.SSS';
     case 'dateFormat:tz':
       return 'UTC';
+    case 'dateFormat:dow':
+      return 'Sunday';
     case UI_SETTINGS.HISTORY_LIMIT:
       return 10;
     case UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS:
@@ -87,16 +89,6 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
-});
-
-startMock.featureFlags.getBooleanValue.mockImplementation((key: string, fallback: boolean) => {
-  if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
-    return useNewDateRangePickerFlag;
-  }
-  if (key === 'unifiedSearch.dateRangePickerPresetsPersistenceEnabled') {
-    return usePresetPersistenceFlag;
-  }
-  return fallback;
 });
 
 startMock.featureFlags.getBooleanValue$.mockImplementation((key: string, fallback: boolean) => {
@@ -908,6 +900,32 @@ describe('QueryBarTopRowTopRow', () => {
         expect(screen.getByTestId(pickerButtonTestSubj)).toBeInTheDocument();
         expect(screen.queryByTestId('querySubmitButton')).not.toBeInTheDocument();
       });
+
+      if (useNewPicker) {
+        expect(screen.getByTestId('dateRangePickerTimeWindowButtons')).toBeInTheDocument();
+      }
+    });
+
+    it('Should hide time window buttons when showTimeWindowButtons is false', async () => {
+      render(
+        wrapWithPicker({
+          isDirty: false,
+          screenTitle: 'Another Screen',
+          showDatePicker: true,
+          showSubmitButton: false,
+          showTimeWindowButtons: false,
+          dateRangeFrom: 'now-7d',
+          dateRangeTo: 'now',
+          timeHistory: mockTimeHistory,
+        })
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(pickerButtonTestSubj)).toBeInTheDocument();
+      });
+
+      expect(screen.queryByTestId('dateRangePickerTimeWindowButtons')).not.toBeInTheDocument();
+      expect(screen.queryByRole('group', { name: 'Time window actions' })).not.toBeInTheDocument();
     });
 
     it('Should render only query input bar', async () => {

@@ -7,23 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-console */
-
-import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
 import type { ElasticsearchCommandDefinition } from '@kbn/esql-language';
 import { commandDefinitions } from '@elastic/esql-definitions/commands';
+import type { GeneratedFile } from '../lib/generated_file';
+import { GENERATED_DEFINITIONS_DIR } from './constants';
 
-const GENERATED_COMMANDS_BASE_PATH = join(
-  REPO_ROOT,
-  'src/platform/packages/shared/esql/kbn-esql-language/src/commands/definitions/generated/commands'
-);
+const GENERATED_COMMANDS_DIR = join(GENERATED_DEFINITIONS_DIR, 'commands');
 
-async function generateElasticsearchCommandDefinitions(): Promise<void> {
-  const outputCommandsDir = GENERATED_COMMANDS_BASE_PATH;
-  await mkdir(outputCommandsDir, { recursive: true });
-
+/** Renders the command metadata and `EsqlCommandNames` consumed by `@kbn/esql-language`. */
+export const renderCommandDefinitions = (): GeneratedFile[] => {
   const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = {};
 
   for (const command of commandDefinitions) {
@@ -44,11 +37,11 @@ ${commandDefinitions
   .join('\n')}
 }`;
 
-  const outputTsPath = join(outputCommandsDir, 'commands.ts');
+  // The output lives inside @kbn/esql-language, which should not import itself by its module ID
   const tsContent = `
 // This file is auto-generated. Do not edit it manually.
 
-import type { ElasticsearchCommandDefinition } from '@kbn/esql-language';
+import type { ElasticsearchCommandDefinition } from '../../../../..';
 
 export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = ${JSON.stringify(
     commandsMetadata,
@@ -59,12 +52,5 @@ export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = 
 ${commandEnum}
 `;
 
-  await writeFile(outputTsPath, tsContent);
-
-  console.log(`Successfully generated commands metadata to: ${outputTsPath}`);
-}
-
-generateElasticsearchCommandDefinitions().catch((error) => {
-  console.error('An unhandled error occurred:', error);
-  process.exit(1);
-});
+  return [{ path: join(GENERATED_COMMANDS_DIR, 'commands.ts'), content: tsContent }];
+};

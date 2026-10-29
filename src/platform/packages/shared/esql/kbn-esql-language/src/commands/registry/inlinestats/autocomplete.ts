@@ -40,7 +40,7 @@ export async function autocomplete(
           label: 'STATS',
           text: 'STATS ',
           kind: 'Keyword',
-          detail: i18n.translate('kbn-esql-language.esql.autocomplete.inlineStats.statsKeyword', {
+          detail: i18n.translate('esqlLanguage.esql.autocomplete.inlineStats.statsKeyword', {
             defaultMessage: 'STATS keyword',
           }),
         }),
@@ -57,12 +57,9 @@ export async function autocomplete(
         label: 'INLINE STATS',
         text: 'INLINE STATS ',
         kind: 'Keyword',
-        detail: i18n.translate(
-          'kbn-esql-language.esql.autocomplete.inlineStats.commandSuggestion',
-          {
-            defaultMessage: 'INLINE STATS command',
-          }
-        ),
+        detail: i18n.translate('esqlLanguage.esql.autocomplete.inlineStats.commandSuggestion', {
+          defaultMessage: 'INLINE STATS command',
+        }),
       }),
     ];
   }

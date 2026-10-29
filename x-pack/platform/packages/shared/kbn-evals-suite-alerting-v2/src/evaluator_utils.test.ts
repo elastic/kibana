@@ -104,8 +104,8 @@ describe('getToolCallSteps', () => {
           {
             type: 'tool_call',
             tool_id: 'load_skill',
-            params: { skill: 'rule-management' },
-            results: [{ data: { skill: { id: 'rule-management' } } }],
+            params: { skill: 'rule-authoring' },
+            results: [{ data: { skill: { id: 'rule-authoring' } } }],
           },
           { type: 'tool_call', tool_id: 'platform.core.list_indices', params: {} },
         ],
@@ -114,8 +114,8 @@ describe('getToolCallSteps', () => {
       {
         type: 'tool_call',
         tool_id: 'load_skill',
-        params: { skill: 'rule-management' },
-        results: [{ data: { skill: { id: 'rule-management' } } }],
+        params: { skill: 'rule-authoring' },
+        results: [{ data: { skill: { id: 'rule-authoring' } } }],
       },
       { type: 'tool_call', tool_id: 'platform.core.list_indices', params: {} },
     ]);
@@ -147,7 +147,7 @@ describe('withLowScoreLogging', () => {
     const evaluator = withLowScoreLogging(
       stubEvaluator({ score: 0, label: 'failed', explanation: 'did not disambiguate' }),
       log,
-      { testTitle: 'observability use case routes to rule-management' }
+      { testTitle: 'observability use case routes to rule-authoring' }
     );
 
     const result = await evaluator.evaluate(params);
@@ -157,7 +157,7 @@ describe('withLowScoreLogging', () => {
     const message = (log.warning as jest.Mock).mock.calls[0][0] as string;
     expect(message).toContain('LOW SCORE: Stub = 0');
     expect(message).toContain('did not disambiguate');
-    expect(message).toContain('observability use case routes to rule-management');
+    expect(message).toContain('observability use case routes to rule-authoring');
     expect(message).toContain('trace-123');
     expect(message).toContain('[user] I want to set up alerting.');
     expect(message).toContain('[assistant] Do you want Alerting V2 or Security?');

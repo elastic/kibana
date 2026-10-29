@@ -59,13 +59,16 @@ describe('AccessControlForm', () => {
 
   it('changes visibility without losing role assignments', async () => {
     const onChange = renderForm();
-    await userEvent.click(screen.getByLabelText('Visibility'));
+    // Query by test subj rather than accessible name: EUI's test-env id mock returns the
+    // same static id for every EuiSuperSelect instance, so aria-labelledby lookups collide
+    // when more than one aria-labeled EuiSuperSelect is rendered at once.
+    await userEvent.click(screen.getByTestId('entityAccessControlMode'));
     await userEvent.click(screen.getByRole('option', { name: /^Public/ }));
     expect(onChange).toHaveBeenCalledWith({ ...value, access_mode: 'public' });
   });
   it('changes an existing user role by profile ID', async () => {
     const onChange = renderForm();
-    await userEvent.click(screen.getByLabelText('Role for reader'));
+    await userEvent.click(screen.getByTestId('entityAccessControlRole-reader'));
     await userEvent.click(screen.getByRole('option', { name: 'Editor' }));
     expect(onChange).toHaveBeenCalledWith({
       ...value,
@@ -101,6 +104,42 @@ describe('AccessControlForm', () => {
     expect(screen.getByRole('option', { name: /other/ })).toBeInTheDocument();
   });
 
+  it.each(['admin', undefined])(
+    'warns administrators editing another owner with current profile %s and allows self-grants',
+    async (currentUserId) => {
+      const onChange = jest.fn();
+      render(
+        <EuiProvider>
+          <AccessControlForm
+            value={{ access_mode: 'private', entries: [] }}
+            onChange={onChange}
+            ownerId="owner"
+            currentUserId={currentUserId}
+            canManage
+            profiles={[]}
+            suggestedProfiles={[
+              { uid: 'admin', enabled: true, user: { username: 'admin' }, data: {} },
+              { uid: 'owner', enabled: true, user: { username: 'owner' }, data: {} },
+            ]}
+            onSearch={jest.fn()}
+            roles={roles}
+            publicDescription="Visible in this space"
+          />
+        </EuiProvider>
+      );
+      expect(
+        screen.getByText("You are editing another user's access settings")
+      ).toBeInTheDocument();
+      await userEvent.click(screen.getByRole('combobox', { name: 'Find users' }));
+      expect(screen.queryByRole('option', { name: /owner/ })).not.toBeInTheDocument();
+      await userEvent.click(screen.getByRole('option', { name: /admin/ }));
+      expect(onChange).toHaveBeenCalledWith({
+        access_mode: 'private',
+        entries: [{ type: 'user', id: 'admin', role: 'viewer' }],
+      });
+    }
+  );
+
   it('labels the current owner separately from editable entries', () => {
     render(
       <EuiProvider>
@@ -109,6 +148,7 @@ describe('AccessControlForm', () => {
           onChange={jest.fn()}
           ownerId="current"
           currentUserId="current"
+          canManage
           profiles={[]}
           suggestedProfiles={[]}
           onSearch={jest.fn()}
@@ -118,6 +158,9 @@ describe('AccessControlForm', () => {
       </EuiProvider>
     );
     expect(screen.getByText('Owner (you)')).toBeInTheDocument();
+    expect(
+      screen.queryByText("You are editing another user's access settings")
+    ).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Role for current')).not.toBeInTheDocument();
   });
 
@@ -173,8 +216,8 @@ describe('AccessControlForm', () => {
 
   it('prevents edits while saving', () => {
     renderForm(true);
-    expect(screen.getByLabelText('Visibility')).toBeDisabled();
-    expect(screen.getByLabelText('Role for reader')).toBeDisabled();
+    expect(screen.getByTestId('entityAccessControlMode')).toBeDisabled();
+    expect(screen.getByTestId('entityAccessControlRole-reader')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Remove reader' })).toBeDisabled();
   });
 });

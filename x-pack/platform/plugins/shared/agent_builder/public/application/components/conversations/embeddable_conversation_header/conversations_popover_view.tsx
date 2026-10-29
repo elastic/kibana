@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useResolvedAgent } from '../../../hooks/agents/use_resolved_agent';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { EmbeddableConversationList } from './embeddable_conversation_list';
@@ -57,10 +57,8 @@ export const ConversationsPopoverView: React.FC<ConversationsPopoverViewProps> =
 
   const { euiTheme } = useEuiTheme();
   const { setConversationId, resetAttachments } = useConversationContext();
-  const { agents } = useAgentBuilderAgents();
   const agentId = useAgentId();
-
-  const currentAgent = agents.find((a) => a.id === agentId);
+  const { agent: currentAgent } = useResolvedAgent(agentId ?? undefined);
 
   const handleNewChat = () => {
     setConversationId?.(undefined);

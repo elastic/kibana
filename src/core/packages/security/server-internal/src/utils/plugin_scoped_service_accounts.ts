@@ -53,6 +53,25 @@ export const createPluginScopedServiceAccounts = ({
     }
   };
 
+  // Optional, but it ends up in the audit log, so it is held to the same bounds as a workload ID.
+  const ensureWellFormedExecutionId = (executionId: string | undefined): void => {
+    if (executionId === undefined) {
+      return;
+    }
+
+    if (typeof executionId !== 'string' || executionId.length === 0) {
+      throw new Error(
+        `Plugin [${pluginId}] supplied an empty service account workload execution ID; execution IDs must be non-empty strings when supplied.`
+      );
+    }
+
+    if (executionId.length > SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH) {
+      throw new Error(
+        `Plugin [${pluginId}] supplied a service account workload execution ID that is too long: it must be at most ${SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH} characters, but got ${executionId.length}.`
+      );
+    }
+  };
+
   const ensureValid = ({ workloadType, workloadId }: ServiceAccountWorkloadRef): void => {
     ensureRegistered(workloadType);
     ensureWellFormedWorkloadId(workloadId);
@@ -63,6 +82,7 @@ export const createPluginScopedServiceAccounts = ({
   return {
     isEnabled: delegate.isEnabled,
     create: delegate.create,
+    delete: delegate.delete,
     bindWorkload: async (request, params) => {
       ensureValid(params);
       return await delegate.bindWorkload(pluginId, request, params);
@@ -77,6 +97,7 @@ export const createPluginScopedServiceAccounts = ({
     },
     withScopedRequestForWorkload: async (params, fn) => {
       ensureValid(params);
+      ensureWellFormedExecutionId(params.executionId);
       return await delegate.withScopedRequestForWorkload(pluginId, params, fn);
     },
   };

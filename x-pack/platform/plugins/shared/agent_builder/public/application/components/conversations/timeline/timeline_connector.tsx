@@ -17,7 +17,7 @@ import type { AgentTurnItem } from './types';
 /**
  * @todo: errors not handled yet. Probably should read the streaming context error state here
  */
-export const TimelineConnector: React.FC = () => {
+const TimelineConnectorComponent: React.FC = () => {
   const { conversation } = useConversation();
   const agentId = useAgentId();
   const { agent } = useAgentBuilderAgentById(agentId);
@@ -38,3 +38,6 @@ export const TimelineConnector: React.FC = () => {
     </>
   );
 };
+
+export const TimelineConnector = React.memo(TimelineConnectorComponent);
+TimelineConnector.displayName = 'TimelineConnector';
