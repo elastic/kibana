@@ -205,11 +205,25 @@ describe('ORCA scores', () => {
     expect(result).toMatchObject({ score: 0, label: 'fail' });
   });
 
-  it('scores a hallucination when a named cause is outside the plausible set', async () => {
+  it('does not score a hallucination when a true flag is named alongside an extra cause', async () => {
     const { deps } = judgeReturning({
       named_flags: ['productCatalogFailure'],
       named_causes: ['productCatalogFailure', 'paymentServiceMemoryLeak'],
       reasoning: 'An extra cause.',
+    });
+    const result = await evaluator(deps, ORCA_HALLUCINATION_EVALUATOR).evaluate({
+      ...example,
+      metadata: { case_id: 'checkout', plausible_flags: ['productCatalogFailure'] },
+      output: output(),
+    });
+    expect(result).toMatchObject({ score: 0, label: 'pass' });
+  });
+
+  it('scores a hallucination when no named cause is in the plausible set', async () => {
+    const { deps } = judgeReturning({
+      named_flags: [],
+      named_causes: ['paymentServiceMemoryLeak'],
+      reasoning: 'No plausible flag.',
     });
     const result = await evaluator(deps, ORCA_HALLUCINATION_EVALUATOR).evaluate({
       ...example,

@@ -526,8 +526,8 @@ const ORCA_FLAGS_SYSTEM = `You extract root causes from an investigation report.
 {{{reference}}}
 
 Call the \`score\` tool with:
-- named_flags: every plausible flag the report names, copied exactly from the list above. Include a flag only when the report states it as a cause. An empty list is valid.
-- named_causes: every root cause the report asserts, whether or not it is in the list. Use the flag id when the cause is one of the flags; otherwise use the report's wording.
+- named_flags: every plausible flag the report names as a cause. Use the key from the list. Append \`:variant\` only when the report states a variant. A key without a variant still counts. An empty list is valid.
+- named_causes: every root cause the report asserts, including flags that are not in the list. Use \`key\` or \`key:variant\` for a feature flag; otherwise use the report's wording.
 - reasoning: one sentence.`;
 
 const ORCA_FLAGS_USER = `## Report
@@ -559,7 +559,8 @@ export const OrcaFlagsJudgePrompt = createPrompt({
             named_flags: {
               type: 'array',
               items: { type: 'string' },
-              description: 'Plausible flag ids the report names, copied exactly.',
+              description:
+                'Plausible flag ids the report names, as key or key:variant when a variant is stated.',
             },
             named_causes: {
               type: 'array',

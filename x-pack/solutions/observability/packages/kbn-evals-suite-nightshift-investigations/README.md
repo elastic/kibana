@@ -645,9 +645,10 @@ investigations run at once and each has its own cutoff, so the bound is not a cl
 
 ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector. Customer-0 keeps the suite's
 evaluation connector. `goal_pass` is unchanged: it scores the single best hypothesis and passes at
-4/5. ORCA also records three scores. RCA accuracy is 1 only when the report names every flag in
-`metadata.plausible_flags`. Hallucination is 1 when a named cause matches none of that set, and
-its direction is minimize. Control passes an empty report and fails when a report places an
+4/5. ORCA also records three scores. RCA accuracy is 1 when the report names every flag in
+`metadata.plausible_flags`. A flag named without its variant still counts, and an extra cause
+does not fail accuracy. Hallucination is 1 when the report names at least one cause and none of
+them is in that set, and its direction is minimize. An empty incident report scores 0 on both. Control passes an empty report and fails when a report places an
 incident inside `metadata.quiet_window`. A release that adds those fields is a new Golden release
 and a pin bump. `rca_anti_leakage` judges trajectory leakage of incident records and
 post-resolution writeups. It does not see prompt leakage, and a feature-flag key in telemetry is

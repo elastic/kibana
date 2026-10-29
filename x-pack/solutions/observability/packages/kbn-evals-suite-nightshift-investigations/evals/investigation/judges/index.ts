@@ -23,7 +23,12 @@ import {
   OrcaFlagsJudgePrompt,
   TruthfulnessJudgePrompt,
 } from './prompts';
-import { scoreOrcaControl, scoreOrcaHallucination, scoreOrcaRcaAccuracy } from './orca_scoring';
+import {
+  scoreOrcaControl,
+  scoreOrcaHallucination,
+  scoreOrcaRcaAccuracy,
+  shrinkQuietWindow,
+} from './orca_scoring';
 import type { JudgeInputs } from './scoring';
 import {
   buildJudgeInputs,
@@ -354,7 +359,7 @@ const reportHasFindings = (report: InvestigationTaskOutput['structured_report'])
 const quietWindowText = (metadata: InvestigationExample['metadata']): string => {
   const window = metadata.quiet_window;
   if (window === undefined || window === null) return '';
-  const text = JSON.stringify(window);
+  const text = JSON.stringify(shrinkQuietWindow(window));
   return text.length > 4_000 ? text.slice(0, 4_000) : text;
 };
 
