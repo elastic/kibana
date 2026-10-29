@@ -315,10 +315,14 @@ describe('AWS JSON services: mixins', () => {
       [id('ListMetricsInput')]: {
         type: 'structure',
         mixins: [ref('PagingMixin')],
-        // An own member overrides the mixin's.
+        // An own member overrides the mixin's, and adds traits to it.
         members: {
           Filter: { target: 'smithy.api#String' },
           Limit: { target: 'smithy.api#Long' },
+          NextToken: {
+            target: 'smithy.api#String',
+            traits: { 'smithy.api#documentation': 'Where the last page ended.' },
+          },
         },
       },
       [id('ListMetricsOutput')]: {
@@ -341,6 +345,9 @@ describe('AWS JSON services: mixins', () => {
     ]);
     expect(schemas.ListMetricsRequestContent.properties.Limit).toMatchObject({ type: 'integer' });
     expect(schemas.ListMetricsRequestContent.required).toEqual(['NextToken']);
+    expect(schemas.ListMetricsRequestContent.properties.NextToken).toMatchObject({
+      description: 'Where the last page ended.',
+    });
     expect(Object.keys(schemas.ListMetricsResponseContent.properties).sort()).toEqual([
       'Limit',
       'NextToken',

@@ -147,7 +147,10 @@ export const hasTrait = (traits: Traits | undefined, id: string): boolean =>
 
 const MAX_MIXIN_DEPTH = 32;
 
-/** A shape's members, those of its mixins first (recursively), which its own members override. */
+/**
+ * A shape's members, those of its mixins first (recursively), which its own members override.
+ * An own member adds traits to the one it overrides, keeping those it inherits.
+ */
 export const membersOfShape = (
   model: SmithyModel,
   shape: Shape,
@@ -161,7 +164,11 @@ export const membersOfShape = (
     }
   }
   for (const [name, member] of Object.entries(shape.members ?? {})) {
-    members.set(name, member);
+    const inherited = members.get(name);
+    members.set(
+      name,
+      inherited ? { ...member, traits: { ...inherited.traits, ...member.traits } } : member
+    );
   }
   return [...members];
 };
