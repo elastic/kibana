@@ -147,7 +147,13 @@ export class SandboxPlugin
 
     const { host, port, api_key: apiKey } = pluginConfig;
 
-    this.apiClient = new SandboxApiClient({ host, port, apiKey, ...tlsCredentials });
+    this.apiClient = new SandboxApiClient({
+      host,
+      port,
+      apiKey,
+      logger: this.logger.get('client'),
+      ...tlsCredentials,
+    });
 
     const apiClient = this.apiClient;
     const sessions = this.sessions;
