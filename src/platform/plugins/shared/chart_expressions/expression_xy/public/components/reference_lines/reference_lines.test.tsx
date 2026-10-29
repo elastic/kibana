@@ -135,6 +135,65 @@ describe('ReferenceLines', () => {
       };
     });
 
+    const invalidResults: Array<{ description: string; rows: Datatable['rows'] }> = [
+      { description: 'empty results', rows: [] },
+      { description: 'missing values', rows: [{}] },
+      { description: 'null values', rows: [{ yAccessorLeftFirstId: null }] },
+      { description: 'string values', rows: [{ yAccessorLeftFirstId: '10' }] },
+      { description: 'NaN values', rows: [{ yAccessorLeftFirstId: NaN }] },
+      { description: 'infinite values', rows: [{ yAccessorLeftFirstId: Infinity }] },
+    ];
+
+    it.each(invalidResults)('omits annotations for $description', ({ rows }) => {
+      const [layer] = createLayers(
+        [
+          {
+            forAccessor: 'yAccessorLeftFirstId',
+            position: 'left',
+            lineStyle: 'solid',
+            fill: 'above',
+            type: 'referenceLineDecorationConfig',
+          },
+        ],
+        { ...data, rows }
+      );
+      const wrapper = shallow(<ReferenceLineLayer {...defaultProps} layer={layer} />);
+      expect(wrapper.find(ReferenceLineAnnotations)).toHaveLength(0);
+    });
+
+    it('retains valid annotations and uses only the first result row', () => {
+      const [layer] = createLayers(
+        [
+          {
+            forAccessor: 'yAccessorLeftFirstId',
+            position: 'left',
+            lineStyle: 'solid',
+            fill: 'above',
+            type: 'referenceLineDecorationConfig',
+          },
+          {
+            forAccessor: 'yAccessorLeftSecondId',
+            position: 'left',
+            lineStyle: 'solid',
+            fill: 'above',
+            type: 'referenceLineDecorationConfig',
+          },
+        ],
+        {
+          ...data,
+          rows: [
+            { yAccessorLeftFirstId: 0, yAccessorLeftSecondId: null },
+            { yAccessorLeftFirstId: 100, yAccessorLeftSecondId: 200 },
+          ],
+        }
+      );
+      const wrapper = shallow(<ReferenceLineLayer {...defaultProps} layer={layer} />);
+      const annotations = wrapper.find(ReferenceLineAnnotations);
+      expect(annotations).toHaveLength(1);
+      expect(annotations.prop('config')).toMatchObject({ value: 0, nextValue: undefined });
+      expect(layer.decorations).toHaveLength(2);
+    });
+
     it('should not throw on null data', () => {
       const position = getAxisFromId('yAccessorLeft');
       const [layer] = createLayers([

@@ -251,6 +251,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const anomalyPrivilegesQuery = useAnomalyPrivileges();
   const {
     detectionEnginePrivileges: { error: alertsPrivilegesError, result: alertsPrivilegesResult },
+    timelinePrivileges: { read: canReadTimeline },
   } = useUserPrivileges();
   const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
     useAlertsPrivileges();
@@ -324,15 +325,19 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
         </>
       ) : (
-        <EntityAnalyticsNewHomePageContent readAccess={readAccess} />
+        <EntityAnalyticsNewHomePageContent
+          readAccess={readAccess}
+          canReadTimeline={canReadTimeline}
+        />
       )}
     </>
   );
 };
 
-const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = ({
-  readAccess,
-}) => {
+const EntityAnalyticsNewHomePageContent: React.FC<{
+  readAccess: ReadAccess;
+  canReadTimeline: boolean;
+}> = ({ readAccess, canReadTimeline }) => {
   const spaceId = useSpaceId();
   const {
     dataView,
@@ -358,6 +363,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     setTimeRange,
     entityFilters,
     setEntityFilters,
+    groupsSelected,
+    setGroupsSelected,
     rowsMode,
     setRowsMode,
     sortField,
@@ -438,25 +445,27 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
   const rowActions = useMemo<RowActions>(
     () => ({
-      onInvestigateInTimeline: (row) => {
-        const entity = getRowEntity(row);
-        if (!entity?.entityName || !isStoreEntityType(entity.entityType)) return;
-        const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
-          euidApi.getBuiltInEntityDefinition(entity.entityType),
-          row
-        );
-        if (kqlFilter) {
-          investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
-          return;
-        }
-        const field = EntityTypeToIdentifierField[entity.entityType] ?? 'entity.id';
-        const dataProviders = createDataProviders({
-          contextId: scopeId,
-          field,
-          values: entity.entityName,
-        });
-        if (dataProviders?.length) investigateInTimeline({ dataProviders });
-      },
+      onInvestigateInTimeline: canReadTimeline
+        ? (row) => {
+            const entity = getRowEntity(row);
+            if (!entity?.entityName || !isStoreEntityType(entity.entityType)) return;
+            const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
+              euidApi.getBuiltInEntityDefinition(entity.entityType),
+              row
+            );
+            if (kqlFilter) {
+              investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
+              return;
+            }
+            const field = EntityTypeToIdentifierField[entity.entityType] ?? 'entity.id';
+            const dataProviders = createDataProviders({
+              contextId: scopeId,
+              field,
+              values: entity.entityName,
+            });
+            if (dataProviders?.length) investigateInTimeline({ dataProviders });
+          }
+        : undefined,
       onOpenEntityGraph: (row) => {
         const entity = getRowEntity(row);
         if (!entity) return;
@@ -502,6 +511,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     }),
     [
       agentBuilder,
+      canReadTimeline,
       euidApi,
       investigateInTimeline,
       isAgentChatExperienceEnabled,
@@ -530,7 +540,6 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     return map;
   }, [watchlistsData]);
 
-  const [groupsSelected, setGroupsSelected] = useState<string[]>(['none']);
   const [groupingPageIndex, setGroupingPageIndex] = useState(0);
   const [groupingPageSize, setGroupingPageSize] = useState(25);
 
@@ -1205,31 +1214,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     ]
   );
 
-  const onGroupChange = useCallback((key: string) => {
-    // Grouping unmounts the grid, and EUI doesn't report leaving full screen when it unmounts.
-    if (key !== 'none') setIsGridFullScreen(false);
-    setGroupsSelected((prev) => {
-      if (key === 'none') return ['none'];
-      const cleaned = prev.filter((g) => g !== 'none');
-      if (cleaned.includes(key)) {
-        const next = cleaned.filter((g) => g !== key);
-        return next.length ? next : ['none'];
-      }
-      return [...cleaned, key];
-    });
-  }, []);
-
-  const onRowsModeChange = useCallback(
-    (next: RowsMode) => {
-      setRowsMode(next);
-      if (next === 'resolved') {
-        setGroupsSelected((prev) => {
-          const filtered = prev.filter((g) => g !== ENTITY_GROUPING_OPTIONS.RESOLUTION);
-          return filtered.length ? filtered : ['none'];
-        });
-      }
+  const onGroupChange = useCallback(
+    (key: string) => {
+      if (key === 'none') return setGroupsSelected(['none']);
+      const cleaned = groupsSelected.filter((g) => g !== 'none');
+      setGroupsSelected(
+        cleaned.includes(key) ? cleaned.filter((g) => g !== key) : [...cleaned, key]
+      );
     },
-    [setRowsMode]
+    [groupsSelected, setGroupsSelected]
   );
 
   const groupByOptions = useMemo(() => {
@@ -1256,7 +1249,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             title={ROWS_SELECTOR_TITLE}
             options={ROWS_OPTIONS}
             selectedKey={rowsMode}
-            onChange={onRowsModeChange}
+            onChange={setRowsMode}
             data-test-subj={ROWS_MODE_SELECTOR_TEST_ID}
           />
         </EuiFlexItem>
@@ -1274,7 +1267,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [rowsMode, onRowsModeChange, groupsSelected, onGroupChange, groupByOptions, groupByFields]
+    [rowsMode, setRowsMode, groupsSelected, onGroupChange, groupByOptions, groupByFields]
   );
 
   const dataViewContextValue = useMemo(

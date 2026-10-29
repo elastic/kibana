@@ -162,6 +162,14 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.getSandboxHosts?.({ config: {} })).toEqual([]);
   });
 
+  it('registers the shipped External Elasticsearch spec as sandbox capable for both auth types', () => {
+    const connectorType = createConnectorTypeFromSpec(
+      connectorsSpecs.Elasticsearch,
+      mockActionsPlugin
+    );
+    expect(connectorType.sandboxSupportedAuthTypes).toEqual(['api_key_header', 'basic']);
+  });
+
   it('registers the shipped New Relic spec as sandbox capable for the API key header auth type', () => {
     const connectorType = createConnectorTypeFromSpec(connectorsSpecs.NewRelic, mockActionsPlugin);
     expect(connectorType.sandboxSupportedAuthTypes).toEqual(['api_key_header']);

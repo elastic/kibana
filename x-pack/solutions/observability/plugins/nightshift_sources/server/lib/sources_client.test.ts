@@ -423,6 +423,25 @@ describe('SourcesClient', () => {
       );
     });
 
+    it('creates a disabled source, with its view, when asked', async () => {
+      const { client, soClient, viewsClient } = setup();
+
+      const source = await client.create({
+        title: 'nginx errors',
+        tags: [],
+        esql: 'FROM logs-*',
+        enabled: false,
+      });
+
+      expect(source.enabled).toBe(false);
+      expect(soClient.create).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        expect.objectContaining({ enabled: false }),
+        { id: source.id }
+      );
+      expect(viewsClient.putView).toHaveBeenCalledWith(source.view_name, 'FROM logs-*');
+    });
+
     it('loads the space view names once, then checks suffixes in memory', async () => {
       const { client, soClient } = setup();
 
@@ -890,6 +909,28 @@ describe('SourcesClient', () => {
 
       expect(updated.slug).toBe('nginx-errors');
       expect(updated.view_name).toBe(NGINX_VIEW_NAME);
+    });
+
+    it.each([false, true])('keeps the stored enabled state when the body says %s', async (sent) => {
+      const { client, soClient } = setup();
+      const stored = !sent;
+      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ enabled: stored })));
+      const body = {
+        title: 'nginx errors',
+        tags: ['nginx'],
+        esql: makeAttributes().esql,
+        enabled: sent,
+      };
+
+      const updated = await client.update('source-1', body);
+
+      expect(updated.enabled).toBe(stored);
+      expect(soClient.update).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'source-1',
+        expect.objectContaining({ enabled: stored }),
+        expect.anything()
+      );
     });
 
     it('always re-puts the view so PUT doubles as repair', async () => {

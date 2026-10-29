@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { getSandboxHosts } from '../../get_sandbox_hosts';
 import { Elasticsearch } from './elasticsearch';
 import { EsqlInputSchema, RequestInputSchema, SearchInputSchema } from './types';
 
@@ -63,6 +64,22 @@ describe('Elasticsearch connector', () => {
       );
       expect(apiKeyAuth?.isRecommended).toBe(true);
       expect(basicAuth).toBeDefined();
+    });
+
+    it('marks both auth types as sandbox capable', () => {
+      const types = Elasticsearch.auth?.types ?? [];
+      expect(types).toEqual([
+        expect.objectContaining({ type: 'api_key_header', supportsSandbox: true }),
+        expect.objectContaining({ type: 'basic', supportsSandbox: true }),
+      ]);
+    });
+
+    it('declares the host of the configured cluster URL as its only sandbox host', () => {
+      expect(
+        getSandboxHosts(Elasticsearch.sandbox, {
+          url: 'https://my-cluster.es.us-east-1.aws.elastic.cloud:443',
+        })
+      ).toEqual(['my-cluster.es.us-east-1.aws.elastic.cloud']);
     });
   });
 
