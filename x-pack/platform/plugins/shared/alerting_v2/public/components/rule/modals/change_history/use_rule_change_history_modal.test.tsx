@@ -46,12 +46,16 @@ jest.mock('./rule_change_history_provider', () => ({
 }));
 
 const mockAnalyticsStub = { reportEvent: jest.fn() };
+const mockNotificationsStub = { toasts: { addSuccess: jest.fn() } };
 const mockApiStub = { restoreRuleChange: jest.fn() };
 
 jest.mock('@kbn/core-di-browser', () => ({
   CoreStart: (key: string) => `CoreStart:${key}`,
-  useService: (token: unknown) =>
-    token === 'CoreStart:analytics' ? mockAnalyticsStub : mockApiStub,
+  useService: (token: unknown) => {
+    if (token === 'CoreStart:analytics') return mockAnalyticsStub;
+    if (token === 'CoreStart:notifications') return mockNotificationsStub;
+    return mockApiStub;
+  },
 }));
 
 const mockInvalidateQueries = jest.fn();
@@ -96,6 +100,7 @@ describe('useRuleChangeHistoryModal', () => {
     mockInvalidateQueries.mockClear();
     mockInvalidateRulesContentList.mockClear();
     mockApiStub.restoreRuleChange.mockReset();
+    mockNotificationsStub.toasts.addSuccess.mockClear();
     mockProviderRenders.length = 0;
   });
 
@@ -157,7 +162,11 @@ describe('useRuleChangeHistoryModal', () => {
   });
 
   it('refetches the rule list, tags and the restored rule after a restore', async () => {
-    mockApiStub.restoreRuleChange.mockResolvedValueOnce({ id: 'a', version: 4 });
+    mockApiStub.restoreRuleChange.mockResolvedValueOnce({
+      id: 'a',
+      version: 4,
+      metadata: { name: 'Rule A' },
+    });
     render(<Harness canRestore />);
 
     fireEvent.click(screen.getByTestId('openA'));
@@ -169,12 +178,15 @@ describe('useRuleChangeHistoryModal', () => {
     expect(mockInvalidateQueries).toHaveBeenCalledWith(ruleKeys.lists());
     expect(mockInvalidateQueries).toHaveBeenCalledWith(ruleKeys.allTags());
     expect(mockInvalidateQueries).toHaveBeenCalledWith(ruleKeys.detail('a'));
+    expect(mockNotificationsStub.toasts.addSuccess).toHaveBeenCalledWith(
+      'Rule "Rule A" restored as version 4'
+    );
   });
 
   it('guards restores with the opened rule version and then the version each restore produced', async () => {
     mockApiStub.restoreRuleChange
-      .mockResolvedValueOnce({ id: 'a', version: 4 })
-      .mockResolvedValueOnce({ id: 'a', version: 5 });
+      .mockResolvedValueOnce({ id: 'a', version: 4, metadata: { name: 'Rule A' } })
+      .mockResolvedValueOnce({ id: 'a', version: 5, metadata: { name: 'Rule A' } });
     render(<Harness canRestore />);
 
     fireEvent.click(screen.getByTestId('openA'));
