@@ -94,7 +94,7 @@ export function ContentFrameworkTable({
           const fieldConfiguration = fieldConfigurations?.[fieldName];
           const formattedValue = formattedHit[fieldName];
 
-          if (!value) return acc;
+          if (value == null || value === '') return acc;
 
           acc.fields[fieldName] = {
             name: fieldConfiguration?.title || fieldName,

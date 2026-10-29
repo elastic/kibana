@@ -11,6 +11,7 @@ import { useStatusByLocation } from './use_status_by_location';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 import { MONITOR_STATUS_LOOKBACK } from '../../../../common/constants/client_defaults';
 import { MONITOR_STATUS_ENUM } from '../../../../common/constants/monitor_management';
+import { HEARTBEAT_UNMAPPED_LOCATION_LABEL } from '../../../../common/runtime_types';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false }),
@@ -82,6 +83,23 @@ describe('useStatusByLocation', () => {
         expect.arrayContaining([{ term: { config_id: 'cfg-xyz' } }])
       );
       expect(params.aggs.locations.terms.field).toBe('observer.geo.name');
+    });
+
+    it('filters heartbeat monitors by monitor.id and buckets missing locations under the placeholder', () => {
+      renderHook(() =>
+        useStatusByLocation({
+          configId: 'k8s-http',
+          origin: 'heartbeat',
+          monitorLocations: [{ id: 'heartbeat', label: HEARTBEAT_UNMAPPED_LOCATION_LABEL }],
+        })
+      );
+
+      const params = useEsSearchMock.mock.calls[0][0];
+      expect(params.query.bool.filter).toEqual(
+        expect.arrayContaining([{ term: { 'monitor.id': 'k8s-http' } }])
+      );
+      expect(params.query.bool.filter).not.toContainEqual({ term: { config_id: 'k8s-http' } });
+      expect(params.aggs.locations.terms.missing).toBe(HEARTBEAT_UNMAPPED_LOCATION_LABEL);
     });
 
     it('bounds the query by a @timestamp lower bound so it prunes frozen-tier shards', () => {
@@ -248,6 +266,44 @@ describe('useStatusByLocation', () => {
 
       expect(result.current.locations[0].status).toBe(MONITOR_STATUS_ENUM.UP);
     });
+  });
+
+  it('resolves status for a location-less heartbeat ping via the placeholder bucket key', () => {
+    useEsSearchMock.mockReturnValue({
+      data: {
+        aggregations: {
+          locations: {
+            buckets: [
+              {
+                key: HEARTBEAT_UNMAPPED_LOCATION_LABEL,
+                summary: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          summary: { up: 1, down: 0 },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+      loading: false,
+    });
+
+    const { result } = renderHook(() =>
+      useStatusByLocation({
+        configId: 'k8s-http',
+        origin: 'heartbeat',
+        monitorLocations: [{ id: 'heartbeat', label: HEARTBEAT_UNMAPPED_LOCATION_LABEL }],
+      })
+    );
+
+    expect(result.current.locations[0].status).toBe(MONITOR_STATUS_ENUM.UP);
   });
 
   it('exposes loading state from useEsSearch', () => {

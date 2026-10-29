@@ -24,6 +24,12 @@ export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations']
 
 const INVESTIGATIONS_PAGE_SIZE = 10;
 
+/**
+ * The shared list API cannot filter on `in_progress`, so the in-progress section reads this many
+ * of the newest open investigations and keeps the running ones.
+ */
+const IN_PROGRESS_CANDIDATES = 20;
+
 /** How long a section's pages stay fresh, which bounds how often a refocus can refetch it. */
 const SECTION_STALE_TIME_MS = 30_000;
 
@@ -106,15 +112,18 @@ export const useFetchInvestigations = ({
         query: {
           sort_field: 'created_at',
           sort_order: 'desc',
-          page: typeof pageParam === 'number' ? pageParam : 1,
-          per_page: INVESTIGATIONS_PAGE_SIZE,
-          in_progress: inProgress,
+          ...(inProgress
+            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES, status: 'open' }
+            : {
+                page: typeof pageParam === 'number' ? pageParam : 1,
+                per_page: INVESTIGATIONS_PAGE_SIZE,
+              }),
           ...(severities?.length ? { severity: severities } : {}),
           ...(query ? { query } : {}),
         },
         signal,
       }),
-    getNextPageParam: getInvestigationsNextPageParam,
+    getNextPageParam: inProgress ? () => undefined : getInvestigationsNextPageParam,
     refetchInterval,
     staleTime: SECTION_STALE_TIME_MS,
     refetchOnWindowFocus: true,
@@ -125,9 +134,15 @@ export const useFetchInvestigations = ({
     retry: (failureCount, err) => !isHttpClientError(err) && failureCount < 3,
   });
 
-  const investigations = useMemo(() => flattenInvestigationPages(data?.pages ?? []), [data?.pages]);
+  // The other sections keep running investigations: dropping them from a page could empty the
+  // section and hide the finished ones on later pages.
+  const investigations = useMemo(() => {
+    const loaded = flattenInvestigationPages(data?.pages ?? []);
+    return inProgress ? loaded.filter(({ in_progress: isRunning }) => isRunning) : loaded;
+  }, [data?.pages, inProgress]);
 
-  const total = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
+  const listedTotal = data?.pages[data.pages.length - 1]?.pagination.total ?? 0;
+  const total = inProgress ? investigations.length : listedTotal;
 
   const handleFetchNextPage = useCallback(() => {
     void fetchNextPage();

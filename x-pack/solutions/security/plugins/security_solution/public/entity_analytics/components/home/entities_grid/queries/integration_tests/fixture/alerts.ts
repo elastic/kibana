@@ -33,6 +33,9 @@ const ALERTS: readonly AlertSeed[] = [
   { entityId: 'host:h1', otherEntityId: 'user:dave@okta', severity: 'high', hoursAgo: 5 },
   { entityId: 'host:h1', severity: 'high', hoursAgo: 7 },
   { entityId: 'host:h2', hostId: 'h2', severity: 'low', hoursAgo: 1 },
+  // Alerts of the aliases of host:h1, one stamped and one by its host id.
+  { entityId: 'host:h4', severity: 'critical', hoursAgo: 0.5 },
+  { entityId: 'host:h5', hostId: 'h5', severity: 'low', hoursAgo: 9 },
   { entityId: 'user:alice@okta', severity: 'medium', hoursAgo: 2 },
   { entityId: 'user:alice@okta', severity: 'medium', hoursAgo: 4 },
   { entityId: 'host:h3', severity: 'high', hoursAgo: 6, status: 'closed' },

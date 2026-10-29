@@ -1322,6 +1322,116 @@ describe('CaseCommentModel', () => {
     });
   });
 
+  describe('attack deduplication', () => {
+    it('drops an attack that is already attached to the case', async () => {
+      clientArgs.services.attachmentService.getter.getAttachedAttackIds.mockResolvedValueOnce(
+        new Set(['attack-id-1'])
+      );
+
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedAttackComment }],
+      });
+
+      expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('drops an attack that is already attached to the case on createComment', async () => {
+      clientArgs.services.attachmentService.getter.getAttachedAttackIds.mockResolvedValueOnce(
+        new Set(['attack-id-1'])
+      );
+
+      await model.createComment({
+        id: 'comment-1',
+        commentReq: unifiedAttackComment,
+        createdDate,
+      });
+
+      expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
+    });
+
+    it('dedupes the same attack repeated within one batch', async () => {
+      await model.bulkCreate({
+        attachments: [
+          { id: 'comment-1', ...unifiedAttackComment },
+          { id: 'comment-2', ...unifiedAttackComment },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      expect(attachments).toHaveLength(1);
+      expect(asUnifiedAttachmentSO(attachments[0]).attributes.attachmentId).toBe('attack-id-1');
+    });
+
+    it('keeps distinct attacks and leaves attachmentId a scalar', async () => {
+      await model.bulkCreate({
+        attachments: [
+          { id: 'comment-1', ...unifiedAttackComment },
+          { id: 'comment-2', ...unifiedAttackComment, attachmentId: 'attack-id-2' },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      expect(attachments).toHaveLength(2);
+      // the attack payload schema requires a string, so dedup must not widen it to an array
+      expect(asUnifiedAttachmentSO(attachments[0]).attributes.attachmentId).toBe('attack-id-1');
+      expect(asUnifiedAttachmentSO(attachments[1]).attributes.attachmentId).toBe('attack-id-2');
+    });
+
+    it('does not drop an alert that shares an id with an attack in the same batch', async () => {
+      await model.bulkCreate({
+        attachments: [
+          { id: 'comment-1', ...unifiedAttackComment, attachmentId: 'shared-id' },
+          {
+            id: 'comment-2',
+            ...unifiedAlertComment,
+            attachmentId: 'shared-id',
+            metadata: { ...unifiedAlertComment.metadata, index: 'idx-1' },
+          },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      expect(attachments).toHaveLength(2);
+    });
+
+    it('looks up only the attack ids the request carries', async () => {
+      await model.bulkCreate({
+        attachments: [
+          { id: 'comment-1', ...unifiedAttackComment },
+          { id: 'comment-2', ...unifiedAttackComment },
+          { id: 'comment-3', ...unifiedAttackComment, attachmentId: 'attack-id-2' },
+          { id: 'comment-4', ...unifiedAlertComment, attachmentId: 'alert-id-1' },
+        ],
+      });
+
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).toHaveBeenCalledWith({
+        caseId: theCase.id,
+        attackIds: ['attack-id-1', 'attack-id-2'],
+      });
+    });
+
+    it('does not look up attached attacks when the request carries none', async () => {
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedAlertComment }],
+      });
+
+      expect(
+        clientArgs.services.attachmentService.getter.getAttachedAttackIds
+      ).not.toHaveBeenCalled();
+    });
+  });
+
   describe('attack status sync on attach', () => {
     it('syncs the attached attack to the current case status', async () => {
       await model.createComment({

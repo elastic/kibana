@@ -29,6 +29,7 @@ export interface SharedStoryArgs {
   numUnstructuredBlocks: number;
   titleAsLink: boolean;
   titleIcon: boolean;
+  titleIsLoading: boolean;
   description: boolean;
   numMetaBlocks: number;
   numBadges: number;
@@ -295,6 +296,7 @@ export const headerZone = (
       )
     }
     {...buildTitleIconProps(args)}
+    isLoading={args.titleIsLoading}
     description={args.description ? HEADER_DESCRIPTION : undefined}
     {...headerProps}
   >

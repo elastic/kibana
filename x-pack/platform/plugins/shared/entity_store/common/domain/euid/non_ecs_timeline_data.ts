@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityDefinitionOfAnyType } from '../definitions/entity_schema';
+import type { EntityDefinitionWithoutId } from '../definitions/entity_schema';
 import { getEuidFromObject, getEntityIdentifiersFromDocument } from './memory';
 
 /**
@@ -59,7 +59,7 @@ export function nonEcsTimelineDataToDocument(
 
 /** Derives the entity id for an entity definition from timeline non-ECS rows, or `undefined` when the rows yield none. */
 export function getEuidFromTimelineNonEcsData(
-  definition: EntityDefinitionOfAnyType,
+  definition: EntityDefinitionWithoutId,
   rows: readonly NonEcsTimelineDataRow[] | undefined
 ): string | undefined {
   const doc = nonEcsTimelineDataToDocument(rows ?? []);
@@ -71,7 +71,7 @@ export function getEuidFromTimelineNonEcsData(
 
 /** Extracts the identity field name → value pairs for an entity definition from timeline non-ECS rows. */
 export function getEntityIdentifiersFromTimelineNonEcsData(
-  definition: EntityDefinitionOfAnyType,
+  definition: EntityDefinitionWithoutId,
   rows: readonly NonEcsTimelineDataRow[] | undefined
 ): Record<string, string> | undefined {
   const doc = nonEcsTimelineDataToDocument(rows ?? []);

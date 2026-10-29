@@ -9,6 +9,7 @@ import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { ContentListProvider } from '@kbn/content-list-provider';
+import type { EisViewMode } from '../../types';
 import {
   DEFAULT_EIS_DISPLAY_OPTIONS,
   getProviderOptions,
@@ -24,7 +25,7 @@ import {
   EIS_RELEASED_SORT_FIELD,
   EIS_TYPE_SORT_FIELD,
 } from '../../utils/eis_content_list_utils';
-import { EisModelsListing, type EisViewMode } from './eis_models_listing';
+import { EisModelsListing } from './eis_models_listing';
 import { ModelFamilyOptionsProvider } from './eis_model_filters';
 import { RegionOptionsProvider } from './region_filter';
 
@@ -108,7 +109,6 @@ export const EisModelsListingProvider = ({
       ),
     [models]
   );
-
   const features = useMemo(
     () => ({
       sorting: {
@@ -139,6 +139,7 @@ export const EisModelsListingProvider = ({
         <RegionOptionsProvider value={regionOptions}>
           <EisModelsListing
             {...{ onViewModelDetails, displayOptions, hasBlockedModels, viewMode }}
+            catalogTotal={models.length}
             onApplyDisplayOptions={setDisplayOptions}
             onViewModeChange={setViewMode}
           />

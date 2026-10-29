@@ -114,6 +114,43 @@ steps:
           core.warning(`Duplicate detection failed: ${err.message}`);
         }
 
+# Copy ownership metadata automatically once safe_outputs creates a PR, even if
+# posting the outcome comment fails or the agent never calls link_fix_pr.
+jobs:
+  label_fix_pr:
+    # gh-aw requires an explicit agent dependency to classify this as a post-agent job.
+    needs: [agent, safe_outputs]
+    if: ${{ !cancelled() && needs.safe_outputs.outputs.created_pr_number != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout labeling helper from trusted main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: elastic/kibana
+          ref: main
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - name: Copy source issue ownership labels to the fix PR
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          SOURCE_ISSUE_NUMBER: *issue_number
+          FIX_PR_NUMBER: ${{ needs.safe_outputs.outputs.created_pr_number }}
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          retries: 3
+          script: |
+            const { labelFlakyFixPr } = require('./.github/scripts/label_flaky_fix_pr.ts');
+            await labelFlakyFixPr({
+              github,
+              core,
+              ...context.repo,
+              issueNumber: Number(process.env.SOURCE_ISSUE_NUMBER),
+              prNumber: Number(process.env.FIX_PR_NUMBER),
+            });
+
 network:
   allowed:
     - defaults
@@ -201,7 +238,7 @@ safe-outputs:
         - name: Append PR link to outcome comment
           uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
           with:
-            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            github-token: ${{ github.token }}
             script: |
               const prUrl = process.env.GH_AW_PR_URL;
               const prNumber = process.env.GH_AW_PR_NUMBER;

@@ -11,7 +11,7 @@ import type {
   ValidatedRuleToImport,
 } from '../../../../../../../../common/api/detection_engine';
 import type { SecurityRuleChangeTracking } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
-import type { RuleLifecycleTelemetryData } from '../../rule_lifecycle_telemetry';
+import type { RuleImportOutcome, RuleLifecycleTelemetryData } from '../../rule_lifecycle_telemetry';
 
 export interface ImportRulesOptions {
   allowMissingConnectorSecrets?: boolean;
@@ -21,6 +21,7 @@ export interface ImportRulesOptions {
 
 export interface ImportRuleSuccess {
   rule_id: string;
+  outcome: RuleImportOutcome;
   telemetry: RuleLifecycleTelemetryData;
 }
 

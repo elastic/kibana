@@ -348,15 +348,44 @@ describe('AgentBuilderPlugin', () => {
       );
     });
 
+    it('adds the collapsed-sidebar flag when asked to collapse the conversation list', () => {
+      const { context } = startAndGetContext();
+
+      expect(
+        context.getConversationUrl({
+          conversationId: 'conv-1',
+          agentId: 'agent-1',
+          openDetails: true,
+          collapseSidebar: true,
+        })
+      ).toBe(
+        'http://localhost:5601/app/agent_builder/agents/agent-1/conversations/conv-1?openConversationDetails=true&sidebarCollapsed=true'
+      );
+      expect(
+        context.getConversationUrl({
+          conversationId: 'conv-1',
+          agentId: 'agent-1',
+          collapseSidebar: true,
+        })
+      ).toBe(
+        'http://localhost:5601/app/agent_builder/agents/agent-1/conversations/conv-1?sidebarCollapsed=true'
+      );
+    });
+
     it('navigates to the same path the URL is built from', async () => {
       const { context, coreStart, sidebarApp } = startAndGetContext();
-      const location = { conversationId: 'conv-1', agentId: 'agent-1', openDetails: true };
+      const location = {
+        conversationId: 'conv-1',
+        agentId: 'agent-1',
+        openDetails: true,
+        collapseSidebar: true,
+      };
 
       await context.openFullscreenConversation(location);
 
       expect(sidebarApp.close).toHaveBeenCalledTimes(1);
       expect(coreStart.application.navigateToApp).toHaveBeenCalledWith('agent_builder', {
-        path: '/agents/agent-1/conversations/conv-1?openConversationDetails=true',
+        path: '/agents/agent-1/conversations/conv-1?openConversationDetails=true&sidebarCollapsed=true',
       });
     });
   });

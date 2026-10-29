@@ -6,11 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import React from 'react';
 import type { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import type { ApmDocumentType } from '../../../../common/document_type';
-import { CONTAINER_ID, HOST_NAME } from '../../../../common/es_fields/apm';
-import { mergeKueries, toKueryFilterFormat } from '../../../../common/utils/kuery_utils';
+import { getProfilingScopeKuery } from '../../../../common/profiling/hosts_scope';
+import { mergeKueries } from '../../../../common/utils/kuery_utils';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { FlamegraphChart } from '../../shared/charts/flamegraph';
 import { ProfilingFlamegraphLink } from '../../shared/profiling/flamegraph/flamegraph_link';
@@ -27,6 +28,8 @@ interface Props {
   kuery: string;
   rangeFrom: string;
   rangeTo: string;
+  /** Undefined until a schema is selected, which the request waits for */
+  schema?: ProfilingSchema;
 }
 
 export function ProfilingHostsFlamegraph({
@@ -38,10 +41,11 @@ export function ProfilingHostsFlamegraph({
   kuery,
   rangeFrom,
   rangeTo,
+  schema,
 }: Props) {
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (dataSource) {
+      if (dataSource && schema) {
         return callApmApi('GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph', {
           params: {
             path: { serviceName },
@@ -52,30 +56,34 @@ export function ProfilingHostsFlamegraph({
               documentType: dataSource.documentType,
               rollupInterval: dataSource.rollupInterval,
               kuery,
+              schema,
             },
           },
         });
       }
     },
-    [dataSource, serviceName, start, end, environment, kuery]
+    [dataSource, schema, serviceName, start, end, environment, kuery]
   );
 
-  const profilingKueryFilter =
-    data?.containerIds && data.containerIds.length > 0
-      ? toKueryFilterFormat(CONTAINER_ID, data?.containerIds || [])
-      : toKueryFilterFormat(HOST_NAME, data?.hostNames || []);
+  const profilingKueryFilter = data ? getProfilingScopeKuery(data) : '';
 
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <FilterWarning containerIds={data?.containerIds} hostNames={data?.hostNames} />
+          <FilterWarning
+            scope={data?.scope}
+            containerIds={data?.containerIds}
+            hostNames={data?.hostNames}
+            workloadNames={data?.workloadNames}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <ProfilingFlamegraphLink
-            kuery={mergeKueries([`(${profilingKueryFilter})`, kuery])}
+            kuery={mergeKueries([profilingKueryFilter, kuery])}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
+            schema={schema}
             justifyContent="flexEnd"
           />
         </EuiFlexItem>

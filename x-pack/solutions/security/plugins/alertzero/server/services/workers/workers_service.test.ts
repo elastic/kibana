@@ -6,9 +6,10 @@
  */
 
 import { parse } from 'yaml';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -18,9 +19,17 @@ import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '@kbn/alertzero-common';
-import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import {
+  getManagedWorkflowDefinition,
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import type { ThreatIntelSupplyService } from '../threat_intel_supply';
+import { ThreatIntelSupplyService } from '../threat_intel_supply';
+import type { SupplyDocumentStates } from '../threat_intel_supply/keyed_supply_store.mock';
+import {
+  createHardGateEsClient,
+  createKeyedSupplyStore,
+} from '../threat_intel_supply/keyed_supply_store.mock';
 import {
   ThreatIntelSupplyHardGateError,
   ThreatIntelSupplyNotInstalledError,
@@ -162,6 +171,8 @@ const createPersistentHarness = () => {
     getWorkflows: jest.fn(),
     getWorkflowExecutions: jest.fn(async () => ({ results: [], page: 1, size: 10, total: 0 })),
     getWorkflowExecution: jest.fn(async () => null),
+    getStepExecution: jest.fn(async () => undefined),
+    getLatestFinishedWorkflowExecution: jest.fn(async () => undefined),
     cancelAllActiveWorkflowExecutions: jest.fn(async () => undefined),
     updateWorkflow,
   } as unknown as WatchWorkflowsManagementClient;
@@ -186,7 +197,6 @@ const createPersistentHarness = () => {
         Promise.resolve(managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
         { agentBuilder, ...agentFns },
-        {},
         async (_request, registration, options) => {
           await install(registration.id, options);
         },
@@ -401,7 +411,6 @@ describe('WorkersService', () => {
       harness.management,
       Promise.resolve(harness.managedWorkflows),
       loggingSystemMock.createLogger() as Logger,
-      {},
       {},
       installWorkerForRequest,
       async () => []
@@ -1130,17 +1139,13 @@ describe('WorkersService', () => {
     });
   });
 
-  describe('alert triage worker opts', () => {
-    const makeService = (
-      harness: ReturnType<typeof createPersistentHarness>,
-      isAlertAnalysisRuntimeEnabled?: () => Promise<boolean>
-    ) => {
+  describe('alert triage worker', () => {
+    const makeService = (harness: ReturnType<typeof createPersistentHarness>) => {
       const service = new WorkersService(
         harness.management,
         Promise.resolve(harness.managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
         {},
-        { isAlertAnalysisRuntimeEnabled },
         async (_request, registration, options) => {
           await harness.install(registration.id, options);
         },
@@ -1149,36 +1154,20 @@ describe('WorkersService', () => {
       return { service };
     };
 
-    // A combined settings-and-enable PATCH (one Watch Save) must not persist the settings half
-    // when the enable half is refused: the preflight check has to run, and fail, before the
-    // settings write, or the operator is left with a bumped revision and a Worker that still
-    // is not enabled — a state its own optimistic UI overlay cannot recover from without a
-    // second, separate save.
-    it('combined settings+enable PATCH: does not persist settings when the enable is blocked', async () => {
+    // Alert analysis is a per-Worker prerequisite: the Watch page callout warns about it and
+    // each Triage run fails with its own message, so the enable goes through.
+    it.each([
+      ['disabled', { enabled: false }],
+      ['missing', null],
+    ])('enables when the Alert Analysis workflow is %s', async (_state, alertAnalysisWorkflow) => {
       const harness = createPersistentHarness();
-      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({ enabled: false });
-      const { service } = makeService(harness);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          settings: { extras: { autoCloseConfidenceScoreMinThreshold: 0.5 } },
-          settingsRevision: null,
-          enabled: true,
-        },
-        SPACE,
-        request
+      const getWorkflow = harness.management.getWorkflow as jest.Mock;
+      const defaultGetWorkflow = getWorkflow.getMockImplementation();
+      getWorkflow.mockImplementation(async (workflowId: string, ...rest: unknown[]) =>
+        workflowId === SECURITY_ALERT_ANALYSIS_WORKFLOW_ID
+          ? alertAnalysisWorkflow
+          : defaultGetWorkflow?.(workflowId, ...rest)
       );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
-      expect(harness.documents.has(`${TRIAGE}-${SPACE}`)).toBe(false);
-      expect(harness.install).not.toHaveBeenCalled();
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    it('preflight fail: blocks with a reason and does not enable the Worker', async () => {
-      const harness = createPersistentHarness();
-      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce({ enabled: false });
       const { service } = makeService(harness);
 
       const result = await service.update(
@@ -1192,104 +1181,13 @@ describe('WorkersService', () => {
         request
       );
 
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
-      expect(harness.management.getWorkflow).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.any(String),
-        request
-      );
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    // getWorkflow returns null for an absent workflow, distinct from a present-but-disabled
-    // one; both must refuse the enable the same way, or a missing sub-workflow lets every rule
-    // fire into a `workflow.execute` that has nothing to execute.
-    it('preflight fail: blocks the enable when the Alert Analysis workflow is missing entirely', async () => {
-      const harness = createPersistentHarness();
-      (harness.management.getWorkflow as jest.Mock).mockResolvedValueOnce(null);
-      const { service } = makeService(harness);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
+      expect(result.outcome).toBe('updated');
+      expect(harness.updateWorkflow).toHaveBeenCalledWith(
+        reportedWorkflowId(TRIAGE, SPACE),
+        { enabled: true },
         SPACE,
         request
       );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisWorkflowDisabled' });
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    // The runtime config guard blocks the enable on its own, whatever else is available.
-    it('runtime config off: blocks the enable', async () => {
-      const harness = createPersistentHarness();
-      const { service } = makeService(harness, async () => false);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    // The workflow's `enabled` flag is not sufficient on its own. It installs enabled, but
-    // `securitySolution:alertAnalysisWorkflowEnabled` now defaults to false, and with that off
-    // the workflow's own guard short-circuits: it completes having classified nothing, so the
-    // Worker reports success while triaging no alerts. Enabling into that state is worse than
-    // refusing, because nothing anywhere reports a problem.
-    it('runtime config off: blocks even though the workflow itself is enabled', async () => {
-      const harness = createPersistentHarness();
-      const { service } = makeService(harness, async () => false);
-
-      const result = await service.update(
-        TRIAGE,
-        {
-          enabled: true,
-          settings: { serviceAccountId: 'sa-1' },
-          settingsRevision: null,
-        },
-        SPACE,
-        request
-      );
-
-      expect(result).toEqual({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
-      expect(harness.updateWorkflow).not.toHaveBeenCalled();
-    });
-
-    // An unreadable setting must not make the Worker permanently un-enableable: a failed read
-    // is not evidence that analysis is off.
-    it('runtime config unreadable: falls through to the remaining checks', async () => {
-      const harness = createPersistentHarness();
-      const { service } = makeService(harness, async () => {
-        throw new Error('uiSettings unavailable');
-      });
-
-      expect(
-        (
-          await service.update(
-            TRIAGE,
-            {
-              enabled: true,
-              settings: { serviceAccountId: 'sa-1' },
-              settingsRevision: null,
-            },
-            SPACE,
-            request
-          )
-        ).outcome
-      ).toBe('updated');
     });
 
     // The Worker is a scheduled sweep, so enabling it no longer attaches an action to every rule.
@@ -1297,7 +1195,7 @@ describe('WorkersService', () => {
     // nothing else, and no rule-attachment service is consulted at all.
     it('enable: switches the Worker on and reports nothing about rules', async () => {
       const harness = createPersistentHarness();
-      const { service } = makeService(harness, async () => true);
+      const { service } = makeService(harness);
 
       const result = await service.update(
         TRIAGE,
@@ -1318,7 +1216,7 @@ describe('WorkersService', () => {
 
     it('disable: switches the Worker off and reports nothing about rules', async () => {
       const harness = createPersistentHarness();
-      const { service } = makeService(harness, async () => true);
+      const { service } = makeService(harness);
       await service.update(
         TRIAGE,
         { enabled: true, settings: { serviceAccountId: 'sa-1' }, settingsRevision: null },
@@ -1548,7 +1446,6 @@ describe('WorkersService', () => {
         Promise.resolve(harness.managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
         {},
-        {},
         async (_request, registration, options) => {
           await harness.install(registration.id, options);
         },
@@ -1598,6 +1495,35 @@ describe('WorkersService', () => {
           request
         )
       ).toEqual({ outcome: 'blocked', reason: 'huntSupplyReportsIndexUnmanaged' });
+    });
+
+    // A combined settings-and-enable PATCH (one Watch Save) must not persist the settings half
+    // when the enable half is refused, or the operator is left with a bumped revision and a
+    // Worker that still is not enabled — a state its own optimistic UI overlay cannot recover
+    // from without a second, separate save.
+    it('combined settings+enable PATCH: does not persist settings when the enable is blocked', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.assertHardGate.mockRejectedValue(
+        new ThreatIntelSupplyHardGateError(['embedding_endpoint_unavailable'])
+      );
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      const result = await service.update(
+        HUNT,
+        {
+          enabled: true,
+          settings: { serviceAccountId: 'sa-1' },
+          settingsRevision: null,
+        },
+        SPACE,
+        request
+      );
+
+      expect(result).toEqual({ outcome: 'blocked', reason: 'huntSupplyPrerequisitesUnmet' });
+      expect(harness.documents.has(`${HUNT}-${SPACE}`)).toBe(false);
+      expect(harness.install).not.toHaveBeenCalled();
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
     });
 
     it('does not ensure supply when the hard-gate fails', async () => {
@@ -1758,6 +1684,471 @@ describe('WorkersService', () => {
       );
 
       expect(threatIntelSupply.assertHardGate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Hunt Watch threat intel supply end state with a real supply service', () => {
+    const SPACE_A = 'space-a';
+    const SPACE_B = 'space-b';
+    const ENABLE = {
+      enabled: true,
+      settings: { serviceAccountId: 'sa-1' },
+      settingsRevision: null,
+    } as const;
+    const tiOff: SupplyDocumentStates = {
+      ingest: false,
+      enrich: false,
+      attrA: false,
+      attrB: false,
+    };
+
+    interface Row {
+      name: string;
+      seed: SupplyDocumentStates;
+      /** Space B already hunts. */
+      bHunts?: boolean;
+      hardGateOk?: boolean;
+      /** Hunt is turned on in A first, then `operation` runs. */
+      operation: 'enable' | 'disable' | 'disableWithForbiddenGlobal';
+      enableWritesFail?: boolean;
+      expectedResult: string;
+      expectedDocs: Record<string, boolean | undefined>;
+    }
+
+    const rows: Row[] = [
+      {
+        name: 'enable A with B off: all supply turns on and Hunt is on',
+        seed: tiOff,
+        operation: 'enable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: true,
+          attrB: false,
+          cthA: true,
+          cthB: false,
+        },
+      },
+      {
+        name: 'enable A while B hunts: globals stay on and Hunt is on in both',
+        seed: { ...tiOff, ingest: true, enrich: true, attrB: true },
+        bHunts: true,
+        operation: 'enable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: true,
+          attrB: true,
+          cthA: true,
+          cthB: true,
+        },
+      },
+      {
+        name: 'enable A with the hard gate blocked: nothing is written and Hunt stays off',
+        seed: tiOff,
+        hardGateOk: false,
+        operation: 'enable',
+        expectedResult: 'blocked: huntSupplyPrerequisitesUnmet',
+        expectedDocs: {
+          ingest: false,
+          enrich: false,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+      {
+        name: 'enable A with enrich missing: nothing is left changed and Hunt stays off',
+        seed: { ingest: false, attrA: false, attrB: false },
+        operation: 'enable',
+        expectedResult: 'blocked: huntSupplyNotInstalled',
+        expectedDocs: { ingest: false, attrA: false, attrB: false, cthA: false, cthB: false },
+      },
+      {
+        name: 'enable A when the Hunt write fails: supply is torn down again',
+        seed: tiOff,
+        operation: 'enable',
+        enableWritesFail: true,
+        expectedResult: 'throws: enable write failed',
+        expectedDocs: {
+          ingest: false,
+          enrich: false,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+      {
+        name: 'disable A with B off: all supply and Hunt turn off',
+        seed: tiOff,
+        operation: 'disable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: false,
+          enrich: false,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+      {
+        name: 'disable A while B hunts: only attribute-A and Hunt-A turn off',
+        seed: { ...tiOff, ingest: true, enrich: true, attrB: true },
+        bHunts: true,
+        operation: 'disable',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: false,
+          attrB: true,
+          cthA: false,
+          cthB: true,
+        },
+      },
+      {
+        name: 'disable A when the global update is forbidden: Hunt-A is off and the disable still succeeds',
+        seed: tiOff,
+        operation: 'disableWithForbiddenGlobal',
+        expectedResult: 'updated',
+        expectedDocs: {
+          ingest: true,
+          enrich: true,
+          attrA: false,
+          attrB: false,
+          cthA: false,
+          cthB: false,
+        },
+      },
+    ];
+
+    const run = async (row: Row) => {
+      const harness = createPersistentHarness();
+      const huntDocument = (spaceId: string) => harness.documents.get(`${HUNT}-${spaceId}`);
+      if (row.bHunts) {
+        harness.documents.set(`${HUNT}-${SPACE_B}`, {
+          id: `${HUNT}-${SPACE_B}`,
+          enabled: true,
+          values: null,
+          yaml: '',
+          version: 1,
+        });
+      }
+      const fake = createKeyedSupplyStore({
+        seed: row.seed,
+        getHuntEnabled: (spaceId) => huntDocument(spaceId)?.enabled === true,
+      });
+      const supply = new ThreatIntelSupplyService({
+        management: fake.management,
+        managedWorkflows: Promise.resolve(fake.managedWorkflows),
+        logger: loggingSystemMock.createLogger() as Logger,
+        getEsClient: async () => createHardGateEsClient(row.hardGateOk !== false),
+        enumerateSpaceIds: async () => ['default', SPACE_A, SPACE_B],
+        getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
+        getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
+      });
+      const service = new WorkersService(
+        harness.management,
+        Promise.resolve(harness.managedWorkflows),
+        loggingSystemMock.createLogger() as Logger,
+        {},
+        async (_request, registration, options) => {
+          await harness.install(registration.id, options);
+        },
+        async () => [],
+        supply
+      );
+
+      if (row.operation !== 'enable') {
+        await service.update(HUNT, ENABLE, SPACE_A, request);
+      }
+      if (row.operation === 'disableWithForbiddenGlobal') {
+        fake.forbid('ingest');
+      }
+      if (row.enableWritesFail) {
+        harness.updateWorkflow.mockRejectedValueOnce(new Error('enable write failed'));
+      }
+
+      const result = await (row.operation === 'enable'
+        ? service.update(HUNT, ENABLE, SPACE_A, request)
+        : service.update(HUNT, { enabled: false }, SPACE_A, request)
+      ).then(
+        (outcome) =>
+          outcome.outcome === 'blocked' ? `blocked: ${outcome.reason}` : outcome.outcome,
+        (error: Error) => `throws: ${error.message}`
+      );
+
+      return {
+        result,
+        docs: {
+          ...fake.snapshot(),
+          cthA: huntDocument(SPACE_A)?.enabled ?? false,
+          cthB: huntDocument(SPACE_B)?.enabled ?? false,
+        },
+      };
+    };
+
+    describe.each(rows)('$name', (row) => {
+      it('leaves the documents in the expected end state', async () => {
+        expect((await run(row)).docs).toEqual(row.expectedDocs);
+      });
+
+      it('returns the expected result', async () => {
+        expect((await run(row)).result).toEqual(row.expectedResult);
+      });
+    });
+  });
+});
+
+describe('WorkersService Hunt index coverage', () => {
+  const ACCOUNT = 'kibana/alertzero_threat_hunt';
+  const noopSupply = {
+    assertHardGate: jest.fn(async () => undefined),
+    ensureSupplyForSpace: jest.fn(async () => undefined),
+    teardownSupplyForSpace: jest.fn(async () => undefined),
+  } as unknown as ThreatIntelSupplyService;
+
+  const blockedScope = (resolution: string) => ({
+    status: 'blocked',
+    resolution,
+    index_patterns: [],
+    missing: ['logs-*'],
+    report_matches: [],
+    actionable_indices: [],
+    window: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-31T00:00:00.000Z' },
+    row_limit: 25,
+  });
+
+  const setup = async ({ enabled = true }: { enabled?: boolean } = {}) => {
+    const harness = createPersistentHarness();
+    const logger = loggingSystemMock.createLogger() as Logger;
+    const service = new WorkersService(
+      harness.management,
+      Promise.resolve(harness.managedWorkflows),
+      logger,
+      {},
+      async (_request, registration, options) => {
+        await harness.install(registration.id, options);
+      },
+      async () => [],
+      noopSupply
+    );
+    await service.update(
+      HUNT,
+      { enabled, settings: { serviceAccountId: ACCOUNT }, settingsRevision: null },
+      SPACE,
+      request
+    );
+    const mocks = harness.management as unknown as {
+      getLatestFinishedWorkflowExecution: jest.Mock;
+      getStepExecution: jest.Mock;
+      getWorkflowExecutions: jest.Mock;
+    };
+    mocks.getLatestFinishedWorkflowExecution.mockClear();
+    mocks.getStepExecution.mockClear();
+    return { harness, service, mocks, logger };
+  };
+
+  const huntOf = async (service: WorkersService) =>
+    (await service.list(request, SPACE)).workers.find(({ id }) => id === HUNT);
+
+  const finishedSweep = (
+    mocks: { getLatestFinishedWorkflowExecution: jest.Mock; getStepExecution: jest.Mock },
+    scope: unknown
+  ) => {
+    mocks.getLatestFinishedWorkflowExecution.mockResolvedValue({ id: 'exec-finished' });
+    mocks.getStepExecution.mockResolvedValue({
+      stepId: 'check_index_scope',
+      startedAt: 's',
+      finishedAt: '2026-10-28T10:00:00.000Z',
+      output: scope,
+    });
+  };
+
+  describe('degraded state', () => {
+    it('is degraded with the empty-universe reason after a blocked:empty_universe sweep', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+
+      const hunt = await huntOf(service);
+
+      expect(hunt).toMatchObject({
+        state: 'degraded',
+        stateReason: `The sweep at 2026-10-28 10:00 UTC running as ${ACCOUNT} could not see any index in this space's default data view`,
+      });
+    });
+
+    it('is degraded with the resolve reason after a blocked:discovery_failed sweep', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:discovery_failed'));
+
+      const hunt = await huntOf(service);
+
+      expect(hunt?.stateReason).toContain("could not resolve this space's default data view");
+    });
+
+    it('stays degraded when the sweep evaluated the current default data view', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+
+      const { workers } = await service.list(request, SPACE, async () => ['logs-*']);
+
+      expect(workers.find(({ id }) => id === HUNT)?.state).toBe('degraded');
+    });
+
+    it('stays degraded after a discovery_failed sweep, which records no patterns to compare', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, { ...blockedScope('blocked:discovery_failed'), missing: [] });
+
+      const { workers } = await service.list(request, SPACE, async () => ['logs-*']);
+
+      expect(workers.find(({ id }) => id === HUNT)?.state).toBe('degraded');
+    });
+
+    it('is no longer degraded once the default data view changed since the blocked sweep', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+
+      const { workers } = await service.list(request, SPACE, async () => ['custom-*']);
+
+      expect(workers.find(({ id }) => id === HUNT)?.state).toBe('ok');
+    });
+
+    it('stays ok after a sweep that resolved', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        ...blockedScope('universe'),
+        status: 'ok',
+        index_patterns: ['logs-*'],
+      });
+
+      expect((await huntOf(service))?.state).toBe('ok');
+    });
+
+    it('reads the execution named by the finished-execution lookup', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+      mocks.getWorkflowExecutions.mockResolvedValue({
+        results: [{ id: 'exec-skipped', status: 'skipped', startedAt: '2026-10-28T11:00:00.000Z' }],
+        page: 1,
+        size: 1,
+        total: 1,
+      });
+
+      const hunt = await huntOf(service);
+
+      expect(mocks.getStepExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowExecutionId: 'exec-finished' }),
+        SPACE,
+        request
+      );
+      expect(hunt?.state).toBe('degraded');
+    });
+
+    it('keeps lastRun from the newest execution of any status', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+      mocks.getWorkflowExecutions.mockResolvedValue({
+        results: [{ id: 'exec-skipped', status: 'skipped', startedAt: '2026-10-28T11:00:00.000Z' }],
+        page: 1,
+        size: 1,
+        total: 1,
+      });
+
+      expect((await huntOf(service))?.lastRun).toBe('2026-10-28T11:00:00.000Z');
+    });
+
+    it('stays ok when the sweep read throws', async () => {
+      const { service, mocks } = await setup();
+      mocks.getLatestFinishedWorkflowExecution.mockRejectedValue(new Error('boom'));
+
+      expect((await huntOf(service))?.state).toBe('ok');
+    });
+
+    it('stays paused and reads nothing when the hunt worker is disabled', async () => {
+      const { service, mocks } = await setup({ enabled: false });
+      finishedSweep(mocks, blockedScope('blocked:empty_universe'));
+
+      expect((await huntOf(service))?.state).toBe('paused');
+      expect(mocks.getLatestFinishedWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('never reads a sweep for another worker', async () => {
+      const { service, mocks } = await setup();
+      mocks.getLatestFinishedWorkflowExecution.mockClear();
+
+      await service.get(TRIAGE, request, SPACE);
+
+      expect(mocks.getLatestFinishedWorkflowExecution).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getHuntCoverageInputs', () => {
+    it('returns the workflow id and the stored account id', async () => {
+      const { service } = await setup();
+
+      await expect(service.getHuntCoverageInputs(SPACE, request)).resolves.toEqual({
+        workflowId: expect.any(String),
+        serviceAccountId: ACCOUNT,
+      });
+    });
+
+    it('returns nulls when the hunt worker is not installed', async () => {
+      const harness = createPersistentHarness();
+
+      await expect(harness.createService().getHuntCoverageInputs(SPACE, request)).resolves.toEqual({
+        workflowId: null,
+        serviceAccountId: null,
+      });
+    });
+
+    it('returns nulls when the status read throws', async () => {
+      const { harness, service } = await setup();
+      (harness.managedWorkflows.getWorkflowStatus as jest.Mock).mockRejectedValue(
+        new Error('boom')
+      );
+
+      await expect(service.getHuntCoverageInputs(SPACE, request)).resolves.toEqual({
+        workflowId: null,
+        serviceAccountId: null,
+      });
+    });
+
+    it('keeps the workflow id with a null account when the state has no template values', async () => {
+      const { harness, service } = await setup();
+      (harness.managedWorkflows.getInstalledWorkflowState as jest.Mock).mockResolvedValue({
+        templateValues: null,
+      });
+
+      await expect(service.getHuntCoverageInputs(SPACE, request)).resolves.toEqual({
+        workflowId: expect.any(String),
+        serviceAccountId: null,
+      });
+    });
+
+    it('keeps the workflow id with a null account when the state read throws', async () => {
+      const { harness, service } = await setup();
+      (harness.managedWorkflows.getInstalledWorkflowState as jest.Mock).mockRejectedValue(
+        new Error('boom')
+      );
+
+      await expect(service.getHuntCoverageInputs(SPACE, request)).resolves.toEqual({
+        workflowId: expect.any(String),
+        serviceAccountId: null,
+      });
+    });
+
+    it('never reads an execution', async () => {
+      const { service, mocks } = await setup();
+
+      await service.getHuntCoverageInputs(SPACE, request);
+
+      expect(mocks.getStepExecution).not.toHaveBeenCalled();
     });
   });
 });

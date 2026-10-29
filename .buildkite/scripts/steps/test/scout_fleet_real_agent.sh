@@ -44,7 +44,8 @@ echo "Config: $CONFIG_PATH"
 start=$(date +%s)
 
 set +e
-node scripts/scout run-tests --location local --arch stateful --domain classic --serverConfigSet fleet_real_agent --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
+# the server config set (`fleet_real_agent`) is derived from the `test/scout_fleet_real_agent` path of the config
+node scripts/scout run-tests --location local --arch stateful --domain classic --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
 EXIT_CODE=$?
 set -e
 

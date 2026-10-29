@@ -95,7 +95,7 @@ export const GithubConnector: ConnectorSpec = {
   metadata: {
     id: '.github',
     displayName: 'GitHub',
-    description: i18n.translate('core.kibanaConnectorSpecs.github.metadata.description', {
+    description: i18n.translate('connectorSpecs.github.metadata.description', {
       defaultMessage:
         'Search, browse, and manage GitHub repositories: create and update issues and pull requests, add comments, labels, and assignees, create branches, trigger workflows, and merge pull requests.',
     }),
@@ -108,6 +108,7 @@ export const GithubConnector: ConnectorSpec = {
     types: [
       {
         type: 'oauth_authorization_code',
+        supportsSandbox: true,
         defaults: {
           authorizationUrl: 'https://github.com/login/oauth/authorize',
           tokenUrl: 'https://github.com/login/oauth/access_token',
@@ -123,9 +124,10 @@ export const GithubConnector: ConnectorSpec = {
       },
       {
         type: 'bearer',
+        supportsSandbox: true,
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.github.auth.bearer.label', {
+          label: i18n.translate('connectorSpecs.github.auth.bearer.label', {
             defaultMessage: 'Personal Access Token (PAT)',
           }),
         },

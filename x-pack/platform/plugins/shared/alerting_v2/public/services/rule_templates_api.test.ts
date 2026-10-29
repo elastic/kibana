@@ -6,6 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH } from '../constants';
 import { RuleTemplatesApi } from './rule_templates_api';
 
@@ -93,6 +94,39 @@ describe('RuleTemplatesApi', () => {
       expect(http.get).toHaveBeenCalledWith(
         `${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/template-1`,
         { signal: undefined }
+      );
+    });
+  });
+
+  describe('installRuleTemplate', () => {
+    it('sends a POST request with the rule payload to the template install path', async () => {
+      const payload: CreateRuleData = {
+        kind: 'signal',
+        metadata: { name: 'CPU usage' },
+        time_field: '@timestamp',
+        schedule: { every: '1m', lookback: '5m' },
+        query: { base: 'FROM logs-*' },
+      };
+      http.post.mockResolvedValue({ id: 'rule-1' });
+
+      await expect(api.installRuleTemplate('template-1', payload)).resolves.toEqual({
+        id: 'rule-1',
+      });
+
+      expect(http.post).toHaveBeenCalledWith(
+        `${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/template-1/_install`,
+        { body: JSON.stringify(payload) }
+      );
+    });
+
+    it('encodes the template id in the path', async () => {
+      http.post.mockResolvedValue({ id: 'rule-1' });
+
+      await api.installRuleTemplate('nginx/error rate', {} as CreateRuleData);
+
+      expect(http.post).toHaveBeenCalledWith(
+        `${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/nginx%2Ferror%20rate/_install`,
+        expect.any(Object)
       );
     });
   });

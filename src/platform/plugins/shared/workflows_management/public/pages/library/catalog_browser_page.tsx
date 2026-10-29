@@ -21,24 +21,24 @@ import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
-const libraryPageTitle = i18n.translate('workflowsManagement.libraryPage.pageTitle', {
+const libraryPageTitle = i18n.translate('workflows.libraryPage.pageTitle', {
   defaultMessage: 'Template library',
 });
 
-const experimentalBadgeLabel = i18n.translate('workflowsManagement.libraryPage.experimentalBadge', {
+const experimentalBadgeLabel = i18n.translate('workflows.libraryPage.experimentalBadge', {
   defaultMessage: 'Experimental',
 });
 
-const contributeLinkLabel = i18n.translate('workflowsManagement.libraryPage.contributeLink', {
+const contributeLinkLabel = i18n.translate('workflows.libraryPage.contributeLink', {
   defaultMessage: 'Contribute a template',
 });
 
-const createFromFileLabel = i18n.translate('workflowsManagement.libraryPage.createFromFile', {
+const createFromFileLabel = i18n.translate('workflows.libraryPage.createFromFile', {
   defaultMessage: 'Import template',
 });
 
 /**
- * Workflow Template Library catalog page (`/app/workflows/library`). The
+ * Workflow Template library catalog page (`/app/workflows/library`). The
  * browse UI itself lives in `@kbn/workflows-ui` (`<CatalogBrowser>`) so it can
  * be reused from other plugins later; this page only wires navigation. The
  * route is always registered (see `routes.tsx`); this page redirects to the
@@ -69,7 +69,7 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
       items: [
         {
           id: 'requestTemplate',
-          label: i18n.translate('workflowsManagement.libraryPage.requestTemplateButtonLabel', {
+          label: i18n.translate('workflows.libraryPage.requestTemplateButtonLabel', {
             defaultMessage: 'Request a template',
           }),
           iconType: 'logoGithub',

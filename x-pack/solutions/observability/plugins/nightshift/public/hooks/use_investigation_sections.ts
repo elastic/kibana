@@ -44,10 +44,21 @@ export interface InvestigationSectionState extends FetchInvestigationsResult {
 export interface InvestigationSectionsResult {
   sections: InvestigationSectionState[];
   severityCounts: SeverityCounts;
+  /** The counts query is separate from the sections, so it settles on its own schedule. */
+  areSeverityCountsLoading: boolean;
+  /** True while the counts query is in flight, including a refetch over previous data. */
+  areSeverityCountsFetching: boolean;
   hasActiveInvestigations: boolean;
   isInitialLoading: boolean;
   isFetching: boolean;
   totalCount: number;
+  /**
+   * Investigations matching the current filters, each counted once. `totalCount` sums the
+   * sections, and a running investigation also appears in its severity section, so it is not a
+   * distinct count. The severity counts come from one query over all investigations, so adding
+   * the unrated section's total gives every match exactly once.
+   */
+  matchedCount: number;
   loadedCount: number;
   refetchAll: () => void;
 }
@@ -100,14 +111,14 @@ export const useInvestigationSections = ({
   const low = useFetchInvestigations({ ...tierSection('low'), query });
   const notRated = useFetchInvestigations({ inProgress: false, severities: ['none'], query });
 
-  // The tiles count the same investigations as the severity sections.
+  // The shared counts cannot leave out running investigations, so the tiles include them.
   const severityCountsQuery = useQuery({
     queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'severityCounts', query],
     enabled: agenticInvestigations != null,
     queryFn: ({ signal }) =>
       http.get<InvestigationSeverityCounts>(SHARED_INVESTIGATIONS_SEVERITY_COUNTS_URL, {
         version: SHARED_INVESTIGATIONS_API_VERSION,
-        query: { in_progress: false, ...(query ? { query } : {}) },
+        query: query ? { query } : {},
         signal,
       }),
     keepPreviousData: true,
@@ -197,10 +208,18 @@ export const useInvestigationSections = ({
   return {
     sections,
     severityCounts,
+    areSeverityCountsLoading: severityCountsQuery.isInitialLoading,
+    areSeverityCountsFetching: severityCountsQuery.isFetching,
     hasActiveInvestigations,
     isInitialLoading: sections.some((section) => section.isInitialLoading),
     isFetching: sections.some((section) => section.isFetching),
     totalCount: sections.reduce((sum, section) => sum + section.total, 0),
+    matchedCount:
+      severityCounts.critical +
+      severityCounts.high +
+      severityCounts.medium +
+      severityCounts.low +
+      notRated.total,
     loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   };

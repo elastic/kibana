@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT, MIN_SAMPLING_RATE } from '../saved_objects';
+import { MIN_SAMPLING_RATE } from '../saved_objects';
 
-/** Per-slice inputs for the dynamic rate; all come from the boundary probe - no extra queries. */
+/** Per-slice inputs for the dynamic rate; all but `maxLogsPerWindow` come from the boundary probe
+ * - no extra queries. */
 export interface AdaptiveSamplingInputs {
   /** Raw logs already counted against this window, before the current slice. */
   scannedLogs: number;
@@ -16,6 +17,9 @@ export interface AdaptiveSamplingInputs {
   sliceStartISO: string;
   sliceEndISO: string;
   windowEndISO: string;
+  /** The process's effective configured cap - already resolved by the caller through the same
+   * config merge stack the hard cap uses. `0` means the hard cap is disabled. */
+  maxLogsPerWindow: number;
 }
 
 /**
@@ -39,23 +43,28 @@ const estimateRemainingLogs = ({
 /**
  * Dynamic sampling rate for the current slice.
  *
- * The budget is pinned to `LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT` by design - never the
- * effective configured cap. A window projected above the default always samples (the ratio drops
- * below 1 exactly then), and one projected at or below it never does (clamped to 1, so no SAMPLE
- * stage is emitted). Raising or lowering `maxLogsPerWindow` changes only the hard stop.
+ * The budget tracks the process's effective configured `maxLogsPerWindow`, the same value the
+ * hard cap uses - raising or lowering it moves both the trigger and the rate together, so a
+ * smaller configured cap gets graceful degradation instead of only ever hitting a hard drop, and
+ * a larger one gets more headroom before sampling engages at all. `maxLogsPerWindow <= 0` means
+ * the hard cap is disabled - there is no budget to protect, so sampling never activates.
+ * A window projected above the budget always samples (the ratio drops below 1 exactly then), and
+ * one projected at or below it never does (clamped to 1, so no SAMPLE stage is emitted).
  */
 export const computeAdaptiveSamplingRate = (inputs: AdaptiveSamplingInputs): number => {
+  if (inputs.maxLogsPerWindow <= 0) return 1;
+
   const estimatedRemaining = estimateRemainingLogs(inputs);
   if (estimatedRemaining <= 0) return 1;
 
-  const remainingBudget = LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT - inputs.scannedLogs;
+  const remainingBudget = inputs.maxLogsPerWindow - inputs.scannedLogs;
   return Math.min(1, Math.max(MIN_SAMPLING_RATE, remainingBudget / estimatedRemaining));
 };
 
 /**
  * Rate in effect for the current slice. A `samplingRate` override from
  * `nonPriorityLogExtractionConfig` is unconditional - the operator asked for sampling, so no
- * volume trigger applies; otherwise the rate adapts per slice via the default-pinned budget.
+ * volume trigger applies; otherwise the rate adapts per slice via the configured-cap budget.
  */
 export const resolveSamplingRate = (
   inputs: AdaptiveSamplingInputs,

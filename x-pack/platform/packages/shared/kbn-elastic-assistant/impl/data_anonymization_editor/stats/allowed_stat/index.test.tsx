@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { AllowedStat } from '.';
@@ -24,13 +23,11 @@ describe('AllowedStat', () => {
     expect(screen.getByTestId('allowedStat')).toHaveTextContent('3Allowed');
   });
 
-  it('displays the correct tooltip content', async () => {
+  it('displays the correct tooltip content', () => {
     render(<AllowedStat {...defaultProps} />);
 
-    await userEvent.hover(screen.getByTestId('allowedStat'));
+    fireEvent.mouseOver(screen.getByTestId('allowedStat'));
 
-    await waitFor(() => {
-      expect(screen.getByText(i18n.ALLOWED_TOOLTIP(defaultProps))).toBeInTheDocument();
-    });
+    expect(screen.getByText(i18n.ALLOWED_TOOLTIP(defaultProps))).toBeInTheDocument();
   });
 });

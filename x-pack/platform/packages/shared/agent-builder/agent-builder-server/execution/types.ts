@@ -17,6 +17,7 @@ import type {
   ConversationRoundOrigin,
   ConversationOrigin,
   ConversationRoundAuthor,
+  ConversationRoundAuthorDecoration,
   ExecutionStatus,
   InteractivityConfig,
   InteractivityConfigInput,
@@ -66,6 +67,13 @@ export interface BaseExecutionParams {
    */
   reasoningLevel?: ChatCompletionReasoningEffort;
   projectRouting?: string;
+  /**
+   * Id of the workflow execution whose `ai.agent` step started this execution, inherited by the
+   * sub-agents it spawns. Reported on round telemetry so a round joins to the workflow run, and
+   * sent to EIS as the `interactionId` of every LLM call the main agent's execution makes (not a
+   * sub-agent's). Set by the workflow step from its own context; no route accepts it.
+   */
+  workflowExecutionId?: string;
 }
 
 /**
@@ -99,6 +107,12 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   readOnly?: boolean;
   /** External origin that initiated this execution, used to resolve the conversation and attribute the round. */
   origin?: ExecutionConversationOrigin;
+  /**
+   * Display decoration for the user message this request writes. Honoured only when the request
+   * principal is a service account, which has no display name on any backend; silently dropped
+   * for interactive users. Never affects the actor's `id`, `username` or `type`.
+   */
+  author?: ConversationRoundAuthorDecoration;
   /** Callback delivery configuration for this execution. */
   callback?: {
     /** URL to deliver the execution result to. */

@@ -23,7 +23,7 @@ const labelEqDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.LABEL_MATCHING_OPERATOR,
   name: 'label_eq',
   operator: '=',
-  description: i18n.translate('kbn-esql-language.promql.definitions.label_eq', {
+  description: i18n.translate('esqlLanguage.promql.definitions.label_eq', {
     defaultMessage: 'Matches labels exactly equal to the provided string.',
   }),
   preview: false,
@@ -55,7 +55,7 @@ const labelNeqDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.LABEL_MATCHING_OPERATOR,
   name: 'label_neq',
   operator: '!=',
-  description: i18n.translate('kbn-esql-language.promql.definitions.label_neq', {
+  description: i18n.translate('esqlLanguage.promql.definitions.label_neq', {
     defaultMessage: 'Matches labels not equal to the provided string.',
   }),
   preview: false,
@@ -87,7 +87,7 @@ const labelNreDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.LABEL_MATCHING_OPERATOR,
   name: 'label_nre',
   operator: '!~',
-  description: i18n.translate('kbn-esql-language.promql.definitions.label_nre', {
+  description: i18n.translate('esqlLanguage.promql.definitions.label_nre', {
     defaultMessage: 'Matches labels whose value does not satisfy the provided regular expression.',
   }),
   preview: false,
@@ -119,7 +119,7 @@ const labelReDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.LABEL_MATCHING_OPERATOR,
   name: 'label_re',
   operator: '=~',
-  description: i18n.translate('kbn-esql-language.promql.definitions.label_re', {
+  description: i18n.translate('esqlLanguage.promql.definitions.label_re', {
     defaultMessage: 'Matches labels whose value satisfies the provided regular expression.',
   }),
   preview: false,

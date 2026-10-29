@@ -10,7 +10,7 @@ import {
   type CausalFeature,
   type SignificantEvent,
   type SignalEntry,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_TEXT_LENGTH,
 } from '@kbn/significant-events-schema';
 
 type EpisodeContextSource = Pick<SignificantEvent, '@timestamp'> &
@@ -102,9 +102,9 @@ export const mergeSignalsLatestPerRule = (
     ],
     (signal) => (signal.type === 'detection' ? signal.metadata?.rule_uuid ?? undefined : undefined)
   ).map((signal) =>
-    signal.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH
+    signal.description.length <= MAX_TEXT_LENGTH
       ? signal
-      : { ...signal, description: signal.description.slice(0, MAX_SIGNAL_DESCRIPTION_LENGTH) }
+      : { ...signal, description: signal.description.slice(0, MAX_TEXT_LENGTH) }
   );
 
 /** Unions source ids and topology across prior episode documents and the submitted payload. */

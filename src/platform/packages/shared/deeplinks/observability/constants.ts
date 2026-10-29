@@ -32,6 +32,8 @@ export const AI_ASSISTANT_APP_ID = 'observabilityAIAssistant';
 
 export const OBLT_UX_APP_ID = 'ux';
 
+export const OBLT_DIGITAL_EXPERIENCE_APP_ID = 'digital_experience';
+
 export const OBLT_PROFILING_APP_ID = 'profiling';
 
 export const INVENTORY_APP_ID = 'inventory';
@@ -45,6 +47,8 @@ export const INGEST_HUB_APP_ID = 'ingestHub';
 export const ONBOARDING_APP_ID = 'onboarding';
 
 export const NIGHTSHIFT_APP_ID = 'nightshift';
+
+export const ENTITY_INVENTORY_APP_ID = 'entityInventoryApp';
 
 export const OBSERVABILITY_ALERTING_APP_ID = 'observabilityAlerting';
 export const OBSERVABILITY_ALERTING_APP_ROUTE = 'observability/alerting';

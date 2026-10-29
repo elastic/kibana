@@ -1,0 +1,72 @@
+{
+  "sha1": "66dbfb5c6eaab631bb707309ff751b67f57a7cdd",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "5ae2d9858e2b281-d9dfc4b24b97038",
+      "title": "Data Usage metrics API returns 400 for data streams that do not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout_data_usage_autoops/api/tests/metrics.spec.ts",
+        "line": 62,
+        "column": 13
+      }
+    },
+    {
+      "id": "5ae2d9858e2b281-043f3f335e96a75",
+      "title": "Data Usage metrics API returns 400 when no data streams are requested",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout_data_usage_autoops/api/tests/metrics.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
+      "id": "5ae2d9858e2b281-4da0964b582185a",
+      "title": "Data Usage metrics API returns 400 for an invalid metric type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout_data_usage_autoops/api/tests/metrics.spec.ts",
+        "line": 84,
+        "column": 13
+      }
+    },
+    {
+      "id": "5ae2d9858e2b281-6f3bc0cad9139d6",
+      "title": "Data Usage metrics API returns the AutoOps metrics for a valid request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_usage/test/scout_data_usage_autoops/api/tests/metrics.spec.ts",
+        "line": 95,
+        "column": 89
+      }
+    }
+  ]
+}

@@ -32,7 +32,12 @@ export {
   type ChatCompleteAPI,
   type ChatCompleteAPIResponse,
   type ChatCompleteOptions,
+  type FeatureChatCompleteAPI,
+  type FeatureChatCompleteOptions,
+  type ChatCompleteTemplate,
+  parseTemplateJson,
   type ChatCompleteCompositeResponse,
+  chatCompletionReasoningEfforts,
   type ChatCompletionReasoning,
   type ChatCompletionReasoningEffort,
   type ChatCompletionTokenCountEvent,
@@ -147,6 +152,7 @@ export {
   getContextWindowSize,
   contextWindowFromModelName,
   getSupportedReasoningEffortLevels,
+  isTemplateRequiredConnector,
   validateReasoningEffort,
   type InferenceConnector,
   type InferenceConnectorCapabilities,
@@ -178,6 +184,8 @@ export {
   type ConfigProperties,
   type FieldsConfiguration,
   type InferenceProvider,
+  type InferenceServiceFeatures,
+  supportsNonStreamingChat,
 } from './src/inference_services_api';
 
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';

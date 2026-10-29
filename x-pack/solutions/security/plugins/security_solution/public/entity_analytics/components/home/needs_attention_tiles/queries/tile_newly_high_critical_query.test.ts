@@ -30,13 +30,15 @@ describe('buildNewlyHighCriticalCountQuery', () => {
     );
   });
 
-  it('reads the current level from the High and Critical entity docs', () => {
+  it('reads the current level from the group when there is one, else from the entity, on main entities only', () => {
     const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
     expect(query).toContain('FROM .entities-v1');
-    expect(query).toContain('WHERE entity.risk.calculated_level IN ("High", "Critical")');
+    expect(query).toContain('WHERE `entity.relationships.resolution.resolved_to` IS NULL');
     expect(query).toContain(
-      'current_level_num = CASE(entity.risk.calculated_level == "Critical", 4, 3)'
+      'current_level = COALESCE(`entity.relationships.resolution.risk.calculated_level`, entity.risk.calculated_level)'
     );
+    expect(query).toContain('WHERE current_level IN ("High", "Critical")');
+    expect(query).toContain('current_level_num = CASE(current_level == "Critical", 4, 3)');
   });
 
   it('maps risk levels to integers so MAX produces the correct ordinal comparison', () => {
@@ -84,8 +86,9 @@ describe('buildNewlyHighCriticalCountQuery', () => {
   it('uses LAST(level_num, @timestamp) not MAX to record the actual level at the boundary', () => {
     const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
     expect(query).toContain(
-      'STATS boundary_level_num = LAST(level_num, @timestamp) BY entity_euid'
+      'STATS last_value = LAST(level_num, @timestamp) BY entity_euid, is_group'
     );
+    expect(query).toContain('EVAL boundary_level_num = COALESCE(group_value, own_value)');
     expect(query).not.toMatch(/MAX\(level_num/);
   });
 
@@ -121,7 +124,7 @@ describe('buildNewlyHighCriticalCountQuery', () => {
   it('deduplicates resolved entities and emits both value and entity_ids columns', () => {
     const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
     expect(query).toContain('COALESCE(`entity.relationships.resolution.resolved_to`, entity.id)');
-    expect(query).toContain('value = COUNT_DISTINCT(effective_id)');
+    expect(query).toContain('value = COUNT(effective_id)');
     expect(query).toContain('entity_ids = VALUES(effective_id)');
   });
 });

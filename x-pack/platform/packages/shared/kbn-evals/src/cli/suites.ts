@@ -56,6 +56,17 @@ export interface EvalSuiteMetadata {
    * It reads the evals config JSON on stdin and prints `{ "env"?: {...} }`.
    */
   scoutHook?: string;
+  /**
+   * Name of the suite's own kbn-evals Vault secret (`kv/ci-shared/kbn-evals/<name>` in ci-prod,
+   * `secret/kibana-issues/dev/kbn-evals/<name>` in dev). When set, `scoutHook` reads this secret
+   * instead of the general config, so the suite's credentials rotate independently.
+   */
+  vaultSecret?: string;
+  /**
+   * Judge connector id used when no `models:judge:` label,
+   * `--evaluation-connector-id` or `EVAL_CONNECTOR_ID` is given, ahead of the Vault default.
+   */
+  defaultJudge?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -75,6 +86,8 @@ export interface EvalSuiteDefinition {
   scoutArch?: string;
   scoutDomain?: string;
   scoutHook?: string;
+  vaultSecret?: string;
+  defaultJudge?: string;
   shards?: EvalSuiteShard[];
   stepTimeoutInMinutes?: number;
 }
@@ -185,6 +198,8 @@ const normalizeSuite = (
     scoutArch: metadata?.scoutArch,
     scoutDomain: metadata?.scoutDomain,
     scoutHook: metadata?.scoutHook,
+    vaultSecret: metadata?.vaultSecret,
+    defaultJudge: metadata?.defaultJudge,
     shards: metadata?.shards,
     stepTimeoutInMinutes: metadata?.stepTimeoutInMinutes,
   };

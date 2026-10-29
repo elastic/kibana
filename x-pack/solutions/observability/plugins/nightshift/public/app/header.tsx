@@ -19,15 +19,15 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { START_INVESTIGATION_PANEL_ID } from '../investigation/start_investigation_panel';
 
 export interface NightshiftHeaderProps {
   isLoading?: boolean;
   hasActiveInvestigations?: boolean;
   showAllEventsHref?: string;
-  /** Renders the "Start investigation" button when set. */
-  onStartInvestigationClick?: () => void;
-  isStartInvestigationOpen?: boolean;
+  /** Replaces the status-derived hero title. */
+  title?: string;
+  /** Puts the greeting in front of the title on one line ("Good morning! Meet Nightshift"). */
+  isGreetingInline?: boolean;
 }
 
 const getGreeting = (): string => {
@@ -78,12 +78,12 @@ export function NightshiftHeader({
   isLoading = false,
   hasActiveInvestigations = false,
   showAllEventsHref,
-  onStartInvestigationClick,
-  isStartInvestigationOpen = false,
+  title: titleOverride,
+  isGreetingInline = false,
 }: NightshiftHeaderProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
-  const title = getHeroTitle({ isLoading, hasActiveInvestigations });
+  const title = titleOverride ?? getHeroTitle({ isLoading, hasActiveInvestigations });
   const buttonCss = css`
     color: ${euiTheme.colors.textSubdued};
   `;
@@ -129,9 +129,11 @@ export function NightshiftHeader({
               </div>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText color="subdued" size="s" textAlign="left">
-                <p>{getGreeting()}</p>
-              </EuiText>
+              {!isGreetingInline && (
+                <EuiText color="subdued" size="s" textAlign="left">
+                  <p>{getGreeting()}</p>
+                </EuiText>
+              )}
               <EuiTitle
                 size="m"
                 css={css`
@@ -142,35 +144,25 @@ export function NightshiftHeader({
                   white-space: nowrap;
                 `}
               >
-                <h2>{title}</h2>
+                <h2>
+                  {isGreetingInline && (
+                    <span
+                      css={css`
+                        color: ${euiTheme.colors.textSubdued};
+                      `}
+                    >
+                      {`${getGreeting()} `}
+                    </span>
+                  )}
+                  {title}
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {(onStartInvestigationClick || showAllEventsHref) && (
+        {showAllEventsHref && (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
-              {onStartInvestigationClick && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    aria-controls={START_INVESTIGATION_PANEL_ID}
-                    aria-expanded={isStartInvestigationOpen}
-                    color="text"
-                    data-test-subj="o11yNightshiftAppStartInvestigationButton"
-                    onClick={onStartInvestigationClick}
-                    size="s"
-                    {...getEbtProps({
-                      action: NIGHTSHIFT_EBT_ACTIONS.OPEN_START_INVESTIGATION,
-                      element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
-                    })}
-                    css={buttonCss}
-                  >
-                    {i18n.translate('xpack.nightshift.summary.startInvestigationButtonText', {
-                      defaultMessage: 'Start investigation',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
               {showAllEventsHref && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty

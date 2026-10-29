@@ -74,15 +74,15 @@ const validate = (yaml: string) =>
   });
 
 describe('variable validation budgets', () => {
-  it('validates a workflow at the step limit', () => {
-    const result = validate(buildWorkflow(MAX_STEPS_FOR_VARIABLE_VALIDATION, 1));
+  it('validates a workflow at the step limit', async () => {
+    const result = await validate(buildWorkflow(MAX_STEPS_FOR_VARIABLE_VALIDATION, 1));
 
     expect(result.notChecked).toBeUndefined();
   });
 
-  it('skips and reports when the step count is over the limit', () => {
+  it('skips and reports when the step count is over the limit', async () => {
     const stepCount = MAX_STEPS_FOR_VARIABLE_VALIDATION + 1;
-    const result = validate(buildWorkflow(stepCount, 1));
+    const result = await validate(buildWorkflow(stepCount, 1));
 
     expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
     expect(result.notChecked).toEqual([
@@ -90,15 +90,15 @@ describe('variable validation budgets', () => {
     ]);
   });
 
-  it('reports a partial result when the variable count is over the limit', () => {
-    const result = validate(buildWorkflow(1, MAX_VARIABLES_FOR_VARIABLE_VALIDATION + 1));
+  it('reports a partial result when the variable count is over the limit', async () => {
+    const result = await validate(buildWorkflow(1, MAX_VARIABLES_FOR_VARIABLE_VALIDATION + 1));
 
     expect(result.notChecked).toEqual([
       `Variable validation is partial: the workflow has more than ${MAX_VARIABLES_FOR_VARIABLE_VALIDATION} variable references, so the rest of it was not checked.`,
     ]);
   });
 
-  it('bounds collection on a body at the route limit', () => {
+  it('bounds collection on a body at the route limit', async () => {
     // ~58,000 short references. Counting them only after collection allocated
     // ~36 MiB, which is the cost the budget exists to avoid.
     const reference = '{{ consts.seed }}';
@@ -106,25 +106,27 @@ describe('variable validation budgets', () => {
     const yaml = buildWorkflow(1, count);
 
     expect(yaml.length).toBeLessThanOrEqual(MAX_WORKFLOW_YAML_LENGTH);
-    expect(validate(yaml).notChecked).toHaveLength(1);
+    expect((await validate(yaml)).notChecked).toHaveLength(1);
   });
 
-  it('reports a partial result when Liquid for-loops are over the limit', () => {
+  it('reports a partial result when Liquid for-loops are over the limit', async () => {
     // Zero `{{ ... }}` references, so only the for-loop budget can stop this.
-    const result = validate(buildTagWorkflow(MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION + 1));
+    const result = await validate(
+      buildTagWorkflow(MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION + 1)
+    );
 
     expect(result.notChecked).toEqual([
       `Variable validation is partial: the workflow has more than ${MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION} Liquid for-loops, so the rest of it was not checked.`,
     ]);
   });
 
-  it('validates a workflow at the for-loop limit', () => {
-    const result = validate(buildTagWorkflow(MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION));
+  it('validates a workflow at the for-loop limit', async () => {
+    const result = await validate(buildTagWorkflow(MAX_FOR_LOOP_SCOPES_FOR_VARIABLE_VALIDATION));
 
     expect(result.notChecked).toBeUndefined();
   });
 
-  it('handles both dimensions at once without a further budget', () => {
+  it('handles both dimensions at once without a further budget', async () => {
     // References at the cap and, behind each one, a scalar of assigns just
     // under the Liquid engine's own 150,000-character parse limit. That limit
     // is what bounds the assign dimension: a larger scalar does not parse, so
@@ -132,7 +134,7 @@ describe('variable validation budgets', () => {
     // ~11 MiB at the route body limit.
     const yaml = buildAssignHeavyWorkflow(7, 4000, 143);
 
-    const result = validate(yaml);
+    const result = await validate(yaml);
 
     // Every reference resolves against an assign in its own scalar.
     expect(result.diagnostics.filter(({ source }) => source === 'variable')).toEqual([]);
@@ -141,7 +143,7 @@ describe('variable validation budgets', () => {
     ]);
   });
 
-  it('reports the syntax error of a malformed scalar behind many references', () => {
+  it('reports the syntax error of a malformed scalar behind many references', async () => {
     // The unterminated tag fails the Liquid parse. That the scalar is parsed
     // once rather than once per reference is pinned where the cache lives, in
     // `extract_template_local_context.test.ts`; this fixture keeps the endpoint
@@ -153,17 +155,17 @@ describe('variable validation budgets', () => {
       ].join(' ')
     );
 
-    const result = validate(yaml);
+    const result = await validate(yaml);
 
     expect(result.diagnostics.map(({ source }) => source)).toContain('liquid');
     expect(result.notChecked).toBeUndefined();
   });
 
-  it('does not exhaust the heap on a workflow at the route body limit', () => {
+  it('does not exhaust the heap on a workflow at the route body limit', async () => {
     // Before the budgets, a body this size took the whole Node process down.
     const yaml = buildWorkflow(20000, 5).slice(0, MAX_WORKFLOW_YAML_LENGTH);
 
-    const result = validate(yaml);
+    const result = await validate(yaml);
 
     expect(result.notChecked).toHaveLength(1);
   });

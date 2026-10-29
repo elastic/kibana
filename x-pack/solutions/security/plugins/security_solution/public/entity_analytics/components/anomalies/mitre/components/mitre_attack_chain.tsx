@@ -34,7 +34,7 @@ export const MitreAttackChain: React.FC<MitreAttackChainProps> = ({
     tactics,
     isLoading: isMitreLoading,
     isError: isMitreError,
-  } = useMitreConfiguration({ types: ['tactic'] });
+  } = useMitreConfiguration({ types: ['tactic'], framework: 'enterprise' });
   const tacticNames = useMemo(
     () => [...tactics].sort((a, b) => a.position - b.position).map(({ name }) => name),
     [tactics]

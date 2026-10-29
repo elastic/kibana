@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/alerting-v2-schemas'
   - '@kbn/es-types'
   - '@kbn/esql-utils'
+  - '@kbn/es-query'
 tags:
   - shared-common
   - package
@@ -32,6 +33,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

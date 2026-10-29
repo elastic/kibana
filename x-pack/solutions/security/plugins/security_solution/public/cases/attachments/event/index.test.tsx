@@ -19,6 +19,15 @@ const baseProps = {
   metadata: { index: '.alerts-security.alerts-default' },
 } as unknown as UnifiedReferenceAttachmentViewProps;
 
+describe('Event attachment count label', () => {
+  it('labels a count of events', () => {
+    const attachmentType = getEventType();
+
+    expect(attachmentType.getCountLabel?.({ count: 1 })).toBe('1 event');
+    expect(attachmentType.getCountLabel?.({ count: 3 })).toBe('3 events');
+  });
+});
+
 describe('Event attachment label rendering', () => {
   it('renders single-event label with the expected test-subj', () => {
     const attachmentType = getEventType();

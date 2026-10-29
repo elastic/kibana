@@ -6,3 +6,4 @@
  */
 
 export { generateDashboardTool } from './generate_dashboard_tool';
+export type { GenerateDashboardToolDeps } from './generate_dashboard_tool';

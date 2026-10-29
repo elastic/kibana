@@ -870,6 +870,11 @@ export const convert = (schema: z.ZodTypeAny, opts: ConvertOptions = {}) => {
       if (oasExtensions) {
         (js as any)[OAS_EXTENSIONS_MARKER] = oasExtensions;
       }
+
+      // `format: date-time` already documents the contract; the regex only bloats the OAS docs.
+      if ((js as any).format === 'date-time') {
+        delete (js as any).pattern;
+      }
     },
   }) as Record<string, any>;
 

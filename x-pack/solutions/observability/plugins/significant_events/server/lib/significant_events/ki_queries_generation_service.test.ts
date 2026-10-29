@@ -92,7 +92,12 @@ describe('generateKIQueries', () => {
     } as unknown as EbtTelemetryClient;
 
     const result = await generateKIQueries(
-      { source, connectorId: 'test-connector', runId: 'run-1' },
+      {
+        source,
+        connectorId: 'test-connector',
+        runId: 'run-1',
+        maxExistingQueriesForContext: 10,
+      },
       makeDeps({ telemetry, logger })
     );
 
@@ -115,6 +120,7 @@ describe('generateKIQueries', () => {
       expect.objectContaining({
         interactionId: 'run-1',
         source,
+        maxExistingQueriesForContext: 10,
         existingQueries: [
           {
             id: 'query-1',
@@ -142,7 +148,12 @@ describe('generateKIQueries', () => {
     const resolveModel = jest.fn().mockResolvedValue('canonical-connector');
 
     await generateKIQueries(
-      { source, connectorId: 'connector-alias', runId: 'run-1' },
+      {
+        source,
+        connectorId: 'connector-alias',
+        runId: 'run-1',
+        maxExistingQueriesForContext: 50,
+      },
       makeDeps({ resolveModel, logger })
     );
 

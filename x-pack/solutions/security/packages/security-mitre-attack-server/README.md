@@ -1,7 +1,8 @@
 # @kbn/security-mitre-attack-server
 
-Server-only package holding the bundled MITRE ATT&CK data artifact and the
-build script that generates it from upstream MITRE STIX bundles.
+Server-only package holding the bundled MITRE data artifact (MITRE ATT&CK
+Enterprise and MITRE ATLAS) and the build script that generates it from the
+upstream MITRE STIX bundles.
 
 ## Scope and lifespan
 
@@ -30,10 +31,11 @@ data.
 - `artifacts/mitre_artifact.json` is a flat JSON array of MITRE entities
   (tactics, techniques, and subtechniques) projected into the
   `@kbn/security-mitre-attack-common` schema. Every entity is self-describing:
-  it carries its own `framework` and `framework_version` fields, so additional
-  frameworks or versions can be appended to the same file without any schema
-  change. This file is generated output. Do not edit it by hand, always re-run
-  the build script and commit the result.
+  it carries its own `framework` (`enterprise` or `atlas`) and
+  `framework_version` fields, so additional frameworks or versions can be
+  appended to the same file without any schema change. This file is generated
+  output. Do not edit it by hand, always re-run the build script and commit the
+  result.
 - `scripts/build_artifact.js` is the artifact build script.
 - `loadMitreArtifact()` reads, validates, and caches the bundled artifact.
 
@@ -59,20 +61,63 @@ From the Kibana repo root:
 node x-pack/solutions/security/packages/security-mitre-attack-server/scripts/build_artifact.js
 ```
 
-The script fetches the pinned MITRE ATT&CK STIX bundle from
-[mitre/cti](https://github.com/mitre/cti), projects it into the common schema,
-validates it, and overwrites `artifacts/mitre_artifact.json`.
+The script fetches one STIX bundle per pinned version of each framework,
+projects every bundle into the common schema, validates the combined result, and
+overwrites `artifacts/mitre_artifact.json`. It prints entity counts per framework
+and version so a bundle that mapped incorrectly is visible rather than hidden in
+the total.
 
-To ship additional MITRE versions, append the corresponding CTI tag to
-`MITRE_CONTENT_VERSIONS` in `src/build_artifact/build_artifact.ts` and re-run the
-script. Each version in that array is fetched and projected into the artifact on
-every build run. The pinned versions must stay aligned with those used by the
+### Frameworks
+
+Frameworks are declared in `MITRE_FRAMEWORK_DEFINITIONS` in
+`src/build_artifact/build_artifact.ts`. Each definition names the framework, the
+STIX `source_name` / `kill_chain_name` that identifies its objects
+(`mitre-attack` or `mitre-atlas`), how a release tag maps to a bundle URL and a
+`framework_version`, and the list of pinned release tags.
+
+| Framework | Upstream | Pinned tags | `source_name` |
+|---|---|---|---|
+| `enterprise` | [mitre/cti](https://github.com/mitre/cti) `enterprise-attack.json` | `MITRE_CONTENT_VERSIONS` (e.g. `ATT&CK-v19.2`) | `mitre-attack` |
+| `atlas` | [mitre-atlas/atlas-data](https://github.com/mitre-atlas/atlas-data/releases) `stix-atlas.json` | `ATLAS_CONTENT_VERSIONS` (e.g. `v2026.08`) | `mitre-atlas` |
+
+The mappers only look at external references and kill chain phases whose source
+name matches the framework being built. This matters for ATLAS: many ATLAS
+techniques also carry a secondary `mitre-attack` reference to the ATT&CK
+technique they correspond to, and that reference must never be used to resolve
+an ATLAS id or URL. Subtechnique parents are taken from the `subtechnique-of`
+relationship and cross-checked against the subtechnique id minus its last dot
+segment (`T1003.001` -> `T1003`, `AML.T0024.002` -> `AML.T0024`).
+
+### Version pins
+
+To ship an additional version, append its release tag to the framework's
+versions array and re-run the script. Every tag in every array is fetched on
+each run. Pins must stay aligned with the versions used by the
 [elastic/detection-rules](https://github.com/elastic/detection-rules) prebuilt
-rules.
+rules:
+
+- ATT&CK tags come from https://github.com/mitre/cti/tags.
+- ATLAS tags come from https://github.com/mitre-atlas/atlas-data/releases and
+  must match the ATLAS bundle vendored by detection-rules at
+  `detection_rules/etc/atlas-v*.json.gz`.
+
+### ATLAS version normalization
+
+ATLAS release tags such as `v2026.08` are normalized to `2026.8` before being
+stored as `framework_version` (`normalizeAtlasVersion` in
+`build_artifact.ts`). The `framework_version` saved object field uses the
+Elasticsearch `version` mapping type, which only orders values that parse as
+semver; `2026.08` does not because semver forbids leading zeros, so Elasticsearch
+would fall back to lexical ordering and sort `2026.08` above `2026.10`. That
+would make latest-version resolution pick the older release on the first ATLAS
+bump. Stripping the leading `v` and any leading zeros from each numeric segment
+(`v2026.08` -> `2026.8`, `v2026.10` -> `2026.10`, `v5.1.0` -> `5.1.0`) keeps
+every ATLAS version comparable. ATT&CK tags only lose their `ATT&CK-v` prefix
+(`ATT&CK-v19.2` -> `19.2`).
 
 ## Where this is going
 
-This package is the first step of the managed MITRE ATT&CK data source work
+This package is the first step of the managed MITRE data source work
 ([epic](https://github.com/elastic/security-team/issues/17157)). The steps that
 follow it, in order:
 
