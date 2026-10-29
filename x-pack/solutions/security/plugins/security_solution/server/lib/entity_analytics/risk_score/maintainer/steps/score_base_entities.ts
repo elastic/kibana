@@ -14,8 +14,11 @@ import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 import {
   getEuidCompositeQuery,
   getBaseScoreESQL,
+  getUnifiedBaseScoreESQL,
+  getUnifiedEuidKeysESQL,
   type EuidCompositeAggregation,
 } from '../../calculate_esql_risk_scores';
+import { buildUnifiedAlertSourceEsql, type UnifiedAlertSources } from './alert_sources';
 import {
   getStampedEuidCompositeQuery,
   getStampedEuidRangeFilter,
@@ -46,6 +49,12 @@ interface ScoreBaseEntitiesParams {
   abortSignal?: AbortSignal;
   /** Explicit creation opt-in; also makes lookup failures fatal so they cannot be treated as misses. */
   createMissingEntities: boolean;
+  /**
+   * When set, base scoring reads every store in it through one ES|QL union and pages by ES|QL
+   * keys instead of the DSL composite aggregation over `alertsIndex`. `alertsIndex` and
+   * `alertFilters` then only serve create-if-missing, which still reads v1 alerts.
+   */
+  unifiedSources?: UnifiedAlertSources;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
@@ -96,6 +105,10 @@ interface EuidPageResult {
  * and each scoring query reads only its page's alerts. Otherwise a Painless runtime mapping derives
  * the EUIDs of the alerts without one, which runs over every alert on every page.
  *
+ * With `unifiedSources`, both steps are ES|QL over the union of the configured alert stores: a
+ * keys-only query picks the page's EUIDs, then the scoring query is bounded to them. Rule events
+ * have no DSL path to their EUIDs, so the composite aggregation cannot page them.
+ *
  * Modifier entities are fetched only for IDs that produced scores.
  */
 export const calculateBaseEntityScores = async function* ({
@@ -112,16 +125,30 @@ export const calculateBaseEntityScores = async function* ({
   calculationRunId,
   abortSignal,
   createMissingEntities,
+  unifiedSources,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
 
-  const stamped = await allAlertsStamped({ esClient, entityType, alertFilters, alertsIndex });
-  logger.debug(
-    stamped
-      ? 'base scoring pages by stamped entity IDs'
-      : 'base scoring pages by derived entity IDs: some alerts have no stamped entity ID'
-  );
+  const sourceEsql = unifiedSources
+    ? buildUnifiedAlertSourceEsql(unifiedSources, entityType)
+    : undefined;
+  const stamped = sourceEsql
+    ? false
+    : await allAlertsStamped({ esClient, entityType, alertFilters, alertsIndex });
+  if (sourceEsql) {
+    logger.debug(
+      `base scoring pages by ES|QL keys over alert stores: ${Object.keys(unifiedSources ?? {}).join(
+        ', '
+      )}`
+    );
+  } else {
+    logger.debug(
+      stamped
+        ? 'base scoring pages by stamped entity IDs'
+        : 'base scoring pages by derived entity IDs: some alerts have no stamped entity ID'
+    );
+  }
 
   do {
     if (abortSignal?.aborted) {
@@ -129,30 +156,43 @@ export const calculateBaseEntityScores = async function* ({
       return;
     }
 
-    const pageResult = await fetchNextEuidPage({
-      esClient,
-      entityType,
-      alertFilters,
-      alertsIndex,
-      pageSize,
-      afterKey,
-      stamped,
-    });
+    const pageResult = sourceEsql
+      ? await fetchNextEuidPageEsql({ esClient, entityType, pageSize, afterKey, sourceEsql })
+      : await fetchNextEuidPage({
+          esClient,
+          entityType,
+          alertFilters,
+          alertsIndex,
+          pageSize,
+          afterKey,
+          stamped,
+        });
     if (!pageResult) {
       return;
     }
 
     afterKey = pageResult.afterKey;
-    const scores = await scorePageFromAlerts({
-      esClient,
-      entityType,
-      bounds: { lower: previousPageUpperBound, upper: pageResult.upperBound },
-      sampleSize,
-      pageSize,
-      alertsIndex,
-      alertFilters,
-      stamped,
-    });
+    const bounds = { lower: previousPageUpperBound, upper: pageResult.upperBound };
+    const scores = sourceEsql
+      ? await scorePageFromUnifiedAlerts({
+          esClient,
+          entityType,
+          bounds,
+          sampleSize,
+          pageSize,
+          alertsIndex,
+          sourceEsql,
+        })
+      : await scorePageFromAlerts({
+          esClient,
+          entityType,
+          bounds,
+          sampleSize,
+          pageSize,
+          alertsIndex,
+          alertFilters,
+          stamped,
+        });
     previousPageUpperBound = pageResult.upperBound;
 
     if (scores.length > 0) {
@@ -359,6 +399,71 @@ const fetchNextEuidPage = async ({
     upperBound: pageBuckets[pageBuckets.length - 1].key.entity_id,
     afterKey: firstOtherType === -1 ? compositeAgg?.after_key : undefined,
   };
+};
+
+/**
+ * One page of EUID keys from the unified alert source. A full page means there may be more:
+ * the next page starts after its last key. A short page is the last one.
+ */
+const fetchNextEuidPageEsql = async ({
+  esClient,
+  entityType,
+  pageSize,
+  afterKey,
+  sourceEsql,
+}: {
+  esClient: ElasticsearchClient;
+  entityType: EntityType;
+  pageSize: number;
+  afterKey: Record<string, string> | undefined;
+  sourceEsql: string;
+}): Promise<EuidPageResult | null> => {
+  const query = getUnifiedEuidKeysESQL(entityType, afterKey?.entity_id, pageSize, sourceEsql);
+  const response = await esClient.esql.query(
+    { query },
+    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
+  );
+  const keys = (response.values ?? [])
+    .map((row) => row[0])
+    .filter((key): key is string => typeof key === 'string');
+  if (keys.length === 0) {
+    return null;
+  }
+
+  const upperBound = keys[keys.length - 1];
+  return {
+    upperBound,
+    afterKey: keys.length === pageSize ? { entity_id: upperBound } : undefined,
+  };
+};
+
+/** Scores one page of EUIDs over the unified alert source; every filter is inside the source. */
+const scorePageFromUnifiedAlerts = async ({
+  esClient,
+  entityType,
+  bounds,
+  sampleSize,
+  pageSize,
+  alertsIndex,
+  sourceEsql,
+}: {
+  esClient: ElasticsearchClient;
+  entityType: EntityType;
+  bounds: EuidPageBounds;
+  sampleSize: number;
+  pageSize: number;
+  alertsIndex: string;
+  sourceEsql: string;
+}): Promise<ParsedRiskScore[]> => {
+  const query = getUnifiedBaseScoreESQL(entityType, bounds, sampleSize, pageSize, sourceEsql);
+  const esqlResponse = await esClient.esql.query(
+    { query },
+    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
+  );
+
+  return (esqlResponse.values ?? []).map(
+    parseEsqlBaseScoreRow(alertsIndex, sampleSize, { preferRowIndex: true })
+  );
 };
 
 const scorePageFromAlerts = async ({

@@ -11,6 +11,8 @@ import {
   buildEuidRuntimeMappingWithStoredFieldFastPath,
   buildRiskScoreBucket,
   getBaseScoreESQL,
+  getUnifiedBaseScoreESQL,
+  getUnifiedEuidKeysESQL,
   getESQL,
   getEuidCompositeQuery,
   getResolutionCompositeQuery,
@@ -317,6 +319,64 @@ describe('Calculate risk scores with ESQL', () => {
       for (const query of queries) {
         expect(query).toContain('risk_inputs = TOP(risk_score, 10, "desc", input)');
       }
+    });
+  });
+
+  describe('unified alert source queries', () => {
+    const sourceEsql = 'FROM (FROM .alerts-security.alerts-default | KEEP risk_score)';
+
+    it('scores a page over the unified source without a request-level filter', () => {
+      const query = getUnifiedBaseScoreESQL(
+        EntityType.host,
+        { lower: 'host:a', upper: 'host:m' },
+        500,
+        100,
+        sourceEsql
+      );
+
+      expect(query).toContain('SET unmapped_fields="nullify"');
+      expect(query).toContain(sourceEsql);
+      expect(query).toContain('MV_SLICE(stamped_entity_id, 0, 0)');
+      expect(query).toContain('entity_id > "host:a" AND entity_id <= "host:m"');
+      expect(query).toContain('category = COALESCE(category, "signal")');
+      expect(query).toContain('\\"source_kind\\": \\"", source_kind');
+      expect(query).toContain('TOP(risk_score, 500, "desc")');
+      expect(query).toContain('LIMIT 100');
+    });
+
+    it('rejects a page without bounds', () => {
+      expect(() => getUnifiedBaseScoreESQL(EntityType.host, {}, 500, 100, sourceEsql)).toThrow(
+        'Either lower or upper bound'
+      );
+    });
+
+    it('escapes quotes and backslashes in bounds', () => {
+      const query = getUnifiedBaseScoreESQL(
+        EntityType.host,
+        { upper: 'host:a"b\\c' },
+        500,
+        100,
+        sourceEsql
+      );
+
+      expect(query).toContain('entity_id <= "host:a\\"b\\\\c"');
+    });
+
+    it('pages keys from the type prefix on the first page and after the last key afterwards', () => {
+      const first = getUnifiedEuidKeysESQL(EntityType.host, undefined, 50, sourceEsql);
+      const next = getUnifiedEuidKeysESQL(EntityType.host, 'host:m', 50, sourceEsql);
+
+      expect(first).toContain('| WHERE entity_id > "host:"');
+      expect(first).toContain('| STATS BY entity_id');
+      expect(first).toContain('| SORT entity_id ASC');
+      expect(first).toContain('| LIMIT 50');
+      expect(next).toContain('| WHERE entity_id > "host:m"');
+    });
+
+    it('rejects an after key with a control character', () => {
+      expect(() => getUnifiedEuidKeysESQL(EntityType.host, 'host:a\nb', 50, sourceEsql)).toThrow(
+        'unsupported control character'
+      );
     });
   });
 

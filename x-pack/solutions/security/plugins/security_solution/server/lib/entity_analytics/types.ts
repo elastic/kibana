@@ -49,6 +49,8 @@ export interface CalculateRiskScoreAggregations {
 export interface SearchHitRiskInput {
   id: string;
   index: string;
+  /** Which alert store the input came from; absent on scores written before v2 alerts were read. */
+  source_kind?: 'v1' | 'v2';
   rule_name?: string;
   category?: string;
   time?: string;

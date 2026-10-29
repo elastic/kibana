@@ -362,6 +362,78 @@ describe('score_base_entities', () => {
     });
   });
 
+  describe('when unified alert sources are configured', () => {
+    const unifiedSources = {
+      v1: {
+        kind: 'v1' as const,
+        index: baseParams.alertsIndex,
+        where: ['kibana.alert.risk_score IS NOT NULL'],
+      },
+      v2: {
+        kind: 'v2' as const,
+        index: '.rule-events',
+        where: ['type == "alert"', 'space_id == "default"'],
+        excludeInactive: true,
+      },
+    };
+    const keysPage = (keys: string[]) => ({ values: keys.map((key) => [key]) });
+
+    it('pages by ES|QL keys over the union and bounds each scoring query to its page', async () => {
+      (esClient.esql.query as jest.Mock)
+        .mockResolvedValueOnce(keysPage(['host:a', 'host:b']))
+        .mockResolvedValueOnce({ values: [esqlRow('host:a'), esqlRow('host:b')] })
+        .mockResolvedValueOnce(keysPage(['host:c']))
+        .mockResolvedValueOnce({ values: [esqlRow('host:c')] });
+
+      const pages = await collectPages(
+        calculateBaseEntityScores({
+          esClient,
+          crudClient,
+          logger,
+          createMissingEntities: false,
+          ...baseParams,
+          entityType: EntityType.host,
+          pageSize: 2,
+          unifiedSources,
+        })
+      );
+
+      expect(pages.map((page) => page.entityIds)).toEqual([['host:a', 'host:b'], ['host:c']]);
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(esClient.count).not.toHaveBeenCalled();
+
+      const calls = (esClient.esql.query as jest.Mock).mock.calls.map(([request]) => request);
+      expect(calls).toHaveLength(4);
+      expect(calls.every((request) => request.filter === undefined)).toBe(true);
+      expect(calls[0].query).toContain('FROM .rule-events METADATA _index');
+      expect(calls[0].query).toContain('| STATS BY entity_id');
+      expect(calls[0].query).toContain('entity_id > "host:"');
+      expect(calls[1].query).toContain('entity_id <= "host:b"');
+      expect(calls[1].query).not.toContain('entity_id >');
+      expect(calls[2].query).toContain('entity_id > "host:b"');
+      expect(calls[3].query).toContain('entity_id > "host:b" AND entity_id <= "host:c"');
+    });
+
+    it('stops after a short keys page and does nothing when the first page is empty', async () => {
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce(keysPage([]));
+
+      const pages = await collectPages(
+        calculateBaseEntityScores({
+          esClient,
+          crudClient,
+          logger,
+          createMissingEntities: false,
+          ...baseParams,
+          entityType: EntityType.host,
+          unifiedSources,
+        })
+      );
+
+      expect(pages).toEqual([]);
+      expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('scoreBaseEntities not_in_store filter', () => {
     const buildWriter = (): RiskEngineDataWriter =>
       ({

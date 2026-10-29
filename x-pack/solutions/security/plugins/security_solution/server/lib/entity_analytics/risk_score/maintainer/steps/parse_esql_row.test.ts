@@ -35,6 +35,44 @@ describe('parseEsqlResolutionScoreRow', () => {
   });
 });
 
+describe('parseEsqlBaseScoreRow input index and source kind', () => {
+  const queriedIndex = '.alerts-security.alerts-default';
+  const v2Input =
+    '{ "risk_score": "60", "time": "2026-01-01T00:00:00.000Z", "index": ".ds-.rule-events-2026.10.29-000001", "source_kind": "v2", "rule_name_b64": "VGVzdCBSdWxl", "category_b64": "c2lnbmFs", "id": "ep-1" }';
+
+  it('stamps the queried index on every input by default and passes source_kind through', () => {
+    const parsed = parseEsqlBaseScoreRow(queriedIndex, 500)([1, 60, [v2Input], 'host:h1']);
+
+    expect(parsed.risk_inputs[0].index).toBe(queriedIndex);
+    expect(parsed.risk_inputs[0].source_kind).toBe('v2');
+    expect(parsed.risk_inputs[0].id).toBe('ep-1');
+  });
+
+  it("keeps the input's own index when asked to prefer the row index", () => {
+    const parsed = parseEsqlBaseScoreRow(queriedIndex, 500, { preferRowIndex: true })([
+      1,
+      60,
+      [v2Input],
+      'host:h1',
+    ]);
+
+    expect(parsed.risk_inputs[0].index).toBe('.ds-.rule-events-2026.10.29-000001');
+  });
+
+  it('falls back to the queried index when the input carries none', () => {
+    const inputWithoutIndex =
+      '{ "risk_score": "60", "time": "2026-01-01T00:00:00.000Z", "source_kind": "v1", "id": "alert-1" }';
+    const parsed = parseEsqlBaseScoreRow(queriedIndex, 500, { preferRowIndex: true })([
+      1,
+      60,
+      [inputWithoutIndex],
+      'host:h1',
+    ]);
+
+    expect(parsed.risk_inputs[0].index).toBe(queriedIndex);
+  });
+});
+
 describe('normalization by sample size', () => {
   const index = '.alerts-security.alerts-default';
   const input =

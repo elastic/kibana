@@ -402,6 +402,13 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoreCreateMissingEntitiesEnabled: true,
 
   /**
+   * Risk score maintainer reads Alerting v2 alerts (`.rule-events`) alongside v1 detection alerts
+   * for base scoring, through one ES|QL union with ES|QL key-first paging. Prototype: resolution
+   * scoring, create-if-missing and single-entity recalculation stay on v1 alerts.
+   */
+  riskScoreMaintainerV2AlertsEnabled: false,
+
+  /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
   siemRuleMigrationsAgentBuilderEnabled: false,
