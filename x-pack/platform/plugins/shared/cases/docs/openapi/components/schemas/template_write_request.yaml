@@ -36,6 +36,8 @@ properties:
       assignees, connector, settings) and a `fields` array of inline field definitions or
       `$ref` entries pointing into the owner's field library. Stored field values appear on
       cases under `extended_fields` keys shaped `<field_name>_as_<storage_type>`.
+      Only Security can set `settings.extractObservables` to `true`. For Stack and Observability, a
+      definition that changes it to `true` fails with a 400 error.
     example: |
       name: Security incident
       severity: high
