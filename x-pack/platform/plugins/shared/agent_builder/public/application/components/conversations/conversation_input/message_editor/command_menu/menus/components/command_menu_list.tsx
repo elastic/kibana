@@ -160,7 +160,11 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
       width: ${menuWidth}px;
     `;
 
-    const maxHeight = maxVisibleRows ? maxVisibleRows * MENU_ROW_HEIGHT : MENU_MAX_HEIGHT;
+    // EuiSelectable caps its own height at 6.5 rows, so a fixed height is needed to show more
+    const listHeight =
+      maxVisibleRows && options.length > maxVisibleRows
+        ? maxVisibleRows * MENU_ROW_HEIGHT
+        : undefined;
     const activeKey = options[activeIndex]?.key;
 
     const rowStyles = css`
@@ -172,7 +176,8 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
 
     const activeHighlightStyles = css`
       .euiSelectableListItem:nth-child(${activeIndex + 1}) {
-        background-color: ${euiTheme.focus.backgroundColor};
+        background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
+        border-radius: ${euiTheme.border.radius.small};
       }
     `;
 
@@ -207,6 +212,7 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
         <EuiSelectable
           options={selectableOptions}
           singleSelection
+          height={listHeight}
           renderOption={(option: CommandMenuListSelectableRow) => {
             const label = option.renderLabel ?? option.label;
             if (!showEnterHint) {
@@ -224,9 +230,12 @@ export const CommandMenuList = forwardRef<CommandMenuHandle, CommandMenuListProp
           listProps={{
             showIcons: false,
             bordered: false,
-            css: css`
-              max-height: ${maxHeight}px;
-            `,
+            paddingSize: 's',
+            css: maxVisibleRows
+              ? undefined
+              : css`
+                  max-height: ${MENU_MAX_HEIGHT}px;
+                `,
           }}
           onChange={(_newOptions, _event, changedOption) => {
             if (changedOption) {
