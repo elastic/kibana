@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
@@ -20,6 +21,7 @@ jest.mock('../decision_trees/register_decision_trees', () => ({
 
 describe('decisionTreePrepareStepDefinition', () => {
   const logger = loggerMock.create();
+  const request = httpServerMock.createKibanaRequest();
 
   const createContext = (input: Record<string, unknown>) =>
     ({
@@ -27,7 +29,7 @@ describe('decisionTreePrepareStepDefinition', () => {
       rawInput: input,
       contextManager: {
         getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'space-1' } }),
-        getFakeRequest: jest.fn(),
+        getFakeRequest: jest.fn().mockReturnValue(request),
         getScopedEsClient: jest.fn().mockReturnValue({}),
         renderInputTemplate: jest.fn((val) => val),
         callKibanaApi: jest.fn(),
@@ -67,6 +69,20 @@ describe('decisionTreePrepareStepDefinition', () => {
     expect(result).toEqual({
       output: { message: '', tree_count: 0, turn_kind: 'initial_investigation', skipped: true },
     });
+  });
+
+  it('resolves reinforcement connectors from the investigation conversation', async () => {
+    const context = createContext({
+      response: 'pool leak',
+      agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+      conversation_id: 'inv-orca',
+    });
+    const getTelemetryConnectorId = jest.fn().mockResolvedValue('orca');
+    await decisionTreePrepareStepDefinition({ getTelemetryConnectorId, logger }).handler(context);
+    expect(getTelemetryConnectorId).toHaveBeenCalledWith(request, 'inv-orca');
+    expect(prepareReinforcementTurn).toHaveBeenCalledWith(
+      expect.objectContaining({ connectorNames: ['orca'] })
+    );
   });
 
   it('prepares a reinforcement turn for the Nightshift investigator', async () => {

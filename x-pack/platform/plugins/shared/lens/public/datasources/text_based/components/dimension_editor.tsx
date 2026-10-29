@@ -53,6 +53,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     enableFormatSelector,
     isMetricDimension,
     filterOperations,
+    supportStaticValue,
   } = props;
 
   // Extract the primitives the fetch effect actually depends on so that a
@@ -95,7 +96,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
             meta: col?.meta ?? { type: 'number' },
             variable: col.variable,
             compatible:
-              isMetricDimension && hasNumberTypeColumns
+              supportStaticValue || (isMetricDimension && hasNumberTypeColumns)
                 ? filterOperations({
                     dataType: col?.meta?.type as DataType,
                     isBucketed: Boolean(isNotNumeric(col)),
@@ -130,6 +131,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     timeFieldName,
     isMetricDimension,
     filterOperations,
+    supportStaticValue,
   ]);
 
   const selectedField = useMemo(() => {
@@ -190,6 +192,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           fullWidth
         >
           <FieldSelect
+            key={selectedField?.fieldName ?? columnId}
             data-test-subj="text-based-dimension-field"
             existingFields={allColumns ?? []}
             selectedField={selectedField}

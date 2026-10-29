@@ -56,7 +56,7 @@ import {
   type ProjectRoutingOverrides,
   type PublishesBlockingError,
   type PublishesDataLoading,
-  type PublishesDataViews,
+  type PublishesDataSources,
   type PublishesWritableDescription,
   type PublishesWritableTitle,
   type PublishesEsql,
@@ -124,7 +124,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesEsql &
   PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesRendered & {
     /** Returns the editor panel content for an already-open flyout. */
     getEditPanel?: (options: {
@@ -182,10 +182,10 @@ export const vegaEmbeddableFactory = (
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
     const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(undefined);
-    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
 
     // A spec change is parsed once for all derived subjects. `switchMap` is used instead
-    // of `tap` for dataViews$ because `extractIndexPatternsFromSpec` is async.
+    // of `tap` for dataSources$ because `extractIndexPatternsFromSpec` is async.
     const specSubscription = spec$
       .pipe(
         map((spec) => {
@@ -202,7 +202,7 @@ export const vegaEmbeddableFactory = (
         }),
         switchMap((spec) => (spec ? extractIndexPatternsFromSpec(spec) : EMPTY))
       )
-      .subscribe((dataViews) => dataViews$.next(dataViews));
+      .subscribe((dataViews) => dataSources$.next(dataViews));
 
     const renderInput$ = new BehaviorSubject<VegaRenderInput | undefined>(undefined);
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -307,7 +307,7 @@ export const vegaEmbeddableFactory = (
       esql$,
       approximationApplied$,
       projectRoutingOverrides$,
-      dataViews$,
+      dataSources$,
       cancelRequests: (reason) => abortController.abort(reason),
       supportedTriggers: () => VEGA_SUPPORTED_TRIGGERS,
       getTypeDisplayName: () => 'Vega',
