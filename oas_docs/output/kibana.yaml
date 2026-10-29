@@ -18227,9 +18227,11 @@ paths:
                 agents:
                   oneOf:
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                     - description: list of agent IDs
                       items:
+                        maxLength: 512
                         type: string
                       type: array
                 policy_id:
@@ -18282,9 +18284,11 @@ paths:
                 agents:
                   oneOf:
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                     - description: list of agent IDs
                       items:
+                        maxLength: 512
                         type: string
                       type: array
                 batchSize:
@@ -18332,9 +18336,11 @@ paths:
                 agents:
                   oneOf:
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                     - description: list of agent IDs
                       items:
+                        maxLength: 512
                         type: string
                       type: array
                 force:
@@ -18391,9 +18397,11 @@ paths:
                 agents:
                   oneOf:
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                     - description: list of agent IDs
                       items:
+                        maxLength: 512
                         type: string
                       type: array
                 batchSize:
@@ -40678,9 +40686,11 @@ components:
         agents:
           oneOf:
             - description: KQL query string, leave empty to action all agents
+              maxLength: 500000
               type: string
             - description: list of agent IDs
               items:
+                maxLength: 512
                 type: string
               type: array
         force:
