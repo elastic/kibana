@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { createElement, type ReactNode } from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { renderHook } from '@testing-library/react';
 import { useFetchEventById } from './use_fetch_event_by_id';
 
 const mockSignificantEventsFetch = jest.fn();
@@ -22,16 +20,29 @@ jest.mock('../../hooks/use_kibana', () => ({
   }),
 }));
 
+let capturedQueryFn: ((args: { signal?: AbortSignal }) => Promise<unknown>) | undefined;
+
+jest.mock('@kbn/react-query', () => ({
+  useQuery: (params: {
+    queryKey: readonly unknown[];
+    enabled: boolean;
+    queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
+  }) => {
+    capturedQueryFn = params.queryFn;
+    return { data: undefined, isFetched: false };
+  },
+}));
+
 describe('useFetchEventById', () => {
-  it('resolves to null (never undefined, which react-query rejects) when the event does not exist', async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedQueryFn = undefined;
     mockSignificantEventsFetch.mockResolvedValue({ hits: [], page: 1, perPage: 1, total: 0 });
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const wrapper = ({ children }: { children: ReactNode }) =>
-      createElement(QueryClientProvider, { client: queryClient }, children);
+  });
 
-    const { result } = renderHook(() => useFetchEventById('evt-unknown'), { wrapper });
+  it('resolves to null (never undefined, which react-query rejects) when the event does not exist', async () => {
+    renderHook(() => useFetchEventById('evt-unknown'));
 
-    await waitFor(() => expect(result.current.isFetched).toBe(true));
-    expect(result.current.data).toBeNull();
+    await expect(capturedQueryFn!({ signal: undefined })).resolves.toBeNull();
   });
 });

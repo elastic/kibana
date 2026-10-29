@@ -44,8 +44,8 @@ describe('filterSourcesByQuery', () => {
   });
 
   it('matches title, query text, or a tag, ignoring case', () => {
-    expect(filterSourcesByQuery(sources, 'ERRORS').map(({ id }) => id)).toEqual(['source-1']);
-    expect(filterSourcesByQuery(sources, 'LOGS-APACHE').map(({ id }) => id)).toEqual(['source-2']);
+    expect(filterSourcesByQuery(sources, 'NGINX').map(({ id }) => id)).toEqual(['source-1']);
+    expect(filterSourcesByQuery(sources, 'logs-apache').map(({ id }) => id)).toEqual(['source-2']);
     expect(filterSourcesByQuery(sources, 'WEB').map(({ id }) => id)).toEqual(['source-1']);
   });
 

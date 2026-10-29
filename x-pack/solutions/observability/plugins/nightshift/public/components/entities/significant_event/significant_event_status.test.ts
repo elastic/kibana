@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 import {
+  NEEDS_ACTION_STATUSES,
+  RESOLVED_STATUSES,
   byCriticalityAndUpdatedAtDesc,
   getInvestigationStatusLabel,
   getLatestInvestigation,
@@ -34,20 +36,22 @@ const mockEvent = (
 
 describe('significant_event_status', () => {
   it('classifies active as needs-action', () => {
+    expect(NEEDS_ACTION_STATUSES).toEqual(['active', 'recovering']);
     expect(isNeedsActionStatus('active')).toBe(true);
     expect(isNeedsActionStatus('recovering')).toBe(true);
     expect(isNeedsActionStatus('inactive')).toBe(false);
   });
 
   it('classifies inactive as resolved', () => {
+    expect(RESOLVED_STATUSES).toEqual(['inactive']);
     expect(isResolvedStatus('inactive')).toBe(true);
     expect(isResolvedStatus('active')).toBe(false);
-    expect(isResolvedStatus('recovering')).toBe(false);
   });
 
   it('treats inactive as resolved, not needs-action', () => {
-    expect(isNeedsActionStatus('inactive')).toBe(false);
-    expect(isResolvedStatus('inactive')).toBe(true);
+    const inactive: SignificantEventStatus = 'inactive';
+    expect(isNeedsActionStatus(inactive)).toBe(false);
+    expect(isResolvedStatus(inactive)).toBe(true);
   });
 
   it('sorts by descending criticality, breaking ties on updated_at', () => {

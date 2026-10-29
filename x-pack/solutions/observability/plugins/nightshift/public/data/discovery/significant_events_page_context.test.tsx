@@ -125,6 +125,7 @@ describe('SignificantEventsPageProvider', () => {
         NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
       ])
     );
+    expect(keys).not.toContainEqual(['significantEvents']);
   });
 
   // Regression coverage for triggering a run while a previous run's terminal

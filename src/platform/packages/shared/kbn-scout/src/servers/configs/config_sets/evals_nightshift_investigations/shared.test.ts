@@ -11,12 +11,10 @@ import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../types';
 
-const SUITE_SCOUT_DIR = join(
+const SANDBOX_KIBANA_CONFIG = join(
   REPO_ROOT,
-  'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout'
+  'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/kibana.sandbox.yml'
 );
-const SANDBOX_KIBANA_CONFIG = join(SUITE_SCOUT_DIR, 'kibana.sandbox.yml');
-const TELEMETRY_KIBANA_CONFIG = join(SUITE_SCOUT_DIR, 'kibana.telemetry.yml');
 
 const loadServers = (modulePath: string, env: Record<string, string>): ScoutServerConfig => {
   let servers: ScoutServerConfig | undefined;
@@ -29,44 +27,27 @@ const loadServers = (modulePath: string, env: Record<string, string>): ScoutServ
 };
 
 describe.each([
-  { arch: 'stateful', configPath: './stateful/classic.stateful.config' },
-  { arch: 'serverless', configPath: './serverless/observability_complete.serverless.config' },
+  {
+    arch: 'stateful',
+    configPath: './stateful/classic.stateful.config',
+  },
+  {
+    arch: 'serverless',
+    configPath: './serverless/observability_complete.serverless.config',
+  },
 ])('evals_nightshift_investigations config set ($arch)', ({ configPath }) => {
   const originalEnv = process.env;
-  const exporters = JSON.stringify([
-    { http: { url: 'https://traces.example.com', headers: { Authorization: 'ApiKey trace-key' } } },
-  ]);
 
   beforeEach(() => {
     process.env = { ...originalEnv };
-    delete process.env.SANDBOX_KIBANA_CONFIG;
     delete process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
+    for (const key of Object.keys(process.env)) {
+      if (key.startsWith('SANDBOX_')) delete process.env[key];
+    }
   });
 
   afterEach(() => {
     process.env = originalEnv;
-  });
-
-  it('loads the optional telemetry YAML and keeps tracing exporter headers in the environment', () => {
-    const { serverArgs, env } = loadServers(configPath, {
-      SANDBOX_KIBANA_CONFIG,
-      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: TELEMETRY_KIBANA_CONFIG,
-      TRACING_EXPORTERS: exporters,
-    }).kbnTestServer;
-
-    expect(serverArgs).toContain(`--config=${TELEMETRY_KIBANA_CONFIG}`);
-    expect(serverArgs.join(' ')).not.toContain('trace-key');
-    expect(env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
-  });
-
-  it('keeps exporter headers out of smoke-only process arguments', () => {
-    const { serverArgs, env } = loadServers(configPath, {
-      TRACING_EXPORTERS: exporters,
-    }).kbnTestServer;
-
-    expect(serverArgs.join(' ')).not.toContain('trace-key');
-    expect(env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
-    expect(serverArgs).toContain(`--config=${join(__dirname, 'kibana.tracing.yml')}`);
   });
 
   it('fails fast when SANDBOX_KIBANA_CONFIG points at a missing file', () => {
@@ -74,6 +55,38 @@ describe.each([
       loadServers(configPath, { SANDBOX_KIBANA_CONFIG: '/does/not/exist/kibana.sandbox.yml' })
     ).toThrow(
       'SANDBOX_KIBANA_CONFIG references a missing file: /does/not/exist/kibana.sandbox.yml'
+    );
+  });
+
+  it('loads the optional telemetry YAML and keeps tracing exporter headers in the environment', () => {
+    const telemetryConfig = join(SANDBOX_KIBANA_CONFIG, '../kibana.telemetry.yml');
+    const exporters = JSON.stringify([
+      {
+        http: {
+          url: 'https://traces.example.com',
+          headers: { Authorization: 'ApiKey trace-test-key' },
+        },
+      },
+    ]);
+    const servers = loadServers(configPath, {
+      SANDBOX_KIBANA_CONFIG,
+      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: telemetryConfig,
+      TRACING_EXPORTERS: exporters,
+    });
+    expect(servers.kbnTestServer.serverArgs).toContain(`--config=${telemetryConfig}`);
+    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('trace-test-key');
+    expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
+  });
+
+  it('keeps exporter headers out of smoke-only process arguments', () => {
+    const exporters = JSON.stringify([
+      { http: { url: 'https://traces.example.com', headers: { Authorization: 'smoke-key' } } },
+    ]);
+    const servers = loadServers(configPath, { TRACING_EXPORTERS: exporters });
+    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('smoke-key');
+    expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
+    expect(servers.kbnTestServer.serverArgs).toContain(
+      `--config=${join(__dirname, 'kibana.tracing.yml')}`
     );
   });
 

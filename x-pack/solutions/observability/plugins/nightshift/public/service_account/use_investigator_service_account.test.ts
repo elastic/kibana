@@ -40,12 +40,15 @@ describe('isNightshiftSetUp', () => {
   });
 
   it.each([
-    ['service accounts are turned off', status({ serviceAccountsEnabled: false })],
-    ['the bound investigation is missing', status({ installed: false })],
-    ['the bound investigation is disabled', status({ enabled: false })],
-    ['the entry point is bound to another account', status({ bound: false })],
-    ['there is no status yet', undefined],
-  ])('is not set up when %s', (_, serviceAccountStatus) => {
-    expect(isNightshiftSetUp(serviceAccountStatus)).toBe(false);
+    ['service accounts are turned off', { serviceAccountsEnabled: false }],
+    ['the bound investigation is missing', { installed: false, enabled: null }],
+    ['the bound investigation is disabled', { enabled: false }],
+    ['the entry point is bound to another account', { bound: false }],
+  ])('is not set up when %s', (_, overrides) => {
+    expect(isNightshiftSetUp(status(overrides))).toBe(false);
+  });
+
+  it('is not set up without a status', () => {
+    expect(isNightshiftSetUp(undefined)).toBe(false);
   });
 });

@@ -25,7 +25,7 @@ describe('automation validation', () => {
     ['0', false],
     ['51', false],
     ['1.5', false],
-  ])('validates daily limit %p', (value, expected) => {
+  ])('validates daily limit %s', (value, expected) => {
     expect(isValidDailyLimit(value)).toBe(expected);
   });
 

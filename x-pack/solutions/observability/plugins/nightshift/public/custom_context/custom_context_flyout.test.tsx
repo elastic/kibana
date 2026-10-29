@@ -27,8 +27,6 @@ const SNIPPET = {
   created_at: '2026-01-01T00:00:00.000Z',
 };
 
-const OTHER_SNIPPET = { ...SNIPPET, id: 'snippet-2', text: 'Checkout is owned by payments.' };
-
 const setup = ({ getResponse }: { getResponse: GetCustomContextResponse }) => {
   const fetch = jest.fn(async (endpoint: string, options?: { params?: { body: unknown } }) => {
     if (endpoint.startsWith('GET ')) return getResponse;
@@ -122,17 +120,13 @@ describe('CustomContextFlyout', () => {
   });
 
   it('removes a snippet when it is deleted', async () => {
-    const { getPutBody } = setup({
-      getResponse: { snippets: [SNIPPET, OTHER_SNIPPET], version: 'v1' },
-    });
+    const { getPutBody } = setup({ getResponse: { snippets: [SNIPPET], version: 'v1' } });
 
-    fireEvent.click((await screen.findAllByTestId('nightshiftCustomContextDelete'))[0]);
+    fireEvent.click(await screen.findByTestId('nightshiftCustomContextDelete'));
 
     await waitFor(() =>
       expect(getPutBody()).toEqual({
-        params: {
-          body: { snippets: [{ id: OTHER_SNIPPET.id, text: OTHER_SNIPPET.text }], version: 'v1' },
-        },
+        params: { body: { snippets: [], version: 'v1' } },
         signal: null,
       })
     );

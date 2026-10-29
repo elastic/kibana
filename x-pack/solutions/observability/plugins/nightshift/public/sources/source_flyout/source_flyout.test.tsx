@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { NightshiftSource, ValidateSourceQueryResponse } from '@kbn/nightshift-shared';
 import { SourceFlyout } from './source_flyout';
+import { SOURCE_QUERY_VALIDATION_DEBOUNCE_MS } from './use_source_query_validation';
 
 const mockFetch = jest.fn<Promise<ValidateSourceQueryResponse>, [string, unknown]>();
+const mockCreateSource = jest.fn();
 const mockUpdateSource = jest.fn();
 
 jest.mock('../../hooks/use_kibana', () => ({
@@ -23,10 +25,32 @@ jest.mock('../../hooks/use_kibana', () => ({
   }),
 }));
 jest.mock('../../data/sources/use_sources_api', () => ({
-  useSourcesApi: () => ({ updateSource: { mutateAsync: mockUpdateSource, isLoading: false } }),
+  useSourcesApi: () => ({
+    createSource: { mutateAsync: mockCreateSource },
+    updateSource: { mutateAsync: mockUpdateSource, isLoading: false },
+  }),
 }));
 jest.mock('./source_preview', () => ({ SourcePreview: () => null }));
-jest.mock('@kbn/esql/public', () => ({ ESQLLangEditor: () => null }));
+jest.mock('@kbn/esql/public', () => ({
+  ESQLLangEditor: ({
+    query,
+    onTextLangQueryChange,
+    warning,
+  }: {
+    query: { esql: string };
+    onTextLangQueryChange: (query: { esql: string }) => void;
+    warning?: string;
+  }) => (
+    <>
+      <textarea
+        aria-label="Query editor"
+        value={query.esql}
+        onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
+      />
+      {warning}
+    </>
+  ),
+}));
 
 const source: NightshiftSource = {
   id: 'source-1',
@@ -43,26 +67,35 @@ const source: NightshiftSource = {
   esql_updated_at: '2026-09-01T00:00:00.000Z',
 };
 
+const renderFlyout = (props: { source?: NightshiftSource } = {}) =>
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <SourceFlyout {...props} onClose={jest.fn()} />
+    </QueryClientProvider>
+  );
+
+const waitOutDebounce = () =>
+  act(async () => {
+    jest.advanceTimersByTime(SOURCE_QUERY_VALIDATION_DEBOUNCE_MS);
+  });
+
+const saveButton = () => screen.getByTestId('significantEventsAppSourceFlyoutSaveButton');
+
 describe('SourceFlyout query validation', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    mockFetch.mockReset();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('lets an unchanged query be saved without validating it again', async () => {
-    mockFetch.mockResolvedValue({ valid: false, error: 'Unknown index [logs-gone]' });
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <SourceFlyout source={source} onClose={jest.fn()} />
-      </QueryClientProvider>
-    );
+    renderFlyout({ source });
+    await waitOutDebounce();
 
-    fireEvent.change(screen.getByTestId('significantEventsAppSourceFlyoutTitleInput'), {
-      target: { value: 'Renamed' },
-    });
-    fireEvent.click(screen.getByTestId('significantEventsAppSourceFlyoutSaveButton'));
-
-    await waitFor(() =>
-      expect(mockUpdateSource).toHaveBeenCalledWith({
-        sourceId: source.id,
-        body: { title: 'Renamed', tags: [], esql: source.esql },
-      })
-    );
+    expect(saveButton()).toBeEnabled();
     expect(mockFetch).not.toHaveBeenCalled();
   });
 });

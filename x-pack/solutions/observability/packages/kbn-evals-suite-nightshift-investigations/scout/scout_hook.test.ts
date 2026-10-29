@@ -13,8 +13,6 @@ import Path from 'path';
 const HOOK = Path.join(__dirname, 'scout_hook.sh');
 
 const runHook = (config: unknown, env: Record<string, string> = {}) => {
-  // The hook falls back to variables exported in the shell, so a developer's own settings must not
-  // leak into the cases.
   const baseEnv = Object.fromEntries(
     Object.entries(process.env).filter(
       ([name]) =>
@@ -29,13 +27,22 @@ const runHook = (config: unknown, env: Record<string, string> = {}) => {
     env: { ...baseEnv, ...env },
     encoding: 'utf8',
   });
-  return { status: result.status, stderr: result.stderr };
+  return {
+    status: result.status,
+    stderr: result.stderr,
+    output: result.status === 0 ? JSON.parse(result.stdout) : undefined,
+  };
 };
 
 const SANDBOX = { url: 'https://sandbox.example.com:9443', apiKey: 'key' };
-const TELEMETRY = { url: 'https://remote.example.com', apiKey: 'remote-key' };
 
 describe('nightshift-investigations scout hook', () => {
+  it('rejects sandbox settings without an API key instead of silently running only smoke', () => {
+    const { status, stderr } = runHook({ sandbox: { url: 'https://sandbox.example.com' } });
+    expect(status).toBe(1);
+    expect(stderr).toContain('sandbox host port set without an API key');
+  });
+
   it('never passes the API keys to jq as command-line arguments', () => {
     // A jq shim records every argv it receives, then defers to the real jq.
     const shimDir = mkdtempSync(Path.join(tmpdir(), 'scout-hook-jq-'));
@@ -49,7 +56,9 @@ describe('nightshift-investigations scout hook', () => {
     try {
       const { status } = runHook(
         {
-          nightshift: { telemetry: { ...TELEMETRY, apiKey: 'SECRET_TELEMETRY_KEY' } },
+          nightshift: {
+            telemetry: { url: 'https://remote.example.com', apiKey: 'SECRET_TELEMETRY_KEY' },
+          },
           sandbox: { ...SANDBOX, apiKey: 'SECRET_API_KEY' },
         },
         { PATH: `${shimDir}:${process.env.PATH}` }
@@ -63,26 +72,28 @@ describe('nightshift-investigations scout hook', () => {
     }
   });
 
-  it.each(['profile', 'shell'])('rejects embedded URL credentials from %s', (source) => {
-    const url = 'https://elastic:SECRET_PASSWORD@telemetry.example.com';
-    const { status, stderr } =
-      source === 'profile'
-        ? runHook({ sandbox: SANDBOX, nightshift: { telemetry: { ...TELEMETRY, url } } })
-        : runHook(
-            { sandbox: SANDBOX },
-            {
-              NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: url,
-              NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: TELEMETRY.apiKey,
-            }
-          );
-    expect(status).toBe(1);
-    expect(stderr).toContain('telemetry URL must not embed credentials');
-    expect(stderr).not.toContain('SECRET_PASSWORD');
-  });
+  describe('telemetry configuration', () => {
+    const TELEMETRY = {
+      url: 'https://remote.example.com',
+      apiKey: 'remote-key',
+      readableIndices: 'remote:logs-*',
+    };
 
-  it('rejects sandbox settings without an API key instead of silently running only smoke', () => {
-    const { status, stderr } = runHook({ sandbox: { url: 'https://sandbox.example.com' } });
-    expect(status).toBe(1);
-    expect(stderr).toContain('sandbox host port set without an API key');
+    it.each(['profile', 'shell'])('rejects embedded URL credentials from %s', (source) => {
+      const url = 'https://elastic:SECRET_PASSWORD@telemetry.example.com';
+      const { status, stderr } =
+        source === 'profile'
+          ? runHook({ sandbox: SANDBOX, nightshift: { telemetry: { ...TELEMETRY, url } } })
+          : runHook(
+              { sandbox: SANDBOX },
+              {
+                NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: url,
+                NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
+              }
+            );
+      expect(status).toBe(1);
+      expect(stderr).toContain('telemetry URL must not embed credentials');
+      expect(stderr).not.toContain('SECRET_PASSWORD');
+    });
   });
 });
