@@ -122,7 +122,7 @@ export interface GenAIInputMessage {
 
 export interface GenAIOutputMessage {
   role: 'assistant';
-  /** Provider-reported finish reason when available, else derived `tool_calls` / `stop`. */
+  /** `tool_calls` when tool calls are present, else the provider-reported reason, else `stop`. */
   finish_reason: 'stop' | 'tool_calls' | string;
   parts: GenAIMessagePart[];
 }

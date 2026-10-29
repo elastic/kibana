@@ -169,6 +169,28 @@ describe('withChatCompleteSpan output message finish_reason', () => {
 
       expect(getOutputMessages()[0].finish_reason).toBe('tool_calls');
     });
+
+    it.each(['tool_use', 'stop'])(
+      'normalizes a provider-reported "%s" to "tool_calls" when tool calls are present',
+      async (providerReason) => {
+        await lastValueFrom(
+          withChatCompleteSpan(
+            options,
+            () =>
+              of({
+                type: ChatCompletionEventType.ChatCompletionMessage,
+                content: '',
+                toolCalls: [
+                  { toolCallId: 'tc-1', function: { name: 'myTool', arguments: { a: 1 } } },
+                ],
+                finish_reason: providerReason,
+              } as unknown as ChatCompleteCompositeResponse) as ReturnType<typeof of>
+          )
+        );
+
+        expect(getOutputMessages()[0].finish_reason).toBe('tool_calls');
+      }
+    );
   });
 
   describe('non-streaming responses', () => {

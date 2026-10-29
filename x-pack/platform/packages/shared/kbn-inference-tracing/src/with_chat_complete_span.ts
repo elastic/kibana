@@ -122,9 +122,9 @@ function buildOutputMessages({
   return [
     {
       role: 'assistant',
-      // Prefer the provider-reported finish reason (e.g. `content_filter`);
-      // only derive it from the response content when the provider did not report one.
-      finish_reason: finishReason ?? (toolCalls.length ? 'tool_calls' : 'stop'),
+      // Tool calls always normalize to `tool_calls` (providers report `tool_use`, or `stop`
+      // under simulated function calling); otherwise prefer the provider reason (e.g. `content_filter`).
+      finish_reason: toolCalls.length ? 'tool_calls' : finishReason ?? 'stop',
       parts,
     },
   ];
