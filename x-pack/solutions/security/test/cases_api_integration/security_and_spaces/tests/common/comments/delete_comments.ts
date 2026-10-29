@@ -111,7 +111,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expectedHttpCode: 404,
         })) as Error;
 
-        expect(error.message).to.be('No comments found for fake-id.');
+        expect(error.message).to.be('No attachments found for case fake-id.');
       });
     });
 

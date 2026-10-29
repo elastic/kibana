@@ -1,5 +1,5 @@
 {
-  "sha1": "41012a9c231e5c37bfdbb881856b279fc2635433",
+  "sha1": "e84d544fb67d7de16cabae3848a8971728dbab1c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -123,6 +123,19 @@
       }
     },
     {
+      "id": "afb81292fdb2fae-4bd8bd8d2207605",
+      "title": "Maps - dashboard reporting: creates a map report PNG file matches the baseline image, using embeddable example",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/dashboard_reporting.spec.ts",
+        "line": 84,
+        "column": 18
+      }
+    },
+    {
       "id": "ec95465caa2c2e6-e43f59b01c6aca8",
       "title": "Maps - discover visualize button should link geo_shape fields to Maps application",
       "expectedStatus": "passed",
@@ -224,6 +237,58 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embedded_map_search_cancellation.spec.ts",
         "line": 62,
         "column": 7
+      }
+    },
+    {
+      "id": "4759cc5bce2db63-0221cfeeccfad03",
+      "title": "Maps - geojson vector layer - es geo grid source geo_point - aggregation request and data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_geo_grid_source.spec.ts",
+        "line": 53,
+        "column": 13
+      }
+    },
+    {
+      "id": "4759cc5bce2db63-19db4da1ba93d41",
+      "title": "Maps - geojson vector layer - es geo grid source geo_point - request lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_geo_grid_source.spec.ts",
+        "line": 76,
+        "column": 11
+      }
+    },
+    {
+      "id": "4759cc5bce2db63-75f9ca121d3380c",
+      "title": "Maps - geojson vector layer - es geo grid source geo_point - grid features follow the map extent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_geo_grid_source.spec.ts",
+        "line": 103,
+        "column": 18
+      }
+    },
+    {
+      "id": "4759cc5bce2db63-27c749f5fbcc543",
+      "title": "Maps - geojson vector layer - es geo grid source geo_shape - grid cells and inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/es_geo_grid_source.spec.ts",
+        "line": 127,
+        "column": 15
       }
     },
     {
@@ -374,6 +439,32 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mapbox_styles.spec.ts",
         "line": 22,
         "column": 8
+      }
+    },
+    {
+      "id": "214846f58c032b8-5ddc1584d6536d5",
+      "title": "Maps - multiple data views ignores global filters on layers using a data view without the filter field by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/multiple_data_views.spec.ts",
+        "line": 40,
+        "column": 28
+      }
+    },
+    {
+      "id": "214846f58c032b8-e5e195698a0e35c",
+      "title": "Maps - multiple data views applies global filters on layers using a data view without the filter field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/multiple_data_views.spec.ts",
+        "line": 46,
+        "column": 21
       }
     },
     {
@@ -693,7 +784,8 @@
       "title": "Maps - visualize create menu maps alias with write permission shows maps in create menu and opens Maps app",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/visualize_create_menu.spec.ts",
@@ -706,12 +798,13 @@
       "title": "Maps - visualize create menu maps alias without write permission does not show maps in create menu",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/visualize_create_menu.spec.ts",
         "line": 65,
-        "column": 9
+        "column": 5
       }
     },
     {
@@ -719,12 +812,13 @@
       "title": "Maps - visualize create menu edit meta-data: should allow to change meta-data on a map visualization",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/visualize_create_menu.spec.ts",
         "line": 72,
-        "column": 11
+        "column": 5
       }
     }
   ]

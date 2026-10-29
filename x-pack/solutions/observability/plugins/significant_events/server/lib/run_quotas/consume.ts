@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { RunQuotaConsumeResponse, RunQuotaGroup } from '../../../common/run_quotas';
+import {
+  isRunQuotaReached,
+  type RunQuotaConsumeResponse,
+  type RunQuotaGroup,
+} from '../../../common/run_quotas';
 import { mutateRunQuotaLedger, readRunQuotaSettings } from './repository';
 import { dayKey, resolveDailyWindow } from './window';
 import type { RunQuotaSavedObjectsRepository } from './repository';
@@ -26,7 +30,7 @@ export const consumeRunQuota = async ({
     date,
     group,
     mutation: (ledger) => {
-      if (settings.enabled && limit > 0 && ledger.count >= limit) {
+      if (isRunQuotaReached({ enabled: settings.enabled, limit, count: ledger.count })) {
         return { result: { allowed: false } };
       }
 
