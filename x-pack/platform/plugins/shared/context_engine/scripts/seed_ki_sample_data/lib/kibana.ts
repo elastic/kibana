@@ -18,13 +18,14 @@ export async function kibanaRequest(
   config: ConnectionConfig,
   method: string,
   path: string,
-  body?: unknown
+  body?: unknown,
+  { timeoutMs = REQUEST_TIMEOUT_MS }: { timeoutMs?: number } = {}
 ): Promise<{ status: number; data: unknown }> {
   let response: Response;
   try {
     response = await fetch(`${config.kibanaUrl}${path}`, {
       method,
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         'Content-Type': 'application/json',
         Authorization: generateAuthHeader(config),
@@ -32,13 +33,13 @@ export async function kibanaRequest(
         'x-elastic-internal-origin': 'Kibana',
         'elastic-api-version': AI_INDEX_API_VERSION,
       },
-      ...(body ? { body: JSON.stringify(body) } : {}),
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     });
   } catch (err) {
     const name = err instanceof Error ? err.name : '';
     if (name === 'AbortError' || name === 'TimeoutError') {
       throw new Error(
-        `kibanaRequest: ${method} ${path} timed out after ${REQUEST_TIMEOUT_MS}ms — is Kibana reachable at ${config.kibanaUrl}?`
+        `kibanaRequest: ${method} ${path} timed out after ${timeoutMs}ms — is Kibana reachable at ${config.kibanaUrl}?`
       );
     }
     throw err;
