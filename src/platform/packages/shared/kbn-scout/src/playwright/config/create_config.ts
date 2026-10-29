@@ -21,6 +21,9 @@ import { VALID_CONFIG_MARKER } from '../types';
 
 const DEFAULT_CI_RETRIES = 1;
 
+/** Half of the Cloud projects' 90 s test timeout, so a stalled navigation still fails as one. */
+const CLOUD_NAVIGATION_TIMEOUT_MS = 45_000;
+
 const isBuildkiteStepRetry = (): boolean => {
   const retryCount = Number.parseInt(process.env.BUILDKITE_RETRY_COUNT ?? '', 10);
   return Number.isFinite(retryCount) && retryCount > 0;
@@ -73,7 +76,13 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
         // TODO: remove when we find a way to run "no data" tests without being affected by others
         '**/no_data_*.spec.ts',
       ],
-      use: { ...devices['Desktop Chrome'], configName: 'cloud_ech' },
+      use: {
+        ...devices['Desktop Chrome'],
+        configName: 'cloud_ech',
+        // Each test gets a fresh browser context, so every navigation is a cold, remote
+        // Kibana bootstrap; the 20 s global cap is calibrated for a local stack.
+        navigationTimeout: CLOUD_NAVIGATION_TIMEOUT_MS,
+      },
     },
     {
       name: 'mki',
@@ -84,7 +93,13 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
         // TODO: remove when we find a way to run "no data" tests without being affected by others
         '**/no_data_*.spec.ts',
       ],
-      use: { ...devices['Desktop Chrome'], configName: 'cloud_mki' },
+      use: {
+        ...devices['Desktop Chrome'],
+        configName: 'cloud_mki',
+        // Each test gets a fresh browser context, so every navigation is a cold, remote
+        // Kibana bootstrap; the 20 s global cap is calibrated for a local stack.
+        navigationTimeout: CLOUD_NAVIGATION_TIMEOUT_MS,
+      },
     },
   ];
 
