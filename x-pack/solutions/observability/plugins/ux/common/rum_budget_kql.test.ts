@@ -38,8 +38,12 @@ describe('normalizeRumBudgetIndex', () => {
   });
 
   it('accepts the session index', () => {
-    expect(normalizeRumBudgetIndex('digital-experience-sessions-2')).toBe('digital-experience-sessions-*');
-    expect(normalizeRumBudgetIndex('*:digital-experience-sessions-*')).toBe('digital-experience-sessions-*');
+    expect(normalizeRumBudgetIndex('digital-experience-sessions-2')).toBe(
+      'digital-experience-sessions-*'
+    );
+    expect(normalizeRumBudgetIndex('*:digital-experience-sessions-*')).toBe(
+      'digital-experience-sessions-*'
+    );
   });
 });
 

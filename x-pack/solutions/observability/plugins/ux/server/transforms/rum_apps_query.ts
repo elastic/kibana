@@ -236,7 +236,12 @@ export const parseAppTerms = (agg: unknown): RumAppInventoryRow[] =>
   });
 
 const sessionVitalP75 = (
-  field: 'web_vitals.lcp' | 'web_vitals.inp' | 'web_vitals.cls' | 'web_vitals.fcp' | 'web_vitals.ttfb'
+  field:
+    | 'web_vitals.lcp'
+    | 'web_vitals.inp'
+    | 'web_vitals.cls'
+    | 'web_vitals.fcp'
+    | 'web_vitals.ttfb'
 ) => ({
   percentiles: { field, percents: [75] },
 });

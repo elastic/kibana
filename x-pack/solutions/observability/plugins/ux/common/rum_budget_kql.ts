@@ -69,7 +69,9 @@ export const normalizeRumBudgetIndex = (raw: string): string => {
     );
   const unique = [...new Set(sources)];
   if (unique.length === 0) {
-    throw new Error('Index must be logs-*.otel-*, traces-*.otel-*, and/or digital-experience-sessions-*');
+    throw new Error(
+      'Index must be logs-*.otel-*, traces-*.otel-*, and/or digital-experience-sessions-*'
+    );
   }
   return unique.join(',');
 };

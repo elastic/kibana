@@ -238,7 +238,9 @@ export const stripFinalWhere = (query: string): string => {
 };
 
 export const rumAlertTimeField = (query: string): string =>
-  /^\s*FROM\s+(?:[A-Za-z0-9_\-*]+:)?(?:digital-experience|ux-rum)-sessions/im.test(query) ? 'start_time' : '@timestamp';
+  /^\s*FROM\s+(?:[A-Za-z0-9_\-*]+:)?(?:digital-experience|ux-rum)-sessions/im.test(query)
+    ? 'start_time'
+    : '@timestamp';
 
 const esqlQuote = (value: string): string =>
   `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;

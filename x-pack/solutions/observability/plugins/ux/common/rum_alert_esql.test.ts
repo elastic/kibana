@@ -124,7 +124,9 @@ describe('rumAlertGroupingFieldsFromQuery', () => {
 describe('rumAlertTimeField', () => {
   it('uses start_time for local and CCS session-index FROM clauses', () => {
     expect(rumAlertTimeField('FROM digital-experience-sessions-*\n| LIMIT 1')).toBe('start_time');
-    expect(rumAlertTimeField('FROM ccs:digital-experience-sessions-*\n| LIMIT 1')).toBe('start_time');
+    expect(rumAlertTimeField('FROM ccs:digital-experience-sessions-*\n| LIMIT 1')).toBe(
+      'start_time'
+    );
     expect(rumAlertTimeField('FROM logs-*.otel-*\n| LIMIT 1')).toBe('@timestamp');
   });
 });

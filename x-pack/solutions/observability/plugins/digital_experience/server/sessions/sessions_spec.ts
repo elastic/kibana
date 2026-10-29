@@ -142,7 +142,14 @@ const fieldsOf = (...attributes: SessionAttribute[]): readonly string[] =>
  */
 export const SESSION_ATTRIBUTE_GROUPS = {
   user_seen: fieldsOf('user'),
-  user_agent_seen: fieldsOf('browser', 'browserVersion', 'os', 'device', 'breakpoint', 'connection'),
+  user_agent_seen: fieldsOf(
+    'browser',
+    'browserVersion',
+    'os',
+    'device',
+    'breakpoint',
+    'connection'
+  ),
   geo_seen: fieldsOf('countryIso', 'region', 'city'),
 } as const;
 
