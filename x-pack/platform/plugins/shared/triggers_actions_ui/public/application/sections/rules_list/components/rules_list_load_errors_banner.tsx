@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+
 import type { LoadRulesError } from '../../../lib/rule_api/rules_helpers';
 
 interface RulesListLoadErrorsBannerProps {
@@ -18,7 +18,8 @@ interface RulesListLoadErrorsBannerProps {
 export const RulesListLoadErrorsBanner = ({ errors }: RulesListLoadErrorsBannerProps) => {
   return (
     <>
-      <KbnWarningCallout
+      <EuiCallOut
+        color="warning"
         size="s"
         data-test-subj="rulesListLoadErrorsBanner"
         title={
@@ -40,7 +41,7 @@ export const RulesListLoadErrorsBanner = ({ errors }: RulesListLoadErrorsBannerP
             <li key={rule.id}>{rule.name ? `${rule.name} (${rule.id})` : rule.id}</li>
           ))}
         </ul>
-      </KbnWarningCallout>
+      </EuiCallOut>
       <EuiSpacer size="s" />
     </>
   );
