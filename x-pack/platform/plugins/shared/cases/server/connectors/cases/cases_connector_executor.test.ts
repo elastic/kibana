@@ -123,7 +123,7 @@ describe('CasesConnectorExecutor', () => {
     casesClientMock.cases.bulkGet.mockResolvedValue({ cases, errors: [] });
     casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [] });
     casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
-    casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
+    casesClientMock.attachments.bulkCreate.mockResolvedValue([]);
     casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
     casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
       fieldDefinitions: [],
@@ -3298,7 +3298,7 @@ fields: []
       });
 
       casesClientMock.cases.bulkGet.mockResolvedValue({ cases: [cases[0]], errors: [] });
-      casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
+      casesClientMock.attachments.bulkCreate.mockResolvedValue([]);
 
       getCasesClient.mockReturnValue(casesClientMock);
 

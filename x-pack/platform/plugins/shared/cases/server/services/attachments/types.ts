@@ -177,7 +177,12 @@ export interface UpdateArgs {
   options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributesV2>, 'upsert'>;
 }
 
-export type UpdateAttachmentArgs = UpdateArgs;
+export interface UpdateAttachmentArgs extends UpdateArgs {
+  /**
+   * The saved object type the attachment is stored as. Skips the type lookup when the caller already read it.
+   */
+  savedObjectType?: AttachmentSavedObjectType;
+}
 
 export interface BulkUpdateAttachmentArgs extends IndexRefresh {
   comments: UpdateArgs[];

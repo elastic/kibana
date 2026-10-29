@@ -36,12 +36,12 @@ export const patchCommentRoute = createCasesRoute({
 
       // 1. v1 request body -> unified patch payload
       const updateRequest = toUnifiedAttachmentPatchRequest(request.body);
-      // 2. update the unified attachment (returns the case with comments)
-      const updatedCase = await client.attachments.update({
+      // 2. update the unified attachment
+      const updatedCase = await client.attachments.updateAndGetCase({
         caseID: request.params.case_id,
         updateRequest,
       });
-      // 3. unified case -> v1 response
+      // 3. case with all attachments -> v1 response
       const res: caseDomainV1.Case = toLegacyCaseResponse(updatedCase);
 
       return response.ok({
