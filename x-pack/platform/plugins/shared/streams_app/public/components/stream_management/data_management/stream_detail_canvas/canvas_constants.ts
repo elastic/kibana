@@ -58,7 +58,7 @@ export const SOURCE_NODE_WIDTH = 246;
 // Wide enough for the stats footer: a status, a rate and an index count on one row.
 export const DESTINATION_NODE_WIDTH = 260;
 export const ROUTING_NODE_WIDTH = 172;
-export const PROCESSING_NODE_WIDTH = 140;
+export const PROCESSING_NODE_WIDTH = 130;
 
 /**
  * Revisit whenever a card gains or loses a content row.
@@ -69,8 +69,8 @@ export const SOURCE_NODE_HEIGHT = 74;
 export const DESTINATION_NODE_HEIGHT = 106;
 /** A routing card with a single rule. Each extra rule adds a row. */
 export const ROUTING_NODE_HEIGHT = 96;
-// The stats row adds 24 (the reserved row) to the 44 of the title and count.
-export const PROCESSING_NODE_HEIGHT = 68;
+// Two lines of stats (40) plus the card's padding and border (18).
+export const PROCESSING_NODE_HEIGHT = 58;
 
 export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
   [SOURCE_NODE_TYPE]: SOURCE_NODE_HEIGHT,
