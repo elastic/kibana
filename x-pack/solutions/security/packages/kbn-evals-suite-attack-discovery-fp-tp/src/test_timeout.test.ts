@@ -10,18 +10,18 @@ import { getTestTimeoutMs } from './test_timeout';
 const MINUTE_MS = 60_000;
 
 describe('getTestTimeoutMs', () => {
-  it.each([undefined, '', 'abc', '0', '1', '2', '3'])(
+  it.each([undefined, '', 'abc', '0', '1', '2'])(
     'keeps the 60 minute floor for EVAL_REPETITIONS=%p',
     (repetitions) => {
       expect(getTestTimeoutMs(repetitions)).toBe(60 * MINUTE_MS);
     }
   );
 
-  it('allows 100 minutes at 5 repetitions', () => {
-    expect(getTestTimeoutMs('5')).toBe(100 * MINUTE_MS);
-  });
-
-  it('keeps scaling past 5 repetitions', () => {
-    expect(getTestTimeoutMs('10')).toBe(200 * MINUTE_MS);
+  it.each([
+    ['3', 90],
+    ['5', 150],
+    ['10', 300],
+  ])('allows 30 minutes per repetition at EVAL_REPETITIONS=%s', (repetitions, minutes) => {
+    expect(getTestTimeoutMs(repetitions)).toBe(minutes * MINUTE_MS);
   });
 });

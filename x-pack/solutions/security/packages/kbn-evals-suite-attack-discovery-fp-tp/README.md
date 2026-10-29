@@ -129,7 +129,7 @@ Serverless is not supported yet: [#297538](https://github.com/elastic/kibana/pul
 
 ## Reproducibility
 
-Run with `--repetitions 5` or more. The whole dataset runs for every repetition inside one Playwright test, so its timeout is 20 minutes per repetition with a 60 minute floor (100 minutes at 5 repetitions). Each repetition is a separate run in the report, so per-example agreement is the share of an example's repetitions that land on the same outcome; `OutcomeAccuracy`'s label distribution per example shows it directly.
+Run with `--repetitions 5` or more. The whole dataset runs for every repetition inside one Playwright test, so its timeout is 30 minutes per repetition with a 60 minute floor (150 minutes at 5 repetitions). Runs above 2 repetitions exceed the 60-minute CI step limit, so run them locally or on dedicated eval infrastructure. Each repetition is a separate run in the report, so per-example agreement is the share of an example's repetitions that land on the same outcome; `OutcomeAccuracy`'s label distribution per example shows it directly.
 
 ## Measured baseline (managed workflow)
 
