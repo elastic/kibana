@@ -6,7 +6,10 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { asDetectionEngineAccount } from './detection_engine_account';
+import {
+  assertCanChangeBoundWorkflows,
+  asDetectionEngineAccount,
+} from './detection_engine_account';
 
 const request = httpServerMock.createKibanaRequest();
 
@@ -78,5 +81,62 @@ describe('asDetectionEngineAccount', () => {
 
     await expect(run()).rejects.toMatchObject({ statusCode: 403 });
     expect(fn).not.toHaveBeenCalled();
+  });
+});
+
+describe('assertCanChangeBoundWorkflows', () => {
+  const run = async ({
+    boundAccountId,
+    canManageSecurity,
+  }: {
+    boundAccountId: string | undefined;
+    canManageSecurity: boolean;
+  }) => {
+    const hasPrivileges = jest.fn(async () => ({ has_all_requested: canManageSecurity }));
+    const core = {
+      security: {
+        serviceAccounts: {
+          isEnabled: () => true,
+          getWorkloadBinding: jest.fn(async () =>
+            boundAccountId ? { serviceAccountId: boundAccountId } : undefined
+          ),
+        },
+      },
+      elasticsearch: {
+        client: { asScoped: () => ({ asCurrentUser: { security: { hasPrivileges } } }) },
+      },
+    };
+    const result = assertCanChangeBoundWorkflows({
+      core: core as never,
+      request,
+      spaceId: 'space-a',
+    });
+    return { result, hasPrivileges };
+  };
+
+  it('lets a user with manage_security pause or resume a space that is set up', async () => {
+    const { result, hasPrivileges } = await run({
+      boundAccountId: 'account-id',
+      canManageSecurity: true,
+    });
+
+    await expect(result).resolves.toBeUndefined();
+    expect(hasPrivileges).toHaveBeenCalledWith({ cluster: ['manage_security'] });
+  });
+
+  it('refuses a user without manage_security with a 403 when the space is set up', async () => {
+    const { result } = await run({ boundAccountId: 'account-id', canManageSecurity: false });
+
+    await expect(result).rejects.toMatchObject({ statusCode: 403 });
+  });
+
+  it('refuses a space that is not set up with a 503, without asking for manage_security', async () => {
+    const { result, hasPrivileges } = await run({
+      boundAccountId: undefined,
+      canManageSecurity: true,
+    });
+
+    await expect(result).rejects.toMatchObject({ statusCode: 503 });
+    expect(hasPrivileges).not.toHaveBeenCalled();
   });
 });

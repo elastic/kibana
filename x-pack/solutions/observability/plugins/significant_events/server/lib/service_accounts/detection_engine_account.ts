@@ -76,6 +76,46 @@ export const isDetectionEngineSetUp = async ({
 }): Promise<boolean> => (await getDetectionEngineAccountId({ core, spaceId })) !== undefined;
 
 /**
+ * Whether the request's user holds `manage_security`, which changing a bound workflow, such as
+ * switching it on or off, requires.
+ */
+export const canManageSecurity = async (
+  core: CoreStart,
+  request: KibanaRequest
+): Promise<boolean> => {
+  const { has_all_requested: allowed } = await core.elasticsearch.client
+    .asScoped(request)
+    .asCurrentUser.security.hasPrivileges({ cluster: ['manage_security'] });
+  return allowed;
+};
+
+/**
+ * Lets a user pause or resume the detection engine only in a space that is set up, and only with
+ * `manage_security`: the space's bound workflows can only be switched by such a user, so without
+ * the check a pause would disable the rules and leave the workflows running. A space that is not
+ * set up has nothing to pause or resume.
+ */
+export const assertCanChangeBoundWorkflows = async ({
+  core,
+  request,
+  spaceId,
+}: {
+  core: CoreStart;
+  request: KibanaRequest;
+  spaceId: string;
+}): Promise<void> => {
+  if (!(await isDetectionEngineSetUp({ core, spaceId }))) {
+    throw createNotSetUpError();
+  }
+  if (!(await canManageSecurity(core, request))) {
+    throw new StatusError(
+      'Pausing or resuming Nightshift requires the manage_security cluster privilege.',
+      403
+    );
+  }
+};
+
+/**
  * Runs `fn` with a request authenticated as the account bound to the space's detection engine.
  * With `expectedAccountId`, refuses when the space was rebound to another account in between.
  */

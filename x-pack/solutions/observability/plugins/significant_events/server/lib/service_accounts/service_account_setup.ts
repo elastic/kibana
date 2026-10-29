@@ -39,6 +39,7 @@ import type { GetScopedClients } from '../../routes/types';
 import {
   DETECTION_ENGINE_WORKLOAD_ID,
   DETECTION_ENGINE_WORKLOAD_TYPE,
+  canManageSecurity,
   getDetectionEngineAccountId,
   reassignRulesToAccount,
 } from './detection_engine_account';
@@ -67,13 +68,6 @@ const SETUP_WORKFLOW_IDS = [
 
 /** Bound workflows a setting installs once it is turned on; the setup only rebinds them. */
 const SETTING_WORKFLOW_IDS = [NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID] as const;
-
-const canManageSecurity = async (core: CoreStart, request: KibanaRequest): Promise<boolean> => {
-  const { has_all_requested: allowed } = await core.elasticsearch.client
-    .asScoped(request)
-    .asCurrentUser.security.hasPrivileges({ cluster: ['manage_security'] });
-  return allowed;
-};
 
 const assertSpaceExists = async ({
   spaces,
