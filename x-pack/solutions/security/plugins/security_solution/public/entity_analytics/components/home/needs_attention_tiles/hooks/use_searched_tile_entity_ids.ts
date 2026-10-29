@@ -20,8 +20,8 @@ import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 export type TileEntityIds = Readonly<Record<SignalCardId, readonly string[]>>;
 
 /**
- * Each tile's entities the search matches. KQL can't run after the tile queries' STATS or joins, so
- * the ids they found are checked on their own entity docs, the main entity's for a resolved one.
+ * Each tile's entities that match the search. KQL can't run after the tiles' STATS or joins, so the
+ * ids they found are checked on their entity docs (the main entity's, for a resolved one).
  */
 export const fetchSearchedTileEntityIds = async (
   runQuery: EsqlRunner,
@@ -44,7 +44,7 @@ const SEARCH_QUERY_ERROR_TITLE = i18n.translate(
   { defaultMessage: 'There was an error applying the search to the tiles' }
 );
 
-/** The tiles' entities, narrowed by the search once every tile has its ids. */
+/** The tiles' entities that match the search; `undefined` without a search. */
 export const useSearchedTileEntityIds = ({
   spaceId,
   searchExpression,
@@ -55,7 +55,7 @@ export const useSearchedTileEntityIds = ({
   searchExpression: string | undefined;
   isReady: boolean;
   tileEntityIds: TileEntityIds;
-}): { tileEntityIds: TileEntityIds; isSearchPending: boolean } => {
+}): { searchedTileEntityIds?: TileEntityIds; isPending: boolean } => {
   const { data } = useKibana().services;
   const searchArgs = searchExpression ? { namespace: spaceId, searchExpression } : null;
   const {
@@ -64,14 +64,14 @@ export const useSearchedTileEntityIds = ({
     error,
   } = useQuery(
     ['searchedTileEntityIds', searchArgs, tileEntityIds],
-    ({ signal }) =>
-      searchArgs
-        ? fetchSearchedTileEntityIds(
-            createEsqlRunner(data.search, signal),
-            searchArgs,
-            tileEntityIds
-          )
-        : tileEntityIds,
+    ({ signal }) => {
+      if (!searchArgs) throw new Error('There is no search to apply to the tiles');
+      return fetchSearchedTileEntityIds(
+        createEsqlRunner(data.search, signal),
+        searchArgs,
+        tileEntityIds
+      );
+    },
     {
       enabled: isReady && searchArgs != null,
       ...TILE_QUERY_CACHE_OPTIONS,
@@ -80,9 +80,8 @@ export const useSearchedTileEntityIds = ({
   );
   useErrorToast(SEARCH_QUERY_ERROR_TITLE, error);
 
-  if (!searchArgs) return { tileEntityIds, isSearchPending: false };
   return {
-    tileEntityIds: searchedTileEntityIds ?? tileEntityIds,
-    isSearchPending: !isReady || isFetching,
+    searchedTileEntityIds,
+    isPending: searchArgs != null && (!isReady || isFetching),
   };
 };

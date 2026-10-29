@@ -40,6 +40,7 @@ export interface UseEntityGridDataOptions {
   columnIds: readonly string[];
   /** Which queries the data belongs to. Defaults to `page`. */
   keyScope?: EntityGridKeyScope;
+  isSearchPending?: boolean;
 }
 
 /** The scope of a view's queries; the grid rows (`page`) unless told otherwise. */

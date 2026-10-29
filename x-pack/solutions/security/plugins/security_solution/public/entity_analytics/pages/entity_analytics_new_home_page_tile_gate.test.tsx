@@ -58,8 +58,9 @@ jest.mock('../api/hooks/use_get_watchlists', () => ({
   useGetWatchlists: () => ({ data: [], error: undefined }),
 }));
 jest.mock('../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn() }));
+const mockAddWarning = jest.fn();
 jest.mock('../../common/hooks/use_app_toasts', () => ({
-  useAppToasts: () => ({ addWarning: jest.fn() }),
+  useAppToasts: () => ({ addWarning: mockAddWarning }),
 }));
 jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state', () => ({
   useEntityAnalyticsUrlState: () => ({
@@ -82,7 +83,7 @@ jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state
   }),
 }));
 jest.mock('../components/home/entities_grid/hooks/use_search_bar_expression', () => ({
-  useSearchBarExpression: jest.fn(),
+  useSearchBarExpression: jest.fn(() => ({ isSearchPending: false })),
 }));
 jest.mock('../components/home/entities_grid/components/entities_grid', () => ({
   EntitiesGrid: jest.fn(() => null),
@@ -295,10 +296,10 @@ const mockTiles = (
     newlyHighCriticalTrend: undefined,
     isTrendLoading: false,
   });
-  hooks.useSearchedTileEntityIds.mockImplementation(({ tileEntityIds }) => ({
-    tileEntityIds,
-    isSearchPending: false,
-  }));
+  hooks.useSearchedTileEntityIds.mockReturnValue({
+    searchedTileEntityIds: undefined,
+    isPending: false,
+  });
 };
 
 const lastOptions = (hook: string) => {
@@ -608,9 +609,12 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
   });
 
   it("shows each tile's searched entities, without its delta and sparkline", () => {
-    (useSearchBarExpression as jest.Mock).mockReturnValue('KQL("host.name: a")');
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'KQL("host.name: a")',
+      isSearchPending: false,
+    });
     hooks.useSearchedTileEntityIds.mockReturnValue({
-      tileEntityIds: {
+      searchedTileEntityIds: {
         entitiesWithAlerts: ['host:a'],
         entitiesWithAnomalies: [],
         riskMovers: [],
@@ -618,7 +622,7 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
         watchlisted: [],
         newEntity: [],
       },
-      isSearchPending: false,
+      isPending: false,
     });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
@@ -633,21 +637,51 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     expect(getCard('entitiesWithAnomalies')?.value).toBe(0);
   });
 
+  it('warns once per search that matches main entities only', () => {
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'KQL("bob")',
+      isSearchPending: false,
+      mainEntityOnlySearch: 'KQL("bob")',
+    });
+    const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+    rerender(<EntityAnalyticsNewHomePage />);
+
+    expect(mockAddWarning).toHaveBeenCalledTimes(1);
+  });
+
   it('keeps the counts, deltas and sparklines without a search', () => {
-    (useSearchBarExpression as jest.Mock).mockReturnValue(undefined);
+    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchPending: false });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
     expect(getCard('entitiesWithAlerts')).toMatchObject({ value: 5, delta: 1 });
   });
 
   it('loads the tiles while the search is checked', () => {
-    (useSearchBarExpression as jest.Mock).mockReturnValue('KQL("host.name: a")');
-    hooks.useSearchedTileEntityIds.mockImplementation(({ tileEntityIds }) => ({
-      tileEntityIds,
-      isSearchPending: true,
-    }));
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'KQL("host.name: a")',
+      isSearchPending: false,
+    });
+    hooks.useSearchedTileEntityIds.mockReturnValue({
+      searchedTileEntityIds: undefined,
+      isPending: true,
+    });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
+    expect(getCard('entitiesWithAlerts')?.isLoading).toBe(true);
+  });
+
+  it('waits for the search overrides before it checks the tiles, and loads them meanwhile', () => {
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'KQL("asset.criticality: low_impact")',
+      isSearchPending: true,
+    });
+    hooks.useSearchedTileEntityIds.mockReturnValue({
+      searchedTileEntityIds: undefined,
+      isPending: true,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(lastOptions('useSearchedTileEntityIds').isReady).toBe(false);
     expect(getCard('entitiesWithAlerts')?.isLoading).toBe(true);
   });
 });

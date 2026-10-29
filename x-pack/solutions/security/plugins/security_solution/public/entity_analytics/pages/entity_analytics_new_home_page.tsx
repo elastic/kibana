@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -60,7 +60,10 @@ import {
 import { toDsl, toEsql } from '../components/home/entities_grid/active_filters';
 import type { ActiveFilters } from '../components/home/entities_grid/active_filters';
 import { useEntityFilterOverrides } from '../components/home/entities_grid/hooks/use_entity_grid_data';
-import { isFilteringByGroupValue } from '../components/home/entities_grid/queries/resolved_entities';
+import {
+  applyResolvedEntityFilterOverridesToQuery,
+  isFilteringByGroupValue,
+} from '../components/home/entities_grid/queries/resolved_entities';
 import type {
   RowActions,
   CellHandlers,
@@ -161,6 +164,24 @@ const getRowEntity = (row: Row) => {
 /** A resolved row stands for its whole group, so its flyouts show the group too. */
 const getEntityViewMode = (rowsMode: RowsMode): EntityViewMode =>
   rowsMode === 'resolved' ? 'resolved' : 'single';
+
+const SEARCH_OVERRIDES_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.searchOverridesError',
+  { defaultMessage: 'Error searching the values of resolved entities' }
+);
+
+const MAIN_ENTITY_ONLY_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.searchMainEntityOnlyTitle',
+  { defaultMessage: 'This search matches main entities only' }
+);
+
+const MAIN_ENTITY_ONLY_TEXT = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.searchMainEntityOnlyText',
+  {
+    defaultMessage:
+      "Resolved entities are matched by their main entity's own values. Switch to Individual records to search all of an entity's records.",
+  }
+);
 
 const ROWS_OPTIONS: ReadonlyArray<LabeledOption<RowsMode>> = [
   {
@@ -534,7 +555,31 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const searchExpression = useSearchBarExpression();
+  const {
+    searchExpression,
+    searchOverrides,
+    isSearchPending,
+    searchOverridesError,
+    mainEntityOnlySearch,
+  } = useSearchBarExpression(rowsMode);
+  useErrorToast(SEARCH_OVERRIDES_ERROR_TITLE, searchOverridesError);
+  useEffect(() => {
+    if (!mainEntityOnlySearch) return;
+
+    addWarning({ title: MAIN_ENTITY_ONLY_TITLE, text: MAIN_ENTITY_ONLY_TEXT });
+  }, [mainEntityOnlySearch, addWarning]);
+  // Group by and the dropdown counts use the patched search, as the grid does.
+  const searchDsl = useMemo(
+    () =>
+      esFilter && searchOverrides
+        ? {
+            bool: {
+              filter: applyResolvedEntityFilterOverridesToQuery([esFilter], searchOverrides),
+            },
+          }
+        : esFilter,
+    [esFilter, searchOverrides]
+  );
 
   const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
   useErrorToast(
@@ -861,10 +906,11 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       newEntityEntityIds,
     ]
   );
-  const { tileEntityIds: searchedTileEntityIds, isSearchPending } = useSearchedTileEntityIds({
+  const { searchedTileEntityIds, isPending: isTilesSearchPending } = useSearchedTileEntityIds({
     spaceId: resolvedSpaceId,
     searchExpression,
     isReady:
+      !isSearchPending &&
       !alertBasedPending &&
       !anomaliesPending &&
       !newEntityPending &&
@@ -873,7 +919,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     tileEntityIds,
   });
 
-  const selectedEntityIds = activeTile ? searchedTileEntityIds[activeTile] : EMPTY_ENTITY_IDS;
+  const shownTileEntityIds = searchedTileEntityIds ?? tileEntityIds;
+  const selectedEntityIds = activeTile ? shownTileEntityIds[activeTile] : EMPTY_ENTITY_IDS;
 
   const cappedTileEntityIds = useMemo(
     () => (activeTile ? getCappedTileEntityIds(selectedEntityIds) : null),
@@ -882,12 +929,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
 
   const activeFilters = useMemo(
     (): ActiveFilters => ({
-      search: { esql: searchExpression, dsl: esFilter },
+      search: { esql: searchExpression, dsl: searchDsl },
       entityFilters,
       tileEntityIds: cappedTileEntityIds,
       rowsMode,
     }),
-    [searchExpression, esFilter, entityFilters, cappedTileEntityIds, rowsMode]
+    [searchExpression, searchDsl, entityFilters, cappedTileEntityIds, rowsMode]
   );
   // Strings, so a tile refetch with the same entities doesn't reset the pages below.
   const { searchExpression: gridSearchExpression, entityExpression: gridEntityExpression } =
@@ -898,8 +945,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     entityExpression: gridEntityExpression,
   });
   const isGroupingQueryReady =
-    !isFilteringByGroupValue({ rowsMode, entityExpression: gridEntityExpression }) ||
-    entityFilterOverrides != null;
+    !isSearchPending &&
+    (!isFilteringByGroupValue({ rowsMode, entityExpression: gridEntityExpression }) ||
+      entityFilterOverrides != null);
   const groupingQuery = useMemo(
     () => toDsl(activeFilters, entityFilterOverrides),
     [activeFilters, entityFilterOverrides]
@@ -1242,21 +1290,22 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       timeRange,
     ]
   );
-  // Deltas and sparklines only have counts, which the search can't narrow, so they are hidden.
+
+  // The search can't narrow a tile's delta and sparkline (counts over time), so a search hides them.
   const shownSignalCards = useMemo(
     (): SignalCardData[] =>
       searchExpression
         ? signalCards.map((card) => ({
             ...card,
-            value: searchedTileEntityIds[card.id].length,
-            isLoading: card.isLoading || isSearchPending,
+            value: shownTileEntityIds[card.id].length,
+            isLoading: card.isLoading || isTilesSearchPending,
             delta: undefined,
             isDeltaLoading: false,
             isDeltaUnavailable: false,
             trend: undefined,
           }))
         : signalCards,
-    [signalCards, searchExpression, searchedTileEntityIds, isSearchPending]
+    [signalCards, searchExpression, shownTileEntityIds, isTilesSearchPending]
   );
 
   const onGroupChange = useCallback(
@@ -1371,7 +1420,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             onFiltersChange={setEntityFilters}
             spaceId={spaceId}
             rowsMode={rowsMode}
-            esFilter={esFilter}
+            esFilter={searchDsl}
             watchlistNames={watchlistNames}
           />
 
@@ -1437,6 +1486,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
                 watchlistNames={watchlistNames}
                 searchExpression={gridSearchExpression}
                 entityExpression={gridEntityExpression}
+                isSearchPending={isSearchPending}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
                 readAccess={readAccess}

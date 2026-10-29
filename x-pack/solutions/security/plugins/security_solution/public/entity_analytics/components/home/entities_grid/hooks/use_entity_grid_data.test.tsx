@@ -19,7 +19,7 @@ import { useGridContext } from './use_entity_grid_context';
 
 const mockFetchSortPage = jest.fn();
 const mockRunQuery = jest.fn();
-const mockFetchResolvedEntityFilterOverrides = jest.fn();
+const mockFetchResolvedEntityOverrides = jest.fn();
 
 jest.mock('../../../../../common/hooks/use_error_toast');
 jest.mock('./use_entity_grid_context', () => ({
@@ -36,8 +36,7 @@ jest.mock('../queries/esql', () => ({
 }));
 jest.mock('../queries/resolved_entities', () => ({
   ...jest.requireActual('../queries/resolved_entities'),
-  fetchResolvedEntityFilterOverrides: (...args: unknown[]) =>
-    mockFetchResolvedEntityFilterOverrides(...args),
+  fetchResolvedEntityOverrides: (...args: unknown[]) => mockFetchResolvedEntityOverrides(...args),
 }));
 jest.mock('./use_entity_grid_rows_enrichment', () => ({
   useEntityGridRowsEnrichment: (_context: unknown, _options: unknown, rows: Row[] = []) => ({
@@ -96,7 +95,7 @@ describe('useEntityGridData', () => {
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     mockContext();
     mockRunQuery.mockResolvedValue([{ total: 40 }]);
-    mockFetchResolvedEntityFilterOverrides.mockResolvedValue({ include: ['e9'], exclude: [] });
+    mockFetchResolvedEntityOverrides.mockResolvedValue({ include: ['e9'], exclude: [] });
     mockSortQueryOver(5);
   });
 
@@ -151,10 +150,11 @@ describe('useEntityGridData', () => {
 
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
-      expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalledTimes(1);
-      expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalledWith(
+      expect(mockFetchResolvedEntityOverrides).toHaveBeenCalledTimes(1);
+      expect(mockFetchResolvedEntityOverrides).toHaveBeenCalledWith(
         expect.objectContaining({
-          entityExpression: FILTERED_OPTIONS.entityExpression,
+          own: FILTERED_OPTIONS.entityExpression,
+          group: FILTERED_OPTIONS.entityExpression,
         }),
         expect.any(Function)
       );
@@ -172,14 +172,14 @@ describe('useEntityGridData', () => {
         include: string[];
         exclude: string[];
       }) => void = () => {};
-      mockFetchResolvedEntityFilterOverrides.mockReturnValue(
+      mockFetchResolvedEntityOverrides.mockReturnValue(
         new Promise((resolve) => {
           resolveOverrides = resolve;
         })
       );
 
       const { result } = renderGridData(FILTERED_OPTIONS);
-      await waitFor(() => expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalled());
+      await waitFor(() => expect(mockFetchResolvedEntityOverrides).toHaveBeenCalled());
 
       expect(mockFetchSortPage).not.toHaveBeenCalled();
       expect(mockRunQuery).not.toHaveBeenCalled();
@@ -191,7 +191,7 @@ describe('useEntityGridData', () => {
 
     it('reports the overrides it cannot read, and reads no rows', async () => {
       const error = new Error('too many resolved entities');
-      mockFetchResolvedEntityFilterOverrides.mockRejectedValue(error);
+      mockFetchResolvedEntityOverrides.mockRejectedValue(error);
 
       renderGridData(FILTERED_OPTIONS);
 
@@ -206,7 +206,7 @@ describe('useEntityGridData', () => {
 
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
-      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
+      expect(mockFetchResolvedEntityOverrides).not.toHaveBeenCalled();
     });
 
     it('does not read the overrides for filters on other columns', async () => {
@@ -217,7 +217,7 @@ describe('useEntityGridData', () => {
 
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
-      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
+      expect(mockFetchResolvedEntityOverrides).not.toHaveBeenCalled();
     });
 
     it('does not read the overrides for individual rows', async () => {
@@ -225,7 +225,7 @@ describe('useEntityGridData', () => {
 
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
-      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
+      expect(mockFetchResolvedEntityOverrides).not.toHaveBeenCalled();
     });
 
     it('does not apply the overrides of resolved rows to individual rows', async () => {

@@ -198,7 +198,7 @@ export const useEntityFilterBarCounts = ({
   filter?: QueryDslQueryContainer;
 }): UseEntityFilterBarCountsResult => {
   const { data: dataServices } = useKibana().services;
-  const searchExpression = useSearchBarExpression();
+  const { searchExpression, isSearchPending } = useSearchBarExpression(rowsMode);
   const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
   const concreteEntityIndexName = resolvedIndex?.indexName;
 
@@ -226,7 +226,7 @@ export const useEntityFilterBarCounts = ({
     error: changesError,
   } = useQuery({
     queryKey: ['entity-filter-value-changes', spaceId, concreteEntityIndexName, searchExpression],
-    enabled: isResolved && !!spaceId && !!concreteEntityIndexName,
+    enabled: isResolved && !!spaceId && !!concreteEntityIndexName && !isSearchPending,
     keepPreviousData: true,
     queryFn: ({ signal }) =>
       fetchResolvedEntityValueChanges(

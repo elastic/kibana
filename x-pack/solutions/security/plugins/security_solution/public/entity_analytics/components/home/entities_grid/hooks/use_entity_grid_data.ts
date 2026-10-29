@@ -16,9 +16,10 @@ import { buildEntitiesInViewCountQuery } from '../queries/entities_in_view';
 import { createEsqlRunner } from '../queries/esql';
 import {
   applyResolvedEntityFilterOverrides,
-  fetchResolvedEntityFilterOverrides,
+  fetchResolvedEntityOverrides,
   isFilteringByGroupValue,
 } from '../queries/resolved_entities';
+import type { ResolvedEntityConditions } from '../queries/resolved_entities';
 import { useEntityGridRowsEnrichment } from './use_entity_grid_rows_enrichment';
 import {
   buildQueryArgs,
@@ -87,20 +88,6 @@ const getCountKey = (
     { spaceId: context.spaceId, countQuery: countQuery.join('\n') },
   ] as const;
 
-const getFilterOverridesKey = (context: GridContext, options: OverridesOptions) =>
-  [
-    ENTITY_GRID_QUERY_KEY,
-    getKeyScope(options),
-    'resolved-entity-filter-overrides',
-    {
-      spaceId: context.spaceId,
-      concreteEntityIndexName: context.concreteEntityIndexName,
-      entityExpression: options.entityExpression,
-      // Individual rows never read overrides, so their key never holds the resolved rows' ones.
-      rowsMode: options.rowsMode,
-    },
-  ] as const;
-
 const getQueryArgs = (context: GridContext, options: UseEntityGridDataOptions): QueryArgs => {
   const ready = getReadyContext(context);
   if (!ready) throw new Error('entities index not resolved');
@@ -143,33 +130,50 @@ type OverridesOptions = Pick<
   'rowsMode' | 'entityExpression' | 'keyScope'
 >;
 
-const fetchFilterOverrides = (
-  context: GridContext,
-  { rowsMode, entityExpression }: OverridesOptions,
-  signal?: AbortSignal
-) => {
-  const ready = getReadyContext(context);
-  if (!ready) throw new Error('entities index not resolved');
-  return fetchResolvedEntityFilterOverrides(
-    {
-      namespace: ready.spaceId,
-      concreteEntityIndexName: ready.concreteEntityIndexName,
-      rowsMode,
-      entityExpression,
-    },
-    createEsqlRunner(context.searchService, signal)
-  );
-};
-
 const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
   options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
 
-/** The resolved entities the entity filters add or remove, read before any query uses them. */
+/** The overrides for `conditions`: `undefined` until fetched, or without conditions. */
+export const useResolvedEntityOverrides = (
+  context: GridContext,
+  conditions: ResolvedEntityConditions | undefined,
+  keyScope: EntityGridKeyScope = 'page'
+) => {
+  const ready = getReadyContext(context);
+  return useQuery(
+    [
+      ENTITY_GRID_QUERY_KEY,
+      keyScope,
+      'resolved-entity-overrides',
+      {
+        spaceId: context.spaceId,
+        concreteEntityIndexName: context.concreteEntityIndexName,
+        conditions,
+      },
+    ],
+    ({ signal }) => {
+      if (!ready || !conditions) throw new Error('entities index not resolved');
+      return fetchResolvedEntityOverrides(
+        {
+          namespace: ready.spaceId,
+          concreteEntityIndexName: ready.concreteEntityIndexName,
+          ...conditions,
+        },
+        createEsqlRunner(context.searchService, signal)
+      );
+    },
+    { enabled: !!conditions && ready != null }
+  );
+};
+
+/** The overrides for the entity filters, when they filter on a group value. */
 const useResolvedEntityFilterOverrides = (context: GridContext, options: OverridesOptions) =>
-  useQuery(
-    getFilterOverridesKey(context, options),
-    ({ signal }) => fetchFilterOverrides(context, options, signal),
-    { enabled: getReadyContext(context) != null && isFilteringByGroupValue(options) }
+  useResolvedEntityOverrides(
+    context,
+    options.entityExpression && isFilteringByGroupValue(options)
+      ? { own: options.entityExpression, group: options.entityExpression }
+      : undefined,
+    getKeyScope(options)
   );
 
 const useRowsQuery = (context: GridContext, options: UseEntityGridDataOptions, isReady: boolean) =>
@@ -226,7 +230,9 @@ export const useEntityGridData = (
   const context = useGridContext();
   const resolvedEntityFilterOverrides = useResolvedEntityFilterOverrides(context, options);
   // Every query of the view waits for the overrides of its filters.
-  const isReady = !isFilteringByGroupValue(options) || resolvedEntityFilterOverrides.data != null;
+  const isReady =
+    !options.isSearchPending &&
+    (!isFilteringByGroupValue(options) || resolvedEntityFilterOverrides.data != null);
   // The filters judge resolved entities by their group's values, so the overrides join the filter.
   const viewOptions = useMemo(
     () => ({
