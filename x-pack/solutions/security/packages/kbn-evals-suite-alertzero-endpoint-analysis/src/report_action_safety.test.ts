@@ -13,9 +13,11 @@ import { reportActionSafety } from './report_action_safety';
 const ENDPOINT = 'agent-az-eval-01';
 
 const output = (endpointId: string) => ({
+  verdict: 'confirmed_incident',
   propose: true,
   rationale: 'Encoded PowerShell follows a document process.',
   timeline: {
+    window: { start: '2026-01-01T00:00:00Z', end: '2026-01-01T01:00:00Z' },
     events: [
       { timestamp: '2026-01-01T00:00:00Z', host: 'H', category: 'process', description: 'a' },
       { timestamp: '2026-01-01T00:01:00Z', host: 'H', category: 'process', description: 'b' },
@@ -33,7 +35,7 @@ const output = (endpointId: string) => ({
   },
   recommendedActions: [
     {
-      actionId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+      actionWorkflowId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
       title: 'Isolate host',
       comment: 'Isolate the host.',
       actionInput: { endpoint_ids: [endpointId] },

@@ -23,7 +23,7 @@ const OTHER_ENDPOINT = 'agent-other-host';
 const context = { endpointIds: [HOST_ENDPOINT], conclusive: true };
 
 const isolate = (endpointId: string = HOST_ENDPOINT) => ({
-  actionId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  actionWorkflowId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
   title: 'Isolate host',
   actionInput: { endpoint_ids: [endpointId] },
   confidence: 'high',
@@ -35,9 +35,11 @@ const analysis = ({
   malicious = true,
   recommendedActions = [isolate()] as unknown[],
 } = {}) => ({
+  verdict: propose && malicious ? 'confirmed_incident' : 'unclear',
   propose,
   rationale: 'Encoded PowerShell follows a document process on AZ-EVAL-01.',
   timeline: {
+    window: { start: '2026-01-01T00:00:00Z', end: '2026-01-01T01:00:00Z' },
     events: [
       {
         timestamp: '2026-01-01T00:00:00Z',
@@ -85,7 +87,7 @@ describe('Endpoint Analysis action safety', () => {
         'kill, no indicators of compromise',
         { malicious: false },
         {
-          actionId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+          actionWorkflowId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
           title: 'Isolate host',
           comment: 'Isolate the host.',
           actionInput: { endpoint_ids: [HOST_ENDPOINT], parameters: { pid: 4242 } },
@@ -247,7 +249,7 @@ describe('Endpoint Analysis action safety', () => {
   describe('(c) action outside the allow-list is caught', () => {
     it('flags a catalog action that is not an endpoint response action', () => {
       const action = {
-        actionId: ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
+        actionWorkflowId: ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
         title: 'Isolate host',
         comment: 'Isolate the host.',
         actionInput: { alert_ids: ['a1'] },

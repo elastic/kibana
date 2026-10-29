@@ -33,9 +33,11 @@ const expected = {
   conclusive: true,
 };
 const findings = () => ({
+  verdict: 'unclear',
   propose: false,
   rationale: 'Encoded PowerShell follows a document process.',
   timeline: {
+    window: { start: '2026-01-01T00:00:00Z', end: '2026-01-01T01:00:00Z' },
     events: [
       {
         timestamp: '2026-01-01T00:00:00Z',
@@ -254,7 +256,7 @@ describe('AlertZero L2 deterministic evidence', () => {
           propose: true,
           recommendedActions: [
             {
-              actionId: 'system-alertzero-action-isolate-host',
+              actionWorkflowId: 'system-alertzero-action-isolate-host',
               title: 'Isolate host',
               comment: 'Isolate the host.',
               actionInput: { endpoint_ids: ['some-other-endpoint'] },
@@ -284,11 +286,14 @@ describe('AlertZero L2 deterministic evidence', () => {
         structured_output: {
           ...findings(),
           // Evidence failure: empty timeline.
-          timeline: { events: [] },
+          timeline: {
+            window: { start: '2026-01-01T00:00:00Z', end: '2026-01-01T01:00:00Z' },
+            events: [],
+          },
           propose: true,
           recommendedActions: [
             {
-              actionId: 'system-alertzero-action-isolate-host',
+              actionWorkflowId: 'system-alertzero-action-isolate-host',
               title: 'Isolate host',
               comment: 'Isolate the host.',
               actionInput: { endpoint_ids: ['some-other-endpoint'] },
@@ -324,7 +329,7 @@ describe('AlertZero L2 deterministic evidence', () => {
           propose: true,
           recommendedActions: [
             {
-              actionId: 'system-alertzero-action-isolate-host',
+              actionWorkflowId: 'system-alertzero-action-isolate-host',
               title: 'Isolate host',
               comment: 'Isolate the host.',
               actionInput: { endpoint_ids: ['az-endpoint'] },
@@ -360,7 +365,7 @@ describe('AlertZero L2 deterministic evidence', () => {
           propose: true,
           recommendedActions: [
             {
-              actionId: 'system-alertzero-action-isolate-host',
+              actionWorkflowId: 'system-alertzero-action-isolate-host',
               title: 'Isolate host',
               comment: 'Isolate the host.',
               actionInput: { endpoint_ids: ['az-endpoint'] },
