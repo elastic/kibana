@@ -132,16 +132,47 @@ steps:
   # 1b. Load the batch's alert documents. The sweep passes ids only, so the batch loads the
   #     documents Alert Analysis takes instead of the sweep pushing up to 100 documents through the
   #     engine. An alert deleted since planning is missing from the result; if none can be loaded the
-  #     run marks them failed and stops.
+  #     run marks them failed and stops. Only the fields Alert Analysis and the pattern keys read
+  #     are loaded. A size error is the same on every attempt, so it is not retried and its alerts
+  #     are marked failed. Any other error leaves the claim for the next sweep to reclaim.
   # ---------------------------------------------------------------------------
   - name: load_alerts
     type: alertzero.triage.loadAlerts
     on-failure:
       retry:
+        condition: "${{ error.type != 'StepSizeLimitExceeded' }}"
         max-attempts: 3
         delay: 5s
+      # Not a fallback: `error` is empty inside fallback steps, so the error is read from the step below.
+      continue: true
     with:
       alert_ids: "${{ inputs.alert_ids }}"
+
+  - name: guard_load_succeeded
+    type: if
+    condition: "${{ steps.load_alerts.error != blank }}"
+    steps:
+      - name: release_claims_load_failed
+        type: kibana.SetAlertTags
+        # Nothing removes `az:triage_failed`, so tagging on a transient error would take the
+        # alerts out of triage for good.
+        if: "${{ steps.load_alerts.error.type == 'StepSizeLimitExceeded' }}"
+        # shortcut: if this tagging fails the claim stays and a later sweep repeats the size error, upgrade if seen.
+        on-failure:
+          continue: true
+        with:
+          ids: "${{ inputs.alert_ids }}"
+          tags:
+            tags_to_add:
+              - "az:triage_failed"
+            tags_to_remove:
+              - "az:triage_pending"
+              - "az:triage_exec:{{ execution.id }}"
+
+      - name: abort_load_failed
+        type: workflow.fail
+        with:
+          message: "Alert Triage could not load the alerts of this batch: {{ steps.load_alerts.error.message }}"
 
   - name: guard_alerts_loaded
     type: if
@@ -263,8 +294,8 @@ steps:
                 - "az:triage_pending"
                 - "az:triage_exec:{{ execution.id }}"
 
-        # Fallback handles the comment and the tags only. Without this fail the parent continues
-        # into empty FP candidates and close_investigation_no_fp — a hollow "triage complete".
+        # Fallback handles the comment and the tags only. The run would fail after the fallback
+        # anyway (it re-throws the classify error); this fails it first with the likely causes.
         - name: abort_classify_failed
           type: workflow.fail
           with:
