@@ -22,7 +22,7 @@ import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import { toExecutionError } from '../step/errors';
+import { STEP_SIZE_LIMIT_EXCEEDED, toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
 import { extractConnectorId, extractTokenUsage, parseDuration, renderDuration } from '../utils';
 
@@ -303,8 +303,8 @@ export class StepExecutionRuntime {
   public failStep(error: Error, partialOutput?: unknown): void {
     // Guardrail: this is the single choke point where a thrown error becomes the persisted
     // error for both the step and the workflow execution. The persisted shape is constrained by
-    // `BaseSerializedErrorSchema` (`type` / `message` / optional `details`) and produced by
-    // `toSerializableObject`, which only ever serializes those three fields. So arbitrary instance
+    // `BaseSerializedErrorSchema` (`type` / `message` / optional `details` / optional `retryable`)
+    // and produced by `toSerializableObject`, which only ever serializes those fields. So arbitrary instance
     // fields a custom error may carry — e.g. `KibanaApiCallError.body`/`.headers` holding a full
     // parsed HTTP response — are never written to ES; only what an error explicitly puts in
     // `details` is persisted (`KibanaApiCallError` deliberately limits this to the safe `status`).
@@ -578,7 +578,7 @@ export class StepExecutionRuntime {
     const message = `Step '${stepName}' failed: ${executionError.message}`;
 
     const tags = ['workflow', 'step', 'fail'];
-    if (executionError.type === 'StepSizeLimitExceeded') {
+    if (executionError.type === STEP_SIZE_LIMIT_EXCEEDED) {
       tags.push('response-size-exceeded');
     }
 
