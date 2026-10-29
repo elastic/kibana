@@ -5,40 +5,22 @@
  * 2.0.
  */
 
+/** Version of the daily rollup transforms; bump to replace them. */
 export const RUM_SESSIONS_VERSION = 3;
-/** Pivot / dest-pipeline revision. Replace transform when this changes; dest stays. */
-export const RUM_SESSIONS_SPEC = 10;
 /**
- * Last-seen / identity `top_metrics` stay size 1 so dest ingest still gets a
- * flattened metrics map (ES #156876 keeps that shape).
- */
-export const RUM_LAST_SEEN_TOP_SIZE = 1;
-/**
- * First-N page/click path on the session dest. ES #156876 writes `token.top[]`
- * for size > 1. Cap is the cluster default `index.top_metrics_max_size` (10).
- */
-export const RUM_SEQUENCE_TOP_SIZE = 10;
-export const RUM_CLICK_TARGET_FIELD = 'attributes.browser.css_selector';
-export const RUM_SESSIONS_TRANSFORM_ID = `ux-rum-sessions-${RUM_SESSIONS_VERSION}`;
-/**
- * Sessions index written by the digitalExperience plugin's sessions transform, which ux reads but
- * doesn't own. Mirrors `SESSIONS_INDEX_PATTERN` there: ux can't import it, as that plugin can
- * optionally depend on this one.
+ * The sessions index, and the transforms that fill it, belong to the digitalExperience plugin.
+ * ux only reads them. The values below mirror `SESSIONS_INDEX_PATTERN`, `SESSIONS_TRANSFORM_PATTERN`,
+ * `SESSIONS_SYNC_DELAY` and `SESSIONS_LOOKBACK_DAYS` in that plugin, which ux can't import because
+ * that plugin can optionally depend on this one.
  */
 export const RUM_SESSIONS_INDEX = 'digital-experience-sessions-*';
-export const RUM_SESSIONS_INDEX_PATTERN = 'ux-rum-sessions-*';
-export const RUM_SESSIONS_TEMPLATE_NAME = 'ux-rum-sessions';
-export const RUM_SESSIONS_PIPELINE_NAME = 'ux-rum-sessions-dest';
-export const RUM_NORMALIZE_PIPELINE_NAME = 'ux-rum-normalize';
+export const RUM_SESSIONS_INDEX_PATTERN = RUM_SESSIONS_INDEX;
+export const RUM_SESSIONS_TRANSFORM_PATTERN = 'digital-experience-sessions-*';
+/** Sync delay of the sessions transforms, which the digitalExperience plugin doesn't let users change. */
+export const RUM_SESSIONS_TRANSFORM_SYNC_DELAY = '60s';
+/** History the sessions transforms keep; the digitalExperience plugin doesn't let users change it. */
+export const RUM_SESSIONS_LOOKBACK_DAYS = 30;
 export const RUM_CANONICAL_SESSION_ID_FIELD = 'resource.attributes.session.id';
-/**
- * Pivot / list grouping. Resource `session.id` is frozen at SDK start; the
- * processors re-stamp the rotated id on `attributes.session.id`.
- */
-export const RUM_SESSION_GROUP_FIELD = 'attributes.session.id';
-/** Dest list default is start_time desc. Sort is create-time only. */
-export const RUM_SESSIONS_INDEX_SORT_FIELD = ['start_time', 'session.id'] as const;
-export const RUM_SESSIONS_INDEX_SORT_ORDER = ['desc', 'asc'] as const;
 /**
  * OTel logsdb source sort. session.id alone drops in-session time locality;
  * Elasticsearch wants @timestamp last (desc) on a custom logsdb sort.
@@ -72,16 +54,12 @@ export const RUM_OTEL_CUSTOM_COMPONENTS = [
 export const RUM_CANONICAL_SERVICE_NAME_FIELD = 'resource.attributes.service.name';
 export const RUM_CANONICAL_URL_PATH_GROUPED_FIELD = 'attributes.url.path.grouped';
 export const RUM_CANONICAL_BROWSER_NAME_FIELD = 'attributes.browser.name';
-export const RUM_CANONICAL_ERROR_GROUP_FIELD = 'attributes.error.group';
-export const RUM_HAS_REPLAY_FIELD = 'attributes.rum.has_replay';
 export const RUM_SESSIONS_MANAGED_BY = 'ux';
+/** Default sync delay of the daily rollup transforms. */
 export const RUM_SESSIONS_SYNC_DELAY = '5m';
 export const RUM_SESSIONS_LAG_SLACK_SECONDS = 15 * 60;
-export const RUM_SESSIONS_PARTITION_COUNT = 16;
-export const RUM_SESSIONS_LOOKBACK_DAYS = 90;
-export const RUM_SESSIONS_LOOKBACK_DAYS_MIN = 1;
-export const RUM_SESSIONS_LOOKBACK_DAYS_MAX = 400;
-export const RUM_SESSIONS_RETENTION_SLACK_DAYS = 3;
+/** Documents the sessions transforms keep past the lookback, as their retention policy does. */
+export const RUM_SESSIONS_RETENTION_SLACK_DAYS = 1;
 
 const ES_TIME_VALUE = /^([1-9]\d*)([smh])$/;
 
@@ -116,53 +94,14 @@ export const approximateCheckpointWatermark = (
   };
 };
 
-export const rumSessionsLagWarnSeconds = (syncDelay = RUM_SESSIONS_SYNC_DELAY): number =>
+export const rumSessionsLagWarnSeconds = (syncDelay = RUM_SESSIONS_TRANSFORM_SYNC_DELAY): number =>
   parseEsTimeValueSeconds(syncDelay) + RUM_SESSIONS_LAG_SLACK_SECONDS;
 
-export const clampLookbackDays = (value: unknown): number => {
-  const n = Math.round(Number(value));
-  if (!Number.isFinite(n)) {
-    return RUM_SESSIONS_LOOKBACK_DAYS;
-  }
-  return Math.min(RUM_SESSIONS_LOOKBACK_DAYS_MAX, Math.max(RUM_SESSIONS_LOOKBACK_DAYS_MIN, n));
-};
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-export const isValidLookbackDays = (value: unknown): value is number => {
-  const n = Number(value);
-  return (
-    Number.isInteger(n) &&
-    n >= RUM_SESSIONS_LOOKBACK_DAYS_MIN &&
-    n <= RUM_SESSIONS_LOOKBACK_DAYS_MAX
-  );
-};
-
-/** Calendar-day rounding so the range is cacheable (transforms-at-scale). */
-export const sessionsSourceLookback = (days = RUM_SESSIONS_LOOKBACK_DAYS): string =>
-  `now-${clampLookbackDays(days)}d/d`;
-
-export const sessionsRetentionMaxAge = (days = RUM_SESSIONS_LOOKBACK_DAYS): string =>
-  `${clampLookbackDays(days) + RUM_SESSIONS_RETENTION_SLACK_DAYS}d`;
-
+/** How far back the sessions index reaches: its lookback plus the days the retention policy adds. */
 export const sessionsIndexWindowMs = (days = RUM_SESSIONS_LOOKBACK_DAYS): number =>
-  (clampLookbackDays(days) + RUM_SESSIONS_RETENTION_SLACK_DAYS) * 24 * 60 * 60 * 1000;
-
-const LOOKBACK_GTE = /^now-(\d+)([dMy])(?:\/d)?$/;
-
-export const parseLookbackDays = (gte?: string): number | undefined => {
-  const match = gte ? LOOKBACK_GTE.exec(gte) : undefined;
-  if (!match) {
-    return undefined;
-  }
-  const amount = Number(match[1]);
-  const unit = match[2];
-  if (unit === 'y') {
-    return amount * 365;
-  }
-  if (unit === 'M') {
-    return amount * 30;
-  }
-  return amount;
-};
+  (Math.max(1, Math.round(days)) + RUM_SESSIONS_RETENTION_SLACK_DAYS) * MS_PER_DAY;
 
 export const RUM_SESSIONS_LAG_WARN_SECONDS = rumSessionsLagWarnSeconds();
 
@@ -212,9 +151,9 @@ export const emptyRumAnalyticsStatus = (): RumAnalyticsStatus => ({
   state: 'unknown',
   watermark: null,
   lagSeconds: null,
-  transformId: RUM_SESSIONS_TRANSFORM_ID,
+  transformId: RUM_SESSIONS_TRANSFORM_PATTERN,
   index: RUM_SESSIONS_INDEX,
-  syncDelay: RUM_SESSIONS_SYNC_DELAY,
+  syncDelay: RUM_SESSIONS_TRANSFORM_SYNC_DELAY,
   sourceLookbackDays: RUM_SESSIONS_LOOKBACK_DAYS,
 });
 

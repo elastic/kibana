@@ -42,7 +42,7 @@ export type RumAppsQueryStage = 'index' | 'remainder';
 export interface RumAppsResponse {
   apps: RumAppInventoryRow[];
   sessionTraffic: RumSessionTrafficPoint[];
-  /** `sessions` = ux-rum-sessions dest; `raw` = OTel traces/logs. */
+  /** `sessions` = digital-experience-sessions dest; `raw` = OTel traces/logs. */
   source: 'sessions' | 'raw';
   /** Client should fetch `stage=remainder` for the open tail. */
   remainder: boolean;

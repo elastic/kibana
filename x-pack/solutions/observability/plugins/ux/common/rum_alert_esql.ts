@@ -28,7 +28,7 @@ Return JSON only:
 Rules:
 - The query MUST return rows only when the user's condition is true (a breach). Last command is a WHERE on an aggregated metric.
 - Put FROM on its own line. Never put | commands on the FROM line.
-- FROM only these exact patterns (no quotes, no METADATA, no cluster prefix), comma-separated if needed: traces-*.otel-*, logs-*.otel-*, ux-rum-sessions-*
+- FROM only these exact patterns (no quotes, no METADATA, no cluster prefix), comma-separated if needed: traces-*.otel-*, logs-*.otel-*, digital-experience-sessions-*
 - Do not use ENRICH, LOOKUP, SHOW, SET, DATE_EXTRACT, DAY_OF_WEEK, or any other index pattern.
 - Do not add a time or weekday filter; the rule executor applies lookback on @timestamp (events) or start_time (session index).
 - If the user asks why / investigates a symptom (errors on Tuesday, slow checkout), write a threshold on that symptom (exception count, p75 LCP, …), not a calendar predicate.
@@ -46,9 +46,9 @@ Rules:
   - attributes.browser.web_vital.value
   - attributes.exception.type
   - attributes.exception.message
-- Known session-index fields (FROM ux-rum-sessions-*):
-  - start_time, service.name, entry_page, user.key, error_count, rage_click_count, dead_click_count, page_count
-- Web vitals and exceptions live on logs-*.otel-*. Page views may need traces-*.otel-* (name == "documentLoad") union logs. Session outcomes live on ux-rum-sessions-*.
+- Known session-index fields (FROM digital-experience-sessions-*):
+  - start_time, service.name, entry_page, user.key, error_count, rage_click_count, dead_click_count, page_view_count
+- Web vitals and exceptions live on logs-*.otel-*. Page views may need traces-*.otel-* (name == "documentLoad") union logs. Session outcomes live on digital-experience-sessions-*.
 - If grouping by page, STATS ... BY page = COALESCE(\`attributes.page.url.path\`, \`attributes.url.full\`) and only then.
 - Example JSON query value (newlines in the string):
 FROM logs-*.otel-*
@@ -108,14 +108,14 @@ const fromClauseOf = (
   const fromIndex = lines.findIndex((line) => /^\s*FROM\s+/i.test(line));
   if (fromIndex < 0) {
     throw new Error(
-      'ES|QL must start with FROM traces-*.otel-*, logs-*.otel-*, and/or ux-rum-sessions-*'
+      'ES|QL must start with FROM traces-*.otel-*, logs-*.otel-*, and/or digital-experience-sessions-*'
     );
   }
   const first = lines[fromIndex].trim();
   const match = first.match(/^FROM\s+(.+)$/i);
   if (!match) {
     throw new Error(
-      'ES|QL must start with FROM traces-*.otel-*, logs-*.otel-*, and/or ux-rum-sessions-*'
+      'ES|QL must start with FROM traces-*.otel-*, logs-*.otel-*, and/or digital-experience-sessions-*'
     );
   }
   // Pipes after FROM are commands, not sources. DATE_EXTRACT(..., @timestamp) commas
@@ -147,8 +147,8 @@ export const normalizeRumAlertFromSource = (raw: string): string | undefined => 
   if (lower === 'traces-*' || /^traces-.*otel/.test(lower)) {
     return 'traces-*.otel-*';
   }
-  if (/^ux-rum-sessions/.test(lower)) {
-    return 'ux-rum-sessions-*';
+  if (/^(digital-experience|ux-rum)-sessions/.test(lower)) {
+    return 'digital-experience-sessions-*';
   }
   return undefined;
 };
@@ -162,7 +162,7 @@ export const rewriteRumAlertFrom = (query: string): string => {
   const unknown = mapped.filter((item) => !item.value).map((item) => item.raw);
   if (unknown.length > 0) {
     throw new Error(
-      `ES|QL must FROM traces-*.otel-*, logs-*.otel-*, and/or ux-rum-sessions-* only (got ${unknown.join(
+      `ES|QL must FROM traces-*.otel-*, logs-*.otel-*, and/or digital-experience-sessions-* only (got ${unknown.join(
         ', '
       )})`
     );
@@ -238,7 +238,7 @@ export const stripFinalWhere = (query: string): string => {
 };
 
 export const rumAlertTimeField = (query: string): string =>
-  /^\s*FROM\s+(?:[A-Za-z0-9_\-*]+:)?ux-rum-sessions/im.test(query) ? 'start_time' : '@timestamp';
+  /^\s*FROM\s+(?:[A-Za-z0-9_\-*]+:)?(?:digital-experience|ux-rum)-sessions/im.test(query) ? 'start_time' : '@timestamp';
 
 const esqlQuote = (value: string): string =>
   `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;

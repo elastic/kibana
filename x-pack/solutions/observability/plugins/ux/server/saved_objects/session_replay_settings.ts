@@ -29,12 +29,10 @@ import {
   SESSION_IDLE_MS_MIN,
   SESSION_IDLE_MS_MAX,
 } from '../../common/session_replay_settings';
-import {
-  RUM_SESSIONS_LOOKBACK_DAYS,
-  RUM_SESSIONS_LOOKBACK_DAYS_MAX,
-  RUM_SESSIONS_LOOKBACK_DAYS_MIN,
-  RUM_SESSIONS_SYNC_DELAY,
-} from '../../common/rum_sessions';
+import { RUM_SESSIONS_SYNC_DELAY } from '../../common/rum_sessions';
+
+/** Bounds of `sourceLookbackDays` as model version 4 stored it. Frozen with that version. */
+const V4_LOOKBACK_DAYS = { default: 90, min: 1, max: 400 } as const;
 
 const attributesSchemaV1 = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
@@ -70,9 +68,9 @@ const attributesSchemaV3 = attributesSchemaV2.extends({
 
 const attributesSchemaV4 = attributesSchemaV3.extends({
   sourceLookbackDays: schema.number({
-    defaultValue: RUM_SESSIONS_LOOKBACK_DAYS,
-    min: RUM_SESSIONS_LOOKBACK_DAYS_MIN,
-    max: RUM_SESSIONS_LOOKBACK_DAYS_MAX,
+    defaultValue: V4_LOOKBACK_DAYS.default,
+    min: V4_LOOKBACK_DAYS.min,
+    max: V4_LOOKBACK_DAYS.max,
   }),
 });
 
@@ -110,6 +108,9 @@ const attributesSchemaV6 = attributesSchemaV5.extends({
 const attributesSchemaV7 = attributesSchemaV6.extends({
   maskAllText: schema.boolean({ defaultValue: false }),
 });
+
+// The sessions transforms belong to the digitalExperience plugin, which keeps a fixed history.
+const attributesSchemaV8 = attributesSchemaV7.extends({ sourceLookbackDays: null });
 
 export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
   name: SESSION_REPLAY_SETTINGS_SO_TYPE,
@@ -184,10 +185,10 @@ export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
             attributes: {
               sourceLookbackDays:
                 typeof doc.attributes.sourceLookbackDays === 'number' &&
-                doc.attributes.sourceLookbackDays >= RUM_SESSIONS_LOOKBACK_DAYS_MIN &&
-                doc.attributes.sourceLookbackDays <= RUM_SESSIONS_LOOKBACK_DAYS_MAX
+                doc.attributes.sourceLookbackDays >= V4_LOOKBACK_DAYS.min &&
+                doc.attributes.sourceLookbackDays <= V4_LOOKBACK_DAYS.max
                   ? doc.attributes.sourceLookbackDays
-                  : RUM_SESSIONS_LOOKBACK_DAYS,
+                  : V4_LOOKBACK_DAYS.default,
             },
           }),
         },
@@ -265,6 +266,13 @@ export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: attributesSchemaV7.extends({}, { unknowns: 'ignore' }),
         create: attributesSchemaV7,
+      },
+    },
+    8: {
+      changes: [{ type: 'data_removal', removedAttributePaths: ['sourceLookbackDays'] }],
+      schemas: {
+        forwardCompatibility: attributesSchemaV8.extends({}, { unknowns: 'ignore' }),
+        create: attributesSchemaV8,
       },
     },
   },

@@ -34,12 +34,12 @@ describe('normalizeRumBudgetIndex', () => {
   });
 
   it('rejects other patterns', () => {
-    expect(() => normalizeRumBudgetIndex('.kibana-*')).toThrow(/ux-rum-sessions-\*/);
+    expect(() => normalizeRumBudgetIndex('.kibana-*')).toThrow(/digital-experience-sessions-\*/);
   });
 
   it('accepts the session index', () => {
-    expect(normalizeRumBudgetIndex('ux-rum-sessions-2')).toBe('ux-rum-sessions-*');
-    expect(normalizeRumBudgetIndex('*:ux-rum-sessions-*')).toBe('ux-rum-sessions-*');
+    expect(normalizeRumBudgetIndex('digital-experience-sessions-2')).toBe('digital-experience-sessions-*');
+    expect(normalizeRumBudgetIndex('*:digital-experience-sessions-*')).toBe('digital-experience-sessions-*');
   });
 });
 

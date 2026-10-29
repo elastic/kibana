@@ -66,7 +66,7 @@ describe('buildSessionIndexFilters', () => {
     expect(filters).toEqual(
       expect.arrayContaining([
         { term: { 'service.name': 'shop' } },
-        { term: { 'browser.name': 'Chrome' } },
+        { term: { 'user_agent.browser': 'Chrome' } },
         { range: { rage_click_count: { gt: 0 } } },
       ])
     );
@@ -82,8 +82,8 @@ describe('buildSessionIndexFilters', () => {
     });
     expect(filters).toEqual(
       expect.arrayContaining([
-        { term: { connection: '4g' } },
-        { term: { device: '8' } },
+        { term: { 'network.connection_type': '4g' } },
+        { term: { 'user_agent.device': '8' } },
         { term: { error_groups: 'TypeError' } },
       ])
     );
@@ -99,9 +99,9 @@ describe('buildSessionIndexFilters', () => {
     });
     expect(filters).toEqual(
       expect.arrayContaining([
-        { terms: { 'browser.name': ['Chrome', 'Firefox'] } },
-        { terms: { country_iso: ['US', 'DE'] } },
-        { terms: { connection: ['4g', '3g'] } },
+        { terms: { 'user_agent.browser': ['Chrome', 'Firefox'] } },
+        { terms: { 'geo.country_iso': ['US', 'DE'] } },
+        { terms: { 'network.connection_type': ['4g', '3g'] } },
       ])
     );
   });
@@ -115,8 +115,8 @@ describe('buildSessionIndexFilters', () => {
     });
     expect(filters).toEqual(
       expect.arrayContaining([
-        { bool: { must_not: [{ term: { 'browser.name': 'Chrome' } }] } },
-        { bool: { must_not: [{ terms: { country_iso: ['US', 'DE'] } }] } },
+        { bool: { must_not: [{ term: { 'user_agent.browser': 'Chrome' } }] } },
+        { bool: { must_not: [{ terms: { 'geo.country_iso': ['US', 'DE'] } }] } },
       ])
     );
   });

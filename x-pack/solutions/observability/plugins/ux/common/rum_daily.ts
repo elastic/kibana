@@ -12,7 +12,6 @@ import {
   RUM_SESSIONS_MANAGED_BY,
   RUM_SESSIONS_SYNC_DELAY,
   RUM_SESSIONS_VERSION,
-  sessionsSourceLookback,
   type RumRollupStatus,
 } from './rum_sessions';
 
@@ -43,7 +42,6 @@ export const RUM_DAILY_MANAGED_BY = RUM_SESSIONS_MANAGED_BY;
 export const RUM_DAILY_SYNC_DELAY = RUM_SESSIONS_SYNC_DELAY;
 export const RUM_DAILY_RETENTION = '400d';
 export const RUM_DAILY_SOURCE_LOOKBACK = 'now-400d';
-export const RUM_SESSIONS_SOURCE_LOOKBACK = sessionsSourceLookback();
 /** Daily + open-day tail once the window is longer than 7×24h (`now-7d/d` included). */
 export const RUM_DAILY_LONG_RANGE_MS = 7 * 24 * 60 * 60 * 1000;
 

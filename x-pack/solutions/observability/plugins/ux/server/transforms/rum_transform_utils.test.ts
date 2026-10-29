@@ -6,74 +6,14 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { RUM_SESSION_GROUP_FIELD } from '../../common/rum_sessions';
 import {
   esStatusCode,
-  installedRetentionMaxAge,
-  installedSourceIndex,
-  installedSourceLookbackGte,
   isEsAuthzDenied,
   isEsNotFound,
   isEsResourceExists,
   readRollupStatus,
-  transformNeedsUpgrade,
-  transformSourceWindowUpdate,
+  readTransformsRollupStatus,
 } from './rum_transform_utils';
-
-const current = {
-  transforms: [
-    {
-      source: {
-        index: ['traces-*.otel-*'],
-        query: {
-          bool: {
-            filter: [
-              { range: { '@timestamp': { gte: 'now-30d' } } },
-              { exists: { field: RUM_SESSION_GROUP_FIELD } },
-            ],
-          },
-        },
-      },
-      retention_policy: { time: { field: 'end_time', max_age: '30d' } },
-    },
-  ],
-};
-
-describe('transform source window helpers', () => {
-  it('reads the installed lookback and retention', () => {
-    expect(installedSourceIndex(current)).toEqual(['traces-*.otel-*']);
-    expect(installedSourceLookbackGte(current)).toBe('now-30d');
-    expect(installedRetentionMaxAge(current)).toBe('30d');
-  });
-
-  it('builds an _update body that includes source.index', () => {
-    expect(
-      transformSourceWindowUpdate({
-        index: ['traces-*.otel-*'],
-        lookbackGte: 'now-90d',
-        retentionMaxAge: '93d',
-      })
-    ).toEqual({
-      source: {
-        index: ['traces-*.otel-*'],
-        query: {
-          bool: {
-            filter: [
-              { range: { '@timestamp': { gte: 'now-90d' } } },
-              { exists: { field: RUM_SESSION_GROUP_FIELD } },
-            ],
-          },
-        },
-      },
-      retention_policy: { time: { field: 'end_time', max_age: '93d' } },
-    });
-  });
-
-  it('does not throw when getTransform returned nothing', () => {
-    expect(installedSourceLookbackGte(null)).toBeUndefined();
-    expect(installedSourceLookbackGte(undefined)).toBeUndefined();
-  });
-});
 
 const esError = (statusCode: number) =>
   Object.assign(new Error('security_exception'), { statusCode, meta: { statusCode } });
@@ -109,7 +49,7 @@ describe('es status helpers', () => {
           body: {
             error: {
               type: 'resource_already_exists_exception',
-              reason: 'Transform with id [ux-rum-sessions-3] already exists',
+              reason: 'Transform with id [ux-rum-pages-daily-3] already exists',
             },
           },
         },
@@ -124,37 +64,6 @@ describe('es status helpers', () => {
   });
 });
 
-describe('transformNeedsUpgrade', () => {
-  const withMeta = (_meta: unknown): ElasticsearchClient =>
-    ({
-      transform: { getTransform: jest.fn().mockResolvedValue({ transforms: [{ _meta }] }) },
-    } as unknown as ElasticsearchClient);
-
-  const args = { transformId: 'ux-rum-sessions-3', version: 3, spec: 6 };
-
-  it('is true when the installed spec is behind the code', async () => {
-    const client = withMeta({ managed_by: 'ux', version: 3, spec: 4 });
-    expect(await transformNeedsUpgrade({ client, ...args })).toBe(true);
-  });
-
-  it('is true when the installed version is behind the code', async () => {
-    const client = withMeta({ managed_by: 'ux', version: 2, spec: 6 });
-    expect(await transformNeedsUpgrade({ client, ...args })).toBe(true);
-  });
-
-  it('is false when version and spec already match', async () => {
-    const client = withMeta({ managed_by: 'ux', version: 3, spec: 6 });
-    expect(await transformNeedsUpgrade({ client, ...args })).toBe(false);
-  });
-
-  it('is false when the transform is missing', async () => {
-    const client = {
-      transform: { getTransform: jest.fn().mockRejectedValue(esError(404)) },
-    } as unknown as ElasticsearchClient;
-    expect(await transformNeedsUpgrade({ client, ...args })).toBe(false);
-  });
-});
-
 describe('readRollupStatus', () => {
   it('uses dest search when transform stats are forbidden', async () => {
     const search = jest.fn().mockResolvedValue({ hits: { hits: [] } });
@@ -163,10 +72,10 @@ describe('readRollupStatus', () => {
         getTransformStats: jest.fn().mockRejectedValue(esError(403)),
         search,
       }),
-      { transformId: 'ux-rum-sessions-3', index: 'ux-rum-sessions-3', syncDelay: '5m' }
+      { transformId: 'ux-rum-pages-daily-3', index: 'ux-rum-pages-daily-3', syncDelay: '5m' }
     );
     expect(search).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'ux-rum-sessions-3', size: 0 })
+      expect.objectContaining({ index: 'ux-rum-pages-daily-3', size: 0 })
     );
     expect(status.installed).toBe(true);
     expect(status.state).toBe('unknown');
@@ -179,14 +88,14 @@ describe('readRollupStatus', () => {
         getTransformStats: jest.fn().mockRejectedValue(esError(403)),
         search: jest.fn().mockRejectedValue(esError(403)),
       }),
-      { transformId: 'ux-rum-sessions-3', index: 'ux-rum-sessions-3' }
+      { transformId: 'ux-rum-pages-daily-3', index: 'ux-rum-pages-daily-3' }
     );
     expect(status).toEqual({
       installed: false,
       state: 'unknown',
       watermark: null,
-      transformId: 'ux-rum-sessions-3',
-      index: 'ux-rum-sessions-3',
+      transformId: 'ux-rum-pages-daily-3',
+      index: 'ux-rum-pages-daily-3',
     });
   });
 
@@ -196,8 +105,88 @@ describe('readRollupStatus', () => {
         getTransformStats: jest.fn().mockRejectedValue(esError(404)),
         search: jest.fn().mockRejectedValue(esError(404)),
       }),
-      { transformId: 'ux-rum-sessions-3', index: 'ux-rum-sessions-3' }
+      { transformId: 'ux-rum-pages-daily-3', index: 'ux-rum-pages-daily-3' }
     );
     expect(status.installed).toBe(false);
+  });
+});
+
+describe('readTransformsRollupStatus', () => {
+  const stats = (...rows: Array<{ state: string; checkpointMillis?: number }>) =>
+    jest.fn().mockResolvedValue({
+      transforms: rows.map(({ state, checkpointMillis }) => ({
+        state,
+        checkpointing: {
+          last: checkpointMillis == null ? {} : { time_upper_bound_millis: checkpointMillis },
+        },
+      })),
+    });
+  const args = {
+    transformId: 'digital-experience-sessions-*',
+    index: 'digital-experience-sessions-*',
+  };
+
+  it('reads every partition with a wildcard and tolerates no match', async () => {
+    const getTransformStats = stats({ state: 'started', checkpointMillis: 1000 });
+    await readTransformsRollupStatus(asClient({ getTransformStats }), args);
+    expect(getTransformStats).toHaveBeenCalledWith({
+      transform_id: 'digital-experience-sessions-*',
+      allow_no_match: true,
+    });
+  });
+
+  it('reports the worst state and the oldest checkpoint across partitions', async () => {
+    const status = await readTransformsRollupStatus(
+      asClient({
+        getTransformStats: stats(
+          { state: 'started', checkpointMillis: Date.parse('2026-10-29T10:00:00.000Z') },
+          { state: 'failed', checkpointMillis: Date.parse('2026-10-29T09:00:00.000Z') },
+          { state: 'indexing', checkpointMillis: Date.parse('2026-10-29T11:00:00.000Z') }
+        ),
+      }),
+      args
+    );
+    expect(status).toEqual({
+      installed: true,
+      state: 'failed',
+      watermark: '2026-10-29T09:00:00.000Z',
+      ...args,
+    });
+  });
+
+  it('has no watermark until every partition has a checkpoint', async () => {
+    const status = await readTransformsRollupStatus(
+      asClient({
+        getTransformStats: stats(
+          { state: 'started', checkpointMillis: Date.parse('2026-10-29T10:00:00.000Z') },
+          { state: 'started' }
+        ),
+      }),
+      args
+    );
+    expect(status.installed).toBe(true);
+    expect(status.watermark).toBeNull();
+  });
+
+  it('is not installed when no transform and no index matches', async () => {
+    const status = await readTransformsRollupStatus(
+      asClient({
+        getTransformStats: jest.fn().mockResolvedValue({ transforms: [] }),
+        search: jest.fn().mockRejectedValue(esError(404)),
+      }),
+      args
+    );
+    expect(status.installed).toBe(false);
+  });
+
+  it('infers installed from the dest search when stats are forbidden', async () => {
+    const search = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+    const status = await readTransformsRollupStatus(
+      asClient({ getTransformStats: jest.fn().mockRejectedValue(esError(403)), search }),
+      args
+    );
+    expect(search).toHaveBeenCalledWith(expect.objectContaining({ allow_no_indices: false }));
+    expect(status.installed).toBe(true);
+    expect(status.state).toBe('unknown');
   });
 });

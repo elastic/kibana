@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RUM_SESSIONS_LOOKBACK_DAYS, RUM_SESSIONS_SYNC_DELAY } from './rum_sessions';
+import { RUM_SESSIONS_SYNC_DELAY } from './rum_sessions';
 import {
   normalizeSessionReplaySettings,
   sdkPrivacyFromSettings,
@@ -17,7 +17,7 @@ import {
 } from './session_replay_settings';
 
 describe('normalizeSessionReplaySettings', () => {
-  it('keeps a valid transform sync delay', () => {
+  it('keeps a valid rollup sync delay', () => {
     expect(normalizeSessionReplaySettings({ syncDelay: '1m' }).syncDelay).toBe('1m');
   });
 
@@ -28,15 +28,10 @@ describe('normalizeSessionReplaySettings', () => {
     expect(normalizeSessionReplaySettings({}).syncDelay).toBe(RUM_SESSIONS_SYNC_DELAY);
   });
 
-  it('clamps session lookback days', () => {
-    expect(normalizeSessionReplaySettings({ sourceLookbackDays: 180 }).sourceLookbackDays).toBe(
-      180
+  it('drops the session lookback that the digitalExperience plugin now fixes', () => {
+    expect(normalizeSessionReplaySettings({ sourceLookbackDays: 180 } as never)).not.toHaveProperty(
+      'sourceLookbackDays'
     );
-    expect(normalizeSessionReplaySettings({ sourceLookbackDays: 0 }).sourceLookbackDays).toBe(1);
-    expect(normalizeSessionReplaySettings({ sourceLookbackDays: 999 }).sourceLookbackDays).toBe(
-      400
-    );
-    expect(normalizeSessionReplaySettings({}).sourceLookbackDays).toBe(RUM_SESSIONS_LOOKBACK_DAYS);
   });
 
   it('defaults CCS settings off', () => {
@@ -64,9 +59,7 @@ describe('normalizeSessionReplaySettings', () => {
   });
 
   it('masks all page text only when opted in', () => {
-    expect(
-      sdkPrivacyFromSettings(normalizeSessionReplaySettings({ maskAllText: true }))
-    ).toEqual({
+    expect(sdkPrivacyFromSettings(normalizeSessionReplaySettings({ maskAllText: true }))).toEqual({
       maskAllInputs: true,
       maskTextSelector: '*',
     });

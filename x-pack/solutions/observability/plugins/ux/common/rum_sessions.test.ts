@@ -8,21 +8,18 @@
 import {
   approximateCheckpointWatermark,
   canUseSessionIndex,
-  clampLookbackDays,
   emptyRumAnalyticsStatus,
   eventSequenceToken,
   isValidEsTimeValue,
-  isValidLookbackDays,
   newSessionIds,
   normalizeSequenceToken,
   parseEsTimeValueSeconds,
   parseIncludeRaw,
-  parseLookbackDays,
   rangeIncludesOpenTail,
   rumAnalyticsHealth,
+  RUM_SESSIONS_LOOKBACK_DAYS,
   rumSessionsLagWarnSeconds,
-  sessionsRetentionMaxAge,
-  sessionsSourceLookback,
+  sessionsIndexWindowMs,
   shouldMergeRawTail,
   shouldQuerySessionIndex,
 } from './rum_sessions';
@@ -151,20 +148,13 @@ describe('rumAnalyticsHealth', () => {
   });
 });
 
-describe('session lookback helpers', () => {
-  it('clamps and formats lookback and retention', () => {
-    expect(clampLookbackDays(180)).toBe(180);
-    expect(clampLookbackDays(0)).toBe(1);
-    expect(clampLookbackDays(999)).toBe(400);
-    expect(isValidLookbackDays(90)).toBe(true);
-    expect(isValidLookbackDays(0)).toBe(false);
-    expect(sessionsSourceLookback(90)).toBe('now-90d/d');
-    expect(sessionsRetentionMaxAge(90)).toBe('93d');
-    expect(parseLookbackDays('now-30d')).toBe(30);
-    expect(parseLookbackDays('now-90d/d')).toBe(90);
-    expect(parseLookbackDays('now-1y/d')).toBe(365);
-    expect(parseLookbackDays('now-1M')).toBe(30);
-    expect(parseLookbackDays('now-5m')).toBeUndefined();
+describe('sessionsIndexWindowMs', () => {
+  const day = 24 * 60 * 60 * 1000;
+
+  it('reaches the lookback of the digitalExperience sessions transforms plus its retention slack', () => {
+    expect(sessionsIndexWindowMs()).toBe((RUM_SESSIONS_LOOKBACK_DAYS + 1) * day);
+    expect(sessionsIndexWindowMs(90)).toBe(91 * day);
+    expect(sessionsIndexWindowMs(0)).toBe(2 * day);
   });
 });
 

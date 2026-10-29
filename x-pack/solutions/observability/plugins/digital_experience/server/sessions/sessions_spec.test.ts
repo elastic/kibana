@@ -160,7 +160,7 @@ describe('sessions transform spec', () => {
       size: SESSIONS_ERROR_GROUPS_SIZE,
     });
     // `top_metrics` of size > 1 fails on shards where the field is unmapped, hence the filter.
-    expect(aggregations.click_targets.filter.bool?.filter).toEqual(
+    expect(aggregations.click_targets.filter?.bool?.filter).toEqual(
       expect.arrayContaining([{ exists: { field: SOURCE_CLICK_TARGET_FIELD } }])
     );
     expect(aggregations.click_targets.aggs?.targets.top_metrics).toEqual({

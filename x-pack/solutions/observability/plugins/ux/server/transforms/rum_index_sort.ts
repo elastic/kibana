@@ -18,11 +18,7 @@ import {
   RUM_REPLAY_INDEX_PATTERN,
   RUM_REPLAY_INDEX_TEMPLATE_NAME,
   RUM_REPLAY_TEMPLATE_PRIORITY,
-  RUM_SESSIONS_INDEX,
-  RUM_SESSIONS_INDEX_SORT_FIELD,
-  RUM_SESSIONS_INDEX_SORT_ORDER,
   RUM_SESSIONS_MANAGED_BY,
-  RUM_SESSIONS_TRANSFORM_ID,
 } from '../../common/rum_sessions';
 import { isEsNotFound } from './rum_transform_utils';
 
@@ -185,66 +181,6 @@ export const mergeSortSettings = (
 
 const sortErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
-
-export const ensureSessionsDestSorted = async ({
-  client,
-  logger,
-}: {
-  client: ElasticsearchClient;
-  logger?: Logger;
-}): Promise<{ destRecreated: boolean }> => {
-  const exists = await client.indices.exists({ index: RUM_SESSIONS_INDEX });
-  if (!exists) {
-    await client.indices.create({ index: RUM_SESSIONS_INDEX });
-    return { destRecreated: false };
-  }
-  const settings = await client.indices.getSettings({
-    index: RUM_SESSIONS_INDEX,
-    flat_settings: true,
-  });
-  if (matchesIndexSort(settings, RUM_SESSIONS_INDEX_SORT_FIELD, RUM_SESSIONS_INDEX_SORT_ORDER)) {
-    return { destRecreated: false };
-  }
-  logger?.info(
-    `Recreating ${RUM_SESSIONS_INDEX} to apply index sort ${RUM_SESSIONS_INDEX_SORT_FIELD.join(
-      ','
-    )}`
-  );
-  try {
-    await client.transform.stopTransform({
-      transform_id: RUM_SESSIONS_TRANSFORM_ID,
-      force: true,
-      wait_for_completion: true,
-    });
-  } catch {
-    // missing or already stopped
-  }
-  await client.indices.delete({ index: RUM_SESSIONS_INDEX });
-  await client.indices.create({ index: RUM_SESSIONS_INDEX });
-  return { destRecreated: true };
-};
-
-export const resetSessionsTransformAfterDestRecreate = async ({
-  client,
-  logger,
-  destRecreated,
-}: {
-  client: ElasticsearchClient;
-  logger?: Logger;
-  destRecreated: boolean;
-}): Promise<void> => {
-  if (!destRecreated) {
-    return;
-  }
-  logger?.info(`Resetting ${RUM_SESSIONS_TRANSFORM_ID} after dest recreate`);
-  try {
-    await client.transform.resetTransform({ transform_id: RUM_SESSIONS_TRANSFORM_ID });
-  } catch (error) {
-    if (!isEsNotFound(error)) {
-      throw error;
-    }
-  }
-};
 
 const getExistingCustom = async (
   client: ElasticsearchClient,

@@ -26,16 +26,16 @@ describe('assertRumAlertEsql', () => {
 
   it('rejects other index patterns', () => {
     expect(() => assertRumAlertEsql('FROM .kibana-event-log-*\n| LIMIT 1')).toThrow(
-      /ux-rum-sessions-\*/
+      /digital-experience-sessions-\*/
     );
   });
 
   it('accepts the session index', () => {
     expect(
       assertRumAlertEsql(
-        'FROM ux-rum-sessions-2\n| STATS sessions = COUNT(*)\n| WHERE sessions < 5'
+        'FROM digital-experience-sessions-2\n| STATS sessions = COUNT(*)\n| WHERE sessions < 5'
       )
-    ).toContain('FROM ux-rum-sessions-*');
+    ).toContain('FROM digital-experience-sessions-*');
   });
 
   it('rejects ENRICH', () => {
@@ -98,7 +98,7 @@ describe('injectLookbackAfterFrom', () => {
 
   it('uses start_time and the watermark on the session index', () => {
     const next = injectLookbackAfterFrom(
-      'FROM ux-rum-sessions-*\n| STATS sessions = COUNT(*)',
+      'FROM digital-experience-sessions-*\n| STATS sessions = COUNT(*)',
       '15m',
       { watermark: '2026-08-15T10:00:00.000Z' }
     );
@@ -123,8 +123,8 @@ describe('rumAlertGroupingFieldsFromQuery', () => {
 
 describe('rumAlertTimeField', () => {
   it('uses start_time for local and CCS session-index FROM clauses', () => {
-    expect(rumAlertTimeField('FROM ux-rum-sessions-*\n| LIMIT 1')).toBe('start_time');
-    expect(rumAlertTimeField('FROM ccs:ux-rum-sessions-*\n| LIMIT 1')).toBe('start_time');
+    expect(rumAlertTimeField('FROM digital-experience-sessions-*\n| LIMIT 1')).toBe('start_time');
+    expect(rumAlertTimeField('FROM ccs:digital-experience-sessions-*\n| LIMIT 1')).toBe('start_time');
     expect(rumAlertTimeField('FROM logs-*.otel-*\n| LIMIT 1')).toBe('@timestamp');
   });
 });

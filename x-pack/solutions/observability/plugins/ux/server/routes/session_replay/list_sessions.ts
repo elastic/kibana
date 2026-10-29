@@ -26,7 +26,7 @@ import {
   type SessionListStats,
   type SessionSortField,
 } from '../../../common/session_replay';
-import { CLICK_FILTER, EXCEPTION_FILTER } from '../../transforms/rum_sessions_spec';
+import { CLICK_FILTER, EXCEPTION_FILTER } from './event_filters';
 import {
   buildSparkline,
   clientFromHits,

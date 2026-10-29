@@ -9,17 +9,19 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import dateMath from '@kbn/datemath';
 import { parseRumSessionTraffic } from '../../common/rum_apps';
 import { rumAppsSpanFromPoints, type RumAppsSpanResponse } from '../../common/rum_span';
-import {
-  RUM_CANONICAL_SESSION_ID_FIELD,
-  RUM_SESSIONS_INDEX,
-  sessionsSourceLookback,
-} from '../../common/rum_sessions';
+import { RUM_CANONICAL_SESSION_ID_FIELD, RUM_SESSIONS_INDEX } from '../../common/rum_sessions';
 import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
 import { rumEsSearchOptions } from '../routes/rum/es_retry';
 import { PAGE_VIEW_FILTER, rumBaseFilters, sessionCardinality } from '../routes/rum/query';
 import { sessionIndexTimeFilter } from './rum_sessions_query';
 
 const SPAN_BUCKETS = 72;
+/** Days the digitalExperience sessions transform keeps, when the caller doesn't know the installed value. */
+const DEFAULT_SESSIONS_LOOKBACK_DAYS = 30;
+
+/** Calendar-day rounding so the range is cacheable. */
+const sessionsSourceLookback = (days = DEFAULT_SESSIONS_LOOKBACK_DAYS): string =>
+  `now-${Math.max(1, Math.round(days))}d/d`;
 
 const parseRangeMs = (rangeFrom?: string, rangeTo?: string): { fromMs: number; toMs: number } => {
   const from = dateMath.parse(rangeFrom || 'now-24h');

@@ -605,7 +605,7 @@ export const buildRumBudgetSlo = (params: RumBudgetParams): RumBudgetBuild => {
     } else if (params.templateId === 'session_rage_free') {
       good = 'rage_click_count: 0 and dead_click_count: 0';
     } else {
-      good = 'page_count > 1';
+      good = 'page_view_count > 1';
     }
   } else if (isRumBudgetVitalTemplate(params.templateId)) {
     filter = andJoin([
@@ -739,7 +739,7 @@ export const rumBudgetBreachKuery = (
     return 'rage_click_count > 0 or dead_click_count > 0';
   }
   if (item.templateId === 'session_bounce') {
-    return 'page_count: 1';
+    return 'page_view_count: 1';
   }
   if (item.templateId === 'ai') {
     return andJoin([item.filter ?? '', item.good ? `not (${item.good})` : '']);

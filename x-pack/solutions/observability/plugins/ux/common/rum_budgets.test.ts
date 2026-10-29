@@ -135,7 +135,7 @@ describe('buildRumBudgetSlo', () => {
       scope: 'app',
       filters: { serviceName: 'shop' },
     });
-    expect(errorFree.slo.indicator.params.index).toBe('ux-rum-sessions-*');
+    expect(errorFree.slo.indicator.params.index).toBe('digital-experience-sessions-*');
     expect(errorFree.slo.indicator.params.timestampField).toBe('start_time');
     expect(errorFree.slo.indicator.params.filter).toContain('service.name: "shop"');
     expect(errorFree.slo.indicator.params.good).toBe('error_count: 0');
@@ -158,7 +158,7 @@ describe('buildRumBudgetSlo', () => {
       scope: 'groupByPage',
       filters: {},
     });
-    expect(bounce.slo.indicator.params.good).toBe('page_count > 1');
+    expect(bounce.slo.indicator.params.good).toBe('page_view_count > 1');
     expect(bounce.slo.groupBy).toBeUndefined();
   });
 

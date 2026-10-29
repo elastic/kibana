@@ -15,7 +15,7 @@ import {
 } from '../../../common/session_replay';
 import { boundedString, rumListQueryCodec } from '../rum/query';
 import { rumEsSearchOptions } from '../rum/es_retry';
-import { CLICK_FILTER, EXCEPTION_FILTER } from '../../transforms/rum_sessions_spec';
+import { CLICK_FILTER, EXCEPTION_FILTER } from './event_filters';
 import { getRumSearchClient } from '../../lib/rum_search_client';
 import {
   SESSION_DETAIL_ERROR_HIT_SIZE,

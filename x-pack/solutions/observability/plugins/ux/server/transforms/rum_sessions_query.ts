@@ -195,7 +195,7 @@ const FRUSTRATION_CLAUSE = {
   dead: { range: { dead_click_count: { gt: 0 } } },
 } as const;
 
-/** Dest `bounced` is `page_view_count <= 1` and includes zero-page rows. Use exact one view. */
+/** Dest `bounced` is exactly one page view. Filter on the count so the two can't drift. */
 export const SESSION_INDEX_BOUNCED_FILTER = { term: { page_view_count: 1 } };
 export const SESSION_INDEX_VIEWED_FILTER = { range: { page_view_count: { gte: 1 } } };
 
@@ -305,7 +305,7 @@ const SORT_FIELD: Record<SessionSortField, string> = {
   durationMs: 'duration_ms',
   errorCount: 'error_count',
   actionCount: 'click_count',
-  pageCount: 'page_count',
+  pageCount: 'page_view_count',
   rageClickCount: 'rage_click_count',
 };
 
@@ -321,8 +321,9 @@ const asStringArray = (value: unknown): string[] =>
 const toSummary = (source: Record<string, unknown>, id: string): RumSessionSummary => {
   const session = (source.session as Record<string, unknown> | undefined) ?? {};
   const user = (source.user as Record<string, unknown> | undefined) ?? {};
-  const browser = (source.browser as Record<string, unknown> | undefined) ?? {};
-  const os = (source.os as Record<string, unknown> | undefined) ?? {};
+  const userAgent = (source.user_agent as Record<string, unknown> | undefined) ?? {};
+  const geo = (source.geo as Record<string, unknown> | undefined) ?? {};
+  const network = (source.network as Record<string, unknown> | undefined) ?? {};
   const startTime = asString(source.start_time);
   const endTime = asString(source.end_time);
   const startMs = startTime ? Date.parse(startTime) : 0;
@@ -342,8 +343,7 @@ const toSummary = (source: Record<string, unknown>, id: string): RumSessionSumma
     errorGroups: asStringArray(source.error_groups),
     activeMs: asNumber(source.duration_ms) || Math.max(0, endMs - startMs),
     durationMs: asNumber(source.duration_ms) || Math.max(0, endMs - startMs),
-    // page_view_count is the transform filter agg; page_count was entry+exit size until spec 8.
-    pageCount: asNumber(source.page_view_count) || asNumber(source.page_count) || pages.length,
+    pageCount: asNumber(source.page_view_count) || pages.length,
     entryPage: asString(source.entry_page),
     exitPage: asString(source.exit_page),
     pagePath: pages,
@@ -351,14 +351,14 @@ const toSummary = (source: Record<string, unknown>, id: string): RumSessionSumma
     sparkline: [],
     user: sessionUserFromKey(userKey),
     client: {
-      browser: asString(browser.name),
-      os: asString(os.name),
-      device: asString(source.device),
+      browser: asString(userAgent.browser),
+      os: asString(userAgent.os),
+      device: asString(userAgent.device),
       mobile: null,
-      country: asString(source.country_iso),
-      countryIso: asString(source.country_iso),
-      breakpoint: asString(browser.breakpoint),
-      connection: asString(source.connection),
+      country: asString(geo.country_iso),
+      countryIso: asString(geo.country_iso),
+      breakpoint: asString(userAgent.breakpoint),
+      connection: asString(network.connection_type),
     },
     hasReplay: sourceHasReplay(source),
     replayEventCount: asNumber(source.replay_event_count),
@@ -490,19 +490,19 @@ export const buildSessionIndexFilters = ({
     sessionIndexActivityFilter(replaySessionIds),
     ...serviceFilter(serviceName),
   ];
-  const browserClause = facetTerm('browser.name', browser);
+  const browserClause = facetTerm('user_agent.browser', browser);
   if (browserClause) {
     filters.push(browserClause);
   }
-  const osClause = facetTerm('os.name', os);
+  const osClause = facetTerm('user_agent.os', os);
   if (osClause) {
     filters.push(osClause);
   }
-  const locationClause = facetTerm('country_iso', location);
+  const locationClause = facetTerm('geo.country_iso', location);
   if (locationClause) {
     filters.push(locationClause);
   }
-  const breakpointClause = facetTerm('browser.breakpoint', breakpoint);
+  const breakpointClause = facetTerm('user_agent.breakpoint', breakpoint);
   if (breakpointClause) {
     filters.push(breakpointClause);
   }
@@ -615,11 +615,11 @@ export const buildSessionIndexFilters = ({
   if (maxDurationMs != null) {
     filters.push({ range: { duration_ms: { lte: maxDurationMs } } });
   }
-  const connectionClause = facetTerm('connection', connection);
+  const connectionClause = facetTerm('network.connection_type', connection);
   if (connectionClause) {
     filters.push(connectionClause);
   }
-  const deviceClause = facetTerm('device', device);
+  const deviceClause = facetTerm('user_agent.device', device);
   if (deviceClause) {
     filters.push(deviceClause);
   }
@@ -712,13 +712,13 @@ export const querySessionIndexFilters = async ({
     size: 0,
     query: { bool: { filter: buildSessionIndexFilters(withReplay) } },
     aggs: {
-      browsers: { terms: { field: 'browser.name', size: 20, exclude: '' } },
-      os: { terms: { field: 'os.name', size: 20, exclude: '' } },
+      browsers: { terms: { field: 'user_agent.browser', size: 20, exclude: '' } },
+      os: { terms: { field: 'user_agent.os', size: 20, exclude: '' } },
       pages: { terms: { field: 'pages', size: 30, exclude: '' } },
-      breakpoints: { terms: { field: 'browser.breakpoint', size: 10, exclude: '' } },
-      countries: { terms: { field: 'country_iso', size: 30, exclude: '' } },
-      connections: { terms: { field: 'connection', size: 10, exclude: '' } },
-      devices: { terms: { field: 'device', size: 10, exclude: '' } },
+      breakpoints: { terms: { field: 'user_agent.breakpoint', size: 10, exclude: '' } },
+      countries: { terms: { field: 'geo.country_iso', size: 30, exclude: '' } },
+      connections: { terms: { field: 'network.connection_type', size: 10, exclude: '' } },
+      devices: { terms: { field: 'user_agent.device', size: 10, exclude: '' } },
     },
   });
   const aggs = (result.aggregations ?? {}) as Record<string, unknown>;
@@ -825,9 +825,9 @@ export const querySessionIndexSessions = async ({
       },
     ],
     aggs: {
-      browsers: { terms: { field: 'browser.name', size: 12, exclude: '' } },
-      os: { terms: { field: 'os.name', size: 12, exclude: '' } },
-      countries: { terms: { field: 'country_iso', size: 12, exclude: '' } },
+      browsers: { terms: { field: 'user_agent.browser', size: 12, exclude: '' } },
+      os: { terms: { field: 'user_agent.os', size: 12, exclude: '' } },
+      countries: { terms: { field: 'geo.country_iso', size: 12, exclude: '' } },
       users: { terms: { field: 'user.key', size: 12, exclude: '' } },
       has_replay: { filter: sessionIndexHasReplayQuery(replaySessionIds) },
       has_errors: { filter: { range: { error_count: { gt: 0 } } } },

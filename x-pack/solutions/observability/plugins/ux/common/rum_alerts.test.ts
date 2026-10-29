@@ -122,7 +122,7 @@ describe('buildRumAlertEsql', () => {
       every: '5m',
       filters: { serviceName: 'shop' },
     });
-    expect(errorRate.query).toContain('FROM ux-rum-sessions-*');
+    expect(errorRate.query).toContain('FROM digital-experience-sessions-*');
     expect(errorRate.query).toContain('error_count > 0');
     expect(errorRate.query).toContain('service.name');
     expect(errorRate.query).toContain('error_rate > 0.1');

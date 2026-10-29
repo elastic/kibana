@@ -14,16 +14,11 @@ import {
   RUM_OTEL_TRACES_CUSTOM_TEMPLATE,
   RUM_REPLAY_COMPONENT_TEMPLATE_NAME,
   RUM_REPLAY_INDEX_TEMPLATE_NAME,
-  RUM_SESSIONS_INDEX,
-  RUM_SESSIONS_INDEX_SORT_FIELD,
-  RUM_SESSIONS_INDEX_SORT_ORDER,
-  RUM_SESSIONS_TRANSFORM_ID,
 } from '../../common/rum_sessions';
 import {
   composedAttributesFromSimulate,
   ensureOtelSessionSort,
   ensureReplayIndexTemplate,
-  ensureSessionsDestSorted,
   hasOtelSessionIdMapping,
   hasReplayComponentMappings,
   isReplayOtelStream,
@@ -33,14 +28,16 @@ import {
   mergeSortSettings,
   otelSourceStreams,
   parseIndexSort,
-  resetSessionsTransformAfterDestRecreate,
   rumReplayComponentMappings,
   withSessionIdAttributes,
   writeIndexName,
 } from './rum_index_sort';
 
+const SAMPLE_SORT_FIELD = ['start_time', 'session.id'] as const;
+const SAMPLE_SORT_ORDER = ['desc', 'asc'] as const;
+
 const destSettings = (field: string[], order: string[]) => ({
-  [RUM_SESSIONS_INDEX]: {
+  'sample-index': {
     settings: {
       'index.sort.field': field,
       'index.sort.order': order,
@@ -72,10 +69,10 @@ describe('parseIndexSort / matchesIndexSort', () => {
   it('reads flat getSettings and nested component settings', () => {
     expect(
       parseIndexSort({
-        [RUM_SESSIONS_INDEX]: {
+        'sample-index': {
           settings: {
-            'index.sort.field': [...RUM_SESSIONS_INDEX_SORT_FIELD],
-            'index.sort.order': [...RUM_SESSIONS_INDEX_SORT_ORDER],
+            'index.sort.field': [...SAMPLE_SORT_FIELD],
+            'index.sort.order': [...SAMPLE_SORT_ORDER],
           },
         },
       })
@@ -92,20 +89,16 @@ describe('parseIndexSort / matchesIndexSort', () => {
     ).toEqual({ field: ['start_time'], order: ['desc'] });
   });
 
-  it('matches dest and OTel target sorts', () => {
+  it('matches an index against a target sort', () => {
     expect(
       matchesIndexSort(
-        destSettings([...RUM_SESSIONS_INDEX_SORT_FIELD], [...RUM_SESSIONS_INDEX_SORT_ORDER]),
-        RUM_SESSIONS_INDEX_SORT_FIELD,
-        RUM_SESSIONS_INDEX_SORT_ORDER
+        destSettings([...SAMPLE_SORT_FIELD], [...SAMPLE_SORT_ORDER]),
+        SAMPLE_SORT_FIELD,
+        SAMPLE_SORT_ORDER
       )
     ).toBe(true);
     expect(
-      matchesIndexSort(
-        destSettings(['start_time'], ['desc']),
-        RUM_SESSIONS_INDEX_SORT_FIELD,
-        RUM_SESSIONS_INDEX_SORT_ORDER
-      )
+      matchesIndexSort(destSettings(['start_time'], ['desc']), SAMPLE_SORT_FIELD, SAMPLE_SORT_ORDER)
     ).toBe(false);
     expect(
       matchesIndexSort(
@@ -233,92 +226,6 @@ describe('OTel mapping helpers', () => {
       })
     ).toBe(true);
     expect(hasOtelSessionIdMapping({ properties: {} })).toBe(false);
-  });
-});
-
-describe('ensureSessionsDestSorted', () => {
-  it('creates dest when missing', async () => {
-    const client = {
-      indices: {
-        exists: jest.fn().mockResolvedValue(false),
-        create: jest.fn().mockResolvedValue({}),
-        getSettings: jest.fn(),
-        delete: jest.fn(),
-      },
-      transform: { stopTransform: jest.fn() },
-    } as unknown as ElasticsearchClient;
-
-    await expect(ensureSessionsDestSorted({ client, logger })).resolves.toEqual({
-      destRecreated: false,
-    });
-    expect(client.indices.create).toHaveBeenCalledWith({ index: RUM_SESSIONS_INDEX });
-    expect(client.indices.delete).not.toHaveBeenCalled();
-  });
-
-  it('leaves a dest that already has the target sort', async () => {
-    const client = {
-      indices: {
-        exists: jest.fn().mockResolvedValue(true),
-        create: jest.fn(),
-        getSettings: jest
-          .fn()
-          .mockResolvedValue(
-            destSettings([...RUM_SESSIONS_INDEX_SORT_FIELD], [...RUM_SESSIONS_INDEX_SORT_ORDER])
-          ),
-        delete: jest.fn(),
-      },
-      transform: { stopTransform: jest.fn() },
-    } as unknown as ElasticsearchClient;
-
-    await expect(ensureSessionsDestSorted({ client, logger })).resolves.toEqual({
-      destRecreated: false,
-    });
-    expect(client.indices.delete).not.toHaveBeenCalled();
-    expect(client.transform.stopTransform).not.toHaveBeenCalled();
-  });
-
-  it('recreates dest when sort is missing', async () => {
-    const client = {
-      indices: {
-        exists: jest.fn().mockResolvedValue(true),
-        create: jest.fn().mockResolvedValue({}),
-        getSettings: jest.fn().mockResolvedValue(destSettings(['host.name'], ['asc'])),
-        delete: jest.fn().mockResolvedValue({}),
-      },
-      transform: { stopTransform: jest.fn().mockResolvedValue({}) },
-    } as unknown as ElasticsearchClient;
-
-    await expect(ensureSessionsDestSorted({ client, logger })).resolves.toEqual({
-      destRecreated: true,
-    });
-    expect(client.transform.stopTransform).toHaveBeenCalledWith({
-      transform_id: RUM_SESSIONS_TRANSFORM_ID,
-      force: true,
-      wait_for_completion: true,
-    });
-    expect(client.indices.delete).toHaveBeenCalledWith({ index: RUM_SESSIONS_INDEX });
-    expect(client.indices.create).toHaveBeenCalledWith({ index: RUM_SESSIONS_INDEX });
-  });
-});
-
-describe('resetSessionsTransformAfterDestRecreate', () => {
-  it('resets only after dest recreate', async () => {
-    const resetTransform = jest.fn().mockResolvedValue({});
-    const client = { transform: { resetTransform } } as unknown as ElasticsearchClient;
-
-    await resetSessionsTransformAfterDestRecreate({
-      client,
-      logger,
-      destRecreated: false,
-    });
-    expect(resetTransform).not.toHaveBeenCalled();
-
-    await resetSessionsTransformAfterDestRecreate({
-      client,
-      logger,
-      destRecreated: true,
-    });
-    expect(resetTransform).toHaveBeenCalledWith({ transform_id: RUM_SESSIONS_TRANSFORM_ID });
   });
 });
 

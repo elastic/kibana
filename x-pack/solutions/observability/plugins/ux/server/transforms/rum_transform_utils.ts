@@ -9,11 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   approximateCheckpointWatermark,
   emptyRumRollupStatus,
-  parseLookbackDays,
-  RUM_SESSION_GROUP_FIELD,
   RUM_SESSIONS_SYNC_DELAY,
-  sessionsRetentionMaxAge,
-  sessionsSourceLookback,
   type RumRollupStatus,
   type RumSessionsTransformState,
 } from '../../common/rum_sessions';
@@ -76,72 +72,6 @@ export const installedSyncDelay = (current: unknown): string | undefined => {
   return delay == null ? undefined : String(delay);
 };
 
-export const installedSourceIndex = (current: unknown): string | string[] | undefined =>
-  (
-    current as {
-      transforms?: Array<{ source?: { index?: string | string[] } }>;
-    }
-  ).transforms?.[0]?.source?.index;
-
-export const installedSourceLookbackGte = (current: unknown): string | undefined => {
-  if (typeof current !== 'object' || current == null) {
-    return undefined;
-  }
-  const filters = (
-    current as {
-      transforms?: Array<{
-        source?: { query?: { bool?: { filter?: unknown[] } } };
-      }>;
-    }
-  ).transforms?.[0]?.source?.query?.bool?.filter;
-  if (!Array.isArray(filters)) {
-    return undefined;
-  }
-  for (const filter of filters) {
-    const gte = (filter as { range?: { '@timestamp'?: { gte?: string } } }).range?.['@timestamp']
-      ?.gte;
-    if (typeof gte === 'string') {
-      return gte;
-    }
-  }
-  return undefined;
-};
-
-export const installedRetentionMaxAge = (current: unknown): string | undefined =>
-  (
-    current as {
-      transforms?: Array<{ retention_policy?: { time?: { max_age?: string } } }>;
-    }
-  ).transforms?.[0]?.retention_policy?.time?.max_age;
-
-export const transformSourceWindowUpdate = ({
-  index,
-  lookbackGte,
-  retentionMaxAge,
-}: {
-  index: string | string[];
-  lookbackGte: string;
-  retentionMaxAge: string;
-}) => ({
-  source: {
-    index,
-    query: {
-      bool: {
-        filter: [
-          { range: { '@timestamp': { gte: lookbackGte } } },
-          { exists: { field: RUM_SESSION_GROUP_FIELD } },
-        ],
-      },
-    },
-  },
-  retention_policy: {
-    time: {
-      field: 'end_time',
-      max_age: retentionMaxAge,
-    },
-  },
-});
-
 const destIndexIsReadable = async (
   client: ElasticsearchClient,
   index: string
@@ -152,6 +82,8 @@ const destIndexIsReadable = async (
       size: 0,
       terminate_after: 1,
       track_total_hits: false,
+      // A wildcard that matches nothing must fail, or a missing index would read as installed.
+      allow_no_indices: false,
     });
     return true;
   } catch {
@@ -218,6 +150,70 @@ export const readRollupStatus = async (
   }
 };
 
+const STATE_SEVERITY: readonly RumSessionsTransformState[] = [
+  'failed',
+  'aborting',
+  'stopped',
+  'stopping',
+  'unknown',
+  'indexing',
+  'started',
+];
+
+interface TransformStatsRow {
+  state?: string;
+  checkpointing?: { last?: unknown };
+}
+
+const checkpointWatermarkMs = (row: TransformStatsRow): number | undefined => {
+  const checkpoint = row.checkpointing?.last as
+    | { time_upper_bound_millis?: number; timestamp_millis?: number }
+    | undefined;
+  const millis = checkpoint?.time_upper_bound_millis ?? checkpoint?.timestamp_millis;
+  return typeof millis === 'number' && Number.isFinite(millis) ? millis : undefined;
+};
+
+/**
+ * Status of every transform matching `transformId`, which may be a wildcard: installed when any
+ * matches, in its worst state, with the oldest checkpoint as the watermark (none until each has
+ * one). Reads the dest index when transform stats are missing or forbidden.
+ */
+export const readTransformsRollupStatus = async (
+  client: ElasticsearchClient,
+  {
+    transformId,
+    index,
+    syncDelay = RUM_SESSIONS_SYNC_DELAY,
+  }: { transformId: string; index: string; syncDelay?: string }
+): Promise<RumRollupStatus> => {
+  try {
+    const { transforms: rows } = await client.transform.getTransformStats({
+      transform_id: transformId,
+      allow_no_match: true,
+    });
+    if (rows.length === 0) {
+      return readRollupStatusFromDest(client, { transformId, index, syncDelay });
+    }
+    const states = rows.map(({ state }) => toTransformState(state));
+    const watermarks = rows.map(checkpointWatermarkMs);
+    const oldest = watermarks.every((millis) => millis != null)
+      ? Math.min(...(watermarks as number[]))
+      : undefined;
+    return {
+      installed: true,
+      state: STATE_SEVERITY.find((state) => states.includes(state)) ?? 'unknown',
+      watermark: oldest != null ? new Date(oldest).toISOString() : null,
+      transformId,
+      index,
+    };
+  } catch (error) {
+    if (isEsNotFound(error) || isEsAuthzDenied(error)) {
+      return readRollupStatusFromDest(client, { transformId, index, syncDelay });
+    }
+    throw error;
+  }
+};
+
 export const ensureDestIndex = async (
   client: ElasticsearchClient,
   index: string
@@ -254,30 +250,6 @@ export const removePreviousTransform = async ({
     logger?.info(`Removed previous ${previousId}; dest index kept`);
   } catch {
     // missing
-  }
-};
-
-/** True when the installed transform carries an older version/spec than the code. */
-export const transformNeedsUpgrade = async ({
-  client,
-  transformId,
-  version,
-  spec,
-}: {
-  client: ElasticsearchClient;
-  transformId: string;
-  version: number;
-  spec?: number;
-}): Promise<boolean> => {
-  try {
-    const current = await client.transform.getTransform({ transform_id: transformId });
-    const meta = current.transforms[0]?._meta as { version?: number; spec?: number } | undefined;
-    if (meta == null) {
-      return false;
-    }
-    return meta.version !== version || (spec != null && meta.spec !== spec);
-  } catch {
-    return false;
   }
 };
 
@@ -377,49 +349,6 @@ export const updateTransformSyncDelay = async ({
       },
     },
   });
-};
-
-export const updateTransformSourceWindow = async ({
-  client,
-  logger,
-  transformId,
-  lookbackDays,
-  resetIfIncreased,
-}: {
-  client: ElasticsearchClient;
-  logger?: Logger;
-  transformId: string;
-  lookbackDays: number;
-  resetIfIncreased: boolean;
-}): Promise<void> => {
-  const current = await client.transform.getTransform({ transform_id: transformId });
-  const index = installedSourceIndex(current);
-  if (index == null) {
-    return;
-  }
-  const lookbackGte = sessionsSourceLookback(lookbackDays);
-  const retentionMaxAge = sessionsRetentionMaxAge(lookbackDays);
-  const currentGte = installedSourceLookbackGte(current);
-  const currentRetention = installedRetentionMaxAge(current);
-  if (currentGte === lookbackGte && currentRetention === retentionMaxAge) {
-    return;
-  }
-  const currentDays = parseLookbackDays(currentGte);
-  logger?.info(`Updating ${transformId} lookback from ${currentGte ?? 'unset'} to ${lookbackGte}`);
-  await client.transform.stopTransform({
-    transform_id: transformId,
-    force: true,
-    wait_for_completion: true,
-  });
-  await client.transform.updateTransform({
-    transform_id: transformId,
-    ...transformSourceWindowUpdate({ index, lookbackGte, retentionMaxAge }),
-  });
-  if (resetIfIncreased && (currentDays == null || lookbackDays > currentDays)) {
-    logger?.info(`Resetting ${transformId} to backfill ${lookbackDays}d`);
-    await client.transform.resetTransform({ transform_id: transformId });
-  }
-  await startTransformIgnoreRunning(client, transformId);
 };
 
 export const restartUnhealthyTransform = async ({

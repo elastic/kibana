@@ -109,7 +109,6 @@ const settingsBody = t.intersection([
     sessionIdleMs: t.number,
     captureGraphql: t.boolean,
     syncDelay: boundedString(SYNC_DELAY_MAX_LENGTH),
-    sourceLookbackDays: t.number,
     useAllRemoteClusters: t.boolean,
     selectedRemoteClusters: boundedStringList(RUM_CCS_CLUSTER_NAME_MAX, RUM_CCS_CLUSTERS_MAX),
   }),
@@ -142,11 +141,10 @@ export const updateSessionReplaySettingsRoute = createUxServerRoute({
         client: elasticsearch.client.asCurrentUser,
         logger,
         syncDelay: saved.syncDelay,
-        sourceLookbackDays: saved.sourceLookbackDays,
       });
     } catch (error) {
       logger.warn(
-        `Saved session replay settings but could not update transforms: ${extractEsErrorMessage(
+        `Saved session replay settings but could not update the daily rollups: ${extractEsErrorMessage(
           error
         )}`
       );

@@ -16,10 +16,39 @@ export const fetchRumAnalyticsStatus = async ({
   return http.get<RumAnalyticsStatus>('/internal/ux/rum/analytics_status');
 };
 
-export const installRumSessionsTransform = async ({
+/** Sets up what ux owns for analytics: the OTel session sort and the daily rollups. */
+export const installRumRollups = async ({
   http,
 }: {
   http: HttpStart;
 }): Promise<RumAnalyticsStatus> => {
   return http.post<RumAnalyticsStatus>('/internal/ux/rum/analytics_status/_install');
+};
+
+/** The part of the digitalExperience sessions status that ux shows. */
+export interface DigitalExperienceSessionsStatus {
+  installed: boolean;
+  /** True when a user with the manage sessions privilege must enable sessions again. */
+  needsUpdate: boolean;
+  reason: string | null;
+}
+
+/**
+ * The sessions transforms belong to the digitalExperience plugin. Both calls need its privileges,
+ * which users of ux alone may lack.
+ */
+export const fetchDigitalExperienceSessionsStatus = async ({
+  http,
+}: {
+  http: HttpStart;
+}): Promise<DigitalExperienceSessionsStatus> => {
+  return http.get<DigitalExperienceSessionsStatus>('/internal/digital_experience/sessions/status');
+};
+
+export const enableDigitalExperienceSessions = async ({
+  http,
+}: {
+  http: HttpStart;
+}): Promise<DigitalExperienceSessionsStatus> => {
+  return http.post<DigitalExperienceSessionsStatus>('/internal/digital_experience/sessions/enable');
 };

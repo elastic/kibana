@@ -13,7 +13,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UxPluginStartDeps } from '../plugin_types';
 import { readSessionReplaySettings } from '../routes/session_replay/settings';
-import { reconcileRumSessionsTransform } from '../transforms/rum_sessions';
+import { reconcileRumRollups } from '../transforms/rum_sessions';
 
 export const RUM_SESSIONS_RECONCILE_TASK_TYPE = 'ux:rum-sessions-reconcile';
 export const RUM_SESSIONS_RECONCILE_TASK_ID = 'ux-rum-sessions-reconcile';
@@ -30,7 +30,8 @@ export const registerRumSessionsReconcileTask = ({
   taskManager.registerTaskDefinitions({
     [RUM_SESSIONS_RECONCILE_TASK_TYPE]: {
       title: 'UX session analytics reconcile',
-      description: 'Ensures ux-rum-sessions and daily RUM rollups exist and are running.',
+      description:
+        'Keeps the daily RUM rollups and the OTel session sort in place once Digital Experience sessions are enabled.',
       timeout: '2m',
       maxAttempts: 1,
       cost: TaskCost.Tiny,
@@ -41,11 +42,10 @@ export const registerRumSessionsReconcileTask = ({
           const settings = await readSessionReplaySettings(
             coreStart.savedObjects.createInternalRepository()
           );
-          await reconcileRumSessionsTransform({
+          await reconcileRumRollups({
             client: coreStart.elasticsearch.client.asInternalUser,
             logger,
             syncDelay: settings.syncDelay,
-            sourceLookbackDays: settings.sourceLookbackDays,
           });
         },
       }),

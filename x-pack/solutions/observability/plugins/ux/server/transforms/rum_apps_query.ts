@@ -235,19 +235,21 @@ export const parseAppTerms = (agg: unknown): RumAppInventoryRow[] =>
     });
   });
 
-const sessionVitalP75 = (field: 'lcp_p75' | 'inp_p75' | 'cls_p75' | 'fcp_p75' | 'ttfb_p75') => ({
+const sessionVitalP75 = (
+  field: 'web_vitals.lcp' | 'web_vitals.inp' | 'web_vitals.cls' | 'web_vitals.fcp' | 'web_vitals.ttfb'
+) => ({
   percentiles: { field, percents: [75] },
 });
 
 const sessionTrafficAggs = {
   page_views: { sum: { field: 'page_view_count' } },
   error_sessions: { filter: { range: { error_count: { gt: 0 } } } },
-  lcp: sessionVitalP75('lcp_p75'),
-  inp: sessionVitalP75('inp_p75'),
-  cls: sessionVitalP75('cls_p75'),
-  fcp: sessionVitalP75('fcp_p75'),
-  ttfb: sessionVitalP75('ttfb_p75'),
-  osName: { terms: { field: 'os.name', size: 5 } },
+  lcp: sessionVitalP75('web_vitals.lcp'),
+  inp: sessionVitalP75('web_vitals.inp'),
+  cls: sessionVitalP75('web_vitals.cls'),
+  fcp: sessionVitalP75('web_vitals.fcp'),
+  ttfb: sessionVitalP75('web_vitals.ttfb'),
+  osName: { terms: { field: 'user_agent.os', size: 5 } },
 };
 
 const sessionCurrentAppAggs = {
@@ -256,11 +258,11 @@ const sessionCurrentAppAggs = {
     auto_date_histogram: { field: 'start_time', buckets: 12 },
     aggs: {
       error_sessions: { filter: { range: { error_count: { gt: 0 } } } },
-      lcp: sessionVitalP75('lcp_p75'),
-      inp: sessionVitalP75('inp_p75'),
-      cls: sessionVitalP75('cls_p75'),
-      fcp: sessionVitalP75('fcp_p75'),
-      ttfb: sessionVitalP75('ttfb_p75'),
+      lcp: sessionVitalP75('web_vitals.lcp'),
+      inp: sessionVitalP75('web_vitals.inp'),
+      cls: sessionVitalP75('web_vitals.cls'),
+      fcp: sessionVitalP75('web_vitals.fcp'),
+      ttfb: sessionVitalP75('web_vitals.ttfb'),
     },
   },
 };

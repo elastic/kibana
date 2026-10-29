@@ -45,10 +45,6 @@ import {
 } from '../../../../common/session_replay_settings';
 import {
   isValidEsTimeValue,
-  isValidLookbackDays,
-  RUM_SESSIONS_LOOKBACK_DAYS_MAX,
-  RUM_SESSIONS_LOOKBACK_DAYS_MIN,
-  RUM_SESSIONS_SYNC_DELAY,
   rumAnalyticsHealth,
   type RumAnalyticsStatus,
 } from '../../../../common/rum_sessions';
@@ -58,8 +54,11 @@ import {
   updateSessionReplaySettings,
 } from '../../../services/rest/session_replay_api';
 import {
+  enableDigitalExperienceSessions,
+  fetchDigitalExperienceSessionsStatus,
   fetchRumAnalyticsStatus,
-  installRumSessionsTransform,
+  installRumRollups,
+  type DigitalExperienceSessionsStatus,
 } from '../../../services/rest/rum_analytics_api';
 
 export function CaptureSettingsPanel() {
@@ -69,6 +68,9 @@ export function CaptureSettingsPanel() {
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [analytics, setAnalytics] = useState<RumAnalyticsStatus | null>(null);
+  const [sessionsStatus, setSessionsStatus] = useState<DigitalExperienceSessionsStatus | null>(
+    null
+  );
   const [installing, setInstalling] = useState(false);
 
   useEffect(() => {
@@ -77,13 +79,16 @@ export function CaptureSettingsPanel() {
       setLoading(true);
       setLoadError(null);
       try {
-        const [result, status] = await Promise.all([
+        const [result, status, sessions] = await Promise.all([
           fetchSessionReplaySettings({ http }),
           fetchRumAnalyticsStatus({ http }).catch(() => null),
+          // Needs the Digital Experience privileges; without them the panel relies on `status`.
+          fetchDigitalExperienceSessionsStatus({ http }).catch(() => null),
         ]);
         if (!cancelled) {
           setSettings(result);
           setAnalytics(status);
+          setSessionsStatus(sessions);
         }
       } catch (err) {
         if (!cancelled) {
@@ -116,8 +121,8 @@ export function CaptureSettingsPanel() {
         nextAnalytics && rumAnalyticsHealth(nextAnalytics) !== 'missing'
           ? i18n.translate('xpack.ux.sessionReplaySettings.savedWithTransforms', {
               defaultMessage:
-                'Settings saved. Session analytics now use a {syncDelay} delay and {lookbackDays} days of history. Reload Kibana pages to apply capture changes.',
-              values: { syncDelay: saved.syncDelay, lookbackDays: saved.sourceLookbackDays },
+                'Settings saved. The daily rollups now use a {syncDelay} sync delay. Reload Kibana pages to apply capture changes.',
+              values: { syncDelay: saved.syncDelay },
             })
           : i18n.translate('xpack.ux.sessionReplaySettings.saved', {
               defaultMessage: 'Session replay settings saved. Reload Kibana pages to apply.',
@@ -135,7 +140,7 @@ export function CaptureSettingsPanel() {
     }
   }, [analytics, http, notifications, settings]);
 
-  const onInstallAnalytics = useCallback(async () => {
+  const onEnableSessions = useCallback(async () => {
     setInstalling(true);
     try {
       const saved = await updateSessionReplaySettings({
@@ -143,19 +148,20 @@ export function CaptureSettingsPanel() {
         settings: normalizeSessionReplaySettings(settings),
       });
       setSettings(saved);
-      const next = await installRumSessionsTransform({ http });
-      setAnalytics(next);
+      // The sessions transforms are Digital Experience's; ux then sets up its daily rollups.
+      const enabled = await enableDigitalExperienceSessions({ http });
+      setSessionsStatus(enabled);
+      setAnalytics(await installRumRollups({ http }));
       notifications.toasts.addSuccess(
         i18n.translate('xpack.ux.sessionReplaySettings.analyticsInstalled', {
           defaultMessage:
-            'Session analytics transform installed. First results appear after a {syncDelay} delay.',
-          values: { syncDelay: next.syncDelay },
+            'Sessions enabled in Digital Experience. First results appear after the transforms checkpoint.',
         })
       );
     } catch (err) {
       notifications.toasts.addDanger({
         title: i18n.translate('xpack.ux.sessionReplaySettings.analyticsInstallError', {
-          defaultMessage: 'Could not install session analytics',
+          defaultMessage: 'Could not enable sessions',
         }),
         text: err instanceof Error ? err.message : String(err),
       });
@@ -166,9 +172,9 @@ export function CaptureSettingsPanel() {
 
   const endpointInvalid = settings.enabled && settings.otlpEndpoint.trim().length === 0;
   const syncDelayInvalid = !isValidEsTimeValue(settings.syncDelay);
-  const lookbackDaysInvalid = !isValidLookbackDays(settings.sourceLookbackDays);
-  const analyticsInvalid = syncDelayInvalid || lookbackDaysInvalid;
+  const analyticsInvalid = syncDelayInvalid;
   const analyticsHealth = analytics ? rumAnalyticsHealth(analytics) : 'missing';
+  const sessionsNeedUpdate = sessionsStatus?.needsUpdate === true;
 
   if (loading) {
     return (
@@ -536,19 +542,18 @@ export function CaptureSettingsPanel() {
           <p>
             {i18n.translate('xpack.ux.sessionReplaySettings.analyticsDescription', {
               defaultMessage:
-                'Builds a cluster-wide session index and daily page/service rollups from RUM events so funnels, journeys, the session list, and long date ranges (90d, 1y) stay fast. Requires manage_transform. The first checkpoint waits {syncDelay} so sessions are mostly complete.',
-              values: { syncDelay: analytics?.syncDelay ?? RUM_SESSIONS_SYNC_DELAY },
+                'Funnels, journeys, the session list and long date ranges read the session index that Digital Experience builds from RUM events, plus daily page and service rollups from this app. Enabling sessions needs the Digital Experience manage sessions privilege.',
             })}
           </p>
         </EuiText>
         <EuiSpacer size="m" />
         <EuiFormRow
           label={i18n.translate('xpack.ux.sessionReplaySettings.syncDelayLabel', {
-            defaultMessage: 'Transform sync delay',
+            defaultMessage: 'Daily rollup sync delay',
           })}
           helpText={i18n.translate('xpack.ux.sessionReplaySettings.syncDelayHelp', {
             defaultMessage:
-              'How long session and daily transforms wait before a checkpoint is settled (5m, 30s, or 1h). Save applies this to running transforms immediately.',
+              'How long the daily rollup transforms wait before a checkpoint is settled (5m, 30s, or 1h). Save applies this to running transforms immediately. The sessions transforms use their own settings in Digital Experience.',
           })}
           isInvalid={syncDelayInvalid}
           error={i18n.translate('xpack.ux.sessionReplaySettings.syncDelayError', {
@@ -563,63 +568,40 @@ export function CaptureSettingsPanel() {
             data-test-subj="uxSessionReplaySyncDelayField"
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.ux.sessionReplaySettings.lookbackDaysLabel', {
-            defaultMessage: 'Session history (days)',
-          })}
-          helpText={i18n.translate('xpack.ux.sessionReplaySettings.lookbackDaysHelp', {
-            defaultMessage:
-              'How far back the session index keeps history (1–400). Retention is three days longer. Increasing this rebuilds older sessions and can take a while.',
-          })}
-          isInvalid={lookbackDaysInvalid}
-          error={i18n.translate('xpack.ux.sessionReplaySettings.lookbackDaysError', {
-            defaultMessage: 'Use a whole number of days between {min} and {max}.',
-            values: {
-              min: RUM_SESSIONS_LOOKBACK_DAYS_MIN,
-              max: RUM_SESSIONS_LOOKBACK_DAYS_MAX,
-            },
-          })}
-        >
-          <EuiFieldNumber
-            value={settings.sourceLookbackDays}
-            min={RUM_SESSIONS_LOOKBACK_DAYS_MIN}
-            max={RUM_SESSIONS_LOOKBACK_DAYS_MAX}
-            isInvalid={lookbackDaysInvalid}
-            onChange={(e) =>
-              setSettings((s) => ({ ...s, sourceLookbackDays: Number(e.target.value) }))
-            }
-            data-test-subj="uxSessionReplayLookbackDaysField"
-          />
-        </EuiFormRow>
-        {analyticsHealth !== 'missing' ? (
+        <EuiSpacer size="m" />
+        {analyticsHealth === 'missing' || sessionsNeedUpdate ? (
           <>
-            <EuiSpacer size="s" />
+            {sessionsNeedUpdate ? (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  size="s"
+                  title={i18n.translate('xpack.ux.sessionReplaySettings.analyticsNeedsUpdate', {
+                    defaultMessage: 'The sessions transforms are out of date',
+                  })}
+                >
+                  {sessionsStatus?.reason ? <p>{sessionsStatus.reason}</p> : null}
+                </EuiCallOut>
+                <EuiSpacer size="s" />
+              </>
+            ) : null}
             <EuiButton
-              size="s"
-              onClick={() => void onInstallAnalytics()}
+              fill
               isLoading={installing}
               isDisabled={analyticsInvalid}
-              data-test-subj="uxSessionAnalyticsApplyButton"
+              onClick={() => void onEnableSessions()}
+              data-test-subj="uxSessionAnalyticsInstallButton"
             >
-              {i18n.translate('xpack.ux.sessionReplaySettings.applyTransforms', {
-                defaultMessage: 'Apply to transforms',
-              })}
+              {sessionsNeedUpdate
+                ? i18n.translate('xpack.ux.sessionReplaySettings.analyticsUpdate', {
+                    defaultMessage: 'Update sessions in Digital Experience',
+                  })
+                : i18n.translate('xpack.ux.sessionReplaySettings.analyticsEnable', {
+                    defaultMessage: 'Enable sessions in Digital Experience',
+                  })}
             </EuiButton>
           </>
-        ) : null}
-        <EuiSpacer size="m" />
-        {analyticsHealth === 'missing' ? (
-          <EuiButton
-            fill
-            isLoading={installing}
-            isDisabled={analyticsInvalid}
-            onClick={() => void onInstallAnalytics()}
-            data-test-subj="uxSessionAnalyticsInstallButton"
-          >
-            {i18n.translate('xpack.ux.sessionReplaySettings.analyticsEnable', {
-              defaultMessage: 'Enable session analytics',
-            })}
-          </EuiButton>
         ) : (
           <EuiCallOut
             announceOnMount

@@ -10,7 +10,7 @@ import { emptyRumAnalyticsStatus } from '../../../common/rum_sessions';
 import { createUxServerRoute } from '../create_ux_server_route';
 import { readSessionReplaySettings } from '../session_replay/settings';
 import {
-  ensureRumSessionsTransform,
+  ensureRumRollups,
   extractEsErrorMessage,
   getRumAnalyticsStatus,
 } from '../../transforms/rum_sessions';
@@ -19,24 +19,17 @@ export const getRumAnalyticsStatusRoute = createUxServerRoute({
   endpoint: 'GET /internal/ux/rum/analytics_status',
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async ({ context, core }): Promise<RumAnalyticsStatus> => {
+  handler: async ({ context }): Promise<RumAnalyticsStatus> => {
     const { elasticsearch } = await context.core;
     try {
-      const coreStart = await core.start();
-      const settings = await readSessionReplaySettings(
-        coreStart.savedObjects.createInternalRepository()
-      );
-      return await getRumAnalyticsStatus(elasticsearch.client.asInternalUser, {
-        syncDelay: settings.syncDelay,
-        sourceLookbackDays: settings.sourceLookbackDays,
-      });
+      return await getRumAnalyticsStatus(elasticsearch.client.asInternalUser);
     } catch {
       return emptyRumAnalyticsStatus();
     }
   },
 });
 
-export const installRumSessionsTransformRoute = createUxServerRoute({
+export const installRumRollupsRoute = createUxServerRoute({
   endpoint: 'POST /internal/ux/rum/analytics_status/_install',
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
@@ -47,15 +40,14 @@ export const installRumSessionsTransformRoute = createUxServerRoute({
       const settings = await readSessionReplaySettings(
         coreStart.savedObjects.createInternalRepository()
       );
-      return await ensureRumSessionsTransform({
+      return await ensureRumRollups({
         client: elasticsearch.client.asCurrentUser,
         logger,
         syncDelay: settings.syncDelay,
-        sourceLookbackDays: settings.sourceLookbackDays,
       });
     } catch (error) {
       const message = extractEsErrorMessage(error);
-      logger.error(`Failed to install ux-rum-sessions: ${message}`);
+      logger.error(`Failed to install the RUM rollups: ${message}`);
       throw new Error(message);
     }
   },

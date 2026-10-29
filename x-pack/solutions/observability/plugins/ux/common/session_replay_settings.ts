@@ -6,12 +6,7 @@
  */
 
 import { normalizeSelectedRemoteClusters, RUM_CCS_CLUSTERS_MAX } from './rum_ccs';
-import {
-  clampLookbackDays,
-  isValidEsTimeValue,
-  RUM_SESSIONS_LOOKBACK_DAYS,
-  RUM_SESSIONS_SYNC_DELAY,
-} from './rum_sessions';
+import { isValidEsTimeValue, RUM_SESSIONS_SYNC_DELAY } from './rum_sessions';
 import { parseGroupingRules, parseIgnoreUrls, type UrlGroupingConfig } from './url_grouping';
 
 /**
@@ -39,10 +34,8 @@ export interface SessionReplaySettings {
   /** SDK idle rotation (`session.idleMs`). */
   sessionIdleMs: number;
   captureGraphql: boolean;
-  /** Elasticsearch time value applied to session and daily transforms (`5m`, `30s`, `1h`). */
+  /** Elasticsearch time value applied to the daily rollup transforms (`5m`, `30s`, `1h`). */
   syncDelay: string;
-  /** Days of session-index history (`now-Nd` source lookback; retention is N+3 days). */
-  sourceLookbackDays: number;
   /** Search every configured remote cluster (`*:index`), like SLO settings. */
   useAllRemoteClusters: boolean;
   /** Remote cluster aliases to include in reads, in addition to the local cluster. */
@@ -91,7 +84,6 @@ export const DEFAULT_SESSION_REPLAY_SETTINGS: SessionReplaySettings = {
   sessionIdleMs: SESSION_IDLE_MS_DEFAULT,
   captureGraphql: false,
   syncDelay: RUM_SESSIONS_SYNC_DELAY,
-  sourceLookbackDays: RUM_SESSIONS_LOOKBACK_DAYS,
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
 };
@@ -148,9 +140,6 @@ export const normalizeSessionReplaySettings = (
   syncDelay: isValidEsTimeValue(input.syncDelay)
     ? input.syncDelay
     : DEFAULT_SESSION_REPLAY_SETTINGS.syncDelay,
-  sourceLookbackDays: clampLookbackDays(
-    input.sourceLookbackDays ?? DEFAULT_SESSION_REPLAY_SETTINGS.sourceLookbackDays
-  ),
   useAllRemoteClusters: Boolean(input.useAllRemoteClusters),
   selectedRemoteClusters: normalizeSelectedRemoteClusters(input.selectedRemoteClusters),
 });

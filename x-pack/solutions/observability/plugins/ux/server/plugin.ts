@@ -36,7 +36,7 @@ import {
 } from './tasks/rum_sessions_reconcile_task';
 import type { UXConfig } from '../common/config';
 import { configureUxInspect } from './lib/inspect/inspectable_es_queries_map';
-import { configureRumSessionsTransform } from './transforms/rum_sessions';
+import { configureRumAnalytics } from './transforms/rum_sessions';
 import { registerUxOverviewPanelEmbeddable } from './embeddables/register_overview_panel_embeddable';
 
 export type { UxPluginSetupDeps, UxPluginStartDeps } from './plugin_types';
@@ -52,7 +52,7 @@ export class Plugin implements PluginType {
 
   public setup(core: CoreSetup<UxPluginStartDeps>, plugins: UxPluginSetupDeps = {}) {
     const config = this.initContext.config.get<UXConfig>();
-    configureRumSessionsTransform({ syncDelay: config.sessionAnalytics.syncDelay });
+    configureRumAnalytics({ syncDelay: config.sessionAnalytics.syncDelay });
     configureUxInspect({ isDev: this.initContext.env.mode.dev });
 
     core.savedObjects.registerType(sessionReplaySettingsSavedObjectType);

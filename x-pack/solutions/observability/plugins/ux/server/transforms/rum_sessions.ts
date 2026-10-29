@@ -7,18 +7,12 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
-  clampLookbackDays,
   isValidEsTimeValue,
-  parseLookbackDays,
-  RUM_NORMALIZE_PIPELINE_NAME,
   RUM_SESSIONS_INDEX,
   RUM_SESSIONS_LOOKBACK_DAYS,
-  RUM_SESSIONS_PIPELINE_NAME,
-  RUM_SESSIONS_SPEC,
   RUM_SESSIONS_SYNC_DELAY,
-  RUM_SESSIONS_TEMPLATE_NAME,
-  RUM_SESSIONS_TRANSFORM_ID,
-  RUM_SESSIONS_VERSION,
+  RUM_SESSIONS_TRANSFORM_PATTERN,
+  RUM_SESSIONS_TRANSFORM_SYNC_DELAY,
   shouldMergeRawTail,
   shouldQuerySessionIndex,
   type RumAnalyticsStatus,
@@ -34,34 +28,17 @@ import {
   getRumDailyStatuses,
   reconcileRumDailyTransforms,
 } from './rum_daily';
-import {
-  buildRumSessionsTransformBody,
-  rumNormalizePipeline,
-  rumSessionsDestPipeline,
-  rumSessionsIndexTemplate,
-} from './rum_sessions_spec';
-import {
-  ensureOtelSessionSort,
-  ensureSessionsDestSorted,
-  resetSessionsTransformAfterDestRecreate,
-} from './rum_index_sort';
+import { ensureOtelSessionSort } from './rum_index_sort';
 import {
   installedSyncDelay,
-  installedSourceLookbackGte,
-  putOrReplaceTransform,
-  readRollupStatus,
-  removePreviousTransform,
-  restartUnhealthyTransform,
-  startTransformIgnoreRunning,
-  transformNeedsUpgrade,
-  updateTransformSourceWindow,
+  readTransformsRollupStatus,
   updateTransformSyncDelay,
 } from './rum_transform_utils';
 
 const STATUS_TTL_MS = 30_000;
 
+/** Sync delay of the daily rollups. The sessions transforms belong to digitalExperience. */
 let configuredSyncDelay = RUM_SESSIONS_SYNC_DELAY;
-let configuredLookbackDays = RUM_SESSIONS_LOOKBACK_DAYS;
 let cachedStatus: { at: number; value: RumAnalyticsStatus } | null = null;
 let inflightStatus: Promise<RumAnalyticsStatus> | null = null;
 
@@ -70,25 +47,13 @@ const clearStatusCache = (): void => {
   inflightStatus = null;
 };
 
-export const configureRumSessionsTransform = ({
-  syncDelay,
-  sourceLookbackDays,
-}: {
-  syncDelay: string;
-  sourceLookbackDays?: number;
-}): void => {
+export const configureRumAnalytics = ({ syncDelay }: { syncDelay: string }): void => {
   configuredSyncDelay = syncDelay;
-  if (sourceLookbackDays != null) {
-    configuredLookbackDays = clampLookbackDays(sourceLookbackDays);
-  }
   clearStatusCache();
 };
 
-export const getRumSessionsSyncDelay = (settingsDelay?: string): string =>
+export const getRumRollupSyncDelay = (settingsDelay?: string): string =>
   isValidEsTimeValue(settingsDelay) ? settingsDelay : configuredSyncDelay;
-
-export const getRumSessionsLookbackDays = (settingsDays?: number): number =>
-  settingsDays != null ? clampLookbackDays(settingsDays) : configuredLookbackDays;
 
 export const extractEsErrorMessage = (error: unknown): string => {
   if (typeof error === 'object' && error != null) {
@@ -124,59 +89,44 @@ const withDailyStatuses = async (
   }
 };
 
-const loadRumAnalyticsStatus = async (
-  client: ElasticsearchClient,
-  resolvedDelay: string,
-  resolvedLookbackDays: number
-): Promise<RumAnalyticsStatus> => {
-  const [rollup, current] = await Promise.all([
-    readRollupStatus(client, {
-      transformId: RUM_SESSIONS_TRANSFORM_ID,
-      index: RUM_SESSIONS_INDEX,
-      syncDelay: resolvedDelay,
-    }),
-    client.transform.getTransform({ transform_id: RUM_SESSIONS_TRANSFORM_ID }).catch(() => null),
-  ]);
+/**
+ * Status of the sessions transforms, which the digitalExperience plugin installs and keeps
+ * healthy, plus the daily rollups ux owns.
+ */
+const loadRumAnalyticsStatus = async (client: ElasticsearchClient): Promise<RumAnalyticsStatus> => {
+  const rollup = await readTransformsRollupStatus(client, {
+    transformId: RUM_SESSIONS_TRANSFORM_PATTERN,
+    index: RUM_SESSIONS_INDEX,
+    syncDelay: RUM_SESSIONS_TRANSFORM_SYNC_DELAY,
+  });
   const watermarkMs = rollup.watermark != null ? Date.parse(rollup.watermark) : NaN;
   const lagSeconds = Number.isFinite(watermarkMs)
     ? Math.max(0, Math.round((Date.now() - watermarkMs) / 1000))
     : null;
-  const installedDays = parseLookbackDays(installedSourceLookbackGte(current));
   return withDailyStatuses(client, {
     installed: rollup.installed,
     state: rollup.state,
     watermark: rollup.watermark,
     lagSeconds,
-    transformId: RUM_SESSIONS_TRANSFORM_ID,
-    index: RUM_SESSIONS_INDEX,
-    syncDelay: resolvedDelay,
-    sourceLookbackDays: installedDays ?? resolvedLookbackDays,
+    transformId: rollup.transformId,
+    index: rollup.index,
+    syncDelay: RUM_SESSIONS_TRANSFORM_SYNC_DELAY,
+    sourceLookbackDays: RUM_SESSIONS_LOOKBACK_DAYS,
   });
 };
 
 /** Transform stats/get are cluster monitor APIs — pass `asInternalUser`. */
 export const getRumAnalyticsStatus = async (
   client: ElasticsearchClient,
-  {
-    refresh = false,
-    syncDelay,
-    sourceLookbackDays,
-  }: { refresh?: boolean; syncDelay?: string; sourceLookbackDays?: number } = {}
+  { refresh = false }: { refresh?: boolean } = {}
 ): Promise<RumAnalyticsStatus> => {
-  const resolvedDelay = getRumSessionsSyncDelay(syncDelay);
-  const resolvedLookbackDays = getRumSessionsLookbackDays(sourceLookbackDays);
-  if (
-    !refresh &&
-    cachedStatus &&
-    Date.now() - cachedStatus.at < STATUS_TTL_MS &&
-    cachedStatus.value.syncDelay === resolvedDelay
-  ) {
+  if (!refresh && cachedStatus && Date.now() - cachedStatus.at < STATUS_TTL_MS) {
     return cachedStatus.value;
   }
   if (!refresh && inflightStatus) {
     return inflightStatus;
   }
-  const pending = loadRumAnalyticsStatus(client, resolvedDelay, resolvedLookbackDays)
+  const pending = loadRumAnalyticsStatus(client)
     .then((value) => {
       cachedStatus = { at: Date.now(), value };
       return value;
@@ -212,80 +162,28 @@ const attachDailyTransforms = async ({
   }
 };
 
-export const ensureRumSessionsTransform = async ({
+/**
+ * Installs what ux owns: the OTel session sort and the daily rollups. The sessions transforms are
+ * enabled from Digital Experience.
+ */
+export const ensureRumRollups = async ({
   client,
   logger,
   syncDelay,
-  sourceLookbackDays,
 }: {
   client: ElasticsearchClient;
   logger?: Logger;
   syncDelay?: string;
-  sourceLookbackDays?: number;
 }): Promise<RumAnalyticsStatus> => {
-  await client.ingest.putPipeline({
-    id: RUM_NORMALIZE_PIPELINE_NAME,
-    ...rumNormalizePipeline,
-  });
-  await client.ingest.putPipeline({
-    id: RUM_SESSIONS_PIPELINE_NAME,
-    ...rumSessionsDestPipeline,
-  });
-  await client.indices.putIndexTemplate({
-    name: RUM_SESSIONS_TEMPLATE_NAME,
-    ...rumSessionsIndexTemplate,
-  });
-  const { destRecreated } = await ensureSessionsDestSorted({ client, logger });
-
-  if (RUM_SESSIONS_VERSION > 1) {
-    await removePreviousTransform({
-      client,
-      logger,
-      previousId: `ux-rum-sessions-${RUM_SESSIONS_VERSION - 1}`,
-    });
-  }
-
-  const delay = getRumSessionsSyncDelay(syncDelay);
-  const lookbackDays = getRumSessionsLookbackDays(sourceLookbackDays);
-  await putOrReplaceTransform({
-    client,
-    logger,
-    transformId: RUM_SESSIONS_TRANSFORM_ID,
-    version: RUM_SESSIONS_VERSION,
-    deleteDestOnReplace: false,
-    body: buildRumSessionsTransformBody(delay, lookbackDays),
-    onUnchanged: async (currentDelay) => {
-      await updateTransformSyncDelay({
-        client,
-        logger,
-        transformId: RUM_SESSIONS_TRANSFORM_ID,
-        currentDelay,
-        delay,
-      });
-    },
-  });
-  await resetSessionsTransformAfterDestRecreate({ client, logger, destRecreated });
-  await updateTransformSourceWindow({
-    client,
-    logger,
-    transformId: RUM_SESSIONS_TRANSFORM_ID,
-    lookbackDays,
-    resetIfIncreased: true,
-  });
-  await startTransformIgnoreRunning(client, RUM_SESSIONS_TRANSFORM_ID);
+  const delay = getRumRollupSyncDelay(syncDelay);
   try {
     await ensureOtelSessionSort({ client, logger });
   } catch (error) {
     logger?.error(`Failed to apply OTel session sort: ${extractEsErrorMessage(error)}`);
   }
   await attachDailyTransforms({ client, logger, syncDelay: delay });
-
   clearStatusCache();
-  return getRumAnalyticsStatus(client, {
-    refresh: true,
-    syncDelay: delay,
-    sourceLookbackDays: lookbackDays,
-  });
+  return getRumAnalyticsStatus(client, { refresh: true });
 };
 
 /** Transform stats/get are cluster monitor APIs — pass `asInternalUser`. */
@@ -341,143 +239,49 @@ const applySyncDelayToInstalled = async ({
   }
 };
 
-/** Push the current settings (sync delay, session lookback) onto installed transforms. */
+/** Push the current sync delay onto the installed daily rollups. */
 export const applyRumAnalyticsSettings = async ({
   client,
   logger,
   syncDelay,
-  sourceLookbackDays,
 }: {
   client: ElasticsearchClient;
   logger?: Logger;
   syncDelay?: string;
-  sourceLookbackDays?: number;
 }): Promise<RumAnalyticsStatus> => {
-  const delay = getRumSessionsSyncDelay(syncDelay);
-  const lookbackDays = getRumSessionsLookbackDays(sourceLookbackDays);
-  configuredLookbackDays = lookbackDays;
-  const status = await getRumAnalyticsStatus(client, {
-    refresh: true,
-    syncDelay: delay,
-    sourceLookbackDays: lookbackDays,
-  });
+  const delay = getRumRollupSyncDelay(syncDelay);
   try {
     await ensureOtelSessionSort({ client, logger });
   } catch (error) {
     logger?.error(`Failed to apply OTel session sort: ${extractEsErrorMessage(error)}`);
   }
-  if (!status.installed) {
-    return status;
+  for (const transformId of [
+    RUM_PAGES_DAILY_TRANSFORM_ID,
+    RUM_SERVICE_DAILY_TRANSFORM_ID,
+    RUM_BROWSER_DAILY_TRANSFORM_ID,
+  ]) {
+    await applySyncDelayToInstalled({ client, logger, transformId, delay });
   }
-  await applySyncDelayToInstalled({
-    client,
-    logger,
-    transformId: RUM_SESSIONS_TRANSFORM_ID,
-    delay,
-  });
-  await applySyncDelayToInstalled({
-    client,
-    logger,
-    transformId: RUM_PAGES_DAILY_TRANSFORM_ID,
-    delay,
-  });
-  await applySyncDelayToInstalled({
-    client,
-    logger,
-    transformId: RUM_SERVICE_DAILY_TRANSFORM_ID,
-    delay,
-  });
-  await applySyncDelayToInstalled({
-    client,
-    logger,
-    transformId: RUM_BROWSER_DAILY_TRANSFORM_ID,
-    delay,
-  });
-  await updateTransformSourceWindow({
-    client,
-    logger,
-    transformId: RUM_SESSIONS_TRANSFORM_ID,
-    lookbackDays,
-    resetIfIncreased: true,
-  });
   clearStatusCache();
-  return getRumAnalyticsStatus(client, {
-    refresh: true,
-    syncDelay: delay,
-    sourceLookbackDays: lookbackDays,
-  });
+  return getRumAnalyticsStatus(client, { refresh: true });
 };
 
-export const reconcileRumSessionsTransform = async ({
+/** Keeps the daily rollups installed and running once sessions are enabled. */
+export const reconcileRumRollups = async ({
   client,
   logger,
   syncDelay,
-  sourceLookbackDays,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
   syncDelay?: string;
-  sourceLookbackDays?: number;
 }): Promise<void> => {
-  const delay = getRumSessionsSyncDelay(syncDelay);
-  const lookbackDays = getRumSessionsLookbackDays(sourceLookbackDays);
-  configuredLookbackDays = lookbackDays;
-  const status = await getRumAnalyticsStatus(client, {
-    refresh: true,
-    syncDelay: delay,
-    sourceLookbackDays: lookbackDays,
-  });
-  try {
-    await client.indices.putIndexTemplate({
-      name: RUM_SESSIONS_TEMPLATE_NAME,
-      ...rumSessionsIndexTemplate,
-    });
-  } catch (error) {
-    logger.error(`Failed to put ${RUM_SESSIONS_TEMPLATE_NAME}: ${extractEsErrorMessage(error)}`);
-  }
+  const delay = getRumRollupSyncDelay(syncDelay);
+  const status = await getRumAnalyticsStatus(client, { refresh: true });
   if (status.installed) {
-    const needsUpgrade = await transformNeedsUpgrade({
-      client,
-      transformId: RUM_SESSIONS_TRANSFORM_ID,
-      version: RUM_SESSIONS_VERSION,
-      spec: RUM_SESSIONS_SPEC,
-    });
-    // A deploy that changes the transform body is otherwise invisible: the
-    // installed transform keeps running the previous spec until reinstalled.
-    if (needsUpgrade) {
-      // PUT/start as asInternalUser stores elastic/kibana on the transform.
-      // That user cannot read traces-*.otel-* / logs-*.otel-*, so the indexer
-      // stays red at checkpoint 0 and the session list never gets a watermark.
-      logger.warn(
-        `${RUM_SESSIONS_TRANSFORM_ID} is behind version ${RUM_SESSIONS_VERSION} spec ${RUM_SESSIONS_SPEC}. Reinstall from UX Settings so the transform keeps the current user's index privileges.`
-      );
-    }
-    const { destRecreated } = await ensureSessionsDestSorted({ client, logger });
-    if (destRecreated) {
-      await resetSessionsTransformAfterDestRecreate({ client, logger, destRecreated });
-      await startTransformIgnoreRunning(client, RUM_SESSIONS_TRANSFORM_ID);
-    }
-    await applySyncDelayToInstalled({
-      client,
-      logger,
-      transformId: RUM_SESSIONS_TRANSFORM_ID,
-      delay,
-    });
-    await updateTransformSourceWindow({
-      client,
-      logger,
-      transformId: RUM_SESSIONS_TRANSFORM_ID,
-      lookbackDays,
-      resetIfIncreased: false,
-    });
-    await restartUnhealthyTransform({ client, logger, status });
     await attachDailyTransforms({ client, logger, syncDelay: delay });
     try {
-      await reconcileRumDailyTransforms({
-        client,
-        logger,
-        syncDelay: delay,
-      });
+      await reconcileRumDailyTransforms({ client, logger, syncDelay: delay });
     } catch (error) {
       logger.error(`Failed to reconcile daily RUM rollups: ${extractEsErrorMessage(error)}`);
     }
