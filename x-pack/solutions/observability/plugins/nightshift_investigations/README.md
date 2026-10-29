@@ -64,10 +64,10 @@ They are **not** enabled in any serverless or stateful default config yet. Enabl
 
 The `agenticInvestigations` and `proposals` routes require the `read_investigations`, `manage_investigations`, `read_proposals`, and `manage_proposals` API privileges. The Nightshift feature grants them, so a Nightshift user does not need the `agenticInvestigations` or `proposals` feature privileges to call those routes:
 
-| Nightshift privilege | Grants |
-| --- | --- |
-| `all` | `read_investigations`, `manage_investigations`, `read_proposals`, `manage_proposals` |
-| `read` | `read_investigations`, `read_proposals` |
+| Nightshift privilege | Grants                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| `all`                | `read_investigations`, `manage_investigations`, `read_proposals`, `manage_proposals` |
+| `read`               | `read_investigations`, `read_proposals`                                              |
 
 These API privileges are not scoped to Nightshift: they cover every agentic investigation and proposal in the space, including those created by other solutions, plus the investigation routes that share `manage_investigations` (status, assignment, impact, user profile suggestions).
 
@@ -132,6 +132,18 @@ Setups of one space run one after another. `_enable` is idempotent: running it a
 
 A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` uninstalls the space's bound workflows and keeps the accounts, which other spaces share.
 
+### Agent Builder hooks
+
+Agent Builder starts hook workflows with the request of the agent run, and the workflows engine runs a workflow started that way as the original caller. In a set-up space, the investigation agent and the decision-tree reinforcement agent therefore name the space's bound hook entry points instead of the global hooks, so hooks run as the agent account:
+
+- `system-nightshift-sandbox-materialize-workspace-bound-<space>`
+- `system-nightshift-agent-optimize-bound-<space>`
+- `system-nightshift-decision-tree-hydrate-bound-<space>`
+
+Each calls its global hook with `run-as-mode: inherit`. A hook entry point only runs when Agent Builder starts it as a hook (`triggeredBy: agent-builder-hook`, which only server code sets), so nobody can run it directly with made-up round content and plant knowledge as the agent account. Spaces that are not set up, and spaces whose setup cannot be read, keep running the global hooks.
+
+The decision-tree reinforcement agent is shared: everyone can run it, so agent optimize can run it as the agent account, and only admins can change it. Agent Builder still hides it from UI listings, and its submit tool writes decision trees as the caller.
+
 ## How investigations are stored and run
 
 An investigation is an Agent Builder conversation with the `investigation` template. The investigation id is the conversation id. The `agenticInvestigations` plugin owns everything around it:
@@ -184,6 +196,10 @@ With `create`, the route creates the investigation as the identity that runs the
 
 The Slack connector delivers each event at least once. The workflow passes Slack's event id as `event_id` and its own execution id as `execution_id`, and the route records both on the thread's subject in `slack.seen_events` (the latest 50). An event another execution already recorded is answered with `duplicate: true`, and the workflow skips it; the same execution asking again, for example on a retried step, is not a duplicate. A run whose investigation failed calls the route again with `release_event: true`, which removes the event as recorded for that execution, so a redelivery of the event is handled. The workflow runs one call per thread at a time, so two deliveries of one event cannot race each other.
 
+## Sandbox connectors
+
+The investigation agent reaches external systems from its sandbox through Kibana connectors. A connector is usable from the sandbox when the actions plugin reports it as sandbox capable and the caller can execute it; the sandbox bash tool then injects the connector's config and auth headers as `CONNECTOR_*` environment variables for one command (see the actions plugin's `getSandboxCredentials`).
+
 ## Notifications
 
 Investigation starts can include up to 5 `notificationDestinations`. Each uses the generic envelope `{ type, connector_id, params }`, with optional `automation_id` and `automation_name` provenance. `params` is a JSON object limited to 4096 serialized characters, three container levels including the root, and 20 entries per object or array; keys are limited to 128 characters. Workflow YAML validates the envelope; notification handlers validate connector-specific params before execution starts, when recovering workflow inputs, and when preparing delivery. Unsupported types are rejected at runtime. Delivery fields are server-owned and rejected in destination input.
@@ -232,6 +248,15 @@ and preserves an existing conversation's open/closed state. It emits the existin
 trigger and uses the same notification routing and delivery claims as `nightshift.sendNotifications`.
 Notification errors do not replace the original workflow error. Lifecycle trigger emission remains
 best effort; Slack delivery claims suppress replayed sends.
+
+Once the conversation exists, the handler also appends an `investigation_run_failed` timeline event
+with the run's execution ID, original request when available, and failure reason. This happens before
+subject recovery so an attachment error does not erase the explanation. The entry is visible in Agent
+Builder even when the agent never recorded a chat round, and is available as historical context to a
+later agent run. Request and reason text are each capped at 10,000 characters. A failed timeline write
+is logged and does not block the existing notification path. The custom-event API assigns fresh IDs,
+so replay or concurrent handling can produce duplicate timeline entries; Slack deduplication is
+unchanged. Existing failed conversations are not backfilled.
 
 Workflow-level timeout, cancellation, Task Manager interruption, and resume-scheduling failure bypass
 these fallbacks. Reporting those outcomes needs a durable Workflows terminal-outcome mechanism,

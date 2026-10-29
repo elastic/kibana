@@ -14,7 +14,7 @@ import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   HasTypeDisplayName,
   HasEditCapabilities,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesDataLoading,
   PublishesEsql,
   PublishesWritableTimeRange,
@@ -100,7 +100,7 @@ const panelMeasureCss = css({
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
   HasEditCapabilities &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesDataLoading &
   PublishesEsql &
   PublishesWritableTimeRange &
@@ -167,7 +167,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           ? parentApi.timeRange$.getValue() ?? undefined
           : undefined)
     );
-    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
     // Starts true so the panel is not reported as render-complete before its first fetch resolves;
     // screenshotting would otherwise capture an empty panel.
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -226,7 +226,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       serializeState,
       esql$,
       approximationApplied$,
-      dataViews$,
+      dataSources$,
       dataLoading$,
       // A static panel makes no request, so it offers no Inspect entry.
       getInspectorAdapters: () =>
@@ -415,7 +415,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             byIndexPattern.set(dataView.getIndexPattern(), dataView);
           }
         });
-        dataViews$.next(byIndexPattern.size ? Array.from(byIndexPattern.values()) : undefined);
+        dataSources$.next(byIndexPattern.size ? Array.from(byIndexPattern.values()) : undefined);
       });
 
     const fetchSubscription = fetch$(api).subscribe((ctx) => {

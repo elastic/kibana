@@ -227,8 +227,8 @@ describe('customContentEmbeddableFactory', () => {
   describe('data views', () => {
     // One fake data view per index: `FROM logs | …` is the data view of `logs`.
     const indexOf = (query: string) => query.replace(/^FROM (\S+).*$/, '$1');
-    const titles = (embeddable: { api: { dataViews$: { getValue: () => unknown } } }) =>
-      ((embeddable.api.dataViews$.getValue() as DataView[] | undefined) ?? []).map((dataView) =>
+    const titles = (embeddable: { api: { dataSources$: { getValue: () => unknown } } }) =>
+      ((embeddable.api.dataSources$.getValue() as DataView[] | undefined) ?? []).map((dataView) =>
         dataView.getIndexPattern()
       );
 
@@ -273,7 +273,7 @@ describe('customContentEmbeddableFactory', () => {
       const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: undefined });
 
       await act(async () => {});
-      expect(embeddable.api.dataViews$.getValue()).toBeUndefined();
+      expect(embeddable.api.dataSources$.getValue()).toBeUndefined();
       expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
     });
 

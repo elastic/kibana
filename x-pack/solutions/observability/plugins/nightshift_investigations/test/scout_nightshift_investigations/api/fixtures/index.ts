@@ -31,14 +31,7 @@ export {
   waitForInvestigationInProgress,
 } from './write_path';
 export type { SharedInvestigation, SharedInvestigationSubject } from './write_path';
-export {
-  NIGHTSHIFT_MANAGE_ROLE,
-  NIGHTSHIFT_READ_ROLE,
-  NIGHTSHIFT_NO_ACCESS_ROLE,
-  getSandboxSecrets,
-  putSandboxSecrets,
-  replaceSandboxSecrets,
-} from './sandbox_secrets';
+export { NIGHTSHIFT_MANAGE_ROLE, NIGHTSHIFT_READ_ROLE, NIGHTSHIFT_NO_ACCESS_ROLE } from './roles';
 export { ensureNightshiftServiceAccountRoles } from '../../../../common';
 export { getCustomContext, putCustomContext, replaceCustomContext } from './custom_context';
 export {
