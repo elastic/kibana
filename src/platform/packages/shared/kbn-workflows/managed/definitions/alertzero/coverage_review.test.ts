@@ -558,7 +558,7 @@ describe('Detection Coverage review', () => {
       ['a crashed run', { error: { message: 'boom' } }, {}, false],
     ])('flags %s for a retry close', (_scenario, run, output, expected) => {
       expect(
-        evaluateExpression(withOf('resolve_outcome')?.creation_retry, {
+        evaluateExpression(withOf('resolve_outcome')?.creation_retry ?? '', {
           steps: {
             coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
             run_rule_creation: { error: null, ...run, output },
