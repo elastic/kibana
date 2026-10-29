@@ -16,8 +16,8 @@ import {
   securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import {
   ExecutionStatus,
   type WorkflowDetailDto,
@@ -1351,7 +1351,9 @@ steps:
   describe('loadAlertDocuments', () => {
     const index = '.alerts-security.alerts-default';
 
-    const mockSearchHit = (esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>) =>
+    const mockSearchHit = (
+      esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>
+    ) =>
       esClient.search.mockResponseOnce({
         took: 1,
         timed_out: false,
