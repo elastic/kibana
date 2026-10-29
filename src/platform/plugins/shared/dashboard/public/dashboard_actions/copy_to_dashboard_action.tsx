@@ -39,12 +39,40 @@ export interface DashboardCopyToCapabilities {
   canEditExisting: boolean;
 }
 
-export type CopyToDashboardAPI = HasType &
-  HasUniqueId &
-  HasParentApi<
-    { type: typeof DASHBOARD_API_TYPE } & PublishesSavedObjectId &
-      Pick<DashboardApi, 'getDashboardPanelFromId'>
-  >;
+export type CopyToDashboardParentApi = {
+  type: typeof DASHBOARD_API_TYPE;
+} & PublishesSavedObjectId &
+  Pick<DashboardApi, 'getDashboardPanelFromId'>;
+
+export type CopyToDashboardAPI = HasType & HasUniqueId & HasParentApi<CopyToDashboardParentApi>;
+
+/** Returns true when the user may copy panels to a new or an existing dashboard */
+export const userCanCopyToDashboard = (): boolean => {
+  const { createNew: canCreateNew, showWriteControls: canEditExisting } =
+    getDashboardCapabilities();
+  return Boolean(canCreateNew || canEditExisting);
+};
+
+/** Opens the modal that copies the given panels of a dashboard to another dashboard */
+export const openCopyToDashboardModal = (
+  parentApi: CopyToDashboardParentApi,
+  panelIds: readonly string[]
+): void => {
+  const session = coreServices.overlays.openModal(
+    toMountPoint(
+      <CopyToDashboardModal
+        closeModal={() => session.close()}
+        parentApi={parentApi}
+        panelIds={panelIds}
+      />,
+      coreServices
+    ),
+    {
+      maxWidth: 400,
+      'data-test-subj': 'copyToDashboardPanel',
+    }
+  );
+};
 
 const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
   return (
@@ -77,23 +105,11 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!apiIsCompatible(embeddable)) return false;
-    const { createNew: canCreateNew, showWriteControls: canEditExisting } =
-      getDashboardCapabilities();
-    return Boolean(canCreateNew || canEditExisting);
+    return userCanCopyToDashboard();
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!apiIsCompatible(embeddable)) throw new IncompatibleActionError();
-
-    const session = coreServices.overlays.openModal(
-      toMountPoint(
-        <CopyToDashboardModal closeModal={() => session.close()} api={embeddable} />,
-        coreServices
-      ),
-      {
-        maxWidth: 400,
-        'data-test-subj': 'copyToDashboardPanel',
-      }
-    );
+    openCopyToDashboardModal(embeddable.parentApi, [embeddable.uuid]);
   }
 }

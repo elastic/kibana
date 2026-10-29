@@ -23,20 +23,32 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { apiCanBeDuplicated, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
+import {
+  userCanCopyToDashboard,
+  openCopyToDashboardModal,
+} from '../../dashboard_actions/copy_to_dashboard_action';
 
 const clearSelectionLabel = i18n.translate('dashboard.selectedPanelsToolbar.clearSelectionLabel', {
   defaultMessage: 'Clear selection (Esc)',
 });
 
+const copyToDashboardDisabledLabel = i18n.translate(
+  'dashboard.selectedPanelsToolbar.copyToDashboardDisabledLabel',
+  {
+    defaultMessage: 'Some of the selected panels cannot be copied',
+  }
+);
+
 /** Floating toolbar shown while panels are selected; exposes the bulk actions available for the selection */
 export const SelectedPanelsToolbar = () => {
   const dashboardApi = useDashboardApi();
   const styles = useMemoCss(selectedPanelsToolbarStyles);
-  const [selectedPanelIds, viewMode] = useBatchedPublishingSubjects(
+  const [selectedPanelIds, viewMode, children] = useBatchedPublishingSubjects(
     dashboardApi.selectedPanelIds$,
-    dashboardApi.viewMode$
+    dashboardApi.viewMode$,
+    dashboardApi.children$
   );
 
   const onDelete = useCallback(() => {
@@ -45,7 +57,16 @@ export const SelectedPanelsToolbar = () => {
     dashboardApi.clearSelectedPanels();
   }, [dashboardApi]);
 
+  const onCopyToDashboard = useCallback(() => {
+    openCopyToDashboardModal(dashboardApi, dashboardApi.selectedPanelIds$.value);
+  }, [dashboardApi]);
+
   if (viewMode !== 'edit' || selectedPanelIds.length === 0) return null;
+
+  const showCopyToDashboard = userCanCopyToDashboard();
+  const canCopySelection = selectedPanelIds.every((panelId) =>
+    apiCanBeDuplicated(children[panelId])
+  );
 
   return (
     <EuiPanel
@@ -80,6 +101,26 @@ export const SelectedPanelsToolbar = () => {
             />
           </EuiBadge>
         </EuiFlexItem>
+        {showCopyToDashboard && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={canCopySelection ? undefined : copyToDashboardDisabledLabel}>
+              <EuiButtonEmpty
+                iconType="logOut"
+                color="text"
+                size="s"
+                isDisabled={!canCopySelection}
+                hasAriaDisabled
+                onClick={onCopyToDashboard}
+                data-test-subj="dashboardSelectedPanelsCopyToDashboard"
+              >
+                <FormattedMessage
+                  id="dashboard.selectedPanelsToolbar.copyToDashboardButtonLabel"
+                  defaultMessage="Copy to dashboard"
+                />
+              </EuiButtonEmpty>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="trash"
