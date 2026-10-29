@@ -5,62 +5,87 @@
  * 2.0.
  */
 
-import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
-import { parseInterval, splitStringInterval } from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService, ParsedInterval } from '@kbn/data-plugin/common';
+import { parseEsInterval } from '@kbn/data-plugin/common';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment-timezone';
 import type { DateHistogramTextBasedExpressionFunction } from '../../defs/date_histogram/types';
 
-type Unit = NonNullable<ReturnType<typeof splitStringInterval>>['unit'];
+function offsetMs(timestamp: number, timeZone: string): number {
+  return moment.tz(timestamp, timeZone).utcOffset() * 60 * 1000;
+}
 
-const isFullyContained = (
-  bucketStart: moment.Moment,
-  from: moment.Moment,
-  to: moment.Moment,
-  step: number,
-  unit: Unit
-) => !bucketStart.isBefore(from) && !bucketStart.clone().add(step, unit).isAfter(to);
+function fixedIntervalMs(interval: ParsedInterval): number {
+  return moment.duration(interval.value, interval.unit).asMilliseconds();
+}
 
 /**
- * Returns the min and max values for the domain of a date histogram given the time range, the interval and one anchor point.
+ * Timezone offset shifts UTC onto a local timeline so `floor(t / interval)`
+ * lands on local midnights/hours. Subtracting the offset at the result converts
+ * back to UTC (the destination offset can differ across DST).
+ *
+ * bucket_key = floor((value + offset) / interval) * interval - offset
+ *
+ * @see https://www.elastic.co/docs/reference/aggregations/search-aggregations-bucket-datehistogram-aggregation#time-zone
+ */
+function snapToEsBucket(timestamp: number, interval: ParsedInterval, timeZone: string): number {
+  if (interval.type === 'calendar') {
+    return moment.tz(timestamp, timeZone).startOf(interval.unit).valueOf();
+  }
+
+  const intervalMs = fixedIntervalMs(interval);
+  const local = timestamp + offsetMs(timestamp, timeZone);
+  const snapped = Math.floor(local / intervalMs) * intervalMs;
+  return snapped - offsetMs(snapped, timeZone);
+}
+
+function addInterval(timestamp: number, interval: ParsedInterval, timeZone: string): number {
+  if (interval.type === 'calendar') {
+    return moment.tz(timestamp, timeZone).add(interval.value, interval.unit).valueOf();
+  }
+
+  const intervalMs = fixedIntervalMs(interval);
+  const local = timestamp + offsetMs(timestamp, timeZone);
+  const next = Math.floor(local / intervalMs) * intervalMs + intervalMs;
+  return next - offsetMs(next, timeZone);
+}
+
+const isFullyContained = (
+  bucketStart: number,
+  from: number,
+  to: number,
+  interval: ParsedInterval,
+  timeZone: string
+): boolean => bucketStart >= from && addInterval(bucketStart, interval, timeZone) <= to;
+
+/**
+ * Builds the histogram domain from the applied time range and interval.
+ * Bounds are snapped independently so the grid does not depend on row order or
+ * break when the range crosses a DST transition.
  */
 const getDomainBounds = (
-  from: moment.Moment,
-  to: moment.Moment,
-  anchor: number,
-  step: number,
-  unit: Unit,
+  from: number,
+  to: number,
+  interval: ParsedInterval,
   timeZone: string,
   dropPartials: boolean
 ): { min: number; max: number } | undefined => {
-  if (!step || step <= 0) {
-    return undefined;
-  }
-
-  const anchorTime = moment.tz(anchor, timeZone);
-
-  const stepsBefore = Math.ceil(anchorTime.diff(from, unit, true) / step);
-  const start = anchorTime.clone().subtract(stepsBefore * step, unit);
-
-  const stepsAfter = Math.floor(to.diff(anchorTime, unit, true) / step);
-  const end = anchorTime.clone().add(stepsAfter * step, unit);
-
-  let min = start.clone();
-  let max = end.clone();
+  let min = snapToEsBucket(from, interval, timeZone);
+  let max = snapToEsBucket(to, interval, timeZone);
 
   if (dropPartials) {
-    if (!isFullyContained(min, from, to, step, unit)) {
-      min = start.clone().add(step, unit);
+    if (!isFullyContained(min, from, to, interval, timeZone)) {
+      min = addInterval(min, interval, timeZone);
     }
-    if (!isFullyContained(max, from, to, step, unit)) {
-      max = end.clone().subtract(step, unit);
+    if (!isFullyContained(max, from, to, interval, timeZone)) {
+      max = snapToEsBucket(max - 1, interval, timeZone);
     }
-    if (min.valueOf() > max.valueOf()) {
+    if (min > max) {
       return undefined;
     }
   }
 
-  return { min: min.valueOf(), max: max.valueOf() };
+  return { min, max };
 };
 
 /**
@@ -103,27 +128,20 @@ export const dateHistogramTextBasedFn =
     // ES|QL date histograms drop partial buckets by default: undefined is treated as true, an explicit false is respected.
     const dropPartials = meta.dropPartials ?? true;
 
-    // Bucket boundaries and interval should must the timezone ES|QL BUCKET so calendar intervals are aligned.
+    // Bucket boundaries must match the timezone ES|QL BUCKET uses so calendar intervals stay aligned.
     const timeZone = meta.timeZone || contextTimeZone;
-    const parsedInterval = splitStringInterval(intervalString);
-    const interval = parseInterval(intervalString);
 
-    if (!parsedInterval || !interval) {
+    let interval: ParsedInterval;
+    try {
+      interval = parseEsInterval(intervalString);
+    } catch {
       return input;
     }
 
-    const from = moment.tz(timeRange.from, timeZone);
-    const to = moment.tz(timeRange.to, timeZone);
+    const from = moment.tz(timeRange.from, timeZone).valueOf();
+    const to = moment.tz(timeRange.to, timeZone).valueOf();
 
-    const computedDomain = getDomainBounds(
-      from,
-      to,
-      input.rows[0]?.[column.id] ?? from.valueOf(),
-      parsedInterval.value,
-      parsedInterval.unit,
-      timeZone,
-      dropPartials
-    );
+    const computedDomain = getDomainBounds(from, to, interval, timeZone, dropPartials);
 
     const columns = computedDomain
       ? input.columns.map((current) =>
@@ -150,13 +168,7 @@ export const dateHistogramTextBasedFn =
         const bucketStart = row[column.id];
         return (
           (typeof bucketStart !== 'string' && typeof bucketStart !== 'number') ||
-          isFullyContained(
-            moment.tz(bucketStart, timeZone),
-            from,
-            to,
-            parsedInterval.value,
-            parsedInterval.unit
-          )
+          isFullyContained(moment.tz(bucketStart, timeZone).valueOf(), from, to, interval, timeZone)
         );
       }),
     };

@@ -120,6 +120,20 @@ describe('getXDomain', () => {
 
       expect(extendedDomain).toEqual({ min: 500, max: 9000, minInterval: 1000 });
     });
+
+    it('expands a precomputed extent to include values that fall outside it', () => {
+      const { extendedDomain } = getXDomain(
+        datatableUtilities,
+        [createLayer([100, 9000], { min: 500, max: 8500 })],
+        1000,
+        true,
+        false,
+        true,
+        'UTC'
+      );
+
+      expect(extendedDomain).toEqual({ min: 100, max: 9000, minInterval: 1000 });
+    });
   });
 
   describe('minInterval', () => {
