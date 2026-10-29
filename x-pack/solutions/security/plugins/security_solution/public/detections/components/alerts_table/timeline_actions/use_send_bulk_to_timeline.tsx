@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineItem, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineItem, TimelineNonEcsData } from '@kbn/securitysolution-timeline-common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import { useCallback, useMemo } from 'react';

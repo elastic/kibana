@@ -75,7 +75,7 @@ describe('Nightshift investigation agent type', () => {
     ]);
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
-    expect(base.instructions).toContain('/workspace/elastic.md');
+    expect(base.instructions).toContain('/workspace/.connector-docs/elastic.md');
     expect(base.instructions).not.toContain('platform_core_execute_esql');
     expect(base.instructions).not.toContain('/workspace/decision-trees/monitors.md');
     expect(base.instructions).toContain('<alert_data>');
@@ -198,12 +198,19 @@ describe('Nightshift investigation agent type', () => {
     expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
   });
 
-  it('runs its hooks through the workflows the resolver names for the space', async () => {
+  it('preserves telemetry connectors when resolving hooks for the space', async () => {
     const type = getInvestigationAgentType({
       sandboxEnabled: true,
       cortexEnabled: true,
       ...ALL_PLUGINS,
       resolveHookWorkflowId: async (id, { spaceId }) => `${id}-bound-${spaceId}`,
+      telemetryConfig: {
+        telemetry_connector_id: 'legacy',
+        telemetry_targets: {
+          c0: { connector_id: 'c0-telemetry' },
+          orca: { connector_id: 'orca-telemetry' },
+        },
+      },
     });
     if (typeof type.baseConfiguration !== 'function') {
       throw new Error('expected a dynamic base configuration');
@@ -213,6 +220,7 @@ describe('Nightshift investigation agent type', () => {
       spaceId: 'sa-a',
     });
 
+    expect(base.connector_ids).toEqual(['legacy', 'c0-telemetry', 'orca-telemetry']);
     expect(base.workflow_ids).toEqual([
       'system-nightshift-sandbox-materialize-workspace-bound-sa-a',
     ]);
@@ -278,4 +286,23 @@ describe('Nightshift investigation agent type', () => {
       );
     });
   });
+});
+
+it('allows configured telemetry connectors on the single investigator type', () => {
+  const base = staticBase(
+    getInvestigationAgentType({
+      sandboxEnabled: true,
+      cortexEnabled: false,
+      ...ALL_PLUGINS,
+      telemetryConfig: {
+        telemetry_connector_id: 'legacy',
+        telemetry_targets: {
+          c0: { connector_id: 'customer0' },
+          orca: { connector_id: 'orca' },
+          alias: { connector_id: 'orca' },
+        },
+      },
+    })
+  );
+  expect(base.connector_ids).toEqual(['legacy', 'customer0', 'orca']);
 });

@@ -113,6 +113,10 @@ jest.mock('../../../hooks/use_fetch_event_lifecycle', () => ({
 }));
 
 const mockOpenChat = jest.fn();
+const mockFocusedSignificantEventService = {
+  setFocusedEvent: jest.fn(),
+  clearFocusedEvent: jest.fn(),
+};
 const mockAddSuccess = jest.fn();
 const mockSignificantEventsFetch = jest.fn();
 let mockCanManage = false;
@@ -133,6 +137,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
         openChat: mockOpenChat,
         openConversationDetails: mockOpenConversationDetails,
       },
+      focusedSignificantEventService: mockFocusedSignificantEventService,
       notifications: {
         toasts: {
           addSuccess: mockAddSuccess,
@@ -187,6 +192,8 @@ describe('EventFlyout', () => {
     queryClient.clear();
     clearPendingInvestigationCompletionsForTests();
     mockOpenChat.mockClear();
+    mockFocusedSignificantEventService.setFocusedEvent.mockClear();
+    mockFocusedSignificantEventService.clearFocusedEvent.mockClear();
     mockAddSuccess.mockClear();
     mockInvestigationRunStatuses = undefined;
     mockOpenConversationDetails.mockClear();
@@ -231,6 +238,14 @@ describe('EventFlyout', () => {
     expect(screen.getAllByText(/Jul 10, 2026 @ \d{2}:\d{2}:\d{2}/).length).toBeGreaterThan(0);
   });
 
+  it('publishes the focused event and clears it by id on unmount', () => {
+    const { unmount } = renderFlyout();
+
+    expect(mockFocusedSignificantEventService.setFocusedEvent).toHaveBeenCalledWith(mockEvent);
+    unmount();
+    expect(mockFocusedSignificantEventService.clearFocusedEvent).toHaveBeenCalledWith('evt-001');
+  });
+
   it('opens a new chat from the Actions menu', async () => {
     renderFlyout({
       event: {
@@ -252,6 +267,9 @@ describe('EventFlyout', () => {
         newConversation: true,
         initialMessage: expect.stringContaining(mockEvent.title),
       })
+    );
+    expect(mockOpenChat.mock.invocationCallOrder[0]).toBeLessThan(
+      Math.max(...mockFocusedSignificantEventService.setFocusedEvent.mock.invocationCallOrder)
     );
   });
 
