@@ -8,6 +8,7 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
+import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../../../flyout/entity_details/shared/components/right/test_ids';
 import {
   mockEntityRecord,
   mockHostRiskScoreState,
@@ -273,6 +274,32 @@ describe('<Host />', () => {
 
       expect(getByTestId('asset-criticality-badge')).toHaveTextContent('Extreme Impact');
       expect(queryByTestId('asset-criticality-edit-chevron')).not.toBeInTheDocument();
+    });
+
+    it('shows the Table tab when there are no aliases', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord);
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <Host {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId(ENTITY_PANEL_TABLE_TAB_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('hides the Table tab in the group view', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <Host {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(ENTITY_PANEL_TABLE_TAB_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('shows the "Resolved from N records" badge counting the target and its aliases', () => {

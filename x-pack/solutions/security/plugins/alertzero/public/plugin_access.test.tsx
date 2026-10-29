@@ -12,6 +12,8 @@ import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@kbn
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { AlertZeroPublicPlugin } from './plugin';
 import { buildAttachment } from './agent_builder/attachment_types/test_utils';
@@ -58,8 +60,16 @@ const setup = (serverless: boolean) => {
     )
   );
   const agentBuilder = agentBuilderMocks.createStart();
+  const spaces = spacesPluginMock.createStartContract();
+  spaces.getActiveSpace.mockResolvedValue({
+    id: DEFAULT_SPACE_ID,
+    name: 'Default',
+    disabledFeatures: [],
+    solution: 'security',
+  });
   const contract = plugin.start(core, {
     licensing: { ...licensingMock.createStart(), license$ },
+    spaces,
     agentBuilder,
     proposals: {},
     agenticInvestigations: { registerImpactEntityOpener: jest.fn(), InvestigationCard: () => null },

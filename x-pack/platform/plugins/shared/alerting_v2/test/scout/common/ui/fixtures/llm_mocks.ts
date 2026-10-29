@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { last } from 'lodash';
-import type { LlmProxy } from '@kbn/ftr-llm-proxy';
+import { findLast, findLastIndex } from 'lodash';
+import type { LlmProxy, LLMMessage } from '@kbn/ftr-llm-proxy';
 import { createToolCallMessage } from '@kbn/ftr-llm-proxy';
 
 const TITLE_GENERATION_PROMPT = 'You are a title-generation utility';
@@ -18,6 +18,31 @@ export const isTitleGenerationRequest = (messages: ProxyMessages) =>
   String(messages.find((m) => m.role === 'system')?.content ?? '').includes(
     TITLE_GENERATION_PROMPT
   );
+
+/**
+ * Whether the model request answers tool results. When a tool call changes attachments, Agent
+ * Builder follows its results with a user message describing the changes.
+ */
+const isToolResultRequest = (messages: ProxyMessages) => {
+  const lastToolIndex = findLastIndex(messages, ({ role }) => role === 'tool');
+  return (
+    lastToolIndex !== -1 && messages.slice(lastToolIndex + 1).every(({ role }) => role === 'user')
+  );
+};
+
+const interceptToolResult = (
+  proxy: LlmProxy,
+  name: string,
+  responseMock: (messages: ProxyMessages) => LLMMessage
+) => {
+  void proxy
+    .intercept({
+      name,
+      when: ({ messages }) => !isTitleGenerationRequest(messages) && isToolResultRequest(messages),
+      responseMock: ({ messages }) => responseMock(messages),
+    })
+    .completeAfterIntercept();
+};
 
 /** LLM-facing tool name: Agent Builder replaces `.` with `_` in tool ids. */
 export const toLlmToolName = (toolId: string) => toolId.replaceAll('.', '_');
@@ -48,11 +73,7 @@ export const mockToolResultCall = (
   toolName: string,
   toolArg: Record<string, unknown>
 ) => {
-  void proxy.interceptors.toolMessage({
-    name: interceptorName,
-    when: ({ messages }) => !isTitleGenerationRequest(messages),
-    response: createToolCallMessage(toolName, toolArg),
-  });
+  interceptToolResult(proxy, interceptorName, () => createToolCallMessage(toolName, toolArg));
 };
 
 /**
@@ -68,15 +89,11 @@ export const mockFinalAnswerRenderingAttachment = (
   const attachmentIdPattern = new RegExp(
     `\\\\?"${attachmentKey}\\\\?"\\s*:\\s*\\{\\s*\\\\?"id\\\\?"\\s*:\\s*\\\\?"([^"\\\\]+)`
   );
-  void proxy.interceptors.toolMessage({
-    name: `agent:final_answer:${attachmentKey}`,
-    when: ({ messages }) => !isTitleGenerationRequest(messages),
-    response: ({ messages }) => {
-      const toolResult = String(last(messages)?.content ?? '');
-      const [, attachmentId] = toolResult.match(attachmentIdPattern) ?? [];
-      return attachmentId
-        ? `${answer}\n\n<render_attachment id="${attachmentId}" version="1" />`
-        : answer;
-    },
+  interceptToolResult(proxy, `agent:final_answer:${attachmentKey}`, (messages) => {
+    const toolResult = String(findLast(messages, ({ role }) => role === 'tool')?.content ?? '');
+    const [, attachmentId] = toolResult.match(attachmentIdPattern) ?? [];
+    return attachmentId
+      ? `${answer}\n\n<render_attachment id="${attachmentId}" version="1" />`
+      : answer;
   });
 };
