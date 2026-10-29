@@ -56,6 +56,11 @@ module.exports = (request, options) => {
     return module.exports(request.replace('@elastic/eui/lib/', '@elastic/eui/test-env/'), options);
   }
 
+  if (request === 'capnweb') {
+    // Jest's resolver picks the ESM "main" entry. Node's require condition is the CJS build.
+    return Path.resolve(REPO_ROOT, 'node_modules/capnweb/dist/index.cjs');
+  }
+
   if (request === 'axios') {
     return resolve.sync('axios/dist/node/axios.cjs', {
       basedir: options.basedir,

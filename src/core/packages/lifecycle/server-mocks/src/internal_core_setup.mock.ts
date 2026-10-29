@@ -69,6 +69,13 @@ export function createInternalCoreSetupMock() {
     dataStreams: dataStreamServiceMock.createSetupContract(),
     pubsub: pubSubServiceMock.createInternalSetupContract(),
     userStorage: userStorageServiceMock.createSetupContract(),
+    remote: lazyObject({
+      register: () => undefined,
+      bind: () => undefined,
+      whenReady: async () => {
+        throw new Error('Remote execution was not started in this test');
+      },
+    }),
   });
   return setupDeps;
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Worker } from 'node:worker_threads';
+import { Worker, type MessagePort } from 'node:worker_threads';
 import type {
   ManagedWorker,
   ManagedWorkerExitInfo,
@@ -56,6 +56,11 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
   private heapSizeLimit?: number;
   private stopping?: Promise<void>;
   private termination?: Promise<void>;
+  private readyPromise?: Promise<void>;
+  private resolveReady?: () => void;
+  private rejectReady?: (error: Error) => void;
+  private readySettled = false;
+  private connectionTransferred = false;
 
   constructor(private readonly options: ManagedWorkerOptions<TData>) {}
 
@@ -64,14 +69,27 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
     if (this.stopping) throw new Error('Cannot start a worker while it is stopping');
     this.running = true;
     this.restarts = 0;
+    this.readySettled = false;
+    this.readyPromise = new Promise<void>((resolve, reject) => {
+      this.resolveReady = resolve;
+      this.rejectReady = reject;
+    });
     this.state = 'starting';
     this.spawnAfterTermination();
+  }
+
+  public ready(): Promise<void> {
+    if (!this.readyPromise) {
+      return Promise.reject(new Error(`Worker ${this.options.name} has not been started`));
+    }
+    return this.readyPromise;
   }
 
   public stop(): Promise<void> {
     if (this.stopping) return this.stopping;
     this.running = false;
     this.state = 'stopped';
+    this.settleReady(new Error(`Worker ${this.options.name} stopped`));
     clearTimeout(this.restartTimer);
     this.restartTimer = undefined;
     this.discardWorker();
@@ -111,10 +129,24 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
     this.heapUsed = undefined;
     this.heapSizeLimit = undefined;
     try {
+      const transferList: MessagePort[] = [];
+      const payload: {
+        __entry: string;
+        __healthIntervalMs: number;
+        __connectionPort?: MessagePort;
+        data: TData | undefined;
+      } = { __entry: entry, __healthIntervalMs: healthIntervalMs, data: workerData };
+      if (this.options.connectionPort && !this.connectionTransferred) {
+        payload.__connectionPort = this.options.connectionPort;
+        transferList.push(this.options.connectionPort);
+        // A MessagePort can be transferred once. Restarts need a new port from the caller.
+        this.connectionTransferred = true;
+      }
       const worker = new Worker(BOOTSTRAP_PATH, {
         name,
         resourceLimits,
-        workerData: { __entry: entry, __healthIntervalMs: healthIntervalMs, data: workerData },
+        workerData: payload,
+        transferList,
       });
       this.worker = worker;
       this.threadId = worker.threadId;
@@ -166,6 +198,7 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
     this.readyTimer = undefined;
     this.readyAt = Date.now();
     this.state = 'running';
+    this.settleReady();
     if (typeof heapSizeLimit === 'number') this.heapSizeLimit = heapSizeLimit;
     // The effective limit can differ from resourceLimits: --max-old-space-size overrides it.
     const limit =
@@ -206,6 +239,7 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
     if (this.restarts >= maxAttempts) {
       this.running = false;
       this.state = 'exhausted';
+      this.settleReady(new Error(`Worker ${name} ${failure}`));
       logger.error(
         `Worker ${name} ${failure} and exhausted ${maxAttempts} restarts; inactive until started again`
       );
@@ -252,6 +286,16 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
     } catch (error) {
       this.options.logger.error(`Worker ${this.options.name} ${callback} failed: ${error.message}`);
     }
+  }
+
+  private settleReady(error?: Error): void {
+    if (this.readySettled) return;
+    this.readySettled = true;
+    if (error) {
+      this.rejectReady?.(error);
+      return;
+    }
+    this.resolveReady?.();
   }
 
   private discardWorker(): void {

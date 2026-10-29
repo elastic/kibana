@@ -13,6 +13,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-di",
+    "@kbn/core-remote-common",
     "@kbn/workflows",
     "@kbn/zod",
     "@kbn/config-schema",

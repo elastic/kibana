@@ -45,6 +45,7 @@
     "@kbn/core-user-storage-server-mocks",
     "@kbn/lazy-object",
     "@kbn/core-user-activity-server-mocks",
+    "@kbn/core-remote-server",
   ],
   "exclude": [
     "target/**/*",

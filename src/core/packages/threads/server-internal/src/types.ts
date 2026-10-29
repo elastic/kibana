@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ResourceLimits } from 'node:worker_threads';
+import type { MessagePort, ResourceLimits } from 'node:worker_threads';
 import type { Logger } from '@kbn/logging';
 
 /** Lifecycle state of a managed worker. */
@@ -43,6 +43,11 @@ export interface ManagedWorkerOptions<TData = unknown> {
    */
   readonly entry: string;
   readonly workerData?: TData;
+  /**
+   * Transferred to the worker as `workerData.__connectionPort`.
+   * Used for an application protocol that must stay off the control channel.
+   */
+  readonly connectionPort?: MessagePort;
   /** Every field of Node's `ResourceLimits` is optional, so the heap cap is required here. */
   readonly resourceLimits: ResourceLimits & { readonly maxOldGenerationSizeMb: number };
   readonly logger: Logger;
@@ -76,6 +81,8 @@ export interface ManagedWorkerStatus {
 
 export interface ManagedWorker {
   start(): void;
+  /** Resolves when the worker reports ready. Rejects if the restart budget is exhausted first. */
+  ready(): Promise<void>;
   stop(): Promise<void>;
   status(): ManagedWorkerStatus;
 }

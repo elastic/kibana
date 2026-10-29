@@ -22,6 +22,49 @@ import {
 } from '../../../common/utils/get_initial_case_value';
 import type { ConnectorTypes } from '../../../common/types/domain';
 
+export async function createCaseWithClient(
+  casesClient: CasesClient,
+  input: CreateCaseStepInput,
+  config: CreateCaseStepConfig
+): Promise<CreateCaseStepOutput['case']> {
+  const rawInput = input as GetInitialCaseValueArgs;
+  let enrichedInput = getInitialCaseValue(rawInput);
+  // Omit extractObservables when the caller did not provide it so the server can apply the
+  // space-config default (precedence: explicit → template → space config → autoExtractDefault → false).
+  if (rawInput.settings?.extractObservables === undefined) {
+    const { extractObservables: _omitted, ...settingsWithoutExtract } = enrichedInput.settings;
+    enrichedInput = { ...enrichedInput, settings: settingsWithoutExtract };
+  }
+
+  // If a connector was provided, make sure to resolve its config and add it to the input.
+  if (config['connector-id']) {
+    const connectorConfig = await casesClient.configure.getConnectors();
+    const foundConnector = connectorConfig.find(
+      (connector) => connector.id === config['connector-id']
+    );
+
+    if (foundConnector) {
+      enrichedInput = {
+        ...enrichedInput,
+        connector: {
+          id: foundConnector.id,
+          name: foundConnector.name,
+          type: foundConnector.actionTypeId as ConnectorTypes,
+          fields: null,
+        },
+      };
+    } else {
+      throw new Error(`Connector configuration not found: ${config['connector-id']}`);
+    }
+  }
+
+  const createdCase = await casesClient.cases.create(enrichedInput);
+  return safeParseCaseForWorkflowOutput(
+    createCaseStepCommonDefinition.outputSchema.shape.case,
+    createdCase
+  );
+}
+
 export const createCaseStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
@@ -31,42 +74,5 @@ export const createCaseStepDefinition = (
       CreateCaseStepInput,
       CreateCaseStepConfig,
       CreateCaseStepOutput['case']
-    >(getCasesClient, async (casesClient, input, config) => {
-      const rawInput = input as GetInitialCaseValueArgs;
-      let enrichedInput = getInitialCaseValue(rawInput);
-      // Omit extractObservables when the caller did not provide it so the server can apply the
-      // space-config default (precedence: explicit → template → space config → autoExtractDefault → false).
-      if (rawInput.settings?.extractObservables === undefined) {
-        const { extractObservables: _omitted, ...settingsWithoutExtract } = enrichedInput.settings;
-        enrichedInput = { ...enrichedInput, settings: settingsWithoutExtract };
-      }
-
-      // If a connector was provided, make sure to resolve its config and add it to the input.
-      if (config['connector-id']) {
-        const connectorConfig = await casesClient.configure.getConnectors();
-        const foundConnector = connectorConfig.find(
-          (connector) => connector.id === config['connector-id']
-        );
-
-        if (foundConnector) {
-          enrichedInput = {
-            ...enrichedInput,
-            connector: {
-              id: foundConnector.id,
-              name: foundConnector.name,
-              type: foundConnector.actionTypeId as ConnectorTypes,
-              fields: null,
-            },
-          };
-        } else {
-          throw new Error(`Connector configuration not found: ${config['connector-id']}`);
-        }
-      }
-
-      const createdCase = await casesClient.cases.create(enrichedInput);
-      return safeParseCaseForWorkflowOutput(
-        createCaseStepCommonDefinition.outputSchema.shape.case,
-        createdCase
-      );
-    }),
+    >(getCasesClient, createCaseWithClient),
   });
