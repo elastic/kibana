@@ -33,6 +33,9 @@ target
 !/.cursor/hooks.json
 !/.cursor/hooks/
 !/.cursor/rules/
+# damn-daniel: only the branch POC rule is tracked; keep personal/other-branch rules local
+/.cursor/rules/*
+!/.cursor/rules/damn-daniel-design-refresh.mdc
 !x-pack/solutions/security/.cursor
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
