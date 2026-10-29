@@ -465,7 +465,7 @@ describe('DispatchStep', () => {
   });
 
   it("builds alert_url from each alert's space and id", async () => {
-    const step = createStep();
+    const step = new DispatchStep(mockWfm, mockLicenseService);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
       { status: 'fulfilled', value: [createWorkflowDetailDto()] },
