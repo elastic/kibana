@@ -404,6 +404,26 @@ describe('Datatable Schema', () => {
       expect(validated.metrics?.[0]).toMatchObject(progressBarDefaults);
       expect(validated.rows?.[0]).toMatchObject(progressBarDefaults);
     });
+
+    it('defaults the progress bar fill mode to gradient', () => {
+      const input: DatatableConfigInput = {
+        type: 'data_table',
+        data_source: {
+          type: 'esql',
+          query: 'FROM my-index | LIMIT 100',
+        },
+        metrics: [{ column: 'bytes', apply_color_to: 'progress_bar' }],
+      };
+
+      const validated = datatableConfigSchema.parse(input);
+      expect(validated.metrics?.[0]).toMatchObject({
+        apply_color_to: 'progress_bar',
+        fill_mode: 'gradient',
+        color: AUTO_COLOR,
+        value_range: { type: 'auto' },
+        alignment: 'right',
+      });
+    });
   });
 
   describe('validation errors', () => {
@@ -838,16 +858,6 @@ describe('Datatable Schema', () => {
       expectPrettyError(result).toMatchInlineSnapshot(
         `"✖ The 'sort_by.index' (2) is out of bounds. The 'metrics' array has 2 item(s)."`
       );
-    });
-
-    it('throws when the fill_mode is missing', () => {
-      const input: InvalidMetricsConfig<{ operation: 'count'; apply_color_to: 'progress_bar' }> = {
-        ...baseDatatableConfig,
-        metrics: [{ operation: 'count', apply_color_to: 'progress_bar' }],
-      };
-
-      const result = datatableConfigSchema.safeParse(input);
-      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
 
     it('throws when the fill_mode is unknown', () => {

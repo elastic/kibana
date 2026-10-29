@@ -378,6 +378,7 @@ const getProgressBarSchema = <Shape extends z.ZodRawShape, Config extends z.core
         .extend({
           fill_mode: z
             .literal('gradient')
+            .default('gradient')
             .meta({ description: 'Reveals the palette along the bar.' }),
           color: paletteColorSchema,
         })
