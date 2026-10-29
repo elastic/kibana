@@ -36,7 +36,7 @@ Method
     - {applies_to}`stack: ga 9.3` `DELETE` 
 
 URL
-:   The request URL. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure the hostname is added to the allowed hosts.
+:   The request URL must start with `http://` or `https://`. Internal hostnames such as `http://dev-logstash:10200` are supported. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure the hostname is added to the allowed hosts.
 
 Authentication
 :   The authentication type: none, basic, SSL, or {applies_to}`stack: ga 9.2` OAuth 2.0 authentication. 

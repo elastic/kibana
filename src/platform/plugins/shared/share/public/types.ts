@@ -147,6 +147,10 @@ export interface ExportShare<S extends SharingData = SharingData>
        */
       toolTipContent?: string;
       label: string;
+      /**
+       * optional badge, for instance a release stage, rendered next to the export flyout title
+       */
+      badge?: { label: string; tooltipContent?: string };
       exportType: string;
       /**
        * allows disabling the export action, for instance the current app has no data to export

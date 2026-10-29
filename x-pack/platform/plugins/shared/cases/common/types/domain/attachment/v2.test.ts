@@ -6,11 +6,11 @@
  */
 
 import {
-  UnifiedAttachmentPayloadRt,
-  UnifiedAttachmentAttributesRt,
-  UnifiedAttachmentRt,
-  AttachmentRtV2,
-  DocumentAttachmentAttributesRtV2,
+  UnifiedAttachmentPayloadSchema,
+  UnifiedAttachmentAttributesSchema,
+  UnifiedAttachmentSchema,
+  AttachmentSchemaV2,
+  DocumentAttachmentAttributesSchemaV2,
 } from './v2';
 import { AttachmentType } from './v1';
 import {
@@ -20,7 +20,7 @@ import {
 } from '../../../constants/attachments';
 
 describe('Unified Attachments', () => {
-  describe('UnifiedAttachmentPayloadRt', () => {
+  describe('UnifiedAttachmentPayloadSchema', () => {
     const defaultRequest = {
       type: 'lens',
       attachmentId: 'attachment-123',
@@ -41,21 +41,15 @@ describe('Unified Attachments', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = UnifiedAttachmentPayloadRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = UnifiedAttachmentPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = UnifiedAttachmentPayloadRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = UnifiedAttachmentPayloadSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     it('accepts null data', () => {
@@ -67,12 +61,9 @@ describe('Unified Attachments', () => {
         metadata: null,
       };
 
-      const query = UnifiedAttachmentPayloadRt.decode(requestWithNullData);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithNullData,
-      });
+      const result = UnifiedAttachmentPayloadSchema.safeParse(requestWithNullData);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(requestWithNullData);
     });
 
     it('accepts request with only data', () => {
@@ -84,11 +75,9 @@ describe('Unified Attachments', () => {
         },
       };
 
-      const query = UnifiedAttachmentPayloadRt.decode(requestWithoutAttachmentId);
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithoutAttachmentId,
-      });
+      const result = UnifiedAttachmentPayloadSchema.safeParse(requestWithoutAttachmentId);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(requestWithoutAttachmentId);
     });
 
     it('accepts request with only attachmentId', () => {
@@ -98,12 +87,11 @@ describe('Unified Attachments', () => {
         owner: 'securitySolution',
       };
 
-      const query = UnifiedAttachmentPayloadRt.decode(requestWithOnlyAttachmentId);
-
-      expect(query._tag).toBe('Right');
-      if (query._tag === 'Right') {
-        expect(query.right).toMatchObject(requestWithOnlyAttachmentId);
-        expect(query.right).not.toHaveProperty('metadata');
+      const result = UnifiedAttachmentPayloadSchema.safeParse(requestWithOnlyAttachmentId);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toMatchObject(requestWithOnlyAttachmentId);
+        expect(result.data).not.toHaveProperty('metadata');
       }
     });
 
@@ -114,11 +102,10 @@ describe('Unified Attachments', () => {
         owner: 'securitySolution',
       };
 
-      const query = UnifiedAttachmentPayloadRt.decode(requestWithAttachmentIdArray);
-
-      expect(query._tag).toBe('Right');
-      if (query._tag === 'Right') {
-        expect(query.right).toMatchObject(requestWithAttachmentIdArray);
+      const result = UnifiedAttachmentPayloadSchema.safeParse(requestWithAttachmentIdArray);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toMatchObject(requestWithAttachmentIdArray);
       }
     });
 
@@ -132,13 +119,11 @@ describe('Unified Attachments', () => {
         },
       };
 
-      const query = UnifiedAttachmentPayloadRt.decode(requestWithAttachmentIdAndMetadata);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithAttachmentIdAndMetadata,
-      });
+      const result = UnifiedAttachmentPayloadSchema.safeParse(requestWithAttachmentIdAndMetadata);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(requestWithAttachmentIdAndMetadata);
     });
+
     it('accepts request without metadata', () => {
       const requestWithoutMetadata = {
         type: 'lens',
@@ -151,11 +136,10 @@ describe('Unified Attachments', () => {
         },
       };
 
-      const query = UnifiedAttachmentPayloadRt.decode(requestWithoutMetadata);
-
-      expect(query._tag).toBe('Right');
-      if (query._tag === 'Right') {
-        expect(query.right).toMatchObject({
+      const result = UnifiedAttachmentPayloadSchema.safeParse(requestWithoutMetadata);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toMatchObject({
           type: 'lens',
           attachmentId: 'attachment-123',
           owner: 'securitySolution',
@@ -165,8 +149,7 @@ describe('Unified Attachments', () => {
             },
           },
         });
-        // metadata should not be present when not provided
-        expect(query.right).not.toHaveProperty('metadata');
+        expect(result.data).not.toHaveProperty('metadata');
       }
     });
 
@@ -176,13 +159,12 @@ describe('Unified Attachments', () => {
         owner: 'securitySolution',
       };
 
-      const query = UnifiedAttachmentPayloadRt.decode(requestWithOnlyType);
-
-      expect(query._tag).toBe('Left');
+      const result = UnifiedAttachmentPayloadSchema.safeParse(requestWithOnlyType);
+      expect(result.success).toBe(false);
     });
   });
 
-  describe('UnifiedAttachmentAttributesRt', () => {
+  describe('UnifiedAttachmentAttributesSchema', () => {
     const defaultRequest = {
       type: 'lens',
       attachmentId: 'attachment-123',
@@ -208,21 +190,15 @@ describe('Unified Attachments', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = UnifiedAttachmentAttributesRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = UnifiedAttachmentAttributesSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = UnifiedAttachmentAttributesRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = UnifiedAttachmentAttributesSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     it('accepts request with only attachmentId', () => {
@@ -242,12 +218,9 @@ describe('Unified Attachments', () => {
         pushed_by: null,
       };
 
-      const query = UnifiedAttachmentAttributesRt.decode(requestWithOnlyAttachmentId);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithOnlyAttachmentId,
-      });
+      const result = UnifiedAttachmentAttributesSchema.safeParse(requestWithOnlyAttachmentId);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(requestWithOnlyAttachmentId);
     });
 
     it('accepts request with only data', () => {
@@ -269,12 +242,9 @@ describe('Unified Attachments', () => {
         pushed_by: null,
       };
 
-      const query = UnifiedAttachmentAttributesRt.decode(requestWithOnlyData);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithOnlyData,
-      });
+      const result = UnifiedAttachmentAttributesSchema.safeParse(requestWithOnlyData);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(requestWithOnlyData);
     });
 
     it('rejects request with neither attachmentId nor data', () => {
@@ -293,13 +263,12 @@ describe('Unified Attachments', () => {
         pushed_by: null,
       };
 
-      const query = UnifiedAttachmentAttributesRt.decode(requestWithoutRequired);
-
-      expect(query._tag).toBe('Left');
+      const result = UnifiedAttachmentAttributesSchema.safeParse(requestWithoutRequired);
+      expect(result.success).toBe(false);
     });
   });
 
-  describe('UnifiedAttachmentRt', () => {
+  describe('UnifiedAttachmentSchema', () => {
     const defaultRequest = {
       type: 'lens',
       attachmentId: 'attachment-123',
@@ -327,21 +296,15 @@ describe('Unified Attachments', () => {
     };
 
     it('has expected attributes in request', () => {
-      const query = UnifiedAttachmentRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+      const result = UnifiedAttachmentSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
-    it('removes foo:bar attributes from request', () => {
-      const query = UnifiedAttachmentRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
+    it('strips unknown fields', () => {
+      const result = UnifiedAttachmentSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     it('accepts request with only attachmentId', () => {
@@ -363,12 +326,9 @@ describe('Unified Attachments', () => {
         version: 'WzEwMCwxXQ==',
       };
 
-      const query = UnifiedAttachmentRt.decode(requestWithOnlyAttachmentId);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithOnlyAttachmentId,
-      });
+      const result = UnifiedAttachmentSchema.safeParse(requestWithOnlyAttachmentId);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(requestWithOnlyAttachmentId);
     });
 
     it('accepts request with only data', () => {
@@ -392,12 +352,9 @@ describe('Unified Attachments', () => {
         version: 'WzEwMCwxXQ==',
       };
 
-      const query = UnifiedAttachmentRt.decode(requestWithOnlyData);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: requestWithOnlyData,
-      });
+      const result = UnifiedAttachmentSchema.safeParse(requestWithOnlyData);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(requestWithOnlyData);
     });
 
     it('rejects request with neither attachmentId nor data', () => {
@@ -418,14 +375,13 @@ describe('Unified Attachments', () => {
         version: 'WzEwMCwxXQ==',
       };
 
-      const query = UnifiedAttachmentRt.decode(requestWithoutRequired);
-
-      expect(query._tag).toBe('Left');
+      const result = UnifiedAttachmentSchema.safeParse(requestWithoutRequired);
+      expect(result.success).toBe(false);
     });
   });
 
-  describe('AttachmentRtV2', () => {
-    it('accepts UnifiedAttachmentRt', () => {
+  describe('AttachmentSchemaV2', () => {
+    it('accepts UnifiedAttachmentSchema', () => {
       const unifiedAttachment = {
         type: 'lens',
         attachmentId: 'attachment-123',
@@ -444,15 +400,12 @@ describe('Unified Attachments', () => {
         version: 'WzEwMCwxXQ==',
       };
 
-      const query = AttachmentRtV2.decode(unifiedAttachment);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: unifiedAttachment,
-      });
+      const result = AttachmentSchemaV2.safeParse(unifiedAttachment);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(unifiedAttachment);
     });
 
-    it('accepts AttachmentRt (v1)', () => {
+    it('accepts AttachmentSchema (v1)', () => {
       const v1Attachment = {
         type: AttachmentType.user,
         comment: 'This is a comment',
@@ -471,16 +424,13 @@ describe('Unified Attachments', () => {
         version: 'WzEwMCwxXQ==',
       };
 
-      const query = AttachmentRtV2.decode(v1Attachment);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: v1Attachment,
-      });
+      const result = AttachmentSchemaV2.safeParse(v1Attachment);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(v1Attachment);
     });
   });
 
-  describe('DocumentAttachmentAttributesRtV2', () => {
+  describe('DocumentAttachmentAttributesSchemaV2', () => {
     it('accepts legacy event attributes', () => {
       const legacyEvent = {
         type: AttachmentType.event,
@@ -495,7 +445,8 @@ describe('Unified Attachments', () => {
         pushed_by: null,
       };
 
-      expect(DocumentAttachmentAttributesRtV2.decode(legacyEvent)._tag).toBe('Right');
+      const result = DocumentAttachmentAttributesSchemaV2.safeParse(legacyEvent);
+      expect(result.success).toBe(true);
     });
 
     it('accepts unified security.event attributes', () => {
@@ -512,7 +463,8 @@ describe('Unified Attachments', () => {
         pushed_by: null,
       };
 
-      expect(DocumentAttachmentAttributesRtV2.decode(unifiedEvent)._tag).toBe('Right');
+      const result = DocumentAttachmentAttributesSchemaV2.safeParse(unifiedEvent);
+      expect(result.success).toBe(true);
     });
 
     it('accepts unified security.alert attributes with rule metadata', () => {
@@ -532,7 +484,8 @@ describe('Unified Attachments', () => {
         pushed_by: null,
       };
 
-      expect(DocumentAttachmentAttributesRtV2.decode(unifiedAlert)._tag).toBe('Right');
+      const result = DocumentAttachmentAttributesSchemaV2.safeParse(unifiedAlert);
+      expect(result.success).toBe(true);
     });
 
     it('accepts unified security.entity attributes so entities participate in dedup', () => {
@@ -549,7 +502,7 @@ describe('Unified Attachments', () => {
         pushed_by: null,
       };
 
-      expect(DocumentAttachmentAttributesRtV2.decode(unifiedEntity)._tag).toBe('Right');
+      expect(DocumentAttachmentAttributesSchemaV2.safeParse(unifiedEntity).success).toBe(true);
     });
   });
 });

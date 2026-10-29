@@ -4,6 +4,7 @@
     ".abuseipdb",
     ".alienvault-otx",
     ".amazon_s3",
+    ".ansible_controller",
     ".aws_lambda",
     ".azure-blob",
     ".bedrock",
@@ -122,6 +123,20 @@
     "amazon_s3.downloadFile",
     "amazon_s3.listBucketObjects",
     "amazon_s3.listBuckets",
+    "ansible_controller.cancelJob",
+    "ansible_controller.getJob",
+    "ansible_controller.getJobStdout",
+    "ansible_controller.getJobTemplate",
+    "ansible_controller.getJobTemplateLaunchOptions",
+    "ansible_controller.getMe",
+    "ansible_controller.launchJobTemplate",
+    "ansible_controller.listHosts",
+    "ansible_controller.listInventories",
+    "ansible_controller.listJobEvents",
+    "ansible_controller.listJobTemplates",
+    "ansible_controller.listJobs",
+    "ansible_controller.listProjects",
+    "ansible_controller.request",
     "aws_lambda.getFunction",
     "aws_lambda.invoke",
     "aws_lambda.listFunctions",
@@ -612,9 +627,11 @@
     "nightshift.decisionTreePrepare",
     "nightshift.decisionTreeReinforce",
     "nightshift.ensureInvestigationAgent",
+    "nightshift.handleInvestigationFailure",
     "nightshift.memoryMaterializeToSandbox",
     "nightshift.memoryOptimize",
     "nightshift.obtainSandbox",
+    "nightshift.renderSlackMessage",
     "nightshift.resolveModel",
     "nightshift.sendNotifications",
     "nightshift.triggerInvestigation",
@@ -1019,11 +1036,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "913b8a8810ea0d1bee86195750b749c15b4d66ac0febf7d78b6eafa94defdd83"
+      "sha256": "90102245662e354851f5eede7bbd7feb3606a5094ac929325d253c69ee4c3a84"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "80a40fb4dda5a8719c48b5b3c64c07575b42aee51a4985a7c48a57d8a3fd1ff2"
+      "sha256": "745bb5e64a1861bd31be5450915cf0133b50d5c69b9cdbebf4edb831c134ccd5"
     }
   }
 }

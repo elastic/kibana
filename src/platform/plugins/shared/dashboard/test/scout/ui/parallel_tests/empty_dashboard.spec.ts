@@ -11,6 +11,8 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
 
+const LIBRARY_PANEL_TITLE = 'Rendering Test: metric';
+
 spaceTest.describe('Empty dashboard', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
@@ -43,8 +45,8 @@ spaceTest.describe('Empty dashboard', { tag: tags.deploymentAgnostic }, () => {
       await expect(page.testSubj.locator('savedObjectsFinderTable')).toBeHidden();
     });
 
-    await spaceTest.step('adds a new panel via the editor menu', async () => {
-      await pageObjects.dashboard.addMarkdownPanel('empty dashboard scout test');
+    await spaceTest.step('adds a panel from the library', async () => {
+      await pageObjects.dashboard.addPanelFromLibrary(LIBRARY_PANEL_TITLE);
       await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBe(1);
     });
 

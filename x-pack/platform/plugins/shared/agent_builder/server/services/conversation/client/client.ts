@@ -17,7 +17,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConversationOrigin,
   ConversationRoundAuthor,
-  ConversationRoundFeedback,
+  ConversationRoundAuthorDecoration,
   ConversationUpdatedTriggerEvent,
   ConversationWriteSource,
   FeedbackChipId,
@@ -42,6 +42,7 @@ import {
   normalizeConversationAccessControl,
   createBadRequestError,
   createConversationAlreadyExistsError,
+  createConversationBusyError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
   createInternalError,
@@ -75,6 +76,7 @@ import {
 } from '../access_control';
 import type {
   AppendEventsRequest,
+  ActiveExecutionUpdate,
   ConversationCreateRequest,
   ConversationUpdatableFields,
   ConversationUpdateRequest,
@@ -86,6 +88,14 @@ import type {
 } from './types';
 import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
 import {
+  ConversationBusySignal,
+  applyActiveExecutionUpdate,
+  isActiveExecutionUpdateNoop,
+  readHeldExecution,
+  toActiveExecution,
+} from './active_execution';
+import type { AgentExecutionClient } from '../../execution/persistence';
+import {
   MAX_CONVERSATIONS_PER_PAGE,
   MAX_CONVERSATION_SEARCH_PER_PAGE,
   MAX_RESULT_WINDOW,
@@ -94,7 +104,7 @@ import { buildConversationIdsFilter } from './build_ids_filter';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationProperties, ConversationStorage } from './storage';
 import { agentActor } from './rounds_to_events';
-import { eventsToRounds, withStoredRoundFeedback } from './events_to_rounds';
+import { eventsToRounds } from './events_to_rounds';
 import {
   type ActivityContext,
   type ActivityEnvelope,
@@ -165,6 +175,8 @@ export interface ConversationClient {
       access?: ConversationAccess;
       retryOnConflict?: boolean;
       activity?: ActivityContext;
+      /** Changes the active execution in the same write. */
+      activeExecution?: ActiveExecutionUpdate;
     }
   ): Promise<Conversation>;
   appendEvents(
@@ -187,7 +199,7 @@ export interface ConversationClient {
   setPinned(conversationId: string, pinned: boolean): Promise<Conversation>;
   updateRoundFeedback(
     conversationId: string,
-    roundId: string,
+    executionId: string,
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void>;
   list(options?: ConversationListOptions): Promise<ConversationListResult>;
@@ -233,7 +245,10 @@ export interface ConversationClient {
     options: ConversationWriteOptions & { access?: ConversationAccess; activity?: ActivityContext }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   getUser(): CurrentUser;
-  getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined;
+  getAuthor(
+    originAuthor?: ConversationRoundAuthor,
+    decoration?: ConversationRoundAuthorDecoration
+  ): ConversationRoundAuthor | undefined;
 }
 
 /**
@@ -294,6 +309,7 @@ export const createClient = ({
   space,
   logger,
   esClient,
+  executionClient,
   user,
   agentRegistry,
   conversationEvents,
@@ -304,6 +320,7 @@ export const createClient = ({
   space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
+  executionClient: AgentExecutionClient;
   user: CurrentUser;
   agentRegistry: AgentRegistry;
   conversationEvents: ConversationEventsServiceStart;
@@ -315,6 +332,7 @@ export const createClient = ({
   return new ConversationClientImpl({
     storage,
     esClient,
+    executionClient,
     user,
     space,
     agentRegistry,
@@ -386,6 +404,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
   private readonly esClient: ElasticsearchClient;
+  private readonly executionClient: AgentExecutionClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly conversationEvents: ConversationEventsServiceStart;
@@ -397,6 +416,7 @@ class ConversationClientImpl implements ConversationClient {
   constructor({
     storage,
     esClient,
+    executionClient,
     user,
     space,
     agentRegistry,
@@ -408,6 +428,7 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
+    executionClient: AgentExecutionClient;
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
@@ -419,6 +440,7 @@ class ConversationClientImpl implements ConversationClient {
   }) {
     this.storage = storage;
     this.esClient = esClient;
+    this.executionClient = executionClient;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
@@ -478,7 +500,9 @@ class ConversationClientImpl implements ConversationClient {
     if (!this.eventEmitter) {
       return;
     }
-    const attachmentEvents = writtenEvents.filter(isAttachmentEvent);
+    const attachmentEvents = writtenEvents
+      .filter(isAttachmentEvent)
+      .filter((event) => !event.data.hidden);
     if (attachmentEvents.length === 0) {
       return;
     }
@@ -724,36 +748,54 @@ class ConversationClientImpl implements ConversationClient {
     ];
   }
 
-  /** Maps a list/search ES response to the shared `{ results, total }` shape. */
-  private mapListResponse(response: ConversationListEsResponse): ConversationListResult {
-    const hitsTotal = response.hits.total;
-    const total = Math.min(
-      typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,
-      MAX_RESULT_WINDOW
-    );
-
-    const results = response.hits.hits.map((hit) => {
-      if (!isConversationDocument(hit)) {
-        throw createInternalError('Conversation list search returned an incomplete hit');
-      }
-
-      return toResponseConversationWithoutRounds({
-        document: hit,
-        user: this.getUser(),
-        resolveTemplate: getTemplate,
-      });
-    });
-
-    return { results, total };
-  }
-
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-
-    return toResponseConversation({
+    const conversation = await toResponseConversation({
       document,
       user: this.getUser(),
       resolveTemplate: getTemplate,
+    });
+    const isOwner = hasConversationOwnerAccess({ conversation, user: this.getUser() });
+    if (!isOwner) {
+      const { feedback: _feedback, ...conversationWithoutFeedback } = conversation;
+      return conversationWithoutFeedback;
+    }
+    return conversation;
+  }
+
+  async updateRoundFeedback(
+    conversationId: string,
+    executionId: string,
+    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
+  ): Promise<void> {
+    await this.writeConversation({
+      conversationId,
+      access: 'owner',
+      emit: false,
+      fields: (current) => {
+        const existing = current.feedback ?? {};
+        if (feedback.vote === null) {
+          if (!existing[executionId]) {
+            throw skipWrite(current);
+          }
+          const { [executionId]: _removed, ...remaining } = existing;
+          return { feedback: remaining };
+        }
+        if (!hasTerminalEventFor(current, executionId)) {
+          throw createConversationNotFoundError({ conversationId });
+        }
+        return {
+          feedback: {
+            ...existing,
+            [executionId]: {
+              vote: feedback.vote,
+              chips: feedback.chips,
+              comment: feedback.comment,
+              submitted_at: new Date().toISOString(),
+            },
+          },
+        };
+      },
     });
   }
 
@@ -815,7 +857,11 @@ class ConversationClientImpl implements ConversationClient {
     const now = new Date();
     const id = conversation.id ?? uuidv4();
 
-    const { template_id: templateId, ...conversationWithoutTemplateId } = conversation;
+    const {
+      template_id: templateId,
+      activeExecution,
+      ...conversationWithoutTemplateId
+    } = conversation;
 
     let resolvedMetadata = conversationWithoutTemplateId.metadata;
     let resolvedTemplateId: string | undefined;
@@ -893,6 +939,7 @@ class ConversationClientImpl implements ConversationClient {
         ...(resolvedTemplateVersion !== undefined
           ? { template_version: resolvedTemplateVersion }
           : {}),
+        active_execution: activeExecution && toActiveExecution(activeExecution),
       },
       currentUser: this.getUser(),
       creationDate: new Date(createdAt),
@@ -954,21 +1001,33 @@ class ConversationClientImpl implements ConversationClient {
       retryOnConflict = false,
       source,
       activity,
+      activeExecution,
     }: ConversationWriteOptions & {
       access?: ConversationAccess;
       retryOnConflict?: boolean;
       activity?: ActivityContext;
+      activeExecution?: ActiveExecutionUpdate;
     }
   ): Promise<Conversation> {
     const { id: conversationId, ...fields } = conversationUpdate;
     const envelope = this.activityEnvelope(activity);
 
+    // An update without fields changes no conversation content, so it emits no
+    // `ai.conversation.updated`, and writes only to change the active execution.
+    const hasFields = Object.keys(fields).length > 0;
+    const emission: ConversationWriteEmission = hasFields ? { source } : { emit: false };
+
     const result = await this.writeConversation({
       conversationId,
       access,
-      source,
+      ...emission,
       ...(retryOnConflict ? {} : { maxRetries: 0 }),
+      activeExecution,
       fields: (current) => {
+        if (!hasFields && isActiveExecutionUpdateNoop(current, activeExecution)) {
+          throw skipWrite(current);
+        }
+
         const bounded = withBoundedTitle(fields);
         const activityEvents: ActivityEvent[] = [
           ...(bounded.title !== undefined
@@ -1030,6 +1089,7 @@ class ConversationClientImpl implements ConversationClient {
       attachments,
       workspaceId,
       skipIfTerminalExistsFor,
+      activeExecution,
     } = request;
     const createdAt = new Date().toISOString();
 
@@ -1041,6 +1101,7 @@ class ConversationClientImpl implements ConversationClient {
       access,
       source,
       refresh,
+      activeExecution,
       fields: (current) => {
         if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
           throw skipWrite(current);
@@ -1062,8 +1123,7 @@ class ConversationClientImpl implements ConversationClient {
         ];
         return {
           events: appended,
-          // Rebuilt from events, which carry no feedback: keep the stored rounds' feedback.
-          rounds: withStoredRoundFeedback(eventsToRounds(appended), current.rounds),
+          rounds: eventsToRounds(appended),
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
@@ -1103,6 +1163,7 @@ class ConversationClientImpl implements ConversationClient {
       attachments,
       workspaceId,
       skipIfTerminalExistsFor,
+      activeExecution,
     } = request;
     const roundPrefix = `${roundId}::`;
     const createdAt = new Date().toISOString();
@@ -1113,6 +1174,7 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access,
       source,
+      activeExecution,
       fields: (current) => {
         if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
           throw skipWrite(current);
@@ -1144,10 +1206,7 @@ class ConversationClientImpl implements ConversationClient {
         ];
         return {
           events: replaced,
-          // The rewritten round's feedback was about its previous answer; the other rounds keep theirs.
-          rounds: withStoredRoundFeedback(eventsToRounds(replaced), current.rounds, {
-            exceptRoundId: roundId,
-          }),
+          rounds: eventsToRounds(replaced),
           schema_version: CONVERSATION_SCHEMA_VERSION,
           ...(title !== undefined ? { title } : {}),
           ...(status ? { status } : {}),
@@ -1205,46 +1264,27 @@ class ConversationClientImpl implements ConversationClient {
     });
   }
 
-  async updateRoundFeedback(
-    conversationId: string,
-    roundId: string,
-    feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
-  ): Promise<void> {
-    await this.writeConversation({
-      conversationId,
-      access: 'owner',
-      // Per-user state only: never reported to `ai.conversation.updated`.
-      emit: false,
-      fields: (current) => {
-        const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
+  /** Maps a list/search ES response to the shared `{ results, total }` shape. */
+  private mapListResponse(response: ConversationListEsResponse): ConversationListResult {
+    const hitsTotal = response.hits.total;
+    const total = Math.min(
+      typeof hitsTotal === 'number' ? hitsTotal : hitsTotal?.value ?? 0,
+      MAX_RESULT_WINDOW
+    );
 
-        if (roundIndex === -1) {
-          throw createConversationNotFoundError({ conversationId });
-        }
+    const results = response.hits.hits.map((hit) => {
+      if (!isConversationDocument(hit)) {
+        throw createInternalError('Conversation list search returned an incomplete hit');
+      }
 
-        const round = current.rounds[roundIndex];
-        const { feedback: _removed, ...roundWithoutFeedback } = round;
-
-        const updatedRound =
-          feedback.vote === null
-            ? roundWithoutFeedback
-            : {
-                ...round,
-                feedback: {
-                  vote: feedback.vote,
-                  chips: feedback.chips ?? [],
-                  comment: feedback.comment ?? '',
-                  submitted_at: new Date().toISOString(),
-                  connector_id: round.model_usage?.connector_id,
-                  model: round.model_usage?.model,
-                } satisfies ConversationRoundFeedback,
-              };
-
-        return {
-          rounds: current.rounds.map((r, i) => (i === roundIndex ? updatedRound : r)),
-        };
-      },
+      return toResponseConversationWithoutRounds({
+        document: hit,
+        user: this.getUser(),
+        resolveTemplate: getTemplate,
+      });
     });
+
+    return { results, total };
   }
 
   async delete(conversationId: string): Promise<boolean> {
@@ -1530,7 +1570,8 @@ class ConversationClientImpl implements ConversationClient {
         }
 
         // validateMetadataUpdate throws with accumulated per-field errors if any key is invalid.
-        validateMetadataUpdate(template.id, template.fields, updates);
+        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
+        validateMetadataUpdate(template.id, template.fields, updates, storedMetadata);
 
         const serialized = Object.fromEntries(
           Object.entries(updates).map(([k, v]) => {
@@ -1538,8 +1579,6 @@ class ConversationClientImpl implements ConversationClient {
             return [k, serializeMetadataValue(v as MetadataFieldValue, def.input_type)];
           })
         );
-
-        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
 
         // Track which fields actually changed to suppress no-op trigger events.
         const metadata = { ...storedMetadata, ...serialized };
@@ -1572,14 +1611,27 @@ class ConversationClientImpl implements ConversationClient {
     return this.user;
   }
 
-  getAuthor(originAuthor?: ConversationRoundAuthor): ConversationRoundAuthor | undefined {
+  getAuthor(
+    originAuthor?: ConversationRoundAuthor,
+    decoration?: ConversationRoundAuthorDecoration
+  ): ConversationRoundAuthor | undefined {
     if (originAuthor) {
       return originAuthor;
     }
 
     const { id, username, type } = this.getUser();
+    if (id === undefined) {
+      return undefined;
+    }
 
-    return id === undefined ? undefined : { id, username, ...(type ? { type } : {}) };
+    const fullName = type === 'service_account' ? decoration?.full_name : undefined;
+
+    return {
+      id,
+      username,
+      ...(type ? { type } : {}),
+      ...(fullName ? { full_name: fullName } : {}),
+    };
   }
 
   private async getDocument(conversationId: string): Promise<Document | undefined> {
@@ -1731,6 +1783,7 @@ class ConversationClientImpl implements ConversationClient {
     fields,
     maxRetries = 5,
     refresh,
+    activeExecution,
     ...emission
   }: {
     conversationId: string;
@@ -1738,8 +1791,9 @@ class ConversationClientImpl implements ConversationClient {
     fields: (current: NormalizedConversation) => Omit<ConversationUpdatableFields, 'id'>;
     maxRetries?: number;
     refresh?: Refresh;
+    activeExecution?: ActiveExecutionUpdate;
   } & ConversationWriteEmission): Promise<Conversation> {
-    const writer = this.createWriter({ access, maxRetries, refresh });
+    const writer = this.createWriter({ access, maxRetries, refresh, activeExecution });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
     // Typed through `as` so the assignment inside the closure does not narrow it to `undefined`.
     let before = undefined as NormalizedConversation | undefined;
@@ -1751,7 +1805,11 @@ class ConversationClientImpl implements ConversationClient {
           before = current;
           return updateConversation({
             conversation: current,
-            update: { id: conversationId, ...fields(current) },
+            update: {
+              id: conversationId,
+              ...fields(current),
+              ...(activeExecution && applyActiveExecutionUpdate(current, activeExecution)),
+            },
             updateDate: new Date(),
             space: this.space,
           });
@@ -1781,6 +1839,11 @@ class ConversationClientImpl implements ConversationClient {
           resolveTemplate: getTemplate,
         });
       }
+      if (error instanceof ConversationBusySignal) {
+        const { activeExecutionId } = error;
+
+        throw createConversationBusyError({ conversationId, activeExecutionId });
+      }
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
         this.logger.warn(
@@ -1798,18 +1861,25 @@ class ConversationClientImpl implements ConversationClient {
     access,
     maxRetries,
     refresh,
+    activeExecution,
   }: {
     access: ConversationAccess;
     maxRetries: number;
     refresh?: Refresh;
+    activeExecution?: ActiveExecutionUpdate;
   }): OccWriter<NormalizedConversation> {
     return new OccWriter<NormalizedConversation>({
       get: async (id) => {
         const document = await this.getDocumentWithAccess({ conversationId: id, access });
+        const execution = await readHeldExecution({
+          document,
+          update: activeExecution,
+          executionClient: this.executionClient,
+        });
 
         return {
           id,
-          source: fromEs(document, this.getUser()),
+          source: fromEs(document, this.getUser(), execution),
           occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
         };
       },

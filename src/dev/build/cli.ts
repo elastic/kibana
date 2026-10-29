@@ -46,6 +46,7 @@ if (showHelp) {
         --docker-tag                         {dim Specify the tag to use for the images, default is version}
         --docker-tag-qualifier               {dim Qualifier to append to the docker tag}
         --epr-registry                       {dim Specify the EPR registry to use for Fleet packages, 'production' or 'snapshot'}
+        --force-node-pointer-compression     {dim Bundle and run only the pointer compression Node.js variant on Linux}
         --no-debug                           {dim Turn off debug logging}
         --release                            {dim Produce a release-ready distributable}
         --rpm                                {dim Only build the rpm packages}
@@ -60,6 +61,7 @@ if (showHelp) {
         --skip-docker-serverless             {dim Don't build the docker serverless image}
         --skip-docker-ubi                    {dim Don't build the docker ubi image}
         --skip-docker-wolfi                  {dim Don't build the docker wolfi image}
+        --skip-fips-provider                 {dim Skip building and bundling the OpenSSL FIPS provider}
         --skip-initialize                    {dim Skip environment cleanup and verification}
         --skip-generic-folders               {dim Skip building package, plugins, etc from source}
         --skip-platform-folders              {dim Skip platform specific folder creation and operations}

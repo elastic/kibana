@@ -23,6 +23,7 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { $Values } from 'utility-types';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { DatasourceUnsupportedError } from '../../errors';
 import type {
   PartitionConfig,
   PartitionConfigESQL,
@@ -584,7 +585,7 @@ function fromLensStateToAPIMetrics(
   }
 
   if (!isFormBasedLayer(layer)) {
-    throw new Error('Datasource type not supported yet');
+    throw new DatasourceUnsupportedError();
   }
   return getMetrics(vizLayer).map(
     (id) =>

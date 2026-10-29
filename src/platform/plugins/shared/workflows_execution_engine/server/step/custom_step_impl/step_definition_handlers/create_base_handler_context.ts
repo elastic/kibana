@@ -63,6 +63,12 @@ export function createBaseHandlerContext(
           additionalContext
         );
       },
+      renderKqlConditionTemplate: (condition, additionalContext) => {
+        return stepExecutionRuntime.contextManager.renderConditionAccordingToContext(
+          condition,
+          additionalContext
+        );
+      },
       createTemplateRenderer: () => {
         const workflowContext = stepExecutionRuntime.contextManager.getContext();
         return (value, additionalContext) =>

@@ -187,6 +187,7 @@ const handleConversationExecution = async ({
     accessControl,
     readOnly,
     origin,
+    author: requestAuthor,
     nextInput,
     browserApiTools,
     configurationOverrides,
@@ -216,7 +217,7 @@ const handleConversationExecution = async ({
     user: { ...owner, isAdmin: false },
   });
 
-  const author = conversationClient.getAuthor(origin?.author);
+  const author = conversationClient.getAuthor(origin?.author, requestAuthor);
 
   // The execution service resolved the conversation, created it when it was new and wrote the
   // opening user message before this run was dispatched: the run reads the stored document and is
@@ -346,6 +347,7 @@ const handleConversationExecution = async ({
           agentEvents$,
           nextInput,
           author,
+          releaseExecutionId: execution.executionId,
         })
       : EMPTY;
 
@@ -408,6 +410,7 @@ const handleConversationExecution = async ({
                     error,
                     interrupted,
                     completed,
+                    releaseExecutionId: execution.executionId,
                     logger,
                   }),
               })
@@ -466,6 +469,7 @@ const handleConversationExecution = async ({
           author,
           origin: roundOrigin,
           error: normalized,
+          releaseExecutionId: execution.executionId,
           logger,
         })
       : [];
@@ -584,6 +588,7 @@ const buildPersistenceEvents = ({
   agentEvents$,
   nextInput,
   author,
+  releaseExecutionId,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -591,6 +596,7 @@ const buildPersistenceEvents = ({
   agentEvents$: Observable<ChatEvent>;
   nextInput: ConverseInput;
   author?: ConversationRoundAuthor;
+  releaseExecutionId: string;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -611,6 +617,7 @@ const buildPersistenceEvents = ({
             take(1)
           ),
           title$: endTitle$,
+          releaseExecutionId,
         })
       )
     );
@@ -626,6 +633,7 @@ const buildPersistenceEvents = ({
     input: nextInput,
     author,
     title$: conversationNeedsTitle(conversation) ? title$ : undefined,
+    releaseExecutionId,
   });
 };
 

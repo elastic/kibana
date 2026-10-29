@@ -19,6 +19,7 @@ import {
   resolveOrCreateAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
+import { putKiRevision } from '../ai_indices/ki_revision';
 import type { VerifyKi } from './verify_ki';
 
 export const getCreateKiStepDefinition = ({
@@ -49,9 +50,7 @@ export const getCreateKiStepDefinition = ({
           const verification = verifiers
             ? await verifyKi({ context, ki, verifiers, aiIndexId })
             : undefined;
-          if (verification && !verification.passed) {
-            return { output: { verification } };
-          }
+          const verificationFailed = verification?.passed === false;
 
           const { dest, managed } = await resolveOrCreateAiIndex(
             getAiIndexService,
@@ -65,22 +64,24 @@ export const getCreateKiStepDefinition = ({
           const id = kiId ?? uuidv4();
           const now = new Date().toISOString();
           const writer = kiWriterFromContext(context.contextManager.getContext());
-          await esClient.index(
-            {
-              index: dest.value,
-              document: {
-                '@timestamp': now,
-                ...ki,
-                id,
-                updated_at: now,
-                governance: { provenance: { created_by: writer, updated_by: writer } },
+          await putKiRevision({
+            esClient,
+            aiIndexId,
+            dest,
+            kiId: id,
+            document: {
+              '@timestamp': now,
+              ...ki,
+              id,
+              updated_at: now,
+              governance: {
+                provenance: { created_by: writer, updated_by: writer },
+                ...(verificationFailed && { lifecycle: { status: 'verification_failed' } }),
               },
-              // Data streams only accept `create`.
-              ...(dest.type === 'data_stream' ? { op_type: 'create' as const } : { id }),
-              ...(refresh && { refresh: 'wait_for' as const }),
             },
-            { signal: context.abortSignal }
-          );
+            refresh,
+            abortSignal: context.abortSignal,
+          });
 
           return { output: { id, ...(verification && { verification }) } };
         },

@@ -30,6 +30,12 @@ const makeManagement = (
   };
 };
 
+// Every valid action declares an approval policy; fixtures that omit one get a default.
+const withApprovalPolicy = (actionMetadata: unknown): unknown =>
+  typeof actionMetadata === 'object' && actionMetadata !== null
+    ? { approvalPolicy: 'autonomy-dependent', ...actionMetadata }
+    : actionMetadata;
+
 const workflowItem = (
   id: string,
   actionMetadata: unknown,
@@ -44,7 +50,10 @@ const workflowItem = (
   managedBy: 'alertzero',
   definition: (actionMetadata === null
     ? null
-    : { consts: { actionMetadata }, ...extraDefinition }) as WorkflowListItemDto['definition'],
+    : {
+        consts: { actionMetadata: withApprovalPolicy(actionMetadata) },
+        ...extraDefinition,
+      }) as WorkflowListItemDto['definition'],
   createdAt: '2026-01-01T00:00:00.000Z',
   tags,
   valid: true,
@@ -155,18 +164,18 @@ describe('ActionsService', () => {
   it('passes a subject list through as subjects and omits subjects when undeclared', async () => {
     const { client } = makeManagement([
       page([
-        workflowItem('criticality', {
-          name: 'Set asset criticality',
-          subject: ['user', 'service'],
+        workflowItem('both', {
+          name: 'Isolate host or kill process',
+          subject: ['host', 'process'],
         }),
         workflowItem('legacy', { name: 'Legacy action' }),
       ]),
     ]);
     const service = new ActionsService(() => client, logger);
     const result = await service.list('default', request);
-    expect(result.actions.find((a) => a.workflowId === 'criticality')?.subjects).toEqual([
-      'user',
-      'service',
+    expect(result.actions.find((a) => a.workflowId === 'both')?.subjects).toEqual([
+      'host',
+      'process',
     ]);
     expect(result.actions.find((a) => a.workflowId === 'legacy')).not.toHaveProperty('subjects');
   });
@@ -175,7 +184,7 @@ describe('ActionsService', () => {
     const { client } = makeManagement([
       page([
         workflowItem('bad-subject', { name: 'Bad', subject: 'container' }),
-        workflowItem('valid', { name: 'Valid', subject: ['user'] }),
+        workflowItem('valid', { name: 'Valid', subject: ['host'] }),
       ]),
     ]);
     const service = new ActionsService(() => client, logger);

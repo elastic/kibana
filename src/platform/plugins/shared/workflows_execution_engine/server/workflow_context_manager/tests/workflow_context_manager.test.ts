@@ -20,7 +20,7 @@ import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
 import { callKibanaApi } from '../../lib/call_kibana_api';
-import type { WorkflowTemplatingEngine } from '../../templating_engine';
+import { WorkflowTemplatingEngine } from '../../templating_engine';
 import type { StepIoService } from '../step_io_service';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
@@ -2170,6 +2170,66 @@ describe('WorkflowContextManager', () => {
       await expect(
         testContainer.underTest.callKibanaApi({ method: 'GET', path: '/api/forbidden' })
       ).rejects.toThrow('HTTP 403: forbidden');
+    });
+  });
+  describe('evaluateBooleanExpressionInContext', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: { secret: 's3' },
+      triggers: [],
+      steps: [{ name: 'gate', type: 'console', with: { message: 'x' } } as ConnectorStep],
+    };
+
+    const createContainerWithGuess = (guess: string) => {
+      const testContainer = createTestContainer(workflow);
+      const realEngine = new WorkflowTemplatingEngine();
+      testContainer.templatingEngineMock.renderCondition = (condition, context) =>
+        realEngine.renderCondition(condition, context);
+      testContainer.templatingEngineMock.extractGlobalVariableSegments = (value) =>
+        realEngine.extractGlobalVariableSegments(value);
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowDefinition: workflow,
+        id: 'exec-123',
+        workflowId: 'workflow-456',
+        spaceId: 'space-789',
+        scopeStack: [] as StackFrame[],
+        startedAt: new Date('2023-01-01T00:00:00Z').toISOString(),
+        context: { inputs: { guess } } as Record<string, any>,
+      } as EsWorkflowExecution);
+      return testContainer;
+    };
+
+    beforeEach(() => {
+      fakeNode.id = 'gate';
+    });
+
+    it.each([
+      ['wrong', false],
+      ['s3', true],
+      ['wrong or consts.secret: s3', false],
+      ['wrong or not consts.secret: x', false],
+    ])('treats the input %p as a literal (match: %p)', (guess, expected) => {
+      const { underTest } = createContainerWithGuess(guess);
+      expect(
+        underTest.evaluateBooleanExpressionInContext('consts.secret: {{ inputs.guess }}')
+      ).toBe(expected);
+    });
+
+    it('keeps ${{ }} expressions working', () => {
+      const { underTest } = createContainerWithGuess('s3');
+      expect(underTest.evaluateBooleanExpressionInContext('${{ inputs.guess == "s3" }}')).toBe(
+        true
+      );
+    });
+
+    it('shows the interpolated value, not its internal token, in a syntax error', () => {
+      const { underTest } = createContainerWithGuess('hello world');
+      expect(() =>
+        underTest.evaluateBooleanExpressionInContext('consts.secret: {{ inputs.guess }} owner: x')
+      ).toThrow(/consts\.secret: hello world owner: x\n-+\^$/);
     });
   });
 });

@@ -92,6 +92,7 @@ export {
   nightshiftSourceSlugsSchema,
   listSourcesQuerySchema,
   updateSourceRequestSchema,
+  validateSourceQueryRequestSchema,
   type CreateSourceRequest,
   type DeleteSourceResponse,
   type ListSourcesResponse,
@@ -101,6 +102,8 @@ export {
   type SourceMutationResponse,
   type SourceWithHealth,
   type UpdateSourceRequest,
+  type ValidateSourceQueryRequest,
+  type ValidateSourceQueryResponse,
 } from './src/sources/schema';
 
 export { SOURCE_TYPES, sourceTypeSchema, type SourceType } from './src/sources/source_type';

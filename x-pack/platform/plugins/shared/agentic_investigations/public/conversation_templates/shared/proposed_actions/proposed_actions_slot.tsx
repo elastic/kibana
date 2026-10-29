@@ -14,21 +14,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import {
-  useApproveProposal,
-  useConversationProposals,
-  useDismissProposal,
-  useIsApprovingProposal,
-  useIsDecliningProposal,
-} from '@kbn/proposals-plugin/public';
-import { PROPOSALS_UI_CAPABILITY_DECIDE } from '@kbn/proposals-common';
+import { useConversationProposals } from '@kbn/proposals-plugin/public';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
-import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { ProposedActionButton, ProposedActionsList } from '@kbn/agentic-investigations-common';
-import { useCurrentUserProfile } from '../../../user_profiles';
 import { decisionErrorMessage } from './decision_errors';
+import { useProposalDecision } from './use_proposal_decision';
 import {
   PROPOSED_ACTIONS_EMPTY_LABEL,
   PROPOSED_ACTIONS_LOAD_ERROR_LABEL,
@@ -41,58 +33,48 @@ export interface ProposedActionsSlotProps {
 
 interface ProposedActionRowProps {
   proposal: ProposalWithMetadata;
-  currentActorName?: string;
   onDecisionError: (err: unknown) => void;
-  approve: ReturnType<typeof useApproveProposal>;
-  dismiss: ReturnType<typeof useDismissProposal>;
 }
 
 /**
- * One row, split out from `ProposedActionsSlot` so `useIsApprovingProposal`/
- * `useIsDecliningProposal` — each scoped to this row's own proposal id — are called a fixed
- * number of times per render, rather than a variable number inside the list's `.map`.
+ * One row, split out from `ProposedActionsSlot` so the decision hooks — each scoped to this row's
+ * own proposal id — are called a fixed number of times per render, rather than a variable number
+ * inside the list's `.map`.
  */
-const ProposedActionRow = ({
-  proposal,
-  currentActorName,
-  onDecisionError,
-  approve,
-  dismiss,
-}: ProposedActionRowProps) => {
-  const {
-    services: { application },
-  } = useKibana<CoreStart>();
-  const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
-  const isApproving = useIsApprovingProposal(proposal.id);
-  const isDeclining = useIsDecliningProposal(proposal.id);
+const ProposedActionRow = ({ proposal, onDecisionError }: ProposedActionRowProps) => {
+  const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
+    useProposalDecision(proposal.id);
 
   return (
     <ProposedActionButton
       proposal={proposal}
-      readOnly={!canDecide}
-      isSubmitting={isApproving ? 'applying' : isDeclining ? 'declining' : undefined}
+      readOnly={readOnly}
+      isSubmitting={isSubmitting}
       onConfirm={async () => {
         try {
-          await approve.mutateAsync({
-            id: proposal.id,
-            body: { actionInput: proposal.actionInput },
-          });
+          await approve(proposal.actionInput);
         } catch (err) {
           onDecisionError(err);
           throw err;
         }
       }}
-      onDismiss={async ({ dismissReason, rationale }) => {
+      onDismiss={async (params) => {
         try {
-          await dismiss.mutateAsync({
-            id: proposal.id,
-            body: { dismissReason, rationale },
-          });
+          await dismiss(params);
         } catch (err) {
           onDecisionError(err);
           throw err;
         }
       }}
+      onReopen={async () => {
+        try {
+          await reopen();
+        } catch (err) {
+          onDecisionError(err);
+          throw err;
+        }
+      }}
+      isReopening={isReopening}
       currentActorName={currentActorName}
       data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
     />
@@ -113,13 +95,6 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   } = useKibana<CoreStart>();
   const { data, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useConversationProposals(conversationId);
-  const { data: currentUserProfile } = useCurrentUserProfile();
-  const approve = useApproveProposal();
-  const dismiss = useDismissProposal();
-
-  const currentActorName = currentUserProfile
-    ? getUserDisplayName(currentUserProfile.user)
-    : undefined;
 
   const onDecisionError = useCallback(
     (err: unknown) => notifications?.toasts.addDanger(decisionErrorMessage(err)),
@@ -158,12 +133,10 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
         <ProposedActionsList data-test-subj="investigationFlyoutProposedActionsList">
           {proposals.map((proposal) => (
             <ProposedActionRow
-              key={proposal.id}
+              // A retry gets a new id but keeps the root id, so its row and open modal stay mounted.
+              key={proposal.rootProposalId ?? proposal.id}
               proposal={proposal}
-              currentActorName={currentActorName}
               onDecisionError={onDecisionError}
-              approve={approve}
-              dismiss={dismiss}
             />
           ))}
         </ProposedActionsList>

@@ -38,8 +38,11 @@ interface SuggestionsComponentProps {
   inputContainer: HTMLElement | null;
 }
 
+export type SuggestionsAbstractionType = 'alerts' | 'rules' | 'cases' | 'endpoints' | 'alerting/v2';
+
 export interface SuggestionsAbstraction {
-  type: 'alerts' | 'rules' | 'cases' | 'endpoints' | 'alerting/v2';
+  type: SuggestionsAbstractionType;
+  valueSuggestionTypeByField?: Record<string, SuggestionsAbstractionType>;
   fields: Record<
     string,
     {

@@ -7,6 +7,7 @@
 
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
+import { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import { internalEventsRoutes } from './route';
 
 const mockCleanupStaleEvents = jest.fn();
@@ -22,6 +23,7 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
 const investigateRoute =
   internalEventsRoutes['POST /internal/significant_events/events/{id}/investigate'];
 const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events/events'];
+const eventsFacetsRoute = internalEventsRoutes['GET /internal/significant_events/events/_facets'];
 const lifecycleRoute =
   internalEventsRoutes['GET /internal/significant_events/events/{id}/lifecycle'];
 const eventsGetRoute = internalEventsRoutes['GET /internal/significant_events/events/{id}'];
@@ -63,6 +65,56 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
 });
 
 describe('POST /internal/significant_events/events/{id}/investigate', () => {
+  it.each(['completed', 'failed'] as const)(
+    'replaces a %s investigation with a running follow-up',
+    async (outcome) => {
+      const event = {
+        '@timestamp': '2026-01-01T00:00:00.000Z',
+        event_uuid: 'version-1',
+        event_id: 'event-1',
+        status: 'active' as const,
+        source_ids: ['logs.test'],
+        title: 'Test event',
+        summary: 'Test summary',
+        severity: 'medium' as const,
+        confidence: 0.8,
+        investigations: [
+          {
+            workflow_execution_id: 'inv-1',
+            started_at: '2026-01-01T00:00:00.000Z',
+            completed_at: '2026-01-01T00:01:00.000Z',
+            outcome,
+          },
+        ],
+      };
+      const createAlertEvent = jest.fn().mockResolvedValue(undefined);
+      const start = jest.fn().mockResolvedValue({ investigation_id: 'inv-1' });
+      const beforeStart = Date.now();
+
+      const result = await investigateRoute.handler({
+        params: { path: { id: 'event-1' } },
+        request: {},
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          getEventSearchClient: () => ({ findLatestByEventId: jest.fn().mockResolvedValue(event) }),
+          getAlertEventsClient: () => ({ createAlertEvent }),
+        }),
+        server: { nightshiftInvestigations: { getInvestigationsClient: () => ({ start }) } },
+        logger: { info: jest.fn(), warn: jest.fn() },
+        maintenanceService: makeMaintenanceService(),
+      } as never);
+
+      expect(result).toEqual({ executionId: 'inv-1' });
+      expect(createAlertEvent).toHaveBeenCalledTimes(1);
+      const investigations = createAlertEvent.mock.calls[0][0].data.investigations;
+      expect(investigations).toEqual([
+        { workflow_execution_id: 'inv-1', started_at: expect.any(String) },
+      ]);
+      expect(Date.parse(investigations[0].started_at)).toBeGreaterThanOrEqual(beforeStart);
+      expect(Date.parse(investigations[0].started_at)).toBeLessThanOrEqual(Date.now());
+    }
+  );
+
   it('rejects with 409 while paused before loading the event', async () => {
     const findLatestByEventId = jest.fn();
     const handlerParams = {
@@ -85,6 +137,95 @@ describe('POST /internal/significant_events/events/{id}/investigate', () => {
 });
 
 describe('GET /internal/significant_events/events', () => {
+  it.each([
+    { selected: undefined, liveIds: ['checkout'], negated: true, combined: false },
+    { selected: 'database', liveIds: ['checkout'], negated: true, combined: true },
+    { selected: 'database', liveIds: [], negated: false, combined: false },
+  ])(
+    'applies unassigned entity membership to lists and facets: %j',
+    async ({ selected, liveIds, negated, combined }) => {
+      const query = jest.fn().mockResolvedValue({ columns: [], values: [] });
+      const eventClient = new RuleEventsClient({
+        esClient: { esql: { query } } as never,
+        space: 'default',
+      });
+      const getFeatures = jest.fn().mockResolvedValue({
+        hits: liveIds.map((id) => ({
+          id,
+          source_id: 'source-1',
+          properties: {},
+          subtype: 'service',
+        })),
+      });
+      const resources = {
+        params: { query: { unassigned_entities: true, topology_feature_id: selected } },
+        request: {},
+        server: {},
+        getScopedClients: jest.fn().mockResolvedValue({
+          licensing: {},
+          sourcesClient: {
+            list: jest.fn().mockResolvedValue({ sources: [{ id: 'source-1' }], total: 1 }),
+            assertReadable: jest.fn().mockResolvedValue(undefined),
+          },
+          getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
+          getEventSearchClient: jest.fn().mockResolvedValue(eventClient),
+        }),
+      };
+      await eventsSearchRoute.handler(resources as never);
+      await eventsFacetsRoute.handler(resources as never);
+      expect(getFeatures).toHaveBeenCalledWith(['source-1'], { type: ['entity'], limit: 1000 });
+      for (const [request] of query.mock.calls) {
+        expect(request.query.includes('NOT (')).toBe(negated);
+        expect(request.query.includes('MV_INTERSECTS')).toBe(negated);
+        if (combined) {
+          expect(request.query).toMatch(/MV_INTERSECTS.* OR .*NOT \(/);
+          expect(request.query).toContain('database');
+        }
+        if (!liveIds.length) {
+          expect(request.query).not.toContain('database');
+        }
+      }
+    }
+  );
+
+  it('counts active events per deduplicated slug without losing either nullable feature field', async () => {
+    const query = jest.fn().mockImplementation(async ({ query: statement }: { query: string }) =>
+      statement.includes('STATS n')
+        ? {
+            columns: [
+              { name: 'fid', type: 'keyword' },
+              { name: 'n', type: 'long' },
+            ],
+            values: [['checkout', 3]],
+          }
+        : { columns: [{ name: 'total', type: 'long' }], values: [[4]] }
+    );
+    const client = new RuleEventsClient({
+      esClient: { esql: { query } } as never,
+      space: 'default',
+    });
+    expect(
+      await client.countActiveEventsByEntity(
+        { from: '2026-09-01T00:00:00.000Z', to: '2026-10-22T00:00:00.000Z' },
+        ['checkout']
+      )
+    ).toEqual({
+      entities: { checkout: 3 },
+      unassigned: 4,
+    });
+    const statements = query.mock.calls.map(([request]) => request.query);
+    expect(statements.find((statement) => statement.includes('STATS n'))).toContain(
+      'MV_DEDUPE(CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)))'
+    );
+    expect(statements.find((statement) => statement.includes('STATS n'))).toContain(
+      'MV_EXPAND fid'
+    );
+    expect(statements.find((statement) => statement.includes('STATS total'))).toContain('NOT (');
+    for (const [request] of query.mock.calls) {
+      expect(request.query).toContain('active');
+    }
+  });
+
   it('serializes the response-only lineage creation timestamp', async () => {
     const event = {
       '@timestamp': '2026-01-03T00:00:00.000Z',
@@ -142,6 +283,9 @@ describe('GET /internal/significant_events/events', () => {
           source_id: 'logs.test',
           topology_feature_id: 'checkout-service',
           search: 'noise',
+          investigation_state: 'in_progress',
+          sort_field: 'severity',
+          sort_order: 'asc',
           page: 2,
           perPage: 10,
         },
@@ -163,6 +307,9 @@ describe('GET /internal/significant_events/events', () => {
       sourceIds: ['logs.test'],
       topologyFeatureIds: ['checkout-service'],
       search: 'noise',
+      investigationStates: ['in_progress'],
+      sortField: 'severity',
+      sortOrder: 'asc',
       page: 2,
       perPage: 10,
     });
@@ -239,12 +386,144 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
         getEventSearchClient: () => ({
           findByEventId: jest.fn().mockResolvedValue({ hits: [firstVersion, latestVersion] }),
         }),
-        getDetectionClient: () => ({ findByIds: jest.fn().mockResolvedValue({ hits: [] }) }),
+        getDetectionClient: () => ({
+          findByIds: jest.fn().mockResolvedValue({ hits: [] }),
+          findSkippedForEvent: jest.fn().mockResolvedValue({ hits: [], truncated: false }),
+        }),
       }),
       server: {},
     } as never);
 
     expect(response.events).toEqual([firstVersion, latestVersion]);
+  });
+});
+
+describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detections', () => {
+  const detectionSignal = (ruleUuid: string, detectionId: string) => ({
+    type: 'detection' as const,
+    source_id: 'logs.test',
+    description: 'description',
+    verdict: 'confirms' as const,
+    metadata: {
+      rule_uuid: ruleUuid,
+      detection_id: detectionId,
+      rule_name: `Rule ${ruleUuid}`,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
+  const event = {
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    event_uuid: 'version-1',
+    event_id: 'event-1',
+    status: 'open' as const,
+    source_ids: ['logs.test'],
+    title: 'Test event',
+    summary: 'Test summary',
+    severity: '40-medium' as const,
+    confidence: 0.8,
+    signals: [detectionSignal('rule-1', 'detection-1')],
+  };
+  const stored = (detectionId: string, overrides: Record<string, unknown> = {}) => ({
+    detection_id: detectionId,
+    rule_uuid: 'rule-1',
+    rule_name: 'Rule 1',
+    source_id: 'logs.test',
+    change_point_type: 'spike',
+    '@timestamp': '2026-01-01T01:00:00.000Z',
+    processed: true,
+    ...overrides,
+  });
+
+  const run = async ({
+    embedded,
+    skipped,
+    truncated = false,
+    includeSkipped = true,
+  }: {
+    embedded: Array<Record<string, unknown>>;
+    skipped: Array<Record<string, unknown>>;
+    truncated?: boolean;
+    includeSkipped?: boolean;
+  }) => {
+    const findSkippedForEvent = jest.fn().mockResolvedValue({ hits: skipped, truncated });
+    const response = await lifecycleRoute.handler({
+      params: {
+        path: { id: event.event_id },
+        ...(includeSkipped ? { query: { include_skipped: 'true' as const } } : {}),
+      },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({
+          findByEventId: jest.fn().mockResolvedValue({ hits: [event] }),
+        }),
+        getDetectionClient: () => ({
+          findByIds: jest.fn().mockResolvedValue({ hits: embedded }),
+          findSkippedForEvent,
+        }),
+      }),
+      server: {},
+    } as never);
+    return { response, findSkippedForEvent };
+  };
+
+  const skip = {
+    reason: 'still_breaching',
+    event_id: event.event_id,
+    probe_status: 'ok',
+    checked_at: '2026-01-01T01:00:05.000Z',
+  };
+
+  it('leaves the skipped detections out, without looking them up, unless asked for', async () => {
+    const { response, findSkippedForEvent } = await run({
+      embedded: [stored('detection-1')],
+      skipped: [stored('detection-2', { skip })],
+      truncated: true,
+      includeSkipped: false,
+    });
+
+    expect(findSkippedForEvent).not.toHaveBeenCalled();
+    expect(response.detections.map(({ detection_id: id }) => id)).toEqual(['detection-1']);
+    expect(response).not.toHaveProperty('skipped_truncated');
+  });
+
+  it('adds the detections the classifier skipped on the strength of this event, with why', async () => {
+    const { response, findSkippedForEvent } = await run({
+      embedded: [stored('detection-1')],
+      skipped: [stored('detection-2', { skip })],
+    });
+
+    expect(findSkippedForEvent).toHaveBeenCalledWith(event.event_id);
+    expect(response.detections.map(({ detection_id: id }) => id)).toEqual([
+      'detection-1',
+      'detection-2',
+    ]);
+    expect(response.detections[1]).toMatchObject({ rule_uuid: 'rule-1', skip });
+    expect(response.detections[0]).not.toHaveProperty('skip');
+    expect(response).not.toHaveProperty('skipped_truncated');
+  });
+
+  it('does not list a detection twice', async () => {
+    const { response } = await run({
+      embedded: [stored('detection-1')],
+      skipped: [stored('detection-1', { skip }), stored('detection-4', { skip })],
+    });
+
+    expect(response.detections.map(({ detection_id: id }) => id)).toEqual([
+      'detection-1',
+      'detection-4',
+    ]);
+  });
+
+  it('says when the event has more skipped detections than it returns', async () => {
+    const { response } = await run({
+      embedded: [],
+      skipped: [stored('detection-2', { skip })],
+      truncated: true,
+    });
+
+    expect(response.skipped_truncated).toBe(true);
   });
 });
 

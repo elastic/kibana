@@ -10,6 +10,7 @@ import { filter, finalize, from, merge, ReplaySubject, shareReplay, tap } from '
 import { Command, Overwrite } from '@langchain/langgraph';
 import { isStreamEvent, reverseMap } from '@kbn/agent-builder-genai-utils/langchain';
 import type {
+  AttachmentTimelineEvent,
   BrowserApiToolMetadata,
   ChatAgentEvent,
   ConversationRoundStep,
@@ -45,11 +46,6 @@ import {
   type PendingTurn,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
-import {
-  selectRelevantSkills,
-  buildRecentContext,
-  type RelevantSkillSelection,
-} from './utils/relevant_skills/select_relevant_skills';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildResumeInitialization } from './utils/resume_initialization';
@@ -58,9 +54,15 @@ import { legacyEligibleRoundIds } from './utils/compaction_coverage';
 import { historyView, translateLegacySummary } from './utils/context_coverage';
 import type { PreviousRoundInfo } from './utils/context_management';
 import { createSummarizationTransformer } from './utils/tool_summarization';
+import { buildResumeAnchors, pausedItems, type PausedItem } from './utils/attachment_placement';
 import { sourceEvents } from '../../conversation/client/source_events';
-import { nextResumeIndex } from '../../conversation/client/rounds_to_events';
+import { nextResumeIndex, userMessageActor } from '../../conversation/client/rounds_to_events';
 import { createAgentGraph } from './graph';
+import {
+  RunAttachmentEvents,
+  inheritedAttachmentEvents,
+  runTriggerEventId,
+} from './run_attachment_events';
 import { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import { buildCycleHookExecutionContext } from './cycle_hooks/execution_context';
 import { convertGraphEvents } from './convert_graph_events';
@@ -76,11 +78,7 @@ import { SubagentTracker } from './subagent_tracker';
 import type { StateUpdate } from './state';
 import {
   eventsForContext,
-  groupTimelineEntries,
-  isTimelineCustomEvent,
-  isTimelineRound,
   lastExecutionTerminal,
-  roundResponse,
   type ProcessedTimelineEvent,
 } from './utils/context_timeline';
 
@@ -156,12 +154,19 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingTurn?.compatRound.started_at ?? startTime.toISOString();
 
-  // Only clear access tracking for a brand new round; keep it when resuming (HITL).
-  if (!pendingTurn) {
-    context.attachmentStateManager.clearAccessTracking();
-  }
-
   const roundId = providedRoundId ?? uuidv4();
+  const triggerEventId = runTriggerEventId({
+    conversation,
+    pendingTurnId: pendingTurn?.id,
+    roundId,
+  });
+  const resumeAnchors = conversation
+    ? buildResumeAnchors(sourceEvents(conversation))
+    : new Map<string, PausedItem[]>();
+  if (pendingTurn?.terminated) {
+    resumeAnchors.set(triggerEventId, pausedItems(pendingTurn.terminated));
+  }
+  const agentIdForEvents = agentId ?? conversation?.agent_id ?? 'unknown';
   // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
   // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
   const roundExecutionIndex = pendingTurn
@@ -231,11 +236,27 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context,
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
+    resumeAnchors,
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
-  // Everything in the log at this point came from the incoming message's attachments; anything
-  // recorded from here on is made by tools during the round.
-  const chatInputChanges = context.attachmentStateManager.drainChanges();
+  const pendingRound = pendingTurn?.compatRound;
+  const runAttachmentEvents = new RunAttachmentEvents({
+    attachmentStateManager: context.attachmentStateManager,
+    roundId: pendingTurn?.id ?? roundId,
+    triggerEventId,
+    inputActor: userMessageActor(
+      conversation,
+      pendingRound
+        ? { author: pendingRound.author, origin: pendingRound.origin }
+        : {
+            ...(author ? { author } : {}),
+            ...(origin ? { origin: { type: origin.type } } : {}),
+          }
+    ),
+    agentId: agentIdForEvents,
+  });
+  // Everything recorded so far came from the incoming message's attachments.
+  const chatInputEvents = runAttachmentEvents.drainChatInput();
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
     request,
@@ -247,12 +268,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     roundExecutionIndex,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
+  if (!pendingTurn && chatInputEvents.length > 0) {
+    processedConversation.nextInput = {
+      ...processedConversation.nextInput,
+      attachment_events: chatInputEvents,
+    };
+  }
   // Only the first execution owns the round's workflow context step.
   const preExecutionWorkflow: PreExecutionWorkflowStepData | undefined = pendingTurn
     ? undefined
     : beforeHookResult.preExecutionWorkflow;
-
-  const agentIdForEvents = agentId ?? conversation?.agent_id ?? 'unknown';
 
   // The stored summary, with a cursor when it predates cycle-based compaction. What it covers is
   // hidden at render time; the graph replaces it when it compacts.
@@ -287,30 +312,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Closed on every exit so a late background append is refused rather than queued for nothing.
   try {
-    const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
-      relevantSkillsEnabled && !pendingTurn
-        ? selectRelevantSkills({
-            skills: filteredSkills,
-            context: {
-              userMessage: processedConversation.nextInput.message,
-              recentContext: buildRecentContext(
-                groupTimelineEntries(processedConversation.timeline).flatMap((entry) => {
-                  // Custom events carry no user input to match skills against.
-                  if (isTimelineCustomEvent(entry)) {
-                    return [];
-                  }
-                  return isTimelineRound(entry)
-                    ? [{ input: entry.userMessage.data, response: roundResponse(entry) }]
-                    : [{ input: entry.userMessage.data }];
-                })
-              ),
-            },
-            modelProvider,
-            logger,
-            abortSignal,
-          })
-        : undefined;
-
     const { staticTools, dynamicTools } = await selectTools({
       conversation: processedConversation,
       previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
@@ -395,9 +396,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
     processedConversation.subagentRosterFallback = subagentTracker.snapshot();
 
-    // On a resume the selection is already persisted as a `relevant_skills` step of the paused turn.
-    const relevantSkillsSelection = await relevantSkillsSelectionPromise;
-
     const imageResolver = createImageResolver({
       attachmentStateManager: context.attachmentStateManager,
       attachments,
@@ -440,6 +438,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       subagentTracker,
       toolExecutionBuffer: tracker,
       todoStateManager,
+      runAttachmentEvents,
       roundId,
       sessionId: conversation?.id ?? executionId,
       cacheControl: { type: 'ephemeral', ttl: '5m' },
@@ -471,8 +470,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         compactionSummary,
         previousRound,
         preExecutionWorkflow,
-        relevantSkillsSelection,
         initialTodos,
+        initialAttachmentEvents: pendingTurn
+          ? [
+              ...inheritedAttachmentEvents(processedConversation.timeline, pendingTurn.id),
+              ...chatInputEvents,
+            ]
+          : [],
       }),
       {
         version: 'v2',
@@ -510,11 +514,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       finalize(() => manualEvents$.complete())
     );
 
-    const processedInput: RoundInput = {
-      message: processedConversation.nextInput.message,
-      attachments: [], // legacy attachments are always stripped in `prepare_conversation` and replaced with refs
-      attachment_refs: processedConversation.nextInput.attachment_refs,
-    };
+    const processedInput: RoundInput = { message: processedConversation.nextInput.message };
 
     manualEvents$.next({
       type: ChatEventType.roundStarted,
@@ -537,15 +537,11 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         pendingTurn,
         startTime,
         processedInput,
-        author,
-        origin,
-        agentId: agentIdForEvents,
-        conversation,
         modelProvider,
         mainConnectorId: model.connector.connectorId,
         configurationOverrides: effectiveOverrides,
         attachmentStateManager: context.attachmentStateManager,
-        chatInputChanges,
+        runAttachmentEvents,
         getWorkspaceId: () => context.bashService?.getWorkspaceId(),
       });
 
@@ -573,9 +569,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         configurationOverrides: effectiveOverrides,
         roundId,
         getWorkspaceId: () => context.bashService?.getWorkspaceId(),
-        chatInputChanges,
-        agentId: agentIdForEvents,
-        conversation,
+        runAttachmentEvents,
       }),
       emitRoundInterruptedOnError({ buildEvent: toRoundInterrupted, logger }),
       shareReplay()
@@ -651,16 +645,14 @@ const getConversationState = ({
 };
 
 /**
- * The steps a fresh run starts with: workflow / relevant-skills bookkeeping, then the todos
+ * The steps a fresh run starts with: the workflow bookkeeping, then the todos
  * carried over from the previous round (the trailing singleton the first `todo_write` replaces).
  */
 const buildPreExecutionSteps = ({
   preExecutionWorkflow,
-  relevantSkillsSelection,
   initialTodos,
 }: {
   preExecutionWorkflow?: PreExecutionWorkflowStepData;
-  relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
 }): ConversationRoundStep[] => {
   const carried = carriedOverTodos(initialTodos);
@@ -668,10 +660,7 @@ const buildPreExecutionSteps = ({
     carried !== undefined
       ? [{ type: ConversationRoundStepType.updateTodos, todos: carried, carried_over: true }]
       : [];
-  return [
-    ...createPreExecutionSteps({ preExecutionWorkflow, relevantSkillsSelection }),
-    ...carriedStep,
-  ];
+  return [...createPreExecutionSteps({ preExecutionWorkflow }), ...carriedStep];
 };
 
 const createInitializerCommand = ({
@@ -685,8 +674,8 @@ const createInitializerCommand = ({
   compactionSummary,
   previousRound,
   preExecutionWorkflow,
-  relevantSkillsSelection,
   initialTodos,
+  initialAttachmentEvents,
 }: {
   pendingTurn?: PendingTurn;
   roundId: string;
@@ -698,13 +687,12 @@ const createInitializerCommand = ({
   compactionSummary?: CompactionSummary;
   previousRound?: PreviousRoundInfo;
   preExecutionWorkflow?: PreExecutionWorkflowStepData;
-  relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
+  initialAttachmentEvents: AttachmentTimelineEvent[];
 }): Command => {
   if (!pendingTurn) {
     const preExecutionSteps = buildPreExecutionSteps({
       preExecutionWorkflow,
-      relevantSkillsSelection,
       initialTodos,
     });
     tracker.seed({ steps: preExecutionSteps, compactionSummary });
@@ -747,6 +735,7 @@ const createInitializerCommand = ({
     currentCycle: init.currentCycle,
     errorCount: init.errorCount,
     compactionSummary,
+    attachmentEvents: initialAttachmentEvents,
     // the paused execution's last call is what the resumed context starts from
     ...(lastCallInputTokens !== undefined
       ? { lastCallUsage: { inputTokens: lastCallInputTokens } }

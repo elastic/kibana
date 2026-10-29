@@ -49,7 +49,6 @@ describe('ServiceFieldsForm — multi-DS flat input-toggle rendering', () => {
   const MULTI_DS_SERVICE: AwsServiceMatrixEntry = {
     id: 'test_multi',
     name: 'Test Multi DS',
-    category: 'security_identity_compliance',
     signalTypes: ['logs'],
     dataStreams: ['ds_a', 'ds_b'],
     packageName: 'aws',
@@ -142,7 +141,6 @@ describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
   const ECF_SERVICE: AwsServiceMatrixEntry = {
     id: 'cloudtrail',
     name: 'AWS CloudTrail',
-    category: 'management_governance',
     signalTypes: ['logs'],
     dataStreams: ['cloudtrail'],
     packageName: 'aws',
@@ -247,7 +245,6 @@ describe('ServiceFieldsForm — agent-based "at least one source" hint', () => {
   const AGENT_VIEW: AwsServiceMatrixEntry = {
     id: 'waf',
     name: 'AWS WAF',
-    category: 'security_identity_compliance',
     signalTypes: ['logs'],
     dataStreams: ['waf'],
     packageName: 'aws',

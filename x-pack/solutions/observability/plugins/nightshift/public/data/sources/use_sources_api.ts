@@ -13,19 +13,14 @@ import type {
 } from '@kbn/nightshift-shared';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { getFormattedError } from '../../common/errors';
-import {
-  DISCOVERY_QUERIES_QUERY_KEY,
-  DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
-  FEATURES_QUERY_KEY,
-  SOURCES_QUERY_KEY,
-} from '../query_keys';
+import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY, SOURCES_QUERY_KEY } from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
+import { useBlocksNewActivity } from '../maintenance/use_significant_events_maintenance';
 
 // Query key prefixes of everything a source's knowledge feeds. The source id follows each prefix.
 const SOURCE_KNOWLEDGE_QUERY_KEYS = [
   FEATURES_QUERY_KEY,
   DISCOVERY_QUERIES_QUERY_KEY,
-  DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
   ['queryOccurrenceStats'],
 ];
 
@@ -36,6 +31,7 @@ export function useSourcesApi() {
     nightshiftSources,
   } = useKibana().services;
   const queryClient = useQueryClient();
+  const { isBlocked: isPaused } = useBlocksNewActivity();
 
   const invalidateSources = () => queryClient.invalidateQueries({ queryKey: SOURCES_QUERY_KEY });
   // Lists that span sources include the changed one: mark every knowledge query stale. Mounted
@@ -58,7 +54,10 @@ export function useSourcesApi() {
       return source;
     },
     onSuccess: (source) => {
-      toasts.addSuccess({ title: getSourceCreatedToastTitle(source.title) });
+      toasts.addSuccess({
+        title: getSourceCreatedToastTitle(source.title),
+        text: isPaused ? ONBOARDING_PAUSED_TOAST_TEXT : undefined,
+      });
       return invalidateSources();
     },
   });
@@ -132,6 +131,14 @@ const getSourceCreatedToastTitle = (title: string) =>
     defaultMessage: 'Source "{title}" created',
     values: { title },
   });
+
+const ONBOARDING_PAUSED_TOAST_TEXT = i18n.translate(
+  'xpack.nightshift.sources.onboardingPausedToastText',
+  {
+    defaultMessage:
+      'Onboarding is paused because significant events activity is paused. Resume it in settings to onboard the source.',
+  }
+);
 
 const getSourceSavedToastTitle = (title: string) =>
   i18n.translate('xpack.nightshift.sources.savedToastTitle', {

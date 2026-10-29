@@ -21,9 +21,12 @@ export const useNonClosedAlerts = ({
   skip = false,
   entityType,
   entityRecord,
+  aliasRecords,
 }: {
   identityFields: Record<string, string>;
   entityRecord?: EntityStoreRecord | null;
+  /** Resolution-group aliases of `entityRecord`; their alerts are counted too. */
+  aliasRecords?: readonly EntityStoreRecord[];
   to: string;
   from: string;
   queryId: string;
@@ -39,6 +42,7 @@ export const useNonClosedAlerts = ({
 
   const { items: alertsData } = useAlertsByStatus({
     entityRecord,
+    aliasRecords,
     identityFields,
     entityType,
     signalIndexName,

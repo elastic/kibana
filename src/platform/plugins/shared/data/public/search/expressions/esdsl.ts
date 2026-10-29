@@ -10,7 +10,6 @@
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { getEsdslFn } from '../../../common/search/expressions/esdsl';
-import type { UiSettingsCommon } from '../../../common';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
@@ -33,9 +32,8 @@ export function getEsdsl({
 }) {
   return getEsdslFn({
     getStartDependencies: async () => {
-      const [core, , { search }] = await getStartServices();
+      const [, , { search }] = await getStartServices();
       return {
-        uiSettingsClient: core.uiSettings as any as UiSettingsCommon,
         searchService: search,
       };
     },

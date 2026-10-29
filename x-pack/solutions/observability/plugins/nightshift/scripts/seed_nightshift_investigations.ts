@@ -347,7 +347,7 @@ const SLACK_THREAD = {
   threadTs: '1790000000.000100',
   statusMessageTs: '1790000001.000200',
 };
-const SLACK_THREAD_KEY = `team:${SLACK_THREAD.workspace}/channel:${SLACK_THREAD.channel}/thread:${SLACK_THREAD.threadTs}`;
+const SLACK_THREAD_KEY = `slack:${SLACK_THREAD.workspace}:${SLACK_THREAD.channel}:${SLACK_THREAD.threadTs}`;
 
 const SCENARIOS: Scenario[] = [
   completed({
