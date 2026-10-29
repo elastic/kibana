@@ -43,6 +43,9 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
         privileges: [
           'feature_nightshift.minimal_all',
           'feature_agentBuilder.minimal_all',
+          // Running an agent bound to a service account needs this sub-feature privilege;
+          // `minimal_all` does not include it. See kibana#300175.
+          'feature_agentBuilder.invoke_bound_agents',
           'feature_actions.read',
           'feature_workflowsManagement.read',
         ],
@@ -62,6 +65,9 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
           'feature_agenticInvestigations.minimal_read',
           'feature_agenticInvestigations.investigations_all',
           'feature_agentBuilder.minimal_all',
+          // Running an agent bound to a service account needs this sub-feature privilege;
+          // `minimal_all` does not include it. See kibana#300175.
+          'feature_agentBuilder.invoke_bound_agents',
           'feature_actions.read',
         ],
         resources: ['*'],
