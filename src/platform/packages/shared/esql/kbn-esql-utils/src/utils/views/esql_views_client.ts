@@ -53,13 +53,19 @@ export interface UpsertEsqlViewRequest {
   name: string;
   query: string;
   description?: string;
+  /** Ask Elasticsearch to analyze the query and return non-blocking validation warnings. */
+  validate?: boolean;
+}
+
+export interface EsqlViewUpsertResponse extends EsqlPutViewResponse {
+  warnings?: string[];
 }
 
 export interface EsqlViewsClient {
   getViews(signal?: AbortSignal): Promise<EsqlViewsResult>;
   getView(name: string, signal?: AbortSignal): Promise<EsqlView | undefined>;
-  createView(request: UpsertEsqlViewRequest): Promise<EsqlPutViewResponse>;
-  updateView(request: UpsertEsqlViewRequest): Promise<EsqlPutViewResponse>;
+  createView(request: UpsertEsqlViewRequest): Promise<EsqlViewUpsertResponse>;
+  updateView(request: UpsertEsqlViewRequest): Promise<EsqlViewUpsertResponse>;
   deleteViews(names: string[]): Promise<EsqlDeleteViewResponse>;
 }
 
@@ -113,14 +119,15 @@ export const createEsqlViewsManagementClient = (http: HttpStart): EsqlViewsClien
     }
   };
 
-  const upsertView = ({ name, query, description }: UpsertEsqlViewRequest) =>
+  const upsertView = ({ name, query, description, validate }: UpsertEsqlViewRequest) =>
     runRequest(() =>
-      http.put<EsqlPutViewResponse>(getViewRoute(name), {
+      http.put<EsqlViewUpsertResponse>(getViewRoute(name), {
         body: JSON.stringify({ query, description }),
+        ...(validate ? { query: { validate: true } } : {}),
       })
     );
 
-  const createView = async (request: UpsertEsqlViewRequest): Promise<EsqlPutViewResponse> => {
+  const createView = async (request: UpsertEsqlViewRequest): Promise<EsqlViewUpsertResponse> => {
     const existingView = await getView(request.name);
     if (existingView === undefined) {
       return upsertView(request);

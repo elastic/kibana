@@ -99,6 +99,7 @@ describe('CreateViewModal', () => {
         name: 'sales',
         query,
         description: undefined,
+        validate: true,
       })
     );
   });
@@ -113,6 +114,7 @@ describe('CreateViewModal', () => {
         name: 'sales',
         query,
         description: 'Daily sales',
+        validate: true,
       })
     );
   });
@@ -177,6 +179,24 @@ describe('CreateViewModal', () => {
       expect(onSaved).toHaveBeenCalledWith('sales');
       expect(onClose).toHaveBeenCalled();
     });
+  });
+
+  it('shows a warning toast when the saved view has validation warnings', async () => {
+    const warning = 'view [sales] query is not valid: Unknown index [missing]';
+    createView.mockResolvedValue({ acknowledged: true, warnings: [warning] });
+    const { core, onClose, onSaved } = renderModal();
+
+    submitView('sales');
+
+    await waitFor(() => {
+      expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith({
+        title: 'View "sales" was created, but its query has validation warnings.',
+        text: warning,
+      });
+      expect(onSaved).toHaveBeenCalledWith('sales');
+      expect(onClose).toHaveBeenCalled();
+    });
+    expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
   });
 
   describe('telemetry', () => {

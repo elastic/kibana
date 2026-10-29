@@ -147,6 +147,12 @@ const createSuccessTitle = (name: string) =>
     values: { name },
   });
 
+const createWarningTitle = (name: string) =>
+  i18n.translate('esqlEditor.createView.createWarningTitle', {
+    defaultMessage: 'View "{name}" was created, but its query has validation warnings.',
+    values: { name },
+  });
+
 const getNameValidationMessage = (
   validationError: EsqlViewNameValidationError | undefined
 ): string | undefined => {
@@ -256,17 +262,20 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
 
     setIsSaving(true);
     const hasDescription = description.trim().length > 0;
+    let validationWarnings: string[] = [];
     try {
-      await client.createView({
+      const result = await client.createView({
         name,
         query,
         description: hasDescription ? description : undefined,
+        validate: true,
       });
       telemetryService.trackViewCreated({
         source,
         hasDescription,
         queryLength: query.length,
       });
+      validationWarnings = result.warnings ?? [];
     } catch (error) {
       if (error instanceof EsqlViewsClientError) {
         if (error.errorType === ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE) {
@@ -283,7 +292,14 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
       return;
     }
 
-    core.notifications.toasts.addSuccess({ title: createSuccessTitle(name) });
+    if (validationWarnings.length > 0) {
+      core.notifications.toasts.addWarning({
+        title: createWarningTitle(name),
+        text: validationWarnings.join('\n'),
+      });
+    } else {
+      core.notifications.toasts.addSuccess({ title: createSuccessTitle(name) });
+    }
     try {
       await onSaved?.(name);
     } catch (error) {
