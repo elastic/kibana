@@ -19,10 +19,20 @@ const NAME = '[A-Za-z0-9._-]+';
 const PATH = '[A-Za-z0-9._/-]+';
 const FIELD = '[A-Za-z0-9._-]+';
 
+const trimSlashes = (path: string): string => path.trim().replace(/^\/+|\/+$/g, '');
+
 export const SECRET_CONNECTION_NAME_REGEX = new RegExp(`^${NAME}$`);
 
 /** Matches the part after `vault://`. The connection is optional; callers decide if it is required. */
 export const VAULT_REFERENCE_CONTENT_REGEX = new RegExp(`^(?:(${NAME})@)?(${PATH})#(${FIELD})$`);
+
+const PATH_REGEX = new RegExp(`^${PATH}$`);
+const FIELD_REGEX = new RegExp(`^${FIELD}$`);
+
+/** Whether the path, as `buildVaultReference` will write it, stays inside the reference grammar. */
+export const isValidVaultPath = (path: string): boolean => PATH_REGEX.test(trimSlashes(path));
+
+export const isValidVaultField = (field: string): boolean => FIELD_REGEX.test(field.trim());
 
 /** Only a value that is exactly one reference with a connection maps back to the form. */
 export const parseVaultReference = (value?: string): VaultReferenceParts | undefined => {
@@ -32,4 +42,4 @@ export const parseVaultReference = (value?: string): VaultReferenceParts | undef
 };
 
 export const buildVaultReference = ({ connection, path, field }: VaultReferenceParts): string =>
-  `${VAULT_PREFIX}${connection.trim()}@${path.trim().replace(/^\/+|\/+$/g, '')}#${field.trim()}`;
+  `${VAULT_PREFIX}${connection.trim()}@${trimSlashes(path)}#${field.trim()}`;

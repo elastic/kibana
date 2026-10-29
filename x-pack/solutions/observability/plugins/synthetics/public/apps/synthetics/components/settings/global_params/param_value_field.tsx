@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiCode, EuiFieldText, EuiFormRow, EuiSelect, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiFieldText,
+  EuiFormRow,
+  EuiLink,
+  EuiSelect,
+  EuiSpacer,
+  EuiTextArea,
+} from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +23,11 @@ import { OptionalText } from '../components/optional_text';
 import type { ListParamItem } from './params_list';
 import type { ParamFormData, ParamValueSourceType } from './add_param_form';
 import { VALUE_LABEL, VALUE_REQUIRED } from './add_param_form';
-import { parseVaultReference } from '../../../../../../common/lib/vault_reference';
+import {
+  isValidVaultField,
+  isValidVaultPath,
+  parseVaultReference,
+} from '../../../../../../common/lib/vault_reference';
 import type { SecretConnectionStatus } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 
@@ -91,12 +103,16 @@ export const ParamValueField = ({
 };
 
 const VaultSourceFields = () => {
-  const { register, getValues, setValue } = useFormContext<ParamFormData>();
+  const { register, getValues, setValue, watch } = useFormContext<ParamFormData>();
   const { errors } = useFormState<ParamFormData>();
   const { http } = useKibana().services;
   const [connections, setConnections] = useState<string[]>([]);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const selected = watch('source.connection');
 
   useEffect(() => {
+    setLoadFailed(false);
     http
       ?.get<SecretConnectionStatus[]>(SYNTHETICS_API_URLS.SECRET_CONNECTION)
       .then((res) => {
@@ -107,8 +123,12 @@ const VaultSourceFields = () => {
           setValue('source.connection', names[0]);
         }
       })
-      .catch(() => {});
-  }, [http, getValues, setValue]);
+      .catch(() => setLoadFailed(true));
+  }, [http, getValues, setValue, attempt]);
+
+  // A stored connection stays selectable even when the list lacks it (still loading or gone).
+  const names = selected && !connections.includes(selected) ? [...connections, selected] : connections;
+  const connectionError = errors?.source?.connection?.message;
 
   return (
     <>
@@ -116,17 +136,32 @@ const VaultSourceFields = () => {
         fullWidth
         label={SECRET_CONNECTION_LABEL}
         helpText={SECRET_CONNECTION_HELP}
-        isInvalid={Boolean(errors?.source?.connection)}
-        error={errors?.source?.connection?.message}
+        isInvalid={Boolean(connectionError) || loadFailed}
+        error={
+          loadFailed ? (
+            <>
+              {VAULT_CONNECTIONS_LOAD_FAILED}{' '}
+              <EuiLink
+                data-test-subj="syntheticsParamSecretConnectionRetry"
+                onClick={() => setAttempt((n) => n + 1)}
+              >
+                {VAULT_CONNECTIONS_RETRY}
+              </EuiLink>
+            </>
+          ) : (
+            connectionError
+          )
+        }
       >
         <EuiSelect
           fullWidth
-          isInvalid={Boolean(errors?.source?.connection)}
+          isInvalid={Boolean(connectionError) || loadFailed}
           data-test-subj="syntheticsParamSecretConnection"
           options={[
             { value: '', text: VAULT_SELECT_CONNECTION },
-            ...connections.map((n) => ({ value: n, text: n })),
+            ...names.map((n) => ({ value: n, text: n })),
           ]}
+          value={selected ?? ''}
           {...register('source.connection', {
             required: { value: true, message: VAULT_CONNECTION_REQUIRED },
           })}
@@ -147,6 +182,7 @@ const VaultSourceFields = () => {
           aria-label={VAULT_PATH_LABEL}
           {...register('source.path', {
             required: { value: true, message: VAULT_PATH_REQUIRED },
+            validate: (value) => isValidVaultPath(value) || VAULT_PATH_INVALID,
           })}
         />
       </EuiFormRow>
@@ -165,6 +201,7 @@ const VaultSourceFields = () => {
           aria-label={VAULT_FIELD_LABEL}
           {...register('source.field', {
             required: { value: true, message: VAULT_FIELD_REQUIRED },
+            validate: (value) => isValidVaultField(value) || VAULT_FIELD_INVALID,
           })}
         />
       </EuiFormRow>
@@ -227,4 +264,23 @@ const VAULT_PATH_REQUIRED = i18n.translate('xpack.synthetics.paramForm.vaultPath
 
 const VAULT_FIELD_REQUIRED = i18n.translate('xpack.synthetics.paramForm.vaultFieldRequired', {
   defaultMessage: 'Vault secret field is required',
+});
+
+const VAULT_PATH_INVALID = i18n.translate('xpack.synthetics.paramForm.vaultPathInvalid', {
+  defaultMessage: 'Use only letters, numbers, ".", "_", "-" and "/" in the secret path',
+});
+
+const VAULT_FIELD_INVALID = i18n.translate('xpack.synthetics.paramForm.vaultFieldInvalid', {
+  defaultMessage: 'Use only letters, numbers, ".", "_" and "-" in the secret field',
+});
+
+const VAULT_CONNECTIONS_LOAD_FAILED = i18n.translate(
+  'xpack.synthetics.paramForm.vaultConnectionsLoadFailed',
+  {
+    defaultMessage: 'Could not load the Vault connections.',
+  }
+);
+
+const VAULT_CONNECTIONS_RETRY = i18n.translate('xpack.synthetics.paramForm.vaultConnectionsRetry', {
+  defaultMessage: 'Retry',
 });
