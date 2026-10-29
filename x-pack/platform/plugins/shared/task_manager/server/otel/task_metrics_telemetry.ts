@@ -16,7 +16,6 @@ import {
 import { BACKPRESSURE_REASONS, type BackpressureReason } from '../lib/backpressure_reason';
 import { getTaskTypeGroup } from '../metrics/lib';
 import type { TaskManagerMetrics } from '../metrics/task_metrics_collector';
-import type { TaskTypeDictionary } from '../task_type_dictionary';
 
 const ATTR_TASK_TYPE = 'task_type';
 const ATTR_TASK_TYPE_GROUP = 'task_type_group';
@@ -24,8 +23,6 @@ const ATTR_TASK_STATUS = 'kibana.task.status';
 const ATTR_ERROR_TYPE = 'error.type';
 const ATTR_CLAIM_STATUS = 'kibana.task_manager.claim.status';
 const ATTR_BACKPRESSURE_REASON = 'kibana.task_manager.backpressure.reason';
-
-const OVERDUE_TOTAL_KEY = 'total';
 
 // 1.8s is the threshold of the existing claim-delayed SLO
 const CLAIM_DURATION_BUCKETS_SECONDS = [0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 1.8, 2.5, 5, 10, 30];
@@ -73,17 +70,14 @@ class TaskManagerMetricsTelemetry {
   private readonly taskExecutionDelayHistogram: Histogram<Attributes>;
   private readonly taskClaimCounter: Counter<Attributes>;
   private readonly taskClaimDurationHistogram: Histogram<Attributes>;
-  private readonly taskClaimLastTimeGauge: ObservableGauge<Attributes>;
+  private readonly taskClaimAgeGauge: ObservableGauge<Attributes>;
   private readonly taskOverdueCountGauge: ObservableGauge<Attributes>;
   private readonly taskOverdueDelayHistogram: Histogram<Attributes>;
   private readonly backpressureActiveGauge: ObservableGauge<Attributes>;
   private readonly backpressureReasonGauge: ObservableGauge<Attributes>;
 
   private lastClaimTimeSeconds?: number;
-  // Observable gauges keep exporting the last value of every attribute set they have
-  // observed under cumulative temporality, so every attribute set ever observed must
-  // keep being observed (as 0 when no longer current) rather than dropped.
-  private overdueCounts: Map<string, { count: number; attributes: Attributes }> = new Map();
+  private overdueCount?: number;
   private backpressure: TaskBackpressureRecord = { active: false, reason: null };
 
   constructor() {
@@ -128,17 +122,13 @@ class TaskManagerMetricsTelemetry {
         advice: { explicitBucketBoundaries: CLAIM_DURATION_BUCKETS_SECONDS },
       }
     );
-    this.taskClaimLastTimeGauge = this.meter.createObservableGauge(
-      'kibana.task_manager.claim.last_time',
-      {
-        description:
-          'Time of the most recent task claim cycle, successful or not, in seconds since the Unix epoch.',
-        unit: 's',
-        valueType: ValueType.DOUBLE,
-      }
-    );
+    this.taskClaimAgeGauge = this.meter.createObservableGauge('kibana.task_manager.claim.age', {
+      description: 'Time since the most recent task claim cycle, successful or not.',
+      unit: 's',
+      valueType: ValueType.DOUBLE,
+    });
     this.taskOverdueCountGauge = this.meter.createObservableGauge('kibana.task.overdue.count', {
-      description: 'Number of tasks currently overdue, by task type.',
+      description: 'Number of tasks currently overdue.',
       unit: '{task}',
       valueType: ValueType.INT,
     });
@@ -166,17 +156,20 @@ class TaskManagerMetricsTelemetry {
       }
     );
 
-    this.taskClaimLastTimeGauge.addCallback((result) => {
+    this.taskClaimAgeGauge.addCallback((result) => {
       // nothing is reported until the first claim cycle completes
       if (this.lastClaimTimeSeconds != null) {
-        result.observe(this.lastClaimTimeSeconds);
+        result.observe(Date.now() / 1000 - this.lastClaimTimeSeconds);
       }
     });
     this.taskOverdueCountGauge.addCallback((result) => {
-      for (const { count, attributes } of this.overdueCounts.values()) {
-        result.observe(count, attributes);
+      // nothing is reported until overdue tasks are first counted
+      if (this.overdueCount != null) {
+        result.observe(this.overdueCount);
       }
     });
+    // Observable gauges keep exporting the last value of every attribute set they have
+    // observed under cumulative temporality, so every reason is always observed.
     this.backpressureActiveGauge.addCallback((result) => {
       result.observe(this.backpressure.active ? 1 : 0);
     });
@@ -216,11 +209,8 @@ class TaskManagerMetricsTelemetry {
   }
 
   /** Records how long a task waited past its scheduled time before it started running. */
-  recordTaskRunDelay(taskType: string, delaySeconds: number, taskTypeGroup?: string) {
-    this.taskExecutionDelayHistogram.record(
-      delaySeconds,
-      getTaskTypeAttributes(taskType, taskTypeGroup)
-    );
+  recordTaskRunDelay(delaySeconds: number) {
+    this.taskExecutionDelayHistogram.record(delaySeconds);
   }
 
   /** Records the outcome and duration of a single task claim cycle. */
@@ -234,29 +224,16 @@ class TaskManagerMetricsTelemetry {
   }
 
   /** Replaces the overdue task snapshot with the latest Elasticsearch aggregation result. */
-  recordTaskOverdue(
-    numOverdueTasks: TaskManagerMetrics['numOverdueTasks'],
-    definitions: TaskTypeDictionary
-  ) {
-    for (const overdue of this.overdueCounts.values()) {
-      overdue.count = 0;
-    }
-
-    for (const [taskType, buckets] of Object.entries(numOverdueTasks)) {
-      // the overall value is the sum of the per-type series
-      if (taskType === OVERDUE_TOTAL_KEY) continue;
-
-      const attributes = getTaskTypeAttributes(taskType, definitions.get(taskType)?.taskTypeGroup);
-      let count = 0;
-      for (const { key, doc_count: docCount } of buckets ?? []) {
-        const overdueBySeconds = parseInt(`${key}`, 10);
-        count += docCount;
-        for (let i = 0; i < docCount; i++) {
-          this.taskOverdueDelayHistogram.record(overdueBySeconds, attributes);
-        }
+  recordTaskOverdue({ total }: TaskManagerMetrics['numOverdueTasks']) {
+    let count = 0;
+    for (const { key, doc_count: docCount } of total ?? []) {
+      const overdueBySeconds = parseInt(`${key}`, 10);
+      count += docCount;
+      for (let i = 0; i < docCount; i++) {
+        this.taskOverdueDelayHistogram.record(overdueBySeconds);
       }
-      this.overdueCounts.set(taskType, { count, attributes });
     }
+    this.overdueCount = count;
   }
 
   /** Updates the current backpressure state reported by the backpressure gauges. */

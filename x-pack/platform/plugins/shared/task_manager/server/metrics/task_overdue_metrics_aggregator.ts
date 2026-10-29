@@ -81,7 +81,7 @@ export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<Task
     let metric: TaskManagerMetrics;
     if (isOk((taskEvent as TaskManagerMetric).event)) {
       metric = unwrap((taskEvent as TaskManagerMetric).event) as TaskManagerMetrics;
-      taskManagerMetricsTelemetry.recordTaskOverdue(metric.numOverdueTasks, this.definitions);
+      taskManagerMetricsTelemetry.recordTaskOverdue(metric.numOverdueTasks);
 
       for (const key of Object.keys(metric.numOverdueTasks)) {
         const hist = new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);

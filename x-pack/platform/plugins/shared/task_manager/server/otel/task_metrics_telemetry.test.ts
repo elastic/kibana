@@ -8,18 +8,12 @@
 import { type Attributes, metrics } from '@opentelemetry/api';
 import { metrics as sdkMetrics } from '@elastic/opentelemetry-node/sdk';
 import { BACKPRESSURE_REASONS } from '../lib/backpressure_reason';
-import type { TaskTypeDictionary } from '../task_type_dictionary';
 import type { taskManagerMetricsTelemetry as TelemetryInstance } from './task_metrics_telemetry';
 
 class TestMetricReader extends sdkMetrics.MetricReader {
   protected async onForceFlush(): Promise<void> {}
   protected async onShutdown(): Promise<void> {}
 }
-
-const mockDefinitions = (groups: Record<string, string>) =>
-  ({
-    get: (type: string) => (groups[type] ? { taskTypeGroup: groups[type] } : undefined),
-  } as unknown as TaskTypeDictionary);
 
 describe('taskManagerMetricsTelemetry', () => {
   let reader: TestMetricReader;
@@ -99,23 +93,25 @@ describe('taskManagerMetricsTelemetry', () => {
     ]);
   });
 
-  test('records run delay by task type and group', async () => {
-    telemetry.recordTaskRunDelay('actions:.email', 12, 'actions');
+  test('records run delay overall, without task type attributes', async () => {
+    telemetry.recordTaskRunDelay(12);
+    telemetry.recordTaskRunDelay(3);
 
     const collected = await collect();
     expect(collected.get('kibana.task.execution.delay')).toEqual([
       expect.objectContaining({
-        attributes: { task_type: 'actions:.email', task_type_group: 'actions' },
-        value: expect.objectContaining({ count: 1, sum: 12 }),
+        attributes: {},
+        value: expect.objectContaining({ count: 2, sum: 15 }),
       }),
     ]);
   });
 
-  test('records claims, claim duration in seconds and the last claim time', async () => {
-    jest.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
+  test('records claims, claim duration in seconds and the time since the last claim', async () => {
+    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
     telemetry.recordTaskClaim({ success: true, durationMs: 1500 });
     telemetry.recordTaskClaim({ success: false });
 
+    dateNowSpy.mockReturnValue(1_700_000_042_500);
     const collected = await collect();
     expect(collected.get('kibana.task_manager.claim.count')).toEqual(
       expect.arrayContaining([
@@ -141,14 +137,14 @@ describe('taskManagerMetricsTelemetry', () => {
         }),
       }),
     ]);
-    expect(collected.get('kibana.task_manager.claim.last_time')).toEqual([
-      expect.objectContaining({ attributes: {}, value: 1_700_000_000 }),
+    expect(collected.get('kibana.task_manager.claim.age')).toEqual([
+      expect.objectContaining({ attributes: {}, value: 42.5 }),
     ]);
   });
 
-  test('does not report the last claim time before the first claim', async () => {
+  test('does not report the claim age before the first claim', async () => {
     const collected = await collect();
-    expect(collected.get('kibana.task_manager.claim.last_time') ?? []).toEqual([]);
+    expect(collected.get('kibana.task_manager.claim.age') ?? []).toEqual([]);
   });
 
   test('reports backpressure as active and as one current reason among all reasons', async () => {
@@ -181,55 +177,40 @@ describe('taskManagerMetricsTelemetry', () => {
     );
   });
 
-  test('reports overdue tasks by type, excluding the total, and zeroes types that are no longer overdue', async () => {
-    const definitions = mockDefinitions({ 'actions:.email': 'actions' });
-    telemetry.recordTaskOverdue(
-      {
-        'actions:.email': [
-          { key: 0, doc_count: 2 },
-          { key: 20, doc_count: 1 },
-        ],
-        report: [{ key: 10, doc_count: 1 }],
-        total: [
-          { key: 0, doc_count: 2 },
-          { key: 10, doc_count: 1 },
-          { key: 20, doc_count: 1 },
-        ],
-      },
-      definitions
-    );
+  test('does not report the overdue count before overdue tasks are first counted', async () => {
+    const collected = await collect();
+    expect(collected.get('kibana.task.overdue.count') ?? []).toEqual([]);
+  });
+
+  test('reports overdue tasks overall from the total, ignoring per-type buckets', async () => {
+    telemetry.recordTaskOverdue({
+      'actions:.email': [
+        { key: 0, doc_count: 2 },
+        { key: 20, doc_count: 1 },
+      ],
+      report: [{ key: 10, doc_count: 1 }],
+      total: [
+        { key: 0, doc_count: 2 },
+        { key: 10, doc_count: 1 },
+        { key: 20, doc_count: 1 },
+      ],
+    });
 
     let collected = await collect();
-    expect(collected.get('kibana.task.overdue.count')).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          attributes: { task_type: 'actions:.email', task_type_group: 'actions' },
-          value: 3,
-        }),
-        expect.objectContaining({ attributes: { task_type: 'report' }, value: 1 }),
-      ])
-    );
-    expect(collected.get('kibana.task.overdue.count')).toHaveLength(2);
-    expect(collected.get('kibana.task.overdue.delay')).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          attributes: { task_type: 'actions:.email', task_type_group: 'actions' },
-          value: expect.objectContaining({ count: 3, sum: 20 }),
-        }),
-      ])
-    );
+    expect(collected.get('kibana.task.overdue.count')).toEqual([
+      expect.objectContaining({ attributes: {}, value: 4 }),
+    ]);
+    expect(collected.get('kibana.task.overdue.delay')).toEqual([
+      expect.objectContaining({
+        attributes: {},
+        value: expect.objectContaining({ count: 4, sum: 30 }),
+      }),
+    ]);
 
-    telemetry.recordTaskOverdue({ report: [{ key: 30, doc_count: 2 }], total: [] }, definitions);
+    telemetry.recordTaskOverdue({ total: [] });
     collected = await collect();
-    expect(collected.get('kibana.task.overdue.count')).toHaveLength(2);
-    expect(collected.get('kibana.task.overdue.count')).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          attributes: { task_type: 'actions:.email', task_type_group: 'actions' },
-          value: 0,
-        }),
-        expect.objectContaining({ attributes: { task_type: 'report' }, value: 2 }),
-      ])
-    );
+    expect(collected.get('kibana.task.overdue.count')).toEqual([
+      expect.objectContaining({ attributes: {}, value: 0 }),
+    ]);
   });
 });

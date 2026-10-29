@@ -2184,7 +2184,7 @@ describe('TaskManagerRunner', () => {
         expect(onTaskEvent).toHaveBeenCalledWith(
           asTaskManagerStatEvent('runDelay', asOk(expect.any(Number)))
         );
-        expect(recordTaskRunDelaySpy).toHaveBeenCalledWith('bar', expect.any(Number), undefined);
+        expect(recordTaskRunDelaySpy).toHaveBeenCalledWith(expect.any(Number));
         recordTaskRunDelaySpy.mockRestore();
       });
 

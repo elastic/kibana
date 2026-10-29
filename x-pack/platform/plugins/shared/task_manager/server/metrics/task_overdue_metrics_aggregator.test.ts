@@ -325,7 +325,7 @@ describe('TaskOverdueMetricsAggregator', () => {
         getTaskManagerMetricEvent({ numOverdueTasks })
       );
       expect(recordSpy).toHaveBeenCalledTimes(1);
-      expect(recordSpy).toHaveBeenCalledWith(numOverdueTasks, expect.anything());
+      expect(recordSpy).toHaveBeenCalledWith(numOverdueTasks);
     } finally {
       recordSpy.mockRestore();
     }

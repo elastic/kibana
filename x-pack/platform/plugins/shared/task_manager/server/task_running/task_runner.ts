@@ -446,11 +446,7 @@ export class TaskManagerRunner implements TaskRunner {
 
         const runDelaySeconds = getTaskDelayInSeconds(this.instance.task.scheduledAt);
         this.onTaskEvent(asTaskManagerStatEvent('runDelay', asOk(runDelaySeconds)));
-        taskManagerMetricsTelemetry.recordTaskRunDelay(
-          this.taskType,
-          runDelaySeconds,
-          this.definition?.taskTypeGroup
-        );
+        taskManagerMetricsTelemetry.recordTaskRunDelay(runDelaySeconds);
 
         // For long running tasks, update retryAt on an interval to allow for quicker task recovery
         const stopUpdatingLongRunningTasks =
