@@ -90,6 +90,26 @@ describe('createAutomaticTroubleshootingSkill', () => {
       expect(skill.content).toContain('NON_POLICY_HEALTH_FAILURE');
       expect(skill.content).toContain('OTHER_CURRENT_ISSUE');
     });
+
+    it('only requires generate_insight for findings about specific endpoints', () => {
+      const skill = createAutomaticTroubleshootingSkill(
+        mockEndpointAppContextService,
+        allowedExperimentalValues
+      );
+
+      expect(skill.content).toContain(
+        'When the findings concern one or more specific endpoints, call automatic_troubleshooting.generate_insight'
+      );
+      expect(skill.content).toContain(
+        'the Elastic Agent IDs (`agent.id`) of the affected endpoints'
+      );
+      expect(skill.content).toContain('Skip this step when no specific endpoint is involved.');
+      expect(skill.content).toContain(
+        'If automatic_troubleshooting.generate_insight returns an error, do not call it again'
+      );
+      expect(skill.content).not.toMatch(/mandatory/i);
+      expect(skill.content).not.toContain('every investigation must produce a persisted insight');
+    });
   });
 
   describe('getRegistryTools', () => {
@@ -194,6 +214,9 @@ describe('createAutomaticTroubleshootingSkill', () => {
         'The Elastic Defend knowledge base has no custom YARA signatures content yet'
       );
       expect(skill.content).not.toContain('- `Elastic Defend custom YARA signatures');
+      expect(skill.content).toContain(
+        'A question about a custom YARA signature alone, without a named host or endpoint, does not involve a specific endpoint.'
+      );
       expect(skill.description).toContain('custom YARA signatures');
       expect(skill.description?.length).toBeLessThanOrEqual(1024);
       expect(artifactsTool?.description).toContain('custom YARA signatures');
