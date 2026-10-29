@@ -13,11 +13,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 const ERROR_MESSAGES = {
   generic: {
     title: (
-      <FormattedMessage id="xpack.search.synonyms.errorTitle" defaultMessage="An error occurred" />
+      <FormattedMessage
+        id="xpack.searchSynonyms.synonyms.errorTitle"
+        defaultMessage="An error occurred"
+      />
     ),
     body: (
       <FormattedMessage
-        id="xpack.search.synonyms.errorDescription"
+        id="xpack.searchSynonyms.synonyms.errorDescription"
         defaultMessage="An error occured while fetching synonyms. Check Kibana logs for more information."
       />
     ),
@@ -25,13 +28,13 @@ const ERROR_MESSAGES = {
   missingPermissions: {
     title: (
       <FormattedMessage
-        id="xpack.search.synonyms.missingPermissionsTitle"
+        id="xpack.searchSynonyms.synonyms.missingPermissionsTitle"
         defaultMessage="Missing permissions"
       />
     ),
     body: (
       <FormattedMessage
-        id="xpack.search.synonyms.missingPermissionsDescription"
+        id="xpack.searchSynonyms.synonyms.missingPermissionsDescription"
         defaultMessage="You do not have the necessary permissions to manage synonyms. Contact your system administrator."
       />
     ),

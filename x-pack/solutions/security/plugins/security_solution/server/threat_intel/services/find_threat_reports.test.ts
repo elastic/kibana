@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '@kbn/alertzero-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { buildFindReportFilters, findThreatReports } from './find_threat_reports';
-import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '../lib/usable_report_filter';
 import { encodeCursor, InvalidCursorError } from '../lib/report_cursor';
 
 const buildHit = ({
@@ -60,8 +60,8 @@ describe('buildFindReportFilters', () => {
   });
 
   it('returns a source.name term when source is set', () => {
-    expect(buildFindReportFilters({ ...defaultArgs, source: 'CISA' })).toEqual(
-      expect.arrayContaining([{ term: { 'source.name': 'CISA' } }])
+    expect(buildFindReportFilters({ ...defaultArgs, source: 'Example source' })).toEqual(
+      expect.arrayContaining([{ term: { 'source.name': 'Example source' } }])
     );
   });
 

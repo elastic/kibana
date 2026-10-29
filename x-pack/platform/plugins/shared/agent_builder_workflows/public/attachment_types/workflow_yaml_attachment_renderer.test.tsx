@@ -114,11 +114,11 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns the workflows app icon', () => {
+    it('returns the workflow icon', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
 
-      expect(definition.getIcon!()).toBe('workflowsApp');
+      expect(definition.getIcon!()).toBe('workflow');
     });
   });
 

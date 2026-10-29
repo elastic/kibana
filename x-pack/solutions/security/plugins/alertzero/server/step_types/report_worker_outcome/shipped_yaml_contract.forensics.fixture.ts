@@ -6,7 +6,7 @@
  */
 
 import {
-  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -60,14 +60,11 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
   {
     contexts: [
       {
-        inputs: { investigationConversationId: INVESTIGATION_ID },
-        steps: {
-          close_if_settled: { output: { conversation_id: INVESTIGATION_ID, status: 'closed' } },
-          read_status_before_close: { output: { metadata: { status: 'open' } } },
-        },
+        inputs: { closeReason: 'false_positive', investigationConversationId: INVESTIGATION_ID },
+        steps: { resolve_decision: { output: { approved: true } } },
       },
     ],
     workerId: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
-    workflowId: ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
+    workflowId: ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
   },
 ];
