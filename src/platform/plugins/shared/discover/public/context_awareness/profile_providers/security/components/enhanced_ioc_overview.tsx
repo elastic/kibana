@@ -7,22 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import type { ProfileProviderServices } from '../../profile_provider_services';
+import type {
+  DocViewRenderProps,
+  DocViewRestorableStateProps,
+} from '@kbn/unified-doc-viewer/types';
+import type { SecuritySolutionIOCFlyoutOverviewTabFeature } from '@kbn/discover-shared-plugin/public';
 
-export interface EnhancedIOCOverviewProps extends DocViewRenderProps {
-  providerServices: ProfileProviderServices;
+export interface EnhancedIOCOverviewProps extends DocViewRenderProps, DocViewRestorableStateProps {
+  overviewTab?: SecuritySolutionIOCFlyoutOverviewTabFeature;
 }
 
 export const EnhancedIOCOverview = ({
   hit,
-  providerServices,
+  overviewTab,
   ...docViewProps
 }: EnhancedIOCOverviewProps) => {
-  const iocFlyoutOverviewTabFeature = providerServices.discoverShared.features.registry.getById(
-    'security-solution-ioc-flyout-overview-tab'
-  );
-
-  const render = iocFlyoutOverviewTabFeature?.render;
-  return render ? render({ hit, ...docViewProps }) : null;
+  return overviewTab ? overviewTab.render({ hit, ...docViewProps }) : null;
 };
