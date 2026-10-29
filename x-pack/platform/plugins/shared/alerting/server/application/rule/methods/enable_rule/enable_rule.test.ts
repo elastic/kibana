@@ -150,9 +150,7 @@ describe('enable()', () => {
     });
 
     test('rejects enabling the rule when the rule type params authorizer denies the persisted params', async () => {
-      // Simulates a rule whose privileged params were persisted through a path that
-      // never ran the rule type's authorizer (for example Saved Objects import):
-      // enabling it must still re-authorize those params before activating them.
+      // Simulates params persisted through a path that skips the authorizer (e.g. import).
       const persistedParams = { responseActions: [{ actionTypeId: '.endpoint' }] };
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
         ...existingRule,
@@ -162,7 +160,6 @@ describe('enable()', () => {
         .fn()
         .mockRejectedValue(new Error('Unauthorized to enable a privileged param'));
       (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
-        validate: { params: { validate: (params: unknown) => params } },
         authorize: { params: { authorize: authorizeParams } },
       });
 
@@ -909,7 +906,6 @@ describe('enable()', () => {
     rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: true,
-      validate: { params: { validate: (params: unknown) => params } },
     });
 
     await rulesClient.enableRule({ id: '1' });
@@ -925,7 +921,6 @@ describe('enable()', () => {
     rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: true,
-      validate: { params: { validate: (params: unknown) => params } },
     });
 
     (rulesClientParams.alertsService?.clearAlertFlappingHistory as jest.Mock).mockRejectedValue(
@@ -945,7 +940,6 @@ describe('enable()', () => {
     rulesClientParams.getAlertIndicesAlias.mockReturnValue(['test-index']);
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: false,
-      validate: { params: { validate: (params: unknown) => params } },
     });
 
     await rulesClient.enableRule({ id: '1' });

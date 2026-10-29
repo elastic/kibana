@@ -584,10 +584,7 @@ describe('bulkEnableRules', () => {
   });
 
   test('skips a rule and records an error when the rule type params authorizer denies its persisted params', async () => {
-    // Simulates a rule whose privileged params were persisted through a path that
-    // never ran the rule type's authorizer (for example Saved Objects import):
-    // bulk enabling it must still re-authorize those params before activating them,
-    // without failing the rest of the batch.
+    // Simulates params persisted through a path that skips the authorizer (e.g. import).
     const persistedParams = { responseActions: [{ actionTypeId: '.endpoint' }] };
     const disabledRuleWithPrivilegedParams: SavedObject<RawRule> = {
       ...disabledRule1,
@@ -607,7 +604,6 @@ describe('bulkEnableRules', () => {
       );
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       id: 'fakeType',
-      validate: { params: { validate: (params: unknown) => params } },
       authorize: { params: { authorize: authorizeParams } },
     });
 
@@ -734,13 +730,11 @@ describe('bulkEnableRules', () => {
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValueOnce({
       autoRecoverAlerts: true,
       id: 'fakeType1',
-      validate: { params: { validate: (params: unknown) => params } },
     });
 
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValueOnce({
       autoRecoverAlerts: true,
       id: 'fakeType2',
-      validate: { params: { validate: (params: unknown) => params } },
     });
 
     const result = await rulesClient.bulkEnableRules({
@@ -777,7 +771,6 @@ describe('bulkEnableRules', () => {
 
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: true,
-      validate: { params: { validate: (params: unknown) => params } },
     });
 
     (rulesClientParams.alertsService?.clearAlertFlappingHistory as jest.Mock).mockRejectedValue(
@@ -817,7 +810,6 @@ describe('bulkEnableRules', () => {
 
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: false,
-      validate: { params: { validate: (params: unknown) => params } },
     });
 
     const result = await rulesClient.bulkEnableRules({
@@ -856,7 +848,6 @@ describe('bulkEnableRules', () => {
 
     (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
       autoRecoverAlerts: true,
-      validate: { params: { validate: (params: unknown) => params } },
     });
 
     const result = await rulesClient.bulkEnableRules({

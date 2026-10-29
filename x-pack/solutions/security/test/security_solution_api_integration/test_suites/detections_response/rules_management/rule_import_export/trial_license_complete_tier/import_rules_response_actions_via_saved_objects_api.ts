@@ -20,16 +20,9 @@ import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import type { CustomRole } from '../../../../../config/services/types';
 
 /**
- * A user with rule management and Saved Objects management privileges, but no Endpoint
- * response-action privilege, could import a hidden `alert` saved object carrying a
- * privileged response action through the generic `/api/saved_objects/_import` route
- * (which never runs the rule type's params authorizer), then activate it through the
- * generic enable routes (which didn't re-run it either).
- *
- * This is deliberately exercised through the *generic* Saved Objects and Alerting routes,
- * not the Detection Engine's own import/bulk-action routes: those already run the full
- * `createRule`/`updateRule` logic (see `import_rules_response_actions.ts`), so they were
- * never part of this bypass.
+ * Imports a hidden `alert` saved object with a privileged response action via the
+ * generic Saved Objects import route (no rule-type authorization), then activates it
+ * via the generic enable routes.
  */
 
 const RULE_ENABLE_ONLY_ROLE: CustomRole = {
@@ -72,10 +65,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     /**
-     * Builds the NDJSON line the generic Saved Objects importer expects: the raw `alert`
-     * saved object, not the Detection Engine's own flat rule-export format. An `.endpoint`
-     * isolate response action is injected into `params`. A fresh `ruleId` is assigned so the
-     * object doesn't collide with the source rule it was cloned from.
+     * Builds the raw `alert` saved object the generic importer expects (not Detection
+     * Engine's export format), with an `.endpoint` isolate action injected into `params`.
      */
     const buildIsolateRuleSavedObject = async (sourceRuleId: string, importedRuleId: string) => {
       const { hits } = await getRuleSOById(es, sourceRuleId);

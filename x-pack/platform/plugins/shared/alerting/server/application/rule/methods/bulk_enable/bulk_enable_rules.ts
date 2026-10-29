@@ -223,14 +223,8 @@ const bulkEnableRulesWithOCC = async (
           const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
           const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
           try {
-            // Re-authorize the persisted params against the acting user's privileges
-            // before activating them. A disabled rule's params may have been written
-            // through a path that stores them without running the rule type's
-            // authorizer (for example Saved Objects import), so create/update
-            // authorization cannot be assumed here. These params come straight off
-            // the saved object, the post-reference-extraction form (e.g. a data
-            // view's index), so the authorizer only inspects specific fields (e.g.
-            // responseActions) rather than requiring a schema-valid object.
+            // Re-authorize persisted params before activating them: they may have
+            // bypassed the authorizer entirely (e.g. via Saved Objects import).
             await authorizeRuleTypeParams(
               rule.attributes.params as RuleTypeParams,
               ruleType.authorize?.params,
