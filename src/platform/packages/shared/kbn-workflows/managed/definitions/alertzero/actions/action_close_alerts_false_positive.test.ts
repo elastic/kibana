@@ -32,21 +32,24 @@ describe('Close alerts as false positive action', () => {
 
   // Mirrors WorkflowTemplatingEngine.evaluateExpression: strip the leading `$` and the
   // surrounding `{{ }}`, then evalValueSync the raw expression against a context — the
-  // same call the execution engine makes for a step's `if` condition.
-  const evaluateIfCondition = (updated: number, alertIds: string[]): unknown => {
-    const expression = (failStep.if as string)
-      .replace(/^\$\{\{/, '')
-      .replace(/\}\}$/, '')
-      .trim();
-    return engine.evalValueSync(expression, {
-      steps: { close_alerts: { output: { updated } } },
-      inputs: { actionInput: { alertIds } },
-    });
-  };
+  // same call the execution engine makes for a step's `if` condition or value.
+  const evaluate = (template: string, context: Record<string, unknown>): unknown =>
+    engine.evalValueSync(
+      template
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim(),
+      context
+    );
+  const step = (name: string) => workflow.steps.find((candidate) => candidate.name === name)!;
 
-  it('places the completeness guard between close_alerts and emit_result', () => {
-    expect(workflow.steps.map((step) => step.name)).toEqual([
+  it('finds the eligible alerts, resolves the skipped ones, closes, then guards the result', () => {
+    expect(workflow.steps.map((candidate) => candidate.name)).toEqual([
+      'find_eligible_alerts',
+      'resolve_eligible_alerts',
+      'resolve_skipped_alerts',
       'close_alerts',
+      'count_closed_alerts',
       'fail_incomplete_close',
       'emit_result',
     ]);
@@ -57,51 +60,95 @@ describe('Close alerts as false positive action', () => {
     expect(typeof failStep.if).toBe('string');
   });
 
-  // Approving a proposal runs this with the proposal's `alertIds`. The close is an update by
-  // query, so any clause beyond the ids (a rule, a time range) would close alerts the analyst
-  // was never shown.
-  it('closes only the alerts named in the approved input, with nothing else in the query', () => {
-    const closeStep = workflow.steps.find((step) => step.name === 'close_alerts')!;
-
-    expect(closeStep.with).toEqual({
-      status: 'closed',
-      reason: 'false_positive',
-      conflicts: 'proceed',
-      query: { bool: { filter: { terms: { _id: '${{ inputs.actionInput.alertIds }}' } } } },
+  // An analyst excludes an alert by giving it another verdict tag, maybe leaving
+  // `az:false_positive` on it. Approval can land before the proposal is revised, so the close
+  // itself must not touch such an alert.
+  it('is eligible only with az:false_positive and neither other verdict tag', () => {
+    expect(step('find_eligible_alerts').with!.query).toEqual({
+      bool: {
+        filter: [
+          { terms: { _id: '${{ inputs.actionInput.alertIds }}' } },
+          { term: { 'kibana.alert.workflow_tags': 'az:false_positive' } },
+        ],
+        must_not: [
+          {
+            terms: {
+              'kibana.alert.workflow_tags': ['az:true_positive', 'az:inconclusive'],
+            },
+          },
+        ],
+      },
     });
   });
 
-  it('resolves the close query to the approved ids', () => {
-    const closeStep = workflow.steps.find((step) => step.name === 'close_alerts')!;
-    const idsExpression = (
-      closeStep.with!.query as { bool: { filter: { terms: { _id: string } } } }
-    ).bool.filter.terms._id.trim();
+  // The close is an update by query, so any clause beyond the ids (a rule, a time range) would
+  // close alerts the analyst was never shown.
+  it('closes only the eligible alerts, with nothing else in the query', () => {
+    expect(step('close_alerts').with).toEqual({
+      status: 'closed',
+      reason: 'false_positive',
+      conflicts: 'proceed',
+      query: { bool: { filter: { terms: { _id: '${{ variables.eligible_alert_ids }}' } } } },
+    });
+  });
 
+  it('skips the close when nothing is eligible', () => {
     expect(
-      engine.evalValueSync(idsExpression.slice(3, -2).trim(), {
-        inputs: { actionInput: { alertIds: ['alert-1', 'alert-2'] } },
+      evaluate(step('close_alerts').if as string, { variables: { eligible_alert_ids: [] } })
+    ).toBe(false);
+  });
+
+  it('reads the eligible ids from the search hits', () => {
+    expect(
+      evaluate(step('resolve_eligible_alerts').with!.eligible_alert_ids as string, {
+        steps: {
+          find_eligible_alerts: { output: { hits: { hits: [{ _id: 'a' }, { _id: 'c' }] } } },
+        },
       })
-    ).toEqual(['alert-1', 'alert-2']);
+    ).toEqual(['a', 'c']);
   });
 
-  it('does not fail when every requested alert was updated', () => {
-    expect(evaluateIfCondition(2, ['alert-1', 'alert-2'])).toBe(false);
+  it('skips the requested alerts that are not eligible', () => {
+    expect(
+      evaluate(step('resolve_skipped_alerts').with!.skipped_alert_ids as string, {
+        inputs: { actionInput: { alertIds: ['a', 'b', 'c'] } },
+        variables: { eligible_alert_ids: ['a', 'c'] },
+      })
+    ).toEqual(['b']);
   });
 
-  it('fails when fewer alerts were updated than requested', () => {
-    expect(evaluateIfCondition(1, ['alert-1', 'alert-2'])).toBe(true);
+  const failsFor = (closed: number, eligible: string[]) =>
+    evaluate(failStep.if as string, {
+      variables: { closed_count: closed, eligible_alert_ids: eligible },
+    });
+
+  it('does not fail when every eligible alert was closed, even if others were skipped', () => {
+    expect(failsFor(2, ['alert-1', 'alert-2'])).toBe(false);
   });
 
-  it('fails when none of the requested alerts were updated (conflicts: proceed no-op)', () => {
-    expect(evaluateIfCondition(0, ['alert-1', 'alert-2'])).toBe(true);
+  it('does not fail when nothing was eligible', () => {
+    expect(failsFor(0, [])).toBe(false);
+  });
+
+  it('fails when fewer eligible alerts were closed than expected', () => {
+    expect(failsFor(1, ['alert-1', 'alert-2'])).toBe(true);
+  });
+
+  it('fails when none of the eligible alerts were closed (conflicts: proceed no-op)', () => {
+    expect(failsFor(0, ['alert-1', 'alert-2'])).toBe(true);
   });
 
   it('renders a message naming the shortfall', () => {
     const rendered = engine.parseAndRenderSync(failStep.with!.message as string, {
-      steps: { close_alerts: { output: { updated: 1 } } },
-      inputs: { actionInput: { alertIds: ['alert-1', 'alert-2'] } },
+      variables: { closed_count: 1, eligible_alert_ids: ['alert-1', 'alert-2'] },
     });
 
-    expect(rendered).toContain('Closed 1 of 2 requested alert(s) as false positive');
+    expect(rendered).toContain('Closed 1 of 2 eligible alert(s) as false positive');
+  });
+
+  it('emits the skipped alerts', () => {
+    expect(step('emit_result').with).toEqual(
+      expect.objectContaining({ skipped_alert_ids: '${{ variables.skipped_alert_ids }}' })
+    );
   });
 });

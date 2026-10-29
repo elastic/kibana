@@ -17,6 +17,7 @@ export const TRIAGE_TAG_PATTERN_KEYS_STEP_ID = 'alertzero.triage.tagPatternKeys'
 export const TRIAGE_GROUP_FP_CANDIDATES_STEP_ID = 'alertzero.triage.groupFpCandidates' as const;
 export const TRIAGE_JOIN_PROPOSAL_STEP_ID = 'alertzero.triage.joinProposal' as const;
 export const TRIAGE_RETAG_PROPOSAL_ALERTS_STEP_ID = 'alertzero.triage.retagProposalAlerts' as const;
+export const TRIAGE_EXCLUDE_FROM_PROPOSAL_STEP_ID = 'alertzero.triage.excludeFromProposal' as const;
 
 const idSchema = z.string().trim().min(1).max(256);
 
@@ -413,4 +414,58 @@ export const triageRetagProposalAlertsStepCommonDefinition: CommonStepDefinition
   stability: 'tech_preview',
   inputSchema: retagProposalAlertsInputSchema,
   outputSchema: retagProposalAlertsOutputSchema,
+};
+
+const excludeFromProposalInputSchema = lazySchema(() =>
+  z.object({
+    alert_ids: z
+      .array(idSchema)
+      .max(10_000)
+      .describe('Alerts whose tags an analyst changed, as the tag change event lists them.'),
+  })
+);
+
+const excludeFromProposalOutputSchema = lazySchema(() =>
+  z.object({
+    proposals: z
+      .array(
+        z.object({
+          root_proposal_id: z.string(),
+          conversation_id: z.string().describe("The proposal's Investigation."),
+          revision: z.number().describe('The live revision after this step.'),
+          excluded_count: z.number().describe('Alerts an analyst took out of the proposal.'),
+          true_positive_count: z.number().describe('Of those, how many are true positives.'),
+          remaining_count: z.number().describe('Alerts the proposal still lists.'),
+          revised: z.boolean().describe('False when the proposal still lists the alerts.'),
+        })
+      )
+      .describe('One entry per pending proposal that held an excluded alert.'),
+    excluded_alert_ids: z
+      .array(z.string())
+      .describe('Alerts that are in a pending proposal and that an analyst excluded.'),
+    needs_verdict_alert_ids: z
+      .array(z.string())
+      .describe('Of those, the alerts with no other verdict tag, which the sweep would re-plan.'),
+  })
+);
+
+export const triageExcludeFromProposalStepCommonDefinition: CommonStepDefinition<
+  typeof excludeFromProposalInputSchema,
+  typeof excludeFromProposalOutputSchema
+> = {
+  id: TRIAGE_EXCLUDE_FROM_PROPOSAL_STEP_ID,
+  label: i18n.translate('xpack.alertzero.workflows.steps.triageExcludeFromProposal.label', {
+    defaultMessage: 'Exclude alerts from triage proposals',
+  }),
+  description: i18n.translate(
+    'xpack.alertzero.workflows.steps.triageExcludeFromProposal.description',
+    {
+      defaultMessage:
+        'Takes the alerts an analyst gave another verdict out of the open proposal that holds them.',
+    }
+  ),
+  category: StepCategory.KibanaSecurity,
+  stability: 'tech_preview',
+  inputSchema: excludeFromProposalInputSchema,
+  outputSchema: excludeFromProposalOutputSchema,
 };
