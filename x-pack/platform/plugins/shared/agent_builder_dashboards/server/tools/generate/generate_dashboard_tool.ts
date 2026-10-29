@@ -41,10 +41,10 @@ import { applyDefaultDashboardTimeRange } from './time_range';
 const newDashboardMetadataErrorMessage = 'New dashboards require a non-empty `title`.';
 
 const noDashboardCreatedErrorMessage =
-  'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardAttachmentId.';
+  'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardId.';
 
 const noControlsAddedErrorMessage =
-  'No dashboard was created because none of the requested controls could be added: controls you add on your own are left out when their field is missing or does not suit the control. Add panels, or controls on suitable fields, and call again without dashboardAttachmentId.';
+  'No dashboard was created because none of the requested controls could be added: controls you add on your own are left out when their field is missing or does not suit the control. Add panels, or controls on suitable fields, and call again without dashboardId.';
 
 /** Whether the dashboard has no panels and no controls. Empty sections do not count. */
 const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAttachmentData) =>
@@ -53,12 +53,12 @@ const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAtta
 
 const generateDashboardSchema = lazySchema(() =>
   z.object({
-    dashboardAttachmentId: z
+    dashboardId: z
       .string()
       .max(256)
       .optional()
       .describe(
-        '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
+        '(optional) The id of the dashboard to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
       ),
     ...upsertDashboardSchema.shape,
     layout: z
@@ -133,7 +133,7 @@ export interface GenerateDashboardToolDeps {
  *
  * Wraps the environment-agnostic {@link executeDashboardUpsert} core with
  * Kibana attachment persistence so the LLM works against a lightweight reference:
- * - the prior payload is read server-side from `dashboardAttachmentId`,
+ * - the prior payload is read server-side from `dashboardId`, the attachment id,
  * - the generated payload is persisted as a `dashboard` attachment,
  * - the result returns only the attachment id, version, and a compact dashboard summary.
  *
@@ -148,7 +148,7 @@ export const generateDashboardTool = ({
     type: ToolType.builtin,
     description: `Create or update a dashboard by describing the desired changes, keyed by id.
 
-Persists the resulting dashboard as an attachment and returns its id plus a compact summary (not the full payload). Reference the returned attachment id to render the dashboard; do not copy the payload into follow-up tool calls.
+Returns the dashboard's id plus a compact summary (not the full payload). Pass that id as \`dashboardId\` to edit the dashboard later; do not copy the payload into follow-up tool calls.
 
 - \`title\`, \`description\`, \`time_range\`: dashboard fields to set.
 - \`sections\`: sections to create or update.
@@ -160,7 +160,7 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 Panel positions and sizes are set automatically after the changes are applied, and the summary shows the resulting \`grid\` of every panel. The result lists the ids the call created, updated and removed, so a mistyped id that created a new panel instead of updating one is visible. A panel only moved or resized by the layout step is not listed as updated.`,
     schema: generateDashboardSchema,
     handler: async (
-      { dashboardAttachmentId: previousAttachmentId, layout, ...upsert },
+      { dashboardId: previousAttachmentId, layout, ...upsert },
       { logger, attachments, events, esClient, modelProvider }
     ) => {
       try {
@@ -318,7 +318,7 @@ Panel positions and sizes are set automatically after the changes are applied, a
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId },
+                metadata: { dashboardId: previousAttachmentId },
               },
             },
           ],

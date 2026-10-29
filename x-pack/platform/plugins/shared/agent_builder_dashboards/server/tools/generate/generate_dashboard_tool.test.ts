@@ -83,7 +83,7 @@ const keepRequestedLayout = async ({
 const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', panels: [] };
 
 const callHandler = async (
-  dashboardAttachmentId?: string,
+  dashboardId?: string,
   layout?: string,
   upsert: Record<string, unknown> = {}
 ) => {
@@ -101,7 +101,7 @@ const callHandler = async (
     esClient: { asCurrentUser: {} },
   };
   const ret = await tool.handler(
-    { dashboardAttachmentId, layout, ...upsert } as unknown as Parameters<typeof tool.handler>[0],
+    { dashboardId, layout, ...upsert } as unknown as Parameters<typeof tool.handler>[0],
     ctx as unknown as Parameters<typeof tool.handler>[1]
   );
   if (!('results' in ret)) throw new Error('Unexpected HITL return from tool handler');
