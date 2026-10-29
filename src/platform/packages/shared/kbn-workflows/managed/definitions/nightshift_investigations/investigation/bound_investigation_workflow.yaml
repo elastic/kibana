@@ -34,11 +34,13 @@ triggers:
           description: Investigation to run. Defaults to one named after this execution.
         # How long the investigation may run. It caps the step below rather than this run's
         # `settings.timeout`, because a workflow bound to a service account only runs its saved
-        # definition: a run that rewrote its own timeout would be refused.
+        # definition: a run that rewrote its own timeout would be refused. Capped at the shared
+        # investigation's own 60m timeout, so the step timeout always fires before this run's.
         timeout_seconds:
           type: number
           default: 3600
-          description: Upper bound for the investigation in seconds. Defaults to an hour.
+          maximum: 3600
+          description: Upper bound for the investigation in seconds, at most an hour. Defaults to an hour.
       # The shared investigation validates the rest of the inputs.
       additionalProperties: true
 
