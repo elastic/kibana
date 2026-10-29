@@ -10,13 +10,19 @@
 /** One reason a dashboard was rejected before it was saved. */
 export type DashboardValidationIssue =
   | {
-      /** A dashboard state field failed the schema. */
+      /**
+       * A dashboard state field failed the schema. In the default format, this includes a panel
+       * config that fails its embeddable schema, reported at the panel's path.
+       */
       readonly type: 'state';
       readonly path: ReadonlyArray<PropertyKey>;
       readonly message: string;
     }
   | {
-      /** A panel config failed its embeddable schema or could not be transformed. */
+      /**
+       * A panel or pinned panel could not be transformed for saving. In the Dashboard app format,
+       * this includes a panel config that fails its embeddable schema.
+       */
       readonly type: 'panel';
       readonly panelType: string;
       readonly message: string;
