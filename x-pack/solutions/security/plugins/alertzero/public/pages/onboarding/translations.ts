@@ -39,7 +39,7 @@ export const ONBOARDING_INTRO_HEADING = i18n.translate('xpack.alertzero.onboardi
 export const ONBOARDING_WATCHES_HEADING = i18n.translate(
   'xpack.alertzero.onboarding.introHeading',
   {
-    defaultMessage: 'Choose your Workers',
+    defaultMessage: 'Set up your Workers',
   }
 );
 
@@ -49,13 +49,16 @@ export const WATCH_SETTINGS = i18n.translate('xpack.alertzero.onboarding.watchSe
 
 export const ONBOARDING_KEEP_ALL_ENABLED_NOTE = i18n.translate(
   'xpack.alertzero.onboarding.keepAllEnabledNote',
-  { defaultMessage: 'We recommend turning on all Workers.' }
+  {
+    defaultMessage:
+      "Some Workers build on each other's results, so we recommend keeping them all on.",
+  }
 );
 
 export const ONBOARDING_WORKERS_FOOTNOTE = i18n.translate(
   'xpack.alertzero.onboarding.workersFootnote',
   {
-    defaultMessage: 'Select at least one to continue.',
+    defaultMessage: 'At least one Worker has to stay on.',
   }
 );
 
@@ -77,7 +80,7 @@ export const READ_MORE = i18n.translate('xpack.alertzero.onboarding.readMore', {
 
 export const workersSelectedCount = (selected: number, total: number) =>
   i18n.translate('xpack.alertzero.onboarding.workersSelectedCount', {
-    defaultMessage: '{selected} of {total} Workers selected',
+    defaultMessage: '{selected} of {total} Workers on',
     values: { selected, total },
   });
 
@@ -109,15 +112,20 @@ export const ONBOARDING_MODIFY_FORBIDDEN = i18n.translate(
 
 export const NO_MODEL_CALLOUT_TITLE = i18n.translate(
   'xpack.alertzero.onboarding.noModelCallout.title',
-  { defaultMessage: "AI models aren't set up for this space" }
+  { defaultMessage: 'Workers need an AI model' }
 );
 
 export const NO_MODEL_CALLOUT_TEXT = i18n.translate(
   'xpack.alertzero.onboarding.noModelCallout.text',
   {
     defaultMessage:
-      'Workers need AI models to run. Choose your models in Feature settings, then come back to turn on Workers.',
+      'Add an AI connector, or choose a model in Feature settings if you already have one. Then come back to finish setting up your Workers.',
   }
+);
+
+export const NO_MODEL_CALLOUT_ADD_CONNECTOR_ACTION = i18n.translate(
+  'xpack.alertzero.onboarding.noModelCallout.addConnectorAction',
+  { defaultMessage: 'Add connector' }
 );
 
 export const NO_MODEL_CALLOUT_ACTION = i18n.translate(
@@ -140,42 +148,42 @@ const ONBOARDING_WORKER_DESCRIPTIONS: Record<string, string> = {
     'xpack.alertzero.onboarding.workerDescription.attackDiscovery',
     {
       defaultMessage:
-        "Finds potential attacks in your alerts, opens an investigation for each, and proposes forensic analysis of the affected hosts for any that aren't false positives.",
+        'Groups related alerts into potential attacks, opens an investigation for each, and proposes forensic analysis of the hosts when an attack looks real.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.alertTriage',
     {
       defaultMessage:
-        'Classifies new alerts and proposes closing false positives, so Attack Discovery has less noise to analyze.',
+        'Classifies new alerts and proposes closing false positives, so you can focus on the alerts that matter.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.ruleTuning',
     {
       defaultMessage:
-        'Finds rules that are too noisy or too narrow, and proposes tuning changes tested against past data.',
+        'Finds rules that are too noisy or too narrow and proposes tuning changes tested against past data, so your alerts are more accurate.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.endpointAnalysis',
     {
       defaultMessage:
-        'Analyzes the affected hosts for attacks that Attack Discovery hands off, and proposes response actions such as isolating a host.',
+        'Investigates the hosts involved in a potential attack and proposes response actions, such as isolating a host, so you can contain the attack faster.',
     }
   ),
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.continuousThreatHunt',
     {
       defaultMessage:
-        'Searches your data for activity that matches threat reports, and opens an investigation for each match.',
+        "Searches your data for activity that matches threat reports and opens an investigation for each match, so you can catch threats that didn't trigger an alert.",
     }
   ),
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerDescription.ruleCoverage',
     {
       defaultMessage:
-        "Reviews detection gaps that Continuous Threat Hunt finds, and proposes rules to close them, either new ones or existing ones you haven't turned on.",
+        'Reviews gaps in your detection coverage and proposes rules to close them, so fewer threats go undetected.',
     }
   ),
 };
@@ -187,11 +195,11 @@ export const onboardingWorkerDescription = (workerId: string): string | undefine
 const ONBOARDING_WORKER_EVENT_TRIGGERS: Record<string, string> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerTrigger.alertTriage',
-    { defaultMessage: 'On new alerts' }
+    { defaultMessage: 'Runs on new alerts' }
   ),
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: i18n.translate(
     'xpack.alertzero.onboarding.workerTrigger.endpointAnalysis',
-    { defaultMessage: 'On handoff from Attack Discovery' }
+    { defaultMessage: 'Runs on attacks from Attack Discovery' }
   ),
 };
 
@@ -218,14 +226,14 @@ export const INTRO_PREVIEW_HEADING = i18n.translate(
 
 export const INTRO_SET_UP_DATA_TITLE = i18n.translate(
   'xpack.alertzero.onboarding.intro.setUpDataTitle',
-  { defaultMessage: 'Get started with your data' }
+  { defaultMessage: 'Bring in your data' }
 );
 
 export const INTRO_SET_UP_DATA_BODY = i18n.translate(
   'xpack.alertzero.onboarding.intro.setUpDataBody',
   {
     defaultMessage:
-      "The Get started page walks you through connecting endpoint, identity, cloud, and network data, and confirms that it's flowing. Any Elastic integration works, and the more you connect, the more AlertZero can see.",
+      'Start with endpoint, identity, cloud, and network data. Any Elastic integration works, and the more you connect, the more AlertZero can see.',
   }
 );
 

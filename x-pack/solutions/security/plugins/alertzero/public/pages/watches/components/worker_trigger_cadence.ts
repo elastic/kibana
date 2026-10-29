@@ -22,7 +22,7 @@ export const parseWorkerScheduleInterval = (
 };
 
 /**
- * Human label for the header band's trigger badge, e.g. "Every 2 hours". Each unit gets its own
+ * Human label for the header band's trigger badge, e.g. "Runs every 2 hours". Each unit gets its own
  * ICU-pluralized message so a translator can reorder the whole phrase per locale.
  */
 export const workerScheduleCadenceLabel = (interval: string | undefined): string => {
@@ -30,17 +30,17 @@ export const workerScheduleCadenceLabel = (interval: string | undefined): string
   switch (unit) {
     case 'm':
       return i18n.translate('xpack.alertzero.watches.settings.trigger.cadence.minutes', {
-        defaultMessage: '{amount, plural, =1 {Every minute} other {Every # minutes}}',
+        defaultMessage: '{amount, plural, =1 {Runs every minute} other {Runs every # minutes}}',
         values: { amount },
       });
     case 'h':
       return i18n.translate('xpack.alertzero.watches.settings.trigger.cadence.hours', {
-        defaultMessage: '{amount, plural, =1 {Every hour} other {Every # hours}}',
+        defaultMessage: '{amount, plural, =1 {Runs every hour} other {Runs every # hours}}',
         values: { amount },
       });
     case 'd':
       return i18n.translate('xpack.alertzero.watches.settings.trigger.cadence.days', {
-        defaultMessage: '{amount, plural, =1 {Every day} other {Every # days}}',
+        defaultMessage: '{amount, plural, =1 {Runs every day} other {Runs every # days}}',
         values: { amount },
       });
   }

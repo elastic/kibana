@@ -118,7 +118,9 @@ const renderPage = ({
   // alertzero.write capability so the component can branch on it.
   (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: canWrite };
   coreStart.application.getUrlForApp.mockImplementation((appId, options) =>
-    options?.deepLinkId === 'model_settings' ? FEATURE_SETTINGS_URL : `/app/${appId}`
+    options?.deepLinkId === 'model_settings'
+      ? FEATURE_SETTINGS_URL
+      : `/app/${appId}${options?.path ?? ''}`
   );
   // Mock http.get so useWorkers() always returns the configured server response
   // (including on background refetches), and http.patch so mutation calls are
@@ -282,8 +284,17 @@ describe('OnboardingPage', () => {
       renderPage({ httpPatch, serverWorkers: NO_MODEL_WORKERS_RESPONSE });
 
       const callout = screen.getByTestId('alertZeroOnboardingNoModelCallout');
-      expect(callout).toHaveTextContent("AI models aren't set up for this space");
-      expect(callout).toHaveTextContent('Workers need AI models to run.');
+      expect(callout).toHaveTextContent('Workers need an AI model');
+      expect(callout).toHaveTextContent(
+        'Add an AI connector, or choose a model in Feature settings if you already have one. Then come back to finish setting up your Workers.'
+      );
+      const addConnector = screen.getByTestId('alertZeroOnboardingNoModelAddConnectorButton');
+      expect(addConnector).toHaveTextContent('Add connector');
+      expect(addConnector).toHaveAttribute(
+        'href',
+        '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
+      );
+      expect(addConnector).toHaveAttribute('target', '_blank');
       const action = screen.getByTestId('alertZeroOnboardingNoModelFeatureSettingsButton');
       expect(action).toHaveTextContent('Open Feature settings');
       expect(action).toHaveAttribute('href', FEATURE_SETTINGS_URL);
@@ -304,7 +315,7 @@ describe('OnboardingPage', () => {
       renderPage({ serverWorkers: NO_MODEL_WORKERS_RESPONSE });
 
       const callout = screen.getByTestId('alertZeroOnboardingNoModelCallout');
-      const intro = screen.getByText(/Turn on Workers to triage alerts/);
+      const intro = screen.getByText(/To start using AlertZero/);
       const firstToggle = screen.getAllByRole('switch')[0];
       expect(intro.compareDocumentPosition(callout)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
       expect(callout.compareDocumentPosition(firstToggle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
@@ -339,7 +350,7 @@ describe('OnboardingPage', () => {
   describe('with write capability', () => {
     it('renders the subtitle', () => {
       renderPage({ canWrite: true });
-      expect(screen.getByText(/Turn on Workers to triage alerts/)).toBeInTheDocument();
+      expect(screen.getByText(/To start using AlertZero/)).toBeInTheDocument();
     });
 
     it('renders worker toggle rows', () => {
@@ -441,9 +452,9 @@ describe('OnboardingPage', () => {
       );
     });
 
-    it('recommends turning on all Workers', () => {
+    it('recommends keeping all Workers on', () => {
       renderPage({ canWrite: true });
-      expect(screen.getByText(/We recommend turning on all Workers/)).toBeInTheDocument();
+      expect(screen.getByText(/we recommend keeping them all on/)).toBeInTheDocument();
     });
 
     it('shows the watch and trigger badges for each worker', () => {
@@ -457,22 +468,22 @@ describe('OnboardingPage', () => {
         screen.getByTestId(
           `alertZeroOnboardingWorkerTrigger-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
         )
-      ).toHaveTextContent('On new alerts');
+      ).toHaveTextContent('Runs on new alerts');
       expect(
         screen.getByTestId(
           `alertZeroOnboardingWorkerTrigger-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
         )
-      ).toHaveTextContent('Every 4 hours');
+      ).toHaveTextContent('Runs every 4 hours');
     });
 
     it('shows how many workers are selected', () => {
       renderPage({ canWrite: true });
       expect(screen.getByTestId('alertZeroOnboardingSelectedCount')).toHaveTextContent(
-        '6 of 6 Workers selected'
+        '6 of 6 Workers on'
       );
       fireEvent.click(screen.getAllByRole('switch')[1]);
       expect(screen.getByTestId('alertZeroOnboardingSelectedCount')).toHaveTextContent(
-        '5 of 6 Workers selected'
+        '5 of 6 Workers on'
       );
     });
 

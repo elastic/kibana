@@ -32,16 +32,25 @@ describe('WorkerSelectionDescription', () => {
     return { onWatchSettingsClick };
   };
 
-  it('explains what Workers do', () => {
-    renderDescription();
-    expect(screen.getByText(/Turn on Workers to triage alerts/)).toBeInTheDocument();
-  });
-
-  it('says that actions wait for approval by default', () => {
+  it('explains what a Watch is', () => {
     renderDescription();
     expect(
-      screen.getByText(/By default, they propose actions for you to approve or decline/)
+      screen.getByText(
+        /Each Worker belongs to a Watch, a team of Workers with one area of expertise/
+      )
     ).toBeInTheDocument();
+  });
+
+  it('tells users to enable the settings their Workers need', () => {
+    renderDescription();
+    expect(
+      screen.getByText(/To start using AlertZero, enable the settings your Workers need/)
+    ).toBeInTheDocument();
+  });
+
+  it('names the Enable and run button in bold', () => {
+    renderDescription();
+    expect(screen.getByText('Enable and run').tagName).toBe('STRONG');
   });
 
   it('calls onWatchSettingsClick from the Watch settings link', () => {

@@ -21,8 +21,9 @@ export const WorkerSelectionDescription: React.FC<Props> = ({ isSaving, onWatchS
     <p>
       <FormattedMessage
         id="xpack.alertzero.onboarding.subtitle"
-        defaultMessage="Turn on Workers to triage alerts, investigate potential attacks, hunt for threats, and improve your detection rules. By default, they propose actions for you to approve or decline. You can change this later in {watchSettingsLink}."
+        defaultMessage="Each Worker belongs to a Watch, a team of Workers with one area of expertise. To start using AlertZero, enable the settings your Workers need, then select {enableAndRun}. You can change any of this later in {watchSettingsLink}."
         values={{
+          enableAndRun: <strong>{i18n.ENABLE_AND_RUN}</strong>,
           watchSettingsLink: (
             <EuiLink
               onClick={onWatchSettingsClick}
