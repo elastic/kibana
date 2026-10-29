@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
 import { getAppMenuItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
@@ -37,6 +37,29 @@ export const AppMenuComponent = ({
   const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
   const isAboveXlBreakpoint = useIsWithinBreakpoints(['xl']);
 
+  // Keep these referentially stable: they feed the popover's `panels` memo, and a new identity
+  // on every render makes EuiContextMenu rebuild its items each time.
+  const handlePopoverToggle = useCallback((id: string) => {
+    setOpenPopoverId((openId) => (openId === id ? null : id));
+  }, []);
+
+  const handleOnPopoverClose = useCallback(() => {
+    setOpenPopoverId(null);
+  }, []);
+
+  const { displayedItems, overflowItems, shouldOverflow } = useMemo(
+    () =>
+      config
+        ? getAppMenuItems({ config })
+        : { displayedItems: [], overflowItems: [], shouldOverflow: false },
+    [config]
+  );
+
+  const allItems = useMemo(
+    () => [...displayedItems, ...overflowItems],
+    [displayedItems, overflowItems]
+  );
+
   if (!config || hasNoItems(config) || !visible) {
     return null;
   }
@@ -49,18 +72,6 @@ export const AppMenuComponent = ({
     gutterSize: 'xs' as const,
     popoverBreakpoints: 'none' as const,
     className: 'kbnTopNavMenu__wrapper',
-  };
-
-  const { displayedItems, overflowItems, shouldOverflow } = getAppMenuItems({
-    config,
-  });
-
-  const handlePopoverToggle = (id: string) => {
-    setOpenPopoverId(openPopoverId === id ? null : id);
-  };
-
-  const handleOnPopoverClose = () => {
-    setOpenPopoverId(null);
   };
 
   const primaryActionComponent = primaryActionItem ? (
@@ -76,7 +87,7 @@ export const AppMenuComponent = ({
 
   const collapsedComponent = (
     <AppMenuOverflowButton
-      items={[...displayedItems, ...overflowItems]}
+      items={allItems}
       isPopoverOpen={openPopoverId === showMoreButtonId}
       primaryActionItem={primaryActionItem}
       onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
@@ -92,7 +103,7 @@ export const AppMenuComponent = ({
     return (
       <EuiHeaderLinks {...headerLinksProps}>
         <AppMenuOverflowButton
-          items={[...displayedItems, ...overflowItems]}
+          items={allItems}
           isPopoverOpen={openPopoverId === showMoreButtonId}
           onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
           onPopoverClose={handleOnPopoverClose}
