@@ -18,6 +18,7 @@ export function MachineLearningJobExpandedDetailsProvider(
 ) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const toasts = getService('toasts');
   const headerPage = getPageObject('header');
 
   return {
@@ -112,6 +113,14 @@ export function MachineLearningJobExpandedDetailsProvider(
       });
       await testSubjects.click('annotationFlyoutUpdateOrCreateButton');
       await testSubjects.missingOrFail('mlAnnotationsFlyoutTextInput');
+      await retry.waitFor('annotation update to complete', async () => {
+        const toastTexts = await Promise.all(
+          (await toasts.getAll()).map((toast) => toast.getVisibleText())
+        );
+        return toastTexts.some((text) =>
+          text.includes(`Updated annotation for job with ID ${jobId}`)
+        );
+      });
       await jobTable.ensureDetailsClosed(jobId);
 
       await jobTable.withDetailsOpen(jobId, async () => {
