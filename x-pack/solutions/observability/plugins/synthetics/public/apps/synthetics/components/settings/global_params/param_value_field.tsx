@@ -183,7 +183,7 @@ const VaultSourceFields = () => {
           aria-label={VAULT_PATH_LABEL}
           {...register('source.path', {
             required: { value: true, message: VAULT_PATH_REQUIRED },
-            validate: (value) => isValidVaultPath(value) || VAULT_PATH_INVALID,
+            validate: (value) => isValidVaultPath(value ?? '') || VAULT_PATH_INVALID,
           })}
         />
       </EuiFormRow>
@@ -202,7 +202,7 @@ const VaultSourceFields = () => {
           aria-label={VAULT_FIELD_LABEL}
           {...register('source.field', {
             required: { value: true, message: VAULT_FIELD_REQUIRED },
-            validate: (value) => isValidVaultField(value) || VAULT_FIELD_INVALID,
+            validate: (value) => isValidVaultField(value ?? '') || VAULT_FIELD_INVALID,
           })}
         />
       </EuiFormRow>
