@@ -22,7 +22,7 @@ The example is **abbreviated** (6 scenarios, 1 feature area) but **complete** �
 
 ## Full example
 
-The content below is the **published form** of the plan — the shape of the comment on GitHub after Step 4 runs. The draft file `.agents/tmp/test-plan-#90201.md` written by Step 3 sub-step 7 differs only in the top markers: at draft-save time the file begins with `<!-- verbosity: standard -->` (and, when captured, `<!-- tokens: … -->`) as the top marker(s); on publish, `scripts/publish_test_plan.sh` adds `<!-- test-plan-generated -->` and `<!-- generated-by: … -->` above those. Marker order is defined in [`output-formats.md` § Token usage marker](output-formats.md#token-usage-marker). Issue numbers (`#90100`, `#90201`) are synthetic — do not match any real Kibana or planning issue.
+The content below is the **published form** of the plan — the shape of the comment on GitHub after Step 4 runs. The draft file `.agents/tmp/test-plan-#90201.md` written by Step 3 sub-step 7 differs only in the top markers: at draft-save time the file begins with `<!-- verbosity: standard -->` (and, when captured, `<!-- tokens: … -->` and `<!-- cost: … -->`) as the top marker(s); on publish, `scripts/publish_test_plan.sh` adds `<!-- test-plan-generated -->` and `<!-- generated-by: … -->` above those. Marker order is defined in [`output-formats.md` § Token usage marker](output-formats.md#token-usage-marker). Issue numbers (`#90100`, `#90201`) are synthetic — do not match any real Kibana or planning issue.
 
 ---
 
