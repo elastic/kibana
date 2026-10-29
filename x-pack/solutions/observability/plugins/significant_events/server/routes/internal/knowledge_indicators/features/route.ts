@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import {
@@ -18,6 +19,7 @@ import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { getSourceWriteConflictMetadata } from '../../../../lib/errors/source_write_conflict_error';
 import { StatusError } from '../../../../lib/errors/status_error';
 import {
   filterReadableSourceIds,
@@ -26,6 +28,8 @@ import {
 import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 
 const MAX_INPUT_STRING_LENGTH = 255;
+// Each source write can wait for its lease, so sources run in parallel to keep the request short.
+const BULK_SOURCE_CONCURRENCY = 3;
 
 const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/features',
@@ -364,7 +368,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
+  }): Promise<{ succeeded: number; failed: number; conflicts: number; skipped: number }> => {
     const scopedClients = await getScopedClients({
       request,
     });
@@ -407,30 +411,40 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     // kiClient.bulk silently drops exclude/restore ops targeting computed
     // features (and any stale UUIDs that slipped through between the lookup
     // and the bulk call). Both classes show up as additional `skipped` count.
-    // Only thrown batches count as `failed`.
+    // Only thrown batches count as `failed`, or as `conflicts` when the source was busy.
     let succeeded = 0;
     let failed = 0;
+    let conflicts = 0;
     let skipped = skippedFromLookup;
 
     const sourcesWithShrinkingOps = new Set<string>();
 
-    for (const [sourceId, ops] of Object.entries(bySource)) {
-      try {
-        const { applied, skipped: sourceSkipped } = await kiClient.bulk(sourceId, ops);
-        succeeded += applied;
-        skipped += sourceSkipped;
-        if (ops.some((op) => 'delete' in op || 'exclude' in op)) {
-          sourcesWithShrinkingOps.add(sourceId);
-        }
-      } catch (error) {
-        logger.error(
-          `Bulk feature operation failed for source ${sourceId}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-        failed += ops.length;
-      }
-    }
+    const limiter = pLimit(BULK_SOURCE_CONCURRENCY);
+    await Promise.all(
+      Object.entries(bySource).map(([sourceId, ops]) =>
+        limiter(async () => {
+          try {
+            const { applied, skipped: sourceSkipped } = await kiClient.bulk(sourceId, ops);
+            succeeded += applied;
+            skipped += sourceSkipped;
+            if (ops.some((op) => 'delete' in op || 'exclude' in op)) {
+              sourcesWithShrinkingOps.add(sourceId);
+            }
+          } catch (error) {
+            logger.error(
+              `Bulk feature operation failed for source ${sourceId}: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            if (getSourceWriteConflictMetadata(error)?.retryable) {
+              conflicts += ops.length;
+            } else {
+              failed += ops.length;
+            }
+          }
+        })
+      )
+    );
 
     for (const sourceId of sourcesWithShrinkingOps) {
       try {
@@ -445,7 +459,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       }
     }
 
-    return { succeeded, failed, skipped };
+    return { succeeded, failed, conflicts, skipped };
   },
 });
 

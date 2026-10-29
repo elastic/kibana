@@ -13,7 +13,7 @@ import { NIGHTSHIFT_DEFAULT_MODELS } from './nightshift_models';
 describe('NIGHTSHIFT_DEFAULT_MODELS', () => {
   it('pins each Nightshift step to its recommended default inference endpoint', () => {
     expect(NIGHTSHIFT_DEFAULT_MODELS).toEqual({
-      discovery: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA_PRO,
+      discovery: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA,
       investigation: defaultInferenceEndpoints.ANTHROPIC_CLAUDE_5_5_SONNET,
       kiExtraction: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA_PRO,
       kiQueryGeneration: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA_PRO,

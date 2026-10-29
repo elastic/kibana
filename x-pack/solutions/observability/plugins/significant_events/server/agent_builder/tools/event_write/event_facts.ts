@@ -125,7 +125,7 @@ const escalatesStoredVerdict = ({
 };
 
 /** A confirming signal, or an off-topic row with its own observed error: both are rated on what they show. */
-export const hasConfirmingSignal = (
+export const hasEventWorthySignal = (
   signals: ReadonlyArray<{ verdict: SignalVerdict }> | undefined
 ): boolean =>
   (signals ?? []).some(({ verdict }) => verdict === 'confirms' || verdict === 'off_topic');
@@ -150,7 +150,7 @@ const decideSeverity = ({
   if ((signals ?? []).length === 0) {
     return proposed ?? 'low';
   }
-  if (!hasConfirmingSignal(signals)) {
+  if (!hasEventWorthySignal(signals)) {
     return 'low';
   }
   if (proposed === undefined) {
@@ -244,7 +244,7 @@ export const computeEventFacts = ({
     frozenNarrative,
     // Nothing confirmed, so nothing to be confident about; a signal-less write keeps its own.
     confidence:
-      signals.length === 0 || hasConfirmingSignal(signals)
+      signals.length === 0 || hasEventWorthySignal(signals)
         ? episodeContext.confidence
         : Math.min(episodeContext.confidence, UNCONFIRMED_EVENT_MAX_CONFIDENCE),
   };

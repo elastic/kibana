@@ -21,7 +21,7 @@ import {
   useEuiMinBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
-import { AppHeader } from '@kbn/app-header';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -30,6 +30,7 @@ import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
+import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import {
   getGroupAction,
@@ -84,9 +85,20 @@ interface EpisodeRouteParams {
   episodeId: string;
 }
 
+export interface EpisodeDetailsPageProps {
+  /** A stable host hook supplying additional declarative header items for the current episode. */
+  useAdditionalEpisodeDetailsHeaderMenuItems?: (
+    episode: AlertEpisode | undefined
+  ) => NonNullable<AppHeaderMenu['items']>;
+}
+
+const useEmptyHeaderMenuItems = (): NonNullable<AppHeaderMenu['items']> => [];
+
 type EpisodeDetailsSidebarPanel = 'episode_details' | 'runbook';
 
-export function EpisodeDetailsPage() {
+export function EpisodeDetailsPage({
+  useAdditionalEpisodeDetailsHeaderMenuItems = useEmptyHeaderMenuItems,
+}: EpisodeDetailsPageProps = {}) {
   const { euiTheme } = useEuiTheme();
   const { episodeId } = useParams<EpisodeRouteParams>();
   const [sidebarPanel, setSidebarPanel] = useState<EpisodeDetailsSidebarPanel>('episode_details');
@@ -299,15 +311,15 @@ export function EpisodeDetailsPage() {
     [episode, episodeAction, groupAction, isFlapping]
   );
 
-  const headerMenu = useMemo(
-    () =>
-      getEpisodeHeaderMenu({
-        actions: applicableActions,
-        episode,
-        onSuccess: invalidateEpisodeQueries,
-      }),
-    [applicableActions, episode, invalidateEpisodeQueries]
-  );
+  const additionalHeaderMenuItems = useAdditionalEpisodeDetailsHeaderMenuItems(episode);
+  const headerMenu = useMemo(() => {
+    const menu = getEpisodeHeaderMenu({
+      actions: applicableActions,
+      episode,
+      onSuccess: invalidateEpisodeQueries,
+    });
+    return { ...menu, items: [...additionalHeaderMenuItems, ...(menu.items ?? [])] };
+  }, [applicableActions, episode, invalidateEpisodeQueries, additionalHeaderMenuItems]);
 
   const episodesListHref = episodesLocators.useUrl({});
   const getRuleDetailsHref = useCallback(
