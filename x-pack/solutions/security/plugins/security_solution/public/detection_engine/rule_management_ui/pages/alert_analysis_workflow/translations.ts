@@ -165,14 +165,14 @@ export const MAX_THRESHOLD_ARIA_LABEL = i18n.translate(
 export const DEPRECATION_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutTitle',
   {
-    defaultMessage: 'This feature will be removed in an upcoming release',
+    defaultMessage: 'This feature will be consolidated in an upcoming release',
   }
 );
 
 export const DEPRECATION_CALLOUT_BODY = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.deprecationCalloutBody',
   {
-    defaultMessage: 'The alert analysis workflow is being replaced by the AlertZero Triage Worker.',
+    defaultMessage: 'The alert analysis workflow is being merged into the AlertZero Triage Worker.',
   }
 );
 
