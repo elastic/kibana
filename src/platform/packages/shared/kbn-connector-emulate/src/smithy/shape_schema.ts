@@ -171,6 +171,16 @@ export interface ShapeConverter {
   readonly components: Record<string, JsonSchema>;
 }
 
+export interface ShapeConverterOptions {
+  /** Whether documents use `@jsonName`, as restJson1 does and awsJson doesn't. Defaults to true. */
+  readonly jsonNames?: boolean;
+  /**
+   * Whether float and double members in documents also take `"NaN"`, `"Infinity"` and
+   * `"-Infinity"`, as AWS's JSON protocols send them.
+   */
+  readonly nonNumericFloats?: boolean;
+}
+
 /** Converts Smithy shapes to OpenAPI 3.0 schemas, collecting named shapes as components. */
 export const createShapeConverter = (
   model: SmithyModel,
