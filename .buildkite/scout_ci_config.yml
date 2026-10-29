@@ -125,7 +125,6 @@ plugins:
     - workflowsExtensionsExample
   disabled:
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
-    - links # Not yet registered for CI; added to unblock flaky test runner pipelines
 
 packages:
   enabled:
