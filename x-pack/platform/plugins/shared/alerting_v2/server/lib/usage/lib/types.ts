@@ -111,9 +111,9 @@ export interface DispatcherPolicyActivityBucket extends TermsBucket {
     dispatched: { doc_count: number; action_groups: ValueAggregation };
     throttled: { doc_count: number; action_groups: ValueAggregation };
     dispatch_failed: { doc_count: number };
-    /** Absent when the policy has neither dispatched nor throttled groups. */
-    throttle_ratio?: ValueAggregation;
   };
+  /** Absent when the policy has neither dispatched nor throttled groups. */
+  throttle_ratio?: ValueAggregation;
 }
 export interface DispatcherPolicyDispatchBucket extends TermsBucket {
   events: {

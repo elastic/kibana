@@ -162,9 +162,14 @@ async function searchPolicyStats(esClient: ElasticsearchClient) {
       },
     },
   });
-  const byPolicy = (eventAggs: Aggregations): AggregationsAggregationContainer => ({
+  // Pipeline aggregations such as `bucket_script` must hang from the multi-bucket `terms`, not
+  // from the single-bucket `reverse_nested`, hence `bucketAggs` next to `events`.
+  const byPolicy = (
+    eventAggs: Aggregations,
+    bucketAggs: Aggregations = {}
+  ): AggregationsAggregationContainer => ({
     terms: { field: `${SAVED_OBJECTS_PATH}.id`, size: TERMS_SIZE },
-    aggs: { events: { reverse_nested: {}, aggs: eventAggs } },
+    aggs: { events: { reverse_nested: {}, aggs: eventAggs }, ...bucketAggs },
   });
 
   const response = await esClient.search({
@@ -175,29 +180,33 @@ async function searchPolicyStats(esClient: ElasticsearchClient) {
     aggs: {
       // Every event of the policy: activity flags and throttle ratio.
       policy_refs: policyRefs({
-        by_policy: byPolicy({
-          dispatched: {
-            filter: actionFilter(DISPATCHED),
-            aggs: { action_groups: sum('action_group_count') },
-          },
-          throttled: {
-            filter: actionFilter(THROTTLED),
-            aggs: { action_groups: sum('action_group_count') },
-          },
-          dispatch_failed: { filter: actionFilter(DISPATCH_FAILED) },
-          throttle_ratio: {
-            bucket_script: {
-              buckets_path: {
-                throttled: 'throttled>action_groups',
-                dispatched: 'dispatched>action_groups',
-              },
-              // null skips the bucket, so policies with no groups do not count as ratio 0.
-              script:
-                'params.throttled + params.dispatched > 0 ? params.throttled / (params.throttled + params.dispatched) : null',
+        by_policy: byPolicy(
+          {
+            dispatched: {
+              filter: actionFilter(DISPATCHED),
+              aggs: { action_groups: sum('action_group_count') },
             },
+            throttled: {
+              filter: actionFilter(THROTTLED),
+              aggs: { action_groups: sum('action_group_count') },
+            },
+            dispatch_failed: { filter: actionFilter(DISPATCH_FAILED) },
           },
-        }),
-        ...distributionOf('throttle_ratio', 'events>throttle_ratio'),
+          {
+            throttle_ratio: {
+              bucket_script: {
+                buckets_path: {
+                  throttled: 'events>throttled>action_groups',
+                  dispatched: 'events>dispatched>action_groups',
+                },
+                // null skips the bucket, so policies with no groups do not count as ratio 0.
+                script:
+                  'params.throttled + params.dispatched > 0 ? params.throttled / (params.throttled + params.dispatched) : null',
+              },
+            },
+          }
+        ),
+        ...distributionOf('throttle_ratio', 'throttle_ratio'),
       }),
       // Only `dispatched` events: what each notifying policy delivered.
       dispatched_events: {
