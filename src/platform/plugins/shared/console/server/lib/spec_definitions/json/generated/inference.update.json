@@ -17,7 +17,8 @@
         "rerank",
         "completion",
         "chat_completion",
-        "embedding"
+        "embedding",
+        "document_extraction"
       ]
     },
     "data_autocomplete_rules": {

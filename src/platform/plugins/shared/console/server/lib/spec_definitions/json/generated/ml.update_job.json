@@ -41,54 +41,104 @@
       "renormalization_window_days": "",
       "results_retention_days": "",
       "groups": [],
-      "detectors": [
-        {
-          "detector_index": "",
-          "description": "",
-          "custom_rules": [
-            {
-              "actions": {
-                "__any_of": [
-                  "skip_result",
-                  "skip_model_update"
-                ]
-              },
-              "conditions": [
-                {
-                  "applies_to": {
-                    "__one_of": [
-                      "actual",
-                      "typical",
-                      "diff_from_typical",
-                      "time"
-                    ]
-                  },
-                  "operator": {
-                    "__one_of": [
-                      "gt",
-                      "gte",
-                      "lt",
-                      "lte"
-                    ]
-                  },
-                  "value": ""
-                }
-              ],
-              "scope": {
-                "*": {
-                  "filter_id": "",
-                  "filter_type": {
-                    "__one_of": [
-                      "include",
-                      "exclude"
-                    ]
+      "detectors": {
+        "__one_of": [
+          {
+            "detector_index": "",
+            "description": "",
+            "custom_rules": [
+              {
+                "actions": {
+                  "__any_of": [
+                    "skip_result",
+                    "skip_model_update"
+                  ]
+                },
+                "conditions": [
+                  {
+                    "applies_to": {
+                      "__one_of": [
+                        "actual",
+                        "typical",
+                        "diff_from_typical",
+                        "time"
+                      ]
+                    },
+                    "operator": {
+                      "__one_of": [
+                        "gt",
+                        "gte",
+                        "lt",
+                        "lte"
+                      ]
+                    },
+                    "value": ""
+                  }
+                ],
+                "scope": {
+                  "*": {
+                    "filter_id": "",
+                    "filter_type": {
+                      "__one_of": [
+                        "include",
+                        "exclude"
+                      ]
+                    }
                   }
                 }
               }
+            ]
+          },
+          [
+            {
+              "detector_index": "",
+              "description": "",
+              "custom_rules": [
+                {
+                  "actions": {
+                    "__any_of": [
+                      "skip_result",
+                      "skip_model_update"
+                    ]
+                  },
+                  "conditions": [
+                    {
+                      "applies_to": {
+                        "__one_of": [
+                          "actual",
+                          "typical",
+                          "diff_from_typical",
+                          "time"
+                        ]
+                      },
+                      "operator": {
+                        "__one_of": [
+                          "gt",
+                          "gte",
+                          "lt",
+                          "lte"
+                        ]
+                      },
+                      "value": ""
+                    }
+                  ],
+                  "scope": {
+                    "*": {
+                      "filter_id": "",
+                      "filter_type": {
+                        "__one_of": [
+                          "include",
+                          "exclude"
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
             }
           ]
-        }
-      ],
+        ]
+      },
       "per_partition_categorization": {
         "enabled": {
           "__one_of": [
