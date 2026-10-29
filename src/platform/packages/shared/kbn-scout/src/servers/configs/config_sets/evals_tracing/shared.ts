@@ -99,6 +99,8 @@ export const withEvalsTracing = (baseConfig: ScoutServerConfig): ScoutServerConf
         '--xpack.evals.enabled=true',
         // Suites ingest scores and read datasets through the evals routes.
         '--xpack.evals.mode=full',
+        // Measurement pin only: record per-call token usage in .kibana-inference-token-usage.
+        '--uiSettings.overrides.genAiSettings:tokenUsageTracking=true',
         ...(shouldEnableTracing
           ? [
               '--elastic.apm.active=false',
