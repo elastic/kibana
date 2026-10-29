@@ -8,7 +8,14 @@
 import React from 'react';
 
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../../../../common/types';
-import { AgentlessStatusDetailsFlyout } from '../../../../../../../components';
+import {
+  AgentlessEnrollmentFlyout,
+  AgentlessStatusDetailsFlyout,
+} from '../../../../../../../components';
+import {
+  getConnectorsFromPackagePolicy,
+  getSelectedInput,
+} from '../../detail/policies/components/agentless_table_adapters';
 
 interface InstanceAgentFlyoutProps {
   agent: Agent;
@@ -19,11 +26,35 @@ interface InstanceAgentFlyoutProps {
 }
 
 /**
- * The status details of an instance agent, with the health of each of its components, as the AWS
- * onboarding flow opens them for an agent that is there. The same for managed integration
- * (agentless) and agent-based agents.
+ * The status flyout of an instance agent: the agentless enrollment status for a managed
+ * integration policy, as the managed integrations table opens it, and the component health of the
+ * agent for an agent-based policy, as the AWS onboarding flow opens it.
  */
-export const InstanceAgentFlyout: React.FunctionComponent<InstanceAgentFlyoutProps> = ({
+export const InstanceAgentFlyout: React.FunctionComponent<InstanceAgentFlyoutProps> = (props) =>
+  props.packagePolicy.supports_agentless ? (
+    <AgentlessStatusFlyout {...props} />
+  ) : (
+    <AgentBasedStatusFlyout {...props} />
+  );
+
+const AgentlessStatusFlyout: React.FunctionComponent<InstanceAgentFlyoutProps> = ({
+  agentPolicyId,
+  packagePolicy,
+  onClose,
+}) => (
+  <AgentlessEnrollmentFlyout
+    onClose={onClose}
+    policyId={agentPolicyId}
+    policyName={packagePolicy.name}
+    // package is always set for agentless policies (createAgentlessPolicy).
+    packageInfo={{ name: packagePolicy.package!.name, version: packagePolicy.package!.version }}
+    selectedInput={getSelectedInput(packagePolicy)}
+    packagePolicy={packagePolicy}
+    connectors={getConnectorsFromPackagePolicy(packagePolicy)}
+  />
+);
+
+const AgentBasedStatusFlyout: React.FunctionComponent<InstanceAgentFlyoutProps> = ({
   agent,
   agentPolicyId,
   packagePolicy,
