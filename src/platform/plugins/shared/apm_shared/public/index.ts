@@ -22,3 +22,14 @@ export const OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG = 'observability.apm.cps
  * `xpack.apm.featureFlags.apmCPSEnabled` setting).
  */
 export const OBSERVABILITY_APM_CPS_ENABLED_DEFAULT = true;
+
+/**
+ * Trace Prism technical preview, off by default. Use with `feature_flags.overrides` in
+ * kibana.yml to toggle it. It first gates the latency map in Discover's traces chart
+ * section, and later the Trace Prism analysis built on it.
+ */
+export const OBSERVABILITY_TRACE_PRISM_ENABLED_FEATURE_FLAG =
+  'observability.tracePrismEnabled' as const;
+
+/** Fallback when the flag is unset and no override exists. */
+export const OBSERVABILITY_TRACE_PRISM_ENABLED_DEFAULT = false;
