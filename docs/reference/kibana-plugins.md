@@ -114,8 +114,10 @@ $ bin/kibana-plugin install x-pack
 You can download official Elastic plugins simply by specifying their name. You can alternatively specify a URL or file path to a specific plugin, as in the following examples:
 
 ```shell subs=true
-$ bin/kibana-plugin install https://artifacts.elastic.co/downloads/packs/x-pack/x-pack-{{version.stack}}.zip
+$ bin/kibana-plugin install https://artifacts.elastic.co/downloads/packs/x-pack/x-pack-{{version.stack}}.zip <1>
 ```
+
+1. Replace the version with your installed {{kib}} version if it differs.
 
 or
 

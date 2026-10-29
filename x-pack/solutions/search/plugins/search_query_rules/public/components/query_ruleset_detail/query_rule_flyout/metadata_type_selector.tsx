@@ -29,7 +29,7 @@ export const MetadataTypeSelector: React.FC<MetadataTypeSelectorProps> = ({
           label: (
             <>
               <FormattedMessage
-                id="xpack.search.queryRulesetDetail.queryRuleFlyout.criteria.custom"
+                id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.criteria.custom"
                 defaultMessage="Custom"
               />
             </>
@@ -41,7 +41,7 @@ export const MetadataTypeSelector: React.FC<MetadataTypeSelectorProps> = ({
           label: (
             <>
               <FormattedMessage
-                id="xpack.search.queryRulesetDetail.queryRuleFlyout.criteria.always"
+                id="xpack.queryRules.queryRulesetDetail.queryRuleFlyout.criteria.always"
                 defaultMessage="Always"
               />
             </>

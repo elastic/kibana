@@ -71,7 +71,7 @@ export const ProposalsTrendChartCard: React.FC<ProposalsTrendChartCardProps> = (
       paddingSize="m"
       data-test-subj={`alertZeroProposalsTrendChartCard-${id}`}
     >
-      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
             <h3>{label}</h3>

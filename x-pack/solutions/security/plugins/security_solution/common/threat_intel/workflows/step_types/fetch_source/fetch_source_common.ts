@@ -75,6 +75,8 @@ export const normalizedReportSchema = lazySchema(() =>
       body_text: z.string(),
       language: z.string().default('en'),
       article_url: z.string().optional(),
+      // Must match the `content.published_at` mapping. Absent means the feed gave no date.
+      published_at: z.string().optional(),
     }),
     severity: z.object({
       level: z.enum(SEVERITY_LEVELS),

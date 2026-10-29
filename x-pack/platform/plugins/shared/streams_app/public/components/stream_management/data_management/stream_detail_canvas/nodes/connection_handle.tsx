@@ -11,6 +11,8 @@ import { Handle } from '@xyflow/react';
 import { i18n } from '@kbn/i18n';
 
 export const CONNECTION_HANDLE_CLASS = 'streamsConnectionHandle';
+/** The open circle drawn at each side of a unit node. */
+export const NODE_HANDLE_CLASS = 'streamsNodeHandle';
 
 const ConnectionTargetsContext = createContext<ReadonlySet<string> | null>(null);
 
@@ -24,6 +26,8 @@ interface ConnectionHandleProps {
   isConnectable: boolean;
   /** Destination id, used to highlight handles that can receive the dragged line. */
   destinationId?: string;
+  /** Overrides the label of a handle that starts lines. */
+  connectAriaLabel?: string;
 }
 
 export function ConnectionHandle({
@@ -31,6 +35,7 @@ export function ConnectionHandle({
   position,
   isConnectable,
   destinationId,
+  connectAriaLabel,
 }: ConnectionHandleProps) {
   const connectionTargets = useContext(ConnectionTargetsContext);
   const canStart = type === 'source' && isConnectable;
@@ -39,6 +44,7 @@ export function ConnectionHandle({
     destinationId !== undefined &&
     connectionTargets?.has(destinationId) === true;
   const className = [
+    isConnectable ? NODE_HANDLE_CLASS : undefined,
     isConnectable ? CONNECTION_HANDLE_CLASS : undefined,
     highlighted ? 'streamsConnectionTarget' : undefined,
   ]
@@ -56,7 +62,8 @@ export function ConnectionHandle({
       aria-label={
         type === 'source'
           ? canStart
-            ? i18n.translate('xpack.streams.canvas.connectionHandle.connectAriaLabel', {
+            ? connectAriaLabel ??
+              i18n.translate('xpack.streams.canvas.connectionHandle.connectAriaLabel', {
                 defaultMessage: 'Drag to connect this source',
               })
             : undefined

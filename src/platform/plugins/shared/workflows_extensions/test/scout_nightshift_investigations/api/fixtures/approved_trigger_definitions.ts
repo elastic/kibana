@@ -124,7 +124,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.v1.alertStatusChanged',
-    schemaHash: '393ba21ad63d5b65d3b019c299b5f7d9e172d9eea52df67c069413b007c22a7a',
+    schemaHash: 'f03ed56b6494a9aeb0deec70247273a3b2ee317396a3b2d8ab0400476f419914',
   },
   {
     id: 'cases.attachmentsAdded',
@@ -324,7 +324,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'slack2.message',
-    schemaHash: '2645d776ad762b38f99a1446b90054e11c2c32b97720c534c94eb757b6056147',
+    schemaHash: '07628098f9ab1dab2890b457416de279f0f8082ac3ff04a75c1f484056a75d31',
   },
   {
     id: 'slack2.reaction_added',

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { CaseObservableRt } from './v1';
-import { CaseObservableSchema } from '../../domain_zod/observable/v1';
+import { CaseObservableSchema } from './v1';
 
-describe('CaseObservableRt', () => {
+describe('CaseObservableSchema', () => {
   const observable = {
     description: null,
     id: '274fcbfc-87b8-47d0-9f17-bfe98e5453e9',
@@ -19,21 +18,12 @@ describe('CaseObservableRt', () => {
   };
 
   it('has expected attributes in request', () => {
-    const query = CaseObservableRt.decode(observable);
-
-    expect(query).toStrictEqual({
-      _tag: 'Right',
-      right: observable,
-    });
-  });
-
-  it('zod: has expected attributes in request', () => {
     const result = CaseObservableSchema.safeParse(observable);
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(observable);
   });
 
-  it('zod: strips unknown fields', () => {
+  it('strips unknown fields', () => {
     const result = CaseObservableSchema.safeParse({ ...observable, foo: 'bar' });
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual(observable);

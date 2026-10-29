@@ -61,6 +61,9 @@ import {
   CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
   CloudOnboardingDeploymentSchemaV2,
+  CloudOnboardingDeploymentSchemaV3,
+  CloudOnboardingDeploymentSchemaV4,
+  CloudOnboardingDeploymentSchemaV5,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2181,6 +2184,40 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV2,
+          },
+        },
+        3: {
+          // Added integrationName + description. No mappings_addition — neither field is
+          // indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV3.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV3,
+          },
+        },
+        4: {
+          // Added namespace. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV4.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV4,
+          },
+        },
+        5: {
+          // Added instances. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV5.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV5,
           },
         },
       },

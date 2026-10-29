@@ -19,6 +19,9 @@ export const NoPackagePolicies = memo<{ agentPolicy: AgentPolicy; refreshAgentPo
     const authz = useAuthz();
     const canWriteIntegrationPolicies =
       authz.integrations.writeIntegrationPolicies && authz.fleet.allAgentPolicies;
+    // Integrations can't be added to managed or agentless policies, same as in the package policies table
+    const canAddIntegrations =
+      canWriteIntegrationPolicies && !agentPolicy.is_managed && !agentPolicy.supports_agentless;
     const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
 
     return (
@@ -42,7 +45,7 @@ export const NoPackagePolicies = memo<{ agentPolicy: AgentPolicy; refreshAgentPo
           actions={
             <EuiButton
               iconType="plusCircle"
-              isDisabled={!canWriteIntegrationPolicies}
+              isDisabled={!canAddIntegrations}
               fill
               onClick={() => {
                 setShowAddIntegrationFlyout(true);
