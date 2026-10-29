@@ -152,6 +152,33 @@ describe('OtelOverview', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps the environments in the picker while the Overview loads again', async () => {
+    renderOverview();
+    await findPageLoads('1,533');
+
+    fetch.mockReturnValue(new Promise(() => {}));
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    fireEvent.click(screen.getByTestId('digitalExperienceEnvironmentFilter'));
+
+    expect(
+      await screen.findByTestId('digitalExperienceEnvironmentFilterOption-production')
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the environments in the picker when the Overview fails to load again', async () => {
+    renderOverview();
+    await findPageLoads('1,533');
+
+    fetch.mockRejectedValue(new Error('Could not load the Overview.'));
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
+    await screen.findByTestId('digitalExperienceOverviewError');
+    fireEvent.click(screen.getByTestId('digitalExperienceEnvironmentFilter'));
+
+    expect(
+      screen.getByTestId('digitalExperienceEnvironmentFilterOption-production')
+    ).toBeInTheDocument();
+  });
+
   it('loads the Overview again on Refresh', async () => {
     renderOverview();
     await findPageLoads('1,533');

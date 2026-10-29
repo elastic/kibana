@@ -23,6 +23,7 @@ import { toTimeRangeQuery } from '../../../utils/time_range_query';
 import { CoreWebVitalsPanel } from './components/core_web_vitals_panel';
 import { OverviewKpis } from './components/overview_kpis';
 import { OverviewTrends } from './components/overview_trends';
+import { usePickerEnvironments } from './hooks/use_picker_environments';
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
   defaultMessage: 'Could not load the Overview',
@@ -97,6 +98,8 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   );
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
+  // The picker swaps its list for a spinner while loading, so it only loads until it has a list.
+  const environments = usePickerEnvironments(serviceName, response);
 
   return (
     <>
@@ -105,10 +108,10 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EnvironmentFilter
-              environments={response?.environments ?? []}
+              environments={environments ?? []}
               selected={environment}
               onChange={setEnvironment}
-              isLoading={isLoading}
+              isLoading={isLoading && !environments}
             />
           </EuiFilterGroup>
         </EuiFlexItem>
