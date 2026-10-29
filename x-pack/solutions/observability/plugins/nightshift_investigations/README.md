@@ -64,10 +64,10 @@ They are **not** enabled in any serverless or stateful default config yet. Enabl
 
 The `agenticInvestigations` and `proposals` routes require the `read_investigations`, `manage_investigations`, `read_proposals`, and `manage_proposals` API privileges. The Nightshift feature grants them, so a Nightshift user does not need the `agenticInvestigations` or `proposals` feature privileges to call those routes:
 
-| Nightshift privilege | Grants |
-| --- | --- |
-| `all` | `read_investigations`, `manage_investigations`, `read_proposals`, `manage_proposals` |
-| `read` | `read_investigations`, `read_proposals` |
+| Nightshift privilege | Grants                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| `all`                | `read_investigations`, `manage_investigations`, `read_proposals`, `manage_proposals` |
+| `read`               | `read_investigations`, `read_proposals`                                              |
 
 These API privileges are not scoped to Nightshift: they cover every agentic investigation and proposal in the space, including those created by other solutions, plus the investigation routes that share `manage_investigations` (status, assignment, impact, user profile suggestions).
 
@@ -184,6 +184,10 @@ With `create`, the route creates the investigation as the identity that runs the
 
 The Slack connector delivers each event at least once. The workflow passes Slack's event id as `event_id` and its own execution id as `execution_id`, and the route records both on the thread's subject in `slack.seen_events` (the latest 50). An event another execution already recorded is answered with `duplicate: true`, and the workflow skips it; the same execution asking again, for example on a retried step, is not a duplicate. A run whose investigation failed calls the route again with `release_event: true`, which removes the event as recorded for that execution, so a redelivery of the event is handled. The workflow runs one call per thread at a time, so two deliveries of one event cannot race each other.
 
+## Sandbox connectors
+
+The investigation agent reaches external systems from its sandbox through Kibana connectors. A connector is usable from the sandbox when the actions plugin reports it as sandbox capable and the caller can execute it; the sandbox bash tool then injects the connector's config and auth headers as `CONNECTOR_*` environment variables for one command (see the actions plugin's `getSandboxCredentials`).
+
 ## Notifications
 
 Investigation starts can include up to 5 `notificationDestinations`. Each uses the generic envelope `{ type, connector_id, params }`, with optional `automation_id` and `automation_name` provenance. `params` is a JSON object limited to 4096 serialized characters, three container levels including the root, and 20 entries per object or array; keys are limited to 128 characters. Workflow YAML validates the envelope; notification handlers validate connector-specific params before execution starts, when recovering workflow inputs, and when preparing delivery. Unsupported types are rejected at runtime. Delivery fields are server-owned and rejected in destination input.
@@ -211,6 +215,15 @@ The investigation workflow sends a started message, stores its confirmed Slack t
 Each execution, destination, and phase is claimed as `unconfirmed` before connector execution. The shared attachment factory handles versioned writes, and the connector executes once using workflow authentication, the investigation's space, and the abort signal. A confirmed message timestamp produces `sent`; connector error responses produce `failed`; exceptions, cancellation after claiming, and missing timestamps remain `unconfirmed`. Replay skips all existing attempts. An uncertain root blocks automatic root recreation across later executions; a definitely failed root may be attempted again by a later execution.
 
 The `nightshift.sendNotifications` step validates the persisted workflow execution and its investigation binding, and reads the investigation (title, severity, summary, impact, first pending proposed action) through the shared query API. Until Agent Builder titles the investigation, messages use the run's `title` input. Investigation and execution IDs may differ for explicit continuation. It returns persisted `sent`, `failed`, and `unconfirmed` counts for the requested execution and phase; full diagnostics are available through authorized attachment reads. Notification-step failures continue the investigation workflow, while persistence failures stop further posts within that step. There is no automatic claim expiry, resend, or routing-document cleanup on investigation or space deletion. A confirmed root post from the Elastic Slack app claims its thread as a `slack_thread` subject using the thread key the Relay returns, so a mention or reply in it continues the investigation. Posts through a custom Slack connector and replies under a caller-named message register nothing here; a thread another investigation holds stays with it.
+
+### Investigation quota notice
+
+When the global investigation quota denies an automatic start from a Slack trigger,
+`nightshift.triggerInvestigation` skips the start with `investigation_limit` and replies in the
+triggering Slack thread, once per Slack channel and UTC day. The reply says the limit was reached
+and links the Nightshift settings in the workflow's space for an admin to raise it, or omits the
+link when no Kibana URL is known. The once-a-day marker is claimed before posting, so a failed post is not
+retried. Alert, schedule, and manual runs post nothing.
 
 ### Workflow failures
 

@@ -7,7 +7,19 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ActionTypeRegistry } from '../../../action_type_registry';
+import type { ActionType } from '../../../types';
 import { getConnectorSandboxHosts } from './get_connector_sandbox_hosts';
+
+/** Whether instances of a connector type can hand credentials to a sandbox  */
+export const isSandboxCapableConnectorType = (
+  actionType: Pick<
+    ActionType,
+    'isSystemActionType' | 'sandboxSupportedAuthTypes' | 'isSandboxCapable'
+  >
+): boolean =>
+  !actionType.isSystemActionType &&
+  (typeof actionType.isSandboxCapable === 'function' ||
+    (actionType.sandboxSupportedAuthTypes?.length ?? 0) > 0);
 
 interface SandboxCapableConnectorOptions {
   actionTypeId: string;
