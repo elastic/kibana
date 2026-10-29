@@ -247,3 +247,80 @@ describe('sanitizeToolId', () => {
     expect(sanitizeToolId('a&b^c')).toEqual('abc');
   });
 });
+
+describe('toolToLangchain - null optional parameters', () => {
+  const schema = z.object({
+    query: z.string(),
+    types: z.array(z.string()).optional(),
+    nullable: z.string().nullable().optional(),
+  });
+
+  const createNullTestTool = () =>
+    createTool('toolA', {
+      getSchema: () => schema,
+      execute: jest.fn().mockResolvedValue({ results: [] }),
+    });
+
+  it('treats null for an optional parameter as omitted', async () => {
+    const tool = createNullTestTool();
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
+
+    await langchainTool.invoke({ query: 'x', types: null });
+
+    expect(tool.execute).toHaveBeenCalledTimes(1);
+    const { toolParams } = (tool.execute as jest.Mock).mock.calls[0][0];
+    expect(toolParams).toEqual({ query: 'x' });
+    expect(toolParams).not.toHaveProperty('types');
+  });
+
+  it('treats null as omitted when invoked with a tool call and the reasoning param', async () => {
+    const tool = createNullTestTool();
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addReasoningParam: true,
+    });
+
+    await langchainTool.invoke({
+      type: 'tool_call',
+      id: 'call-1',
+      name: 'toolA',
+      args: { query: 'x', types: null, _reasoning: 'because' },
+    });
+
+    expect(tool.execute).toHaveBeenCalledTimes(1);
+    expect((tool.execute as jest.Mock).mock.calls[0][0].toolParams).toEqual({ query: 'x' });
+  });
+
+  it('keeps null for parameters that accept null', async () => {
+    const tool = createNullTestTool();
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
+
+    await langchainTool.invoke({ query: 'x', nullable: null });
+
+    expect((tool.execute as jest.Mock).mock.calls[0][0].toolParams).toEqual({
+      query: 'x',
+      nullable: null,
+    });
+  });
+
+  it('still rejects null for a required parameter', async () => {
+    const tool = createNullTestTool();
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
+
+    await expect(langchainTool.invoke({ query: null })).rejects.toThrow(
+      /did not match expected schema/
+    );
+    expect(tool.execute).not.toHaveBeenCalled();
+  });
+
+  it('does not change the JSON schema exposed to the model', async () => {
+    const tool = createNullTestTool();
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
+
+    expect(z.toJSONSchema(langchainTool.schema as z.ZodType, { io: 'input' })).toEqual(
+      z.toJSONSchema(schema, { io: 'input' })
+    );
+  });
+});

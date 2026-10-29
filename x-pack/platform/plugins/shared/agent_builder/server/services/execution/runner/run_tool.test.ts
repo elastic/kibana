@@ -129,6 +129,39 @@ describe('runTool', () => {
     expect(toolHandler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
   });
 
+  describe('null tool parameters', () => {
+    beforeEach(() => {
+      tool.getSchema.mockReturnValue(
+        z.object({
+          query: z.string(),
+          types: z.array(z.string()).optional(),
+        })
+      );
+    });
+
+    it('treats null for an optional parameter as omitted', async () => {
+      await runTool({
+        toolExecutionParams: { toolId: 'test-tool', toolParams: { query: 'x', types: null } },
+        parentManager: runnerManager,
+      });
+
+      expect(toolHandler).toHaveBeenCalledTimes(1);
+      const [handlerParams] = toolHandler.mock.calls[0];
+      expect(handlerParams).toEqual({ query: 'x' });
+      expect(handlerParams).not.toHaveProperty('types');
+    });
+
+    it('still rejects null for a required parameter', async () => {
+      await expect(
+        runTool({
+          toolExecutionParams: { toolId: 'test-tool', toolParams: { query: null } },
+          parentManager: runnerManager,
+        })
+      ).rejects.toThrow(/Tool test-tool was called with invalid parameters/);
+      expect(toolHandler).not.toHaveBeenCalled();
+    });
+  });
+
   it('truncates the parameters not defined on the schema', async () => {
     const params: ScopedRunnerRunToolsParams = {
       toolId: 'test-tool',

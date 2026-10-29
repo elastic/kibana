@@ -23,6 +23,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { isDynamicToolEvent, isDynamicToolRunReturn } from '@kbn/agent-builder-server/runner';
+import { omitNullForOptionalParams } from '../tools/utils/omit_null_optional_params';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
@@ -129,8 +130,17 @@ export const toolToLangchain = async ({
     : tool.description;
 
   const schema = await tool.getSchema();
+  const toolSchema = addReasoningParam
+    ? z.object({
+        _reasoning: z
+          .string()
+          .optional()
+          .describe('Brief reasoning of why you are calling this tool'),
+        ...schema.shape,
+      })
+    : schema;
 
-  return toTool(
+  const langchainTool = toTool(
     async (rawInput: Record<string, unknown>, config): Promise<[string, RunToolReturn]> => {
       const toolCallId = config.configurable?.tool_call_id ?? config.toolCall?.id ?? 'unknown';
 
@@ -172,15 +182,7 @@ export const toolToLangchain = async ({
     },
     {
       name: toolId ?? tool.id,
-      schema: addReasoningParam
-        ? z.object({
-            _reasoning: z
-              .string()
-              .optional()
-              .describe('Brief reasoning of why you are calling this tool'),
-            ...schema.shape,
-          })
-        : schema,
+      schema: toolSchema,
       description,
       verboseParsingErrors: true,
       responseFormat: 'content_and_artifact',
@@ -189,7 +191,28 @@ export const toolToLangchain = async ({
       },
     }
   );
+
+  // LangChain validates the input against the schema before our handler runs, and rejects the
+  // `null` some models send for unused optional args. Normalize the input ahead of that parse
+  // rather than changing the schema, so the JSON schema sent to the model stays untouched.
+  // `invoke` delegates to `call`, so this covers both entry points.
+  const originalCall = langchainTool.call.bind(langchainTool);
+  langchainTool.call = (arg, configArg, tags) => {
+    if (isToolCallInput(arg)) {
+      return originalCall(
+        { ...arg, args: omitNullForOptionalParams(toolSchema, arg.args) },
+        configArg,
+        tags
+      );
+    }
+    return originalCall(omitNullForOptionalParams(toolSchema, arg), configArg, tags);
+  };
+
+  return langchainTool;
 };
+
+const isToolCallInput = (arg: unknown): arg is { type: 'tool_call'; args: unknown } =>
+  typeof arg === 'object' && arg !== null && 'type' in arg && arg.type === 'tool_call';
 
 export const toolIdentifierFromToolCall = (toolCall: ToolCall, mapping: ToolIdMapping): string => {
   return mapping.get(toolCall.toolName) ?? toolCall.toolName;

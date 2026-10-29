@@ -14,6 +14,7 @@ export {
 } from './esql';
 export { listDatasets, getDatasetFields, type DatasetInfo } from './datasets';
 export { listViews, getViewFields, type ViewInfo } from './views';
+export { omitNullForOptionalParams } from './omit_null_optional_params';
 export { FROZEN_TIER, excludeFrozenTierQuery, applyFrozenTierExclusion } from './data_tiers';
 export {
   flattenMapping,

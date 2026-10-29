@@ -23,6 +23,7 @@ import type {
   ScopedRunnerRunInternalToolParams,
 } from '@kbn/agent-builder-server/runner';
 import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain';
+import { omitNullForOptionalParams } from '@kbn/agent-builder-genai-utils/tools/utils';
 import { createErrorResult, createNonInteractiveDeclinedResult } from '@kbn/agent-builder-server';
 import type {
   InternalToolDefinition,
@@ -177,7 +178,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     { tool: { input: toolParams, toolCallId, description: tool.description } },
     async (span): Promise<ToolHandlerReturn> => {
       const schema = await tool.getSchema();
-      const validation = schema.safeParse(toolParams);
+      const validation = schema.safeParse(omitNullForOptionalParams(schema, toolParams));
       if (validation.error) {
         throw createBadRequestError(
           `Tool ${tool.id} was called with invalid parameters: ${validation.error.message}`
