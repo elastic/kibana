@@ -351,7 +351,7 @@ describe('OnboardingPage', () => {
     it('renders a Read more link pointing at the placeholder docs URL', () => {
       renderPage({ canWrite: true });
       const link = screen.getByTestId('alertZeroOnboardingReadMoreLink');
-      expect(link).toHaveTextContent('Read more about Watches');
+      expect(link).toHaveTextContent('Read more about Watches and Workers');
       expect(link).toHaveAttribute('href', ONBOARDING_READ_MORE_URL_PLACEHOLDER);
     });
 

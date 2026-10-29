@@ -72,7 +72,7 @@ export const ENABLE_AND_RUN = i18n.translate('xpack.alertzero.onboarding.enableA
 });
 
 export const READ_MORE = i18n.translate('xpack.alertzero.onboarding.readMore', {
-  defaultMessage: 'Read more about Watches',
+  defaultMessage: 'Read more about Watches and Workers',
 });
 
 export const workersSelectedCount = (selected: number, total: number) =>
