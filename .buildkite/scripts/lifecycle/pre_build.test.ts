@@ -288,6 +288,10 @@ describe('lifecycle pre_build.sh', () => {
     ],
     ['mode off', { BUILDKITE_PIPELINE_SLUG: 'kibana-on-merge', ON_MERGE_SELECTIVE_MODE: 'off' }],
     ['mode unset', { BUILDKITE_PIPELINE_SLUG: 'kibana-on-merge' }],
+    [
+      'invalid mode',
+      { BUILDKITE_PIPELINE_SLUG: 'kibana-on-merge', ON_MERGE_SELECTIVE_MODE: 'Shadow' },
+    ],
   ])('does not resolve the on-merge selection for %s', (_, overrides) => {
     const result = runPreBuildScript(overrides);
 

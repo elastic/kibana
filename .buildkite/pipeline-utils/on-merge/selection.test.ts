@@ -17,7 +17,7 @@ describe('parseOnMergeSelectiveMode', () => {
     [undefined, 'off'],
     ['', 'off'],
     ['off', 'off'],
-    [' Shadow ', 'shadow'],
+    ['shadow', 'shadow'],
   ])('parses %p as %p', (raw, expected) => {
     expect(parseOnMergeSelectiveMode(raw)).toBe(expected);
   });
@@ -28,6 +28,7 @@ describe('parseOnMergeSelectiveMode', () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
     try {
       expect(parseOnMergeSelectiveMode('enabled')).toBe('off');
+      expect(parseOnMergeSelectiveMode('Shadow')).toBe('off');
       expect(consoleError).toHaveBeenCalledWith(
         expect.stringContaining('Ignoring invalid ON_MERGE_SELECTIVE_MODE: enabled')
       );

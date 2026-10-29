@@ -27,14 +27,15 @@ export interface OnMergeSelection {
 }
 
 /**
- * Parses `ON_MERGE_SELECTIVE_MODE`; unset or unrecognised means `off`.
+ * Parses `ON_MERGE_SELECTIVE_MODE`; unset or unrecognised means `off`. Values must match exactly,
+ * as Pre-Build and the Scout builder compare them in bash.
  *
  * Falls back rather than throwing: this is read from `loadRunOrderConfig()` in the
  * "Pick Test Group Run Order" step, which exits non-zero on any error. A typo in the
  * variable must disable the shadow run, not fail the build.
  */
 export const parseOnMergeSelectiveMode = (raw: string | undefined): OnMergeSelectiveMode => {
-  const value = raw?.trim().toLowerCase() || 'off';
+  const value = raw || 'off';
   if (!(ON_MERGE_SELECTIVE_MODES as readonly string[]).includes(value)) {
     console.error(
       `Ignoring invalid ON_MERGE_SELECTIVE_MODE: ${raw}. Valid values: ${ON_MERGE_SELECTIVE_MODES.join(
