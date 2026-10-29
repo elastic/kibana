@@ -516,6 +516,11 @@ describe('Detection Coverage review', () => {
         'close_investigation_no_rule',
         'report_investigation_closed_no_rule',
       ]);
+      expect(caseSteps('retry')).toEqual([
+        'note_retry',
+        'close_investigation_retry',
+        'report_investigation_closed_retry',
+      ]);
 
       const resolved = stepByName('close_investigation_resolved');
       const dismissed = stepByName('close_investigation_dismissed');
@@ -524,6 +529,42 @@ describe('Detection Coverage review', () => {
       expect(dismissed).not.toHaveProperty('if');
       expect((resolved?.with?.updates as Record<string, string>).status).toBe('closed');
       expect((dismissed?.with?.updates as Record<string, string>).status).toBe('closed');
+    });
+
+    // A retryable draft was not proposed, so the note says why and that the gap comes
+    // back.
+    it('notes why no usable rule was drafted this time, within the journal limit', () => {
+      const note = stepByName('note_retry');
+      expect(note?.['on-failure']?.continue).toBe(true);
+      expect(note?.with?.['workflow-id']).toBe('system-alertzero-journal-note');
+
+      const render = (skipReason: string) =>
+        createWorkflowLiquidEngine().parseAndRenderSync(inputsOf(note).message as string, {
+          steps: { run_rule_creation: { output: { skip_reason: skipReason } } },
+        });
+      expect(render('The interval was a placeholder.')).toBe(
+        '**No usable rule was drafted this time.** The interval was a placeholder.\n\n' +
+          'Nothing was proposed. The gap stays pending, and the next sweep tries again.'
+      );
+      expect(render('x'.repeat(10000)).length).toBeLessThanOrEqual(8000);
+    });
+
+    // Only a completed rule-creation run that proposed nothing and may pass next time
+    // closes for a retry. A crash, a permanent rejection and an expired proposal do not.
+    it.each([
+      ['an unproposed draft that may pass next time', {}, { proposed: false }, true],
+      ['an expired proposal', {}, { proposed: true }, false],
+      ['a permanent rejection', {}, { proposed: false, no_rule: true }, false],
+      ['a crashed run', { error: { message: 'boom' } }, {}, false],
+    ])('flags %s for a retry close', (_scenario, run, output, expected) => {
+      expect(
+        evaluateExpression(withOf('resolve_outcome')?.creation_retry, {
+          steps: {
+            coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
+            run_rule_creation: { error: null, ...run, output },
+          },
+        })
+      ).toBe(expected);
     });
 
     // Nothing was proposed, so the note is the only message in the chat saying why.
@@ -590,6 +631,12 @@ describe('Detection Coverage review', () => {
         { approved: false, dismissed: false },
         { creation_no_rule: true },
         'no_rule',
+      ],
+      [
+        'a draft that was not proposed but may pass next time',
+        { approved: false, dismissed: false },
+        { creation_retry: true },
+        'retry',
       ],
     ])('routes %s to the matching close', (_scenario, decision, outcome, expected) => {
       const rendered = createWorkflowLiquidEngine().parseAndRenderSync(

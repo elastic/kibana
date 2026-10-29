@@ -70,6 +70,8 @@ outputs:
     type: string
   - name: no_rule
     type: boolean
+  - name: proposed
+    type: boolean
 consts:
   # Temporary: service accounts have no display name, so the chat would show the raw account
   # id. Remove once they carry one (elastic/security-team#20422).
@@ -359,7 +361,10 @@ steps:
       # gap. A draft with a model mistake or a tool error, or one that could not be
       # copied to the investigation, is not this case: that can pass on the next sweep.
       no_rule: "${{ steps.draft_ready.output.ok != true and steps.draft_ready.output.final == true }}"
+      # The draft reached the gate. An expired proposal was proposed; a draft that never
+      # reached the gate was not.
+      proposed: "${{ steps.proposal_ready.output.ok == true }}"
       # Why nothing was proposed, so a gap that keeps coming back can be explained
       # without opening the agent conversation. Empty when the draft reached the gate.
       skip_reason: >-
-        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description and an attachment.{% endif %}{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}
+        {% if steps.draft_ready.output.ok != true %}{% if steps.draft_creation.output.structured_output.reason != null and steps.draft_creation.output.structured_output.reason != '' %}{{ steps.draft_creation.output.structured_output.reason }}{% else %}The draft is incomplete: it needs a query, a name, a description, an interval and an attachment.{% endif %}{% elsif steps.attach_draft.error != null %}The draft could not be attached to the investigation: {{ steps.attach_draft.error.message }}{% endif %}

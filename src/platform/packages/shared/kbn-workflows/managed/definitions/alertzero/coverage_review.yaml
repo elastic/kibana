@@ -982,6 +982,11 @@ steps:
         ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
           and steps.run_rule_creation.error == null
           and steps.run_rule_creation.output.no_rule == true }}
+      creation_retry: >-
+        ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
+          and steps.run_rule_creation.error == null
+          and steps.run_rule_creation.output.no_rule != true
+          and steps.run_rule_creation.output.proposed != true }}
       creation_unreviewed: >-
         ${{ steps.coverage_check.output.structured_output.verdict == 'no_coverage'
           and steps.run_rule_creation.output.reviewed != true
@@ -997,14 +1002,16 @@ steps:
   # Step 9 of 10: close the investigation. Metadata writes fire the
   # ai.conversation.metadataUpdated trigger, which is the emit point for downstream
   # feedback signals. A gap no rule can be drafted for closes without a proposal,
-  # because the indicator is marked processed and no later review would close it. Two
-  # outcomes match no case, and the investigation stays open on purpose: an expired
-  # gate, because nobody decided, and an approval whose change did not land, because
-  # the indicator stays pending and the gap is not resolved.
+  # because the indicator is marked processed and no later review would close it. A
+  # draft that was not proposed but may pass next time also closes: the indicator
+  # stays pending, and the next sweep opens a new investigation. Two outcomes match no
+  # case, and the investigation stays open on purpose: an expired gate, because nobody
+  # decided, and an approval whose change did not land, because the indicator stays
+  # pending and the gap is not resolved.
   - name: close_investigation
     type: switch
     if: "${{ steps.create_investigation.output.conversation_id != null }}"
-    expression: "{% if steps.record_decision.output.approved == true and steps.resolve_outcome.output.enable_approved_not_applied == false and steps.resolve_outcome.output.install_approved_not_applied == false %}approved{% elsif steps.record_decision.output.dismissed == true %}dismissed{% elsif steps.resolve_outcome.output.creation_no_rule == true %}no_rule{% endif %}"
+    expression: "{% if steps.record_decision.output.approved == true and steps.resolve_outcome.output.enable_approved_not_applied == false and steps.resolve_outcome.output.install_approved_not_applied == false %}approved{% elsif steps.record_decision.output.dismissed == true %}dismissed{% elsif steps.resolve_outcome.output.creation_no_rule == true %}no_rule{% elsif steps.resolve_outcome.output.creation_retry == true %}retry{% endif %}"
     cases:
       - match: approved
         steps:
@@ -1086,6 +1093,47 @@ steps:
           - name: report_investigation_closed_no_rule
             type: alertzero.reportWorkerOutcome
             if: "${{ steps.close_investigation_no_rule.error == blank and steps.close_investigation_no_rule.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              close_reason: other
+
+      # Rule creation completed but drafted nothing it could propose, for a reason the
+      # next run may not repeat, such as a model mistake or a tool error. The indicator
+      # stays pending, and the next sweep opens a new investigation, so this one closes.
+      - match: retry
+        steps:
+          - name: note_retry
+            type: workflow.execute
+            on-failure:
+              continue: true
+            with:
+              workflow-id: system-alertzero-journal-note
+              run-as-mode: inherit
+              inputs:
+                author_name: "{{ consts.author_name }}"
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                message: |-
+                  **No usable rule was drafted this time.** {{ steps.run_rule_creation.output.skip_reason | truncate: 2000 }}
+
+                  Nothing was proposed. The gap stays pending, and the next sweep tries again.
+
+          - name: close_investigation_retry
+            type: ai.conversation.metadata.patch
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: other
+                verdict: "No usable rule was drafted. The next sweep tries again. {{ steps.run_rule_creation.output.skip_reason }}"
+            on-failure:
+              continue: true
+
+          - name: report_investigation_closed_retry
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_investigation_retry.error == blank and steps.close_investigation_retry.output.changed_fields contains 'status' }}"
             on-failure:
               continue: true
             with:

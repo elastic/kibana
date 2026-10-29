@@ -77,6 +77,12 @@ describe('Rule Tuning and Rule Coverage close reports', () => {
         definition: ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
         reportStep: 'report_investigation_closed_no_rule',
       },
+      {
+        closeReason: 'other',
+        closeStep: 'close_investigation_retry',
+        definition: ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
+        reportStep: 'report_investigation_closed_retry',
+      },
     ],
     definitions: [
       ALERTZERO_RULE_TUNING_WORKER_WORKFLOW,

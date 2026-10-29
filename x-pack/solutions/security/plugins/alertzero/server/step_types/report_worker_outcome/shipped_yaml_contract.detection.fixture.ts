@@ -168,6 +168,24 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           },
         },
       },
+      {
+        steps: {
+          close_investigation_retry: { output: CHANGED_STATUS },
+          coverage_check: { output: { structured_output: { verdict: 'no_coverage' } } },
+          create_investigation: OPENED_INVESTIGATION,
+          record_decision: { output: { applied: false, approved: false, dismissed: false } },
+          resolve_outcome: { output: { creation_retry: true } },
+          run_rule_creation: {
+            output: {
+              created: false,
+              no_rule: false,
+              proposed: false,
+              reviewed: false,
+              skip_reason: 'The interval was a placeholder.',
+            },
+          },
+        },
+      },
       { steps: { read_ki: { output: { hits: { total: { value: 0 } } } } } },
       {
         steps: {

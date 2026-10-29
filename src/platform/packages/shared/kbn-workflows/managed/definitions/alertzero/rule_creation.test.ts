@@ -115,7 +115,8 @@ describe('Detection Rule Creation worker', () => {
       expect(create?.with?.rule).toBe('${{ inputs.actionInput }}');
     });
 
-    // A draft is reviewable only with a query, a name, a description and an attachment.
+    // A draft is reviewable only with a query, a name, a description, an interval and an
+    // attachment.
     // The create action requires a name and a description, so proposing a draft without
     // them would ask the analyst to approve a rule that can never be created.
     it('previews and attaches only a complete draft with an attachment', () => {
@@ -312,6 +313,7 @@ describe('Detection Rule Creation worker', () => {
           'rule_name',
           'skip_reason',
           'no_rule',
+          'proposed',
         ])
       );
     });
@@ -332,6 +334,20 @@ describe('Detection Rule Creation worker', () => {
       ).toBe(expected);
     });
 
+    // An expired proposal was proposed. A draft that never reached the gate was not, so
+    // the caller can close its investigation and retry on the next sweep.
+    it.each([
+      ['a draft that reached the gate', true, true],
+      ['a draft that never reached the gate', false, false],
+    ])('reports proposed for %s', (_scenario, ok, expected) => {
+      const expression = emit.proposed.trim().slice(3, -2).trim();
+      expect(
+        createWorkflowLiquidEngine().evalValueSync(expression, {
+          steps: { proposal_ready: { output: { ok } } },
+        })
+      ).toBe(expected);
+    });
+
     // The model's reason lives in the structured output, not only in its conversation,
     // so a gap that keeps coming back can be explained from the run alone.
     it.each([
@@ -347,7 +363,7 @@ describe('Detection Rule Creation worker', () => {
         { ok: false },
         { reason: '' },
         null,
-        'The draft is incomplete: it needs a query, a name, a description and an attachment.',
+        'The draft is incomplete: it needs a query, a name, a description, an interval and an attachment.',
       ],
       [
         'the attachment error for a draft that could not be copied',
