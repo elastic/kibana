@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../ebt_constants';
 
-const RETRY_LABEL = i18n.translate('xpack.digitalExperience.loadError.retry', {
+const RETRY_LABEL = i18n.translate('xpack.digitalExperience.loadError.retryButtonLabel', {
   defaultMessage: 'Try again',
 });
 

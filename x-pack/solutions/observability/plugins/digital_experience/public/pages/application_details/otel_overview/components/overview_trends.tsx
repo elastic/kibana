@@ -53,20 +53,26 @@ const TRENDS_TITLE = i18n.translate('xpack.digitalExperience.overview.trends.tit
   defaultMessage: 'Trends',
 });
 
-const TRENDS_SUBTITLE = i18n.translate('xpack.digitalExperience.overview.trends.subtitle', {
-  defaultMessage: 'Page loads and their load time over the selected range',
-});
+const TRENDS_SUBTITLE = i18n.translate(
+  'xpack.digitalExperience.overview.trends.subtitleDescription',
+  {
+    defaultMessage: 'Page loads and their load time over the selected range',
+  }
+);
 
-const NO_PAGE_LOADS = i18n.translate('xpack.digitalExperience.overview.trends.noData', {
+const NO_PAGE_LOADS = i18n.translate('xpack.digitalExperience.overview.trends.noDataDescription', {
   defaultMessage: 'No page loads in the selected time range',
 });
 
-const NO_LOAD_TIMES = i18n.translate('xpack.digitalExperience.overview.trends.noLoadTimes', {
-  defaultMessage: 'No page load reported a load time in the selected time range',
-});
+const NO_LOAD_TIMES = i18n.translate(
+  'xpack.digitalExperience.overview.trends.noLoadTimesDescription',
+  {
+    defaultMessage: 'No page load reported a load time in the selected time range',
+  }
+);
 
 const CHART_TYPE_LEGEND = i18n.translate(
-  'xpack.digitalExperience.overview.trends.chartTypeLegend',
+  'xpack.digitalExperience.overview.trends.chartTypeLegendLabel',
   { defaultMessage: 'Trend chart type' }
 );
 
@@ -75,14 +81,14 @@ type TrendChartType = 'area' | 'bar';
 const CHART_TYPE_OPTIONS: Array<{ id: TrendChartType; label: string; iconType: string }> = [
   {
     id: 'area',
-    label: i18n.translate('xpack.digitalExperience.overview.trends.areaChart', {
+    label: i18n.translate('xpack.digitalExperience.overview.trends.areaChartButtonLabel', {
       defaultMessage: 'Area',
     }),
     iconType: 'chartArea',
   },
   {
     id: 'bar',
-    label: i18n.translate('xpack.digitalExperience.overview.trends.barChart', {
+    label: i18n.translate('xpack.digitalExperience.overview.trends.barChartButtonLabel', {
       defaultMessage: 'Bar',
     }),
     iconType: 'chartBarVertical',

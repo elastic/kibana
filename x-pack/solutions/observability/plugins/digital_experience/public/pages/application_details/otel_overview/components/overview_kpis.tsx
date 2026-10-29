@@ -15,23 +15,23 @@ import { useFormatters } from '../../../../hooks/use_formatters';
 import { LOAD_TIME_LABEL, PAGE_LOADS_LABEL } from '../../../../labels';
 import { formatDurationMs } from '../../../../utils/format_duration';
 
-const JS_ERRORS_LABEL = i18n.translate('xpack.digitalExperience.overview.kpis.jsErrors', {
+const JS_ERRORS_LABEL = i18n.translate('xpack.digitalExperience.overview.kpis.jsErrorsLabel', {
   defaultMessage: 'JS errors',
 });
 
-const FAILED_HTTP_LABEL = i18n.translate('xpack.digitalExperience.overview.kpis.failedHttp', {
+const FAILED_HTTP_LABEL = i18n.translate('xpack.digitalExperience.overview.kpis.failedHttpLabel', {
   defaultMessage: 'Failed HTTP requests',
 });
 
 const loadTimeHint = (sampleCount: number) =>
-  i18n.translate('xpack.digitalExperience.overview.kpis.loadTimeHint', {
+  i18n.translate('xpack.digitalExperience.overview.kpis.loadTimeTooltip', {
     defaultMessage:
       '75th percentile of the load event end of {sampleCount, plural, one {# page load} other {# page loads}}. Page loads that reported no load event are counted as page loads but do not contribute to it.',
     values: { sampleCount },
   });
 
 const failedHttpHint = (failedCount: number, count: number) =>
-  i18n.translate('xpack.digitalExperience.overview.kpis.failedHttpHint', {
+  i18n.translate('xpack.digitalExperience.overview.kpis.failedHttpTooltip', {
     defaultMessage:
       '{failedCount} of {count, plural, one {# request} other {# requests}} returned an error status or never received a response.',
     values: { failedCount, count },

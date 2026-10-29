@@ -24,7 +24,7 @@ import { CoreWebVitalsPanel } from './components/core_web_vitals_panel';
 import { OverviewKpis } from './components/overview_kpis';
 import { OverviewTrends } from './components/overview_trends';
 
-const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchError', {
+const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
   defaultMessage: 'Could not load the Overview',
 });
 

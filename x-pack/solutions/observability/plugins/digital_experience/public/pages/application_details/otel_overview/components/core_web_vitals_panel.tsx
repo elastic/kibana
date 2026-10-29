@@ -22,15 +22,16 @@ import type { DurationVital, WebVitals } from '../../../../../common/types/appli
 import { formatDurationMs } from '../../../../utils/format_duration';
 import { toUxMetrics } from '../utils/to_ux_metrics';
 
-const OTHER_METRICS_TITLE = i18n.translate('xpack.digitalExperience.overview.vitals.otherMetrics', {
-  defaultMessage: 'Other page load metrics',
-});
+const OTHER_METRICS_TITLE = i18n.translate(
+  'xpack.digitalExperience.overview.vitals.otherMetricsTitle',
+  { defaultMessage: 'Other page load metrics' }
+);
 
-const FCP_LABEL = i18n.translate('xpack.digitalExperience.overview.vitals.fcp', {
+const FCP_LABEL = i18n.translate('xpack.digitalExperience.overview.vitals.fcpLabel', {
   defaultMessage: 'FCP (p75)',
 });
 
-const TTFB_LABEL = i18n.translate('xpack.digitalExperience.overview.vitals.ttfb', {
+const TTFB_LABEL = i18n.translate('xpack.digitalExperience.overview.vitals.ttfbLabel', {
   defaultMessage: 'TTFB (p75)',
 });
 
