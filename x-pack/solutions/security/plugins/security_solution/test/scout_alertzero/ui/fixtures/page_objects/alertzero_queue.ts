@@ -7,6 +7,8 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
 
+const TREND_CHART_CARD_IDS = ['respond', 'investigate', 'configure'] as const;
+
 export class AlertZeroQueuePage {
   public readonly trendChartRow: Locator;
   public readonly trendChartCards: Locator;
@@ -14,9 +16,9 @@ export class AlertZeroQueuePage {
 
   constructor(private readonly page: ScoutPage) {
     this.trendChartRow = this.page.testSubj.locator('alertZeroProposalsTrendChartRow');
-    this.trendChartCards = this.page.testSubj.locator(
-      '[data-test-subj^="alertZeroProposalsTrendChartCard-"]'
-    );
+    this.trendChartCards = TREND_CHART_CARD_IDS.map((id) =>
+      this.page.testSubj.locator(`alertZeroProposalsTrendChartCard-${id}`)
+    ).reduce((cards, card) => cards.or(card));
     this.trendSparklines = this.page.testSubj.locator('alertZeroProposalsTrendSparkline');
   }
 

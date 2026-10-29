@@ -168,12 +168,11 @@ export const TrendSparkline: React.FC<TrendSparklineProps> = ({
         css={{ position: 'relative', width: '100%', height: chartHeight, minWidth: 0 }}
       >
         {chartWidth > 0 && series.length > 0 && (
-          <div css={{ position: 'absolute', top: 0, left: 0 }}>
-            <Chart
-              size={{ height: chartHeight, width: chartWidth }}
-              aria-hidden="true"
-              data-test-subj="alertZeroProposalsTrendSparkline"
-            >
+          <div
+            css={{ position: 'absolute', top: 0, left: 0 }}
+            data-test-subj="alertZeroProposalsTrendSparkline"
+          >
+            <Chart size={{ height: chartHeight, width: chartWidth }} aria-hidden="true">
               <Settings
                 theme={[PARTIAL_THEME]}
                 baseTheme={chartBaseTheme}
