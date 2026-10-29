@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/shared/dashboard
 dependsOn:
+  - '@kbn/data-source'
   - '@kbn/search-sessions-management-plugin'
   - '@kbn/core'
   - '@kbn/inspector-plugin'
@@ -147,6 +148,8 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - '*.ts'

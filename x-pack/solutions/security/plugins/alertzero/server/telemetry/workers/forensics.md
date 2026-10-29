@@ -1,12 +1,12 @@
 # How the Endpoint Analysis Worker reports
 
-The Worker reports its sweep, each analysis run reports how it settled its indicator, and the proposal gate reports its close. Event fields are in the [telemetry README](../README.md).
+The Worker reports its sweep, each analysis run reports how it settled its indicator, and the close gate reports an approved close. Event fields are in the [telemetry README](../README.md).
 
 | Workflow | Step | `event` | Where |
 |---|---|---|---|
 | `forensics_endpoint_analysis.yaml` | `report_worker_run_completed` | `worker_run_completed` | Right before `emit_result`, only when the sweep started a new analysis, had a dispatch refused, or its search failed |
 | `forensics_run_endpoint_analysis.yaml` | `report_analysis_completed` | `endpoint_analysis_completed` | Right before `mark_processed`, once every verdict condition is decided |
-| `forensics_proposal_gate.yaml` | `report_investigation_closed_settled` | `worker_investigation_closed` | Right after `close_if_settled` |
+| `forensics_close_investigation_gate.yaml` | `report_investigation_closed` | `worker_investigation_closed` | Right before `journal_outcome`, only when the analyst approved the Close Investigation proposal and its action succeeded |
 
 ## Runs
 
@@ -29,11 +29,12 @@ The report runs before the `mark_*` writes, so it is the verdict the run reached
 
 ## Closes
 
-The Worker never opens an Investigation. It works on the Attack Discovery Investigation named by the indicator, and its proposal gate closes that Investigation once every containment Proposal is decided.
+The Worker never opens an Investigation, and none of its workflows closes one. It works on the Attack Discovery Investigation named by the indicator; once every containment Proposal is decided (or right away when none was proposed), the close gate asks the analyst whether to close it, through an always-gated `Close Investigation` Proposal. Approving runs the `system-alertzero-action-close-attack-discovery-investigation` action as the approver, which closes the attack and its alerts, then the Investigation through the Agentic Investigations status route.
 
 | Workflow | Close | `close_reason` |
 |---|---|---|
-| Proposal gate | Every containment Proposal of the Investigation decided | `other` |
+| Close gate | The analyst approved the Close Investigation proposal and the action succeeded | The reason the analysis decided: `false_positive` for a `not_an_incident` verdict, `resolved` for `confirmed_incident`, `other` otherwise |
 
-- The gate closes through the Agentic Investigations status route, because it runs as the Worker's service account and doesn't own the Investigation. That route writes no close reason, so the close is `other`, and it also sends `agentic_investigations_investigation_closed`.
-- The route doesn't return what it changed, so the gate reads the Investigation's status first (`read_status_before_close`) and reports only when it was `open` and the close returned `closed`. Two gates that settle at the same moment can both see it open, so a close can rarely be counted twice.
+- The report is in the close gate, not the action: the step verifies that every ancestor is an AlertZero-managed execution, and the action's chain passes through the platform's proposal workflow, so a report there would skip as `not_managed`.
+- `close_reason` is what the analysis decided and what the action writes on the attack and its alerts as `workflow_reason`. The status route writes no close reason on the Investigation itself yet.
+- The action does not continue past a failed status-route close, so `succeeded` means the route returned. The route is idempotent, so an Investigation someone closed while the card was pending is counted as the Worker's. The route also sends `agentic_investigations_investigation_closed`.
