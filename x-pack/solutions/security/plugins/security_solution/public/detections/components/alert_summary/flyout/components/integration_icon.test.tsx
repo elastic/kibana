@@ -8,17 +8,17 @@
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import React from 'react';
-import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
+import { useFetchIntegrations } from '../../../../hooks/alert_summary/use_fetch_integrations';
 import { usePackageIconType } from '@kbn/fleet-plugin/public/hooks';
 import { INTEGRATION_TEST_ID, IntegrationIcon } from './integration_icon';
 import {
   INTEGRATION_ICON_TEST_ID,
   INTEGRATION_LOADING_SKELETON_TEST_ID,
-} from '../../../detections/components/alert_summary/common/integration_icon';
+} from '../../common/integration_icon';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 
-jest.mock('../../../detections/hooks/alert_summary/use_fetch_integrations');
+jest.mock('../../../../hooks/alert_summary/use_fetch_integrations');
 jest.mock('@kbn/fleet-plugin/public/hooks');
 
 const LOADING_SKELETON_TEST_ID = `${INTEGRATION_TEST_ID}-${INTEGRATION_LOADING_SKELETON_TEST_ID}`;

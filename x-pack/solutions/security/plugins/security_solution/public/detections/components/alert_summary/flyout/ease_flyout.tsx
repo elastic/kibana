@@ -7,29 +7,28 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { getRawData } from '../../assistant/helpers';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { getRawData } from '../../../../assistant/helpers';
 import { AIAssistantSection } from './components/ai_assistant_section';
 import { AttackDiscoverySection } from './components/attack_discovery_section';
-import { DocumentSummarySection } from '../../flyout_v2/document/main/components/document_summary_section';
-import { HighlightedFields } from '../../flyout_v2/document/main/components/highlighted_fields';
-import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
-import { useEaseDetailsContext } from './context';
-import { FlyoutBody } from '../shared/components/flyout_body';
-import { FlyoutNavigation } from '../shared/components/flyout_navigation';
-import type { EaseDetailsProps } from './types';
+import { DocumentSummarySection } from '../../../../flyout_v2/document/main/components/document_summary_section';
+import { HighlightedFields } from '../../../../flyout_v2/document/main/components/highlighted_fields';
+import { noopCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
+import { EaseDetailsProvider, useEaseDetailsContext } from './context';
 import { PanelFooter } from './footer';
-import { FlyoutHeader } from '../shared/components/flyout_header';
 import { HeaderTitle } from './components/header_title';
+import { DOCUMENT_SUMMARY_SECTION_TEST_ID, FLYOUT_BODY_TEST_ID, FLYOUT_TEST_ID } from './test_ids';
 
-export const FLYOUT_BODY_TEST_ID = 'ease-alert-flyout-body';
-export const ATTACK_DISCOVERY_SECTION_TEST_ID = 'ease-alert-flyout-attack-discovery-section';
-export const DOCUMENT_SUMMARY_SECTION_TEST_ID = 'ease-alert-flyout-document-summary-section';
+const EASE_FLYOUT_ARIA_LABEL = i18n.translate('xpack.securitySolution.flyout.panelAriaLabel.ease', {
+  defaultMessage: 'Alert summary',
+});
 
 /**
- * Panel to be displayed in EASE alert summary flyout
+ * Header, body and footer of the EASE alert summary flyout. Must be rendered within the
+ * EaseDetailsProvider.
  */
-export const EasePanel: React.FC<Partial<EaseDetailsProps>> = memo(() => {
+const EaseFlyoutContent = memo(() => {
   const { eventId, dataFormattedForFieldBrowser, investigationFields, searchHit } =
     useEaseDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
@@ -41,11 +40,10 @@ export const EasePanel: React.FC<Partial<EaseDetailsProps>> = memo(() => {
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
-      <FlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <HeaderTitle />
-      </FlyoutHeader>
-      <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <DocumentSummarySection
@@ -69,10 +67,42 @@ export const EasePanel: React.FC<Partial<EaseDetailsProps>> = memo(() => {
             <AIAssistantSection getPromptContext={getPromptContext} />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </FlyoutBody>
+      </EuiFlyoutBody>
       <PanelFooter />
     </>
   );
 });
 
-EasePanel.displayName = 'EasePanel';
+EaseFlyoutContent.displayName = 'EaseFlyoutContent';
+
+export interface EaseFlyoutProps {
+  /**
+   * Id of the alert to display
+   */
+  documentId: string;
+  /**
+   * Called when the flyout is closed
+   */
+  onClose: () => void;
+}
+
+/**
+ * EASE alert summary flyout. The alert is fetched from the EASE alerts data view, so only its id
+ * is needed.
+ */
+export const EaseFlyout = memo(({ documentId, onClose }: EaseFlyoutProps) => (
+  <EuiFlyout
+    aria-label={EASE_FLYOUT_ARIA_LABEL}
+    data-test-subj={FLYOUT_TEST_ID}
+    onClose={onClose}
+    ownFocus
+    resizable
+    size="s"
+  >
+    <EaseDetailsProvider id={documentId}>
+      <EaseFlyoutContent />
+    </EaseDetailsProvider>
+  </EuiFlyout>
+));
+
+EaseFlyout.displayName = 'EaseFlyout';
