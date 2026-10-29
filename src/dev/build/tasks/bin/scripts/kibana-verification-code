@@ -16,15 +16,16 @@ done
 DIR="$(dirname "${SCRIPT}")/.."
 . "$DIR/bin/kibana_env"
 NODE="${DIR}/node/default/bin/node"
+{{#linux}}
 if [ -n "$KBN_NODE_HOME" ]; then
   NODE="${KBN_NODE_HOME}/bin/node"
 else
-  {{#linux}}
+
   if ! "$NODE" --version >/dev/null 2>&1; then
     NODE="${DIR}/node/glibc-217/bin/node"
   fi
-  {{/linux}}
 fi
+{{/linux}}
 test -x "$NODE"
 if [ ! -x "$NODE" ]; then
   echo "unable to find usable node.js executable."
