@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
@@ -15,6 +15,7 @@ import { InvestigationList } from './investigation_list';
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
+      http: { basePath: { get: () => '' } },
       agenticInvestigations: {
         InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
           <div data-test-subj="investigationCard">{item.title}</div>
@@ -108,7 +109,9 @@ describe('InvestigationList', () => {
       makeSection('not-rated', { investigations: [investigation], total: 1 }),
     ]);
 
-    const titles = screen.getAllByRole('heading').map((heading) => heading.textContent);
+    const titles = Array.from(document.querySelectorAll('[id$="-heading"]')).map(
+      (heading) => heading.textContent
+    );
     expect(titles).toEqual(['In progress', 'Critical', 'Not rated']);
   });
 
@@ -116,5 +119,31 @@ describe('InvestigationList', () => {
     renderSections([makeSection('critical', { investigations: [investigation], total: 1 })]);
 
     expect(screen.getByTestId('investigationCard')).toHaveTextContent('Checkout errors');
+  });
+
+  it('closes and reopens one section without touching the others', () => {
+    window.localStorage.clear();
+    renderSections([
+      makeSection('in-progress', { investigations: [investigation], total: 1 }),
+      makeSection('critical', { investigations: [investigation], total: 1 }),
+      makeSection('high', { investigations: [investigation], total: 1 }),
+    ]);
+    const expanded = () =>
+      ['in-progress', 'critical', 'high'].map((id) =>
+        screen
+          .getByTestId(`nightshiftInvestigationSectionToggle-${id}`)
+          .getAttribute('aria-expanded')
+      );
+
+    expect(expanded()).toEqual(['true', 'true', 'true']);
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-critical'));
+    expect(expanded()).toEqual(['true', 'false', 'true']);
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-high'));
+    expect(expanded()).toEqual(['true', 'false', 'false']);
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-critical'));
+    expect(expanded()).toEqual(['true', 'true', 'false']);
   });
 });
