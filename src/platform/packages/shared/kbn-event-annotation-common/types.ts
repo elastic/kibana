@@ -85,7 +85,8 @@ export type EsqlEventAnnotationConfig = {
 export type EventAnnotationConfig =
   | PointInTimeEventAnnotationConfig
   | RangeEventAnnotationConfig
-  | QueryPointEventAnnotationConfig;
+  | QueryPointEventAnnotationConfig
+  | EsqlEventAnnotationConfig;
 
 export interface EventAnnotationGroupConfig {
   annotations: EventAnnotationConfig[];

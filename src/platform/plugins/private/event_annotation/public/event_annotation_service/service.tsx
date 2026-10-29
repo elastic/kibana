@@ -21,6 +21,7 @@ import {
   getPersistedAnnotationColor,
   isRangeAnnotationConfig,
   isQueryAnnotationConfig,
+  isEsqlAnnotationConfig,
   defaultAnnotationLabel,
   type EventAnnotationGroupContent,
   type EventAnnotationConfig,
@@ -372,6 +373,9 @@ const annotationsToExpression = (annotations: EventAnnotationConfig[]) => {
   const expressions = [];
 
   for (const annotation of manualBasedAnnotations) {
+    if (isEsqlAnnotationConfig(annotation)) {
+      throw new Error('ES|QL annotations are not supported by the legacy annotation expression.');
+    }
     if (isRangeAnnotationConfig(annotation)) {
       const { label, color, key, outside, id } = annotation;
       const { timestamp: time, endTimestamp: endTime } = key;

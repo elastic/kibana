@@ -13,6 +13,7 @@ import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugi
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
   isManualPointAnnotationConfig,
+  isQueryAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { LegendSize, LENS_DEFAULT_LEGEND_SIZE } from '@kbn/chart-expressions-common';
@@ -293,7 +294,7 @@ export const buildXYExpression = (
   const isValidAnnotation = (a: EventAnnotationConfig) =>
     isManualPointAnnotationConfig(a) ||
     isRangeAnnotationConfig(a) ||
-    (a.filter && a.filter?.query !== '');
+    (isQueryAnnotationConfig(a) && a.filter?.query !== '');
 
   const legendConfigFn = buildExpressionFunction<LegendConfigFn>('legendConfig', {
     isVisible: state.legend.isVisible,

@@ -175,6 +175,28 @@ describe('XY', () => {
     });
 
     describe('Annotations', () => {
+      it('rejects ES|QL annotations instead of serializing them as manual points', () => {
+        const attributes = structuredClone(annotationXY);
+        const visualization = attributes.state.visualization as XYVisualizationState;
+        const layer = visualization.layers.find(({ layerType }) => layerType === 'annotations');
+        if (layer?.layerType !== 'annotations')
+          throw new Error('Annotation fixture is missing its layer');
+        layer.annotations = [
+          {
+            id: 'deployments',
+            type: 'esql',
+            query: { esql: 'FROM deployments | KEEP time' },
+            timeColumn: 'time',
+            key: { type: 'point_in_time' },
+            label: 'Deployments',
+          },
+        ];
+
+        expect(() => new LensConfigBuilder(undefined, true).toAPIFormat(attributes)).toThrow(
+          'ES|QL annotations are not supported by the configuration API yet.'
+        );
+      });
+
       for (const type of ['bar', 'line', 'area'] as const) {
         it(`should work for an annotation with a ${type} chart`, () => {
           validator.xy.fromState(setSeriesType(annotationXY, type));

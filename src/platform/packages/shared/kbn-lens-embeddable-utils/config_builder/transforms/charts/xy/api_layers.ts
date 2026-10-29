@@ -8,7 +8,11 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
+import {
+  isQueryAnnotationConfig,
+  isRangeAnnotationConfig,
+  isEsqlAnnotationConfig,
+} from '@kbn/event-annotation-common';
 import type {
   FormBasedLayer,
   SeriesType,
@@ -464,6 +468,9 @@ export function buildAPIAnnotationsLayer(
     ...(dataSource ? { data_source: dataSource } : {}),
     ignore_global_filters: layer.ignoreGlobalFilters ?? LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
     events: layer.annotations.map((annotation) => {
+      if (isEsqlAnnotationConfig(annotation)) {
+        throw new Error('ES|QL annotations are not supported by the configuration API yet.');
+      }
       if (isQueryAnnotationConfig(annotation)) {
         return {
           type: 'query',
