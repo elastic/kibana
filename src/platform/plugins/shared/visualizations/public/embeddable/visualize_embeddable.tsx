@@ -308,6 +308,13 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       ...initializeEditApi({
         customTimeRange$: timeRangeManager.api.timeRange$,
         description$: titleManager.api.description$,
+        getSerializedState: () =>
+          serializeVisualizeEmbeddable(savedObjectId$.getValue(), linkedToLibrary),
+        panelSettingsApi: {
+          ...titleManager.api,
+          ...timeRangeManager.api,
+          defaultTitle$,
+        },
         parentApi,
         savedObjectId$,
         searchSessionId$,

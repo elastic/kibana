@@ -34,6 +34,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openCustomizePanelFlyout } from './open_customize_panel';
 import { ACTION_CUSTOMIZE_PANEL } from './constants';
+import { apiHasPanelSettingsInEditFlyout } from '../../panel_settings/types';
 
 export type CustomizePanelActionApi = CanAccessViewMode &
   IsCustomizable &
@@ -72,9 +73,18 @@ export class CustomizePanelAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatibleWithCustomizePanelAction(embeddable)) return false;
+    const isEditMode = getInheritedViewMode(embeddable) === 'edit';
+    // In edit mode, panels that edit their settings in their edit flyout don't need this action
+    if (
+      isEditMode &&
+      apiHasPanelSettingsInEditFlyout(embeddable) &&
+      embeddable.hasPanelSettingsInEditFlyout()
+    ) {
+      return false;
+    }
     // It should be possible to customize just the time range in View mode
     return (
-      getInheritedViewMode(embeddable) === 'edit' ||
+      isEditMode ||
       (apiPublishesUnifiedSearch(embeddable) &&
         (embeddable.isCompatibleWithUnifiedSearch?.() ?? true))
     );

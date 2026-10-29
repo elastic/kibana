@@ -98,6 +98,7 @@ import {
   setAggs,
   setChrome,
   setOverlays,
+  setCoreStart,
   setEmbeddable,
   setDocLinks,
   setSpaces,
@@ -577,6 +578,7 @@ export class VisualizationsPlugin
     setTimeFilter(data.query.timefilter.timefilter);
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
+    setCoreStart(core);
     setExecutionContext(core.executionContext);
     setChrome(core.chrome);
     setFieldFormats(fieldFormats);

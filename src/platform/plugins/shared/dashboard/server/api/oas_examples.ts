@@ -1031,6 +1031,7 @@ const dashboardCreateResponseExamples = {
         options: {
           hide_panel_titles: false,
           hide_panel_borders: false,
+          show_hint_bar: true,
           use_margins: true,
           auto_apply_filters: true,
           sync_colors: false,
@@ -1304,6 +1305,7 @@ const dashboardReadResponseExamples = {
         options: {
           hide_panel_titles: false,
           hide_panel_borders: false,
+          show_hint_bar: true,
           use_margins: true,
           auto_apply_filters: true,
           sync_colors: false,
@@ -1517,6 +1519,7 @@ const dashboardUpdateResponseExamples = {
         options: {
           hide_panel_titles: false,
           hide_panel_borders: false,
+          show_hint_bar: true,
           use_margins: true,
           auto_apply_filters: true,
           sync_colors: false,
@@ -1797,6 +1800,7 @@ const dashboardUpdateCreatedResponseExamples = {
         options: {
           hide_panel_titles: false,
           hide_panel_borders: false,
+          show_hint_bar: true,
           use_margins: true,
           auto_apply_filters: true,
           sync_colors: false,

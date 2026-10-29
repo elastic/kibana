@@ -198,6 +198,7 @@ const EditLensConfiguration: FC<
   parentApi,
   applyButtonLabel,
   hideTextBasedEditor,
+  panelSettingsApi,
 }) => {
   const [currentAttributes, setCurrentAttributes] =
     useState<TypedLensSerializedState['attributes']>(attributes);
@@ -293,6 +294,7 @@ const EditLensConfiguration: FC<
     panelId,
     applyButtonLabel,
     hideTextBasedEditor,
+    panelSettingsApi,
   };
 
   return (

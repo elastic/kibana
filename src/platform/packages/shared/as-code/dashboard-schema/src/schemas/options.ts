@@ -10,6 +10,9 @@
 import { z } from '@kbn/zod';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../constants';
 
+// unchanged from main apart from one prototype field; converting this shared schema to
+// lazySchema is out of scope for the prototype branch
+// eslint-disable-next-line @kbn/eslint/require_lazy_zod_schema
 export const optionsSchema = z
   .object({
     auto_apply_filters: z.boolean().default(DEFAULT_DASHBOARD_OPTIONS.auto_apply_filters).meta({
@@ -24,6 +27,10 @@ export const optionsSchema = z
       .boolean()
       .default(DEFAULT_DASHBOARD_OPTIONS.hide_panel_borders)
       .meta({ description: 'When `true`, panel borders are hidden. Defaults to `false`.' }),
+    show_hint_bar: z.boolean().default(DEFAULT_DASHBOARD_OPTIONS.show_hint_bar).meta({
+      description:
+        'When `true`, a bar with keyboard and mouse shortcuts is shown while editing the dashboard. Defaults to `false`.',
+    }),
     use_margins: z
       .boolean()
       .default(DEFAULT_DASHBOARD_OPTIONS.use_margins)

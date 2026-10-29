@@ -29,6 +29,7 @@ const defaultTitlesState: WithAllKeys<SerializedTitles> = {
   description: undefined,
   hide_title: undefined,
   hide_border: undefined,
+  smart_title: undefined,
 };
 
 export const titleComparators: StateComparators<SerializedTitles> = {
@@ -36,6 +37,7 @@ export const titleComparators: StateComparators<SerializedTitles> = {
   description: 'referenceEquality',
   hide_title: (a, b) => Boolean(a) === Boolean(b),
   hide_border: (a, b) => Boolean(a) === Boolean(b),
+  smart_title: (a, b) => Boolean(a) === Boolean(b),
 };
 
 export const stateHasTitles = (state: unknown): state is SerializedTitles => {
@@ -43,7 +45,8 @@ export const stateHasTitles = (state: unknown): state is SerializedTitles => {
     (state as SerializedTitles)?.title !== undefined ||
     (state as SerializedTitles)?.description !== undefined ||
     (state as SerializedTitles)?.hide_title !== undefined ||
-    (state as SerializedTitles)?.hide_border !== undefined
+    (state as SerializedTitles)?.hide_border !== undefined ||
+    (state as SerializedTitles)?.smart_title !== undefined
   );
 };
 

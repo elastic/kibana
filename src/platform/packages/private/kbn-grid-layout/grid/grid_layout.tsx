@@ -41,6 +41,8 @@ export type GridLayoutProps = {
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
+  /** When provided, dragging one selected panel moves all selected panels together (same delta). */
+  selectedPanelIds?: ReadonlySet<string>;
 } & UseCustomDragHandle;
 
 type GridLayoutElementsInOrder = Array<{
@@ -57,14 +59,20 @@ export const GridLayout = ({
   accessMode = 'EDIT',
   className,
   useCustomDragHandle = false,
+  selectedPanelIds,
 }: GridLayoutProps) => {
   const layoutRef = useRef<HTMLDivElement | null>(null);
+  const selectedPanelIdsRef = useRef<ReadonlySet<string> | undefined>(undefined);
+  useEffect(() => {
+    selectedPanelIdsRef.current = selectedPanelIds;
+  }, [selectedPanelIds]);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
     layoutRef,
     gridSettings,
     expandedPanelId,
     accessMode,
+    getSelectedPanelIds: () => selectedPanelIdsRef.current,
   });
   const [elementsInOrder, setElementsInOrder] = useState<GridLayoutElementsInOrder>([]);
 

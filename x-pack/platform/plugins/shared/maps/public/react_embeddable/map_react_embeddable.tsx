@@ -181,7 +181,13 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
             : getByValueState(latestState, savedMap.getAttributes());
         },
         parentApi,
-        (state as MapByReferenceState).savedObjectId
+        (state as MapByReferenceState).savedObjectId,
+        {
+          ...titleManager.api,
+          ...timeRangeManager.api,
+          defaultTitle$,
+          defaultDescription$,
+        }
       ),
       ...initializeLibraryTransforms(
         Boolean(savedMap.getSavedObjectId()),

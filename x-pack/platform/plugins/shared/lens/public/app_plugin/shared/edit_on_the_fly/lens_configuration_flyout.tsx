@@ -27,6 +27,7 @@ import type {
   LensDatasourceId,
 } from '@kbn/lens-common';
 import { LENS_DATASOURCE_ID, isTextBasedAttributes } from '@kbn/lens-common';
+import { PanelSettingsAccordions, usePanelSettings } from '@kbn/embeddable-plugin/public';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -45,8 +46,6 @@ import {
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
-import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
-import { useHasMultipleVisibleLayers } from '../../../editor_frame_service/editor_frame/config_panel/use_has_multiple_visible_layers';
 import { VisualizationToolbarWrapper } from '../../../editor_frame_service/editor_frame/visualization_toolbar';
 import { useEditorFrameService } from '../../../editor_frame_service/editor_frame_service_context';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
@@ -83,6 +82,7 @@ export function LensEditConfigurationFlyout({
   parentApi,
   panelId,
   applyButtonLabel,
+  panelSettingsApi,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
@@ -94,7 +94,6 @@ export function LensEditConfigurationFlyout({
 
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
-  const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
   const [esqlQueryState, setESQLQueryState] = useState<TextBasedQueryState | null>(null);
 
@@ -117,6 +116,16 @@ export function LensEditConfigurationFlyout({
     useCurrentAttributes({
       initialAttributes: attributes,
     });
+
+  const globalTimeRange = useMemo(
+    () => startDependencies.data.query.timefilter.timefilter.getTime(),
+    [startDependencies.data.query.timefilter.timefilter]
+  );
+  const panelSettings = usePanelSettings(
+    isReadOnly ? undefined : panelSettingsApi,
+    globalTimeRange
+  );
+  const applyPanelSettings = panelSettings.apply;
 
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
@@ -271,6 +280,8 @@ export function LensEditConfigurationFlyout({
       // complete before the visualization is persisted via saveByRef.
       const updatedAttributes = await onApplyCallback?.(currentAttributes);
       attributesToSave = updatedAttributes ?? currentAttributes;
+      // Apply after the editing session has ended so the changes are tracked as unsaved dashboard changes
+      applyPanelSettings();
     } catch (err) {
       coreStart.notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
         title: i18n.translate('xpack.lens.config.applyError', {
@@ -319,6 +330,7 @@ export function LensEditConfigurationFlyout({
     coreStart.notifications.toasts,
     saveByRef,
     updateByRefInput,
+    applyPanelSettings,
     parentApi,
   ]);
 
@@ -337,7 +349,7 @@ export function LensEditConfigurationFlyout({
   const editorContainer = useRef(null);
 
   const isSaveable = useMemo(() => {
-    if (!attributesChanged) {
+    if (!attributesChanged && !panelSettings.hasChanges) {
       return false;
     }
     if (!visualization.state || !visualization.activeId) {
@@ -371,6 +383,7 @@ export function LensEditConfigurationFlyout({
     }
   }, [
     attributesChanged,
+    panelSettings.hasChanges,
     activeVisualization,
     datasourceMap,
     datasourceStates,
@@ -415,17 +428,6 @@ export function LensEditConfigurationFlyout({
       ? activeVisualization.getLayerIds(visualization.state)
       : [];
   }, [activeVisualization, visualization.state]);
-
-  // Suggestions are single-layer: applying one would silently drop the other
-  // layers (e.g. annotations, reference lines), so show the panel only for
-  // single-layer ES|QL charts edited via layer tabs. Hidden layers (e.g. the
-  // metric trendline) do not render as tabs and must not count here.
-  const hasMultipleVisibleLayers = useHasMultipleVisibleLayers({
-    activeVisualization,
-    visualizationState: visualization.state,
-    framePublicAPI,
-  });
-  const showSuggestions = !textBasedMode || !hasMultipleVisibleLayers;
 
   const showConvertToEsqlButton = useMemo(() => {
     return getLensFeatureFlags().enableEsqlConversion && !textBasedMode;
@@ -559,7 +561,6 @@ export function LensEditConfigurationFlyout({
         applyButtonLabel={applyButtonLabel}
         applyButtonDisabledTooltip={applyButtonDisabledTooltip}
         toolbar={toolbar}
-        layerTabs={layerTabs}
       >
         <>
           {/* Flex container for the flyout content layout.
@@ -655,16 +656,30 @@ export function LensEditConfigurationFlyout({
                 initialIsOpen={isLayerAccordionOpen}
                 forceState={isLayerAccordionOpen ? 'open' : 'closed'}
                 onToggle={(status) => {
-                  if (status && isSuggestionsAccordionOpen) {
-                    setIsSuggestionsAccordionOpen(!status);
-                  }
                   if (status && isESQLResultsAccordionOpen) {
                     setIsESQLResultsAccordionOpen(!status);
                   }
                   setIsLayerAccordionOpen(!isLayerAccordionOpen);
                 }}
               >
-                <>
+                {/* the layer tabs belong to the visualization parameters, so they collapse with them.
+                    With several layers, the tabs and the settings of the selected layer are grouped
+                    in a container */}
+                <div
+                  css={css`
+                    &:has(.lnsLayerTabs--visible) {
+                      border: ${euiTheme.euiTheme.border.thin};
+                      border-radius: ${euiTheme.euiTheme.border.radius.medium};
+                      padding: ${euiTheme.euiTheme.size.s};
+                      // keeps the container clear of the divider above the next accordion
+                      margin-block-end: ${euiTheme.euiTheme.size.base};
+                    }
+                    .lnsLayerTabs--visible {
+                      margin-block-end: ${euiTheme.euiTheme.size.s};
+                    }
+                  `}
+                >
+                  {layerTabs}
                   <LayerConfiguration
                     attributes={attributes}
                     dataLoading$={dataLoading$}
@@ -682,44 +697,21 @@ export function LensEditConfigurationFlyout({
                     editorContainer={editorContainer.current || undefined}
                     onTextBasedQueryStateChange={onTextBasedQueryStateChange}
                   />
-                </>
+                </div>
               </EuiAccordion>
             </EuiFlexItem>
 
-            {showSuggestions && (
-              <EuiFlexItem
-                grow={isSuggestionsAccordionOpen ? 1 : false}
-                data-test-subj="InlineEditingSuggestions"
-                css={css`
-                  border-top: ${euiTheme.euiTheme.border.thin};
-                  border-bottom: ${euiTheme.euiTheme.border.thin};
-                  padding-left: ${euiTheme.euiTheme.size.base};
-                  padding-right: ${euiTheme.euiTheme.size.base};
-                  .euiAccordion__childWrapper {
-                    flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
-                  }
+            {panelSettingsApi && panelSettings.state ? (
+              <PanelSettingsAccordions
+                api={panelSettingsApi}
+                state={panelSettings.state}
+                updateState={panelSettings.updateState}
+                fallbackTimeRange={globalTimeRange}
+                sectionCss={css`
+                  padding: 0 ${euiTheme.euiTheme.size.base};
                 `}
-              >
-                <SuggestionPanel
-                  ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
-                  frame={framePublicAPI}
-                  core={coreStart}
-                  nowProvider={startDependencies.data.nowProvider}
-                  showOnlyIcons
-                  wrapSuggestions
-                  isAccordionOpen={isSuggestionsAccordionOpen}
-                  toggleAccordionCb={(status) => {
-                    if (!status && isLayerAccordionOpen) {
-                      setIsLayerAccordionOpen(status);
-                    }
-                    if (status && isESQLResultsAccordionOpen) {
-                      setIsESQLResultsAccordionOpen(!status);
-                    }
-                    setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
-                  }}
-                />
-              </EuiFlexItem>
-            )}
+              />
+            ) : null}
           </EuiFlexGroup>
           {isModalVisible && esqlConvertAttributes ? (
             <ConvertToEsqlModal

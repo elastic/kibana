@@ -14,6 +14,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 const savedObjectToAPIOptionsKeys = {
   hidePanelTitles: 'hide_panel_titles',
   hidePanelBorders: 'hide_panel_borders',
+  showHintBar: 'show_hint_bar',
   useMargins: 'use_margins',
   syncColors: 'sync_colors',
   syncTooltips: 'sync_tooltips',

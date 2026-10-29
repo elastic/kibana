@@ -16,10 +16,11 @@ import { APP_ICON, MARKDOWN_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MarkdownByValueState } from '../embeddable/schemas';
 
 /**
- * Type used to enforce alignment with source zod `markdownByValueStateSchema`
+ * Type used to enforce alignment with source zod `markdownByValueStateSchema`.
+ * `smart_title` is a panel setting that isn't stored on the markdown saved object.
  */
 type MarkdownByValueStateCompat = {
-  [K in keyof Required<MarkdownByValueState>]: Type<MarkdownByValueState[K]>;
+  [K in keyof Required<Omit<MarkdownByValueState, 'smart_title'>>]: Type<MarkdownByValueState[K]>;
 };
 
 /**

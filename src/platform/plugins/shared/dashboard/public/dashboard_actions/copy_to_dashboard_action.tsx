@@ -43,7 +43,10 @@ export type CopyToDashboardAPI = HasType &
   HasUniqueId &
   HasParentApi<
     { type: typeof DASHBOARD_API_TYPE } & PublishesSavedObjectId &
-      Pick<DashboardApi, 'getDashboardPanelFromId'>
+      Pick<
+        DashboardApi,
+        'getDashboardPanelFromId' | 'getDashboardPanelFromIdAsync' | 'selectedPanelIds$'
+      >
   >;
 
 const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {

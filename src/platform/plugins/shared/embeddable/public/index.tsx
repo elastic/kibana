@@ -53,6 +53,20 @@ export {
 
 export type { PresentationPanelProps } from './react_embeddable_system/panel_component/types';
 
+export {
+  apiHasPanelSettingsInEditFlyout,
+  PanelEditFlyout,
+  PanelSettingsAccordions,
+  PanelSettingsFlyoutSections,
+  usePanelSettings,
+  type HasPanelSettingsInEditFlyout,
+  type PanelEditFlyoutProps,
+  type PanelSettingsAccordionsProps,
+  type PanelSettingsFlyoutSectionsProps,
+  type PanelSettingsApi,
+  type PanelSettingsState,
+} from './panel_settings';
+
 export type { DrilldownsManager, HasDrilldowns } from './drilldowns/types';
 
 import type { PresentationPanelErrorProps } from './react_embeddable_system/panel_component/presentation_panel_error';

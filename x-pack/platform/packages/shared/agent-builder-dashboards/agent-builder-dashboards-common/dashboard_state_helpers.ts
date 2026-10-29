@@ -20,6 +20,7 @@ export const EMPTY_DASHBOARD_STATE = Object.freeze({
   options: {
     hide_panel_titles: false,
     hide_panel_borders: false,
+    show_hint_bar: false,
     use_margins: true,
     auto_apply_filters: true,
     sync_colors: false,
