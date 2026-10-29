@@ -12,7 +12,12 @@ describe('formatDurationMs', () => {
   it('shows durations under a second in milliseconds', () => {
     expect(formatDurationMs(0)).toBe('0 ms');
     expect(formatDurationMs(950.25)).toBe('950 ms');
-    expect(formatDurationMs(999.6)).toBe('1000 ms');
+    expect(formatDurationMs(999.4)).toBe('999 ms');
+  });
+
+  it('switches to seconds when a duration rounds up to a second', () => {
+    expect(formatDurationMs(999.5)).toBe('1.00 s');
+    expect(formatDurationMs(999.99)).toBe('1.00 s');
   });
 
   it('shows a second and above in seconds, with two decimals', () => {
