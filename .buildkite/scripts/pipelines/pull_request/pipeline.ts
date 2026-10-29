@@ -65,8 +65,6 @@ import {
   investigationsSteps,
   osqueryCypressSteps,
   ruleManagementSteps,
-  commandStep,
-  k8sMinimalAgent,
 } from '#pipeline-utils/step-library';
 
 const prConfigs =
@@ -793,18 +791,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     if (GITHUB_PR_LABELS.includes('ci:run-code-quality')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/code_quality.yml', cancelable));
     }
-
-    // TEMP: force a failure to test Post-Build's continue_on_failure wait
-    pipeline.push(
-      renderSteps([
-        commandStep({
-          command: 'exit 1',
-          label: 'TEMP Force Failure',
-          key: 'temp_force_failure',
-          agents: k8sMinimalAgent(),
-        }),
-      ])
-    );
 
     // post_build is not cancelable — cleanup/reporting should always run
     pipeline.push(renderSteps(postBuildSteps()));
