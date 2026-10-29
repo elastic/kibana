@@ -20,9 +20,8 @@ import { COMMON_API_HEADERS, PUBLIC_API_HEADERS } from '../../fixtures/constants
 // A shared managed workflow, installed as soon as Significant Events is available. Every space
 // uses it, so the pause leaves it enabled.
 const SHARED_WORKFLOW_ENDPOINT = 'api/workflows/workflow/system-significant-events-discovery';
-// A per-space workflow, created on demand. The pause turns it off in the space.
-const BOOTSTRAP_CLEANUP_ENDPOINT = 'internal/significant_events/maintenance/cleanup/_bootstrap';
-const SPACE_WORKFLOW_ENDPOINT = 'api/workflows/workflow/system-significant-events-cleanup-default';
+// A per-space workflow, installed by the space's setup. The pause turns it off in the space.
+const SPACE_WORKFLOW_ENDPOINT = 'api/workflows/workflow/system-nightshift-cleanup-bound-default';
 // Serverless disables the public global settings API.
 const ALERTING_V2_ENABLED_SETTING_PATH = `/internal/kibana/global_settings/${encodeURIComponent(
   ALERTING_V2_ENABLED_SETTING_ID
@@ -165,14 +164,6 @@ const createClient = (apiClient: ApiClientFixture, sessions: IRoleSessions) => {
         });
       }
     },
-    async bootstrapSpaceWorkflow() {
-      // Bootstrapping needs Manage engines, which the streams admin role does not include.
-      const response = await apiClient.post(BOOTSTRAP_CLEANUP_ENDPOINT, {
-        headers: { ...COMMON_API_HEADERS, ...(await cookieFor('engine')) },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-    },
     async isRuleEnabled(ruleId: string) {
       const response = await apiClient.get(`api/alerting/v2/rules/${ruleId}`, {
         headers: await publicHeaders(),
@@ -302,12 +293,11 @@ apiTest.describe(
               message: 'the shared discovery workflow is installed and enabled',
               options: INSTALL_POLL_OPTIONS,
             });
-            // The per-space workflow only exists once something asks for it.
-            await client.bootstrapSpaceWorkflow();
+            // The per-space workflow is installed by the space's setup, in global setup.
             await client.pollWorkflowEnabled({
               endpoint: SPACE_WORKFLOW_ENDPOINT,
               expected: true,
-              message: 'the bootstrapped space cleanup workflow is installed and enabled',
+              message: 'the space cleanup workflow is installed and enabled',
               options: INSTALL_POLL_OPTIONS,
             });
             const source = await client.createSource(`flag-off-${uuidv4()}`);

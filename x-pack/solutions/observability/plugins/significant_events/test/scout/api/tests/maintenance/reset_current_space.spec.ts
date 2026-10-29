@@ -14,6 +14,7 @@ import {
 } from '@kbn/nightshift-shared';
 import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
+import { setUpDetectionEngineServiceAccount } from '../../fixtures/detection_engine_service_account';
 
 const STREAMS = ['.significant_events-knowledge_indicators', '.significant_events-detections'];
 const RESET_PATH = 'internal/significant_events/maintenance/_reset';
@@ -42,7 +43,8 @@ apiTest.describe(
         },
       ],
       elasticsearch: {
-        cluster: [],
+        // Resetting a set-up space switches its bound workflows, which needs `manage_security`.
+        cluster: ['manage_security'],
         indices: [
           {
             names: ['.significant_events-*'],
@@ -52,43 +54,56 @@ apiTest.describe(
       },
     });
 
-    apiTest.beforeAll(async ({ apiServices, kbnClient, esClient }) => {
-      for (const id of [spaceA, spaceB]) {
-        await apiServices.spaces.create({ id, name: id });
-      }
-      // Initialize the owned streams before writing test documents directly.
-      await kbnClient.request({
-        method: 'POST',
-        path: `/s/${spaceA}/${RESET_PATH}`,
-        headers: COMMON_API_HEADERS,
-      });
-      await kbnClient.request({
-        method: 'POST',
-        path: `/s/${spaceB}/internal/significant_events/maintenance/_pause`,
-        headers: COMMON_API_HEADERS,
-      });
-      for (const index of STREAMS) {
-        for (const [offset, id] of ids.entries()) {
-          await esClient.index({
-            index,
-            id,
-            op_type: 'create',
-            refresh: true,
-            document: {
-              '@timestamp': new Date().toISOString(),
-              id: 'same-ki-id',
-              type: 'feature',
-              'source.id': 'same-source-id',
-              ...(offset < 2 ? { 'kibana.space_ids': [offset === 0 ? spaceA : spaceB] } : {}),
-              feature: { type: 'entity', slug: 'same-slug', properties: {}, confidence: 90 },
-              detection_id: id,
-              rule_uuid: 'same-rule-id',
-              change_point_type: 'spike',
-            },
+    apiTest.beforeAll(
+      async ({ apiServices, kbnClient, esClient, kbnUrl, samlAuth, config, log }) => {
+        for (const id of [spaceA, spaceB]) {
+          await apiServices.spaces.create({ id, name: id });
+        }
+        // Resetting and pausing a space need it set up first.
+        for (const spaceId of [spaceA, spaceB]) {
+          await setUpDetectionEngineServiceAccount({
+            kbnUrl,
+            esClient,
+            samlAuth,
+            isServerless: Boolean(config.serverless),
+            log,
+            spaceId,
           });
         }
+        // Initialize the owned streams before writing test documents directly.
+        await kbnClient.request({
+          method: 'POST',
+          path: `/s/${spaceA}/${RESET_PATH}`,
+          headers: COMMON_API_HEADERS,
+        });
+        await kbnClient.request({
+          method: 'POST',
+          path: `/s/${spaceB}/internal/significant_events/maintenance/_pause`,
+          headers: COMMON_API_HEADERS,
+        });
+        for (const index of STREAMS) {
+          for (const [offset, id] of ids.entries()) {
+            await esClient.index({
+              index,
+              id,
+              op_type: 'create',
+              refresh: true,
+              document: {
+                '@timestamp': new Date().toISOString(),
+                id: 'same-ki-id',
+                type: 'feature',
+                'source.id': 'same-source-id',
+                ...(offset < 2 ? { 'kibana.space_ids': [offset === 0 ? spaceA : spaceB] } : {}),
+                feature: { type: 'entity', slug: 'same-slug', properties: {}, confidence: 90 },
+                detection_id: id,
+                rule_uuid: 'same-rule-id',
+                change_point_type: 'spike',
+              },
+            });
+          }
+        }
       }
-    });
+    );
 
     apiTest.afterAll(async ({ apiServices, esClient }) => {
       for (const index of STREAMS) {

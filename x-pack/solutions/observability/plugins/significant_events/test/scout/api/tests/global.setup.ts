@@ -10,6 +10,7 @@ import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import type { SignificantEventsAvailabilityResponse } from '../../../../common';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
+import { setUpDetectionEngineServiceAccount } from '../fixtures/detection_engine_service_account';
 
 const AVAILABILITY_PATH = '/internal/significant_events/availability';
 const AVAILABILITY_TIMEOUT_MS = 30_000;
@@ -64,5 +65,22 @@ globalSetupHook(
         lastResponse
       )}`
     );
+  }
+);
+
+globalSetupHook(
+  'Set the default space up with the detection engine service account',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  async ({ kbnUrl, esClient, samlAuth, config, log }) => {
+    // The detection engine only runs as a service account, so resuming Significant Events, which
+    // many specs do first, needs the space set up. Once for the whole run: the account belongs to
+    // the deployment, and two workers creating it at once conflict.
+    await setUpDetectionEngineServiceAccount({
+      kbnUrl,
+      esClient,
+      samlAuth,
+      isServerless: Boolean(config.serverless),
+      log,
+    });
   }
 );
