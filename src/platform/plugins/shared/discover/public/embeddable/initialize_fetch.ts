@@ -281,7 +281,6 @@ export function initializeFetch({
               abortSignal: currentAbortController.signal,
               inspectorAdapters,
               data: discoverServices.data,
-              expressions: discoverServices.expressions,
               scopedProfilesManager,
               searchSessionId,
               esqlVariables,
