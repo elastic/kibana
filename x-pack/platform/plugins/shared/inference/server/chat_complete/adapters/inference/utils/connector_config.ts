@@ -44,9 +44,15 @@ export const getElasticModelProvider = (
       `trying to retrieve model provider for a non-elastic inference endpoint (${provider})`
     );
   }
-  const modelId = getModelId(connector);
+  // Preconfigured EIS connectors carry no model_id, so fall back to the inference endpoint id.
+  const modelId = getModelId(connector) ?? connector.config?.inferenceId;
   if (modelId === elasticModelIds.RainbowSprinkles) {
     return InferenceEndpointProvider.AmazonBedrock;
+  }
+  // EIS ids are vendor-prefixed (`openai-gpt-5.5`, `.openai-gpt-5.5-chat_completion`).
+  // GPT-OSS is open-weights served outside the OpenAI API, so it is not treated as OpenAI.
+  if (modelId && /^\.?openai-/.test(modelId) && !/^\.?openai-gpt-oss/.test(modelId)) {
+    return InferenceEndpointProvider.OpenAI;
   }
   return undefined;
 };

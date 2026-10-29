@@ -11,6 +11,7 @@ import { fixSchemaArrayProperties } from '../../bedrock/convert_tools';
 import { ensureToolsWhenHistoryHasToolUse } from '../../../utils/ensure_tools_when_history_has_tool_use';
 import type { CreateOpenAIRequestOptions } from '../types';
 import { getProvider, getElasticModelProvider } from '../utils';
+import { toStrictToolSchemas } from './to_strict_tool_schemas';
 
 export const applyProviderTransforms = (
   options: CreateOpenAIRequestOptions
@@ -23,6 +24,13 @@ export const applyProviderTransforms = (
 
   if (provider === InferenceEndpointProvider.AmazonBedrock) {
     options = applyBedrockTransforms(options);
+  }
+
+  if (
+    provider === InferenceEndpointProvider.OpenAI ||
+    provider === InferenceEndpointProvider.AzureOpenAI
+  ) {
+    options = applyOpenAiTransforms(options);
   }
 
   options.tools = ensureToolsWhenHistoryHasToolUse({
@@ -48,4 +56,12 @@ const applyBedrockTransforms = (
   }
 
   return options;
+};
+
+const applyOpenAiTransforms = (options: CreateOpenAIRequestOptions): CreateOpenAIRequestOptions => {
+  if (options.simulatedFunctionCalling) {
+    return options;
+  }
+  const { tools, strictToolNames } = toStrictToolSchemas(options.tools);
+  return { ...options, tools, strictToolNames };
 };

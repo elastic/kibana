@@ -286,7 +286,7 @@ describe('validateToolCalls', () => {
       expect(logger.debug).toHaveBeenCalledTimes(1);
       const message = logger.debug.mock.calls[0][0]();
       expect(message).toBe(
-        'Repaired JSON-encoded arguments of my_function (1) at: response, response.verdicts'
+        'Repaired arguments of my_function (1) at: response, response.verdicts'
       );
       expect(message).not.toContain('secret-id');
     });
@@ -384,5 +384,62 @@ describe('validateToolCalls', () => {
         },
       })
     ).toThrow('were invalid');
+  });
+
+  describe('when a strict-mode model sends null for parameters it does not set', () => {
+    const schema = asToolSchema({
+      type: 'object',
+      properties: {
+        migration_id: { type: 'string' },
+        is_prebuilt: { type: 'boolean' },
+        status: { type: 'string', enum: ['completed', 'failed'] },
+        ids: { type: 'array', items: { type: 'string' } },
+        filter: {
+          type: 'object',
+          properties: { search_term: { type: 'string' } },
+        },
+        note: { type: ['string', 'null'] },
+      },
+      required: ['migration_id'],
+    });
+
+    const validate = (args: Record<string, unknown>) =>
+      validateToolCalls({
+        logger,
+        toolCalls: [
+          { function: { name: 'my_function', arguments: JSON.stringify(args) }, toolCallId: '1' },
+        ],
+        tools: { my_function: { description: 'description', schema } },
+      })[0].function.arguments;
+
+    it('should treat a null optional parameter as absent', () => {
+      expect(
+        validate({
+          migration_id: 'm-1',
+          is_prebuilt: null,
+          status: null,
+          ids: null,
+          filter: { search_term: null },
+        })
+      ).toEqual({ migration_id: 'm-1', filter: {} });
+    });
+
+    it('should keep false for an optional parameter the model set', () => {
+      expect(validate({ migration_id: 'm-1', is_prebuilt: false, status: null })).toEqual({
+        migration_id: 'm-1',
+        is_prebuilt: false,
+      });
+    });
+
+    it('should keep null for a parameter whose schema accepts null', () => {
+      expect(validate({ migration_id: 'm-1', note: null })).toEqual({
+        migration_id: 'm-1',
+        note: null,
+      });
+    });
+
+    it('should reject null for a required parameter', () => {
+      expect(() => validate({ migration_id: null })).toThrow('were invalid');
+    });
   });
 });
