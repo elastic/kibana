@@ -35,6 +35,7 @@ interface ActionInputSchema {
 
 interface ActionYaml {
   tags?: string[];
+  outputs?: Array<{ name: string }>;
   consts?: {
     actionMetadata?: Record<string, unknown>;
     required_index_privileges?: string[];
@@ -131,6 +132,44 @@ describe('AlertZero action workflows', () => {
       });
     }
   );
+
+  describe('create rule', () => {
+    const yaml = parsed(ALERTZERO_ACTION_CREATE_RULE_WORKFLOW.yaml);
+    const create = stepByName(yaml, 'create_rule');
+    const rule = create?.with?.rule as Record<string, unknown>;
+
+    // An approved proposal is meant to close the coverage gap, and a disabled
+    // rule detects nothing, so the rule is created enabled in the one call that
+    // creates it. A separate enable step would leave a disabled rule behind when
+    // it failed, and the gate's retry would then create a second copy.
+    it('creates the rule enabled, with no separate enable step', () => {
+      expect(create?.type).toBe('security.createRule');
+      expect(rule.enabled).toBe(true);
+      expect(yaml.steps.map(({ type }) => type)).not.toContain('security.enableRule');
+    });
+
+    // The action owns `enabled`, and `actionInput` rejects unknown fields, so the
+    // body is spelled out. Every drafted field must reach the engine, and nothing
+    // the draft cannot carry may be invented here.
+    it('forwards every actionInput field to the create step', () => {
+      const trigger = yaml.triggers?.find(({ type }) => type === 'manual');
+      const drafted = Object.keys(trigger?.inputs?.properties?.actionInput?.properties ?? {});
+      expect(drafted.length).toBeGreaterThan(0);
+      expect(drafted).not.toContain('enabled');
+      for (const field of drafted) {
+        expect(rule[field]).toBe(`\${{ inputs.actionInput.${field} }}`);
+      }
+      expect(Object.keys(rule).sort()).toEqual([...drafted, 'enabled'].sort());
+    });
+
+    it('reports the created rule and whether it is enabled', () => {
+      const emit = stepByName(yaml, 'emit_result')?.with as Record<string, string>;
+      expect(emit.ruleId).toBe('{{ steps.create_rule.output.id }}');
+      expect(emit.ruleName).toBe('{{ steps.create_rule.output.name }}');
+      expect(emit.enabled).toBe('${{ steps.create_rule.output.enabled }}');
+      expect(yaml.outputs?.map(({ name }) => name)).toEqual(['ruleId', 'ruleName', 'enabled']);
+    });
+  });
 
   describe('enable rule', () => {
     const yaml = parsed(ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW.yaml);
