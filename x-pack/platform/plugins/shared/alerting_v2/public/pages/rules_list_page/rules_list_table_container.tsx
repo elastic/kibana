@@ -58,7 +58,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   onCloneInFlyout,
 }) => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
-  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal({
+    canRestore: canWrite,
+  });
 
   const { items: contentItems, totalItems, isLoading, hasActiveQuery } = useContentListItems();
   const { pageIndex, pageSize, pageSizeOptions, setPageIndex, setPageSize } =

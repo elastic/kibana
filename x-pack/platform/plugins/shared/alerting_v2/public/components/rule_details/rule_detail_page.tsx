@@ -99,7 +99,9 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
   const { mutate: runRule } = useRunRule();
   const { flyout, confirmationModal, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
-  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal({
+    canRestore: canWrite,
+  });
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
   const [showUpdateApiKeyConfirmation, setShowUpdateApiKeyConfirmation] = React.useState(false);
 

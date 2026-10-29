@@ -52,7 +52,9 @@ export const RuleSummaryFlyoutContainer = ({
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
   const { mutate: runRule } = useRunRule();
   const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
-  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal({
+    canRestore: canWrite,
+  });
 
   const {
     rule: sourceRule,
