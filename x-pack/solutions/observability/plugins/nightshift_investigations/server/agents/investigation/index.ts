@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type {
   AgentBaseConfiguration,
@@ -24,6 +25,7 @@ import {
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
 import { getTelemetryTargets } from '../../telemetry_targets';
+import { ELASTIC_APPS_SLACK_CONNECTOR_ID } from '../../lib/automations/generate_workflow_yaml';
 import type { NightshiftInvestigationsConfig } from '../../config';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
@@ -173,8 +175,8 @@ export type NightshiftAgentTypeOptions = Omit<
 /**
  * Builds the configuration every Nightshift agent type shares: tools, connectors, the Cortex and
  * Memory hooks and the space's custom context. Only the instructions differ between types.
- * With `standalone`, the agent lists only its own tools. Agent Builder's own prompt and internal
- * tools still apply to it.
+ * With `standalone`, the agent lists only its own tools and the connector tool that reads Slack.
+ * Agent Builder's own prompt and internal tools still apply to it.
  */
 export const buildNightshiftAgentConfiguration = ({
   instructions: agentInstructions,
@@ -214,17 +216,22 @@ export const buildNightshiftAgentConfiguration = ({
       skill_ids: [],
       tools: [
         {
-          tool_ids: standalone
-            ? [...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []), TIME_CONVERTER_TOOL_ID]
-            : [
-                ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
-                ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
-                ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
-              ],
+          tool_ids: [
+            ...(standalone
+              ? [...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []), TIME_CONVERTER_TOOL_ID]
+              : [
+                  ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
+                  ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
+                  ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
+                ]),
+            // The Elastic Slack app connector has no credentials to hand the sandbox: Relay
+            // holds the token, so the agent calls it as a tool.
+            platformCoreTools.executeConnectorSubAction,
+          ],
         },
       ],
       enable_elastic_capabilities: false,
-      connector_ids: telemetryConnectorIds,
+      connector_ids: [...telemetryConnectorIds, ELASTIC_APPS_SLACK_CONNECTOR_ID],
       ...(() => {
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the

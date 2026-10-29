@@ -8,6 +8,7 @@
 import {
   ConversationRoundStepType,
   isToolCallStep,
+  platformCoreTools,
   type ConversationRoundStep,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
@@ -246,6 +247,7 @@ const KNOWN_AGENT_TOOLS = [
   SANDBOX_VIEW_FILE_TOOL_ID,
   SANDBOX_WRITE_FILE_TOOL_ID,
   TIME_CONVERTER_TOOL_ID,
+  replayToolName(platformCoreTools.executeConnectorSubAction),
 ];
 
 /** The tool names to define: the known ones, then any other the conversation calls, in a fixed order. */

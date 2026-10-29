@@ -63,7 +63,11 @@ describe('Nightshift investigation agent type', () => {
       workflow_ids: ['system-nightshift-sandbox-materialize-workspace-bound-default'],
       post_execution_workflow_ids: ['system-nightshift-agent-optimize-bound-default'],
     });
-    expect(base.tools?.[0]?.tool_ids).toEqual([...SANDBOX_TOOL_IDS, TIME_CONVERTER_TOOL_ID]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([
+      ...SANDBOX_TOOL_IDS,
+      TIME_CONVERTER_TOOL_ID,
+      platformCoreTools.executeConnectorSubAction,
+    ]);
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
     expect(base.instructions).toContain('/workspace/.connector-docs/elastic.md');
@@ -137,7 +141,10 @@ describe('Nightshift investigation agent type', () => {
     expect(base.post_execution_workflow_ids).toEqual([
       'system-nightshift-agent-optimize-bound-default',
     ]);
-    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([
+      TIME_CONVERTER_TOOL_ID,
+      platformCoreTools.executeConnectorSubAction,
+    ]);
   });
 
   it('allow-lists the telemetry connector when one is configured', async () => {
@@ -149,7 +156,17 @@ describe('Nightshift investigation agent type', () => {
       })
     );
 
-    expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
+    expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'elastic-apps-slack']);
+  });
+
+  it('assigns the Elastic Slack app connector, which reads Slack outside the sandbox', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false })
+    );
+
+    expect(base.connector_ids).toEqual(['elastic-apps-slack']);
+    expect(base.instructions).toContain('**SLACK**');
+    expect(base.instructions).toContain('"connectorId": "elastic-apps-slack"');
   });
 
   it('adds inherited connectors to the telemetry allow-list when a resolver is given', async () => {
@@ -162,15 +179,18 @@ describe('Nightshift investigation agent type', () => {
       })
     );
 
-    expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'github']);
+    expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'elastic-apps-slack', 'github']);
   });
 
-  it('offers only nightshift_time_converter_tool when the sandbox is not configured', async () => {
+  it('offers only the time converter and the Slack connector tool when the sandbox is not configured', async () => {
     const base = await baseFor(
       getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: false })
     );
 
-    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([
+      TIME_CONVERTER_TOOL_ID,
+      platformCoreTools.executeConnectorSubAction,
+    ]);
   });
 
   it('instructs the agent to answer in its final message and not to record findings', async () => {
@@ -207,7 +227,12 @@ describe('Nightshift investigation agent type', () => {
       'sa-a'
     );
 
-    expect(base.connector_ids).toEqual(['legacy', 'c0-telemetry', 'orca-telemetry']);
+    expect(base.connector_ids).toEqual([
+      'legacy',
+      'c0-telemetry',
+      'orca-telemetry',
+      'elastic-apps-slack',
+    ]);
     expect(base.workflow_ids).toEqual([
       'system-nightshift-sandbox-materialize-workspace-bound-sa-a',
     ]);
@@ -288,5 +313,5 @@ it('allows configured telemetry connectors on the single investigator type', asy
       },
     })
   );
-  expect(base.connector_ids).toEqual(['legacy', 'customer0', 'orca']);
+  expect(base.connector_ids).toEqual(['legacy', 'customer0', 'orca', 'elastic-apps-slack']);
 });

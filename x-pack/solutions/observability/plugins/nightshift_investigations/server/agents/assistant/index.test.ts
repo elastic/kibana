@@ -71,7 +71,7 @@ describe('Nightshift assistant agent type', () => {
     expect(instructions).toBe(ASSISTANT_INSTRUCTIONS);
     expect(instructions).not.toBe(investigatorInstructions);
     expect(assistant).toMatchObject({
-      connector_ids: ['telemetry'],
+      connector_ids: ['telemetry', 'elastic-apps-slack'],
       workflow_ids: [
         getNightshiftBoundHookWorkflowId(
           NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
@@ -101,7 +101,7 @@ describe('Nightshift assistant agent type', () => {
     const assistant = await configurationFor(getAssistantAgentType(telemetryOptions));
     const investigator = await configurationFor(getInvestigationAgentType(telemetryOptions));
 
-    expect(assistant.connector_ids).toEqual(['c0', 'orca']);
+    expect(assistant.connector_ids).toEqual(['c0', 'orca', 'elastic-apps-slack']);
     expect(assistant.connector_ids).toEqual(investigator.connector_ids);
   });
 
@@ -113,7 +113,7 @@ describe('Nightshift assistant agent type', () => {
 
     const { connector_ids: connectorIds } = await baseConfiguration({ request, spaceId: 'ops' });
 
-    expect(connectorIds).toEqual(['telemetry', 'github', 'pagerduty']);
+    expect(connectorIds).toEqual(['telemetry', 'elastic-apps-slack', 'github', 'pagerduty']);
     expect(getInheritedConnectorIds).toHaveBeenCalledWith({ request, spaceId: 'ops' });
   });
 
@@ -133,7 +133,7 @@ describe('Nightshift assistant agent type', () => {
       baseConfiguration,
     });
 
-    expect(connectorIds).toEqual(['telemetry']);
+    expect(connectorIds).toEqual(['telemetry', 'elastic-apps-slack']);
     expect(logger.warn).toHaveBeenCalledWith(
       'Failed to resolve inherited connectors for space "default": registry down'
     );
