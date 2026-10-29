@@ -503,8 +503,22 @@ export const PostAgentUnenrollRequestSchema = {
   }),
   body: schema.nullable(
     schema.object({
-      force: schema.maybe(schema.boolean()),
-      revoke: schema.maybe(schema.boolean()),
+      force: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'Unenrolls the agent even if it is enrolled in a hosted agent policy or is a managed agent. Does not revoke API keys immediately. To do so, also set `revoke`.',
+          },
+        })
+      ),
+      revoke: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'Immediately invalidates the API keys of the agent without notifying it. The agent keeps running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.',
+          },
+        })
+      ),
     })
   ),
 };
@@ -518,14 +532,16 @@ export const PostBulkAgentUnenrollRequestSchema = {
     force: schema.maybe(
       schema.boolean({
         meta: {
-          description: 'Unenrolls hosted agents too',
+          description:
+            'Also unenrolls agents that are enrolled in hosted agent policies or are managed agents. Does not revoke API keys immediately. To do so, also set `revoke`.',
         },
       })
     ),
     revoke: schema.maybe(
       schema.boolean({
         meta: {
-          description: 'Revokes API keys of agents',
+          description:
+            'Immediately invalidates the API keys of the agents without notifying them. The agents keep running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.',
         },
       })
     ),
