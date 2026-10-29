@@ -10,9 +10,17 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
-import { InvestigationList } from './investigation_list';
+import { InvestigationList, type InvestigationListHandle } from './investigation_list';
+import { scrollSectionIntoView } from './scroll_section_into_view';
 
 let mockBasePath = '';
+
+jest.mock('./scroll_section_into_view', () => ({
+  scrollSectionIntoView: jest.fn(() => jest.fn()),
+}));
+const mockScrollSectionIntoView = scrollSectionIntoView as jest.MockedFunction<
+  typeof scrollSectionIntoView
+>;
 
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
@@ -197,6 +205,47 @@ describe('InvestigationList', () => {
       mockBasePath = '/s/other-space';
       renderTwoSections();
       expect(toggle('critical')).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+
+  describe('scrolling to a severity', () => {
+    beforeEach(() => {
+      window.localStorage.clear();
+      mockBasePath = '';
+      mockScrollSectionIntoView.mockClear();
+    });
+
+    it('cancels the scroll still running when a newer jump starts, and when the list unmounts', () => {
+      const ref = React.createRef<InvestigationListHandle>();
+      const { unmount } = render(
+        <I18nProvider>
+          <InvestigationList
+            ref={ref}
+            sections={[
+              makeSection('critical', { investigations: [investigation], total: 1 }),
+              makeSection('high', { investigations: [investigation], total: 1 }),
+            ]}
+          />
+        </I18nProvider>
+      );
+
+      expect(ref.current?.scrollToSeverity('critical')).toBe(true);
+      const cancelFirst = mockScrollSectionIntoView.mock.results[0].value as jest.Mock;
+      expect(cancelFirst).not.toHaveBeenCalled();
+
+      // The second tier is already open, so the jump has nothing to open; it still has to stop
+      // the first scroll, or that one lands and pulls the page back to the first tier.
+      expect(ref.current?.scrollToSeverity('high')).toBe(true);
+      expect(cancelFirst).toHaveBeenCalledTimes(1);
+      const cancelSecond = mockScrollSectionIntoView.mock.results[1].value as jest.Mock;
+      expect(cancelSecond).not.toHaveBeenCalled();
+
+      expect(ref.current?.scrollToSeverity('low')).toBe(false);
+      expect(mockScrollSectionIntoView).toHaveBeenCalledTimes(2);
+
+      unmount();
+      expect(cancelSecond).toHaveBeenCalledTimes(1);
+      expect(cancelFirst).toHaveBeenCalledTimes(1);
     });
   });
 });
