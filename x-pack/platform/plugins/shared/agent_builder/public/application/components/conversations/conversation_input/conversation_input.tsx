@@ -409,7 +409,6 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     draftHydratedRef.current = true;
     if (draft && !lastEditorContentRef.current) {
       messageEditorController.setContent(draft);
-      // `setContent` does not report a content change
       updateLeadingMention(getLeadingMention(draft));
     }
   }, [

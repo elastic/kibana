@@ -302,7 +302,6 @@ export const useMessageEditor = (
   }, [maxLength]);
 
   const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus, onContentChange });
-  // A ref keeps the controller stable when `instance` changes
   const onChangeRef = useRef(instance.onChange);
   onChangeRef.current = instance.onChange;
   const notifyInput = useCallback(() => onChangeRef.current(), []);
