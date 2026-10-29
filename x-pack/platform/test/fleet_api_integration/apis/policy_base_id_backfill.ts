@@ -33,7 +33,8 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
 
-  describe('policy_base_id backfill', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/301277
+  describe.skip('policy_base_id backfill', () => {
     skipIfNoDockerRegistry(providerContext);
 
     let agentPolicyId: string;
