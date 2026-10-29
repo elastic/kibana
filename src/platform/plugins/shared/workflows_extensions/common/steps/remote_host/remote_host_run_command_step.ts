@@ -9,22 +9,26 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const SshRunStepTypeId = 'ssh.run' as const;
 
 const REMOTE_HOST_COMMAND_TEMPLATE_MAX_CHARS = 1024 * 32; // 32 KB
 
-export const ConfigSchema = z.object({
-  'connector-id': z.string().min(1),
-});
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    'connector-id': z.string().min(1),
+  })
+);
 
-export const InputSchema = z.object({
-  command: z.string().max(REMOTE_HOST_COMMAND_TEMPLATE_MAX_CHARS),
-  env: z.record(z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/), z.string()).optional(),
-  cwd: z.string().optional(),
-});
+export const InputSchema = lazySchema(() =>
+  z.object({
+    command: z.string().max(REMOTE_HOST_COMMAND_TEMPLATE_MAX_CHARS),
+    env: z.record(z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/), z.string()).optional(),
+    cwd: z.string().optional(),
+  })
+);
 
 export const OutputSchema = z.unknown();
 

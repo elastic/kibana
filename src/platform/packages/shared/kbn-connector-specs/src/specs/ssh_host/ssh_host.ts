@@ -17,7 +17,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
 const SCRIPT_MAX_LENGTH = 1048576;
@@ -25,38 +25,48 @@ const REMOTE_PATH_MAX_LENGTH = 4096;
 const UPLOAD_CONTENT_MAX_LENGTH = 104857600;
 const DOWNLOAD_MAX_BYTES = 1024 * 1024 * 1024;
 
-const ExecInputSchema = z.object({
-  script: z
-    .string()
-    .min(1)
-    .max(SCRIPT_MAX_LENGTH)
-    .describe('Shell script to run on the remote host. One call is one new shell.'),
-});
+const ExecInputSchema = lazySchema(() =>
+  z.object({
+    script: z
+      .string()
+      .min(1)
+      .max(SCRIPT_MAX_LENGTH)
+      .describe('Shell script to run on the remote host. One call is one new shell.'),
+  })
+);
 
-const UploadFileInputSchema = z.object({
-  remotePath: z
-    .string()
-    .min(1)
-    .max(REMOTE_PATH_MAX_LENGTH)
-    .describe('Absolute or relative path of the file to write on the remote host.'),
-  content: z.string().min(1).max(UPLOAD_CONTENT_MAX_LENGTH).describe('File bytes, base64-encoded.'),
-  encoding: z.literal('base64').describe('Must be the literal "base64".'),
-});
+const UploadFileInputSchema = lazySchema(() =>
+  z.object({
+    remotePath: z
+      .string()
+      .min(1)
+      .max(REMOTE_PATH_MAX_LENGTH)
+      .describe('Absolute or relative path of the file to write on the remote host.'),
+    content: z
+      .string()
+      .min(1)
+      .max(UPLOAD_CONTENT_MAX_LENGTH)
+      .describe('File bytes, base64-encoded.'),
+    encoding: z.literal('base64').describe('Must be the literal "base64".'),
+  })
+);
 
-const DownloadFileInputSchema = z.object({
-  remotePath: z
-    .string()
-    .min(1)
-    .max(REMOTE_PATH_MAX_LENGTH)
-    .describe('Absolute or relative path of the file to read on the remote host.'),
-  maxBytes: z
-    .number()
-    .int()
-    .positive()
-    .max(DOWNLOAD_MAX_BYTES)
-    .optional()
-    .describe('Maximum file size in bytes. Defaults to 10 MiB when omitted.'),
-});
+const DownloadFileInputSchema = lazySchema(() =>
+  z.object({
+    remotePath: z
+      .string()
+      .min(1)
+      .max(REMOTE_PATH_MAX_LENGTH)
+      .describe('Absolute or relative path of the file to read on the remote host.'),
+    maxBytes: z
+      .number()
+      .int()
+      .positive()
+      .max(DOWNLOAD_MAX_BYTES)
+      .optional()
+      .describe('Maximum file size in bytes. Defaults to 10 MiB when omitted.'),
+  })
+);
 
 const catalogOnly = async (): Promise<never> => {
   throw new Error(

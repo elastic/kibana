@@ -9,19 +9,23 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const SshUploadFileStepTypeId = 'ssh.uploadFile' as const;
 
-export const ConfigSchema = z.object({
-  'connector-id': z.string().min(1),
-});
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    'connector-id': z.string().min(1),
+  })
+);
 
-export const InputSchema = z.object({
-  remotePath: z.string().min(1),
-  content: z.string(),
-});
+export const InputSchema = lazySchema(() =>
+  z.object({
+    remotePath: z.string().min(1),
+    content: z.string(),
+  })
+);
 
 export const OutputSchema = z.null();
 

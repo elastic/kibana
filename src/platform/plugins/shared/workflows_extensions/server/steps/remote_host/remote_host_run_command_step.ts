@@ -9,7 +9,7 @@
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { ExecutionError } from '@kbn/workflows/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorCallContext } from './execute_in_connector';
 import type { RemoteHostJobStatus } from './remote_host_job';
 import {
@@ -22,12 +22,14 @@ import {
 import { remoteHostRunCommandStepCommonDefinition } from '../../../common/steps/remote_host';
 import { createPollServerStepDefinition } from '../../step_registry/types';
 
-const StateSchema = z.object({
-  jobId: z.string(),
-  stdoutOffset: z.number().default(0),
-  stderrOffset: z.number().default(0),
-  polls: z.number().default(0),
-});
+const StateSchema = lazySchema(() =>
+  z.object({
+    jobId: z.string(),
+    stdoutOffset: z.number().default(0),
+    stderrOffset: z.number().default(0),
+    polls: z.number().default(0),
+  })
+);
 
 const CANCEL_TIMEOUT_MS = 30000;
 const MAX_POLL_ATTEMPTS = 20000;
