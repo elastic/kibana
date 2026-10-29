@@ -109,6 +109,7 @@ export const JsonCodeEditorCommon = ({
 export const JSONCodeEditorCommonMemoized = React.memo((props: JsonCodeEditorCommonProps) => {
   return <JsonCodeEditorCommon {...props} />;
 });
+JSONCodeEditorCommonMemoized.displayName = 'JSONCodeEditorCommonMemoized';
 
 const componentStyles = {
   codeEditor: ({ euiTheme }: UseEuiTheme) => css`

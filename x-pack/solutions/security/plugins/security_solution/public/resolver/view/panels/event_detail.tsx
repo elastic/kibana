@@ -354,3 +354,4 @@ const StyledDescriptiveName = memo(styled(EuiText)`
   padding-right: 1em;
   overflow-wrap: break-word;
 `);
+StyledDescriptiveName.displayName = 'StyledDescriptiveName';
