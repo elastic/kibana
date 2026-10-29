@@ -8,6 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { TelemetryTarget } from '../../telemetry_targets';
 import type { SandboxCallContext } from './tool_utils';
 import { authorizeConnector } from './connector_authorization';
 import { writeConnectorManifest } from './connector_manifest';
@@ -29,17 +30,57 @@ export const createSandboxWorkspaceManager = ({
   getDeps,
   telemetryConnectorId,
   telemetryReadableIndices,
+  telemetryTargets,
+  getTelemetryTarget,
   logger,
 }: {
   getDeps: () => { actions?: ActionsPluginStart };
   /** When set, `/workspace/.connector-docs/elastic.md` is (re-)seeded alongside the connector manifest. */
   telemetryConnectorId?: string;
   telemetryReadableIndices?: string;
+  telemetryTargets?: TelemetryTarget[];
+  getTelemetryTarget?: (callContext: SandboxCallContext) => Promise<TelemetryTarget | undefined>;
   logger: Logger;
 }) => {
   const lastWorkspaceKeys = new Map<SandboxSession, string>();
 
+  const configuredTargets = telemetryTargets ?? [
+    { connectorId: telemetryConnectorId, readableIndices: telemetryReadableIndices },
+  ];
+  const telemetryConnectorIds = new Set(configuredTargets.map(({ connectorId }) => connectorId));
+  const callTargets = new WeakMap<SandboxCallContext, Promise<TelemetryTarget | undefined>>();
+
+  const prepareCallContext = (
+    callContext: SandboxCallContext
+  ): Promise<TelemetryTarget | undefined> => {
+    const cached = callTargets.get(callContext);
+    if (cached) return cached;
+    const pending = (async () => {
+      const boundTarget = await getTelemetryTarget?.(callContext);
+      if (boundTarget !== undefined) {
+        // Restrict both manifests and credential resolution to this conversation's telemetry.
+        callContext.allowedConnectorIds = callContext.allowedConnectorIds.filter(
+          (id) => !telemetryConnectorIds.has(id) || id === boundTarget.connectorId
+        );
+      }
+      const allowedTargets = configuredTargets.filter(
+        ({ connectorId }) => connectorId && callContext.allowedConnectorIds.includes(connectorId)
+      );
+      // Custom agents can use several connectors; only infer guidance for an unambiguous source.
+      const inferredTarget =
+        new Set(allowedTargets.map(({ connectorId }) => connectorId)).size === 1
+          ? allowedTargets[0]
+          : undefined;
+      return boundTarget ?? inferredTarget;
+    })();
+    callTargets.set(callContext, pending);
+    return pending;
+  };
+
   return {
+    async prepareCallContext(callContext: SandboxCallContext): Promise<void> {
+      await prepareCallContext(callContext);
+    },
     async ensureWorkspaceReady({
       session,
       callContext,
@@ -48,11 +89,14 @@ export const createSandboxWorkspaceManager = ({
       callContext: SandboxCallContext;
     }): Promise<void> {
       const { actions } = getDeps();
+      const selected = await prepareCallContext(callContext);
+      const selectedConnectorId = selected?.connectorId;
+      const selectedReadableIndices = selected?.readableIndices;
       const getActionsClient = actions
         ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req)
         : undefined;
-      const telemetryAuthorization = telemetryConnectorId
-        ? await authorizeConnector(telemetryConnectorId, callContext, actions)
+      const telemetryAuthorization = selectedConnectorId
+        ? await authorizeConnector(selectedConnectorId, callContext, actions)
         : undefined;
       const canUseTelemetry = Boolean(
         telemetryAuthorization && !('errorMessage' in telemetryAuthorization)
@@ -60,6 +104,8 @@ export const createSandboxWorkspaceManager = ({
       const currentKey = JSON.stringify({
         connectorIds: [...callContext.allowedConnectorIds].sort(),
         canUseTelemetry,
+        selectedConnectorId,
+        selectedReadableIndices,
       });
       const lastKey = lastWorkspaceKeys.get(session);
       if (!session.isReset && lastKey === currentKey) {
@@ -95,11 +141,11 @@ export const createSandboxWorkspaceManager = ({
           getActionsClient,
           logger,
         });
-        if (telemetryConnectorId && canUseTelemetry) {
+        if (selectedConnectorId && canUseTelemetry) {
           await writeElasticManifest({
             session,
-            credentials: { kind: 'connector', connectorId: telemetryConnectorId },
-            readableIndices: telemetryReadableIndices,
+            credentials: { kind: 'connector', connectorId: selectedConnectorId },
+            readableIndices: selectedReadableIndices,
             logger,
           });
         }
