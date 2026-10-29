@@ -97,6 +97,23 @@ test.describe('AlertZero queue page width', { tag: tags.stateful.classic }, () =
         .toBeLessThanOrEqual(testData.NARROW_VIEWPORT.width);
     });
 
+    await test.step('each chart stays inside its card', async () => {
+      for (const card of await alertZeroQueue.trendChartCards.all()) {
+        const sparkline = card.locator(alertZeroQueue.trendSparklines);
+        await expect
+          .poll(async () => {
+            const [cardBox, chartBox] = await Promise.all([
+              card.boundingBox(),
+              sparkline.boundingBox(),
+            ]);
+            return cardBox && chartBox
+              ? chartBox.x + chartBox.width <= cardBox.x + cardBox.width
+              : false;
+          })
+          .toBe(true);
+      }
+    });
+
     await test.step('each chart is narrower than it was in the wide window', async () => {
       await expect
         .poll(async () => {
