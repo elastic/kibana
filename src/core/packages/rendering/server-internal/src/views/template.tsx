@@ -115,6 +115,13 @@ export const Template: FunctionComponent<Props> = ({
           data-test-subj="kbnLoadingMessage"
         >
           {/*
+           * POC: ambient blob-dot field behind the splash (same CE as login).
+           * Script: /ui/ambient_bg.js — fixed overlay, pointer-events none.
+           */}
+          {createElement('elastic-ambient-bg', {
+            'data-test-subj': 'kbnAmbientBg',
+          })}
+          {/*
            * Default splash: `<elastic-loader-ring>` owns `role="status"` /
            * aria itself (see /ui/loader_ring.js). Custom branding keeps
            * the wrapper announcement + progress bar (static logo image).
@@ -181,7 +188,8 @@ export const Template: FunctionComponent<Props> = ({
             window.__kbnCspNotEnforced__ = true;
           `}
         </script>
-        {/* Loader-ring CE must define before bootstrap flips the splash visible. */}
+        {/* Ambient bg + loader-ring CEs must define before bootstrap flips the splash visible. */}
+        <script src={`${uiPublicUrl}/ambient_bg.js`} />
         <script src={`${uiPublicUrl}/loader_ring.js`} />
         <script src={bootstrapScriptUrl} />
       </body>

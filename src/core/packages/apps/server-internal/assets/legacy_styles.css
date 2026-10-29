@@ -97,6 +97,8 @@ body, html {
   font-kerning: normal;
   font-weight: 400;
   position: relative;
+  /* POC: sit above <elastic-ambient-bg> (fixed, z-index: 0) */
+  z-index: 1;
 }
 
 /*
