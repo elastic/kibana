@@ -10,15 +10,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-emulate';
-import {
-  applyOverlay,
-  convertDiscovery,
-  convertSwagger2,
-  isDiscoveryDocument,
-} from '@kbn/connector-emulate';
 import type { ConnectorSpec } from '../../connector_spec';
-import { bundleSpec } from './bundle_spec';
-import { isJsonObject } from './json_pointer';
+import { forEachRef } from './json_pointer';
+import { loadVendorSpec } from './load_vendor_spec';
 import type { VendorApiFixtures } from './fixtures';
 import { vendorApiFixturesSchema } from './fixtures';
 import type {
@@ -28,7 +22,16 @@ import type {
   UnmatchedRequest,
   VendorApiManifest,
 } from './manifest';
-import { parseManifest, serializeManifest } from './manifest';
+import { matchesPathTemplate, parseManifest, serializeManifest } from './manifest';
+import type { VendorApiLog } from './load_vendor_specs';
+import {
+  applyOverlayToSources,
+  FIXTURES,
+  MANIFEST,
+  OVERLAY,
+  readOptional,
+  snapshotFile,
+} from './load_vendor_specs';
 import { parseSpecText } from './parse_spec_text';
 import { projectSpec } from './project_spec';
 import { assessPagination } from './propose_pagination';
@@ -36,10 +39,7 @@ import type { RecordingFinding } from './record_actions';
 import { recordActions } from './record_actions';
 import { toStableJson } from './stable_json';
 
-export interface VendorApiLog {
-  readonly info: (message: string) => void;
-  readonly warning: (message: string) => void;
-}
+export type { VendorApiLog } from './load_vendor_specs';
 
 export interface UpdateVendorApiOptions {
   readonly connector: ConnectorSpec;
@@ -55,6 +55,8 @@ export interface UpdateVendorApiOptions {
   /** Reports what would change instead of writing it. */
   readonly check?: boolean;
   readonly fetchText: (url: string) => Promise<string>;
+  /** When the document `fetchText` returned for a URL was fetched, if not just now. */
+  readonly fetchedAt?: (url: string) => Date | undefined;
   readonly now: () => Date;
   readonly log: VendorApiLog;
 }
@@ -65,30 +67,6 @@ export interface UpdateVendorApiResult {
   /** What makes the artifacts untrustworthy; the script fails when there are any. */
   readonly problems: readonly string[];
 }
-
-const MANIFEST = 'manifest.json';
-const FIXTURES = 'fixtures.json';
-const OVERLAY = 'overlay.yaml';
-const snapshotFile = (source: string) => path.join('snapshots', `${source}.openapi.json`);
-
-const readOptional = async (file: string): Promise<string | undefined> => {
-  try {
-    return await fs.readFile(file, 'utf8');
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return undefined;
-    }
-    throw error;
-  }
-};
-
-const formatOf = (document: OpenApiDocument): ManifestSource['format'] =>
-  document.swagger === '2.0' ? 'swagger' : 'openapi';
-
-const apiVersionOf = ({ info }: OpenApiDocument): string | undefined => {
-  const version = isJsonObject(info) ? info.version : undefined;
-  return typeof version === 'string' ? version : undefined;
-};
 
 const listSnapshots = async (directory: string): Promise<string[]> => {
   try {
@@ -109,6 +87,14 @@ const describeFinding = (finding: RecordingFinding): string => {
       return `${finding.action}: no generated input passes the action's schema; add an input to ${FIXTURES}`;
     case 'handler-error':
       return `${finding.action}: the handler threw: ${finding.message}`;
+    case 'no-auth-type':
+      return `${
+        finding.action
+      }: threw before sending a request under every auth type: ${Object.entries(finding.errors)
+        .map(([authType, message]) => `${authType}: ${message}`)
+        .join('; ')}`;
+    case 'auth-type-error':
+      return `auth type ${finding.authType} can't be used against the contract mock, so no action was recorded with it: ${finding.message}`;
     case 'request-violation':
       return `${finding.action}: ${finding.request} breaks the spec: ${finding.violations
         .map(({ message }) => message)
@@ -125,6 +111,7 @@ const describeFinding = (finding: RecordingFinding): string => {
 };
 
 const isProblem = ({ kind }: RecordingFinding): boolean =>
+  kind === 'no-auth-type' ||
   kind === 'request-violation' ||
   kind === 'read-scope' ||
   kind === 'unused-query' ||
@@ -142,6 +129,7 @@ export const updateVendorApi = async ({
   refresh = false,
   check = false,
   fetchText,
+  fetchedAt: fetchedAtOf,
   now,
   log,
 }: UpdateVendorApiOptions): Promise<UpdateVendorApiResult> => {
@@ -172,42 +160,23 @@ export const updateVendorApi = async ({
 
   const raw: Record<string, OpenApiDocument> = {};
   const formats: Record<string, ManifestSource['format']> = {};
+  // The `info.version` of each source loaded in full, rather than read from its snapshot.
+  const loaded = new Map<string, string | undefined>();
   for (const [name, url] of Object.entries(urls)) {
     const snapshot = fetchAll ? undefined : await read(snapshotFile(name));
     if (snapshot === undefined) {
-      log.info(`Fetching ${name} from ${url}`);
-      const parsed = parseSpecText(await fetchText(url)) as OpenApiDocument;
-      // Discovery `$ref`s are schema names, which bundling would take for relative URLs.
-      const discovery = isDiscoveryDocument(parsed);
-      const document = discovery ? convertDiscovery(parsed) : parsed;
-      const load = async (documentUrl: string) => parseSpecText(await fetchText(documentUrl));
-      const bundled = await bundleSpec(document, { url, load });
-      formats[name] = discovery ? 'discovery' : formatOf(bundled);
-      raw[name] = formats[name] === 'swagger' ? convertSwagger2(bundled) : bundled;
+      log.info(`Loading ${name} from ${url}`);
+      const { format, apiVersion, document } = await loadVendorSpec(url, fetchText);
+      formats[name] = format;
+      raw[name] = document;
+      loaded.set(name, apiVersion);
     } else {
       raw[name] = JSON.parse(snapshot);
       formats[name] = previous?.sources[name]?.format ?? 'openapi';
     }
   }
 
-  // One overlay corrects every source; an action only needs to match in one of them.
-  const specs: Record<string, OpenApiDocument> = {};
-  const matched = new Set<number>();
-  for (const [name, document] of Object.entries(raw)) {
-    const result = overlay ? applyOverlay(document, overlay) : { document, findings: [] };
-    specs[name] = result.document;
-    const missed = new Set(
-      result.findings.filter(({ problem }) => problem === 'no-match').map(({ index }) => index)
-    );
-    overlay?.actions.forEach((_, index) => !missed.has(index) && matched.add(index));
-  }
-  overlay?.actions.forEach((_, index) => {
-    if (!matched.has(index)) {
-      log.warning(
-        `${OVERLAY} action ${index} matches nothing in any source; the vendor may have fixed it`
-      );
-    }
-  });
+  const specs = applyOverlayToSources(raw, overlay, log);
 
   log.info(
     `Recording ${Object.keys(connector.actions).length} actions of ${connector.metadata.id}`
@@ -264,10 +233,12 @@ export const updateVendorApi = async ({
   for (const [action, requests] of Object.entries(recording.unmatched)) {
     for (const { method, path: requestPath } of requests) {
       const acknowledged = previous?.unmatched?.[action]?.find(
-        (entry) => entry.method === method && entry.path === requestPath
+        (entry) => entry.method === method && matchesPathTemplate(entry.path, requestPath)
       );
       if (acknowledged) {
-        unmatched[action] = [...(unmatched[action] ?? []), acknowledged];
+        if (!unmatched[action]?.includes(acknowledged)) {
+          unmatched[action] = [...(unmatched[action] ?? []), acknowledged];
+        }
       } else {
         const refreshHint = fetchAll ? '' : '; if it is new to the connector, rerun with --refresh';
         problems.add(
@@ -277,6 +248,9 @@ export const updateVendorApi = async ({
     }
   }
 
+  // Offline runs apply the overlay to the snapshots, so they keep what its updates reference.
+  const overlayRefs: string[] = [];
+  overlay?.actions.forEach(({ update }) => forEachRef(update, (ref) => overlayRefs.push(ref)));
   const files: Record<string, string> = {};
   const sources: Record<string, ManifestSource> = {};
   for (const [name, document] of Object.entries(raw)) {
@@ -284,15 +258,19 @@ export const updateVendorApi = async ({
       .flat()
       .filter(({ source }) => source === name);
     const file = snapshotFile(name);
-    files[file] = toStableJson(projectSpec(document, used));
+    files[file] = toStableJson(projectSpec(document, used, overlayRefs));
     const unchanged = (await read(file)) === files[file];
-    const apiVersion = fetchAll ? apiVersionOf(document) : previous?.sources[name]?.apiVersion;
-    const fetchedAt = unchanged ? previous?.sources[name]?.fetchedAt : undefined;
+    const apiVersion = loaded.has(name) ? loaded.get(name) : previous?.sources[name]?.apiVersion;
+    const fetchedAt = unchanged
+      ? previous?.sources[name]?.fetchedAt
+      : (fetchedAtOf?.(urls[name]) ?? now()).toISOString();
+    const note = previous?.sources[name]?.note;
     sources[name] = {
       format: formats[name],
       url: urls[name],
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),
+      ...(note === undefined ? {} : { note }),
     };
   }
   files[MANIFEST] = serializeManifest({

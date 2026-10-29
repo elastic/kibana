@@ -582,27 +582,43 @@ Inputs are parsed with the action's schema first. Auth secrets the test leaves o
 
 ## Vendor API artifacts
 
-Each connector can have a `vendor_api/` folder next to its spec, recording the vendor API it depends on ([#295685](https://github.com/elastic/kibana/issues/295685)). `recordActions` (in `src/test/vendor_api`) produces most of it: it runs every action against the contract mock, with inputs generated from the action's schema (one without and one with optional properties), and records the vendor operations each one calls.
+Each connector can have a `vendor_api/` folder next to its spec, recording the vendor API it depends on ([#295685](https://github.com/elastic/kibana/issues/295685)). `recordActions` (in `src/test/vendor_api`) produces most of it: it runs every action against the contract mock, with inputs generated from the action's schema, and records the vendor operations each one calls. The inputs are:
+
+- one without optional properties, and one with them;
+- one at the schema's upper bounds: longest strings (`max` up to 65,536 characters, or 1024 characters when unbounded), largest numbers, fullest arrays and the last enum value;
+- one per enum value, so every value the schema allows is sent once.
+
+The vendor spec rejecting any of them fails recording, so the action's schema has to be at least as strict as the vendor's: a limit the vendor doesn't have is fine, a looser one isn't.
 
 ```sh
-# First run: name each vendor spec; YAML or JSON, external $refs are bundled
-node scripts/connector_vendor_api --connector datadog --source v1=https://… --source v2=https://…
+# Before writing the connector: list what a vendor spec offers, which adds it to manifest.json
+node scripts/connector_vendor_api --inspect --connector datadog --source v1=https://… --grep monitor
+# Then describe the operations to call
+node scripts/connector_vendor_api --inspect --connector datadog --operation 'GET /api/v1/monitor'
+# First recording: against the inspected sources, or name each vendor spec; YAML or JSON, external $refs are bundled
+node scripts/connector_vendor_api --connector datadog [--source v1=https://… --source v2=https://…]
 # After changing the connector: record offline against the committed snapshots
 node scripts/connector_vendor_api --connector datadog
 # Pick up vendor changes: fetch every source in manifest.json again
 node scripts/connector_vendor_api --connector datadog --refresh
 # CI: write nothing, fail if anything would change
 node scripts/connector_vendor_api --connector datadog --check
+# Specs of tens of megabytes, such as Microsoft Graph's, need a larger heap to fetch
+NODE_OPTIONS=--max-old-space-size=8192 node scripts/connector_vendor_api --connector microsoft-teams --refresh
 ```
+
+Fetched documents are kept by URL in `data/connector_vendor_api` (not committed), and the manifest's `fetchedAt` says when. A spec inspected before writing a connector is then the one it is recorded against, even when the vendor publishes it from a moving branch. `--refresh` fetches every source again.
+
+`--inspect` needs no connector code, so it can run before any exists. It loads specs the way recording does (converted to OpenAPI 3, `$ref`s bundled, and with `--connector`, the connector's manifest sources and overlay). With `--connector`, `--source` specs the manifest doesn't have yet are added to it, so the source is declared once; a source it has can only be moved by recording with `--source`. It then either lists operations (`METHOD path operationId summary`, up to 200 per source; narrow with `--grep`) or, for each `--operation` (`METHOD /path` or an `operationId`), prints as YAML what an action needs to call it: servers, security schemes and required scopes, every parameter with its location and effective `style`/`explode`, the request body and success response schemas with `$ref`s inlined `--depth` levels deep (default 4), and the `pagination` descriptor recording would propose. Examples and `x-` extensions are left out and descriptions shortened, so even a large spec gives a short answer.
 
 The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
-- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed (from Swagger 2.0, or from a Google API Discovery document such as `https://gmail.googleapis.com/$discovery/rest?version=v1`) and cut down to the recorded operations and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination` and `x-ms-pageable` are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them.
+- `snapshots/<source>.openapi.json`: each vendor spec, converted to OpenAPI 3 if needed (from Swagger 2.0, or from a Google API Discovery document such as `https://gmail.googleapis.com/$discovery/rest?version=v1`) and cut down to the recorded operations and what they reference. Descriptions, examples and `x-` extensions other than `x-speakeasy-pagination`, `x-ms-pageable` and `x-ms-skip-url-encoding` (which marks a path parameter that spans segments, such as Azure's `{scope}`) are dropped so that wording changes don't produce diffs. Snapshots are the vendor's spec as published: the overlay is not applied to them, but they keep the components its updates reference.
 - `overlay.yaml` (optional): an [OpenAPI Overlay](https://spec.openapis.org/overlay/latest.html) correcting the vendor specs, applied whenever they are loaded, including while recording. An action that no longer matches anything is reported, as the vendor may have fixed the spec.
 - `fixtures.json` (optional): see below.
 
-Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults.
+Actions run with a connector config sampled from the connector's `schema`, required properties only, so optional settings such as custom base URLs keep their defaults. They run under each auth type in `auth.types`, with placeholder secrets, and the manifest lists the operations reached under any of them, so an action that only some auth types allow (such as Gmail's write actions, which Elastic-managed OAuth refuses) is still recorded.
 
 Connectors that can't have a vendor spec, such as ones that talk to a database driver instead of an HTTP API, are listed in `vendor_api_exemptions.json` at the package root, by `metadata.id` with a reason. Existing connectors without a `vendor_api` folder are simply not recorded yet; [#295688](https://github.com/elastic/kibana/issues/295688) backfills them.
 
@@ -615,9 +631,10 @@ The script fails when:
 - a `queries` entry is never needed;
 - a response override breaks the spec;
 - a request matches no operation and isn't listed in `unmatched`;
-- an operation looks like it returns a collection, but has no `pagination` and none could be proposed.
+- an operation looks like it returns a collection, but has no `pagination` and none could be proposed;
+- an action throws before sending a request under every auth type, so nothing it calls would be recorded.
 
-Handler errors and proposed `pagination` descriptors are reported as warnings.
+Other handler errors, auth types that can't be used against the contract mock, and proposed `pagination` descriptors are reported as warnings. An action's errors under an auth type it refuses are left out when another auth type works.
 
 ### Contract test
 
@@ -654,15 +671,15 @@ Handler errors and proposed `pagination` descriptors are reported as warnings.
     ]
   },
   "unmatched": {
-    "mute": [{ "method": "post", "path": "/v1/mute", "reason": "Missing from the spec; see #123" }]
+    "mute": [{ "method": "post", "path": "/v1/monitor/{id}/mute", "reason": "Missing from the spec; see #123" }]
   }
 }
 ```
 
-- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`). `apiVersion` is the spec's `info.version`. `fetchedAt` only changes when the snapshot changes.
+- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`). `apiVersion` is the spec's `info.version`. `fetchedAt` only changes when the snapshot changes. An optional `note`, written by hand and kept on updates, explains an unusual source, such as a vendor test fixture.
 - `operations`: per action, the operations its runs matched, by source, lowercase method and path template, sorted.
 - `pagination`: how an operation pages, as the contract mock takes it (see the `@kbn/connector-emulate` README), or `"none"` for one that returns everything at once. Operations look like they return a collection when they take a cursor, offset or page parameter, a page size next to an array in the response, or return a bare array. For those without one, the script proposes a descriptor from `x-speakeasy-pagination`, `x-ms-pageable` or parameter and field names, and warns so it gets reviewed; when it can't, it fails until one is declared. Declared descriptors are kept on every run.
-- `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A request that matches nothing and isn't listed fails the script.
+- `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A `{name}` path segment matches any value, as the generated inputs vary. A request that matches nothing and isn't listed fails the script.
 
 Keys are sorted at every depth (`serializeManifest`), so regenerating without vendor changes produces no diff. `vendorApiManifestSchema` is the schema.
 
@@ -683,10 +700,42 @@ Keys are sorted at every depth (`serializeManifest`), so regenerating without ve
 Per action:
 
 - `input`: merged into each generated input, for values the schema can't describe, such as cross-field rules or IDs with a vendor format.
-- `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec.
+- `config`: merged into the connector config for the action's runs. Recording samples only the required config fields, so use this to set an optional field the action needs, such as a second server URL.
+- `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec. Requests that match no operation (those in `"unmatched"`, such as calls to a vendor's MCP server) are matched by their path, where a `{name}` segment matches any segment.
 - `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec. Overrides that break the spec, or name an operation it lacks, are reported.
 
 `vendorApiFixturesSchema` is the schema.
+
+### Drift detection
+
+`--drift` compares a connector's committed artifacts with the vendor's latest specs, without writing them:
+
+```bash
+# One connector, or every connector with a manifest when --connector is left out
+node scripts/connector_vendor_api --drift --connector firecrawl --report target/drift.json
+```
+
+For each connector it:
+
+- fetches every source in `manifest.json` (a source that doesn't load is reported as unreachable);
+- records the actions against the committed snapshots and against the latest specs, with the overlay applied, as a refresh would, but in a temporary copy of the folder;
+- compares each regenerated snapshot with the committed one and classifies the changes with [`oasdiff`](https://github.com/oasdiff/oasdiff) `changelog`. The binary is `OASDIFF_BIN`, else `oasdiff` on the `PATH`, as for `@kbn/api-contracts`; Kibana's CI agents have it. A response that widens (a new enum value, a longer string) is breaking, since a connector reading the field may not handle it; deprecations are their own kind;
+- reports overlay actions that no longer match the latest specs.
+
+Each connector in the JSON report gets a `verdict`: `healthy`, `vendor-drift` (the actions pass against the snapshots but not the latest specs), `kibana-regression` (they fail against the snapshots already) or `unknown` (a spec didn't load). Its `outcome` says what to do: `none`, `refresh` (only non-breaking changes, or the actions now call other operations, and everything passes; a run with `--refresh` updates the artifacts) or `issue` (anything breaking, deprecated, unreachable, unclassified without `oasdiff`, failing, or a stale overlay action). A new `info.version` alone changes nothing, since some vendors bump it on every deploy.
+
+### Running a connector in Kibana against its contract mock
+
+`node scripts/connector_emulate` serves a connector's contract mock as an HTTP forward proxy (see the server mode section of `@kbn/connector-emulate`'s README), so a running Kibana can execute the connector without vendor credentials:
+
+```bash
+# Answers from the committed snapshots, with the overlay applied
+node scripts/connector_emulate --connector firecrawl
+# Answers from each source's current vendor spec instead
+node scripts/connector_emulate --connector firecrawl --spec latest --port 5691
+```
+
+The mock answers with the manifest's pagination, but not with the per-action `responses` in `fixtures.json`, because a proxied request doesn't say which action sent it. It logs every request with its status, and the violations of failed ones. On startup it prints the Kibana settings to use: `xpack.actions.proxyUrl` pointing at the proxy, and `xpack.actions.customHostSettings` entries that trust its CA for the vendor hosts in the specs. Vendor hosts that come from connector config, such as a tenant's subdomain, need the CA trusted for every host instead, by starting Kibana with `NODE_EXTRA_CA_CERTS=data/connector_emulate/ca.crt`. The CA is created there on first use and reused afterwards, so Kibana keeps trusting it when the mock restarts.
 
 ## Related Documentation
 

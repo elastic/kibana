@@ -8,12 +8,20 @@
  */
 
 import { existsSync } from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { findConnector } from '../src/test/vendor_api/find_connector';
+import type { ConnectorDrift } from '../src/test/vendor_api/detect_drift';
+import { detectDrift } from '../src/test/vendor_api/detect_drift';
+import { findConnector, listConnectors } from '../src/test/vendor_api/find_connector';
+import { inspectVendorApi } from '../src/test/vendor_api/inspect_vendor_api';
+import { createSpecCache } from '../src/test/vendor_api/spec_cache';
 import { updateVendorApi } from '../src/test/vendor_api/update_vendor_api';
+
+const SPEC_CACHE = path.join(REPO_ROOT, 'data', 'connector_vendor_api');
+const DRIFT_REPORT = path.join(REPO_ROOT, 'target', 'connector_vendor_api', 'drift.json');
 
 const parseSource = (flag: string): [string, string] => {
   const separator = flag.indexOf('=');
@@ -33,12 +41,68 @@ const fetchText = async (url: string): Promise<string> => {
 
 run(
   async ({ log, flagsReader }) => {
-    const id = flagsReader.requiredString('connector');
     const check = flagsReader.boolean('check');
+    const refresh = flagsReader.boolean('refresh');
     const sources = Object.fromEntries(
       (flagsReader.arrayOfStrings('source') ?? []).map(parseSource)
     );
+    const now = () => new Date();
+    const cache = createSpecCache({ directory: SPEC_CACHE, fetchText, refresh, now, log });
 
+    if (flagsReader.boolean('drift')) {
+      if (check || refresh || flagsReader.boolean('inspect') || Object.keys(sources).length > 0) {
+        throw createFlagError('--drift always fetches the latest specs and writes no artifacts');
+      }
+      const driftedId = flagsReader.string('connector');
+      const connectors = driftedId
+        ? [await findConnector(driftedId)]
+        : (await listConnectors()).filter(({ directory }) =>
+            existsSync(path.join(directory, 'manifest.json'))
+          );
+      const report: ConnectorDrift[] = [];
+      for (const { connector, directory } of connectors) {
+        // Uncached, so the vendor's latest spec is compared.
+        const drift = await detectDrift({ connector, directory, fetchText, now, log });
+        log.info(`${drift.connector}: ${drift.outcome} (${drift.verdict})`);
+        report.push(drift);
+      }
+      const reportPath = path.resolve(flagsReader.string('report') ?? DRIFT_REPORT);
+      await fs.mkdir(path.dirname(reportPath), { recursive: true });
+      await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+      log.success(`Wrote the drift report of ${report.length} connector(s) to ${reportPath}`);
+      return;
+    }
+
+    if (flagsReader.boolean('inspect')) {
+      if (check) {
+        throw createFlagError('--inspect checks nothing; leave out --check');
+      }
+      const inspectedId = flagsReader.string('connector');
+      const directory = inspectedId ? (await findConnector(inspectedId)).directory : undefined;
+      const { output, manifestUpdated, problems } = await inspectVendorApi({
+        sources,
+        directory,
+        operations: flagsReader.arrayOfStrings('operation') ?? [],
+        grep: flagsReader.string('grep'),
+        depth: flagsReader.number('depth'),
+        fetchText: cache.fetchText,
+        fetchedAt: cache.fetchedAt,
+        now,
+        log,
+      });
+      log.write(output);
+      if (directory && manifestUpdated) {
+        log.info(
+          `Added the sources to ${path.relative(REPO_ROOT, path.join(directory, 'manifest.json'))}`
+        );
+      }
+      if (problems.length > 0) {
+        throw createFailError(problems.join('\n'));
+      }
+      return;
+    }
+
+    const id = flagsReader.requiredString('connector');
     const { connector, directory } = await findConnector(id);
     if (Object.keys(sources).length === 0 && !existsSync(path.join(directory, 'manifest.json'))) {
       throw createFlagError(
@@ -49,10 +113,11 @@ run(
       connector,
       directory,
       sources,
-      refresh: flagsReader.boolean('refresh'),
+      refresh,
       check,
-      fetchText,
-      now: () => new Date(),
+      fetchText: cache.fetchText,
+      fetchedAt: cache.fetchedAt,
+      now,
       log,
     });
 
@@ -79,15 +144,35 @@ run(
   {
     description: `Records which vendor API operations a connector calls and writes its vendor_api artifacts.
 
-      Without --source or --refresh, records offline against the committed snapshots.`,
+      Without --source or --refresh, records offline against the committed snapshots.
+      With --inspect, shows what the vendor specs offer instead, before or while writing the connector.
+      With --drift, compares the committed artifacts with the vendor's latest specs and reports
+      what changed, without writing them.
+
+      Fetched specs are kept in data/connector_vendor_api, so a spec inspected before writing a
+      connector is the one it is recorded against. --refresh fetches them again.`,
     flags: {
-      string: ['connector', 'source'],
-      boolean: ['refresh', 'check'],
+      string: ['connector', 'source', 'operation', 'grep', 'depth', 'report'],
+      boolean: ['refresh', 'check', 'inspect', 'drift'],
       help: `
-        --connector  Connector metadata.id, for example datadog or .datadog (required)
-        --source     name=url of a vendor spec to add or move; repeatable. Fetches every source.
-        --refresh    Fetch every source URL in manifest.json again
+        --connector  Connector metadata.id, for example datadog or .datadog (required unless --inspect
+                     or --drift)
+        --source     name=url of a vendor spec to add or move; repeatable. Loads every source.
+        --refresh    Fetch every source URL again, instead of using the specs fetched before
         --check      Write nothing; fail if artifacts would change or problems are found
+        --inspect    List the operations of the --source specs, or of the connector's manifest
+                     sources, with its overlay applied. With --connector, adds new --source specs
+                     to its manifest.json, so recording needs no --source
+        --operation  With --inspect, describe this operation instead: "METHOD /path" or an
+                     operationId; repeatable
+        --grep       With --inspect, list only operations matching this case-insensitive pattern
+        --depth      With --inspect, how many $refs deep to inline schemas (default 4)
+        --drift      Compare the artifacts of --connector, or of every connector with a manifest,
+                     with the latest vendor specs: changes classified with oasdiff (OASDIFF_BIN or
+                     oasdiff on the PATH), actions recorded against both, and whether that needs
+                     a refresh or an issue. Writes nothing but the report
+        --report     With --drift, where to write the JSON report
+                     (default target/connector_vendor_api/drift.json)
       `,
     },
   }
