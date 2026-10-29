@@ -19,7 +19,19 @@ import {
   type ServerStepDefinition,
 } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
+import { ConversationRoundStatus, EventActorType } from '@kbn/agent-builder-common';
+import type { ConversationWithPermissions, MetadataFieldValue } from '@kbn/agent-builder-common';
+import type {
+  ConversationAddEventsRequest,
+  ConversationCreatePublicRequest,
+} from '@kbn/agent-builder-server';
+import {
+  INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  investigationRunFailedEventSchema,
+} from '@kbn/agentic-investigations-plugin/common';
 import { InvestigationLocatorDefinition } from '../common/locators';
+import { NightshiftInvestigationsClient } from '../server/client/investigations_client';
+import type { WorkflowSubjectInput } from '../server/client/investigation_subjects';
 import { createRoutingTestContext } from '../server/lib/notifications/notification_routing.mock';
 import type { NotificationExecution } from '../server/lib/notifications/notification_delivery';
 import { handleInvestigationFailureStepDefinition } from '../server/step_definitions/handle_investigation_failure';
@@ -35,11 +47,12 @@ type Failure =
   | 'setup'
   | 'persistence'
   | 'pre_execution'
+  | 'permission'
   | 'agent'
   | 'handler'
   | 'step_timeout';
 
-const setup = (failure?: Failure, persistenceFailures = 0) => {
+const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = false) => {
   jest
     .mocked(resolveNightshiftModelForRequest)
     .mockReset()
@@ -55,10 +68,86 @@ const setup = (failure?: Failure, persistenceFailures = 0) => {
     status: 'ok',
     data: { ts: '1.2', channel: 'C123' },
   }));
-  const ensureForFailure = jest.fn(async () => {
-    if (failure === 'handler') throw new Error('Failure handler unavailable');
-    return 'conv-1';
+  const storedConversations = new Map<string, ConversationWithPermissions>();
+  const storedSubjects = new Map<string, WorkflowSubjectInput[]>();
+  const conversations = {
+    bulkGet: async (ids: string[]) =>
+      new Map([...storedConversations].filter(([id]) => ids.includes(id))),
+    create: async ({ id, metadata, templateId }: ConversationCreatePublicRequest) => {
+      if (!id) throw new Error('Expected an investigation id');
+      const conversation: ConversationWithPermissions = {
+        id,
+        agent_id: 'nightshift.investigation',
+        template_id: templateId,
+        title: 'New conversation',
+        metadata,
+        rounds: [],
+        events: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user: { id: 'workflow-user', username: 'workflow-user' },
+        permissions: { rename: true, delete: true, update_access_control: true },
+      };
+      storedConversations.set(id, conversation);
+      return conversation;
+    },
+    patchMetadata: async (id: string, updates: Record<string, MetadataFieldValue>) => {
+      const conversation = storedConversations.get(id);
+      if (!conversation) throw new Error('Conversation not found');
+      conversation.metadata = { ...conversation.metadata, ...updates };
+      return { conversation, changedFields: Object.keys(updates) };
+    },
+    addEvents: async ({ conversationId, events }: ConversationAddEventsRequest) => {
+      if (eventWriteFailure) throw new Error('Timeline write denied');
+      const conversation = storedConversations.get(conversationId);
+      if (!conversation) throw new Error('Conversation not found');
+      const recorded = events.map(({ type, data }, index) => ({
+        id: `failure-${conversation.events?.length ?? 0}-${index}`,
+        created_at: new Date().toISOString(),
+        actor: { type: EventActorType.user, id: 'workflow-user' },
+        type,
+        data: investigationRunFailedEventSchema.parse(data),
+      }));
+      conversation.events = [...(conversation.events ?? []), ...recorded];
+      return recorded;
+    },
+  };
+  const client = new NightshiftInvestigationsClient({
+    request: engine.fakeKibanaRequest,
+    spaceIdOverride: 'fake_space_id',
+    logger: engine.loggerMock,
+    workflowsManagement: {
+      management: {
+        getWorkflowExecution: async (id: string, spaceId: string) => {
+          const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(id);
+          // The engine fixture uses a synthetic workflow id; retain its real execution and inputs.
+          return execution?.spaceId === spaceId
+            ? { ...execution, originManagedWorkflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID }
+            : null;
+        },
+      },
+    } as never,
+    agentBuilder: {
+      agents: { ensure: async () => {} },
+      conversations: { getScopedClient: async () => conversations },
+    } as never,
+    agenticInvestigations: {
+      getSubjectsClient: () => ({
+        listByConversationIds: async () => [],
+        upsertSubjects: async (id: string, subjects: WorkflowSubjectInput[]) => {
+          storedSubjects.set(id, subjects);
+          return [];
+        },
+      }),
+    } as never,
+    agentAvailability: { cacheMode: 'space', handler: () => ({ status: 'available' }) },
+    isAvailable: async () => true,
+    isInfrastructureAvailable: async () => true,
   });
+  const ensureForFailure = jest.spyOn(client, 'ensureForFailure');
+  if (failure === 'handler') {
+    ensureForFailure.mockRejectedValue(new Error('Failure handler unavailable'));
+  }
   const getInvestigationExecutionContext = jest.fn(async () => ({
     investigation: { investigation_id: 'inv-1', title: 'Latency' },
     conversationId: 'conv-1',
@@ -71,7 +160,7 @@ const setup = (failure?: Failure, persistenceFailures = 0) => {
       new InvestigationLocatorDefinition()
     ),
     getInvestigationsClient: jest.fn(() => ({
-      ensureForFailure,
+      ensureForFailure: client.ensureForFailure.bind(client),
       getInvestigationExecutionContext,
       getLifecycleSubject: async () => ({
         subject: { type: 'manual', id: 'question' },
@@ -108,6 +197,7 @@ const setup = (failure?: Failure, persistenceFailures = 0) => {
     fixture.agentBuilder.ensure.mockRejectedValue(new Error('Agent setup unavailable'));
   const agent = jest.fn(async () => {
     if (failure === 'pre_execution') throw new Error('Agent pre-execution failed');
+    if (failure === 'permission') throw new Error('Permission denied: agent execution');
     if (failure === 'agent' || failure === 'handler') throw new Error('Agent execution failed');
     return { output: {} };
   });
@@ -152,6 +242,9 @@ const setup = (failure?: Failure, persistenceFailures = 0) => {
     agent,
     ensureForFailure,
     emitter,
+    storedConversations,
+    storedSubjects,
+    createConversation: conversations.create,
     persistenceAttempts: () => persistenceAttempts,
     run: async () => {
       await engine.runWorkflow({
@@ -159,6 +252,7 @@ const setup = (failure?: Failure, persistenceFailures = 0) => {
         inputs: {
           investigation_id: 'inv-1',
           message: 'Why is latency high?',
+          subjects: [{ type: 'manual', id: 'question', summary: 'Why is latency high?' }],
           notificationDestinations: destinations,
         },
       });
@@ -175,6 +269,7 @@ describe('managed investigation workflow failure handling', () => {
     ['setup', 'Agent setup unavailable', 1],
     ['persistence', 'Persistence unavailable', 1],
     ['pre_execution', 'Agent pre-execution failed', 2],
+    ['permission', 'Permission denied: agent execution', 2],
     ['agent', 'Agent execution failed', 2],
   ] as const)(
     'reports %s failure while preserving the original error',
@@ -187,7 +282,26 @@ describe('managed investigation workflow failure handling', () => {
       expect(context.execute.mock.calls.at(-1)?.[0].params.subActionParams).toMatchObject({
         text: expect.stringContaining(reason),
       });
-      expect(context.ensureForFailure).toHaveBeenCalledWith('inv-1', 'fake_workflow_execution_id');
+      expect(context.ensureForFailure).toHaveBeenCalledWith(
+        'inv-1',
+        'fake_workflow_execution_id',
+        expect.stringContaining(reason)
+      );
+      const conversation = context.storedConversations.get('inv-1');
+      expect(conversation?.rounds).toEqual([]);
+      expect(conversation?.events).toEqual([
+        expect.objectContaining({
+          type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+          data: {
+            execution_id: 'fake_workflow_execution_id',
+            request: 'Why is latency high?',
+            reason: expect.stringContaining(reason),
+          },
+        }),
+      ]);
+      expect(context.storedSubjects.get('inv-1')).toEqual([
+        { type: 'manual', id: 'question', summary: 'Why is latency high?' },
+      ]);
       expect(context.emitter).toHaveBeenCalledTimes(1);
       if (failure === 'persistence') {
         expect(context.persistenceAttempts()).toBe(4);
@@ -216,6 +330,56 @@ describe('managed investigation workflow failure handling', () => {
     expect(context.execution()?.status).toBe(ExecutionStatus.FAILED);
     expect(context.execution()?.error?.message).toBe('Agent execution failed');
     expect(context.ensureForFailure).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves the permission error and Slack delivery when timeline persistence fails', async () => {
+    const context = setup('permission', 0, true);
+    await context.run();
+
+    expect(context.execution()?.status).toBe(ExecutionStatus.FAILED);
+    expect(context.execution()?.error?.message).toBe('Permission denied: agent execution');
+    expect(context.execute.mock.calls.at(-1)?.[0].params.subActionParams).toMatchObject({
+      text: expect.stringContaining('Permission denied: agent execution'),
+    });
+    expect(context.storedConversations.get('inv-1')?.events).toEqual([]);
+    expect((await context.routing.client.get())?.executions[0].terminal_phase).toBe('failed');
+  });
+
+  it('appends failure context to an existing conversation without changing earlier rounds or closed state', async () => {
+    const context = setup('permission');
+    const conversation = await context.createConversation({
+      id: 'inv-1',
+      templateId: 'investigation',
+      metadata: { status: 'closed', workflow_execution_ids: ['earlier-execution'] },
+    });
+    const earlierRound = {
+      id: 'earlier-round',
+      status: ConversationRoundStatus.completed,
+      input: { message: 'Earlier question' },
+      response: { message: 'Earlier findings' },
+      steps: [],
+      started_at: '2026-01-01T00:00:00.000Z',
+      time_to_first_token: 0,
+      time_to_last_token: 0,
+      model_usage: {
+        connector_id: 'model',
+        input_tokens: 0,
+        output_tokens: 0,
+        llm_calls: 0,
+      },
+    };
+    conversation.rounds = [earlierRound];
+
+    await context.run();
+
+    expect(conversation.rounds).toEqual([earlierRound]);
+    expect(conversation.metadata).toMatchObject({
+      status: 'closed',
+      workflow_execution_ids: ['earlier-execution', 'fake_workflow_execution_id'],
+    });
+    expect(conversation.events).toEqual([
+      expect.objectContaining({ type: INVESTIGATION_RUN_FAILED_EVENT_TYPE }),
+    ]);
   });
 
   it('reports an agent step timeout through the fallback', async () => {

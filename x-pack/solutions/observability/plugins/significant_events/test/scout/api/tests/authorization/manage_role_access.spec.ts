@@ -19,10 +19,14 @@ import {
   DISCOVERY_QUERIES_ENDPOINT,
   EVENTS_ENDPOINT,
   KI_FEATURE_CREATE_TOOL_ID,
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
   MARK_SCANNED_ENDPOINT,
   POLL_OPTIONS,
   QUERIES_ENDPOINT,
   SOURCES_ENDPOINT,
+  SOURCE_CREATE_TOOL_ID,
+  SOURCE_DELETE_TOOL_ID,
+  SOURCE_UPDATE_TOOL_ID,
   TOOL_API_HEADERS,
   TOOL_EXECUTE_ENDPOINT,
   buildDetection,
@@ -36,8 +40,8 @@ import {
   fenceAutomaticOnboarding,
   getFeaturesEndpoint,
   deleteSignificantEvent,
-  isToolWriteLeaseConflict,
-  retryOnWriteLease,
+  executeTool,
+  seedFeature,
   seedRuleBackedQuery,
   seedSignificantEvent,
 } from '../../fixtures/built_in_role_access';
@@ -189,13 +193,10 @@ for (const { name, label, role } of ROLES) {
       });
 
       apiTest('creates, lists and deletes a feature knowledge indicator', async ({ apiClient }) => {
-        const createResponse = await retryOnWriteLease({
-          send: () =>
-            apiClient.post(getFeaturesEndpoint(sourceId), {
-              headers,
-              body: buildFeature(featureId),
-              responseType: 'json',
-            }),
+        const createResponse = await apiClient.post(getFeaturesEndpoint(sourceId), {
+          headers,
+          body: buildFeature(featureId),
+          responseType: 'json',
         });
         expect(createResponse).toHaveStatusCode(200);
         expect(createResponse.body).toStrictEqual({ acknowledged: true });
@@ -209,26 +210,20 @@ for (const { name, label, role } of ROLES) {
           expect.arrayContaining([expect.objectContaining({ id: featureId, source_id: sourceId })])
         );
 
-        const deleteResponse = await retryOnWriteLease({
-          send: () =>
-            apiClient.delete(`${getFeaturesEndpoint(sourceId)}/${featureId}`, {
-              headers,
-              responseType: 'json',
-            }),
-        });
+        const deleteResponse = await apiClient.delete(
+          `${getFeaturesEndpoint(sourceId)}/${featureId}`,
+          { headers, responseType: 'json' }
+        );
         expect(deleteResponse).toHaveStatusCode(200);
       });
 
       apiTest(
         'creates and lists a rule-backed query knowledge indicator',
         async ({ apiClient }) => {
-          const createResponse = await retryOnWriteLease({
-            send: () =>
-              apiClient.put(`${QUERIES_ENDPOINT}/${queryId}`, {
-                headers,
-                body: buildRuleBackedQuery({ sourceId, viewName: sourceViewName }),
-                responseType: 'json',
-              }),
+          const createResponse = await apiClient.put(`${QUERIES_ENDPOINT}/${queryId}`, {
+            headers,
+            body: buildRuleBackedQuery({ sourceId, viewName: sourceViewName }),
+            responseType: 'json',
           });
           expect(createResponse).toHaveStatusCode(200);
 
@@ -281,17 +276,13 @@ for (const { name, label, role } of ROLES) {
       );
 
       apiTest('creates a knowledge indicator from Agent Builder', async ({ apiClient }) => {
-        const response = await retryOnWriteLease({
-          send: () =>
-            apiClient.post(TOOL_EXECUTE_ENDPOINT, {
-              headers: toolHeaders,
-              body: {
-                tool_id: KI_FEATURE_CREATE_TOOL_ID,
-                tool_params: { ...buildFeature(toolFeatureId), slug: sourceSlug },
-              },
-              responseType: 'json',
-            }),
-          isLeaseConflict: isToolWriteLeaseConflict,
+        const response = await apiClient.post(TOOL_EXECUTE_ENDPOINT, {
+          headers: toolHeaders,
+          body: {
+            tool_id: KI_FEATURE_CREATE_TOOL_ID,
+            tool_params: { ...buildFeature(toolFeatureId), slug: sourceSlug },
+          },
+          responseType: 'json',
         });
         expect(response).toHaveStatusCode(200);
         expect(response.body.results).toStrictEqual([
@@ -305,6 +296,116 @@ for (const { name, label, role } of ROLES) {
           }),
         ]);
       });
+
+      apiTest(
+        'creates, updates and deletes a source from Agent Builder',
+        async ({ apiClient, kbnClient }) => {
+          const title = `${name}-tool-source-${uuidv4()}`;
+
+          const createResponse = await executeTool(apiClient, toolHeaders, SOURCE_CREATE_TOOL_ID, {
+            title,
+            esql: ACCESS_SOURCE_ESQL,
+          });
+          // Read before any assertion, so the source is removed even when one fails.
+          const createdId: string | undefined = createResponse.body.results?.[0]?.data?.id;
+          try {
+            expect(createResponse).toHaveStatusCode(200);
+            const created = createResponse.body.results[0];
+            expect(created).toStrictEqual(
+              expect.objectContaining({
+                type: 'other',
+                data: expect.objectContaining({ title, enabled: true }),
+              })
+            );
+            const { id, slug } = created.data;
+            const updatedTitle = `${title}-renamed`;
+            const updateResponse = await executeTool(
+              apiClient,
+              toolHeaders,
+              SOURCE_UPDATE_TOOL_ID,
+              {
+                source: slug,
+                title: updatedTitle,
+                enabled: false,
+              }
+            );
+            expect(updateResponse).toHaveStatusCode(200);
+            expect(updateResponse.body.results[0].data).toStrictEqual(
+              expect.objectContaining({
+                id,
+                slug,
+                title: updatedTitle,
+                esql: ACCESS_SOURCE_ESQL,
+                enabled: false,
+              })
+            );
+
+            const deleteResponse = await executeTool(
+              apiClient,
+              toolHeaders,
+              SOURCE_DELETE_TOOL_ID,
+              {
+                source: slug,
+              }
+            );
+            expect(deleteResponse).toHaveStatusCode(200);
+            expect(deleteResponse.body.results[0].data).toStrictEqual(
+              expect.objectContaining({ deleted: true, id })
+            );
+
+            const getResponse = await apiClient.get(`${SOURCES_ENDPOINT}/${id}`, {
+              headers,
+              responseType: 'json',
+            });
+            expect(getResponse).toHaveStatusCode(404);
+          } finally {
+            if (createdId) {
+              await deleteAccessSource({ kbnClient, sourceId: createdId });
+            }
+          }
+        }
+      );
+
+      apiTest(
+        'cleans up the knowledge indicators of a source deleted from Agent Builder',
+        async ({ apiClient, esClient, kbnClient }) => {
+          const { id, slug } = await createAccessSource({
+            kbnClient,
+            title: `${name}-delete-cascade-${uuidv4()}`,
+          });
+          try {
+            await seedFeature({
+              kbnClient,
+              sourceId: id,
+              featureId: `${name}-cascade-${uuidv4()}`,
+            });
+
+            const response = await executeTool(apiClient, toolHeaders, SOURCE_DELETE_TOOL_ID, {
+              source: slug,
+            });
+            expect(response).toHaveStatusCode(200);
+            expect(response.body.results[0].data).toStrictEqual(
+              expect.objectContaining({ deleted: true, id })
+            );
+
+            await expect
+              .poll(async () => {
+                const { hits } = await esClient.search({
+                  index: KNOWLEDGE_INDICATORS_DATA_STREAM,
+                  size: 0,
+                  track_total_hits: true,
+                  query: {
+                    bool: { filter: [{ term: { 'source.id': id } }, { term: { deleted: true } }] },
+                  },
+                });
+                return typeof hits.total === 'number' ? hits.total : hits.total?.value;
+              }, POLL_OPTIONS)
+              .toBeGreaterThan(0);
+          } finally {
+            await deleteAccessSource({ kbnClient, sourceId: id });
+          }
+        }
+      );
     }
   );
 }

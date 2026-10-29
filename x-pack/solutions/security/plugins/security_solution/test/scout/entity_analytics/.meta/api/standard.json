@@ -1,5 +1,5 @@
 {
-  "sha1": "067fc6032315a95edc6906281c760932fbd365c7",
+  "sha1": "82406e77bd0c5f33ef10ae8e78fc7e758fe63d6b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -9,13 +9,12 @@
       "title": "Entity Analytics AI brief - the brief tool bound to a captured view posts a brief with one priority from the tile entities",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_brief/generate_brief.spec.ts",
-        "line": 139,
-        "column": 7
+        "line": 137,
+        "column": 18
       }
     },
     {
@@ -23,12 +22,11 @@
       "title": "Entity Analytics AI brief - the brief tool bound to a captured view posts the quiet brief without a model call when no tile is flagged",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_brief/generate_brief.spec.ts",
-        "line": 186,
+        "line": 184,
         "column": 24
       }
     },
@@ -37,13 +35,12 @@
       "title": "Entity Analytics AI brief - the brief tool bound to a captured view sends the model only the entities of the request's space",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_brief/generate_brief.spec.ts",
         "line": 212,
-        "column": 41
+        "column": 70
       }
     },
     {
