@@ -37,8 +37,8 @@ export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string
 /**
  * Stable task id / deduplication key for any immediate `workflow:resume` (no runAt).
  * Task Manager owns this document throughout the run; callers must never replace it.
- * While the execution is not terminal the runner stays parked between resumes, so every
- * wake-up reuses the API key granted when it was first scheduled.
+ * While the execution is not terminal the runner stays parked between resumes.
+ * An approval replaces that parked key; a timer or wake poll leaves it in place.
  */
 export const getWorkflowImmediateResumeTaskId = (workflowExecutionId: string): string =>
   `workflow-immediate-resume-${workflowExecutionId}`;
@@ -274,11 +274,13 @@ export class WorkflowTaskManager {
     spaceId,
     fakeRequest,
     isUserInteractive,
+    regenerateApiKey,
   }: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
     isUserInteractive?: boolean;
+    regenerateApiKey?: boolean;
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
     const priority = getTaskPriority({ isUserInteractive });
@@ -293,7 +295,11 @@ export class WorkflowTaskManager {
         priority,
       },
       fakeRequest
-        ? { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+        ? {
+            request: getWorkflowOriginalRequest(fakeRequest),
+            cloneApiKey: true,
+            ...(regenerateApiKey ? { regenerateApiKey: true } : {}),
+          }
         : undefined
     );
     return { taskId };
@@ -337,6 +343,7 @@ export class WorkflowTaskManager {
     spaceId: string;
     fakeRequest?: KibanaRequest;
     isUserInteractive?: boolean;
+    regenerateApiKey?: boolean;
   }): Promise<boolean> {
     const { taskId } = await this.scheduleImmediateResume(params);
     try {
@@ -363,6 +370,7 @@ export class WorkflowTaskManager {
     spaceId: string;
     fakeRequest?: KibanaRequest;
     isUserInteractive?: boolean;
+    regenerateApiKey?: boolean;
   }): Promise<void> {
     if (await this.tryRunImmediateResume(params)) return;
     await this.ensureWakeTask(params);
