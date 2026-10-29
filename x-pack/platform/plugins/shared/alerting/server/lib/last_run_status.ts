@@ -8,6 +8,7 @@
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
+import { addCloudApiKeyAuthErrorGuidance } from './cloud_api_key_auth_error_guidance';
 import type { RuleLastRunOutcomes } from '../../common';
 import { RuleLastRunOutcomeOrderMap } from '../../common';
 import type { RawRuleLastRun, RuleLastRun } from '../types';
@@ -60,7 +61,7 @@ export const lastRunFromState = (
   // Optionally push outcome message reported by
   // rule execution to the Framework's outcome message array
   if (outcomeMessage) {
-    outcomeMsg.push(outcomeMessage);
+    outcomeMsg.push(addCloudApiKeyAuthErrorGuidance(outcomeMessage));
   }
 
   return {
@@ -81,7 +82,7 @@ export const lastRunFromState = (
 };
 
 export const lastRunFromError = (error: Error): ILastRun => {
-  const esErrorMessage = getEsErrorMessage(error);
+  const esErrorMessage = addCloudApiKeyAuthErrorGuidance(getEsErrorMessage(error));
   const outcome = RuleLastRunOutcomeValues[2];
   return {
     lastRun: {
