@@ -9,7 +9,6 @@ import { lazySchema, z } from '@kbn/zod/v4';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { RawRoundStep } from '../investigation_round/round_loader';
 import {
   classifyInvestigationRun,
   type OnlineEvalsRoundClassification,
@@ -36,7 +35,7 @@ const skipReasonSchema = lazySchema(() =>
     'evals_unavailable',
     'paused',
     'no_round',
-    'root_cause_unchanged',
+    'follow_up_not_scored',
     'recovery_verdict_unavailable',
     'recovery_unresolved',
   ])
@@ -45,16 +44,16 @@ const skipReasonSchema = lazySchema(() =>
 type SkipReason = z.infer<typeof skipReasonSchema>;
 
 /**
- * Scores initial rounds, follow-ups that change the root cause, and recoveries with a resolved
- * verdict. Other follow-ups (questions, Slack chatter) don't change the conclusion judges grade.
+ * Scores initial rounds and recoveries with a resolved verdict. Follow-ups aren't scored yet:
+ * telling a follow-up that changes the root cause from a question or Slack chatter comes with
+ * follow-up scoring.
  */
 const getRoundSkipReason = ({
   roundKind,
-  rootCauseChanged,
   recoveryVerdict,
 }: OnlineEvalsRoundClassification): SkipReason | undefined => {
-  if (roundKind === 'follow_up' && !rootCauseChanged) {
-    return 'root_cause_unchanged';
+  if (roundKind === 'follow_up') {
+    return 'follow_up_not_scored';
   }
   if (roundKind === 'alert_recovery') {
     if (recoveryVerdict === undefined) {
@@ -84,7 +83,7 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
     label: 'Classify an Investigation Round for Online Evals',
     category: StepCategory.Ai,
     description:
-      'Decides whether the round this investigation run created has anything to score: an initial round, a follow-up that changed the root cause, or an alert recovery with a resolved verdict. Makes no LLM call.',
+      'Decides whether the round this investigation run created has anything to score: an initial round, or an alert recovery with a resolved verdict. Makes no LLM call.',
     inputSchema,
     outputSchema: z.object({
       should_score: z.boolean().describe('Whether to start the scoring workflow for this round.'),
@@ -93,11 +92,6 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
         .optional()
         .describe('What kind of round this run created.'),
       round_id: z.string().optional().describe('The round this run created.'),
-      root_cause_changed: z
-        .boolean()
-        .describe(
-          'Follow-ups only: the round confirmed a root cause that was not confirmed before.'
-        ),
       recovery_verdict: z
         .string()
         .optional()
@@ -107,7 +101,7 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
     handler: async (context) => {
       const input = inputSchema.parse(context.input);
       const skip = (skipReason: SkipReason) => ({
-        output: { should_score: false, root_cause_changed: false, skip_reason: skipReason },
+        output: { should_score: false, skip_reason: skipReason },
       });
 
       if (!isEvalsAvailable()) {
@@ -127,11 +121,7 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
       const { rounds } = await conversations.get(input.investigation_id);
 
       const classification = classifyInvestigationRun({
-        rounds: rounds.map(({ id, started_at: startedAt, steps }) => ({
-          id,
-          started_at: startedAt,
-          steps: steps as unknown as RawRoundStep[],
-        })),
+        rounds: rounds.map(({ id, started_at: startedAt }) => ({ id, started_at: startedAt })),
         followUp: input.follow_up || undefined,
         runStartedAt: input.investigation_started_at,
       });
@@ -139,11 +129,10 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
         return skip('no_round');
       }
 
-      const { roundKind, roundId, rootCauseChanged, recoveryVerdict } = classification;
+      const { roundKind, roundId, recoveryVerdict } = classification;
       const roundOutput = {
         round_kind: roundKind,
         round_id: roundId,
-        root_cause_changed: rootCauseChanged,
         ...(recoveryVerdict ? { recovery_verdict: recoveryVerdict } : {}),
       };
 
