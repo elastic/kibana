@@ -30,6 +30,12 @@ describe('getSandboxHosts', () => {
     ).toEqual(['api.example.com', 'my-cluster.example.com', '10.0.0.5']);
   });
 
+  it('drops the trailing dot of a fully qualified host name', () => {
+    expect(
+      getSandboxHosts({ hostsFromConfig: ['url'] }, { url: 'https://API.example.com.:8443/v1' })
+    ).toEqual(['api.example.com']);
+  });
+
   it('removes duplicate hosts', () => {
     expect(
       getSandboxHosts(

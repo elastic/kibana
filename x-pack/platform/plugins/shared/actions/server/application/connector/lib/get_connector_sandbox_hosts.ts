@@ -13,10 +13,14 @@ import type { ActionType } from '../../../types';
 // as an IPv6 literal or '_', and treats '*' as any host, so those entries are dropped here.
 const SANDBOX_HOST_PATTERN = /^(?![.-])[a-z0-9.-]{1,253}(?<![.-])$/;
 
+// The credential proxy rejects a command whose secret lists more allowed hosts than this.
+export const MAX_SANDBOX_HOSTS = 32;
+
 /**
- * The connector's sandbox hosts the credential proxy accepts, lowercased and deduplicated. A
- * getSandboxHosts hook that throws is logged and treated as no hosts, so the connector fails
- * closed without breaking sandbox use for other connectors.
+ * The connector's sandbox hosts the credential proxy accepts, lowercased, deduplicated and
+ * capped at MAX_SANDBOX_HOSTS (with a warning). A getSandboxHosts hook that throws is logged
+ * and treated as no hosts, so the connector fails closed without breaking sandbox use for
+ * other connectors.
  */
 export const getConnectorSandboxHosts = ({
   actionType,
@@ -40,7 +44,7 @@ export const getConnectorSandboxHosts = ({
     );
     return [];
   }
-  return [
+  const validHosts = [
     ...new Set(
       hosts
         .filter((host): host is string => typeof host === 'string')
@@ -48,4 +52,13 @@ export const getConnectorSandboxHosts = ({
         .filter((host) => SANDBOX_HOST_PATTERN.test(host))
     ),
   ];
+  if (validHosts.length > MAX_SANDBOX_HOSTS) {
+    logger?.warn(
+      `Connector${connectorId ? ` "${connectorId}"` : ''} (${actionType.id}) has ${
+        validHosts.length
+      } sandbox hosts; only the first ${MAX_SANDBOX_HOSTS} are used, because the sandbox credential proxy accepts at most ${MAX_SANDBOX_HOSTS}`
+    );
+    return validHosts.slice(0, MAX_SANDBOX_HOSTS);
+  }
+  return validHosts;
 };

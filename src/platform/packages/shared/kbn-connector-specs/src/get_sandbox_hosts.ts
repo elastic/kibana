@@ -14,8 +14,10 @@ const getUrlHost = (value: unknown): string | undefined => {
     return undefined;
   }
   try {
-    const { hostname } = new URL(value.trim());
-    return hostname.length > 0 ? hostname.toLowerCase() : undefined;
+    // A fully qualified name may end in '.', e.g. `api.example.com.`; the sandbox matches hosts
+    // without it.
+    const host = new URL(value.trim()).hostname.replace(/\.$/, '').toLowerCase();
+    return host.length > 0 ? host : undefined;
   } catch {
     return undefined;
   }

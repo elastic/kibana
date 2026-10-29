@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ActionType } from '../../../types';
-import { getConnectorSandboxHosts } from './get_connector_sandbox_hosts';
+import { getConnectorSandboxHosts, MAX_SANDBOX_HOSTS } from './get_connector_sandbox_hosts';
 
 describe('getConnectorSandboxHosts', () => {
   const createActionType = (
@@ -51,6 +51,33 @@ describe('getConnectorSandboxHosts', () => {
         config: {},
       })
     ).toEqual(['api.example.com']);
+  });
+
+  it('keeps the first 32 hosts and logs a warning when there are more', () => {
+    const logger = loggingSystemMock.createLogger();
+    const hosts = Array.from({ length: 40 }, (_, index) => `host-${index}.example.com`);
+
+    expect(
+      getConnectorSandboxHosts({
+        actionType: createActionType(() => hosts),
+        config: {},
+        connectorId: 'connector-1',
+        logger,
+      })
+    ).toEqual(hosts.slice(0, MAX_SANDBOX_HOSTS));
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Connector "connector-1" (.test) has 40 sandbox hosts; only the first 32 are used, because the sandbox credential proxy accepts at most 32'
+    );
+  });
+
+  it('does not warn for exactly 32 hosts', () => {
+    const logger = loggingSystemMock.createLogger();
+    const hosts = Array.from({ length: 32 }, (_, index) => `host-${index}.example.com`);
+
+    expect(
+      getConnectorSandboxHosts({ actionType: createActionType(() => hosts), config: {}, logger })
+    ).toEqual(hosts);
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('logs a hook error and returns no hosts', () => {
