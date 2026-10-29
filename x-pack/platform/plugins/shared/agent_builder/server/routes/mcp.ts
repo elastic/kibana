@@ -151,7 +151,13 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
               async (args: { [x: string]: any }) => {
                 const toolResult = await registry.execute({
                   toolId: tool.id,
-                  toolParams: args,
+                  // The null-to-undefined preprocess leaves the key present with an `undefined`
+                  // value; drop it so the tool sees the arg as not provided.
+                  // The null-to-undefined preprocess leaves the key present with an `undefined`
+                  // value; drop it so the tool sees the arg as not provided.
+                  toolParams: Object.fromEntries(
+                    Object.entries(args).filter(([, value]) => value !== undefined)
+                  ),
                   source: 'mcp',
                 });
                 return {

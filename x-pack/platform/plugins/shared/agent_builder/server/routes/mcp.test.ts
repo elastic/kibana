@@ -167,6 +167,7 @@ describe('MCP route — registerTool arguments', () => {
   };
 
   let postHandler: Function;
+  let mockRegistry: { list: jest.Mock; execute: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -186,7 +187,7 @@ describe('MCP route — registerTool arguments', () => {
       excludeFromMcp: true,
     });
 
-    const mockRegistry = {
+    mockRegistry = {
       list: jest.fn().mockResolvedValue([annotatedTool, unannotatedTool, excludedTool]),
       execute: jest.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
     };
@@ -258,8 +259,8 @@ describe('MCP route — registerTool arguments', () => {
 
   it('registers an input schema that the real SDK accepts null optional args for, without changing the advertised JSON schema', async () => {
     await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
-    const [, { inputSchema }] = mockRegisterTool.mock.calls.find(
-      (call: any[]) => call[0] === 'platform_core_search'
+    const [, { inputSchema }, registeredHandler] = mockRegisterTool.mock.calls.find(
+      (call: unknown[]) => call[0] === 'platform_core_search'
     )!;
 
     const { McpServer: RealMcpServer } = jest.requireActual<
@@ -273,10 +274,11 @@ describe('MCP route — registerTool arguments', () => {
     >('@modelcontextprotocol/sdk/inMemory.js');
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
-    const handler = jest
-      .fn()
-      .mockResolvedValue({ content: [{ type: 'text' as const, text: 'ok' }] });
-    server.registerTool('platform_core_search', { description: 'd', inputSchema }, handler);
+    server.registerTool(
+      'platform_core_search',
+      { description: 'd', inputSchema },
+      registeredHandler
+    );
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await server.connect(serverTransport);
     const client = new Client({ name: 'test-client', version: '0.0.1' });
@@ -289,7 +291,8 @@ describe('MCP route — registerTool arguments', () => {
     const { tools } = await client.listTools();
 
     expect(result.isError).toBeFalsy();
-    expect(handler.mock.calls[0][0]).toEqual({ query: 'x' });
+    // the key must be absent, not present with an `undefined` value
+    expect(mockRegistry.execute.mock.calls[0][0].toolParams).toStrictEqual({ query: 'x' });
     expect(tools[0].inputSchema).toEqual({
       $schema: 'http://json-schema.org/draft-07/schema#',
       type: 'object',
@@ -307,7 +310,7 @@ describe('MCP route — registerTool arguments', () => {
     await postHandler(createMockContext(), createMockRequest(), { customError: jest.fn() });
 
     const excludedCall = mockRegisterTool.mock.calls.find(
-      (call: any[]) => call[0] === 'platform_core_execute_connector_sub_action'
+      (call: unknown[]) => call[0] === 'platform_core_execute_connector_sub_action'
     );
     expect(excludedCall).toBeUndefined();
     expect(mockRegisterTool).toHaveBeenCalledTimes(2);

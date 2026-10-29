@@ -284,7 +284,7 @@ describe('dispatchToolCall', () => {
   });
 
   it('treats null for optional args as omitted (strict function calling sends null)', async () => {
-    mockLookupStepDefinitions.mockResolvedValue({ count: 0 } as any);
+    mockLookupStepDefinitions.mockResolvedValue({ count: 0, stepTypes: [] });
 
     const result = await dispatchToolCall(
       { yaml: '' },
