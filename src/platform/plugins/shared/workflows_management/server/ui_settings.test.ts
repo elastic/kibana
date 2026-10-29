@@ -69,7 +69,7 @@ describe('Workflows Management UI Settings', () => {
     expect(coreSetupMock.uiSettings.registerGlobal).toHaveBeenCalledWith(
       expect.objectContaining({
         [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: expect.objectContaining({
-          name: 'Workflow Template Library',
+          name: 'Workflow Template library',
           value: true,
           readonly: true,
           readonlyMode: 'ui',

@@ -22,6 +22,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useBlocksNewActivity } from '../../data/maintenance/use_significant_events_maintenance';
 import { useFetchSources } from '../../data/sources/use_fetch_sources';
 import type { ScheduleOnboardingOptions } from '../../data/sources/use_onboarding_api';
 import { useBulkOnboarding } from './use_bulk_onboarding';
@@ -55,6 +56,11 @@ interface KiGenerationContextValue {
   refetchSources: () => void;
   isInitialGenerationStatusLoading: boolean;
   generatingSourceIds: string[];
+  /**
+   * Created or edited sources whose new run has not been reported yet. A query edit drops the
+   * knowledge of the old query in the background, so counts read before the run are stale.
+   */
+  awaitingRunSourceIds: string[];
   isGenerating: boolean;
   isScheduling: boolean;
   sourceStatusMap: Record<string, SignificantEventsWorkflowStatusResult>;
@@ -86,6 +92,7 @@ export function KiGenerationProvider({
   onFailed,
 }: KiGenerationProviderProps) {
   const [generatingSources, setGeneratingSources] = useState<Set<string>>(new Set());
+  const [awaitingRunSources, setAwaitingRunSources] = useState<Set<string>>(new Set());
   const [sourceStatusMap, setSourceStatusMap] = useState<
     Record<string, SignificantEventsWorkflowStatusResult>
   >({});
@@ -113,6 +120,8 @@ export function KiGenerationProvider({
   const isSourcesFetching = sourcesFetch.isFetching;
   const isSourcesError = sourcesFetch.isError;
   const refetchSources = sourcesFetch.refetch;
+  // Only a known pause: while the state loads or fails, the server may still start the run.
+  const { isBlocked: isPaused } = useBlocksNewActivity();
 
   // Adds sources discovered as InProgress (e.g. on initial status fetch after
   // page refresh) and removes sources that reach a terminal state. Callback
@@ -121,6 +130,13 @@ export function KiGenerationProvider({
   const onSourceStatusUpdate = useCallback(
     (sourceId: string, statusResult: SignificantEventsWorkflowStatusResult) => {
       setSourceStatusMap((current) => ({ ...current, [sourceId]: statusResult }));
+      // The queue holds back an awaited source until its run shows up or the wait ends.
+      setAwaitingRunSources((current) => {
+        if (!current.has(sourceId)) return current;
+        const next = new Set(current);
+        next.delete(sourceId);
+        return next;
+      });
 
       const isInProgress = KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status);
 
@@ -175,12 +191,14 @@ export function KiGenerationProvider({
       const knownVersion = enqueuedQueryVersionsRef.current.get(id);
       if (knownVersion !== queryVersion) {
         // After the first load, a new id or a new query version is a source the user just created
-        // or edited. The server starts its onboarding asynchronously, so keep polling for it.
-        if (enabled && (knownVersion !== undefined || !isFirstSourceList)) {
+        // or edited. The server starts its onboarding asynchronously, so keep polling for it. A
+        // paused space starts none.
+        if (!isPaused && enabled && (knownVersion !== undefined || !isFirstSourceList)) {
           expectOnboardingStart(id);
           // Optimistic: show the spinner now. The status poll clears it when the grace period
           // ends without a run, and keeps it while a run is going.
           setGeneratingSources((current) => new Set(current).add(id));
+          setAwaitingRunSources((current) => new Set(current).add(id));
         }
         enqueuedQueryVersionsRef.current.set(id, queryVersion);
         onboardingStatusUpdateQueue.add(id);
@@ -194,6 +212,7 @@ export function KiGenerationProvider({
     }
   }, [
     fetchedSources,
+    isPaused,
     onboardingStatusUpdateQueue,
     processStatusUpdateQueue,
     expectOnboardingStart,
@@ -201,6 +220,7 @@ export function KiGenerationProvider({
 
   const isGenerating = generatingSources.size > 0;
   const generatingSourceIds = useMemo(() => Array.from(generatingSources), [generatingSources]);
+  const awaitingRunSourceIds = useMemo(() => Array.from(awaitingRunSources), [awaitingRunSources]);
 
   // True until we've received at least one status result for every source, so
   // consumers can defer rendering empty/generating UI until the generating set
@@ -264,6 +284,7 @@ export function KiGenerationProvider({
       refetchSources,
       isInitialGenerationStatusLoading,
       generatingSourceIds,
+      awaitingRunSourceIds,
       isGenerating,
       sourceStatusMap,
       onboardingConfig,
@@ -285,6 +306,7 @@ export function KiGenerationProvider({
       refetchSources,
       isInitialGenerationStatusLoading,
       generatingSourceIds,
+      awaitingRunSourceIds,
       isGenerating,
       sourceStatusMap,
       onboardingConfig,

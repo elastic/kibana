@@ -7,10 +7,9 @@
 
 import { useMemo } from 'react';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import {
   anomaliesSeriesColumn,
   buildEntitiesWithAnomaliesSeriesQuery,
@@ -29,6 +28,8 @@ interface AnomaliesSeriesOptions {
   reachesBack: boolean | undefined;
   /** The live count, which replaces the newest dot so the line ends on the number shown. */
   count: number;
+  /** From the tile's delta hook (its `previous`): the delta's baseline, which starts the line. */
+  deltaBaseline: number | undefined;
 }
 
 /**
@@ -47,9 +48,13 @@ export const useEntitiesWithAnomaliesSeries = ({
   isReady,
   reachesBack,
   count,
+  deltaBaseline,
 }: AnomaliesSeriesOptions): { trend: number[] | undefined; isTrendLoading: boolean } => {
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    entityFilterClauses,
+  } = useTileQueryInputs(spaceId, entityFilters);
   const { jobIds, loading: isJobsLoading } = useInstalledSecurityJobsIds();
   const index = resolvedIndex?.indexName;
   const isLoadingInputs = isIndexLoading || isJobsLoading;
@@ -57,14 +62,9 @@ export const useEntitiesWithAnomaliesSeries = ({
   const query = useMemo(
     () =>
       index && jobIds.length > 0
-        ? buildEntitiesWithAnomaliesSeriesQuery(
-            index,
-            timeRange,
-            buildEntityFilterClauses(entityFilters),
-            jobIds
-          )
+        ? buildEntitiesWithAnomaliesSeriesQuery(index, timeRange, entityFilterClauses, jobIds)
         : null,
-    [index, jobIds, timeRange, entityFilters]
+    [index, jobIds, timeRange, entityFilterClauses]
   );
 
   const { canRun, isHidden } = getSeriesGate({ isReady, reachesBack, count });
@@ -78,6 +78,7 @@ export const useEntitiesWithAnomaliesSeries = ({
   return getTileTrend({
     dots: series,
     liveCount: count,
+    deltaBaseline,
     skip,
     isFetching,
     isError,

@@ -18,13 +18,19 @@ export const ENDPOINT_RESPONSE_ACTIONS_REFERENCE = `## Error Handling Reference
 | No endpoints match the filter | \`list_endpoints\` with \`hostNameFilter\` returns an empty \`endpoints\` list | Report that no endpoints match that hostname fragment (the match is case-sensitive); do not claim the space has no endpoints |
 | Host not found | \`found: false\`, \`reason: endpoint_not_found\` (+ \`hostName\` or \`agentId\`, whichever was looked up) | Ask analyst to clarify that hostname or agent ID; do not guess, and do not report any status or isolation state |
 | \`status: 'unknown'\` | \`host_status\` not yet in metadata | Report the state is unknown; do not call it offline |
-| Hostname matches several endpoints | \`found: false\`, \`reason: ambiguous_hostname\` (+ \`candidates\`) | Ask analyst which agent ID they mean, then re-call \`get_endpoint_status\` with \`agentId\` |
+| Hostname matches several endpoints | \`found: false\`, \`reason: ambiguous_hostname\` (+ \`candidates\`, possibly \`truncated: true\` + \`totalCandidates\`) | Ask analyst which agent ID they mean, then re-call the tool with \`agentId\`; if truncated, say only 10 newest candidates of \`totalCandidates\` are shown |
 | Action not found | \`found: false\`, \`reason: action_not_found\` | Ask analyst to verify the action ID from Response Actions history |
+| Agent unenrolled or uninstalled | \`found: false\`, \`reason: endpoint_not_active\` (+ \`agentId\`) | Tell the analyst the agent can no longer receive actions and nothing was dispatched; if the ID is stale, look the host up again by hostname |
+| Action failed | \`status: failed\` + \`errors\` (bounded; see \`totalErrors\`) | Report the reasons in \`errors\`; do not retry blindly |
 | Action still pending | \`status: pending\` + action ID | Report it is still in flight; offer to re-check with \`get_response_action_status\` |
 | Action expired | \`status: failed\` + \`isExpired: true\` | Report that the action expired before the host responded, not that the command failed; direct the analyst to re-issue it from the Response Actions UI |
 | Insufficient privileges | \`error: insufficient_privileges\` | Tell analyst which privilege is missing; suggest Security UI |
+| License tier too low | \`error: license_tier_required\` (+ \`privilege\`, \`requiredLicenseTier\`) | Tell analyst the deployment's Elastic license tier does not include this capability and a role grant cannot fix it; an administrator would need to upgrade the license. Do NOT suggest the Security UI (it enforces the same limit) and do not offer the action again this conversation |
+| License expired or unavailable | \`error: license_unavailable\` (+ \`privilege\`, \`licenseState\`: \`expired\` or \`unavailable\`) | Tell analyst the deployment's Elastic license has expired (renewing it restores the capability) or could not be read (an administrator must restore license availability). A role grant will not fix either; do not suggest a tier upgrade and do not offer the action again until the license is restored |
+| Product configuration excludes response actions | \`error: product_feature_disabled\` (+ \`privilege\`, \`productFeature\`) | Tell analyst the deployment's product tier does not include response actions (on serverless, response actions require the Endpoint Complete tier). Report it as a property of the project — no role grant, license upgrade, or Security UI workaround exists; do not offer the action again this conversation |
 | Page out of range | \`error: invalid_argument\` | Narrow the request with \`hostNameFilter\` instead of paging further |
 | Unexpected failure | \`error: unknown_error\` | Report the message; do not retry blindly |
+| Failure after dispatch | \`error: unknown_error\` + \`actionMayHaveBeenSent: true\` | The action may already have been sent. Do NOT call the write tool again; check \`get_response_action_status\` / Response Actions history for the host first |
 
 ## Bounded Fields in \`get_response_action_status\`
 
@@ -42,12 +48,13 @@ When a counter shows dropped items, say that only a sample is shown and give the
 ## Best Practices
 
 - When the analyst asks which hosts are available, call \`list_endpoints\` first.
-- To confirm a host's identity and current isolation state, call \`get_endpoint_status\`.
+- Call \`isolate_host\` / \`unisolate_host\` directly: they resolve the hostname themselves and return \`endpoint_not_found\` or \`ambiguous_hostname\` rather than guessing, so no \`get_endpoint_status\` pre-check is needed. Use \`get_endpoint_status\` when the analyst asks for the current state.
+- Always surface the action ID from write tools — it is the audit anchor in Response Actions history. If a write tool reports \`status: pending\` with no outcome, the action was still dispatched: report its ID and check it with \`get_response_action_status\`; never re-issue it.
 - For follow-up on a prior action ("what happened to scan X?"), use \`get_response_action_status\` with the action ID.
 - For this skill's status and response action lookups, use \`list_endpoints\`, \`get_endpoint_status\`, and \`get_response_action_status\` instead of \`platform.core.search\` or raw Elasticsearch queries. Other skills' diagnostic queries are unaffected.
 
 ## Scope
 
-This skill is **read-only** and currently covers: list endpoints, host status, response action status lookup.
+Supported: list endpoints, isolate, release, host status, running processes, malware scan, action status lookup.
 
-Not available from chat: isolate, release/unisolate, scan, running processes, execute, kill-process, suspend-process, get-file, upload, runscript, memory-dump. Do not attempt these with this skill or any other tool — direct the analyst to the Response Actions UI instead.`;
+Not supported yet: execute, kill-process, suspend-process, get-file, upload, runscript, memory-dump. Do not attempt these.`;

@@ -8,7 +8,7 @@
 {
   "type": "functional-tests",
   "id": "@kbn/evals-suite-security-esql-generation-regression",
-  "owner": "@elastic/security-detection-platform",
+  "owner": "@elastic/security-generative-ai",
   "group": "security",
   "visibility": "private"
 }

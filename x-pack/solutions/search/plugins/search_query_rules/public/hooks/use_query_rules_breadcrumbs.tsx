@@ -11,12 +11,9 @@ import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from './use_kibana';
 
-const QUERY_RULES_BREADCRUMB_TEXT = i18n.translate(
-  'xpack.searchQueryRules.breadcrumbs.queryRules',
-  {
-    defaultMessage: 'Query rules',
-  }
-);
+const QUERY_RULES_BREADCRUMB_TEXT = i18n.translate('xpack.queryRules.breadcrumbs.queryRules', {
+  defaultMessage: 'Query rules',
+});
 
 /**
  * Sets breadcrumbs for the Query Rules app.
@@ -36,7 +33,7 @@ export const useQueryRulesBreadcrumbs = (rulesetId?: string) => {
     // In project chrome, the navigation tree handles the base path automatically.
     if (chromeStyle === 'classic') {
       breadcrumbs.push({
-        text: i18n.translate('xpack.searchQueryRules.breadcrumbs.relevance', {
+        text: i18n.translate('xpack.queryRules.breadcrumbs.relevance', {
           defaultMessage: 'Relevance',
         }),
       });

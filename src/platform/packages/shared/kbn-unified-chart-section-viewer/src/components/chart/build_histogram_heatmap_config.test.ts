@@ -13,15 +13,23 @@ const query = 'TS metrics-a | STATS count = COUNT(latency) BY bucket, TBUCKET(10
 
 describe('buildHistogramHeatmapConfig', () => {
   it('builds the heatmap with the same config builder XY charts use', () => {
-    expect(buildHistogramHeatmapConfig({ query, title: 'latency' })).toEqual({
+    expect(
+      buildHistogramHeatmapConfig({
+        query,
+        title: 'latency',
+        description: 'Data stream: metrics-a',
+      })
+    ).toEqual({
       chartType: 'heatmap',
       title: 'latency',
+      description: 'Data stream: metrics-a',
       dataset: { esql: query },
       value: 'count',
       xAxis: 'TBUCKET(100)',
       breakdown: 'bucket',
       legend: { show: false },
       axisLabel: { xAxis: true, yAxis: true },
+      ySort: 'desc',
     });
   });
 });

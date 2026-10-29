@@ -28,6 +28,7 @@ import { buildRiskMoversCountQuery } from '../tile_risk_movers_query';
  * | host:rise          | 20             | 60            | yes    |                                    |
  * | host:dropped       | 90             | 15            | no     | went down                          |
  * | host:never-scored  | 30             | none          | no     | no current score at all            |
+ * | host:group-rise    | 20             | 5 (group 40)  | yes    | own score below 10, group's counts |
  */
 
 const NAMESPACE = 'default';
@@ -35,7 +36,12 @@ const ENTITY_INDEX = 'entities-latest-low-scores-test';
 const HOUR_MS = 60 * 60 * 1000;
 const BOUNDARY_MS = 30 * 24 * HOUR_MS;
 
-const ENTITIES: ReadonlyArray<{ id: string; boundary: number; current?: number }> = [
+const ENTITIES: ReadonlyArray<{
+  id: string;
+  boundary: number;
+  current?: number;
+  groupCurrent?: number;
+}> = [
   { id: 'host:reset-to-zero', boundary: 70, current: 0 },
   { id: 'host:zero-zero', boundary: 0, current: 0 },
   { id: 'host:small-rise', boundary: 0, current: 8 },
@@ -44,6 +50,7 @@ const ENTITIES: ReadonlyArray<{ id: string; boundary: number; current?: number }
   { id: 'host:rise', boundary: 20, current: 60 },
   { id: 'host:dropped', boundary: 90, current: 15 },
   { id: 'host:never-scored', boundary: 30 },
+  { id: 'host:group-rise', boundary: 20, current: 5, groupCurrent: 40 },
 ];
 
 describe('Risk movers count and entities with a low current score, on Elasticsearch', () => {
@@ -64,6 +71,7 @@ describe('Risk movers count and entities with a low current score, on Elasticsea
           'entity.name': { type: 'keyword' },
           'entity.risk.calculated_score_norm': { type: 'float' },
           'entity.relationships.resolution.resolved_to': { type: 'keyword' },
+          'entity.relationships.resolution.risk.calculated_score_norm': { type: 'float' },
         },
       },
     });
@@ -78,12 +86,15 @@ describe('Risk movers count and entities with a low current score, on Elasticsea
       },
     });
     const now = Date.now();
-    const operations = ENTITIES.flatMap(({ id, boundary, current }) => [
+    const operations = ENTITIES.flatMap(({ id, boundary, current, groupCurrent }) => [
       { index: { _index: ENTITY_INDEX } },
       {
         'entity.id': id,
         'entity.name': id.split(':')[1],
         ...(current === undefined ? {} : { 'entity.risk.calculated_score_norm': current }),
+        ...(groupCurrent === undefined
+          ? {}
+          : { 'entity.relationships.resolution.risk.calculated_score_norm': groupCurrent }),
       },
       { index: { _index: getRiskScoreIndex(NAMESPACE) } },
       {
@@ -111,16 +122,19 @@ describe('Risk movers count and entities with a low current score, on Elasticsea
   };
 
   const shipped = buildRiskMoversCountQuery(NAMESPACE, ENTITY_INDEX, '30d');
+  /** The entity branch's filter: the current score (the group's, else the entity's own) is high enough. */
+  const CAN_QUALIFY =
+    /COALESCE\(`entity\.relationships\.resolution\.risk\.calculated_score_norm`, entity\.risk\.calculated_score_norm\) >= \d+/;
   /** The same query with the entity branch as it was: every entity that has a score. */
   const readingEveryScoredEntity = shipped.replace(
-    /entity\.risk\.calculated_score_norm >= \d+ AND/,
-    'entity.risk.calculated_score_norm IS NOT NULL AND'
+    CAN_QUALIFY,
+    '(entity.risk.calculated_score_norm IS NOT NULL OR `entity.relationships.resolution.risk.calculated_score_norm` IS NOT NULL)'
   );
 
   it('counts the entities that rose by 10 or more, also from a score of 0', async () => {
     expect(await run(shipped)).toEqual({
-      value: 2,
-      entityIds: ['host:rise', 'host:ten-from-zero'],
+      value: 3,
+      entityIds: ['host:group-rise', 'host:rise', 'host:ten-from-zero'],
     });
   });
 
@@ -150,10 +164,11 @@ describe('Risk movers count and entities with a low current score, on Elasticsea
       });
       return Number(values[0]?.[0]);
     };
-    const predicate = /entity\.risk\.calculated_score_norm >= \d+/.exec(shipped)?.[0];
+    const predicate = CAN_QUALIFY.exec(shipped)?.[0];
     expect(predicate).toBeDefined();
-    // Seven entities have a score, but only three have a current score of 10 or more.
-    expect(await countRows('entity.risk.calculated_score_norm IS NOT NULL')).toBe(7);
-    expect(await countRows(predicate as string)).toBe(3);
+    // Eight entities have a score, but only four have a current score (the group's, else their
+    // own) of 10 or more; host:group-rise is one of them though its own score is 5.
+    expect(await countRows('entity.risk.calculated_score_norm IS NOT NULL')).toBe(8);
+    expect(await countRows(predicate as string)).toBe(4);
   });
 });

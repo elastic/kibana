@@ -10,7 +10,11 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import { ExecutionStatus, isRequestAbortedError } from '@kbn/agent-builder-common';
+import {
+  AgentExecutionMode,
+  ExecutionStatus,
+  isRequestAbortedError,
+} from '@kbn/agent-builder-common';
 import { createAgentExecutionClient, type AgentExecutionClient } from '../persistence';
 import {
   handleAgentExecution,
@@ -18,6 +22,7 @@ import {
   type AgentExecutionDeps,
 } from '../execution_runner';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
+import { releaseActiveExecution } from '../utils/conversations';
 import { AbortMonitor } from './abort_monitor';
 import { HeartbeatReporter } from './heartbeat_reporter';
 import type { SurfacesService } from '../../surfaces';
@@ -67,6 +72,7 @@ class TaskHandlerImpl implements TaskHandler {
 
     if (execution.status === ExecutionStatus.aborted) {
       this.logger.info(`Execution ${executionId} was aborted before it started; skipping`);
+      await this.releaseAbortedExecution({ execution, fakeRequest });
       return;
     }
 
@@ -105,6 +111,7 @@ class TaskHandlerImpl implements TaskHandler {
     const callbackDeliveryPromise = deliverCallbackEvents({
       execution,
       events$,
+      request: fakeRequest,
       callbackDeliveryService: this.deps.callbackDeliveryService,
       surfacesService: this.deps.surfacesService,
       logger: this.logger,
@@ -159,6 +166,43 @@ class TaskHandlerImpl implements TaskHandler {
     } catch (statusError) {
       this.logger.error(
         `Failed to update status for execution ${executionId}: ${statusError.message}`
+      );
+    }
+  }
+
+  /**
+   * Releases the conversation an execution aborted before it started still holds: its run never
+   * reaches a terminal write, which is where a run releases it.
+   */
+  private async releaseAbortedExecution({
+    execution,
+    fakeRequest,
+  }: {
+    execution: AgentExecution;
+    fakeRequest: KibanaRequest;
+  }): Promise<void> {
+    const { executionId, executionMode, agentParams, owner } = execution;
+
+    if (executionMode !== AgentExecutionMode.conversation || !owner) {
+      return;
+    }
+
+    const { conversationId, storeConversation } = agentParams;
+
+    if (!conversationId || storeConversation === false) {
+      return;
+    }
+
+    try {
+      const conversationClient = await this.deps.conversationService.getScopedClientAsUser({
+        request: fakeRequest,
+        user: { ...owner, isAdmin: false },
+      });
+
+      await releaseActiveExecution({ conversationClient, conversationId, executionId });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to release conversation ${conversationId} after execution ${executionId} was aborted before it started: ${error.message}`
       );
     }
   }

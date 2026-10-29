@@ -131,6 +131,7 @@ describe('useFetchEntityDetailsHighlights', () => {
         from: expect.any(Number),
         to: expect.any(Number),
         connectorId: 'test-connector-id',
+        mode: 'single',
       },
       context: {
         child: {
@@ -325,6 +326,45 @@ describe('useFetchEntityDetailsHighlights', () => {
       });
     });
 
+    it('does not tag single-mode summaries with a variant id', async () => {
+      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
+      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
+
+      const { result } = renderHook(() => useFetchEntityDetailsHighlights(mockProps));
+
+      await act(async () => {
+        await result.current.fetchEntityHighlights();
+      });
+
+      const [{ params }] = mockSaveEntityAiSummary.mock.calls[0];
+      expect(params.summary).not.toHaveProperty('variant_id');
+    });
+
+    it('requests a group summary and persists it under the resolved variant in resolved mode', async () => {
+      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
+      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
+
+      const { result } = renderHook(() =>
+        useFetchEntityDetailsHighlights({ ...mockProps, mode: 'resolved' })
+      );
+
+      await act(async () => {
+        await result.current.fetchEntityHighlights();
+      });
+
+      expect(mockFetchEntityDetailsHighlights).toHaveBeenCalledWith(
+        expect.objectContaining({ params: expect.objectContaining({ mode: 'resolved' }) })
+      );
+      expect(mockSaveEntityAiSummary).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            entityId: 'test-user',
+            summary: expect.objectContaining({ variant_id: 'resolved' }),
+          }),
+        })
+      );
+    });
+
     it('skips persistence when the user lacks metadata read access (canRead: false)', async () => {
       mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
       mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
@@ -439,6 +479,33 @@ describe('useFetchEntityDetailsHighlights', () => {
         entityIdentifier: 'other-user',
         entitySnapshot: mockEntitySnapshot,
       });
+
+      expect(result.current.generationBaseline).toBeNull();
+    });
+
+    it('resets the generation baseline when the view mode changes for the same entity', async () => {
+      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
+      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
+
+      const { result, rerender } = renderHook(
+        (props: Parameters<typeof useFetchEntityDetailsHighlights>[0]) =>
+          useFetchEntityDetailsHighlights(props),
+        {
+          initialProps: {
+            ...mockProps,
+            mode: 'single',
+            entitySnapshot: mockEntitySnapshot,
+          } as Parameters<typeof useFetchEntityDetailsHighlights>[0],
+        }
+      );
+
+      await act(async () => {
+        await result.current.fetchEntityHighlights();
+      });
+
+      expect(result.current.generationBaseline).toEqual(mockEntitySnapshot);
+
+      rerender({ ...mockProps, mode: 'resolved', entitySnapshot: mockEntitySnapshot });
 
       expect(result.current.generationBaseline).toBeNull();
     });

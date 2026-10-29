@@ -103,6 +103,19 @@ Rendered by `onboarding_landing_page.tsx` in the onboarding package. All IDs use
 | `vectordbOnboarding-pathSelection-generateVectors`    | `EuiSplitPanel.Outer` "Generate embeddings from your content"  | Chooses the `generate-vectors` path.                  |
 | `vectordbOnboarding-pathSelection-haveVectors`        | `EuiSplitPanel.Outer` "Store your existing embeddings"         | Chooses the `have-vectors` path.                      |
 
+### Additional options
+
+| Telemetry ID                                                 | Attached to                                       | Description                                                          |
+| ------------------------------------------------------------ | ------------------------------------------------- | -------------------------------------------------------------------- |
+| `vectordbOnboarding-pathSelection-viewPrompt`                | `EuiButton` "View prompt"                         | Opens the coding agent prompt modal.                                 |
+| `vectordbOnboarding-pathSelection-installCli`                | `EuiButton` "Install the CLI"                     | Opens the Elastic CLI install modal.                                 |
+| `vectordbOnboarding-pathSelection-openElasticAgent`          | `AiButton` "Open Elastic AI Agent"                | Opens Agent Builder chat with `sessionTag: vectordb-getting-started`. |
+| `vectordbOnboarding-pathSelection-promptModal-cancel`        | `EuiButtonEmpty` "Cancel" (prompt modal footer)   | Closes the prompt modal.                                             |
+| `vectordbOnboarding-pathSelection-promptModal-copy`          | `EuiButton` "Copy to clipboard" (prompt modal)    | Copies the prompt text.                                              |
+| `vectordbOnboarding-pathSelection-cliModal-repoLink`         | `EuiButtonEmpty` "elastic/cli" (CLI modal footer) | Opens the Elastic CLI GitHub repository.                             |
+| `vectordbOnboarding-pathSelection-cliModal-commandReference` | `EuiButtonEmpty` "Command reference" (CLI modal)  | Opens the Elastic CLI command reference.                             |
+| `vectordbOnboarding-pathSelection-cliModal-close`            | `EuiButton` "Close" (CLI modal footer)            | Closes the CLI modal.                                                |
+
 ### Footer
 
 | Telemetry ID                                       | Attached to                                              | Description                              |

@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useMetricSubtitle } from './use_metric_subtitle';
-import { WrappedHelper } from '../utils/testing';
+import { HookWrapper } from '../utils/testing/hook_helpers';
 import type { OverviewStatusMetaData } from '../../../../common/runtime_types';
 
 const makeMeta = (overrides: Partial<OverviewStatusMetaData> = {}): OverviewStatusMetaData =>
@@ -28,7 +28,7 @@ const makeMeta = (overrides: Partial<OverviewStatusMetaData> = {}): OverviewStat
 
 describe('useMetricSubtitle', () => {
   const Wrapper = ({ children }: React.PropsWithChildren) => (
-    <WrappedHelper
+    <HookWrapper
       state={{
         serviceLocations: {
           locationsLoaded: true,
@@ -41,7 +41,7 @@ describe('useMetricSubtitle', () => {
       }}
     >
       {children}
-    </WrappedHelper>
+    </HookWrapper>
   );
 
   it('returns "Down in {location}" for a single down location', () => {
@@ -132,7 +132,7 @@ describe('useMetricSubtitle', () => {
       locations: [{ id: 'custom_loc', label: undefined as unknown as string, status: 'unknown' }],
     });
     const NotLoadedWrapper = ({ children }: React.PropsWithChildren) => (
-      <WrappedHelper
+      <HookWrapper
         state={{
           serviceLocations: {
             locationsLoaded: false,
@@ -142,7 +142,7 @@ describe('useMetricSubtitle', () => {
         }}
       >
         {children}
-      </WrappedHelper>
+      </HookWrapper>
     );
     const { result } = renderHook(() => useMetricSubtitle(monitor), {
       wrapper: NotLoadedWrapper,

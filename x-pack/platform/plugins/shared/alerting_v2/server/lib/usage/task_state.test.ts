@@ -133,4 +133,96 @@ describe('alerting v2 telemetry task state', () => {
       expect(() => v4.schema.validate(state)).toThrow();
     });
   });
+
+  describe('v5', () => {
+    const v5 = stateSchemaByVersion[5];
+
+    const v4State = {
+      has_errors: false,
+      runs: 4,
+      count_total: 20,
+      count_agent_builder_assisted: 3,
+      action_policies_count_agent_builder_assisted: 1,
+    };
+
+    it('removes the agent-builder counters from the migrated state', () => {
+      const result = v5.up(cloneDeep(v4State));
+
+      expect(result).not.toHaveProperty('count_agent_builder_assisted');
+      expect(result).not.toHaveProperty('action_policies_count_agent_builder_assisted');
+    });
+
+    it('preserves the counters it does not own', () => {
+      expect(v5.up(cloneDeep(v4State))).toMatchObject({
+        has_errors: false,
+        runs: 4,
+        count_total: 20,
+      });
+    });
+
+    it('produces a state the v5 schema accepts', () => {
+      expect(() => v5.schema.validate(v5.up(cloneDeep(v4State)))).not.toThrow();
+    });
+
+    it('rejects a state that still carries the agent-builder counters', () => {
+      expect(() => v5.schema.validate(v4State)).toThrow();
+    });
+  });
+
+  describe('v6', () => {
+    const v6 = stateSchemaByVersion[6];
+
+    const v5State = {
+      has_errors: false,
+      runs: 5,
+      action_policies_count: 7,
+    };
+
+    const newFields = {
+      action_policies_count_by_status: { enabled: 5, disabled: 1, snoozed: 1 },
+      action_policies_count_by_grouping_mode: { per_alert: 6, all: 1 },
+      action_policies_count_by_throttle_strategy: { none: 4, every_time: 3 },
+      action_policies_workflows_per_policy: { p50: 1, p99: 3, avg: 1.4 },
+      action_policies_count_with_multiple_workflows: 2,
+    };
+
+    it('adds the action policy configuration counters as undefined', () => {
+      const result = v6.up(cloneDeep(v5State));
+
+      expect(result).toMatchObject({
+        action_policies_count_by_status: undefined,
+        action_policies_count_by_grouping_mode: undefined,
+        action_policies_count_by_throttle_strategy: undefined,
+        action_policies_workflows_per_policy: undefined,
+        action_policies_count_with_multiple_workflows: undefined,
+      });
+    });
+
+    it('preserves the counters it does not own', () => {
+      expect(v6.up(cloneDeep(v5State))).toMatchObject(v5State);
+    });
+
+    it('produces a state the v6 schema accepts', () => {
+      expect(() => v6.schema.validate(v6.up(cloneDeep(v5State)))).not.toThrow();
+    });
+
+    it('accepts the new counters, including null percentiles', () => {
+      expect(() =>
+        v6.schema.validate({
+          ...v5State,
+          ...newFields,
+          action_policies_workflows_per_policy: { p50: null, p99: null, avg: null },
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a count_by value outside the known vocabulary', () => {
+      expect(() =>
+        v6.schema.validate({
+          ...v5State,
+          action_policies_count_by_throttle_strategy: { burst: 1 },
+        })
+      ).toThrow();
+    });
+  });
 });

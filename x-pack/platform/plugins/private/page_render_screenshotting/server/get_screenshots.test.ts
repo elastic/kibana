@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { Agent } from 'undici';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
+import { RenderRequestRejectedError } from '@kbn/reporting-common';
 import type { PdfScreenshotOptions, PngScreenshotOptions } from '@kbn/screenshotting-plugin/server';
 import { createGetScreenshots, diagnose } from './get_screenshots';
 import { renderPage } from './render/client';
@@ -176,10 +177,11 @@ describe('createGetScreenshots', () => {
     expect(mockRenderPage).not.toHaveBeenCalled();
   });
 
-  it('passes the capture base url, dispatcher and task deadline to the render', async () => {
+  it('passes the capture base url, dispatcher, task deadline and report to the render', async () => {
     mockRenderPage.mockReturnValue(Rx.of({ data: Buffer.from('x'), renderErrors: [] }));
     const dispatcher = new Agent();
     const retryAt = new Date('2026-01-01T00:05:00Z');
+    const report = { id: 'report-1', createdAt: new Date('2026-01-01T00:00:00Z') };
 
     const getScreenshots = createGetScreenshots({
       getServiceUrl,
@@ -190,13 +192,15 @@ describe('createGetScreenshots', () => {
       getDispatcher: () => dispatcher,
     });
     await firstValueFrom(
-      getScreenshots(pdfOptions({ taskInstanceFields: { retryAt, startedAt: null } }))
+      getScreenshots(
+        pdfOptions({ taskInstanceFields: { retryAt, startedAt: null, report, canHandBack: true } })
+      )
     );
 
-    const [payload, serviceConfig, deadline] = mockRenderPage.mock.calls[0];
+    const [payload, serviceConfig, context] = mockRenderPage.mock.calls[0];
     expect(payload.url).toBe('https://kibana.example.com/app/reportingRedirect');
     expect(serviceConfig).toMatchObject({ url: 'http://localhost:3001', dispatcher });
-    expect(deadline).toBe(retryAt);
+    expect(context).toEqual({ retryAt, report, canHandBack: true });
   });
 
   it('emits a dispatcher failure as an observable error', async () => {
@@ -260,9 +264,9 @@ describe('createGetScreenshots', () => {
       await firstValueFrom(getScreenshots(pdfOptions()));
       const { createToken } = mockRenderPage.mock.calls[0][1];
 
-      await expect(createToken(new AbortController().signal)).rejects.toThrow(
-        /xpack.security.uiam is not configured/
-      );
+      const error = await createToken(new AbortController().signal).catch((e: Error) => e);
+      expect(error).toBeInstanceOf(RenderRequestRejectedError);
+      expect((error as Error).message).toMatch(/xpack.security.uiam is not configured/);
     });
   });
 });

@@ -212,6 +212,10 @@ describe('CheckStatus', () => {
 
   it.each([
     ['Universal Profiling data', makeStatus({ universalProfiling: { hasData: true } })],
+    [
+      'Universal Profiling data and its setup is incomplete',
+      makeStatus({ universalProfiling: { hasData: true, hasSetup: false } }),
+    ],
     ['OTel data', makeStatus({ otel: { hasData: true } })],
     [
       'data in both schemas',
@@ -251,18 +255,6 @@ describe('CheckStatus', () => {
     ],
   ])('redirects to the add data page when %s and there is no data', (_name, data) => {
     mockStatus({ data });
-
-    renderCheckStatus();
-
-    expect(routerPush).toHaveBeenCalledWith('/add-data-instructions', {
-      path: {},
-      query: {},
-    });
-    expect(screen.queryByTestId('profilingApp')).not.toBeInTheDocument();
-  });
-
-  it('redirects to the add data page when there is only Universal Profiling data and it is not set up', () => {
-    mockStatus({ data: makeStatus({ universalProfiling: { hasData: true, hasSetup: false } }) });
 
     renderCheckStatus();
 

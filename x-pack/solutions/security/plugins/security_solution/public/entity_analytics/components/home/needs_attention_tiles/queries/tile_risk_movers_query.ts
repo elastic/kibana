@@ -62,9 +62,12 @@ export const buildRiskMoversCountQuery = (
     // not read. This keeps the read from growing with every entity that was ever scored (an entity
     // that stops alerting is reset to a score of 0, which is not null, and stays in the store).
     `  FROM ${entitiesIndexName}`,
-    `  | WHERE entity.risk.calculated_score_norm >= ${RISK_MOVER_MIN_SCORE_CHANGE} AND entity.name IS NOT NULL`,
+    // Aliases are left out: the group is judged by its main entity, which holds the group's score.
+    `  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL AND entity.name IS NOT NULL`,
+    `    AND COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm) >= ${RISK_MOVER_MIN_SCORE_CHANGE}`,
     ...entityFilterClauses.map((clause) => `  ${clause}`),
-    `  | EVAL current_score = entity.risk.calculated_score_norm,`,
+    // The group's score if the entity has one, else its own.
+    `  | EVAL current_score = COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm),`,
     `         effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
     `  | KEEP \`entity.id\`, current_score, effective_id`,
     ')',

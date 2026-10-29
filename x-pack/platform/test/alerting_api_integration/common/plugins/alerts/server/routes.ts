@@ -17,6 +17,7 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import type {
@@ -434,7 +435,7 @@ export function defineRoutes(
         await actionsClient.bulkEnqueueExecution([
           {
             id: req.params.id,
-            spaceId: spaces ? spaces.spacesService.getSpaceId(req) : 'default',
+            spaceId: spaces ? spaces.spacesService.getSpaceId(req) : DEFAULT_SPACE_ID,
             executionId: uuidv4(),
             apiKey: createAPIKeyResult
               ? Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
