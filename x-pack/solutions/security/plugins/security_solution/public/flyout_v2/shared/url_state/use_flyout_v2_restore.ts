@@ -451,6 +451,7 @@ export const openDescriptorAsStart = (
           entityType: d.entityType,
           entityName: d.entityName,
           entityId: d.entityId,
+          scopeId: d.scopeId,
         }),
       });
       break;
