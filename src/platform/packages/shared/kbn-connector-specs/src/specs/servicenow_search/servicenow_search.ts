@@ -47,6 +47,7 @@ import {
   GetChoicesInputSchema,
   QueryUsersInputSchema,
   WhoAmIInputSchema,
+  SendA2AMessageInputSchema,
 } from './types';
 import { servicenowSearchEvents } from './events';
 import type {
@@ -71,6 +72,7 @@ import type {
   DeleteRecordInput,
   GetChoicesInput,
   QueryUsersInput,
+  SendA2AMessageInput,
 } from './types';
 
 const extractSnError = (err: unknown): string | undefined => {
@@ -721,6 +723,56 @@ export const ServicenowSearch: ConnectorSpec = {
         return results[0] ?? response.data;
       },
     },
+
+    sendA2AMessage: {
+      isTool: true,
+      scope: 'write',
+      description:
+        'Send a JSON-RPC 2.0 Agent-to-Agent (A2A v2) message to a ServiceNow AI Agent by agentId. ' +
+        'Allows a single ServiceNow connector (including per-user OAuth 2.0 Authorization Code connectors) ' +
+        'to invoke multiple ServiceNow AI Agents across multi-turn conversations using contextId.',
+      input: SendA2AMessageInputSchema,
+      handler: async (ctx, input: SendA2AMessageInput) => {
+        const { instanceUrl } = ctx.config as { instanceUrl: string };
+        const baseUrl = instanceUrl.replace(/\/+$/, '');
+        const url = `${baseUrl}/api/sn_aia/a2a/v2/agent/id/${encodeURIComponent(input.agentId)}`;
+        const trimmedContextId = input.contextId?.trim();
+        const messageId =
+          input.messageId && input.messageId.trim().length > 0
+            ? input.messageId.trim()
+            : `msg-${Date.now()}`;
+        const requestId =
+          input.requestId && input.requestId.trim().length > 0
+            ? input.requestId.trim()
+            : 'a2a-req-1';
+
+        const payload = {
+          jsonrpc: '2.0',
+          id: requestId,
+          method: 'message/send',
+          params: {
+            message: {
+              kind: 'message',
+              messageId,
+              role: 'user',
+              ...(trimmedContextId ? { contextId: trimmedContextId } : {}),
+              parts: [{ kind: 'text', text: input.prompt }],
+            },
+          },
+        };
+
+        try {
+          const response = await ctx.client.post(url, payload);
+          return response.data;
+        } catch (err) {
+          const snError = extractSnError(err);
+          throw new Error(
+            `Unable to invoke ServiceNow A2A agent.${snError ? ` ${snError}.` : ''} ` +
+              'Ensure ServiceNow AI Agent Studio A2A is enabled and the authenticated user has permission to execute the target agent.'
+          );
+        }
+      },
+    },
   },
 
   skill: [
@@ -768,6 +820,10 @@ export const ServicenowSearch: ConnectorSpec = {
     '## Current user identity',
     'Use whoAmI to get the sys_id and details of the authenticated connector user.',
     'Useful for populating caller_id with the connector account or verifying permissions.',
+    '',
+    '## AI Agent Studio (A2A v2)',
+    'Use sendA2AMessage with agentId and prompt to invoke any ServiceNow AI Agent over JSON-RPC 2.0 A2A v2.',
+    'Pass the returned result.contextId as contextId on subsequent turns to preserve multi-turn conversation state.',
   ].join('\n'),
 
   events: servicenowSearchEvents,

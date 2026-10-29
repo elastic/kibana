@@ -1331,6 +1331,121 @@ describe('ServicenowSearch', () => {
     });
   });
 
+  describe('sendA2AMessage action', () => {
+    it('should send an initial JSON-RPC 2.0 A2A v2 message without contextId when omitted or blank', async () => {
+      const mockResponse = {
+        data: {
+          jsonrpc: '2.0',
+          id: 'a2a-req-1',
+          result: {
+            id: 'task-001',
+            contextId: 'ctx-1234-5678',
+            status: { state: 'input-required' },
+            artifacts: [
+              {
+                parts: [{ kind: 'text', text: 'Which item would you like to request?' }],
+              },
+            ],
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await ServicenowSearch.actions.sendA2AMessage.handler(mockContext, {
+        agentId: '0123456789abcdef0123456789abcdef',
+        prompt: 'I would like to submit a catalog request',
+        contextId: '   ',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/sn_aia/a2a/v2/agent/id/0123456789abcdef0123456789abcdef',
+        {
+          jsonrpc: '2.0',
+          id: 'a2a-req-1',
+          method: 'message/send',
+          params: {
+            message: {
+              kind: 'message',
+              messageId: expect.stringMatching(/^msg-\d+$/),
+              role: 'user',
+              parts: [{ kind: 'text', text: 'I would like to submit a catalog request' }],
+            },
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should pass contextId, messageId, and requestId and normalize trailing slashes on instanceUrl', async () => {
+      const trailingSlashContext = {
+        ...mockContext,
+        config: { instanceUrl: 'https://test-instance.service-now.com/' },
+      } as unknown as ActionContext;
+      const mockResponse = {
+        data: {
+          jsonrpc: '2.0',
+          id: 'custom-req-2',
+          result: {
+            id: 'task-002',
+            contextId: 'ctx-1234-5678',
+            status: { state: 'completed' },
+            artifacts: [{ parts: [{ kind: 'text', text: 'Request submitted.' }] }],
+          },
+        },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await ServicenowSearch.actions.sendA2AMessage.handler(trailingSlashContext, {
+        agentId: '0123456789abcdef0123456789abcdef',
+        prompt: 'Confirm submission',
+        contextId: 'ctx-1234-5678',
+        messageId: 'msg-exec-42',
+        requestId: 'custom-req-2',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://test-instance.service-now.com/api/sn_aia/a2a/v2/agent/id/0123456789abcdef0123456789abcdef',
+        {
+          jsonrpc: '2.0',
+          id: 'custom-req-2',
+          method: 'message/send',
+          params: {
+            message: {
+              kind: 'message',
+              messageId: 'msg-exec-42',
+              role: 'user',
+              contextId: 'ctx-1234-5678',
+              parts: [{ kind: 'text', text: 'Confirm submission' }],
+            },
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should surface ServiceNow API error details when A2A invocation fails', async () => {
+      mockClient.post.mockRejectedValue({
+        response: {
+          data: {
+            error: {
+              message: 'User Not Authorized',
+              detail: 'Insufficient privileges to execute AI Agent',
+            },
+          },
+        },
+      });
+
+      await expect(
+        ServicenowSearch.actions.sendA2AMessage.handler(mockContext, {
+          agentId: '0123456789abcdef0123456789abcdef',
+          prompt: 'Check status',
+        })
+      ).rejects.toThrow(
+        'Unable to invoke ServiceNow A2A agent. User Not Authorized: Insufficient privileges to execute AI Agent.'
+      );
+    });
+  });
+
   describe('test handler', () => {
     const testSpec = ServicenowSearch.test;
 

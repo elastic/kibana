@@ -322,6 +322,19 @@ Delete record
     - `table` (required): The table containing the record to delete.
     - `sysId` (required): The `sys_id` of the record to permanently delete.
 
+Send A2A message
+:   Send a JSON-RPC 2.0 Agent-to-Agent (A2A v2) `message/send` request to a {{sn}} AI Agent via `/api/sn_aia/a2a/v2/agent/id/<agentId>`. Allows a single {{sn}} connector, including per-user OAuth 2.0 Authorization Code connectors, to invoke multiple {{sn}} AI Agents dynamically and maintain multi-turn conversation state.
+
+    ::::{note}
+    Requires **{{sn}} AI Agent Studio** with A2A v2 enabled on the {{sn}} instance, and the authenticated {{sn}} user must have permission to execute the target AI Agent.
+    ::::
+
+    - `agentId` (required): The `sys_id` of the target {{sn}} AI Agent.
+    - `prompt` (required): Natural language message text to send to the {{sn}} AI Agent.
+    - `contextId` (optional): A2A `contextId` returned from an earlier turn to continue a multi-turn conversation.
+    - `messageId` (optional): Unique message identifier for the JSON-RPC 2.0 A2A message payload (auto-generated when omitted).
+    - `requestId` (optional): JSON-RPC 2.0 request `id` (defaults to `a2a-req-1`).
+
 ## Receive ServiceNow events [servicenow-search-inbound-events]
 ```{applies_to}
 serverless: preview
