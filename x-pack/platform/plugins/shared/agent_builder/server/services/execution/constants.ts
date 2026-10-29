@@ -35,7 +35,7 @@ export const FOLLOW_TERMINAL_READ_MAX_RETRIES = 2;
 /** Delay (ms) between retries when reading remaining events after terminal status. */
 export const FOLLOW_TERMINAL_READ_RETRY_DELAY_MS = 500;
 
-/** Safety timeout (ms) for followExecution polling. Prevents infinite polling if the execution never reaches a terminal status. */
+/** Safety timeout (ms) for followExecution polling, counted from when the execution is first seen running. Prevents infinite polling if the execution never reaches a terminal status. */
 export const FOLLOW_EXECUTION_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
 
 /** How often (ms) the executing node writes `last_heartbeat` to the execution document while a task runs. */
@@ -71,3 +71,9 @@ export const FOLLOW_ABORT_DRAIN_TIMEOUT_MS =
   EVENT_BATCH_INTERVAL_MS +
   FOLLOW_POLL_INTERVAL_MS +
   7_300; // ≈ 15 s
+
+/** How often (ms) an execution waiting for its turn on a conversation checks again. */
+export const QUEUE_RECHECK_INTERVAL_MS = 5 * 1000; // 5 seconds
+
+/** How many live executions a conversation takes, the running one included, before refusing more. */
+export const MAX_LIVE_CONVERSATION_EXECUTIONS = 5;

@@ -255,6 +255,11 @@ const handleConversationExecution = async ({
   // resolution moved inside this guard too, so a run that fails to resolve one still gets a
   // terminal recorded next to the message that was already persisted.
   try {
+    // An execution aborted while it waited for its turn stops here, before any model call.
+    if (abortSignal.aborted) {
+      throw createAbortedError(abortSignal);
+    }
+
     // Captured once, before the first model call, so every EIS call in this round (including
     // the title-generation and default-connector lookups below, which run ahead of the
     // `invoke_agent` span) reports the same trace id rather than whichever span happened to be
@@ -347,6 +352,7 @@ const handleConversationExecution = async ({
           agentEvents$,
           nextInput,
           author,
+          releaseExecutionId: execution.executionId,
         })
       : EMPTY;
 
@@ -409,6 +415,7 @@ const handleConversationExecution = async ({
                     error,
                     interrupted,
                     completed,
+                    releaseExecutionId: execution.executionId,
                     logger,
                   }),
               })
@@ -467,6 +474,7 @@ const handleConversationExecution = async ({
           author,
           origin: roundOrigin,
           error: normalized,
+          releaseExecutionId: execution.executionId,
           logger,
         })
       : [];
@@ -585,6 +593,7 @@ const buildPersistenceEvents = ({
   agentEvents$,
   nextInput,
   author,
+  releaseExecutionId,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -592,6 +601,7 @@ const buildPersistenceEvents = ({
   agentEvents$: Observable<ChatEvent>;
   nextInput: ConverseInput;
   author?: ConversationRoundAuthor;
+  releaseExecutionId: string;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -612,6 +622,7 @@ const buildPersistenceEvents = ({
             take(1)
           ),
           title$: endTitle$,
+          releaseExecutionId,
         })
       )
     );
@@ -627,6 +638,7 @@ const buildPersistenceEvents = ({
     input: nextInput,
     author,
     title$: conversationNeedsTitle(conversation) ? title$ : undefined,
+    releaseExecutionId,
   });
 };
 

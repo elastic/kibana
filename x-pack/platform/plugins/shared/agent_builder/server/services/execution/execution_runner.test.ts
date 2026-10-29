@@ -1626,6 +1626,11 @@ describe('handleAgentExecution — interrupted executions', () => {
     expect(conversationClient.replaceRoundEvents.mock.calls[0][0]).not.toHaveProperty(
       'skipIfTerminalExistsFor'
     );
+    // the terminal write releases this execution as the active execution
+    expect(conversationClient.replaceRoundEvents.mock.calls[0][0].activeExecution).toEqual({
+      action: 'release',
+      executionId: 'execution-1',
+    });
     expect(seen.map((event) => event.type)).toContain(TimelineEventType.executionTerminated);
     expect(seen.map((event) => event.type)).not.toContain(TimelineEventType.executionAborted);
   });
@@ -1818,6 +1823,40 @@ describe('handleAgentExecution — interrupted executions', () => {
         actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
       },
     });
+  });
+
+  it('an execution aborted while it waited for its turn records execution_aborted before any model call', async () => {
+    const conversationClient = echoingClient();
+    stubResolveServices(conversationClient);
+    const deps = createDeps({ conversationClient });
+    const abortReason = { source: 'api' } as const;
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          roundId: 'round-1',
+          conversationOperation: 'UPDATE',
+          receivedAt: '2024-01-01T00:00:00.000Z',
+          nextInput: { message: 'Hello' },
+        },
+      } as never,
+      deps: deps as never,
+      request: { headers: {} } as never,
+      abortSignal: AbortSignal.abort(abortReason),
+    });
+    const { seen, thrown } = await collect(events$);
+
+    expect(isRequestAbortedError(thrown)).toBe(true);
+    expect(resolveServicesMock).not.toHaveBeenCalled();
+    expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionAborted]);
+    const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
+    expect(write.events.at(-1)!.data).toMatchObject({ aborted_by: abortReason });
+    expect(write.activeExecution).toEqual({ action: 'release', executionId: 'execution-1' });
   });
 
   it('setup failure on a HITL resume: prompt_response + minimal exec_k projection appended', async () => {

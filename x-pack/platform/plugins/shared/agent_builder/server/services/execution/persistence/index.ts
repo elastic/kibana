@@ -8,5 +8,6 @@
 export {
   createAgentExecutionClient,
   type AgentExecutionClient,
+  type ConversationExecutionPeek,
   type ExecutionPeek,
 } from './agent_execution_client';

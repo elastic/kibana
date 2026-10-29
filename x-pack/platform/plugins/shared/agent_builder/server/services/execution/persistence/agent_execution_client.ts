@@ -52,6 +52,19 @@ export interface ExecutionPeek {
   owner?: UserIdAndName;
 }
 
+/** Liveness snapshot of an execution, as returned by {@link AgentExecutionClient.findLiveByConversation}. */
+export interface ConversationExecutionPeek {
+  executionId: string;
+  '@timestamp': string;
+  status: ExecutionStatus;
+  lastHeartbeat?: string;
+}
+
+const LIVE_CONVERSATION_EXECUTIONS_LIMIT = 20;
+
+const getConversationId = (agentParams: AgentExecutionProperties['agent_params']) =>
+  agentParams && 'conversationId' in agentParams ? agentParams.conversationId : undefined;
+
 const fromEs = (source: AgentExecutionProperties): AgentExecution => {
   return {
     executionId: source.execution_id,
@@ -117,8 +130,14 @@ export interface AgentExecutionClient {
     since?: number
   ): Promise<{ events: ChatEvent[]; status: ExecutionStatus; error?: SerializedExecutionError }>;
 
+  /** Delete an execution document. Resolves silently when it does not exist. */
+  delete(executionId: string): Promise<void>;
+
   /** Search executions by metadata and/or status filters. */
   find(options: FindExecutionsOptions): Promise<AgentExecution[]>;
+
+  /** The conversation's `scheduled` and `running` executions, oldest first (search, not real-time). */
+  findLiveByConversation(conversationId: string): Promise<ConversationExecutionPeek[]>;
 }
 
 export const createAgentExecutionClient = ({
@@ -167,6 +186,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     }
 
     const now = new Date().toISOString();
+    const conversationId = getConversationId(agentParams);
     const document: AgentExecutionProperties = {
       execution_id: executionId,
       '@timestamp': now,
@@ -176,6 +196,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       execution_mode: executionMode,
       ...(interactivity ? { interactivity } : {}),
       parent_execution_id: parentExecutionId,
+      ...(conversationId ? { conversation_id: conversationId } : {}),
       space_id: spaceId,
       ...(owner ? { owner } : {}),
       agent_params: agentParams,
@@ -280,8 +301,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
         return undefined;
       }
       const { agent_params: agentParams, agent_id: agentId, owner } = source;
-      const conversationId =
-        agentParams && 'conversationId' in agentParams ? agentParams.conversationId : undefined;
+      const conversationId = getConversationId(agentParams);
       return {
         status: source.status,
         eventCount: source.event_count ?? 0,
@@ -294,6 +314,17 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     } catch (err) {
       if (err?.meta?.statusCode === 404) {
         return undefined;
+      }
+      throw err;
+    }
+  }
+
+  async delete(executionId: string): Promise<void> {
+    try {
+      await this.esClient.delete({ index: agentExecutionIndexName, id: executionId });
+    } catch (err) {
+      if (err?.meta?.statusCode === 404) {
+        return;
       }
       throw err;
     }
@@ -352,6 +383,43 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       });
 
       return response.hits.hits.flatMap((hit) => (hit._source ? [fromEs(hit._source)] : []));
+    } catch (err) {
+      if (err?.meta?.statusCode === 404) {
+        return [];
+      }
+      throw err;
+    }
+  }
+
+  async findLiveByConversation(conversationId: string): Promise<ConversationExecutionPeek[]> {
+    try {
+      const response = await this.esClient.search<AgentExecutionProperties>({
+        index: agentExecutionIndexName,
+        size: LIVE_CONVERSATION_EXECUTIONS_LIMIT,
+        sort: [{ '@timestamp': { order: 'asc' } }, { execution_id: { order: 'asc' } }],
+        _source_includes: ['execution_id', '@timestamp', 'status', 'last_heartbeat'],
+        query: {
+          bool: {
+            filter: [
+              { term: { conversation_id: conversationId } },
+              { terms: { status: [ExecutionStatus.scheduled, ExecutionStatus.running] } },
+            ],
+          },
+        },
+      });
+
+      return response.hits.hits.flatMap(({ _source: source }) =>
+        source
+          ? [
+              {
+                executionId: source.execution_id,
+                '@timestamp': source['@timestamp'],
+                status: source.status,
+                ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
+              },
+            ]
+          : []
+      );
     } catch (err) {
       if (err?.meta?.statusCode === 404) {
         return [];

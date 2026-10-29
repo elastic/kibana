@@ -97,20 +97,21 @@ async function* pollExecutionEvents(
   let receivedRoundComplete = false;
   let lastStatus: ExecutionStatus | undefined;
   let lastHeartbeat: string | undefined;
-  let hasStartedRunning = false;
-  const startTime = Date.now();
-  let lastLivenessTime = startTime;
+  // Queued time is bounded by the scheduled liveness check, so the overall timeout only counts
+  // from when the execution was first seen running.
+  let runningSince: number | undefined;
+  let lastLivenessTime = Date.now();
 
   while (true) {
     const now = Date.now();
 
     // 0. Safety timeouts
-    if (now - startTime > FOLLOW_EXECUTION_TIMEOUT_MS) {
+    if (runningSince !== undefined && now - runningSince > FOLLOW_EXECUTION_TIMEOUT_MS) {
       throw createInternalError(
         `Execution ${executionId} timed out: no terminal status reached within ${FOLLOW_EXECUTION_TIMEOUT_MS}ms`
       );
     }
-    if (hasStartedRunning) {
+    if (runningSince !== undefined) {
       if (now - lastLivenessTime > FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS) {
         throw createInternalError(
           `Execution ${executionId} timed out: no heartbeat for ${FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS}ms`
@@ -162,8 +163,8 @@ async function* pollExecutionEvents(
       lastStatus = status;
     }
 
-    if (status === ExecutionStatus.running) {
-      hasStartedRunning = true;
+    if (status === ExecutionStatus.running && runningSince === undefined) {
+      runningSince = Date.now();
     }
 
     // 5. Handle terminal statuses

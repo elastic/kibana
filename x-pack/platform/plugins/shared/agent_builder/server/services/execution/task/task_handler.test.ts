@@ -12,6 +12,7 @@ import {
   ConversationAccessControlMode,
   ConversationRoundStatus,
   ExecutionStatus,
+  createConversationBusyError,
   createRequestAbortedError,
   type ChatEvent,
 } from '@kbn/agent-builder-common';
@@ -22,6 +23,7 @@ import { deliverCallbackEvents } from '../callback/deliver_callback_events';
 import { collectAndWriteEvents, handleAgentExecution } from '../execution_runner';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
 import { createAgentExecutionClient } from '../persistence';
+import { createConversationClientMock } from '../../../test_utils/conversations';
 
 jest.mock('../execution_runner');
 jest.mock('../utils/serialize_execution_error');
@@ -99,10 +101,16 @@ describe('TaskHandler event streaming and finalization', () => {
     get: jest.Mock;
     updateStatus: jest.Mock;
     updateHeartbeat: jest.Mock;
+    findLiveByConversation: jest.Mock;
   };
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let callbackDeliveryService: jest.Mocked<CallbackDeliveryService>;
   const surfacesService = {};
+  const conversationClient = createConversationClientMock();
+  const conversationService = {
+    getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
+  };
+  const taskManager = { runSoon: jest.fn() };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -113,8 +121,11 @@ describe('TaskHandler event streaming and finalization', () => {
       get: jest.fn().mockResolvedValue(execution),
       updateStatus: jest.fn().mockResolvedValue(undefined),
       updateHeartbeat: jest.fn().mockResolvedValue(undefined),
+      findLiveByConversation: jest.fn().mockResolvedValue([]),
     };
+    taskManager.runSoon.mockResolvedValue(undefined);
     createAgentExecutionClientMock.mockReturnValue(executionClient as never);
+    conversationService.getScopedClientAsUser.mockResolvedValue(conversationClient);
     handleAgentExecutionMock.mockResolvedValue(of(...events));
     collectAndWriteEventsMock.mockImplementation(async ({ events$ }) => {
       await firstValueFrom(events$.pipe(toArray()));
@@ -131,6 +142,8 @@ describe('TaskHandler event streaming and finalization', () => {
       elasticsearch: { client: { asInternalUser: {} } },
       callbackDeliveryService,
       surfacesService,
+      conversationService,
+      taskManager,
     } as never);
 
   const fakeRequest = httpServerMock.createKibanaRequest();
@@ -323,5 +336,194 @@ describe('TaskHandler event streaming and finalization', () => {
     expect(logger.error).toHaveBeenCalledWith(
       'Failed to update status for execution execution-1: status update failed'
     );
+  });
+
+  describe('taking turns on a conversation', () => {
+    const owner = { id: 'user-1', username: 'elastic' };
+
+    const queued = (executionId: string, timestamp: string, heartbeatAgoMs = 0) => ({
+      executionId,
+      '@timestamp': timestamp,
+      status: ExecutionStatus.scheduled,
+      lastHeartbeat: new Date(Date.now() - heartbeatAgoMs).toISOString(),
+    });
+
+    const acquire = {
+      source: 'execution',
+      access: 'converse',
+      retryOnConflict: true,
+      activeExecution: { action: 'acquire', executionId: 'execution-1' },
+    };
+
+    beforeEach(() => {
+      executionClient.get.mockResolvedValue({ ...execution, owner });
+    });
+
+    it('takes the conversation as its owner and runs when nothing waits ahead', async () => {
+      await expect(run()).resolves.toEqual({ waiting: false });
+
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith({
+        request: fakeRequest,
+        user: { ...owner, isAdmin: false },
+      });
+      expect(executionClient.findLiveByConversation).toHaveBeenCalledWith('conversation-1');
+      expect(conversationClient.update).toHaveBeenCalledWith({ id: 'conversation-1' }, acquire);
+      expect(executionClient.updateStatus).toHaveBeenCalledWith(
+        'execution-1',
+        ExecutionStatus.running
+      );
+      expect(handleAgentExecutionMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('waits behind an older execution still waiting its turn', async () => {
+      executionClient.findLiveByConversation.mockResolvedValue([
+        queued('older', '2025-12-31T00:00:00.000Z'),
+      ]);
+
+      await expect(run()).resolves.toEqual({ waiting: true });
+
+      expect(executionClient.updateHeartbeat).toHaveBeenCalledWith('execution-1');
+      expect(conversationClient.update).not.toHaveBeenCalled();
+      expect(executionClient.updateStatus).not.toHaveBeenCalled();
+      expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    });
+
+    it('breaks a timestamp tie by execution id', async () => {
+      executionClient.findLiveByConversation.mockResolvedValue([
+        queued('execution-0', execution['@timestamp']),
+      ]);
+
+      await expect(run()).resolves.toEqual({ waiting: true });
+    });
+
+    it('does not wait behind newer or stale executions', async () => {
+      executionClient.findLiveByConversation.mockResolvedValue([
+        queued('stale', '2025-12-31T00:00:00.000Z', 10 * 60 * 1000),
+        queued('newer', '2026-01-02T00:00:00.000Z'),
+      ]);
+
+      await expect(run()).resolves.toEqual({ waiting: false });
+
+      expect(conversationClient.update).toHaveBeenCalledWith({ id: 'conversation-1' }, acquire);
+    });
+
+    it('waits while another live execution holds the conversation', async () => {
+      conversationClient.update.mockRejectedValueOnce(
+        createConversationBusyError({
+          conversationId: 'conversation-1',
+          activeExecutionId: 'holder',
+        })
+      );
+
+      await expect(run()).resolves.toEqual({ waiting: true });
+
+      expect(executionClient.updateHeartbeat).toHaveBeenCalledWith('execution-1');
+      expect(executionClient.updateStatus).not.toHaveBeenCalled();
+      expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    });
+
+    it('fails the execution when taking the conversation fails otherwise', async () => {
+      conversationClient.update.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(run()).resolves.toEqual({ waiting: false });
+
+      expect(executionClient.updateStatus).toHaveBeenCalledWith(
+        'execution-1',
+        ExecutionStatus.failed,
+        { error: { code: 'internal_error', message: 'boom' } }
+      );
+      expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    });
+
+    it('starts the next waiting execution once the run ends', async () => {
+      executionClient.findLiveByConversation
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          { ...queued('execution-1', execution['@timestamp']), status: ExecutionStatus.running },
+          queued('next', '2026-01-02T00:00:00.000Z'),
+        ]);
+
+      await run();
+
+      expect(taskManager.runSoon).toHaveBeenCalledWith('agent-next', {
+        requestImmediateClaim: true,
+      });
+    });
+
+    it('leaves the next execution to its own check when it cannot start it now', async () => {
+      executionClient.findLiveByConversation
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([queued('next', '2026-01-02T00:00:00.000Z')]);
+      taskManager.runSoon.mockRejectedValueOnce(new Error('already running'));
+
+      await expect(run()).resolves.toEqual({ waiting: false });
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Could not start the next execution on conversation conversation-1: already running'
+      );
+    });
+
+    it('takes no turn for an execution that stores no conversation', async () => {
+      executionClient.get.mockResolvedValue({
+        ...execution,
+        owner,
+        agentParams: { ...execution.agentParams, storeConversation: false },
+      });
+
+      await run();
+
+      expect(executionClient.findLiveByConversation).not.toHaveBeenCalled();
+      expect(conversationClient.update).not.toHaveBeenCalled();
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('an execution aborted before it started', () => {
+    const owner = { id: 'user-1', username: 'elastic' };
+    const abortReason = { source: 'api' } as const;
+
+    const runAborted = (overrides: Record<string, unknown> = {}) => {
+      executionClient.get.mockResolvedValue({
+        ...execution,
+        status: ExecutionStatus.aborted,
+        abortReason,
+        owner,
+        ...overrides,
+      });
+
+      return run();
+    };
+
+    it('runs with its signal already aborted, so the runner records the interruption', async () => {
+      await expect(runAborted()).resolves.toEqual({ waiting: false });
+
+      expect(conversationClient.update).not.toHaveBeenCalled();
+      expect(executionClient.updateStatus).not.toHaveBeenCalledWith(
+        'execution-1',
+        ExecutionStatus.running
+      );
+
+      const [{ abortSignal }] = handleAgentExecutionMock.mock.calls[0];
+
+      expect(abortSignal.aborted).toBe(true);
+      expect(abortSignal.reason).toEqual(abortReason);
+    });
+
+    it('skips an execution that stores no conversation', async () => {
+      await expect(
+        runAborted({ agentParams: { ...execution.agentParams, storeConversation: false } })
+      ).resolves.toEqual({ waiting: false });
+
+      expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    });
+
+    it('skips a standalone execution', async () => {
+      await runAborted({
+        executionMode: AgentExecutionMode.standalone,
+        agentParams: { nextInput: { message: 'hello' } },
+      });
+
+      expect(handleAgentExecutionMock).not.toHaveBeenCalled();
+    });
   });
 });

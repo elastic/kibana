@@ -28,8 +28,10 @@ const createMockExecutionClient = () =>
     appendEvents: jest.fn(),
     updateHeartbeat: jest.fn(),
     peek: jest.fn(),
+    delete: jest.fn(),
     readEvents: jest.fn(),
     find: jest.fn().mockResolvedValue([]),
+    findLiveByConversation: jest.fn().mockResolvedValue([]),
   } as jest.Mocked<AgentExecutionClient>);
 
 const messageChunkEvent = (text: string): ChatEvent =>
@@ -572,6 +574,41 @@ describe('followExecution$', () => {
     expect(result.error).toBeDefined();
     expect(result.error!.message).toContain('timed out');
     expect(result.error!.message).toContain('no terminal status');
+  });
+
+  it('does not count time spent queued against FOLLOW_EXECUTION_TIMEOUT_MS', async () => {
+    const executionClient = createMockExecutionClient();
+    const complete = roundCompleteEvent();
+    const queuedSteps = 6;
+    const stepMs = 4 * 60 * 1000;
+
+    // Queued past the total timeout, its heartbeat refreshed on every turn check, then it runs.
+    let pollCount = 0;
+    executionClient.peek.mockImplementation(async () => {
+      pollCount++;
+      if (pollCount <= queuedSteps) {
+        return peekResult(ExecutionStatus.scheduled, 0, undefined, `hb-${pollCount}`);
+      }
+      return peekResult(ExecutionStatus.completed, 1, undefined, `hb-${pollCount}`);
+    });
+    executionClient.readEvents.mockResolvedValue(
+      readEventsResult([complete], ExecutionStatus.completed)
+    );
+
+    const promise = collectEvents(followExecution$({ executionId: EXECUTION_ID, executionClient }));
+
+    await jest.advanceTimersByTimeAsync(0);
+
+    for (let step = 0; step < queuedSteps; step++) {
+      jest.setSystemTime(Date.now() + stepMs);
+      await jest.advanceTimersByTimeAsync(constants.FOLLOW_POLL_INTERVAL_MS);
+    }
+
+    const result = await promise;
+
+    expect(queuedSteps * stepMs).toBeGreaterThan(constants.FOLLOW_EXECUTION_TIMEOUT_MS);
+    expect(result.error).toBeUndefined();
+    expect(result.events).toEqual([complete]);
   });
 
   it('times out after FOLLOW_EXECUTION_HEARTBEAT_TIMEOUT_MS when the heartbeat is stale', async () => {

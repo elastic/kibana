@@ -10,8 +10,18 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import { ExecutionStatus, isRequestAbortedError } from '@kbn/agent-builder-common';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
+import {
+  AgentExecutionMode,
+  ExecutionStatus,
+  isConversationBusyError,
+  isConversationWriteConflictError,
+  isRequestAbortedError,
+} from '@kbn/agent-builder-common';
 import { createAgentExecutionClient, type AgentExecutionClient } from '../persistence';
+import { findQueuedExecutions, hasExecutionQueuedAhead } from '../conversation_turn';
+import { toRunAgentTaskId } from './task_definitions';
 import {
   handleAgentExecution,
   collectAndWriteEvents,
@@ -27,15 +37,41 @@ export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
   callbackDeliveryService: CallbackDeliveryService;
   surfacesService: SurfacesService;
+  taskManager: TaskManagerStartContract;
+}
+
+export interface TaskHandlerRunResult {
+  /** Another execution has the conversation's turn: the task checks again later. */
+  waiting: boolean;
 }
 
 /**
  * The task handler interface used by the task definition.
  */
 export interface TaskHandler {
-  run(params: { executionId: string; fakeRequest: KibanaRequest }): Promise<void>;
+  run(params: { executionId: string; fakeRequest: KibanaRequest }): Promise<TaskHandlerRunResult>;
   cancel(params: { executionId: string }): Promise<void>;
 }
+
+/** The conversation a stored conversation execution takes turns on, and who it runs as. */
+interface ConversationTurn {
+  conversationId: string;
+  owner: UserIdAndName;
+}
+
+const getConversationTurn = ({
+  executionMode,
+  agentParams,
+  owner,
+}: AgentExecution): ConversationTurn | undefined => {
+  if (executionMode !== AgentExecutionMode.conversation || !owner) {
+    return undefined;
+  }
+
+  const { conversationId, storeConversation } = agentParams;
+
+  return conversationId && storeConversation !== false ? { conversationId, owner } : undefined;
+};
 
 export const createTaskHandler = (deps: TaskHandlerDeps): TaskHandler => {
   return new TaskHandlerImpl(deps);
@@ -56,7 +92,7 @@ class TaskHandlerImpl implements TaskHandler {
   }: {
     executionId: string;
     fakeRequest: KibanaRequest;
-  }): Promise<void> {
+  }): Promise<TaskHandlerRunResult> {
     const executionClient = this.createExecutionClient();
 
     // 1. Load execution document
@@ -65,13 +101,39 @@ class TaskHandlerImpl implements TaskHandler {
       throw new Error(`Execution ${executionId} not found`);
     }
 
-    if (execution.status === ExecutionStatus.aborted) {
+    const turn = getConversationTurn(execution);
+    const abortedBeforeStart = execution.status === ExecutionStatus.aborted;
+
+    if (abortedBeforeStart && !turn) {
       this.logger.info(`Execution ${executionId} was aborted before it started; skipping`);
-      return;
+      return { waiting: false };
     }
 
-    // 2. Update status to running
-    await executionClient.updateStatus(executionId, ExecutionStatus.running);
+    // 2. Wait for the conversation's turn, then update status to running. An execution aborted
+    // while it waited still runs, with its signal already aborted, so the runner records the
+    // interruption next to its user message.
+    if (!abortedBeforeStart) {
+      if (turn) {
+        try {
+          const hasTurn = await this.takeTurn({
+            execution,
+            turn,
+            executionClient,
+            fakeRequest,
+          });
+
+          if (!hasTurn) {
+            await executionClient.updateHeartbeat(executionId);
+            return { waiting: true };
+          }
+        } catch (error) {
+          await this.handleExecutionFailure({ execution, executionClient, error });
+          return { waiting: false };
+        }
+      }
+
+      await executionClient.updateStatus(executionId, ExecutionStatus.running);
+    }
 
     // 3. Set up abort monitoring and heartbeat reporting
     const abortMonitor = new AbortMonitor({
@@ -79,14 +141,21 @@ class TaskHandlerImpl implements TaskHandler {
       executionClient,
       logger: this.logger.get('abort-monitor'),
     });
-    abortMonitor.start();
 
     const heartbeatReporter = new HeartbeatReporter({
       executionId,
       executionClient,
       logger: this.logger.get('heartbeat-reporter'),
     });
-    heartbeatReporter.start();
+
+    if (!abortedBeforeStart) {
+      abortMonitor.start();
+      heartbeatReporter.start();
+    }
+
+    const abortSignal = abortedBeforeStart
+      ? AbortSignal.abort(execution.abortReason)
+      : abortMonitor.getSignal();
 
     // 4. Build a single multicast event stream; wrapping the async setup makes setup
     // errors surface as stream errors too.
@@ -96,7 +165,7 @@ class TaskHandlerImpl implements TaskHandler {
           deps: this.deps,
           request: fakeRequest,
           execution,
-          abortSignal: abortMonitor.getSignal(),
+          abortSignal,
         })
       ).pipe(switchMap((agentEvents$) => agentEvents$))
     );
@@ -132,6 +201,90 @@ class TaskHandlerImpl implements TaskHandler {
     } finally {
       abortMonitor.stop();
       heartbeatReporter.stop();
+    }
+
+    // 7. The run released the conversation: start the next execution waiting on it now, rather
+    // than at its next check.
+    if (turn) {
+      await this.startNextQueuedExecution({
+        executionId,
+        conversationId: turn.conversationId,
+        executionClient,
+      });
+    }
+
+    return { waiting: false };
+  }
+
+  /** True when no older execution waits on the conversation and this one now holds it. */
+  private async takeTurn({
+    execution,
+    turn: { conversationId, owner },
+    executionClient,
+    fakeRequest,
+  }: {
+    execution: AgentExecution;
+    turn: ConversationTurn;
+    executionClient: AgentExecutionClient;
+    fakeRequest: KibanaRequest;
+  }): Promise<boolean> {
+    const { executionId } = execution;
+
+    if (await hasExecutionQueuedAhead({ executionClient, conversationId, execution })) {
+      return false;
+    }
+
+    const conversationClient = await this.deps.conversationService.getScopedClientAsUser({
+      request: fakeRequest,
+      user: { ...owner, isAdmin: false },
+    });
+
+    try {
+      await conversationClient.update(
+        { id: conversationId },
+        {
+          source: 'execution',
+          access: 'converse',
+          retryOnConflict: true,
+          activeExecution: { action: 'acquire', executionId },
+        }
+      );
+
+      return true;
+    } catch (error) {
+      if (isConversationBusyError(error) || isConversationWriteConflictError(error)) {
+        return false;
+      }
+
+      throw error;
+    }
+  }
+
+  private async startNextQueuedExecution({
+    executionId,
+    conversationId,
+    executionClient,
+  }: {
+    executionId: string;
+    conversationId: string;
+    executionClient: AgentExecutionClient;
+  }): Promise<void> {
+    try {
+      const queued = await findQueuedExecutions({ executionClient, conversationId });
+      const next = queued.find((execution) => execution.executionId !== executionId);
+
+      if (!next) {
+        return;
+      }
+
+      await this.deps.taskManager.runSoon(toRunAgentTaskId(next.executionId), {
+        requestImmediateClaim: true,
+      });
+    } catch (error) {
+      // The next execution still starts at its own next check.
+      this.logger.debug(
+        `Could not start the next execution on conversation ${conversationId}: ${error.message}`
+      );
     }
   }
 

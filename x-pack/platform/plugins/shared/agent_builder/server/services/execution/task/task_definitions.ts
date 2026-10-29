@@ -7,6 +7,7 @@
 
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { TaskHandler } from './task_handler';
+import { QUEUE_RECHECK_INTERVAL_MS } from '../constants';
 
 export const taskTypes = {
   runAgent: 'agent-builder:run-agent',
@@ -15,6 +16,8 @@ export const taskTypes = {
 export interface RunAgentTaskParams {
   executionId: string;
 }
+
+export const toRunAgentTaskId = (executionId: string): string => `agent-${executionId}`;
 
 /**
  * Register agent builder task definitions with task manager.
@@ -44,8 +47,12 @@ export const registerTaskDefinitions = ({
 
         return {
           run: async () => {
-            await taskHandler.run({ executionId, fakeRequest });
-            return { state: {} };
+            const { waiting } = await taskHandler.run({ executionId, fakeRequest });
+
+            // Rescheduling a one-off task keeps it, and its API key, for the next check.
+            return waiting
+              ? { state: {}, runAt: new Date(Date.now() + QUEUE_RECHECK_INTERVAL_MS) }
+              : { state: {} };
           },
           cancel: async () => {
             await taskHandler.cancel({ executionId });

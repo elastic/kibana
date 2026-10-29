@@ -291,6 +291,7 @@ export class ServiceManager {
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
       surfacesService: surfaces,
+      taskManager,
     });
 
     executionService = createAgentExecutionService({
