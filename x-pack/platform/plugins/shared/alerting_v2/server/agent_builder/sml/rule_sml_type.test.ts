@@ -297,6 +297,20 @@ describe('createRuleSmlType', () => {
       expect(result?.data).toEqual(expect.objectContaining({ id: 'rule-1', kind: 'alert' }));
     });
 
+    it('sets the attachment origin to the raw rule id instead of the SML origin URI', async () => {
+      getRule.mockResolvedValueOnce({
+        ...baseRuleResponse,
+        id: 'rule-1',
+      });
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result?.origin).toBe('rule-1');
+    });
+
     it('returns undefined when getRule throws', async () => {
       getRule.mockRejectedValueOnce(new Error('not found'));
 
