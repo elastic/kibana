@@ -157,11 +157,10 @@ export function StreamsCanvas() {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
-        data,
       },
     },
   } = useKibana();
-  const { timeState$ } = useTimefilter();
+  const { timeState, timeState$ } = useTimefilter();
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
   const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
   const loadSourceEnvironment = useSourceEnvironmentLoader();
@@ -175,7 +174,7 @@ export function StreamsCanvas() {
       core={core}
       urlStateStorageContainer={urlStateStorageContainer}
       apiKeyGenerationDeps={apiKeyGenerationDeps}
-      data={data}
+      timeState={timeState}
       timeState$={timeState$}
       loadSourceEnvironment={loadSourceEnvironment}
       loadUnitDefinition={unitDefinitionRepository.load}

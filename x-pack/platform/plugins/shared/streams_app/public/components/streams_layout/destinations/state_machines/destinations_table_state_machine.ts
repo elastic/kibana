@@ -247,7 +247,7 @@ export const destinationsTableStateMachine = setup({
           createDestinationsMachineImplementations({
             toasts: input.toasts,
             apiKeyGenerationDeps: input.apiKeyGenerationDeps,
-            data: input.data,
+            timeState: input.timeState,
             timeState$: input.timeState$,
           })
         ),

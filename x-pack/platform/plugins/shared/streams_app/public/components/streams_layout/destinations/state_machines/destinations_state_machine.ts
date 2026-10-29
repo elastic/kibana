@@ -19,7 +19,8 @@ import {
   setup,
   stateIn,
 } from 'xstate';
-import type { DataPublicPluginStart, TimefilterHook } from '@kbn/data-plugin/public';
+import type { TimefilterHook } from '@kbn/data-plugin/public';
+import type { TimeState } from '@kbn/es-query';
 import { filter, map, startWith } from 'rxjs';
 import type { ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
@@ -74,9 +75,9 @@ export interface DestinationsParentEvent {
   secrets?: StreamsUnit.Secrets;
 }
 
-/** The page time filter: `timeState$` signals changes and refreshes, `data` reads the range. */
+/** The page time filter: the range at start, then each change and refresh from `timeState$`. */
 export interface DestinationsTimeDeps {
-  data: DataPublicPluginStart;
+  timeState: TimeState;
   timeState$: TimefilterHook['timeState$'];
 }
 
@@ -927,20 +928,17 @@ function createLoadResolvedIndicesActor({
   });
 }
 
-function createWatchTimefilterActor({ data, timeState$ }: DestinationsTimeDeps) {
-  const toTimeRangeEvent = (): DestinationsStateEvent => {
-    const { from, to } = data.query.timefilter.timefilter.getAbsoluteTime();
-    return {
-      type: 'timefilter.changed',
-      timeRange: { start: new Date(from).getTime(), end: new Date(to).getTime() },
-    };
-  };
+function createWatchTimefilterActor({ timeState, timeState$ }: DestinationsTimeDeps) {
+  const toTimeRangeEvent = ({ start, end }: TimeState): DestinationsStateEvent => ({
+    type: 'timefilter.changed',
+    timeRange: { start, end },
+  });
   // Every later emission is a range change or a refresh, including one that keeps an absolute range.
   return fromEventObservable(() =>
     timeState$.pipe(
       filter(({ kind }) => kind !== 'initial'),
-      map(toTimeRangeEvent),
-      startWith(toTimeRangeEvent())
+      map((update) => toTimeRangeEvent(update.timeState)),
+      startWith(toTimeRangeEvent(timeState))
     )
   );
 }
@@ -961,7 +959,7 @@ function createNotifyResolvedIndicesErrorAction({ toasts }: { toasts: Toasts }) 
 export const createDestinationsMachineImplementations = ({
   toasts,
   apiKeyGenerationDeps,
-  data,
+  timeState,
   timeState$,
 }: {
   toasts: Toasts;
@@ -972,7 +970,7 @@ export const createDestinationsMachineImplementations = ({
     actors: {
       generateApiKey: createGenerateApiKeyActor({ services }),
       loadResolvedIndices: createLoadResolvedIndicesActor(apiKeyGenerationDeps),
-      watchTimefilter: createWatchTimefilterActor({ data, timeState$ }),
+      watchTimefilter: createWatchTimefilterActor({ timeState, timeState$ }),
       destinationDetail: destinationDetailStateMachine.provide(
         createDestinationDetailMachineImplementations(apiKeyGenerationDeps)
       ),

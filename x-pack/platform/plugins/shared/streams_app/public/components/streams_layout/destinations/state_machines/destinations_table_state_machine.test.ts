@@ -6,7 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { TimeState } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
 import { createActor, waitFor, type Actor } from 'xstate';
 import { createDefaultUnit } from '../../../../services/unit_repository';
@@ -14,6 +14,17 @@ import type { DestinationApiKeyGenerationDeps } from '../destination_api_keys';
 import { destinationsTableStateMachine } from './destinations_table_state_machine';
 
 type TableActor = Actor<typeof destinationsTableStateMachine>;
+
+const timeState: TimeState = {
+  timeRange: { from: 'now-15m', to: 'now' },
+  asAbsoluteTimeRange: {
+    from: '2026-01-01T00:00:00.000Z',
+    to: '2026-01-01T00:15:00.000Z',
+    mode: 'absolute',
+  },
+  start: Date.parse('2026-01-01T00:00:00.000Z'),
+  end: Date.parse('2026-01-01T00:15:00.000Z'),
+};
 
 const waitForReady = (actor: TableActor) => waitFor(actor, (snapshot) => snapshot.matches('ready'));
 
@@ -35,7 +46,7 @@ describe('destinationsTableStateMachine', () => {
         apiKeyGenerationDeps: {
           streamsRepositoryClient: { fetch },
         } as unknown as DestinationApiKeyGenerationDeps,
-        data: dataPluginMock.createStartContract(),
+        timeState,
         timeState$: EMPTY,
         loadUnitDefinition: load,
         persistUnitDefinition: persist,

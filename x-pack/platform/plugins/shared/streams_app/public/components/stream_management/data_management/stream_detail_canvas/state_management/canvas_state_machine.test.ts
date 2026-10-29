@@ -6,7 +6,7 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { TimeState } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
@@ -27,6 +27,17 @@ import type { destinationsStateMachine } from '../../../../streams_layout/destin
 import type { DestinationApiKeyGenerationDeps } from '../../../../streams_layout/destinations/destination_api_keys';
 import type { sourcesStateMachine } from '../../../../streams_layout/sources/state_machines/sources_state_machine';
 import { defaultCanvasUrlState } from './types';
+
+const timeState: TimeState = {
+  timeRange: { from: 'now-15m', to: 'now' },
+  asAbsoluteTimeRange: {
+    from: '2026-01-01T00:00:00.000Z',
+    to: '2026-01-01T00:15:00.000Z',
+    mode: 'absolute',
+  },
+  start: Date.parse('2026-01-01T00:00:00.000Z'),
+  end: Date.parse('2026-01-01T00:15:00.000Z'),
+};
 
 const loadedUnit = (): Unit => ({
   unit: {
@@ -74,7 +85,7 @@ const startCanvas = (
         useHash: false,
       }),
       apiKeyGenerationDeps: { streamsRepositoryClient: createStreamsRepositoryClient(core) },
-      data: dataPluginMock.createStartContract(),
+      timeState,
       timeState$: EMPTY,
       loadUnitDefinition: async () => unit,
       persistUnitDefinition,
@@ -323,7 +334,7 @@ describe('canvasStateMachine', () => {
       apiKeyGenerationDeps: {
         streamsRepositoryClient: { fetch: jest.fn() },
       } as unknown as DestinationApiKeyGenerationDeps,
-      data: dataPluginMock.createStartContract(),
+      timeState,
       timeState$: EMPTY,
       loadUnitDefinition: load,
       persistUnitDefinition: persist,

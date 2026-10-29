@@ -6,7 +6,6 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimeState } from '@kbn/es-query';
 import { Subject, type ObservedValueOf } from 'rxjs';
 import { createActor, waitFor, type Actor, type AnyActorRef } from 'xstate';
@@ -31,20 +30,16 @@ describe('destinationsStateMachine', () => {
   let fetch: jest.Mock;
   let parentSend: jest.Mock<void, [DestinationsParentEvent]>;
   let actor: DestinationsActor;
-  let data: ReturnType<typeof dataPluginMock.createStartContract>;
   let timeState$: Subject<ObservedValueOf<DestinationsTimeDeps['timeState$']>>;
-  const setAbsoluteTime = (from: string, to: string) =>
-    jest.mocked(data.query.timefilter.timefilter.getAbsoluteTime).mockReturnValue({ from, to });
-  const emitTimeState = (kind: 'shift' | 'override', from: string, to: string) => {
-    setAbsoluteTime(from, to);
-    const timeState: TimeState = {
-      timeRange: { from, to },
-      asAbsoluteTimeRange: { from, to, mode: 'absolute' },
-      start: Date.parse(from),
-      end: Date.parse(to),
-    };
-    timeState$.next({ kind, timeState });
-  };
+  const toTimeState = (from: string, to: string): TimeState => ({
+    timeRange: { from, to },
+    asAbsoluteTimeRange: { from, to, mode: 'absolute' },
+    start: Date.parse(from),
+    end: Date.parse(to),
+  });
+  const timeState = toTimeState('1970-01-01T00:00:00.000Z', '1970-01-01T00:00:01.000Z');
+  const emitTimeState = (kind: 'shift' | 'override', from: string, to: string) =>
+    timeState$.next({ kind, timeState: toTimeState(from, to) });
 
   const apiKeyCalls = () =>
     fetch.mock.calls.filter(([endpoint]: [string]) => endpoint.includes('/destinations/api_key'));
@@ -71,9 +66,7 @@ describe('destinationsStateMachine', () => {
     fetch = jest.fn(async (endpoint: string) =>
       endpoint.startsWith('GET /internal/streams/unit/') ? { destinations: {} } : apiKeyResponse
     );
-    data = dataPluginMock.createStartContract();
     timeState$ = new Subject();
-    setAbsoluteTime('1970-01-01T00:00:00.000Z', '1970-01-01T00:00:01.000Z');
     parentSend = jest.fn();
     const parentRef = {
       send: jest.fn(),
@@ -87,7 +80,7 @@ describe('destinationsStateMachine', () => {
           apiKeyGenerationDeps: {
             streamsRepositoryClient: { fetch },
           } as unknown as DestinationApiKeyGenerationDeps,
-          data,
+          timeState,
           timeState$,
         })
       ),
@@ -273,7 +266,7 @@ describe('destinationsStateMachine', () => {
           apiKeyGenerationDeps: {
             streamsRepositoryClient: { fetch },
           } as unknown as DestinationApiKeyGenerationDeps,
-          data,
+          timeState,
           timeState$,
         })
       ),

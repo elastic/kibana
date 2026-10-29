@@ -88,10 +88,10 @@ export const useDestinationsTable = (): DestinationsTableController => {
       notifications: { toasts },
     },
     dependencies: {
-      start: { streams, data },
+      start: { streams },
     },
   } = useKibana();
-  const { timeState$ } = useTimefilter();
+  const { timeState, timeState$ } = useTimefilter();
   const unitDefinitionRepository = useMemo(
     () =>
       createUnitRepository({
@@ -107,7 +107,7 @@ export const useDestinationsTable = (): DestinationsTableController => {
         streamsRepositoryClient: streams.streamsRepositoryClient,
         unitId: STREAMS_DEFAULT_UNIT_ID,
       },
-      data,
+      timeState,
       timeState$,
       loadUnitDefinition: unitDefinitionRepository.load,
       persistUnitDefinition: unitDefinitionRepository.persist,
