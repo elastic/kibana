@@ -464,6 +464,37 @@ describe('AlertZero L1 endpoint forensic routing', () => {
     );
   });
 
+  it('rejects a call whose only result is an error', () => {
+    const failed = {
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'security.endpoint_forensic.discover_telemetry',
+          results: [{ type: 'error', data: { message: 'index_not_found_exception' } }],
+        },
+      ],
+    };
+    expect(() => assertEndpointForensicToolCall(getToolCallSteps(failed))).toThrow(
+      /No successful production endpoint forensic tool call/
+    );
+  });
+
+  it('accepts a call that returned an error result alongside a successful one', () => {
+    const mixed = {
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'security.endpoint_forensic.discover_telemetry',
+          results: [
+            { type: 'error', data: {} },
+            { type: 'other', data: { ok: true } },
+          ],
+        },
+      ],
+    };
+    expect(() => assertEndpointForensicToolCall(getToolCallSteps(mixed))).not.toThrow();
+  });
+
   it('names the tools it did see when the skill was never used', () => {
     const wrongTool = {
       steps: [{ type: 'tool_call', tool_id: 'platform.core.search', results: [{}] }],

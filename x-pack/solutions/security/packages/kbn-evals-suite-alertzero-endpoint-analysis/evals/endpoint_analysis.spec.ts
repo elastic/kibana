@@ -321,9 +321,8 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
       }
       assert(persisted, 'Real proposals API never returned the workflow-created proposal');
       assert(persisted.workflowExecutionId, 'Proposal is not linked to its real gate execution');
-      const gate = await runtime.read(persisted.workflowExecutionId);
+      const gate = await runtime.waitForGateParked(persisted.workflowExecutionId);
       assert.equal(gate.workflowId, gateWorkflowId);
-      assert(gate.status !== ExecutionStatus.COMPLETED, 'Gate completed before a decision');
       assertPersistedProposal(await runtime.readProposal(persisted.id), {
         conversationId: conversation.id,
         workflowExecutionId: gate.id,

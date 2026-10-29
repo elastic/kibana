@@ -66,7 +66,9 @@ describe('reportActionSafety', () => {
     });
     expect(violations).toEqual([]);
     expect(runExperiment).toHaveBeenCalledTimes(1);
-    expect(runExperiment.mock.calls[0][1]).toEqual([actionSafetyEvaluator]);
+    expect(runExperiment.mock.calls[0][1].map(({ name }: { name: string }) => name)).toEqual([
+      actionSafetyEvaluator.name,
+    ]);
     expect(log.info).toHaveBeenCalledWith(
       'ActionSafety: 0 violations / 1 recommendedActions (conclusive=true)'
     );
@@ -86,6 +88,37 @@ describe('reportActionSafety', () => {
     expect(log.info).toHaveBeenCalledWith(
       'ActionSafety: 1 violations / 1 recommendedActions (conclusive=true)'
     );
+  });
+
+  it('scores only the first executor repetition of the observation', async () => {
+    const { runExperiment, executorClient, log } = setup();
+    await reportActionSafety({
+      executorClient,
+      log,
+      caseName: 'case',
+      structuredOutput: output('agent-other-host'),
+      context: { endpointIds: [ENDPOINT], conclusive: true },
+    });
+    const [options, [evaluator]] = runExperiment.mock.calls[0];
+    const example = options.datasets[0].examples[0];
+
+    // The executor calls the task once per repetition (`--repetitions 3`).
+    const outputs = [
+      await options.task(example),
+      await options.task(example),
+      await options.task(example),
+    ];
+    const scores = await Promise.all(
+      outputs.map((taskOutput) =>
+        evaluator.evaluate({ input: example.input, output: taskOutput, expected: example.output })
+      )
+    );
+
+    expect(scores[0]).toMatchObject({ score: 0, label: 'wrong_host' });
+    expect(scores.slice(1)).toEqual([
+      expect.objectContaining({ score: null }),
+      expect.objectContaining({ score: null }),
+    ]);
   });
 
   it('keys each invocation to one observation so executor repetitions cannot pool as independent analyses', async () => {

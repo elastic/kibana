@@ -59,7 +59,14 @@ const proposalHeaders = {
 };
 export class AlertZeroRuntime {
   readonly executionIds = new Set<string>();
-  private readonly workersToDisable = new Set<string>();
+  /**
+   * What `installWorker` changed that `restoreWorker` must undo: the Worker was off before the
+   * suite, and/or a different service account was bound (the suite always binds its own).
+   */
+  private readonly workersToRestore = new Map<
+    string,
+    { disable: boolean; previousAccountId?: string }
+  >();
   constructor(public readonly fetch: HttpHandler) {}
   /**
    * Each Worker installs per space as `${workerWorkflowId}-${spaceId}` (see
@@ -127,6 +134,17 @@ export class AlertZeroRuntime {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
     throw new Error(`AlertZero execution ${id} timed out`);
+  }
+  /**
+   * Proposal persistence happens before the gate workflow parks, and `releaseGate` rejects any
+   * state but `WAITING_FOR_INPUT` with 409, so a decision may only be taken once it is parked.
+   */
+  waitForGateParked(id: string, timeout?: number) {
+    return this.wait(
+      id,
+      (execution) => execution.status === ExecutionStatus.WAITING_FOR_INPUT,
+      timeout
+    );
   }
   async proposals(conversationId: string) {
     const response = await this.fetch<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
@@ -213,9 +231,7 @@ export class AlertZeroRuntime {
    */
   async installWorker(id: string): Promise<void> {
     const serviceAccountId = await ensureWorkerServiceAccount(this.fetch, id);
-    const response = await this.fetch<{
-      workers?: Array<{ id: string; enabled?: boolean; settingsRevision?: number | null }>;
-    }>(ALERTZERO_WORKERS_URL, {
+    const response = await this.fetch<{ workers?: WorkerEntry[] }>(ALERTZERO_WORKERS_URL, {
       headers: {
         'elastic-api-version': API_VERSIONS.internal.v1,
         'kbn-xsrf': 'true',
@@ -247,28 +263,63 @@ export class AlertZeroRuntime {
     // (400 "Workflow is disabled", build 1430), so the Worker has to stay enabled while the
     // suite runs; `restoreWorker()` turns it back off from the suite's cleanup. The account
     // stays bound either way, and on a fresh stack the Worker did not exist before this run.
-    if (!wasEnabled) this.workersToDisable.add(id);
+    // The suite always binds its own account, so a Worker that already ran as another identity
+    // (a custom binding on a local stack) would keep scheduled sweeps under the suite's account
+    // after the run. Remember the original binding and put it back in `restoreWorker()`.
+    const previousAccountId = existing?.settings?.serviceAccountId ?? undefined;
+    const rebound = previousAccountId !== undefined && previousAccountId !== serviceAccountId;
+    if (!wasEnabled || rebound) {
+      this.workersToRestore.set(id, {
+        disable: !wasEnabled,
+        ...(rebound ? { previousAccountId } : {}),
+      });
+    }
   }
 
-  /** Disables every Worker `installWorker` enabled that was off before the suite. */
+  /**
+   * Undoes `installWorker`: disables a Worker that was off before the suite and rebinds the
+   * service account it ran as before the suite.
+   */
   async restoreWorker(): Promise<void> {
-    for (const id of [...this.workersToDisable]) {
+    for (const [id, { disable, previousAccountId }] of [...this.workersToRestore]) {
+      let rebind = {};
+      if (previousAccountId !== undefined) {
+        // The install PATCH bumped the settings revision; a settings patch must carry the
+        // current one or the workers service rejects it as a conflict.
+        const current = await this.fetch<{ workers?: WorkerEntry[] }>(ALERTZERO_WORKERS_URL, {
+          headers: workersHeaders,
+        });
+        rebind = {
+          settings: { serviceAccountId: previousAccountId },
+          settingsRevision:
+            current.workers?.find((worker) => worker.id === id)?.settingsRevision ?? null,
+        };
+      }
       await this.fetch(
         ALERTZERO_WORKER_URL_TEMPLATE.replace('{workerId}', encodeURIComponent(id)),
         {
           method: 'PATCH',
-          headers: {
-            'elastic-api-version': API_VERSIONS.internal.v1,
-            'kbn-xsrf': 'true',
-            'x-elastic-internal-origin': INTERNAL_API_ACCESS,
-          },
-          body: JSON.stringify({ enabled: false }),
+          headers: workersHeaders,
+          body: JSON.stringify({ ...(disable ? { enabled: false } : {}), ...rebind }),
         }
       );
-      this.workersToDisable.delete(id);
+      this.workersToRestore.delete(id);
     }
   }
 }
+
+interface WorkerEntry {
+  id: string;
+  enabled?: boolean;
+  settingsRevision?: number | null;
+  settings?: { serviceAccountId?: string | null };
+}
+
+const workersHeaders = {
+  'elastic-api-version': API_VERSIONS.internal.v1,
+  'kbn-xsrf': 'true',
+  'x-elastic-internal-origin': INTERNAL_API_ACCESS,
+};
 
 interface ServiceAccountEntry {
   id: string;
@@ -447,9 +498,11 @@ export const assertNoCompetingPendingKis = async (es: Client, ownKiId: string) =
   }
 };
 const ATTACK_DISCOVERY_ADHOC_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-default';
-// Constituent detections live in the space's detections index, which exists in the
-// suite's stack before the spec runs — the attack-analysis suite indexes into it the
-// same way without creating it.
+// Constituent detections live in the space's detections index. It only exists once a
+// detection rule has run, so on a fresh stack the first write would auto-create a
+// dynamically mapped index where `host.name` is `text` and the child's `host.name` terms
+// aggregation fails. `seedAlertZeroEndpoint` creates it with a keyword mapping when missing
+// and removes it again in cleanup.
 const CONSTITUENT_ALERTS_INDEX = '.alerts-security.alerts-default';
 // Matches `ALERT_ATTACK_DISCOVERY_ALERT_IDS` from @kbn/attack-discovery-schedules-common
 // (`kibana.alert.attack_discovery.alert_ids`), restated locally: the package is not a
@@ -486,6 +539,7 @@ export const seedAlertZeroEndpoint = async (
   const constituentAlertId = `alertzero-constituent-${id}`;
   let conversationId: string | undefined;
   let kiSeeded = false;
+  let createdConstituentIndex = false;
 
   // Every step is attempted, so a failure while seeding cannot leave earlier resources behind.
   const cleanup = async () => {
@@ -515,15 +569,19 @@ export const seedAlertZeroEndpoint = async (
           },
           { ignore: [404] }
         ),
+      // An index this run created is ours to drop whole; a pre-existing detections index only
+      // loses the one document.
       async () =>
-        es.delete(
-          {
-            index: CONSTITUENT_ALERTS_INDEX,
-            id: constituentAlertId,
-            refresh: 'wait_for',
-          },
-          { ignore: [404] }
-        ),
+        createdConstituentIndex
+          ? ignore404(() => es.indices.delete({ index: CONSTITUENT_ALERTS_INDEX }))
+          : es.delete(
+              {
+                index: CONSTITUENT_ALERTS_INDEX,
+                id: constituentAlertId,
+                refresh: 'wait_for',
+              },
+              { ignore: [404] }
+            ),
     ];
     const results = await Promise.allSettled(steps.map((step) => step()));
     const failed = results.find((result) => result.status === 'rejected');
@@ -638,6 +696,20 @@ export const seedAlertZeroEndpoint = async (
         [AD_ALERT_IDS_KEY]: [constituentAlertId],
       },
     });
+    if (!(await es.indices.exists({ index: CONSTITUENT_ALERTS_INDEX }))) {
+      // Flagged before the call: a create that fails midway must still be cleaned up.
+      createdConstituentIndex = true;
+      await es.indices.create({
+        index: CONSTITUENT_ALERTS_INDEX,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            'kibana.alert.uuid': { type: 'keyword' },
+            host: { properties: { name: { type: 'keyword' } } },
+          },
+        },
+      });
+    }
     await es.index({
       index: CONSTITUENT_ALERTS_INDEX,
       id: constituentAlertId,

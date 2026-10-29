@@ -151,10 +151,15 @@ export const ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID =
 export const assertEndpointForensicToolCall = (
   calls: Array<{ tool_id?: string; results?: unknown[] }>
 ) => {
+  // A failed call still carries a non-empty `results` array (`[{ type: 'error', ... }]`), so
+  // require at least one result that is not an error.
+  const isSuccessfulResult = (result: unknown) =>
+    (result as { type?: string } | null | undefined)?.type !== 'error';
   if (
     !calls.some(
       (call) =>
-        call.tool_id === ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID && call.results?.length
+        call.tool_id === ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID &&
+        call.results?.some(isSuccessfulResult)
     )
   ) {
     throw new Error(
