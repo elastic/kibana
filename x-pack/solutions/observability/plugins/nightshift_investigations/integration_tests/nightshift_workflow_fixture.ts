@@ -60,6 +60,8 @@ import { cortexHydrateStepDefinition } from '../server/step_definitions/cortex_h
 import { cortexOptimizeStepDefinition } from '../server/step_definitions/cortex_optimize';
 import { decisionTreeHydrateStepDefinition } from '../server/step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from '../server/step_definitions/decision_tree_prepare';
+import { labelRoundStepDefinition } from '../server/step_definitions/label_round';
+import type { InvestigationRoundKind } from '../server/client/round_kind';
 import { decisionTreeReinforceStepDefinition } from '../server/step_definitions/decision_tree_reinforce';
 import { ensureInvestigationAgentStepDefinition } from '../server/step_definitions/ensure_investigation_agent';
 import { memoryMaterializeToSandboxStepDefinition } from '../server/step_definitions/memory_materialize_to_sandbox';
@@ -127,6 +129,11 @@ export interface NightshiftWorkflowFixtureOptions {
   cortexEnabled?: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
+  /**
+   * What the investigation's run declares for the round the materialize workflow labels, or the
+   * error reading it fails with.
+   */
+  roundKind?: InvestigationRoundKind | Error;
 }
 
 /** One `runAgent` invocation as the fake recorded it. */
@@ -194,6 +201,7 @@ const setHealthyBoundary = (): void => {
   });
   jest.mocked(runMemoryOptimize).mockResolvedValue(memoryOptimizeSummary);
   jest.mocked(prepareReinforcementTurn).mockResolvedValue({
+    skipped: false,
     message: 'reinforcement turn prompt',
     treeCount: 3,
     turnKind: 'initial_investigation',
@@ -204,6 +212,7 @@ export const createNightshiftWorkflowFixture = ({
   cortexEnabled = true,
   memoryEnabled = true,
   decisionTreesEnabled = true,
+  roundKind = 'initial',
 }: NightshiftWorkflowFixtureOptions = {}): NightshiftWorkflowFixture => {
   setHealthyBoundary();
 
@@ -299,8 +308,18 @@ export const createNightshiftWorkflowFixture = ({
       isEnabled: () => memoryEnabled,
       telemetry,
     }),
+    labelRoundStepDefinition({
+      getRoundKind: async () => {
+        if (roundKind instanceof Error) {
+          throw roundKind;
+        }
+        return roundKind;
+      },
+      isEnabled: () => decisionTreesEnabled,
+    }),
     decisionTreePrepareStepDefinition({
       getTelemetryConnectorId: () => undefined,
+      getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,
       logger,
       isEnabled: () => decisionTreesEnabled,
     }),

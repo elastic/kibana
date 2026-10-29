@@ -142,6 +142,8 @@ steps:
 
               {{ event.text }}
             investigation_id: '{{ steps.find_investigation.output.investigation_id }}'
+            # A reply only continues an existing investigation (see find_investigation).
+            round_kind: follow_up
         on-failure:
           continue: true
 

@@ -8,6 +8,11 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import {
+  INVESTIGATION_ROUND_KINDS,
+  isInvestigationRoundKind,
+  ROUND_WORKFLOW_CONTEXT_KEY,
+} from '../client/round_kind';
 import { composeHydrateNotificationContext } from '../lib/hydrate_notification';
 
 export const composeHydrateNotificationsStepDefinition = () =>
@@ -45,6 +50,11 @@ export const composeHydrateNotificationsStepDefinition = () =>
         .array(z.string())
         .max(100)
         .describe('Semantic Memory ids recalled for this exact round.'),
+      round_kind: z
+        .string()
+        .max(64)
+        .optional()
+        .describe('The kind of investigation round, when it is known. Empty when it is not.'),
     }),
     outputSchema: z.object({
       model_context: z
@@ -58,12 +68,20 @@ export const composeHydrateNotificationsStepDefinition = () =>
             recalled_ids: z.array(z.string()).max(100),
           }),
         }),
+        [ROUND_WORKFLOW_CONTEXT_KEY]: z
+          .object({
+            version: z.literal(1),
+            data: z.object({ round_kind: z.enum(INVESTIGATION_ROUND_KINDS) }),
+          })
+          .optional(),
       }),
     }),
     handler: async (context) => {
       const { model_context: modelContext } = composeHydrateNotificationContext({
         writers: context.input.writers,
       });
+      // Liquid renders an absent step output as ''.
+      const roundKind = context.input.round_kind;
       return {
         output: {
           ...(modelContext ? { model_context: modelContext } : {}),
@@ -74,6 +92,14 @@ export const composeHydrateNotificationsStepDefinition = () =>
                 recalled_ids: context.input.recalled_ids,
               },
             },
+            ...(isInvestigationRoundKind(roundKind)
+              ? {
+                  [ROUND_WORKFLOW_CONTEXT_KEY]: {
+                    version: 1 as const,
+                    data: { round_kind: roundKind },
+                  },
+                }
+              : {}),
           },
         },
       };

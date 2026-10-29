@@ -92,6 +92,22 @@ Object {
           "workflow_context": Object {
             "description": "Persisted non-model workflow state for the completed round.",
             "properties": Object {
+              "nightshift.round": Object {
+                "properties": Object {
+                  "data": Object {
+                    "properties": Object {
+                      "round_kind": Object {
+                        "type": "string",
+                      },
+                    },
+                    "type": "object",
+                  },
+                  "version": Object {
+                    "type": "number",
+                  },
+                },
+                "type": "object",
+              },
               "nightshift.semantic_memory.recall": Object {
                 "properties": Object {
                   "data": Object {
@@ -119,7 +135,7 @@ Object {
       "type": "manual",
     },
   ],
-  "version": 1,
+  "version": 2,
 }
 `;
 

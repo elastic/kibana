@@ -6,7 +6,12 @@
  */
 
 import { symptomTreeId } from '@kbn/nightshift-decision-trees';
-import { extractWorkspaceReadsFromToolCalls } from '../investigation_round';
+import {
+  extractWorkspaceReads,
+  extractWorkspaceReadsFromToolCalls,
+  stepsFromRound,
+  type RawRoundStep,
+} from '../investigation_round';
 
 /** One post-execution tool call, matching Agent Builder's after-execution workflow payload. */
 export interface InvestigationToolCall {
@@ -26,6 +31,25 @@ const ACCESSED_TREES_MARKER_RE = /<!-- nightshift-accessed-trees:([a-z0-9,-]*) -
  */
 export const extractAccessedTreeIds = (toolCalls: InvestigationToolCall[]): string[] =>
   extractWorkspaceReadsFromToolCalls(toolCalls).decisionTreeIds;
+
+/**
+ * Tree ids the investigator opened or edited in the conversation's other rounds. The round being
+ * reinforced is skipped: it may not be saved yet, so its own tool calls come from the hook.
+ */
+export const extractAccessedTreeIdsFromRounds = (
+  rounds: ReadonlyArray<{ id: string; steps: readonly unknown[] }>,
+  currentRoundId: string | undefined
+): string[] => [
+  ...new Set(
+    rounds
+      .filter((round) => round.id !== currentRoundId)
+      .flatMap(
+        (round) =>
+          extractWorkspaceReads(stepsFromRound(round.steps as readonly RawRoundStep[]))
+            .decisionTreeIds
+      )
+  ),
+];
 
 /** First line of the reinforcement message; hydrate uses it to restrict the sandbox. */
 export const embedAccessedTreesMarker = (treeIds: string[]): string => {

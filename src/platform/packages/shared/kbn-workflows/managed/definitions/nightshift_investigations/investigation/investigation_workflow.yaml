@@ -118,6 +118,14 @@ triggers:
           description: >
             Upper bound the caller asked for. The space's entry point caps its investigation step
             with it and hands the inputs on unchanged, so this run accepts it and ignores it.
+        round_kind:
+          type: string
+          enum: [initial, follow_up, alert_recovery]
+          description: >
+            The kind of round this run adds, set by the caller that starts it: the first round of
+            a new investigation, a follow-up on an existing one, or an alert recovery. The
+            agent's before-agent workflow reads it from this run as the round starts, and
+            decision-tree reinforcement uses it to decide whether the round may seed a new tree.
       required:
         - message
       additionalProperties: false

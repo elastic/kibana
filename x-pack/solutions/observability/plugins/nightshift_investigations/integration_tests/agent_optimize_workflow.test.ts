@@ -47,6 +47,7 @@ const ELIGIBLE_ROUND_INPUTS = {
   // What the materialize workflow persisted for this round, forwarded by Agent Builder.
   workflow_context: {
     'nightshift.semantic_memory.recall': { version: 1, data: { recalled_ids: ['mem-1', 'mem-2'] } },
+    'nightshift.round': { version: 1, data: { round_kind: 'initial' } },
   },
 };
 
@@ -197,6 +198,36 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     expect(jest.mocked(runMemoryOptimize).mock.calls[0][0]).toMatchObject({
       recalledIds: ['mem-1', 'mem-2'],
     });
+  });
+
+  // The label the materialize workflow wrote when the round started, round-tripped the same way.
+  it('hands the round kind to the reinforcement turn', () => {
+    expect(jest.mocked(prepareReinforcementTurn).mock.calls[0][0]).toMatchObject({
+      roundKind: 'initial',
+      investigationId: 'conv-1',
+    });
+  });
+});
+
+describe('agent optimize workflow, a round with no kind', () => {
+  // Guessing a first round could seed a stray tree, and guessing a follow-up never seeds one.
+  it('fails the reinforcement rather than guessing', async () => {
+    const fixture = createNightshiftWorkflowFixture();
+
+    await fixture.runOptimize({
+      ...ELIGIBLE_ROUND_INPUTS,
+      workflow_context: {
+        'nightshift.semantic_memory.recall':
+          ELIGIBLE_ROUND_INPUTS.workflow_context['nightshift.semantic_memory.recall'],
+      },
+    });
+
+    expect(fixture.executionStatus()).toBe(ExecutionStatus.FAILED);
+    expect(fixture.stepExecutions('prepare_turn')[0]?.status).toBe(ExecutionStatus.FAILED);
+    expect(prepareReinforcementTurn).not.toHaveBeenCalled();
+    expect(fixture.agentRuns).toEqual([]);
+    // The optimizers ran before the reinforcement tail and keep their results.
+    expect(fixture.stepOutput<{ status: string }>('optimize_memory')).toEqual({ status: 'ok' });
   });
 });
 
