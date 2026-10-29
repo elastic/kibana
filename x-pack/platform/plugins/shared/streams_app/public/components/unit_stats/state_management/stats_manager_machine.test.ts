@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 import { createActor } from 'xstate';
 import { createFixtureUnitStatsClient } from '../../../services/unit_stats_client/fixture_unit_stats_client';
 import type { StatsWindow, UnitStatsClient } from '../../../services/unit_stats_client/types';
-import { STATS_BATCH_DEBOUNCE_MS, STATS_MAX_CONSECUTIVE_FAILURES } from './constants';
+import { STATS_BATCH_DEBOUNCE_MS } from './constants';
 import { createStatsManagerImplementations, statsManagerMachine } from './stats_manager_machine';
 
 const destination = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'destination', id });
@@ -287,7 +287,7 @@ const createClientSequence = (steps: Array<'success' | 'failure'>) => {
       return (step === 'failure' ? failure : success).fetchStats(request, options);
     },
   };
-  return { client, calls: () => call };
+  return { client };
 };
 
 describe('failures', () => {
@@ -327,19 +327,6 @@ describe('failures', () => {
     await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS * 10);
 
     expect(fetchStats).toHaveBeenCalledTimes(1);
-  });
-
-  it('counts failures in a row, and a success resets the count', async () => {
-    const { client } = createClientSequence(['failure', 'success']);
-    const { actor, register } = startManager({ client });
-
-    register(ES_PROD);
-    await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS);
-    expect(actor.getSnapshot().context.consecutiveFailures).toBe(1);
-
-    actor.send({ type: 'stats.refresh' });
-    await jest.advanceTimersByTimeAsync(0);
-    expect(actor.getSnapshot().context.consecutiveFailures).toBe(0);
   });
 
   it('leaves the request region idle after a failure, so the next request can start', async () => {
@@ -408,45 +395,6 @@ describe('polling', () => {
 
     await jest.advanceTimersByTimeAsync(300);
     expect(destinationEntry('es-prod')?.status).toBe('ready');
-  });
-
-  it('stops after repeated failures', async () => {
-    const { client, fetchStats } = createClient({ scenario: 'requestFailure' });
-    const { actor, register } = startManager({ client, pollIntervalMs: POLL_INTERVAL_MS });
-
-    register(ES_PROD);
-    await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS * 10);
-
-    expect(fetchStats).toHaveBeenCalledTimes(STATS_MAX_CONSECUTIVE_FAILURES);
-    expect(actor.getSnapshot().matches({ polling: 'stopped' })).toBe(true);
-    expect(actor.getSnapshot().context.consecutiveFailures).toBe(STATS_MAX_CONSECUTIVE_FAILURES);
-  });
-
-  it('starts again when the user refreshes after it stopped', async () => {
-    const failures = Array.from(
-      { length: STATS_MAX_CONSECUTIVE_FAILURES },
-      () => 'failure' as const
-    );
-    const { client, calls } = createClientSequence(failures);
-    const { actor, register, destinationEntry } = startManager({
-      client,
-      pollIntervalMs: POLL_INTERVAL_MS,
-    });
-
-    register(ES_PROD);
-    await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS * 10);
-    expect(actor.getSnapshot().matches({ polling: 'stopped' })).toBe(true);
-    const callsWhenStopped = calls();
-
-    actor.send({ type: 'stats.refresh' });
-    await jest.advanceTimersByTimeAsync(0);
-
-    expect(destinationEntry('es-prod')?.status).toBe('ready');
-    expect(actor.getSnapshot().matches({ polling: 'active' })).toBe(true);
-    expect(actor.getSnapshot().context.consecutiveFailures).toBe(0);
-
-    await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
-    expect(calls()).toBeGreaterThan(callsWhenStopped + 1);
   });
 
   it('still fetches on a registration and on a refresh when polling is off', async () => {
@@ -666,16 +614,15 @@ describe('abort', () => {
     expect(destinationEntry('es-dev')?.status).toBe('ready');
   });
 
-  it('is not a failure: no error, no failure count, and nothing is retried', async () => {
+  it('is not a failure: no error entry, and nothing is retried', async () => {
     const { client, fetchStats } = createClient({ delayMs: 500 });
-    const { actor, register, unregister, destinationEntry } = startManager({ client });
+    const { register, unregister, destinationEntry } = startManager({ client });
 
     register(ES_PROD);
     await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS + 100);
     unregister(ES_PROD);
     await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS * 10);
 
-    expect(actor.getSnapshot().context.consecutiveFailures).toBe(0);
     expect(destinationEntry('es-prod')).toBeUndefined();
     expect(fetchStats).toHaveBeenCalledTimes(1);
   });

@@ -16,12 +16,7 @@ import type {
   StatsWindow,
   UnitStatsClient,
 } from '../../../services/unit_stats_client/types';
-import {
-  STATS_BATCH_DEBOUNCE_MS,
-  STATS_FRESHNESS_MS,
-  STATS_MAX_CONSECUTIVE_FAILURES,
-  STATS_POLL_INTERVAL_MS,
-} from './constants';
+import { STATS_BATCH_DEBOUNCE_MS, STATS_FRESHNESS_MS, STATS_POLL_INTERVAL_MS } from './constants';
 import { isBatchWanted, planBatches } from './stats_batching';
 import {
   clearValues,
@@ -57,8 +52,6 @@ export interface StatsManagerContext {
    */
   request: StatsBatch;
   lastUpdated?: number;
-  /** Failed requests in a row. A result resets it. */
-  consecutiveFailures: number;
 }
 
 /** A request for no components, which stands for "nothing in flight". */
@@ -79,7 +72,7 @@ export interface StatsUnregisterEvent {
   registrant: string;
 }
 
-/** The user asks for fresh values. It also restarts polling after it stopped. */
+/** The user asks for fresh values. */
 export interface StatsRefreshEvent {
   type: 'stats.refresh';
 }
@@ -197,22 +190,19 @@ export const statsManagerMachine = setup({
       const request = planNextBatch(context, event);
       return request ? { request, components: markBatchLoading(context.components, request) } : {};
     }),
-    /** Writes the response into the components of the request, and counts as a success. */
+    /** Writes the response into the components of the request. */
     storeResult: assign(({ context }, params: { response: MappedStatsResponse }) => {
       const now = Date.now();
       return {
         components: mergeFetchedStats(context.components, context.request, params.response, now),
         lastUpdated: now,
-        consecutiveFailures: 0,
       };
     }),
-    /** Marks the components of the request as stale or failed, and counts the failure. */
+    /** Marks the components of the request as stale or failed. */
     storeFailure: assign(({ context }, params: { reason: string }) => ({
       components: markBatchFailed(context.components, context.request, params.reason),
-      consecutiveFailures: context.consecutiveFailures + 1,
     })),
     clearRequest: assign({ request: NO_REQUEST }),
-    resetFailures: assign({ consecutiveFailures: 0 }),
     /** The window changed, so every value describes the old range. */
     clearValues: assign(({ context }) => ({ components: clearValues(context.components) })),
     /** A unit was saved. A component that is no longer in it is dropped. */
@@ -222,7 +212,6 @@ export const statsManagerMachine = setup({
   },
   guards: {
     pollingEnabled: ({ context }) => context.pollIntervalMs !== undefined,
-    tooManyFailures: ({ context }) => context.consecutiveFailures >= STATS_MAX_CONSECUTIVE_FAILURES,
     /** Whether the event that is being handled leaves something to request. */
     hasDueBatch: ({ context, event }) => planNextBatch(context, event) !== undefined,
     /** Whether no shown component wants the request in flight any more. */
@@ -240,7 +229,6 @@ export const statsManagerMachine = setup({
     pollIntervalMs: input.pollIntervalMs,
     components: { destination: {}, processor: {} },
     request: NO_REQUEST,
-    consecutiveFailures: 0,
   }),
   invoke: { id: 'timeUpdates', src: 'timeUpdates' },
   type: 'parallel',
@@ -350,8 +338,7 @@ export const statsManagerMachine = setup({
         },
       },
     },
-    // Optional. Asks for every shown component again on an interval, and stops after repeated
-    // failures until the user refreshes.
+    // Optional. Asks for every shown component again on an interval.
     polling: {
       initial: 'checking',
       states: {
@@ -368,11 +355,6 @@ export const statsManagerMachine = setup({
               actions: raise({ type: 'stats.poll' }),
             },
           },
-          always: { guard: 'tooManyFailures', target: 'stopped' },
-          on: { 'stats.refresh': { actions: 'resetFailures' } },
-        },
-        stopped: {
-          on: { 'stats.refresh': { target: 'active', actions: 'resetFailures' } },
         },
       },
     },
