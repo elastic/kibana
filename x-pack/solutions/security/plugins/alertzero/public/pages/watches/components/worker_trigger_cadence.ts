@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-/** Schedule units the "Every N unit" trigger control offers. */
+/** Schedule units the "Runs every N unit" trigger control offers. */
 export type WorkerTriggerScheduleUnit = 'm' | 'h' | 'd';
 
 /** Parses a Worker's `scheduleInterval` (e.g. `"2h"`) into amount + unit, defaulting to 1h. */
