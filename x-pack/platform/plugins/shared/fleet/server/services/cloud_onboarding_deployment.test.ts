@@ -248,6 +248,85 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
+  describe('update — integration name and description', () => {
+    const writtenAttributes = () => soClient.create.mock.calls[0][1] as Record<string, unknown>;
+
+    it('stores a new name and description', async () => {
+      const existing = makeAttributes({});
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        integrationName: 'my-aws',
+        description: 'Production AWS',
+      });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ integrationName: 'my-aws', description: 'Production AWS' })
+      );
+    });
+
+    it('keeps the stored description when an update does not mention it', async () => {
+      const existing = makeAttributes({ description: 'Production AWS' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes()).toEqual(
+        expect.objectContaining({ description: 'Production AWS' })
+      );
+    });
+
+    it('removes the description when the update clears it with null', async () => {
+      const existing = makeAttributes({ description: 'Production AWS', integrationName: 'my-aws' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { description: null });
+
+      // Not stored as null: the saved object schema has no null for it.
+      expect(writtenAttributes()).not.toHaveProperty('description');
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ integrationName: 'my-aws' }));
+    });
+  });
+
+  describe('update — namespace', () => {
+    const writtenAttributes = () => soClient.create.mock.calls[0][1] as Record<string, unknown>;
+
+    it('stores a new namespace', async () => {
+      const existing = makeAttributes({});
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { namespace: 'prod' });
+
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ namespace: 'prod' }));
+    });
+
+    it('keeps the stored namespace when an update does not mention it', async () => {
+      const existing = makeAttributes({ namespace: 'prod' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ namespace: 'prod' }));
+    });
+
+    it('removes the namespace when the update clears it with null', async () => {
+      const existing = makeAttributes({ namespace: 'prod', integrationName: 'my-aws' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', existing));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', existing));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { namespace: null });
+
+      // Not stored as null: the saved object schema has no null for it.
+      expect(writtenAttributes()).not.toHaveProperty('namespace');
+      expect(writtenAttributes()).toEqual(expect.objectContaining({ integrationName: 'my-aws' }));
+    });
+  });
+
   describe('update — full-replace semantics', () => {
     it('removed serviceVars and policyIdsByInstance keys are absent from the written SO', async () => {
       // Initial record has stale keys that the update intentionally omits.
@@ -278,6 +357,66 @@ describe('cloudOnboardingDeploymentService', () => {
       expect(writtenAttrs?.policyIdsByInstance).not.toHaveProperty('removed_instance');
       expect(writtenAttrs?.serviceVars).toHaveProperty('cloudtrail');
       expect(writtenAttrs?.policyIdsByInstance).toHaveProperty('elb');
+    });
+  });
+
+  describe('instances', () => {
+    const original = {
+      instanceId: 'cloudtrail',
+      serviceId: 'cloudtrail',
+      name: 'AWS CloudTrail',
+      isDuplicate: false,
+    };
+    const duplicate = {
+      instanceId: 'cloudtrail__dup-1',
+      serviceId: 'cloudtrail',
+      name: 'CloudTrail prod',
+      isDuplicate: true,
+    };
+    const writtenAttributes = () =>
+      soClient.create.mock.calls.find((c) => c[2]?.overwrite)?.[1] as
+        | CloudOnboardingDeploymentSOAttributes
+        | undefined;
+
+    it('stores the instances given on create', async () => {
+      const input = {
+        provider: 'aws' as const,
+        mechanisms: ['agent_based' as const],
+        services: ['cloudtrail'],
+        instances: [original, duplicate],
+      };
+      soClient.create.mockResolvedValue(
+        makeSOResponse('deploy-1', makeAttributes({ connectorId: undefined, ...input }))
+      );
+
+      await cloudOnboardingDeploymentService.create(soClient, input);
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ instances: [original, duplicate] })
+      );
+    });
+
+    it('replaces the stored instances on update, so a removed duplicate does not linger', async () => {
+      const initialAttrs = makeAttributes({ instances: [original, duplicate] });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+        instances: [original],
+      });
+
+      expect(writtenAttributes()?.instances).toEqual([original]);
+    });
+
+    it('keeps the stored instances when an update does not mention them', async () => {
+      const initialAttrs = makeAttributes({ instances: [original, duplicate] });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+      soClient.create.mockResolvedValue(makeSOResponse('deploy-1', initialAttrs));
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(writtenAttributes()?.instances).toEqual([original, duplicate]);
     });
   });
 

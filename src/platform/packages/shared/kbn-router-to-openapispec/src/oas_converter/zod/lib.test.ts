@@ -998,4 +998,17 @@ describe('zod', () => {
       format: 'date-time',
     });
   });
+
+  test('isoDateTime OpenAPI schema bounds length and omits pattern', () => {
+    const schema = z4.object({ createdAt: isoDateTime({ offset: true }) });
+    const result = convert(schema as any);
+    const createdAt = result.schema.properties?.createdAt;
+
+    expect(createdAt).toMatchObject({
+      type: 'string',
+      format: 'date-time',
+      maxLength: 64,
+    });
+    expect(createdAt).not.toHaveProperty('pattern');
+  });
 });

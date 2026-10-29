@@ -5,7 +5,29 @@
  * 2.0.
  */
 
-import { getWorkflowFailureMessage } from './errors';
+import { getFormattedError, getWorkflowFailureMessage } from './errors';
+
+const SERVER_MESSAGE = 'Source knowledge is being updated; retry after the current write finishes';
+
+const conflictResponse = (data: unknown) => ({
+  body: {
+    statusCode: 409,
+    error: 'Conflict',
+    message: SERVER_MESSAGE,
+    attributes: { data },
+  },
+});
+
+describe('getFormattedError', () => {
+  it('shows the message for a known conflict reason and the server message otherwise', () => {
+    expect(getFormattedError(conflictResponse({ reason: 'lease_held' })).message).toBe(
+      'This source is being updated. Try again in a few seconds.'
+    );
+    expect(getFormattedError(conflictResponse({ reason: 'something_else' })).message).toBe(
+      SERVER_MESSAGE
+    );
+  });
+});
 
 describe('getWorkflowFailureMessage', () => {
   it('unwraps the API message from a failed workflow HTTP step and keeps anything else as is', () => {

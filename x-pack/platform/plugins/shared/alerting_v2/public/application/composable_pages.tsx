@@ -24,7 +24,6 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { AppHeaderTab } from '@kbn/app-header';
 import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
@@ -37,14 +36,15 @@ import { BreadcrumbProvider } from './breadcrumb_context';
 import { LocatorProvider } from './locator_context';
 import { TabsProvider } from './tabs_context';
 import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
-import type { AlertingV2HostApp } from '../locators';
+import type { AlertingV2HostApp } from '../../common/locators';
 import type { AlertsKibanaServices } from '../alerts_kibana_services';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 import { ManageRulesHrefProvider } from './manage_rules_href_context';
+import type { EpisodeDetailsPageProps } from '../pages/episode_details_page/episode_details_page';
 
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
 
-export interface AlertingV2PageProps {
+export interface AlertingV2PageProps extends EpisodeDetailsPageProps {
   coreStart: CoreStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   hostApp: AlertingV2HostApp;
@@ -171,6 +171,7 @@ export const AlertingV2EpisodesPage = ({
   hostApp,
   privilegeCheck,
   createActions,
+  useAdditionalEpisodeDetailsHeaderMenuItems,
   manageRulesHref,
 }: InternalPageProps) => {
   const [queryClient] = useState(() => new QueryClient());
@@ -205,7 +206,6 @@ export const AlertingV2EpisodesPage = ({
       toastNotifications: coreStart.notifications.toasts,
       unifiedDocViewer: container.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart,
       spaces: container.get(PluginStart('spaces')) as SpacesPluginStart,
-      licensing: container.get(PluginStart('licensing')) as LicensingPluginStart,
     }),
     [coreStart, container]
   );
@@ -219,7 +219,12 @@ export const AlertingV2EpisodesPage = ({
               <PrivilegeCheckProvider value={privilegeCheck}>
                 <ManageRulesHrefProvider value={manageRulesHref}>
                   <I18nProvider>
-                    <EpisodesApp dataSource={dataSource} />
+                    <EpisodesApp
+                      dataSource={dataSource}
+                      useAdditionalEpisodeDetailsHeaderMenuItems={
+                        useAdditionalEpisodeDetailsHeaderMenuItems
+                      }
+                    />
                   </I18nProvider>
                 </ManageRulesHrefProvider>
               </PrivilegeCheckProvider>

@@ -91,8 +91,8 @@ export function getCastingTypesSuggestions(typeBeingCasted?: SupportedDataType):
       label: castingType,
       text: castingType,
       kind: 'Keyword',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.inlineCastingTypeDescription', {
-        defaultMessage: `Cast value to ${castingType}`,
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.inlineCastingTypeDescription', {
+        defaultMessage: 'Cast value to {castingType}',
         values: { castingType },
       }),
     };

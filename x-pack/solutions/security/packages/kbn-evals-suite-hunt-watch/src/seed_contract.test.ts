@@ -91,6 +91,12 @@ describe('Investigation id binding', () => {
     );
   });
 
+  it('returns the hash material the alertzero plugin derives the id from', () => {
+    expect(
+      readRepoFile(alertzeroRoot, 'server/services/watches/hunt/common/hunt_investigation_id.ts')
+    ).toContain('`${HUNT_INVESTIGATION_ID_NAMESPACE}${spaceId}|${reportId}`');
+  });
+
   it('returns the frozen uuid namespace the alertzero plugin hashes with', () => {
     expect(
       readRepoFile(alertzeroRoot, 'server/services/watches/hunt/common/hunt_investigation_id.ts')
@@ -179,10 +185,18 @@ describe('canary report', () => {
   it('returns no seeded evidence', () => {
     expect(doc).not.toHaveProperty('evidence');
   });
+
+  it('stamps content.published_at to match generator historic reports', () => {
+    expect(doc.content.published_at).toBe('2026-01-01T00:00:00.000Z');
+  });
 });
 
 describe('IOC dump report', () => {
   const doc = buildIocDumpReportDoc('2026-01-01T00:00:00.000Z');
+
+  it('stamps content.published_at to match generator historic reports', () => {
+    expect(doc.content.published_at).toBe('2026-01-01T00:00:00.000Z');
+  });
 
   it('returns the per-hunt IOC bound the coordinator enforces', () => {
     const source = readRepoFile(

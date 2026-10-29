@@ -15,8 +15,17 @@ export type EntityViewMode = 'single' | 'resolved';
 
 export const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 
-/** Upper bound on records fetched for a resolution group; matches the list API's `per_page` ceiling. */
-export const RESOLVED_MODE_MAX_RECORDS = 10_000;
+/**
+ * Upper bound on members (target + aliases) loaded for a resolution group.
+ */
+export const RESOLVED_MODE_MAX_RECORDS = 100;
+
+export const RESOLUTION_GROUP_RISK_SORT_FIELD = 'entity.risk.calculated_score_norm';
+
+/** Entity Store filter selecting the aliases of `entityId`: the records resolved to it, excluding itself. */
+export const buildAliasesFilter = (entityId: string): QueryDslQueryContainer => ({
+  term: { [RESOLVED_TO_FIELD]: entityId },
+});
 
 /**
  * Entity Store filter selecting the records `entityId` covers in the given `mode`. In `resolved`
@@ -30,7 +39,7 @@ export const buildEntityIdFilter = (
   if (mode === 'resolved') {
     return {
       bool: {
-        should: [{ term: { 'entity.id': entityId } }, { term: { [RESOLVED_TO_FIELD]: entityId } }],
+        should: [{ term: { 'entity.id': entityId } }, buildAliasesFilter(entityId)],
         minimum_should_match: 1,
       },
     };

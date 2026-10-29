@@ -231,6 +231,25 @@ describe('RulesListTableContainer', () => {
       expect(mockOnCloneInFlyout).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
+    it('links the row View details action to the rule details page', async () => {
+      const locators = createMockLocators();
+      renderContainer({ locators });
+      await waitForRules();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+      const viewDetails = await screen.findByTestId('viewRuleDetails-rule-1');
+
+      expect(viewDetails).toHaveAttribute('href', '/mock-locator-url');
+      expect(locators.rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+      expect(screen.queryByTestId('ruleSummaryFlyout')).not.toBeInTheDocument();
+      expect(locators.rulesLocators.navigateSync).not.toHaveBeenCalled();
+
+      fireEvent.click(viewDetails);
+
+      expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+      expect(screen.queryByTestId('ruleSummaryFlyout')).not.toBeInTheDocument();
+    });
+
     it('opens the rule summary flyout when the rule name is clicked', async () => {
       const locators = createMockLocators();
       renderContainer({ locators });

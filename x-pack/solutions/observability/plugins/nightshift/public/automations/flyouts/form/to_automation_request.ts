@@ -29,7 +29,6 @@ const toTriggerRow = (
       kind: 'alert',
       ...(ruleNamePattern ? { ruleNamePattern } : {}),
       ...(trigger.ruleNames.length ? { ruleNames: trigger.ruleNames } : {}),
-      ...(trigger.alertStatus !== 'any' ? { alertStatus: trigger.alertStatus } : {}),
       ...(trigger.ruleTags.length ? { tags: trigger.ruleTags } : {}),
     };
   }
@@ -40,6 +39,7 @@ const toTriggerRow = (
       event: SLACK_TRIGGER_EVENTS[trigger.kind],
       ...(trigger.channels.length ? { channels: trigger.channels } : {}),
       ...(trigger.users.length ? { users: trigger.users } : {}),
+      ...(trigger.bots.length ? { bots: trigger.bots } : {}),
       ...(messageFilter ? { messageFilter } : {}),
     };
   }

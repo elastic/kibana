@@ -13,11 +13,11 @@ import { isRangeFilter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';
 import { isFilterable, IpAddress } from '@kbn/data-plugin/common';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { Operator } from './filter_operators';
 import { FILTER_OPERATORS, OPERATORS } from './filter_operators';
 
-export function getFieldFromFilter(filter: Filter, indexPattern?: DataView) {
+export function getFieldFromFilter(filter: Filter, indexPattern?: FilterableSource) {
   return indexPattern?.fields.find((field) => field.name === filter.meta.key);
 }
 
@@ -52,11 +52,11 @@ export function getOperatorFromFilter(filter: Filter) {
   });
 }
 
-export function getFilterableFields(indexPattern: DataView) {
+export function getFilterableFields(indexPattern: FilterableSource) {
   return indexPattern.fields.filter(isFilterable);
 }
 
-export function getOperatorOptions(field: DataViewField) {
+export function getOperatorOptions(field: FilterableField) {
   return FILTER_OPERATORS.filter((operator) => {
     if (operator.field) return operator.field(field);
     if (operator.fieldTypes) return operator.fieldTypes.includes(field.type);
@@ -64,7 +64,7 @@ export function getOperatorOptions(field: DataViewField) {
   });
 }
 
-export function validateParams(params: any, field: DataViewField) {
+export function validateParams(params: any, field: FilterableField) {
   switch (field?.type) {
     case 'date':
       const moment = typeof params === 'string' ? dateMath.parse(params) : null;
@@ -88,8 +88,8 @@ export function validateParams(params: any, field: DataViewField) {
 }
 
 export function isFilterValid(
-  indexPattern?: DataView,
-  field?: DataViewField,
+  indexPattern?: FilterableSource,
+  field?: FilterableField,
   operator?: Operator,
   params?: any
 ) {

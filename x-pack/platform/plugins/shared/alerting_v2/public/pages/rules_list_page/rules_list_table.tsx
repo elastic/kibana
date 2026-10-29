@@ -59,7 +59,7 @@ export interface RulesListTableProps {
   sortDirection?: 'asc' | 'desc';
   isLoading: boolean;
 
-  /** When false, write affordances (selection, bulk actions, quick edit, actions menu) are hidden and the enabled toggle is read-only. */
+  /** When false, write affordances (selection, bulk actions, quick edit) are hidden and the enabled toggle is read-only. The actions menu still shows read actions. */
   canWrite: boolean;
 
   /** Bulk selection state */
@@ -158,8 +158,6 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   };
 
   const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(() => {
-    const showActionsColumn = canWrite || onViewChangeHistory;
-
     return [
       ...(canWrite
         ? ([
@@ -338,64 +336,58 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           );
         },
       },
-      ...(showActionsColumn
-        ? ([
-            {
-              name: (
-                <FormattedMessage
-                  id="xpack.alertingV2.rulesList.column.actions"
-                  defaultMessage="Actions"
-                />
-              ),
-              width: '8%',
-              align: 'right',
-              render: (rule: RuleApiResponse) => (
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  justifyContent="flexEnd"
+      {
+        name: (
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.column.actions"
+            defaultMessage="Actions"
+          />
+        ),
+        width: '8%',
+        align: 'right',
+        render: (rule: RuleApiResponse) => (
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+            justifyContent="flexEnd"
+          >
+            {canWrite ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                    defaultMessage: 'Edit rule',
+                  })}
+                  disableScreenReaderOutput
                 >
-                  {canWrite ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                          defaultMessage: 'Edit rule',
-                        })}
-                        disableScreenReaderOutput
-                      >
-                        <EuiButtonIcon
-                          iconType="pencil"
-                          color="text"
-                          onClick={() => onQuickEdit(rule)}
-                          aria-label={i18n.translate(
-                            'xpack.alertingV2.rulesList.action.quickEdit',
-                            {
-                              defaultMessage: 'Edit rule',
-                            }
-                          )}
-                          data-test-subj={`quickEditRule-${rule.id}`}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem grow={false}>
-                    <RuleActionsMenu
-                      rule={rule}
-                      canWrite={canWrite}
-                      onEdit={onEdit}
-                      onClone={onClone}
-                      onDelete={onDelete}
-                      onUpdateApiKey={onUpdateApiKey}
-                      onRun={onRun}
-                      onViewChangeHistory={onViewChangeHistory}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-            },
-          ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
-        : []),
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    color="text"
+                    onClick={() => onQuickEdit(rule)}
+                    aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                      defaultMessage: 'Edit rule',
+                    })}
+                    data-test-subj={`quickEditRule-${rule.id}`}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <RuleActionsMenu
+                rule={rule}
+                canWrite={canWrite}
+                onEdit={onEdit}
+                onClone={onClone}
+                onDelete={onDelete}
+                onUpdateApiKey={onUpdateApiKey}
+                onRun={onRun}
+                onViewChangeHistory={onViewChangeHistory}
+                showViewDetails
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
     ];
   }, [
     canWrite,

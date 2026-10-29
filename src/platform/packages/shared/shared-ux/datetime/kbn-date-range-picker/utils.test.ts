@@ -27,6 +27,7 @@ import {
   getStartDate,
   getEndDate,
 } from './utils';
+import { TZDate } from 'react-day-picker';
 
 describe('toLocalPreciseString', () => {
   it('formats a date using local time components (no Z)', () => {
@@ -347,6 +348,14 @@ describe('getStartDate', () => {
     expect(result).not.toBe(d);
     expect(d.getHours()).toBe(14);
   });
+
+  it('sets the start of the day in the requested time zone', () => {
+    const selectedDate = new TZDate(2026, 1, 10, 'Japan');
+
+    expect(getStartDate(selectedDate, 'Japan').getTime()).toBe(
+      Date.parse('2026-02-10T00:00:00.000+09:00')
+    );
+  });
 });
 
 describe('getEndDate', () => {
@@ -372,6 +381,14 @@ describe('getEndDate', () => {
     const result = getEndDate(d);
     expect(result).not.toBe(d);
     expect(d.getHours()).toBe(8);
+  });
+
+  it('sets the end of the day in the requested time zone', () => {
+    const selectedDate = new TZDate(2026, 1, 10, 'Japan');
+
+    expect(getEndDate(selectedDate, 'Japan').getTime()).toBe(
+      Date.parse('2026-02-10T23:59:59.999+09:00')
+    );
   });
 });
 

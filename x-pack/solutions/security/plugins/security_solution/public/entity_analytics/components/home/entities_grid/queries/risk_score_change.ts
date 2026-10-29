@@ -18,12 +18,12 @@ import {
   buildStatsByEntityClause,
   getRiskScoreIndex,
   OWN_RISK_SCORE_CONDITION,
-  RISK_SCORE_TYPE,
   toList,
 } from './esql';
 import type { EnrichedFields, SortPageContext } from './types';
 import { getComputedColumnQuerySpec } from './computed_column';
 import type { ComputedColumn } from './computed_column';
+import { pickGroupValueFirst } from '../../needs_attention_tiles/queries/risk_history';
 
 const RISK_SCORE_CHANGE_FIELD = 'risk_score_change';
 
@@ -48,11 +48,7 @@ const buildReferenceScoreDocs = ({ namespace, timeRange, rowsMode }: QueryArgs):
 /** Resolved rows compare to their group's last score, else their own; others skip the group docs beside theirs. */
 const buildReferenceScoreStats = ({ rowsMode }: QueryArgs, key: string): string[] =>
   rowsMode === 'resolved'
-    ? [
-        `| STATS group_reference = LAST(score, \`@timestamp\`) WHERE ${RISK_SCORE_TYPE} == "resolution", own_reference = LAST(score, \`@timestamp\`) WHERE ${OWN_RISK_SCORE_CONDITION} BY ${key}`,
-        '| EVAL reference_score = COALESCE(group_reference, own_reference)',
-        `| KEEP ${key}, reference_score`,
-      ]
+    ? pickGroupValueFirst('', key, 'score', 'reference_score')
     : [`| STATS reference_score = LAST(score, \`@timestamp\`) BY ${key}`];
 
 const buildReferenceScoreRows = (args: QueryArgs): string[] => [
