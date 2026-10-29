@@ -101,39 +101,47 @@ export const SelectedPanelsToolbar = () => {
             />
           </EuiBadge>
         </EuiFlexItem>
-        {showCopyToDashboard && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={canCopySelection ? undefined : copyToDashboardDisabledLabel}>
+        <EuiFlexItem grow={false}>
+          <span css={styles.divider} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {/* No gutter between the actions: the buttons' own padding already separates them */}
+          <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+            {showCopyToDashboard && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={canCopySelection ? undefined : copyToDashboardDisabledLabel}>
+                  <EuiButtonEmpty
+                    iconType="logOut"
+                    color="text"
+                    size="s"
+                    isDisabled={!canCopySelection}
+                    hasAriaDisabled
+                    onClick={onCopyToDashboard}
+                    data-test-subj="dashboardSelectedPanelsCopyToDashboard"
+                  >
+                    <FormattedMessage
+                      id="dashboard.selectedPanelsToolbar.copyToDashboardButtonLabel"
+                      defaultMessage="Copy to dashboard"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="logOut"
-                color="text"
+                iconType="trash"
+                color="danger"
                 size="s"
-                isDisabled={!canCopySelection}
-                hasAriaDisabled
-                onClick={onCopyToDashboard}
-                data-test-subj="dashboardSelectedPanelsCopyToDashboard"
+                onClick={onDelete}
+                data-test-subj="dashboardSelectedPanelsDelete"
               >
                 <FormattedMessage
-                  id="dashboard.selectedPanelsToolbar.copyToDashboardButtonLabel"
-                  defaultMessage="Copy to dashboard"
+                  id="dashboard.selectedPanelsToolbar.deleteButtonLabel"
+                  defaultMessage="Delete"
                 />
               </EuiButtonEmpty>
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="trash"
-            color="danger"
-            size="s"
-            onClick={onDelete}
-            data-test-subj="dashboardSelectedPanelsDelete"
-          >
-            <FormattedMessage
-              id="dashboard.selectedPanelsToolbar.deleteButtonLabel"
-              defaultMessage="Delete"
-            />
-          </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
@@ -151,4 +159,11 @@ const selectedPanelsToolbarStyles = {
     }),
   // EuiBadge is fixed to the `xs` font scale; use the `s` scale of the small "Delete" button next to it
   count: (euiThemeContext: UseEuiTheme) => css(euiFontSize(euiThemeContext, 's')),
+  divider: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'block',
+      width: euiTheme.border.width.thin,
+      height: euiTheme.size.l,
+      backgroundColor: euiTheme.colors.borderBaseSubdued,
+    }),
 };
