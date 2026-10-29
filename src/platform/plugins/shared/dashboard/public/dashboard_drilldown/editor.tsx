@@ -108,11 +108,6 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
           value: initialDashboardId,
           label: result.attributes.title,
         });
-      })
-      .catch((err) => {
-        if (canceled) return;
-        setIsLoadingInitialDashboard(false);
-        setError(err.message);
       });
 
     return () => {
