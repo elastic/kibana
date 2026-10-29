@@ -36,6 +36,7 @@ export class StreamsApp {
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
   public readonly dateProcessorFormatsComboBox;
+  private readonly globalToastList;
   public readonly stepsListSaveSettledToast;
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
@@ -107,10 +108,11 @@ export class StreamsApp {
     this.dateProcessorFormatsComboBox = this.page.components.comboBox(
       'streamsAppDateProcessorFormatsComboBox'
     );
+    this.globalToastList = this.page.components.toast();
     // Either terminal outcome of a steps list "Save changes" round-trip.
-    this.stepsListSaveSettledToast = this.page
-      .getByText("Stream's processors updated")
-      .or(this.page.getByText("An issue occurred saving processors' changes."));
+    this.stepsListSaveSettledToast = this.toastWithText("Stream's processors updated").or(
+      this.toastWithText("An issue occurred saving processors' changes.")
+    );
     this.fieldTypeSuperSelect = this.page.components.superSelect('streamsAppFieldFormTypeSelect');
     this.previewDataGrid = this.page.components.dataGrid('streamsAppPreviewDataGrid');
     this.schemaDataGrid = this.page.components.dataGrid('streamsAppSchemaEditorFieldsTableLoaded');
@@ -126,17 +128,17 @@ export class StreamsApp {
     this.queryStreamFlyoutSaveButton = this.page.getByTestId(
       'streamsAppQueryStreamFlyoutSaveButton'
     );
-    this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
-    this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
-    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated');
+    this.queryStreamCreatedSuccessToast = this.toastWithText('Query stream created successfully');
+    this.childQueryStreamCreatedSuccessToast = this.toastWithText('Query stream created');
+    this.queryStreamUpdatedSuccessToast = this.toastWithText('Query stream updated');
     this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
       'queryStreamDetailsQueryViewerCodeBlock'
     );
     this.deleteQueryStreamModalInput = this.page.getByTestId(
       'streamsAppDeleteStreamModalStreamNameInput'
     );
-    this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
-    this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
+    this.queryStreamDeletedSuccessToast = this.toastWithText('Stream deleted');
+    this.queryStreamCreateErrorToast = this.toastWithText('Error creating query stream');
     this.fetchMoreMatchingSamplesButton = this.page.getByTestId(
       'streamsAppFetchMoreMatchingSamplesButton'
     );
@@ -174,6 +176,11 @@ export class StreamsApp {
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
     this.streamsDestinationsTable = this.page.testSubj.locator('streamsDestinationsTable');
     this.streamsDestinationsSearch = this.page.testSubj.locator('streamsDestinationsSearch');
+  }
+
+  // Scoped to the toast list: core's screen reader announcer repeats every toast's text page-wide.
+  private toastWithText(text: string): Locator {
+    return this.globalToastList.toasts.getByText(text);
   }
 
   async goto() {
@@ -385,25 +392,24 @@ export class StreamsApp {
   async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
     // Use .first() because some pages (like Retention) may have multiple date pickers
     const newControlButton = this.page.testSubj.locator('dateRangePickerControlButton').first();
-    try {
-      await newControlButton.waitFor({ state: 'visible', timeout: 5_000 });
-      // New DateRangePicker stores the range as ISO strings on data-date-range
-      // for absolute dates. Compare canonical ISO on both sides to avoid the
-      // display-format differences between the legacy and new pickers.
-      const dateRange = (await newControlButton.getAttribute('data-date-range')) ?? '';
-      const [actualStart, actualEnd] = dateRange.split(' to ').map((s) => s.trim());
-      const expectedStart = moment.utc(expectedRange.from, LEGACY_DATE_FORMAT, true).toISOString();
-      const expectedEnd = moment.utc(expectedRange.to, LEGACY_DATE_FORMAT, true).toISOString();
-      expect(actualStart, `Date picker 'start date' is incorrect`).toBe(expectedStart);
-      expect(actualEnd, `Date picker 'end date' is incorrect`).toBe(expectedEnd);
+    const legacyStartButton = this.page.testSubj
+      .locator('superDatePickerstartDatePopoverButton')
+      .first();
+    // `waitFor` is not a strict-mode action, so it tolerates whichever picker variant mounted.
+    await newControlButton.or(legacyStartButton).waitFor({ state: 'visible', timeout: 10_000 });
+
+    if ((await newControlButton.count()) > 0) {
+      const toIso = (value: string) => moment.utc(value, LEGACY_DATE_FORMAT, true).toISOString();
+      await expect(newControlButton, `Date picker time range is incorrect`).toHaveAttribute(
+        'data-date-range',
+        `${toIso(expectedRange.from)} to ${toIso(expectedRange.to)}`
+      );
       return;
-    } catch {
-      // New picker not present; fall through to legacy assertions.
     }
-    await expect(
-      this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first(),
-      `Date picker 'start date' is incorrect`
-    ).toHaveText(expectedRange.from);
+
+    await expect(legacyStartButton, `Date picker 'start date' is incorrect`).toHaveText(
+      expectedRange.from
+    );
     await expect(
       this.page.testSubj.locator('superDatePickerendDatePopoverButton').first(),
       `Date picker 'end date' is incorrect`
