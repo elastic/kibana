@@ -882,11 +882,9 @@ export class RuleEventsClient {
   }
 
   /**
-   * Reads every operator deactivation of an event from Alerting v2's `.alert-actions`: the episode
-   * and the operator's reason. It is history, not current state: a deactivation that an operator
-   * later activated again is still listed. The version a deactivation writes to `.rule-events`
-   * only copies the previous version's data, so the reason lives only here. Failures read as no
-   * deactivations and are logged.
+   * Reads every operator deactivation of an event from `.alert-actions`, oldest first: the episode,
+   * the time and the reason. The version a deactivation writes to `.rule-events` only copies the
+   * previous data, so the reason lives only here. Failures read as none and are logged.
    */
   async findEventDeactivations(eventId: string): Promise<EventDeactivation[]> {
     try {
@@ -900,7 +898,11 @@ export class RuleEventsClient {
       );
       if (series === undefined) return [];
 
-      const rows = esqlToObjects<{ alert_id: string | null; reason: string | null }>(
+      const rows = esqlToObjects<{
+        '@timestamp': string;
+        alert_id: string | null;
+        reason: string | null;
+      }>(
         await queryEsql({
           esClient: this.actionsEsClient(),
           query: esql.from([ALERT_ACTIONS_DATA_STREAM], []).where`space_id == ${esql.str(
@@ -908,14 +910,20 @@ export class RuleEventsClient {
           )}`.where`group_hash == ${esql.str(series.group_hash)}`
             .where`action_type == "deactivate" AND actor.type == "user"`
             .sort(['@timestamp', 'ASC'])
-            .keep('alert_id', 'reason'),
+            .keep('@timestamp', 'alert_id', 'reason'),
         })
       );
       // `alert_id` in `.alert-actions` is the episode id.
       return rows.flatMap((row) =>
         row.alert_id === null
           ? []
-          : [{ episode_id: row.alert_id, reason: (row.reason ?? '').trim() }]
+          : [
+              {
+                '@timestamp': row['@timestamp'],
+                episode_id: row.alert_id,
+                reason: (row.reason ?? '').trim(),
+              },
+            ]
       );
     } catch (error) {
       this.clients.logger?.error(
