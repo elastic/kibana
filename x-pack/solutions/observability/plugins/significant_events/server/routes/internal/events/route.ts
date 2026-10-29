@@ -48,7 +48,7 @@ import {
   collectEmbeddedDetections,
   hasChangePointType,
   toLifecycleDetection,
-  toLifecycleEvents,
+  applyDeactivationReasons,
 } from '../../../lib/significant_events/events/to_lifecycle_response';
 import { getLiveEntities } from '../../../lib/significant_events/entities/get_live_entities';
 import { filterReadableSourceIds } from '../../utils/resolve_source_ids';
@@ -288,12 +288,15 @@ const eventsLifecycleRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const eventClient = await getEventSearchClient();
-    const { hits: events } = await eventClient.findByEventId(params.path.id);
+    const [{ hits: events }, deactivations] = await Promise.all([
+      eventClient.findByEventId(params.path.id),
+      eventClient.findEventDeactivations(params.path.id),
+    ]);
     if (events.length === 0) {
       return { detections: [], events: [] };
     }
 
-    const deactivationsPromise = eventClient.findEventDeactivations(params.path.id);
+    const lifecycleEvents = applyDeactivationReasons(events, deactivations);
     const embedded = collectEmbeddedDetections(events);
     const detectionClient = await getDetectionClient();
     const { hits: allDetectionHits } = await detectionClient.findByIds(
@@ -308,8 +311,6 @@ const eventsLifecycleRoute = createServerRoute({
       const detection = hit && toLifecycleDetection(hit, { rule_name, source_id });
       return detection ? [detection] : [];
     });
-
-    const lifecycleEvents = toLifecycleEvents(events, await deactivationsPromise);
 
     if (params.query?.include_skipped !== 'true') {
       return { detections, events: lifecycleEvents };

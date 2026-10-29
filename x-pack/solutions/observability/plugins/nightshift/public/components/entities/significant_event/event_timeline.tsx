@@ -95,22 +95,10 @@ const RevisionDetails = ({
 const getRevisionStatusLabel = ({
   previousStatus,
   status,
-  wasDeactivated,
 }: {
   previousStatus: SignificantEventResponse['status'];
   status: SignificantEventResponse['status'];
-  wasDeactivated: boolean;
 }): string => {
-  if (wasDeactivated) {
-    return i18n.translate('xpack.nightshift.flyout.timelineDeactivatedLabel', {
-      defaultMessage: 'Significant event deactivated',
-    });
-  }
-  if (previousStatus === 'inactive' && status !== 'inactive') {
-    return i18n.translate('xpack.nightshift.flyout.timelineReopenedLabel', {
-      defaultMessage: 'Significant event reopened',
-    });
-  }
   if (previousStatus !== status) {
     return i18n.translate('xpack.nightshift.flyout.timelineStatusChangedLabel', {
       defaultMessage: 'Status changed to',
@@ -255,7 +243,6 @@ export const EventTimeline = ({
                   label={getRevisionStatusLabel({
                     previousStatus: previousRevision.status,
                     status: revision.status,
-                    wasDeactivated: revision.deactivated === true,
                   })}
                   revision={revision}
                 />

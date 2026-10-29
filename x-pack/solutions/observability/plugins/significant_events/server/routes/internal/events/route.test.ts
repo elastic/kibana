@@ -400,10 +400,27 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
 });
 
 describe('GET /internal/significant_events/events/{id}/lifecycle, deactivations', () => {
+  const version = (
+    hour: number,
+    status: 'active' | 'inactive',
+    assessmentNote: string,
+    episodeId = 'episode-1'
+  ) => ({
+    event_id: 'event-1',
+    '@timestamp': `2026-01-01T0${hour}:00:00.000Z`,
+    status,
+    episode_id: episodeId,
+    assessment_note: assessmentNote,
+  });
+  const deactivation = (at: string, reason: string, episodeId = 'episode-1') => ({
+    '@timestamp': at,
+    episode_id: episodeId,
+    reason,
+  });
   const versions = [
-    { event_id: 'event-1', status: 'active', episode_id: 'episode-1', assessment_note: 'Original' },
-    { event_id: 'event-1', status: 'inactive', episode_id: 'episode-1', assessment_note: 'Copied' },
-    { event_id: 'event-1', status: 'active', episode_id: 'episode-2', assessment_note: 'Reopened' },
+    version(0, 'active', 'Original'),
+    version(1, 'inactive', 'Copied'),
+    version(2, 'active', 'Reopened', 'episode-2'),
   ];
 
   const getLifecycleEvents = async ({
@@ -411,7 +428,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, deactivations'
     includeSkipped = false,
     hits = versions,
   }: {
-    deactivations: Array<{ episode_id: string; reason: string }>;
+    deactivations: Array<ReturnType<typeof deactivation>>;
     includeSkipped?: boolean;
     hits?: Array<Record<string, unknown>>;
   }) => {
@@ -438,50 +455,117 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, deactivations'
   };
 
   it.each([false, true])(
-    'marks the deactivated version and carries the operator reason as its note (include_skipped: %s)',
+    'carries the operator reason as the note of the deactivated version (include_skipped: %s)',
     async (includeSkipped) => {
       const events = await getLifecycleEvents({
-        deactivations: [{ episode_id: 'episode-1', reason: 'Known noise' }],
+        // Stamped just after the version it produced: the two are written separately.
+        deactivations: [deactivation('2026-01-01T01:00:00.200Z', 'Known noise')],
         includeSkipped,
       });
 
       expect(events).toEqual([
         versions[0],
-        { ...versions[1], deactivated: true, assessment_note: 'Known noise' },
+        { ...versions[1], assessment_note: 'Known noise' },
         versions[2],
       ]);
     }
   );
 
-  it('marks a deactivation without a reason and keeps the copied note', async () => {
+  it('keeps the copied note when the operator gave no reason', async () => {
     const events = await getLifecycleEvents({
-      deactivations: [{ episode_id: 'episode-1', reason: '' }],
+      deactivations: [deactivation('2026-01-01T00:59:59.900Z', '')],
     });
 
-    expect(events[1]).toEqual({ ...versions[1], deactivated: true });
+    expect(events).toEqual(versions);
   });
 
-  it('marks only the version that became inactive in the deactivated episode', async () => {
-    const noEpisode = { event_id: 'event-1', status: 'inactive' };
-    const stillInactive = { ...versions[1], assessment_note: 'Still inactive' };
+  it('gives each deactivation of a reopened episode to its own version', async () => {
+    const hits = [
+      version(0, 'active', 'Original'),
+      version(1, 'inactive', 'Copied'),
+      version(2, 'active', 'Reopened'),
+      version(3, 'inactive', 'Copied again'),
+    ];
+
+    const events = await getLifecycleEvents({
+      hits,
+      deactivations: [
+        deactivation('2026-01-01T00:59:59.900Z', 'First reason'),
+        deactivation('2026-01-01T02:59:59.900Z', 'Second reason'),
+      ],
+    });
+
+    expect(events.map(({ assessment_note: note }) => note)).toEqual([
+      'Original',
+      'First reason',
+      'Reopened',
+      'Second reason',
+    ]);
+  });
+
+  it('still matches when the engine writes another inactive version before the action is stamped', async () => {
+    const hits = [
+      version(0, 'active', 'Original'),
+      version(1, 'inactive', 'Copied'),
+      { ...version(1, 'inactive', 'Engine update'), '@timestamp': '2026-01-01T01:00:00.050Z' },
+    ];
+
+    const events = await getLifecycleEvents({
+      hits,
+      deactivations: [deactivation('2026-01-01T01:00:00.100Z', 'Known noise')],
+    });
+
+    expect(events.map(({ assessment_note: note }) => note)).toEqual([
+      'Original',
+      'Known noise',
+      'Engine update',
+    ]);
+  });
+
+  it('does not give an operator reason to a version the engine made inactive', async () => {
+    const hits = [
+      version(0, 'active', 'Original'),
+      version(1, 'inactive', 'Recovered'),
+      version(2, 'active', 'Reopened by an operator'),
+      version(3, 'inactive', 'Copied'),
+    ];
+
+    const events = await getLifecycleEvents({
+      hits,
+      deactivations: [deactivation('2026-01-01T02:59:59.900Z', 'Known noise')],
+    });
+
+    expect(events.map(({ assessment_note: note }) => note)).toEqual([
+      'Original',
+      'Recovered',
+      'Reopened by an operator',
+      'Known noise',
+    ]);
+  });
+
+  it('replaces only the note of the version that became inactive in the deactivated episode', async () => {
+    const noEpisode = {
+      event_id: 'event-1',
+      '@timestamp': '2026-01-01T05:00:00.000Z',
+      status: 'inactive',
+    };
+    const stillInactive = { ...version(4, 'inactive', 'Still inactive') };
     const hits = [versions[0], versions[1], stillInactive, noEpisode];
 
     const events = await getLifecycleEvents({
       hits,
       deactivations: [
-        { episode_id: 'episode-1', reason: 'Known noise' },
-        { episode_id: 'unknown-episode', reason: 'Ignored' },
+        deactivation('2026-01-01T00:59:59.900Z', 'Known noise'),
+        deactivation('2026-01-01T00:59:59.900Z', 'Ignored', 'unknown-episode'),
       ],
     });
 
-    expect(events.map(({ deactivated }) => deactivated)).toEqual([
-      undefined,
-      true,
-      undefined,
-      undefined,
+    expect(events).toEqual([
+      versions[0],
+      { ...versions[1], assessment_note: 'Known noise' },
+      stillInactive,
+      noEpisode,
     ]);
-    expect(events[2]).toEqual(stillInactive);
-    expect(events[3]).toEqual(noEpisode);
   });
 });
 

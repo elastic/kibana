@@ -39,7 +39,6 @@ export type {
   EventLifecycleResponse,
   GeneratedSignificantEventQuery,
   LifecycleDetection,
-  LifecycleEvent,
   QueryWithOccurrences,
   QueryOccurrencesResponse,
   SignificantEventsQueriesGenerationResult,

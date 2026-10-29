@@ -11,7 +11,6 @@ import {
   type Detection,
   type EventDeactivation,
   type LifecycleDetection,
-  type LifecycleEvent,
   type SignificantEvent,
   type SignificantEventResponse,
 } from '@kbn/significant-events-schema';
@@ -73,23 +72,29 @@ export const collectEmbeddedDetections = (
 };
 
 /**
- * Marks the version each operator deactivation produced. That version only copies the previous
- * note, so the operator's reason, when given, replaces it. `events` must be oldest first, as
- * `findByEventId` returns them: each version is compared with the one before it.
+ * Gives the version an operator deactivation produced the operator's reason as its note, when one
+ * was given. A version matches the deactivation made after the previous version and before the
+ * next reopen; the action is not compared with the version's own timestamp, as they are stamped
+ * separately at ingest. `events` must be oldest first.
  */
-export const toLifecycleEvents = (
+export const applyDeactivationReasons = (
   events: SignificantEventResponse[],
   deactivations: EventDeactivation[]
-): LifecycleEvent[] => {
-  const reasonsByEpisode = new Map(
-    deactivations.map(({ episode_id: episodeId, reason }) => [episodeId, reason])
-  );
+): SignificantEventResponse[] => {
   return events.map((event, index) => {
     const { episode_id: episodeId } = event;
+    const previous = events[index - 1];
     const becameInactive =
-      index > 0 && events[index - 1].status !== 'inactive' && event.status === 'inactive';
-    const reason = becameInactive && episodeId ? reasonsByEpisode.get(episodeId) : undefined;
-    if (reason === undefined) return event;
-    return { ...event, deactivated: true, ...(reason ? { assessment_note: reason } : {}) };
+      previous !== undefined && previous.status !== 'inactive' && event.status === 'inactive';
+    if (!becameInactive || !episodeId) return event;
+
+    const after = Date.parse(previous['@timestamp']);
+    const reopened = events.slice(index + 1).find(({ status }) => status !== 'inactive');
+    const before = reopened ? Date.parse(reopened['@timestamp']) : Number.POSITIVE_INFINITY;
+    const deactivation = deactivations.find(
+      ({ episode_id: deactivatedId, '@timestamp': at }) =>
+        deactivatedId === episodeId && Date.parse(at) > after && Date.parse(at) < before
+    );
+    return deactivation?.reason ? { ...event, assessment_note: deactivation.reason } : event;
   });
 };

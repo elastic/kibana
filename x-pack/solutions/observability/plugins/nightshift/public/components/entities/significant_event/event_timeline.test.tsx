@@ -93,27 +93,6 @@ describe('EventTimeline', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(4);
   });
 
-  it('labels a deactivated version with its note and a subsequent reopen', () => {
-    renderTimeline({
-      ...lifecycle,
-      events: [
-        { ...event, '@timestamp': event.created_at },
-        {
-          ...event,
-          '@timestamp': '2026-07-10T13:00:00Z',
-          status: 'inactive',
-          deactivated: true,
-          assessment_note: 'Known noise',
-        },
-        { ...event, '@timestamp': '2026-07-10T14:00:00Z' },
-      ],
-    });
-
-    expect(screen.getByText('Significant event deactivated')).toBeInTheDocument();
-    expect(screen.getByText('Known noise')).toBeInTheDocument();
-    expect(screen.getByText('Significant event reopened')).toBeInTheDocument();
-  });
-
   it('labels a same-status revision as an event update', () => {
     renderTimeline({
       ...lifecycle,
