@@ -1328,7 +1328,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           },
           version,
         });
-      } catch (error) {
+      } catch (caughtError) {
+        const error = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
         logger.warn(
           `Preparing update to package policy [${packagePolicyUpdate.id}] failed: [${error.name}] ${error.message}`
         );
