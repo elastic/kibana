@@ -14,9 +14,9 @@ export const MAX_RUN_LIMIT = 10_000;
 export const DEFAULT_RUN_QUOTA_TIME_ZONE = 'UTC';
 
 export const DEFAULT_RUN_LIMITS: Readonly<Record<RunQuotaGroup, number>> = {
-  detection: 15,
-  investigation: 3,
-  ki_extraction: 3,
+  detection: 40,
+  investigation: 5,
+  ki_extraction: 5,
 };
 
 export interface RunQuotaSettings {
