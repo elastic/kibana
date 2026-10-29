@@ -228,6 +228,23 @@ whoever started it; the conversation owner and round authors stay the caller.
   refuses to continue if the agent is no longer bound to that account. Anything else the run
   looks up, such as sub-agents, is subject to the account's own access.
 
+**Residual risk.** The `manage_security` gate protects the agent document, not what it refers to.
+Everything a bound run executes beyond the agent itself runs with the account's permissions and
+is editable by people who hold neither `manage_security` nor `invoke_bound_agents`:
+
+- Pre-agent workflows: the agent's own `workflow_ids` are locked with the rest of its
+  configuration, but the workflow definitions are editable by anyone who can edit workflows, and
+  the space-wide pre-prompt workflows setting by anyone who can change advanced settings.
+- Sub-agents: an unbound sub-agent the agent calls runs as the account (the account needs `use`
+  access to it) and its definition is editable by its owner. A sub-agent bound to another account
+  runs in its own task as that account, which requires the first account to hold
+  `invoke_bound_agents`.
+- Tools: custom tools are editable by anyone who can edit tools, and a `*` tool selection picks
+  up tools created after the binding.
+
+Before binding an agent, check that its workflows, sub-agents and tools are managed by people you
+would trust with the account, and prefer an explicit tool list over `*`.
+
 ## Hooks
 
 The hooks API lets you register lifecycle callbacks around agent execution. Register hooks

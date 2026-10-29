@@ -11,7 +11,6 @@ import {
   createAgentNotFoundError,
   createAgentUnavailableError,
   createBadRequestError,
-  createForbiddenError,
   SELF_AGENT_ID,
   type AgentAccessControl,
 } from '@kbn/agent-builder-common';
@@ -134,21 +133,24 @@ class AgentRegistryImpl implements AgentRegistry {
   }
 
   async get(agentId: string, opts?: GetAgentOptions): Promise<InternalAgentDefinition> {
+    // Only persisted agents can be bound, and the account running one holds no read access to
+    // it, so a bound run skips the access-checked `has` lookups and resolves the agent directly.
+    if (opts?.runAs !== undefined) {
+      return this.ensureAvailable(await this.persistedProvider.get(agentId, opts));
+    }
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
-        if (opts?.runAs !== undefined && isReadonlyProvider(provider)) {
-          throw createForbiddenError(
-            `Agent "${agentId}" is no longer bound to service account "${opts.runAs}".`
-          );
-        }
-        const agent = await provider.get(agentId, opts);
-        if (!(await this.isAvailable(agent))) {
-          throw createAgentUnavailableError({ agentId });
-        }
-        return agent;
+        return this.ensureAvailable(await provider.get(agentId, opts));
       }
     }
     throw createAgentNotFoundError({ agentId });
+  }
+
+  private async ensureAvailable(agent: InternalAgentDefinition): Promise<InternalAgentDefinition> {
+    if (!(await this.isAvailable(agent))) {
+      throw createAgentUnavailableError({ agentId: agent.id });
+    }
+    return agent;
   }
 
   async list(opts: AgentListOptions = {}): Promise<InternalAgentDefinition[]> {

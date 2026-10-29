@@ -24,6 +24,7 @@ import {
   getAccessControlEntryKey,
   isAgentAccessControlRole,
   isEntryCoveredByOwner,
+  serviceAccountUserId,
   AGENT_ACCESS_CONTROL_MAX_ENTRIES,
   AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   type AgentAccessControl,
@@ -774,8 +775,14 @@ class AgentClientImpl implements AgentClient {
     const source = document._source;
     // A run was authorized for its caller when it was dispatched and executes under the account's
     // credentials, which hold no access to the agent themselves; it only has to be the agent the
-    // account was bound to run.
+    // account was bound to run. Only a request that actually carries that credential may skip the
+    // access check, so `runAs` cannot be used to borrow an account from a user request.
     if (runAs !== undefined) {
+      if (this.user.type !== 'service_account' || this.user.id !== serviceAccountUserId(runAs)) {
+        throw createForbiddenError(
+          `Agent "${agentId}" can only be resolved as service account "${runAs}" by a request running as that account.`
+        );
+      }
       if (source.service_account_id !== runAs) {
         throw createForbiddenError(
           `Agent "${agentId}" is no longer bound to service account "${runAs}".`

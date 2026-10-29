@@ -18,6 +18,7 @@ import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceStart } from '../agents';
 import type { ConversationClient } from './client';
 import { createClient } from './client';
+import { createAgentExecutionClient } from '../execution/persistence';
 import type { ConversationEventBus } from '../../workflows/triggers/conversation_event_bus';
 import { createScopedConversationEventEmitter } from '../../workflows/triggers/conversation_event_bus';
 import type { ConversationEventsServiceStart } from '../conversation_events';
@@ -120,6 +121,7 @@ export class ConversationServiceImpl implements ConversationService {
       user,
       runAs,
       esClient,
+      executionClient: createAgentExecutionClient({ logger: this.logger, esClient }),
       logger: this.logger,
       space,
       agentRegistry,

@@ -279,6 +279,7 @@ const handleConversationExecution = async ({
       connectorId,
       reasoningLevel,
       telemetryMetadata: roundTelemetryMetadata,
+      runAs: execution.runAs?.serviceAccountId,
       request,
       ...deps,
     });
@@ -357,6 +358,7 @@ const handleConversationExecution = async ({
           agentEvents$,
           nextInput,
           author,
+          releaseExecutionId: execution.executionId,
         })
       : EMPTY;
 
@@ -419,6 +421,7 @@ const handleConversationExecution = async ({
                     error,
                     interrupted,
                     completed,
+                    releaseExecutionId: execution.executionId,
                     logger,
                   }),
               })
@@ -477,6 +480,7 @@ const handleConversationExecution = async ({
           author,
           origin: roundOrigin,
           error: normalized,
+          releaseExecutionId: execution.executionId,
           logger,
         })
       : [];
@@ -595,6 +599,7 @@ const buildPersistenceEvents = ({
   agentEvents$,
   nextInput,
   author,
+  releaseExecutionId,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -602,6 +607,7 @@ const buildPersistenceEvents = ({
   agentEvents$: Observable<ChatEvent>;
   nextInput: ConverseInput;
   author?: ConversationRoundAuthor;
+  releaseExecutionId: string;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -622,6 +628,7 @@ const buildPersistenceEvents = ({
             take(1)
           ),
           title$: endTitle$,
+          releaseExecutionId,
         })
       )
     );
@@ -637,6 +644,7 @@ const buildPersistenceEvents = ({
     input: nextInput,
     author,
     title$: conversationNeedsTitle(conversation) ? title$ : undefined,
+    releaseExecutionId,
   });
 };
 
@@ -684,6 +692,7 @@ const handleStandaloneExecution = async ({
     connectorId: execution.agentParams.connectorId,
     reasoningLevel,
     telemetryMetadata: roundTelemetryMetadata,
+    runAs: execution.runAs?.serviceAccountId,
     request,
     ...deps,
   });
@@ -695,6 +704,8 @@ const handleStandaloneExecution = async ({
     nextInput: execution.agentParams.nextInput,
     structuredOutput,
     outputSchema,
+    // Only a bound run swaps credentials; an unbound run's request already is the owner.
+    ...(execution.runAs ? { owner: execution.owner, runAs: execution.runAs } : {}),
     abortSignal,
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,

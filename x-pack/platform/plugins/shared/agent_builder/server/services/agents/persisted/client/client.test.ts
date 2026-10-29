@@ -13,7 +13,9 @@ import {
   AgentAccessControlRole,
   agentBuilderDefaultAgentId,
   isAgentNotFoundError,
+  serviceAccountUserId,
   type AgentAccessControlEntry,
+  type CurrentUser,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest } from '../../../../../common/agents';
@@ -1090,7 +1092,7 @@ describe('AgentClient service account bindings', () => {
   };
   const request = {} as never;
 
-  const buildClient = (user: typeof mockUser = mockUser): Promise<AgentClient> => {
+  const buildClient = (user: CurrentUser = mockUser): Promise<AgentClient> => {
     getUserFromRequestMock.mockResolvedValue(user);
     return createClient({
       space: testSpace,
@@ -1235,11 +1237,16 @@ describe('AgentClient service account bindings', () => {
   });
 
   describe('getWithAccess for a run as the bound account', () => {
-    const stranger = { ...mockUser, id: 'stranger-id', username: 'stranger' };
+    const boundAccount = {
+      id: serviceAccountUserId('kibana/sa-1'),
+      username: 'kibana/sa-1',
+      type: 'service_account' as const,
+      isAdmin: false,
+    };
 
     it('resolves the bound agent without consulting access control', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
-      const client = await buildClient(stranger);
+      const client = await buildClient(boundAccount);
 
       await expect(client.getWithAccess('agent-1', { access: 'use' })).rejects.toMatchObject({
         meta: { statusCode: 404 },
@@ -1251,10 +1258,28 @@ describe('AgentClient service account bindings', () => {
 
     it('refuses an agent that is not bound to the account', async () => {
       mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc()] } });
-      const client = await buildClient(securityUser);
+      const client = await buildClient(boundAccount);
 
       await expect(
         client.getWithAccess('agent-1', { access: 'use', runAs: 'kibana/sa-1' })
+      ).rejects.toMatchObject({ meta: { statusCode: 403 } });
+    });
+
+    it('refuses a request that does not run as the account', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('kibana/sa-1')] } });
+
+      const userClient = await buildClient({ ...securityUser, id: 'stranger-id' });
+      await expect(
+        userClient.getWithAccess('agent-1', { access: 'use', runAs: 'kibana/sa-1' })
+      ).rejects.toMatchObject({ meta: { statusCode: 403 } });
+
+      const otherAccountClient = await buildClient({
+        ...boundAccount,
+        id: serviceAccountUserId('kibana/sa-2'),
+        username: 'kibana/sa-2',
+      });
+      await expect(
+        otherAccountClient.getWithAccess('agent-1', { access: 'use', runAs: 'kibana/sa-1' })
       ).rejects.toMatchObject({ meta: { statusCode: 403 } });
     });
   });
