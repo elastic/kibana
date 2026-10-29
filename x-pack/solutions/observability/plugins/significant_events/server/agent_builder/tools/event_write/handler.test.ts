@@ -88,7 +88,9 @@ const makeDetectionSignal = ({
 type SearchClientMethods =
   | 'findLatestPaginated'
   | 'findLatestByCurrentStatePaginated'
-  | 'findLatestActive'
+  | 'findLatestLive'
+  | 'findLatestInactiveByIdentity'
+  | 'findOperatorDeactivations'
   | 'findByEventId'
   | 'findLatestByEventId';
 
@@ -102,7 +104,9 @@ const makeEventSearchClient = (
     {
       findLatestPaginated: jest.fn(),
       findLatestByCurrentStatePaginated: jest.fn(),
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestLive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestInactiveByIdentity: jest.fn().mockResolvedValue({ hits: [], heads: [] }),
+      findOperatorDeactivations: jest.fn().mockResolvedValue(new Map()),
       findByEventId,
       findLatestByEventId: jest
         .fn()
@@ -340,7 +344,7 @@ describe('eventsWriteHandler', () => {
 
     it('throws when the bulk result is existing_active_event (wrapper does not swallow skips)', async () => {
       const eventClient = makeEventSearchClient({
-        findLatestActive: jest.fn().mockResolvedValue({
+        findLatestLive: jest.fn().mockResolvedValue({
           hits: [makeStoredEvent('existing-event-id')],
         }),
       });
@@ -399,8 +403,8 @@ describe('eventsWriteBulkHandler', () => {
   });
 
   it('routes to find-or-create (dedup scan) when event_id is absent', async () => {
-    const findLatestActive = jest.fn().mockResolvedValue({ hits: [] });
-    const eventClient = makeEventSearchClient({ findLatestActive });
+    const findLatestLive = jest.fn().mockResolvedValue({ hits: [] });
+    const eventClient = makeEventSearchClient({ findLatestLive });
 
     const results = await eventsWriteBulkHandler({
       eventSearchClient: eventClient,
@@ -408,7 +412,7 @@ describe('eventsWriteBulkHandler', () => {
     });
 
     // find-or-create: dedup scan runs, no snapshot lineage lookup needed.
-    expect(findLatestActive).toHaveBeenCalledTimes(1);
+    expect(findLatestLive).toHaveBeenCalledTimes(1);
     expect(results[0]).toMatchObject({ index: 0, written: true });
   });
 });
@@ -421,7 +425,7 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
 
   it('skips the write and returns the existing event_id when an active duplicate is found', async () => {
     const eventClient = makeEventSearchClient({
-      findLatestActive: jest.fn().mockResolvedValue({
+      findLatestLive: jest.fn().mockResolvedValue({
         hits: [
           makeStoredEvent('existing-event-id', {
             '@timestamp': new Date().toISOString(),
@@ -615,6 +619,40 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
     const [written] = writtenDocs();
     expect(written.status).toBe('active');
     expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-c']);
+  });
+
+  it('does not restore closed-episode signals on a later healthy continuation', async () => {
+    const eventId = 'checkout-current-episode';
+    const closed = makeStoredEvent(eventId, {
+      status: 'inactive',
+      signals: [
+        makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' }),
+        makeDetectionSignal({ ruleUuid: 'rule-b', verdict: 'confirms' }),
+      ],
+    });
+    const reopened = makeStoredEvent(eventId, {
+      status: 'active',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findByEventId: jest.fn().mockResolvedValue({ hits: [closed, reopened] }),
+      }),
+      inputs: [
+        {
+          ...baseInput,
+          event_id: eventId,
+          status: undefined,
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'refutes' })],
+        },
+      ],
+    });
+
+    expect(result).toMatchObject({ written: true, status: 'recovering' });
+    expect(writtenDocs()[0].signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual([
+      'rule-a',
+    ]);
   });
 
   it('does not skip a continuation that re-submits a rule from the closed episode of a reopened event', async () => {
@@ -1398,5 +1436,235 @@ describe('eventsWriteBulkHandler — how a version is written', () => {
     });
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
     expect(emitTrigger).not.toHaveBeenCalled();
+  });
+});
+
+describe('eventsWriteBulkHandler — reopening a closed series', () => {
+  const closedEventId = 'checkout-closed-series';
+  const closedSeries = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
+    makeStoredEvent(closedEventId, {
+      status: 'inactive',
+      title: 'Closed title',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+      ...overrides,
+    });
+  const breachFor = (ruleUuid: string): EventsWriteInput => ({
+    ...baseInput,
+    status: undefined,
+    event_id: undefined,
+    title: 'Fresh title',
+    signals: [makeDetectionSignal({ ruleUuid, verdict: 'confirms' })],
+  });
+  const clientWithClosedSeries = (closed: SignificantEvent = closedSeries()) =>
+    makeEventSearchClient({
+      findLatestInactiveByIdentity: jest.fn().mockResolvedValue({
+        hits: [closed],
+        heads: [{ eventId: closedEventId, groupHash: 'group-1', episodeId: 'episode-1' }],
+      }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [closed] }),
+    });
+
+  it('reuses the event_id of a closed series on an exact-identity breach, with the new narrative', async () => {
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: clientWithClosedSeries(),
+      inputs: [breachFor('rule-a')],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, event_id: closedEventId, status: 'active' });
+    const [written] = writtenDocs();
+    expect(written.event_id).toBe(closedEventId);
+    expect(written.title).toBe('Fresh title');
+    expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-a']);
+  });
+
+  it('reopens a closed series that holds more rules than the batch', async () => {
+    const closed = closedSeries({
+      signals: [
+        makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' }),
+        makeDetectionSignal({ ruleUuid: 'rule-b', verdict: 'confirms' }),
+      ],
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: clientWithClosedSeries(closed),
+      inputs: [breachFor('rule-a')],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, event_id: closedEventId, status: 'active' });
+    const [written] = writtenDocs();
+    expect(written.signals?.map((signal) => signal.metadata?.rule_uuid)).toEqual(['rule-a']);
+  });
+
+  it('rejects a second batch item that resolves to the same closed series', async () => {
+    const closed = closedSeries({
+      signals: [
+        makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' }),
+        makeDetectionSignal({ ruleUuid: 'rule-b', verdict: 'confirms' }),
+      ],
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: clientWithClosedSeries(closed),
+      inputs: [breachFor('rule-a'), breachFor('rule-b')],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, event_id: closedEventId });
+    expect(results[1]).toMatchObject({
+      written: false,
+      event_id: closedEventId,
+      reason: 'duplicate_in_batch',
+    });
+    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the closed-series read when every candidate is covered by a live event', async () => {
+    const findLatestInactiveByIdentity = jest.fn().mockResolvedValue({ hits: [], heads: [] });
+    const live = makeStoredEvent('live-event', {
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findLatestLive: jest.fn().mockResolvedValue({ hits: [live] }),
+        findLatestInactiveByIdentity,
+      }),
+      inputs: [breachFor('rule-a')],
+    });
+
+    expect(results[0]).toMatchObject({ skipped: true, reason: 'existing_active_event' });
+    expect(findLatestInactiveByIdentity).not.toHaveBeenCalled();
+  });
+
+  describe('when an operator deactivated the closed series', () => {
+    const deactivation = {
+      groupHash: 'group-1',
+      episodeId: 'episode-1',
+      reason: 'known noise',
+      deactivatedAt: '2026-10-28T10:00:00.000Z',
+    };
+    const deactivated = () => jest.fn().mockResolvedValue(new Map([['group-1', deactivation]]));
+    const clientWith = (findOperatorDeactivations: jest.Mock) => {
+      const closed = closedSeries();
+      return makeEventSearchClient({
+        findLatestInactiveByIdentity: jest.fn().mockResolvedValue({
+          hits: [closed],
+          heads: [{ eventId: closedEventId, groupHash: 'group-1', episodeId: 'episode-1' }],
+        }),
+        findByEventId: jest.fn().mockResolvedValue({ hits: [closed] }),
+        findOperatorDeactivations,
+      });
+    };
+
+    it('holds the reopen, writes nothing, logs the hold, and returns the operator reason', async () => {
+      const findOperatorDeactivations = deactivated();
+      const logger = makeLogger();
+
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith(findOperatorDeactivations),
+        inputs: [breachFor('rule-a')],
+        logger,
+      });
+
+      expect(results[0]).toEqual({
+        index: 0,
+        event_id: closedEventId,
+        status: 'inactive',
+        written: false,
+        skipped: true,
+        reason: 'held_by_deactivation',
+        existing_event_id: closedEventId,
+        deactivation_reason: 'known noise',
+        deactivated_at: '2026-10-28T10:00:00.000Z',
+      });
+      expect(findOperatorDeactivations).toHaveBeenCalledWith({
+        heads: [{ groupHash: 'group-1', episodeId: 'episode-1' }],
+      });
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('held_by_deactivation'));
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('reopens when the agent re-submits with reopen_deactivated, and logs that it did', async () => {
+      const logger = makeLogger();
+
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith(deactivated()),
+        inputs: [{ ...breachFor('rule-a'), reopen_deactivated: true }],
+        logger,
+      });
+
+      expect(results[0]).toMatchObject({
+        written: true,
+        event_id: closedEventId,
+        status: 'active',
+      });
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('reopened_after_deactivation')
+      );
+    });
+
+    it('holds only the deactivated item and still writes the others', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith(deactivated()),
+        inputs: [breachFor('rule-a'), breachFor('rule-z')],
+      });
+
+      expect(results[0]).toMatchObject({ reason: 'held_by_deactivation' });
+      expect(results[1]).toMatchObject({ written: true });
+    });
+  });
+
+  describe('when several closed series match the batch', () => {
+    const older = makeStoredEvent('series-older', {
+      status: 'inactive',
+      '@timestamp': '2026-10-27T01:00:00.000Z',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+    });
+    const newer = makeStoredEvent('series-newer', {
+      status: 'inactive',
+      '@timestamp': '2026-10-28T01:00:00.000Z',
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+    });
+    const heads = [
+      { eventId: 'series-older', groupHash: 'group-older', episodeId: 'episode-older' },
+      { eventId: 'series-newer', groupHash: 'group-newer', episodeId: 'episode-newer' },
+    ];
+    const clientWithTwo = (findOperatorDeactivations: jest.Mock) =>
+      makeEventSearchClient({
+        findLatestInactiveByIdentity: jest.fn().mockResolvedValue({ hits: [newer, older], heads }),
+        findByEventId: jest.fn().mockImplementation(async (eventId: string) => ({
+          hits: [eventId === 'series-older' ? older : newer],
+        })),
+        findOperatorDeactivations,
+      });
+
+    it('holds the series an operator deactivated, not the newer one', async () => {
+      const findOperatorDeactivations = jest.fn().mockResolvedValue(
+        new Map([
+          [
+            'group-older',
+            {
+              groupHash: 'group-older',
+              episodeId: 'episode-older',
+              reason: 'known noise',
+              deactivatedAt: '2026-10-27T02:00:00.000Z',
+            },
+          ],
+        ])
+      );
+
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWithTwo(findOperatorDeactivations),
+        inputs: [breachFor('rule-a')],
+      });
+
+      expect(findOperatorDeactivations).toHaveBeenNthCalledWith(1, { heads: expect.any(Array) });
+      expect(findOperatorDeactivations.mock.calls[0][0].heads).toHaveLength(2);
+      expect(results[0]).toMatchObject({
+        reason: 'held_by_deactivation',
+        existing_event_id: 'series-older',
+        deactivation_reason: 'known noise',
+      });
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
   });
 });
