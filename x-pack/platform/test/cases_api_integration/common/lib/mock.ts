@@ -29,6 +29,7 @@ import type {
   PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
 import { buildAlertCaseAttachment } from '@kbn/cases-plugin/common';
+import { canStoreExtractObservablesTrue } from '@kbn/cases-plugin/common/utils/case_settings';
 import {
   COMMENT_ATTACHMENT_TYPE,
   FILE_ATTACHMENT_TYPE,
@@ -81,12 +82,21 @@ export const postCaseReq: CasePostRequest = {
 };
 
 /**
- * Return a request for creating a case.
+ * Return a request for creating a case. Owners that cannot auto-extract observables (Stack and
+ * Observability) get `extractObservables: false` by default, because the server rejects true.
  */
-export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequest => ({
-  ...postCaseReq,
-  ...req,
-});
+export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequest => {
+  const owner = req?.owner ?? postCaseReq.owner;
+  const defaultSettings = canStoreExtractObservablesTrue(owner)
+    ? postCaseReq.settings
+    : { ...postCaseReq.settings, extractObservables: false };
+
+  return {
+    ...postCaseReq,
+    settings: defaultSettings,
+    ...req,
+  };
+};
 
 export const postCommentUserReq: UserCommentAttachmentPayload = {
   comment: 'This is a cool comment',
