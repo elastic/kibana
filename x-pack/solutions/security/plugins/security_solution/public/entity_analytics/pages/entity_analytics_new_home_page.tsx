@@ -262,6 +262,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const { cases } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
+  // Index read without `hasAlertsRead` can only mean the Alerts feature privilege is missing. When
+  // the index privilege is missing too, the callout already lists the index.
+  const alertsFeatureMissing = hasAlertsIndexRead === true && hasAlertsRead === false;
+
   const alerts = getReadAccess({
     isLoading: isAlertsPrivilegesLoading,
     isError: alertsPrivilegesError != null,
@@ -313,6 +317,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           entityEnginePrivileges={entityEnginePrivilegesQuery.data}
           anomalyPrivileges={anomalyPrivilegesQuery.data}
           alertsIndexPrivileges={alertsPrivilegesResult?.index}
+          alertsFeatureMissing={alertsFeatureMissing}
           id="entity-analytics-home"
         />
       </div>

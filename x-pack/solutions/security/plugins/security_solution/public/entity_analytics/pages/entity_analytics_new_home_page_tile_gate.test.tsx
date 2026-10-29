@@ -423,6 +423,15 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
     expect(gridCalls[gridCalls.length - 1][0].readAccess.alerts).toBe(false);
   });
 
+  it('warns in the privileges callout when only the Alerts feature privilege is missing', () => {
+    mockPrivileges({ alerts: true, alertsFeature: false });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    const wrapper = screen.getByTestId('entityAnalyticsPrivilegesCalloutWrapper');
+    expect(within(wrapper).getByText('Insufficient privileges')).toBeInTheDocument();
+    expect(within(wrapper).getByText('Alerts')).toBeInTheDocument();
+  });
+
   it('keeps the alert tiles on when Alerts and the alerts index are both readable', () => {
     mockPrivileges({ alerts: true, alertsFeature: true });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
