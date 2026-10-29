@@ -32,6 +32,7 @@ import { createRuleEventPublisher } from '../events/rule_event_publisher/rule_ev
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
 import type { CreateRulesClientOptions } from './types';
+import type { RuleChangesHistoryEventLogger } from '../events/rule_changes_history_subscriber/rule_changes_history_event_logger';
 import { RulesClient } from './rules_client';
 import type { CreateRuleParams } from './types';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
@@ -100,6 +101,7 @@ describe('RulesClient', () => {
   let rulesSavedObjectService: RulesSavedObjectServiceMock;
   let ruleEventPublisher: RuleEventPublisher;
   let artifactTypeRegistry: ArtifactTypeRegistry;
+  let changeHistoryEventLogger: jest.Mocked<Pick<RuleChangesHistoryEventLogger, 'log'>>;
 
   beforeAll(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-01-01T00:00:00.000Z'));
@@ -112,6 +114,7 @@ describe('RulesClient', () => {
     artifactTypeRegistry = new ArtifactTypeRegistry();
     registerBuiltinArtifactTypes(artifactTypeRegistry);
     ({ publisher: ruleEventPublisher } = createRuleEventPublisher());
+    changeHistoryEventLogger = { log: jest.fn().mockResolvedValue(undefined) };
     jest.spyOn(ruleEventPublisher, 'emitRuleCreated');
     jest.spyOn(ruleEventPublisher, 'emitRuleUpdated');
     jest.spyOn(ruleEventPublisher, 'emitRuleDeleted');
@@ -183,7 +186,8 @@ describe('RulesClient', () => {
       loggerService,
       artifactTypeRegistry,
       'user',
-      rulesClientOptions
+      rulesClientOptions,
+      changeHistoryEventLogger as unknown as RuleChangesHistoryEventLogger
     );
   }
 
@@ -1741,6 +1745,22 @@ describe('RulesClient', () => {
         expect(res.created).toBe(false);
       });
 
+      it('leaves the change-history write to the event subscriber', async () => {
+        const client = createClient();
+        const existingDoc = { id: 'rule-id-1', attributes: baseSoAttrs, version: 'WzEsMV0=' };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+
+        await client.upsertRule({ id: 'rule-id-1', data: baseCreateData });
+
+        expect(changeHistoryEventLogger.log).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(expect.any(Object), [
+          expect.not.objectContaining({ changeHistoryLogged: expect.anything() }),
+        ]);
+      });
+
       it('keeps the existing template', async () => {
         const client = createClient();
         const existingDoc = {
@@ -2080,8 +2100,27 @@ describe('RulesClient', () => {
         })
       );
       expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(expect.any(Object), [
-        expect.objectContaining({ ruleId: 'rule-id-1', rule }),
+        expect.objectContaining({ ruleId: 'rule-id-1', rule, changeHistoryLogged: true }),
       ]);
+    });
+
+    it('writes its change-history entry and waits for it to be searchable before emitting', async () => {
+      const client = createClient();
+      mockExistingRule();
+
+      const rule = await client.restoreRule({ id: 'rule-id-1', snapshot });
+
+      expect(changeHistoryEventLogger.log).toHaveBeenCalledWith(
+        {
+          type: 'rule.updated',
+          payload: { ruleId: 'rule-id-1', spaceId: 'space-1', rule },
+        },
+        expect.objectContaining({ request }),
+        { refresh: 'wait_for' }
+      );
+      expect(changeHistoryEventLogger.log.mock.invocationCallOrder[0]).toBeLessThan(
+        jest.mocked(ruleEventPublisher.emitRuleUpdated).mock.invocationCallOrder[0]
+      );
     });
 
     it('restores when current_version matches the current version', async () => {

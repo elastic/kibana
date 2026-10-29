@@ -239,10 +239,38 @@ apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_T
 
       expect(fetched).toStrictEqual(restored);
 
-      await apiServices.alertingV2.ruleChangesHistory.waitForAtLeast(2, {
-        ruleId: created.id,
+      // The restore responds only once its history entry is searchable, so no wait is needed.
+      const afterRestoreResponse = await apiClient.get(
+        `${CHANGE_HISTORY_URL}?rule_id=${encodeURIComponent(created.id)}`,
+        { headers: readerHeaders }
+      );
+
+      expect(afterRestoreResponse).toHaveStatusCode(200);
+
+      const afterRestore: ListRuleChangeHistoryResponse = afterRestoreResponse.body;
+
+      expect(afterRestore.items[0]).toMatchObject({
         action: RuleChangesHistoryAction.ruleUpdate,
+        version: restored.version,
+        is_current: true,
       });
+
+      // A later change's entry is written after any subscriber work queued by the restore.
+      await apiServices.alertingV2.rules.enable(created.id);
+      await apiServices.alertingV2.ruleChangesHistory.waitForAtLeast(1, {
+        ruleId: created.id,
+        action: RuleChangesHistoryAction.ruleEnable,
+      });
+
+      const finalHistoryResponse = await apiClient.get(
+        `${CHANGE_HISTORY_URL}?rule_id=${encodeURIComponent(created.id)}`,
+        { headers: readerHeaders }
+      );
+      const finalHistory: ListRuleChangeHistoryResponse = finalHistoryResponse.body;
+
+      expect(finalHistory.items.filter(({ version }) => version === restored.version)).toHaveLength(
+        1
+      );
     }
   );
 
