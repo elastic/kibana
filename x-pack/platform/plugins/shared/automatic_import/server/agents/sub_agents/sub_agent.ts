@@ -27,6 +27,7 @@ import {
   BOILERPLATE_PROCESSOR_COUNT,
   formatCompactCustomProcessorToc,
 } from '../tools/pipeline_constants';
+import { formatUserContextBlock, type UserProvidedContext } from '../user_context';
 
 const MAX_INJECTED_SAMPLES = 10;
 const MAX_INJECTED_SUCCESSFUL_OUTPUTS = 5;
@@ -37,41 +38,63 @@ interface TaskToolParams {
   subagents: SubAgent[];
   model: InferenceChatModel;
   samples?: string[];
+  userContext?: UserProvidedContext;
   recursionLimit?: number;
 }
 
 type ContextBuilder = (
   taskDescription: string,
   state: AutomaticImportAgentStateType,
-  samples?: string[]
+  samples?: string[],
+  userContextBlock?: string
 ) => string;
 
 const hasPipelineProcessors = (state: AutomaticImportAgentStateType): boolean =>
   Array.isArray(state.current_pipeline?.processors) && state.current_pipeline.processors.length > 0;
 
-const wrapTask = (taskDescription: string, ...extraBlocks: string[]): string =>
-  ['<task>', taskDescription, '</task>', ...extraBlocks].join('\n');
+const taskParts = (taskDescription: string, userContextBlock?: string): string[] => [
+  '<task>',
+  taskDescription,
+  '</task>',
+  ...(userContextBlock ? ['', userContextBlock] : []),
+];
 
-const buildAnalyzerContext: ContextBuilder = (taskDescription, _state, samples) => {
-  if (!samples || samples.length === 0) return taskDescription;
+const buildAnalyzerContext: ContextBuilder = (
+  taskDescription,
+  _state,
+  samples,
+  userContextBlock
+) => {
+  const hasSamples = samples != null && samples.length > 0;
+  if (!hasSamples && !userContextBlock) return taskDescription;
 
-  const injectedSamples = samples.slice(0, DEFAULT_ANALYZER_SAMPLE_COUNT);
-  const sampleLines = injectedSamples
-    .map((s, i) => `### Sample ${i + 1}\n\`\`\`\n${s}\n\`\`\``)
-    .join('\n\n');
+  const parts = taskParts(taskDescription, userContextBlock);
 
-  return wrapTask(
-    taskDescription,
-    '',
-    `<log_samples injected="${injectedSamples.length}" total_available="${samples.length}">`,
-    sampleLines,
-    '</log_samples>'
-  );
+  if (hasSamples) {
+    const injectedSamples = samples.slice(0, DEFAULT_ANALYZER_SAMPLE_COUNT);
+    const sampleLines = injectedSamples
+      .map((s, i) => `### Sample ${i + 1}\n\`\`\`\n${s}\n\`\`\``)
+      .join('\n\n');
+
+    parts.push(
+      '',
+      `<log_samples injected="${injectedSamples.length}" total_available="${samples.length}">`,
+      sampleLines,
+      '</log_samples>'
+    );
+  }
+
+  return parts.join('\n');
 };
 
-const buildGeneratorContext: ContextBuilder = (taskDescription, state, samples) => {
+const buildGeneratorContext: ContextBuilder = (
+  taskDescription,
+  state,
+  samples,
+  userContextBlock
+) => {
   const isReviewIteration = Boolean(state.review);
-  const parts: string[] = ['<task>', taskDescription, '</task>'];
+  const parts = taskParts(taskDescription, userContextBlock);
 
   if (!isReviewIteration && state.analysis) {
     parts.push('', '<log_format_analysis>', state.analysis, '</log_format_analysis>');
@@ -142,8 +165,8 @@ const buildGeneratorContext: ContextBuilder = (taskDescription, state, samples) 
   return parts.join('\n');
 };
 
-const buildReviewContext: ContextBuilder = (taskDescription, state, samples) => {
-  const parts: string[] = ['<task>', taskDescription, '</task>'];
+const buildReviewContext: ContextBuilder = (taskDescription, state, samples, userContextBlock) => {
+  const parts = taskParts(taskDescription, userContextBlock);
 
   parts.push(
     '',
@@ -215,17 +238,28 @@ const CONTEXT_BUILDERS: Record<string, ContextBuilder> = {
   review_agent: buildReviewContext,
 };
 
+export const buildSubAgentContext = (
+  agentName: string,
+  taskDescription: string,
+  state: AutomaticImportAgentStateType,
+  samples?: string[],
+  userContext?: UserProvidedContext
+): string => {
+  const builder = CONTEXT_BUILDERS[agentName];
+  if (!builder) return taskDescription;
+
+  return builder(taskDescription, state, samples, formatUserContextBlock(userContext));
+};
+
 const injectPipelineState = (
   taskDescription: string,
   agentName: string,
-  samples?: string[]
+  samples?: string[],
+  userContext?: UserProvidedContext
 ): string => {
   try {
     const currentState = getCurrentTaskInput<AutomaticImportAgentStateType>();
-    const builder = CONTEXT_BUILDERS[agentName];
-    if (builder) {
-      return builder(taskDescription, currentState, samples);
-    }
+    return buildSubAgentContext(agentName, taskDescription, currentState, samples, userContext);
   } catch {
     // State injection is best-effort; proceed without if unavailable
   }
@@ -236,7 +270,7 @@ const injectPipelineState = (
 type AutomaticImportSubAgent = ReturnType<typeof createReactAgent>;
 
 export const createTaskTool = (params: TaskToolParams) => {
-  const { subagents, model, samples, recursionLimit } = params;
+  const { subagents, model, samples, userContext, recursionLimit } = params;
   const agentsMap = new Map<string, AutomaticImportSubAgent>();
   for (const subagent of subagents) {
     const baseSubAgent = createReactAgent({
@@ -269,7 +303,12 @@ export const createTaskTool = (params: TaskToolParams) => {
         });
       }
 
-      const taskDescription = injectPipelineState(input.description, input.subagent_name, samples);
+      const taskDescription = injectPipelineState(
+        input.description,
+        input.subagent_name,
+        samples,
+        userContext
+      );
 
       let parentState: AutomaticImportAgentStateType | undefined;
       try {
