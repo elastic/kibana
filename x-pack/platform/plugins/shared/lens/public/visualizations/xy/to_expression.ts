@@ -14,6 +14,7 @@ import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/pu
 import {
   isManualPointAnnotationConfig,
   isQueryAnnotationConfig,
+  isEsqlAnnotationConfig,
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import { LegendSize, LENS_DEFAULT_LEGEND_SIZE } from '@kbn/chart-expressions-common';
@@ -294,7 +295,9 @@ export const buildXYExpression = (
   const isValidAnnotation = (a: EventAnnotationConfig) =>
     isManualPointAnnotationConfig(a) ||
     isRangeAnnotationConfig(a) ||
-    (isQueryAnnotationConfig(a) && a.filter?.query !== '');
+    (isQueryAnnotationConfig(a) && a.filter?.query !== '') ||
+    (isEsqlAnnotationConfig(a) &&
+      Boolean(a.query.esql.trim() && a.timeColumn && (!('endTimeColumn' in a) || a.endTimeColumn)));
 
   const legendConfigFn = buildExpressionFunction<LegendConfigFn>('legendConfig', {
     isVisible: state.legend.isVisible,

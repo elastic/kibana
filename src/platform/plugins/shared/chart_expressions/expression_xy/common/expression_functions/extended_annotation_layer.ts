@@ -29,6 +29,7 @@ export function extendedAnnotationLayerFunction(): ExtendedAnnotationLayerFn {
           'manual_point_event_annotation',
           'manual_range_event_annotation',
           'query_point_event_annotation',
+          'esql_event_annotation',
         ],
         help: strings.getAnnotationLayerAnnotationsHelp(),
         multi: true,

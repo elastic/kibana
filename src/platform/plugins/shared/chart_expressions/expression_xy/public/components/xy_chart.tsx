@@ -1150,6 +1150,8 @@ export function XYChart({
             ) : null}
             {(rangeAnnotations.length || lineAnnotations.length) && isTimeVis ? (
               <Annotations
+                columns={annotations?.datatable.columns}
+                formatFactory={formatFactory}
                 rangeAnnotations={rangeAnnotations}
                 groupedLineAnnotations={groupedLineAnnotations}
                 timeFormat={timeFormat}

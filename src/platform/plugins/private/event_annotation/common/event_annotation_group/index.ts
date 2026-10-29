@@ -16,12 +16,12 @@ export interface EventAnnotationGroupOutput {
   type: 'event_annotation_group';
   annotations: EventAnnotationOutput[];
   ignoreGlobalFilters: boolean;
-  dataView: IndexPatternExpressionType;
+  dataView?: IndexPatternExpressionType;
 }
 
 export interface EventAnnotationGroupArgs {
   annotations: EventAnnotationOutput[];
-  dataView: IndexPatternExpressionType;
+  dataView?: IndexPatternExpressionType;
   ignoreGlobalFilters: boolean;
 }
 
@@ -42,7 +42,6 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
     args: {
       dataView: {
         types: ['index_pattern'],
-        required: true,
         help: i18n.translate('eventAnnotation.group.args.annotationConfigs.dataView.help', {
           defaultMessage: 'Data view retrieved with indexPatternLoad',
         }),
@@ -62,6 +61,7 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
           'manual_point_event_annotation',
           'manual_range_event_annotation',
           'query_point_event_annotation',
+          'esql_event_annotation',
         ],
         help: i18n.translate('eventAnnotation.group.args.annotationConfigs', {
           defaultMessage: 'Annotation configs',

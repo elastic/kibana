@@ -21,6 +21,8 @@ export type {
 } from './query_point_event_annotation/types';
 export { manualPointEventAnnotation, manualRangeEventAnnotation } from './manual_event_annotation';
 export { queryPointEventAnnotation } from './query_point_event_annotation';
+export { esqlEventAnnotation } from './esql_event_annotation';
+export type { EsqlEventAnnotationOutput } from './esql_event_annotation';
 export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
 

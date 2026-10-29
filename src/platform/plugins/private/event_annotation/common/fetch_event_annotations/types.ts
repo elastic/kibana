@@ -8,6 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { ISearchMethods } from '@kbn/search-types';
 import type {
   AggsStart,
   DataViewsContract,
@@ -39,6 +40,7 @@ export interface FetchEventAnnotationsStartDependencies {
   aggs: AggsStart;
   dataViews: DataViewsContract;
   searchSource: ISearchStartSearchSource;
+  esql: ISearchMethods['esql'];
   getNow?: () => Date;
   uiSettings: IUiSettingsClient;
 }

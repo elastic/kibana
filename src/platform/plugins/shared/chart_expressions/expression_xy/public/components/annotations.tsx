@@ -43,6 +43,8 @@ import { getExtraFields } from '../helpers/get_extra_fields';
 export interface AnnotationsProps {
   groupedLineAnnotations: MergedAnnotation[];
   rangeAnnotations: ManualRangeEventAnnotationRow[];
+  columns?: DatatableColumn[];
+  formatFactory: FormatFactory;
   timeFormat?: string;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
@@ -56,7 +58,7 @@ const TooltipAnnotationDetails = ({
   row,
   extraFields,
 }: {
-  row: PointEventAnnotationRow;
+  row: DatatableRow;
   extraFields: Array<{
     key: string;
     name: string;
@@ -229,13 +231,8 @@ export const getAnnotationsGroupedByInterval = (
     });
 
     const config = configs?.find((c) => c.id === firstRow.id);
-    const textField = config && 'textField' in config && config?.textField;
-    const columnFormatter = columns?.find((c) => c.id === `field:${textField}`)?.meta?.params;
-    const formatter = columnFormatter && formatFactory(columnFormatter);
-    const label =
-      textField && formatter && `field:${textField}` in firstRow
-        ? formatter.convertToText(firstRow[`field:${textField}`])
-        : firstRow.label;
+    const textField = firstRow.textField || (config && 'textField' in config && config.textField);
+    const label = getAnnotationLabel({ row: firstRow, textField, columns, formatFactory });
     const mergedAnnotation: MergedAnnotation = {
       ...firstRow,
       color: resolvedRowColor,
@@ -271,12 +268,31 @@ export const getAnnotationsGroupedByInterval = (
   });
 };
 
+const getAnnotationLabel = ({
+  row,
+  textField,
+  columns,
+  formatFactory,
+}: {
+  row: DatatableRow;
+  textField?: string;
+  columns?: DatatableColumn[];
+  formatFactory: FormatFactory;
+}): string => {
+  if (!textField || !(`field:${textField}` in row)) return row.label;
+  const params = columns?.find((column) => column.id === `field:${textField}`)?.meta.params;
+  if (params) return formatFactory(params).convertToText(row[`field:${textField}`]);
+  return row.textField ? String(row[`field:${textField}`] ?? '') : row.label;
+};
+
 // todo: remove when closed https://github.com/elastic/elastic-charts/issues/1647
 RectAnnotation.displayName = 'RectAnnotation';
 
 export const Annotations = ({
   groupedLineAnnotations,
   rangeAnnotations,
+  columns,
+  formatFactory,
   timeFormat,
   isHorizontal,
   paddingMap,
@@ -359,7 +375,10 @@ export const Annotations = ({
           />
         );
       })}
-      {rangeAnnotations.map(({ id, label, time, color, endTime, outside }) => {
+      {rangeAnnotations.map((row) => {
+        const { id, time, color, endTime, outside } = row;
+        const label = getAnnotationLabel({ row, textField: row.textField, columns, formatFactory });
+        const extraFields = getExtraFields(row, formatFactory, columns);
         const resolvedColor = getResolvedAnnotationColor({
           color,
           isDarkMode,
@@ -390,6 +409,7 @@ export const Annotations = ({
                       <EuiFlexItem>{`${moment(time).format(timeFormat)} — ${moment(endTime).format(
                         timeFormat
                       )}`}</EuiFlexItem>
+                      <TooltipAnnotationDetails row={row} extraFields={extraFields} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </div>

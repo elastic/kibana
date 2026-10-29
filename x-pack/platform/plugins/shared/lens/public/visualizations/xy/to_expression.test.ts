@@ -12,6 +12,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { XYVisualizationState } from './xy_visualization';
 import { getXyVisualization } from './xy_visualization';
 import type { OperationDescriptor } from '@kbn/lens-common';
+import type { EsqlEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -123,6 +124,63 @@ describe('#toExpression', () => {
       )
     ).toMatchSnapshot();
   });
+
+  it.each<EsqlEventAnnotationConfig>([
+    {
+      id: 'events',
+      type: 'esql',
+      query: { esql: 'FROM events | KEEP time' },
+      timeColumn: 'time',
+      key: { type: 'point_in_time' },
+      label: 'Events',
+    },
+    {
+      id: 'events',
+      type: 'esql',
+      query: { esql: 'FROM events | KEEP time, end' },
+      timeColumn: 'time',
+      endTimeColumn: 'end',
+      key: { type: 'range' },
+      label: 'Events',
+    },
+  ])(
+    'includes ES|QL $key.type annotations in the fetch expression without loading data views',
+    (annotation) => {
+      const ast = xyVisualization.toExpression(
+        {
+          legend: { position: Position.Bottom, isVisible: true },
+          valueLabels: 'hide',
+          preferredSeriesType: 'bar',
+          layers: [
+            {
+              layerId: 'first',
+              layerType: LayerTypes.DATA,
+              seriesType: 'bar',
+              xAccessor: 'a',
+              accessors: ['b'],
+            },
+            {
+              layerId: 'annotations',
+              layerType: LayerTypes.ANNOTATIONS,
+              indexPatternId: '',
+              ignoreGlobalFilters: false,
+              annotations: [annotation],
+            },
+          ],
+        },
+        frame.datasourceLayers,
+        undefined,
+        datasourceExpressionsByLayers
+      ) as Ast;
+      const result = ast.chain[0].arguments.annotations[0] as Ast;
+      const fetch = result.chain[0].arguments.datatable[0] as Ast;
+      const group = fetch.chain[1].arguments.groups[0] as Ast;
+      expect(group.chain[0].arguments.dataView).toEqual([]);
+      const event = group.chain[0].arguments.annotations[0] as Ast;
+      expect(event.chain[0].function).toBe('esql_event_annotation');
+      expect(event.chain[0].arguments.query).toEqual([annotation.query.esql]);
+    }
+  );
 
   it('should default the fitting function to Linear', () => {
     const ast = xyVisualization.toExpression(
