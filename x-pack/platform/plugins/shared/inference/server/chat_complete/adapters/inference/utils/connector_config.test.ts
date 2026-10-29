@@ -11,7 +11,12 @@ import {
   InferenceEndpointProvider,
 } from '@kbn/inference-common';
 import { createInferenceConnectorMock } from '../../../../test_utils';
-import { getElasticModelProvider, getModelId, getProvider } from './connector_config';
+import {
+  getElasticModelProvider,
+  getModelId,
+  getProvider,
+  isElasticOpenAiModelId,
+} from './connector_config';
 
 describe('getProvider', () => {
   it('returns the provider for an inference connector', () => {
@@ -66,6 +71,27 @@ describe('getModelId', () => {
     expect(() => getModelId(connector)).toThrowErrorMatchingInlineSnapshot(
       `"trying to get modelId for a non-inference connector (.gen-ai)"`
     );
+  });
+});
+
+describe('isElasticOpenAiModelId', () => {
+  ['openai-gpt-5.5', '.openai-gpt-5.5-chat_completion'].forEach((id) => {
+    it(`returns true for ${id}`, () => {
+      expect(isElasticOpenAiModelId(id)).toBe(true);
+    });
+  });
+
+  [
+    'openai-gpt-oss-120b',
+    '.openai-gpt-oss-120b-chat_completion',
+    'anthropic-claude-4.6-sonnet',
+    'gpt-5.5',
+    '',
+    undefined,
+  ].forEach((id) => {
+    it(`returns false for ${String(id)}`, () => {
+      expect(isElasticOpenAiModelId(id)).toBe(false);
+    });
   });
 });
 

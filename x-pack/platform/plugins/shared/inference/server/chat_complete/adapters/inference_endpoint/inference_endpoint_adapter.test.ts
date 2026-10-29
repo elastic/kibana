@@ -872,6 +872,120 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
+    describe('strict function calling', () => {
+      const originalTool = {
+        type: 'function',
+        function: {
+          name: 'foo',
+          description: 'my tool',
+          parameters: {
+            type: 'object',
+            properties: { id: { type: 'string' }, is_prebuilt: { type: 'boolean' } },
+            required: ['id'],
+          },
+        },
+      };
+
+      const toolsOfRequestFor = ({
+        functionCalling,
+        ...endpoint
+      }: {
+        provider: string;
+        endpointModelId?: string;
+        modelName?: string;
+        functionCalling?: 'auto' | 'simulated';
+      }) => {
+        executorMock.invoke.mockResolvedValue(
+          observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+        );
+
+        inferenceEndpointAdapter
+          .chatComplete({
+            ...defaultArgs,
+            ...endpoint,
+            functionCalling,
+            messages: [{ role: MessageRole.User, content: 'question' }],
+            tools: {
+              foo: {
+                description: 'my tool',
+                schema: {
+                  type: 'object',
+                  properties: { id: { type: 'string' }, is_prebuilt: { type: 'boolean' } },
+                  required: ['id'],
+                },
+              },
+            },
+            toolChoice: ToolChoiceType.auto,
+          })
+          .subscribe(noop);
+
+        return (executorMock.invoke.mock.calls[0][0].body as Record<string, unknown>).tools;
+      };
+
+      const strictTool = {
+        type: 'function',
+        function: {
+          name: 'foo',
+          description: 'my tool',
+          strict: true,
+          parameters: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              is_prebuilt: { anyOf: [{ type: 'boolean' }, { type: 'null' }] },
+            },
+            required: ['id', 'is_prebuilt'],
+            additionalProperties: false,
+          },
+        },
+      };
+
+      const strictEndpoints: Array<
+        [string, { provider: string; endpointModelId?: string; modelName?: string }]
+      > = [
+        ['an EIS GPT endpoint', { provider: 'elastic', endpointModelId: 'openai-gpt-5.5' }],
+        [
+          'an EIS GPT endpoint identified only by modelName',
+          { provider: 'elastic', modelName: '.openai-gpt-5.5-chat_completion' },
+        ],
+        ['an OpenAI endpoint', { provider: 'openai' }],
+        ['an Azure OpenAI endpoint', { provider: 'azureopenai' }],
+      ];
+      strictEndpoints.forEach(([label, endpoint]) => {
+        it(`sends tools in strict mode for ${label}`, () => {
+          expect(toolsOfRequestFor(endpoint)).toEqual([strictTool]);
+        });
+      });
+
+      const nonStrictEndpoints: Array<[string, { provider: string; endpointModelId?: string }]> = [
+        [
+          'an EIS Claude endpoint',
+          { provider: 'elastic', endpointModelId: 'anthropic-claude-4.6-sonnet' },
+        ],
+        [
+          'an EIS GPT-OSS endpoint',
+          { provider: 'elastic', endpointModelId: 'openai-gpt-oss-120b' },
+        ],
+        ['an EIS endpoint without a model id', { provider: 'elastic' }],
+        ['a Bedrock endpoint', { provider: 'amazonbedrock' }],
+      ];
+      nonStrictEndpoints.forEach(([label, endpoint]) => {
+        it(`sends tools unchanged for ${label}`, () => {
+          expect(toolsOfRequestFor(endpoint)).toEqual([originalTool]);
+        });
+      });
+
+      it('does not send native tools with simulated function calling', () => {
+        expect(
+          toolsOfRequestFor({
+            provider: 'elastic',
+            endpointModelId: 'openai-gpt-5.5',
+            functionCalling: 'simulated',
+          })
+        ).toBeUndefined();
+      });
+    });
+
     it('injects a dummy tool when history has tool use and tools are omitted', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(

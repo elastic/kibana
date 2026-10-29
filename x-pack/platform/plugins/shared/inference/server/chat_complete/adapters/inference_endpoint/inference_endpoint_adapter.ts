@@ -37,6 +37,8 @@ import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_e
 import { ensureToolsWhenHistoryHasToolUse } from '../../utils/ensure_tools_when_history_has_tool_use';
 import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
 import { sanitizeToolSchemasForVertex } from '../../utils/sanitize_tool_schemas_for_vertex';
+import { isElasticOpenAiModelId } from '../inference/utils';
+import { toStrictToolSchemas } from '../inference/providers/to_strict_tool_schemas';
 import type { InferenceEndpointRequest } from './types';
 
 export interface InferenceEndpointAdapterChatCompleteOptions {
@@ -148,6 +150,17 @@ export const inferenceEndpointAdapter = {
   },
 };
 
+const isOpenAiBackedEndpoint = ({
+  provider,
+  modelId,
+}: {
+  provider?: string;
+  modelId?: string;
+}): boolean =>
+  provider === InferenceEndpointProvider.OpenAI ||
+  provider === InferenceEndpointProvider.AzureOpenAI ||
+  (provider === InferenceEndpointProvider.Elastic && isElasticOpenAiModelId(modelId));
+
 const createEndpointRequest = ({
   system,
   messages,
@@ -213,8 +226,17 @@ const createEndpointRequest = ({
     };
   }
 
-  const toolsForRequest = ensureToolsWhenHistoryHasToolUse({ tools, messages });
-  const openAiTools = toolsToOpenAI(toolsForRequest);
+  const { tools: strictCandidateTools, strictToolNames } = isOpenAiBackedEndpoint({
+    provider,
+    modelId: endpointModelId ?? modelName,
+  })
+    ? toStrictToolSchemas(tools)
+    : { tools, strictToolNames: [] };
+  const toolsForRequest = ensureToolsWhenHistoryHasToolUse({
+    tools: strictCandidateTools,
+    messages,
+  });
+  const openAiTools = toolsToOpenAI(toolsForRequest, strictToolNames);
   const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
   const resolvedReasoning = resolveChatCompletionReasoning({
     reasoning,
