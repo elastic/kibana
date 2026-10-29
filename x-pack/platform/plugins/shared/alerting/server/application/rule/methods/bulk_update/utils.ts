@@ -6,9 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
+import pMap from 'p-map';
 import { isEqual, omit } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { parseDuration, type IntervalSchedule } from '../../../../../common';
 import {
   convertRuleIdsToKueryNode,
@@ -18,6 +20,7 @@ import {
 } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { getMappedParams, API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
+import { RULE_RELOAD_CONCURRENCY } from '../../../../rules_client/common/constants';
 import type {
   BulkOperationError,
   NormalizedAlertActionWithGeneratedValues,
@@ -66,6 +69,38 @@ export const loadRulesByIds = async (
     await finder.close();
   }
   return loaded;
+};
+
+// Realtime per-id reads: rule executors write the rule SO with `refresh: false`, so `loadRulesByIds`
+// can still return the version that just lost optimistic concurrency control.
+export const loadRulesByIdsRealtime = async (
+  context: RulesClientContext,
+  ids: string[]
+): Promise<Array<SavedObject<RawRule>>> => {
+  if (ids.length === 0) {
+    return [];
+  }
+
+  const loaded = await pMap(
+    ids,
+    async (id) => {
+      try {
+        return await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+          RULE_SAVED_OBJECT_TYPE,
+          id,
+          { namespace: context.namespace }
+        );
+      } catch (err) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          return undefined;
+        }
+        throw err;
+      }
+    },
+    { concurrency: RULE_RELOAD_CONCURRENCY }
+  );
+
+  return loaded.filter((so): so is SavedObject<RawRule> => so != null);
 };
 
 export const prepareUpdate = async <Params extends RuleParams>({
@@ -249,15 +284,18 @@ export const loadPending = async <Params extends RuleParams>(
   context: RulesClientContext,
   byId: Map<string, BulkUpdateRulesItem<Params>>,
   ids: string[],
-  errors: BulkOperationError[]
+  errors: BulkOperationError[],
+  { realtime = false }: { realtime?: boolean } = {}
 ): Promise<Array<Pending<Params>>> => {
   const loaded = await withSpan(
     {
-      name: 'bulkUpdateRules.loadPending.loadRulesByIds',
+      name: realtime
+        ? 'bulkUpdateRules.loadPending.loadRulesByIdsRealtime'
+        : 'bulkUpdateRules.loadPending.loadRulesByIds',
       type: 'rules',
       labels: { count: String(ids.length) },
     },
-    () => loadRulesByIds(context, ids)
+    () => (realtime ? loadRulesByIdsRealtime(context, ids) : loadRulesByIds(context, ids))
   );
   const loadedById = new Map(loaded.map((so) => [so.id, so]));
   const pending: Array<Pending<Params>> = [];
