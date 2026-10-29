@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import type { UserProfileAvatarData } from '@kbn/core-user-settings-types';
 import {
   HUMAN_READABLE_ID_MAX_LENGTH,
   HUMAN_READABLE_ID_MIN_LENGTH,
@@ -318,6 +320,8 @@ export interface WorkflowExecutionDto {
   duration: number | null;
   effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
   executedBy?: string; // User who triggered the workflow
+  /** Profile of `executedBy`, resolved server-side so readers don't need `bulkGetUserProfiles`. */
+  executedByProfile?: UserProfile<{ avatar?: UserProfileAvatarData }>;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;

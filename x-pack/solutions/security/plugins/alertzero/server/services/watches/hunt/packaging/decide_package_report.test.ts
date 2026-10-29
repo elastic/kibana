@@ -301,6 +301,21 @@ describe('decidePackageReport', () => {
     expect(result.proposals[0].comment).toContain('ghost');
   });
 
+  it('mints no executable action for a run whose evidence is all on a remote cluster', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hosts: [{ name: 'ubuntu', enrolled: false, capabilities: [] }],
+        allEventsActionable: false,
+        hasProcessBearingEvent: false,
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+    expect(result.proposals).toHaveLength(1);
+    expect(result.proposals[0].actionWorkflowId).toBeUndefined();
+    expect(result.proposals[0].title).toBe('Analyst recommendation');
+  });
+
   it('mints executable plus a recommendation when some hosts are unenrolled (trigger: partial enrollment)', () => {
     const result = decidePackageReport({
       conversationId,
@@ -319,6 +334,52 @@ describe('decidePackageReport', () => {
     expect(recommendation).toBeDefined();
     expect(recommendation?.comment).toContain('ghost');
     expect(recommendation?.comment).toContain('not enrolled');
+  });
+
+  it('packages a remote-only host as a recommendation naming its cluster, beside the local host action', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hosts: [
+          enrolledHost('host-a', 'agent-a'),
+          { name: 'ubuntu', enrolled: false, capabilities: [], remoteClusters: ['infosec_zocalo'] },
+        ],
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+
+    expect(result.proposals.map((p) => p.title).sort()).toEqual([
+      'Analyst recommendation',
+      'Isolate host host-a',
+    ]);
+    const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
+    expect(recommendation?.comment).toContain(
+      "Host ubuntu (infosec_zocalo) was seen only on a remote cluster, so response actions from this deployment can't reach it."
+    );
+    // It was never looked up in local Fleet, so "not enrolled" would be unchecked.
+    expect(recommendation?.comment).not.toContain('not enrolled');
+  });
+
+  it('names local unenrolled and remote-only hosts on separate lines', () => {
+    const result = decidePackageReport({
+      conversationId,
+      state: baseHitState({
+        hosts: [
+          { name: 'ghost', enrolled: false, capabilities: [] },
+          { name: 'ubuntu', enrolled: false, capabilities: [], remoteClusters: ['b', 'c'] },
+          { name: 'db-1', enrolled: false, capabilities: [], remoteClusters: ['d'] },
+        ],
+      }),
+      catalog: { ok: true, actions: [isolateHost] },
+    });
+
+    const [recommendation] = result.proposals;
+    expect(recommendation.comment).toContain(
+      'Host ghost is not enrolled, so no Defend action reaches it.'
+    );
+    expect(recommendation.comment).toContain(
+      "Hosts ubuntu (b, c), db-1 (d) were seen only on a remote cluster, so response actions from this deployment can't reach them."
+    );
   });
 
   it('mints a recommendation when the catalog errors (trigger: no executable proposal at all)', () => {
