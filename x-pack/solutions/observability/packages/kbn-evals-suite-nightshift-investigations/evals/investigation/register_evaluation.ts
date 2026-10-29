@@ -10,6 +10,11 @@ import pMap from 'p-map';
 import { tags } from '@kbn/evals';
 import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
 import type { ConversationRound } from '@kbn/agent-builder-common';
+import {
+  createHttpServiceAccountsApi,
+  ensureNightshiftServiceAccountRoles,
+  ensureNightshiftServiceAccounts,
+} from '@kbn/nightshift-investigations-plugin/common';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
@@ -58,6 +63,8 @@ export const registerInvestigationEvaluation = ({
     evaluate(
       'grades investigations with the RCA judges and persists complete agent traces',
       async ({
+        config,
+        esClient,
         executorClient,
         connector,
         fetch,
@@ -88,6 +95,42 @@ export const registerInvestigationEvaluation = ({
             (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
             5 * 60_000
         );
+        // Investigations only run as the Nightshift agent service account, so the space has to be
+        // set up first. The eval user holds manage_security; setup is idempotent. On stateful,
+        // Elasticsearch has no predefined roles for the account, so the eval creates them first.
+        await ensureNightshiftServiceAccountRoles(esClient, { isServerless: config.serverless });
+        // Like the app's setup step: find or create the accounts by name, then bind the space to
+        // the ids the backend assigned (generated ones on Serverless).
+        const serviceAccountIds = await ensureNightshiftServiceAccounts(
+          createHttpServiceAccountsApi({
+            request: (path, { method, query, body, version }) =>
+              fetch(path, {
+                method,
+                ...(query ? { query } : {}),
+                ...(body ? { body } : {}),
+                ...(version ? { version } : {}),
+              }),
+            getStatus: (error) => (error as { status?: number }).status,
+          }),
+          { isServerless: config.serverless }
+        );
+        await expect
+          .poll(
+            async () =>
+              fetch<{ installed: boolean; bound: boolean }>(
+                '/internal/nightshift/investigations/service_account/_enable',
+                { method: 'POST', body: JSON.stringify({ serviceAccountIds }) }
+              ).then(
+                ({ installed, bound }) => installed && bound,
+                (error: unknown) => {
+                  log.warning(`Nightshift setup failed, retrying: ${String(error)}`);
+                  return false;
+                }
+              ),
+            // Setup needs the managed workflows plugin to be ready after a cold start.
+            { timeout: 120_000, intervals: [5_000] }
+          )
+          .toBe(true);
         await expect
           .poll(
             async () =>

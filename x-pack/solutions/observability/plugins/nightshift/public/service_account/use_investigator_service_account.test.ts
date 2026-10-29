@@ -5,7 +5,24 @@
  * 2.0.
  */
 
-import { isNightshiftSetUp } from './use_investigator_service_account';
+import React from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { useKibana } from '../hooks/use_kibana';
+import {
+  isNightshiftSetUp,
+  useSetUpNightshiftServiceAccount,
+} from './use_investigator_service_account';
+
+jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('@kbn/nightshift-investigations-plugin/common', () => ({
+  ...jest.requireActual('@kbn/nightshift-investigations-plugin/common'),
+  ensureNightshiftServiceAccounts: jest
+    .fn()
+    .mockResolvedValue({ agent: 'kibana/nightshift_agent', automations: 'kibana/auto' }),
+}));
+
+const mockUseKibana = useKibana as jest.Mock;
 
 const status = (overrides: Record<string, unknown> = {}) => ({
   serviceAccountsEnabled: true,
@@ -32,6 +49,38 @@ const status = (overrides: Record<string, unknown> = {}) => ({
   installed: true,
   enabled: true,
   ...overrides,
+});
+
+describe('useSetUpNightshiftServiceAccount', () => {
+  it('binds the space to its service accounts and installs the agent in one step', async () => {
+    const fetch = jest.fn().mockResolvedValue(status());
+    const addSuccess = jest.fn();
+    mockUseKibana.mockReturnValue({
+      services: {
+        notifications: { toasts: { addSuccess, addError: jest.fn() } },
+        nightshiftInvestigations: { investigationsClient: { fetch } },
+        http: {},
+        security: { serviceAccounts: {} },
+        isServerless: false,
+      },
+    });
+    const queryClient = new QueryClient();
+    const { result } = renderHook(() => useSetUpNightshiftServiceAccount(), {
+      wrapper: ({ children }) =>
+        React.createElement(QueryClientProvider, { client: queryClient }, children),
+    });
+
+    result.current.mutate();
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    expect(fetch.mock.calls.map(([endpoint]) => endpoint)).toEqual([
+      'POST /internal/nightshift/investigations/service_account/_enable',
+      'POST /internal/nightshift/onboarding/enable',
+    ]);
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({ title: 'Elastic Nightshift enabled' })
+    );
+  });
 });
 
 describe('isNightshiftSetUp', () => {

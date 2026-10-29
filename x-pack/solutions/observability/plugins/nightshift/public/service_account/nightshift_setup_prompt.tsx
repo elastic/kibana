@@ -23,6 +23,8 @@ import {
   getNightshiftServiceAccountName,
   type InvestigatorServiceAccountStatus,
 } from '@kbn/nightshift-investigations-plugin/common';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { useKibana } from '../hooks/use_kibana';
 import { useSetUpNightshiftServiceAccount } from './use_investigator_service_account';
 
 /** The accounts, roles and privileges `_enable` grants, until product docs exist. */
@@ -30,9 +32,10 @@ export const NIGHTSHIFT_SERVICE_ACCOUNT_PRIVILEGES_HREF =
   'https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/nightshift_investigations/README.md#accounts-and-roles';
 
 /**
- * The first onboarding step, shown until the space is set up: Nightshift runs as its service
- * account, so nothing else works before an admin enables it. Enabling requires `manage_security`;
- * everyone else sees why the button is disabled.
+ * The one "Enable Elastic Nightshift" step, shown until the space is set up: a single click binds
+ * the space to its service accounts and installs the investigation agent. Nightshift runs as its
+ * service account, so nothing else works before an admin does it. Enabling requires Nightshift
+ * manage and `manage_security`; everyone else sees why the button is disabled.
  */
 export const NightshiftSetupPrompt = ({
   status,
@@ -40,11 +43,13 @@ export const NightshiftSetupPrompt = ({
   status: InvestigatorServiceAccountStatus | undefined;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { application } = useKibana().services;
+  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const setUp = useSetUpNightshiftServiceAccount();
   // The account is found or created by name; the backend assigns its id on setup.
   const account = getNightshiftServiceAccountName('agent');
   const serviceAccountsOff = status?.serviceAccountsEnabled === false;
-  const canEnable = !serviceAccountsOff && status?.canModifyBoundWorkflows === true;
+  const canEnable = canManage && !serviceAccountsOff && status?.canModifyBoundWorkflows === true;
 
   const body = serviceAccountsOff ? (
     <p data-test-subj="nightshiftSetupServiceAccountsOff">
@@ -58,7 +63,7 @@ export const NightshiftSetupPrompt = ({
     <p>
       <FormattedMessage
         id="xpack.nightshift.setup.adminBody"
-        defaultMessage="Grant the agent a {account} account with {privilegesLink}. It will perform investigations and actions on behalf of users in this space. You can revoke privileges anytime in Settings."
+        defaultMessage="Grant the agent a {account} account with {privilegesLink}, and install it in this space. It will perform investigations and actions on behalf of users in this space. You can revoke privileges anytime in Settings."
         values={{
           account: <EuiCode>{account}</EuiCode>,
           privilegesLink: (
@@ -79,13 +84,20 @@ export const NightshiftSetupPrompt = ({
         }}
       />
     </p>
-  ) : (
+  ) : canManage ? (
     <p data-test-subj="nightshiftSetupAskAdmin">
       <FormattedMessage
         id="xpack.nightshift.setup.askAdminBody"
         defaultMessage="A space administrator with the {privilege} privilege has to enable Elastic Nightshift once for this space. Ask them to turn it on."
         values={{ privilege: <EuiCode>manage_security</EuiCode> }}
       />
+    </p>
+  ) : (
+    <p data-test-subj="nightshiftSetupAskAdmin">
+      {i18n.translate('xpack.nightshift.setup.askNightshiftAdminBody', {
+        defaultMessage:
+          'A Nightshift administrator has to enable Elastic Nightshift once for this space. Ask them to turn it on.',
+      })}
     </p>
   );
 
