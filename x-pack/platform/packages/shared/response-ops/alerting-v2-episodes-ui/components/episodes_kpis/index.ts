@@ -6,3 +6,4 @@
  */
 
 export { EpisodesKpis } from './episodes_kpis';
+export type { EpisodesKpisProps, EpisodesKpisServices } from './episodes_kpis';
