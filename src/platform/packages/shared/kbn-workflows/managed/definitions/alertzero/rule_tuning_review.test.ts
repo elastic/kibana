@@ -121,15 +121,17 @@ describe('rule_tuning_review schedule look-backs', () => {
     interval: string,
     from: string,
     proposedInterval: string,
-    proposedFrom: string
+    proposedFrom: string,
+    changeType: string = 'schedule'
   ): string =>
     engine.parseAndRenderSync(lookbacksTemplate, {
+      consts: definition.consts,
       steps: {
         fetch_rule: { output: { interval, from } },
         diagnose_rule: {
           output: {
             structured_output: {
-              change_type: 'schedule',
+              change_type: changeType,
               proposed_interval: proposedInterval,
               proposed_from: proposedFrom,
             },
@@ -139,9 +141,15 @@ describe('rule_tuning_review schedule look-backs', () => {
     });
 
   it('computes look-backs as from minus interval, in the largest whole unit', () => {
-    expect(renderLookbacks('5m', 'now-65m', '5m', 'now-6m')).toBe('1h,1m');
-    expect(renderLookbacks('5m', 'now-5m', '1h', 'now-90m')).toBe('0s,30m');
-    expect(renderLookbacks('30s', 'now-95s', '1d', 'now-2d')).toBe('65s,1d');
+    expect(renderLookbacks('5m', 'now-65m', '5m', 'now-6m')).toBe('1h,1m,600');
+    expect(renderLookbacks('5m', 'now-5m', '1h', 'now-90m')).toBe('0s,30m,600');
+    expect(renderLookbacks('30s', 'now-95s', '1d', 'now-2d')).toBe('65s,1d,60');
+  });
+
+  // Two runs one interval apart, each covering its own `from`: 5m + 6m. A schedule
+  // change instead reports the 2 x 5m its two schedules' runs share (above).
+  it('computes how far back the backtest reaches', () => {
+    expect(renderLookbacks('5m', 'now-6m', '', '', 'query')).toBe('1m,1m,660');
   });
 
   it('computes no look-backs for date math it cannot reduce to a duration', () => {

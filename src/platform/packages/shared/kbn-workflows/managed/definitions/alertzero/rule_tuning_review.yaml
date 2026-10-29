@@ -817,8 +817,13 @@ steps:
 
   # The rule details page shows a schedule's `from` as "Additional look-back time":
   # `from` minus the interval, in the largest whole unit (now-65m every 5m is 1h).
-  # Renders "<current>,<proposed>", or nothing when either `from` is not plain
-  # now-<n><unit> or starts after its interval, so the proposal falls back to `from`.
+  # Also renders how far back the backtest reaches: its runs are one interval apart
+  # and each covers its own `from`, so (runs - 1) x interval + from, in seconds. A
+  # schedule change compares two look-backs, so for it this is the period both
+  # schedules' runs share instead: runs x the current interval.
+  # Renders "<current>,<proposed>,<backtest seconds>", or nothing when either `from`
+  # is not plain now-<n><unit> or starts after its interval, so the proposal falls
+  # back to `from`.
   # Every change type is backtested on a schedule, so this runs for all of them;
   # only a schedule change has a proposed schedule that differs from the current one.
   - name: compute_schedule_lookbacks
@@ -837,6 +842,7 @@ steps:
         {%- assign valid = true -%}
         {%- if schedules.size != 4 %}{% assign valid = false %}{% endif -%}
         {%- assign lookbacks = "" -%}
+        {%- assign runs = inputs.preview_invocation_count | default: consts.preview_invocation_count -%}
         {%- for expression in schedules -%}
         {%- assign unit = expression | slice: -1 -%}
         {%- assign amount = expression | slice: 4, 64 | remove_last: unit | plus: 0 -%}
@@ -853,6 +859,10 @@ steps:
         {%- if is_interval == 0 -%}
         {%- assign interval_seconds = seconds -%}
         {%- else -%}
+        {%- if forloop.index0 == 1 -%}
+        {%- if steps.diagnose_rule.output.structured_output.change_type == 'schedule' %}{% assign backtest_seconds = runs | times: interval_seconds -%}
+        {%- else %}{% assign backtest_seconds = runs | minus: 1 | times: interval_seconds | plus: seconds %}{% endif -%}
+        {%- endif -%}
         {%- assign lookback = seconds | minus: interval_seconds -%}
         {%- assign days = lookback | modulo: 86400 -%}
         {%- assign hours = lookback | modulo: 3600 -%}
@@ -867,7 +877,7 @@ steps:
         {%- assign lookbacks = lookbacks | append: lookback | append: "," -%}
         {%- endif -%}
         {%- endfor -%}
-        {%- if valid %}{{ lookbacks | remove_last: "," }}{% endif -%}
+        {%- if valid %}{{ lookbacks }}{{ backtest_seconds }}{% endif -%}
 
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
@@ -1158,9 +1168,9 @@ steps:
         {%- if proposal.proposed_interval != rule.interval %}
         Runs every: `{{ rule.interval }}` → `{{ proposal.proposed_interval }}`
         {%- endif %}
-        {%- if lookbacks.size == 2 %}
-        {%- if lookbacks.first != lookbacks.last %}
-        Additional look-back time: `{{ lookbacks.first }}` → `{{ lookbacks.last }}`
+        {%- if lookbacks.size == 3 %}
+        {%- if lookbacks[0] != lookbacks[1] %}
+        Additional look-back time: `{{ lookbacks[0] }}` → `{{ lookbacks[1] }}`
         {%- endif %}
         {%- elsif proposal.proposed_from != rule.from %}
         Analyzed time range starts at: `{{ rule.from }}` → `{{ proposal.proposed_from }}`
@@ -1182,14 +1192,21 @@ steps:
         {%- assign proposal = steps.diagnose_rule.output.structured_output -%}
         {%- assign outcome = steps.record_preview_outcome.output -%}
         {%- assign lookbacks = steps.compute_schedule_lookbacks.output.lookbacks | split: "," -%}
-        {%- assign runs = inputs.preview_invocation_count | default: consts.preview_invocation_count -%}
+        {%- assign end_day = inputs.last_fp_at | date: "%B %-d, %Y", "UTC" -%}
         {%- if steps.can_preview_query_change.output.supported %}
         **Backtest**
-        {%- if proposal.change_type == 'schedule' %}
-        The backtest ran {{ runs }} simulated executions with the current schedule and {{ steps.compute_schedule_preview_runs.output.proposed_invocation_count }} with the proposed schedule, over the same time span.
+        {%- if lookbacks.size == 3 %}
+        {%- assign seconds = lookbacks[2] | plus: 0 %}
+        {%- assign start = inputs.last_fp_at | date: "%s" | minus: seconds %}
+        {%- assign start_day = start | date: "%B %-d, %Y", "UTC" %}
+        {%- if seconds < 120 %}{% assign length = seconds | append: " seconds" %}
+        {%- elsif seconds < 7200 %}{% assign length = seconds | divided_by: 60 | floor | append: " minutes" %}
+        {%- else %}{% assign length = seconds | divided_by: 3600 | floor | append: " hours" %}
+        {%- endif %}
+        The backtest {% if proposal.change_type == 'schedule' %}ran the current and proposed schedules over the same period,{% else %}replayed the rule{% endif %} from {% if start_day == end_day %}{{ start | date: "%H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%H:%M", "UTC" }} UTC on {{ end_day }}{% else %}{{ start | date: "%B %-d, %Y at %H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%B %-d, %Y at %H:%M", "UTC" }} UTC{% endif %} ({{ length }}), ending at the newest false positive.
         {%- else %}
-        The backtest ran {{ runs }} simulated executions, running every `{{ rule.interval }}` {% if lookbacks.size == 2 %}with `{{ lookbacks.first }}` additional look-back time{% else %}and looking back from `{{ rule.from }}`{% endif %}.
-        {%- endif %} It ends at the newest false positive, {{ inputs.last_fp_at | date: "%B %-d, %Y at %H:%M UTC", "UTC" }}. This time span is usually much shorter than the span of the false positives.
+        The backtest ends at the newest false positive, {{ inputs.last_fp_at | date: "%B %-d, %Y at %H:%M UTC", "UTC" }}.
+        {%- endif %}
 
         Alerts with the current rule: {% if outcome.current_succeeded and outcome.current_is_aborted == false %}{{ outcome.current_alert_count }}{% else %}inconclusive{% endif %}
         Alerts with the proposed change: {% if outcome.proposed_succeeded and outcome.proposed_is_aborted == false %}{{ outcome.proposed_alert_count }}{% else %}inconclusive{% endif %}
