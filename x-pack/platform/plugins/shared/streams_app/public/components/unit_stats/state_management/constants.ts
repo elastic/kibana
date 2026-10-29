@@ -8,7 +8,6 @@
 /** Registrations that arrive within this window, for example from a graph build, share a request. */
 export const STATS_BATCH_DEBOUNCE_MS = 300;
 
-// Provisional: the poll interval is open in ingest-dev#10027.
 export const STATS_POLL_INTERVAL_MS = 30_000;
 
 /** A value younger than this is not fetched again when a component registers. */

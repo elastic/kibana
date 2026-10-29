@@ -13,8 +13,6 @@ import type {
   ProcessorStatsView,
 } from './types';
 
-// Provisional: the server returns this per component for an id that is not in the persisted unit,
-// for example a destination that is staged but not saved yet. There is nothing to report for it.
 const NOT_FOUND_ERROR_CODE = 'not_found';
 
 const EMPTY_DESTINATION_STATS: DestinationStatsView = {
