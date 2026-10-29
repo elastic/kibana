@@ -266,18 +266,18 @@ describe('renderFlakySuiteIssueBody', () => {
     const { suite, report } = multiTestReport();
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
       [
-        '#### Failures by Branch',
+        '#### Status by Branch',
         '',
-        '| Branch | Failed builds | Sample failure |',
-        '|---|---|---|',
-        '| 🔴 `main` | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
-        '| 🔴 `9.2` | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |',
-        '| ✅ `9.1` | 0 / 58 |',
+        '| Branch | Status | Failed builds | Sample failure |',
+        '|---|---|---|---|',
+        '| `main` | 🔴 Flaky | 49 / 509 (**10%**) | [#12345](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd) · 2026-09-09 06:12 UTC |',
+        '| `9.2` | 🔴 Flaky | 3 / 64 (**5%**) | [#12290](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200) · 2026-09-07 11:40 UTC |',
+        '| `9.1` | ✅ No failures | 0 / 58 |  |',
       ].join('\n')
     );
   });
 
-  it('marks the branches every setup skips every test on, after the failing ones and with when one last ran', () => {
+  it('says whether the suite is flaky, has some failures, is skipped or is clean on main and each version branch, in that order', () => {
     const branch = (
       name: string,
       failedBuilds: number,
@@ -311,6 +311,15 @@ describe('renderFlakySuiteIssueBody', () => {
           // skipped here, but test a still runs on 9.5
           branch('9.5', 0, true),
           branch('8.19', 0, false, { builds: 40 }),
+          // a higher rate than 9.5, but too few builds to clear the thresholds
+          branch('9.3', 2, false, {
+            builds: 5,
+            buildFailRate: 2 / 5,
+            lastFailedAt: new Date('2026-09-04T10:00:00.000Z'),
+          }),
+          // feature and pull request branches are left out
+          branch('fix/some-feature', 2, false, { builds: 2, buildFailRate: 1 }),
+          branch('someone:fix-it', 5, false),
         ],
       }),
     ]);
@@ -318,12 +327,36 @@ describe('renderFlakySuiteIssueBody', () => {
 
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
       [
-        '| 🔴 `9.5` | 3 / 100 (**3%**) | 2026-09-08 10:00 UTC |',
-        '| ⏭️ `main` | 8 / 100 (**8%**) | 2026-09-05 10:00 UTC · skipped, last ran 7 Sep |',
-        '| ⏭️ `9.4` | 0 / 0 | skipped in every run |',
-        '| ✅ `8.19` | 0 / 40 |',
+        '| Branch | Status | Failed builds | Sample failure |',
+        '|---|---|---|---|',
+        '| `9.5` | 🔴 Flaky | 3 / 100 (**3%**) | 2026-09-08 10:00 UTC |',
+        '| `9.3` | 🟠 Some failures | 2 / 5 (**40%**) | 2026-09-04 10:00 UTC |',
+        '| `main` | ⏭️ Skipped, last ran 7 Sep | 8 / 100 (**8%**) | 2026-09-05 10:00 UTC |',
+        '| `9.4` | ⏭️ Skipped in every run | 0 / 0 |  |',
+        '| `8.19` | ✅ No failures | 0 / 40 |  |',
       ].join('\n')
     );
+  });
+
+  it('marks a branch flaky when any test is flaky there, with the worst test counts', () => {
+    const report = flakyReport([
+      // the most failed builds on main, but below the rate threshold
+      flakyTest({
+        testId: 'a',
+        byBranch: [{ branch: 'main', builds: 200, failedBuilds: 4, buildFailRate: 4 / 200 }],
+      }),
+      flakyTest({
+        testId: 'b',
+        title: 'another test',
+        byBranch: [{ branch: 'main', builds: 50, failedBuilds: 3, buildFailRate: 3 / 50 }],
+      }),
+    ]);
+    const [suite] = groupIntoSuites(report.flaky, report.files);
+
+    const body = renderFlakySuiteIssueBody(suite, { report });
+
+    expect(body).toContain('| another test | **`main` 6% (3 / 50)** |');
+    expect(body).toContain('| `main` | 🔴 Flaky | 4 / 200 (**2%**) |  |');
   });
 
   it('dates a failure without a recorded build, for reports written before it was', () => {
@@ -342,7 +375,7 @@ describe('renderFlakySuiteIssueBody', () => {
     ]);
     const [suite] = groupIntoSuites(report.flaky, report.files);
     expect(renderFlakySuiteIssueBody(suite, { report })).toContain(
-      '| 🔴 `main` | 2 / 10 (**20%**) | 2026-09-09 06:12 UTC |'
+      '| `main` | 🔴 Flaky | 2 / 10 (**20%**) | 2026-09-09 06:12 UTC |'
     );
   });
 
@@ -392,7 +425,7 @@ describe('renderFlakySuiteIssueBody', () => {
     const [suite] = groupIntoSuites(report.flaky, report.files);
     const body = renderFlakySuiteIssueBody(suite, { report });
     expect(body).not.toContain('Failures by Target');
-    expect(body).toContain('#### Failures by Branch');
+    expect(body).toContain('#### Status by Branch');
   });
 
   it("lists the suite's distinct errors merged across tests, most failures first, each collapsed under its share", () => {
@@ -450,7 +483,7 @@ describe('renderFlakySuiteIssueBody', () => {
       }),
     ]);
     expect(renderFlakySuiteIssueBody(groupIntoSuites(report.flaky)[0], { report })).toContain(
-      '### Failures\n\n#### Failures by Error Message\n\n*Errors that only appeared in PR builds were excluded.*\n\n#### Failures by Branch'
+      '### Failures\n\n#### Failures by Error Message\n\n*Errors that only appeared in PR builds were excluded.*\n\n#### Status by Branch'
     );
   });
 
@@ -720,7 +753,7 @@ describe('refreshing a suite issue', () => {
     );
     for (const section of [
       '#### Failures by Error Message',
-      '#### Failures by Branch',
+      '#### Status by Branch',
       '#### Failures by Target',
       '#### Failures by Pipeline',
     ]) {
