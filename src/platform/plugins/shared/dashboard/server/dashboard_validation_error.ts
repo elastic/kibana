@@ -8,7 +8,7 @@
  */
 
 import { ZodError, prettifyError } from '@kbn/zod';
-import { TransformPanelsInError } from './api/transforms/in/transform_panels_in_error';
+import type { TransformPanelsInError } from './api/transforms/in/transform_panels_in_error';
 
 const formatPanelErrors = ({ panelErrors }: TransformPanelsInError): string =>
   panelErrors.map(({ type, message }) => `${type}: ${message}`).join('\n');
