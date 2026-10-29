@@ -84,9 +84,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.openPopover();
       await searchSessions.viewSearchSessions();
 
-      const searchSessionList = await searchSessionsManagement.getList();
-      const searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-      expect(searchSessionItem.searchesCount).to.be(1);
+      const searchSessionItem = await retry.try(async () => {
+        const searchSessionList = await searchSessionsManagement.getList();
+        const sessionItem = searchSessionList.find((session) => session.id === savedSessionId);
+        if (!sessionItem) {
+          throw new Error(`Saved search session ${savedSessionId} was not found`);
+        }
+        expect(sessionItem.searchesCount).to.be(1);
+        return sessionItem;
+      });
 
       await searchSessionItem.extend();
 
