@@ -10,6 +10,7 @@
 import { set } from '@kbn/safer-lodash-set';
 import { defaults } from 'lodash';
 import { DataViewsService, DataView, DataViewLazy } from '.';
+import { UNKNOWN_SPACE } from '@kbn/core-spaces-common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import type {
@@ -558,6 +559,26 @@ describe('IndexPatterns', () => {
     await indexPatterns.createSavedObject(dataView, true);
 
     expect(savedObjectsClient.find).toHaveBeenCalledWith(expect.objectContaining({ namespaces }));
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('dupe-id', namespaces);
+  });
+
+  test('createSavedObject with overwrite does not delete redacted namespaces of the duplicate', async () => {
+    const namespaces = ['test-namespace'];
+    const dataView = await indexPatterns.create(
+      { title: 'kibana-*', name: 'test', namespaces },
+      true
+    );
+
+    savedObjectsClient.find = jest
+      .fn()
+      .mockResolvedValue([
+        { ...savedObject, id: 'dupe-id', namespaces: [...namespaces, UNKNOWN_SPACE] },
+      ]);
+    savedObjectsClient.delete = jest.fn().mockResolvedValue(undefined);
+    savedObjectsClient.create = jest.fn().mockResolvedValue({ ...savedObject, id: dataView.id });
+
+    await indexPatterns.createSavedObject(dataView, true);
+
     expect(savedObjectsClient.delete).toHaveBeenCalledWith('dupe-id', namespaces);
   });
 
