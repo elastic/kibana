@@ -46,12 +46,22 @@ const SEARCH_FIELDS = [
   'geo.city',
 ] as const;
 
+/** Narrow the list and every count; unlike facets, they have no values to pick from. */
+export interface SessionListFilters {
+  hasErrors?: boolean;
+  /** Inclusive lower bound of the session duration. */
+  minDurationMs?: number;
+  /** Exclusive upper bound of the session duration. */
+  maxDurationMs?: number;
+}
+
 export interface ListSessionsParams {
   serviceName: string;
   start: string;
   end: string;
   query?: string;
   facets?: Partial<Record<FacetName, string>>;
+  filters?: SessionListFilters;
   sortField: SessionSortField;
   sortDirection: 'asc' | 'desc';
   page: number;
@@ -125,15 +135,40 @@ const facetFilters = (
     .filter((name) => name !== exclude && facets[name])
     .map((name) => ({ term: { [SESSION_FACET_FIELDS[name]]: facets[name] } }));
 
+const sessionFilters = ({
+  hasErrors,
+  minDurationMs,
+  maxDurationMs,
+}: SessionListFilters = {}): QueryDslQueryContainer[] => {
+  const filters: QueryDslQueryContainer[] = hasErrors ? [{ term: { has_error: true } }] : [];
+  if (minDurationMs !== undefined || maxDurationMs !== undefined) {
+    filters.push({
+      range: {
+        duration_ms: {
+          ...(minDurationMs !== undefined ? { gte: minDurationMs } : {}),
+          ...(maxDurationMs !== undefined ? { lt: maxDurationMs } : {}),
+        },
+      },
+    });
+  }
+  return filters;
+};
+
 const allOf = (filters: QueryDslQueryContainer[]): QueryDslQueryContainer =>
   filters.length > 0 ? { bool: { filter: filters } } : { match_all: {} };
 
 /** Set by the dest pipeline when it couldn't summarize a session; its counts are missing. */
 const FAILED_SUMMARY: QueryDslQueryContainer = { exists: { field: 'error.message' } };
 
-/** The listed sessions: selected facets, and only summaries the pipeline completed. */
-const listedFilter = (facets: ListSessionsParams['facets'], exclude?: FacetName) => ({
-  bool: { filter: facetFilters(facets, exclude), must_not: [FAILED_SUMMARY] },
+/** The listed sessions: selected filters and facets, and only summaries the pipeline completed. */
+const listedFilter = (
+  { facets, filters }: Pick<ListSessionsParams, 'facets' | 'filters'>,
+  exclude?: FacetName
+) => ({
+  bool: {
+    filter: [...sessionFilters(filters), ...facetFilters(facets, exclude)],
+    must_not: [FAILED_SUMMARY],
+  },
 });
 
 export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequest => {
@@ -145,7 +180,7 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
       name,
       {
         // Each facet ignores its own selection so its other values stay selectable.
-        filter: listedFilter(params.facets, name),
+        filter: listedFilter(params, name),
         aggs: { values: { terms: { field: SESSION_FACET_FIELDS[name], size: FACET_SIZE } } },
       },
     ])
@@ -174,10 +209,10 @@ export const buildListSessionsRequest = (params: ListSessionsParams): SearchRequ
     size,
     sort: [{ [params.sortField]: params.sortDirection }, { 'session.id': 'asc' }],
     query: { bool: { filter: [...sessionScopeFilters(params), ...searchFilter(params.query)] } },
-    post_filter: listedFilter(params.facets),
+    post_filter: listedFilter(params),
     aggs: {
       ...facetAggs,
-      kpis: { filter: listedFilter(params.facets), aggs: kpiAggs },
+      kpis: { filter: listedFilter(params), aggs: kpiAggs },
       failed_summaries: {
         filter: allOf([...facetFilters(params.facets), FAILED_SUMMARY]),
       },

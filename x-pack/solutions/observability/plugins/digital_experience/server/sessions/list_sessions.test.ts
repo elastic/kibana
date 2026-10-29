@@ -112,6 +112,39 @@ describe('buildListSessionsRequest', () => {
     expect(request.aggs?.kpis.filter).toEqual(request.post_filter);
   });
 
+  it('narrows the list, KPIs and every facet to sessions with errors and in the duration range', () => {
+    const request = buildListSessionsRequest({
+      ...baseParams,
+      facets: { browsers: 'Chrome' },
+      filters: { hasErrors: true, minDurationMs: 10_000, maxDurationMs: 60_000 },
+    });
+    const failed = { exists: { field: 'error.message' } };
+    const filters = [
+      { term: { has_error: true } },
+      { range: { duration_ms: { gte: 10_000, lt: 60_000 } } },
+    ];
+    expect(request.post_filter).toEqual({
+      bool: {
+        filter: [...filters, { term: { 'user_agent.browser': 'Chrome' } }],
+        must_not: [failed],
+      },
+    });
+    expect(request.aggs?.kpis.filter).toEqual(request.post_filter);
+    expect(request.aggs?.browsers.filter).toEqual({
+      bool: { filter: filters, must_not: [failed] },
+    });
+  });
+
+  it('applies an open-ended duration range', () => {
+    const request = buildListSessionsRequest({ ...baseParams, filters: { minDurationMs: 0 } });
+    expect(request.post_filter).toEqual({
+      bool: {
+        filter: [{ range: { duration_ms: { gte: 0 } } }],
+        must_not: [{ exists: { field: 'error.message' } }],
+      },
+    });
+  });
+
   it('leaves summaries the pipeline failed on out of the list and KPIs, and counts them', () => {
     const request = buildListSessionsRequest(baseParams);
     const failed = { exists: { field: 'error.message' } };

@@ -35,6 +35,8 @@ export const SESSION_DETAIL_ENDPOINT =
   'GET /internal/digital_experience/applications/{serviceName}/sessions/{sessionId}';
 
 const MAX_PER_PAGE = 100;
+/** A week; longer sessions only match a lower bound. */
+const MAX_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_SERVICE_NAME_LENGTH = 1024;
 
 const NO_ACCESS_MESSAGE = i18n.translate('xpack.digitalExperience.sessions.api.noAccess', {
@@ -186,6 +188,7 @@ const enableRoute = createDigitalExperienceServerRoute({
 
 const serviceName = () => z.string().min(1).max(MAX_SERVICE_NAME_LENGTH);
 const facetValue = (maxLength: number) => z.string().min(1).max(maxLength).optional();
+const durationMs = () => z.coerce.number().int().min(0).max(MAX_DURATION_MS).optional();
 
 const listRoute = createDigitalExperienceServerRoute({
   endpoint: SESSIONS_LIST_ENDPOINT,
@@ -203,6 +206,9 @@ const listRoute = createDigitalExperienceServerRoute({
           os: facetValue(256),
           country: facetValue(16),
           entryPage: facetValue(1024),
+          hasErrors: z.stringbool().optional(),
+          minDurationMs: durationMs(),
+          maxDurationMs: durationMs(),
           sortField: z.enum(SESSION_SORT_FIELDS).default('start_time'),
           sortDirection: z.enum(['asc', 'desc']).default('desc'),
           page: z.coerce.number().int().min(0).max(1000).default(0),
@@ -211,17 +217,26 @@ const listRoute = createDigitalExperienceServerRoute({
         .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
           message: '`start` must be before `end`',
           path: ['end'],
-        }),
+        })
+        .refine(
+          ({ minDurationMs, maxDurationMs }) =>
+            minDurationMs === undefined ||
+            maxDurationMs === undefined ||
+            minDurationMs < maxDurationMs,
+          { message: '`minDurationMs` must be below `maxDurationMs`', path: ['maxDurationMs'] }
+        ),
     })
   ),
   handler: async ({ context, params, logger }): Promise<SessionListResponse> => {
     const { elasticsearch } = await context.core;
-    const { browser, os, country, entryPage, ...query } = params.query;
+    const { browser, os, country, entryPage, hasErrors, minDurationMs, maxDurationMs, ...query } =
+      params.query;
     try {
       return await listSessions(elasticsearch.client.asCurrentUser, {
         ...query,
         serviceName: params.path.serviceName,
         facets: { browsers: browser, os, countries: country, entryPages: entryPage },
+        filters: { hasErrors, minDurationMs, maxDurationMs },
       });
     } catch (error) {
       throw toReadError(error, logger, 'the sessions list');
