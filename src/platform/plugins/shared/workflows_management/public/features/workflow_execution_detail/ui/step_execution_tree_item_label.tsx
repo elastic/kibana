@@ -20,12 +20,11 @@ import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
 import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
 
-const actionRequiredLabel = i18n.translate(
-  'workflowsManagement.stepExecutionTreeItemLabel.actionRequired',
-  { defaultMessage: 'Action is required' }
-);
+const actionRequiredLabel = i18n.translate('workflows.stepExecutionTreeItemLabel.actionRequired', {
+  defaultMessage: 'Action is required',
+});
 
-const notRunLabel = i18n.translate('workflowsManagement.stepExecutionTreeItemLabel.notRun', {
+const notRunLabel = i18n.translate('workflows.stepExecutionTreeItemLabel.notRun', {
   defaultMessage: 'Not run',
 });
 

@@ -64,8 +64,9 @@ export const scoreSeverity = (score: number): Severity => {
   return 'critical';
 };
 
-export function SeverityBadge({ score }: { score?: number }) {
-  if (!score) {
+export function SeverityBadge({ score, severity }: { score?: number; severity?: Severity }) {
+  const normalizedSeverity = severity ?? (score !== undefined ? scoreSeverity(score) : undefined);
+  if (!normalizedSeverity) {
     return (
       <EuiHealth color="text" style={{ lineHeight: 'inherit' }} textSize="xs">
         {i18n.translate(
@@ -77,7 +78,7 @@ export function SeverityBadge({ score }: { score?: number }) {
       </EuiHealth>
     );
   }
-  const { color, label } = SIGNIFICANT_EVENT_SEVERITY[scoreSeverity(score)];
+  const { color, label } = SIGNIFICANT_EVENT_SEVERITY[normalizedSeverity];
   return (
     <EuiHealth color={color} style={{ lineHeight: 'inherit' }} textSize="xs">
       {label}

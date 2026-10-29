@@ -63,7 +63,9 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
   // floating controls (toolbar, zoom, minimap) stay put when the window resizes.
   flex: 1 1 auto;
   min-height: 0;
-  width: 100%;
+  width: auto;
+  margin-inline: ${euiTheme.size.m};
+  margin-bottom: ${euiTheme.size.m};
   background: ${euiTheme.colors.backgroundBaseSubdued};
 
   // Communicate pannable space: open hand at rest, grabbing while dragging.
@@ -81,9 +83,8 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
     border-color: ${euiTheme.colors.borderBaseProminent};
   }
 
-  // Configured unit nodes: a plus while hovering a handle you can drag from,
-  // and a blue ring around every handle that can receive the line.
-  .react-flow__handle.streamsConnectionHandle {
+  // Configured unit nodes and processing nodes: an open circle at each side.
+  .react-flow__handle.streamsNodeHandle {
     width: 16px;
     height: 16px;
     background: ${euiTheme.colors.backgroundBasePlain};
@@ -96,6 +97,8 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
     line-height: 1;
   }
 
+  // A plus while hovering a handle you can drag from, and a blue ring around
+  // every handle that can receive the line.
   .react-flow__handle.streamsConnectionHandle.connectablestart.connectionindicator:hover::after {
     content: '+';
   }
@@ -124,6 +127,16 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
   .react-flow__edge.streamsUnitConnection.updating {
     cursor: grabbing;
   }
+
+  .react-flow__edges {
+    z-index: 1;
+  }
+  .react-flow__nodes {
+    z-index: 3;
+  }
+  .react-flow__edgelabel-renderer {
+    z-index: 2;
+  }
 `;
 
 /**
@@ -133,7 +146,8 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
  * rough estimate on the first render.
  */
 const getTranslateExtent = (nodes: Node[]): CoordinateExtent | undefined => {
-  if (nodes.length === 0) {
+  const visibleNodes = nodes.filter((node) => !node.hidden);
+  if (visibleNodes.length === 0) {
     return undefined;
   }
 
@@ -142,7 +156,7 @@ const getTranslateExtent = (nodes: Node[]): CoordinateExtent | undefined => {
   let maxX = -Infinity;
   let maxY = -Infinity;
 
-  for (const node of nodes) {
+  for (const node of visibleNodes) {
     const width = node.measured?.width ?? NODE_WIDTH_ESTIMATE;
     const height = node.measured?.height ?? NODE_HEIGHT_ESTIMATE;
     minX = Math.min(minX, node.position.x);
@@ -171,6 +185,7 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   onConnectStart?: OnConnectStart;
   onConnectEnd?: OnConnectEnd;
   onReconnect?: OnReconnect<EdgeType>;
+  onReconnectStart?: (event: React.MouseEvent, edge: EdgeType, handleType: HandleType) => void;
   onReconnectEnd?: (
     event: MouseEvent | TouchEvent,
     edge: EdgeType,
@@ -228,12 +243,13 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   onConnectStart,
   onConnectEnd,
   onReconnect,
+  onReconnectStart,
   onReconnectEnd,
   isValidConnection,
   connectionLineType = ConnectionLineType.SmoothStep,
   connectionLineStyle,
   connectionRadius = 24,
-  reconnectRadius = 36,
+  reconnectRadius = 6,
   edgesReconnectable = false,
   onNodeClick,
   onNodeContextMenu,
@@ -263,20 +279,23 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
         return;
       }
       const nodeElement = (event.target as HTMLElement).closest('.react-flow__node');
-      const focusedId = nodeElement?.getAttribute('data-id');
-      const focusVisible = nodeElement ? nodeElement.matches(':focus-visible') : false;
-      if (!focusedId || !focusVisible) {
+      const focusedNodeId = nodeElement?.getAttribute('data-id');
+      const nodeFocusVisible = nodeElement ? nodeElement.matches(':focus-visible') : false;
+
+      if (!focusedNodeId || !nodeFocusVisible) {
         return;
       }
-      const changes = nodes
-        .filter((node) => node.selected !== (node.id === focusedId))
+
+      const nodeChanges = nodes
+        .filter((node) => node.selected !== (node.id === focusedNodeId))
         .map<NodeSelectionChange>((node) => ({
           id: node.id,
           type: 'select',
-          selected: node.id === focusedId,
+          selected: node.id === focusedNodeId,
         }));
-      if (changes.length > 0) {
-        onNodesChange(changes);
+
+      if (nodeChanges.length > 0) {
+        onNodesChange(nodeChanges);
       }
     },
     [nodes, onNodesChange]
@@ -308,6 +327,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           onConnectStart={onConnectStart}
           onConnectEnd={onConnectEnd}
           onReconnect={onReconnect}
+          onReconnectStart={onReconnectStart}
           onReconnectEnd={onReconnectEnd}
           isValidConnection={isValidConnection}
           connectionLineType={connectionLineType}

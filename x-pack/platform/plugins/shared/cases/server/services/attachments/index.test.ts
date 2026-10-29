@@ -108,7 +108,7 @@ describe('AttachmentService', () => {
             id: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+          `"comment: Invalid input: expected string, received undefined, type: Invalid input: expected \\"alert\\", rule: Invalid input: expected object, received undefined, type: Invalid input: expected \\"event\\", type: Invalid input: expected \\"actions\\", and 23 more"`
         );
       });
 
@@ -125,7 +125,7 @@ describe('AttachmentService', () => {
             id: '1',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\",Invalid value \\"undefined\\" supplied to \\"data\\""`
+          `"comment: Invalid input: expected string, received undefined, type: Invalid input: expected \\"alert\\", rule: Invalid input: expected object, received undefined, type: Invalid input: expected \\"event\\", type: Invalid input: expected \\"actions\\", and 26 more"`
         );
       });
 
@@ -208,7 +208,7 @@ describe('AttachmentService', () => {
             ],
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
+          `"comment: Invalid input: expected string, received undefined, type: Invalid input: expected \\"alert\\", rule: Invalid input: expected object, received undefined, type: Invalid input: expected \\"event\\", type: Invalid input: expected \\"actions\\", and 23 more"`
         );
       });
 
@@ -225,7 +225,7 @@ describe('AttachmentService', () => {
             attachments: [{ attributes: invalidAttachment.attributes, references: [], id: '1' }],
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"user\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceMetadata\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceId\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceStorage\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\",Invalid value \\"undefined\\" supplied to \\"data\\""`
+          `"comment: Invalid input: expected string, received undefined, type: Invalid input: expected \\"alert\\", rule: Invalid input: expected object, received undefined, type: Invalid input: expected \\"event\\", type: Invalid input: expected \\"actions\\", and 26 more"`
         );
       });
 
@@ -771,6 +771,30 @@ describe('AttachmentService', () => {
       });
     });
 
+    it('throws a 404 when the attachment is in neither saved object type', async () => {
+      unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+        const requests = objects as Array<{ id: string; type: string }>;
+        return Promise.resolve({
+          saved_objects: requests.map(({ id, type }) => ({
+            ...createErrorSO(type),
+            id,
+          })) as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+      });
+
+      await expect(
+        service.update({
+          savedObjectId: 'missing',
+          updatedAttributes: persistableStateAttachment,
+          options: { references: [] },
+        })
+      ).rejects.toMatchObject({
+        message: 'Attachment missing not found',
+        output: expect.objectContaining({ statusCode: 404 }),
+      });
+      expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
     it('should inject the references to the attributes correctly (persistable state)', async () => {
       unsecuredSavedObjectsClient.update.mockResolvedValue(soClientRes);
 
@@ -1292,6 +1316,61 @@ describe('AttachmentService', () => {
       });
     });
 
+    describe('bulkDelete return value', () => {
+      it('returns only the ids whose SO delete succeeded in this call', async () => {
+        const svc = makeService(makeMirrorWriter());
+        // id-1: legacy delete succeeded → deleted.
+        // id-2: legacy delete failed with a 500 → the SO may survive, not deleted.
+        // id-3: both types 404 → already gone before this call, not deleted by it.
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            {
+              id: 'id-1',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            { id: 'id-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+            {
+              id: 'id-2',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            {
+              id: 'id-2',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 500, error: 'Internal Server Error', message: 'boom' },
+            },
+            {
+              id: 'id-3',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+            {
+              id: 'id-3',
+              type: CASE_COMMENT_SAVED_OBJECT,
+              success: false,
+              error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            },
+          ],
+        });
+
+        await expect(
+          svc.bulkDelete({ savedObjectIds: ['id-1', 'id-2', 'id-3'], refresh: false })
+        ).resolves.toEqual(['id-1']);
+      });
+
+      it('returns an empty array without calling the SO client when there are no ids', async () => {
+        const svc = makeService(makeMirrorWriter());
+
+        await expect(svc.bulkDelete({ savedObjectIds: [], refresh: false })).resolves.toEqual([]);
+        expect(unsecuredSavedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+      });
+    });
+
     describe('fire-and-forget: a throwing analytics writer never breaks the primary SO write', () => {
       it('create: swallows a synchronous writer throw and still returns the created attachment', async () => {
         const writer = makeMirrorWriter();
@@ -1352,9 +1431,9 @@ describe('AttachmentService', () => {
           ],
         });
 
-        await expect(
-          svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false })
-        ).resolves.toBeUndefined();
+        await expect(svc.bulkDelete({ savedObjectIds: ['id-1'], refresh: false })).resolves.toEqual(
+          ['id-1']
+        );
         expect(mockLogger.warn).toHaveBeenCalledWith(
           expect.stringContaining('attachments mirror dispatch threw')
         );
@@ -1993,6 +2072,27 @@ describe('AttachmentService', () => {
           data: { content: '' },
         });
       });
+
+      it('skips a row that fails to decode and logs a warning', async () => {
+        const userAttachment = createUserAttachment();
+        const junkAttachment = {
+          ...userAttachment,
+          id: 'junk-1',
+          attributes: { ...userAttachment.attributes, type: 'junk' },
+        };
+
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createSOFindResponse([
+            { ...junkAttachment, score: 0 },
+            { ...userAttachment, score: 0 },
+          ])
+        );
+
+        const res = await service.find({});
+
+        expect(res.saved_objects.map(({ id }) => id)).toEqual([userAttachment.id]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('junk-1'));
+      });
     });
   });
 
@@ -2110,6 +2210,18 @@ describe('AttachmentService', () => {
       expect(filterAsString).toMatch(/"value":\s*"osquery"/);
       expect(filterAsString).toMatch(/"value":\s*"security.indicator"/);
       expect(filterAsString).not.toMatch(/"value":\s*"file"/);
+    });
+  });
+
+  describe('countAlertsWithinCase', () => {
+    it('logs and rethrows when the aggregation fails', async () => {
+      unsecuredSavedObjectsClient.find.mockRejectedValue(new Error('aggregation failed'));
+
+      await expect(service.countAlertsWithinCase('test-id')).rejects.toThrow('aggregation failed');
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error while counting alerts for case test-id: Error: aggregation failed'
+      );
     });
   });
 

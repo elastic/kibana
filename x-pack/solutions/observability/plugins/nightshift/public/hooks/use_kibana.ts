@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NightshiftStartDependencies } from '../types';
 
@@ -14,7 +14,14 @@ import type { NightshiftStartDependencies } from '../types';
  * `StartServices` this app was extracted from, so consumers keep destructuring
  * `useKibana().services` directly.
  */
-export type StartServices = CoreStart & NightshiftStartDependencies;
+export type StartServices = CoreStart &
+  NightshiftStartDependencies & {
+    /** Set by the app root; false outside it, for example in a test that does not provide it. */
+    isServerless?: boolean;
+    appParams: {
+      history: ScopedHistory;
+    };
+  };
 
 const useTypedKibana = () => useKibana<StartServices>();
 

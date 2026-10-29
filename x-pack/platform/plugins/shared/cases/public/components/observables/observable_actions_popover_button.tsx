@@ -30,10 +30,8 @@ import { EditObservableModal } from './edit_observable_modal';
 import { useDeleteObservable } from '../../containers/use_delete_observables';
 import { RunCaseWorkflowModal } from '../workflows/run_case_workflow_modal';
 import { useCasesWorkflowExecutor } from '../workflows/use_cases_workflow_executor';
-import {
-  untaggedCaseWorkflowFilter,
-  untaggedCaseWorkflowComparator,
-} from '../workflows/use_run_case_workflow';
+import { useCaseWorkflowRunTelemetry } from '../../analytics/use_case_workflow_run_telemetry';
+import { useCaseWorkflowFilters } from '../workflows/use_run_case_workflow';
 import { OBSERVABLE_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 
 /** The Cases API derives the workflow event from the origin, so no client inputs are sent. */
@@ -85,6 +83,8 @@ export const ObservableActionsPopoverButton: React.FC<ObservableActionsPopoverBu
   );
 
   const runWorkflow = useCasesWorkflowExecutor({ caseId: caseData.id, origin });
+  const workflowTelemetry = useCaseWorkflowRunTelemetry(origin);
+  const { filterWorkflow, sortWorkflow } = useCaseWorkflowFilters();
 
   const tooglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -191,9 +191,10 @@ export const ObservableActionsPopoverButton: React.FC<ObservableActionsPopoverBu
         <RunCaseWorkflowModal
           inputs={WORKFLOW_INPUTS}
           runWorkflow={runWorkflow}
-          filterWorkflow={untaggedCaseWorkflowFilter}
-          sortWorkflow={untaggedCaseWorkflowComparator}
+          filterWorkflow={filterWorkflow}
+          sortWorkflow={sortWorkflow}
           onClose={() => setShowRunWorkflowModal(false)}
+          telemetry={workflowTelemetry}
           focusButtonRef={buttonRef}
         />
       )}

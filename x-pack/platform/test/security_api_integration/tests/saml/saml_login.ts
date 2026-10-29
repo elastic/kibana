@@ -35,7 +35,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   function createSAMLResponse(options = {}) {
     return getSAMLResponse({
-      destination: `${kibanaServerConfig.protocol}://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
+      destination: url.format({
+        protocol: kibanaServerConfig.protocol,
+        hostname: kibanaServerConfig.hostname,
+        port: kibanaServerConfig.port,
+        pathname: '/api/security/saml/callback',
+      }),
       sessionIndex: String(randomness.naturalNumber()),
       ...options,
     });
@@ -43,7 +48,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   function createLogoutRequest(options: { sessionIndex: string }) {
     return getLogoutRequest({
-      destination: `${kibanaServerConfig.protocol}://localhost:${kibanaServerConfig.port}/logout`,
+      destination: url.format({
+        protocol: kibanaServerConfig.protocol,
+        hostname: kibanaServerConfig.hostname,
+        port: kibanaServerConfig.port,
+        pathname: '/logout',
+      }),
       ...options,
     });
   }

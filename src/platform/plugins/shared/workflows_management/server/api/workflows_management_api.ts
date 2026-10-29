@@ -72,11 +72,16 @@ import {
   resumeWorkflowExecutionExternallyViaGet,
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
+import { withHitlClaim } from './hitl_claim_release';
 import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import {
+  ALL_TRIGGER_SELECTION_KINDS,
+  preprocessTriggerInputs,
+} from './routes/executions/utils/preprocess_trigger_inputs';
+import type { TriggerSelectionKind } from './routes/executions/utils/preprocess_trigger_inputs';
 import type { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type { WorkflowsManagementClient } from './workflows_management_client';
 import { createWorkflowsManagementClient } from './workflows_management_client';
@@ -91,16 +96,20 @@ import type {
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
+import {
+  EPHEMERAL_WORKFLOW_ID,
+  getWorkflowDeleteOperation,
+  INTERNAL_TEST_WORKFLOW_ID,
+} from '../services/workflow_access_control';
 import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
-
-const INTERNAL_TEST_WORKFLOW_ID = 'internal-test-workflow';
 
 const isEnablementOnlyUpdate = (workflow: Partial<EsWorkflow>): boolean => {
   const fields = Object.keys(workflow);
@@ -245,12 +254,17 @@ export interface RunWorkflowWithAlertPreprocessingParams {
   preprocessingContext: AlertPreprocessingContext;
   metadata?: Record<string, unknown>;
   /**
-   * Fields to merge into `event` *after* alert preprocessing. Use this to inject
-   * server-owned values (e.g. `caseIds`) that alert preprocessing would otherwise
-   * overwrite, because `preprocessAlertInputs` replaces the whole `event` object with
-   * the expanded alert-event shape.
+   * Fields to merge into `event` *after* trigger preprocessing. Use this to inject
+   * server-owned values (e.g. `caseIds`) that preprocessing would otherwise
+   * overwrite, because `preprocessTriggerInputs` rewrites the `event` object into
+   * its expanded shape.
    */
   eventOverrides?: Record<string, unknown>;
+  /**
+   * Which compact selections in `event` the server may expand. Defaults to every kind it
+   * supports; a caller that validates selections itself should list only the kinds it checked.
+   */
+  expandSelections?: readonly TriggerSelectionKind[];
 }
 
 export interface RunWorkflowWithAlertPreprocessingResult {
@@ -380,12 +394,13 @@ export class WorkflowsManagementApi {
     id: string,
     spaceId: string,
     operation: WorkflowAccessOperation,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { allowAdminOverride?: boolean; auditOverride?: boolean }
   ): Promise<void> {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
-    await access.assertAccess(workflow, operation, request);
+    await access.assertAccess(workflow, operation, request, options);
   }
 
   public async updateAccessControl(
@@ -397,7 +412,6 @@ export class WorkflowsManagementApi {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
-    await access.assertAccess(workflow, 'manage', request);
     const result = await access.update(id, spaceId, input, request);
     if (input.access_mode === 'private') {
       // Finish earlier public writes before removing their search entries.
@@ -456,8 +470,8 @@ export class WorkflowsManagementApi {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) return null;
     const access = await this.workflowsService.getAccessControl();
-    const result = await access.toDto(workflow, request);
-    return result.permissions.read ? result : null;
+    if (!(await access.checkAccess(workflow, 'read', request))) return null;
+    return access.toDto(workflow, request);
   }
 
   public async getHistoryForWorkflow(
@@ -550,7 +564,14 @@ export class WorkflowsManagementApi {
         workflows.flatMap(({ id }) => (id ? [id] : [])),
         spaceId
       );
-      for (const { id } of existing) await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+      for (const { id } of existing) {
+        try {
+          await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+        } catch (error) {
+          // A hidden workflow is reported per item by the service, like an id taken by anyone else.
+          if (!(error instanceof WorkflowNotFoundError)) throw error;
+        }
+      }
     }
     const result = await this.workflowsService.bulkCreateWorkflows(
       workflows,
@@ -577,7 +598,7 @@ export class WorkflowsManagementApi {
     // Rewrite only the `name` field directly in the YAML text so that cloning
     // works even when the source workflow's YAML is schema-invalid. Strictly
     // parsing/validating here would reject invalid-but-editable workflows.
-    const cloneName = `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+    const cloneName = `${workflow.name} ${i18n.translate('workflows.cloneSuffix', {
       defaultMessage: 'Copy',
     })}`;
     const clonedYaml = updateWorkflowYamlFields(workflow.yaml, { name: cloneName });
@@ -659,11 +680,17 @@ export class WorkflowsManagementApi {
       });
       if (workflow?.access_control) {
         const access = await this.workflowsService.getAccessControl();
-        await access.assertAccess(
-          workflow,
-          options?.force && workflow.access_control.access_mode === 'private' ? 'manage' : 'edit',
-          request
-        );
+        try {
+          await access.assertAccess(
+            workflow,
+            getWorkflowDeleteOperation(workflow, options?.force),
+            request,
+            { allowAdminOverride: options?.force === true }
+          );
+        } catch (error) {
+          // The service skips a hidden workflow like an unknown one.
+          if (!(error instanceof WorkflowNotFoundError)) throw error;
+        }
       }
     }
     const workflows = await this.workflowsService.getWorkflowsByIds(workflowIds, spaceId);
@@ -702,7 +729,8 @@ export class WorkflowsManagementApi {
     inputs: Record<string, any>,
     request: KibanaRequest,
     triggeredBy?: string,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
+    isUserInteractive?: boolean
   ): Promise<string> {
     if (!workflow.isEphemeral) {
       await this.assertWorkflowAccess(workflow.id, spaceId, 'execute', request);
@@ -717,6 +745,9 @@ export class WorkflowsManagementApi {
     if (metadata) {
       context.metadata = metadata;
     }
+    if (isUserInteractive === true) {
+      context.isUserInteractive = true;
+    }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       workflow,
@@ -727,11 +758,12 @@ export class WorkflowsManagementApi {
   }
 
   /**
-   * Preprocesses alert inputs and starts a workflow without waiting for its execution document.
+   * Expands any compact trigger selection in `inputs` and starts a workflow without waiting for
+   * its execution document.
    *
    * When `eventOverrides` is supplied, its keys are merged into `event` *after* preprocessing.
-   * This is needed because `preprocessAlertInputs` replaces the whole `event` object with the
-   * expanded alert-event shape, so any caller-owned event fields must be re-applied afterwards.
+   * This is needed because preprocessing rewrites the `event` object into its expanded shape, so
+   * any caller-owned event fields must be re-applied afterwards.
    */
   public async runWorkflowWithAlertPreprocessing({
     workflow,
@@ -741,12 +773,14 @@ export class WorkflowsManagementApi {
     preprocessingContext,
     metadata,
     eventOverrides,
+    expandSelections = ALL_TRIGGER_SELECTION_KINDS,
   }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
-    const processedInputs = await preprocessAlertInputs(
+    const processedInputs = await preprocessTriggerInputs(
       inputs,
       preprocessingContext,
       spaceId,
-      this.logger
+      this.logger,
+      expandSelections
     );
 
     const finalInputs =
@@ -770,7 +804,8 @@ export class WorkflowsManagementApi {
       finalInputs,
       request,
       undefined,
-      metadata
+      metadata,
+      true
     );
 
     return { workflowExecutionId };
@@ -822,7 +857,7 @@ export class WorkflowsManagementApi {
       params.spaceId,
       params.request,
       // This throws on an invalid result, so it must not apply the variable rules.
-      { includeVariableRules: false }
+      { includeVariableRules: false, includeEsqlRules: false }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, params.yaml);
@@ -831,7 +866,7 @@ export class WorkflowsManagementApi {
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
 
     return {
-      id: params.workflowId ?? 'ephemeral-workflow',
+      id: params.workflowId ?? EPHEMERAL_WORKFLOW_ID,
       name: params.name ?? workflowJson.name,
       enabled: workflowJson.enabled,
       definition: workflowJson.definition,
@@ -967,7 +1002,8 @@ export class WorkflowsManagementApi {
         workflowId,
         spaceId,
         workflowYaml ? 'edit' : 'execute',
-        request
+        request,
+        { allowAdminOverride: false }
       );
     }
     let resolvedYaml = workflowYaml;
@@ -998,6 +1034,7 @@ export class WorkflowsManagementApi {
       request,
       {
         includeVariableRules: false,
+        includeEsqlRules: false,
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1010,6 +1047,7 @@ export class WorkflowsManagementApi {
       event,
       spaceId,
       inputs: manualInputs,
+      isUserInteractive: true,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
@@ -1043,13 +1081,18 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
-    if (workflowId) await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request);
+    if (workflowId) {
+      await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request, {
+        allowAdminOverride: false,
+      });
+    }
     const validation = await this.workflowsService.validateWorkflow(
       workflowYaml,
       spaceId,
       request,
       {
         includeVariableRules: false,
+        includeEsqlRules: false,
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1087,7 +1130,7 @@ export class WorkflowsManagementApi {
       const workflow = await this.workflowsService.getWorkflow(params.workflowId, spaceId, {
         includeDeleted: true,
       });
-      if (workflow && !(await access.permissions(workflow, params.request)).read) {
+      if (workflow && !(await access.checkAccess(workflow, 'read', params.request))) {
         accessControlFilter = { match_none: {} };
       }
     } else {
@@ -1105,6 +1148,16 @@ export class WorkflowsManagementApi {
       { ...params, accessControlFilter: await access.executionFilter(spaceId, params.request) },
       spaceId
     );
+  }
+
+  /** Workflow ids the caller can read, or `undefined` when no workflow is hidden from them. */
+  public async getReadableWorkflowIds(
+    spaceId: string,
+    request: KibanaRequest,
+    options: { includeManaged: boolean }
+  ): Promise<string[] | undefined> {
+    const access = await this.workflowsService.getAccessControl();
+    return access.readableWorkflowIds(spaceId, request, options);
   }
 
   public async getWorkflowExecution(
@@ -1129,9 +1182,37 @@ export class WorkflowsManagementApi {
     });
     if (workflow) {
       const access = await this.workflowsService.getAccessControl();
-      if (!(await access.permissions(workflow, options?.request)).read) return null;
+      if (!(await access.checkAccess(workflow, 'read', options?.request))) return null;
     }
     return execution;
+  }
+
+  /**
+   * The status of each execution the caller can read, in one read. An id that is missing, in
+   * another space, or whose workflow the caller cannot read or that no longer exists is left out
+   * of the result.
+   */
+  public async getWorkflowExecutionStatuses(
+    workflowExecutionIds: string[],
+    spaceId: string,
+    options: { request: KibanaRequest }
+  ): Promise<WorkflowExecutionStatusItem[]> {
+    const executions = await this.workflowsService.getWorkflowExecutionStatuses(
+      workflowExecutionIds,
+      spaceId
+    );
+    if (executions.length === 0) {
+      return [];
+    }
+    const access = await this.workflowsService.getAccessControl();
+    const readable = await this.workflowsService.getWorkflowsSourceByIds(
+      [...new Set(executions.map(({ workflowId }) => workflowId).filter(Boolean))],
+      spaceId,
+      ['id'],
+      { includeDeleted: true, accessControlFilter: await access.readFilter(options.request) }
+    );
+    const readableIds = new Set(readable.map(({ id }) => id));
+    return executions.filter(({ workflowId }) => readableIds.has(workflowId));
   }
 
   public async getChildWorkflowExecutions(
@@ -1331,6 +1412,7 @@ export class WorkflowsManagementApi {
   ): Promise<ResumeWorkflowExecutionResponseDto> {
     await this.assertExecutionAccess(executionId, spaceId, 'execute', request);
     const channel = options?.channel;
+    let claimReleased: boolean | undefined;
     try {
       const stepExecutionId =
         options?.stepExecutionId ??
@@ -1344,13 +1426,16 @@ export class WorkflowsManagementApi {
         );
       }
 
-      const claimed = await this.workflowsService.markStepAsResponded(
+      // Resolved before claiming so a lookup failure cannot strand the claim.
+      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+      const claim = await this.workflowsService.markStepAsResponded(
         stepExecutionId,
+        executionId,
         request,
         channel,
         spaceId
       );
-      if (!claimed) {
+      if (!claim) {
         throw new WorkflowExecutionInvalidStatusError(
           executionId,
           'already responded to or no longer waiting for input',
@@ -1358,12 +1443,19 @@ export class WorkflowsManagementApi {
         );
       }
 
-      const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-      const result = await workflowsExecutionEngine.resumeWorkflowExecution(
-        executionId,
-        spaceId,
-        input,
-        request
+      const result = await withHitlClaim(
+        {
+          workflowsService: this.workflowsService,
+          logger: this.logger,
+          executionId,
+          stepExecutionId,
+          claim,
+          spaceId,
+          onRelease: (released) => {
+            claimReleased = released;
+          },
+        },
+        () => workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request)
       );
       this.audit?.logExecutionResumed(request, {
         executionId,
@@ -1372,7 +1464,7 @@ export class WorkflowsManagementApi {
       });
       return result;
     } catch (error) {
-      this.audit?.logExecutionResumed(request, { executionId, channel, error });
+      this.audit?.logExecutionResumed(request, { executionId, channel, error, claimReleased });
       throw error;
     }
   }
@@ -1542,6 +1634,7 @@ export class WorkflowsManagementApi {
   ): Promise<ValidateWorkflowResponseDto> {
     return this.workflowsService.validateWorkflow(yaml, spaceId, request, {
       includeVariableRules: true,
+      includeEsqlRules: true,
     });
   }
 

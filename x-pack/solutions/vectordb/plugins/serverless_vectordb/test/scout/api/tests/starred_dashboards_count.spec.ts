@@ -83,11 +83,12 @@ apiTest.describe(
 
     apiTest(
       'returns no count for a user without dashboard access',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(NO_DASHBOARDS_ROLE);
+      async ({ apiClient, requestAuth }) => {
+        // an API key carries the custom role's privileges; a Cloud SAML session keeps the test account's own
+        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(NO_DASHBOARDS_ROLE);
 
         const response = await apiClient.post(STARRED_DASHBOARDS_COUNT_API_PATH, {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
           body: { dashboardIds: [EXISTING_DASHBOARD_ID] },
           responseType: 'json',
         });

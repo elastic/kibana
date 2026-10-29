@@ -40,6 +40,7 @@ import type {
   DocumentThreatIntelligenceDescriptor,
   EntityAlertsInsightsDescriptor,
   EntityAnomalyInsightsDescriptor,
+  EntityDescriptorMode,
   EntityEntraInsightsDescriptor,
   EntityGraphViewDescriptor,
   EntityMisconfigurationInsightsDescriptor,
@@ -130,23 +131,43 @@ const buildShowEntityCallback = (
     entityName,
     entityId,
     scopeId,
-  }: { entityType?: string; entityName: string; entityId?: string; scopeId?: string }
+    mode,
+  }: {
+    entityType?: string;
+    entityName: string;
+    entityId?: string;
+    scopeId?: string;
+    mode?: EntityDescriptorMode;
+  }
 ): (() => void) => {
   return () => {
     switch (entityType) {
       case 'user':
-        api.openUserFlyoutAsChild({ userName: entityName, entityId, scopeId, title: entityName });
+        api.openUserFlyoutAsChild({
+          userName: entityName,
+          entityId,
+          scopeId,
+          mode,
+          title: entityName,
+        });
         break;
       case 'service':
         api.openServiceFlyoutAsChild({
           serviceName: entityName,
           entityId,
           scopeId,
+          mode,
           title: entityName,
         });
         break;
       case 'host':
-        api.openHostFlyoutAsChild({ hostName: entityName, entityId, scopeId, title: entityName });
+        api.openHostFlyoutAsChild({
+          hostName: entityName,
+          entityId,
+          scopeId,
+          mode,
+          title: entityName,
+        });
         break;
       default:
         // Generic / unknown entity type: only openable when we have the canonical entity id.
@@ -181,12 +202,20 @@ export const openDescriptorAsStart = (
     // --- Document main flyouts ---
     case 'document': {
       const { documentId, indexName } = descriptor as DocumentDescriptor;
-      api.openDocumentFlyoutFromIndex({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromIndex({
+        documentId,
+        indexName,
+        ...originParams,
+      });
       break;
     }
     case 'documentFromPattern': {
       const { documentId, indexName } = descriptor as DocumentFromPatternDescriptor;
-      api.openDocumentFlyoutFromPattern({ documentId, indexName, ...originParams });
+      api.openDocumentFlyoutFromPattern({
+        documentId,
+        indexName,
+        ...originParams,
+      });
       break;
     }
 
@@ -342,7 +371,11 @@ export const openDescriptorAsStart = (
     // --- Attack main flyout + tools ---
     case 'attack': {
       const { attackId, indexName } = descriptor as AttackDescriptor;
-      api.openAttackFlyout({ attackId, indexName, ...originParams });
+      api.openAttackFlyout({
+        attackId,
+        indexName,
+        ...originParams,
+      });
       break;
     }
     case 'attackCorrelations': {
@@ -374,18 +407,18 @@ export const openDescriptorAsStart = (
 
     // --- Entity main flyouts ---
     case 'host': {
-      const { hostName, entityId, scopeId } = descriptor as HostDescriptor;
-      api.openHostFlyout({ hostName, entityId, scopeId, ...originParams });
+      const { hostName, entityId, scopeId, mode } = descriptor as HostDescriptor;
+      api.openHostFlyout({ hostName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'user': {
-      const { userName, entityId, scopeId } = descriptor as UserDescriptor;
-      api.openUserFlyout({ userName, entityId, scopeId, ...originParams });
+      const { userName, entityId, scopeId, mode } = descriptor as UserDescriptor;
+      api.openUserFlyout({ userName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'service': {
-      const { serviceName, entityId, scopeId } = descriptor as ServiceDescriptor;
-      api.openServiceFlyout({ serviceName, entityId, scopeId, ...originParams });
+      const { serviceName, entityId, scopeId, mode } = descriptor as ServiceDescriptor;
+      api.openServiceFlyout({ serviceName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'genericEntity': {
@@ -427,11 +460,15 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as unknown as EntityType.host | EntityType.user,
         value: d.value,
         entityId: d.entityId,
+        mode: d.mode,
+        scopeId: d.scopeId,
         ...originParams,
         onOpenEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          scopeId: d.scopeId,
+          mode: d.mode,
         }),
       });
       break;
@@ -445,11 +482,15 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
+        mode: d.mode,
+        scopeId: d.scopeId,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          scopeId: d.scopeId,
+          mode: d.mode,
         }),
       });
       break;
@@ -463,11 +504,13 @@ export const openDescriptorAsStart = (
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
+        mode: d.mode,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          mode: d.mode,
         }),
       });
       break;
@@ -478,11 +521,13 @@ export const openDescriptorAsStart = (
         value: d.value,
         entityId: d.entityId,
         entityType: d.entityType as unknown as EntityType.host | EntityType.generic | undefined,
+        mode: d.mode,
         ...originParams,
         onShowHost: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          mode: d.mode,
         }),
       });
       break;
@@ -511,12 +556,14 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as EntityType,
         entityName: d.entityName,
         scopeId: d.scopeId,
+        mode: d.mode,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.entityName,
           entityId: d.entityId,
           scopeId: d.scopeId,
+          mode: d.mode,
         }),
       });
       break;
@@ -554,7 +601,10 @@ export const openDescriptorAsStart = (
     }
     case 'rule': {
       const { ruleId } = descriptor as RuleDescriptor;
-      api.openRuleFlyout({ ruleId, ...originParams });
+      api.openRuleFlyout({
+        ruleId,
+        ...originParams,
+      });
       break;
     }
 
@@ -624,18 +674,18 @@ export const openDescriptorAsChild = (
       break;
     }
     case 'host': {
-      const { hostName, entityId, scopeId } = descriptor as HostDescriptor;
-      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, ...originParams });
+      const { hostName, entityId, scopeId, mode } = descriptor as HostDescriptor;
+      api.openHostFlyoutAsChild({ hostName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'user': {
-      const { userName, entityId, scopeId } = descriptor as UserDescriptor;
-      api.openUserFlyoutAsChild({ userName, entityId, scopeId, ...originParams });
+      const { userName, entityId, scopeId, mode } = descriptor as UserDescriptor;
+      api.openUserFlyoutAsChild({ userName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'service': {
-      const { serviceName, entityId, scopeId } = descriptor as ServiceDescriptor;
-      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, ...originParams });
+      const { serviceName, entityId, scopeId, mode } = descriptor as ServiceDescriptor;
+      api.openServiceFlyoutAsChild({ serviceName, entityId, scopeId, mode, ...originParams });
       break;
     }
     case 'genericEntity': {

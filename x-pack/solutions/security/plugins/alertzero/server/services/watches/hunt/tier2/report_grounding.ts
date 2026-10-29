@@ -170,6 +170,34 @@ const PATTERN_OPERATORS: ReadonlySet<string> = new Set(['like', 'rlike']);
 const WORD_CHARACTER = /[\p{L}\p{N}_]/u;
 
 /**
+ * Elasticsearch's `standard` tokenizer's own default `max_token_length`: a token longer than this
+ * is split into chunks of this size rather than kept whole, regardless of what characters it's
+ * made of. A 259-character ASCII run ending in `role` grounds as one term here but analyzes into
+ * a 255-character chunk plus a separate `role` token, so `MATCH` ORs them and a document holding
+ * only `role` comes back as a hit this gate had approved as the full literal. This is the
+ * tokenizer's own default, not a limit this gate derives from anything else -- a deployment that
+ * raises it on a specific field's mapping would make this gate stricter than it needs to be for
+ * that field, which is the safe direction; one that lowers it is the one way this gate could still
+ * be wrong, and nothing short of reading the field's own mapping would catch that.
+ */
+const MAX_SINGLE_TOKEN_LENGTH = 255;
+
+/**
+ * Unambiguously one token under the standard tokenizer: ASCII letters, digits and underscore
+ * throughout, no longer than `MAX_SINGLE_TOKEN_LENGTH`. Deliberately narrower than
+ * `WORD_CHARACTER` above (which has a different job -- finding term boundaries inside report text
+ * that may itself be in any script): the standard tokenizer's word-break algorithm (UAX #29) only
+ * behaves like "one token per space-delimited word" for scripts that use spaces. CJK text has no
+ * such boundary, so the standard tokenizer emits one token per ideograph -- `MATCH(message,
+ * "权限提升")` is four independent OR alternatives, not one, even though every character is a
+ * `\p{L}` letter. Accepting all of `\p{L}` here would ground the whole value as a single verified
+ * term while the analyzed query matches on any one character of it. ASCII is the one range this
+ * gate can be sure of; anything else -- including an ASCII run past the length bound -- keeps the
+ * placeholder and has `MATCH_PHRASE` as its escape hatch, same as punctuation.
+ */
+const SINGLE_TOKEN = new RegExp(`^[A-Za-z0-9_]{1,${MAX_SINGLE_TOKEN_LENGTH}}$`);
+
+/**
  * True when `value` appears in `text` as a term of its own rather than buried inside a longer
  * word. A report describing an `unsuccessful login` contains the characters of `success`, but the
  * rows `WHERE event.outcome == "success"` brings back are the opposite of what it describes, and
@@ -333,6 +361,25 @@ const requiredRegexpCore = (alternative: string): string[] => {
  *   a match on short tokens alone — `MATCH(process.command_line, "net use")` keeps the
  *   placeholder — and costs nothing that can be verified.
  *
+ * `match` and `:` split their literal on whitespace here and compare each piece whole, but
+ * Elasticsearch's own analyzer also splits on punctuation, and `MATCH` ORs whatever it produces.
+ * `MATCH(message, "escalated-role")` is one term above and verified as a report artifact once —
+ * but the query that actually runs matches any document holding the analyzed `escalated` **or**
+ * `role`, so a document containing only `role` comes back as a hit this gate had already approved
+ * as `escalated-role`. Whether a given field's mapping would really split it is not something this
+ * gate can see, so there is no correct simulation of the analyzer to fall back on — only a choice
+ * about which direction to be wrong in. The choice here: a term has to be ASCII letters, digits
+ * and underscore throughout, no longer than `MAX_SINGLE_TOKEN_LENGTH` (unambiguously one token
+ * under the standard tokenizer) to ground at all; anything else — hyphenated, dotted,
+ * multi-word-as-one-literal, a non-ASCII script the tokenizer would segment differently (CJK text
+ * has no space-delimited words, so the standard tokenizer emits one token per ideograph), or an
+ * ASCII run long enough that the tokenizer's own length limit would split it anyway — keeps the
+ * placeholder regardless of whether the report contains it. `MATCH_PHRASE` is exempt, because its
+ * terms are conjunctive
+ * and ordered rather than independent OR alternatives: a hyphenated or multi-word phrase still has
+ * to appear together, in order, so it stays grounded by the whitespace-split rule above with no
+ * extra check, and is the shape to steer generation at when a value cannot stand as one token.
+ *
  * `LIKE` needs neither the alternation rule nor `RLIKE`'s whitelist: its only wildcards are `*`
  * for any sequence and `?` for exactly one character, so every fragment between them is text the
  * matching rows contain.
@@ -348,7 +395,15 @@ const groundingRequirements = (operator: string, literal: string): string[][] =>
     const terms = literal.split(/\s+/).filter((term) => term.length > 0);
     // A literal with no term asks for nothing, and an empty requirement list is satisfied by
     // everything, so it has to fail here rather than pass vacuously.
-    return terms.length > 0 ? terms.map((term) => [term]) : [[]];
+    if (terms.length === 0) {
+      return [[]];
+    }
+    if (operator === 'match_phrase') {
+      return terms.map((term) => [term]);
+    }
+    // `match` and `:` OR their terms — see the comment above this function for why a term this
+    // gate cannot confirm is a single token refuses rather than grounds as one.
+    return terms.map((term) => (SINGLE_TOKEN.test(term) ? [term] : []));
   }
   return [[literal]];
 };
@@ -376,6 +431,75 @@ const listValuesOf = (args: ESQLAstNode[]): string[] | undefined => {
   // A list holding anything other than literals — a column, a function — has a member this
   // cannot ground, which under `IN`'s alternative semantics is enough to widen the result.
   return literals.length === list.values.length ? literals : [];
+};
+
+/**
+ * `text` with every term occurrence of a rejected value blanked, so no fragment of one can ground
+ * a pattern. Longer values are blanked first so a shorter rejected term inside a longer one
+ * cannot split it before it is matched. Blanks keep the length so offsets stay aligned.
+ */
+const withoutRejectedMentions = (text: string, rejected: ReadonlySet<string>): string => {
+  let scrubbed = text;
+  const ordered = [...rejected].sort((a, b) => b.length - a.length);
+  for (const value of ordered) {
+    for (let at = scrubbed.indexOf(value); at !== -1; at = scrubbed.indexOf(value, at + 1)) {
+      const end = at + value.length;
+      const before = scrubbed[at - 1] ?? ' ';
+      const after = scrubbed[end] ?? ' ';
+      if (WORD_CHARACTER.test(before) || WORD_CHARACTER.test(after)) continue;
+      scrubbed = `${scrubbed.slice(0, at)}${' '.repeat(value.length)}${scrubbed.slice(end)}`;
+    }
+  }
+  return scrubbed;
+};
+
+/**
+ * Whether `value` is a substring of an eligible IOC that carries at least
+ * `MIN_GROUNDING_LENGTH` characters from the non-rejected part of that IOC.
+ *
+ * When a shared-platform root (`github.com`) is rejected while a specific URL under it
+ * (`https://github.com/attacker/stage2`) is eligible, a pattern like
+ * `LIKE "*github.com/attacker/stage2*"` hunts the eligible URL, whereas
+ * `LIKE "*https://github.com/*"` or `LIKE "*github.co*"` hunts only the rejected root.
+ * Blanking rejected terms out of both the eligible IOC and the candidate requires the
+ * candidate to include a distinguishing segment of the eligible IOC outside the rejected root.
+ *
+ * `eligible` maps each eligible IOC to its already-scrubbed form, computed once per gate call
+ * rather than per candidate.
+ */
+type ScrubbedEligibleIocs = ReadonlyMap<string, string>;
+
+const scrubEligibleIocs = (
+  eligible: Iterable<string>,
+  rejected: ReadonlySet<string>
+): ScrubbedEligibleIocs =>
+  new Map(
+    Array.from(eligible, (ioc) => [
+      ioc,
+      rejected.size > 0 ? withoutRejectedMentions(ioc, rejected) : ioc,
+    ])
+  );
+
+const isSpecificToEligibleIoc = (
+  value: string,
+  rejected: ReadonlySet<string>,
+  eligible: ScrubbedEligibleIocs
+): boolean => {
+  const scrubbedValue = withoutRejectedMentions(value, rejected);
+  const hasMeaningfulPart = scrubbedValue
+    .replace(/^\s*https?:\/\//, '')
+    .split(/\s+/)
+    .some(
+      (part) =>
+        part.replace(/^[^\p{L}\p{N}_]+|[^\p{L}\p{N}_]+$/gu, '').length >= MIN_GROUNDING_LENGTH
+    );
+  if (!hasMeaningfulPart) return false;
+  for (const [ioc, scrubbedIoc] of eligible) {
+    if (ioc.includes(value) && scrubbedIoc.includes(scrubbedValue)) {
+      return true;
+    }
+  }
+  return false;
 };
 
 interface GroundingRules {
@@ -477,6 +601,14 @@ const isPipelineGrounded = (
  * the query filled with a constant, or no column at all, matches every row while reading as a hunt
  * for the value it carries.
  *
+ * Values intel review adjudicated out (`excludedIocValues`) may narrow a query but never ground
+ * it. Their mentions are blanked out of the report text before the check, so a predicate on one
+ * is ungrounded on its own (and so is a wildcard fragment of one), while beside a predicate the
+ * report does support it only narrows the rows: a `reference` IMDS address can scope a hunt for a
+ * grounded cloud-metadata request without being the thing hunted. A value still in `iocValues`
+ * wins, and an eligible IOC that embeds a rejected value (an approved URL under a rejected
+ * shared-platform root) still grounds on its distinguishing part.
+ *
  * It remains a value test rather than a semantic one: it establishes that the report constrains
  * the rows, not that the constraint is tight. A tautology disjoined onto a grounded comparison is
  * caught as an ungrounded `OR` branch, but a predicate that is grounded and still matches most of
@@ -484,7 +616,11 @@ const isPipelineGrounded = (
  */
 export const assertEsqlGroundedInReport = (
   query: string,
-  { reportText, iocValues }: { reportText: string; iocValues: string[] }
+  {
+    reportText,
+    iocValues,
+    excludedIocValues,
+  }: { reportText: string; iocValues: string[]; excludedIocValues?: string[] }
 ): EsqlGroundedResult => {
   const { root, errors } = Parser.parse(query);
   if (errors.length > 0) {
@@ -504,29 +640,100 @@ export const assertEsqlGroundedInReport = (
   const sources = new Set<string>();
   Walker.walk(root, { visitSource: ({ name }) => sources.add(normalize(name)) });
 
-  const haystack = normalize(reportText);
   const groundingIocs = new Set(iocValues.map(normalize).filter((value) => value.length > 0));
+  // Adjudicated-out values must not ground a query even when they appear in report text. A value
+  // still listed in `iocValues` wins (eligible to hunt), so it is removed from the denylist.
+  const excludedSet = new Set(
+    (excludedIocValues ?? [])
+      .map(normalize)
+      .filter((value) => value.length >= MIN_GROUNDING_LENGTH && !groundingIocs.has(value))
+  );
+  const scrubbedEligible = scrubEligibleIocs(groundingIocs, excludedSet);
 
-  const qualifies = (candidate: string, standalone: boolean): boolean => {
-    const value = normalize(candidate);
-    if (value.length < MIN_GROUNDING_LENGTH || sources.has(value)) {
-      return false;
-    }
-    if (groundingIocs.has(value)) {
-      return true;
-    }
-    return standalone ? appearsAsTerm(haystack, value) : haystack.includes(value);
-  };
+  // A rejected value may narrow a query but never ground it. Its mentions are blanked out of the
+  // text literals are checked against, so `WHERE source.ip == "169.254.169.254"` on its own, or
+  // `LIKE "169.254.169*"` on nothing but that mention, is ungrounded, while the same predicate
+  // beside one the report does support only narrows the rows. A fragment the report also uses on
+  // its own (`kubernetes` as a word, not only inside a rejected `kubernetes.io`) still grounds.
+  const rawHaystack = normalize(reportText);
+  const haystack =
+    excludedSet.size > 0 ? withoutRejectedMentions(rawHaystack, excludedSet) : rawHaystack;
 
-  const grounds = (operator: string, literal: string): boolean => {
-    const standalone = !PATTERN_OPERATORS.has(operator);
-    return groundingRequirements(operator, literal).every((alternatives) =>
-      alternatives.some((candidate) => qualifies(candidate, standalone))
-    );
-  };
+  const qualifiesIn =
+    (text: string, scrubbed: boolean) =>
+    (candidate: string, standalone: boolean): boolean => {
+      const value = normalize(candidate);
+      if (value.length < MIN_GROUNDING_LENGTH || sources.has(value)) {
+        return false;
+      }
+      if (groundingIocs.has(value)) {
+        return true;
+      }
+      // Blanking only term occurrences leaves a rejected value readable inside a longer token
+      // (`192.0.2.3` inside an eligible `192.0.2.30`), so the exact value is refused outright
+      // here rather than looked up: it may narrow a query, never ground one.
+      if (scrubbed && excludedSet.has(value)) {
+        return false;
+      }
+      if (!standalone && isSpecificToEligibleIoc(value, excludedSet, scrubbedEligible)) {
+        return true;
+      }
+      return standalone
+        ? appearsAsTerm(text, value)
+        : text.includes(value) ||
+            (!scrubbed && [...groundingIocs].some((ioc) => ioc.includes(value)));
+    };
+
+  const groundsIn =
+    (text: string, scrubbed: boolean) =>
+    (operator: string, literal: string): boolean => {
+      const standalone = !PATTERN_OPERATORS.has(operator);
+      const qualifies = qualifiesIn(text, scrubbed);
+      return groundingRequirements(operator, literal).every((alternatives) =>
+        alternatives.some((candidate) => qualifies(candidate, standalone))
+      );
+    };
+
+  const grounds = groundsIn(haystack, true);
 
   if (isPipelineGrounded(root, grounds)) {
     return { ok: true };
+  }
+
+  // Grounded only while the rejected mentions were still in the text: the query hunts a rejected
+  // value, or a fragment of one. Name it so the retry instruction can say which.
+  if (excludedSet.size > 0 && isPipelineGrounded(root, groundsIn(rawHaystack, false))) {
+    const qualifiesRaw = qualifiesIn(rawHaystack, false);
+    const qualifiesScrubbed = qualifiesIn(haystack, true);
+    let fragment: string | undefined;
+    Walker.walk(root, {
+      visitLiteral: (literal) => {
+        if (fragment !== undefined) return;
+        const text = valueOf(literal);
+        const found = [
+          ...groundingRequirements('like', text).flat(),
+          ...groundingRequirements('rlike', text).flat(),
+        ].find(
+          (candidate) => qualifiesRaw(candidate, false) && !qualifiesScrubbed(candidate, false)
+        );
+        if (found !== undefined) fragment = normalize(found);
+      },
+    });
+    const carried =
+      fragment === undefined
+        ? undefined
+        : [...excludedSet].find(
+            (rejected) => rejected === fragment || appearsAsTerm(fragment as string, rejected)
+          );
+    return {
+      ok: false,
+      reason:
+        carried !== undefined
+          ? `query filters on a value intel review rejected (${carried})`
+          : `query filters on a fragment of a value intel review rejected${
+              fragment !== undefined ? ` (${fragment})` : ''
+            }`,
+    };
   }
 
   // Deliberately permissive — it only chooses the wording of a rejection, never accepts one — so

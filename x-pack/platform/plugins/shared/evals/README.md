@@ -43,8 +43,9 @@ The evaluation system spans three packages:
 The plugin is **disabled by default**. To enable it locally, add the following to your `kibana.dev.yml`:
 
 ```yaml
-# Enable the evals plugin
+# Enable the evals plugin, with the full evals product (UI, API and workflow steps)
 xpack.evals.enabled: true
+xpack.evals.mode: full
 
 # Required: enable experimental agent-builder features
 uiSettings:
@@ -69,6 +70,17 @@ Then start the EDOT collector in a separate terminal:
 ```bash
 node scripts/edot_collector
 ```
+
+### Modes
+
+`xpack.evals.enabled` decides whether Kibana loads the plugin at all. `xpack.evals.mode` decides how much of it loads:
+
+| Mode | Loads |
+| --- | --- |
+| `runtime` | Only what other plugins need to run evaluators in-process. No HTTP routes, `evals` feature or privileges, data streams, app, management section, or `ai.evals.*` workflow steps. |
+| `full` (default) | Also everything runtime mode leaves out: the evals UI and API that the `@kbn/evals` CLI, in-tool experiments, and the Agent Builder evals skills use. |
+
+Runtime mode is for deployments that run evaluators in the background without exposing evals to users. The default will move to `runtime`, so anything that uses the evals UI or API, including local development, Scout and FTR configs, and the golden cluster, sets `xpack.evals.mode: full` explicitly. Against a runtime-mode Kibana, the `@kbn/evals` CLI reports that the evals API is not available.
 
 ### Prerequisite data
 
@@ -109,7 +121,7 @@ The **New experiment** button on the Experiments tab opens a form: choose one or
 
 #### From Agent Builder
 
-An `eval-experiment-authoring` skill lets you do the same thing from an Agent Builder chat: discover datasets, evaluators, task targets, and connectors, preview the experiment, then run it or save it as a workflow. It is available only when `xpack.evals.enabled` is set.
+An `eval-experiment-authoring` skill lets you do the same thing from an Agent Builder chat: discover datasets, evaluators, task targets, and connectors, preview the experiment, then run it or save it as a workflow. It is available only when `xpack.evals.enabled` is set and `xpack.evals.mode` is `full`.
 
 #### From YAML
 
@@ -150,16 +162,17 @@ steps:
 
 The full set of `ai.evals.*` steps:
 
-| Step                          | Purpose                                                        |
-| ----------------------------- | -------------------------------------------------------------- |
-| `ai.evals.startExperiment`    | Create the experiment/execution ids that group a run's scores. |
-| `ai.evals.resolveDataset`     | Load datasets and their examples.                              |
-| `ai.evals.executeTask`        | Run the thing being evaluated against one example.             |
-| `ai.evals.evaluateTrace`      | Grade one trace with one or more evaluators.                   |
-| `ai.evals.ingestScores`       | Persist evaluator scores for one example.                      |
-| `ai.evals.evaluateExample`    | Execute, evaluate, and ingest scores for a single example.     |
-| `ai.evals.evaluateDataset`    | Resolve datasets and evaluate every example (the main step).   |
-| `ai.evals.compareExperiments` | Statistically compare two or more experiments.                 |
+| Step                           | Purpose                                                        |
+| ------------------------------ | -------------------------------------------------------------- |
+| `ai.evals.startExperiment`     | Create the experiment/execution ids that group a run's scores. |
+| `ai.evals.resolveDataset`      | Load datasets and their examples.                              |
+| `ai.evals.executeTask`         | Run the thing being evaluated against one example.             |
+| `ai.evals.evaluateTrace`       | Grade one trace with one or more evaluators.                   |
+| `ai.evals.ingestScores`        | Persist evaluator scores for one example.                      |
+| `ai.evals.persistOnlineScores` | Persist an online evaluation's scores for one trace.           |
+| `ai.evals.evaluateExample`     | Execute, evaluate, and ingest scores for a single example.     |
+| `ai.evals.evaluateDataset`     | Resolve datasets and evaluate every example (the main step).   |
+| `ai.evals.compareExperiments`  | Statistically compare two or more experiments.                 |
 
 The Workflows YAML editor autocompletes and validates these steps and their inputs as you author.
 
@@ -173,6 +186,26 @@ Each experiment runs one **task target** — the thing being evaluated for each 
 | Agent Builder agent        | An Agent Builder agent conversation. |
 
 Other plugins can contribute their own production feature as an additional target, so the real feature — not a reimplementation — is what gets evaluated.
+
+## Registering evaluators from a plugin
+
+A plugin can ship its own evaluators through `registerEvaluator()` on the evals setup contract, so they live and version with the feature they grade.
+
+```ts
+evals.registerEvaluator({
+  name: 'nightshift_rca_quality',
+  version: '1.0.0',
+  kind: 'llm',
+  description: 'Grades a root cause analysis',
+  direction: 'maximize',
+  evaluate: async ({ round, inferenceClient }) => ({ scores: [/* ... */] }),
+});
+```
+
+- A registered evaluator is treated like the ones Kibana ships: it is listed and resolved as `built_in` in every space, and its name is reserved, so a user-defined evaluator can't be created under it or shadow it.
+- Names follow the same rules as user-defined ones, and versions must be semver. Registering several versions of one name is allowed; the latest is used unless a version is pinned.
+- Registration throws for a name Kibana ships, a name and version already registered, or a call made after setup.
+- Prefix names with the owning plugin, for example `nightshift_`. The registry can't tell which plugin registered a name, so two plugins could otherwise claim the same one. And when a registered name matches a user-defined evaluator already stored in a space, that stored evaluator is hidden and can no longer be updated or deleted, as happens for names Kibana ships.
 
 ## API routes
 
@@ -197,6 +230,23 @@ All routes are internal (`elastic-api-version: 1`). Read routes require the `rea
 - **Remotes** — manage remote Kibana configurations for dataset forwarding
 
 For full request/response schemas, see the OpenAPI definitions in [`@kbn/evals-common/impl/schemas/`](../../packages/shared/kbn-evals-common/impl/schemas/).
+
+### Evaluating in-process
+
+Server plugins can grade a trace without HTTP through `evaluate()` on the evals start contract. It runs the same evaluator execution as `_evaluate` and takes the same `subject` and `evaluators`, held to the same bounds.
+
+```ts
+const results = await evals.evaluate?.({
+  request,
+  subject: { traces: [{ trace_id: traceId }] },
+  evaluators: [{ name: 'groundedness', connector_id: judgeConnectorId }],
+});
+```
+
+- Evaluators are resolved in `spaceId` when given, otherwise in the request's space.
+- Traces are read as the request's current user, and judges call their connector on behalf of the request. Whenever a trace is read, that identity needs read access to `traces-*` and `logs-*`. For a workflow step, it is the identity behind the step's fake request.
+- Invalid input, an unknown evaluator, a trace that is not ready, or missing privileges to read the trace throws `EvaluationExecutionError`. A failing evaluator does not throw; it is returned as an `error` result next to the others.
+- A caller with read access to only some of the matching indices gets no privilege error, because Elasticsearch narrows wildcard searches to the indices it can read. Its trace can then look not ready instead (see [Reading normalized trace evidence](#reading-normalized-trace-evidence)).
 
 ## Dataset tags and maturity
 
@@ -240,25 +290,35 @@ The endpoint requires `read_evals` and current-user read access to `traces-*` an
 
 The plugin UI is organized into five navigation tabs:
 
-- **Experiments** — paginated listing of evaluation experiments, detail view with per-evaluator stats, and a comparison view with paired t-test results. The **New experiment** flow launches or saves workflow-based runs and streams live progress on the detail page (see [Workflow-based experiment execution](#workflow-based-experiment-execution)).
+- **Experiments** — paginated listing of evaluation experiments, detail view with per-evaluator stats, and a comparison view that runs a paired hypothesis test per evaluator (McNemar for pass/fail scores, Wilcoxon signed-rank or paired t-test otherwise). The **New experiment** flow launches or saves workflow-based runs and streams live progress on the detail page (see [Workflow-based experiment execution](#workflow-based-experiment-execution)).
 - **Datasets** — manage evaluation datasets and examples (CRUD, JSON editor), tag and set the maturity of a dataset, and filter the listing by tag or maturity
 - **Evaluators** — a catalog of every evaluator in the space, searchable and filterable by kind (LLM judge or code) and origin (built-in or user-defined), showing each one's version and required inputs. Selecting a name opens a read-only view of the stored definition, including the versions saved before it. Built-ins are read-only; user-defined judges can be created, edited, and deleted here by users holding `manage_evals`. The editor collects the judge's prompts, the trace evidence it needs, and its output scores, and can run the draft against a real trace ID before saving — the connector chosen for that test is not stored on the definition.
 
 #### Score direction
 
-A user-defined judge is compiled with `direction: 'maximize'`, and direction is set once per evaluator, so every score it emits is read as higher is better. That covers both numeric scores and the values assigned to categorical labels. Comparisons depend on it: a judge whose score falls as quality improves, such as a hallucination rate, shows improvements as regressions. Phrase rubrics so that 1 is the best outcome, for example scoring groundedness rather than hallucination. The editor says the same above its score list.
+Each score a user-defined judge declares carries its own `direction`, so one judge can maximize groundedness while minimizing a hallucination rate:
+
+| Direction | Editor label | Comparisons read it as |
+| --- | --- | --- |
+| `maximize` | Higher is better | An increase is an improvement |
+| `minimize` | Lower is better | A decrease is an improvement |
+| `neutral` | Neutral | Informational; never an improvement or a regression |
+
+Direction covers both numeric scores and the values assigned to categorical labels. A score that omits it is `maximize`, which is how every score was read before scores could declare one, so existing versions behave exactly as before. A numeric score's direction is also stated to the judge, so a lower-is-better score is not reported on an inverted scale.
+
+`_evaluate` and `_test` return the direction on each score, and every score document is stamped with it. Experiment comparison reads it per score, so improvements and regressions are colored correctly even when one evaluator's scores point different ways. The evaluator-level `direction` remains the fallback for scores that do not set one, which is how built-in evaluators and older score documents are read. For a user-defined judge it is the direction its scores share, or `maximize` when they point different ways.
 
 #### Evaluator versions
 
-Every saved change writes a new immutable version; saving without changing anything writes nothing. The semver level is **derived from the edit rather than chosen by the author**, because a judge offers no way to verify a claim that a change was safe — a one-word rubric change can move every score.
+Every saved change writes a new immutable version; saving without changing anything writes nothing. An update may send `base_version`, the version the edit started from; if the evaluator has moved on since, the update is refused with `409` instead of being written over the newer version. The editor always sends it, so two people editing the same evaluator cannot silently undo each other's changes. An update without it is layered onto whatever the latest version is. The semver level is **derived from the edit rather than chosen by the author**, because a judge offers no way to verify a claim that a change was safe — a one-word rubric change can move every score.
 
 | Level | What changed | Effect on past scores |
 | --- | --- | --- |
 | `patch` | Only the catalog description, which the judge never sees | Still comparable |
 | `minor` | The judge's instructions: prompts, or the criteria attached to a score | Scores may shift, but still line up |
-| `major` | The scores themselves (added, removed, renamed, retyped, or relabelled) or the required evidence and reference data keys | Earlier runs no longer line up |
+| `major` | The scores themselves (added, removed, renamed, retyped, relabelled, or given a different direction) or the required evidence and reference data keys | Earlier runs no longer line up |
 
-A major is therefore a mechanical statement that results before and after cannot be compared, not an opinion about how large the edit was.
+A major is therefore a mechanical statement that results before and after cannot be compared, not an opinion about how large the edit was. Changing a score's direction is a major because the same movement would read the opposite way: when two experiments straddle the change, comparison uses the target experiment's direction for both sides. Re-saving a version that predates per-score direction, with every score left at Higher is better, is not a change and writes no version.
 
 Order matters in one place only. Evidence and reference data keys are sets of requirements, so their order is normalized and reordering them alone writes no version at all. Score order is part of the definition a reader sees and the order the judge is asked for them, so reordering scores is a `minor` — the set of scores is unchanged, which is why it is not a `major`.
 - **Tracing** — browse tracing projects with metrics, drill into individual traces with a waterfall view

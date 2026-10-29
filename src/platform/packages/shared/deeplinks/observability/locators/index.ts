@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './alerts';
 export * from './apm';
 export * from './dataset_quality';
 export * from './dataset_quality_details';
+export * from './observability_alerting';
 export * from './observability_logs_explorer';
 export * from './observability_onboarding';
+export * from './nightshift';
 export * from './significant_events';
 export * from './slo';
 export * from './streams';

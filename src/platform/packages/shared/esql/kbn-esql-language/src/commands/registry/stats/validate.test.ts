@@ -9,7 +9,8 @@
 import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/commands/validation';
-import type { ICommandContext } from '../types';
+import { getNoValidCallSignatureError } from '../../definitions/utils/validation/utils';
+import type { ESQLColumnData, ICommandContext } from '../types';
 
 const statsExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'stats', validate);
@@ -192,6 +193,80 @@ describe('STATS Validation', () => {
           statsExpectErrors(query, expectedErrors);
         }
       );
+
+      describe('grouping assignments referenced by the aggregation', () => {
+        const histogramContext: ICommandContext = {
+          ...mockContext,
+          columns: new Map<string, ESQLColumnData>([
+            ...mockContext.columns,
+            ['histo', { name: 'histo', type: 'exponential_histogram', userDefined: false }],
+            ['addr', { name: 'addr', type: 'long', userDefined: false }], // Used to test columns overwrites.
+          ]),
+        };
+
+        test('resolves a BY assignment used as an aggregation argument', () => {
+          statsExpectErrors(
+            'FROM a_index | STATS count = COUNT(histo, buck) BY buck = BUCKET(histo, 0.005)',
+            [],
+            histogramContext
+          );
+        });
+
+        test('resolves a BY assignment used in the aggregation WHERE', () => {
+          statsExpectErrors(
+            'FROM a_index | STATS COUNT() WHERE addr != null BY addr = keywordField',
+            []
+          );
+        });
+
+        test('a BY assignment hides an input column of the same name', () => {
+          statsExpectErrors(
+            'FROM a_index | STATS COUNT() WHERE addr > 10 BY addr = keywordField',
+            [getNoValidCallSignatureError('>', ['keyword', 'integer'])],
+            histogramContext
+          );
+        });
+
+        test('a grouping expression does not see BY assignments', () => {
+          statsExpectErrors('FROM a_index | STATS COUNT(*) BY addr = keywordField, other = addr', [
+            'Unknown column "addr"',
+          ]);
+        });
+
+        test('the assignment expression is still resolved from the input columns', () => {
+          statsExpectErrors('FROM a_index | STATS COUNT() WHERE addr != null BY addr = missing', [
+            'Unknown column "missing"',
+          ]);
+        });
+
+        test('a bare grouping shadows an earlier same-name assignment', () => {
+          statsExpectErrors(
+            'FROM a_index | STATS SUM(doubleField) BY doubleField = keywordField, doubleField',
+            []
+          );
+        });
+
+        test('a later assignment wins over an earlier bare grouping', () => {
+          statsExpectErrors(
+            'FROM a_index | STATS SUM(doubleField) BY doubleField, doubleField = keywordField',
+            [getNoValidCallSignatureError('sum', ['keyword'])]
+          );
+        });
+
+        test('resolves a bare expression grouping referenced by its source name', () => {
+          statsExpectErrors(
+            'FROM a_index | STATS m = COUNT(`BUCKET(@timestamp, 1 d)`) BY BUCKET(@timestamp, 1 d)',
+            []
+          );
+        });
+
+        test('a bare expression grouping is referenced by its exact source text', () => {
+          statsExpectErrors(
+            'FROM a_index | STATS m = COUNT(`BUCKET(@timestamp,1 d)`) BY BUCKET(@timestamp, 1 d)',
+            ['Unknown column "BUCKET(@timestamp,1 d)"']
+          );
+        });
+      });
 
       describe('constant-only parameters', () => {
         test('no errors', () => {

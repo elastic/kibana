@@ -137,3 +137,37 @@ describe('OAuthAuthorizationCode.configure', () => {
     });
   });
 });
+
+describe('OAuthAuthorizationCode.getAuthHeaders', () => {
+  const getAuthHeaders = OAuthAuthorizationCode.getAuthHeaders;
+  if (!getAuthHeaders) {
+    throw new Error('OAuthAuthorizationCode.getAuthHeaders is not defined');
+  }
+
+  it('returns a normalized Authorization header', async () => {
+    const getToken = jest.fn().mockResolvedValue('bearer access-token');
+
+    await expect(getAuthHeaders(makeCtx(getToken), baseSecret)).resolves.toEqual({
+      Authorization: 'Bearer access-token',
+    });
+  });
+
+  it('throws when getToken returns null', async () => {
+    const getToken = jest.fn().mockResolvedValue(null);
+
+    await expect(getAuthHeaders(makeCtx(getToken), baseSecret)).rejects.toThrow(
+      'No access token available'
+    );
+  });
+
+  it('rethrows ConnectorAuthorizationError from getToken without wrapping', async () => {
+    const authError = new ConnectorAuthorizationError({
+      authMethod: 'oauth_authorization_code',
+      reason: 'token_expired',
+      message: 'Token expired',
+    });
+    const getToken = jest.fn().mockRejectedValue(authError);
+
+    await expect(getAuthHeaders(makeCtx(getToken), baseSecret)).rejects.toBe(authError);
+  });
+});

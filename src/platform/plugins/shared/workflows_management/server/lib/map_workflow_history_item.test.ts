@@ -8,7 +8,6 @@
  */
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
-import type { UserProfile } from '@kbn/core-user-profile-common';
 
 import { mapWorkflowHistoryItem } from './map_workflow_history_item';
 import { WORKFLOW_CHANGE_HISTORY_SYSTEM_USER } from '../../common/lib/workflow_change_history/constants';
@@ -88,38 +87,41 @@ describe('mapWorkflowHistoryItem', () => {
     expect(result).not.toHaveProperty('restoredFromSequence');
   });
 
-  it('resolves `name` to the profile `full_name` when the profile is known', () => {
-    const userProfilesById = new Map<string, UserProfile>([
-      [
-        'profile-1',
-        {
-          uid: 'profile-1',
-          enabled: true,
-          user: { username: 'alice', full_name: 'Alice Smith' },
-          data: {},
+  it('uses `full_name` as the display name when resolved', () => {
+    const result = mapWorkflowHistoryItem(
+      createDocument({
+        user: {
+          name: 'alice',
+          id: 'profile-1',
+          full_name: 'Alice Smith',
+          email: 'alice@elastic.co',
         },
-      ],
-    ]);
-
-    const result = mapWorkflowHistoryItem(createDocument(), userProfilesById);
+      })
+    );
 
     expect(result.user).toEqual({ profileId: 'profile-1', name: 'Alice Smith' });
   });
 
-  it('falls back to the raw `name` when the profile has no `full_name`', () => {
-    const userProfilesById = new Map<string, UserProfile>([
-      ['profile-1', { uid: 'profile-1', enabled: true, user: { username: 'alice' }, data: {} }],
-    ]);
+  it('falls back to `email` when `full_name` is not resolved', () => {
+    const result = mapWorkflowHistoryItem(
+      createDocument({ user: { name: 'alice', id: 'profile-1', email: 'alice@elastic.co' } })
+    );
 
-    const result = mapWorkflowHistoryItem(createDocument(), userProfilesById);
+    expect(result.user).toEqual({ profileId: 'profile-1', name: 'alice@elastic.co' });
+  });
+
+  it('falls back to the raw `name` when neither `full_name` nor `email` is resolved', () => {
+    const result = mapWorkflowHistoryItem(createDocument());
 
     expect(result.user).toEqual({ profileId: 'profile-1', name: 'alice' });
   });
 
-  it('falls back to the raw `name` when no matching profile is present', () => {
-    const result = mapWorkflowHistoryItem(createDocument(), new Map());
+  it('omits `profileId` when the document has no user id', () => {
+    const result = mapWorkflowHistoryItem(
+      createDocument({ user: { name: 'alice', full_name: 'Alice Smith' } })
+    );
 
-    expect(result.user).toEqual({ profileId: 'profile-1', name: 'alice' });
+    expect(result.user).toEqual({ name: 'Alice Smith' });
   });
 
   it('omits optional fields when absent', () => {

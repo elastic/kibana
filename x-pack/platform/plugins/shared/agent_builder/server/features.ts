@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
   AGENTBUILDER_APP_ID,
@@ -35,21 +36,22 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           apiPrivileges.readAgentBuilder,
           apiPrivileges.writeAgentBuilder,
           ApiPrivileges.manage('llm_product_doc'),
+          'bulkGetUserProfiles',
         ],
         catalogue: [AGENTBUILDER_FEATURE_ID],
         // Read the space-settings singleton for UI resolution of default Agent
         savedObject: {
-          all: [],
+          all: [...filesSavedObjectTypes],
           read: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
         },
         ui: [uiPrivileges.show, uiPrivileges.write],
       },
       read: {
         app: ['kibana', AGENTBUILDER_APP_ID],
-        api: [apiPrivileges.readAgentBuilder],
+        api: [apiPrivileges.readAgentBuilder, 'bulkGetUserProfiles'],
         catalogue: [AGENTBUILDER_FEATURE_ID],
         savedObject: {
-          all: [],
+          all: [...filesSavedObjectTypes],
           read: [AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE],
         },
         ui: [uiPrivileges.show],

@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
@@ -15,16 +15,18 @@ import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '
 import { wrapMiddlewares } from '../../middleware';
 import { enterpriseLicenseMiddleware } from '../../middleware/enterprise_license';
 import { EntitiesNotFoundError, MixedEntityTypesError } from '../../../domain/errors';
-import { ENTITY_STORE_RESOLUTION_UNLINK_EVENT } from '../../../telemetry/events';
-import { reportResolutionError } from './utils/resolution_telemetry';
 
-const bodySchema = z.object({
-  entity_ids: z
-    .array(z.string())
-    .min(1)
-    .max(1000)
-    .describe('Entity identifiers to unlink from their resolution group. Minimum 1, maximum 1000.'),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    entity_ids: z
+      .array(z.string())
+      .min(1)
+      .max(1000)
+      .describe(
+        'Entity identifiers to unlink from their resolution group. Minimum 1, maximum 1000.'
+      ),
+  })
+);
 
 type UnlinkRequestBody = z.infer<typeof bodySchema>;
 
@@ -33,7 +35,7 @@ export async function handleResolutionUnlink(
   req: KibanaRequest<unknown, unknown, UnlinkRequestBody>,
   res: KibanaResponseFactory
 ): Promise<IKibanaResponse> {
-  const { logger, resolutionClient, analytics, namespace } = await ctx.entityStore;
+  const { logger, resolutionClient } = await ctx.entityStore;
 
   logger.debug('Resolution Unlink API called');
 
@@ -42,17 +44,8 @@ export async function handleResolutionUnlink(
       awaitVisibility: true,
     });
 
-    analytics.reportEvent(ENTITY_STORE_RESOLUTION_UNLINK_EVENT, {
-      entityType: result.entity_type,
-      entitiesUnlinked: result.unlinked.length,
-      entitiesSkipped: result.skipped.length,
-      namespace,
-    });
-
     return res.ok({ body: result });
   } catch (error) {
-    reportResolutionError(analytics, 'unlink', namespace, error);
-
     if (error instanceof EntitiesNotFoundError || error instanceof MixedEntityTypesError) {
       return res.badRequest({ body: error });
     }

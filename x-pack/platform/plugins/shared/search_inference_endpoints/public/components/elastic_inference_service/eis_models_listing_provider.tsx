@@ -9,9 +9,11 @@ import React, { useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { ContentListProvider } from '@kbn/content-list-provider';
+import type { EisViewMode } from '../../types';
 import {
   DEFAULT_EIS_DISPLAY_OPTIONS,
   getProviderOptions,
+  getRegionOptions,
   type GroupedModel,
 } from '../../utils/eis_utils';
 import {
@@ -23,8 +25,9 @@ import {
   EIS_RELEASED_SORT_FIELD,
   EIS_TYPE_SORT_FIELD,
 } from '../../utils/eis_content_list_utils';
-import { EisModelsListing, type EisViewMode } from './eis_models_listing';
+import { EisModelsListing } from './eis_models_listing';
 import { ModelFamilyOptionsProvider } from './eis_model_filters';
+import { RegionOptionsProvider } from './region_filter';
 
 interface EisModelsListingProviderProps {
   models: GroupedModel[];
@@ -92,6 +95,10 @@ export const EisModelsListingProvider = ({
   );
   const fields = useMemo(() => createEisFieldDefinitions(models), [models]);
   const modelFamilyOptions = useMemo(() => getProviderOptions(models), [models]);
+  const regionOptions = useMemo(
+    () => getRegionOptions(models.flatMap((model) => model.endpoints)),
+    [models]
+  );
   const queryKeyScope = `eis-models-listing-${viewMode}-${Number(
     displayOptions.showOutsideRegionPreferences
   )}-${Number(displayOptions.showEndOfLifeModels)}-${Number(displayOptions.showPreviewModels)}`;
@@ -102,7 +109,6 @@ export const EisModelsListingProvider = ({
       ),
     [models]
   );
-
   const features = useMemo(
     () => ({
       sorting: {
@@ -130,11 +136,14 @@ export const EisModelsListingProvider = ({
       {...{ dataSource, features }}
     >
       <ModelFamilyOptionsProvider value={modelFamilyOptions}>
-        <EisModelsListing
-          {...{ onViewModelDetails, displayOptions, hasBlockedModels, viewMode }}
-          onApplyDisplayOptions={setDisplayOptions}
-          onViewModeChange={setViewMode}
-        />
+        <RegionOptionsProvider value={regionOptions}>
+          <EisModelsListing
+            {...{ onViewModelDetails, displayOptions, hasBlockedModels, viewMode }}
+            catalogTotal={models.length}
+            onApplyDisplayOptions={setDisplayOptions}
+            onViewModeChange={setViewMode}
+          />
+        </RegionOptionsProvider>
       </ModelFamilyOptionsProvider>
     </ContentListProvider>
   );

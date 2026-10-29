@@ -1,6 +1,6 @@
 Evaluate the following feature merge events for correctness:
 
-**Stream name**: {{{stream_name}}}
+**Source id**: {{{source_id}}}
 
 **Merge events** (JSON array — each element has `event_index`, `existing`, and `incoming` fields):
 {{{merge_events}}}

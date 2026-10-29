@@ -17,18 +17,34 @@ import { createAlertEvent, createEsqlResponse } from '../rule_executor/test_util
 import { createRuleResponse } from '../test_utils';
 import type { LatestAlertEventState } from './queries';
 import { createExecutionContext } from '../execution_context';
+import { v5 as uuidV5 } from 'uuid';
 
 const testExecutionContext = createExecutionContext(new AbortController().signal);
 
+// New episode ids now come from uuid v5. The default implementation returns a
+// constant so the precondition-matrix tests stay assertion-stable; the
+// single-series suite below swaps in an input-sensitive implementation to prove
+// determinism, then restores this default.
+const MOCKED_UUID = 'mocked-uuid';
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mocked-uuid'),
+  v5: jest.fn(() => 'mocked-uuid'),
 }));
+
+// The real `v5` has buffer-writing overloads that don't match a plain
+// string-returning jest.fn, so reach the mock through a narrowed handle.
+const uuidV5Mock = uuidV5 as unknown as jest.Mock<string, [string]>;
 
 // The existing precondition-matrix tests default `last_lifecycle_action_type`
 // to `null` — no user has issued activate/deactivate on the group. Tests that
 // exercise the user-lock path override this explicitly.
-type LatestAlertEventStateInput = Omit<LatestAlertEventState, 'last_lifecycle_action_type'> &
-  Partial<Pick<LatestAlertEventState, 'last_lifecycle_action_type'>>;
+type LatestAlertEventStateInput = Omit<
+  LatestAlertEventState,
+  'last_lifecycle_action_type' | 'last_episode_phase_started_at'
+> &
+  Partial<
+    Pick<LatestAlertEventState, 'last_lifecycle_action_type' | 'last_episode_phase_started_at'>
+  >;
 
 function createLatestAlertEventStateResponse(records: Array<LatestAlertEventStateInput>) {
   return createEsqlResponse(
@@ -38,6 +54,7 @@ function createLatestAlertEventStateResponse(records: Array<LatestAlertEventStat
       { name: 'last_episode_status', type: 'keyword' },
       { name: 'last_episode_status_count', type: 'long' },
       { name: 'last_episode_timestamp', type: 'date' },
+      { name: 'last_episode_phase_started_at', type: 'date' },
       { name: 'last_lifecycle_action_type', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
     ],
@@ -47,6 +64,7 @@ function createLatestAlertEventStateResponse(records: Array<LatestAlertEventStat
       r.last_episode_status,
       r.last_episode_status_count,
       r.last_episode_timestamp ?? null,
+      r.last_episode_phase_started_at ?? null,
       r.last_lifecycle_action_type ?? null,
       r.group_hash,
     ])
@@ -81,7 +99,11 @@ describe('DirectorService', () => {
         alertEvents: [],
       });
 
-      expect(result).toEqual({ alertEvents: [], stats: { newEpisodeIds: [] } });
+      expect(result).toEqual({
+        alertEvents: [],
+        stats: { newEpisodeIds: [] },
+        previousAlertStateByGroupHash: new Map(),
+      });
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     });
 
@@ -589,7 +611,9 @@ describe('DirectorService', () => {
 
     it('evaluates timeframe thresholds against the director clock, not the event', async () => {
       // Incoming events carry no `@timestamp` (ES sets it at ingest), so the
-      // elapsed time must come from the director run time.
+      // elapsed time must come from the director run time (`evaluatedAt`) measured
+      // against the derived phase-entry timestamp — not the latest stored event
+      // (`last_episode_timestamp`, 00:09 here), which would never accumulate.
       jest.useFakeTimers().setSystemTime(new Date('2026-01-01T00:10:00.000Z'));
 
       try {
@@ -606,7 +630,8 @@ describe('DirectorService', () => {
         mockEsClient.esql.query.mockResolvedValue(
           createLatestAlertEventStateResponse([
             {
-              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_episode_timestamp: '2026-01-01T00:09:00.000Z',
+              last_episode_phase_started_at: '2026-01-01T00:00:00.000Z',
               last_status: 'breached',
               last_episode_id: 'episode-1',
               last_episode_status: 'pending',
@@ -963,6 +988,177 @@ describe('DirectorService', () => {
           status: alertEpisodeStatus.recovering,
         });
       });
+    });
+
+    describe('single-series (ungrouped) episodes', () => {
+      // An ungrouped rule emits one rule event per returned row, all sharing one
+      // group_hash within a run. New episode ids are deterministic (uuid v5)
+      // seeded from `ruleId | group_hash | scheduled_timestamp`, so every one of
+      // those rows must collapse to the same alert.id — within a batch, across
+      // the batches of one run, yet rolling over on a later run.
+      const UNGROUPED_HASH = 'ungrouped-series-hash';
+      const RUN_TS = '2025-01-01T00:00:00.000Z';
+      const seedId = (ts: string) => `episode:${rule.id}|${UNGROUPED_HASH}|${ts}`;
+
+      beforeEach(() => {
+        // Echo the seed so the test can assert the id is a function of the seed,
+        // not a fresh value per call (which is the bug being fixed).
+        uuidV5Mock.mockImplementation((name) => `episode:${name}`);
+      });
+
+      afterEach(() => {
+        uuidV5Mock.mockImplementation(() => MOCKED_UUID);
+      });
+
+      const ungroupedRow = (data: Record<string, unknown>, scheduledTimestamp = RUN_TS) =>
+        createAlertEvent({
+          group_hash: UNGROUPED_HASH,
+          scheduled_timestamp: scheduledTimestamp,
+          status: 'breached',
+          type: 'alert',
+          alert: undefined,
+          data,
+        });
+
+      it('assigns one shared episode id to every row of a newly opened series', async () => {
+        mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+
+        const result = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: [
+            ungroupedRow({ 'host.name': 'host-a' }),
+            ungroupedRow({ 'host.name': 'host-b' }),
+            ungroupedRow({ 'host.name': 'host-c' }),
+          ],
+        });
+
+        const ids = result.alertEvents.map((e) => e.alert?.id);
+        // Every row shares one non-empty episode id derived from the run seed.
+        expect(ids).toEqual([seedId(RUN_TS), seedId(RUN_TS), seedId(RUN_TS)]);
+        // The run opened exactly one distinct episode, not one per row.
+        expect(new Set(result.stats.newEpisodeIds).size).toBe(1);
+      });
+
+      it('reuses the same episode id across the streamed batches of one run', async () => {
+        // The director runs once per streamed batch with freshly fetched prior
+        // state (empty for a brand-new series, since within-run writes are not
+        // yet visible). Deterministic ids keep the batches on one episode.
+        mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+
+        const batch1 = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: [ungroupedRow({ 'host.name': 'host-a' })],
+        });
+        const batch2 = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: [ungroupedRow({ 'host.name': 'host-b' })],
+        });
+
+        expect(batch1.alertEvents[0].alert?.id).toBe(seedId(RUN_TS));
+        expect(batch2.alertEvents[0].alert?.id).toBe(seedId(RUN_TS));
+      });
+
+      it('mints a different episode id when a later run reopens the series', async () => {
+        mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([]));
+        const laterTs = '2025-01-01T00:05:00.000Z';
+
+        const firstRun = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: [ungroupedRow({ 'host.name': 'host-a' }, RUN_TS)],
+        });
+        const laterRun = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: [ungroupedRow({ 'host.name': 'host-a' }, laterTs)],
+        });
+
+        expect(firstRun.alertEvents[0].alert?.id).toBe(seedId(RUN_TS));
+        expect(laterRun.alertEvents[0].alert?.id).toBe(seedId(laterTs));
+        expect(laterRun.alertEvents[0].alert?.id).not.toBe(firstRun.alertEvents[0].alert?.id);
+      });
+
+      it('does not change grouped rules: one episode per group, existing episodes preserved', async () => {
+        // Grouped rules emit one event per group per run. Each new group must
+        // still open its own episode (distinct ids, derived from its own hash),
+        // and a group with an open episode must keep that id rather than have
+        // it re-derived.
+        const groupedRow = (groupHash: string) =>
+          createAlertEvent({
+            group_hash: groupHash,
+            scheduled_timestamp: RUN_TS,
+            status: 'breached',
+            type: 'alert',
+            alert: undefined,
+            data: { 'host.name': groupHash },
+          });
+
+        mockEsClient.esql.query.mockResolvedValue(
+          createLatestAlertEventStateResponse([
+            {
+              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_status: 'breached',
+              last_episode_id: 'existing-episode-c',
+              last_episode_status: 'active',
+              last_episode_status_count: null,
+              group_hash: 'hash-c',
+            },
+          ])
+        );
+
+        const result = await directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents: [groupedRow('hash-a'), groupedRow('hash-b'), groupedRow('hash-c')],
+        });
+
+        const [a, b, c] = result.alertEvents.map((event) => event.alert?.id);
+        // New groups: one episode each, keyed by their own group hash.
+        expect(a).toBe(`episode:${rule.id}|hash-a|${RUN_TS}`);
+        expect(b).toBe(`episode:${rule.id}|hash-b|${RUN_TS}`);
+        expect(a).not.toBe(b);
+        // Existing active group: episode id preserved, not re-derived.
+        expect(c).toBe('existing-episode-c');
+        expect(new Set(result.stats.newEpisodeIds)).toEqual(new Set([a, b]));
+      });
+    });
+  });
+
+  describe('previous alert state', () => {
+    it('returns the persisted state it loaded, keyed by group_hash, alongside a 1:1 batch', async () => {
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'no_data',
+        alert: undefined,
+      });
+      const previous = {
+        last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+        last_status: 'no_data' as const,
+        last_episode_id: 'held-episode',
+        last_episode_status: alertEpisodeStatus.active,
+        last_episode_status_count: null,
+        group_hash: 'hash-1',
+      };
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([previous]));
+
+      const result = await directorService.run({
+        spaceId: 'default',
+        rule: createRuleResponse({ no_data: { strategy: 'keep_last' } }),
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
+
+      expect(result.alertEvents).toHaveLength(1);
+      expect(result.previousAlertStateByGroupHash.get('hash-1')).toMatchObject(previous);
     });
   });
 });

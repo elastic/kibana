@@ -16,31 +16,40 @@ const investigation: Investigation = {
   template_id: 'investigation',
   title: 'Impossible travel — exec account',
   createdAt: '2024-01-01T00:00:00Z',
-  updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  worker_execution_ids: ['exec-1'],
   pendingProposalCount: 0,
   assignees: [],
   events: [],
 };
 
-const renderCard = (isSelected?: boolean, onClickCard = jest.fn()) => {
+const renderCard = (
+  isSelected?: boolean,
+  onClickCard = jest.fn(),
+  renderInFlightStatus?: (inv: Investigation) => React.ReactNode
+) => {
   renderWithKibanaRenderContext(
     <ConversationCard
       investigation={investigation}
-      hasBorder={false}
       isSelected={isSelected}
       onClickCard={onClickCard}
       onClickAction={jest.fn()}
+      onCopyLink={jest.fn()}
       onOpenChat={jest.fn()}
       onClickRecommendedAction={jest.fn()}
       renderAssignees={() => null}
+      renderInFlightStatus={renderInFlightStatus}
     />
   );
   return { onClickCard };
 };
 
 describe('ConversationCard', () => {
+  it('renders the in-flight status the page supplies for this investigation', () => {
+    renderCard(false, jest.fn(), (inv) => <span>{`Applying ${inv.id}`}</span>);
+
+    expect(screen.getByText('Applying inv-1')).toBeInTheDocument();
+  });
+
   it('emits the conversation id on click so the caller can open the details flyout', () => {
     const { onClickCard } = renderCard();
 
@@ -48,6 +57,31 @@ describe('ConversationCard', () => {
 
     expect(onClickCard).toHaveBeenCalledWith('inv-1');
   });
+
+  describe.each([
+    { canOpenInvestigationDetails: true, expectedAssignees: 1 },
+    { canOpenInvestigationDetails: false, expectedAssignees: 0 },
+  ])(
+    'with canOpenInvestigationDetails $canOpenInvestigationDetails',
+    ({ canOpenInvestigationDetails, expectedAssignees }) => {
+      it(`renders ${expectedAssignees} assignee control`, () => {
+        renderWithKibanaRenderContext(
+          <ConversationCard
+            investigation={investigation}
+            canOpenInvestigationDetails={canOpenInvestigationDetails}
+            onClickCard={jest.fn()}
+            onClickAction={jest.fn()}
+            onCopyLink={jest.fn()}
+            onOpenChat={jest.fn()}
+            onClickRecommendedAction={jest.fn()}
+            renderAssignees={() => <span>Assignees</span>}
+          />
+        );
+
+        expect(screen.queryAllByText('Assignees')).toHaveLength(expectedAssignees);
+      });
+    }
+  );
 
   it('marks the card as current while its flyout is open', () => {
     renderCard(true);
@@ -70,17 +104,16 @@ describe('ConversationCard', () => {
     const createdAt = new Date(Date.now() - 26 * 60 * 1000).toISOString();
     renderWithKibanaRenderContext(
       <ConversationCard
-        investigation={{ ...investigation, createdAt, updatedAt: new Date().toISOString() }}
-        hasBorder={false}
+        investigation={{ ...investigation, createdAt }}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}
       />
     );
 
-    // `updatedAt` is now, so anything reading that field would say "in 0 seconds".
     expect(screen.getByText('26 minutes ago')).toBeInTheDocument();
   });
 
@@ -88,9 +121,9 @@ describe('ConversationCard', () => {
     renderWithKibanaRenderContext(
       <ConversationCard
         investigation={{ ...investigation, createdAt: '2024-03-05T14:30:00.000Z' }}
-        hasBorder={false}
         onClickCard={jest.fn()}
         onClickAction={jest.fn()}
+        onCopyLink={jest.fn()}
         onOpenChat={jest.fn()}
         onClickRecommendedAction={jest.fn()}
         renderAssignees={() => null}

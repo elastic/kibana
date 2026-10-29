@@ -6,13 +6,22 @@
  */
 
 import type { BulkGetRulesResponse } from '@kbn/alerting-v2-schemas';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import { BULK_OPERATION_REQUEST, RULE_RESPONSE } from './rule_oas_shared_examples';
 
 export const BULK_GET_RULES_RESPONSE: BulkGetRulesResponse = {
   items: [RULE_RESPONSE],
+  errors: [
+    {
+      id: 'rule-id-2',
+      error: {
+        code: 'RULE_NOT_FOUND',
+        message: 'Rule with id "rule-id-2" not found',
+        details: { rule_id: 'rule-id-2' },
+      },
+    },
+  ],
 };
 
 const INVALID_BULK_GET_RULES_RESPONSE = invalidResponseExample({
@@ -20,17 +29,6 @@ const INVALID_BULK_GET_RULES_RESPONSE = invalidResponseExample({
   message: 'ids: Required',
   details: { errors: { ids: ['Required'] } },
 });
-
-// Bulk-get rethrows the raw SO Boom; onError derives `NOT_FOUND` + SO message.
-const RULES_NOT_FOUND_RESPONSE = {
-  name: 'rulesNotFound',
-  summary: 'One or more requested rule ids could not be found',
-  value: {
-    code: 'NOT_FOUND',
-    error: 'Not Found',
-    message: `Saved object [${RULE_SAVED_OBJECT_TYPE}/${RULE_RESPONSE.id}] not found`,
-  },
-};
 
 export const bulkGetRulesOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
@@ -42,10 +40,9 @@ export const bulkGetRulesOasExamples = (): AlertingOasOperationObject =>
     responses: {
       200: {
         name: 'bulkGetRulesResponse',
-        summary: 'Returned the requested rules',
+        summary: 'Returned one rule and reported the other id as not found',
         value: BULK_GET_RULES_RESPONSE,
       },
       400: INVALID_BULK_GET_RULES_RESPONSE,
-      404: RULES_NOT_FOUND_RESPONSE,
     },
   });

@@ -78,9 +78,9 @@ describe('syncEditedMonitor', () => {
     references: [],
   } as SavedObject<EncryptedSyntheticsMonitorAttributes>;
 
-  const { routeContext, syntheticsService, serverMock } = getRouteContextMock();
-  syntheticsService.editConfig = jest.fn();
-  syntheticsService.getMaintenanceWindows = jest.fn();
+  const { routeContext, serviceManagedLocations, serverMock } = getRouteContextMock();
+  serviceManagedLocations.editMonitors = jest.fn();
+  routeContext.syntheticsMonitorClient.getMaintenanceWindows = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -95,7 +95,7 @@ describe('syncEditedMonitor', () => {
       spaceId: 'test-space',
     });
 
-    expect(syntheticsService.editConfig).toHaveBeenCalledWith(
+    expect(serviceManagedLocations.editMonitors).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
           configId: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
@@ -215,7 +215,7 @@ describe('editSyntheticsMonitorRoute', () => {
 
     const { routeContext } = getRouteContextMock();
     routeContext.request = {
-      params: { monitorId },
+      params: { id: monitorId },
       query: {},
       body: { [ConfigKey.KIBANA_SPACES]: ['space-a'] },
     } as any;
@@ -252,5 +252,66 @@ describe('editSyntheticsMonitorRoute', () => {
     // requires bulk_update privileges there.
     expect(spacesArg).toEqual(expect.arrayContaining(['space-a', 'space-b']));
     expect(spacesArg).toHaveLength(2);
+  });
+
+  describe('params that are not a JSON object', () => {
+    const editWithParams = async (storedParams: string, body: Record<string, unknown>) => {
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+        './monitor_locations_utils'
+      );
+      // Reaching the space authorization check means params validation let the edit through.
+      const forbidden = { status: 403 };
+      assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
+      const { normalizeAPIConfig } = jest.requireMock('./monitor_validation');
+      normalizeAPIConfig.mockImplementation(
+        jest.requireActual('./monitor_validation').normalizeAPIConfig
+      );
+
+      const { routeContext } = getRouteContextMock();
+      routeContext.request = { params: { id: monitorId }, query: {}, body } as any;
+      routeContext.spaceId = 'default';
+      routeContext.response = {
+        badRequest: jest.fn((r) => r),
+        customError: jest.fn((r) => r),
+      } as any;
+      routeContext.monitorConfigRepository.getDecrypted = jest.fn().mockResolvedValue({
+        decryptedMonitor: { id: monitorId, type: 'synthetics-monitor', namespaces: ['default'] },
+        normalizedMonitor: {
+          id: monitorId,
+          attributes: {
+            origin: 'ui',
+            [ConfigKey.MONITOR_TYPE]: 'browser',
+            [ConfigKey.PARAMS]: storedParams,
+            locations: [],
+          },
+        },
+      });
+
+      const result = await editSyntheticsMonitorRoute().handler(routeContext);
+      return { result, forbidden, response: routeContext.response };
+    };
+
+    it('does not re-reject unchanged stored params on an unrelated edit', async () => {
+      const { result, forbidden } = await editWithParams('["secret"]', {
+        [ConfigKey.ENABLED]: false,
+      });
+
+      expect(result).toBe(forbidden);
+    });
+
+    it('rejects an edit that sets params to something that is not a JSON object', async () => {
+      const { result, forbidden, response } = await editWithParams('{"token":"secret"}', {
+        [ConfigKey.PARAMS]: '["secret"]',
+      });
+
+      expect(result).not.toBe(forbidden);
+      expect(response.badRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            message: 'Invalid params: Params must be a JSON object.',
+          }),
+        })
+      );
+    });
   });
 });

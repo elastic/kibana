@@ -10,6 +10,21 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const sandboxConfigSchema = schema.object({
+  telemetry_targets: schema.recordOf(
+    schema.string({
+      maxLength: 64,
+      validate: (name) =>
+        name !== 'none' && /^[a-z][a-z0-9_-]*$/.test(name)
+          ? undefined
+          : 'Invalid telemetry target name',
+    }),
+    schema.object({
+      connector_id: schema.string({ minLength: 1, maxLength: 500 }),
+      readable_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
+    }),
+    { defaultValue: {} }
+  ),
+  default_telemetry_target: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
   /**
    * Id of the preconfigured connector holding the Elasticsearch URL and API key the sandbox
    * queries telemetry with. It is added to the investigator's connector allow-list; credentials
@@ -41,7 +56,7 @@ const decisionTreesConfigSchema = schema.object({
 const memoryConfigSchema = schema.object({
   // Governs Semantic Memory independently of Cortex: index ensure, hydrate/
   // optimize hooks on the deductive agent, and the matching managed workflows.
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 const configSchema = schema.object({

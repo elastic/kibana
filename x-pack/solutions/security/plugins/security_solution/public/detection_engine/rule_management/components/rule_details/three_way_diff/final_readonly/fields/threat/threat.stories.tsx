@@ -42,4 +42,55 @@ export const Default = () => (
   />
 );
 
+export const MixedFrameworks = () => (
+  <ThreatReadOnly
+    threat={[
+      {
+        framework: 'MITRE ATT&CK',
+        tactic: {
+          id: 'TA0001',
+          name: 'Initial Access',
+          reference: 'https://attack.mitre.org/tactics/TA0001/',
+        },
+        technique: [
+          {
+            id: 'T1566',
+            name: 'Phishing',
+            reference: 'https://attack.mitre.org/techniques/T1566/',
+            subtechnique: [
+              {
+                id: 'T1566.001',
+                name: 'Spearphishing Attachment',
+                reference: 'https://attack.mitre.org/techniques/T1566/001/',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        framework: 'MITRE ATLAS',
+        tactic: {
+          id: 'AML.TA0000',
+          name: 'Reconnaissance',
+          reference: 'https://atlas.mitre.org/tactics/AML.TA0000/',
+        },
+        technique: [
+          {
+            id: 'AML.T0024',
+            name: 'Exfiltration via ML Inference API',
+            reference: 'https://atlas.mitre.org/techniques/AML.T0024/',
+            subtechnique: [
+              {
+                id: 'AML.T0024.002',
+                name: 'Extract ML Model',
+                reference: 'https://atlas.mitre.org/techniques/AML.T0024.002/',
+              },
+            ],
+          },
+        ],
+      },
+    ]}
+  />
+);
+
 export const EmptyArrayValue = () => <ThreatReadOnly threat={[]} />;

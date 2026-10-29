@@ -33,6 +33,9 @@ const notifications: NotificationsStart = {
   tours: {
     isEnabled: () => true,
   },
+  screenReader: {
+    notify: () => {},
+  },
 };
 
 export const getNotifications = () => notifications;

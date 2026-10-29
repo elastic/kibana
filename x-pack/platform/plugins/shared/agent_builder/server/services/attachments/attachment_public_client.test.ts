@@ -163,7 +163,7 @@ describe('createAttachmentPublicClient', () => {
       expect(deps.conversationClient.update).not.toHaveBeenCalled();
       expect(deps.conversationClient.appendEvents).toHaveBeenCalledTimes(1);
       const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
       expect(request.id).toBe('c1');
       expect(request.attachments).toEqual({
         snapshot: [],
@@ -180,6 +180,7 @@ describe('createAttachmentPublicClient', () => {
             current_version: 1,
             render_inline: true,
             source: 'http_api',
+            format: 2,
           },
         }),
       ]);
@@ -192,8 +193,9 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build('workflow');
       await client.create({ conversationId: 'c1', type: 'text', data: { text: 'hi' } });
 
-      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
       expect(request.events[0].data).toMatchObject({ source: 'workflow' });
+      expect(options).toEqual({ access: 'converse', source: 'workflow' });
     });
 
     it('binds source `server_api` for external plugin callers reaching the client via AttachmentsStart', async () => {
@@ -203,8 +205,9 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build('server_api');
       await client.create({ conversationId: 'c1', type: 'text', data: { text: 'hi' } });
 
-      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
       expect(request.events[0].data).toMatchObject({ source: 'server_api' });
+      expect(options).toEqual({ access: 'converse', source: 'server_api' });
     });
 
     it('stamps id "unknown" (does NOT fall back to conversation owner) when the caller has no profile id', async () => {
@@ -320,6 +323,7 @@ describe('createAttachmentPublicClient', () => {
             current_version: 2,
             render_inline: false,
             source: 'http_api',
+            format: 2,
           },
         }),
       ]);
@@ -415,6 +419,7 @@ describe('createAttachmentPublicClient', () => {
             attachment_type: 'text',
             hard_delete: false,
             source: 'http_api',
+            format: 2,
           },
         }),
       ]);
@@ -475,6 +480,7 @@ describe('createAttachmentPublicClient', () => {
         attachment_type: 'text',
         hard_delete: true,
         source: 'http_api',
+        format: 2,
       });
     });
 
@@ -524,6 +530,60 @@ describe('createAttachmentPublicClient', () => {
     });
   });
 
+  describe('restore', () => {
+    it('restores a soft-deleted attachment and emits attachment_restored in the same write', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({
+        id: 'c1',
+        attachments: [makeAttachment({ id: 'a1', active: false, description: 'Notes' })],
+        rounds: [],
+      });
+
+      const restored = await deps.build().restore({ conversationId: 'c1', attachmentId: 'a1' });
+
+      expect(restored.active).toBe(true);
+      const [{ events, attachments }] = deps.conversationClient.appendEvents.mock.calls[0];
+      expect(events).toEqual([
+        expect.objectContaining({
+          type: 'attachment_restored',
+          data: {
+            attachment_id: 'a1',
+            attachment_type: 'text',
+            current_version: 1,
+            description: 'Notes',
+            source: 'http_api',
+            format: 2,
+          },
+        }),
+      ]);
+      expect(attachments.produced[0].active).toBe(true);
+    });
+
+    it('throws AttachmentNotFoundError when the attachment is missing', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({ id: 'c1', attachments: [], rounds: [] });
+      await expect(
+        deps.build().restore({ conversationId: 'c1', attachmentId: 'missing' })
+      ).rejects.toMatchObject({ meta: expect.objectContaining({ statusCode: 404 }) });
+    });
+
+    it('rejects an attachment that is not deleted, without writing', async () => {
+      const deps = buildDeps();
+      deps.conversationClient.get.mockResolvedValue({
+        id: 'c1',
+        attachments: [makeAttachment({ id: 'a1' })],
+        rounds: [],
+      });
+      await expect(
+        deps.build().restore({ conversationId: 'c1', attachmentId: 'a1' })
+      ).rejects.toMatchObject({
+        message: "Attachment 'a1' is not deleted",
+        meta: expect.objectContaining({ statusCode: 400 }),
+      });
+      expect(deps.conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+  });
+
   describe('access option', () => {
     it('defaults to "converse" for create', async () => {
       const deps = buildDeps();
@@ -533,7 +593,7 @@ describe('createAttachmentPublicClient', () => {
       await client.create({ conversationId: 'c1', type: 'text', data: { text: 'x' } });
 
       const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
     });
 
     it('forwards "converse" access to appendEvents for create', async () => {
@@ -549,7 +609,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
     });
 
     it('forwards "converse" access to appendEvents for update', async () => {
@@ -569,7 +629,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
     });
 
     it('forwards "converse" access to appendEvents for delete', async () => {
@@ -584,7 +644,7 @@ describe('createAttachmentPublicClient', () => {
       await client.delete({ conversationId: 'c1', attachmentId: 'a1', access: 'converse' });
 
       const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
     });
   });
 
@@ -619,7 +679,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
       expect(request.events[0].data).toMatchObject({ render_inline: false });
     });
 
@@ -636,7 +696,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
       expect(request.events[0].data).toMatchObject({ render_inline: true });
     });
 

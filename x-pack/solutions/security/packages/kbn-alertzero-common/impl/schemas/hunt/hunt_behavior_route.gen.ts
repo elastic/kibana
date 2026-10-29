@@ -16,7 +16,12 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntIncompleteReason, HuntForThreatHit, HuntIncompleteness } from '../components/hunt.gen';
+import {
+  HuntIncompleteReason,
+  HostOrigin,
+  HuntForThreatHit,
+  HuntIncompleteness,
+} from '../components/hunt.gen';
 
 export const HuntBehaviorStatus = lazySchema(() =>
   z.enum(['no_behaviors_found', 'no_behaviors_validated', 'behaviors_proposed'])
@@ -69,6 +74,14 @@ export const HuntBehaviorRequestBody = lazySchema(() =>
       report_id: z.string().min(1).max(512).optional(),
       llm_confidence_threshold: z.number().min(0).max(1).optional(),
       iocs: z.array(HuntBehaviorIoc).max(100).optional(),
+      /**
+       * Adjudicated-out IOCs the run must not search.
+       */
+      excluded_iocs: z
+        .array(HuntBehaviorIoc)
+        .max(100)
+        .optional()
+        .describe('Adjudicated-out IOCs the run must not search.'),
       article_context: HuntBehaviorArticleContext.optional(),
     })
     .strict()
@@ -90,8 +103,18 @@ export const HuntBehaviorResponse = lazySchema(() =>
         reference: z.string(),
         tactic_ids: z.array(z.string()),
         parent_technique_id: z.string().optional(),
-        proposed_esql_rule: z.string(),
-        rule_name: z.string(),
+        /**
+         * The query Tier 2 generated and validated (and, when grounded, executed) to hunt this technique.
+         */
+        validated_esql: z
+          .string()
+          .describe(
+            'The query Tier 2 generated and validated (and, when grounded, executed) to hunt this technique.'
+          ),
+        /**
+         * Display title for this hunted finding.
+         */
+        title: z.string().describe('Display title for this hunted finding.'),
         severity: z.enum(['critical', 'high', 'medium', 'low']),
         risk_score: z.number(),
         execution: z
@@ -136,6 +159,16 @@ export const HuntBehaviorResponse = lazySchema(() =>
           .array(z.string())
           .optional()
           .describe('Distinct user.name values from required-index rows, capped at 20.'),
+        /**
+         * Where each `affected_hosts` entry was seen (local cluster, remote clusters, or both), from the same rows' `_index`.
+         */
+        affected_host_origins: z
+          .array(HostOrigin)
+          .max(20)
+          .optional()
+          .describe(
+            "Where each `affected_hosts` entry was seen (local cluster, remote clusters, or both), from the same rows' `_index`."
+          ),
         /**
          * True when more than 20 distinct hosts were seen.
          */

@@ -23,41 +23,67 @@ const boundedRecord = (maxEntries: number) =>
       message: `Must contain at most ${maxEntries} top-level keys.`,
     });
 
-const MonitorIdSchema = z
-  .string()
-  .min(1)
-  .max(200)
-  .describe('The OpenSearch Alerting monitor ID, e.g. as returned by searchMonitors or getAlerts.');
+/** `plugins.alerting.monitor.max_triggers` defaults to 10 and can be raised to at most 50:
+ * https://github.com/opensearch-project/alerting/blob/main/alerting/src/main/kotlin/org/opensearch/alerting/settings/AlertingSettings.kt */
+const MAX_TRIGGERS_PER_MONITOR = 50;
+/** Matches the largest page getAlerts can return, so every returned alert can be acknowledged. */
+const MAX_ALERT_IDS = 1000;
+/** OpenSearch documents no limit on document fields beyond the per-index (configurable)
+ * `index.mapping.total_fields.limit`; this ceiling only guards against unbounded input. */
+const MAX_DOCUMENT_TOP_LEVEL_KEYS = 10000;
+/** OpenSearch documents no limit on backend roles per monitor; this ceiling only guards against
+ * unbounded input. */
+const MAX_RBAC_ROLES = 1000;
 
-const DetectorIdSchema = z
-  .string()
-  .min(1)
-  .max(200)
-  .describe(
-    'The Security Analytics detector ID, e.g. as returned by getDetectorFindings or the OpenSearch Dashboards detector list.'
-  );
+const MonitorIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'The OpenSearch Alerting monitor ID, e.g. as returned by searchMonitors or getAlerts.'
+    )
+);
 
-const AlertIdsSchema = z
-  .array(z.string().min(1).max(200))
-  .min(1)
-  .max(100)
-  .describe(
-    'One or more alert IDs to acknowledge. Only alerts currently in the ACTIVE state are acknowledged; alerts already ERROR, COMPLETED, or ACKNOWLEDGED are reported back as failed.'
-  );
+const DetectorIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'The Security Analytics detector ID, e.g. as returned by getDetectorFindings or the OpenSearch Dashboards detector list.'
+    )
+);
 
-export const AlertStateSchema = z
-  .enum(['ALL', 'ACTIVE', 'ACKNOWLEDGED', 'COMPLETED', 'ERROR'])
-  .describe('Filter by alert state. Defaults to "ALL".');
+const AlertIdsSchema = lazySchema(() =>
+  z
+    .array(z.string().min(1).max(200))
+    .min(1)
+    .max(MAX_ALERT_IDS)
+    .describe(
+      'One or more alert IDs to acknowledge. Only alerts currently in the ACTIVE state are acknowledged; alerts already ERROR, COMPLETED, or ACKNOWLEDGED are reported back as failed.'
+    )
+);
 
-const SortOrderSchema = z.enum(['asc', 'desc']).describe('Sort order: "asc" or "desc".');
+export const AlertStateSchema = lazySchema(() =>
+  z
+    .enum(['ALL', 'ACTIVE', 'ACKNOWLEDGED', 'COMPLETED', 'ERROR'])
+    .describe('Filter by alert state. Defaults to "ALL".')
+);
 
-const MonitorTypeSchema = z
-  .enum(['query_level_monitor', 'bucket_level_monitor', 'doc_level_monitor'])
-  .describe(
-    'The monitor type: "query_level_monitor" (a single search query with a script-based trigger condition), ' +
-      '"bucket_level_monitor" (aggregates results into buckets and evaluates each bucket), or ' +
-      '"doc_level_monitor" (matches individual documents against percolator-style queries).'
-  );
+const SortOrderSchema = lazySchema(() =>
+  z.enum(['asc', 'desc']).describe('Sort order: "asc" or "desc".')
+);
+
+const MonitorTypeSchema = lazySchema(() =>
+  z
+    .enum(['query_level_monitor', 'bucket_level_monitor', 'doc_level_monitor'])
+    .describe(
+      'The monitor type: "query_level_monitor" (a single search query with a script-based trigger condition), ' +
+        '"bucket_level_monitor" (aggregates results into buckets and evaluates each bucket), or ' +
+        '"doc_level_monitor" (matches individual documents against percolator-style queries).'
+    )
+);
 
 const ScheduleSchema = lazySchema(() =>
   z
@@ -111,9 +137,10 @@ const MonitorInputsSchema = lazySchema(() =>
 const MonitorTriggersSchema = lazySchema(() =>
   z
     .array(boundedRecord(30))
-    .max(10)
+    .max(MAX_TRIGGERS_PER_MONITOR)
     .describe(
       "The monitor's trigger(s), following the OpenSearch monitor definition. " +
+        `OpenSearch allows 10 triggers per monitor by default (plugins.alerting.monitor.max_triggers, up to ${MAX_TRIGGERS_PER_MONITOR}). ` +
         'For query_level_monitor: [{ "name": "...", "severity": "1", "condition": { "script": { "source": "ctx.results[0].hits.total.value > 0", "lang": "painless" } }, "actions": [...] }]. ' +
         'For bucket_level_monitor, wrap the same shape under a "bucket_level_trigger" key; for doc_level_monitor, under a "document_level_trigger" key. ' +
         'The "actions" array (notification destinations) may be left empty ([]) if no notification is needed.'
@@ -123,7 +150,7 @@ const MonitorTriggersSchema = lazySchema(() =>
 const RbacRolesSchema = lazySchema(() =>
   z
     .array(z.string().min(1).max(100))
-    .max(20)
+    .max(MAX_RBAC_ROLES)
     .optional()
     .describe(
       'Optional backend role names to limit access to this monitor (fine-grained security / rbac_roles). Only relevant for self-managed clusters with the Security plugin.'
@@ -291,9 +318,11 @@ export type UpdateMonitorInput = z.infer<typeof UpdateMonitorInputSchema>;
 // Security Analytics detectors, detector alerts, and findings
 // ============================================================================
 
-const DetectorTypeSchema = z
-  .enum(['linux', 'network', 'windows', 'ad_ldap', 'apache_access', 'cloudtrail', 'dns', 's3'])
-  .describe("The detector's log type.");
+const DetectorTypeSchema = lazySchema(() =>
+  z
+    .enum(['linux', 'network', 'windows', 'ad_ldap', 'apache_access', 'cloudtrail', 'dns', 's3'])
+    .describe("The detector's log type.")
+);
 
 export const SearchDetectorsInputSchema = lazySchema(() =>
   z.object({
@@ -394,7 +423,9 @@ export type RunQueryInput = z.infer<typeof RunQueryInputSchema>;
 export const IndexDocumentInputSchema = lazySchema(() =>
   z.object({
     index: z.string().min(1).max(255).describe('The index to write the document into.'),
-    document: boundedRecord(50).describe('The JSON document body to index.'),
+    document: boundedRecord(MAX_DOCUMENT_TOP_LEVEL_KEYS).describe(
+      'The JSON document body to index.'
+    ),
     id: z
       .string()
       .max(512)

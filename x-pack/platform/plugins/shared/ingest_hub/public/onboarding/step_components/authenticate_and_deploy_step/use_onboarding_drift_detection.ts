@@ -15,7 +15,12 @@ import {
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { DetectAndReviewStepState } from '../../onboarding_flow_context';
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
-import { detectServiceVarsDrift, detectAuthDrift, detectAgentPoliciesDrift } from './detect_drift';
+import {
+  detectServiceVarsDrift,
+  detectGlobalNamespaceDrift,
+  detectAuthDrift,
+  detectAgentPoliciesDrift,
+} from './detect_drift';
 
 interface UseOnboardingDriftDetectionParams {
   onboardingDeploymentId: string | undefined;
@@ -73,20 +78,39 @@ export function useOnboardingDriftDetection({
       ? agentBasedDeployment.selectedAgentPolicyIds.slice().sort().join(',')
       : '';
 
+  // Readiness key for the only matrix entries drift compares: deployed, still-selected instances.
+  // awsServicesMap is rebuilt whenever any of the ten AWS package queries resolves, so keying the
+  // effect on the Map restarted the check on manifest arrivals it never reads — re-fetching the SO
+  // and unmounting the error callout, with its Retry button, while the user was acting on it.
+  const policyInstanceIds = Object.keys(policyIdsByInstance ?? {});
+  const comparedManifestsSettled =
+    awsServicesMap !== undefined &&
+    (serviceSettings?.instances ?? []).every(({ instanceId, serviceId }) => {
+      if (!policyInstanceIds.includes(instanceId)) return true;
+      const entry = awsServicesMap.get(serviceId);
+      return !entry || entry.isManifestLoaded || entry.isManifestError;
+    });
+
   useEffect(() => {
     let cancelled = false;
     const thisId = ++driftCheckIdRef.current;
     // Nothing to fetch — leave driftSettled unchanged (already true for fresh deploys; remains
     // false for edit mode while awsServicesMap is still loading, allowing it to settle once the
-    // effect re-runs with a loaded map).
-    if (!onboardingDeploymentId || awsServicesMap === undefined) return;
+    // effect re-runs with a loaded map). Also wait for the manifests of the compared instances: a
+    // check before they load compares untyped vars against the saved ones, which can read as drift
+    // for a moment and flash the callout.
+    if (!onboardingDeploymentId || awsServicesMap === undefined || !comparedManifestsSettled) {
+      return;
+    }
     setDriftSettled(false);
-    setDriftCheckError(false);
     sendGetCloudOnboardingDeployment(onboardingDeploymentId)
       .then(({ item }) => {
         // cancelled guards against unmount (step navigated away); thisId guards against a
         // newer effect run superseding this one within the same hook instance.
         if (cancelled || thisId !== driftCheckIdRef.current) return;
+        // Cleared here, not before the fetch: an up-front reset unmounted the callout — and its
+        // Retry button — before the re-check had a result.
+        setDriftCheckError(false);
         if (!item) {
           // SO does not exist or was cleared — nothing to compare against; treat as clean.
           // Also clear persisted drift flags so stale session state doesn't re-trigger callout.
@@ -130,7 +154,18 @@ export function useOnboardingDriftDetection({
           },
           { agentPolicyIds: item.agentPolicyIds }
         );
-        const dirty = dirtyVarIds.length > 0 || authDirty || agentPoliciesDirty;
+        // Instances are absent from a session that never went through Step 2's Next, and then
+        // every deployed instance is an original, since duplicates only exist as instances.
+        const namespaceDeployedIds = serviceSettings?.instances
+          ? deployedInstanceIds
+          : Object.keys(policyIdsByInstance ?? {});
+        const namespaceDirty = detectGlobalNamespaceDrift(
+          serviceSettings?.namespace,
+          item.namespace,
+          namespaceDeployedIds,
+          serviceSettings?.serviceVars
+        );
+        const dirty = dirtyVarIds.length > 0 || namespaceDirty || authDirty || agentPoliciesDirty;
         driftDirtyRef.current = dirty;
         // Merge with replace-form dirty: a clean SO result still clears isDirty when the form
         // hasn't been touched.
@@ -150,14 +185,15 @@ export function useOnboardingDriftDetection({
     return () => {
       cancelled = true;
     };
-    // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
-    // service-var and region changes come from Step 2 navigation (full remount), not same-step
+    // awsServicesMap is captured from the closure, standing in the deps as comparedManifestsSettled.
+    // serviceSettings.serviceVars, namespace and globalRegion are intentionally captured from the closure:
+    // service-var, namespace and region changes come from Step 2 navigation (full remount), not same-step
     // edits. Auth mutations (MI: connector swap; agent-based: credential method) and agent-based
     // mode changes (agentHostsMode, policy selection) happen in this component's lifetime.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     onboardingDeploymentId,
-    awsServicesMap,
+    comparedManifestsSettled,
     connectorId,
     selectedAgentPoliciesKey,
     driftRetryKey,

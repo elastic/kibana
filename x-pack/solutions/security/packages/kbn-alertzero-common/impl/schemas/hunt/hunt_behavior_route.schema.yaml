@@ -41,6 +41,12 @@ paths:
                   maxItems: 100
                   items:
                     $ref: '#/components/schemas/HuntBehaviorIoc'
+                excluded_iocs:
+                  type: array
+                  description: Adjudicated-out IOCs the run must not search.
+                  maxItems: 100
+                  items:
+                    $ref: '#/components/schemas/HuntBehaviorIoc'
                 article_context:
                   $ref: '#/components/schemas/HuntBehaviorArticleContext'
       responses:
@@ -68,8 +74,8 @@ paths:
                         - technique_name
                         - reference
                         - tactic_ids
-                        - proposed_esql_rule
-                        - rule_name
+                        - validated_esql
+                        - title
                         - severity
                         - risk_score
                       properties:
@@ -91,10 +97,14 @@ paths:
                             type: string
                         parent_technique_id:
                           type: string
-                        proposed_esql_rule:
+                        validated_esql:
                           type: string
-                        rule_name:
+                          description: >-
+                            The query Tier 2 generated and validated (and, when grounded,
+                            executed) to hunt this technique.
+                        title:
                           type: string
+                          description: Display title for this hunted finding.
                         severity:
                           type: string
                           enum: [critical, high, medium, low]
@@ -143,6 +153,15 @@ paths:
                             capped at 20.
                           items:
                             type: string
+                        affected_host_origins:
+                          type: array
+                          maxItems: 20
+                          description: >-
+                            Where each `affected_hosts` entry was seen (local
+                            cluster, remote clusters, or both), from the same
+                            rows' `_index`.
+                          items:
+                            $ref: '../components/hunt.schema.yaml#/components/schemas/HostOrigin'
                         affected_hosts_truncated:
                           type: boolean
                           description: >-

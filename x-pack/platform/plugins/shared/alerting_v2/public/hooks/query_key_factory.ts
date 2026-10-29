@@ -26,6 +26,7 @@ export const ruleKeys = {
   detail: (id: string) => [...ruleKeys.details(), id] as const,
   allTags: () => [...ruleKeys.all, 'tags'] as const,
   tags: (search?: string, kind?: string) => [...ruleKeys.allTags(), { search, kind }] as const,
+  routingTags: (search?: string) => [...ruleKeys.allTags(), 'routing', { search }] as const,
 };
 
 export const ruleTemplateKeys = {
@@ -102,6 +103,12 @@ export const ruleExecutionKeys = {
   all: ['ruleExecution'] as const,
   list: (filters: ListRuleExecutionsUiParams) =>
     [...ruleExecutionKeys.all, 'list', filters] as const,
+};
+
+export const sequenceBuilderKeys = {
+  all: ['sequenceBuilder'] as const,
+  editRule: (id: string) => [...sequenceBuilderKeys.all, 'editRule', id] as const,
+  ruleFetch: (ruleIds: string[]) => [...sequenceBuilderKeys.all, 'ruleFetch', ...ruleIds] as const,
 };
 
 export const userProfileKeys = {

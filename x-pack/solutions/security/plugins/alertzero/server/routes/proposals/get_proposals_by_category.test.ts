@@ -81,6 +81,16 @@ describe('registerGetProposalsByCategoryRoute', () => {
     expect(response.ok).toHaveBeenCalledWith({ body: { proposals: [], total: 0 } });
   });
 
+  it('accepts an entity filter and bounds it', () => {
+    const { validateQuery } = makeDeps({ listByCategory: jest.fn() });
+
+    expect(validateQuery({ entity: 'host-1' })).toEqual({
+      value: { size: 10, from: 0, entity: 'host-1' },
+    });
+    expect(validateQuery({ entity: '' })).toHaveProperty('error');
+    expect(validateQuery({ entity: 'x'.repeat(257) })).toHaveProperty('error');
+  });
+
   it('accepts size=0, so a collapsed accordion can read the total without the rows', () => {
     const { validateQuery } = makeDeps({ listByCategory: jest.fn() });
 

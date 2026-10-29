@@ -23,6 +23,9 @@ import type { InferenceServerStart, InferenceStartDependencies } from '../../../
 
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
 
+const MAX_REPLACEMENTS_ID_LENGTH = 512;
+const MAX_DEANONYMIZE_TEXT_LENGTH = 1_000_000;
+
 const assertReplacementsEncryptionKeyConfigured = (encryptionKey?: string): void => {
   if (!encryptionKey) {
     const error = new Error(
@@ -106,7 +109,7 @@ export const registerReplacementsRoutes = (
         version: ANONYMIZATION_API_VERSION,
         validate: {
           request: {
-            params: schema.object({ id: schema.string() }),
+            params: schema.object({ id: schema.string({ maxLength: MAX_REPLACEMENTS_ID_LENGTH }) }),
           },
         },
       },
@@ -156,8 +159,8 @@ export const registerReplacementsRoutes = (
         validate: {
           request: {
             body: schema.object({
-              text: schema.string(),
-              replacementsId: schema.string(),
+              text: schema.string({ maxLength: MAX_DEANONYMIZE_TEXT_LENGTH }),
+              replacementsId: schema.string({ maxLength: MAX_REPLACEMENTS_ID_LENGTH }),
             }),
           },
         },

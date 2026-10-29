@@ -14,6 +14,7 @@ import {
   CreateProposalStepId,
   GetLatestRevisionStepId,
   GetProposalStepId,
+  PROPOSALS_CREATE_TOOL_ID,
   PROPOSALS_UI_CAPABILITY_DECIDE,
   PROPOSALS_UI_CAPABILITY_SHOW,
   PROPOSALS_REVISE_TOOL_ID,
@@ -137,12 +138,15 @@ describe('ProposalsPlugin', () => {
       expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(1);
     });
 
-    it('registers revision tooling without any solution plugin dependencies', () => {
+    it('registers revision tooling and the proposals.create tool without any solution plugin dependencies', () => {
       const { agentBuilder } = setupPlugin();
 
-      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.tools.register).toHaveBeenCalledTimes(2);
       expect(agentBuilder.tools.register).toHaveBeenCalledWith(
         expect.objectContaining({ id: PROPOSALS_REVISE_TOOL_ID })
+      );
+      expect(agentBuilder.tools.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: PROPOSALS_CREATE_TOOL_ID })
       );
       expect(agentBuilder.skills.register).toHaveBeenCalledTimes(1);
       expect(agentBuilder.skills.register).toHaveBeenCalledWith(

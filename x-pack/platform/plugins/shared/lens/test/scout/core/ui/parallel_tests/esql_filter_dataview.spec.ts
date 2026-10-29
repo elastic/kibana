@@ -6,7 +6,7 @@
  */
 
 import { LENS_METRIC_STATE_DEFAULTS } from '@kbn/lens-common';
-import { KibanaCodeEditorWrapper, type KbnClient, type ScoutPage } from '@kbn/scout';
+import type { EsqlEditor, KbnClient, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { applyLensInlineEditorAndWaitClosed, spaceTest, testData } from '../fixtures';
@@ -61,9 +61,8 @@ const createFlightsLibraryLens = async (
 };
 
 /** Waits until the inline ES|QL editor is interactive. */
-const waitForEsqlEditorReady = async (page: ScoutPage): Promise<void> => {
-  await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
-  await expect(page.testSubj.locator('ESQLEditor-run-query-button')).toBeEnabled();
+const waitForEsqlEditorReady = async (page: ScoutPage, esqlEditor: EsqlEditor): Promise<void> => {
+  await expect(esqlEditor.runButton).toBeEnabled();
   await expect(page.testSubj.locator('lnsChartSwitchPopover')).toBeVisible();
 };
 
@@ -73,23 +72,23 @@ const waitForEsqlEditorReady = async (page: ScoutPage): Promise<void> => {
  * The initial request uses `FROM <index> | limit 0` and can complete *after* a
  * later STATS Run, overwriting a good chart suggestion with an empty Table.
  */
-const waitForNewEsqlPanelInitialized = async (page: ScoutPage): Promise<void> => {
-  await waitForEsqlEditorReady(page);
-  await expect(
-    page.testSubj.locator('ESQLEditor-queryStats-totalDocumentsProcessed')
-  ).toBeVisible();
+const waitForNewEsqlPanelInitialized = async (
+  page: ScoutPage,
+  esqlEditor: EsqlEditor
+): Promise<void> => {
+  await waitForEsqlEditorReady(page, esqlEditor);
+  await expect(esqlEditor.queryStatsTotalDocumentsProcessed).toBeVisible();
 };
 
-const setEsqlQueryAndRun = async (page: ScoutPage, query: string): Promise<void> => {
-  const codeEditor = new KibanaCodeEditorWrapper(page);
-  await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-
-  const runButton = page.testSubj.locator('ESQLEditor-run-query-button');
-  await expect(runButton).toBeEnabled();
-  await codeEditor.setCodeEditorValue(query);
+const setEsqlQueryAndRun = async (
+  page: ScoutPage,
+  esqlEditor: EsqlEditor,
+  query: string
+): Promise<void> => {
+  await esqlEditor.setQuery(query);
   // Monaco setValue is sync; wait until the model reflects STATS before Run.
-  await expect.poll(async () => codeEditor.getCodeEditorValue()).toContain('STATS');
-  await runButton.click();
+  await expect.poll(async () => esqlEditor.getQuery()).toContain('STATS');
+  await esqlEditor.runQuery();
   const chart = page.testSubj.locator('xyVisChart');
   await expect(chart).toBeVisible();
   await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
@@ -140,16 +139,16 @@ spaceTest.describe(
     spaceTest(
       'dashboard add filter from ES|QL panel should not show duplicate data view names',
       async ({ page, pageObjects }) => {
-        const { dashboard, filterBar, lens } = pageObjects;
+        const { dashboard, filterBar, lens, esqlEditor } = pageObjects;
 
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
           await dashboard.addNewESQLPanel();
-          await waitForNewEsqlPanelInitialized(page);
+          await waitForNewEsqlPanelInitialized(page, esqlEditor);
         });
 
         await spaceTest.step('set the ESQL query and apply', async () => {
-          await setEsqlQueryAndRun(page, WILDCARD_ESQL_QUERY);
+          await setEsqlQueryAndRun(page, esqlEditor, WILDCARD_ESQL_QUERY);
         });
 
         await spaceTest.step('apply and close the inline editor', async () => {
@@ -192,16 +191,16 @@ spaceTest.describe(
     spaceTest(
       'filter fields should be available after changing ES|QL query source',
       async ({ page, pageObjects }) => {
-        const { dashboard, lens } = pageObjects;
+        const { dashboard, lens, esqlEditor } = pageObjects;
 
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
           await dashboard.addNewESQLPanel();
-          await waitForNewEsqlPanelInitialized(page);
+          await waitForNewEsqlPanelInitialized(page, esqlEditor);
         });
 
         await spaceTest.step('set the initial ESQL query and apply', async () => {
-          await setEsqlQueryAndRun(page, INITIAL_ESQL_QUERY);
+          await setEsqlQueryAndRun(page, esqlEditor, INITIAL_ESQL_QUERY);
         });
 
         await spaceTest.step('apply and close the inline editor', async () => {
@@ -211,9 +210,9 @@ spaceTest.describe(
 
         await spaceTest.step('reopen the inline editor and change the query', async () => {
           await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-          await waitForEsqlEditorReady(page);
+          await waitForEsqlEditorReady(page, esqlEditor);
 
-          await setEsqlQueryAndRun(page, WILDCARD_ESQL_QUERY);
+          await setEsqlQueryAndRun(page, esqlEditor, WILDCARD_ESQL_QUERY);
         });
 
         await spaceTest.step('apply and close the inline editor', async () => {

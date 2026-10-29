@@ -33,6 +33,24 @@ describe('STATS', () => {
     ]);
   });
 
+  it('types a bare counter aggregate as double in a TS pipeline', () => {
+    const previousCommandFields: ESQLFieldWithMetadata[] = [
+      { name: 'requests', type: 'counter_double', userDefined: false },
+    ];
+
+    const result = columnsAfter(
+      synth.cmd`STATS var0=AVG(requests)`,
+      previousCommandFields,
+      '',
+      { ...additionalFieldsMock, isTimeseriesSource: true },
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'var0', type: 'double', userDefined: true, location: { min: 0, max: 0 } },
+    ]);
+  });
+
   it('adds the escaped column, when no grouping is given', () => {
     const previousCommandFields: ESQLFieldWithMetadata[] = [
       { name: 'field1', type: 'keyword', userDefined: false },
@@ -180,6 +198,117 @@ describe('STATS', () => {
     expect(result).toEqual<ESQLColumnData[]>([
       { name: 'AVG(field2)', type: 'double', userDefined: true, location: { min: 15, max: 25 } },
       { name: 'ss', type: 'keyword', userDefined: true, location: { min: 30, max: 33 } },
+    ]);
+  });
+
+  it('types an aggregating expression from the BY assignment', () => {
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'doubleField', type: 'double', userDefined: false },
+    ];
+
+    const queryString = `FROM a | STATS s1 = b1 + 1 BY b1 = doubleField`;
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+    const result = columnsAfter(
+      command,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      {
+        name: 's1',
+        type: 'double',
+        userDefined: true,
+        location: { min: 15, max: 16 },
+      },
+      {
+        name: 'b1',
+        type: 'double',
+        userDefined: true,
+        location: { min: 30, max: 31 },
+      },
+    ]);
+  });
+
+  it('keeps the rightmost BY assignment when a name is reused', () => {
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'address', type: 'keyword', userDefined: false },
+      { name: 'doubleField', type: 'double', userDefined: false },
+    ];
+
+    const queryString = `FROM a | STATS COUNT() BY addr = address, addr = doubleField`;
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+    const result = columnsAfter(
+      command,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'COUNT()', type: 'long', userDefined: true, location: { min: 15, max: 21 } },
+      { name: 'addr', type: 'double', userDefined: true, location: { min: 42, max: 45 } },
+    ]);
+  });
+
+  it('types an aggregation from a bare grouping that shadows an earlier assignment', () => {
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'doubleField', type: 'double', userDefined: false },
+      { name: 'keywordField', type: 'keyword', userDefined: false },
+    ];
+
+    const queryString = `FROM a | STATS total = SUM(doubleField) BY doubleField = keywordField, doubleField`;
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+    const result = columnsAfter(
+      command,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'total', type: 'double', userDefined: true, location: { min: 15, max: 19 } },
+      { name: 'doubleField', type: 'double', userDefined: true, location: { min: 71, max: 81 } },
+    ]);
+  });
+
+  it('keeps the grouping column when an aggregation output reuses its name', () => {
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'address', type: 'keyword', userDefined: false },
+    ];
+
+    const queryString = `FROM a | STATS addr = COUNT() BY addr = address`;
+    const {
+      root: {
+        commands: [, command],
+      },
+    } = Parser.parseQuery(queryString);
+    const result = columnsAfter(
+      command,
+      previousCommandFields,
+      queryString,
+      additionalFieldsMock,
+      unmappedFieldsStrategy
+    );
+
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'addr', type: 'keyword', userDefined: true, location: { min: 33, max: 36 } },
     ]);
   });
 });

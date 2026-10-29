@@ -102,4 +102,25 @@ describe('AttachmentEvent', () => {
 
     expect(container).toBeEmptyDOMElement();
   });
+
+  describe('rendering cost', () => {
+    it('does not render again when its parent renders with the same props', () => {
+      const item = createAttachmentItem();
+      const { rerender } = render(<AttachmentEvent item={item} />);
+      expect(mockInlineCard).toHaveBeenCalledTimes(1);
+
+      rerender(<AttachmentEvent item={item} />);
+
+      expect(mockInlineCard).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders again when its item changes', () => {
+      const item = createAttachmentItem();
+      const { rerender } = render(<AttachmentEvent item={item} />);
+
+      rerender(<AttachmentEvent item={{ ...item }} />);
+
+      expect(mockInlineCard).toHaveBeenCalledTimes(2);
+    });
+  });
 });
