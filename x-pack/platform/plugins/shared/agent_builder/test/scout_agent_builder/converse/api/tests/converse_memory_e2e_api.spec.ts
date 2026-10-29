@@ -14,6 +14,7 @@ import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settin
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { randomUUID } from 'crypto';
 import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
@@ -25,6 +26,8 @@ const RUN_ID = Date.now().toString(36);
 const AI_INDEX_ID = `scout-memory-agent-e2e-${RUN_ID}`;
 const DESTINATION_INDEX = `ai-index-idx-scout-memory-agent-e2e-${RUN_ID}`;
 const AGENT_ID = `scout-memory-agent-e2e-${RUN_ID}`;
+const REMEMBER_CONVERSATION_ID = randomUUID();
+const RECALL_CONVERSATION_ID = randomUUID();
 const AI_INDEX_COLLECTION_PATH = '/api/context_engine/ai_index';
 const MEMORY_CONTENT = 'Project Atlas uses deployment code cobalt-731.';
 const API_HEADERS = {
@@ -33,6 +36,8 @@ const API_HEADERS = {
 };
 
 const toLlmToolName = (toolId: string) => toolId.replaceAll('.', '_');
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;
 
 interface ConverseResponse {
   conversation_id: string;
@@ -64,9 +69,9 @@ apiTest.describe(
     let llmProxy: LlmProxy | undefined;
     let connectorId: string | undefined;
     let previousMemoryEnabled: boolean | undefined;
-    const conversationIds: string[] = [];
+    const conversationIds = [REMEMBER_CONVERSATION_ID, RECALL_CONVERSATION_ID];
 
-    apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, log, requestAuth }) => {
+    apiTest.beforeAll(async ({ apiClient, kbnClient, log, requestAuth }) => {
       credentials = await requestAuth.getApiKeyForAdmin();
       const headers = { ...credentials.apiKeyHeader, ...API_HEADERS };
 
@@ -82,7 +87,6 @@ apiTest.describe(
       });
       await kbnClient.uiSettings.waitForEventualCacheRefresh();
 
-      await esClient.indices.create({ index: DESTINATION_INDEX });
       const aiIndexResponse = await apiClient.put(`${AI_INDEX_COLLECTION_PATH}/${AI_INDEX_ID}`, {
         headers,
         responseType: 'json',
@@ -105,14 +109,7 @@ apiTest.describe(
           description: 'Exercises Memory across separate Agent Builder conversations.',
           configuration: {
             instructions: 'Use the configured Context Engine AI index when explicitly requested.',
-            tools: [
-              {
-                tool_ids: [
-                  contextEngineMemoryTools.remember,
-                  contextEngineAiIndexTools.queryAiIndices,
-                ],
-              },
-            ],
+            tools: [],
             ai_indices: [AI_INDEX_ID],
           },
         },
@@ -130,52 +127,105 @@ apiTest.describe(
         return;
       }
       const headers = { ...credentials.apiKeyHeader, ...API_HEADERS };
+      const cleanupErrors: string[] = [];
+      const cleanup = async (label: string, operation: () => Promise<void>) => {
+        try {
+          await operation();
+        } catch (error) {
+          cleanupErrors.push(`${label}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      };
 
       for (const conversationId of conversationIds) {
-        await apiClient.delete(
-          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
-          { headers, responseType: 'json' }
-        );
-      }
-      await apiClient.delete(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(AGENT_ID)}`, {
-        headers,
-        responseType: 'json',
-      });
-      await apiClient.delete(`${AI_INDEX_COLLECTION_PATH}/${AI_INDEX_ID}`, {
-        headers,
-        responseType: 'json',
-      });
-      await esClient.indices.delete({ index: DESTINATION_INDEX }, { ignore: [404] });
-
-      if (connectorId !== undefined) {
-        await deleteConnectorById(kbnClient, connectorId);
-      }
-      llmProxy?.close();
-
-      if (previousMemoryEnabled === undefined) {
-        await apiClient.delete(
-          `/internal/kibana/global_settings/${encodeURIComponent(
-            CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID
-          )}`,
-          { headers, responseType: 'json' }
-        );
-      } else {
-        await kbnClient.uiSettings.updateGlobal({
-          [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: previousMemoryEnabled,
+        await cleanup(`conversation ${conversationId}`, async () => {
+          const response = await apiClient.delete(
+            `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
+            { headers, responseType: 'json' }
+          );
+          if (response.statusCode !== 200 && response.statusCode !== 404) {
+            throw new Error(`HTTP ${response.statusCode}: ${JSON.stringify(response.body)}`);
+          }
         });
       }
-      await kbnClient.uiSettings.waitForEventualCacheRefresh();
+      await cleanup(`agent ${AGENT_ID}`, async () => {
+        const response = await apiClient.delete(
+          `${API_AGENT_BUILDER}/agents/${encodeURIComponent(AGENT_ID)}`,
+          {
+            headers,
+            responseType: 'json',
+          }
+        );
+        if (response.statusCode !== 200 && response.statusCode !== 404) {
+          throw new Error(`HTTP ${response.statusCode}: ${JSON.stringify(response.body)}`);
+        }
+      });
+      await cleanup(`AI index ${AI_INDEX_ID}`, async () => {
+        const response = await apiClient.delete(
+          `${AI_INDEX_COLLECTION_PATH}/${AI_INDEX_ID}?delete_knowledge_indicators=true`,
+          { headers, responseType: 'json' }
+        );
+        if (response.statusCode === 200) {
+          const body = asRecord(response.body);
+          const errors = Array.isArray(body?.errors) ? body.errors : [];
+          if (body?.acknowledged !== true || errors.length > 0) {
+            throw new Error(JSON.stringify(response.body));
+          }
+        } else if (response.statusCode !== 404) {
+          throw new Error(`HTTP ${response.statusCode}: ${JSON.stringify(response.body)}`);
+        }
+      });
+      await cleanup(`backing index ${DESTINATION_INDEX}`, async () => {
+        await esClient.indices.delete({ index: DESTINATION_INDEX }, { ignore: [404] });
+      });
+
+      if (connectorId !== undefined) {
+        const createdConnectorId = connectorId;
+        await cleanup(`connector ${createdConnectorId}`, async () => {
+          await deleteConnectorById(kbnClient, createdConnectorId);
+        });
+      }
+      try {
+        llmProxy?.close();
+      } catch (error) {
+        cleanupErrors.push(`LLM proxy: ${error instanceof Error ? error.message : String(error)}`);
+      }
+
+      await cleanup('global Memory setting', async () => {
+        if (previousMemoryEnabled === undefined) {
+          const response = await apiClient.delete(
+            `/internal/kibana/global_settings/${encodeURIComponent(
+              CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID
+            )}`,
+            { headers, responseType: 'json' }
+          );
+          if (response.statusCode !== 200) {
+            throw new Error(`HTTP ${response.statusCode}: ${JSON.stringify(response.body)}`);
+          }
+        } else {
+          await kbnClient.uiSettings.updateGlobal({
+            [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: previousMemoryEnabled,
+          });
+        }
+        await kbnClient.uiSettings.waitForEventualCacheRefresh();
+      });
+
+      if (cleanupErrors.length > 0) {
+        throw new Error(`Memory end-to-end cleanup failed:\n${cleanupErrors.join('\n')}`);
+      }
     });
 
     apiTest(
       'writes a memory in one conversation and retrieves it in another',
       async ({ apiClient, esClient }) => {
-        if (credentials === undefined || llmProxy === undefined || connectorId === undefined) {
-          throw new Error('The test credentials and LLM proxy connector were not initialized.');
-        }
+        expect(credentials).toBeDefined();
+        expect(llmProxy).toBeDefined();
+        expect(connectorId).toBeDefined();
+        const testCredentials = credentials as RoleApiCredentials;
+        const proxy = llmProxy as LlmProxy;
+        const testConnectorId = connectorId as string;
 
         setupAgentCallToolThenAnswer({
-          proxy: llmProxy,
+          proxy,
           continueConversation: true,
           toolName: toLlmToolName(contextEngineMemoryTools.remember),
           toolArg: {
@@ -191,21 +241,22 @@ apiTest.describe(
 
         const rememberResponse = await postConverse(
           apiClient,
-          credentials.apiKeyHeader,
+          testCredentials.apiKeyHeader,
           {
+            conversation_id: REMEMBER_CONVERSATION_ID,
             input: `Remember this shared project fact: ${MEMORY_CONTENT}`,
             agent_id: AGENT_ID,
-            connector_id: connectorId,
+            connector_id: testConnectorId,
           },
           'local'
         );
         expect(rememberResponse).toHaveStatusCode(200);
         const rememberBody = rememberResponse.body as ConverseResponse;
-        conversationIds.push(rememberBody.conversation_id);
+        expect(rememberBody.conversation_id).toBe(REMEMBER_CONVERSATION_ID);
         expect(rememberBody.response.message).toBe(
           'I will remember the Project Atlas deployment code.'
         );
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
         const storedMemories = await esClient.search<StoredMemory>({
           index: DESTINATION_INDEX,
@@ -233,7 +284,7 @@ apiTest.describe(
         });
 
         setupAgentCallToolThenAnswer({
-          proxy: llmProxy,
+          proxy,
           continueConversation: true,
           toolName: toLlmToolName(contextEngineAiIndexTools.queryAiIndices),
           toolArg: {
@@ -245,22 +296,23 @@ apiTest.describe(
 
         const recallResponse = await postConverse(
           apiClient,
-          credentials.apiKeyHeader,
+          testCredentials.apiKeyHeader,
           {
+            conversation_id: RECALL_CONVERSATION_ID,
             input: 'What deployment code does Project Atlas use? Search the configured AI index.',
             agent_id: AGENT_ID,
-            connector_id: connectorId,
+            connector_id: testConnectorId,
           },
           'local'
         );
         expect(recallResponse).toHaveStatusCode(200);
         const recallBody = recallResponse.body as ConverseResponse;
-        conversationIds.push(recallBody.conversation_id);
+        expect(recallBody.conversation_id).toBe(RECALL_CONVERSATION_ID);
         expect(recallBody.conversation_id).not.toBe(rememberBody.conversation_id);
         expect(recallBody.response.message).toBe(MEMORY_CONTENT);
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        const finalModelRequests = llmProxy.interceptedRequests.filter(
+        const finalModelRequests = proxy.interceptedRequests.filter(
           ({ matchingInterceptorName }) => matchingInterceptorName === 'final-assistant-response'
         );
         const recallFinalRequest = finalModelRequests.at(-1)?.requestBody;

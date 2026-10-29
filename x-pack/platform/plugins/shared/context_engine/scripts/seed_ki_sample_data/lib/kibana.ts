@@ -19,13 +19,14 @@ export async function kibanaRequest(
   method: string,
   path: string,
   body?: unknown,
-  { timeoutMs = REQUEST_TIMEOUT_MS }: { timeoutMs?: number } = {}
+  { timeoutMs = REQUEST_TIMEOUT_MS, signal }: { timeoutMs?: number; signal?: AbortSignal } = {}
 ): Promise<{ status: number; data: unknown }> {
   let response: Response;
   try {
+    const timeoutSignal = AbortSignal.timeout(timeoutMs);
     response = await fetch(`${config.kibanaUrl}${path}`, {
       method,
-      signal: AbortSignal.timeout(timeoutMs),
+      signal: signal ? AbortSignal.any([timeoutSignal, signal]) : timeoutSignal,
       headers: {
         'Content-Type': 'application/json',
         Authorization: generateAuthHeader(config),
