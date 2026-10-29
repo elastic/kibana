@@ -1,5 +1,5 @@
 {
-  "sha1": "1656a557f18342b879ce87940fb192d53af2d3dd",
+  "sha1": "0973872a1f88410b956346983027d58be3ddae9f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -362,7 +362,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/dataview_without_timefield.spec.ts",
         "line": 55,
-        "column": 17
+        "column": 18
       }
     },
     {
@@ -649,7 +649,8 @@
       "title": "Discover feature controls — share and reporting discover:all gets a short share URL",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
@@ -662,7 +663,8 @@
       "title": "Discover feature controls — share and reporting discover:all can generate a CSV report",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
@@ -675,7 +677,8 @@
       "title": "Discover feature controls — share and reporting discover:read + url_create also gets a short share URL",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
@@ -688,7 +691,8 @@
       "title": "Discover feature controls — share and reporting discover:read without url_create only gets a long share URL",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",
@@ -701,7 +705,8 @@
       "title": "Discover feature controls — share and reporting discover:read snapshot URL encodes the current query, sort and time range",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/feature_controls/discover_share_and_reporting.spec.ts",

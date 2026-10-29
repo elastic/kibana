@@ -10,9 +10,11 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "nightshift_investigations"],
-    "requiredPlugins": ["share", "taskManager"],
+    "requiredPlugins": ["share"],
     "optionalPlugins": [
       "actions",
+      "alerting",
+      "alertingVTwo",
       "agentBuilder",
       "agenticInvestigations",
       "contextEngine",

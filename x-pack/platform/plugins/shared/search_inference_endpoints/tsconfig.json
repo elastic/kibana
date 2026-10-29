@@ -20,7 +20,6 @@
     "@kbn/shared-ux-router",
     "@kbn/core-http-server",
     "@kbn/share-plugin",
-    "@kbn/actions-plugin",
     "@kbn/logging",
     "@kbn/react-kibana-context-render",
     "@kbn/doc-links",
@@ -39,7 +38,6 @@
     "@kbn/react-query",
     "@kbn/cloud-plugin",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/logging-mocks",
     "@kbn/cloud-connect-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-security-server",
@@ -58,7 +56,8 @@
     "@kbn/es-errors",
     "@kbn/app-header",
     "@kbn/core-chrome-browser-context-mocks",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/core-http-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

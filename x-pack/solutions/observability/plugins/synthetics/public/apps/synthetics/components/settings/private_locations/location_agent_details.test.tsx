@@ -39,6 +39,7 @@ const agent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   platform: 'linux',
   tags: [],
   monitorsAssigned: null,
+  complete: false,
   ...overrides,
 });
 
@@ -172,5 +173,20 @@ describe('LocationAgentDetails', () => {
       'href',
       '/app/fleet/agents/agent-a-id'
     );
+  });
+
+  it('warns when browser monitors have no elastic-agent-complete agent', () => {
+    render(
+      <LocationAgentDetails
+        stats={stats([agent()])}
+        loading={false}
+        agentPolicyId="policy-1"
+        locationLabel="Local Docker PL"
+        locationMonitorCount={1}
+        missingCompleteAgent
+      />
+    );
+
+    expect(screen.getByTestId('locationAgentWarnings')).toHaveTextContent('elastic-agent-complete');
   });
 });

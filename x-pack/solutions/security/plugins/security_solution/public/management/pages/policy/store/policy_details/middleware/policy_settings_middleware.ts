@@ -59,13 +59,15 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
           }
         }
 
-        // Only the per-OS form exposes the macOS ransomware notification, so its message is
-        // defaulted alongside it. Optional: a policy predating macOS ransomware has no popup
-        // branch to default.
-        const macRansomwarePopup = policyItem.inputs[0].config.policy.value.mac.popup.ransomware;
+        // Only the per-OS form exposes the macOS and Linux ransomware notifications, so their
+        // messages are defaulted alongside it. Optional: a policy predating either OS's ransomware
+        // protection has no popup branch to default.
+        for (const os of [PolicyOperatingSystem.mac, PolicyOperatingSystem.linux] as const) {
+          const ransomwarePopup = policyItem.inputs[0].config.policy.value[os].popup.ransomware;
 
-        if (macRansomwarePopup?.message === '') {
-          macRansomwarePopup.message = DefaultPolicyNotificationMessage;
+          if (ransomwarePopup?.message === '') {
+            ransomwarePopup.message = DefaultPolicyNotificationMessage;
+          }
         }
       } else if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
         policyItem.inputs[0].config.policy.value.windows.popup.malware.message =

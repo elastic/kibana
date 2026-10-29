@@ -8,6 +8,8 @@ import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { of } from 'rxjs';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -23,6 +25,7 @@ import {
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyInvalidError,
+  FleetError,
 } from '../errors';
 import type {
   AgentPolicy,
@@ -1134,6 +1137,10 @@ describe('Agent policy', () => {
           id: 'package-3',
         },
       ] as any);
+      mockedPackagePolicyService.bulkUpdate.mockResolvedValueOnce({
+        updatedPolicies: [{ id: 'package-1' }] as any,
+        failedPolicies: [],
+      });
       await agentPolicyService.delete(soClient, esClient, 'policy_1');
       expect(mockedPackagePolicyService.delete).toHaveBeenCalledWith(
         expect.anything(),
@@ -1152,6 +1159,70 @@ describe('Agent policy', () => {
           },
         ]
       );
+    });
+
+    it('should remove the agent policy from shared package policies before deleting the others', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-2', policy_ids: ['policy_1'] },
+      ] as any);
+      const callOrder: string[] = [];
+      mockedPackagePolicyService.bulkUpdate.mockImplementationOnce(async () => {
+        callOrder.push('bulkUpdate');
+        return { updatedPolicies: [{ id: 'package-1' }] as any, failedPolicies: [] };
+      });
+      mockedPackagePolicyService.delete.mockImplementationOnce(async () => {
+        callOrder.push('delete');
+        return [];
+      });
+
+      await agentPolicyService.delete(soClient, esClient, 'policy_1');
+
+      expect(callOrder).toEqual(['bulkUpdate', 'delete']);
+    });
+
+    it('should not delete the agent policy when removing it from shared package policies fails', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-2', policy_ids: ['policy_1'] },
+      ] as any);
+      mockedPackagePolicyService.bulkUpdate.mockResolvedValueOnce({
+        updatedPolicies: [],
+        failedPolicies: [
+          {
+            packagePolicy: { id: 'package-1' } as any,
+            error: new FleetError('Package system-2.20.0 not found'),
+          },
+        ],
+      });
+      mockedPackagePolicyService.delete.mockClear();
+      esClient.deleteByQuery.mockClear();
+
+      await expect(agentPolicyService.delete(soClient, esClient, 'policy_1')).rejects.toThrow(
+        'Cannot delete agent policy [policy_1]: failed to remove it from shared package policies [package-1]: Package system-2.20.0 not found'
+      );
+
+      expect(mockedPackagePolicyService.delete).not.toHaveBeenCalled();
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('should not delete the agent policy with force when removing it from shared package policies fails', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+      ] as any);
+      mockedPackagePolicyService.bulkUpdate.mockResolvedValueOnce({
+        updatedPolicies: [],
+        failedPolicies: [
+          { packagePolicy: { id: 'package-1' } as any, error: new FleetError('failed') },
+        ],
+      });
+
+      await expect(
+        agentPolicyService.delete(soClient, esClient, 'policy_1', { force: true })
+      ).rejects.toThrow(FleetError);
+
+      expect(soClient.delete).not.toHaveBeenCalled();
     });
 
     it('should force-revoke agents before deleting an agentless policy', async () => {
@@ -3224,6 +3295,106 @@ describe('Agent policy', () => {
 
       expect(getByIdsSpy.mock.calls[0][2]?.spaceId).toBeUndefined();
       expect(getFullAgentPolicySpy.mock.calls[0][2]?.spaceId).toBeUndefined();
+    });
+
+    describe('sentinel policy version', () => {
+      const deploy = async ({
+        sentinelVersionFlag,
+        options,
+        policyAttributes,
+      }: {
+        sentinelVersionFlag: boolean;
+        options?: Parameters<typeof agentPolicyService.deployPolicies>[3];
+        policyAttributes?: Record<string, unknown>;
+      }) => {
+        const soClient = createSavedObjectClientMock();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+        esClient.search.mockResolvedValue({ hits: { hits: [] }, aggregations: {} } as any);
+        mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+        mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+          enableVersionSpecificPolicies: true,
+        } as any);
+        mockedAppContextService.getFeatureFlags.mockReturnValue({
+          getBooleanValue$: jest.fn().mockReturnValue(of(sentinelVersionFlag)),
+        } as any);
+        mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
+        mockedGetFullAgentPolicy.mockResolvedValue({
+          id: 'policy-1',
+          revision: 2,
+          namespaces: ['default'],
+          inputs: [],
+        } as any);
+        soClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'policy-1',
+              type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+              attributes: {
+                name: 'Policy 1',
+                revision: 2,
+                has_agent_version_conditions: false,
+                is_default_fleet_server: true,
+                schema_version: '99.0.0',
+                ...policyAttributes,
+              },
+              references: [],
+            },
+          ],
+        });
+        jest
+          .spyOn(agentlessAgentService, 'createAgentlessAgent')
+          .mockResolvedValue(undefined as any);
+
+        await agentPolicyService.deployPolicies(soClient, ['policy-1'], undefined, options);
+
+        return esClient.bulk.mock.calls.flatMap(([request]) =>
+          (request.operations as any[]).filter((op) => op.policy_id)
+        );
+      };
+
+      it('deploys the base and the #sentinel policy when the flag is enabled', async () => {
+        const docs = await deploy({ sentinelVersionFlag: true });
+
+        expect(docs.map((doc) => doc.policy_id)).toEqual(['policy-1', 'policy-1#sentinel']);
+        const [base, sentinel] = docs;
+        expect(sentinel).toEqual({
+          ...base,
+          policy_id: 'policy-1#sentinel',
+          policy_base_id: 'policy-1',
+          default_fleet_server: false,
+          data: { ...base.data, id: 'policy-1#sentinel' },
+        });
+        expect(base.data.id).toEqual('policy-1');
+        expect(base.default_fleet_server).toBe(true);
+      });
+
+      it.each([
+        ['agentless', { supports_agentless: true }],
+        ['managed', { is_managed: true }],
+      ])(
+        'does not deploy the #sentinel policy for %s policies',
+        async (_name, policyAttributes) => {
+          const docs = await deploy({ sentinelVersionFlag: true, policyAttributes });
+
+          expect(docs.map((doc) => doc.policy_id)).toEqual(['policy-1']);
+        }
+      );
+
+      it('deploys only the base policy when the flag is disabled', async () => {
+        const docs = await deploy({ sentinelVersionFlag: false });
+
+        expect(docs.map((doc) => doc.policy_id)).toEqual(['policy-1']);
+      });
+
+      it('does not deploy the #sentinel policy when deploying specific agent versions', async () => {
+        const docs = await deploy({
+          sentinelVersionFlag: true,
+          options: { agentVersions: ['9.4'] },
+        });
+
+        expect(docs).toEqual([]);
+      });
     });
   });
 

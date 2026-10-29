@@ -1,0 +1,46 @@
+# PROCESSING-COMMANDS
+
+Processing commands change an input table by adding, removing, or changing rows and columns.
+
+Supported processing commands:
+- `CHANGE_POINT` Elastic Stack: Preview since 9.1 Elastic Stack: Generally available since 9.2
+- `COMPLETION` Elastic Stack: Preview since 9.1 Elastic Stack: Generally available since 9.3
+- `DEDUP` Elastic Stack: Planned Elastic Cloud Serverless: Preview
+- `DENSE_VECTOR` Elastic Stack: Planned Elastic Cloud Serverless: Preview
+- `DISSECT`
+- `DROP`
+- `ENRICH`
+- `EVAL`
+- `GROK`
+- `FORK` Elastic Stack: Preview from 9.1 to 9.3 Elastic Stack: Generally available since 9.4
+- `FUSE` Elastic Stack: Preview from 9.2 to 9.4 Elastic Stack: Generally available since 9.5
+- `HIGHLIGHT` Elastic Stack: Planned Elastic Cloud Serverless: Generally available
+- `KEEP`
+- `LIMIT`
+- `LOOKUP JOIN` Elastic Stack: Preview since 9.0 Elastic Stack: Generally available since 9.1
+- `METRICS_INFO` Elastic Stack: Generally available since 9.4 Elastic Cloud Serverless: Preview
+- `INLINE STATS` Elastic Stack: Preview since 9.2 Elastic Stack: Generally available since 9.3
+- `IP_LOCATION` Elastic Stack: Preview since 9.5 Elastic Cloud Serverless: Preview
+- `MMR` Elastic Stack: Preview since 9.4 Elastic Cloud Serverless: Preview
+- `MV_EXPAND` Elastic Stack: Preview from 9.0 to 9.3 Elastic Stack: Generally available since 9.4
+- `REGISTERED_DOMAIN` Elastic Stack: Preview since 9.4 Elastic Cloud Serverless: Preview
+- `RENAME`
+- `RERANK` Elastic Stack: Preview since 9.2 Elastic Stack: Generally available since 9.4
+- `SAMPLE` Elastic Stack: Preview from 9.1 to 9.4 Elastic Stack: Generally available since 9.5
+- `SORT`
+- `STATS`
+- `TS_INFO` Elastic Stack: Generally available since 9.4 Elastic Cloud Serverless: Preview
+- `TS_COLLAPSE` Elastic Stack: Preview since 9.5 Elastic Cloud Serverless: Preview
+- `USER_AGENT` Elastic Stack: Preview since 9.4 Elastic Cloud Serverless: Preview
+- `URI_PARTS` Elastic Stack: Preview since 9.4 Elastic Cloud Serverless: Preview
+- `WHERE`
+
+## Syntax
+
+`<source-command> | <processing-command1> | <processing-command2>`
+
+### Parameters
+
+Processing commands have command-specific parameters.
+
+## Examples

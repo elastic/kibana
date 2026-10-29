@@ -30,6 +30,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
   DISCOVERY_QUERIES_QUERY_KEY,
@@ -41,6 +42,7 @@ import {
   useFetchDiscoveryQueriesOccurrences,
 } from '../../../../hooks/use_fetch_discovery_queries_occurrences';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { useQueriesApi } from '../../../../hooks/use_queries_api';
 import { getFormattedError } from '../../../../util/errors';
 import { AssetImage } from '../../../../components/asset_image';
@@ -100,6 +102,7 @@ export function QueriesTable() {
     },
     core: {
       application: {
+        getUrlForApp,
         capabilities: { nightshift },
       },
       notifications: { toasts },
@@ -108,6 +111,7 @@ export function QueriesTable() {
   const canManage = getNightshiftCapabilities(nightshift).canManage;
   const { timeState } = useTimefilter();
   const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
+  const { getSourceTitle } = useSourcesById();
   const [searchQuery, setSearchQuery] = useState('');
 
   const [pagination, setPagination] = useState<{
@@ -200,8 +204,8 @@ export function QueriesTable() {
     },
   });
 
-  const deleteQueryMutation = useMutation<void, Error, { queryId: string; streamName: string }>({
-    mutationFn: async ({ queryId, streamName }) => {
+  const deleteQueryMutation = useMutation<void, Error, { queryId: string; sourceId: string }>({
+    mutationFn: async ({ queryId, sourceId }) => {
       await removeQuery({ queryId });
     },
     onSuccess: async (_, { queryId }) => {
@@ -321,11 +325,11 @@ export function QueriesTable() {
         ),
       },
       {
-        field: 'stream_name',
+        field: 'source_id',
         name: STREAM_COLUMN,
         width: '130px',
         render: (_: unknown, item: SignificantEventQueryRow) => (
-          <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
+          <EuiBadge color="hollow">{getSourceTitle(item.source_id)}</EuiBadge>
         ),
       },
       {
@@ -349,7 +353,7 @@ export function QueriesTable() {
         ],
       },
     ];
-  }, [share.url.locators, timeState, selectedQuery, handleSelectQuery]);
+  }, [share.url.locators, timeState, selectedQuery, handleSelectQuery, getSourceTitle]);
 
   const isLoading = queriesLoading;
   if (isLoading) {
@@ -398,9 +402,7 @@ export function QueriesTable() {
         actions={
           <EuiButtonEmpty
             data-test-subj="significantEventsAppQueriesTableGoToKnowledgeIndicatorsButton"
-            href={router.link('/{tab}', {
-              path: { tab: 'knowledge_indicators' },
-            })}
+            href={getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/knowledge/knowledge_indicators' })}
           >
             {i18n.translate(
               'xpack.significantEventsApp.queriesTable.emptyState.goToKnowledgeIndicatorsButton',
@@ -555,9 +557,7 @@ export function QueriesTable() {
           key={selectedQuery.query.id}
           item={selectedQuery}
           onClose={closeQueryFlyout}
-          onDelete={(queryId, streamName) =>
-            deleteQueryMutation.mutateAsync({ queryId, streamName })
-          }
+          onDelete={(queryId, sourceId) => deleteQueryMutation.mutateAsync({ queryId, sourceId })}
           isDeleting={deleteQueryMutation.isLoading}
         />
       )}

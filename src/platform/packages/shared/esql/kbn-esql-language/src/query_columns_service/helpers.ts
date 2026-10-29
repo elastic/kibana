@@ -21,6 +21,7 @@ import { columnIsPresent } from '../commands/definitions/utils/columns';
 import { getUnmappedFieldType } from '../commands/definitions/utils/settings';
 import { getLookupJoinSource } from '../commands/definitions/utils/sources';
 import { getIndexFromPromQLParams } from '../commands/definitions/utils/promql';
+import { isTimeseriesSourceCommand } from '../commands/definitions/utils/timeseries_check';
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
@@ -189,6 +190,7 @@ export async function getCurrentQueryAvailableColumns(
     fromEnrich: getEnrichFields,
     fromFrom: getFromFields,
     fromPromql: getPromqlFields,
+    isTimeseriesSource: isTimeseriesSourceCommand(commands),
   };
 
   const previousCommands = commands.slice(0, -1);

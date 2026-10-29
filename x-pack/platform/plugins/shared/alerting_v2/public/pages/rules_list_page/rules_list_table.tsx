@@ -8,13 +8,13 @@
 import React, { useMemo } from 'react';
 import {
   EuiBadge,
-  EuiBadgeGroup,
   EuiBasicTable,
   EuiButtonIcon,
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -33,24 +33,8 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RuleKindBadge } from '../../components/rule_details/rule_summary_header';
 import { RuleActionsMenu } from './rule_actions_menu';
+import { RuleTagsCell } from './rule_tags_cell';
 import { RulesBulkActions } from './rules_bulk_actions';
-
-const labelsContainerStyle = css`
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  overflow: hidden;
-`;
-
-const labelBadgeStyle = css`
-  min-width: 0;
-  flex-shrink: 1;
-`;
-
-const overflowTooltipStyle = css`
-  flex-shrink: 0;
-  line-height: 0;
-`;
 
 const descriptionTextStyle = css`
   text-overflow: ellipsis;
@@ -75,7 +59,7 @@ export interface RulesListTableProps {
   sortDirection?: 'asc' | 'desc';
   isLoading: boolean;
 
-  /** When false, write affordances (selection, bulk actions, quick edit, actions menu) are hidden and the enabled toggle is read-only. */
+  /** When false, write affordances (selection, bulk actions, quick edit) are hidden and the enabled toggle is read-only. The actions menu still shows read actions. */
   canWrite: boolean;
 
   /** Bulk selection state */
@@ -95,8 +79,7 @@ export interface RulesListTableProps {
   onBulkUpdateApiKey: () => void;
 
   /** Row action callbacks */
-  onNavigateToDetails: (rule: RuleApiResponse) => void;
-  onExpand: (rule: RuleApiResponse) => void;
+  onOpenSummary: (rule: RuleApiResponse) => void;
   onQuickEdit: (rule: RuleApiResponse) => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
@@ -141,8 +124,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkDisable,
   onBulkDelete,
   onBulkUpdateApiKey,
-  onNavigateToDetails,
-  onExpand,
+  onOpenSummary,
   onQuickEdit,
   onEdit,
   onClone,
@@ -176,8 +158,6 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   };
 
   const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(() => {
-    const showActionsColumn = canWrite || onViewChangeHistory;
-
     return [
       ...(canWrite
         ? ([
@@ -210,28 +190,6 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
         : []),
       {
-        name: '',
-        width: '32px',
-        render: (rule: RuleApiResponse) => (
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
-              defaultMessage: 'Open rule summary',
-            })}
-            disableScreenReaderOutput
-          >
-            <EuiButtonIcon
-              iconType="maximize"
-              color="text"
-              onClick={() => onExpand(rule)}
-              aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
-                defaultMessage: 'Open rule summary',
-              })}
-              data-test-subj={`expandRule-${rule.id}`}
-            />
-          </EuiToolTip>
-        ),
-      },
-      {
         field: 'metadata',
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
@@ -240,10 +198,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         sortable: true,
         render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
           <div>
-            <EuiLink
-              onClick={() => onNavigateToDetails(rule)}
-              data-test-subj={`ruleNameLink-${rule.id}`}
-            >
+            <EuiLink onClick={() => onOpenSummary(rule)} data-test-subj={`ruleNameLink-${rule.id}`}>
               {metadata?.name ?? rule.id}
             </EuiLink>
             {metadata?.description && (
@@ -277,45 +232,50 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.tags" defaultMessage="Tags" />
         ),
-        width: '20%',
-        render: (_metadata: RuleApiResponse['metadata']) => {
-          const tags = _metadata?.tags;
-          if (!tags || tags.length === 0) {
-            return (
-              <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
-            );
-          }
-          const overflowCount = tags.length - 1;
-          return (
-            <EuiBadgeGroup
-              gutterSize="xs"
-              css={labelsContainerStyle}
-              data-test-subj="tagsContainer"
-            >
-              <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
-                {tags[0]}
-              </EuiBadge>
-              {overflowCount > 0 && (
-                <span css={overflowTooltipStyle}>
-                  <EuiToolTip content={tags.slice(1).join(', ')}>
-                    <EuiBadge
-                      tabIndex={0}
-                      color="hollow"
-                      data-test-subj="overflowTagsBadge"
-                      iconType="tag"
-                      title=""
-                    >
-                      {i18n.translate('xpack.alertingV2.rulesList.tags.overflow', {
-                        defaultMessage: '+{count}',
-                        values: { count: overflowCount },
-                      })}
-                    </EuiBadge>
-                  </EuiToolTip>
-                </span>
-              )}
-            </EuiBadgeGroup>
-          );
-        },
+        width: '18%',
+        render: (metadata: RuleApiResponse['metadata']) => (
+          <RuleTagsCell
+            tags={metadata?.tags}
+            containerTestSubj="tagsContainer"
+            overflowTestSubj="overflowTagsBadge"
+          />
+        ),
+      },
+      {
+        field: 'metadata',
+        name: (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.alertingV2.rulesList.column.routingTags"
+                defaultMessage="Routing tags"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="info"
+                color="subdued"
+                anchorProps={{ 'data-test-subj': 'routingTagsColumnInfoIcon' }}
+                aria-label={i18n.translate(
+                  'xpack.alertingV2.rulesList.column.routingTags.ariaLabel',
+                  { defaultMessage: 'What are routing tags?' }
+                )}
+                content={i18n.translate('xpack.alertingV2.rulesList.column.routingTags.tooltip', {
+                  defaultMessage:
+                    'Action policies apply to a rule when they share at least one of its routing tags.',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        width: '18%',
+        render: (metadata: RuleApiResponse['metadata']) => (
+          <RuleTagsCell
+            tags={metadata?.routing_tags}
+            containerTestSubj="routingTagsContainer"
+            overflowTestSubj="overflowRoutingTagsBadge"
+          />
+        ),
       },
       {
         field: 'kind',
@@ -376,64 +336,58 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           );
         },
       },
-      ...(showActionsColumn
-        ? ([
-            {
-              name: (
-                <FormattedMessage
-                  id="xpack.alertingV2.rulesList.column.actions"
-                  defaultMessage="Actions"
-                />
-              ),
-              width: '8%',
-              align: 'right',
-              render: (rule: RuleApiResponse) => (
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  responsive={false}
-                  justifyContent="flexEnd"
+      {
+        name: (
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.column.actions"
+            defaultMessage="Actions"
+          />
+        ),
+        width: '8%',
+        align: 'right',
+        render: (rule: RuleApiResponse) => (
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+            justifyContent="flexEnd"
+          >
+            {canWrite ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                    defaultMessage: 'Edit rule',
+                  })}
+                  disableScreenReaderOutput
                 >
-                  {canWrite ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                          defaultMessage: 'Edit rule',
-                        })}
-                        disableScreenReaderOutput
-                      >
-                        <EuiButtonIcon
-                          iconType="pencil"
-                          color="text"
-                          onClick={() => onQuickEdit(rule)}
-                          aria-label={i18n.translate(
-                            'xpack.alertingV2.rulesList.action.quickEdit',
-                            {
-                              defaultMessage: 'Edit rule',
-                            }
-                          )}
-                          data-test-subj={`quickEditRule-${rule.id}`}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem grow={false}>
-                    <RuleActionsMenu
-                      rule={rule}
-                      canWrite={canWrite}
-                      onEdit={onEdit}
-                      onClone={onClone}
-                      onDelete={onDelete}
-                      onUpdateApiKey={onUpdateApiKey}
-                      onRun={onRun}
-                      onViewChangeHistory={onViewChangeHistory}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-            },
-          ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
-        : []),
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    color="text"
+                    onClick={() => onQuickEdit(rule)}
+                    aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                      defaultMessage: 'Edit rule',
+                    })}
+                    data-test-subj={`quickEditRule-${rule.id}`}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <RuleActionsMenu
+                rule={rule}
+                canWrite={canWrite}
+                onEdit={onEdit}
+                onClone={onClone}
+                onDelete={onDelete}
+                onUpdateApiKey={onUpdateApiKey}
+                onRun={onRun}
+                onViewChangeHistory={onViewChangeHistory}
+                showViewDetails
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
     ];
   }, [
     canWrite,
@@ -441,8 +395,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     isRowSelected,
     onSelectPage,
     onSelectRow,
-    onNavigateToDetails,
-    onExpand,
+    onOpenSummary,
     onQuickEdit,
     onEdit,
     onClone,

@@ -163,7 +163,7 @@ export const getInferenceServicesRoute = (
         validate: {
           request: {
             params: schema.object({
-              inferenceId: schema.string(),
+              inferenceId: schema.string({ maxLength: 256 }),
             }),
           },
         },

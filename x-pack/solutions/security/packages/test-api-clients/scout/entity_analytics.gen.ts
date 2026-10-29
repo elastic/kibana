@@ -785,7 +785,7 @@ Removes a privileged user from monitoring by their document ID.
     );
   },
   /**
-   * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+   * Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   async getAnomalyOverview<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAnomalyOverviewProps,
@@ -810,7 +810,7 @@ Removes a privileged user from monitoring by their document ID.
     });
   },
   /**
-   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group is combined.
    */
   async getAnomalySummary<TResponseType extends ScoutResponseType = 'json'>(
     props: GetAnomalySummaryProps,

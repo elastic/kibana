@@ -26,9 +26,7 @@ import type { RegistrableEntityDefinition } from './domain/definitions/registry'
 const makeDefinition = (type: string): RegistrableEntityDefinition => ({
   type,
   name: `Test '${type}' definition`,
-  fields: [],
   identityField: { singleField: `${type}.name` },
-  indexPatterns: ['logs-*'],
   managedBy: { kind: 'plugin', id: 'testPlugin' },
 });
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as nodeSetTimeout } from 'timers';
 import { withTimeout, isPromise } from './promise';
 
 const delay = (ms: number, resolveValue?: any) =>
@@ -45,6 +46,41 @@ describe('withTimeout', () => {
         timeoutMs: 10,
       })
     ).rejects.toMatchInlineSnapshot(`[Error: from-promise]`);
+  });
+
+  it('drops the event-loop ref only when unref is true, and still reports the timeout', async () => {
+    const timers: NodeJS.Timeout[] = [];
+    const spy = jest.spyOn(global, 'setTimeout').mockImplementation(((
+      handler: () => void,
+      timeout?: number
+    ) => {
+      // Call the Node timer directly. Spreading unknown extra args makes this resolve
+      // to the DOM setTimeout overload, which is typed as returning a number.
+      const timer = nodeSetTimeout(handler, timeout);
+      timers.push(timer);
+      return timer;
+    }) as typeof setTimeout);
+
+    try {
+      const unrefed = withTimeout({
+        promise: new Promise(() => {}),
+        timeoutMs: 20,
+        unref: true,
+      });
+      expect(timers).toHaveLength(1);
+      expect(timers[0].hasRef()).toBe(false);
+      await expect(unrefed).resolves.toStrictEqual({ timedout: true });
+
+      const referenced = withTimeout({
+        promise: new Promise(() => {}),
+        timeoutMs: 20,
+      });
+      expect(timers).toHaveLength(2);
+      expect(timers[1].hasRef()).toBe(true);
+      await expect(referenced).resolves.toStrictEqual({ timedout: true });
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
 

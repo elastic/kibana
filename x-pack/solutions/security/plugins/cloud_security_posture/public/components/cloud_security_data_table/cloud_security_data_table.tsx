@@ -15,12 +15,9 @@ import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type {
-  EuiDataGridCellValueElementProps,
-  EuiDataGridControlColumn,
-  EuiDataGridStyle,
-} from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
 import type { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -303,16 +300,14 @@ export const CloudSecurityDataTable = ({
     />
   );
 
-  const externalControlColumns: EuiDataGridControlColumn[] | undefined = createRuleFn
+  const rowAdditionalLeadingControls: RowControlColumn[] | undefined = createRuleFn
     ? [
         {
           id: 'select',
           width: 20,
-          headerCellRender: () => null,
-          rowCellRender: ({ rowIndex }) =>
-            createRuleFn && (
-              <TakeAction isDataGridControlColumn createRuleFn={createRuleFn(rowIndex)} />
-            ),
+          render: (_Control, { rowIndex }) => (
+            <TakeAction isDataGridControlColumn createRuleFn={createRuleFn(rowIndex)} />
+          ),
         },
       ]
     : undefined;
@@ -362,7 +357,7 @@ export const CloudSecurityDataTable = ({
           showTimeCol={false}
           settings={settings}
           onFetchMoreRecords={loadMore}
-          externalControlColumns={externalControlColumns}
+          rowAdditionalLeadingControls={rowAdditionalLeadingControls}
           externalCustomRenderers={externalCustomRenderers}
           externalAdditionalControls={externalAdditionalControls}
           gridStyleOverride={gridStyle}

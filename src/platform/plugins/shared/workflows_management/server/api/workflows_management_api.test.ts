@@ -20,7 +20,9 @@ import {
 } from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
+  WorkflowExecutionNotFoundError,
   WorkflowNotFoundError,
+  WorkflowResumeNotAppliedError,
 } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
@@ -31,7 +33,7 @@ import {
 } from './external_resume/external_resume_service';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import { preprocessTriggerInputs } from './routes/executions/utils/preprocess_trigger_inputs';
 import {
   type AlertPreprocessingContext,
   type SmlIndexAttachmentFn,
@@ -55,7 +57,10 @@ const mockResumeExternallyWithInput =
     typeof resumeWorkflowExecutionExternallyWithInput
   >;
 
-jest.mock('./routes/executions/utils/preprocess_alert_inputs');
+jest.mock('./routes/executions/utils/preprocess_trigger_inputs', () => ({
+  ...jest.requireActual('./routes/executions/utils/preprocess_trigger_inputs'),
+  preprocessTriggerInputs: jest.fn(),
+}));
 
 describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;
@@ -63,7 +68,7 @@ describe('WorkflowsManagementApi', () => {
   let mockRequest: KibanaRequest;
   let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
   const logger = loggingSystemMock.createLogger();
-  const mockPreprocessAlertInputs = jest.mocked(preprocessAlertInputs);
+  const mockPreprocessTriggerInputs = jest.mocked(preprocessTriggerInputs);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -75,7 +80,7 @@ describe('WorkflowsManagementApi', () => {
       workflowExecutionId: 'sched-exec-id',
     });
     mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([]);
-    mockPreprocessAlertInputs.mockImplementation(async (inputs) => inputs);
+    mockPreprocessTriggerInputs.mockImplementation(async (inputs) => inputs);
 
     const access = new WorkflowAccessControlService(coreMock.createStart(), {
       getWorkflowDocumentWithVersion: jest.fn(),
@@ -113,6 +118,7 @@ describe('WorkflowsManagementApi', () => {
       getWorkflows: jest.fn(),
       getWorkflowsSourceByIds: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
+      getWorkflowExecutionStatuses: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
@@ -129,6 +135,7 @@ describe('WorkflowsManagementApi', () => {
       getExecutionStepExecutions: jest.fn(),
       searchStepExecutions: jest.fn(),
       markStepAsResponded: jest.fn(),
+      releaseHitlStepClaim: jest.fn(),
       getWaitingStepExecutionId: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
     } as any;
@@ -213,7 +220,7 @@ describe('WorkflowsManagementApi', () => {
             'default'
           );
         } else {
-          await expect(steps).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          await expect(steps).rejects.toBeInstanceOf(WorkflowNotFoundError);
           expect(mockWorkflowsService.getExecutionStepExecutions).not.toHaveBeenCalled();
         }
 
@@ -226,7 +233,7 @@ describe('WorkflowsManagementApi', () => {
             'default'
           );
         } else {
-          await expect(history).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          await expect(history).rejects.toBeInstanceOf(WorkflowNotFoundError);
           expect(mockWorkflowsService.searchStepExecutions).not.toHaveBeenCalled();
         }
 
@@ -242,7 +249,7 @@ describe('WorkflowsManagementApi', () => {
             historyOptions
           );
         } else {
-          await expect(changes).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          await expect(changes).rejects.toBeInstanceOf(WorkflowNotFoundError);
           expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
         }
       }
@@ -544,6 +551,69 @@ describe('WorkflowsManagementApi', () => {
       steps: z.array(z.any()).optional(),
     });
   };
+
+  describe('getWorkflowExecutionStatuses', () => {
+    const status = (id: string, workflowId: string) => ({
+      id,
+      workflowId,
+      status: ExecutionStatus.CANCELLED,
+    });
+
+    it('should leave out the executions of workflows the caller cannot read, filtered in one query', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      const filter = { term: { 'access_control.access_mode': 'public' } };
+      jest.mocked(access.readFilter).mockResolvedValue(filter);
+      mockWorkflowsService.getWorkflowExecutionStatuses.mockResolvedValue([
+        status('run-1', 'workflow-123'),
+        status('run-2', 'private-hidden'),
+        status('run-3', 'workflow-123'),
+      ]);
+      // The read filter runs in the query, so an unreadable workflow is simply not returned.
+      mockWorkflowsService.getWorkflowsSourceByIds.mockResolvedValue([{ id: 'workflow-123' }]);
+
+      const result = await api.getWorkflowExecutionStatuses(
+        ['run-1', 'run-2', 'run-3'],
+        'default',
+        { request: mockRequest }
+      );
+
+      expect(access.readFilter).toHaveBeenCalledWith(mockRequest);
+      expect(mockWorkflowsService.getWorkflowsSourceByIds).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowsService.getWorkflowsSourceByIds).toHaveBeenCalledWith(
+        ['workflow-123', 'private-hidden'],
+        'default',
+        ['id'],
+        { includeDeleted: true, accessControlFilter: filter }
+      );
+      expect(mockWorkflowsService.getWorkflowsByIds).not.toHaveBeenCalled();
+      expect(result.map(({ id }) => id)).toEqual(['run-1', 'run-3']);
+    });
+
+    it('should leave out an execution when its workflow no longer exists', async () => {
+      mockWorkflowsService.getWorkflowExecutionStatuses.mockResolvedValue([
+        status('run-1', 'workflow-123'),
+        status('run-2', 'hard-deleted'),
+      ]);
+      mockWorkflowsService.getWorkflowsSourceByIds.mockResolvedValue([{ id: 'workflow-123' }]);
+
+      const result = await api.getWorkflowExecutionStatuses(['run-1', 'run-2'], 'default', {
+        request: mockRequest,
+      });
+
+      // Unlike `getWorkflowExecution`, which keeps it: with no ACL left, nothing proves the caller
+      // may read it.
+      expect(result.map(({ id }) => id)).toEqual(['run-1']);
+    });
+
+    it('should not look up workflows when no execution was found', async () => {
+      mockWorkflowsService.getWorkflowExecutionStatuses.mockResolvedValue([]);
+
+      await expect(
+        api.getWorkflowExecutionStatuses(['missing'], 'default', { request: mockRequest })
+      ).resolves.toEqual([]);
+      expect(mockWorkflowsService.getWorkflowsSourceByIds).not.toHaveBeenCalled();
+    });
+  });
 
   it('returns remaining execution data when hard deletion removed the workflow ACL', async () => {
     const execution = await mockWorkflowsService.getWorkflowExecution('run-1', 'default');
@@ -863,7 +933,7 @@ steps:
           mockWorkflowYaml,
           spaceId,
           mockRequest,
-          { includeVariableRules: false }
+          { includeVariableRules: false, includeEsqlRules: false }
         );
         const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
         expect(engine.executeWorkflow).toHaveBeenCalledWith(
@@ -1189,7 +1259,7 @@ steps:
           mockWorkflowYaml,
           spaceId,
           mockRequest,
-          { includeVariableRules: false }
+          { includeVariableRules: false, includeEsqlRules: false }
         );
       });
     });
@@ -1264,7 +1334,7 @@ steps:
       };
       const context = {} as AlertPreprocessingContext;
       const metadata = { caseIds: ['case-1'] };
-      mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
+      mockPreprocessTriggerInputs.mockResolvedValue(processedInputs);
 
       await expect(
         api.runWorkflowWithAlertPreprocessing({
@@ -1279,7 +1349,10 @@ steps:
         workflowExecutionId: 'test-exec-id',
       });
 
-      expect(mockPreprocessAlertInputs).toHaveBeenCalledWith(inputs, context, 'default', logger);
+      expect(mockPreprocessTriggerInputs).toHaveBeenCalledWith(inputs, context, 'default', logger, [
+        'alertIds',
+        'documentIds',
+      ]);
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         workflow,
         {
@@ -1292,6 +1365,37 @@ steps:
         },
         mockRequest
       );
+    });
+
+    it('expands only the selection kinds the caller allows', async () => {
+      const workflow = {
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Test workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+        },
+        yaml: 'name: Test workflow',
+      } as WorkflowExecutionEngineModel;
+      const inputs = { event: { triggerType: 'alert' } };
+      const context = {} as AlertPreprocessingContext;
+
+      await api.runWorkflowWithAlertPreprocessing({
+        workflow,
+        spaceId: 'default',
+        inputs,
+        request: mockRequest,
+        preprocessingContext: context,
+        expandSelections: ['alertIds'],
+      });
+
+      expect(mockPreprocessTriggerInputs).toHaveBeenCalledWith(inputs, context, 'default', logger, [
+        'alertIds',
+      ]);
     });
 
     it('merges eventOverrides into event after preprocessing so caller-owned fields survive event replacement', async () => {
@@ -1314,13 +1418,13 @@ steps:
           alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
         },
       };
-      // preprocessAlertInputs replaces the whole event — caseIds would be lost without overrides.
+      // Preprocessing replaces the whole event — caseIds would be lost without overrides.
       const processedInputs = {
         event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }] },
       };
       const context = {} as AlertPreprocessingContext;
       const eventOverrides = { caseIds: ['case-1'] };
-      mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
+      mockPreprocessTriggerInputs.mockResolvedValue(processedInputs);
 
       const result = await api.runWorkflowWithAlertPreprocessing({
         workflow,
@@ -1458,7 +1562,7 @@ steps:
         'name: Test Workflow',
         'default',
         mockRequest,
-        { includeVariableRules: false }
+        { includeVariableRules: false, includeEsqlRules: false }
       );
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1569,7 +1673,7 @@ steps:
         'name: Test',
         'default',
         mockRequest,
-        { includeVariableRules: true }
+        { includeVariableRules: true, includeEsqlRules: true }
       );
       expect(result).toBe(expectedResult);
     });
@@ -1595,7 +1699,7 @@ steps:
         'invalid: yaml',
         'my-space',
         mockRequest,
-        { includeVariableRules: true }
+        { includeVariableRules: true, includeEsqlRules: true }
       );
       expect(result).toEqual(expectedResult);
     });
@@ -1832,6 +1936,91 @@ steps:
         undefined,
         mockRequest
       );
+    });
+
+    describe('with a hidden workflow', () => {
+      const privateAccess: NonNullable<WorkflowDetailDto['access_control']> = {
+        access_mode: 'private',
+        entries: [],
+      };
+
+      beforeEach(async () => {
+        mockWorkflowsService.getWorkflow.mockImplementation(async (id) =>
+          createWorkflowDto({ id, access_control: privateAccess })
+        );
+        mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([]);
+        mockWorkflowsService.deleteWorkflows.mockResolvedValue({
+          total: 2,
+          deleted: 1,
+          successfulIds: ['visible'],
+          failures: [],
+        });
+      });
+
+      it('leaves it to the service to skip it like an unknown id', async () => {
+        const access = await mockWorkflowsService.getAccessControl();
+        jest.mocked(access.assertAccess).mockImplementation(async ({ id }) => {
+          if (id === 'hidden') throw new WorkflowNotFoundError(id);
+        });
+
+        await api.deleteWorkflows(['hidden', 'visible'], 'default', mockRequest);
+
+        expect(mockWorkflowsService.deleteWorkflows).toHaveBeenCalledWith(
+          ['hidden', 'visible'],
+          'default',
+          undefined,
+          mockRequest
+        );
+      });
+
+      it('still rejects a workflow the caller can read but not delete', async () => {
+        const access = await mockWorkflowsService.getAccessControl();
+        jest.mocked(access.assertAccess).mockRejectedValue(new WorkflowAccessDeniedError());
+
+        await expect(
+          api.deleteWorkflows(['visible'], 'default', mockRequest)
+        ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+        expect(mockWorkflowsService.deleteWorkflows).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('bulkCreateWorkflows overwrite with a hidden workflow', () => {
+    const yaml = 'name: Test Workflow';
+
+    beforeEach(() => {
+      mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+        { id: 'hidden' } as WorkflowDetailDto,
+      ]);
+      mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({ created: [], failed: [] });
+    });
+
+    it('leaves it to the service to report it as already existing', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      jest.mocked(access.assertAccess).mockRejectedValue(new WorkflowNotFoundError('hidden'));
+
+      await api.bulkCreateWorkflows([{ id: 'hidden', yaml }], 'default', mockRequest, {
+        overwrite: true,
+      });
+
+      expect(mockWorkflowsService.bulkCreateWorkflows).toHaveBeenCalledWith(
+        [{ id: 'hidden', yaml }],
+        'default',
+        mockRequest,
+        { overwrite: true }
+      );
+    });
+
+    it('still rejects the request when the caller can read but not edit', async () => {
+      const access = await mockWorkflowsService.getAccessControl();
+      jest.mocked(access.assertAccess).mockRejectedValue(new WorkflowAccessDeniedError());
+
+      await expect(
+        api.bulkCreateWorkflows([{ id: 'hidden', yaml }], 'default', mockRequest, {
+          overwrite: true,
+        })
+      ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+      expect(mockWorkflowsService.bulkCreateWorkflows).not.toHaveBeenCalled();
     });
   });
 
@@ -2513,9 +2702,16 @@ steps:
   });
 
   describe('resumeWorkflowExecution (consolidated HITL claim)', () => {
+    const claim = {
+      respondedBy: 'elastic',
+      respondedAt: '2026-04-29T10:00:00.000Z',
+      channel: 'inbox',
+    };
+
     beforeEach(() => {
       mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockResolvedValue({ resumedBy: 'user' });
-      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(true);
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(claim);
+      mockWorkflowsService.releaseHitlStepClaim.mockResolvedValue(true);
     });
 
     it('claims the caller-supplied step before resuming and forwards the channel', async () => {
@@ -2530,6 +2726,7 @@ steps:
       expect(mockWorkflowsService.getWaitingStepExecutionId).not.toHaveBeenCalled();
       expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
         'step-exec-1',
+        'run-1',
         mockRequest,
         'agent_builder',
         'default'
@@ -2555,6 +2752,7 @@ steps:
       );
       expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
         'step-exec-9',
+        'run-1',
         mockRequest,
         undefined,
         'default'
@@ -2562,7 +2760,7 @@ steps:
     });
 
     it('throws a conflict and never resumes when the first-writer-wins claim is lost', async () => {
-      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(false);
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValue(null);
 
       await expect(
         api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
@@ -2604,7 +2802,7 @@ steps:
       });
 
       audit.logExecutionResumed.mockClear();
-      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValueOnce(false);
+      (mockWorkflowsService.markStepAsResponded as jest.Mock).mockResolvedValueOnce(null);
 
       await expect(
         api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
@@ -2617,6 +2815,160 @@ steps:
         executionId: 'run-1',
         channel: 'inbox',
         error: expect.any(WorkflowExecutionInvalidStatusError),
+      });
+    });
+
+    describe('claim release', () => {
+      let audit: { logExecutionResumed: jest.Mock; logExecutionCanceled: jest.Mock };
+
+      const resume = () =>
+        api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest, {
+          channel: 'inbox',
+          stepExecutionId: 'step-exec-1',
+        });
+
+      beforeEach(() => {
+        audit = { logExecutionResumed: jest.fn(), logExecutionCanceled: jest.fn() };
+        api.setAuditLog(audit as any);
+      });
+
+      it('resolves the engine before claiming so a failed lookup cannot strand the claim', async () => {
+        const lookupError = new Error('engine unavailable');
+        jest
+          .spyOn(mockWorkflowsService, 'getWorkflowsExecutionEngine')
+          .mockRejectedValue(lookupError);
+
+        await expect(resume()).rejects.toBe(lookupError);
+
+        expect(mockWorkflowsService.markStepAsResponded).not.toHaveBeenCalled();
+        expect(mockWorkflowsService.releaseHitlStepClaim).not.toHaveBeenCalled();
+      });
+
+      it('releases the claim and rethrows the original error when the resume was not applied', async () => {
+        const cause = new Error('task manager unavailable');
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(
+          new WorkflowResumeNotAppliedError('run-1', cause)
+        );
+
+        await expect(resume()).rejects.toBe(cause);
+
+        expect(mockWorkflowsService.releaseHitlStepClaim).toHaveBeenCalledWith(
+          'step-exec-1',
+          claim,
+          'default'
+        );
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: cause,
+          claimReleased: true,
+        });
+      });
+
+      it('releases the claim and rethrows a WorkflowExecutionNotFoundError', async () => {
+        const engineError = new WorkflowExecutionNotFoundError('run-1');
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(engineError);
+
+        await expect(resume()).rejects.toBe(engineError);
+
+        expect(mockWorkflowsService.releaseHitlStepClaim).toHaveBeenCalledWith(
+          'step-exec-1',
+          claim,
+          'default'
+        );
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: engineError,
+          claimReleased: true,
+        });
+      });
+
+      it.each([
+        ['is not waiting for input', 'completed'],
+        ['has already finished', 'waiting_for_input (already finished at 2026-10-20T15:55:00Z)'],
+      ])('keeps the claim when the execution %s', async (_case, status) => {
+        const engineError = new WorkflowExecutionInvalidStatusError(
+          'run-1',
+          status,
+          'waiting_for_input'
+        );
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(engineError);
+
+        await expect(resume()).rejects.toBe(engineError);
+
+        expect(mockWorkflowsService.releaseHitlStepClaim).not.toHaveBeenCalled();
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: engineError,
+        });
+      });
+
+      it('audits claimReleased: false when the step no longer holds the claim', async () => {
+        const cause = new Error('task manager unavailable');
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(
+          new WorkflowResumeNotAppliedError('run-1', cause)
+        );
+        mockWorkflowsService.releaseHitlStepClaim.mockResolvedValue(false);
+
+        await expect(resume()).rejects.toBe(cause);
+
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: cause,
+          claimReleased: false,
+        });
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Did not release the claim on step execution step-exec-1')
+        );
+      });
+
+      it('keeps the claim when the engine does not confirm that nothing is pending', async () => {
+        const engineError = new Error('handoff outcome unknown');
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(engineError);
+
+        await expect(resume()).rejects.toBe(engineError);
+
+        expect(mockWorkflowsService.releaseHitlStepClaim).not.toHaveBeenCalled();
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: engineError,
+        });
+        expect(audit.logExecutionResumed.mock.calls[0][1].claimReleased).toBeUndefined();
+      });
+
+      it('still throws the original error when releasing the claim fails', async () => {
+        const cause = new Error('task manager unavailable');
+        mockWorkflowsExecutionEngine.resumeWorkflowExecution.mockRejectedValue(
+          new WorkflowResumeNotAppliedError('run-1', cause)
+        );
+        mockWorkflowsService.releaseHitlStepClaim.mockRejectedValue(
+          new Error('cluster unavailable')
+        );
+
+        await expect(resume()).rejects.toBe(cause);
+
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          channel: 'inbox',
+          error: cause,
+          claimReleased: false,
+        });
+        expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
+      });
+
+      it('does not release the claim when the resume succeeds', async () => {
+        await expect(resume()).resolves.toEqual({ resumedBy: 'user' });
+
+        expect(mockWorkflowsService.releaseHitlStepClaim).not.toHaveBeenCalled();
+        expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+          executionId: 'run-1',
+          resumedBy: 'user',
+          channel: 'inbox',
+        });
       });
     });
   });

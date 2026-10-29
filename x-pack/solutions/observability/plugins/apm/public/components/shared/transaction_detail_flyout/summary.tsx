@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { getEnvironmentLabel } from '../../../../common/environment_filter_values';
 import { getTimeZone } from '../charts/helper/timezone';
 import { useTransactionDetailFlyoutContext } from './transaction_detail_flyout_context';
@@ -22,7 +21,14 @@ function formatInConfiguredTimezone(iso: string, dateFormat: string, timeZone: s
   return moment.tz(iso, timeZone).format(dateFormat);
 }
 
-export function TransactionDetailFlyoutSummary() {
+export interface TransactionDetailFlyoutSummaryItem {
+  id: 'environment' | 'transactionType' | 'dateRange';
+  title: string;
+  value: string;
+}
+
+/** Resolves the environment, transaction type, and date range shown as header meta blocks. */
+export function useTransactionDetailFlyoutSummaryItems(): TransactionDetailFlyoutSummaryItem[] {
   const {
     deps: { core },
     filters: { transactionType, environment, rangeFrom, rangeTo, start, end },
@@ -41,45 +47,30 @@ export function TransactionDetailFlyoutSummary() {
     }
   );
 
-  const listItems = useMemo(
+  return useMemo(
     () => [
       {
+        id: 'environment',
         title: i18n.translate('xpack.apm.transactionDetailFlyout.summary.environmentLabel', {
           defaultMessage: 'Environment',
         }),
-        description: getEnvironmentLabel(environment),
+        value: getEnvironmentLabel(environment),
       },
       {
+        id: 'transactionType',
         title: i18n.translate('xpack.apm.transactionDetailFlyout.summary.transactionTypeLabel', {
           defaultMessage: 'Transaction type',
         }),
-        description: transactionType,
+        value: transactionType,
       },
       {
+        id: 'dateRange',
         title: i18n.translate('xpack.apm.transactionDetailFlyout.summary.dateRangeLabel', {
           defaultMessage: 'Date range',
         }),
-        description: dateRangeLabel,
+        value: dateRangeLabel,
       },
     ],
     [environment, transactionType, dateRangeLabel]
-  );
-
-  return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="s"
-      data-test-subj="transactionDetailFlyoutSummary"
-    >
-      <EuiDescriptionList
-        compressed
-        type="column"
-        columnGutterSize="m"
-        rowGutterSize="s"
-        align="left"
-        listItems={listItems}
-      />
-    </EuiPanel>
   );
 }

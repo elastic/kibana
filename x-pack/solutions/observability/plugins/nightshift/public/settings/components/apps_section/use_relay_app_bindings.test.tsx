@@ -9,7 +9,13 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SlackAppBindingsResponse } from '@kbn/significant-events-plugin/common';
-import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_relay_app_bindings';
+import {
+  formatChannelValue,
+  useAllRelayAppBindings,
+  useRelayAppBindings,
+  useBindChannel,
+  useUnbindChannel,
+} from './use_relay_app_bindings';
 import { useKibana } from '../../../hooks/use_kibana';
 
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -126,6 +132,89 @@ describe('useRelayAppBindings', () => {
   });
 });
 
+describe('useAllRelayAppBindings', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.clearAllMocks();
+    mockUseKibana.mockReturnValue({
+      services: { http: { get: httpGet }, notifications: { toasts: { addError } } },
+    } as any);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('follows the cursor and returns every connected channel sorted by label', async () => {
+    httpGet
+      .mockResolvedValueOnce({
+        bindings: [
+          { channel: 'C2', displayName: 'oncall', status: 'bound_to_self' },
+          { status: 'bound_to_self' },
+        ],
+        nextCursor: 'cursor-2',
+      })
+      .mockResolvedValueOnce({
+        bindings: [{ channel: 'C1', displayName: 'alerts', status: 'bound_to_self' }],
+      });
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useAllRelayAppBindings(), { wrapper });
+
+    await flush();
+    expect(httpGet).toHaveBeenNthCalledWith(
+      2,
+      '/internal/significant_events/apps/slack/bindings',
+      expect.objectContaining({ query: { perPage: 200, cursor: 'cursor-2' } })
+    );
+    expect(result.current.bindings).toEqual([
+      { channel: 'C1', displayName: 'alerts', status: 'bound_to_self' },
+      { channel: 'C2', displayName: 'oncall', status: 'bound_to_self' },
+    ]);
+    expect(result.current.isComplete).toBe(true);
+  });
+
+  it('stops at the page bound and reports the list as incomplete', async () => {
+    httpGet.mockResolvedValue({
+      bindings: [{ channel: 'C1', status: 'bound_to_self' }],
+      nextCursor: 'more',
+    });
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useAllRelayAppBindings(), { wrapper });
+
+    await flush();
+    expect(httpGet).toHaveBeenCalledTimes(10);
+    expect(result.current.isComplete).toBe(false);
+  });
+
+  it('reports a load error without a toast', async () => {
+    httpGet.mockRejectedValue(new Error('relay error'));
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useAllRelayAppBindings(), { wrapper });
+
+    await flush();
+    expect(result.current.isError).toBe(true);
+    expect(result.current.bindings).toEqual([]);
+    expect(addError).not.toHaveBeenCalled();
+  });
+});
+
+describe('formatChannelValue', () => {
+  const bindings = [
+    { channel: 'C1', displayName: 'alerts', status: 'bound_to_self' as const },
+    { channel: 'C9', status: 'bound_to_self' as const },
+    { channel: 'G7', visibility: 'private' as const, status: 'bound_to_self' as const },
+  ];
+
+  it.each([
+    ['C1', '#alerts'],
+    ['C9', 'C9'],
+    ['G7', 'Private · G7'],
+    ['#legacy', '#legacy'],
+  ])('labels %s as %s', (value, label) => {
+    expect(formatChannelValue(value, bindings)).toBe(label);
+  });
+});
+
 describe('useBindChannel', () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -157,8 +246,13 @@ describe('useBindChannel', () => {
     );
   });
 
-  it('shows an error toast when bind fails', async () => {
-    httpPost.mockRejectedValue(new Error('conflict'));
+  it.each([
+    ['private_channel_access_required', 'private_channel_access_required'],
+    ['something_new', 'other'],
+  ])('exposes a %s rejection as the %s failure instead of a toast', async (sent, expected) => {
+    httpPost.mockRejectedValue({
+      body: { message: 'Elastic is not in this channel.', attributes: { data: { reason: sent } } },
+    });
     const { wrapper } = createSetup();
     const { result } = renderHook(() => useBindChannel(), { wrapper });
 
@@ -166,27 +260,16 @@ describe('useBindChannel', () => {
       await result.current.bind('C123').catch(() => {});
     });
 
-    expect(addError).toHaveBeenCalledWith(
-      expect.any(Error),
-      expect.objectContaining({ title: expect.stringContaining('bind') })
-    );
-  });
-
-  it('surfaces the relay reason from the response body as the toast message', async () => {
-    httpPost.mockRejectedValue(
-      Object.assign(new Error('Conflict'), { body: { message: 'channel already claimed' } })
-    );
-    const { wrapper } = createSetup();
-    const { result } = renderHook(() => useBindChannel(), { wrapper });
-
-    await act(async () => {
-      await result.current.bind('C123').catch(() => {});
+    await flush();
+    expect(result.current.failure).toEqual({
+      reason: expected,
+      message: 'Elastic is not in this channel.',
     });
+    expect(addError).not.toHaveBeenCalled();
 
-    expect(addError).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'channel already claimed' }),
-      expect.any(Object)
-    );
+    act(() => result.current.clearFailure());
+    await flush();
+    expect(result.current.failure).toBeUndefined();
   });
 });
 

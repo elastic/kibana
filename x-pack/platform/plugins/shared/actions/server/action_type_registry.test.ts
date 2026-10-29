@@ -439,6 +439,28 @@ describe('actionTypeRegistry', () => {
       expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
     });
 
+    test('returns only sandbox-capable connector types when asked', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType());
+      actionTypeRegistry.register(
+        getConnectorType({ id: 'spec-type', sandboxSupportedAuthTypes: ['bearer'] })
+      );
+      actionTypeRegistry.register(
+        getConnectorType({ id: 'hook-type', isSandboxCapable: () => true })
+      );
+
+      expect(actionTypeRegistry.list({ sandboxCapableOnly: true }).map(({ id }) => id)).toEqual([
+        'spec-type',
+        'hook-type',
+      ]);
+      expect(actionTypeRegistry.list().map(({ id }) => id)).toEqual([
+        'my-connector-type',
+        'spec-type',
+        'hook-type',
+      ]);
+    });
+
     test('returns list of connector types filtered by feature id if provided', () => {
       mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
@@ -950,6 +972,34 @@ describe('actionTypeRegistry', () => {
 
       const result = registry.isDeprecated('test.action');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('getSpec()', () => {
+    it('returns the source spec for a spec-backed type', () => {
+      const spec = { metadata: { id: 'spec-backed' } };
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'spec-backed',
+          spec,
+        })
+      );
+
+      expect(actionTypeRegistry.getSpec('spec-backed')).toBe(spec);
+    });
+
+    it('returns undefined for a classic type without a spec', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType());
+
+      expect(actionTypeRegistry.getSpec('my-connector-type')).toBeUndefined();
+    });
+
+    it('returns undefined for an unknown id without throwing', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(actionTypeRegistry.getSpec('unknown')).toBeUndefined();
     });
   });
 

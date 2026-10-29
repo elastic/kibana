@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { anonymizeRecords } from './anonymize_records';
-import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
+import type { AnonymizationRule, RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { RegexWorkerService } from './regex_worker_service';
@@ -334,6 +334,7 @@ describe('anonymizeRecords', () => {
       anonymizationRules: [regexRule, nerRule],
       regexWorker,
       esClient: mockEsClient,
+      logger,
     });
 
     expect(result.records[0].content).toContain('EMAIL_');
@@ -410,6 +411,257 @@ describe('anonymizeRecords', () => {
     const maskIn = (text: string) => text.match(/PER_[0-9a-f]{40}/)?.[0];
     expect(maskIn(result.records[0].content)).toBeDefined();
     expect(maskIn(result.records[1].content)).toBe(maskIn(result.records[0].content));
+  });
+
+  it('warns when it skips an NER rule because its model is not available, so the gap is visible', async () => {
+    mockEsClient.ml.inferTrainedModel.mockRejectedValueOnce(
+      new Error("The NER model 'model-1' was not found. Please download and deploy the model.")
+    );
+
+    await anonymizeRecords({
+      input: [{ content: 'Contact me at jane@example.com' }],
+      anonymizationRules: [nerRule],
+      regexWorker,
+      esClient: mockEsClient,
+      logger,
+    });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(`model: ${(nerRule as { modelId?: string }).modelId ?? 'default'}`)
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('was not found'));
+  });
+
+  it('throws when regex execution fails and onFailure is "block" (default)', async () => {
+    jest.spyOn(regexWorker, 'run').mockRejectedValueOnce(new Error('regex worker crashed'));
+
+    await expect(
+      anonymizeRecords({
+        input: [{ content: 'jorge21@gmail.com' }],
+        anonymizationRules: [regexRule],
+        regexWorker,
+        esClient: mockEsClient,
+      })
+    ).rejects.toThrow('regex worker crashed');
+  });
+
+  it('proceeds unmasked and logs a warning when regex execution fails and onFailure is "allow_unsafe"', async () => {
+    jest.spyOn(regexWorker, 'run').mockRejectedValueOnce(new Error('regex worker crashed'));
+
+    const input = [{ content: 'jorge21@gmail.com' }];
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [regexRule],
+      regexWorker,
+      esClient: mockEsClient,
+      onFailure: 'allow_unsafe',
+      logger,
+    });
+
+    expect(result.records[0].content).toBe('jorge21@gmail.com');
+    expect(result.anonymizations).toHaveLength(0);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('regex worker crashed'));
+  });
+
+  // A rule that RE2 cannot compile runs on the legacy engine, which has no linear-time guarantee.
+  // It must not share a worker task with the other rules: when it stalls and the task is aborted,
+  // every match of the built-in and RE2 rules would be lost with it.
+  describe('a rule that only the legacy engine supports', () => {
+    const emailRule = regexRule as RegexAnonymizationRule;
+    const legacyRule = (pattern: string, entityClass: 'MISC' | 'EMAIL' = 'MISC') =>
+      ({
+        type: 'RegExp',
+        enabled: true,
+        id: `legacy-${pattern}`,
+        name: 'Legacy',
+        entityClass,
+        pattern,
+      } as RegexAnonymizationRule);
+    const run = (
+      rules: AnonymizationRule[],
+      options: { onFailure?: 'block' | 'allow_unsafe'; content?: string } = {}
+    ) =>
+      anonymizeRecords({
+        input: [{ content: options.content ?? 'mail jorge21@gmail.com and foobar' }],
+        anonymizationRules: rules,
+        regexWorker,
+        esClient: mockEsClient,
+        onFailure: options.onFailure ?? 'block',
+        logger,
+      });
+
+    it('runs in a worker task of its own, apart from the other rules', async () => {
+      const spy = jest.spyOn(regexWorker, 'run');
+      const legacy = legacyRule('foo(?=bar)');
+
+      const result = await run([emailRule, legacy]);
+
+      expect(spy.mock.calls.map(([payload]) => payload.rules.map((rule) => rule.pattern))).toEqual([
+        [emailRule.pattern],
+        [legacy.pattern],
+      ]);
+      expect(result.records[0].content).toMatch(/^mail EMAIL_\w+ and MISC_\w+bar$/);
+    });
+
+    it('does not start a second task when no rule needs the legacy engine', async () => {
+      const spy = jest.spyOn(regexWorker, 'run');
+
+      await run([emailRule]);
+
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the configured rule order when it overlaps another rule', async () => {
+      const content = 'alice@example.com';
+
+      const legacyFirst = await run([legacyRule('alice(?=@)'), emailRule], { content });
+      const emailFirst = await run([emailRule, legacyRule('alice(?=@)')], { content });
+
+      expect(legacyFirst.records[0].content).toMatch(/^MISC_/);
+      expect(emailFirst.records[0].content).toMatch(/^EMAIL_/);
+    });
+
+    describe('when it stalls and its task is aborted', () => {
+      const stalling = legacyRule('(?=a)(a+)+$');
+      const abortOnlyTheLegacyTask = () => {
+        const realRun = regexWorker.run.bind(regexWorker);
+        jest
+          .spyOn(regexWorker, 'run')
+          .mockImplementation(async (payload) =>
+            payload.rules.some((rule) => rule.id === stalling.id)
+              ? Promise.reject(new Error('Anonymization patterns timed out after 15s'))
+              : realRun(payload)
+          );
+      };
+
+      it('with allow_unsafe still masks with the other rules and says it skipped the rule', async () => {
+        abortOnlyTheLegacyTask();
+
+        const result = await run([emailRule, stalling], { onFailure: 'allow_unsafe' });
+
+        expect(result.records[0].content).toMatch(/^mail EMAIL_/);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('only the legacy engine supports failed; skipping them')
+        );
+      });
+
+      it('with block fails the request', async () => {
+        abortOnlyTheLegacyTask();
+
+        await expect(run([emailRule, stalling], { onFailure: 'block' })).rejects.toThrow(
+          'timed out'
+        );
+      });
+    });
+
+    describe('when the other rules fail too', () => {
+      const legacy = legacyRule('(?=x)(x+)+$');
+      const failSafeTask = (legacyTask: () => Promise<never>) => {
+        jest
+          .spyOn(regexWorker, 'run')
+          .mockImplementation(async (payload) =>
+            payload.rules.some((rule) => rule.id === legacy.id)
+              ? legacyTask()
+              : Promise.reject(new Error('regex worker crashed'))
+          );
+      };
+
+      // With block the request fails whichever task fails first: it must not wait for a legacy
+      // task that may still run until the worker timeout before reporting the error.
+      it('with block reports the failure without waiting for a slow legacy task', async () => {
+        failSafeTask(() => new Promise<never>(() => {}));
+
+        await expect(run([emailRule, legacy], { onFailure: 'block' })).rejects.toThrow(
+          'regex worker crashed'
+        );
+      });
+
+      it('with allow_unsafe proceeds unmasked and reports both failures', async () => {
+        failSafeTask(() => Promise.reject(new Error('legacy task timed out')));
+
+        const result = await run([emailRule, legacy], { onFailure: 'allow_unsafe' });
+
+        expect(result.records[0].content).toBe('mail jorge21@gmail.com and foobar');
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'proceeding unmasked because onFailure is "allow_unsafe": regex worker crashed'
+          )
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('legacy engine supports failed; skipping them')
+        );
+      });
+    });
+
+    it('is reported once in the log, not on every request', async () => {
+      const legacy = legacyRule('zq(?=x)');
+
+      await run([legacy]);
+      await run([legacy]);
+
+      const reports = (logger.warn as jest.Mock).mock.calls.filter(([message]) =>
+        String(message).includes('only the legacy regex engine supports')
+      );
+      expect(reports).toHaveLength(1);
+    });
+  });
+
+  describe('a custom rule whose pattern does not compile', () => {
+    const brokenRule: RegexAnonymizationRule = {
+      type: 'RegExp',
+      enabled: true,
+      id: 'custom-broken',
+      name: 'Broken pattern',
+      entityClass: 'MISC',
+      pattern: '(unclosed',
+    };
+    const input = [{ content: 'jorge21@gmail.com' }];
+
+    it('fails the call under onFailure "block" instead of silently leaving data unmasked', async () => {
+      await expect(
+        anonymizeRecords({
+          input,
+          anonymizationRules: [regexRule, brokenRule],
+          regexWorker,
+          esClient: mockEsClient,
+          onFailure: 'block',
+        })
+      ).rejects.toThrow(/"Broken pattern" has an invalid regular expression/);
+    });
+
+    it('skips only the broken rule, and says why, under onFailure "allow_unsafe"', async () => {
+      const result = await anonymizeRecords({
+        input,
+        anonymizationRules: [regexRule, brokenRule],
+        regexWorker,
+        esClient: mockEsClient,
+        onFailure: 'allow_unsafe',
+        logger,
+      });
+
+      expect(result.records[0].content).not.toContain('jorge21@gmail.com');
+      expect(result.anonymizations).toHaveLength(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('invalid regular expression')
+      );
+    });
+  });
+
+  it('still applies the valid rules when a broken rule comes first and onFailure is "allow_unsafe"', async () => {
+    const brokenRule = { ...regexRule, pattern: '(unclosed' };
+
+    const result = await anonymizeRecords({
+      input: [{ content: 'jorge21@gmail.com' }],
+      anonymizationRules: [brokenRule, regexRule],
+      regexWorker,
+      esClient: mockEsClient,
+      onFailure: 'allow_unsafe',
+      logger,
+    });
+
+    expect(result.records[0].content).not.toContain('jorge21@gmail.com');
+    expect(result.anonymizations).toHaveLength(1);
   });
 
   it('applies known replacements before regex processing', async () => {

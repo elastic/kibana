@@ -30,8 +30,8 @@ describe('aiIndexAutomationsSkill', () => {
     expect(isAllowedBuiltinSkill(aiIndexAutomationsSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features and Context Engine availability', () => {
-    expect(aiIndexAutomationsSkill.experimental).toBe(true);
+  it('is hidden in spaces where the Context Engine is off', () => {
+    expect(aiIndexAutomationsSkill.experimental).toBeFalsy();
     expect(aiIndexAutomationsSkill.availability).toBe(contextEngineSkillAvailability);
   });
 
@@ -745,10 +745,12 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('projects only from a pilot whose every item wrote a KI, and reports a partial one', () => {
-      expect(prose).toMatch(/returns `status`, `durationMs` and `kisWritten`/);
+      expect(prose).toMatch(
+        /returns `status`, `durationMs`, `kisWritten` and `kisFailedVerification`/
+      );
       expect(prose).toMatch(/Project only when `kisWritten` equals the pilot size/);
       expect(prose).toMatch(
-        /When it is lower, say how many of the pilot's items wrote a KI and stop/
+        /When it is lower, say how many of the pilot's items wrote a KI and how many failed verification \(`kisFailedVerification`\) and stop/
       );
       expect(prose).not.toMatch(/the pilot wrote three units;/);
     });

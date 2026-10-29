@@ -23,11 +23,11 @@ export const ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID =
   'system-security-detection-rule-tuning';
 
 export const ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
   management: ALERTZERO_WORKER_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 10,
+  version: 12,
   yamlTemplate: (values: RuleTuningWorkerTemplateValues): string =>
     renderRuleTuningWorkerYaml(
       DETECTION_RULE_TUNING_YAML,

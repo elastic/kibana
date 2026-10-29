@@ -61,7 +61,6 @@ const ExportDashboardJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void })
         downloadFileAs(filename, { content, type: 'application/json' })
       }
       getExportJson={getExportJson}
-      isTechnicalPreview
       objectType={objectTypeAlias ?? objectType.toLocaleLowerCase()}
       openInConsole={{
         canShow: Boolean(coreServices.application?.capabilities?.dev_tools?.show),

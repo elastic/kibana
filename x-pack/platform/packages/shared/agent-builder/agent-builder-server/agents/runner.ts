@@ -44,6 +44,11 @@ export interface RunAgentParams {
    */
   conversationAccess?: ExecutionConversationAccess;
   /**
+   * The workflow execution whose `ai.agent` step started this run, when applicable; passed on to
+   * the sub-agents the run spawns so their rounds join to the same workflow run.
+   */
+  workflowExecutionId?: string;
+  /**
    * ID of the agent to call.
    */
   agentId: string;

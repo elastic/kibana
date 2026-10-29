@@ -20,6 +20,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  RenderServiceSaturatedError,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { JobParamsPNGV2, TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png-common';
@@ -159,7 +160,13 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
             metrics: { png: metrics },
             warnings,
           })),
-          tap({ error: (error) => logger.error(error, { tags: [jobId] }) }),
+          tap({
+            error: (error) =>
+              // Waiting for render capacity is routine; the task logs that it will run again.
+              error instanceof RenderServiceSaturatedError
+                ? logger.debug(error.message, { tags: [jobId] })
+                : logger.error(error, { tags: [jobId] }),
+          }),
           finalize(() => apmGeneratePng?.end())
         );
 

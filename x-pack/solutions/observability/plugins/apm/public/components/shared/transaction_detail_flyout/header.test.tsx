@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { TransactionDetailFlyoutHeader } from './header';
+import { useTransactionDetailFlyoutHeader } from './header';
 
 const mockUseTransactionDetailFlyoutLinks = jest.fn();
 jest.mock('./hooks/use_transaction_detail_flyout_links', () => ({
@@ -25,19 +26,36 @@ jest.mock('./transaction_detail_flyout_context', () => ({
   useTransactionDetailFlyoutContext: () => mockUseTransactionDetailFlyoutContext(),
 }));
 
-function renderHeader(isFiltersPending = false) {
+jest.mock('./summary', () => ({
+  useTransactionDetailFlyoutSummaryItems: () => [
+    { id: 'environment', title: 'Environment', value: 'production' },
+    { id: 'transactionType', title: 'Transaction type', value: 'request' },
+    { id: 'dateRange', title: 'Date range', value: 'Sep 18, 2026 → Sep 18, 2026' },
+  ],
+}));
+
+function HeaderInTemplate() {
+  const { titleNode, titleText, metaBlocks, badges } = useTransactionDetailFlyoutHeader();
+  return (
+    <FlyoutTemplate onClose={jest.fn()} session="never">
+      <FlyoutTemplate.Header title={titleNode} titleText={titleText}>
+        {metaBlocks}
+        {badges}
+      </FlyoutTemplate.Header>
+      <FlyoutTemplate.Body>content</FlyoutTemplate.Body>
+    </FlyoutTemplate>
+  );
+}
+
+function renderHeader() {
   return render(
     <IntlProvider locale="en">
-      <TransactionDetailFlyoutHeader
-        transactionName="GET /api/orders"
-        titleId="title-id"
-        isFiltersPending={isFiltersPending}
-      />
+      <HeaderInTemplate />
     </IntlProvider>
   );
 }
 
-describe('TransactionDetailFlyoutHeader', () => {
+describe('useTransactionDetailFlyoutHeader', () => {
   beforeEach(() => {
     mockUseTransactionDetailFlyoutLinks.mockReturnValue({
       loading: false,
@@ -49,7 +67,7 @@ describe('TransactionDetailFlyoutHeader', () => {
       count: 0,
     });
     mockUseTransactionDetailFlyoutContext.mockReturnValue({
-      filters: { serviceName: 'checkout' },
+      filters: { serviceName: 'checkout', transactionName: 'GET /api/orders' },
     });
   });
 
@@ -65,6 +83,7 @@ describe('TransactionDetailFlyoutHeader', () => {
     expect(link).toHaveTextContent('GET /api/orders');
     expect(link).toHaveAttribute('data-ebt-action', 'viewSpan');
     expect(link).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutTitle');
+    expect(link.closest('h3')).toBeInTheDocument();
   });
 
   it('shows a tooltip describing the title link destination', async () => {
@@ -93,10 +112,18 @@ describe('TransactionDetailFlyoutHeader', () => {
     expect(screen.queryByTestId('transactionDetailFlyoutTitleLink')).not.toBeInTheDocument();
   });
 
-  it('shows a spinner next to the title while filters are pending', () => {
-    renderHeader(true);
+  it('renders the environment, transaction type, and date range as header meta blocks', () => {
+    renderHeader();
 
-    expect(screen.getByTestId('transactionDetailFlyoutFiltersPendingSpinner')).toBeInTheDocument();
+    expect(screen.getByTestId('transactionDetailFlyoutSummary-environment')).toHaveTextContent(
+      'production'
+    );
+    expect(screen.getByTestId('transactionDetailFlyoutSummary-transactionType')).toHaveTextContent(
+      'request'
+    );
+    expect(screen.getByTestId('transactionDetailFlyoutSummary-dateRange')).toHaveTextContent(
+      'Sep 18, 2026 → Sep 18, 2026'
+    );
   });
 
   it('renders the alerts badge when the alerts hook says to show it', () => {
@@ -114,6 +141,7 @@ describe('TransactionDetailFlyoutHeader', () => {
       'href',
       '/app/apm/services/checkout/alerts?kuery=transaction.name:%20%22GET%22'
     );
+    expect(badge).toHaveAttribute('aria-label', '3 active alerts for GET /api/orders of checkout');
     expect(badge).toHaveAttribute('data-ebt-action', 'viewAlerts');
     expect(badge).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutAlertsBadge');
   });
