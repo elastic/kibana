@@ -94,10 +94,7 @@ const MATCH_ICONS: Readonly<Record<MatchKind, { iconType: string; label: string 
 interface MatchIconProps {
   /** How the name matches the pattern, or nothing when it doesn't. */
   match?: MatchKind;
-  /**
-   * Whether the icon is disabled, like the name of a match that a higher-ranked rule keeps, or the
-   * count of hidden matches a list leaves out.
-   */
+  /** Whether the icon is disabled, like the name of a match that a higher-ranked rule keeps. */
   isDisabled?: boolean;
   /** Whether screen readers hear what the icon means, which a list's label may already say. */
   isLabeled: boolean;
@@ -218,22 +215,17 @@ export const PatternMatches = ({
     </EuiText>
   );
 
-  // How many hidden data sources a list leaves out, in a row after the rest, disabled, after the
+  // How many hidden data sources a list leaves out, in a row after any others, like them, after the
   // icon of how they match, if they do.
-  const renderHiddenNote = (count: number, match?: MatchKind) =>
+  const renderHiddenNote = (count: number, isAfterOthers: boolean, match?: MatchKind) =>
     count > 0 && (
       <div
         key="hiddenNote"
-        css={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: euiTheme.size.s,
-          color: euiTheme.colors.textDisabled,
-        }}
+        css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}
         data-test-subj="boostRuleHiddenNotShown"
       >
-        <MatchIcon match={match} isDisabled isLabeled={false} />
-        {formatHiddenNotShown(targetType, count)}
+        <MatchIcon match={match} isLabeled={false} />
+        {formatHiddenNotShown(targetType, count, isAfterOthers)}
       </div>
     );
 
@@ -329,7 +321,7 @@ export const PatternMatches = ({
           testSubj,
         })
       ),
-      renderHiddenNote(targets.length - shown.length, match),
+      renderHiddenNote(targets.length - shown.length, shown.length > 0, match),
     ]);
   };
 
@@ -383,8 +375,8 @@ export const PatternMatches = ({
       : dataSources.filter(({ name, hidden }) => hidden && matchesByName.has(name)).length;
     const hiddenNote =
       shown.length === 0 && hiddenMatchCount === 0
-        ? renderHiddenNote(dataSources.length)
-        : renderHiddenNote(hiddenMatchCount, matchKind);
+        ? renderHiddenNote(dataSources.length, false)
+        : renderHiddenNote(hiddenMatchCount, shown.length > 0, matchKind);
     return renderList(
       TAB_LABELS.all[targetType],
       // Matches are mixed with everything else here, so their icons say which they are, and each

@@ -39,7 +39,7 @@ import { useTablePage } from '../use_table_page';
 import { useShowsEstimates } from '../../prototype/prototype_settings';
 import { EmptyCell } from '../empty_cell';
 import { formatDataSourceCount, formatMaxAge } from '../format';
-import { ShowHiddenSwitch, formatHiddenNotShown } from '../hidden_data';
+import { ShowHiddenSwitch, formatHiddenCount } from '../hidden_data';
 import { TargetName } from './target_name';
 
 /** Whether the rule applies to a match, or a higher-ranked rule outranks it. */
@@ -497,7 +497,7 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
             pageSize={pageSize}
             total={items.length}
             formatTotal={(count) => formatDataSourceCount(type, count)}
-            note={hiddenNotShown > 0 ? formatHiddenNotShown(type, hiddenNotShown) : undefined}
+            note={hiddenNotShown > 0 ? formatHiddenCount(hiddenNotShown) : undefined}
             data-test-subj="boostMatchedCount"
           />
         </>

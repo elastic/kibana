@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleCoverage } from '../../../common/resolution';
 import type { BoostProfileType } from '../../../common/types';
 import { formatDataSourceCount } from '../format';
-import { formatMoreHidden } from '../hidden_data';
+import { formatHiddenTargets } from '../hidden_data';
 import { SupersedingRuleTip, TargetName } from './target_name';
 
 interface RuleMatchesProps {
@@ -184,11 +184,8 @@ export const MatchesPopover = ({
             );
           })}
           {hiddenCount > 0 && (
-            <li
-              css={{ color: euiTheme.colors.textDisabled }}
-              data-test-subj="boostRuleMatchesMoreHidden"
-            >
-              {formatMoreHidden(type, hiddenCount)}
+            <li data-test-subj="boostRuleMatchesMoreHidden">
+              {formatHiddenTargets(type, hiddenCount, shownNames.length > 0)}
             </li>
           )}
         </ul>

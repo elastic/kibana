@@ -58,7 +58,7 @@ import { TARGET_LIST_HEADER_HEIGHT, TargetListHeader } from './target_list_heade
 import type { TargetPreview } from './pattern_matches';
 import { PatternMatches, getPartialPattern } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
-import { HiddenBadge, formatHiddenNotShown } from '../hidden_data';
+import { HiddenBadge, formatHiddenCount } from '../hidden_data';
 import { CREATE_PROFILE_TITLE, ProfileFlyoutContent } from '../profiles/profile_flyout';
 import { FlyoutOnTop, getFlyoutHistoryProps } from '../flyout_history';
 import { useBoostState, useCreateRule, useUpdateRule } from '../../hooks/use_boost_state';
@@ -931,8 +931,8 @@ export const RuleFlyout = ({
                         >
                           {allowsMultipleTargets
                             ? PICKED_COUNT_FORMATS[targetType](draft.picked.length, pickableCount)
-                            : i18n.translate('xpack.boost.ruleForm.pickShowingCount', {
-                                defaultMessage: 'Showing {targets}',
+                            : i18n.translate('xpack.boost.ruleForm.pickFromCount', {
+                                defaultMessage: 'Select from {targets}',
                                 values: {
                                   targets: formatDataSourceCount(targetType, pickableCount),
                                 },
@@ -940,8 +940,7 @@ export const RuleFlyout = ({
                           {hiddenNotListed > 0 && (
                             <>
                               {' '}
-                              <span aria-hidden={true}>·</span>{' '}
-                              {formatHiddenNotShown(targetType, hiddenNotListed)}
+                              <span aria-hidden={true}>·</span> {formatHiddenCount(hiddenNotListed)}
                             </>
                           )}
                         </EuiText>

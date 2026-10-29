@@ -24,31 +24,78 @@ export const HiddenBadge = () => (
   <EuiBadge data-test-subj="boostHiddenBadge">{HIDDEN_BADGE_LABEL}</EuiBadge>
 );
 
-/** How many hidden indices or data streams a list leaves out, such as "3 hidden indices not shown". */
-export const formatHiddenNotShown = (type: BoostProfileType | undefined, count: number): string =>
-  type === 'data_streams'
-    ? i18n.translate('xpack.boost.hiddenData.dataStreamsNotShown', {
-        defaultMessage:
-          '{count, plural, one {# hidden data stream} other {# hidden data streams}} not shown',
+/**
+ * How many hidden indices or data streams a list leaves out, such as "3 hidden indices not shown",
+ * or "+3 …" after what the list shows.
+ */
+export const formatHiddenNotShown = (
+  type: BoostProfileType | undefined,
+  count: number,
+  isAfterOthers: boolean
+): string => {
+  if (type === 'data_streams') {
+    return isAfterOthers
+      ? i18n.translate('xpack.boost.hiddenData.moreDataStreamsNotShown', {
+          defaultMessage:
+            '+{count, plural, one {# hidden data stream} other {# hidden data streams}} not shown',
+          values: { count },
+        })
+      : i18n.translate('xpack.boost.hiddenData.dataStreamsNotShown', {
+          defaultMessage:
+            '{count, plural, one {# hidden data stream} other {# hidden data streams}} not shown',
+          values: { count },
+        });
+  }
+  return isAfterOthers
+    ? i18n.translate('xpack.boost.hiddenData.moreIndicesNotShown', {
+        defaultMessage: '+{count, plural, one {# hidden index} other {# hidden indices}} not shown',
         values: { count },
       })
     : i18n.translate('xpack.boost.hiddenData.indicesNotShown', {
         defaultMessage: '{count, plural, one {# hidden index} other {# hidden indices}} not shown',
         values: { count },
       });
+};
 
-/** How many hidden indices or data streams follow a list that leaves them out, such as "+3 hidden indices". */
-export const formatMoreHidden = (type: BoostProfileType | undefined, count: number): string =>
-  type === 'data_streams'
-    ? i18n.translate('xpack.boost.hiddenData.moreHiddenDataStreams', {
-        defaultMessage:
-          '+{count, plural, one {# hidden data stream} other {# hidden data streams}}',
-        values: { count },
-      })
-    : i18n.translate('xpack.boost.hiddenData.moreHiddenIndices', {
+/**
+ * How many hidden indices or data streams end a list that leaves them out, such as "3 hidden
+ * indices", or "+3 …" after what the list shows.
+ */
+export const formatHiddenTargets = (
+  type: BoostProfileType | undefined,
+  count: number,
+  isAfterOthers: boolean
+): string => {
+  if (type === 'data_streams') {
+    return isAfterOthers
+      ? i18n.translate('xpack.boost.hiddenData.moreHiddenDataStreams', {
+          defaultMessage:
+            '+{count, plural, one {# hidden data stream} other {# hidden data streams}}',
+          values: { count },
+        })
+      : i18n.translate('xpack.boost.hiddenData.hiddenDataStreams', {
+          defaultMessage:
+            '{count, plural, one {# hidden data stream} other {# hidden data streams}}',
+          values: { count },
+        });
+  }
+  return isAfterOthers
+    ? i18n.translate('xpack.boost.hiddenData.moreHiddenIndices', {
         defaultMessage: '+{count, plural, one {# hidden index} other {# hidden indices}}',
         values: { count },
+      })
+    : i18n.translate('xpack.boost.hiddenData.hiddenIndices', {
+        defaultMessage: '{count, plural, one {# hidden index} other {# hidden indices}}',
+        values: { count },
       });
+};
+
+/** How many hidden ones a count leaves out, after the count names what it counts: "3 hidden". */
+export const formatHiddenCount = (count: number): string =>
+  i18n.translate('xpack.boost.hiddenData.hiddenCount', {
+    defaultMessage: '{count} hidden',
+    values: { count },
+  });
 
 interface ShowHiddenSwitchProps {
   checked: boolean;
