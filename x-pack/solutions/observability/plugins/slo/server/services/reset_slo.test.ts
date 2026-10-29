@@ -112,10 +112,7 @@ describe('ResetSLO', () => {
 
       expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
       expect(getReportedEvents(mockTelemetry)).toEqual([
-        [
-          'slo_reset',
-          expect.objectContaining({ slo_id: hashSloId('irrelevant'), revision: slo.revision + 1 }),
-        ],
+        ['slo_reset', expect.objectContaining({ slo_id: hashSloId('irrelevant') })],
       ]);
     });
   });

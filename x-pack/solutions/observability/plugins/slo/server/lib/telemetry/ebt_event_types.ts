@@ -27,26 +27,10 @@ export type SloChangedField = (typeof SLO_CHANGED_FIELDS)[number];
 
 export interface SloDefinitionEbtData {
   slo_id: string;
-  revision: number;
   indicator_type: string;
   budgeting_method: string;
   time_window_type: string;
-  time_window_duration: string;
-  objective_target: number;
-  timeslice_target?: number;
-  timeslice_window?: string;
-  group_by_count: number;
-  tags_count: number;
-  dashboards_count: number;
-  enabled: boolean;
-  created_at: string;
-  settings: {
-    sync_delay: string;
-    frequency: string;
-    prevent_initial_backfill: boolean;
-    has_sync_field: boolean;
-    has_project_routing: boolean;
-  };
+  grouped: boolean;
 }
 
 export interface SloUpdatedEbtData extends SloDefinitionEbtData {

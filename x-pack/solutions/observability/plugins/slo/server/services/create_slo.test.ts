@@ -96,7 +96,6 @@ describe('CreateSLO', () => {
           'slo_created',
           expect.objectContaining({
             slo_id: hashSloId('unique-id'),
-            revision: 1,
             indicator_type: 'sli.apm.transactionErrorRate',
             budgeting_method: sloParams.budgetingMethod,
           }),

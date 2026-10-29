@@ -62,10 +62,6 @@ const sloDefinitionEbtSchema: RootSchema<WithOrigin<SloDefinitionEbtData>> = {
     type: 'keyword',
     _meta: { description: 'The SHA-256 hash of the SLO id.' },
   },
-  revision: {
-    type: 'long',
-    _meta: { description: 'The revision of the SLO after the operation.' },
-  },
   indicator_type: {
     type: 'keyword',
     _meta: { description: 'The SLI type, e.g. `sli.kql.custom` or `sli.apm.transactionDuration`.' },
@@ -78,75 +74,9 @@ const sloDefinitionEbtSchema: RootSchema<WithOrigin<SloDefinitionEbtData>> = {
     type: 'keyword',
     _meta: { description: 'The time window type: `rolling` or `calendarAligned`.' },
   },
-  time_window_duration: {
-    type: 'keyword',
-    _meta: { description: 'The time window duration, e.g. `30d` or `1w`.' },
-  },
-  objective_target: {
-    type: 'float',
-    _meta: { description: 'The objective target, between 0 and 1.' },
-  },
-  timeslice_target: {
-    type: 'float',
-    _meta: {
-      description: 'The timeslice target, between 0 and 1. Only set for timeslices SLOs.',
-      optional: true,
-    },
-  },
-  timeslice_window: {
-    type: 'keyword',
-    _meta: {
-      description: 'The timeslice window duration, e.g. `5m`. Only set for timeslices SLOs.',
-      optional: true,
-    },
-  },
-  group_by_count: {
-    type: 'long',
-    _meta: { description: 'The number of group by fields. 0 when the SLO is not grouped.' },
-  },
-  tags_count: {
-    type: 'long',
-    _meta: { description: 'The number of tags.' },
-  },
-  dashboards_count: {
-    type: 'long',
-    _meta: { description: 'The number of dashboards linked to the SLO.' },
-  },
-  enabled: {
+  grouped: {
     type: 'boolean',
-    _meta: {
-      description:
-        'Whether the SLO is enabled after the operation (for a deletion, whether it was enabled when deleted).',
-    },
-  },
-  created_at: {
-    type: 'date',
-    _meta: { description: 'ISO timestamp of when the SLO was created.' },
-  },
-  settings: {
-    properties: {
-      sync_delay: {
-        type: 'keyword',
-        _meta: { description: 'The sync delay duration, e.g. `1m`.' },
-      },
-      frequency: {
-        type: 'keyword',
-        _meta: { description: 'The transform frequency duration, e.g. `1m`.' },
-      },
-      prevent_initial_backfill: {
-        type: 'boolean',
-        _meta: { description: 'Whether the initial backfill of historical data is skipped.' },
-      },
-      has_sync_field: {
-        type: 'boolean',
-        _meta: { description: 'Whether a custom sync field is configured.' },
-      },
-      has_project_routing: {
-        type: 'boolean',
-        _meta: { description: 'Whether a cross-project routing expression is configured.' },
-      },
-    },
-    _meta: { description: 'The SLO settings.' },
+    _meta: { description: 'Whether the SLO is grouped by at least one field.' },
   },
   origin: eventOriginEbtSchema,
 };

@@ -17,33 +17,13 @@ export const hashSloId = (sloId: string): string =>
   createHash('sha256').update(sloId).digest('hex');
 
 /** Projects an SLO definition into the attributes reported by the SLO EBT events. */
-export const toSloDefinitionEbtData = (slo: SLODefinition): SloDefinitionEbtData => {
-  const { objective, settings, timeWindow } = slo;
-
-  return {
-    slo_id: hashSloId(slo.id),
-    revision: slo.revision,
-    indicator_type: slo.indicator.type,
-    budgeting_method: slo.budgetingMethod,
-    time_window_type: timeWindow.type,
-    time_window_duration: timeWindow.duration.format(),
-    objective_target: objective.target,
-    timeslice_target: objective.timesliceTarget,
-    timeslice_window: objective.timesliceWindow?.format(),
-    group_by_count: [slo.groupBy].flat().filter((field) => field !== ALL_VALUE).length,
-    tags_count: slo.tags.length,
-    dashboards_count: slo.artifacts?.dashboards?.length ?? 0,
-    enabled: slo.enabled,
-    created_at: slo.createdAt.toISOString(),
-    settings: {
-      sync_delay: settings.syncDelay.format(),
-      frequency: settings.frequency.format(),
-      prevent_initial_backfill: settings.preventInitialBackfill,
-      has_sync_field: Boolean(settings.syncField),
-      has_project_routing: Boolean(settings.projectRoutings),
-    },
-  };
-};
+export const toSloDefinitionEbtData = (slo: SLODefinition): SloDefinitionEbtData => ({
+  slo_id: hashSloId(slo.id),
+  indicator_type: slo.indicator.type,
+  budgeting_method: slo.budgetingMethod,
+  time_window_type: slo.timeWindow.type,
+  grouped: [slo.groupBy].flat().some((field) => field !== ALL_VALUE),
+});
 
 /** Returns the user-editable SLO fields that differ between two definitions. */
 export const getChangedFields = (

@@ -78,17 +78,14 @@ describe('DeleteSLO', () => {
     });
 
     it('reports the slo_deleted telemetry event', async () => {
-      const slo = createSLO({ id: 'irrelevant', enabled: false });
+      const slo = createSLO({ id: 'irrelevant' });
       mockRepository.findById.mockResolvedValueOnce(slo);
 
       await deleteSLO.execute(slo.id);
 
       expect(mockTelemetry.report).toHaveBeenCalledTimes(1);
       expect(getReportedEvents(mockTelemetry)).toEqual([
-        [
-          'slo_deleted',
-          expect.objectContaining({ slo_id: hashSloId('irrelevant'), enabled: false, bulk: false }),
-        ],
+        ['slo_deleted', expect.objectContaining({ slo_id: hashSloId('irrelevant'), bulk: false })],
       ]);
     });
 

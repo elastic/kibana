@@ -238,8 +238,6 @@ describe('UpdateSLO', () => {
             'slo_updated',
             expect.objectContaining({
               slo_id: hashSloId(slo.id),
-              revision: slo.revision,
-              tags_count: 1,
               revision_bumped: false,
               changed_fields: ['name', 'tags'],
             }),
@@ -304,8 +302,7 @@ describe('UpdateSLO', () => {
           'slo_updated',
           expect.objectContaining({
             slo_id: hashSloId(slo.id),
-            revision: slo.revision + 1,
-            group_by_count: 1,
+            grouped: true,
             revision_bumped: true,
             changed_fields: ['groupBy'],
           }),
