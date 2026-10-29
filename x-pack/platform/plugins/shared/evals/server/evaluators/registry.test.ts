@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import type { EvaluatorDefinitionClient } from '../storage/evaluators/evaluator_definition_client';
 import type { EvaluatorDefinitionDocument, LlmJudgeConfig } from './user_defined/types';
 import { createEvaluatorRegistry } from './registry';
@@ -296,18 +295,6 @@ describe('createEvaluatorRegistry', () => {
 
       expect(() => registry.register(registered({ version }))).toThrow(
         'Cannot register evaluator "rca_quality": version must be at most 64 characters'
-      );
-    });
-
-    it('keeps every schema a registered evaluator declares', async () => {
-      const referenceDataSchema = z.object({ expected: z.string() });
-      const contextSchema = z.object({ decision_tree: z.string() });
-      const evidenceSchema = z.object({ response: z.object({ message: z.string().min(1) }) });
-      const { registry, scoped } = createRegistry();
-      registry.register(registered({ referenceDataSchema, contextSchema, evidenceSchema }));
-
-      await expect(scoped.get('rca_quality')).resolves.toEqual(
-        expect.objectContaining({ referenceDataSchema, contextSchema, evidenceSchema })
       );
     });
 

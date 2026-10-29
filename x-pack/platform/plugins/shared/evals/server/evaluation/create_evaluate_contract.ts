@@ -16,33 +16,16 @@ import { lazySchema, z } from '@kbn/zod/v4';
 import { EvaluationExecutionError } from './evaluation_execution_error';
 import type { EvaluationService } from './evaluation_service';
 
-/**
- * Catches a runaway transcript early. It doesn't bound prompt size, since message content is
- * uncapped; judges guard their own model's context window.
- */
-export const MAX_TRANSCRIPT_MESSAGES = 1000;
-
-const TranscriptMessageInput = lazySchema(() =>
-  z.object({
-    role: z.enum(['user', 'assistant', 'tool']),
-    content: z.string(),
-    tool_id: z.string().optional(),
-  })
-);
-
 /** A round the caller already holds, so no trace is polled or read. */
 export interface EvaluateEvidence {
   /** The round in the normalized shape evaluators read: user input, tool calls, response. */
   round: z.input<typeof EvidenceRound>;
-  /** Ground truth for reference-based evaluators, as `reference_data` is on a trace subject. */
-  reference_data?: Record<string, unknown>;
   /**
-   * The conversation as ordered messages, for judges that read more than one round or the
-   * assistant's messages between tool calls. Slice it to the window the judges should see.
+   * Everything else the selected evaluators read, as `reference_data` is on a trace subject:
+   * ground truth, or other inputs such as a transcript or a decision tree. Each evaluator's
+   * `referenceDataSchema` declares what it reads.
    */
-  transcript?: Array<z.input<typeof TranscriptMessageInput>>;
-  /** Inputs specific to the selected evaluators, each checked against its `contextSchema`. */
-  context?: Record<string, unknown>;
+  reference_data?: Record<string, unknown>;
 }
 
 interface EvaluateBaseParams {
@@ -81,8 +64,6 @@ const EvaluateEvidenceInput = lazySchema(() =>
     evidence: z.object({
       round: EvidenceRound,
       reference_data: z.object({}).catchall(z.unknown()).optional(),
-      transcript: z.array(TranscriptMessageInput).max(MAX_TRANSCRIPT_MESSAGES).optional(),
-      context: z.object({}).catchall(z.unknown()).optional(),
     }),
   })
 );
@@ -124,12 +105,7 @@ export const createEvaluateContract =
         request,
         spaceId,
         evaluators,
-        evidence: {
-          round: evidence.round,
-          referenceData: evidence.reference_data,
-          transcript: evidence.transcript,
-          context: evidence.context,
-        },
+        evidence: { round: evidence.round, referenceData: evidence.reference_data },
       });
     }
 

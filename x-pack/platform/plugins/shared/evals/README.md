@@ -266,13 +266,12 @@ const results = await evals.evaluate?.({
     },
     reference_data: { expected: groundTruth },
   },
-  evaluators: [{ name: 'groundedness', connector_id: judgeConnectorId }],
+  evaluators: [{ name: 'correctness', connector_id: judgeConnectorId }],
 });
 ```
 
 - The round uses the same normalized shape evaluators read from a trace (see [Reading normalized trace evidence](#reading-normalized-trace-evidence)), with up to 200 tool calls. Every evaluator receives it, including the built-in and user-defined judges.
-- `transcript` (optional) is the conversation as ordered `user`, `assistant` and `tool` messages, up to 1000, for judges that read more than one round or the assistant's messages between tool calls. The caller slices it to the window its judges should see, such as the initial investigation only. Message content isn't capped, so a judge is responsible for keeping its prompt within its model's context window.
-- `context` (optional) carries inputs specific to the selected evaluators, such as a decision tree. An evaluator that declares a `contextSchema` receives only what its schema accepts, and a mismatch is refused before any evaluator runs. An evaluator whose `contextSchema` requires context can't grade a trace, because a trace subject carries none.
+- `reference_data` (optional) carries everything else the selected evaluators read: ground truth, or other inputs such as a transcript or a decision tree. An evaluator that declares a `referenceDataSchema` receives only what its schema accepts, and a mismatch is refused before any evaluator runs. Content isn't length-capped, so a judge is responsible for keeping its prompt within its model's context window.
 - Evaluators that read the trace itself, such as `latency`, `input_tokens`, `output_tokens` and `tool_calls`, return an `error` result for evidence, without failing the others.
 - Passing both `subject` and `evidence` throws `EvaluationExecutionError`.
 

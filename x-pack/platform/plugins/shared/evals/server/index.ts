@@ -32,11 +32,7 @@ export type {
   RegisteredEvaluatorDefinition,
   TraceAccessor,
 } from './evaluators/types';
-export type {
-  EvidenceRound,
-  ToolCallEvidence,
-  TranscriptMessage,
-} from './evaluators/evidence/types';
+export type { EvidenceRound, ToolCallEvidence } from './evaluators/evidence/types';
 
 export {
   generateExperimentRun,

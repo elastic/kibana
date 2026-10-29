@@ -21,7 +21,6 @@ export const toBuiltIn = (definition: RegisteredEvaluatorDefinition): EvaluatorD
   ...(definition.referenceDataSchema
     ? { referenceDataSchema: definition.referenceDataSchema }
     : {}),
-  ...(definition.contextSchema ? { contextSchema: definition.contextSchema } : {}),
   ...(definition.evidenceSchema ? { evidenceSchema: definition.evidenceSchema } : {}),
   evaluate: (ctx) => definition.evaluate(ctx),
 });

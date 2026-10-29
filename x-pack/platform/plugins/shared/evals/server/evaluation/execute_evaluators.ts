@@ -18,7 +18,7 @@ import { withEvaluatorNameBaggage } from '../evaluators/evaluator_tracing_contex
 import { formatEvidenceSchemaIssues } from '../evaluators/evidence/schema_issues';
 import { createTraceAccessor, type TraceAccessorWithSearch } from '../evaluators/trace_accessor';
 import { awaitTraceReady, TraceReadinessError } from '../evaluators/trace_readiness';
-import type { EvidenceRound, TranscriptMessage } from '../evaluators/evidence/types';
+import type { EvidenceRound } from '../evaluators/evidence/types';
 import type { EvaluatorDefinition, TraceAccessor } from '../evaluators/types';
 import { resolveConnectorModel } from '../lib/resolve_connector_model';
 import { EvaluationExecutionError } from './evaluation_execution_error';
@@ -35,43 +35,29 @@ export interface ResolvedEvaluator {
 export interface InMemoryEvidence {
   round: EvidenceRound;
   referenceData?: Record<string, unknown>;
-  transcript?: TranscriptMessage[];
-  context?: Record<string, unknown>;
 }
 
 /**
- * Checks one input against each evaluator's schema for it, so a mismatch is refused before any
- * evaluator runs. Evaluators without a schema get the input as passed.
+ * Checks `reference_data` against each evaluator's schema, so a mismatch is refused before any
+ * evaluator runs. Evaluators without a schema get it as passed.
  */
-const parseForEvaluators = ({
-  evaluators,
-  input,
-  inputName,
-  getSchema,
-  getUnavailableMessage,
-}: {
-  evaluators: ResolvedEvaluator[];
-  input: Record<string, unknown> | undefined;
-  inputName: 'reference_data' | 'context';
-  getSchema: (definition: EvaluatorDefinition) => z.ZodType | undefined;
-  /** Explains a refusal when the input can't be supplied at all on this path. */
-  getUnavailableMessage?: (definition: EvaluatorDefinition) => string;
-}): Map<EvaluatorDefinition, Record<string, unknown> | undefined> => {
+const parseReferenceData = (
+  evaluators: ResolvedEvaluator[],
+  referenceData: Record<string, unknown> | undefined
+): Map<EvaluatorDefinition, Record<string, unknown> | undefined> => {
   const parsedByDefinition = new Map<EvaluatorDefinition, Record<string, unknown> | undefined>();
   for (const { definition } of evaluators) {
-    const schema = getSchema(definition);
-    if (!schema) {
-      parsedByDefinition.set(definition, input);
+    if (!definition.referenceDataSchema) {
+      parsedByDefinition.set(definition, referenceData);
       continue;
     }
 
-    const parsed = schema.safeParse(input);
+    const parsed = definition.referenceDataSchema.safeParse(referenceData);
     if (!parsed.success) {
       throw new EvaluationExecutionError(
-        getUnavailableMessage?.(definition) ??
-          `Invalid ${inputName} for evaluator "${definition.name}": ${z.prettifyError(
-            parsed.error
-          )}`,
+        `Invalid reference_data for evaluator "${definition.name}": ${z.prettifyError(
+          parsed.error
+        )}`,
         'badRequest'
       );
     }
@@ -177,22 +163,7 @@ export const executeEvaluators = async (
     });
   }
 
-  const parsedReferenceData = parseForEvaluators({
-    evaluators,
-    input: referenceData,
-    inputName: 'reference_data',
-    getSchema: ({ referenceDataSchema }) => referenceDataSchema,
-  });
-  const parsedContext = parseForEvaluators({
-    evaluators,
-    input: options.evidence?.context,
-    inputName: 'context',
-    getSchema: ({ contextSchema }) => contextSchema,
-    getUnavailableMessage: options.evidence
-      ? undefined
-      : ({ name }) =>
-          `Evaluator "${name}" needs context, which only in-memory evidence passed to evals.evaluate() carries, so it cannot grade a trace`,
-  });
+  const parsedReferenceData = parseReferenceData(evaluators, referenceData);
 
   const { round, traceAccessor } = await readRound();
 
@@ -292,8 +263,6 @@ export const executeEvaluators = async (
           trace: traceAccessor,
           round,
           referenceData: parsedReferenceData.get(definition),
-          transcript: options.evidence?.transcript,
-          context: parsedContext.get(definition),
           inferenceClient,
           log: logger,
         })

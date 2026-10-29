@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import { createEvaluateContract, MAX_TRANSCRIPT_MESSAGES } from './create_evaluate_contract';
+import { createEvaluateContract } from './create_evaluate_contract';
 import { EvaluationExecutionError } from './evaluation_execution_error';
 import type { EvaluationService } from './evaluation_service';
 
@@ -103,74 +103,6 @@ describe('createEvaluateContract', () => {
         evaluators: [{ name: 'groundedness', connector_id: 'judge-connector' }],
         evidence: { round: ROUND, referenceData: { expected: 'A bad deploy' } },
       });
-    });
-
-    it('passes the transcript and context through', async () => {
-      const { evaluate, evaluationService } = setup();
-      const transcript = [
-        { role: 'user' as const, content: 'Why did the checkout alert fire?' },
-        { role: 'tool' as const, content: '{"hits":12}', tool_id: 'search_logs' },
-        { role: 'assistant' as const, content: 'A bad deploy of the payments service.' },
-      ];
-
-      await evaluate({
-        request,
-        evaluators: [{ name: 'tree_coverage' }],
-        evidence: { round: ROUND, transcript, context: { decision_tree: 'graph TD; A-->B' } },
-      });
-
-      expect(evaluationService.evaluate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          evidence: expect.objectContaining({
-            transcript,
-            context: { decision_tree: 'graph TD; A-->B' },
-          }),
-        })
-      );
-    });
-
-    it('rejects a transcript message with an unknown role', async () => {
-      const { evaluate, evaluationService } = setup();
-
-      const evaluation = evaluate({
-        request,
-        evaluators: [{ name: 'tree_coverage' }],
-        evidence: {
-          round: ROUND,
-          transcript: [{ role: 'system', content: 'You are an SRE.' }] as unknown as Array<{
-            role: 'user';
-            content: string;
-          }>,
-        },
-      });
-
-      await expect(evaluation).rejects.toMatchObject({
-        message: expect.stringContaining('Invalid evaluation input'),
-        responseType: 'badRequest',
-      });
-      expect(evaluationService.evaluate).not.toHaveBeenCalled();
-    });
-
-    it(`rejects a transcript longer than ${MAX_TRANSCRIPT_MESSAGES} messages`, async () => {
-      const { evaluate, evaluationService } = setup();
-
-      const evaluation = evaluate({
-        request,
-        evaluators: [{ name: 'tree_coverage' }],
-        evidence: {
-          round: ROUND,
-          transcript: Array.from({ length: MAX_TRANSCRIPT_MESSAGES + 1 }, () => ({
-            role: 'assistant' as const,
-            content: 'Still investigating.',
-          })),
-        },
-      });
-
-      await expect(evaluation).rejects.toMatchObject({
-        message: expect.stringContaining('Invalid evaluation input'),
-        responseType: 'badRequest',
-      });
-      expect(evaluationService.evaluate).not.toHaveBeenCalled();
     });
 
     it('rejects a round missing the response', async () => {

@@ -281,72 +281,34 @@ describe('createEvaluationService', () => {
       expect(traceReader.search).not.toHaveBeenCalled();
     });
 
-    it('gives evaluators the transcript and their own context', async () => {
+    it('gives each evaluator the part of the reference data its schema reads', async () => {
       const treeCoverage: EvaluatorDefinition = {
         ...buildEvaluator({ name: 'tree_coverage' }),
-        contextSchema: z.object({ decision_tree: z.string().min(1) }),
+        referenceDataSchema: z.object({
+          decision_tree: z.string().min(1),
+          transcript: z.array(z.object({ role: z.string(), content: z.string() })),
+        }),
       };
       const conclusionQuality = buildEvaluator({ name: 'conclusion_quality' });
       const { evaluateEvidence } = setup([treeCoverage, conclusionQuality]);
       const transcript = [
-        { role: 'user' as const, content: 'Why did the checkout alert fire?' },
-        { role: 'assistant' as const, content: 'Checking recent deploys first.' },
-        { role: 'tool' as const, content: '{"deploys":1}', tool_id: 'list_deploys' },
-        { role: 'assistant' as const, content: 'A bad deploy of the payments service.' },
+        { role: 'user', content: 'Why did the checkout alert fire?' },
+        { role: 'assistant', content: 'A bad deploy of the payments service.' },
       ];
+      const referenceData = { decision_tree: 'graph TD; A-->B', transcript, verified_cause: 'x' };
 
       await evaluateEvidence({
         evaluators: [{ name: 'tree_coverage' }, { name: 'conclusion_quality' }],
-        evidence: {
-          round: EVIDENCE_ROUND,
-          transcript,
-          context: { decision_tree: 'graph TD; A-->B', unrelated: true },
-        },
+        evidence: { round: EVIDENCE_ROUND, referenceData },
       });
 
       const [treeCoverageContext] = (treeCoverage.evaluate as jest.Mock).mock.calls[0];
-      expect(treeCoverageContext.transcript).toBe(transcript);
-      expect(treeCoverageContext.context).toEqual({ decision_tree: 'graph TD; A-->B' });
-      const [conclusionQualityContext] = (conclusionQuality.evaluate as jest.Mock).mock.calls[0];
-      expect(conclusionQualityContext.context).toEqual({
+      expect(treeCoverageContext.referenceData).toEqual({
         decision_tree: 'graph TD; A-->B',
-        unrelated: true,
+        transcript,
       });
-    });
-
-    it('refuses context that does not match an evaluator schema', async () => {
-      const treeCoverage: EvaluatorDefinition = {
-        ...buildEvaluator({ name: 'tree_coverage' }),
-        contextSchema: z.object({ decision_tree: z.string().min(1) }),
-      };
-      const { evaluateEvidence } = setup([treeCoverage]);
-
-      await expect(
-        evaluateEvidence({
-          evaluators: [{ name: 'tree_coverage' }],
-          evidence: { round: EVIDENCE_ROUND, context: {} },
-        })
-      ).rejects.toMatchObject({
-        message: expect.stringContaining('Invalid context for evaluator "tree_coverage"'),
-        responseType: 'badRequest',
-      });
-      expect(treeCoverage.evaluate).not.toHaveBeenCalled();
-    });
-
-    it('explains that a trace cannot supply context an evaluator requires', async () => {
-      const treeCoverage: EvaluatorDefinition = {
-        ...buildEvaluator({ name: 'tree_coverage' }),
-        contextSchema: z.object({ decision_tree: z.string().min(1) }),
-      };
-      const { evaluate } = setup([treeCoverage]);
-
-      await expect(evaluate({ evaluators: [{ name: 'tree_coverage' }] })).rejects.toMatchObject({
-        message:
-          'Evaluator "tree_coverage" needs context, which only in-memory evidence passed to evals.evaluate() carries, so it cannot grade a trace',
-        responseType: 'badRequest',
-      });
-      expect(awaitTraceReadyMock).not.toHaveBeenCalled();
-      expect(treeCoverage.evaluate).not.toHaveBeenCalled();
+      const [conclusionQualityContext] = (conclusionQuality.evaluate as jest.Mock).mock.calls[0];
+      expect(conclusionQualityContext.referenceData).toEqual(referenceData);
     });
 
     it('validates reference data against the evaluator schema', async () => {
