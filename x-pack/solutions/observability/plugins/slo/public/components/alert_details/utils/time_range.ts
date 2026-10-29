@@ -13,7 +13,9 @@ import { getActionGroupWindow } from './alert';
 export function getDataTimeRange(alert: BurnRateAlert): TimeRange {
   const timeRange = alert.fields[ALERT_TIME_RANGE] as DateRange;
   const actionGroupWindow = getActionGroupWindow(alert);
-  const windowDurationInMs = actionGroupWindow.longWindow.value * 60 * 60 * 1000;
+  const windowDurationInMs = actionGroupWindow
+    ? actionGroupWindow.longWindow.value * 60 * 60 * 1000
+    : 0;
   return {
     from: new Date(new Date(timeRange.gte).getTime() - windowDurationInMs),
     to: timeRange.lte ? new Date(timeRange.lte) : new Date(),

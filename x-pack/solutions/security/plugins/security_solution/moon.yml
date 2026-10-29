@@ -242,7 +242,6 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/esql-ast'
   - '@kbn/inference-langchain'
-  - '@kbn/scout-security'
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/actions-types'
   - '@kbn/triggers-actions-ui-types'
@@ -268,14 +267,13 @@ fileGroups:
     - public/**/*
     - server/**/*
     - scripts/**/*
-    - test/scout/**/*
-    - test/scout_es_max_response_size/**/*
     - common/**/*.json
     - server/**/*.json
     - scripts/**/*.json
     - public/**/*.json
     - emotion.d.ts
     - '!target/**/*'
+    - '!test/**/*'
     - '!**/cypress/**'
     - '!public/management/cypress.config.ts'
 tasks: {}

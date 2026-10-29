@@ -305,4 +305,126 @@ describe('bulkUpdateCases', () => {
       `"You cannot attach more than 10 cases to an alert"`
     );
   });
+
+  it('throws when only some documents in a batch are missing the authorization fields', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        {
+          found: true,
+          _id: 'alert-id',
+          _index: 'alert-index',
+          _source: {
+            [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+            [ALERT_RULE_CONSUMER]: 'apm',
+            [ALERT_CASE_IDS]: caseIds,
+          },
+        },
+        {
+          found: true,
+          _id: 'forged-id',
+          _index: 'alert-index',
+          _source: {
+            [ALERT_CASE_IDS]: caseIds,
+          },
+        },
+      ],
+    });
+
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const mixedAlerts = [
+      { id: 'alert-id', index: 'alert-index' },
+      { id: 'forged-id', index: 'alert-index' },
+    ];
+
+    await expect(
+      alertsClient.bulkUpdateCases({ caseIds, alerts: mixedAlerts })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Invalid alert found with id of \\"forged-id\\" and operation get"`
+    );
+
+    expect(esClientMock.bulk).not.toHaveBeenCalled();
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      message: 'Failed attempt to access alert [id=forged-id]',
+      event: {
+        action: 'alert_get',
+        category: ['database'],
+        outcome: 'failure',
+        type: ['access'],
+      },
+      error: {
+        code: 'Error',
+        message: 'Invalid alert found with id of "forged-id" and operation get',
+      },
+    });
+    expect(auditLogger.log).toHaveBeenCalledWith({
+      message: 'Failed attempt to access alert [id=alert-id]',
+      event: {
+        action: 'alert_get',
+        category: ['database'],
+        outcome: 'failure',
+        type: ['access'],
+      },
+      error: {
+        code: 'Error',
+        message: 'Invalid alert found with id of "forged-id" and operation get',
+      },
+    });
+    expect(auditLogger.log).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({ outcome: 'success' }),
+      })
+    );
+  });
+
+  it('links valid alerts and skips not-found and errored lookups', async () => {
+    esClientMock.mget.mockResponse({
+      docs: [
+        {
+          found: true,
+          _id: 'alert-id',
+          _index: 'alert-index',
+          _source: {
+            [ALERT_RULE_TYPE_ID]: 'apm.error_rate',
+            [ALERT_RULE_CONSUMER]: 'apm',
+            [ALERT_CASE_IDS]: caseIds,
+          },
+        },
+        { found: false, _id: 'absent-id', _index: 'alert-index' },
+        {
+          _id: 'error-id',
+          _index: 'alert-index',
+          error: { type: 'index_not_found_exception', reason: 'no such index [alert-index]' },
+        },
+      ],
+    });
+    const alertsClient = new AlertsClient(alertsClientParams);
+
+    await alertsClient.bulkUpdateCases({
+      caseIds,
+      alerts: [
+        { id: 'alert-id', index: 'alert-index' },
+        { id: 'absent-id', index: 'alert-index' },
+        { id: 'error-id', index: 'alert-index' },
+      ],
+    });
+
+    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledTimes(1);
+    expect(alertingAuthMock.ensureAuthorized).toHaveBeenCalledWith({
+      consumer: 'apm',
+      entity: 'alert',
+      operation: 'get',
+      ruleTypeId: 'apm.error_rate',
+    });
+    expect(alertsClientParams.logger.warn).toHaveBeenCalledTimes(1);
+    expect(alertsClientParams.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('error-id')
+    );
+    expect(esClientMock.bulk).toHaveBeenCalled();
+    expect(esClientMock.bulk.mock.calls[0][0]).toMatchObject({
+      body: [
+        { update: { _index: 'alert-index', _id: 'alert-id' } },
+        { doc: { [ALERT_CASE_IDS]: ['test-case'] } },
+      ],
+    });
+  });
 });

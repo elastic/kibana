@@ -8,23 +8,17 @@
  */
 
 import { test as base } from '@playwright/test';
-import { tags } from '../../../../tags';
-
-const supportedTags = [...tags.stateful.all, ...tags.serverless.all, ...tags.performance];
+import { testTags } from '@kbn/scout-info';
 
 export const validateTagsFixture = base.extend<{ validateTags: void }>({
   validateTags: [
     async ({}, use, testInfo) => {
-      if (testInfo.tags.length === 0) {
-        throw new Error(`At least one tag is required: ${supportedTags.join(', ')}`);
-      }
-
-      const invalidTags = testInfo.tags.filter((tag: string) => !supportedTags.includes(tag));
-      if (invalidTags.length > 0) {
+      const issues = testTags.findIssues(testInfo.tags);
+      if (issues.length > 0) {
         throw new Error(
-          `Unsupported tag(s) found in test suite "${testInfo.title}": ${invalidTags.join(
-            ', '
-          )}. ` + `Supported tags are: ${supportedTags.join(', ')}.`
+          `Invalid tag(s) found in test suite "${testInfo.title}":\n${issues
+            .map(({ message }) => `- ${message}`)
+            .join('\n')}`
         );
       }
 

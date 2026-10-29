@@ -25,6 +25,7 @@ import {
   SlackApiSecretsSchema,
   SlackApiParamsSchema,
   SlackApiConfigSchema,
+  setDefaultSubAction,
 } from '../../../common/slack_api/schema';
 import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
@@ -50,7 +51,9 @@ export const getConnectorType = (): SlackApiConnectorType => {
         customValidator: validateSlackUrl,
       },
       params: {
-        schema: SlackApiParamsSchema,
+        schema: {
+          validate: (value: unknown) => SlackApiParamsSchema.validate(setDefaultSubAction(value)),
+        },
       },
     },
     renderParameterTemplates,
@@ -80,15 +83,7 @@ const renderParameterTemplates = (
   params: SlackApiParams,
   variables: Record<string, unknown>
 ) => {
-  if (params.subAction === 'postMessage') {
-    return {
-      subAction: params.subAction,
-      subActionParams: {
-        ...params.subActionParams,
-        text: renderMustacheString(logger, params.subActionParams.text, variables, 'slack'),
-      },
-    };
-  } else if (params.subAction === 'postBlockkit') {
+  if (params.subAction === 'postBlockkit') {
     return {
       subAction: params.subAction,
       subActionParams: {
@@ -97,7 +92,19 @@ const renderParameterTemplates = (
       },
     };
   }
-  return params;
+
+  if (params.subAction === 'validChannelId') {
+    return params;
+  }
+
+  const text = params.subActionParams !== null ? params.subActionParams.text : '';
+  return {
+    subAction: 'postMessage' as const,
+    subActionParams: {
+      ...params.subActionParams,
+      text: renderMustacheString(logger, text, variables, 'slack'),
+    },
+  };
 };
 
 const slackApiExecutor = async ({

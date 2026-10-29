@@ -7456,7 +7456,6 @@
     "searchConnectors.nativeConnectors.postgresql.configuration.tablesLabel": "表的逗号分隔列表",
     "searchConnectors.nativeConnectors.postgresql.name": "PostgreSQL",
     "searchConnectors.nativeConnectors.retriesPerRequest.label": "根据请求重试",
-    "searchConnectors.nativeConnectors.salesforce.name": "Salesforce",
     "searchConnectors.nativeConnectors.schemaLabel": "架构",
     "searchConnectors.nativeConnectors.servicenow.configuration.useDocumentLevelSecurityTooltip": "文档级别安全性确保在 Elasticsearch 中维护在 ServiceNow 中设置的身份和权限。这样，您就可以限制用户和组对此索引中的文档具有的读取访问权限并对其进行个性化。访问控制同步将确保此元数据在 Elasticsearch 文档中保持最新。",
     "searchConnectors.nativeConnectors.servicenow.name": "ServiceNow",

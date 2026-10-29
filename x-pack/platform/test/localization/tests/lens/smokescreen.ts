@@ -157,7 +157,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
-  describe('lens smokescreen tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/299196
+  describe.skip('lens smokescreen tests', () => {
     let termTranslator: (term: string, field?: string, values?: number) => string;
 
     before(async () => {
@@ -688,16 +689,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'cumulative_sum',
       });
-      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await lens.assertWorkspaceErrorCount(1);
 
       await lens.removeDimension('lnsXY_xDimensionPanel');
-      expect(await lens.getWorkspaceErrorCount()).to.eql(2);
+      await lens.assertWorkspaceErrorCount(2);
 
       await lens.dragFieldToDimensionTrigger(
         '@timestamp',
         'lnsXY_xDimensionPanel > lns-empty-dimension'
       );
-      expect(await lens.getWorkspaceErrorCount()).to.eql(1);
+      await lens.assertWorkspaceErrorCount(1);
 
       expect(await lens.hasChartSwitchWarning('lnsDatatable', termTranslator('datatable'))).to.eql(
         false

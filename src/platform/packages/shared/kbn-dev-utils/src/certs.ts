@@ -29,3 +29,33 @@ export const FLEET_SERVER_KEY_PATH = resolve(__dirname, '../certs/fleet_server.k
 export const FLEET_SERVER_CERT_PATH = resolve(__dirname, '../certs/fleet_server.crt');
 export const FLEET_SERVER_P12_PATH = resolve(__dirname, '../certs/fleet_server.p12');
 export const FLEET_SERVER_P12_PASSWORD = 'storepass';
+export const PKI_INTERMEDIATE_CA_CERT_PATH = resolve(__dirname, '../certs/pki_intermediate_ca.crt');
+export const PKI_INTERMEDIATE_CA_2_CERT_PATH = resolve(
+  __dirname,
+  '../certs/pki_intermediate_ca_2.crt'
+);
+export const PKI_INTERMEDIATE_CLIENT_CERT_PATH = resolve(
+  __dirname,
+  '../certs/pki_intermediate_client.crt'
+);
+export const PKI_INTERMEDIATE_CLIENT_KEY_PATH = resolve(
+  __dirname,
+  '../certs/pki_intermediate_client.key'
+);
+export const PKI_INTERMEDIATE_2_CLIENT_CERT_PATH = resolve(
+  __dirname,
+  '../certs/pki_intermediate_2_client.crt'
+);
+export const PKI_INTERMEDIATE_2_CLIENT_KEY_PATH = resolve(
+  __dirname,
+  '../certs/pki_intermediate_2_client.key'
+);
+export const PKI_UNTRUSTED_CA_CERT_PATH = resolve(__dirname, '../certs/pki_untrusted_ca.crt');
+export const PKI_UNTRUSTED_CLIENT_CERT_PATH = resolve(
+  __dirname,
+  '../certs/pki_untrusted_client.crt'
+);
+export const PKI_UNTRUSTED_CLIENT_KEY_PATH = resolve(
+  __dirname,
+  '../certs/pki_untrusted_client.key'
+);

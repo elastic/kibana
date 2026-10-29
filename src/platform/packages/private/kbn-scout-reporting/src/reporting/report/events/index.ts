@@ -10,3 +10,4 @@
 export { ScoutEventsReport } from './report';
 export * from './event';
 export * from './persistence';
+export * from './target_info';
