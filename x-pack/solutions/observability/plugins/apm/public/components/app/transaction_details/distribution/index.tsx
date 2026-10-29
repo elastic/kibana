@@ -28,6 +28,7 @@ import type { TransactionTab } from '../waterfall_with_summary/transaction_tabs'
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
 import type { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 import { isDiscoverDefaultLogColumns } from './get_trace_logs_columns';
+import { isValidSampleIndex } from '../is_valid_sample_index';
 
 interface TransactionDistributionProps {
   onChartSelection: (event: XYBrushEvent) => void;
@@ -76,12 +77,7 @@ export function TransactionDistribution({
   // Prefer the explicit index when present so paired samples are kept distinct;
   // fall back to matching by identifier for URLs without a `sampleIndex`.
   const selectedSample = useMemo(() => {
-    if (
-      selectedSampleIndex !== undefined &&
-      traceSamples &&
-      selectedSampleIndex >= 0 &&
-      selectedSampleIndex < traceSamples.length
-    ) {
+    if (isValidSampleIndex(selectedSampleIndex, traceSamples)) {
       return traceSamples[selectedSampleIndex];
     }
     return (

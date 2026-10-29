@@ -35,6 +35,7 @@ import { isNotInitiated, isPending, isSuccess } from '../../../../hooks/use_fetc
 import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { useGetErrorMarkerHrefFromRouter } from './waterfall_container/use_get_error_marker_href_from_router';
+import { isValidSampleIndex } from '../is_valid_sample_index';
 
 interface Props<TSample extends {}> {
   traceSamples?: TSample[];
@@ -116,11 +117,7 @@ export function WaterfallWithSummary<TSample extends {}>({
   // Prefer the explicit index when the parent provides one: two samples that
   // share the same identifiers would otherwise both resolve to the first match
   // via `indexOf`, making forward navigation a no-op.
-  const hasSelectedSampleIndex =
-    selectedSampleIndex !== undefined &&
-    !!traceSamples &&
-    selectedSampleIndex >= 0 &&
-    selectedSampleIndex < traceSamples.length;
+  const hasSelectedSampleIndex = isValidSampleIndex(selectedSampleIndex, traceSamples);
 
   const samplePageIndex = isControlled
     ? hasSelectedSampleIndex
