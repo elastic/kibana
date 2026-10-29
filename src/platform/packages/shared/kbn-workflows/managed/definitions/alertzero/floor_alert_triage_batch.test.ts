@@ -101,19 +101,32 @@ describe('Alert Triage batch workflow', () => {
       };
       expect(onFailure.retry.condition).toBe("${{ error.type != 'StepSizeLimitExceeded' }}");
       expect(stepByName('release_claims_load_failed')).toEqual(
-        expect.objectContaining({ if: "${{ error.type == 'StepSizeLimitExceeded' }}" })
+        expect.objectContaining({
+          if: "${{ steps.load_alerts.error.type == 'StepSizeLimitExceeded' }}",
+        })
       );
     });
 
-    it('ends the run after the load fallback, since a fallback clears the error', () => {
+    // `error` is empty inside fallback steps, so the error is read from steps.load_alerts instead.
+    it('continues past a load error and fails the run in a guard that reads the step error', () => {
       const { 'on-failure': onFailure } = stepByName('load_alerts') as YamlStep & {
-        'on-failure': { fallback: Array<{ name: string }> };
+        'on-failure': { continue?: boolean; fallback?: unknown };
       };
-      expect(onFailure.fallback.map(({ name }) => name)).toEqual([
+      expect(onFailure).toEqual(expect.objectContaining({ continue: true }));
+      expect(onFailure.fallback).toBeUndefined();
+
+      const guard = stepByName('guard_load_succeeded');
+      expect(guard).toEqual(
+        expect.objectContaining({ condition: '${{ steps.load_alerts.error != blank }}' })
+      );
+      expect(guard.steps?.map(({ name }) => name)).toEqual([
         'release_claims_load_failed',
         'abort_load_failed',
       ]);
       expect(stepByName('abort_load_failed').type).toBe('workflow.fail');
+
+      const names = batchSteps.map(({ name }) => name);
+      expect(names.indexOf('guard_load_succeeded')).toBe(names.indexOf('load_alerts') + 1);
     });
   });
 

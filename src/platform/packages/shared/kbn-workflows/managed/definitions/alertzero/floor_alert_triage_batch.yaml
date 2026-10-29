@@ -143,31 +143,36 @@ steps:
         condition: "${{ error.type != 'StepSizeLimitExceeded' }}"
         max-attempts: 3
         delay: 5s
-      fallback:
-        - name: release_claims_load_failed
-          type: kibana.SetAlertTags
-          # Nothing removes `az:triage_failed`, so tagging on a transient error would take the
-          # alerts out of triage for good.
-          if: "${{ error.type == 'StepSizeLimitExceeded' }}"
-          # shortcut: if this tagging fails the claim stays and a later sweep repeats the size error, upgrade if seen.
-          on-failure:
-            continue: true
-          with:
-            ids: "${{ inputs.alert_ids }}"
-            tags:
-              tags_to_add:
-                - "az:triage_failed"
-              tags_to_remove:
-                - "az:triage_pending"
-                - "az:triage_exec:{{ execution.id }}"
-
-        # The run fails after the fallback anyway (it re-throws the load error); this adds a clearer message.
-        - name: abort_load_failed
-          type: workflow.fail
-          with:
-            message: "Alert Triage could not load the alerts of this batch: {{ error.message }}"
+      # Not a fallback: `error` is empty inside fallback steps, so the error is read from the step below.
+      continue: true
     with:
       alert_ids: "${{ inputs.alert_ids }}"
+
+  - name: guard_load_succeeded
+    type: if
+    condition: "${{ steps.load_alerts.error != blank }}"
+    steps:
+      - name: release_claims_load_failed
+        type: kibana.SetAlertTags
+        # Nothing removes `az:triage_failed`, so tagging on a transient error would take the
+        # alerts out of triage for good.
+        if: "${{ steps.load_alerts.error.type == 'StepSizeLimitExceeded' }}"
+        # shortcut: if this tagging fails the claim stays and a later sweep repeats the size error, upgrade if seen.
+        on-failure:
+          continue: true
+        with:
+          ids: "${{ inputs.alert_ids }}"
+          tags:
+            tags_to_add:
+              - "az:triage_failed"
+            tags_to_remove:
+              - "az:triage_pending"
+              - "az:triage_exec:{{ execution.id }}"
+
+      - name: abort_load_failed
+        type: workflow.fail
+        with:
+          message: "Alert Triage could not load the alerts of this batch: {{ steps.load_alerts.error.message }}"
 
   - name: guard_alerts_loaded
     type: if
@@ -289,8 +294,8 @@ steps:
                 - "az:triage_pending"
                 - "az:triage_exec:{{ execution.id }}"
 
-        # Fallback handles the comment and the tags only. The run fails after the fallback anyway
-        # (it re-throws the classify error); this adds a message that names the likely causes.
+        # Fallback handles the comment and the tags only. The run would fail after the fallback
+        # anyway (it re-throws the classify error); this fails it first with the likely causes.
         - name: abort_classify_failed
           type: workflow.fail
           with:
