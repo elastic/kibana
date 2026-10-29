@@ -7,7 +7,6 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { SET_HYPOTHESES_TOOL_ID } from '@kbn/agentic-investigations-plugin/common';
 import { classifyOnlineEvalsRoundStepDefinition } from './classify_online_evals_round';
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
@@ -24,12 +23,6 @@ const createContext = (input: Record<string, unknown>) =>
     input,
     contextManager: { getFakeRequest: jest.fn().mockReturnValue(request) },
   } as never);
-
-const confirm = (candidate: string) => ({
-  type: 'tool_call',
-  tool_id: SET_HYPOTHESES_TOOL_ID,
-  params: { hypotheses: [{ candidate, confidence: 0.9, status: 'confirmed' }] },
-});
 
 const setup = ({
   rounds = [{ id: 'round-1', started_at: DURING_RUN, steps: [] }],
@@ -70,17 +63,16 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
         should_score: true,
         round_kind: 'initial',
         round_id: 'round-1',
-        root_cause_changed: false,
       },
     });
     expect(getScopedClient).toHaveBeenCalledWith({ request });
     expect(get).toHaveBeenCalledWith('inv-1');
   });
 
-  it('skips a follow-up that leaves the root cause unchanged, such as Slack chatter', async () => {
+  it('skips a follow-up, such as a question or Slack chatter, until follow-ups are scored', async () => {
     const { run } = setup({
       rounds: [
-        { id: 'round-1', started_at: BEFORE_RUN, steps: [confirm('Bad deploy')] },
+        { id: 'round-1', started_at: BEFORE_RUN, steps: [] },
         { id: 'round-2', started_at: DURING_RUN, steps: [] },
       ],
     });
@@ -90,26 +82,7 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
         should_score: false,
         round_kind: 'follow_up',
         round_id: 'round-2',
-        root_cause_changed: false,
-        skip_reason: 'root_cause_unchanged',
-      },
-    });
-  });
-
-  it('scores a follow-up that confirms a different root cause', async () => {
-    const { run } = setup({
-      rounds: [
-        { id: 'round-1', started_at: BEFORE_RUN, steps: [confirm('Bad deploy')] },
-        { id: 'round-2', started_at: DURING_RUN, steps: [confirm('Expired certificate')] },
-      ],
-    });
-
-    await expect(run()).resolves.toEqual({
-      output: {
-        should_score: true,
-        round_kind: 'follow_up',
-        round_id: 'round-2',
-        root_cause_changed: true,
+        skip_reason: 'follow_up_not_scored',
       },
     });
   });
@@ -127,7 +100,6 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
         should_score: false,
         round_kind: 'alert_recovery',
         round_id: 'round-2',
-        root_cause_changed: false,
         skip_reason: 'recovery_verdict_unavailable',
       },
     });
@@ -137,7 +109,7 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
     const { run, getScopedClient, isPaused } = setup({ evalsAvailable: false });
 
     await expect(run()).resolves.toEqual({
-      output: { should_score: false, root_cause_changed: false, skip_reason: 'evals_unavailable' },
+      output: { should_score: false, skip_reason: 'evals_unavailable' },
     });
     expect(isPaused).not.toHaveBeenCalled();
     expect(getScopedClient).not.toHaveBeenCalled();
@@ -147,7 +119,7 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
     const { run, getScopedClient } = setup({ paused: true });
 
     await expect(run()).resolves.toEqual({
-      output: { should_score: false, root_cause_changed: false, skip_reason: 'paused' },
+      output: { should_score: false, skip_reason: 'paused' },
     });
     expect(getScopedClient).not.toHaveBeenCalled();
   });
@@ -156,7 +128,7 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
     const { run } = setup({ rounds: [] });
 
     await expect(run()).resolves.toEqual({
-      output: { should_score: false, root_cause_changed: false, skip_reason: 'no_round' },
+      output: { should_score: false, skip_reason: 'no_round' },
     });
   });
 
