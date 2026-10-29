@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup, ToolHandlerContext } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
@@ -23,23 +23,33 @@ import type { UxRouteHandlerResources } from '../routes/types';
 import { createUxRouteResources } from './resources';
 
 const scopeSchema = {
-  start: z
-    .string()
-    .max(64)
-    .default('now-24h')
-    .describe('Elasticsearch date math start, e.g. now-24h or an ISO timestamp.'),
-  end: z
-    .string()
-    .max(64)
-    .default('now')
-    .describe('Elasticsearch date math end, e.g. now or an ISO timestamp.'),
-  serviceName: z.string().max(256).optional().describe('RUM service.name filter.'),
-  browser: z.string().max(128).optional(),
-  os: z.string().max(128).optional(),
-  location: z.string().max(8).optional().describe('ISO-3166 alpha-2 country code.'),
-  pageUrl: z.string().max(512).optional(),
-  user: z.string().max(256).optional(),
-  kuery: z.string().max(4096).optional().describe('KQL filter over RUM documents.'),
+  start: lazySchema(() =>
+    z
+      .string()
+      .max(64)
+      .default('now-24h')
+      .describe('Elasticsearch date math start, e.g. now-24h or an ISO timestamp.')
+  ),
+  end: lazySchema(() =>
+    z
+      .string()
+      .max(64)
+      .default('now')
+      .describe('Elasticsearch date math end, e.g. now or an ISO timestamp.')
+  ),
+  serviceName: lazySchema(() =>
+    z.string().max(256).optional().describe('RUM service.name filter.')
+  ),
+  browser: lazySchema(() => z.string().max(128).optional()),
+  os: lazySchema(() => z.string().max(128).optional()),
+  location: lazySchema(() =>
+    z.string().max(8).optional().describe('ISO-3166 alpha-2 country code.')
+  ),
+  pageUrl: lazySchema(() => z.string().max(512).optional()),
+  user: lazySchema(() => z.string().max(256).optional()),
+  kuery: lazySchema(() =>
+    z.string().max(4096).optional().describe('KQL filter over RUM documents.')
+  ),
 };
 
 const toListQuery = (params: {
