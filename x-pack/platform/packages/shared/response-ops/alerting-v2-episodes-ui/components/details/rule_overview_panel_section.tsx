@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,6 +30,7 @@ import {
 import { AlertEpisodeRuleOverviewPanel } from './rule_overview_panel';
 import type { AlertEpisodeDetailsServices } from './types';
 import { CopyableShortId } from '../copyable_short_id';
+import { getConnectorSource } from '../../source_labels';
 import { getPanelTextSize } from './panel_title_sizes';
 import * as cellI18n from '../translations';
 import * as i18n from './translations';
@@ -85,6 +87,21 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
         titleSize="xs"
         title={<h3>{i18n.RULE_OVERVIEW_PANEL_SECTION_ERROR_TITLE}</h3>}
       />
+    );
+  }
+
+  // POC: alerts from a custom import carry the import id as `rule.id`, which never resolves to a
+  // rule. Same treatment as the episodes table rule cell. Temporary.
+  const importedSource = getConnectorSource(episode?.source);
+  if (!isRuleLoaded(ruleState) && importedSource) {
+    return (
+      <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeRuleImported">
+        <EuiToolTip content={cellI18n.getRuleCellImportedTooltip(importedSource)}>
+          <EuiBadge color="hollow" tabIndex={0}>
+            {cellI18n.RULE_CELL_IMPORTED_LABEL}
+          </EuiBadge>
+        </EuiToolTip>
+      </EuiPanel>
     );
   }
 

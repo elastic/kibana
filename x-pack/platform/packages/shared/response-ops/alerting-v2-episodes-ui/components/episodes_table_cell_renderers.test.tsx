@@ -549,6 +549,36 @@ describe('EpisodeRuleCell', () => {
     expect(await screen.findAllByText('Rule ID copied')).not.toHaveLength(0);
   });
 
+  it('labels an alert from a custom import as imported instead of an unavailable rule', () => {
+    const row = makeRow({ 'rule.id': 'import-id-1234567890', source: 'datadog-monitors' });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByTestId('episodeRuleCellImported')).toHaveTextContent('Imported');
+    expect(screen.queryByTestId('episodeRuleCellMissingRule')).not.toBeInTheDocument();
+  });
+
+  it('still reports an unavailable rule when the source is the native internal one', () => {
+    const row = makeRow({ 'rule.id': 'deleted-rule-1234567890', source: 'internal' });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByTestId('episodeRuleCellMissingRule')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeRuleCellImported')).not.toBeInTheDocument();
+  });
+
   it('renders an em dash when rule SO, rule.id, rule.name and data.rule_name are all absent', () => {
     const row = makeRow({ episode_data: JSON.stringify({}) });
     render(

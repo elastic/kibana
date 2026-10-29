@@ -57,6 +57,23 @@ export const RULE_CELL_MISSING_RULE_TOOLTIP = i18n.translate(
   }
 );
 
+/**
+ * POC: shown instead of the missing rule label for alerts that come from a custom import. Their
+ * `rule.id` is the import id, which is not a rule.
+ */
+export const RULE_CELL_IMPORTED_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.ruleCell.importedLabel',
+  {
+    defaultMessage: 'Imported',
+  }
+);
+
+export const getRuleCellImportedTooltip = (source: string) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.ruleCell.importedTooltip', {
+    defaultMessage: 'Imported from {source}. Alerts from imports are not created by a rule.',
+    values: { source },
+  });
+
 export const getRuleCellCopyRuleIdTooltip = (ruleId: string) =>
   i18n.translate('xpack.alertingV2EpisodesUi.ruleCell.copyRuleIdTooltip', {
     defaultMessage: 'Click to copy the full rule ID: {ruleId}',

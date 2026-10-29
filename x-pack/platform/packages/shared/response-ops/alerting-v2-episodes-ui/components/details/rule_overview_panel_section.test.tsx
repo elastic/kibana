@@ -258,4 +258,39 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
     // The id stays available to copy, like in the table cell.
     expect(screen.getByTestId('alertingV2EpisodeRuleUnavailableId')).toBeInTheDocument();
   });
+
+  it('labels the rule of an alert from a custom import as imported', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+        { name: 'source', type: 'keyword' },
+      ],
+      values: [
+        ['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'import-1', 'gh-1', 'datadog'],
+      ],
+    });
+    mockHttp.get.mockRejectedValueOnce({
+      response: { status: 404 },
+      body: { code: 'RULE_NOT_FOUND' },
+    });
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(await screen.findByTestId('alertingV2EpisodeRuleImported')).toHaveTextContent(
+      'Imported'
+    );
+    expect(screen.queryByTestId('alertingV2EpisodeRuleUnavailable')).not.toBeInTheDocument();
+  });
 });

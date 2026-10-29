@@ -219,6 +219,9 @@ export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {
   return <AlertEpisodeSeverityBadge severity={severity} />;
 };
 
+const getImportedSource = (source: unknown): string | undefined =>
+  typeof source === 'string' ? getConnectorSource(source) : undefined;
+
 export interface EpisodeRuleCellProps extends CellRendererProps {
   rulesCache: Record<string, Rule>;
   isLoadingRules: boolean;
@@ -296,6 +299,20 @@ export const EpisodeRuleCell = ({
 
     if (!ruleId) {
       return <span>{i18n.RULE_CELL_EMPTY_RULE}</span>;
+    }
+
+    // POC: alerts from a custom import carry the import id as `rule.id`, which never resolves to
+    // a rule. Call them imported instead of saying the rule is missing. Temporary until imports
+    // are resolved to their names here.
+    const importedSource = getImportedSource(row.flattened.source);
+    if (importedSource) {
+      return (
+        <EuiToolTip content={i18n.getRuleCellImportedTooltip(importedSource)}>
+          <EuiBadge color="hollow" tabIndex={0} data-test-subj="episodeRuleCellImported">
+            {i18n.RULE_CELL_IMPORTED_LABEL}
+          </EuiBadge>
+        </EuiToolTip>
+      );
     }
 
     return (
