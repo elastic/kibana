@@ -20,6 +20,8 @@ import {
   titleComparators,
   timeRangeComparators,
   getViewModeSubject,
+  areComparatorsEqual,
+  type StateComparators,
   type ViewMode,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
@@ -54,7 +56,10 @@ import type { FieldStatsTableEmbeddableState } from '@kbn/data-visualizer-server
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
 import { FieldStatsInitializerViewType } from '../../../../../common/embeddables/types';
-import { initializeFieldStatsControls } from './initialize_field_stats_controls';
+import {
+  fieldStatsControlsComparators,
+  initializeFieldStatsControls,
+} from './initialize_field_stats_controls';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { FieldStatisticsTableEmbeddableApi } from './types';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
@@ -75,6 +80,12 @@ const ERROR_MSG = {
   ),
 };
 
+const comparators: StateComparators<FieldStatsTableEmbeddableState> = {
+  ...titleComparators,
+  ...fieldStatsControlsComparators,
+  ...timeRangeComparators,
+};
+
 export const getFieldStatsChartEmbeddableFactory = (
   getStartServices: StartServicesAccessor<
     DataVisualizerStartDependencies,
@@ -86,6 +97,8 @@ export const getFieldStatsChartEmbeddableFactory = (
     FieldStatisticsTableEmbeddableApi
   > = {
     type: FIELD_STATS_EMBEDDABLE_TYPE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({ uuid, initialState, parentApi, finalizeApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
@@ -113,7 +126,6 @@ export const getFieldStatsChartEmbeddableFactory = (
       const {
         fieldStatsControlsApi,
         dataLoadingApi,
-        fieldStatsControlsComparators,
         serializeFieldStatsChartState,
         onFieldStatsTableDestroy,
         resetData$,
@@ -193,11 +205,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           timeRangeManager.anyStateChange$,
           fieldStatsStateManager.anyStateChange$
         ),
-        getComparators: () => ({
-          ...titleComparators,
-          ...fieldStatsControlsComparators,
-          ...timeRangeComparators,
-        }),
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           titleManager.reinitializeState(nextState);
           timeRangeManager.reinitializeState(nextState);

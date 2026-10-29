@@ -26,14 +26,12 @@ import {
   Subject,
   Subscription,
   combineLatest,
-  combineLatestWith,
   debounceTime,
   distinctUntilChanged,
   finalize,
   map,
   merge,
   skip,
-  startWith,
   switchMap,
   tap,
 } from 'rxjs';
@@ -44,7 +42,38 @@ import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import type { DashboardApi, DashboardCreationOptions } from './types';
 import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
-export const COMPARE_DEBOUNCE = 100;
+type UnifiedSearchState = Pick<
+  DashboardState,
+  'filters' | 'query' | 'refresh_interval' | 'time_range'
+>;
+
+/** Unsaved-changes comparators of the unified search state; time and refresh count only with time restore on. */
+const getUnifiedSearchComparators = (
+  isTimeRestore: () => boolean
+): StateComparators<UnifiedSearchState> => ({
+  filters: (a, b) =>
+    compareFilters(
+      toStoredFilters(a, logger) ?? [],
+      toStoredFilters(b, logger) ?? [],
+      COMPARE_ALL_OPTIONS
+    ),
+  query: 'deepEquality',
+  refresh_interval: (a, b) => (isTimeRestore() ? fastIsEqual(a, b) : true),
+  time_range: (a, b) =>
+    !isTimeRestore() || (areTimesEqual(a?.from, b?.from) && areTimesEqual(a?.to, b?.to)),
+});
+
+/** The unified search keys that changed from `baseline` to `current`, as unsaved changes reports them. */
+export const diffUnifiedSearchState = (
+  baseline: Partial<UnifiedSearchState>,
+  current: Partial<UnifiedSearchState>,
+  isTimeRestore: boolean
+): Partial<UnifiedSearchState> =>
+  diffComparators(
+    getUnifiedSearchComparators(() => isTimeRestore),
+    baseline,
+    current
+  );
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,
@@ -241,31 +270,7 @@ export function initializeUnifiedSearchManager(
     );
   }
 
-  const comparators = {
-    filters: (a, b) =>
-      compareFilters(
-        toStoredFilters(a, logger) ?? [],
-        toStoredFilters(b, logger) ?? [],
-        COMPARE_ALL_OPTIONS
-      ),
-    query: 'deepEquality',
-    refresh_interval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
-      timeRestore$.value ? fastIsEqual(a, b) : true,
-    time_range: (a: TimeRange | undefined, b: TimeRange | undefined) => {
-      if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
-      if (!areTimesEqual(a?.from, b?.from) || !areTimesEqual(a?.to, b?.to)) {
-        return false;
-      }
-      return true;
-    },
-  } as StateComparators<
-    Pick<DashboardState, 'filters' | 'query' | 'refresh_interval' | 'time_range'>
-  >;
-
-  const getState = (): Pick<
-    DashboardState,
-    'filters' | 'query' | 'refresh_interval' | 'time_range'
-  > => {
+  const getState = (): UnifiedSearchState => {
     const serializableFilters = asCodeFilters$.value;
     const asCodeQuery = query$.value ? toAsCodeQuery(query$.value) : undefined;
 
@@ -318,26 +323,6 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       anyStateChange$,
       unifiedSearchFilters$,
-      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return anyStateChange$.pipe(
-          // anyStateChange$ does not emit on subscribe
-          // use startWith to compare unsaved changes on subscribe
-          startWith(undefined),
-          debounceTime(COMPARE_DEBOUNCE),
-          map(() => {
-            return {
-              filters: asCodeFilters$.getValue(),
-              query: asCodeQuery$.getValue(),
-              refresh_interval: refreshInterval$.getValue(),
-              time_range: timeRange$.getValue(),
-            };
-          }),
-          combineLatestWith(lastSavedState$),
-          map(([latestState, lastSavedState]) =>
-            diffComparators(comparators, lastSavedState, latestState)
-          )
-        );
-      },
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),

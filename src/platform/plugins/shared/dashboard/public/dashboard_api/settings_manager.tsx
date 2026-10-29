@@ -10,7 +10,6 @@
 import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '@kbn/as-code-dashboard-schema';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { coreServices, screenshotModeService } from '../services/kibana_services';
@@ -57,6 +56,50 @@ function deserializeState(state: DashboardState) {
     title: state.title,
   };
 }
+
+type ComparableSettings = ReturnType<typeof deserializeState>;
+
+const getOptions = ({
+  description,
+  tags,
+  time_restore,
+  project_routing_restore,
+  title,
+  ...options
+}: ComparableSettings) => options;
+
+// an empty description is saved as no description
+const withoutEmptyDescription = (settings: ComparableSettings): ComparableSettings => ({
+  ...settings,
+  description: settings.description || undefined,
+});
+
+const diffSettings = (baseline: ComparableSettings, current: ComparableSettings) => {
+  const diff = diffComparators(
+    comparators,
+    withoutEmptyDescription(baseline),
+    withoutEmptyDescription(current),
+    DEFAULT_SETTINGS
+  );
+  const { description, tags, time_restore, project_routing_restore, title, ...optionDiffs } = diff;
+  // options needs to contain all values and not just diffs since is spread into saved state
+  const options = Object.keys(optionDiffs).length
+    ? { ...DEFAULT_DASHBOARD_OPTIONS, ...getOptions(current) }
+    : undefined;
+  return {
+    // key presence, not truthiness, so clearing the description or title is still a change
+    ...('description' in diff && { description }),
+    ...(tags && { tags }),
+    ...('title' in diff && { title }),
+    ...(typeof time_restore === 'boolean' && { time_restore }),
+    ...(typeof project_routing_restore === 'boolean' && { project_routing_restore }),
+    ...(options && { options }),
+  };
+};
+
+/** Same settings diff the unsaved-changes manager produces, for any two dashboard states. */
+export const diffDashboardSettings = (baseline: DashboardState, current: DashboardState) =>
+  diffSettings(deserializeState(baseline), deserializeState(current));
 
 export function initializeSettingsManager(initialState: DashboardState) {
   const stateManager = initializeStateManager(
@@ -111,40 +154,6 @@ export function initializeSettingsManager(initialState: DashboardState) {
     internalApi: {
       anyStateChange$: stateManager.anyStateChange$,
       serializeSettings,
-      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return stateManager.anyStateChange$.pipe(
-          // anyStateChange$ does not emit on subscribe
-          // use startWith to compare unsaved changes on subscribe
-          startWith(undefined),
-          debounceTime(100),
-          map(() => stateManager.getLatestState()),
-          combineLatestWith(lastSavedState$.pipe(map((lastSaved) => deserializeState(lastSaved)))),
-          map(([latestState, lastSavedState]) => {
-            const {
-              description,
-              tags,
-
-              time_restore,
-
-              project_routing_restore,
-              title,
-              ...optionDiffs
-            } = diffComparators(comparators, lastSavedState, latestState, DEFAULT_SETTINGS);
-            // options needs to contain all values and not just diffs since is spread into saved state
-            const options = Object.keys(optionDiffs).length
-              ? { ...serializeSettings().options, ...optionDiffs }
-              : undefined;
-            return {
-              ...(description && { description }),
-              ...(tags && { tags }),
-              ...(title && { title }),
-              ...(typeof time_restore === 'boolean' && { time_restore }),
-              ...(typeof project_routing_restore === 'boolean' && { project_routing_restore }),
-              ...(options && { options }),
-            };
-          })
-        );
-      },
       reset: (lastSavedState: DashboardState) => {
         stateManager.reinitializeState(deserializeState(lastSavedState));
       },

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { initializeSettingsManager } from './settings_manager';
+import { diffDashboardSettings, initializeSettingsManager } from './settings_manager';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 
@@ -32,60 +31,59 @@ describe('initializeSettingsManager', () => {
     });
   });
 
-  describe('startComparing', () => {
-    test('Should return no changes when there are no changes', (done) => {
-      const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-      const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-        expect(changes).toMatchInlineSnapshot(`Object {}`);
-        done();
+  describe('diffDashboardSettings', () => {
+    const getChanges = (
+      lastSavedState: DashboardState,
+      settingsManager: ReturnType<typeof initializeSettingsManager>,
+      currentState: DashboardState = lastSavedState
+    ) =>
+      diffDashboardSettings(lastSavedState, {
+        ...currentState,
+        ...settingsManager.internalApi.serializeSettings(),
       });
+
+    test('Should return no changes when there are no changes', () => {
+      const lastSavedState = getSampleDashboardState();
+      const settingsManager = initializeSettingsManager(lastSavedState);
+      expect(getChanges(lastSavedState, settingsManager)).toMatchInlineSnapshot(`Object {}`);
     });
 
-    test('Should return time_restore change when time_restoreChanges', (done) => {
-      const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-      const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-        expect(changes).toMatchInlineSnapshot(`
-          Object {
-            "time_restore": false,
-          }
-        `);
-        done();
-      });
-      const currentSettings = settingsManager.api.getSettings();
-      settingsManager.api.setSettings({
-        ...currentSettings,
-        time_restore: !currentSettings.time_restore,
-      });
+    test('Should return time_restore change when the time range is no longer saved', () => {
+      const lastSavedState = getSampleDashboardState();
+      const settingsManager = initializeSettingsManager(lastSavedState);
+      // with time restore off, the dashboard state has no time range
+      const { time_range: timeRange, ...stateWithoutTimeRange } = lastSavedState;
+      expect(getChanges(lastSavedState, settingsManager, stateWithoutTimeRange))
+        .toMatchInlineSnapshot(`
+        Object {
+          "time_restore": false,
+        }
+      `);
     });
 
-    test('Should return only changed keys when there are changes', (done) => {
-      const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
-      const settingsManager = initializeSettingsManager(lastSavedState$.value);
-      settingsManager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-        expect(changes).toMatchInlineSnapshot(`
-          Object {
-            "options": Object {
-              "auto_apply_filters": true,
-              "hide_panel_borders": false,
-              "hide_panel_titles": true,
-              "sync_colors": false,
-              "sync_cursor": true,
-              "sync_tooltips": false,
-              "use_margins": true,
-            },
-            "title": "updated title",
-          }
-        `);
-        done();
-      });
+    test('Should return only changed keys when there are changes', () => {
+      const lastSavedState = getSampleDashboardState();
+      const settingsManager = initializeSettingsManager(lastSavedState);
       const currentSettings = settingsManager.api.getSettings();
       settingsManager.api.setSettings({
         ...currentSettings,
         title: 'updated title',
         hide_panel_titles: !currentSettings.hide_panel_titles,
       });
+      expect(getChanges(lastSavedState, settingsManager)).toMatchInlineSnapshot(`
+        Object {
+          "options": Object {
+            "auto_apply_filters": true,
+            "hide_panel_borders": false,
+            "hide_panel_titles": true,
+            "sync_colors": false,
+            "sync_cursor": true,
+            "sync_tooltips": false,
+            "use_margins": true,
+          },
+          "title": "updated title",
+        }
+      `);
     });
   });
 

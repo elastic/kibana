@@ -16,10 +16,11 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
-import type {
-  DefaultEmbeddableApi,
-  EmbeddablePublicDefinition,
-  HasDrilldowns,
+import {
+  drilldownsComparators,
+  type DefaultEmbeddableApi,
+  type EmbeddablePublicDefinition,
+  type HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
 import {
   BehaviorSubject,
@@ -44,6 +45,7 @@ import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   apiHasExecutionContext,
   apiIsPresentationContainer,
+  areComparatorsEqual,
   areTriggersDisabled,
   fetch$,
   getInheritedViewMode,
@@ -64,6 +66,7 @@ import {
   type PublishesProjectRoutingOverrides,
   type PublishesRendered,
   type HasSupportedTriggers,
+  type StateComparators,
   type SupportsJsonExport,
   timeRangeComparators,
   titleComparators,
@@ -140,6 +143,15 @@ const toPanelFilters = (filters: VegaByValueState['filters']): Filter[] | undefi
     filter.$state?.store ? filter : { ...filter, $state: { store: FilterStateStore.APP_STATE } }
   );
 
+const vegaComparators: StateComparators<VegaByValueState> = {
+  ...titleComparators,
+  ...timeRangeComparators,
+  ...drilldownsComparators,
+  query: 'deepEquality',
+  filters: 'deepEquality',
+  spec: 'deepEquality',
+};
+
 interface VegaEmbeddableDependencies {
   uiActions: Pick<VegaPluginStartDependencies['uiActions'], 'executeTriggerActions'>;
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
@@ -151,6 +163,8 @@ export const vegaEmbeddableFactory = (
   deps: VegaEmbeddableDependencies
 ): EmbeddablePublicDefinition<VegaByValueState, VegaEmbeddableApi> => ({
   type: VEGA_EMBEDDABLE_TYPE,
+  compareSerializedState: (baseline, current) =>
+    areComparatorsEqual(vegaComparators, baseline, current),
   buildEmbeddable: async ({
     initializeDrilldownsManager,
     initialState,
@@ -236,14 +250,7 @@ export const vegaEmbeddableFactory = (
         ),
         panelSearchStateManager.anyStateChange$
       ),
-      getComparators: () => ({
-        ...titleComparators,
-        ...timeRangeComparators,
-        ...drilldownsManager.comparators,
-        query: 'deepEquality',
-        filters: 'deepEquality',
-        spec: 'deepEquality',
-      }),
+      getComparators: () => vegaComparators,
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);

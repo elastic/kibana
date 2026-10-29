@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import { initializeApproximationManager } from './approximation_manager';
+import { diffApproximationState, initializeApproximationManager } from './approximation_manager';
 
 describe('approximationManager', () => {
-  const createLastSavedState = (esql_approximation?: boolean) =>
-    new BehaviorSubject<DashboardState>({
-      ...getSampleDashboardState({ esql_approximation }),
-    });
+  const createLastSavedState = (esql_approximation?: boolean): DashboardState =>
+    getSampleDashboardState({ esql_approximation });
 
   test('initializes with the value from initial state', () => {
     const manager = initializeApproximationManager(
@@ -65,29 +62,23 @@ describe('approximationManager', () => {
     expect(manager.api.isApproximate$.value).toBe(true);
   });
 
-  test('startComparing detects change from false to true', (done) => {
+  test('diffApproximationState detects change from false to true', () => {
     const manager = initializeApproximationManager(getSampleDashboardState());
-    const lastSavedState$ = createLastSavedState(false);
-
-    manager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-      expect(changes).toEqual({ esql_approximation: true });
-      done();
-    });
-
     manager.api.setEsqlApproximation(true);
+
+    expect(
+      diffApproximationState(createLastSavedState(false), manager.internalApi.getState())
+    ).toEqual({ esql_approximation: true });
   });
 
-  test('startComparing emits empty object when value matches saved state', (done) => {
+  test('diffApproximationState returns no changes when value matches saved state', () => {
     const manager = initializeApproximationManager(
       getSampleDashboardState({ esql_approximation: true })
     );
-    const lastSavedState$ = createLastSavedState(true);
-
-    manager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-      expect(changes).toEqual({});
-      done();
-    });
-
     manager.api.setEsqlApproximation(true);
+
+    expect(
+      diffApproximationState(createLastSavedState(true), manager.internalApi.getState())
+    ).toEqual({});
   });
 });

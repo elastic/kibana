@@ -20,6 +20,7 @@ export const getLegacyLogStreamEmbeddableFactory = (
   const searchEmbeddableFactory = getSearchEmbeddableFactory({ startServices, discoverServices });
   const logStreamEmbeddableFactory: ReturnType<typeof getSearchEmbeddableFactory> = {
     type: LEGACY_LOG_STREAM_EMBEDDABLE,
+    compareSerializedState: searchEmbeddableFactory.compareSerializedState,
     buildEmbeddable: async ({ initialState, ...restParams }) => {
       const searchSource = await discoverServices.data.search.searchSource.create();
       let fallbackPattern = 'logs-*-*';

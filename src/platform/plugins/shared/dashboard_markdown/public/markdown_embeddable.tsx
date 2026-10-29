@@ -14,11 +14,13 @@ import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
   apiIsPresentationContainer,
+  areComparatorsEqual,
   initializeStateApi,
   getViewModeSubject,
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
@@ -43,11 +45,24 @@ const flexCss = css({
   flex: '1 1 100%',
 });
 
+const getComparators = (isByReference: boolean): StateComparators<MarkdownEmbeddableState> => ({
+  ...titleComparators,
+  content: isByReference ? 'skip' : 'referenceEquality',
+  settings: isByReference ? 'skip' : 'deepEquality',
+  ref_id: 'skip',
+});
+
 export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
   MarkdownEmbeddableState,
   MarkdownEditorApi
 > = {
   type: MARKDOWN_EMBEDDABLE_TYPE,
+  compareSerializedState: (baseline, current) =>
+    areComparatorsEqual(
+      getComparators((current as MarkdownByReferenceState | undefined)?.ref_id !== undefined),
+      baseline,
+      current
+    ),
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const libraryId = (initialState as MarkdownByReferenceState).ref_id;
     const isByReference = libraryId !== undefined;
@@ -114,14 +129,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
           map(() => undefined)
         )
       ),
-      getComparators: () => {
-        return {
-          ...titleComparators,
-          content: isByReference ? 'skip' : 'referenceEquality',
-          settings: isByReference ? 'skip' : 'deepEquality',
-          ref_id: 'skip',
-        };
-      },
+      getComparators: () => getComparators(isByReference),
       applySerializedState: (nextState) => {
         titleManager.reinitializeState(nextState);
         // There are no unsaved changes to reset for

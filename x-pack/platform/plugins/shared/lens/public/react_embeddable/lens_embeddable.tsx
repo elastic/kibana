@@ -6,9 +6,16 @@
  */
 
 import React from 'react';
-import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
-import { initializeTitleManager } from '@kbn/presentation-publishing';
-import { initializeStateApi } from '@kbn/presentation-publishing';
+import {
+  drilldownsComparators,
+  type EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
+import {
+  areComparatorsEqual,
+  initializeStateApi,
+  initializeTitleManager,
+  type StateComparators,
+} from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
 import { LENS_EMBEDDABLE_TYPE, type LensRuntimeState } from '@kbn/lens-common';
 import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
@@ -28,16 +35,37 @@ import {
 } from './initializers/initialize_search_context';
 import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
-import { initializeStateManagement } from './initializers/initialize_state_management';
+import {
+  getStateComparators,
+  initializeStateManagement,
+} from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 import type { LensEmbeddableStartServices } from './types';
+
+const getComparators = (stateComparators: ReturnType<typeof getStateComparators>) =>
+  ({
+    ...stateComparators,
+    ...drilldownsComparators,
+    ...dashboardServicesComparators,
+    ...searchContextComparators,
+    isNewPanel: 'skip',
+    references: 'skip',
+  } as const);
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
 ): EmbeddablePublicDefinition<LensWireAPIConfig, LensApi> => {
   return {
     type: LENS_EMBEDDABLE_TYPE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(
+        getComparators(
+          getStateComparators(current && 'ref_id' in current ? current.ref_id : undefined)
+        ) as StateComparators<LensWireAPIConfig>,
+        baseline,
+        current
+      ),
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
      * @param uuid      a unique identifier for the embeddable panel
@@ -161,14 +189,7 @@ export const createLensEmbeddableFactory = (
           searchContextConfig.anyStateChange$
         ),
         getComparators: () => {
-          const comparators = {
-            ...stateConfig.getComparators(),
-            ...actionsConfig.getComparators(),
-            ...dashboardServicesComparators,
-            ...searchContextComparators,
-            isNewPanel: 'skip',
-            references: 'skip',
-          } as const;
+          const comparators = getComparators(stateConfig.getComparators());
           // set all comparators to 'skip' when inline editing is in progress
           if (internalApi.isEditingInProgress()) {
             const keys = Object.keys(comparators) as (keyof typeof comparators)[];

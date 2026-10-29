@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { act, render, renderHook, waitFor } from '@testing-library/react';
-import { BehaviorSubject, EMPTY, of } from 'rxjs';
+import { BehaviorSubject, EMPTY } from 'rxjs';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { DiscoverTabType } from '@kbn/discover-session-constants';
 import {
@@ -180,13 +180,16 @@ describe('control order after saving a Discover session', () => {
       expect(apiClient.upsert).not.toHaveBeenCalled();
     }
 
-    // A child can publish its unchanged state again. The real renderer then combines it with
-    // its existing layout; this must not make a successfully saved session look modified.
+    // A child can publish its unchanged state again; this must not make a successfully saved
+    // session look modified.
     const onInput = jest.fn();
     const subscription = renderer.getInput$().subscribe(onInput);
     onInput.mockClear();
-    act(() => childUnsavedChanges.last.next(false));
-    await waitFor(() => expect(onInput).toHaveBeenCalled());
+    await act(async () => {
+      childLatestStates.last.next({ ...childLatestStates.last.getValue() });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(onInput).not.toHaveBeenCalled();
     subscription.unsubscribe();
     expect(
       selectHasUnsavedChanges(internalState.getState(), { services, runtimeStateManager })
@@ -203,14 +206,15 @@ const controlConfig = {
   single_select: true,
 } satisfies OptionsListESQLControlState;
 
-const childUnsavedChanges: Record<string, BehaviorSubject<boolean>> = {};
+const childLatestStates: Record<string, BehaviorSubject<OptionsListESQLControlState>> = {};
 
 // Only the child content is stubbed; layout, deletion, and input publishing use the real renderer.
 const testControlFactory: EmbeddablePublicDefinition<OptionsListESQLControlState> = {
   type: ESQL_CONTROL,
+  compareSerializedState: () => true,
   buildEmbeddable: async ({ initialState, finalizeApi, uuid }) => {
-    const hasUnsavedChanges$ = new BehaviorSubject(false);
-    childUnsavedChanges[uuid] = hasUnsavedChanges$;
+    const latestState$ = new BehaviorSubject(initialState);
+    childLatestStates[uuid] = latestState$;
     return {
       Component: () => null,
       api: {
@@ -218,9 +222,8 @@ const testControlFactory: EmbeddablePublicDefinition<OptionsListESQLControlState
           serializeState: () => initialState,
           applySerializedState: jest.fn(),
           anyStateChange$: EMPTY,
-          latestState$: of(initialState),
+          latestState$,
         }),
-        hasUnsavedChanges$,
       },
     };
   },

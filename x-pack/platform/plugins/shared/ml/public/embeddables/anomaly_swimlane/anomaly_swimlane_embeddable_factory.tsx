@@ -19,6 +19,7 @@ import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { PublishesUnifiedSearch, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
+  areComparatorsEqual,
   fetch$,
   getViewModeSubject,
   initializeTimeRangeManager,
@@ -26,6 +27,7 @@ import {
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { useCallback, useState } from 'react';
@@ -86,6 +88,12 @@ export const getServices = async (
   ];
 };
 
+const comparators: StateComparators<AnomalySwimLaneEmbeddableState> = {
+  ...titleComparators,
+  ...timeRangeComparators,
+  ...swimLaneComparators,
+};
+
 export const getAnomalySwimLaneEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
 ) => {
@@ -94,6 +102,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
     AnomalySwimLaneEmbeddableApi
   > = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       await checkPermissionAsync(getStartServices, 'canGetJobs', true);
       if (!apiHasExecutionContext(parentApi)) {
@@ -145,11 +155,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           timeRangeManager.anyStateChange$,
           swimlaneManager.anyStateChange$
         ),
-        getComparators: () => ({
-          ...titleComparators,
-          ...timeRangeComparators,
-          ...swimLaneComparators,
-        }),
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           timeRangeManager.reinitializeState(nextState);
           titleManager.reinitializeState(nextState);

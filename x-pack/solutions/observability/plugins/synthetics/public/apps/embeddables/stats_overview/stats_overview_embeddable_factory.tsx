@@ -13,6 +13,7 @@ import type {
   EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
+import { drilldownsComparators } from '@kbn/embeddable-plugin/public';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
@@ -27,6 +28,8 @@ import {
   fetch$,
   titleComparators,
   getViewModeSubject,
+  areComparatorsEqual,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
@@ -63,11 +66,23 @@ export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState
   HasSupportedTriggers &
   CanCancelRequests;
 
+const comparators: StateComparators<OverviewStatsEmbeddableState> = {
+  ...titleComparators,
+  filters: 'deepEquality',
+  ...drilldownsComparators,
+};
+
+const DEFAULT_STATE: Partial<OverviewStatsEmbeddableState> = {
+  filters: DEFAULT_FILTERS,
+};
+
 export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
   const factory: EmbeddablePublicDefinition<OverviewStatsEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current, DEFAULT_STATE),
     getPlacementHints: () => ({ width: 10, height: 8 }),
     buildEmbeddable: async ({
       initializeDrilldownsManager,
@@ -107,14 +122,8 @@ export const getStatsOverviewEmbeddableFactory = (
           ),
           drilldownsManager.anyStateChange$
         ),
-        getComparators: () => ({
-          ...titleComparators,
-          filters: 'deepEquality',
-          ...drilldownsManager.comparators,
-        }),
-        defaultState: {
-          filters: DEFAULT_FILTERS,
-        },
+        getComparators: () => comparators,
+        defaultState: DEFAULT_STATE,
         applySerializedState: (nextState) => {
           drilldownsManager.reinitializeState(nextState);
           titleManager.reinitializeState(nextState);

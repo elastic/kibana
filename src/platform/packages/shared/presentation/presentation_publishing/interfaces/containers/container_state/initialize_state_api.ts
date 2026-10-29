@@ -10,13 +10,20 @@
 import { combineLatestWith, debounceTime, map, of, shareReplay, startWith } from 'rxjs';
 import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
 import type { HasParentApi } from '../../has_parent_api';
-import type { HasSerializableState } from '../../has_serializable_state';
+import type { ComparesSerializedState, HasSerializableState } from '../../has_serializable_state';
 import type { HasUniqueId } from '../../has_uuid';
 import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
 import { getTitle } from '../../titles/publishes_title';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';
 import type { PresentationContainer } from '../presentation_container';
 export const UNSAVED_CHANGES_DEBOUNCE = 100;
+
+interface StateApiUnsavedChanges {
+  /**
+   * @deprecated Compare children with `compareSerializedState` instead. Only Canvas and the embeddable examples still use it.
+   */
+  hasUnsavedChanges$: PublishesUnsavedChanges['hasUnsavedChanges$'];
+}
 
 export const initializeStateApi = <StateType extends object = object>({
   uuid,
@@ -31,7 +38,15 @@ export const initializeStateApi = <StateType extends object = object>({
   HasParentApi & {
     getComparators: () => StateComparators<StateType>;
     defaultState?: Partial<StateType>;
-  }): PublishesUnsavedChanges & HasSerializableState<StateType> => {
+  }): StateApiUnsavedChanges &
+  HasSerializableState<StateType> &
+  ComparesSerializedState<StateType> => {
+  const compareSerializedState = (
+    baseline: Partial<StateType> | undefined,
+    current: Partial<StateType> | undefined,
+    getLogLabel?: (key: string) => string
+  ) => areComparatorsEqual(getComparators(), baseline, current, defaultState, getLogLabel);
+
   const latestState$ = anyStateChange$.pipe(
     debounceTime(0), // combine all state changes
     // anyStateChange$ does not emit on subscribe
@@ -45,6 +60,7 @@ export const initializeStateApi = <StateType extends object = object>({
     return {
       anyStateChange$,
       applySerializedState,
+      compareSerializedState,
       hasUnsavedChanges$: of(false),
       serializeState,
       latestState$,
@@ -54,28 +70,23 @@ export const initializeStateApi = <StateType extends object = object>({
   const hasUnsavedChanges$ = latestState$.pipe(
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     combineLatestWith(parentApi.lastSavedStateForChild$(uuid)),
-    map(([currentState, lastSavedState]) => {
-      // check state equality
-      return !areComparatorsEqual(
-        getComparators(),
-        lastSavedState,
-        currentState,
-        defaultState,
-        (key: string) => {
+    map(
+      ([currentState, lastSavedState]) =>
+        !compareSerializedState(lastSavedState, currentState, (key: string) => {
           const childApi = (parentApi as Partial<PresentationContainer>).children$?.getValue()[
             uuid
           ];
           const childlTitle = childApi ? getTitle(childApi) : undefined;
           const childLabel = childlTitle ? `"${childlTitle}"` : uuid;
           return `child: ${childLabel}, key: ${key}`;
-        }
-      );
-    })
+        })
+    )
   );
 
   return {
     anyStateChange$,
     applySerializedState,
+    compareSerializedState,
     hasUnsavedChanges$,
     latestState$,
     serializeState,

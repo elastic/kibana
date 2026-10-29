@@ -18,6 +18,7 @@ describe('embeddable registry', () => {
     Promise.resolve({
       type: 'test',
       buildEmbeddable: jest.fn(),
+      compareSerializedState: jest.fn(),
     } as EmbeddablePublicDefinition);
 
   it('throws an error if type is not lower case', () => {

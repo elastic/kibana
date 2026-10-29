@@ -21,6 +21,8 @@ import {
   useBatchedPublishingSubjects,
   titleComparators,
   timeRangeComparators,
+  areComparatorsEqual,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 
@@ -38,6 +40,12 @@ import { canUseAiops } from '../../capabilities';
 
 export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
+const comparators: StateComparators<LogRateAnalysisEmbeddableState> = {
+  data_view_id: 'referenceEquality',
+  ...timeRangeComparators,
+  ...titleComparators,
+};
+
 export const getLogRateAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
@@ -46,6 +54,8 @@ export const getLogRateAnalysisEmbeddableFactory = (
     LogRateAnalysisEmbeddableApi
   > = {
     type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
       canUseAiops(coreStart, true);
@@ -81,11 +91,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
             map(() => undefined)
           )
         ),
-        getComparators: () => ({
-          data_view_id: 'referenceEquality',
-          ...timeRangeComparators,
-          ...titleComparators,
-        }),
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           titleManager.reinitializeState(nextState);
           timeRangeManager.reinitializeState(nextState);

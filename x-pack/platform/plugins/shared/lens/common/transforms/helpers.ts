@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import type { LensSerializedState } from '@kbn/lens-common';
@@ -50,16 +51,17 @@ export function stripInheritedContext(state: LensSerializedState): StrippedLensS
     drilldowns,
   } = state;
 
-  if (attributes) {
-    // We need to strip id and type property that were leaked into attributes by Lens embeddable logic.
-    // See https://github.com/elastic/kibana/issues/250115
-    if ('type' in attributes) delete attributes.type;
-    if ('id' in attributes) delete attributes.id;
-  }
+  // We need to strip id and type property that were leaked into attributes by Lens embeddable logic.
+  // See https://github.com/elastic/kibana/issues/250115
+  // Omit into a copy, since attributes may be shared with the caller's state
+  const strippedAttributes =
+    attributes && ('type' in attributes || 'id' in attributes)
+      ? omit(attributes, ['type', 'id'])
+      : attributes;
 
   return stripUndefined({
     ref_id,
-    attributes,
+    attributes: strippedAttributes,
     references,
     time_range,
     title,

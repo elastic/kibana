@@ -125,7 +125,6 @@ export const initializeFieldStatsControls = (
     // Reset data is internal state management, so no need to expose this in api
     resetData$,
     serializeFieldStatsChartState: getLatestState,
-    fieldStatsControlsComparators,
     onFieldStatsTableDestroy: () => {
       viewType$.complete();
       dataViewId$.complete();

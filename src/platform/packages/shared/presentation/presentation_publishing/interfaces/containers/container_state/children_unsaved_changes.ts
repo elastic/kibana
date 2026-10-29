@@ -19,6 +19,7 @@ export const DEBOUNCE_TIME = 100;
 
 /**
  *  Create an observable stream of unsaved changes from all react embeddable children
+ * @deprecated Compare children with `compareSerializedState` instead. Only Canvas and the embeddable examples still use it.
  */
 export function childrenUnsavedChanges$<Api extends unknown = unknown>(
   children$: PublishingSubject<{ [key: string]: Api }>

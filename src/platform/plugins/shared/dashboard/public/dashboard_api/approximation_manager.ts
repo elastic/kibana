@@ -9,8 +9,25 @@
 
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith } from 'rxjs';
+import { BehaviorSubject, map, skip } from 'rxjs';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+
+type ApproximationState = Pick<DashboardState, 'esql_approximation'>;
+
+const approximationComparators: StateComparators<ApproximationState> = {
+  esql_approximation: (a, b) => Boolean(a) === Boolean(b),
+};
+
+/** The approximation change from `baseline` to `current`; a missing baseline value counts as off. */
+export const diffApproximationState = (
+  baseline: ApproximationState,
+  current: ApproximationState
+): Partial<ApproximationState> =>
+  diffComparators(
+    approximationComparators,
+    { esql_approximation: baseline.esql_approximation ?? false },
+    current
+  );
 
 export function initializeApproximationManager(initialState: DashboardState) {
   const isApproximate$ = new BehaviorSubject<boolean | undefined>(initialState.esql_approximation);
@@ -21,11 +38,7 @@ export function initializeApproximationManager(initialState: DashboardState) {
     }
   }
 
-  const comparators: StateComparators<Pick<DashboardState, 'esql_approximation'>> = {
-    esql_approximation: (a, b) => Boolean(a) === Boolean(b),
-  };
-
-  const getState = (): Pick<DashboardState, 'esql_approximation'> => ({
+  const getState = (): ApproximationState => ({
     esql_approximation: isApproximate$.value,
   });
 
@@ -41,22 +54,7 @@ export function initializeApproximationManager(initialState: DashboardState) {
     },
     internalApi: {
       anyStateChange$,
-      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return anyStateChange$.pipe(
-          startWith(undefined),
-          debounceTime(100),
-          map(() => getState()),
-          combineLatestWith(lastSavedState$),
-          map(([latestState, lastSavedState]) => {
-            return diffComparators(
-              comparators,
-              { esql_approximation: lastSavedState.esql_approximation ?? false },
-              latestState
-            );
-          })
-        );
-      },
-      comparators,
+      comparators: approximationComparators,
       getState,
       reset: (lastSavedState: DashboardState) => {
         setEsqlApproximation(lastSavedState.esql_approximation ?? false);

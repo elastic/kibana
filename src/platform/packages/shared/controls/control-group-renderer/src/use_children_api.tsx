@@ -10,7 +10,7 @@
 import deepEqual from 'fast-deep-equal';
 import { omit } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 
 import type { TimeSlice } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
@@ -21,12 +21,11 @@ import {
   type PublishesESQLVariable,
 } from '@kbn/esql-types';
 import {
-  childrenUnsavedChanges$,
+  childrenLatestState$,
   combineCompatibleChildrenApis,
   apiAppliesFilters,
   apiAppliesTimeslice,
-  apiHasSerializableState,
-  apiHasUniqueId,
+  apiComparesSerializedState,
   type AppliesFilters,
   type AppliesTimeslice,
 } from '@kbn/presentation-publishing';
@@ -61,25 +60,28 @@ export const useChildrenApi = (
   }, [lastSavedState$Ref]);
 
   useEffect(() => {
-    /** Keep `currentChildState` in sync with children's state */
-    const unsavedChangesSubscription = childrenUnsavedChanges$(children$Ref.current)
-      .pipe(map((children) => children.some(({ hasUnsavedChanges }) => hasUnsavedChanges)))
-      .subscribe((hasUnsavedChanges) => {
-        if (hasUnsavedChanges) {
-          const result: { [id: string]: object } = {};
-          Object.values(children$Ref.current.getValue()).forEach((child) => {
-            if (apiHasSerializableState(child) && apiHasUniqueId(child)) {
-              result[child.uuid] = child.serializeState();
-            }
-          });
-          currentChildState$Ref.current.next(result);
-        } else {
-          // this will trigger `input$` when there are no unsaved changes
-          currentChildState$Ref.current.next(lastSavedChildState$Ref.current?.value);
-        }
+    /**
+     * Keep `currentChildState` in sync with children's state. A child whose state matches its
+     * last saved state keeps the saved state, so `input$` reports the saved values.
+     */
+    const childStateSubscription = combineLatest([
+      childrenLatestState$(children$Ref.current),
+      lastSavedChildState$Ref.current,
+    ]).subscribe(([childrenState, lastSavedChildState]) => {
+      const children = children$Ref.current.getValue();
+      const nextChildState = { ...currentChildState$Ref.current.getValue() };
+      childrenState.forEach(({ uuid, latestState }) => {
+        const child = children[uuid];
+        const lastSaved = lastSavedChildState[uuid];
+        const isUnchanged = apiComparesSerializedState(child)
+          ? child.compareSerializedState(lastSaved, latestState)
+          : deepEqual(lastSaved, latestState);
+        nextChildState[uuid] = isUnchanged ? lastSaved : latestState;
       });
+      currentChildState$Ref.current.next(nextChildState);
+    });
     return () => {
-      unsavedChangesSubscription.unsubscribe();
+      childStateSubscription.unsubscribe();
     };
   }, []);
 

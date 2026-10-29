@@ -18,9 +18,11 @@ import type {
   PublishesDataLoading,
   PublishesEsql,
   PublishesWritableTimeRange,
+  StateComparators,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import {
+  areComparatorsEqual,
   initializeTitleManager,
   titleComparators,
   initializeTimeRangeManager,
@@ -105,11 +107,20 @@ export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState
   PublishesWritableTimeRange &
   HasInspectorAdapters;
 
+const customContentComparators: StateComparators<CustomContentEmbeddableState> = {
+  ...titleComparators,
+  ...timeRangeComparators,
+  esql_query: 'deepEquality',
+  template: 'referenceEquality',
+};
+
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentEmbeddableState,
   CustomContentApi
 > = {
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  compareSerializedState: (baseline, current) =>
+    areComparatorsEqual(customContentComparators, baseline, current),
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const { core, search, dataViews, agentBuilder } = getServices();
     const rendererServices: CustomContentRendererServices = {
@@ -195,12 +206,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           map(() => undefined)
         )
       ),
-      getComparators: () => ({
-        ...titleComparators,
-        ...timeRangeComparators,
-        esql_query: 'deepEquality',
-        template: 'referenceEquality',
-      }),
+      getComparators: () => customContentComparators,
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
         timeRangeManager.reinitializeState(lastSaved ?? {});

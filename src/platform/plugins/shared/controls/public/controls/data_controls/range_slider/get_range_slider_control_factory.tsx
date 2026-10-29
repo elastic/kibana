@@ -20,6 +20,8 @@ import {
   useBatchedPublishingSubjects,
   getViewModeSubject,
   type ViewMode,
+  areComparatorsEqual,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
@@ -40,6 +42,12 @@ import { editorComparators, initializeEditorStateManager } from './editor_state_
 import { buildFilter } from './utils/filter_utils';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
+const rangeSliderComparators: StateComparators<RangeSliderControlState> = {
+  ...editorComparators,
+  ...defaultDataControlComparators,
+  value: 'deepEquality',
+};
+
 export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
   RangeSliderControlState,
   RangeSliderControlApi
@@ -48,6 +56,8 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
     type: RANGE_SLIDER_CONTROL,
     getPlacementHints,
     layoutConstraints: LAYOUT_CONSTRAINTS,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(rangeSliderComparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
@@ -90,13 +100,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
           ),
           editorStateManager.anyStateChange$
         ),
-        getComparators: () => {
-          return {
-            ...editorComparators,
-            ...defaultDataControlComparators,
-            value: 'deepEquality',
-          };
-        },
+        getComparators: () => rangeSliderComparators,
         applySerializedState: (nextState) => {
           dataControlManager.reinitializeState(nextState);
           editorStateManager.reinitializeState(nextState);

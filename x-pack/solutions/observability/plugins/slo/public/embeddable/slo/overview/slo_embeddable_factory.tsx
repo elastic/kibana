@@ -7,6 +7,7 @@
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import { drilldownsComparators } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -15,8 +16,10 @@ import {
   getViewModeSubject,
   initializeStateManager,
   initializeTitleManager,
+  areComparatorsEqual,
   titleComparators,
   useBatchedPublishingSubjects,
+  type StateComparators,
   useFetchContext,
   type ViewMode,
 } from '@kbn/presentation-publishing';
@@ -47,6 +50,16 @@ const getOverviewPanelTitle = () =>
     defaultMessage: 'SLO Overview',
   });
 
+const comparators: StateComparators<OverviewEmbeddableState> = {
+  slo_id: 'referenceEquality',
+  slo_instance_id: 'referenceEquality',
+  group_filters: 'referenceEquality',
+  remote_name: 'referenceEquality',
+  overview_mode: 'referenceEquality',
+  ...titleComparators,
+  ...drilldownsComparators,
+};
+
 export const getOverviewEmbeddableFactory = ({
   coreStart,
   pluginsStart,
@@ -57,6 +70,8 @@ export const getOverviewEmbeddableFactory = ({
   sloClient: SLORepositoryClient;
 }): EmbeddablePublicDefinition<OverviewEmbeddableState, SloOverviewApi> => ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
+  compareSerializedState: (baseline, current) =>
+    areComparatorsEqual(comparators, baseline, current),
   getPlacementHints: (serializedState?: OverviewEmbeddableState) => {
     if (
       (serializedState as SingleOverviewCustomState)?.slo_instance_id === ALL_VALUE ||
@@ -139,15 +154,7 @@ export const getOverviewEmbeddableFactory = ({
         singleSloManager.anyStateChange$,
         groupSloManager.anyStateChange$
       ),
-      getComparators: () => ({
-        slo_id: 'referenceEquality',
-        slo_instance_id: 'referenceEquality',
-        group_filters: 'referenceEquality',
-        remote_name: 'referenceEquality',
-        overview_mode: 'referenceEquality',
-        ...titleComparators,
-        ...drilldownsManager.comparators,
-      }),
+      getComparators: () => comparators,
       applySerializedState: (nextState) => {
         drilldownsManager.reinitializeState(nextState);
         titleManager.reinitializeState(nextState);

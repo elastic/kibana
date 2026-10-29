@@ -25,6 +25,8 @@ import {
   fetch$,
   titleComparators,
   getViewModeSubject,
+  areComparatorsEqual,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
@@ -65,11 +67,23 @@ export type StatusOverviewApi = DefaultEmbeddableApi<OverviewMonitorsEmbeddableS
   HasEditCapabilities &
   CanCancelRequests;
 
+const comparators: StateComparators<OverviewMonitorsEmbeddableState> = {
+  ...titleComparators,
+  filters: 'deepEquality',
+  view: 'referenceEquality',
+};
+
+const DEFAULT_STATE: Partial<OverviewMonitorsEmbeddableState> = {
+  filters: DEFAULT_FILTERS,
+};
+
 export const getMonitorsEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
   const factory: EmbeddablePublicDefinition<OverviewMonitorsEmbeddableState, StatusOverviewApi> = {
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current, DEFAULT_STATE),
     getPlacementHints: () => ({ width: 30, height: 12 }),
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
@@ -104,14 +118,8 @@ export const getMonitorsEmbeddableFactory = (
             map(() => undefined)
           )
         ),
-        getComparators: () => ({
-          ...titleComparators,
-          filters: 'deepEquality',
-          view: 'referenceEquality',
-        }),
-        defaultState: {
-          filters: DEFAULT_FILTERS,
-        },
+        getComparators: () => comparators,
+        defaultState: DEFAULT_STATE,
         applySerializedState: (nextState) => {
           titleManager.reinitializeState(nextState);
           filters$.next(nextState.filters ?? DEFAULT_FILTERS);

@@ -8,8 +8,12 @@
 import React, { useEffect } from 'react';
 import { Provider } from 'react-redux-v7';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
+  drilldownsComparators,
+  type EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
+import {
+  areComparatorsEqual,
   areTriggersDisabled,
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -19,6 +23,7 @@ import {
   initializeStateApi,
   getViewModeSubject,
   useStateFromPublishingSubject,
+  type StateComparators,
   type ViewMode,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
@@ -57,8 +62,26 @@ export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
 }
 
+const getComparators = (isByReference: boolean): StateComparators<MapEmbeddableState> => ({
+  ...crossPanelActionsComparators,
+  ...drilldownsComparators,
+  ...reduxSyncComparators,
+  ...titleComparators,
+  ...timeRangeComparators,
+  attributes: isByReference ? 'skip' : 'deepEquality',
+  mapSettings: 'deepEquality',
+  savedObjectId: 'skip',
+});
+
 export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
+  // mapCenter is only skipped in non-interactive view mode, which never applies while editing
+  compareSerializedState: (baseline, current) =>
+    areComparatorsEqual(
+      getComparators(Boolean(current && 'savedObjectId' in current && current.savedObjectId)),
+      baseline,
+      current
+    ),
   buildEmbeddable: async ({
     initializeDrilldownsManager,
     initialState,
@@ -137,19 +160,10 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         titleManager.anyStateChange$,
         timeRangeManager.anyStateChange$
       ),
-      getComparators: () => {
-        return {
-          ...crossPanelActionsComparators,
-          ...drilldownsManager.comparators,
-          ...reduxSyncComparators,
-          ...titleComparators,
-          ...timeRangeComparators,
-          attributes: savedMap.getSavedObjectId() !== undefined ? 'skip' : 'deepEquality',
-          mapSettings: 'deepEquality',
-          savedObjectId: 'skip',
-          ...(viewMode$.getValue() === 'non-interactive' && { mapCenter: 'skip' }),
-        };
-      },
+      getComparators: () => ({
+        ...getComparators(savedMap.getSavedObjectId() !== undefined),
+        ...(viewMode$.getValue() === 'non-interactive' && { mapCenter: 'skip' }),
+      }),
       applySerializedState: async (nextState) => {
         drilldownsManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);

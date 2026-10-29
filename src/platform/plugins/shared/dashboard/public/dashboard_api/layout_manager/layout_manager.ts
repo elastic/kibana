@@ -13,7 +13,6 @@ import { cloneDeep, filter, map as lodashMap, max, pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
-  combineLatestWith,
   debounceTime,
   distinctUntilChanged,
   map,
@@ -21,7 +20,6 @@ import {
   mergeMap,
   skip,
   startWith,
-  tap,
   type Observable,
 } from 'rxjs';
 import { v4 } from 'uuid';
@@ -46,10 +44,7 @@ import {
   apiHasSerializableState,
   apiPublishesTitle,
   childrenLatestState$,
-  childrenUnsavedChanges$,
   getTitle,
-  logStateDiff,
-  shouldLogStateDiff,
   UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
@@ -70,11 +65,8 @@ import {
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
-import {
-  areLayoutsEqual,
-  arePanelLayoutsEqual,
-  arePinnedPanelLayoutsEqual,
-} from './are_layouts_equal';
+import type { PanelTypeComparers } from '../compare_dashboard_state';
+import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import {
@@ -129,8 +121,30 @@ export function initializeLayoutManager(
     }
   );
 
+  /** Each panel type's comparer, so panels that have not loaded are compared like loaded ones */
+  const panelTypeComparers$ = new BehaviorSubject<PanelTypeComparers>({});
+  const requestedPanelTypes = new Set<string>();
+  const loadPanelTypeComparer = async (type: string) => {
+    try {
+      const definition = await embeddableService.getEmbeddableDefinition(type);
+      if (!definition) return;
+      panelTypeComparers$.next({
+        ...panelTypeComparers$.value,
+        [type]: definition.compareSerializedState,
+      });
+    } catch {
+      // an unknown panel type renders an error panel, whose config cannot change
+    }
+  };
+  const panelTypeComparersSubscription = layout$.subscribe(({ panels, pinnedPanels }) => {
+    [...Object.values(panels), ...Object.values(pinnedPanels)].forEach(({ type }) => {
+      if (requestedPanelTypes.has(type)) return;
+      requestedPanelTypes.add(type);
+      loadPanelTypeComparer(type);
+    });
+  });
+
   const latestChildrenState$ = childrenLatestState$(children$);
-  const childrenChanges$ = childrenUnsavedChanges$(children$);
   const stateChangedSubscription = latestChildrenState$.subscribe((childrenState) => {
     for (const { uuid, latestState } of childrenState) {
       currentChildState[uuid] = latestState;
@@ -156,7 +170,6 @@ export function initializeLayoutManager(
     distinctUntilChanged()
   );
 
-  let lastSavedLayout = initialLayout;
   let lastSavedChildState = initialChildState;
 
   const resetLayout = async (state: DashboardState) => {
@@ -538,67 +551,19 @@ export function initializeLayoutManager(
         map(() => undefined)
       ),
       childrenStateLoading$,
+      panelTypeComparers$,
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
+      setLastSavedState: (lastSavedState: DashboardState) => {
+        ({ childState: lastSavedChildState } = deserializeLayout(
+          lastSavedState.panels,
+          lastSavedState.pinned_panels
+        ));
+      },
       gridLayout$,
       childrenLoading$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
-
-      startComparing: (
-        lastSavedState$: BehaviorSubject<DashboardState>
-      ): Observable<{
-        panels?: DashboardState['panels'];
-        pinned_panels?: DashboardState['pinned_panels'];
-      }> => {
-        return combineLatest([layout$, childrenChanges$]).pipe(
-          debounceTime(100),
-          combineLatestWith(
-            lastSavedState$.pipe(
-              map((lastSaved) => deserializeLayout(lastSaved.panels, lastSaved.pinned_panels)),
-              tap(({ layout, childState }) => {
-                lastSavedChildState = childState;
-                lastSavedLayout = layout;
-              })
-            )
-          ),
-          map(([[currentLayout, childrenChanges]]) => {
-            const hasPanelChanges =
-              childrenChanges.some(
-                (childChanges) =>
-                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.panels
-              ) || !arePanelLayoutsEqual(lastSavedLayout, currentLayout);
-            const hasPinnedPanelChanges =
-              childrenChanges.some(
-                (childChanges) =>
-                  childChanges.hasUnsavedChanges && childChanges.uuid in currentLayout.pinnedPanels
-              ) || !arePinnedPanelLayoutsEqual(lastSavedLayout, currentLayout);
-
-            if (!hasPanelChanges && !hasPinnedPanelChanges) {
-              return {};
-            }
-
-            const { pinned_panels, panels } = serializeLayout(currentLayout, currentChildState);
-            if (shouldLogStateDiff()) {
-              const { pinned_panels: oldPinnedPanels, panels: oldPanels } = serializeLayout(
-                lastSavedLayout,
-                lastSavedChildState
-              );
-              if (hasPanelChanges) {
-                logStateDiff('dashboard panels', oldPanels, panels);
-              }
-              if (hasPinnedPanelChanges) {
-                logStateDiff('dashboard pinned panels', oldPinnedPanels, pinned_panels);
-              }
-            }
-
-            return {
-              ...(hasPanelChanges ? { panels } : {}),
-              ...(hasPinnedPanelChanges ? { pinned_panels } : {}),
-            };
-          })
-        );
-      },
 
       isSectionCollapsed,
     },
@@ -722,6 +687,7 @@ export function initializeLayoutManager(
       stateChangedSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
       removeOrphanedChildrenSubscription.unsubscribe();
+      panelTypeComparersSubscription.unsubscribe();
     },
   };
 }

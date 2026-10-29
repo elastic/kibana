@@ -6,6 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import { drilldownsComparators } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -17,8 +18,10 @@ import {
   fetch$,
   initializeStateManager,
   initializeTitleManager,
+  areComparatorsEqual,
   titleComparators,
   useBatchedPublishingSubjects,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
@@ -40,6 +43,13 @@ const getErrorBudgetPanelTitle = () =>
     defaultMessage: 'SLO Error Budget burn down',
   });
 
+const comparators: StateComparators<ErrorBudgetEmbeddableState> = {
+  ...titleComparators,
+  ...drilldownsComparators,
+  slo_id: 'referenceEquality',
+  slo_instance_id: 'referenceEquality',
+};
+
 export const getErrorBudgetEmbeddableFactory = ({
   coreStart,
   pluginsStart,
@@ -51,6 +61,8 @@ export const getErrorBudgetEmbeddableFactory = ({
 }) => {
   const factory: EmbeddablePublicDefinition<ErrorBudgetEmbeddableState, ErrorBudgetApi> = {
     type: SLO_ERROR_BUDGET_ID,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({
       initializeDrilldownsManager,
       initialState,
@@ -82,12 +94,7 @@ export const getErrorBudgetEmbeddableFactory = ({
           titleManager.anyStateChange$,
           sloErrorBudgetManager.anyStateChange$
         ),
-        getComparators: () => ({
-          ...titleComparators,
-          ...drilldownsManager.comparators,
-          slo_id: 'referenceEquality',
-          slo_instance_id: 'referenceEquality',
-        }),
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           drilldownsManager.reinitializeState(nextState);
           sloErrorBudgetManager.reinitializeState(nextState);

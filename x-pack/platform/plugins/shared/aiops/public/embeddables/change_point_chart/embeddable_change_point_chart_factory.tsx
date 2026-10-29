@@ -20,6 +20,8 @@ import {
   apiPublishesFilters,
   titleComparators,
   timeRangeComparators,
+  areComparatorsEqual,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 
@@ -39,6 +41,12 @@ import { canUseAiops } from '../../capabilities';
 
 export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
 
+const comparators: StateComparators<ChangePointChartEmbeddableState> = {
+  ...titleComparators,
+  ...timeRangeComparators,
+  ...changePointComparators,
+};
+
 export const getChangePointChartEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
@@ -47,6 +55,8 @@ export const getChangePointChartEmbeddableFactory = (
     ChangePointEmbeddableApi
   > = {
     type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
       canUseAiops(coreStart, true);
@@ -80,13 +90,7 @@ export const getChangePointChartEmbeddableFactory = (
           timeRangeManager.anyStateChange$,
           changePointManager.anyStateChange$
         ),
-        getComparators: () => {
-          return {
-            ...titleComparators,
-            ...timeRangeComparators,
-            ...changePointComparators,
-          };
-        },
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           timeRangeManager.reinitializeState(nextState);
           titleManager.reinitializeState(nextState);

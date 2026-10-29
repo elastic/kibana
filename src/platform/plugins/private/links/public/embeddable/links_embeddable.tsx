@@ -17,9 +17,10 @@ import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { css } from '@emotion/react';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
-import type { SerializedTitles, ViewMode } from '@kbn/presentation-publishing';
+import type { SerializedTitles, StateComparators, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiIsPresentationContainer,
+  areComparatorsEqual,
   getViewModeSubject,
   initializeStateApi,
   initializeTitleManager,
@@ -47,9 +48,34 @@ import { getPlacementHints } from './get_placement_hints';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
+const getComparators = (isByReference: boolean): StateComparators<LinksEmbeddableState> => ({
+  ...titleComparators,
+  layout: isByReference ? 'skip' : 'referenceEquality',
+  links: isByReference
+    ? 'skip'
+    : (aLinks, bLinks) => {
+        if (aLinks?.length !== bLinks?.length) {
+          return false;
+        }
+
+        const hasLinkDifference = (aLinks ?? []).some((linkFromA, index) => {
+          const linkFromB = bLinks?.[index];
+          return !deepEqual(omitBy(linkFromA, isUndefined), omitBy(linkFromB, isUndefined));
+        });
+        return !hasLinkDifference;
+      },
+  ref_id: 'skip',
+});
+
 export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: EmbeddablePublicDefinition<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(
+        getComparators((current as LinksByReferenceState | undefined)?.ref_id !== undefined),
+        baseline,
+        current
+      ),
     getPlacementHints,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const refId = (initialState as LinksByReferenceState).ref_id;
@@ -103,29 +129,7 @@ export const getLinksEmbeddableFactory = () => {
             map(() => undefined)
           )
         ),
-        getComparators: () => {
-          return {
-            ...titleComparators,
-            layout: isByReference ? 'skip' : 'referenceEquality',
-            links: isByReference
-              ? 'skip'
-              : (aLinks, bLinks) => {
-                  if (aLinks?.length !== bLinks?.length) {
-                    return false;
-                  }
-
-                  const hasLinkDifference = (aLinks ?? []).some((linkFromA, index) => {
-                    const linkFromB = bLinks?.[index];
-                    return !deepEqual(
-                      omitBy(linkFromA, isUndefined),
-                      omitBy(linkFromB, isUndefined)
-                    );
-                  });
-                  return !hasLinkDifference;
-                },
-            ref_id: 'skip',
-          };
-        },
+        getComparators: () => getComparators(isByReference),
         applySerializedState: async (nextState) => {
           titleManager.reinitializeState(nextState);
           if (!refId) {

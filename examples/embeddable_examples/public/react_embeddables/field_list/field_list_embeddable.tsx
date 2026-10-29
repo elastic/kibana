@@ -14,7 +14,9 @@ import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PlacementStrategy, type EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
+  type StateComparators,
   type WithAllKeys,
+  areComparatorsEqual,
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
@@ -42,6 +44,14 @@ const defaultFieldListState: WithAllKeys<FieldListRuntimeState> = {
   dataViewId: undefined,
   selectedFieldNames: undefined,
   dataViews: undefined,
+};
+
+const fieldListComparators: StateComparators<FieldListSerializedState> = {
+  ...titleComparators,
+  selectedFieldNames: (a, b) => {
+    return (a?.slice().sort().join(',') ?? '') === (b?.slice().sort().join(',') ?? '');
+  },
+  dataViewId: 'referenceEquality',
 };
 
 const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
@@ -88,6 +98,8 @@ export const getFieldListFactory = (
     FieldListApi
   > = {
     type: FIELD_LIST_ID,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(fieldListComparators, baseline, current),
     getPlacementHints: () => ({
       width: 12,
       height: 36,
@@ -132,13 +144,7 @@ export const getFieldListFactory = (
           };
         },
         anyStateChange$: merge(titleManager.anyStateChange$, fieldListStateManager.anyStateChange$),
-        getComparators: () => ({
-          ...titleComparators,
-          selectedFieldNames: (a, b) => {
-            return (a?.slice().sort().join(',') ?? '') === (b?.slice().sort().join(',') ?? '');
-          },
-          dataViewId: 'referenceEquality',
-        }),
+        getComparators: () => fieldListComparators,
         applySerializedState: async (nextState) => {
           const nextRuntimeState = await deserializeState(dataViews, nextState);
           fieldListStateManager.reinitializeState(nextRuntimeState);

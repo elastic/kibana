@@ -16,12 +16,14 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
+  areComparatorsEqual,
   initializeStateApi,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
@@ -33,11 +35,18 @@ import { DATA_TABLE_ID } from './constants';
 import { initializeDataTableQueries } from './data_table_queries';
 import type { DataTableApi, DataTableSerializedState } from './types';
 
+const dataTableComparators: StateComparators<DataTableSerializedState> = {
+  ...titleComparators,
+  ...timeRangeComparators,
+};
+
 export const getDataTableFactory = (
   core: CoreStart,
   services: StartDeps
 ): EmbeddablePublicDefinition<DataTableSerializedState, DataTableApi> => ({
   type: DATA_TABLE_ID,
+  compareSerializedState: (baseline, current) =>
+    areComparatorsEqual(dataTableComparators, baseline, current),
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const state = initialState;
     const timeRangeManager = initializeTimeRangeManager(state);
@@ -63,12 +72,7 @@ export const getDataTableFactory = (
         };
       },
       anyStateChange$: merge(titleManager.anyStateChange$, timeRangeManager.anyStateChange$),
-      getComparators: () => {
-        return {
-          ...titleComparators,
-          ...timeRangeComparators,
-        };
-      },
+      getComparators: () => dataTableComparators,
       applySerializedState: (nextState) => {
         timeRangeManager.reinitializeState(nextState);
         titleManager.reinitializeState(nextState);

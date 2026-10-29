@@ -29,6 +29,7 @@ import {
   initializeRelatedPanels,
   initializeStateApi,
   useStateFromPublishingSubject,
+  areComparatorsEqual,
   type StateComparators,
 } from '@kbn/presentation-publishing';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
@@ -48,6 +49,15 @@ import {
 import { getTooltipTitle } from './utils/get_tooltip_title';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../constants';
 
+const getESQLControlComparators = <State extends object>(
+  controlType: OptionsListESQLControlState['control_type'] | undefined
+): StateComparators<State> =>
+  ({
+    ...getSelectionComparators(controlType),
+    ...defaultControlLabelComparators,
+    display_settings: 'skip',
+  } as StateComparators<State>);
+
 export const getESQLControlFactory = <
   State extends OptionsListESQLControlState = OptionsListESQLControlState
 >(): EmbeddablePublicDefinition<
@@ -58,6 +68,12 @@ export const getESQLControlFactory = <
     type: ESQL_CONTROL,
     getPlacementHints,
     layoutConstraints: LAYOUT_CONSTRAINTS,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(
+        getESQLControlComparators<NonNullable<typeof current>>(current?.control_type),
+        baseline,
+        current
+      ),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 
@@ -94,13 +110,7 @@ export const getESQLControlFactory = <
             ...labelManager.getLatestState(),
           } as typeof initialState),
         anyStateChange$: merge(labelManager.anyStateChange$, selections.anyStateChange$),
-        getComparators: () => {
-          return {
-            ...getSelectionComparators(state.control_type),
-            ...defaultControlLabelComparators,
-            display_settings: 'skip',
-          } as StateComparators<typeof initialState>;
-        },
+        getComparators: () => getESQLControlComparators<typeof initialState>(state.control_type),
         applySerializedState: (nextState) => {
           selections.reinitializeState({
             available_options: [],

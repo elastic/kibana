@@ -16,6 +16,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import {
   apiHasExecutionContext,
+  areComparatorsEqual,
   getViewModeSubject,
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -23,6 +24,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
+  type StateComparators,
   type ViewMode,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subscription, merge } from 'rxjs';
@@ -41,6 +43,12 @@ import { getSingleMetricViewerComponent } from '../../shared_components/single_m
 import { EmbeddableSingleMetricViewerUserInput } from './single_metric_viewer_setup_flyout';
 import { checkPermissionAsync } from '../../application/capabilities/check_capabilities';
 
+const comparators: StateComparators<SingleMetricViewerEmbeddableState> = {
+  ...titleComparators,
+  ...timeRangeComparators,
+  ...singleMetricViewerComparators,
+};
+
 export const getSingleMetricViewerEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
   usageCollection?: UsageCollectionSetup
@@ -50,6 +58,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
     SingleMetricViewerEmbeddableApi
   > = {
     type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       await checkPermissionAsync(getStartServices, 'canGetJobs', true);
       const services = await getServices(getStartServices, usageCollection);
@@ -78,11 +88,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
           timeRangeManager.anyStateChange$,
           singleMetricManager.anyStateChange$
         ),
-        getComparators: () => ({
-          ...titleComparators,
-          ...timeRangeComparators,
-          ...singleMetricViewerComparators,
-        }),
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           timeRangeManager.reinitializeState(nextState);
           titleManager.reinitializeState(nextState);

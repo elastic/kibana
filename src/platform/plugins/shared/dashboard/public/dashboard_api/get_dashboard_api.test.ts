@@ -7,12 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { initializeStateApi } from '@kbn/presentation-publishing';
+import { waitFor } from '@testing-library/react';
+import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
+import type { DashboardReadResponseBody } from '../../server';
 import type { DashboardChangeSource } from '../../common/change_sources';
 import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardApi } from './get_dashboard_api';
 import { openSaveModal } from './save_modal/open_save_modal';
 import { saveDashboard } from './save_modal/save_dashboard';
+import type { DashboardApi } from './types';
 
 jest.mock('./save_modal/save_dashboard', () => ({
   saveDashboard: jest.fn(),
@@ -49,6 +56,217 @@ describe('initializeSettingsManager', () => {
       api.setSettings({
         ...api.getSettings(),
         title: 'Updated title',
+      });
+    });
+  });
+});
+
+describe('hasUnsavedChanges$', () => {
+  const timeRange = { from: '2026-10-01T00:00:00.000Z', to: '2026-10-02T00:00:00.000Z' };
+  const panel = {
+    id: 'panel-1',
+    type: 'testPanelType',
+    grid: { x: 0, y: 0, w: 12, h: 8 },
+    config: { title: 'Logs' },
+  };
+  const savedState: DashboardState = {
+    ...DEFAULT_DASHBOARD_STATE,
+    time_range: timeRange,
+    panels: [panel],
+  };
+
+  test.each<[string, (dashboardApi: DashboardApi) => void]>([
+    ['the title', (dashboardApi) => dashboardApi.setSettings({ title: 'Errors' })],
+    ['time restore', (dashboardApi) => dashboardApi.setSettings({ time_restore: false })],
+    ['the tags', (dashboardApi) => dashboardApi.setTags(['logs'])],
+    [
+      'the time range',
+      (dashboardApi) =>
+        dashboardApi.setTimeRange({ from: '2026-09-01T00:00:00.000Z', to: timeRange.to }),
+    ],
+    [
+      'the query',
+      (dashboardApi) => dashboardApi.setQuery({ query: 'status:500', language: 'kuery' }),
+    ],
+    [
+      'the filters',
+      (dashboardApi) =>
+        dashboardApi.setFilters([{ meta: { alias: null, disabled: false, negate: false } }]),
+    ],
+    ['ES|QL approximation', (dashboardApi) => dashboardApi.setEsqlApproximation(true)],
+    ['the layout', (dashboardApi) => dashboardApi.removePanel(panel.id)],
+  ])('turns true after changing %s', async (_, change) => {
+    const { api: dashboardApi, cleanup } = getDashboardApi({
+      incomingEmbeddables: [],
+      initialState: savedState,
+      readResult: { data: savedState, meta: { managed: false } } as DashboardReadResponseBody,
+    });
+    await waitFor(() => expect(dashboardApi.hasUnsavedChanges$.value).toBe(false));
+
+    change(dashboardApi);
+
+    await waitFor(() => expect(dashboardApi.hasUnsavedChanges$.value).toBe(true));
+    cleanup();
+  });
+});
+
+describe('diffStates', () => {
+  const { api } = getDashboardApi({
+    incomingEmbeddables: [],
+    initialState: DEFAULT_DASHBOARD_STATE,
+  });
+
+  test('finds no changes between states that differ only in what unsaved changes ignores', () => {
+    expect(
+      api.diffStates(DEFAULT_DASHBOARD_STATE, {
+        ...DEFAULT_DASHBOARD_STATE,
+        esql_approximation: false,
+      })
+    ).toEqual({});
+  });
+
+  test('returns a changed setting', () => {
+    expect(
+      api.diffStates(DEFAULT_DASHBOARD_STATE, { ...DEFAULT_DASHBOARD_STATE, title: 'Logs' })
+    ).toEqual({ title: 'Logs' });
+  });
+
+  describe('matches unsaved changes', () => {
+    const timeRange = { from: '2026-10-01T00:00:00.000Z', to: '2026-10-02T00:00:00.000Z' };
+    const withTimeRestore = { ...DEFAULT_DASHBOARD_STATE, time_range: timeRange };
+    const scenarios: Array<[string, DashboardState, (saved: DashboardState) => DashboardState]> = [
+      ['a changed title', DEFAULT_DASHBOARD_STATE, (saved) => ({ ...saved, title: 'Logs' })],
+      [
+        'a changed option',
+        DEFAULT_DASHBOARD_STATE,
+        (saved) => ({
+          ...saved,
+          options: { ...saved.options, use_margins: !saved.options?.use_margins },
+        }),
+      ],
+      [
+        'a changed query',
+        DEFAULT_DASHBOARD_STATE,
+        (saved) => ({ ...saved, query: { expression: 'status:500', language: 'kql' } }),
+      ],
+      [
+        'turning ES|QL approximation on',
+        DEFAULT_DASHBOARD_STATE,
+        (saved) => ({ ...saved, esql_approximation: true }),
+      ],
+      [
+        'turning time restore on',
+        DEFAULT_DASHBOARD_STATE,
+        (saved) => ({ ...saved, time_range: timeRange }),
+      ],
+      ['turning time restore off', withTimeRestore, ({ time_range, ...saved }) => saved],
+      [
+        'a changed time range with time restore',
+        withTimeRestore,
+        (saved) => ({
+          ...saved,
+          time_range: { from: '2026-09-01T00:00:00.000Z', to: '2026-10-02T00:00:00.000Z' },
+        }),
+      ],
+      [
+        'a changed refresh interval with time restore',
+        { ...withTimeRestore, refresh_interval: { pause: true, value: 60000 } },
+        (saved) => ({ ...saved, refresh_interval: { pause: false, value: 60000 } }),
+      ],
+      [
+        'an added section',
+        DEFAULT_DASHBOARD_STATE,
+        (saved) => ({
+          ...saved,
+          panels: [
+            { id: 'section-1', title: 'Logs', collapsed: false, grid: { y: 0 }, panels: [] },
+          ],
+        }),
+      ],
+    ];
+
+    test.each(scenarios)('for %s', async (_, savedState, change) => {
+      const {
+        api: dashboardApi,
+        internalApi,
+        cleanup,
+      } = getDashboardApi({
+        incomingEmbeddables: [],
+        initialState: savedState,
+        readResult: { data: savedState, meta: { managed: false } } as DashboardReadResponseBody,
+      });
+      await dashboardApi.setState(change(internalApi.getLastSavedState()));
+
+      const unsavedChanges = await firstValueFrom(internalApi.unsavedChanges$);
+      const diff = dashboardApi.diffStates(
+        internalApi.getLastSavedState(),
+        dashboardApi.getSerializedState().attributes
+      );
+
+      expect(Object.keys(unsavedChanges).length).toBeGreaterThan(0);
+      expect(diff).toStrictEqual(unsavedChanges);
+      cleanup();
+    });
+
+    describe('with a loaded panel', () => {
+      interface PanelConfig {
+        title?: string;
+        description?: string;
+      }
+      const panel = {
+        id: 'panel-1',
+        type: 'testPanelType',
+        grid: { x: 0, y: 0, w: 12, h: 8 },
+        config: { title: 'Logs' } as PanelConfig,
+      };
+      const savedState: DashboardState = { ...DEFAULT_DASHBOARD_STATE, panels: [panel] };
+
+      const loadPanel = () => {
+        const dashboard = getDashboardApi({
+          incomingEmbeddables: [],
+          initialState: savedState,
+          readResult: { data: savedState, meta: { managed: false } } as DashboardReadResponseBody,
+        });
+        const panelConfig$ = new BehaviorSubject<PanelConfig>(panel.config);
+        const stateApi = initializeStateApi<PanelConfig>({
+          uuid: panel.id,
+          parentApi: dashboard.api,
+          serializeState: () => panelConfig$.value,
+          applySerializedState: (config) => panelConfig$.next(config),
+          anyStateChange$: panelConfig$.pipe(map(() => undefined)),
+          getComparators: () => ({
+            title: 'referenceEquality',
+            description: (a, b) => (a ?? '') === (b ?? ''),
+          }),
+        });
+        dashboard.api.registerChildApi({
+          ...stateApi,
+          uuid: panel.id,
+          type: panel.type,
+        } as unknown as DefaultEmbeddableApi);
+        return { ...dashboard, panelConfig$ };
+      };
+
+      const getPanelConfig = (dashboardApi: DashboardApi) =>
+        dashboardApi.getSerializedState().attributes.panels?.[0] as typeof panel | undefined;
+
+      test.each<[string, PanelConfig, string[]]>([
+        ['a changed panel', { title: 'Errors' }, ['panels']],
+        ['a panel change its comparators ignore', { title: 'Logs', description: '' }, []],
+      ])('for %s', async (_, nextConfig, changedKeys) => {
+        const { api: dashboardApi, internalApi, cleanup, panelConfig$ } = loadPanel();
+        panelConfig$.next(nextConfig);
+        await waitFor(() => expect(getPanelConfig(dashboardApi)?.config).toEqual(nextConfig));
+
+        const unsavedChanges = await firstValueFrom(internalApi.unsavedChanges$);
+        const diff = dashboardApi.diffStates(
+          internalApi.getLastSavedState(),
+          dashboardApi.getSerializedState().attributes
+        );
+
+        expect(Object.keys(unsavedChanges)).toEqual(changedKeys);
+        expect(diff).toStrictEqual(unsavedChanges);
+        cleanup();
       });
     });
   });

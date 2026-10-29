@@ -21,6 +21,7 @@ import type {
 import {
   apiCanExpandPanels,
   apiHasParentApi,
+  areComparatorsEqual,
   getViewModeSubject,
   initializeStateManager,
   initializeTimeRangeManager,
@@ -82,6 +83,12 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   anomaly_severity_filter: 'deepEquality',
 };
 
+const comparators: StateComparators<ServiceMapEmbeddableState> = {
+  ...titleComparators,
+  ...timeRangeComparators,
+  ...customStateComparators,
+};
+
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
   HasEditCapabilities &
   PublishesBlockingError &
@@ -135,6 +142,8 @@ const DEFAULT_VIEW_MODE$ = new BehaviorSubject<ViewMode>('view');
 export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: EmbeddablePublicDefinition<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
     type: APM_SERVICE_MAP_EMBEDDABLE,
+    compareSerializedState: (baseline, current) =>
+      areComparatorsEqual(comparators, baseline, current),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const { coreStart } = deps;
       const state = initialState;
@@ -183,11 +192,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           timeRangeManager.anyStateChange$,
           customStateManager.anyStateChange$
         ).pipe(map(() => undefined)),
-        getComparators: () => ({
-          ...titleComparators,
-          ...timeRangeComparators,
-          ...customStateComparators,
-        }),
+        getComparators: () => comparators,
         applySerializedState: (nextState) => {
           titleManager.reinitializeState(nextState);
           timeRangeManager.reinitializeState({ time_range: nextState.time_range });
