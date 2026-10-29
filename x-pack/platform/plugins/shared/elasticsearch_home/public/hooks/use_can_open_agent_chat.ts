@@ -15,7 +15,7 @@ export const useCanOpenAgentChat = (): boolean => {
 
   const [hasRequiredLicense, setHasRequiredLicense] = useState(false);
   useEffect(() => {
-    if (!canShowAgentBuilder) {
+    if (!agentBuilder || !canShowAgentBuilder) {
       return;
     }
 

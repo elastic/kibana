@@ -254,12 +254,20 @@ const fetchStatefulIndexSizes = async (
   logger: Logger
 ): Promise<RequestResult<IndexSizeStat[]>> => {
   try {
-    const { indices } = await client.asCurrentUser.indices.stats({
+    const { _shards: shards, indices } = await client.asCurrentUser.indices.stats({
       index: USER_INDICES_PATTERN,
       expand_wildcards: ['open'],
       metric: ['store'],
-      filter_path: ['indices.*.primaries.store.total_data_set_size_in_bytes'],
+      filter_path: ['_shards.failed', 'indices.*.primaries.store.total_data_set_size_in_bytes'],
     });
+
+    // Index stats answers 200 when shards fail, leaving their sizes out of the total.
+    if (shards?.failed) {
+      logger.warn(
+        `Failed to fetch index sizes for deployment stats. Returning partial stats: ${shards.failed} shards failed`
+      );
+      return { value: null, hasPrivilege: true };
+    }
 
     const sizes = Object.entries(indices ?? {}).map(([name, stats]) => ({
       name,

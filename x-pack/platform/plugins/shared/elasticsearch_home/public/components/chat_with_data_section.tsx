@@ -88,7 +88,7 @@ export const ChatWithYourDataSection = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {canOpenAgentChat && (
+        {canOpenAgentChat && agentBuilder && (
           <>
             <EuiSpacer size="l" />
             <EuiTitle size="xxs">

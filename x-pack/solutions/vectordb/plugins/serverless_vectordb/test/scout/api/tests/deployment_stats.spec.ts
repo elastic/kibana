@@ -15,6 +15,7 @@ import { apiTest, COMMON_HEADERS, DEPLOYMENT_STATS_API_PATH } from '../fixtures'
  * loses a field, so new fields have to be added here.
  */
 const EXPECTED_TYPES: Record<string, 'number' | 'object'> = {
+  dataPanelAccess: 'object',
   indicesCount: 'number',
   documentsCount: 'number',
   vectorCount: 'number',

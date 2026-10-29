@@ -41,7 +41,9 @@ export class ElasticsearchHomePlugin
       ],
     });
 
-    registerSearchSkills({ agentBuilder, logger: this.logger });
+    if (agentBuilder) {
+      registerSearchSkills({ agentBuilder, logger: this.logger });
+    }
 
     const router = core.http.createRouter();
     registerDeploymentStatsRoute(router, this.logger, { isServerless: this.isServerless });

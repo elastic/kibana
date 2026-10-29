@@ -100,6 +100,8 @@ capability must be granted too, since that app stays registered for unauthorized
 "Create" action additionally needs the matching write capability (`dashboard_v2.createNew`,
 `workflowsManagement.createWorkflow`, `api_keys.save`), so read-only users only get "Manage". The "Chat
 with AI Agent" button needs `capabilities.agentBuilder.show` and the license Agent Builder requires.
+Agent Builder is an optional dependency, so with `xpack.agentBuilder.enabled: false` the page still
+renders, without the button or the search skills.
 
 ## Public API
 
