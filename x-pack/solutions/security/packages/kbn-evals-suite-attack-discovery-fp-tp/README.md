@@ -1,6 +1,6 @@
 # @kbn/evals-suite-attack-discovery-fp-tp
 
-Outcome eval for the Attack Discovery FP/TP analysis ([security-team#19285](https://github.com/elastic/security-team/issues/19285)). It seeds a world around one persisted Attack Discovery, runs the analysis workflow, and grades the workflow's execution output against the contract posted on [security-team#19280](https://github.com/elastic/security-team/issues/19280).
+Outcome eval for the Attack Discovery FP/TP analysis ([security-team#19285](https://github.com/elastic/security-team/issues/19285)). It seeds a world around one persisted Attack Discovery, runs the analysis workflow, and grades the workflow's execution output against the contract posted on [security-team#19280](https://github.com/elastic/security-team/issues/19280). One deliberate departure: `entity_role` follows the shipped prompt, where a management server, MDM host, jump box, or service account is `neutral`, not `contradicts` as the contract reads it.
 
 ## What it runs
 
@@ -162,6 +162,6 @@ Gates against the managed workflow, per core model, on a run with `--repetitions
 1. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'` ([#295911](https://github.com/elastic/kibana/pull/295911)).
 2. Give `UnsafeClose` a scenario that hides a real attack behind benign-looking evidence, so a `false_positive` prediction on a non-FP gold can occur and the gate can leave the 1.0 ceiling.
 3. Re-baseline on the managed workflow with the current 29 examples.
-4. Keep the gold in step with the prompt's `entity_role` rule: the prompt reads a management server, MDM, or jump box as `neutral`, not `contradicts`, where the contract says `contradicts`. `entity_role_gold.test.ts` fails if either the prompt sentence or an example's gold moves alone.
+4. Keep the gold in step with the prompt's `entity_role` rule: the prompt reads a management server, MDM host, jump box, or service account as `neutral`, not `contradicts`, where the contract says `contradicts`. `entity_role_gold.test.ts` fails if either the prompt sentence or an example's gold moves alone. Action: update the contract's `entity_role` definition to match the prompt, or change the prompt and re-derive the gold.
 
 Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.
