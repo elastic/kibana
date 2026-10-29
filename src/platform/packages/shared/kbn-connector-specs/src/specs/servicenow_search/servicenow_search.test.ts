@@ -1332,11 +1332,13 @@ describe('ServicenowSearch', () => {
   });
 
   describe('sendA2AMessage action', () => {
-    it('should send an initial JSON-RPC 2.0 A2A v2 message without contextId when omitted or blank', async () => {
+    const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    it('should send an initial JSON-RPC 2.0 A2A v2 message without contextId or taskId when omitted or blank', async () => {
       const mockResponse = {
         data: {
           jsonrpc: '2.0',
-          id: 'a2a-req-1',
+          id: '550e8400-e29b-41d4-a716-446655440000',
           result: {
             id: 'task-001',
             contextId: 'ctx-1234-5678',
@@ -1355,18 +1357,19 @@ describe('ServicenowSearch', () => {
         agentId: '0123456789abcdef0123456789abcdef',
         prompt: 'I would like to submit a catalog request',
         contextId: '   ',
+        taskId: '   ',
       });
 
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://test-instance.service-now.com/api/sn_aia/a2a/v2/agent/id/0123456789abcdef0123456789abcdef',
         {
           jsonrpc: '2.0',
-          id: 'a2a-req-1',
+          id: expect.stringMatching(uuidV4Regex),
           method: 'message/send',
           params: {
             message: {
               kind: 'message',
-              messageId: expect.stringMatching(/^msg-\d+$/),
+              messageId: expect.stringMatching(uuidV4Regex),
               role: 'user',
               parts: [{ kind: 'text', text: 'I would like to submit a catalog request' }],
             },
@@ -1376,7 +1379,7 @@ describe('ServicenowSearch', () => {
       expect(result).toEqual(mockResponse.data);
     });
 
-    it('should pass contextId, messageId, and requestId and normalize trailing slashes on instanceUrl', async () => {
+    it('should pass contextId, taskId, and messageId on follow-up turns and normalize trailing slashes on instanceUrl', async () => {
       const trailingSlashContext = {
         ...mockContext,
         config: { instanceUrl: 'https://test-instance.service-now.com/' },
@@ -1384,9 +1387,9 @@ describe('ServicenowSearch', () => {
       const mockResponse = {
         data: {
           jsonrpc: '2.0',
-          id: 'custom-req-2',
+          id: '6ba7b810-9dad-41d1-80b4-00c04fd430c8',
           result: {
-            id: 'task-002',
+            id: 'task-001',
             contextId: 'ctx-1234-5678',
             status: { state: 'completed' },
             artifacts: [{ parts: [{ kind: 'text', text: 'Request submitted.' }] }],
@@ -1399,15 +1402,15 @@ describe('ServicenowSearch', () => {
         agentId: '0123456789abcdef0123456789abcdef',
         prompt: 'Confirm submission',
         contextId: 'ctx-1234-5678',
+        taskId: 'task-001',
         messageId: 'msg-exec-42',
-        requestId: 'custom-req-2',
       });
 
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://test-instance.service-now.com/api/sn_aia/a2a/v2/agent/id/0123456789abcdef0123456789abcdef',
         {
           jsonrpc: '2.0',
-          id: 'custom-req-2',
+          id: expect.stringMatching(uuidV4Regex),
           method: 'message/send',
           params: {
             message: {
@@ -1415,6 +1418,7 @@ describe('ServicenowSearch', () => {
               messageId: 'msg-exec-42',
               role: 'user',
               contextId: 'ctx-1234-5678',
+              taskId: 'task-001',
               parts: [{ kind: 'text', text: 'Confirm submission' }],
             },
           },
@@ -1423,7 +1427,29 @@ describe('ServicenowSearch', () => {
       expect(result).toEqual(mockResponse.data);
     });
 
-    it('should surface ServiceNow API error details when A2A invocation fails', async () => {
+    it('should throw when ServiceNow returns a JSON-RPC error object in an HTTP 200 response', async () => {
+      mockClient.post.mockResolvedValue({
+        data: {
+          jsonrpc: '2.0',
+          id: '550e8400-e29b-41d4-a716-446655440000',
+          error: {
+            code: -32602,
+            message: 'Invalid method parameters: Message Object missing',
+          },
+        },
+      });
+
+      await expect(
+        ServicenowSearch.actions.sendA2AMessage.handler(mockContext, {
+          agentId: '0123456789abcdef0123456789abcdef',
+          prompt: 'Check status',
+        })
+      ).rejects.toThrow(
+        'Unable to invoke ServiceNow A2A agent. Invalid method parameters: Message Object missing (code -32602)'
+      );
+    });
+
+    it('should surface ServiceNow API error details when A2A HTTP invocation fails', async () => {
       mockClient.post.mockRejectedValue({
         response: {
           data: {

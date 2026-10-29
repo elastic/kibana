@@ -17,6 +17,7 @@ Some capabilities of this connector are only available from a certain version:
 
 - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Write actions to create, update, close, and delete records, add comments and work notes, and upload attachments.
 - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Lookup actions to find choice values, user IDs, and the identity of the connector account before you write.
+- {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+` Send A2A messages to {{sn}} AI Agent Studio agents.
 
 ::::{note}
 For the ServiceNow ITSM, SecOps, and ITOM connectors used with alerting and cases, refer to [ServiceNow ITSM](/reference/connectors-kibana/servicenow-action-type.md), [ServiceNow SecOps](/reference/connectors-kibana/servicenow-sir-action-type.md), and [ServiceNow ITOM](/reference/connectors-kibana/servicenow-itom-action-type.md).
@@ -33,6 +34,7 @@ In {{sn}}, you need:
   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **Security incidents** (Create security incident): `sn_si_incident_write`.
   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **Delete record**: admin or equivalent role on the target table.
   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **ITOM events** (Create event): `evt_mgmt_integration`, or `evt_mgmt_operator` or `evt_mgmt_admin`.
+  - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+` **AI Agent Studio A2A** (Send A2A message): `sn_aia.integration` (or `sn_aia.admin`), `snc_platform_rest_api_access`, and any functional roles required by the target AI Agent.
 
 In {{kib}}, you need:
 
@@ -322,18 +324,18 @@ Delete record
     - `table` (required): The table containing the record to delete.
     - `sysId` (required): The `sys_id` of the record to permanently delete.
 
-Send A2A message
+Send A2A message {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+`
 :   Send a JSON-RPC 2.0 Agent-to-Agent (A2A v2) `message/send` request to a {{sn}} AI Agent via `/api/sn_aia/a2a/v2/agent/id/<agentId>`. Allows a single {{sn}} connector, including per-user OAuth 2.0 Authorization Code connectors, to invoke multiple {{sn}} AI Agents dynamically and maintain multi-turn conversation state.
 
     ::::{note}
-    Requires **{{sn}} AI Agent Studio** with A2A v2 enabled on the {{sn}} instance, and the authenticated {{sn}} user must have permission to execute the target AI Agent.
+    Requires **{{sn}} AI Agent Studio** with external A2A v2 access enabled on the {{sn}} instance and on the target AI Agent. The connector user must have the `sn_aia.integration` (or `sn_aia.admin`) and `snc_platform_rest_api_access` roles, plus any functional roles required by the target AI Agent.
     ::::
 
     - `agentId` (required): The `sys_id` of the target {{sn}} AI Agent.
     - `prompt` (required): Natural language message text to send to the {{sn}} AI Agent.
-    - `contextId` (optional): A2A `contextId` returned from an earlier turn to continue a multi-turn conversation.
-    - `messageId` (optional): Unique message identifier for the JSON-RPC 2.0 A2A message payload (auto-generated when omitted).
-    - `requestId` (optional): JSON-RPC 2.0 request `id` (defaults to `a2a-req-1`).
+    - `contextId` (optional): A2A `contextId` (`result.contextId` from an earlier turn) to continue a multi-turn conversation.
+    - `taskId` (optional): A2A `taskId` (`result.id` from a previous `input-required` turn) to resume an in-progress task alongside `contextId`.
+    - `messageId` (optional): Unique message identifier for the JSON-RPC 2.0 A2A message payload (auto-generated UUID v4 when omitted).
 
 ## Receive ServiceNow events [servicenow-search-inbound-events]
 ```{applies_to}

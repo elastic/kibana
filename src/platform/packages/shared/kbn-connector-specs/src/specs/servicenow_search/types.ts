@@ -557,20 +557,22 @@ export const SendA2AMessageInputSchema = lazySchema(() =>
       .max(200)
       .optional()
       .describe(
-        'Optional A2A contextId returned from a previous turn to continue a multi-turn conversation'
+        'Optional A2A contextId (result.contextId from a previous turn) to continue a multi-turn conversation'
+      ),
+    taskId: z
+      .string()
+      .max(200)
+      .optional()
+      .describe(
+        'Optional A2A taskId (result.id from a previous input-required turn) to resume an in-progress task alongside contextId'
       ),
     messageId: z
       .string()
       .max(200)
       .optional()
       .describe(
-        'Optional unique message identifier for the JSON-RPC 2.0 A2A message payload (auto-generated when omitted)'
+        'Optional unique message identifier for the JSON-RPC 2.0 A2A message payload (auto-generated UUID v4 when omitted)'
       ),
-    requestId: z
-      .string()
-      .max(200)
-      .optional()
-      .describe('Optional JSON-RPC 2.0 request id (defaults to "a2a-req-1")'),
   })
 );
 export type SendA2AMessageInput = z.infer<typeof SendA2AMessageInputSchema>;

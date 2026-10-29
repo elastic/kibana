@@ -23,6 +23,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { v4 as uuidv4 } from 'uuid';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   SearchInputSchema,
@@ -82,6 +83,23 @@ const extractSnError = (err: unknown): string | undefined => {
   const { message, detail } = axiosErr.response?.data?.error ?? {};
   if (!message) return undefined;
   return detail ? `${message}: ${detail}` : message;
+};
+
+const extractJsonRpcError = (data: unknown): string | undefined => {
+  const rpcError = (
+    data as
+      | {
+          error?:
+            string | { code?: number | string; message?: string; detail?: string; data?: unknown };
+        }
+      | undefined
+  )?.error;
+  if (!rpcError) return undefined;
+  if (typeof rpcError === 'string') return rpcError;
+  const baseMessage = rpcError.message || 'JSON-RPC error returned by ServiceNow A2A agent';
+  const extra = rpcError.detail ?? (typeof rpcError.data === 'string' ? rpcError.data : undefined);
+  const withExtra = extra ? `${baseMessage}: ${extra}` : baseMessage;
+  return rpcError.code !== undefined ? `${withExtra} (code ${rpcError.code})` : withExtra;
 };
 
 export const ServicenowSearch: ConnectorSpec = {
@@ -730,25 +748,20 @@ export const ServicenowSearch: ConnectorSpec = {
       description:
         'Send a JSON-RPC 2.0 Agent-to-Agent (A2A v2) message to a ServiceNow AI Agent by agentId. ' +
         'Allows a single ServiceNow connector (including per-user OAuth 2.0 Authorization Code connectors) ' +
-        'to invoke multiple ServiceNow AI Agents across multi-turn conversations using contextId.',
+        'to invoke multiple ServiceNow AI Agents across multi-turn conversations using contextId and taskId.',
       input: SendA2AMessageInputSchema,
       handler: async (ctx, input: SendA2AMessageInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
         const baseUrl = instanceUrl.replace(/\/+$/, '');
         const url = `${baseUrl}/api/sn_aia/a2a/v2/agent/id/${encodeURIComponent(input.agentId)}`;
         const trimmedContextId = input.contextId?.trim();
+        const trimmedTaskId = input.taskId?.trim();
         const messageId =
-          input.messageId && input.messageId.trim().length > 0
-            ? input.messageId.trim()
-            : `msg-${Date.now()}`;
-        const requestId =
-          input.requestId && input.requestId.trim().length > 0
-            ? input.requestId.trim()
-            : 'a2a-req-1';
+          input.messageId && input.messageId.trim().length > 0 ? input.messageId.trim() : uuidv4();
 
         const payload = {
           jsonrpc: '2.0',
-          id: requestId,
+          id: uuidv4(),
           method: 'message/send',
           params: {
             message: {
@@ -756,14 +769,15 @@ export const ServicenowSearch: ConnectorSpec = {
               messageId,
               role: 'user',
               ...(trimmedContextId ? { contextId: trimmedContextId } : {}),
+              ...(trimmedTaskId ? { taskId: trimmedTaskId } : {}),
               parts: [{ kind: 'text', text: input.prompt }],
             },
           },
         };
 
+        let response: { data: unknown };
         try {
-          const response = await ctx.client.post(url, payload);
-          return response.data;
+          response = await ctx.client.post(url, payload);
         } catch (err) {
           const snError = extractSnError(err);
           throw new Error(
@@ -771,6 +785,13 @@ export const ServicenowSearch: ConnectorSpec = {
               'Ensure ServiceNow AI Agent Studio A2A is enabled and the authenticated user has permission to execute the target agent.'
           );
         }
+
+        const rpcError = extractJsonRpcError(response.data);
+        if (rpcError) {
+          throw new Error(`Unable to invoke ServiceNow A2A agent. ${rpcError}`);
+        }
+
+        return response.data;
       },
     },
   },
@@ -823,7 +844,7 @@ export const ServicenowSearch: ConnectorSpec = {
     '',
     '## AI Agent Studio (A2A v2)',
     'Use sendA2AMessage with agentId and prompt to invoke any ServiceNow AI Agent over JSON-RPC 2.0 A2A v2.',
-    'Pass the returned result.contextId as contextId on subsequent turns to preserve multi-turn conversation state.',
+    'When resuming an in-progress turn (such as status.state = input-required), pass both result.contextId as contextId and result.id as taskId. Pass only contextId to start a new task in the same conversation context.',
   ].join('\n'),
 
   events: servicenowSearchEvents,
