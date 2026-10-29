@@ -16,7 +16,6 @@ import {
   EuiLink,
   EuiIconTip,
   EuiCallOut,
-  EuiLoadingElastic,
   EuiInMemoryTable,
   EuiText,
   EuiSpacer,
@@ -270,7 +269,6 @@ export class RelationshipsClass extends Component<
       basePath,
       savedObject,
       allowedTypes,
-      showPlainSpinner,
       euiTablePersist: { pageSize, onTableChange },
     } = this.props;
     const { relations, isLoading, error } = this.state;
@@ -280,7 +278,8 @@ export class RelationshipsClass extends Component<
     }
 
     if (isLoading) {
-      return showPlainSpinner ? <EuiLoadingSpinner size="xl" /> : <EuiLoadingElastic size="xl" />;
+      // POC: EuiLoadingElastic → EuiLoadingSpinner
+      return <EuiLoadingSpinner size="xl" />;
     }
 
     const columns = [

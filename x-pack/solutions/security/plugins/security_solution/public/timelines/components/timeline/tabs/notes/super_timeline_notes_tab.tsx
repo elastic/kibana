@@ -11,7 +11,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingElastic,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -69,7 +69,7 @@ export const SuperTimelineNotesTab: React.FC<SuperTimelineNotesTabProps> = React
         {!isSuperTimelineEmpty && (
           <>
             {fetchStatus === ReqStatus.Loading && (
-              <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
+              <EuiLoadingSpinner data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
             )}
             {fetchStatus === ReqStatus.Failed && (
               <EuiCallOut

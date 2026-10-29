@@ -11,7 +11,7 @@ import {
   EuiComment,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingElastic,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -82,7 +82,7 @@ export const RegularNotesTab: React.FC<RegularNotesTabProps> = React.memo(({ tim
       <EuiFlexItem>
         {timelineDescription}
         {fetchStatus === ReqStatus.Loading && (
-          <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
+          <EuiLoadingSpinner data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
         )}
         {isTimelineSaved && fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
           <EuiFlexGroup justifyContent="center">

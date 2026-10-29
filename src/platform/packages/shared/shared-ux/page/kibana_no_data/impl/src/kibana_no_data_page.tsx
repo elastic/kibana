@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
 import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
 import type { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
@@ -25,7 +25,6 @@ export const KibanaNoDataPage = ({
   onTryESQL,
   isTryESQLDisabled,
   onESQLNavigationComplete,
-  showPlainSpinner,
 }: KibanaNoDataPageProps) => {
   // These hooks are temporary, until this component is moved to a package.
   const services = useServices();
@@ -49,11 +48,8 @@ export const KibanaNoDataPage = ({
   }, [hasESData, hasDataView]);
 
   if (isLoading) {
-    return showPlainSpinner ? (
-      <EuiLoadingSpinner css={{ margin: 'auto' }} size="xxl" />
-    ) : (
-      <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />
-    );
+    // POC: EuiLoadingElastic → EuiLoadingSpinner (ring is chrome-only)
+    return <EuiLoadingSpinner css={{ margin: 'auto' }} size="xxl" />;
   }
 
   if (!hasDataViews && dataExists) {

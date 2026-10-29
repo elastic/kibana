@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import type { EuiFlyoutResizableProps } from '@elastic/eui';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
@@ -148,7 +148,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   if (isInitialLoading) {
     return (
       <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
-        <EuiLoadingElastic size="xl" />
+        <EuiLoadingSpinner size="xl" />
       </RuleFormErrorPromptWrapper>
     );
   }

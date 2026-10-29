@@ -11,7 +11,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingElastic,
+  EuiLoadingSpinner,
   EuiText,
   EuiFlexGrid,
   EuiSpacer,
@@ -29,7 +29,7 @@ export const LoadingCategorization: FC<Props> = ({ onCancel }) => (
       <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
         <EuiFlexGrid columns={1}>
           <EuiFlexItem>
-            <EuiLoadingElastic size="xl" />
+            <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText>

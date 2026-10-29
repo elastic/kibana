@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { TimelineId } from '../../../../../common/types';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { getTimelineShowStatusByIdSelector } from '../../../store/selectors';
@@ -68,7 +68,7 @@ export const TimelineTabFallback = () => (
         justify-content: center;
       `}
     >
-      <EuiLoadingElastic size="xxl" />
+      <EuiLoadingSpinner size="xxl" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

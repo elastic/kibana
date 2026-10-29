@@ -11,7 +11,7 @@ import { css, keyframes } from '@emotion/react';
 import type { Observable } from 'rxjs';
 import type { FC, MutableRefObject } from 'react';
 import React, { Fragment, useLayoutEffect, useRef, useState } from 'react';
-import { EuiLoadingElastic, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingElasticRing, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { CoreTheme } from '@kbn/core-theme-browser';
@@ -173,13 +173,14 @@ const AppLoadingPlaceholder: FC<{ showPlainSpinner: boolean }> = ({ showPlainSpi
       />
     );
   }
+  // POC: EuiLoadingElastic → EuiLoadingElasticRing (xxl → xl; label vs aria-label)
   return (
-    <EuiLoadingElastic
+    <EuiLoadingElasticRing
       css={appContainerStyles}
-      aria-label={i18n.translate('core.application.appContainer.loadingAriaLabel', {
+      label={i18n.translate('core.application.appContainer.loadingAriaLabel', {
         defaultMessage: 'Loading application',
       })}
-      size="xxl"
+      size="xl"
     />
   );
 };

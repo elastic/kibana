@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { AddNote } from '../../../../../notes/components/add_note';
@@ -136,7 +136,7 @@ export const NotesDetailsContent = memo(
     return (
       <AlertDataContext.Provider value={hit}>
         {fetchStatus === ReqStatus.Loading && (
-          <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
+          <EuiLoadingSpinner data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
         )}
         {fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
           <>{noNotesMessage}</>

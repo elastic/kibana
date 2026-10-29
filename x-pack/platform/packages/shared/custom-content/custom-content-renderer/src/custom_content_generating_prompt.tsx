@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingElastic, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -31,7 +31,7 @@ export const CustomContentGeneratingPrompt = () => {
       role="status"
       aria-live="polite"
     >
-      <EuiLoadingElastic size="xxl" />
+      <EuiLoadingSpinner size="xxl" />
       <EuiSpacer size="m" />
       <EuiTitle size="xs">
         <h3>

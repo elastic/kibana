@@ -10,7 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingElastic,
+  EuiLoadingSpinner,
   EuiProgress,
   EuiSpacer,
   EuiText,
@@ -228,7 +228,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
   if (isLoadingDocuments && !hasDocuments) {
     content = (
       <EuiFlexGroup justifyContent="center" alignItems="center">
-        <EuiLoadingElastic size="xl" />
+        <EuiLoadingSpinner size="xl" />
       </EuiFlexGroup>
     );
   } else if (documentsError) {
@@ -400,7 +400,7 @@ const QueryStreamPreviewPanel = ({
   if (isLoading && !hasDocuments) {
     content = (
       <EuiFlexGroup justifyContent="center" alignItems="center">
-        <EuiLoadingElastic size="xl" />
+        <EuiLoadingSpinner size="xl" />
       </EuiFlexGroup>
     );
   } else if (documentsError) {

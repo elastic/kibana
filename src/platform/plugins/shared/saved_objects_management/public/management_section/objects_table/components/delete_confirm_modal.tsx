@@ -11,7 +11,6 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import {
   EuiInMemoryTable,
-  EuiLoadingElastic,
   EuiIconTip,
   EuiOverlayMask,
   EuiModal,
@@ -49,7 +48,6 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   onCancel,
   selectedObjects,
   allowedTypes,
-  showPlainSpinner,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
 
@@ -72,7 +70,8 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   if (isDeleting) {
     return (
       <EuiOverlayMask>
-        {showPlainSpinner ? <EuiLoadingSpinner size="xl" /> : <EuiLoadingElastic size="xl" />}
+        {/* POC: EuiLoadingElastic → EuiLoadingSpinner */}
+        <EuiLoadingSpinner size="xl" />
       </EuiOverlayMask>
     );
   }

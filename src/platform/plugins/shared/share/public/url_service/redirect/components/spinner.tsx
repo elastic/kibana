@@ -8,13 +8,7 @@
  */
 
 import * as React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingElastic,
-  EuiLoadingSpinner,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const text = i18n.translate('share.urlService.redirect.components.Spinner.label', {
@@ -22,13 +16,15 @@ const text = i18n.translate('share.urlService.redirect.components.Spinner.label'
   description: 'Redirect endpoint spinner label.',
 });
 
-export const Spinner: React.FC<{ showPlainSpinner: boolean }> = ({ showPlainSpinner }) => {
+// POC: showPlainSpinner kept for callers; branded elastic loader removed
+export const Spinner: React.FC<{ showPlainSpinner: boolean }> = () => {
   return (
     <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
           <EuiFlexItem grow={false}>
-            {showPlainSpinner ? <EuiLoadingSpinner size="xxl" /> : <EuiLoadingElastic size="xxl" />}
+            {/* POC: EuiLoadingElastic → EuiLoadingSpinner (ring is chrome-only) */}
+            <EuiLoadingSpinner size="xxl" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="subdued" size={'m'}>

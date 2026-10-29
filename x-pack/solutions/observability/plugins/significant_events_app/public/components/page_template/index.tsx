@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { EuiPageSectionProps } from '@elastic/eui';
-import { EuiLoadingElastic, EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
 import type { AppHeaderProps } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
@@ -37,7 +37,7 @@ export const SignificantEventsAppLoading = () => (
   <EuiPageTemplate.EmptyPrompt
     color="transparent"
     icon={
-      <EuiLoadingElastic
+      <EuiLoadingSpinner
         size="xxl"
         aria-label={i18n.translate('xpack.significantEventsApp.loadingLabel', {
           defaultMessage: 'Loading',

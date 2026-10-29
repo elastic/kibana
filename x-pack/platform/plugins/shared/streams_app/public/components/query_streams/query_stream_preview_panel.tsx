@@ -10,7 +10,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingElastic,
+  EuiLoadingSpinner,
   EuiProgress,
   EuiSpacer,
 } from '@elastic/eui';
@@ -47,7 +47,7 @@ export function QueryStreamPreviewPanel({
   if (isLoading && !hasDocuments) {
     content = (
       <EuiFlexGroup justifyContent="center" alignItems="center">
-        <EuiLoadingElastic size="xl" />
+        <EuiLoadingSpinner size="xl" />
       </EuiFlexGroup>
     );
   } else if (error) {

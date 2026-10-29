@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiBasicTable,
   EuiHorizontalRule,
-  EuiLoadingElastic,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiCallOut,
   EuiText,
@@ -147,7 +147,7 @@ export const WatchlistsManagementTable: React.FC<{ spaceId: string; canWrite?: b
                   data-test-subj="watchlistsManagementTableLoading"
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiLoadingElastic size="l" />
+                    <EuiLoadingSpinner size="l" />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : visibleRecords.length > 0 ? (

@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingElastic,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -88,7 +88,7 @@ function SourcePreviewContent({
   if (!data) {
     return isFetching ? (
       <EuiFlexGroup justifyContent="center">
-        <EuiLoadingElastic size="xl" />
+        <EuiLoadingSpinner size="xl" />
       </EuiFlexGroup>
     ) : null;
   }

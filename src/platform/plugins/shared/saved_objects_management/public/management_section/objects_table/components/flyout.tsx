@@ -26,7 +26,6 @@ import {
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingElastic,
   EuiCallOut,
   EuiSpacer,
   EuiLink,
@@ -422,7 +421,7 @@ export class FlyoutClass extends Component<
   }
 
   renderBody() {
-    const { allowedTypes, showPlainSpinner } = this.props;
+    const { allowedTypes } = this.props;
     const {
       status,
       loadingMessage,
@@ -436,7 +435,8 @@ export class FlyoutClass extends Component<
       return (
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
-            {showPlainSpinner ? <EuiLoadingSpinner size="xl" /> : <EuiLoadingElastic size="xl" />}
+            {/* POC: EuiLoadingElastic → EuiLoadingSpinner */}
+            <EuiLoadingSpinner size="xl" />
             <EuiSpacer size="m" />
             <EuiText>
               <p>{loadingMessage}</p>

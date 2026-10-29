@@ -12,7 +12,7 @@ import {
   EuiBasicTable,
   EuiIcon,
   EuiIconTip,
-  EuiLoadingElastic,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -25,7 +25,7 @@ export function DiagnosticsIndices() {
   const { diagnosticsBundle, status } = useDiagnosticsContext();
 
   if (!diagnosticsBundle || status === FETCH_STATUS.LOADING) {
-    return <EuiLoadingElastic size="m" />;
+    return <EuiLoadingSpinner size="m" />;
   }
 
   const { invalidIndices = [], validIndices = [] } = diagnosticsBundle;

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
@@ -145,7 +145,7 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
         data-test-subj="agentBuilderTimelineAvatar"
       >
         {isLoading ? (
-          <EuiLoadingElastic size="l" aria-label={loadingLabel} />
+          <EuiLoadingSpinner size="l" aria-label={loadingLabel} />
         ) : (
           agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
         )}

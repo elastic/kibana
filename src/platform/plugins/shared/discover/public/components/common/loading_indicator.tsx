@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiLoadingElastic } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 interface Props {
@@ -15,9 +15,12 @@ interface Props {
 }
 
 export const LoadingIndicator = ({ type = 'spinner' }: Props) => {
+  // POC: EuiLoadingElastic → EuiLoadingSpinner for both variants
   return (
     <EuiEmptyPrompt
-      icon={type === 'spinner' ? <EuiLoadingSpinner size="l" /> : <EuiLoadingElastic size="xxl" />}
+      icon={
+        type === 'spinner' ? <EuiLoadingSpinner size="l" /> : <EuiLoadingSpinner size="xxl" />
+      }
     />
   );
 };

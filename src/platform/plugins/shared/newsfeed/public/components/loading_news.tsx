@@ -10,16 +10,17 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 
 export const NewsLoadingPrompt = ({ showPlainSpinner }: { showPlainSpinner: boolean }) => {
   return (
     <EuiEmptyPrompt
       title={
+        // POC: EuiLoadingElastic → EuiLoadingSpinner; keep test subjects for branding fork
         showPlainSpinner ? (
           <EuiLoadingSpinner size="xl" data-test-subj="newsfeedPlainSpinner" />
         ) : (
-          <EuiLoadingElastic size="xl" data-test-subj="newsfeedElasticSpinner" />
+          <EuiLoadingSpinner size="xl" data-test-subj="newsfeedElasticSpinner" />
         )
       }
       body={

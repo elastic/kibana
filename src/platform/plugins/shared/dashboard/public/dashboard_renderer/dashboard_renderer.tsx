@@ -13,7 +13,6 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 're
 import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
-  EuiLoadingElastic,
   EuiLoadingSpinner,
   useEuiPaddingSize,
 } from '@elastic/eui';
@@ -84,7 +83,6 @@ export interface DashboardRendererProps {
 export function DashboardRenderer({
   locator,
   savedObjectId,
-  showPlainSpinner,
   panelFlyoutType,
   dashboardRedirect,
   getCreationOptions,
@@ -195,11 +193,8 @@ export function DashboardRenderer({
     'dashboardViewport--loading': isDashboardViewportLoading,
   });
 
-  const loadingSpinner = showPlainSpinner ? (
-    <EuiLoadingSpinner size="xxl" />
-  ) : (
-    <EuiLoadingElastic size="xxl" />
-  );
+  // POC: EuiLoadingElastic → EuiLoadingSpinner (ring is chrome-only)
+  const loadingSpinner = <EuiLoadingSpinner size="xxl" />;
 
   const renderDashboardContents = () => {
     if (error) {

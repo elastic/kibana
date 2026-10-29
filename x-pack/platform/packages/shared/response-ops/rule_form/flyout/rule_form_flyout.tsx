@@ -6,7 +6,7 @@
  */
 
 import type { EuiFlyoutResizableProps } from '@elastic/eui';
-import { EuiFlyoutResizable, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlyoutResizable, EuiLoadingSpinner } from '@elastic/eui';
 import React, { Suspense, lazy, useCallback } from 'react';
 import { css } from '@emotion/react';
 import type { RuleFormProps } from '../src/rule_form';
@@ -63,7 +63,7 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>({
       <Suspense
         fallback={
           <RuleFormErrorPromptWrapper hasBorder={false} hasShadow={false}>
-            <EuiLoadingElastic size="xl" />
+            <EuiLoadingSpinner size="xl" />
           </RuleFormErrorPromptWrapper>
         }
       >

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLoadingElastic } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
@@ -19,7 +19,7 @@ export function DiagnosticsIndexTemplates() {
   const { diagnosticsBundle, status } = useDiagnosticsContext();
 
   if (status === FETCH_STATUS.LOADING) {
-    return <EuiLoadingElastic size="m" />;
+    return <EuiLoadingSpinner size="m" />;
   }
 
   const items = diagnosticsBundle?.apmIndexTemplates ?? [];

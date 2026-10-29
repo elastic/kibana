@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingElastic,
   EuiLoadingSpinner,
   EuiToolTip,
   useEuiTheme,
@@ -130,7 +129,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
           {isTerminalState ? (
             <EuiIcon type="logoElastic" size="l" aria-hidden={true} />
           ) : (
-            <EuiLoadingElastic data-test-subj="loadingElastic" size="l" />
+            <EuiLoadingSpinner data-test-subj="loadingElastic" size="l" />
           )}
         </EuiFlexItem>
 

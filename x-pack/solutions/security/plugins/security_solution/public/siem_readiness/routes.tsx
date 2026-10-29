@@ -9,7 +9,7 @@ import React, { lazy, Suspense } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { SIEM_READINESS_PATH } from '../../common/constants';
@@ -26,7 +26,7 @@ export const SiemReadinessRoutes = () => {
     <QueryClientProvider client={queryClient}>
       <PluginTemplateWrapper>
         <SecuritySolutionPageWrapper noPadding>
-          <Suspense fallback={<EuiLoadingElastic />}>
+          <Suspense fallback={<EuiLoadingSpinner />}>
             <Routes>
               <Route
                 exact

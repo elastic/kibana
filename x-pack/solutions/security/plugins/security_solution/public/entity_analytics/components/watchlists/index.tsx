@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -52,7 +52,7 @@ export const Watchlists = ({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
-              <EuiLoadingElastic size="m" />
+              <EuiLoadingSpinner size="m" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

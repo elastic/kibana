@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -232,7 +232,7 @@ export function StreamListView() {
       <StreamsAppPageTemplate.Body grow paddingSize="m">
         {streamsListFetch.loading && streamsListFetch.value === undefined ? (
           <EuiEmptyPrompt
-            icon={<EuiLoadingElastic size="xl" />}
+            icon={<EuiLoadingSpinner size="xl" />}
             title={
               <h2>
                 {i18n.translate('xpack.streams.streamsListView.loadingStreams', {

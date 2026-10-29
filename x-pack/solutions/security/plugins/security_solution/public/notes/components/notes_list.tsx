@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiAvatar, EuiComment, EuiCommentList, EuiLoadingElastic } from '@elastic/eui';
+import { EuiAvatar, EuiComment, EuiCommentList, EuiLoadingSpinner } from '@elastic/eui';
 import { useSelector } from 'react-redux-v7';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -95,7 +95,7 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
           </EuiComment>
         ))}
         {createStatus === ReqStatus.Loading && (
-          <EuiLoadingElastic size="xxl" data-test-subj={ADD_NOTE_LOADING_TEST_ID} />
+          <EuiLoadingSpinner size="xxl" data-test-subj={ADD_NOTE_LOADING_TEST_ID} />
         )}
       </EuiCommentList>
     </>
