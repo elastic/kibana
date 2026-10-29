@@ -81,7 +81,7 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
     });
   });
 
-  test('opens a session with its waterfall, then goes back to the same list', async ({
+  test('opens a session with its waterfall and journey, then goes back to the same list', async ({
     page,
     pageObjects: { digitalExperience },
   }) => {
@@ -98,6 +98,17 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
         DETAILED_SESSION.pages.length
       );
       await expect(digitalExperience.sessionWaterfallErrors).toHaveCount(1);
+    });
+
+    await test.step('lists what happened on each page', async () => {
+      await expect(digitalExperience.sessionPageVisits).toHaveCount(DETAILED_SESSION.pages.length);
+      const cart = digitalExperience.sessionPageVisits.filter({
+        hasText: DETAILED_SESSION.pages[2],
+      });
+      await expect(cart).toHaveCount(1);
+      await expect(cart.getByTestId('digitalExperienceSessionEvent-error')).toContainText(
+        DETAILED_SESSION.errorMessage
+      );
     });
 
     await test.step('goes back to the list with its filters and time range', async () => {

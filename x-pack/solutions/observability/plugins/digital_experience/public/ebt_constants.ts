@@ -67,6 +67,7 @@ export const SESSIONS_EBT_ELEMENTS = {
   COUNTRY_FILTER: 'sessionsCountryFilter',
   ENTRY_PAGE_FILTER: 'sessionsEntryPageFilter',
   CLEAR_FILTERS: 'sessionsClearFilters',
+  WATERFALL_PAGE: 'sessionWaterfallPage',
   DOCS_LINK: 'sessionsDocsLink',
   COLUMN_SELECTOR: 'sessionsColumnSelector',
   SESSION_BACK: 'sessionBack',
