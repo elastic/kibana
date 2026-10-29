@@ -31,11 +31,22 @@ jest.mock('../../lib/get_result_counts_for_actions', () => ({
   getResultCountsForActions: jest.fn().mockResolvedValue(new Map()),
 }));
 
+// `config.validate.request` is typed as a union (`false | VersionedRouteValidation | (() => ...)`)
+// to cover every possible route shape; this route always registers the plain object form.
+interface QuerySchemaValidator {
+  validate: (value: unknown) => unknown;
+}
+
+interface UnifiedHistoryValidationConfig {
+  request: { query: QuerySchemaValidator };
+}
+
 describe('getUnifiedHistoryRoute', () => {
   let routeHandler: RequestHandler;
   let mockOsqueryContext: OsqueryAppContext;
   let mockEsClient: { search: jest.Mock };
   let mockScopedEsClient: { search: jest.Mock };
+  let queryValidator: QuerySchemaValidator;
 
   const emptyScheduledAggregations = {
     aggregations: { scheduled_executions: { buckets: [] } },
@@ -80,7 +91,53 @@ describe('getUnifiedHistoryRoute', () => {
     }
 
     routeHandler = routeVersion.handler;
+
+    const validateConfig = routeVersion.config
+      .validate as unknown as UnifiedHistoryValidationConfig;
+    queryValidator = validateConfig.request.query;
   };
+
+  describe('request validation', () => {
+    beforeEach(() => {
+      setupRoute();
+    });
+
+    const LENGTH_LIMITS = [
+      { field: 'nextPage', limit: 4096 },
+      { field: 'kuery', limit: 10_000 },
+      { field: 'userIds', limit: 10_000 },
+      { field: 'tags', limit: 10_000 },
+      { field: 'startDate', limit: 64 },
+      { field: 'endDate', limit: 64 },
+    ] as const;
+
+    it.each(LENGTH_LIMITS)('accepts $field at the maximum length of $limit', ({ field, limit }) => {
+      expect(() => queryValidator.validate({ [field]: 'a'.repeat(limit) })).not.toThrow();
+    });
+
+    it.each(LENGTH_LIMITS)(
+      'rejects $field longer than the maximum length of $limit',
+      ({ field, limit }) => {
+        expect(() => queryValidator.validate({ [field]: 'a'.repeat(limit + 1) })).toThrow(
+          new RegExp(`maximum length of \\[${limit}\\]`)
+        );
+      }
+    );
+
+    it('accepts sourceFilters at the maximum length of 64 (valid tokens only)', () => {
+      const sourceFilters = `${'live,'.repeat(12)}live`;
+      expect(sourceFilters).toHaveLength(64);
+
+      expect(() => queryValidator.validate({ sourceFilters })).not.toThrow();
+    });
+
+    it('rejects sourceFilters longer than the maximum length of 64 (valid tokens only)', () => {
+      const sourceFilters = 'live,'.repeat(13);
+      expect(sourceFilters).toHaveLength(65);
+
+      expect(() => queryValidator.validate({ sourceFilters })).toThrow(/maximum length of \[64\]/);
+    });
+  });
 
   describe('when CPS is enabled', () => {
     beforeEach(() => {
