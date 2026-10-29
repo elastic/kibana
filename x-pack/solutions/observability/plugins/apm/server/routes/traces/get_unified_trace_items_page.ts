@@ -302,6 +302,7 @@ export async function getUnifiedTraceItemsPaginated({
     start,
     end,
     ecsOnly,
+    serviceName,
   });
 
   return { hits, total: result.total };

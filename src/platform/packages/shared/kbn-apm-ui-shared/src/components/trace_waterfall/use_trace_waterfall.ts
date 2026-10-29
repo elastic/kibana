@@ -313,10 +313,20 @@ export function getRootItemOrFallback(
 
   if (entryTransactionId && !entryTransactionRootItem) {
     const fallbackRoot = traceParentChildrenMap.root?.[0];
+    if (fallbackRoot) {
+      return {
+        traceState: TraceDataState.MissingEntry,
+        rootItem: fallbackRoot,
+        orphans: getOrphanItems(traceItems, fallbackRoot),
+      };
+    }
+
+    const orphans = getOrphanItems(traceItems, undefined);
+    const [fallbackRootItem, ...remainingOrphans] = orphans;
     return {
       traceState: TraceDataState.MissingEntry,
-      rootItem: fallbackRoot,
-      orphans: getOrphanItems(traceItems, fallbackRoot),
+      rootItem: fallbackRootItem,
+      orphans: remainingOrphans,
     };
   }
 

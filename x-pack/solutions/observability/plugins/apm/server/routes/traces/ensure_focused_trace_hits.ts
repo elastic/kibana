@@ -11,6 +11,8 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   PARENT_ID,
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
   SPAN_ID,
   TRACE_ID,
   TRANSACTION_ID,
@@ -62,6 +64,7 @@ export async function ensureFocusedTraceHits<THit extends FocusedTraceHit>({
   start,
   end,
   ecsOnly,
+  serviceName,
 }: {
   apmEventClient: APMEventClient;
   hits: THit[];
@@ -71,6 +74,7 @@ export async function ensureFocusedTraceHits<THit extends FocusedTraceHit>({
   start: number;
   end: number;
   ecsOnly: boolean;
+  serviceName?: string;
 }): Promise<THit[]> {
   const hitsById = new Map<string, THit>();
   for (const hit of hits) {
@@ -93,11 +97,12 @@ export async function ensureFocusedTraceHits<THit extends FocusedTraceHit>({
         end,
         ids: idsToFetch,
         ecsOnly,
+        serviceName,
       });
 
       for (const fetchedHit of fetchedHits) {
         const id = getTraceHitId(fetchedHit);
-        if (!id || hitsById.has(id)) {
+        if (!id || !idsToFetch.includes(id) || hitsById.has(id)) {
           continue;
         }
         // Intentional `as THit` type assertion as apmEventClient.search returns generic Elasticsearch SearchHit documents;
@@ -155,6 +160,7 @@ async function fetchTraceHitsByIds({
   end,
   ids,
   ecsOnly,
+  serviceName,
 }: {
   apmEventClient: APMEventClient;
   traceId: string;
@@ -162,6 +168,7 @@ async function fetchTraceHitsByIds({
   end: number;
   ids: string[];
   ecsOnly: boolean;
+  serviceName?: string;
 }): Promise<FocusedTraceHit[]> {
   if (ids.length === 0) {
     return [];
@@ -177,8 +184,24 @@ async function fetchTraceHitsByIds({
       size: ids.length,
       query: {
         bool: {
-          filter: [...termQuery(TRACE_ID, traceId), ...rangeQuery(start, end)],
-          should: [{ terms: { [TRANSACTION_ID]: ids } }, { terms: { [SPAN_ID]: ids } }],
+          filter: [
+            ...termQuery(TRACE_ID, traceId),
+            ...rangeQuery(start, end),
+            ...termQuery(SERVICE_NAME, serviceName),
+          ],
+          // Child spans copy transaction.id from their transaction. Restrict that
+          // clause to transaction documents so a span cannot take the only hit.
+          should: [
+            {
+              bool: {
+                filter: [
+                  { terms: { [TRANSACTION_ID]: ids } },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+                ],
+              },
+            },
+            { terms: { [SPAN_ID]: ids } },
+          ],
           minimum_should_match: 1,
         },
       },

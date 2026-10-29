@@ -6,7 +6,14 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { PARENT_ID, SPAN_ID, TRANSACTION_ID } from '../../../common/es_fields/apm';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import {
+  PARENT_ID,
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
+  SPAN_ID,
+  TRANSACTION_ID,
+} from '../../../common/es_fields/apm';
 import { ensureFocusedTraceHits, getTraceHitId } from './ensure_focused_trace_hits';
 
 function createHit({ id, parentId }: { id: string; parentId?: string }): {
@@ -143,5 +150,68 @@ describe('ensureFocusedTraceHits', () => {
 
     expect(search).toHaveBeenCalledTimes(1);
     expect(result.map(getTraceHitId)).toEqual(['focused', 'parent', 'root-a']);
+  });
+
+  it('matches transaction.id only on transaction documents and ignores a child span', async () => {
+    const rankedRoot = createHit({ id: 'root-a' });
+    const childSpan = {
+      fields: {
+        [SPAN_ID]: ['child-span'],
+        [TRANSACTION_ID]: ['focused'],
+        [PARENT_ID]: ['focused'],
+      },
+    };
+
+    search.mockResolvedValueOnce({
+      hits: { hits: [childSpan] },
+    });
+
+    const result = await ensureFocusedTraceHits({
+      apmEventClient,
+      hits: [rankedRoot],
+      focusedDocId: 'focused',
+      maxTraceItems: 2,
+      traceId: 'trace-1',
+      start: 0,
+      end: 1000,
+      ecsOnly: true,
+    });
+
+    expect(search.mock.calls[0][1].query.bool.should).toEqual([
+      {
+        bool: {
+          filter: [
+            { terms: { [TRANSACTION_ID]: ['focused'] } },
+            { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+          ],
+        },
+      },
+      { terms: { [SPAN_ID]: ['focused'] } },
+    ]);
+    expect(result.map(getTraceHitId)).toEqual(['root-a']);
+  });
+
+  it('applies the service filter when reserving a focused document', async () => {
+    const focused = createHit({ id: 'focused' });
+
+    search.mockResolvedValueOnce({
+      hits: { hits: [focused] },
+    });
+
+    await ensureFocusedTraceHits({
+      apmEventClient,
+      hits: [],
+      focusedDocId: 'focused',
+      maxTraceItems: 1,
+      traceId: 'trace-1',
+      start: 0,
+      end: 1000,
+      ecsOnly: true,
+      serviceName: 'focused-service',
+    });
+
+    expect(search.mock.calls[0][1].query.bool.filter).toEqual(
+      expect.arrayContaining([{ term: { [SERVICE_NAME]: 'focused-service' } }])
+    );
   });
 });

@@ -888,6 +888,20 @@ describe('getRootItemOrFallback', () => {
     expect(result.rootItem).toEqual(otherRoot);
     expect(result.traceState).toBe(TraceDataState.MissingEntry);
   });
+
+  it('should keep MissingEntry and elect the first orphan when the truncated set has no parentless root', () => {
+    const traceData = [child1, child2];
+
+    const result = getRootItemOrFallback(
+      getTraceParentChildrenMap(traceData, false),
+      traceData,
+      'missing-entry-id'
+    );
+
+    expect(result.rootItem).toEqual(child1);
+    expect(result.traceState).toBe(TraceDataState.MissingEntry);
+    expect(result.orphans).toEqual([child2]);
+  });
 });
 
 describe('getTraceWaterfallDuration', () => {
