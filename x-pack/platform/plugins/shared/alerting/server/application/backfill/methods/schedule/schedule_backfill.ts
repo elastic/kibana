@@ -25,6 +25,7 @@ import type {
 import { scheduleBackfillParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain } from '../../../rule/transforms';
 import type { RawRule } from '../../../../types';
+import { getBackfillActions } from '../../../../backfill_client/lib';
 
 export async function scheduleBackfill(
   context: RulesClientContext,
@@ -144,23 +145,52 @@ export async function scheduleBackfill(
   }
 
   const actionsClient = await context.getActionsClient();
+  const rules = rulesToSchedule.map(({ id, attributes, references }) => {
+    const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+    return transformRuleAttributesToRuleDomain(
+      attributes,
+      {
+        id,
+        logger: context.logger,
+        ruleType,
+        references,
+      },
+      (connectorId: string) => actionsClient.isSystemAction(connectorId)
+    );
+  });
+
+  // if any rule being scheduled has actions that the backfill will run,
+  // the caller must hold the connector-execute privilege on their own credentials.
+  // Without this, a low-privileged user with only "Manual rule run" sub-feature could
+  // trigger another user's connectors under that owner's stored API key.
+  // Check every param rather than unique ruleIds: bulkQueue schedules each param independently,
+  // so duplicate ruleIds with mixed runActions values must not skip the check.
+  const ruleIdsWithBackfillActions = new Set(
+    rules.filter((rule) => getBackfillActions(rule).actions.length > 0).map(({ id }) => id)
+  );
+  const anyRuleHasActionsToRun = params.some(
+    ({ ruleId, runActions }) => runActions !== false && ruleIdsWithBackfillActions.has(ruleId)
+  );
+
+  if (anyRuleHasActionsToRun) {
+    try {
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
+    } catch (error) {
+      context.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.SCHEDULE_BACKFILL,
+          error,
+        })
+      );
+      throw error;
+    }
+  }
+
   return await context.backfillClient.bulkQueue({
     actionsClient,
     auditLogger: context.auditLogger,
     params,
-    rules: rulesToSchedule.map(({ id, attributes, references }) => {
-      const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
-      return transformRuleAttributesToRuleDomain(
-        attributes,
-        {
-          id,
-          logger: context.logger,
-          ruleType,
-          references,
-        },
-        (connectorId: string) => actionsClient.isSystemAction(connectorId)
-      );
-    }),
+    rules,
     gaps,
     ruleTypeRegistry: context.ruleTypeRegistry,
     spaceId: context.spaceId,
