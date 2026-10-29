@@ -51,7 +51,7 @@ export const SelectedPanelsToolbar = () => {
     dashboardApi.children$
   );
 
-  const onDelete = useCallback(() => {
+  const onRemove = useCallback(() => {
     if (dashboardApi.canRemovePanels && !dashboardApi.canRemovePanels()) return;
     dashboardApi.removePanels(dashboardApi.selectedPanelIds$.value);
     dashboardApi.clearSelectedPanels();
@@ -132,12 +132,12 @@ export const SelectedPanelsToolbar = () => {
                 iconType="trash"
                 color="danger"
                 size="s"
-                onClick={onDelete}
-                data-test-subj="dashboardSelectedPanelsDelete"
+                onClick={onRemove}
+                data-test-subj="dashboardSelectedPanelsRemove"
               >
                 <FormattedMessage
-                  id="dashboard.selectedPanelsToolbar.deleteButtonLabel"
-                  defaultMessage="Delete"
+                  id="dashboard.selectedPanelsToolbar.removeButtonLabel"
+                  defaultMessage="Remove"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -157,7 +157,7 @@ const selectedPanelsToolbarStyles = {
       transform: 'translateX(-50%)',
       zIndex: euiTheme.levels.toast,
     }),
-  // EuiBadge is fixed to the `xs` font scale; use the `s` scale of the small "Delete" button next to it
+  // EuiBadge is fixed to the `xs` font scale; use the `s` scale of the small action buttons next to it
   count: (euiThemeContext: UseEuiTheme) => css(euiFontSize(euiThemeContext, 's')),
   divider: ({ euiTheme }: UseEuiTheme) =>
     css({
