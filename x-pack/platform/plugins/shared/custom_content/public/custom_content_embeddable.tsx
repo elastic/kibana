@@ -408,14 +408,18 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         })
       )
       .subscribe((resolved) => {
-        // Queries on the same index describe the same data view, so it is published once.
-        const byIndexPattern = new Map<string, DataView>();
+        // Queries that resolve to the same data view publish it once. The identity is the whole
+        // ad-hoc data view (index pattern, project routing and time field), not just the index:
+        // two queries on one index can resolve different time fields, and the one that has a time
+        // field is what makes the dashboard offer its time picker.
+        const byIdentity = new Map<string, DataView>();
         (resolved ?? []).forEach((dataView) => {
-          if (dataView && !byIndexPattern.has(dataView.getIndexPattern())) {
-            byIndexPattern.set(dataView.getIndexPattern(), dataView);
-          }
+          if (!dataView) return;
+          const identity =
+            dataView.id ?? `${dataView.getIndexPattern()}|${dataView.timeFieldName ?? ''}`;
+          if (!byIdentity.has(identity)) byIdentity.set(identity, dataView);
         });
-        dataSources$.next(byIndexPattern.size ? Array.from(byIndexPattern.values()) : undefined);
+        dataSources$.next(byIdentity.size ? Array.from(byIdentity.values()) : undefined);
       });
 
     const fetchSubscription = fetch$(api).subscribe((ctx) => {

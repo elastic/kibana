@@ -225,8 +225,11 @@ describe('customContentEmbeddableFactory', () => {
   });
 
   describe('data views', () => {
-    // One fake data view per index: `FROM logs | …` is the data view of `logs`.
+    // One fake data view per index and time field, like the real ad-hoc ones (their id is made of
+    // both): `FROM logs | …` is the data view of `logs`, and a query that uses `?_tstart` on
+    // `sale_date` gives it that time field.
     const indexOf = (query: string) => query.replace(/^FROM (\S+).*$/, '$1');
+    const timeFieldOf = (query: string) => (query.includes('?_tstart') ? 'sale_date' : undefined);
     const titles = (embeddable: { api: { dataSources$: { getValue: () => unknown } } }) =>
       ((embeddable.api.dataSources$.getValue() as DataView[] | undefined) ?? []).map((dataView) =>
         dataView.getIndexPattern()
@@ -236,7 +239,12 @@ describe('customContentEmbeddableFactory', () => {
       mockGetESQLAdHocDataview.mockReset();
       mockGetESQLAdHocDataview.mockImplementation(async ({ query }: { query: string }) => {
         if (query.startsWith('FROM broken')) throw new Error('cannot resolve');
-        return { getIndexPattern: () => indexOf(query) };
+        const timeFieldName = timeFieldOf(query);
+        return {
+          id: [indexOf(query), timeFieldName].filter(Boolean).join('-'),
+          timeFieldName,
+          getIndexPattern: () => indexOf(query),
+        };
       });
     });
 
@@ -258,6 +266,24 @@ describe('customContentEmbeddableFactory', () => {
       });
 
       await waitFor(() => expect(titles(embeddable)).toEqual(['logs']));
+    });
+
+    // A time field is what makes the dashboard offer its time picker, so a data view that has one
+    // must not be dropped because another query on the same index has none.
+    it('publishes both data views when queries on one index resolve different time fields', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: [
+          'FROM sales | STATS total = COUNT(*)',
+          'FROM sales | WHERE sale_date >= ?_tstart | STATS total = COUNT(*)',
+        ],
+      });
+
+      await waitFor(() => expect(titles(embeddable)).toEqual(['sales', 'sales']));
+      const timeFields = (embeddable.api.dataSources$.getValue() as DataView[]).map(
+        ({ timeFieldName }) => timeFieldName
+      );
+      expect(timeFields).toEqual([undefined, 'sale_date']);
     });
 
     it('keeps the data views of the other queries when one cannot be resolved', async () => {

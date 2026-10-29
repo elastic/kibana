@@ -15,7 +15,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
     "@kbn/esql-utils",
-    "@kbn/esql-types",
     "@kbn/custom-content-common"
   ]
 }

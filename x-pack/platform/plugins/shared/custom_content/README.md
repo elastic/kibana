@@ -160,7 +160,7 @@ The agent does not create or change a panel's additional queries yet, but it wor
 
 - The context attachment carries them as `additional_esql_queries` and its text lists each one with the name the template reads it by (`queries[1]`, …). The chat card renders them, and an applied update, including `Preview` on an earlier version, puts them back on the panel.
 - `custom_content_update_panel` and the dashboard generation tool keep them through an edit. They are dropped with the main query when that is removed, because they have nothing to extend.
-- The template resolver samples each additional query on every refinement (binding the control values the panel was sent with, so a query that uses `?name` can be sampled) and adds `queries[n]` guidance to the Liquid system prompt, only for panels that have them, so a restyle does not drop or mangle a section that reads `queries[1]`. A failed sample names the query (`Query 2 (queries[1]): …`) and fails the whole resolve, like the main query.
+- The template resolver treats the additional queries like the main one: a query that is not changing is not run, because the template that already reads it describes it. Only a new or changing query is sampled. For a panel that has additional queries it adds `queries[n]` guidance to the Liquid system prompt, so a restyle keeps the references and does not drop or mangle a section that reads `queries[1]`. Panels with one query get the same prompt as before.
 - "Refine with chat" from the flyout sends the panel's queries, so an agent update does not lose the additional ones.
 
 ### How a panel's query is resolved

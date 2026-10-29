@@ -10,8 +10,7 @@ import { MessageRole } from '@kbn/inference-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { appendLimitToQuery, getNamedParams } from '@kbn/esql-utils';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { appendLimitToQuery, getStartEndParams } from '@kbn/esql-utils';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
@@ -119,20 +118,6 @@ const describeSamplingFailure = (error: unknown): string => {
   return `Could not sample the ES|QL query schema: ${reason}. This is likely transient — retry the operation.`;
 };
 
-function formatSchemaAndSample(
-  columns: Array<{ name: string; type: string }>,
-  values: unknown[][]
-): string {
-  const schemaLines = columns
-    .map((c) => `  - ${sanitizeCellValue(c.name)} (${sanitizeCellValue(c.type)})`)
-    .join('\n');
-  const sampleSection =
-    values.length > 0
-      ? `\n\nSample rows:\n${formatSampleTable(columns, values)}`
-      : '\n\nNote: no rows available for the current time range.';
-  return `Data schema:\n${schemaLines}${sampleSection}`;
-}
-
 function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]): string {
   const header = columns.map((c) => sanitizeCellValue(c.name)).join(' | ');
   const separator = columns.map(() => '---').join(' | ');
@@ -227,14 +212,11 @@ export type CustomContentTemplateResolver = (params: {
   hasExistingQuery?: boolean;
   /**
    * The panel's queries after the main one, which its template reads as `queries[1]`, `queries[2]`,
-   * ... They are sampled every time, because the model needs their columns to keep using them.
+   * ... They are not sampled: like the main query, a query that is not changing is described by the
+   * template that already reads it. Giving them only tells the model what `queries[n]` is, so a
+   * refinement keeps the references to them.
    */
   additionalEsqlQueries?: readonly string[];
-  /**
-   * The values of the dashboard controls a query refers to (`?name`), so a query that uses one can
-   * be sampled. Only the ones a query uses are sent.
-   */
-  esqlVariables?: ESQLControlVariable[];
 }) => Promise<ResolvedCustomContentTemplate>;
 
 export const createCustomContentTemplateResolver = ({
@@ -242,67 +224,35 @@ export const createCustomContentTemplateResolver = ({
   esClient,
   logger,
 }: CustomContentTemplateResolverDeps): CustomContentTemplateResolver => {
-  const sampleQuery = async (query: string, esqlVariables?: ESQLControlVariable[]) => {
-    const sampledQuery = appendLimitToQuery(query, SAMPLE_ROW_COUNT);
-    // The time range and any control values the query uses: an unbound `?name` is an error.
-    const params = getNamedParams(sampledQuery, SAMPLE_TIME_RANGE, esqlVariables);
-    const result = await esClient.asCurrentUser.esql.query({
-      query: sampledQuery,
-      ...(params.length ? { params } : {}),
-    });
-    return {
-      columns: (result.columns ?? []) as Array<{ name: string; type: string }>,
-      values: (result.values ?? []) as unknown[][],
-    };
-  };
-
   return async ({
     prompt,
     esqlQuery,
     existingTemplate,
     hasExistingQuery,
     additionalEsqlQueries = [],
-    esqlVariables,
   }) => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 
     if (esqlQuery) {
       try {
-        ({ columns, values } = await sampleQuery(esqlQuery, esqlVariables));
+        const sampledQuery = appendLimitToQuery(esqlQuery, SAMPLE_ROW_COUNT);
+        const params = getStartEndParams(sampledQuery, SAMPLE_TIME_RANGE);
+        const result = await esClient.asCurrentUser.esql.query({
+          query: sampledQuery,
+          ...(params.length ? { params } : {}),
+        });
+        columns = (result.columns ?? []) as Array<{ name: string; type: string }>;
+        values = (result.values ?? []) as unknown[][];
       } catch (err) {
         logger.warn(`custom_content template resolver: ES|QL sample fetch failed — ${err}`);
         throw new Error(describeSamplingFailure(err));
       }
     }
 
-    // A panel's other queries are sampled each time: the model can only keep using their columns
-    // when it sees them, and the sample is the only source of the real names.
-    const additionalSections: string[] = [];
-    const queriesAfterMain = esqlQuery || hasExistingQuery ? additionalEsqlQueries : [];
-    for (const [index, additionalQuery] of queriesAfterMain.entries()) {
-      const variable = `queries[${index + 1}]`;
-      try {
-        const sample = await sampleQuery(additionalQuery, esqlVariables);
-        additionalSections.push(
-          `Query ${index + 2}, read by the template as ${variable}:\n${
-            sample.columns.length > 0
-              ? formatSchemaAndSample(sample.columns, sample.values)
-              : 'Note: schema unavailable.'
-          }`
-        );
-      } catch (err) {
-        logger.warn(
-          `custom_content template resolver: ES|QL sample fetch failed for ${variable} — ${err}`
-        );
-        throw new Error(`Query ${index + 2} (${variable}): ${describeSamplingFailure(err)}`);
-      }
-    }
-    const hasAdditionalQueries = additionalSections.length > 0;
-
     const systemPrompt =
       esqlQuery || hasExistingQuery
-        ? buildSystemPromptTemplate(hasAdditionalQueries)
+        ? buildSystemPromptTemplate(additionalEsqlQueries.length > 0)
         : buildSystemPromptStatic();
 
     let userContent: string;
@@ -310,10 +260,14 @@ export const createCustomContentTemplateResolver = ({
       const promptPrefix = prompt ? `${prompt}\n\n` : '';
       let schemaSection: string;
       if (columns.length > 0) {
-        schemaSection = `${formatSchemaAndSample(
-          columns,
-          values
-        )}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${sanitizeCellValue(
+        const schemaLines = columns
+          .map((c) => `  - ${sanitizeCellValue(c.name)} (${sanitizeCellValue(c.type)})`)
+          .join('\n');
+        const sampleSection =
+          values.length > 0
+            ? `\n\nSample rows:\n${formatSampleTable(columns, values)}`
+            : '\n\nNote: no rows available for the current time range.';
+        schemaSection = `Data schema:\n${schemaLines}${sampleSection}\n\nGenerate an HTML template that accesses each column via bracket notation using its exact name, e.g. row["${sanitizeCellValue(
           columns[0].name
         )}"].value.`;
       } else {
@@ -330,11 +284,6 @@ export const createCustomContentTemplateResolver = ({
       userContent = `Current template:\n${existingTemplate}\n\nUpdate instructions: ${prompt}\n\nPreserve the overall layout, design, and color choices — only change what is necessary.`;
     } else {
       userContent = prompt;
-    }
-    if (hasAdditionalQueries) {
-      userContent += `\n\nThe panel has further queries. Their results are available to the template next to \`rows\`:\n\n${additionalSections.join(
-        '\n\n'
-      )}`;
     }
 
     const { inferenceClient } = await modelProvider.getDefaultModel();
