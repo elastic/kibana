@@ -302,7 +302,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(mockWriteElasticManifest).toHaveBeenCalledTimes(2);
       expect(noneSession.writeFiles).toHaveBeenCalledWith([
         {
-          path: '/workspace/elastic.md',
+          path: '/workspace/.connector-docs/elastic.md',
           content: Buffer.from('No telemetry connector is available.\n'),
         },
       ]);
