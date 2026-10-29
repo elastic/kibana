@@ -33,11 +33,8 @@ test.describe(
       }
 
       await pageObjects.streams.gotoPartitioningTab('logs.otel', {
-        waitUntil: 'domcontentloaded',
-      });
-      // This gate, not the document `load` event, owns the cold Cloud bootstrap wait.
-      await expect(page.getByTestId('routingRuleDragHandle-logs.otel.first')).toBeVisible({
-        timeout: 30_000,
+        // A cold Cloud bootstrap can outlast Playwright's navigation timeout.
+        readyWhen: page.getByTestId('routingRuleDragHandle-logs.otel.first'),
       });
     });
 

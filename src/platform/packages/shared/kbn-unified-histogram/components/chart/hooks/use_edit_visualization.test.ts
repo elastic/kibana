@@ -42,15 +42,19 @@ describe('useEditVisualization', () => {
         dataSource: new DataViewSource(dataViewWithTimefieldMock),
         relativeTimeRange,
         lensAttributes,
+        lensEditorOptions: { originatingApp: 'discover' },
       })
     );
     await waitFor(() => expect(hook.result.current).toBeDefined());
     hook.result.current!();
-    expect(navigateToPrefilledEditor).toHaveBeenCalledWith({
-      id: '',
-      time_range: relativeTimeRange,
-      attributes: lensAttributes,
-    });
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith(
+      {
+        id: '',
+        time_range: relativeTimeRange,
+        attributes: lensAttributes,
+      },
+      { originatingApp: 'discover' }
+    );
   });
 
   it('should return undefined if the data source has no ID', async () => {

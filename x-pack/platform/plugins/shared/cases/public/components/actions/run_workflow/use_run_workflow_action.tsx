@@ -48,6 +48,7 @@ export const useRunWorkflowAction = ({
     openModal,
     closeModal,
     runWorkflow,
+    telemetry,
     filterWorkflow,
     sortWorkflow,
   } = useRunCasesWorkflow();
@@ -87,8 +88,9 @@ export const useRunWorkflowAction = ({
       sortWorkflow,
       onClose: closeModal,
       onExecutionSettled: onActionSuccess,
+      telemetry,
     }),
-    [inputs, runWorkflow, filterWorkflow, sortWorkflow, closeModal, onActionSuccess]
+    [inputs, runWorkflow, filterWorkflow, sortWorkflow, closeModal, onActionSuccess, telemetry]
   );
 
   return {

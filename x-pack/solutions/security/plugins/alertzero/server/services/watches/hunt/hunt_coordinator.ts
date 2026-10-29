@@ -25,6 +25,7 @@ import { resolveHuntScope } from './common/resolve_index_scope';
 import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_tier2_targets';
 import type { Tier2TargetSource } from './common/resolve_tier2_targets';
 import { generateRecommendations } from './common/build_recommendations';
+import { selectHuntCallModel } from './common/select_hunt_call_model';
 import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
 import type { HuntNarrativeContext } from './common/build_hunt_narrative';
 import { isTier1SearchableIoc } from './tier1/attribute_hits';
@@ -42,8 +43,15 @@ import {
 import type { HuntForThreatServiceResult } from './tier1/types';
 import { huntBehavior } from './tier2/hunt_behavior';
 import type { HuntBehaviorResult } from './tier2/types';
+import { getPendingTechniqueIds } from './tier2/pending_technique_ids';
+import { getSearchedTechniqueIds } from './tier2/searched_technique_ids';
 
 export type HuntCoordinatorTier2SkipReason =
+  /**
+   * The report's enrichment has not finished, so there is nothing to hunt yet. The whole
+   * hunt is skipped and the gap is retryable, so the report stays eligible for a later sweep.
+   */
+  | 'extraction_pending'
   | 'configured_never'
   | 'no_inference'
   | 'no_environment_hits'
@@ -134,10 +142,11 @@ export interface HuntCoordinatorCoreResult {
   tier2?: HuntCoordinatorTier2;
   tier2_skipped_reason?: HuntCoordinatorTier2SkipReason;
   /**
-   * The model tiers that had no usable model on this run, in tier order; absent when every
-   * tier resolved. Reported whether or not the run needed them: a missing Efficient model
-   * quietly degrades dataset matching and recommendations without skipping anything, and a
-   * missing Frontier model is what makes Tier 2 report `no_inference`.
+   * Tiers whose consumers had no model on this run, in tier order; absent when every
+   * consumer resolved. A Cyber domain model covers the consumers it is selected for, so a
+   * missing Efficient tier is not listed when that model ran dataset matching and
+   * recommendations. A missing Frontier model is what makes Tier 2 report `no_inference`,
+   * including when a template-required Cyber model cannot run ES|QL generation.
    */
   unavailable_model_tiers?: HuntModelTier[];
   message: string;
@@ -175,6 +184,33 @@ export interface HuntCoordinatorCoreResult {
    * itself found nothing to report here.
    */
   incomplete?: HuntIncompleteness[];
+  /**
+   * Report IOCs excluded by adjudication and not searched by this run. Present only when
+   * the run used the report's IOC list (not a caller-supplied override) and at least one
+   * searchable IOC was ineligible. This is not an `incomplete` gap: the run is complete,
+   * it chose not to search those values.
+   */
+  excluded_report_iocs?: { count: number };
+  /**
+   * The techniques Tier 2 searched on this run, which the caller records so a later run on
+   * the same report spends its generation budget on the ones still unsearched. Absent when
+   * Tier 2 did not run.
+   */
+  searched_technique_ids?: string[];
+  /**
+   * The techniques Tier 2 could not search on this run but a later one still should (the ones a
+   * retryable gap names). The caller records them so the next run keeps them as pending even if
+   * its own extraction no longer returns them. Absent when Tier 2 did not run, which tells the
+   * caller to leave what is already recorded alone; empty when nothing is pending.
+   */
+  pending_technique_ids?: string[];
+  /**
+   * Whether this run was a manual replay of the whole report: Tier 2 ran on the report's own text
+   * without skipping anything an earlier run searched. The caller reads it to let this run's result
+   * replace an earlier finding, which a run that skipped techniques (or never reached Tier 2)
+   * cannot do. Absent when Tier 2 did not run.
+   */
+  replayed_whole_report?: boolean;
   /**
    * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible
    * entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
@@ -454,6 +490,60 @@ const coordinatorGaps = ({
   return gaps;
 };
 
+/**
+ * The result for a `report_id` run that stopped before any search: nothing about the
+ * report could be hunted, so every search-shaped field is empty. Only the reason and the
+ * completeness differ between callers.
+ */
+const buildSkippedReportResult = ({
+  reportId,
+  runId,
+  timeRange,
+  reason,
+  message,
+  nextStep,
+  gap,
+}: {
+  reportId: string;
+  runId: string;
+  timeRange: HuntCoordinatorParams['time_range'];
+  reason: HuntCoordinatorTier2SkipReason;
+  message: string;
+  nextStep: string;
+  gap?: HuntIncompleteness;
+}): HuntCoordinatorCoreResult => {
+  return {
+    status: 'tier1_only',
+    report_id: reportId,
+    run_id: runId,
+    index_patterns: [],
+    tier2_targets: [],
+    tier2_target_sources: [],
+    report_intent_targets: [],
+    actionable_indices: [],
+    tier1: {
+      tier: 1,
+      ...emptyHuntForThreatResult(
+        'no_searchable_terms',
+        [],
+        [],
+        timeRange ?? { from: 'now-24h', to: 'now' },
+        message
+      ),
+    },
+    tier2_skipped_reason: reason,
+    message,
+    next_step: nextStep,
+    has_confirmed_hit: false,
+    // Nothing about this run says whether the environment is clean, and a later run can
+    // differ: the report may be indexed, enrichment may finish, the scope may resolve.
+    // The report has to stay eligible.
+    completeness: 'incomplete_retryable',
+    completed_successfully: false,
+    ...(gap ? { incomplete: [gap] } : {}),
+  };
+};
+
 const huntCoordinatorCore = async (
   { esClient, reportsEsClient, mitreDataClient }: HuntCoordinatorClients,
   models: HuntModels,
@@ -475,6 +565,7 @@ const huntCoordinatorCore = async (
     text: callerText,
     run_id,
     indexPatterns,
+    trigger,
   } = params;
 
   // A report-driven run (the Worker's child passes only `report_id`) hunts the
@@ -488,37 +579,35 @@ const huntCoordinatorCore = async (
       ? await loadReportHuntContext({ esClient: reportsEsClient, spaceId, reportId })
       : null;
   if (reportId !== undefined && reportContext === null) {
-    const message = `Report ${reportId} was not found in space ${spaceId}.`;
-    return {
-      status: 'tier1_only',
-      report_id: reportId,
-      run_id,
-      index_patterns: [],
-      tier2_targets: [],
-      tier2_target_sources: [],
-      report_intent_targets: [],
-      actionable_indices: [],
-      tier1: {
-        tier: 1,
-        ...emptyHuntForThreatResult(
-          'no_searchable_terms',
-          [],
-          [],
-          timeRange ?? { from: 'now-24h', to: 'now' },
-          message
-        ),
-      },
-      tier2_skipped_reason: 'report_not_found',
-      message,
-      next_step:
+    return buildSkippedReportResult({
+      reportId,
+      runId: run_id,
+      timeRange,
+      reason: 'report_not_found',
+      message: `Report ${reportId} was not found in space ${spaceId}.`,
+      nextStep:
         'A report_id run requires the report to be visible in this space. Pass a report id that exists here, or omit report_id and pass iocs/techniques/text for an ad hoc hunt.',
-      has_confirmed_hit: false,
-      // Nothing about this run says whether the environment is clean, and a later run
-      // can differ: the report may be indexed, the scope may resolve, the index may
-      // come back. The report has to stay eligible.
-      completeness: 'incomplete_retryable',
-      completed_successfully: false,
-    };
+    });
+  }
+  if (reportContext?.title) narrativeContext.reportTitle = reportContext.title;
+  // Even when the caller supplied explicit inputs: a report_id run writes its evidence
+  // and Investigation state to that report, so an unenriched report is never hunted
+  // (or retired) until enrichment finishes.
+  if (reportId !== undefined && reportContext?.extraction_pending === true) {
+    return buildSkippedReportResult({
+      reportId,
+      runId: run_id,
+      timeRange,
+      reason: 'extraction_pending',
+      message: `Report ${reportId} has not been enriched yet.`,
+      nextStep:
+        'Wait for the threat intel extraction workflow to finish enriching this report, then re-run the hunt.',
+      gap: {
+        reason: 'extraction_pending',
+        detail:
+          'This report has not been enriched yet, so neither Tier 1 nor Tier 2 ran against it. It is not marked as hunted, so a later sweep can pick it up once enrichment finishes.',
+      },
+    });
   }
   // An omitted array falls back to the report; an explicitly empty one is a
   // choice and wins, as the contract above says caller input does. Testing length
@@ -526,7 +615,9 @@ const huntCoordinatorCore = async (
   // alone — still searched the report's IOCs and could confirm a hit on them.
   const iocs = callerIocs ?? reportContext?.iocs ?? [];
   const techniques = callerTechniques ?? reportContext?.techniques ?? [];
-  if (reportContext?.title) narrativeContext.reportTitle = reportContext.title;
+  // Caller-supplied IOCs replace the report's list, so adjudication exclusions from the
+  // report are not coverage this run chose to skip (same gating as `truncated` below).
+  const excludedIocs = callerIocs === undefined ? reportContext?.excluded_iocs : undefined;
   // Clamp after merge: request schema bounds caller `text`, but report-loaded
   // `content.body_text` has no such bound and must not exceed the Tier 2 contract.
   const text = clampHuntReportText(callerText ?? reportContext?.text);
@@ -647,6 +738,7 @@ const huntCoordinatorCore = async (
       // come back. The report has to stay eligible.
       completeness: 'incomplete_retryable',
       completed_successfully: false,
+      ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
     };
   }
 
@@ -725,17 +817,34 @@ const huntCoordinatorCore = async (
   // The model is a fallback inside it and spends tokens, so a run that Tier 2 will not
   // reach gets the deterministic targets only; they still describe the run.
   // The one place a hunt workload is mapped to a tier (see `HuntModels` for the reasoning).
-  // Both Tier 2 jobs run on Frontier, so Tier 2 is unreachable without it.
-  const tier2Models: HuntBehaviorModels | undefined = models.frontier
-    ? { extraction: models.frontier, esql: models.frontier }
-    : undefined;
+  // A saved Cyber domain model replaces the tier for extraction, dataset matching, and
+  // recommendations. ES|QL generation keeps Frontier when that model requires a prompt template.
+  // `unavailable_model_tiers` follows this selection: a tier is listed only when one of its
+  // consumers was left without a model.
+  const extractionModel = selectHuntCallModel({
+    tierModel: models.frontier,
+    cyberModel: models.cyber,
+  });
+  const esqlModel = selectHuntCallModel({
+    tierModel: models.frontier,
+    cyberModel: models.cyber,
+    messagesOnly: true,
+  });
+  const tier2Models: HuntBehaviorModels | undefined =
+    extractionModel && esqlModel ? { extraction: extractionModel, esql: esqlModel } : undefined;
   const tier2Reachable = gatedSkipReason === null && tier2Models !== undefined && Boolean(text);
+  // Dataset matching: a selection task from a list, so the efficient tier unless a
+  // cyber-domain model is saved. Resolved once so the empty-target guard below keys
+  // on the model the call actually used.
+  const datasetMatchModel = tier2Reachable
+    ? selectHuntCallModel({ tierModel: models.efficient, cyberModel: models.cyber })
+    : undefined;
   const targets = await resolveTier2Targets({
     scope,
     tier1: tier1Raw,
     report: scopeReport,
-    // Dataset matching: a selection task from a list, so the efficient tier.
-    model: tier2Reachable ? models.efficient : undefined,
+    model: datasetMatchModel,
+    messagesFallback: models.efficient,
     logger,
   });
 
@@ -791,6 +900,7 @@ const huntCoordinatorCore = async (
       completeness,
       completed_successfully: completedSuccessfully(completeness),
       ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
+      ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
     };
   };
 
@@ -841,6 +951,7 @@ const huntCoordinatorCore = async (
       completeness,
       completed_successfully: completedSuccessfully(completeness),
       ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
+      ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
     };
   }
 
@@ -849,12 +960,14 @@ const huntCoordinatorCore = async (
   // because a query with no allowed index could only be refused at the source gate.
   //
   // That only holds when every signal was consulted. Choosing a dataset by model is the last
-  // one, and without a model for the Efficient tier it never ran, so "no targets" says nothing
-  // about this report and a run with the model restored may find some. That is a Tier 2 that
-  // was requested but could not run, which stays retryable, and not a report to retire.
+  // one, and without a model for that call it never ran, so "no targets" says nothing
+  // about this report and a run with the model restored may find some. The call uses the
+  // Efficient tier unless a Cyber domain model is saved. Either one counts: a saved Cyber
+  // model that found nothing is `no_tier2_targets`, not a missing Efficient tier. A call
+  // that never ran stays retryable, and is not a report to retire.
   if (targets.tier2_targets.length === 0) {
     if (
-      !models.efficient &&
+      !datasetMatchModel &&
       needsModelDatasetMatch({ scope, tier1: tier1Raw, report: scopeReport })
     ) {
       const missingTier = describeModelTiers(['efficient']);
@@ -896,6 +1009,9 @@ const huntCoordinatorCore = async (
         report_id: reportId,
         llm_confidence_threshold: llmThreshold,
         iocs: iocs.map((ioc) => ({ type: ioc.type, value: ioc.value })),
+        ...(excludedIocs && excludedIocs.values.length > 0
+          ? { excluded_iocs: excludedIocs.values }
+          : {}),
         article_context: articleContext,
         window: tier1Raw.time_range,
         size,
@@ -982,6 +1098,13 @@ const huntCoordinatorCore = async (
     completeness,
     completed_successfully: completedSuccessfully(completeness),
     ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
+    ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
+    searched_technique_ids: getSearchedTechniqueIds(tier2Raw),
+    pending_technique_ids: getPendingTechniqueIds(
+      tier2Raw,
+      nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}
+    ),
+    replayed_whole_report: trigger === 'manual' && callerText === undefined,
   };
 
   if (!hasConfirmedHit) {
@@ -1005,8 +1128,11 @@ const huntCoordinatorCore = async (
     .join('\n');
 
   const recommendations = await generateRecommendations({
-    // A few short grounded lines with a template floor, so the efficient tier.
-    model: models.efficient,
+    // A few short grounded lines with a deterministic floor, so the efficient tier
+    // unless a cyber-domain model is saved. The efficient model takes the call when
+    // the gateway rejects the cyber model's template.
+    model: selectHuntCallModel({ tierModel: models.efficient, cyberModel: models.cyber }),
+    messagesFallback: models.efficient,
     logger,
     result: coreResult,
     context: recommendationContext,

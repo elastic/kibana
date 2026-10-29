@@ -1,6 +1,9 @@
 # -----
 # Copy from internal roles config in elasticsearch-controller
 # -----
+
+# Predefined roles for "Observability" project types
+
 viewer:
   metadata:
     _public: true
@@ -14,6 +17,7 @@ viewer:
       privileges:
         - 'read'
         - 'view_index_metadata'
+        - 'read_view_metadata'
       allow_restricted_indices: false
     - names:
         - '.siem-signals*'
@@ -36,6 +40,12 @@ viewer:
       privileges:
         - 'read'
         - 'view_index_metadata'
+    - names:
+        - '.evaluation-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'
       privileges:
@@ -55,7 +65,9 @@ editor:
         - '/~(([.]|ilm-history-).*)/'
       privileges:
         - 'read'
+        - 'read_failure_store'
         - 'view_index_metadata'
+        - 'read_view_metadata'
       allow_restricted_indices: false
     - names:
         - 'observability-annotations'
@@ -79,8 +91,8 @@ editor:
         - '.alerts*'
         - '.internal.preview.alerts*'
         - '.preview.alerts*'
-        - '.adhoc.alerts*'
         - '.internal.adhoc.alerts*'
+        - '.adhoc.alerts*'
       privileges:
         - 'read'
         - 'view_index_metadata'
@@ -95,6 +107,13 @@ editor:
         - 'view_index_metadata'
         - 'manage'
     - names:
+        - '.evaluation-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+      allow_restricted_indices: false
+    - names:
         - 'kibana_sample_data_*'
       privileges:
         - 'read'
@@ -106,6 +125,61 @@ editor:
     - application: 'kibana-.kibana'
       privileges:
         - 'all'
+      resources:
+        - '*'
+  run_as: []
+_nightshift_agent:
+  description: 'Privileges for the service account of the Nightshift agent. Assigned by Kibana; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names:
+        - 'logs-*'
+        - 'metrics-*'
+        - 'traces-*'
+        - 'apm-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - 'ai-index-idx-nightshift-cortex'
+        - 'ai-index-idx-nightshift-semantic-memory'
+        - 'ai-index-idx-nightshift-decision-trees'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+        - 'auto_configure'
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'feature_nightshift.minimal_all'
+        - 'feature_agentBuilder.minimal_all'
+        - 'feature_actions.read'
+        - 'feature_workflowsManagement.read'
+      resources:
+        - '*'
+  run_as: []
+_nightshift_automations:
+  description: 'Privileges for the service account of Nightshift automations. Assigned by Kibana; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'feature_agenticInvestigations.minimal_read'
+        - 'feature_agenticInvestigations.investigations_all'
+        - 'feature_agentBuilder.minimal_all'
+        - 'feature_actions.read'
       resources:
         - '*'
   run_as: []

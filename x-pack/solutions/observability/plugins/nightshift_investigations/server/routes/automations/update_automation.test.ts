@@ -154,9 +154,16 @@ describe('request validation', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
 
+  it('rejects a daily dispatch limit of zero and accepts removing the limit', () => {
+    const parseLimit = (dailyDispatchLimit: number | null) =>
+      params.parse({ path: { id: 'automation-1' }, body: { runtime: { dailyDispatchLimit } } });
+    expect(() => parseLimit(0)).toThrow();
+    expect(parseLimit(null).body.runtime).toEqual({ dailyDispatchLimit: null });
+  });
+
   it('rejects a Slack trigger row with no filters', () => {
     expect(() => parseRows([{ kind: 'slack', event: 'message' }])).toThrow(
-      'at least one of channels, users or messageFilter'
+      'at least one of channels, users, bots or messageFilter'
     );
   });
 
@@ -272,3 +279,63 @@ it('returns to the Elastic Slack app when the saved connector is explicitly clea
     params: { channel: '#oncall' },
   });
 });
+
+const dailySchedule = { kind: 'schedule', schedulePreset: 'daily', time: '09:00' };
+
+it('validates merged instructions even when a partial update only enables the schedule', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: { ...existing, trigger: { rows: [dailySchedule] }, execution: {} },
+  });
+  await expect(call({ isEnabled: true })).rejects.toMatchObject({ output: { statusCode: 400 } });
+  expect(updateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('rejects clearing instructions on a saved scheduled automation', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: { ...existing, trigger: { rows: [dailySchedule] } },
+  });
+  await expect(call({ execution: { promptTemplate: null } })).rejects.toMatchObject({
+    output: { statusCode: 400 },
+  });
+  expect(updateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('disables a scheduled automation through the normal workflow update', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      trigger: { rows: [dailySchedule] },
+    },
+  });
+  await call({ isEnabled: false });
+  expect(updateWorkflow).toHaveBeenCalledWith(
+    'workflow-1',
+    { yaml: expect.any(String) },
+    'default',
+    expect.anything()
+  );
+  expect(parse(updateWorkflow.mock.calls[0][1].yaml).enabled).toBe(false);
+  expect(soClient.update).toHaveBeenCalledWith(
+    'nightshift-automation',
+    'automation-1',
+    expect.objectContaining({ isEnabled: false }),
+    { mergeAttributes: false }
+  );
+});
+
+it.each([{ name: 'Changed' }, { isEnabled: false }])(
+  'rejects unsupported schedules on update %j without changing the workflow or saved object',
+  async (body) => {
+    soClient.get.mockResolvedValue({
+      attributes: {
+        ...existing,
+        trigger: { rows: [{ ...dailySchedule, schedulePreset: 'custom' }] },
+      },
+    });
+    await expect(call(body)).rejects.toMatchObject({ output: { statusCode: 400 } });
+    expect(updateWorkflow).not.toHaveBeenCalled();
+    expect(soClient.update).not.toHaveBeenCalled();
+  }
+);

@@ -25,6 +25,7 @@ import {
 import type { ReportConversationFieldsChangedParams } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
 import { ModelProvider } from '@kbn/inference-common';
 import type { ExecutionTelemetry } from '../services/execution/utils/report_round_telemetry';
+import { attachmentEventFixture } from '../test_utils/timeline';
 import { AnalyticsService } from './analytics_service';
 
 describe('AnalyticsService', () => {
@@ -227,6 +228,7 @@ describe('AnalyticsService', () => {
         roundCount: 2,
         modelProvider,
         conversationAttachments: [],
+        inputAttachmentEvents: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
@@ -254,6 +256,71 @@ describe('AnalyticsService', () => {
       });
     });
 
+    it('reports reasoning tokens and the distinct models of the round', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: {
+          ...round,
+          model_usage: {
+            ...round.model_usage,
+            reasoning_tokens: 3,
+            connectors: [
+              {
+                connector_id: 'c1',
+                model: 'gpt-97q',
+                llm_calls: 2,
+                input_tokens: 3,
+                output_tokens: 4,
+              },
+              {
+                connector_id: 'c2',
+                model: 'small-1',
+                llm_calls: 1,
+                input_tokens: 1,
+                output_tokens: 1,
+              },
+              {
+                connector_id: 'c3',
+                model: 'small-1',
+                llm_calls: 1,
+                input_tokens: 1,
+                output_tokens: 1,
+              },
+            ],
+          },
+        },
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+        inputAttachmentEvents: [],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({
+          reasoning_tokens: 3,
+          models: ['gpt-97q', 'small-1'],
+          models_count: 2,
+        })
+      );
+    });
+
+    it('omits the models of a round without a per-model breakdown', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        round,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+        inputAttachmentEvents: [],
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).not.toHaveProperty('models');
+      expect(payload).not.toHaveProperty('models_count');
+    });
+
     it('reports attachments.read in tools_invoked', () => {
       const roundWithBuiltinTool: ConversationRound = {
         ...round,
@@ -276,6 +343,7 @@ describe('AnalyticsService', () => {
         roundCount: 2,
         modelProvider,
         conversationAttachments: [],
+        inputAttachmentEvents: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(
@@ -313,6 +381,7 @@ describe('AnalyticsService', () => {
         roundCount: 2,
         modelProvider,
         conversationAttachments: imageAttachments,
+        inputAttachmentEvents: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(
@@ -320,6 +389,34 @@ describe('AnalyticsService', () => {
         expect.objectContaining({
           attachments: [AttachmentType.image, AttachmentType.image],
         })
+      );
+    });
+
+    it('reports image attachments uploaded with the message as chat_input events', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: { ...round, input: { message: 'What is in this image?' } },
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+        inputAttachmentEvents: [
+          attachmentEventFixture({
+            id: 'img',
+            source: 'chat_input',
+            attachmentType: AttachmentType.image,
+          }),
+          attachmentEventFixture({
+            id: 'tool-img',
+            source: 'execution',
+            attachmentType: AttachmentType.image,
+          }),
+        ],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({ attachments: [AttachmentType.image] })
       );
     });
 
@@ -345,6 +442,7 @@ describe('AnalyticsService', () => {
         roundCount: 2,
         modelProvider,
         conversationAttachments: imageAttachments,
+        inputAttachmentEvents: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(
@@ -361,6 +459,7 @@ describe('AnalyticsService', () => {
         roundCount: 2,
         modelProvider,
         conversationAttachments: [],
+        inputAttachmentEvents: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.RoundComplete, {
@@ -396,6 +495,7 @@ describe('AnalyticsService', () => {
         roundCount: 2,
         modelProvider,
         conversationAttachments: [],
+        inputAttachmentEvents: [],
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledWith(
@@ -412,6 +512,7 @@ describe('AnalyticsService', () => {
         roundCount: 2,
         modelProvider,
         conversationAttachments: [],
+        inputAttachmentEvents: [],
         workflowExecutionId: 'workflow-run-1',
       });
 
@@ -429,6 +530,7 @@ describe('AnalyticsService', () => {
         roundCount: 2,
         modelProvider,
         conversationAttachments: [],
+        inputAttachmentEvents: [],
       });
 
       const [[, payload]] = analytics.reportEvent.mock.calls;
@@ -448,6 +550,7 @@ describe('AnalyticsService', () => {
           roundCount: 2,
           modelProvider,
           conversationAttachments: [],
+          inputAttachmentEvents: [],
         })
       ).not.toThrow();
     });
@@ -464,6 +567,7 @@ describe('AnalyticsService', () => {
         roundCount: 2,
         modelProvider,
         conversationAttachments: [],
+        inputAttachmentEvents: [],
       });
 
       expect(logger.debug).toHaveBeenCalled();
@@ -888,6 +992,7 @@ describe('AnalyticsService', () => {
         executionId: 'execution-1',
         modelProvider,
         conversationAttachments: [],
+        inputAttachmentEvents: [],
         telemetry: telemetry(),
       });
 
@@ -911,6 +1016,41 @@ describe('AnalyticsService', () => {
       );
     });
 
+    it("reports this execution's reasoning tokens and models", () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments: [],
+        inputAttachmentEvents: [],
+        telemetry: telemetry({
+          executionRound: buildRound({
+            model_usage: {
+              connector_id: 'c1',
+              llm_calls: 1,
+              input_tokens: 4,
+              output_tokens: 2,
+              reasoning_tokens: 1,
+              connectors: [
+                {
+                  connector_id: 'c1',
+                  model: 'gpt-97q',
+                  llm_calls: 1,
+                  input_tokens: 4,
+                  output_tokens: 2,
+                  reasoning_tokens: 1,
+                },
+              ],
+            },
+          }),
+        }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).toEqual(
+        expect.objectContaining({ reasoning_tokens: 1, models: ['gpt-97q'], models_count: 1 })
+      );
+    });
+
     it('resolves user image attachments from refs, as round_complete does', () => {
       const conversationAttachments: VersionedAttachment[] = [
         { id: 'image-1', type: AttachmentType.image, versions: [], current_version: 1 },
@@ -920,6 +1060,7 @@ describe('AnalyticsService', () => {
         agentId: 'my-agent',
         modelProvider,
         conversationAttachments,
+        inputAttachmentEvents: [],
         telemetry: telemetry({
           roundTotals: buildRound({
             input: {
@@ -942,6 +1083,7 @@ describe('AnalyticsService', () => {
         agentId: 'my-agent',
         modelProvider,
         conversationAttachments: [],
+        inputAttachmentEvents: [],
         telemetry: telemetry({
           isRoundTerminal: false,
           isResume: false,
@@ -966,6 +1108,7 @@ describe('AnalyticsService', () => {
         agentId: 'my-agent',
         modelProvider,
         conversationAttachments: [],
+        inputAttachmentEvents: [],
         telemetry: telemetry({ isResume: false, executionIndex: 0 }),
       });
 
@@ -980,6 +1123,7 @@ describe('AnalyticsService', () => {
         agentId: 'my-agent',
         modelProvider,
         conversationAttachments: [],
+        inputAttachmentEvents: [],
         telemetry: telemetry({ humanLatencyMs: 30_000 }),
       });
 
@@ -997,6 +1141,7 @@ describe('AnalyticsService', () => {
           agentId: 'my-agent',
           modelProvider,
           conversationAttachments: [],
+          inputAttachmentEvents: [],
           telemetry: telemetry(),
         })
       ).not.toThrow();

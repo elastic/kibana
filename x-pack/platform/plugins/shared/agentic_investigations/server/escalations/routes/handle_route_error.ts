@@ -8,6 +8,7 @@
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
 import {
+  EscalationLinkForbiddenError,
   InvalidLinkedInvestigationError,
   NotAnEscalationError,
   TooManyLinkedInvestigationsError,
@@ -38,6 +39,10 @@ export const handleEscalationRouteError = (
   response: KibanaResponseFactory,
   logger: Logger
 ) => {
+  if (error instanceof EscalationLinkForbiddenError) {
+    return response.forbidden({ body: { message: error.message } });
+  }
+
   if (error instanceof InvalidLinkedInvestigationError) {
     return response.badRequest({ body: { message: error.message } });
   }

@@ -8,7 +8,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useFilters } from './use_filters';
 import { useDispatch } from 'react-redux-v7';
-import { WrappedHelper } from '../../../../utils/testing';
+import { HookWrapper } from '../../../../utils/testing/hook_helpers';
 import { fetchMonitorFiltersAction } from '../../../../state';
 
 jest.mock('react-redux-v7', () => ({
@@ -22,7 +22,7 @@ describe('useMonitorListFilters', () => {
   it('returns expected results', () => {
     const { result } = renderHook(() => useFilters(), {
       wrapper: ({ children }: React.PropsWithChildren) => (
-        <WrappedHelper>{React.createElement(React.Fragment, {}, children)}</WrappedHelper>
+        <HookWrapper>{React.createElement(React.Fragment, {}, children)}</HookWrapper>
       ),
     });
 
@@ -38,7 +38,7 @@ describe('useMonitorListFilters', () => {
   it('dispatches action when filters are null', () => {
     const Wrapper = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper
+        <HookWrapper
           state={{
             monitorList: {
               monitorFilterOptions: null,
@@ -46,7 +46,7 @@ describe('useMonitorListFilters', () => {
           }}
         >
           {React.createElement(React.Fragment, null, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
     const spy = jest.fn();
@@ -73,7 +73,7 @@ describe('useMonitorListFilters', () => {
     };
     const Wrapper = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper
+        <HookWrapper
           state={{
             monitorList: {
               monitorFilterOptions: filters,
@@ -81,7 +81,7 @@ describe('useMonitorListFilters', () => {
           }}
         >
           {React.createElement(React.Fragment, null, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
     const spy = jest.fn();

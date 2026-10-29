@@ -13,17 +13,21 @@ export enum StorageExplorerAvailability {
   NotAvailable = 'notAvailable',
 }
 
-/** Storage explorer only covers Universal Profiling, so it needs Universal Profiling to be set up. */
+/** Storage explorer only covers Universal Profiling, so it needs Universal Profiling to be set up
+ * or, when its setup is incomplete, to already have data. */
 export const getStorageExplorerAvailability = ({
   isAvailable,
   hasSetup,
+  hasData,
 }: Pick<
   UniversalProfilingSchemaStatus,
-  'isAvailable' | 'hasSetup'
+  'isAvailable' | 'hasSetup' | 'hasData'
 >): StorageExplorerAvailability => {
   if (!isAvailable) {
     return StorageExplorerAvailability.NotAvailable;
   }
 
-  return hasSetup ? StorageExplorerAvailability.Available : StorageExplorerAvailability.NotSetUp;
+  return hasSetup || hasData
+    ? StorageExplorerAvailability.Available
+    : StorageExplorerAvailability.NotSetUp;
 };

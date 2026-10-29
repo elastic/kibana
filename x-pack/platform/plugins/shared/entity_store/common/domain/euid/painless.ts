@@ -22,6 +22,108 @@ import {
 import type { EuidGateOptions } from './commons';
 import { assertEmittableEntityType, isEuidField, waiveForAlerts } from './commons';
 
+export interface EuidPainlessOptions extends EuidGateOptions {
+  /**
+   * The per-field Painless fragments the script is built from. Defaults to
+   * {@link docValuesExpressions}.
+   */
+  expressions?: PainlessFieldExpressions;
+}
+
+/**
+ * The per-field Painless expressions a generated script is assembled from.
+ *
+ * They are passed in so that there is one EUID implementation, rather than one per context a
+ * script can run in. Reading a field is the only part that cannot be shared — a search script
+ * reads a document through `doc`, an update-by-query script through `ctx._source` — so that part
+ * is supplied by the caller and the rest is generated from the entity definitions as usual.
+ *
+ * The effect is that a change to an entity's identity fields reaches every script, instead of each
+ * one having to be kept in step by hand.
+ */
+export interface PainlessFieldExpressions {
+  /** Painless boolean: the field is present and not empty. */
+  isNotEmpty: (field: string) => string;
+  /**
+   * Painless boolean: the field is present, regardless of whether its value is empty.
+   *
+   * Distinct from {@link isNotEmpty} only for doc-values, where presence and emptiness are
+   * separate checks. Reading `_source` collapses the two, since an empty string reads as absent.
+   */
+  isPresent: (field: string) => string;
+  /** Painless expression yielding the field's value, or null. */
+  value: (field: string) => string;
+  /** Emitted once at the top of the script, when reading a field needs a helper function. */
+  preamble?: string;
+  /**
+   * The one variable the generated reads are written against — `doc` for doc-values, the source
+   * root for `_source`.
+   *
+   * Declared rather than assumed because a Painless user-defined function sees only its own
+   * parameters, not `doc`, `params` or `ctx`. A wrapper that puts the evaluation in a function
+   * declares `param` on it and passes `expression` at the call site.
+   */
+  rootBinding: { param: string; expression: string };
+}
+
+/** The doc-values implementation of {@link PainlessFieldExpressions}, and the default. */
+export const docValuesExpressions: PainlessFieldExpressions = {
+  isNotEmpty: (field) => {
+    const escaped = escapePainlessField(field);
+    return `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0 && doc['${escaped}'].value != null && doc['${escaped}'].value != ""`;
+  },
+  isPresent: (field) => {
+    const escaped = escapePainlessField(field);
+    return `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0`;
+  },
+  value: (field) => `doc['${escapePainlessField(field)}'].value`,
+  rootBinding: { param: 'doc', expression: 'doc' },
+};
+
+/**
+ * The name of the `_source` reader emitted as the preamble. Kept short because it appears once per
+ * field read.
+ */
+const SOURCE_READER = '__euid_src';
+
+/**
+ * Mirrors `getFieldValue` in commons.ts, which is what the in-memory implementation uses: try the
+ * flattened key first, then walk the nested path, collapse an array to its first element, and
+ * treat an empty string as absent.
+ *
+ * Path segments are passed in as a list rather than split at runtime, because Painless regex is
+ * disabled by default and the field names are known when the script is generated.
+ */
+const SOURCE_READER_PREAMBLE = `def ${SOURCE_READER}(def src, String flat, List path) { if (src == null) { return null; } def v = src.containsKey(flat) ? src[flat] : null; if (v == null) { def cur = src; for (int i = 0; i < path.size(); i++) { if (!(cur instanceof Map)) { return null; } cur = cur[path.get(i)]; if (cur == null) { return null; } } v = cur; } if (v instanceof List) { if (((List)v).isEmpty()) { return null; } v = ((List)v).get(0); } if (v == null || v instanceof Map || v instanceof List) { return null; } String r = String.valueOf(v); return r == "" ? null : r; }`;
+
+/**
+ * The `_source` implementation of {@link PainlessFieldExpressions}, for contexts with no
+ * doc-values.
+ *
+ * `rootExpression` is the Painless expression holding the source, which differs by context:
+ * `ctx._source` in update-by-query and ingest scripts, `params._source` in search script fields.
+ */
+export const createSourceExpressions = (rootExpression: string): PainlessFieldExpressions => {
+  // Referenced by name so the expression can be passed into a wrapping function; see rootBinding.
+  const param = '__euid_root';
+  const value = (field: string) => {
+    const flat = escapePainlessField(field);
+    const segments = field.split('.').map((segment) => `'${escapePainlessField(segment)}'`);
+    return `${SOURCE_READER}(${param},'${flat}',[${segments.join(',')}])`;
+  };
+
+  return {
+    isNotEmpty: (field) => `${value(field)} != null`,
+    isPresent: (field) => `${value(field)} != null`,
+    value,
+    preamble: SOURCE_READER_PREAMBLE,
+    rootBinding: { param, expression: rootExpression },
+  };
+};
+
+/** Reads `ctx._source`, for update-by-query and ingest scripts. */
+export const sourceExpressions: PainlessFieldExpressions = createSourceExpressions('ctx._source');
+
 /**
  * Keyword runtime field scripts must call emit(); they cannot return a value from the script root.
  *
@@ -32,9 +134,16 @@ import { assertEmittableEntityType, isEuidField, waiveForAlerts } from './common
  * Wrapping the evaluation in a `String`-returning function preserves ordinary `return`
  * statements from getEuidPainlessEvaluation without break/loop tricks.
  */
-function wrapEvaluationScriptForKeywordRuntimeField(evaluationScript: string): string {
+function wrapEvaluationScriptForKeywordRuntimeField(
+  evaluationScript: string,
+  expressions: PainlessFieldExpressions
+): string {
   const fn = '___euid_rt_eval';
-  return `String ${fn}(def doc) { ${evaluationScript} } String ___euid = ${fn}(doc); if (___euid != null) { emit(___euid); }`;
+  // Painless has no nested function definitions, so the preamble has to sit at the script root
+  // rather than inside the wrapper.
+  const prefix = expressions.preamble ? `${expressions.preamble} ` : '';
+  const { param, expression } = expressions.rootBinding;
+  return `${prefix}String ${fn}(def ${param}) { ${evaluationScript} } String ___euid = ${fn}(${expression}); if (___euid != null) { emit(___euid); }`;
 }
 
 /**
@@ -43,14 +152,15 @@ function wrapEvaluationScriptForKeywordRuntimeField(evaluationScript: string): s
  */
 function buildPreAggEvaluatedVarOverridesPreamble(
   whenRules: SetFieldsByCondition[] | undefined,
-  evaluatedVars: Map<string, string>
+  evaluatedVars: Map<string, string>,
+  expressions: PainlessFieldExpressions
 ): string {
   if (!whenRules?.length) {
     return '';
   }
   const parts: string[] = [];
   for (const rule of whenRules) {
-    const cond = streamlangConditionToPainlessDoc(rule.condition, { evaluatedVars });
+    const cond = conditionToPainless(rule.condition, { evaluatedVars, expressions });
     for (const [field, value] of Object.entries(rule.fields)) {
       if (typeof value !== 'string') {
         continue;
@@ -74,22 +184,71 @@ function buildPreAggEvaluatedVarOverridesPreamble(
  * runtime_mappings: { 'user_id': getEuidPainlessRuntimeMapping(userDefinition) }
  * ```
  *
+ * For update contexts, where doc-values are unavailable, see
+ * {@link getEuidPainlessSourceUpdateScript}.
+ *
  * @param entityDefinition - The entity definition whose identity rules compute the EUID
  * @returns A runtime keyword field mapping (type + script) for use in runtime_mappings.
  */
 export function getEuidPainlessRuntimeMapping(
   entityDefinition: EntityDefinitionWithoutId,
-  options?: EuidGateOptions
+  options?: EuidPainlessOptions
 ): {
   type: 'keyword';
   script: { source: string };
 } {
+  const expressions = options?.expressions ?? docValuesExpressions;
   const returnScript = getEuidPainlessEvaluation(entityDefinition, options);
-  const emitScript = wrapEvaluationScriptForKeywordRuntimeField(returnScript);
+  const emitScript = wrapEvaluationScriptForKeywordRuntimeField(returnScript, expressions);
   return {
     type: 'keyword',
     script: { source: emitScript },
   };
+}
+
+/**
+ * The update-context counterpart to {@link getEuidPainlessRuntimeMapping}: both assemble a whole
+ * script around the fragments {@link getEuidPainlessEvaluation} produces, one to emit a runtime
+ * field value, this one to write onto the document.
+ *
+ * A Painless script for update contexts — `update_by_query`, ingest — that derives the EUID for
+ * each of `entityDefinitions` from `ctx._source` and runs `onEuids`, a snippet in which the local
+ * `euids` is a `List` of the values found. When no definition resolves, the document is left
+ * untouched via `ctx.op = 'noop'` rather than rewritten.
+ *
+ * All the definitions are evaluated in one script so a document is rewritten once rather than once
+ * per entity type, and so the resulting list reflects a single read of the source.
+ *
+ * Reads `_source` because update contexts have no doc-values. That also means it resolves fields
+ * the way the in-memory implementation does, which is not always the way doc-values do — a
+ * multi-valued field yields the first value written rather than the lowest.
+ */
+export function getEuidPainlessSourceUpdateScript(
+  entityDefinitions: EntityDefinitionWithoutId[],
+  onEuids: string
+): string {
+  const { preamble, rootBinding } = sourceExpressions;
+
+  const evaluators = entityDefinitions.map((entityDefinition) => ({
+    fn: `__euid_eval_${entityDefinition.type}`,
+    body: getEuidPainlessEvaluation(entityDefinition, {
+      applyPostAggFilter: false,
+      expressions: sourceExpressions,
+    }),
+  }));
+
+  return [
+    preamble ?? '',
+    ...evaluators.map(({ fn, body }) => `String ${fn}(def ${rootBinding.param}) { ${body} }`),
+    'List euids = new ArrayList(); String __euid;',
+    ...evaluators.map(
+      ({ fn }) =>
+        `__euid = ${fn}(${rootBinding.expression}); if (__euid != null) { euids.add(__euid); }`
+    ),
+    `if (euids.isEmpty()) { ctx.op = 'noop'; } else { ${onEuids} }`,
+  ]
+    .filter(Boolean)
+    .join(' ');
 }
 
 /**
@@ -112,9 +271,9 @@ export function getEuidPainlessRuntimeMapping(
  */
 export function getEuidPainlessEvaluation(
   entityDefinition: EntityDefinitionWithoutId,
-  options?: EuidGateOptions
+  options?: EuidPainlessOptions
 ): string {
-  const { applyPostAggFilter = true } = options ?? {};
+  const { applyPostAggFilter = true, expressions = docValuesExpressions } = options ?? {};
   const { identityField, type: entityType } = entityDefinition;
   let prefixExpr = '';
   if (!identityField.skipTypePrepend) {
@@ -124,9 +283,9 @@ export function getEuidPainlessEvaluation(
 
   if (isSingleFieldIdentity(identityField)) {
     const field = identityField.singleField;
-    const escaped = escapePainlessField(field);
-    const condition = `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0 && doc['${escaped}'].value != null && doc['${escaped}'].value != ""`;
-    return `if (${condition}) { return ${prefixExpr}doc['${escaped}'].value; } return null;`;
+    return `if (${expressions.isNotEmpty(field)}) { return ${prefixExpr}${expressions.value(
+      field
+    )}; } return null;`;
   }
 
   const { euidRanking } = identityField;
@@ -138,42 +297,42 @@ export function getEuidPainlessEvaluation(
   let preamble = '';
   const fieldEvaluations = identityField.fieldEvaluations ?? [];
   if (fieldEvaluations.length > 0) {
-    const result = buildFieldEvaluationsPreamble(fieldEvaluations);
+    const result = buildFieldEvaluationsPreamble(fieldEvaluations, expressions);
     preamble = result.preamble + ' ';
     result.evaluatedVars.forEach((v, k) => evaluatedVars.set(k, v));
   }
   preamble += buildPreAggEvaluatedVarOverridesPreamble(
     getPreAggFieldOverrides(entityDefinition),
-    evaluatedVars
+    evaluatedVars,
+    expressions
   );
   preamble += buildPreAggEvaluatedVarOverridesPreamble(
     getPostStatsFieldOverrides(entityDefinition),
-    evaluatedVars
+    evaluatedVars,
+    expressions
   );
 
   /** Same order as getEuidFromObject: field evals (and pre/post stats overrides) run before the pipeline gate. */
-  const filterOpts: StreamlangToPainlessDocOptions = { evaluatedVars };
+  const filterOpts: ConditionToPainlessOptions = { evaluatedVars, expressions };
   const filterChecks: string[] = [];
   const gateConditions = applyPostAggFilter
     ? [identityField.documentsFilter, waiveForAlerts(getPostAggFilter(entityDefinition))]
     : [identityField.documentsFilter];
   for (const filterCond of gateConditions.filter((c): c is Condition => Boolean(c))) {
-    filterChecks.push(
-      `if (!(${streamlangConditionToPainlessDoc(filterCond, filterOpts)})) { return null; }`
-    );
+    filterChecks.push(`if (!(${conditionToPainless(filterCond, filterOpts)})) { return null; }`);
   }
   const filterPreamble = filterChecks.length > 0 ? filterChecks.join(' ') + ' ' : '';
 
   const fieldCondition = (field: string): string => {
     const varName = evaluatedVars.get(field);
     if (varName) return `${varName} != null`;
-    return painlessFieldNonEmpty(field);
+    return expressions.isNotEmpty(field);
   };
 
   const fieldValueExpr = (field: string): string => {
     const varName = evaluatedVars.get(field);
     if (varName) return varName;
-    return `doc['${escapePainlessField(field)}'].value`;
+    return expressions.value(field);
   };
 
   const buildBranchClauses = (ranking: EuidAttribute[][]) =>
@@ -203,7 +362,7 @@ export function getEuidPainlessEvaluation(
     const branch = euidRanking.branches[i];
     const clauses = buildBranchClauses(branch.ranking);
     if (branch.when) {
-      const cond = streamlangConditionToPainlessDoc(branch.when, { evaluatedVars });
+      const cond = conditionToPainless(branch.when, { evaluatedVars, expressions });
       const prefix = i === 0 ? 'if' : 'else if';
       branchParts.push(`${prefix} (${cond}) { ${clauses} return null; }`);
     } else {
@@ -235,39 +394,40 @@ export function getEuidPainlessEvaluationForSearch(
   return getEuidPainlessEvaluation(entityDefinition, { applyPostAggFilter: false });
 }
 
-function painlessFieldNonEmpty(field: string): string {
-  const escaped = escapePainlessField(field);
-  return `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0 && doc['${escaped}'].value != null && doc['${escaped}'].value != ""`;
-}
-
-export interface StreamlangToPainlessDocOptions {
+export interface ConditionToPainlessOptions {
   /** Maps logical field names (e.g. entity.namespace) to Painless locals from field-eval preamble. */
   evaluatedVars?: ReadonlyMap<string, string>;
+  /**
+   * The per-field Painless fragments the condition is built from. Defaults to
+   * {@link docValuesExpressions}.
+   */
+  expressions?: PainlessFieldExpressions;
 }
 
 /**
- * Translates a streamlang condition to Painless using doc['field'].value and/or evaluated locals.
- * Handles and, or, not, and field predicates (eq, neq, exists, includes).
+ * Translates a streamlang condition into a Painless boolean, reading fields through `expressions`
+ * and/or evaluated locals. Handles and, or, not, and field predicates (eq, neq, exists, includes).
  *
  * @internal Exported for testing.
  */
-export function streamlangConditionToPainlessDoc(
+export function conditionToPainless(
   condition: unknown,
-  options?: StreamlangToPainlessDocOptions
+  options?: ConditionToPainlessOptions
 ): string {
-  const opts: StreamlangToPainlessDocOptions = options ?? {};
+  const opts: ConditionToPainlessOptions = options ?? {};
+  const expressions = opts.expressions ?? docValuesExpressions;
   if (!condition || typeof condition !== 'object') return 'false';
   const c = condition as Record<string, unknown>;
   if ('and' in c && Array.isArray(c.and)) {
-    const parts = (c.and as unknown[]).map((sub) => streamlangConditionToPainlessDoc(sub, opts));
+    const parts = (c.and as unknown[]).map((sub) => conditionToPainless(sub, opts));
     return parts.length > 0 ? `(${parts.join(' && ')})` : 'true';
   }
   if ('or' in c && Array.isArray(c.or)) {
-    const parts = (c.or as unknown[]).map((sub) => streamlangConditionToPainlessDoc(sub, opts));
+    const parts = (c.or as unknown[]).map((sub) => conditionToPainless(sub, opts));
     return parts.length > 0 ? `(${parts.join(' || ')})` : 'false';
   }
   if ('not' in c) {
-    return `!(${streamlangConditionToPainlessDoc(c.not, opts)})`;
+    return `!(${conditionToPainless(c.not, opts)})`;
   }
   if ('always' in c) return 'true';
   if ('never' in c) return 'false';
@@ -293,22 +453,22 @@ export function streamlangConditionToPainlessDoc(
         return `${varName} != null && ${varName} != "" && ${varName}.contains("${val}")`;
       }
     }
-    const escaped = escapePainlessField(field);
-    const nonEmpty = painlessFieldNonEmpty(field);
+    const nonEmpty = expressions.isNotEmpty(field);
+    const valueExpr = expressions.value(field);
     if ('eq' in c && c.eq !== undefined) {
       const val = escapePainlessString(String(c.eq));
-      return `(${nonEmpty} && doc['${escaped}'].value == "${val}")`;
+      return `(${nonEmpty} && ${valueExpr} == "${val}")`;
     }
     if ('neq' in c && c.neq !== undefined) {
       const val = escapePainlessString(String(c.neq));
-      return `(!(${nonEmpty}) || doc['${escaped}'].value != "${val}")`;
+      return `(!(${nonEmpty}) || ${valueExpr} != "${val}")`;
     }
     if ('exists' in c) {
       return c.exists ? nonEmpty : `!(${nonEmpty})`;
     }
     if ('includes' in c) {
       const val = escapePainlessString(String(c.includes));
-      return `(${nonEmpty} && doc['${escaped}'].value.contains("${val}"))`;
+      return `(${nonEmpty} && ${valueExpr}.contains("${val}"))`;
     }
   }
   return 'false';
@@ -353,17 +513,19 @@ function destinationToVarName(destination: string): string {
  * destination variable, all subsequent arms are skipped) and by the caller-supplied `cond`
  * (the stringified condition that must be true for this arm to fire).
  *
- * Inside the block, `then.field` is read from `doc` with a null-safe accessor.
+ * Inside the block, `then.field` is read null-safely.
  * If the value is present and found in `then.mapping`, `varName` is assigned the mapped value;
  * otherwise `varName` remains `null` and the next when-clause arm is tried.
  */
 function buildFieldMappingPainless(
   varName: string,
   cond: string,
-  then: FieldEvaluationWhenClauseFieldMappingThen
+  then: FieldEvaluationWhenClauseFieldMappingThen,
+  expressions: PainlessFieldExpressions
 ): string {
-  const fieldEsc = escapePainlessField(then.field);
-  const fieldRead = `(doc.containsKey('${fieldEsc}') && doc['${fieldEsc}'].size() > 0 ? doc['${fieldEsc}'].value : null)`;
+  const fieldRead = `(${expressions.isPresent(then.field)} ? ${expressions.value(
+    then.field
+  )} : null)`;
   const branches = Object.entries(then.mapping)
     .map(
       ([from, to], i) =>
@@ -375,7 +537,10 @@ function buildFieldMappingPainless(
   return `if (${varName} == null && (${cond})) { String _mappedField = ${fieldRead}; if (_mappedField != null) { ${branches} } }`;
 }
 
-function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
+function buildFieldEvaluationsPreamble(
+  evaluations: FieldEvaluation[],
+  expressions: PainlessFieldExpressions
+): {
   preamble: string;
   evaluatedVars: Map<string, string>;
 } {
@@ -387,15 +552,19 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
     const stmts: string[] = [`String ${varName} = null;`, `String _src = null;`];
     for (const source of ev.sources) {
       if ('field' in source) {
-        const srcEsc = escapePainlessField(source.field);
         stmts.push(
-          `if (_src == null && doc.containsKey('${srcEsc}') && doc['${srcEsc}'].size() > 0 && doc['${srcEsc}'].value != null && doc['${srcEsc}'].value != "") { _src = doc['${srcEsc}'].value; }`
+          `if (_src == null && ${expressions.isNotEmpty(
+            source.field
+          )}) { _src = ${expressions.value(source.field)}; }`
         );
       } else {
-        const fieldEsc = escapePainlessField(source.firstChunkOfField);
         const delimInString = escapePainlessString(source.splitBy);
         stmts.push(
-          `if (_src == null && doc.containsKey('${fieldEsc}') && doc['${fieldEsc}'].size() > 0 && doc['${fieldEsc}'].value != null && doc['${fieldEsc}'].value != "") { String _raw = doc['${fieldEsc}'].value; int _idx = _raw.indexOf("${delimInString}"); String _first = _idx >= 0 ? _raw.substring(0, _idx) : _raw; if (_first != null && _first != "") { _src = _first; } }`
+          `if (_src == null && ${expressions.isNotEmpty(
+            source.firstChunkOfField
+          )}) { String _raw = ${expressions.value(
+            source.firstChunkOfField
+          )}; int _idx = _raw.indexOf("${delimInString}"); String _first = _idx >= 0 ? _raw.substring(0, _idx) : _raw; if (_first != null && _first != "") { _src = _first; } }`
         );
       }
     }
@@ -411,7 +580,7 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
           )}"; }`
         );
       } else {
-        const cond = streamlangConditionToPainlessDoc(clause.condition);
+        const cond = conditionToPainless(clause.condition, { expressions });
         if (typeof clause.then === 'string') {
           stmts.push(
             `if (${varName} == null && (${cond})) { ${varName} = "${escapePainlessString(
@@ -419,7 +588,7 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
             )}"; }`
           );
         } else {
-          stmts.push(buildFieldMappingPainless(varName, cond, clause.then));
+          stmts.push(buildFieldMappingPainless(varName, cond, clause.then, expressions));
         }
       }
     }

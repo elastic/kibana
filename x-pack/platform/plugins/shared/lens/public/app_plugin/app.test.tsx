@@ -43,6 +43,12 @@ import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
+import { trackCreateUiCounterEvents } from '../lens_ui_telemetry';
+
+jest.mock('../lens_ui_telemetry', () => ({
+  ...jest.requireActual('../lens_ui_telemetry'),
+  trackCreateUiCounterEvents: jest.fn(),
+}));
 
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
@@ -1028,6 +1034,61 @@ describe('Lens App', () => {
             title: expect.stringContaining('failed'),
           })
         );
+      });
+
+      it('tracks a creation when a new doc is saved and returned to the originating app', async () => {
+        await save({ savedObjectId: undefined });
+        expect(props.redirectToOrigin).toHaveBeenCalled();
+        expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+        expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'dashboards');
+      });
+
+      it('does not track a creation when an existing doc is saved', async () => {
+        await save({
+          savedObjectId: defaultSavedObjectId,
+          prevSavedObjectId: defaultSavedObjectId,
+          comesFromDashboard: false,
+          preloadedState: {
+            persistedDoc: getLensDocumentMock({ savedObjectId: defaultSavedObjectId }),
+          },
+        });
+        expect(services.attributeService.saveToLibrary).toHaveBeenCalled();
+        expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
+      });
+
+      it('tracks a creation when an existing doc is saved as a new copy', async () => {
+        const doc = getLensDocumentMock();
+        props.incomingState = { originatingApp: 'visualize' };
+        await save({
+          savedObjectId: doc.savedObjectId,
+          newCopyOnSave: true,
+          preloadedState: { persistedDoc: doc },
+          prevSavedObjectId: 'prevId',
+          comesFromDashboard: false,
+        });
+        expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+        expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'library');
+      });
+
+      it('does not track a creation when the save fails', async () => {
+        services.attributeService.saveToLibrary = jest
+          .fn()
+          .mockRejectedValue({ message: 'failed' });
+        props.incomingState = {
+          originatingApp: 'dashboards',
+          originatingPath: '#/view/123',
+        };
+
+        await renderApp({
+          preloadedState: { isSaveable: true, isLinkedToOriginatingApp: true },
+        });
+        await clickSaveButton();
+        await userEvent.type(screen.getByTestId('savedObjectTitle'), 'hello there');
+        await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
+        await waitToLoad();
+
+        expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
+        expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
       });
 
       it('does not show the copy button on first save', async () => {

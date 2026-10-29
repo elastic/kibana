@@ -6,11 +6,12 @@
  */
 
 import { delay, finalize, switchMap, tap } from 'rxjs';
+import type { Dispatch } from '@reduxjs/toolkit';
 import { debounce, isEqual } from 'lodash';
 import { waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { LensAppServices } from '@kbn/lens-common';
-import type { LensGetState, LensDispatch } from '..';
+import type { LensGetState } from '..';
 import { setState, setExecutionContext } from '..';
 import { getResolvedDateRange } from '../../utils';
 
@@ -20,7 +21,7 @@ import { getResolvedDateRange } from '../../utils';
 export function subscribeToExternalContext(
   { data, cps }: LensAppServices,
   getState: LensGetState,
-  dispatch: LensDispatch
+  dispatch: Dispatch
 ) {
   const { query: queryService, search } = data;
   const { filterManager } = queryService;

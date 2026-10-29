@@ -37,8 +37,10 @@ export const ChromeAppHeader = ({ menu, share, tabsBar }: ChromeAppHeaderProps) 
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
-  const draftSessionTitle = useInternalStateSelector((state) => state.draftSessionTitle);
-  const sessionTitle = persistedDiscoverSession?.title ?? draftSessionTitle;
+  const pendingSessionTitle = useInternalStateSelector(
+    (state) => state.saveSessionModal.initialTitle
+  );
+  const sessionTitle = persistedDiscoverSession?.title ?? pendingSessionTitle;
   const canRenameSession = Boolean(
     capabilities.discover_v2.save &&
       !persistedDiscoverSession?.managed &&
@@ -58,6 +60,11 @@ export const ChromeAppHeader = ({ menu, share, tabsBar }: ChromeAppHeaderProps) 
         defaultMessage: 'Edit Discover session name',
       }),
       onSave: async (newTitle) => {
+        if (!persistedDiscoverSession) {
+          dispatch(internalStateActions.openSaveSessionModal({ initialTitle: newTitle }));
+          return;
+        }
+
         try {
           await dispatch(internalStateActions.renameDiscoverSession({ newTitle })).unwrap();
         } catch {
@@ -67,7 +74,7 @@ export const ChromeAppHeader = ({ menu, share, tabsBar }: ChromeAppHeaderProps) 
         }
       },
     };
-  }, [canRenameSession, dispatch, embeddableEditor, sessionTitle]);
+  }, [canRenameSession, dispatch, embeddableEditor, persistedDiscoverSession, sessionTitle]);
 
   const back = useMemo(() => {
     return getChromeHeaderBack(embeddableEditor);

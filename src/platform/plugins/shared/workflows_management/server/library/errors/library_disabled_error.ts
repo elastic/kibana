@@ -15,7 +15,7 @@
 export class LibraryDisabledError extends Error {
   readonly statusCode = 503;
   constructor() {
-    super('Workflow Template Library is disabled.');
+    super('Workflow Template library is disabled.');
     this.name = 'LibraryDisabledError';
   }
 }

@@ -6,12 +6,11 @@
  */
 
 import { useMemo } from 'react';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
 import { buildAlertsHistoryReachesBackQuery } from '../queries/history_reaches_back';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { parseAlertBasedTilesResponse } from './use_entities_with_alerts_tiles';
 import { isDeltaStillComing, usePreviousPeriod } from './use_previous_period';
 
@@ -45,28 +44,28 @@ export const useAlertBasedTilesDelta = ({
 }: AlertBasedTilesDeltaOptions): {
   severeAlertsDelta: number | undefined;
   watchlistedDelta: number | undefined;
+  /** The counts over the previous period, which the sparklines start from. */
+  severeAlertsPrevious: number | undefined;
+  watchlistedPrevious: number | undefined;
   isDeltaLoading: boolean;
   isHistoryMissing: boolean;
   /** True once the history check passed, so the sparkline can follow the same rule. */
   reachesBack: boolean | undefined;
 } => {
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    entityFilterClauses,
+  } = useTileQueryInputs(spaceId, entityFilters);
   const index = resolvedIndex?.indexName;
 
   const guardQuery = buildAlertsHistoryReachesBackQuery(spaceId, timeRange);
   const previousQuery = useMemo(
     () =>
       index
-        ? buildAlertBasedTilesQuery(
-            index,
-            spaceId,
-            timeRange,
-            buildEntityFilterClauses(entityFilters),
-            'previous'
-          )
+        ? buildAlertBasedTilesQuery(index, spaceId, timeRange, entityFilterClauses, 'previous')
         : null,
-    [index, spaceId, timeRange, entityFilters]
+    [index, spaceId, timeRange, entityFilterClauses]
   );
 
   const highestCount = Math.max(severeAlertsCount, watchlistedCount);
@@ -81,6 +80,8 @@ export const useAlertBasedTilesDelta = ({
   return {
     severeAlertsDelta: previous ? severeAlertsCount - previous.severeAlertsCount : undefined,
     watchlistedDelta: previous ? watchlistedCount - previous.watchlistedCount : undefined,
+    severeAlertsPrevious: previous?.severeAlertsCount,
+    watchlistedPrevious: previous?.watchlistedCount,
     isHistoryMissing,
     reachesBack,
     isDeltaLoading: isDeltaStillComing({

@@ -10,42 +10,77 @@ import type { ImpactPill } from './impact_pills';
 import { useEntityFilter } from './use_entity_filter';
 
 describe('useEntityFilter', () => {
-  const pill = (entityId: string): ImpactPill => ({ entityId, count: 1 });
+  const pill = (entityId: string, count = 1): ImpactPill => ({ entityId, count });
   const items = [pill('host-1'), pill('user-1')];
+  const page = (pills: ImpactPill[], total = pills.length) => ({ pills, total });
 
   it('starts without a selection', () => {
-    const { result } = renderHook(() => useEntityFilter(items));
+    const { result } = renderHook(() => useEntityFilter(page(items)));
 
     expect(result.current.entityFilter).toBeNull();
+    expect(result.current.selectedPill).toBeNull();
   });
 
-  it('keeps a selection whose pill is still available', () => {
-    const { result } = renderHook(() => useEntityFilter(items));
+  it('selects a loaded pill', () => {
+    const { result } = renderHook(() => useEntityFilter(page(items)));
 
     act(() => result.current.setEntityFilter('host-1'));
 
     expect(result.current.entityFilter).toBe('host-1');
+    expect(result.current.selectedPill).toEqual(pill('host-1'));
   });
 
-  it('clears the selection once its entity drops out of the pills', () => {
-    const { result, rerender } = renderHook(({ rows }) => useEntityFilter(rows), {
+  it('keeps the selection when its pill falls off the loaded pages', () => {
+    const { result, rerender } = renderHook(({ rows }) => useEntityFilter(page(rows, 25)), {
       initialProps: { rows: items },
     });
     act(() => result.current.setEntityFilter('host-1'));
 
     rerender({ rows: [pill('user-1')] });
+
+    expect(result.current.entityFilter).toBe('host-1');
+    expect(result.current.selectedPill).toEqual(pill('host-1'));
+  });
+
+  it('refreshes the selected pill from the loaded pages', () => {
+    const { result, rerender } = renderHook(({ rows }) => useEntityFilter(page(rows)), {
+      initialProps: { rows: items },
+    });
+    act(() => result.current.setEntityFilter('host-1'));
+
+    rerender({ rows: [pill('host-1', 7)] });
+
+    expect(result.current.selectedPill).toEqual(pill('host-1', 7));
+  });
+
+  it('clears the selection with null', () => {
+    const { result } = renderHook(() => useEntityFilter(page(items)));
+    act(() => result.current.setEntityFilter('host-1'));
+
+    act(() => result.current.setEntityFilter(null));
 
     expect(result.current.entityFilter).toBeNull();
   });
 
-  it('does not bring a cleared selection back when its entity reappears', () => {
-    const { result, rerender } = renderHook(({ rows }) => useEntityFilter(rows), {
+  it('does not bring a cleared selection back when pills return', () => {
+    const { result, rerender } = renderHook(({ rows }) => useEntityFilter(page(rows)), {
       initialProps: { rows: items },
     });
     act(() => result.current.setEntityFilter('host-1'));
-    rerender({ rows: [pill('user-1')] });
+    rerender({ rows: [] });
 
     rerender({ rows: items });
+
+    expect(result.current.entityFilter).toBeNull();
+  });
+
+  it('clears the selection once the queue has no pills at all', () => {
+    const { result, rerender } = renderHook(({ rows }) => useEntityFilter(page(rows)), {
+      initialProps: { rows: items },
+    });
+    act(() => result.current.setEntityFilter('host-1'));
+
+    rerender({ rows: [] });
 
     expect(result.current.entityFilter).toBeNull();
   });

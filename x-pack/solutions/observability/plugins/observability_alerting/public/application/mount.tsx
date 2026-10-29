@@ -15,18 +15,21 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
+import type { ObservabilityAlertingCases } from '../types';
 import { createObservabilityAlertingSetBreadcrumbs } from './breadcrumbs';
 
 export const mountObservabilityAlertingApp = ({
   coreStart,
   alertingVTwo,
   triggersActionsUi,
+  cases,
   observabilityShared,
   params,
 }: {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
   triggersActionsUi: Pick<TriggersAndActionsUIPublicPluginStart, 'getClassicRulesPage'>;
+  cases?: ObservabilityAlertingCases;
   observabilityShared: Pick<ObservabilitySharedPluginStart, 'navigation'>;
   params: AppMountParameters;
 }): AppUnmount => {
@@ -48,6 +51,7 @@ export const mountObservabilityAlertingApp = ({
             alertingVTwo={alertingVTwo}
             triggersActionsUi={triggersActionsUi}
             ObservabilityPageTemplate={observabilityShared.navigation.PageTemplate}
+            cases={cases}
             history={history}
             setBreadcrumbs={setBreadcrumbs}
           />

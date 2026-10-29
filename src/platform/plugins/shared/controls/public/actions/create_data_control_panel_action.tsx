@@ -14,7 +14,7 @@ import {
   apiCanAddNewPanel,
   apiCanPinPanels,
   apiIsPresentationContainer,
-  apiPublishesDataViews,
+  apiPublishesDataSources,
   type EmbeddableApiContext,
 } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -38,8 +38,8 @@ export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiCo
     const defaultDataViewId = apiHasEditorConfig(embeddable)
       ? embeddable.getEditorConfig()?.defaultDataViewId
       : undefined;
-    const publishedDataViewId = apiPublishesDataViews(embeddable)
-      ? embeddable.dataViews$.value?.[0]?.id
+    const publishedDataViewId = apiPublishesDataSources(embeddable)
+      ? embeddable.dataSources$.value?.[0]?.id
       : undefined;
     const parentDataViewId =
       defaultDataViewId ??

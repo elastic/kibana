@@ -7,7 +7,11 @@
 
 import { RiskSeverity } from '../../../../common/search_strategy';
 import type { EntityStoreRecord } from './hooks/use_entity_from_store';
-import { getHeaderRiskLevel, getResolutionRiskFromEntityRecord } from './entity_store_risk_utils';
+import {
+  buildEntitySummaryStalenessEntitySnapshot,
+  getHeaderRiskLevel,
+  getResolutionRiskFromEntityRecord,
+} from './entity_store_risk_utils';
 
 const recordWithBothScores = {
   entity: {
@@ -40,5 +44,35 @@ describe('getHeaderRiskLevel', () => {
 
   it('returns undefined when there is no entity record', () => {
     expect(getHeaderRiskLevel(undefined, true)).toBeUndefined();
+  });
+});
+
+describe('buildEntitySummaryStalenessEntitySnapshot', () => {
+  it('snapshots the individual risk score by default', () => {
+    expect(buildEntitySummaryStalenessEntitySnapshot(recordWithBothScores)).toEqual({
+      riskScoreNorm: 12,
+    });
+  });
+
+  it('snapshots the resolution-group risk score when useResolutionRisk is set', () => {
+    expect(
+      buildEntitySummaryStalenessEntitySnapshot(recordWithBothScores, {
+        useResolutionRisk: true,
+      })
+    ).toEqual({ riskScoreNorm: 91 });
+  });
+
+  it('snapshots null when useResolutionRisk is set but the record has no resolution score', () => {
+    const record = {
+      entity: { risk: { calculated_level: RiskSeverity.High, calculated_score_norm: 70 } },
+    } as EntityStoreRecord;
+
+    expect(buildEntitySummaryStalenessEntitySnapshot(record, { useResolutionRisk: true })).toEqual({
+      riskScoreNorm: null,
+    });
+  });
+
+  it('snapshots null when there is no entity record', () => {
+    expect(buildEntitySummaryStalenessEntitySnapshot(null)).toEqual({ riskScoreNorm: null });
   });
 });
