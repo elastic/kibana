@@ -97,7 +97,6 @@ export const ConversationDetailsFlyoutFooter = ({
 
       <InvestigationActionModals
         action={modalAction}
-        initialAssignee={investigation.assignee}
         investigation={investigation}
         onCloseAction={closeModal}
         onCloseApproval={closeModal}

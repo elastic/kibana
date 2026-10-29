@@ -34,7 +34,6 @@ export interface InvestigationActionModalsProps<
 > {
   /** Action awaiting confirmation, or `null` when no action modal is open. */
   action: CardActionType | null;
-  initialAssignee?: string | null;
   /** The investigation the action applies to. The close and escalation modals need it. */
   investigation?: Investigation;
   /** Proposal awaiting a decision, if any. */

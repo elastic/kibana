@@ -405,7 +405,6 @@ const ConversationsPageContent: React.FC = () => {
     <AlertZeroPageSection contentProps={pageContentProps}>
       <InvestigationActionModals
         action={modalState.type}
-        initialAssignee={actionInvestigation?.assignee}
         investigation={actionInvestigation}
         onCloseAction={closeModal}
         renderCloseModal={canManageInvestigations ? renderCloseModal : undefined}
