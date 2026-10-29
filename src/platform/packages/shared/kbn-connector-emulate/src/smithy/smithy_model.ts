@@ -26,8 +26,6 @@ export interface Shape {
   readonly traits?: Traits;
   /** Structures, unions, enums and intEnums. */
   readonly members?: Readonly<Record<string, MemberShape>>;
-  /** Shapes whose members this one includes; the AST doesn't repeat them in `members`. */
-  readonly mixins?: readonly ShapeRef[];
   /** Lists and sets. */
   readonly member?: MemberShape;
   /** Maps. */
@@ -48,6 +46,8 @@ export interface Shape {
   readonly update?: ShapeRef;
   readonly delete?: ShapeRef;
   readonly list?: ShapeRef;
+  /** Shapes whose members and traits the shape includes. */
+  readonly mixins?: readonly ShapeRef[];
 }
 
 export interface SmithyModel {
@@ -90,11 +90,52 @@ const PRELUDE_TYPES: Readonly<Record<string, string>> = {
 /** Looks up a shape, including prelude shapes such as `smithy.api#String`. */
 export const getShape = (model: SmithyModel, id: string): Shape | undefined => {
   const shape = model.shapes[id];
-  if (shape || !id.startsWith(PRELUDE)) {
-    return shape;
+  if (shape) {
+    return shape.mixins?.length ? withMixins(model, shape) : shape;
+  }
+  if (!id.startsWith(PRELUDE)) {
+    return undefined;
   }
   const type = PRELUDE_TYPES[shapeName(id).replace(/^Primitive/, '')];
   return type ? { type, ...(type === 'structure' ? { members: {} } : {}) } : undefined;
+};
+
+// Members by name, later layers over earlier ones. A member that overrides one adds its traits
+// to those it inherits (https://smithy.io/2.0/spec/mixins.html#mixin-member-traits).
+const mergeMembers = (
+  layers: ReadonlyArray<Record<string, MemberShape> | undefined>
+): Record<string, MemberShape> => {
+  const merged: Record<string, MemberShape> = {};
+  for (const members of layers) {
+    for (const [name, member] of Object.entries(members ?? {})) {
+      const inherited = merged[name];
+      merged[name] = inherited
+        ? { ...member, traits: { ...inherited.traits, ...member.traits } }
+        : member;
+    }
+  }
+  return merged;
+};
+
+// A shape with the members and traits of its mixins, which the JSON AST lists only on the
+// mixins; the shape's own come last and win.
+const withMixins = (model: SmithyModel, shape: Shape): Shape => {
+  const mixins = (shape.mixins ?? []).flatMap(({ target }) => getShape(model, target) ?? []);
+  const traits = Object.assign(
+    {},
+    ...mixins.map(({ traits: mixinTraits = {} }) => {
+      const { 'smithy.api#mixin': _, ...rest } = mixinTraits;
+      return rest;
+    }),
+    shape.traits
+  );
+  return {
+    ...shape,
+    traits,
+    ...(shape.members || mixins.some(({ members }) => members)
+      ? { members: mergeMembers([...mixins.map(({ members }) => members), shape.members]) }
+      : {}),
+  };
 };
 
 export const UNIT = `${PRELUDE}Unit`;
@@ -145,42 +186,12 @@ export const traitRecord = (
 export const hasTrait = (traits: Traits | undefined, id: string): boolean =>
   traits !== undefined && id in traits;
 
-const MAX_MIXIN_DEPTH = 32;
-
-/**
- * A shape's members, those of its mixins first (recursively), which its own members override.
- * An own member adds traits to the one it overrides, keeping those it inherits.
- */
-export const membersOfShape = (
-  model: SmithyModel,
-  shape: Shape,
-  depth = 0
-): Array<[string, MemberShape]> => {
-  const members = new Map<string, MemberShape>();
-  for (const { target } of depth < MAX_MIXIN_DEPTH ? shape.mixins ?? [] : []) {
-    const mixin = getShape(model, target);
-    for (const [name, member] of mixin ? membersOfShape(model, mixin, depth + 1) : []) {
-      members.set(name, member);
-    }
-  }
-  for (const [name, member] of Object.entries(shape.members ?? {})) {
-    const inherited = members.get(name);
-    members.set(
-      name,
-      inherited ? { ...member, traits: { ...inherited.traits, ...member.traits } } : member
-    );
-  }
-  return [...members];
-};
-
 /** The members of a structure, by name; none for `smithy.api#Unit`. */
 export const membersOf = (
   model: SmithyModel,
   target: string | undefined
-): Array<[string, MemberShape]> => {
-  const shape = target && target !== UNIT ? getShape(model, target) : undefined;
-  return shape ? membersOfShape(model, shape) : [];
-};
+): Array<[string, MemberShape]> =>
+  target && target !== UNIT ? Object.entries(getShape(model, target)?.members ?? {}) : [];
 
 export const documentationOf = (shape: { readonly traits?: Traits }) => {
   const documentation = shape.traits?.['smithy.api#documentation'];
