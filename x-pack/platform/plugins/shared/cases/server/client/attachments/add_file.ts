@@ -8,7 +8,11 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Owner } from '../../../common/constants/types';
-import { type Case, type UnifiedAttachment } from '../../../common/types/domain';
+import {
+  type Case,
+  type UnifiedAttachment,
+  FileAttachmentMetadataPayloadRt,
+} from '../../../common/types/domain';
 import type { CasesClient, CasesClientArgs } from '..';
 import type { AttachmentSavedObjectTransformedV2 } from '../../common/types/attachments_v2';
 import type { AddFileArgs } from './types';
