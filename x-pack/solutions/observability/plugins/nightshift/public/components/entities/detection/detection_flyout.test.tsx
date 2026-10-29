@@ -22,6 +22,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 const mockGetRedirectUrl = jest.fn(() => '/app/discover#redirect');
+const mockOpenChat = jest.fn();
 
 const mockStreamFeatures = jest.fn();
 
@@ -56,6 +57,9 @@ jest.mock('../../../hooks/use_kibana', () => ({
             get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
           },
         },
+      },
+      agentBuilder: {
+        openChat: mockOpenChat,
       },
     },
   }),
@@ -123,6 +127,7 @@ const mockSignal: SignalEntry = {
 
 describe('DetectionFlyout', () => {
   beforeEach(() => {
+    mockOpenChat.mockClear();
     mockStreamFeatures.mockReturnValue({
       features: [webFrontendFeature],
       failedSourceIds: [],
@@ -147,6 +152,43 @@ describe('DetectionFlyout', () => {
         </EuiProvider>
       </I18nProvider>
     );
+
+  it.each([
+    ['confirms', 'Confirmed'],
+    ['refutes', 'Refuted'],
+    ['off_topic', 'Off topic'],
+    ['inconclusive', 'Inconclusive'],
+    ['not_checked', 'Not checked'],
+  ] as const)('shows the %s verdict badge', (verdict, label) => {
+    renderFlyout({ signal: { ...mockSignal, verdict } });
+
+    expect(screen.getByText(label)).toBeInTheDocument();
+  });
+
+  it('opens the entity flyout when an associated entity chip is clicked', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('nightshiftEntityFlyout')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutEntityChip'));
+    const entityFlyout = screen.getByTestId('nightshiftEntityFlyout');
+    expect(entityFlyout).toBeInTheDocument();
+    expect(within(entityFlyout).getByText('Summary')).toBeInTheDocument();
+    expect(within(entityFlyout).getByText(webFrontendFeature.description)).toBeInTheDocument();
+    expect(within(entityFlyout).getByText('source_id = logs.web-frontend')).toBeInTheDocument();
+  });
+
+  it('closes the entity flyout without closing the detection flyout', () => {
+    const onClose = jest.fn();
+    renderFlyout({ onClose });
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutEntityChip'));
+    const entityFlyout = screen.getByTestId('nightshiftEntityFlyout');
+    fireEvent.click(within(entityFlyout).getByTestId('euiFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('nightshiftEntityFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionFlyout')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
 
   it('includes resolved services and says when some sources failed to load', () => {
     const paymentsFeature = {
@@ -247,30 +289,5 @@ describe('DetectionFlyout', () => {
         to: '2026-07-10T12:15:00.000Z',
       },
     });
-  });
-
-  it('opens the entity flyout when an associated entity chip is clicked', () => {
-    renderFlyout();
-
-    expect(screen.queryByTestId('nightshiftEntityFlyout')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutEntityChip'));
-    const entityFlyout = screen.getByTestId('nightshiftEntityFlyout');
-    expect(entityFlyout).toBeInTheDocument();
-    expect(within(entityFlyout).getByText('Summary')).toBeInTheDocument();
-    expect(within(entityFlyout).getByText(webFrontendFeature.description)).toBeInTheDocument();
-    expect(within(entityFlyout).getByText('source_id = logs.web-frontend')).toBeInTheDocument();
-  });
-
-  it('closes the entity flyout without closing the detection flyout', () => {
-    const onClose = jest.fn();
-    renderFlyout({ onClose });
-
-    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutEntityChip'));
-    const entityFlyout = screen.getByTestId('nightshiftEntityFlyout');
-    fireEvent.click(within(entityFlyout).getByTestId('euiFlyoutCloseButton'));
-
-    expect(screen.queryByTestId('nightshiftEntityFlyout')).not.toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftDetectionFlyout')).toBeInTheDocument();
-    expect(onClose).not.toHaveBeenCalled();
   });
 });

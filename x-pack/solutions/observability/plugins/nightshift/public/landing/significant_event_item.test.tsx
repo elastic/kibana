@@ -117,17 +117,17 @@ describe('SignificantEventItem', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it('shows progress while closing', () => {
+    renderItem({ onCloseClick: jest.fn(), isClosing: true });
+
+    expect(screen.getByTestId('nightshiftCloseSignificantEventButton')).toBeDisabled();
+  });
+
   it('hides the close action for inactive events', () => {
     const status = 'inactive' as const;
     renderItem({ event: { ...mockEvent, status }, onCloseClick: jest.fn() });
 
     expect(screen.queryByTestId('nightshiftCloseSignificantEventButton')).not.toBeInTheDocument();
-  });
-
-  it('shows progress while closing', () => {
-    renderItem({ onCloseClick: jest.fn(), isClosing: true });
-
-    expect(screen.getByTestId('nightshiftCloseSignificantEventButton')).toBeDisabled();
   });
 
   describe('investigation marker', () => {

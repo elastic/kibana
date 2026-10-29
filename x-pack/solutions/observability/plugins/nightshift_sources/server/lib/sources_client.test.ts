@@ -88,9 +88,12 @@ const emptyFind = {
   per_page: 1,
 };
 
-const setup = () => {
+const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
   const soClient = savedObjectsClientMock.create();
   const serializer = savedObjectsServiceMock.createSerializer();
+  serializer.generateRawId.mockImplementation(
+    (namespace, type, id) => `${namespace ? `${namespace}:` : ''}${type}:${id}`
+  );
   const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
   const viewsClient: jest.Mocked<SourceViewsClient> = {
@@ -109,7 +112,7 @@ const setup = () => {
     internalEsClient,
     logger,
     username: 'marco',
-    spaceId: SPACE_ID,
+    spaceId,
     onChange,
   });
 
@@ -119,12 +122,24 @@ const setup = () => {
   return {
     client,
     soClient,
+    serializer,
     viewsClient,
     dataEsClient,
+    internalEsClient,
     logger,
     onChange,
   };
 };
+
+const analyzed = (...tokens: string[]) => ({
+  tokens: tokens.map((token, position) => ({
+    token,
+    position,
+    start_offset: 0,
+    end_offset: 0,
+    type: '<ALPHANUM>',
+  })),
+});
 
 describe('SourcesClient', () => {
   describe('assertReadable', () => {
@@ -391,6 +406,8 @@ describe('SourcesClient', () => {
       expect(soClient.create).not.toHaveBeenCalled();
     });
 
+    // A wildcard matching nothing resolves to an empty relation, so ES reports the WHERE field
+    // as an unknown column instead of an unknown index.
     it('surfaces an unknown field on an existing index as a 400', async () => {
       const { client, soClient, dataEsClient } = setup();
       dataEsClient.esql.query
@@ -497,28 +514,6 @@ describe('SourcesClient', () => {
       expect(viewsClient.putView).not.toHaveBeenCalled();
     });
 
-    it.each([false, true])('keeps the stored enabled state when the body says %s', async (sent) => {
-      const { client, soClient } = setup();
-      const stored = !sent;
-      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ enabled: stored })));
-      const body = {
-        title: 'nginx errors',
-        tags: ['nginx'],
-        esql: makeAttributes().esql,
-        enabled: sent,
-      };
-
-      const updated = await client.update('source-1', body);
-
-      expect(updated.enabled).toBe(stored);
-      expect(soClient.update).toHaveBeenCalledWith(
-        NIGHTSHIFT_SOURCE_SO_TYPE,
-        'source-1',
-        expect.objectContaining({ enabled: stored }),
-        expect.anything()
-      );
-    });
-
     it('moves esql_updated_at forward when the clock does not', async () => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date('2026-09-01T00:00:00.000Z'));
@@ -563,6 +558,28 @@ describe('SourcesClient', () => {
         'source-1',
         expect.objectContaining({ description: undefined }),
         { ...FULL_UPDATE, version: 'v1' }
+      );
+    });
+
+    it.each([false, true])('keeps the stored enabled state when the body says %s', async (sent) => {
+      const { client, soClient } = setup();
+      const stored = !sent;
+      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ enabled: stored })));
+      const body = {
+        title: 'nginx errors',
+        tags: ['nginx'],
+        esql: makeAttributes().esql,
+        enabled: sent,
+      };
+
+      const updated = await client.update('source-1', body);
+
+      expect(updated.enabled).toBe(stored);
+      expect(soClient.update).toHaveBeenCalledWith(
+        NIGHTSHIFT_SOURCE_SO_TYPE,
+        'source-1',
+        expect.objectContaining({ enabled: stored }),
+        expect.anything()
       );
     });
 

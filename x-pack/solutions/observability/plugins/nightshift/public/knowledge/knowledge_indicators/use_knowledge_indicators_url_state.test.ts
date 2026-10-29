@@ -49,6 +49,25 @@ function makeFeatureKI(
   };
 }
 
+function makeQueryKI(opts: {
+  id: string;
+  title?: string;
+  source_id: string;
+  backed?: boolean;
+  type?: string;
+}): KnowledgeIndicator {
+  return {
+    kind: 'query',
+    query: {
+      id: opts.id,
+      title: opts.title ?? opts.id,
+      type: opts.type ?? 'match',
+    },
+    rule: { backed: opts.backed ?? false, id: opts.id },
+    source_id: opts.source_id,
+  } as KnowledgeIndicator;
+}
+
 const defaultParams = {
   knowledgeIndicators: [] as KnowledgeIndicator[],
   isLoading: false,
@@ -267,7 +286,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       });
     });
 
-    it('prunes stream filters that no longer match any indicator and were not in the initial URL', async () => {
+    it('prunes stream filters that no longer match any indicator and were not in the initial URL', () => {
       const knowledgeIndicators = [makeFeatureKI({ uuid: 'f1', source_id: 'logs' })];
       mockQuery = { source: ['logs'] };
       const { result } = renderHook(() =>
@@ -278,7 +297,7 @@ describe('useKnowledgeIndicatorsUrlState', () => {
         result.current.handleSelectedStreamsChange(['logs', 'metrics']);
       });
 
-      await waitFor(() => {
+      waitFor(() => {
         expect(result.current.selectedStreams).toEqual(['logs']);
       });
     });

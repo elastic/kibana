@@ -179,6 +179,8 @@ describe('AutomationsPage', () => {
     const deleteMutate = jest.fn();
     const toggleMutate = jest.fn();
 
+    const rowOf = (name: string) => screen.getByText(name).closest('tr') as HTMLElement;
+
     beforeEach(() => {
       createMutate.mockClear();
       deleteMutate.mockClear();
@@ -212,27 +214,28 @@ describe('AutomationsPage', () => {
       mockUseToggleAutomation.mockReturnValue({ mutate: toggleMutate, isLoading: false });
     });
 
-    it('returns to the list when the automation id in the URL does not exist', () => {
-      const { history } = renderPage('/automations/missing');
-
-      expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
-      expect(history.location.pathname).toBe('/automations');
-    });
-
-    it('hides management actions for read-only users', () => {
-      mockUseKibana.mockReturnValue({
-        services: {
-          application: { capabilities: { nightshift: {} } },
-          uiSettings: {
-            get: jest.fn((key: string) => uiSettingsValues[key]),
-          },
-        },
-      });
+    it('toggles an automation', () => {
       renderPage();
 
-      expect(screen.queryByRole('button', { name: 'Create automation' })).not.toBeInTheDocument();
-      expect(screen.queryByTestId('automationActions-triage')).not.toBeInTheDocument();
-      expect(screen.getByTestId('automationToggle-triage')).toBeDisabled();
+      fireEvent.click(screen.getByTestId('automationToggle-report'));
+
+      expect(toggleMutate).toHaveBeenCalledWith({
+        id: 'report',
+        name: 'Daily report',
+        isEnabled: true,
+      });
+    });
+
+    it('clones an automation from the row actions', async () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('automationActions-triage'));
+      fireEvent.click(await screen.findByTestId('cloneAutomation'));
+
+      expect(createMutate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Triage incoming alerts (copy)' })
+      );
+      expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
     });
 
     it('deletes an automation after confirmation', async () => {
@@ -248,28 +251,11 @@ describe('AutomationsPage', () => {
       );
     });
 
-    it('clones an automation from the row actions', async () => {
-      renderPage();
+    it('returns to the list when the automation id in the URL does not exist', () => {
+      const { history } = renderPage('/automations/missing');
 
-      fireEvent.click(screen.getByTestId('automationActions-triage'));
-      fireEvent.click(await screen.findByTestId('cloneAutomation'));
-
-      expect(createMutate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'Triage incoming alerts (copy)' })
-      );
       expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
-    });
-
-    it('toggles an automation', () => {
-      renderPage();
-
-      fireEvent.click(screen.getByTestId('automationToggle-report'));
-
-      expect(toggleMutate).toHaveBeenCalledWith({
-        id: 'report',
-        name: 'Daily report',
-        isEnabled: true,
-      });
+      expect(history.location.pathname).toBe('/automations');
     });
 
     it('shows only the global callout when automations are also rate limited', () => {
@@ -293,6 +279,22 @@ describe('AutomationsPage', () => {
       expect(screen.queryByTestId('automationsGlobalLimitBanner')).not.toBeInTheDocument();
       expect(screen.getByTestId('automationsRateLimitBanner')).toBeInTheDocument();
       expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
+    });
+
+    it('hides management actions for read-only users', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          application: { capabilities: { nightshift: {} } },
+          uiSettings: {
+            get: jest.fn((key: string) => uiSettingsValues[key]),
+          },
+        },
+      });
+      renderPage();
+
+      expect(screen.queryByRole('button', { name: 'Create automation' })).not.toBeInTheDocument();
+      expect(screen.queryByTestId('automationActions-triage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('automationToggle-triage')).toBeDisabled();
     });
   });
 });
