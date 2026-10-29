@@ -46,30 +46,18 @@ if [ "$KBN_ENABLE_JEMALLOC" = 'true' ]; then
     echo "unable to find jemalloc at $LD_PRELOAD"
     exit 1
   fi
-  {{/linux}}
-  {{#serverless}}
-  if [ "$KBN_ENABLE_POINTER_COMPRESSION" = 'true' ]; then
-    NODE="${DIR}/node/pointer-compression/bin/node"
-  fi
-  if [ "$KBN_ENABLE_JEMALLOC" = 'true' ]; then
-    export LD_PRELOAD='/usr/lib/libjemalloc.so.2'
-    if [ ! -f "$LD_PRELOAD" ]; then
-      echo "unable to find jemalloc at $LD_PRELOAD"
-      exit 1
-    fi
-  fi
-  if [ "$KBN_ENABLE_MIMALLOC" = 'true' ]; then
-    export LD_PRELOAD='/usr/lib/libmimalloc-secure.so.2'
-    if [ ! -f "$LD_PRELOAD" ]; then
-      echo "unable to find mimalloc at $LD_PRELOAD"
-      exit 1
-    fi
-  fi
-  {{/serverless}}
-  {{#forcePointerCompression}}
-  NODE="${DIR}/node/pointer-compression/bin/node"
-  {{/forcePointerCompression}}
 fi
+if [ "$KBN_ENABLE_MIMALLOC" = 'true' ]; then
+  export LD_PRELOAD='/usr/lib/libmimalloc-secure.so.2'
+  if [ ! -f "$LD_PRELOAD" ]; then
+    echo "unable to find mimalloc at $LD_PRELOAD"
+    exit 1
+  fi
+fi
+{{/serverless}}
+{{#forcePointerCompression}}
+NODE="${DIR}/node/pointer-compression/bin/node"
+{{/forcePointerCompression}}
 test_node
 
 BASE_NODE_OPTIONS="--no-warnings --max-http-header-size=65536"
