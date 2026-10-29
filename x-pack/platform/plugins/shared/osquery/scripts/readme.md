@@ -114,11 +114,26 @@ node x-pack/platform/plugins/shared/osquery/scripts/create_actions \
 
 ## Schema Formatter (`schema_formatter/`)
 
-Extracts only the currently used fields from osquery schema files (manually curated selection). Output goes to `public/editor/osquery_schema`.
+Strips a raw ECS or osquery schema export down to the fields the plugin uses (ECS: a fixed set of columns minus a restricted-field list; osquery: a fixed set of columns). The output directory is resolved from the script location (`__dirname`), so the scripts can be run from any working directory.
+
+### Input and output
+
+- Input: the raw export, placed in `common/schemas/{ecs,osquery}/` and named `<ver>.json` with **no leading `v`** (for example `9.2.0.json`). The script loads it with `require`, so the `.json` extension is optional.
+- Flag: `--schema_version=<ver>`, the bare version (for example `9.2.0`), not `v9.2.0`.
+- Output: `common/schemas/{ecs,osquery}/v<ver>-formatted.json` (for example `v9.2.0-formatted.json`), written next to the input.
 
 ```bash
-node x-pack/platform/plugins/shared/osquery/scripts/schema_formatter/ecs.js --schema_version=4.6.0
-node x-pack/platform/plugins/shared/osquery/scripts/schema_formatter/osquery.js --schema_version=4.6.0
+# 1. Save the raw export as common/schemas/ecs/9.2.0.json, then:
+node x-pack/platform/plugins/shared/osquery/scripts/schema_formatter/ecs.js --schema_version=9.2.0
+# -> common/schemas/ecs/v9.2.0-formatted.json
+
+# 1. Save the raw export as common/schemas/osquery/5.19.0.json, then:
+node x-pack/platform/plugins/shared/osquery/scripts/schema_formatter/osquery.js --schema_version=5.19.0
+# -> common/schemas/osquery/v5.19.0-formatted.json
 ```
 
-Note: CSV exports may have capitalized field names that need to be transformed to lowercase.
+### Committed files
+
+No `*-formatted.json` file is committed. The bundled schemas are the un-suffixed `common/schemas/{ecs,osquery}/v<ver>.json` files, imported by `public/common/hooks/use_ecs_schema.ts` (ECS) and `public/editor/osquery_tables.ts` (osquery). The script does not write those files: after running it, a maintainer renames `v<ver>-formatted.json` to `v<ver>.json` by hand, removes the raw `<ver>.json`, and updates the import in the file above.
+
+Note: CSV exports may have capitalized field names. The ECS formatter lowercases all keys.
