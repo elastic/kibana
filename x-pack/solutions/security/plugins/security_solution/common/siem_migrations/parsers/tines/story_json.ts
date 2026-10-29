@@ -5,40 +5,46 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ParsedTinesStory, TinesStoryExport } from './types';
 import { TINES_AGENT_TYPES } from './types';
 import { slugifyStepName } from './slugify_step_name';
 
-const TinesAgentSchema = z
-  .object({
-    type: z.string().min(1),
-    name: z.string().min(1),
-    guid: z.string().min(1),
-    disabled: z.boolean().optional(),
-    description: z.string().nullable().optional(),
-    options: z.record(z.string(), z.unknown()).optional(),
-  })
-  .passthrough();
+const TinesAgentSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.string().min(1),
+      name: z.string().min(1),
+      guid: z.string().min(1),
+      disabled: z.boolean().optional(),
+      description: z.string().nullable().optional(),
+      options: z.record(z.string(), z.unknown()).optional(),
+    })
+    .passthrough()
+);
 
-const TinesLinkSchema = z
-  .object({
-    source: z.number().int().nonnegative(),
-    receiver: z.number().int().nonnegative(),
-  })
-  .passthrough();
+const TinesLinkSchema = lazySchema(() =>
+  z
+    .object({
+      source: z.number().int().nonnegative(),
+      receiver: z.number().int().nonnegative(),
+    })
+    .passthrough()
+);
 
-export const TinesStoryExportSchema = z
-  .object({
-    name: z.string().min(1),
-    // Real Tines exports often set description to null rather than omitting it.
-    description: z.string().nullable().optional(),
-    guid: z.string().optional(),
-    tags: z.array(z.string()).optional(),
-    agents: z.array(TinesAgentSchema).min(1),
-    links: z.array(TinesLinkSchema).optional(),
-  })
-  .passthrough();
+export const TinesStoryExportSchema = lazySchema(() =>
+  z
+    .object({
+      name: z.string().min(1),
+      // Real Tines exports often set description to null rather than omitting it.
+      description: z.string().nullable().optional(),
+      guid: z.string().optional(),
+      tags: z.array(z.string()).optional(),
+      agents: z.array(TinesAgentSchema).min(1),
+      links: z.array(TinesLinkSchema).optional(),
+    })
+    .passthrough()
+);
 
 /**
  * Validates and normalizes a Tines story export JSON document into
