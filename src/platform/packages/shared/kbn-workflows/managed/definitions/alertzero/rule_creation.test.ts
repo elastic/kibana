@@ -112,7 +112,23 @@ describe('Detection Rule Creation worker', () => {
       );
       const create = action.steps.find((step) => step.name === 'create_rule');
       expect(create?.type).toBe('security.createRule');
-      expect(create?.with?.rule).toBe('${{ inputs.actionInput }}');
+      const rule = create?.with?.rule as Record<string, unknown>;
+      for (const field of Object.keys(props.actionInput.properties ?? {})) {
+        expect(rule[field]).toBe(`\${{ inputs.actionInput.${field} }}`);
+      }
+    });
+
+    // The approval closes the gap only if the rule runs, so the action creates
+    // the rule enabled and the proposal tells the analyst that is what approving
+    // does.
+    it('creates the rule enabled and says so in the proposal', () => {
+      const create = action.steps.find((step) => step.name === 'create_rule');
+      expect((create?.with?.rule as Record<string, unknown>).enabled).toBe(true);
+      expect(action.steps.map((step) => step.type)).not.toContain('security.enableRule');
+
+      const comment = String(inputsOf(stepByName('propose_creation')).comment);
+      expect(comment).toContain('creates and enables the rule');
+      expect(comment).not.toContain('disabled');
     });
 
     // A draft is reviewable only with a query, a name, a description and an attachment.
