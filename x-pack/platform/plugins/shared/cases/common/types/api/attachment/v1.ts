@@ -23,16 +23,8 @@ import {
   paginationSchema,
 } from '../../../schema';
 import {
-  UserCommentAttachmentPayloadRt,
-  AlertAttachmentPayloadRt,
-  ActionsAttachmentPayloadRt,
-  ExternalReferenceNoSOAttachmentPayloadRt,
-  ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceSOWithoutRefsAttachmentPayloadRt,
-  PersistableStateAttachmentPayloadRt,
-  AttachmentType,
   AttachmentRt,
-  EventAttachmentPayloadRt,
 } from '../../domain/attachment/v1';
 
 /**

@@ -22,8 +22,6 @@ import {
   BulkDeleteFileAttachmentsRequestRt,
   FindAttachmentsQueryParamsRt,
   PostFileAttachmentRequestRt,
-} from './v1';
-import {
   AttachmentPatchRequestSchema,
   AttachmentRequestSchema,
   AttachmentsFindResponseSchema,
