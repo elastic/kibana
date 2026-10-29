@@ -515,7 +515,7 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Add the Rootly connector [#281142]({{kib-pull}}281142).
 * Add the Zabbix connector [#282937]({{kib-pull}}282937).
 * Add the SolarWinds Platform connector [#295471]({{kib-pull}}295471).
-* Add the Kubernetes connector as a technical preview to read and modify cluster resources through the Kubernetes REST API, and make it available in workflows [#275922]({{kib-pull}}275922), [#280854]({{kib-pull}}280854).
+* Add the Kubernetes connector as a technical preview to read and modify cluster resources through the Kubernetes REST API [#275922]({{kib-pull}}275922).
 * Add the Argo CD connector for GitOps application management [#280074]({{kib-pull}}280074).
 * Add the Ansible Control Server connector for AWX and Controller jobs, and make it available in workflows [#280115]({{kib-pull}}280115), [#297437]({{kib-pull}}297437).
 * Add the Jenkins connector [#281935]({{kib-pull}}281935).
@@ -695,8 +695,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Run each `foreach` item as its own step [#290950]({{kib-pull}}290950).
 * Deliver human-in-the-loop requests through HTTP, Microsoft Teams, ServiceNow comments, Slack v2, and email [#296205]({{kib-pull}}296205), [#296204]({{kib-pull}}296204), [#296203]({{kib-pull}}296203), [#294500]({{kib-pull}}294500), [#294498]({{kib-pull}}294498).
 * Add a post-execution workflow hook (`configuration.post_execution_workflow_ids`) to agents, so a workflow can react when an agent finishes an execution [#289635]({{kib-pull}}289635).
-* Add a public-conversation option to the `ai.agent` workflow step [#280364]({{kib-pull}}280364).
-
 ### Fixes [kibana-9.6.0-fixes]
 
 **Elastic Agent Builder**:
@@ -1016,6 +1014,10 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Disable **Try {{esql}}** until the visualization state helpers resolve [#297237]({{kib-pull}}297237).
 % * Limit the number of data table cells that the Canvas functions route creates [#287935]({{kib-pull}}287935).
 % * Upgrade `@elastic/charts` to 73.3.1 [#298033]({{kib-pull}}298033), [#296879]({{kib-pull}}296879), [#294108]({{kib-pull}}294108).
+
+% Removed from 9.6.0: Nightshift-labelled PRs that don't add a new Kibana connector. Nightshift routes to the Observability notes.
+% * Make the Kubernetes connector available in workflows [#280854]({{kib-pull}}280854).
+% * Add a public-conversation option to the `ai.agent` workflow step [#280364]({{kib-pull}}280364).
 
 % Folded into the single Kibana Universal Alerting entry for 9.6.0. Add these back only if you want separate entries.
 % * Add quick-fix code actions, a **Prettify** shortcut, live validation, inline completions, and an {{esql}} help menu with recommended queries to the {{esql}} query sandbox in the alerting v2 rule editor [#289736]({{kib-pull}}289736), [#289532]({{kib-pull}}289532), [#290863]({{kib-pull}}290863).
