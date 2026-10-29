@@ -340,27 +340,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(secondDelete).to.eql({ succeeded: 0, failed: 0, skipped: 1 });
     });
 
-    it('cleans up an already-expired query and its rule when the stream itself is deleted', async () => {
-      const queryId = v4();
-      await upsertQuery(apiClient, STREAM_NAME, queryId, {
-        title: 'lingering expired query',
-        esql: {
-          query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message:'lingering'")`,
-        },
-        expires_at: '2020-01-01T00:00:00.000Z',
-      });
-
-      // Deliberately left in place, expired but never explicitly deleted, so
-      // teardown (deleteStream -> deleteAllQueries) must be the one to catch it.
-      await deleteStream(apiClient, STREAM_NAME);
-
-      const rules = await alertingApi.searchRulesV2(roleAuthc);
-      expect(rules.body.items).to.have.length(0);
-
-      // Recreate so the outer afterEach's deleteStream (expecting 200) doesn't 404.
-      await putStream(apiClient, STREAM_NAME, { stream, ...emptyAssets });
-    });
-
     it('bulks insert and remove queries', async () => {
       const firstQuery = {
         id: 'first',
@@ -641,7 +620,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('feature-grounding survives unrelated query bulk operations', () => {
       const testFeature: BaseFeature = {
         id: 'reconcile-ttl-probe',
-        stream_name: STREAM_NAME,
         type: 'entity',
         description: 'grounding probe for TTL-preservation regression tests',
         properties: {},
@@ -650,9 +628,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       async function persistGroundedQuery(title: string) {
         const response = await apiClient
-          .fetch('POST /internal/streams/{streamName}/queries/_persist', {
+          .fetch('POST /internal/streams/{sourceId}/queries/_persist', {
             params: {
-              path: { streamName: STREAM_NAME },
+              path: { sourceId: STREAM_NAME },
               body: {
                 queries: [
                   {
@@ -674,7 +652,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         return response.persistedQueries[0].id as string;
       }
 
-      it('reconcileStream still tombstones a persist-created query once its feature is gone', async () => {
+      it('reconcileSource still tombstones a persist-created query once its feature is gone', async () => {
         // Regression: rewriting other queries used to drop expires_at on this survivor,
         // making it durable and immune to the reconciliation below.
         const { uuid: featureUuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);

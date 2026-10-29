@@ -13,11 +13,13 @@ export const PillPopover = ({
   ariaLabel,
   children,
   testSubject,
+  isInvalid = false,
 }: {
   label: string;
   ariaLabel: string;
   children: (close: () => void) => React.ReactNode;
   testSubject: string;
+  isInvalid?: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
@@ -31,6 +33,8 @@ export const PillPopover = ({
         <EuiFormControlButton
           compressed
           fullWidth={false}
+          isInvalid={isInvalid}
+          aria-invalid={isInvalid}
           value={label}
           aria-label={ariaLabel}
           iconType="chevronSingleDown"

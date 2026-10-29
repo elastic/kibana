@@ -18,6 +18,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { Replacements } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import { EntityViewMode } from '../common/common.gen';
 
 export const EntityDetailsHighlightsRequestBody = lazySchema(() =>
   z.object({
@@ -26,9 +27,15 @@ export const EntityDetailsHighlightsRequestBody = lazySchema(() =>
      */
     entityType: z.enum(['user', 'host', 'service', 'generic']).describe('The type of entity.'),
     /**
-     * The identifier of the entity.
+     * The identifier of the entity (its Entity Store `entity.id` when Entity Store v2 is enabled).
      */
-    entityIdentifier: z.string().describe('The identifier of the entity.'),
+    entityIdentifier: z
+      .string()
+      .max(1024)
+      .describe(
+        'The identifier of the entity (its Entity Store `entity.id` when Entity Store v2 is enabled).'
+      ),
+    mode: EntityViewMode.optional().default('single'),
     anonymizationFields: z.array(AnonymizationFieldResponse),
     /**
      * The 'from' date.
@@ -41,7 +48,7 @@ export const EntityDetailsHighlightsRequestBody = lazySchema(() =>
     /**
      * The connector id.
      */
-    connectorId: z.string().describe('The connector id.'),
+    connectorId: z.string().max(200).describe('The connector id.'),
   })
 );
 export type EntityDetailsHighlightsRequestBody = z.infer<typeof EntityDetailsHighlightsRequestBody>;
@@ -74,6 +81,31 @@ export const EntityDetailsHighlightsResponse = lazySchema(() =>
           .nullable()
           .optional()
           .describe('ML anomaly findings. Null when there are none.'),
+        /**
+         * Present only when `mode` is `resolved`. Describes the resolution group whose signals were combined into the summary.
+         */
+        resolutionGroup: z
+          .object({
+            /**
+             * Number of group members (target included) whose signals are in the summary.
+             */
+            member_count: z
+              .number()
+              .int()
+              .describe(
+                'Number of group members (target included) whose signals are in the summary.'
+              ),
+            /**
+             * Anonymized identifiers of the included members, target first.
+             */
+            members: z
+              .array(z.string())
+              .describe('Anonymized identifiers of the included members, target first.'),
+          })
+          .optional()
+          .describe(
+            'Present only when `mode` is `resolved`. Describes the resolution group whose signals were combined into the summary.'
+          ),
       })
       .describe('The highlights of the entity.'),
     replacements: Replacements,

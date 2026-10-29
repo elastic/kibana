@@ -19,6 +19,7 @@ import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { noDataPagePublicMock } from '@kbn/no-data-page-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
@@ -54,6 +55,7 @@ export const setStubKibanaServices = () => {
     embeddable: embeddablePluginMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     inspector: inspectorPluginMock.createStartContract(),
+    lens: { stateHelperApi: jest.fn().mockResolvedValue(null) } as unknown as LensPublicStart,
     navigation: navigationPluginMock.createStartContract(),
     noDataPage: noDataPagePublicMock.createStart(),
     observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),

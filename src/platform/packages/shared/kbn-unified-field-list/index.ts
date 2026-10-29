@@ -50,6 +50,7 @@ export type {
   BucketedAggregation,
   NumberSummary,
   AddFieldFilterHandler,
+  AddOtherFilterHandler,
   FieldsGroup,
   FieldListGroups,
   FieldsGroupDetails,

@@ -50,6 +50,7 @@ import type {
   GetWorkflowStepExecutionsParams,
   InstallTemplateResponse,
   MgetWorkflowsParams,
+  ReadableWorkflowIdsResponse,
   RestoreWorkflowVersionParams,
   RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
@@ -348,6 +349,12 @@ export class WorkflowApi {
     });
   }
 
+  async getReadableWorkflowIds(): Promise<ReadableWorkflowIdsResponse> {
+    return this.http.get(`${INTERNAL_BASE}/readable_workflow_ids`, {
+      version: INTERNAL_API_VERSION,
+    });
+  }
+
   async searchTriggerEvents(
     params: SearchTriggerEventLogParams
   ): Promise<SearchTriggerEventLogResult> {
@@ -358,7 +365,7 @@ export class WorkflowApi {
   }
 
   // ---------------------------------------------------------------------------
-  // Workflow Template Library
+  // Workflow Template library
   // ---------------------------------------------------------------------------
 
   async getCatalog(params: GetCatalogParams = {}): Promise<GetCatalogResponse> {

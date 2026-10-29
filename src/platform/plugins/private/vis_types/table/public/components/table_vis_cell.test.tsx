@@ -32,6 +32,30 @@ describe('table vis cell', () => {
     const comp = shallow(<Cell {...cellProps} />);
 
     expect(comp).toMatchSnapshot();
-    expect(formattedColumns.second.formatter.convertToReact).toHaveBeenLastCalledWith(2);
+    expect(formattedColumns.second.formatter.convertToReact).toHaveBeenLastCalledWith(2, {
+      isInteractive: true,
+    });
+  });
+
+  it('passes isInteractive through to the formatter so it can suppress live content (e.g. links) when false', () => {
+    const rows = [{ first: 1, second: 2 }];
+    const formattedColumns = {
+      second: {
+        formatter: {
+          convertToReact: jest.fn().mockReturnValue('formatted value'),
+        },
+      },
+    } as unknown as FormattedColumns;
+    const Cell = createTableVisCell(rows, formattedColumns, undefined, false);
+    const cellProps = {
+      rowIndex: 0,
+      columnId: 'second',
+    } as EuiDataGridCellValueElementProps;
+
+    shallow(<Cell {...cellProps} />);
+
+    expect(formattedColumns.second.formatter.convertToReact).toHaveBeenLastCalledWith(2, {
+      isInteractive: false,
+    });
   });
 });

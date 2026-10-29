@@ -52,6 +52,7 @@ import useLatest from 'react-use/lib/useLatest';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BehaviorSubject } from 'rxjs';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import {
@@ -339,6 +340,21 @@ function DiscoverDocumentsComponent({
   });
 
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  const onOpenInNewTab = useCallback<NonNullable<UnifiedDataTableProps['onOpenInNewTab']>>(
+    ({ query: newQuery, filters: newFilters, dataViewId, timeRange, tabLabel }) =>
+      dispatch(
+        internalStateActions.openInNewTab({
+          tabLabel,
+          appState: {
+            query: newQuery,
+            filters: newFilters,
+            ...(dataViewId ? { dataSource: createDataViewDataSource({ dataViewId }) } : {}),
+          },
+          globalState: { timeRange },
+        })
+      ),
+    [dispatch]
+  );
   const onUpdateESQLQuery: UpdateESQLQueryFn = useCallback(
     (queryOrUpdater) => {
       dispatch(updateESQLQuery({ queryOrUpdater }));
@@ -373,12 +389,23 @@ function DiscoverDocumentsComponent({
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   // Same ES|QL table the histogram uses, so Summary cells can fetch without waiting for the chart.
+  const {
+    result: documentsResult,
+    dataSource: documentsDataSource,
+    fetchStatus: documentsFetchStatus,
+    approximationApplied: documentsApproximationApplied,
+  } = documentState;
   const { table: esqlTable } = useMemo(
     () =>
       getEsqlDatatableFromDocuments({
-        documentsValue: documentState,
+        documentsValue: {
+          result: documentsResult,
+          dataSource: documentsDataSource,
+          fetchStatus: documentsFetchStatus,
+          approximationApplied: documentsApproximationApplied,
+        },
       }),
-    [documentState]
+    [documentsResult, documentsDataSource, documentsFetchStatus, documentsApproximationApplied]
   );
   // New result identity after refresh - keeps sparkline cache from reusing a stale series.
   const requestId = useMemo(() => getGridRequestId(documentState.result), [documentState.result]);
@@ -612,6 +639,7 @@ function DiscoverDocumentsComponent({
             showTimeCol={showTimeCol}
             settings={grid}
             onFilter={onAddFilter as DocViewFilterFn}
+            onOpenInNewTab={onOpenInNewTab}
             onSetColumns={onSetColumns}
             onSort={onSort}
             onResize={onResizeDataGrid}
@@ -651,6 +679,7 @@ function DiscoverDocumentsComponent({
             dataGridDensityState={density}
             onUpdateDataGridDensity={onUpdateDensity}
             query={query}
+            filters={filters}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"

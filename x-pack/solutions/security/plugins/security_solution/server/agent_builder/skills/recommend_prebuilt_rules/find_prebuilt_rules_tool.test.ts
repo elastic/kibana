@@ -122,9 +122,37 @@ describe('reduceMitreToTacticsOnly', () => {
       severity: 'high',
       risk_score: 73,
       tags: ['OS: Windows'],
-      threat: [{ tactic: { id: 'TA0001', name: 'Initial Access' } }],
+      threat: [{ framework: 'MITRE ATT&CK', tactic: { id: 'TA0001', name: 'Initial Access' } }],
       related_integrations: [{ package: 'windows', version: '^1.0.0' }],
     });
+  });
+
+  it('keeps ATLAS entries with their framework and drops unknown frameworks', () => {
+    const result = reduceMitreToTacticsOnly(
+      makeRule({
+        threat: [
+          {
+            framework: 'MITRE ATLAS',
+            tactic: { id: 'AML.TA0000', name: 'Reconnaissance', reference: 'https://example' },
+            technique: [],
+          },
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: { id: 'TA0001', name: 'Initial Access', reference: 'https://example' },
+            technique: [],
+          },
+          {
+            framework: 'Some Other Framework',
+            tactic: { id: 'XX', name: 'X', reference: 'https://example' },
+            technique: [],
+          },
+        ],
+      })
+    );
+    expect(result.threat).toEqual([
+      { framework: 'MITRE ATLAS', tactic: { id: 'AML.TA0000', name: 'Reconnaissance' } },
+      { framework: 'MITRE ATT&CK', tactic: { id: 'TA0001', name: 'Initial Access' } },
+    ]);
   });
 
   it('abridges absent threat to an empty array', () => {
@@ -152,6 +180,15 @@ describe('findPrebuiltRulesSchema', () => {
     );
   });
 
+  it('accepts ATLAS tactic and technique IDs', () => {
+    expect(
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTactic: ['AML.TA0000'] } }).success
+    ).toBe(true);
+    expect(
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['AML.T0044'] } }).success
+    ).toBe(true);
+  });
+
   it('rejects unknown parameters at the top level and inside `filter`', () => {
     expect(findPrebuiltRulesSchema.safeParse({ ruleSource: 'prebuilt' }).success).toBe(false);
     expect(findPrebuiltRulesSchema.safeParse({ enabled: true }).success).toBe(false);
@@ -171,6 +208,12 @@ describe('findPrebuiltRulesSchema', () => {
     // Sub-techniques (T####.###) are not accepted — the filter only matches the technique id.
     expect(
       findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['T1059.001'] } }).success
+    ).toBe(false);
+    expect(
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['AML.'] } }).success
+    ).toBe(false);
+    expect(
+      findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: ['AML.T0024.002'] } }).success
     ).toBe(false);
     // A non-array value is no longer accepted.
     expect(findPrebuiltRulesSchema.safeParse({ filter: { mitreTechnique: 'T1059' } }).success).toBe(
@@ -319,7 +362,7 @@ describe('createFindPrebuiltRulesInlineTool', () => {
         expect(data.total).toBe(1);
         // `threat` is abridged to tactics only, under the same `threat` key.
         expect(data.rules[0].threat).toEqual([
-          { tactic: { id: 'TA0001', name: 'Initial Access' } },
+          { framework: 'MITRE ATT&CK', tactic: { id: 'TA0001', name: 'Initial Access' } },
         ]);
         // related_integrations is passed through in full (not trimmed to `package` only).
         expect(data.rules[0].related_integrations).toEqual([

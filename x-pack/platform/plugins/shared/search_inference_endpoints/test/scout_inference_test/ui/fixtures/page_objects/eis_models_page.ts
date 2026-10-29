@@ -24,8 +24,10 @@ export class EisModelsPage {
 
   // Model Detail Flyout
   readonly flyout: Locator;
-  readonly flyoutTaskBadges: Locator;
+  readonly flyoutTitle: Locator;
+  readonly flyoutProvider: Locator;
   readonly flyoutModelDetails: Locator;
+  readonly flyoutViewEisDocumentationLink: Locator;
   readonly flyoutRegionOptions: Locator;
   readonly flyoutRegionOptionsUnavailable: Locator;
   readonly flyoutAddEndpointButton: Locator;
@@ -108,8 +110,12 @@ export class EisModelsPage {
 
     // Model Detail Flyout
     this.flyout = this.page.testSubj.locator('modelDetailFlyout');
-    this.flyoutTaskBadges = this.page.testSubj.locator('flyoutTaskBadges');
+    this.flyoutTitle = this.page.testSubj.locator('modelDetailFlyoutTitle');
+    this.flyoutProvider = this.page.testSubj.locator('modelDetailFlyoutProvider');
     this.flyoutModelDetails = this.page.testSubj.locator('flyoutModelDetails');
+    this.flyoutViewEisDocumentationLink = this.page.testSubj.locator(
+      'modelDetailFlyoutViewEisDocumentationLink'
+    );
     this.flyoutRegionOptions = this.page.testSubj.locator('flyoutRegionOptions');
     this.flyoutRegionOptionsUnavailable = this.page.testSubj.locator(
       'flyoutRegionOptionsUnavailable'

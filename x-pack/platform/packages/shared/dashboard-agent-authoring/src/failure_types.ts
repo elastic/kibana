@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-export const DASHBOARD_OPERATION_FAILURE_TYPES = {
-  addSection: 'add_section',
-  addPanels: 'add_panels',
-  addControls: 'add_controls',
-  editPanels: 'edit_panels',
-  updatePanelLayouts: 'update_panel_layouts',
+/** The step of a dashboard update that failed. */
+export const DASHBOARD_FAILURE_TYPES = {
+  upsertDashboard: 'upsert_dashboard',
+  validateDashboard: 'validate_dashboard',
+  layout: 'layout',
 } as const;
 
-export type DashboardOperationFailureType =
-  (typeof DASHBOARD_OPERATION_FAILURE_TYPES)[keyof typeof DASHBOARD_OPERATION_FAILURE_TYPES];
+export type DashboardFailureType =
+  (typeof DASHBOARD_FAILURE_TYPES)[keyof typeof DASHBOARD_FAILURE_TYPES];
+
+/** What a failure is about: one panel, section or control, or the dashboard as a whole. */
+export type DashboardFailureKind = 'panel' | 'section' | 'control' | 'dashboard';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
@@ -587,6 +588,64 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           confidence: ENTITY_CONFIDENCE.High,
         },
       });
+    }
+  );
+
+  apiTest(
+    'Should resolve CloudTrail actors to the inventory IAM role entity via user.entity.id (aws)',
+    async ({ apiClient, esClient }) => {
+      const from = '2026-04-01T10:00:00Z';
+      const to = '2026-04-01T12:00:00Z';
+      const roleArn = 'arn:aws:iam::123456789012:role/scout/ExtractionRole';
+      const roleEntityId = `user:${roleArn}@aws`;
+      const readList = (source: Record<string, unknown>, path: string): unknown[] => {
+        const value = source[path] ?? get(source, path);
+        return Array.isArray(value) ? value : [value];
+      };
+
+      // 1. A CloudTrail event alone cannot create the user (event.kind is not asset).
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-04-01T10:01:00Z',
+        event: { kind: 'event', module: 'aws', action: 'AssumeRole', outcome: 'success' },
+        cloud: { provider: 'aws' },
+        user: { id: 'AROAEXAMPLE:session-1', name: 'session-1', entity: { id: roleArn } },
+      });
+      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      expect(ext1.statusCode).toBe(200);
+      expect((await searchDocById(esClient, roleEntityId)).hits.hits).toHaveLength(0);
+
+      // 2. Cloud Asset Inventory creates the IAM role entity keyed by ARN.
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-04-01T10:02:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        cloud: { provider: 'aws' },
+        user: { id: roleArn, name: 'ExtractionRole', entity: { id: roleArn } },
+      });
+      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      expect(ext2.statusCode).toBe(200);
+      const created = await searchDocById(esClient, roleEntityId);
+      expect(created.hits.hits).toHaveLength(1);
+      expect(created.hits.hits[0]._source).toMatchObject({
+        entity: { id: roleEntityId, namespace: 'aws' },
+      });
+
+      // 3. A later CloudTrail event updates the same entity instead of creating user:<principalId>@aws.
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-04-01T10:03:00Z',
+        event: { kind: 'event', module: 'aws', action: 'ListBuckets', outcome: 'success' },
+        cloud: { provider: 'aws' },
+        user: { id: 'AROAEXAMPLE:session-2', name: 'session-2', entity: { id: roleArn } },
+      });
+      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      expect(ext3.statusCode).toBe(200);
+      const updated = await searchDocById(esClient, roleEntityId);
+      expect(updated.hits.hits).toHaveLength(1);
+      const source = updated.hits.hits[0]._source as Record<string, unknown>;
+      expect(readList(source, 'user.id')).toContain('AROAEXAMPLE:session-2');
+      expect(readList(source, 'event.kind')).toContain('event');
+      expect(
+        (await searchDocById(esClient, 'user:AROAEXAMPLE:session-2@aws')).hits.hits
+      ).toHaveLength(0);
     }
   );
 

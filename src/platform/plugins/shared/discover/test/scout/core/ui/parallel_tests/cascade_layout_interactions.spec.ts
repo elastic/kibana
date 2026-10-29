@@ -10,8 +10,9 @@
 /**
  * Covers the ES|QL grouped ("cascade") layout's end-to-end UI interactions:
  * the layout renders with a group count, a row's context menu opens,
- * fullscreen works, and opting out of / back into grouping (plus switching
- * to classic mode) renders the expected layout.
+ * fullscreen works, documents within a group can be compared, and opting
+ * out of / back into grouping (plus switching to classic mode) renders the
+ * expected layout.
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -102,6 +103,33 @@ spaceTest.describe(
 
           await expandedRowGrid.closeFullScreenMode();
           // Rows are still rendered (the grid didn't unmount/lose its data) after exiting fullscreen.
+          await expect(expandedRowGrid.rows).not.toHaveCount(0);
+        });
+
+        await spaceTest.step('selected documents within a group can be compared', async () => {
+          const expandedRow = page.locator(`[id="${firstRowId}"]`);
+          const expandedRowGrid = page.components.dataGrid('docTable', expandedRow);
+
+          // The cascade grid body renders rows with its own virtualizer, which doesn't set the
+          // `data-grid-visible-row-index` attribute `dataGrid.selectRow()` relies on, so the
+          // checkboxes are addressed through the `select` control column cells instead.
+          // Every `clientip` group in the fixture has at least 2 documents.
+          await expandedRowGrid.cell(0, 'select').locator('input[type="checkbox"]').check();
+          await expandedRowGrid.cell(1, 'select').locator('input[type="checkbox"]').check();
+
+          await expandedRow.locator('[data-test-subj="unifiedDataTableSelectionBtn"]').click();
+          await expect(page.testSubj.locator('unifiedDataTableSelectionMenu')).toBeVisible();
+          await page.testSubj.click('unifiedDataTableCompareSelectedDocuments');
+
+          const comparisonGrid = expandedRow.locator(
+            '[data-test-subj="unifiedDataTableCompareDocuments"]'
+          );
+          await expect(comparisonGrid).toBeVisible();
+          await expect(page.testSubj.locator('unifiedDataTableComparisonDisplay')).toHaveText(
+            'Comparing 2 results'
+          );
+
+          await dataGrid.exitComparisonMode();
           await expect(expandedRowGrid.rows).not.toHaveCount(0);
         });
 

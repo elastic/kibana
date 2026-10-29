@@ -33,6 +33,7 @@ export const indexSearchToolRegistryEntry: ToolTypeRegistryEntry<IndexSearchTool
     pattern: '',
     rowLimit: undefined,
     customInstructions: '',
+    includeFrozen: false,
   },
   toolToFormData: (tool: ToolDefinitionWithSchema) => {
     if (!isIndexSearchTool(tool)) {

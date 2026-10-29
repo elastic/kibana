@@ -20,12 +20,20 @@ export {
   ALERTZERO_APP_PATH,
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_FEATURE_ID,
-  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
-  ALERTZERO_FAST_INFERENCE_FEATURE_ID,
+  ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+  ALERTZERO_HUNT_SWEEP_TELEMETRY_PLUGIN_ID,
+  ALERTZERO_HUNT_TIER2_TELEMETRY_PLUGIN_ID,
+  ALERTZERO_THREAT_INTEL_ASSESS_RELEVANCE_TELEMETRY_PLUGIN_ID,
+  ALERTZERO_THREAT_INTEL_CLASSIFY_SEVERITY_TELEMETRY_PLUGIN_ID,
+  ALERTZERO_THREAT_INTEL_ENRICH_REPORT_TELEMETRY_PLUGIN_ID,
+  ALERTZERO_THREAT_INTEL_ENRICH_TAXONOMY_TELEMETRY_PLUGIN_ID,
+  ALERTZERO_THREAT_INTEL_EXTRACT_DIAMOND_TELEMETRY_PLUGIN_ID,
   ALERTZERO_INTERNAL_URL,
   ALERTZERO_PLUGIN_NAME,
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_INVESTIGATIONS_COUNT_URL,
   ALERTZERO_SCAN_FAILURES_URL,
@@ -39,6 +47,7 @@ export {
   ALERTZERO_WORKER_URL_TEMPLATE,
   HUNT_INTERNAL_ROUTE_BASE,
   HUNT_INDEX_SCOPE_URL,
+  HUNT_WORKER_INDEX_COVERAGE_URL,
   CANDIDATES_URL,
   HUNT_COORDINATOR_URL,
   FIND_OR_CREATE_INVESTIGATION_URL,
@@ -80,6 +89,13 @@ export {
   buildWorkerUrl,
 } from './constants';
 
+export {
+  SECURITY_ROLE_API_VERSION,
+  WORKER_SERVICE_ACCOUNT_NAMES,
+  buildSecurityRoleUrl,
+  getWorkerRoleName,
+} from './worker_roles';
+
 export type {
   ScanFailureWorker,
   ScanFailuresResponse,
@@ -87,6 +103,9 @@ export type {
   HuntThreatIntelSupplyWorkflowKey,
   HuntThreatIntelSupplyWorkflowStatus,
   HuntThreatIntelSupplyHardGate,
+  HuntModelTierId,
+  HuntModelTierState,
+  HuntModelTierStatus,
   HuntThreatIntelSupplyStatus,
 } from './constants';
 
@@ -139,6 +158,7 @@ export {
   WorkerSettingsWrite,
   WorkflowTriggerType,
   AffectedAsset,
+  HostOrigin,
   HuntCompleteness,
   HuntForThreatHit,
   HuntForThreatRequestBody,
@@ -149,7 +169,10 @@ export {
   HuntIncompleteReason,
   HuntIoc,
   HuntIocType,
+  huntResultSchema,
+  isoDatetimeSchema,
   HuntIndexScopeResponse,
+  HuntWorkerIndexCoverageResponse,
   HuntScope,
   HuntScopeResolution,
   IndexScopeStatus,
@@ -164,12 +187,14 @@ export {
   CandidateSkipReason,
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
   FindOrCreateInvestigationRequestBody,
   FindOrCreateInvestigationResponse,
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './impl/schemas';
+export type { HuntResult } from './impl/schemas';
 
 export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
 
@@ -188,6 +213,17 @@ export type {
 
 export {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
+  BUDGET_PER_HOUR_DEFAULT,
+  BUDGET_PER_HOUR_MAX,
+  BUDGET_PER_HOUR_MIN,
+  TRIAGE_ALERT_COST,
+  TRIAGE_BATCH_OVERHEAD_COST,
+  getMinBudgetPerHour,
+  LOOKBACK_HOURS_DEFAULT,
+  LOOKBACK_HOURS_MAX,
+  EXCLUDED_RULE_TAGS_MAX_COUNT,
+  EXCLUDED_RULE_TAG_MAX_LENGTH,
+  LOOKBACK_HOURS_MIN,
   ANALYSIS_WINDOW_DAYS_DEFAULT,
   ANALYSIS_WINDOW_DAYS_MAX,
   ANALYSIS_WINDOW_DAYS_MIN,
@@ -209,6 +245,7 @@ export {
   applyWorkerSettingsWrite,
   createDefaultWorkerSettings,
   diffWorkerSettings,
+  formatCrossFieldIssues,
   formatWorkerSettingsIssues,
   getAllowedAutonomyLevels,
   isWorkerScheduleIntervalReadOnly,
@@ -224,3 +261,17 @@ export type {
   SystemSecurityWorkerCatalogEntry,
   WorkerScheduleUnit,
 } from './constants';
+export {
+  REQUIRED_REPORT_SEMANTIC_FIELDS,
+  THREAT_REPORTS_GET_MAPPING_PARAMS,
+  THREAT_REPORTS_INDEX,
+  getReportEmbeddingEndpointIds,
+  getSemanticTextInferenceId,
+  isReportsIndexManaged,
+} from './threat_intel_mapping';
+export { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from './impl/hunt/usable_report_filter';
+export {
+  HUNT_ELIGIBLE_IOC_TIERS,
+  isHuntEligibleIoc,
+  type HuntEligibleIocTier,
+} from './impl/hunt/hunt_eligible_ioc';

@@ -15,7 +15,12 @@ import {
   LATEST_ALIAS,
   LATEST_INDEX,
 } from '../../../common/fixtures/constants';
-import { RESOLUTION_RULE_IDS } from '../../../../../common';
+import {
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+  RESOLUTION_RULE_IDS,
+} from '../../../../../common';
 import { hashEuid } from '../../../../../common/domain/euid';
 import {
   clearInstalledEntityStoreDocuments,
@@ -1044,4 +1049,90 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
       expect(enable.statusCode).toBe(200);
     }
   });
+
+  apiTest(
+    'Security all can enable and disable built-in rules; Security read cannot',
+    async ({ apiClient, samlAuth }) => {
+      const securityRole = (privilege: 'all' | 'read') => ({
+        elasticsearch: {
+          cluster: [],
+          indices: [{ names: ['.entities.v2.*'], privileges: ['read', 'view_index_metadata'] }],
+        },
+        kibana: [{ base: [], feature: { siemV5: [privilege] }, spaces: ['*'] }],
+      });
+      // Scout has one custom role per worker: each asInteractiveUser call
+      // redefines it, so the same session takes on whichever role was set last.
+      const { cookieHeader } = await samlAuth.asInteractiveUser(securityRole('all'));
+      const customRoleHeaders = { ...cookieHeader, ...PUBLIC_HEADERS };
+      const toggleEmailRule = (action: 'ENABLE' | 'DISABLE') =>
+        apiClient.put(
+          ENTITY_STORE_ROUTES.public[`RESOLUTION_RULES_${action}`](
+            RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH
+          ),
+          { headers: customRoleHeaders, responseType: 'json' }
+        );
+
+      await apiTest.step('Security all disables and re-enables a built-in rule', async () => {
+        expect((await toggleEmailRule('DISABLE')).statusCode).toBe(200);
+        expect((await toggleEmailRule('ENABLE')).statusCode).toBe(200);
+      });
+
+      await apiTest.step('Security read can do neither', async () => {
+        await samlAuth.asInteractiveUser(securityRole('read'));
+        for (const action of ['DISABLE', 'ENABLE'] as const) {
+          const response = await toggleEmailRule(action);
+          expect(response.statusCode).toBe(403);
+          // Refused by route authorization, not only by the saved-objects layer.
+          expect(response.body.message).toContain('securitySolution-entity-analytics-manage');
+        }
+      });
+    }
+  );
+
+  apiTest(
+    'A maintainer run by a Security all user honours a built-in rule an admin disabled',
+    async ({ apiClient, esClient, samlAuth }) => {
+      const disable = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.RESOLUTION_RULES_DISABLE(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH),
+        { headers: defaultHeaders, responseType: 'json' }
+      );
+      expect(disable.statusCode).toBe(200);
+
+      // Enough to run the maintainer without being a superuser: the entity store's own
+      // privilege check, plus Security `all` for reading the rule overrides.
+      const { cookieHeader } = await samlAuth.asInteractiveUser({
+        elasticsearch: {
+          cluster: ENTITY_STORE_CLUSTER_PRIVILEGES,
+          indices: [
+            { names: ['*'], privileges: ENTITY_STORE_SOURCE_INDICES_PRIVILEGES },
+            {
+              names: ['.entities.v2.*', LATEST_ALIAS],
+              privileges: [
+                ...new Set([
+                  ...ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+                  ...ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+                ]),
+              ],
+            },
+          ],
+        },
+        kibana: [{ base: [], feature: { siemV5: ['all'] }, spaces: ['*'] }],
+      });
+      const customRoleInternalHeaders = { ...cookieHeader, ...INTERNAL_HEADERS };
+
+      const email = 'non-superuser-disabled@co.com';
+      const oktaEntity = 'non-superuser-okta';
+      const entraEntity = 'non-superuser-entra';
+      await seedUserEntity(esClient, { entityId: oktaEntity, namespace: 'okta', email });
+      await seedUserEntity(esClient, { entityId: entraEntity, namespace: 'entra_id', email });
+
+      // A sync run reads the overrides with the caller's credentials, as the scheduled
+      // task does with the API key of whoever set up the store.
+      await triggerMaintainerRun(apiClient, customRoleInternalHeaders, 'automated-resolution', {
+        sync: true,
+      });
+      await assertNotResolved(esClient, entraEntity);
+      await assertNotResolved(esClient, oktaEntity);
+    }
+  );
 });

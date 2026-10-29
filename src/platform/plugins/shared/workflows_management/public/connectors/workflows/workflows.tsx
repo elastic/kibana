@@ -23,15 +23,12 @@ export function getConnectorType(): ConnectorTypeModel<
   return {
     id: '.workflows',
     iconClass: 'workflow',
-    selectMessage: i18n.translate('xpack.stackConnectors.components.workflows.selectMessageText', {
+    selectMessage: i18n.translate('workflows.components.workflows.selectMessageText', {
       defaultMessage: 'Execute workflows when alerts are triggered.',
     }),
-    actionTypeTitle: i18n.translate(
-      'xpack.stackConnectors.components.workflows.connectorTypeTitle',
-      {
-        defaultMessage: 'Workflows',
-      }
-    ),
+    actionTypeTitle: i18n.translate('workflows.components.workflows.connectorTypeTitle', {
+      defaultMessage: 'Workflows',
+    }),
     validateParams: async (
       actionParams: WorkflowsActionParams
     ): Promise<GenericValidationResult<unknown>> => {

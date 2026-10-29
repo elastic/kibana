@@ -6,11 +6,14 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/securitysolution-alerts-page-url",
+    "@kbn/std",
     "@kbn/security-plugin-types-server",
     "@kbn/security-plugin",
     "@kbn/agentic-investigations-common",
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/safer-lodash-set",
     "@kbn/datemath",
     "@kbn/logging",
     "@kbn/features-plugin",
@@ -62,14 +65,20 @@
     "@kbn/user-profile-components",
     "@kbn/proposals-common",
     "@kbn/proposals-plugin",
-    "@kbn/security-mitre-attack-server",
     "@kbn/security-mitre-attack-common",
+    "@kbn/security-mitre-attack-mocks",
     "@kbn/inference-plugin",
     "@kbn/fleet-plugin",
+    "@kbn/mitre-attack-plugin",
     "@kbn/management-settings-ids",
     "@kbn/proposals-ui",
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/core-chrome-browser-mocks",
-    "@kbn/context-engine-plugin"
+    "@kbn/context-engine-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/telemetry-plugin",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-elasticsearch-server-mocks"
   ]
 }
