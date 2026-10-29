@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE } from '@kbn/management-settings-ids';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { test } from '../fixtures';
+import { mockNightshiftSetUp, test } from '../fixtures';
 
 test.describe(
   'Significant Events app',
@@ -37,7 +37,8 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, kbnClient }) => {
+    test.beforeEach(async ({ browserAuth, kbnClient, page }) => {
+      await mockNightshiftSetUp(page);
       await kbnClient.uiSettings.update({ [OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE]: false });
       await browserAuth.loginAsAdmin();
     });
