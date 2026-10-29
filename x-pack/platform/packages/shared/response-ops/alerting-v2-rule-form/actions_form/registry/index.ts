@@ -12,3 +12,4 @@ export {
   getDefaultInlineActionStepDefinition,
 } from './registry';
 export { DISPATCH_PAYLOAD_VARIABLES, PAYLOAD_ALERT_FIELDS } from './payload_variables';
+export { getPayloadTemplateVariables } from './payload_template_variables';
