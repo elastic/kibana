@@ -104,7 +104,11 @@ export const requestEventAnnotations = (
           {
             query: annotation.query,
             timeZone: timezone,
-            kibanaQueryContext: { timeRange, esqlVariables: input.esqlVariables },
+            kibanaQueryContext: {
+              timeRange,
+              timeField: annotation.timeField,
+              esqlVariables: input.esqlVariables,
+            },
             approximation: input.isApproximate,
             projectRouting: input.projectRouting,
             dropNullColumns: false,

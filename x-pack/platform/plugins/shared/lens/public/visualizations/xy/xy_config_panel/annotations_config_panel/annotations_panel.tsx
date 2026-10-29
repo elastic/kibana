@@ -10,6 +10,7 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { AnnotationEditorControls } from '@kbn/event-annotation-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { AggregateQuery } from '@kbn/es-query';
+import { getESQLTimeField } from '@kbn/esql-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
@@ -99,22 +100,23 @@ export const AnnotationsPanel = (
   ]);
 
   const queryInputServices = useKibana<LensAppServices>().services;
-  const { data } = queryInputServices;
+  const { data, http } = queryInputServices;
   const { fromDate, toDate } = frame.absDateRange;
   const fetchColumns = useCallback(
     async (query: AggregateQuery, abortSignal: AbortSignal) => {
+      const timeField = await getESQLTimeField({ query: query.esql, http });
       const { datatable } = await data.search.esql(
         {
           query: query.esql,
-          kibanaQueryContext: { timeRange: { from: fromDate, to: toDate } },
+          kibanaQueryContext: { timeRange: { from: fromDate, to: toDate }, timeField },
           dropNullColumns: false,
           columnMetadata: true,
         },
         { abortSignal, includeDataTable: true }
       );
-      return datatable?.columns ?? [];
+      return { columns: datatable?.columns ?? [], timeField };
     },
-    [data.search, fromDate, toDate]
+    [data.search, http, fromDate, toDate]
   );
 
   if (!currentAnnotation) {

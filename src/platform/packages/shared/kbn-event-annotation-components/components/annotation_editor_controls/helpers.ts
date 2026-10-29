@@ -59,6 +59,7 @@ export const sanitizeProperties = (annotation: EventAnnotationConfig): EventAnno
       'id',
       'label',
       'query',
+      'timeField',
       'timeColumn',
       'textColumn',
       'extraColumns',

@@ -15,7 +15,10 @@ import { ConfigPanelEsqlAnnotation } from '@kbn/event-annotation-components';
 interface Props {
   annotation: EsqlEventAnnotationConfig;
   onChange: (annotation: EsqlEventAnnotationConfig) => void;
-  fetchColumns: (query: AggregateQuery, abortSignal: AbortSignal) => Promise<DatatableColumn[]>;
+  fetchColumns: (
+    query: AggregateQuery,
+    abortSignal: AbortSignal
+  ) => Promise<{ columns: DatatableColumn[]; timeField?: string }>;
 }
 
 export const EsqlAnnotationControls = ({ annotation, onChange, fetchColumns }: Props) => {
@@ -45,9 +48,9 @@ export const EsqlAnnotationControls = ({ annotation, onChange, fetchColumns }: P
     setIsLoading(true);
     setErrors([]);
     fetchColumns({ esql: savedQuery }, controller.signal)
-      .then((resultColumns) => {
+      .then((result) => {
         if (controller.signal.aborted) return;
-        setColumns(resultColumns);
+        setColumns(result.columns);
         loadedResultRef.current = { query: savedQuery, fetchColumns };
       })
       .catch((error) => {
@@ -79,12 +82,16 @@ export const EsqlAnnotationControls = ({ annotation, onChange, fetchColumns }: P
             setIsLoading(true);
             setErrors([]);
             try {
-              const resultColumns = await fetchColumns(submittedQuery, controller.signal);
+              const result = await fetchColumns(submittedQuery, controller.signal);
               if (controller.signal.aborted) return;
               loadedResultRef.current = { query: submittedQuery.esql, fetchColumns };
-              setColumns(resultColumns);
+              setColumns(result.columns);
               const current = currentPropsRef.current;
-              current.onChange({ ...current.annotation, query: submittedQuery });
+              current.onChange({
+                ...current.annotation,
+                query: submittedQuery,
+                timeField: result.timeField,
+              });
             } catch (error) {
               if (controller.signal.aborted) return;
               setErrors([error instanceof Error ? error : new Error(String(error))]);

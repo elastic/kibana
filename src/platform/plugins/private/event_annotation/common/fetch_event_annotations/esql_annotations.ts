@@ -31,6 +31,8 @@ export const toEsqlAnnotationDatatable = ({
   timezone: string;
   timeRange: TimeRange;
 }): Datatable => {
+  // Column problems are configuration errors and fail the chart, like missing fields on DSL
+  // query annotations. Row problems are skipped, like documents without the time field.
   const findColumn = (name: string, dateOnly = false): DatatableColumn => {
     const column = datatable.columns.find((candidate) => candidate.name === name);
     if (!column || (dateOnly && column.meta.type !== 'date')) {
@@ -59,18 +61,13 @@ export const toEsqlAnnotationDatatable = ({
   const rows: DatatableRow[] = [];
 
   for (const [index, row] of datatable.rows.entries()) {
-    const time = parseTimestamp(row[timeColumn.id], annotation.label);
-    const endTime = endTimeColumn
-      ? parseTimestamp(row[endTimeColumn.id], annotation.label)
-      : undefined;
-    if (endTime && endTime < time) {
-      throw new Error(
-        i18n.translate('eventAnnotation.esqlAnnotation.invalidRangeErrorMessage', {
-          defaultMessage: 'Annotation {label}: an end timestamp precedes its start timestamp.',
-          values: { label: annotation.label },
-        })
-      );
+    const startMs = parseTimestamp(row[timeColumn.id]);
+    const endMs = endTimeColumn ? parseTimestamp(row[endTimeColumn.id]) : undefined;
+    if (startMs === undefined || (endTimeColumn && (endMs === undefined || endMs < startMs))) {
+      continue;
     }
+    const time = moment(startMs).toISOString();
+    const endTime = endMs === undefined ? undefined : moment(endMs).toISOString();
     if (
       bounds &&
       (moment(time).isAfter(bounds.to) || moment(endTime ?? time).isBefore(bounds.from))
@@ -132,17 +129,10 @@ export const toEsqlAnnotationDatatable = ({
   ]);
 };
 
-const parseTimestamp = (value: string | number | null, label: string): string => {
+const parseTimestamp = (value: unknown): number | undefined => {
+  if (typeof value !== 'number' && typeof value !== 'string') return undefined;
   const date = typeof value === 'number' ? moment(value) : moment(value, moment.ISO_8601, true);
-  if ((typeof value !== 'string' && typeof value !== 'number') || !date.isValid()) {
-    throw new Error(
-      i18n.translate('eventAnnotation.esqlAnnotation.invalidTimestampErrorMessage', {
-        defaultMessage: 'Annotation {label}: time columns must contain non-null, valid timestamps.',
-        values: { label },
-      })
-    );
-  }
-  return date.toISOString();
+  return date.isValid() ? date.valueOf() : undefined;
 };
 
 export const mergeAnnotationDatatables = (tables: Datatable[]): Datatable => {

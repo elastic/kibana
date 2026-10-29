@@ -146,37 +146,43 @@ describe('toEsqlAnnotationDatatable', () => {
     ).toThrow(`column ${timeColumn} is missing or has an incompatible type`);
   });
 
-  it.each([null, 'not-a-date'])('rejects invalid timestamps: %s', (time) => {
-    expect(() =>
-      toEsqlAnnotationDatatable({
-        ...options,
-        datatable: { ...datatable, rows: [{ ...datatable.rows[0], 'time-id': time }] },
-      })
-    ).toThrow('time columns must contain non-null, valid timestamps');
+  it.each([null, 'not-a-date'])('skips rows with invalid timestamps: %s', (time) => {
+    const result = toEsqlAnnotationDatatable({
+      ...options,
+      datatable: {
+        ...datatable,
+        rows: [{ ...datatable.rows[0], 'time-id': time }, datatable.rows[1]],
+      },
+    });
+    expect(result.rows.map(({ time: rowTime }) => rowTime)).toEqual(['2026-01-01T00:30:00.000Z']);
   });
 
-  it('rejects ranges ending before their start', () => {
-    expect(() =>
-      toEsqlAnnotationDatatable({
-        ...options,
-        annotation: { ...annotation, endTimeColumn: 'time' },
-        datatable: {
-          ...datatable,
-          columns: [...datatable.columns, { id: 'end-id', name: 'end', meta: { type: 'date' } }],
-        },
-      })
-    ).not.toThrow();
-    expect(() =>
-      toEsqlAnnotationDatatable({
+  it.each([null, '2026-01-01T00:00:00Z'])(
+    'skips ranges with an invalid or earlier end: %s',
+    (end) => {
+      const result = toEsqlAnnotationDatatable({
         ...options,
         annotation: { ...annotation, endTimeColumn: 'end' },
         datatable: {
           ...datatable,
           columns: [...datatable.columns, { id: 'end-id', name: 'end', meta: { type: 'date' } }],
-          rows: [{ ...datatable.rows[0], 'end-id': '2026-01-01T00:00:00Z' }],
+          rows: [
+            { ...datatable.rows[0], 'end-id': end },
+            { ...datatable.rows[1], 'end-id': '2026-01-01T03:00:00Z' },
+          ],
         },
+      });
+      expect(result.rows.map(({ id }) => id)).toEqual(['deployments:1']);
+    }
+  );
+
+  it('fails on missing text or tooltip columns like missing DSL annotation fields', () => {
+    expect(() =>
+      toEsqlAnnotationDatatable({
+        ...options,
+        annotation: { ...annotation, extraColumns: ['gone'] },
       })
-    ).toThrow('an end timestamp precedes its start timestamp');
+    ).toThrow('column gone is missing or has an incompatible type');
   });
 
   it('limits points per bucket and carries skipped counts through merging with manual annotations', () => {

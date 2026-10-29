@@ -16,6 +16,7 @@ import { manualRangeEventAnnotation } from '../manual_event_annotation';
 export type EsqlEventAnnotationArgs = PointStyleProps & {
   id: string;
   query: string;
+  timeField?: string;
   timeColumn: string;
   endTimeColumn?: string;
   textColumn?: string;
@@ -54,6 +55,12 @@ export const esqlEventAnnotation: ExpressionFunctionDefinition<
       required: true,
       help: i18n.translate('eventAnnotation.esqlAnnotation.queryDescription', {
         defaultMessage: 'The ES|QL query that returns annotation events',
+      }),
+    },
+    timeField: {
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.esqlAnnotation.timeFieldDescription', {
+        defaultMessage: 'The source time field used to apply the chart time range',
       }),
     },
     timeColumn: {

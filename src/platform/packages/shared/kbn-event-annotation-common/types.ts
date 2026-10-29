@@ -74,6 +74,8 @@ export type EsqlEventAnnotationConfig = {
   id: string;
   type: 'esql';
   query: { esql: string };
+  /** Source time field used to apply the chart time range, resolved when the query is submitted. */
+  timeField?: string;
   timeColumn: string;
   textColumn?: string;
   extraColumns?: string[];
