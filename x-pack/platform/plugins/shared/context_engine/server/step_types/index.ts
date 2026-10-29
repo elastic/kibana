@@ -20,18 +20,28 @@ import { getRecordImprovementsStepDefinition } from './record_improvements';
 import { getGetAiIndexStepDefinition } from './get_ai_index';
 import { getQueryAiIndexStepDefinition } from './query_ai_index';
 import { getPurgeKisStepDefinition } from './purge_kis';
+import { getGetLastRunStepDefinition, type LastRunStepDependencies } from './get_last_run';
+import {
+  getGetKiUsageStepDefinition,
+  getRecordKiEnrichmentStepDefinition,
+  type KiUsageStepDependencies,
+} from './ki_usage';
 
 /** Registers the KI, AI index and feedback analysis workflow steps. */
 export const registerStepDefinitions = ({
   workflowsExtensions,
   feedbackAnalysis,
   aiIndexSteps,
+  lastRunSteps,
+  kiUsageSteps,
   verifyKi,
   ...deps
 }: KiStepDependencies & {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   feedbackAnalysis: FeedbackAnalysisStepDependencies;
   aiIndexSteps: AiIndexStepDependencies;
+  lastRunSteps: LastRunStepDependencies;
+  kiUsageSteps: KiUsageStepDependencies;
   verifyKi: VerifyKi;
 }): void => {
   workflowsExtensions.registerStepDefinition(getCreateKiStepDefinition({ ...deps, verifyKi }));
@@ -42,4 +52,7 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(getGetAiIndexStepDefinition(aiIndexSteps));
   workflowsExtensions.registerStepDefinition(getQueryAiIndexStepDefinition(aiIndexSteps));
   workflowsExtensions.registerStepDefinition(getPurgeKisStepDefinition(aiIndexSteps));
+  workflowsExtensions.registerStepDefinition(getGetLastRunStepDefinition(lastRunSteps));
+  workflowsExtensions.registerStepDefinition(getGetKiUsageStepDefinition(kiUsageSteps));
+  workflowsExtensions.registerStepDefinition(getRecordKiEnrichmentStepDefinition(kiUsageSteps));
 };

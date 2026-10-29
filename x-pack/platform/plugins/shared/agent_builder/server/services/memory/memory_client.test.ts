@@ -10,7 +10,7 @@ import { ShortTermMemoryNotFoundError } from '@kbn/agent-builder-server';
 import { ShortTermMemoryClient } from './memory_client';
 import { ShortTermMemorySystemClientImpl } from './memory_system_client';
 import { memoryIndexName } from './storage';
-import type { ShortTermMemoryKiDocument } from './memory_document';
+import { toShortTermMemory, type ShortTermMemoryKiDocument } from './memory_document';
 
 const NOW = new Date('2026-10-26T12:00:00.000Z');
 
@@ -44,7 +44,7 @@ const storedDoc = (
   },
   permissions: {
     kibana: {
-      privileges: [{ space: 'default', name: ['ai_index:short_term_memory/read'], count: 1 }],
+      privileges: [{ space: 'default', name: ['user://u_alice_0'], count: 1 }],
     },
   },
   ...overrides,
@@ -70,7 +70,7 @@ const createClient = (esClient: ReturnType<typeof createEsClient>) =>
   });
 
 describe('ShortTermMemoryClient', () => {
-  it('writes a short-term memory KI into the Elastic AI index, hidden by its access action', async () => {
+  it('writes a short-term memory KI into the Elastic AI index, scoped to its owner', async () => {
     const esClient = createEsClient();
 
     const created = await createClient(esClient).create({
@@ -120,7 +120,7 @@ describe('ShortTermMemoryClient', () => {
         },
         permissions: {
           kibana: {
-            privileges: [{ space: 'default', name: ['ai_index:short_term_memory/read'], count: 1 }],
+            privileges: [{ space: 'default', name: ['user://u_alice_0'], count: 1 }],
           },
         },
       },
@@ -150,6 +150,16 @@ describe('ShortTermMemoryClient', () => {
     );
   });
 
+  it('never reads a memory deleted through the AI index KI API', async () => {
+    const esClient = createEsClient();
+
+    await createClient(esClient).list();
+
+    expect(esClient.search.mock.calls[0][0].query.bool.filter).toContainEqual({
+      bool: { must_not: [{ term: { 'governance.lifecycle.status': 'deleted' } }] },
+    });
+  });
+
   it('treats a memory of another user as not found', async () => {
     const esClient = createEsClient();
 
@@ -162,10 +172,17 @@ describe('ShortTermMemoryClient', () => {
     expect(esClient.delete).not.toHaveBeenCalled();
   });
 
-  it('resets promotion and refreshes the expiry when a memory is revised', async () => {
+  it('resets every automation’s decision and refreshes the expiry when a memory is revised', async () => {
     const esClient = createEsClient();
+    const decided = storedDoc({
+      attributes: {
+        ...storedDoc().attributes,
+        'memory.decisions.memory-extraction.status': 'promoted',
+        'memory.decisions.memory-extraction.ki_id': 'memory/fact/x',
+      },
+    });
     esClient.search.mockResolvedValue({
-      hits: { hits: [{ _id: 'memory-1', _source: storedDoc(), _seq_no: 3, _primary_term: 1 }] },
+      hits: { hits: [{ _id: 'memory-1', _source: decided, _seq_no: 3, _primary_term: 1 }] },
     });
 
     const revised = await createClient(esClient).update('memory-1', { content: 'Use TO_DOUBLE.' });
@@ -297,6 +314,128 @@ describe('ShortTermMemorySystemClientImpl', () => {
     });
     expect(document.attributes).not.toHaveProperty('memory.promotion.reason');
     expect(result).toEqual({ updated: 0 });
+  });
+
+  describe('decisions per automation', () => {
+    it('lists the memories this automation has not decided, whatever others decided', async () => {
+      const esClient = createEsClient();
+
+      await createSystemClient(esClient).listForPromotion({
+        spaceId: 'default',
+        decider: 'ecommerce-memory-extraction',
+      });
+
+      const field = 'attributes.memory.decisions.ecommerce-memory-extraction.status';
+      expect(esClient.search.mock.calls[0][0].query.bool.filter).toContainEqual({
+        bool: {
+          should: [
+            { terms: { [field]: ['pending'] } },
+            { bool: { must_not: { exists: { field } } } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+      expect(JSON.stringify(esClient.search.mock.calls[0][0].query)).not.toContain(
+        'memory.promotion.status'
+      );
+    });
+
+    it('records the decision as the automation’s own, keeping the other automations’ decisions', async () => {
+      const esClient = createEsClient();
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'memory-1',
+              _source: storedDoc({
+                attributes: {
+                  ...storedDoc().attributes,
+                  'memory.decisions.custom-extraction.status': 'rejected',
+                  'memory.decisions.custom-extraction.reason': 'not a recipe',
+                },
+              }),
+              _seq_no: 7,
+              _primary_term: 2,
+            },
+          ],
+        },
+      });
+      esClient.bulk.mockResolvedValue({ items: [{ index: { status: 200 } }] });
+
+      await createSystemClient(esClient).setPromotion({
+        spaceId: 'default',
+        ids: ['memory-1'],
+        decider: 'structured.extraction',
+        promotion: { status: 'promoted', ki_id: 'memory/fact/x' },
+      });
+
+      expect(esClient.bulk.mock.calls[0][0].operations[1].attributes).toMatchObject({
+        'memory.decisions.custom-extraction.status': 'rejected',
+        'memory.decisions.custom-extraction.reason': 'not a recipe',
+        'memory.decisions.structured_extraction.status': 'promoted',
+        'memory.decisions.structured_extraction.ki_id': 'memory/fact/x',
+        'memory.promotion.status': 'promoted',
+        'memory.promotion.ki_id': 'memory/fact/x',
+      });
+    });
+
+    it('keeps a promotion by another automation as what the owner sees over a later rejection', async () => {
+      const esClient = createEsClient();
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'memory-1',
+              _source: storedDoc({
+                attributes: {
+                  ...storedDoc().attributes,
+                  'memory.promotion.status': 'promoted',
+                  'memory.promotion.ki_id': 'memory/fact/x',
+                  'memory.promotion.reason': 'extracted',
+                },
+              }),
+              _seq_no: 7,
+              _primary_term: 2,
+            },
+          ],
+        },
+      });
+      esClient.bulk.mockResolvedValue({ items: [{ index: { status: 200 } }] });
+
+      await createSystemClient(esClient).setPromotion({
+        spaceId: 'default',
+        ids: ['memory-1'],
+        decider: 'custom-extraction',
+        promotion: { status: 'rejected', reason: 'not a recipe' },
+      });
+
+      expect(esClient.bulk.mock.calls[0][0].operations[1].attributes).toMatchObject({
+        'memory.promotion.status': 'promoted',
+        'memory.promotion.reason': 'extracted',
+        'memory.decisions.custom-extraction.status': 'rejected',
+      });
+    });
+
+    it('exposes every automation’s decision on the memory', () => {
+      const memory = toShortTermMemory(
+        storedDoc({
+          attributes: {
+            ...storedDoc().attributes,
+            'memory.decisions.custom-extraction.status': 'promoted',
+            'memory.decisions.custom-extraction.ki_id': 'memory/data_rule/x',
+            'memory.decisions.custom-extraction.updated_at': NOW.toISOString(),
+          },
+        })
+      );
+
+      expect(memory.decisions).toEqual({
+        'custom-extraction': {
+          status: 'promoted',
+          ki_id: 'memory/data_rule/x',
+          updated_at: NOW.toISOString(),
+        },
+      });
+    });
   });
 
   describe('listByOwner', () => {
@@ -506,9 +645,16 @@ describe('ShortTermMemorySystemClientImpl', () => {
       });
 
       const [expired, unused] = esClient.deleteByQuery.mock.calls.map(([request]) => request);
-      expect(expired.query.bool.filter).toEqual(
-        expect.arrayContaining([{ range: { expires_at: { lte: NOW.toISOString() } } }])
-      );
+      // Expired memories, and tombstones left by a delete through the AI index KI API.
+      expect(expired.query.bool.filter).toContainEqual({
+        bool: {
+          should: [
+            { range: { expires_at: { lte: NOW.toISOString() } } },
+            { term: { 'governance.lifecycle.status': 'deleted' } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
       expect(unused.query.bool).toEqual({
         filter: expect.arrayContaining([
           { terms: { 'attributes.memory.agent_id': ['agent-1'] } },

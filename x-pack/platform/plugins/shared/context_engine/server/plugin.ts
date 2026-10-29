@@ -31,7 +31,13 @@ import type {
 } from './types';
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
-import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerAiIndexRoutes, type GetKiClientParams } from './routes/ai_indices';
+import {
+  buildManagedVisibilityFilter,
+  createVisibilityScopedClient,
+  isManagedDest,
+  resolveManagedAiIndexAccess,
+} from './ai_indices/user_scope';
 import { registerSignalRoutes } from './routes/signals';
 import type {
   FeedbackAnalysisScheduleService,
@@ -49,6 +55,8 @@ import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from '
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { createVerifyKi } from './step_types/verify_ki';
 import { registerStepDefinitions } from './step_types';
+import type { WorkflowExecutionHistory } from './step_types/get_last_run';
+import { KiUsageService } from './ki_usage/ki_usage_service';
 import { ContextEngineAnalyticsService, registerContextEngineUsageCollector } from './telemetry';
 import { isContextEngineEnabledInSpace } from './utils/is_context_engine_enabled_in_space';
 import { resolveSpaceId } from './utils/resolve_space_id';
@@ -82,8 +90,9 @@ export class ContextEnginePlugin
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
+  private kiUsageService?: KiUsageService;
   private workflowsManagementApiPromise: Promise<
-    (DeleteWorkflowsApi & KiVerifierWorkflowRunner) | undefined
+    (DeleteWorkflowsApi & KiVerifierWorkflowRunner & WorkflowExecutionHistory) | undefined
   > = Promise.resolve(undefined);
 
   constructor(context: PluginInitializerContext) {
@@ -231,9 +240,34 @@ export class ContextEnginePlugin
       );
     };
 
+    const userScopeLogger = this.logger.get('user_scope');
+    const getKiClient = async ({ request, dest, spaceId, scopedClient }: GetKiClientParams) => {
+      if (!isManagedDest(dest)) {
+        return scopedClient;
+      }
+      const [coreStart, startDeps] = await coreSetup.getStartServices();
+      const internalClient = coreStart.elasticsearch.client.asInternalUser;
+      const access = await resolveManagedAiIndexAccess(
+        {
+          internalClient,
+          coreSecurity: coreStart.security,
+          authz: startDeps.security?.authz,
+          logger: userScopeLogger,
+        },
+        {
+          request,
+          scopedClient,
+          spaceId,
+          indices: dest.value.split(',').map((target) => target.trim()),
+        }
+      );
+      return createVisibilityScopedClient(internalClient, buildManagedVisibilityFilter(access));
+    };
+
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
       router,
+      getKiClient,
       logger: this.logger.get('routes'),
       getAiIndexService,
       getImprovementsService,
@@ -316,6 +350,16 @@ export class ContextEnginePlugin
         checkWritePrivilege,
         logger: this.logger.get('feedback_analysis'),
       },
+      lastRunSteps: {
+        getExecutionHistory: () => this.workflowsManagementApiPromise,
+        isContextEngineEnabled,
+      },
+      kiUsageSteps: {
+        getKiUsageService: () => this.getKiUsageService(),
+        isContextEngineEnabled,
+        checkReadPrivilege,
+        checkWritePrivilege,
+      },
       aiIndexSteps: {
         getAiIndexService,
         getAiIndexDataReadService: (params) => {
@@ -352,7 +396,9 @@ export class ContextEnginePlugin
     try {
       this.workflowsManagementApiPromise = coreSetup.plugins
         .onSetup<{
-          workflowsManagement: { management: DeleteWorkflowsApi & KiVerifierWorkflowRunner };
+          workflowsManagement: {
+            management: DeleteWorkflowsApi & KiVerifierWorkflowRunner & WorkflowExecutionHistory;
+          };
         }>('workflowsManagement')
         .then(({ workflowsManagement }) =>
           workflowsManagement.found ? workflowsManagement.contract.management : undefined
@@ -413,10 +459,25 @@ export class ContextEnginePlugin
       new ImprovementsService({ esClient, logger: improvementsLogger, space: spaceId });
     const createImprovementsService = this.createImprovementsService;
 
-    this.createAiIndexDataReadService = ({ esClient, request, spaceId }) =>
-      new AiIndexDataReadService({
+    this.createAiIndexDataReadService = ({ esClient, request, spaceId }) => {
+      const resolvedSpaceId = spaceId ?? resolveSpaceId(startDeps.spaces, request);
+      const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+      return new AiIndexDataReadService({
         esClient,
-        spaceId: spaceId ?? resolveSpaceId(startDeps.spaces, request),
+        spaceId: resolvedSpaceId,
+        managedReads: {
+          internalEsClient,
+          resolveAccess: (indices) =>
+            resolveManagedAiIndexAccess(
+              {
+                internalClient: internalEsClient,
+                coreSecurity: coreStart.security,
+                authz: startDeps.security?.authz,
+                logger: this.logger.get('user_scope'),
+              },
+              { request, scopedClient: esClient, spaceId: resolvedSpaceId, indices }
+            ),
+        },
         auditLogger: coreStart.security.audit.asScoped(request),
         aiIndexService,
         logger: this.logger,
@@ -428,6 +489,7 @@ export class ContextEnginePlugin
           );
         },
       });
+    };
     const createAiIndexDataReadService = this.createAiIndexDataReadService;
 
     // Installed as Kibana, with the cluster privilege it already holds. The index is left for the
@@ -457,6 +519,12 @@ export class ContextEnginePlugin
       (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID)) ??
       false;
 
+    // Kibana's own store, so it is read and written as the internal user.
+    this.kiUsageService = new KiUsageService({
+      esClient: coreStart.elasticsearch.client.asInternalUser,
+      logger: this.logger.get('ki_usage'),
+    });
+
     scheduleSignalGenerator({ taskManager: startDeps.taskManager }).catch((err) => {
       this.logger.warn(
         `Failed to schedule signal generator: ${err instanceof Error ? err.message : String(err)}`
@@ -471,9 +539,17 @@ export class ContextEnginePlugin
         return this.aiIndexService;
       },
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
+      getKiUsageService: () => this.getKiUsageService(),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
     };
+  }
+
+  private getKiUsageService(): KiUsageService {
+    if (!this.kiUsageService) {
+      throw new Error('KI usage service not available — plugin has not started');
+    }
+    return this.kiUsageService;
   }
 
   stop() {}

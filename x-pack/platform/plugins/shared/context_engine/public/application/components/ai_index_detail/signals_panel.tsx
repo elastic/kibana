@@ -10,7 +10,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
@@ -19,6 +18,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { BackdropAwarePanel } from '../panel_backdrop';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { SignalGroup } from '../../../../common/http_api/signals';
@@ -77,7 +77,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
   }
 
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextSignalsPanel">
+    <BackdropAwarePanel hasBorder paddingSize="l" data-test-subj="contextSignalsPanel">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">
@@ -196,6 +196,6 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
           onClose={() => setSelectedGroup(undefined)}
         />
       )}
-    </EuiPanel>
+    </BackdropAwarePanel>
   );
 };

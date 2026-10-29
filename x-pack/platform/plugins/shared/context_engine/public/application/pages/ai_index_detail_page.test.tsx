@@ -961,6 +961,38 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
   });
 
+  it('draws the KI graph behind the overview when the AI index has KIs', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    // The graph query stays in flight, so the graph shows its loading state.
+    services.http.post.mockImplementation(() => new Promise(() => {}));
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextAiIndexOverviewWithGraph')).toBeInTheDocument();
+    expect(screen.getByTestId('contextKiGraphLoading')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
+  });
+
+  it('leaves the graph out of the overview when there are no KIs', async () => {
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexOverviewWithGraph')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
+  });
+
   it('shows the Knowledge Indicators tab on a deep link before the AI index has loaded', async () => {
     mockUseListKi.mockImplementation(() => ({
       ...defaultListKiMock,

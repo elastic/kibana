@@ -10,7 +10,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
@@ -18,6 +17,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { BackdropAwarePanel } from '../panel_backdrop';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useTracesEditor } from '../../hooks/use_traces_editor';
@@ -43,7 +43,7 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
   const isSaving = editing?.isSaving ?? false;
 
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextTracesPanel">
+    <BackdropAwarePanel hasBorder paddingSize="l" data-test-subj="contextTracesPanel">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem css={{ minWidth: 0 }}>
           <EuiTitle size="s">
@@ -175,6 +175,6 @@ export const TracesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: TracesPa
           />
         </>
       )}
-    </EuiPanel>
+    </BackdropAwarePanel>
   );
 };

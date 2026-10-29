@@ -28,6 +28,8 @@ export const contextEngineQueryKeys = {
         query ?? '',
         lifecycleStatus?.join(',') ?? '',
       ] as const,
+    graph: (aiIndexId: string, dest: string) =>
+      ['context_engine', 'ai_index', aiIndexId, 'graph', dest] as const,
     viewKi: (
       aiIndexId: string,
       index: string,

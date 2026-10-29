@@ -88,7 +88,6 @@ export const memoryCustomExtractionConfigSchema = z.object({
 export const MAX_EXTRACTION_SOURCES = 5;
 const MAX_SOURCE_QUERY_LENGTH = 10_000;
 const MAX_SOURCE_RECORDS = 1000;
-const DEFAULT_SOURCE_RECORDS = 200;
 const MAX_LOOKBACK_HOURS = 24 * 30;
 const ID_COLUMN_PATTERN = /^[A-Za-z_@][A-Za-z0-9_.@]{0,127}$/;
 const URI_PREFIX_PATTERN = /^[a-z][a-z0-9+.-]{0,31}:\/\/$/;
@@ -134,23 +133,25 @@ export const extractionSourcesSchema = z
   .max(MAX_EXTRACTION_SOURCES);
 
 /** A source as the template reads it from `consts.sources`. */
-interface NormalizedSource {
-  type: ExtractionSource['type'];
-  description: string;
-  id_column: string;
-  uri_prefix: string;
-  query?: string;
-  max_records?: number;
-}
-
-const readsAiIndex = (query: string): boolean => /\bFROM\s+[^|]*\.?ai-index-/i.test(query);
-const readsTraces = (query: string): boolean => /\bFROM\s+[^|]*traces-/i.test(query);
+/** A source as stored in the workflow's `sources` const: only what was chosen, in snake_case. */
+type StoredSource =
+  | { type: 'short_term_memory' }
+  | {
+      type: 'query';
+      query: string;
+      description?: string;
+      id_column?: string;
+      uri_prefix?: string;
+      exclude_memory?: boolean;
+      lookback_hours?: number;
+      max_records?: number;
+    };
 
 /**
- * Builds each source's final ES|QL: the memory exclusion and the time window are appended here,
- * once, rather than in Liquid on every run.
+ * Validates the sources and stores them as chosen. Their defaults (description, id column, URI
+ * prefix, memory exclusion) and filters are applied by the workflow on every run.
  */
-export const normalizeExtractionSources = (sources: ExtractionSource[]): NormalizedSource[] => {
+export const toStoredSources = (sources: ExtractionSource[]): StoredSource[] => {
   if (sources.length === 0 || sources.length > MAX_EXTRACTION_SOURCES) {
     throw new Error(`Extraction needs 1 to ${MAX_EXTRACTION_SOURCES} sources.`);
   }
@@ -159,36 +160,22 @@ export const normalizeExtractionSources = (sources: ExtractionSource[]): Normali
   }
   return sources.map((source) => {
     if (source.type === 'short_term_memory') {
-      return {
-        type: 'short_term_memory',
-        description: 'short-term memories users recorded with the agents, each with an `id`',
-        id_column: 'id',
-        uri_prefix: 'stm://',
-      };
+      return { type: 'short_term_memory' };
     }
     const { query } = source;
-    // The query is spliced into the workflow and rendered by Liquid; a tag in it would run.
+    // The query is rendered by Liquid in the workflow; a tag in it would run.
     if (query.includes('{{') || query.includes('{%')) {
       throw new Error('A source query cannot contain Liquid tags ({{ or {%).');
     }
-    const aiIndex = readsAiIndex(query);
-    const traces = !aiIndex && readsTraces(query);
-    const excludeMemory = source.excludeMemory ?? aiIndex;
     return {
       type: 'query',
-      description:
-        source.description ??
-        (aiIndex ? 'knowledge indicators' : traces ? 'agent traces' : 'query results'),
-      id_column: source.idColumn ?? (traces ? 'trace_id' : 'id'),
-      uri_prefix: source.uriPrefix ?? (aiIndex ? 'ki://' : traces ? 'trace://' : 'record://'),
-      query: [
-        query.trim(),
-        ...(excludeMemory ? ['| WHERE type IS NULL OR type NOT LIKE "memory.*"'] : []),
-        ...(source.lookbackHours !== undefined
-          ? [`| WHERE @timestamp >= NOW() - ${source.lookbackHours} hours`]
-          : []),
-      ].join('\n'),
-      max_records: source.maxRecords ?? DEFAULT_SOURCE_RECORDS,
+      query: query.trim(),
+      ...(source.description !== undefined && { description: source.description }),
+      ...(source.idColumn !== undefined && { id_column: source.idColumn }),
+      ...(source.uriPrefix !== undefined && { uri_prefix: source.uriPrefix }),
+      ...(source.excludeMemory !== undefined && { exclude_memory: source.excludeMemory }),
+      ...(source.lookbackHours !== undefined && { lookback_hours: source.lookbackHours }),
+      ...(source.maxRecords !== undefined && { max_records: source.maxRecords }),
     };
   });
 };
@@ -513,17 +500,14 @@ export const buildExtractionOutputSchema = ({
 };
 
 /**
- * The tokens of the memory extraction template that depend on the configuration. JSON is valid
- * YAML flow syntax, so every structured value renders on its key's own line.
+ * The tokens of the memory extraction template that depend on the configuration, which is
+ * validated here. JSON is valid YAML flow syntax, so every value renders on its key's own line.
+ * Everything derived from them is built by the workflow at run time.
  */
 export const buildMemoryExtractionTokens = (
   config: MemoryExtractionConfig | MemoryCustomExtractionConfig,
-  compiled: CompiledExtraction,
   sources: ExtractionSource[]
 ): Record<string, string> => ({
-  __SOURCES__: JSON.stringify(normalizeExtractionSources(sources)),
+  __SOURCES__: JSON.stringify(toStoredSources(sources)),
   __EXTRACTION_CONFIG__: JSON.stringify(config),
-  __NODE_KINDS__: JSON.stringify(compiled.nodeKinds),
-  __RELATIONSHIP_KINDS__: JSON.stringify(compiled.relationshipKinds),
-  __OUTPUT_SCHEMA__: JSON.stringify(buildExtractionOutputSchema(compiled)),
 });

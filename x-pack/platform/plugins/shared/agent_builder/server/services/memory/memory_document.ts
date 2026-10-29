@@ -6,38 +6,33 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  ShortTermMemory,
-  ShortTermMemoryPromotion,
-  ShortTermMemoryPromotionStatus,
-  ShortTermMemoryType,
-} from '@kbn/agent-builder-common';
+import { toUserPrincipal } from '@kbn/agent-builder-server/identity';
+import type { ShortTermMemoryPromotion, ShortTermMemoryType } from '@kbn/agent-builder-common';
+import {
+  MEMORY_ATTRIBUTES,
+  SHORT_TERM_MEMORY_KI_TYPE_PREFIX,
+  toShortTermMemory,
+} from '../../../common/short_term_memory';
 
-/** Short-term memories are KIs of these types in the Elastic AI index. */
-export const SHORT_TERM_MEMORY_KI_TYPE_PREFIX = 'memory.short_term.';
+export { MEMORY_ATTRIBUTES, SHORT_TERM_MEMORY_KI_TYPE_PREFIX, toShortTermMemory };
 
 /**
- * Stamped on every short-term memory and granted by no feature, so the Elastic AI index's implicit
- * document-level security and the SML visibility filter hide it from everyone but superusers and
- * roles with an explicit grant on the index. Agent Builder reads it as the internal user and
- * filters on the owner itself.
+ * A short-term memory is scoped to its owner: its only required "action" is the owner's user
+ * principal. No role grants that, so Elasticsearch's document-level security hides it from every
+ * direct query (superusers and explicit index grants aside), while Context Engine's reads show it
+ * to its owner and to administrators.
  */
-export const SHORT_TERM_MEMORY_ACCESS_ACTION = 'ai_index:short_term_memory/read';
+export const shortTermMemoryPermissions = (
+  space: string,
+  userId: string
+): ShortTermMemoryKiDocument['permissions'] => ({
+  kibana: { privileges: [{ space, name: [toUserPrincipal(userId)], count: 1 }] },
+});
 
-/** Owner, agent, session and promotion live in the flattened `attributes`, the strict mapping's only open field. */
-export const MEMORY_ATTRIBUTES = {
-  userId: 'memory.user_id',
-  userName: 'memory.user_name',
-  agentId: 'memory.agent_id',
-  sessionId: 'memory.session_id',
-  space: 'memory.space',
-  lastUsedAt: 'memory.last_used_at',
-  promotionStatus: 'memory.promotion.status',
-  promotionReason: 'memory.promotion.reason',
-  promotionAiIndexId: 'memory.promotion.ai_index_id',
-  promotionKiId: 'memory.promotion.ki_id',
-  promotionUpdatedAt: 'memory.promotion.updated_at',
-} as const;
+/** A memory deleted through the AI index KI API is a tombstone until decay removes it. */
+export const notDeletedFilter: QueryDslQueryContainer = {
+  bool: { must_not: [{ term: { 'governance.lifecycle.status': 'deleted' } }] },
+};
 
 export const attributeField = (key: string): string => `attributes.${key}`;
 
@@ -66,64 +61,56 @@ export interface ShortTermMemoryKiDocument {
 export const toKiType = (type: ShortTermMemoryType): string =>
   `${SHORT_TERM_MEMORY_KI_TYPE_PREFIX}${type.slice('memory.'.length)}`;
 
-const fromKiType = (kiType: string): ShortTermMemoryType =>
-  kiType === `${SHORT_TERM_MEMORY_KI_TYPE_PREFIX}session`
-    ? 'memory.session'
-    : 'memory.session_fact';
+const PROMOTION_PREFIX = 'memory.promotion.';
+/** Each deciding automation's own decision: `memory.decisions.<decider>.status` and so on. */
+const DECISIONS_PREFIX = 'memory.decisions.';
 
-export const promotionAttributes = (
-  promotion: Omit<ShortTermMemoryPromotion, 'updated_at'> & { updated_at?: string }
-): Record<string, string> => ({
-  [MEMORY_ATTRIBUTES.promotionStatus]: promotion.status,
-  ...(promotion.reason !== undefined && { [MEMORY_ATTRIBUTES.promotionReason]: promotion.reason }),
-  ...(promotion.ai_index_id !== undefined && {
-    [MEMORY_ATTRIBUTES.promotionAiIndexId]: promotion.ai_index_id,
-  }),
-  ...(promotion.ki_id !== undefined && { [MEMORY_ATTRIBUTES.promotionKiId]: promotion.ki_id }),
-  ...(promotion.updated_at !== undefined && {
-    [MEMORY_ATTRIBUTES.promotionUpdatedAt]: promotion.updated_at,
-  }),
+type PromotionInput = Omit<ShortTermMemoryPromotion, 'updated_at'> & { updated_at?: string };
+
+const promotionFields = (prefix: string, promotion: PromotionInput): Record<string, string> => ({
+  [`${prefix}status`]: promotion.status,
+  ...(promotion.reason !== undefined && { [`${prefix}reason`]: promotion.reason }),
+  ...(promotion.ai_index_id !== undefined && { [`${prefix}ai_index_id`]: promotion.ai_index_id }),
+  ...(promotion.ki_id !== undefined && { [`${prefix}ki_id`]: promotion.ki_id }),
+  ...(promotion.updated_at !== undefined && { [`${prefix}updated_at`]: promotion.updated_at }),
 });
 
-/** Drops the promotion attributes, so a revised memory is decided afresh. */
-export const withoutPromotion = (attributes: Record<string, string>): Record<string, string> =>
-  Object.fromEntries(
-    Object.entries(attributes).filter(([key]) => !key.startsWith('memory.promotion.'))
-  );
+const withoutPrefix = (
+  attributes: Record<string, string>,
+  prefix: string
+): Record<string, string> =>
+  Object.fromEntries(Object.entries(attributes).filter(([key]) => !key.startsWith(prefix)));
 
-export const toShortTermMemory = (doc: ShortTermMemoryKiDocument): ShortTermMemory => {
-  const { attributes } = doc;
-  const reason = attributes[MEMORY_ATTRIBUTES.promotionReason];
-  const aiIndexId = attributes[MEMORY_ATTRIBUTES.promotionAiIndexId];
-  const kiId = attributes[MEMORY_ATTRIBUTES.promotionKiId];
-  const promotionUpdatedAt = attributes[MEMORY_ATTRIBUTES.promotionUpdatedAt];
-  const lastUsedAt = attributes[MEMORY_ATTRIBUTES.lastUsedAt];
-  return {
-    id: doc.id,
-    type: fromKiType(doc.type),
-    title: doc.title,
-    description: doc.description,
-    content: doc.content,
-    tags: doc.tags ?? [],
-    user_id: attributes[MEMORY_ATTRIBUTES.userId],
-    user_name: attributes[MEMORY_ATTRIBUTES.userName],
-    agent_id: attributes[MEMORY_ATTRIBUTES.agentId],
-    session_id: attributes[MEMORY_ATTRIBUTES.sessionId],
-    space: attributes[MEMORY_ATTRIBUTES.space],
-    created_at: doc['@timestamp'],
-    updated_at: doc.updated_at,
-    ...(doc.expires_at !== undefined && { expires_at: doc.expires_at }),
-    ...(lastUsedAt !== undefined && { last_used_at: lastUsedAt }),
-    promotion: {
-      status: (attributes[MEMORY_ATTRIBUTES.promotionStatus] ??
-        'pending') as ShortTermMemoryPromotionStatus,
-      ...(reason !== undefined && { reason }),
-      ...(aiIndexId !== undefined && { ai_index_id: aiIndexId }),
-      ...(kiId !== undefined && { ki_id: kiId }),
-      ...(promotionUpdatedAt !== undefined && { updated_at: promotionUpdatedAt }),
-    },
-  };
-};
+/** A decider id as one segment of a flattened attribute key: dots would nest it. */
+const deciderKey = (decider: string): string => decider.replace(/[^A-Za-z0-9_-]/g, '_');
+
+const decisionPrefix = (decider: string): string => `${DECISIONS_PREFIX}${deciderKey(decider)}.`;
+
+/** The summary every reader shows: the latest decision, or a promotion by any decider. */
+export const promotionAttributes = (promotion: PromotionInput): Record<string, string> =>
+  promotionFields(PROMOTION_PREFIX, promotion);
+
+/** One decider's own decision, kept next to the other deciders'. */
+export const decisionAttributes = (
+  decider: string,
+  promotion: PromotionInput
+): Record<string, string> => promotionFields(decisionPrefix(decider), promotion);
+
+export const decisionStatusAttribute = (decider: string): string =>
+  `${decisionPrefix(decider)}status`;
+
+/** Drops the summary and every decider's decision, so a revised memory is decided afresh. */
+export const withoutPromotion = (attributes: Record<string, string>): Record<string, string> =>
+  withoutPrefix(withoutPrefix(attributes, PROMOTION_PREFIX), DECISIONS_PREFIX);
+
+export const withoutPromotionSummary = (
+  attributes: Record<string, string>
+): Record<string, string> => withoutPrefix(attributes, PROMOTION_PREFIX);
+
+export const withoutDecision = (
+  attributes: Record<string, string>,
+  decider: string
+): Record<string, string> => withoutPrefix(attributes, decisionPrefix(decider));
 
 export const shortTermMemoryTypeFilter: QueryDslQueryContainer = {
   prefix: { type: SHORT_TERM_MEMORY_KI_TYPE_PREFIX },

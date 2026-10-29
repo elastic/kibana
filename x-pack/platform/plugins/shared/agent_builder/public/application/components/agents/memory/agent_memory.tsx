@@ -44,7 +44,11 @@ const labels = {
   }),
   forget: i18n.translate('xpack.agentBuilder.agentMemory.forget', { defaultMessage: 'Forget' }),
   forgetDescription: i18n.translate('xpack.agentBuilder.agentMemory.forgetDescription', {
-    defaultMessage: 'Permanently delete this memory',
+    defaultMessage: 'Delete this memory',
+  }),
+  forgetAllOthers: i18n.translate('xpack.agentBuilder.agentMemory.forgetAllOthers', {
+    defaultMessage:
+      "As an administrator you see every user's memories with this agent. Forget them one at a time.",
   }),
   emptyTitle: i18n.translate('xpack.agentBuilder.agentMemory.emptyTitle', {
     defaultMessage: 'No memories yet',
@@ -64,7 +68,7 @@ const labels = {
   }),
   confirmBody: i18n.translate('xpack.agentBuilder.agentMemory.confirmBody', {
     defaultMessage:
-      'This permanently deletes your short-term memories with this agent. Memories already promoted into long-term memory are not affected.',
+      'This deletes your short-term memories with this agent. Memories already promoted into long-term memory are not affected.',
   }),
   cancel: i18n.translate('xpack.agentBuilder.agentMemory.cancel', { defaultMessage: 'Cancel' }),
   deleteError: i18n.translate('xpack.agentBuilder.agentMemory.deleteError', {
@@ -85,6 +89,9 @@ const labels = {
     }),
     expires: i18n.translate('xpack.agentBuilder.agentMemory.columns.expires', {
       defaultMessage: 'Expires',
+    }),
+    owner: i18n.translate('xpack.agentBuilder.agentMemory.columns.owner', {
+      defaultMessage: 'Owner',
     }),
     actions: i18n.translate('xpack.agentBuilder.agentMemory.columns.actions', {
       defaultMessage: 'Actions',
@@ -119,6 +126,11 @@ export const AgentMemory = ({ agentId }: { agentId: string }) => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const confirmTitleId = useGeneratedHtmlId();
   const { memories, isLoading, error } = useAgentMemories({ agentId });
+  // Only an administrator is shown memories of more than one user.
+  const showsOtherUsers = useMemo(
+    () => new Set(memories.map(({ user_id: userId }) => userId)).size > 1,
+    [memories]
+  );
 
   const { deleteMemory, isDeleting } = useDeleteAgentMemory({
     agentId,
@@ -143,6 +155,7 @@ export const AgentMemory = ({ agentId }: { agentId: string }) => {
       {
         field: 'title',
         name: labels.columns.title,
+        width: '35%',
         render: (_title: string, memory: ShortTermMemory) => (
           <div>
             <EuiText size="s">
@@ -154,6 +167,16 @@ export const AgentMemory = ({ agentId }: { agentId: string }) => {
           </div>
         ),
       },
+      ...(showsOtherUsers
+        ? [
+            {
+              field: 'user_name',
+              name: labels.columns.owner,
+              width: '110px',
+              sortable: true,
+            },
+          ]
+        : []),
       {
         field: 'type',
         name: labels.columns.type,
@@ -204,7 +227,7 @@ export const AgentMemory = ({ agentId }: { agentId: string }) => {
         ],
       },
     ],
-    [deleteMemory, isDeleting]
+    [deleteMemory, isDeleting, showsOtherUsers]
   );
 
   return (
@@ -216,16 +239,18 @@ export const AgentMemory = ({ agentId }: { agentId: string }) => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="danger"
-            iconType="trash"
-            isDisabled={memories.length === 0}
-            isLoading={isDeletingAll}
-            onClick={() => setIsConfirmOpen(true)}
-            data-test-subj="agentBuilderMemoryForgetAll"
-          >
-            {labels.forgetAll}
-          </EuiButton>
+          <EuiToolTip content={showsOtherUsers ? labels.forgetAllOthers : undefined}>
+            <EuiButton
+              color="danger"
+              iconType="trash"
+              isDisabled={memories.length === 0 || showsOtherUsers}
+              isLoading={isDeletingAll}
+              onClick={() => setIsConfirmOpen(true)}
+              data-test-subj="agentBuilderMemoryForgetAll"
+            >
+              {labels.forgetAll}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

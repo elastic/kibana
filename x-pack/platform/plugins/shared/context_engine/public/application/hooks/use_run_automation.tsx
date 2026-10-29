@@ -7,9 +7,11 @@
 
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
+import { useQueryClient } from '@kbn/react-query';
 import { useRunWorkflow } from '@kbn/workflows-ui';
 import { getErrorMessage } from '../utils/get_error_message';
 import { getWorkflowExecutionPath } from '../utils/get_workflow_execution_path';
+import { latestWorkflowExecutionQueryKey } from './use_latest_workflow_execution';
 import { useKibana } from './use_kibana';
 
 export interface UseRunAutomationResult {
@@ -21,9 +23,12 @@ export const useRunAutomation = (): UseRunAutomationResult => {
   const {
     services: { application, notifications },
   } = useKibana();
+  const queryClient = useQueryClient();
 
   const { mutate, isLoading } = useRunWorkflow({
     onSuccess: (data, { id: automationId }) => {
+      // The row shows the new run as running right away instead of at the next poll.
+      queryClient.invalidateQueries({ queryKey: latestWorkflowExecutionQueryKey(automationId) });
       const executionHref = application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: getWorkflowExecutionPath(automationId, data.workflowExecutionId),
       });

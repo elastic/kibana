@@ -94,7 +94,9 @@ describe('recall tool', () => {
     const result = await handle({ query: 'duration' }, context);
 
     expect(client.markUsed).toHaveBeenCalledWith(recalled);
-    expect(result.results[0].type).toBe(ToolResultType.other);
+    expect(result).toEqual({
+      results: [expect.objectContaining({ type: ToolResultType.other })],
+    });
   });
 
   it('bounds the query and the limit', () => {

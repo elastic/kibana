@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPanel,
   EuiPopover,
   EuiSkeletonText,
   EuiSpacer,
@@ -26,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
+import { BackdropAwarePanel } from '../panel_backdrop';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
@@ -202,7 +202,7 @@ export const AutomationsPanel = ({
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="l">
+    <BackdropAwarePanel hasBorder paddingSize="l">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">
@@ -277,6 +277,6 @@ export const AutomationsPanel = ({
           )}
         </>
       )}
-    </EuiPanel>
+    </BackdropAwarePanel>
   );
 };

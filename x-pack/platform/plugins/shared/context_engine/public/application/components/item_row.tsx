@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
+import { BackdropAwarePanel } from './panel_backdrop';
 
 interface ItemRowProps {
   label: string;
@@ -29,7 +30,7 @@ export const ItemRow = ({
   className,
   'data-test-subj': dataTestSubj,
 }: ItemRowProps) => (
-  <EuiPanel hasBorder paddingSize="m" className={className} data-test-subj={dataTestSubj}>
+  <BackdropAwarePanel hasBorder paddingSize="m" className={className} data-test-subj={dataTestSubj}>
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
       <EuiFlexItem css={{ minWidth: 0 }}>
@@ -40,5 +41,5 @@ export const ItemRow = ({
       {badge ? <EuiFlexItem grow={false}>{badge}</EuiFlexItem> : null}
       {actions ? <EuiFlexItem grow={false}>{actions}</EuiFlexItem> : null}
     </EuiFlexGroup>
-  </EuiPanel>
+  </BackdropAwarePanel>
 );

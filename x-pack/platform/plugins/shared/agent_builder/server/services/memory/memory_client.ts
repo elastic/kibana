@@ -20,11 +20,12 @@ import {
 import { memoryIndexName } from './storage';
 import {
   MEMORY_ATTRIBUTES,
-  SHORT_TERM_MEMORY_ACCESS_ACTION,
   agentFilter,
+  notDeletedFilter,
   notExpiredFilter,
   ownerFilter,
   promotionAttributes,
+  shortTermMemoryPermissions,
   shortTermMemoryTypeFilter,
   spaceFilter,
   toKiType,
@@ -116,11 +117,7 @@ export class ShortTermMemoryClient implements ScopedShortTermMemoryClient {
         ...promotionAttributes({ status: 'pending' }),
       },
       governance: { provenance: { created_by: writer, updated_by: writer } },
-      permissions: {
-        kibana: {
-          privileges: [{ space: this.space, name: [SHORT_TERM_MEMORY_ACCESS_ACTION], count: 1 }],
-        },
-      },
+      permissions: shortTermMemoryPermissions(this.space, this.userId),
     };
     await this.esClient.index({
       index: memoryIndexName,
@@ -159,6 +156,7 @@ export class ShortTermMemoryClient implements ScopedShortTermMemoryClient {
           ),
         },
       },
+      permissions: shortTermMemoryPermissions(this.space, this.userId),
     };
     await this.esClient.index({
       index: memoryIndexName,
@@ -272,6 +270,7 @@ export class ShortTermMemoryClient implements ScopedShortTermMemoryClient {
       shortTermMemoryTypeFilter,
       spaceFilter(this.space),
       ownerFilter(this.userId),
+      notDeletedFilter,
       ...(agentId !== undefined ? [agentFilter(agentId)] : []),
       ...(includeExpired ? [] : [notExpiredFilter(this.getNow())]),
     ];

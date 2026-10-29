@@ -150,7 +150,8 @@ export interface QueryAiIndicesRequest {
 
 export interface QueryAiIndicesResponse {
   columns: EsqlEsqlColumnInfo[];
-  values: FieldValue[][];
+  /** A multi-valued field, such as `references.uri`, comes back as an array. */
+  values: Array<Array<FieldValue | FieldValue[]>>;
 }
 
 /** Free-form context block for an agent: what the index is, its fields, and how to query it. */

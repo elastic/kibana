@@ -71,6 +71,11 @@ export interface ShortTermMemoryPromotionListParams {
   spaceId: string;
   /** Only memories recorded by these agents. Omit for every agent. */
   agentIds?: string[];
+  /**
+   * Whose decisions `statuses` reads: each automation decides every memory on its own, so one
+   * automation's decision never hides a memory from another. Omit to read the latest decision.
+   */
+  decider?: string;
   statuses?: ShortTermMemoryPromotionStatus[];
   /** Only memories last written at or after this ISO 8601 time. */
   since?: string;
@@ -148,6 +153,8 @@ export interface ShortTermMemorySystemClient {
     spaceId: string;
     ids: string[];
     promotion: Omit<ShortTermMemoryPromotion, 'updated_at'>;
+    /** Records the decision as this automation's own, next to the other automations'. */
+    decider?: string;
   }): Promise<{ updated: number }>;
   listByOwner(params: ShortTermMemoryOwnerListParams): Promise<ShortTermMemoryOwnerGroup[]>;
   /** Applies merges and removals within one owner's memories. Never touches another owner's. */

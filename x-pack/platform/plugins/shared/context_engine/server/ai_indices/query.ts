@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsqlNamedValue } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlNamedValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import {
@@ -28,6 +28,8 @@ export interface QueryAiIndicesParams extends QueryAiIndicesRequest {
   spaceId: string;
   /** Registered AI index dests; a query reading one gets the lifecycle pipeline applied. */
   aiIndexDests?: AiIndexDest[];
+  /** Applied with the space filter, before the query runs, so the query text cannot lift it. */
+  visibilityFilter?: QueryDslQueryContainer;
 }
 
 /**
@@ -41,6 +43,7 @@ export const queryAiIndices = async ({
   params,
   limit,
   aiIndexDests = [],
+  visibilityFilter,
 }: QueryAiIndicesParams): Promise<QueryAiIndicesResponse> => {
   const validationError = validateQueryAiIndicesRequest({ query, params, limit });
   if (validationError) {
@@ -58,7 +61,10 @@ export const queryAiIndices = async ({
           applyKiLifecycle(query, aiIndexDests),
           limit ?? DEFAULT_AI_INDEX_QUERY_LIMIT
         ),
-        filter: buildAiIndexSpaceFilter(spaceId),
+        filter:
+          visibilityFilter !== undefined
+            ? { bool: { filter: [buildAiIndexSpaceFilter(spaceId), visibilityFilter] } }
+            : buildAiIndexSpaceFilter(spaceId),
         drop_null_columns: true,
         allow_partial_results: true,
         ...(namedParams.length > 0 ? { params: namedParams } : {}),

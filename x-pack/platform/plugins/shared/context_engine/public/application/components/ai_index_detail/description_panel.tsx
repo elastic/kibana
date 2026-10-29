@@ -10,7 +10,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
@@ -19,6 +18,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { BackdropAwarePanel } from '../panel_backdrop';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
@@ -68,7 +68,7 @@ export const DescriptionPanel = ({
   };
 
   return (
-    <EuiPanel hasBorder paddingSize="l">
+    <BackdropAwarePanel hasBorder paddingSize="l">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="s">
@@ -207,6 +207,6 @@ export const DescriptionPanel = ({
           />
         </>
       )}
-    </EuiPanel>
+    </BackdropAwarePanel>
   );
 };

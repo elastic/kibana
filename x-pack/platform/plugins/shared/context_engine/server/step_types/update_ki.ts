@@ -40,8 +40,12 @@ export const getUpdateKiStepDefinition = ({
           lifecycle,
           force = false,
           refresh = false,
+          add_references: addReferences,
         } = context.input;
         const ki = omitNullKiAttributes(context.input.ki);
+        const addAttributes = context.input.add_attributes
+          ? omitNullKiAttributes({ attributes: context.input.add_attributes }).attributes
+          : undefined;
         return await withKiWriteTelemetry({
           action: 'update',
           aiIndexId,
@@ -63,6 +67,8 @@ export const getUpdateKiStepDefinition = ({
               writer,
               force,
               lifecycle,
+              addReferences,
+              addAttributes,
               refresh,
               abortSignal: context.abortSignal,
             });

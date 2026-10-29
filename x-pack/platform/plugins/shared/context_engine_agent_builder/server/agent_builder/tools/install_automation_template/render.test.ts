@@ -16,8 +16,8 @@ import {
   AUTOMATION_TEMPLATE_TAGS,
   renderDocumentOrchestrationTemplate,
   renderIndexMetadataTemplate,
-  maintenanceLookbackHours,
   renderMemoryDistillationTemplate,
+  renderMemoryEnrichmentTemplate,
   renderMemoryMaintenanceTemplate,
   renderMemoryPromotionTemplate,
   renderTargetedKiWriterTemplate,
@@ -49,6 +49,17 @@ const memoryDistillationValues = {
   interval: '1d',
 };
 
+const memoryEnrichmentValues = {
+  aiIndexId: 'support',
+  automationName: 'support-enrichment',
+  memoryTypes: 'memory.entity.*',
+  minNewAccesses: 3,
+  minDaysBetweenEnrichments: 7,
+  maxEnrichments: 5,
+  agentId: 'elastic-ai-agent',
+  interval: '1d',
+};
+
 const memoryMaintenanceValues = {
   aiIndexId: 'elastic',
   agentIds: [],
@@ -69,11 +80,13 @@ describe('memory templates', () => {
       batch_size: 50,
     });
     expect(definition.tags).toContain(AUTOMATION_TEMPLATE_TAGS.memory_promotion);
-    expect(definition.settings.concurrency).toEqual({
-      key: 'memory-promotion-support',
-      strategy: 'drop',
-      max: 1,
-    });
+    expect(definition.settings.concurrency).toMatchObject({ strategy: 'drop', max: 1 });
+    // Rendered from the consts when a run starts.
+    expect(
+      createWorkflowLiquidEngine().parseAndRenderSync(definition.settings.concurrency.key, {
+        consts: definition.consts,
+      })
+    ).toBe('memory-promotion-support');
     expect(definition.triggers).toContainEqual({ type: 'scheduled', with: { every: '1h' } });
   });
 
@@ -85,31 +98,162 @@ describe('memory templates', () => {
     expect(definition.consts.agent_ids).toEqual([]);
   });
 
-  it('fills the maintenance consts, with a lookback of twice the interval', () => {
+  describe('model and instructions are consts, so they can be configured after install', () => {
+    const findPromptStep = (steps: TemplateStep[]): TemplateStep | undefined => {
+      for (const step of steps) {
+        if (step.type === 'ai.prompt') {
+          return step;
+        }
+        const nested = findPromptStep([...(step.steps ?? []), ...(step.else ?? [])]);
+        if (nested) {
+          return nested;
+        }
+      }
+      return undefined;
+    };
+    const liquid = createWorkflowLiquidEngine();
+
+    it.each([
+      ['memory_promotion', () => renderMemoryPromotionTemplate(memoryPromotionValues)],
+      [
+        'trace_memory_extraction',
+        () => renderTraceMemoryExtractionTemplate(traceMemoryExtractionValues),
+      ],
+      ['memory_distillation', () => renderMemoryDistillationTemplate(memoryDistillationValues)],
+      ['memory_maintenance', () => renderMemoryMaintenanceTemplate(memoryMaintenanceValues)],
+    ])('%s puts its instructions in the prompt and defaults the model', (_template, render) => {
+      const definition = parse(render());
+      const step = findPromptStep(definition.steps) as TemplateStep & Record<string, string>;
+      const { consts } = definition;
+
+      expect(consts.connector_id).toBe('');
+      expect(consts.instructions.length).toBeGreaterThan(100);
+      expect(step.with).toHaveProperty(
+        'prompt',
+        expect.stringContaining('{{ consts.instructions }}')
+      );
+
+      const renderConfig = (connectorId: string) =>
+        ['connector-id', 'connector-id-by-feature'].map((key) =>
+          liquid.parseAndRenderSync(step[key], { consts: { ...consts, connector_id: connectorId } })
+        );
+      // Empty uses the Context Engine model; a connector id replaces it.
+      expect(renderConfig('')).toEqual(['', 'context_engine_prompt']);
+      expect(renderConfig('my-connector')).toEqual(['my-connector', '']);
+    });
+  });
+
+  it('fills the maintenance consts and windows each run from the last successful one', () => {
     const definition = parse(renderMemoryMaintenanceTemplate(memoryMaintenanceValues));
 
     expect(definition.consts).toMatchObject({
       agent_ids: [],
       unused_days: 14,
-      lookback_hours: 48,
+      first_run_hours: 720,
       max_owners: 20,
       max_memories: 50,
     });
     expect(definition.tags).toContain(AUTOMATION_TEMPLATE_TAGS.memory_maintenance);
     expect(definition.settings.concurrency.key).toBe('memory-maintenance-elastic');
     expect(definition.steps.map(({ type }: { type: string }) => type)).toEqual([
+      'context-engine.getLastRun',
       'ai.memory.short_term.decay',
       'ai.memory.short_term.list_by_owner',
       'foreach',
     ]);
   });
 
-  it.each([
-    ['30m', 1],
-    ['6h', 12],
-    ['7d', 336],
-  ])('derives a %s interval into a %i hour lookback', (interval, hours) => {
-    expect(maintenanceLookbackHours(interval)).toBe(hours);
+  describe('memory enrichment', () => {
+    const definition = parse(renderMemoryEnrichmentTemplate(memoryEnrichmentValues));
+    const liquid = createWorkflowLiquidEngine();
+    const stepNamed = (name: string) =>
+      allSteps(definition.steps).find((step) => step.name === name) as TemplateStep &
+        Record<string, unknown>;
+
+    it('fills the thresholds that decide how often a memory is enriched', () => {
+      expect(definition.consts).toMatchObject({
+        ai_index_id: 'support',
+        memory_types: 'memory.entity.*',
+        min_new_accesses: 3,
+        min_days_between_enrichments: 7,
+        max_enrichments: 5,
+        agent_id: 'elastic-ai-agent',
+        connector_id: '',
+      });
+      expect(definition.tags).toContain(AUTOMATION_TEMPLATE_TAGS.memory_enrichment);
+      expect(definition.settings.concurrency.key).toBe(
+        'memory-enrichment-{{ consts.ai_index_id }}'
+      );
+      expect(stepNamed('due')).toMatchObject({
+        type: 'context-engine.getKiUsage',
+        with: {
+          min_new_accesses: '${{ consts.min_new_accesses }}',
+          min_days_since_enrichment: '${{ consts.min_days_between_enrichments }}',
+          limit: '${{ consts.max_enrichments }}',
+        },
+      });
+    });
+
+    it('passes the memory types to ES|QL as a parameter, not as query text', () => {
+      const { with: candidates } = definition.steps.find(
+        ({ name }: { name: string }) => name === 'candidates'
+      );
+
+      expect(candidates.query).toContain('WHERE type LIKE ?memory_types');
+      expect(liquid.parseAndRenderSync(candidates.params.memory_types, definition)).toBe(
+        'memory.entity.*'
+      );
+    });
+
+    it('hands the agent the due memory, its instructions and the sources', () => {
+      const memory = { id: 'memory/entity/customer/acme', title: 'Acme' };
+      const scope = {
+        consts: definition.consts,
+        foreach: { item: { ki_id: memory.id, new_accesses: 4 } },
+        steps: {
+          ai_index: { output: { sources: [{ type: 'connector', value: 'gdrive-1' }] } },
+          candidates: { output: { rows: [{ id: 'other', title: 'Other' }, memory] } },
+        },
+      };
+      const memoryJson = liquid.parseAndRenderSync(
+        (stepNamed('memory').with as Record<string, string>).memory_json,
+        scope
+      );
+      const research = stepNamed('research') as TemplateStep &
+        Record<string, string> & { with: { message: string } };
+      const message = liquid.parseAndRenderSync(research.with.message, {
+        ...scope,
+        steps: { ...scope.steps, memory: { output: { memory_json: memoryJson } } },
+      });
+
+      expect(JSON.parse(memoryJson)).toEqual(memory);
+      expect(research.type).toBe('ai.agent');
+      expect(liquid.parseAndRenderSync(research['agent-id'], scope)).toBe('elastic-ai-agent');
+      expect(liquid.parseAndRenderSync(research['connector-id-by-feature'], scope)).toBe(
+        'context_engine_prompt'
+      );
+      expect(message).toContain(definition.consts.instructions.trim());
+      expect(message).toContain('"title":"Acme"');
+      expect(message).toContain('read 4 times');
+      expect(message).toContain('"value":"gdrive-1"');
+    });
+
+    it('writes only enriched memories, and records every memory the agent looked at', () => {
+      expect(stepNamed('write')).toMatchObject({
+        condition: '${{ steps.research.output.structured_output.enriched == true }}',
+        steps: [{ type: 'context-engine.updateKi' }],
+      });
+      expect(stepNamed('researched')).toMatchObject({
+        condition: '${{ steps.research.output.structured_output.enriched != nil }}',
+        steps: [{ type: 'context-engine.recordKiEnrichment' }],
+      });
+    });
+
+    it('rejects memory types outside long-term memory', () => {
+      expect(() =>
+        renderMemoryEnrichmentTemplate({ ...memoryEnrichmentValues, memoryTypes: 'constraint' })
+      ).toThrow(/memory\.\* type/);
+    });
   });
 
   it('rejects a malformed schedule interval', () => {
@@ -118,27 +262,91 @@ describe('memory templates', () => {
     ).toThrow(/number of minutes, hours or days/);
   });
 
-  it('rejects an AI index id that cannot sit in a concurrency key', () => {
-    expect(() =>
+  it('keys concurrency on the AI index id const, so an odd id stays inside its quoted value', () => {
+    const definition = parse(
       renderTraceMemoryExtractionTemplate({
         ...traceMemoryExtractionValues,
         aiIndexId: 'support"\nkey: x',
       })
-    ).toThrow(/concurrency key/);
+    );
+
+    expect(definition.consts.ai_index_id).toBe('support"\nkey: x');
+    expect(definition.settings.concurrency.key).toBe(
+      'trace-memory-extraction-{{ consts.ai_index_id }}'
+    );
   });
 
-  it('appends a time window to every trace query', () => {
+  it('reads every trace source since the last successful run', () => {
     const definition = parse(renderTraceMemoryExtractionTemplate(traceMemoryExtractionValues));
     const query = createWorkflowLiquidEngine().parseAndRenderSync(
       findStep(definition.steps, 'read_traces')?.with?.query ?? '',
       {
         consts: definition.consts,
-        steps: { trace_source: { output: { query: 'FROM traces-agent_builder.otel-default' } } },
+        steps: {
+          last_run: { output: { hours_since: 7 } },
+          trace_source: { output: { query: 'FROM traces-agent_builder.otel-default' } },
+        },
       }
     );
 
-    expect(query).toBe(
-      'FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= NOW() - 24 hours\n| SORT @timestamp DESC\n'
+    expect(query).toBe('FROM traces-agent_builder.otel-default\n| SORT @timestamp DESC\n');
+    // The window is applied where the query is built, before any per-trace aggregation.
+    expect(findStep(definition.steps, 'ai_index')).toMatchObject({
+      type: 'context-engine.getAiIndex',
+      with: { traces_since_hours: '${{ steps.last_run.output.hours_since }}' },
+    });
+    expect(definition.steps.map(({ name }: { name: string }) => name).slice(0, 2)).toEqual([
+      'last_run',
+      'ai_index',
+    ]);
+    // The first run reads lookback_hours; no run reads more than a week.
+    expect(findStep(definition.steps, 'last_run')).toMatchObject({
+      type: 'context-engine.getLastRun',
+      with: {
+        default_hours: '${{ consts.lookback_hours }}',
+        max_hours: '${{ consts.max_lookback_hours }}',
+      },
+    });
+    expect(definition.consts).toMatchObject({ lookback_hours: 24, max_lookback_hours: 168 });
+  });
+
+  it('reads an Agent Builder trace source as the chat turns of each agent run', () => {
+    const definition = parse(renderTraceMemoryExtractionTemplate(traceMemoryExtractionValues));
+    const liquid = createWorkflowLiquidEngine();
+    const scope = {
+      consts: definition.consts,
+      steps: {
+        last_run: { output: { hours_since: 7 } },
+        trace_source: {
+          output: {
+            type: 'elastic_agent',
+            value: 'elastic-ai-agent',
+            query: 'FROM traces-agent_builder.otel-default',
+          },
+        },
+        read_traces: { output: { rows: [] } },
+        existing_memory: { output: { rows: [] } },
+      },
+    };
+    const query = liquid.parseAndRenderSync(
+      findStep(definition.steps, 'read_traces')?.with?.query ?? '',
+      scope
+    );
+    const extract = findStep(definition.steps, 'extract') as TemplateStep & {
+      with: { prompt: string };
+    };
+
+    expect(query.split('\n')).toEqual([
+      'FROM traces-agent_builder.otel-default',
+      '| INLINE STATS agent_span_ids = VALUES(span_id) WHERE name LIKE "invoke_agent *", run_started = MIN(@timestamp) BY trace_id',
+      '| WHERE name LIKE "chat *" AND MV_CONTAINS(agent_span_ids, parent_span_id)',
+      '| WHERE (attributes.gen_ai.input.messages IS NOT NULL AND attributes.gen_ai.input.messages != "[]") OR attributes.gen_ai.output.messages IS NOT NULL',
+      '| SORT run_started DESC, @timestamp ASC',
+      '| KEEP trace_id, @timestamp, attributes.gen_ai.input.messages, attributes.gen_ai.output.messages',
+      '',
+    ]);
+    expect(liquid.parseAndRenderSync(extract.with.prompt, scope)).toContain(
+      'Each row is one model turn of an agent run'
     );
   });
 });
@@ -245,6 +453,16 @@ describe('automation template rendering', () => {
     });
 
     expect(yaml).toContain('| WHERE code == \\"__KEEP__\\"');
+  });
+
+  it('checks that the document title and body fields exist before reading any document', () => {
+    const definition = parse(renderDocumentOrchestrationTemplate(documentValues));
+    const query = createWorkflowLiquidEngine().parseAndRenderSync(
+      findStep(definition.steps, 'check_fields')?.with?.query ?? '',
+      { consts: definition.consts }
+    );
+
+    expect(query).toBe('FROM loyalty-docs\n| KEEP `title`, `body`\n| LIMIT 0\n');
   });
 
   describe('document batches', () => {
@@ -439,6 +657,32 @@ describe('automation template rendering', () => {
       );
 
       expect(unitEscaped).toBe('a\\"b\\\\c\\nd\\re');
+    });
+
+    it('matches records whose unit key holds several values, which == leaves out', () => {
+      const yaml = renderUnitProfileTemplate(unitValues);
+
+      for (const step of ['unit_totals', 'unit_breakdown']) {
+        expect(renderUnitQuery(yaml, step)).toContain('| WHERE MV_CONTAINS(`Province`, "ON")');
+      }
+      expect(yaml).toContain('`MV_CONTAINS({{ consts.unit_key }}, ?unit)`');
+    });
+
+    it('checks that the configured fields exist before reading any unit', () => {
+      const query = renderUnitQuery(
+        renderUnitProfileTemplate({ ...unitValues, metricFields: ['Points Accumulated'] }),
+        'check_fields'
+      );
+
+      expect(query).toBe(
+        'FROM airline_loyalty_customer_loyalty_history\n| KEEP `Province`, `Enrollment Date`, `Loyalty Card`, `Points Accumulated`\n| LIMIT 0\n'
+      );
+    });
+
+    it('discovers no unit for an empty key', () => {
+      const query = renderUnitQuery(renderUnitProfileTemplate(unitValues), 'discover_units');
+
+      expect(query).toContain('| STATS docs = COUNT(*) BY `Province`\n| WHERE `Province` != ""\n');
     });
 
     it('rejects a metric field that would break out of its backticks', () => {
@@ -677,6 +921,7 @@ describe('automation template rendering', () => {
     ],
     ['memory_distillation', () => renderMemoryDistillationTemplate(memoryDistillationValues)],
     ['memory_maintenance', () => renderMemoryMaintenanceTemplate(memoryMaintenanceValues)],
+    ['memory_enrichment', () => renderMemoryEnrichmentTemplate(memoryEnrichmentValues)],
   ])(
     'renders %s into a definition the workflow schema accepts and the engine can build',
     (_template, render) => {

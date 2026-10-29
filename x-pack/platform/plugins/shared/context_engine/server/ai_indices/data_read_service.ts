@@ -19,6 +19,12 @@ import { AiIndexNotReadableError } from './errors';
 import { filterReadableAiIndices, probeAiIndices } from './filter_readable_ai_indices';
 import { queryAiIndices } from './query';
 import type { AiIndexService } from './service';
+import {
+  buildManagedVisibilityFilter,
+  isManagedDest,
+  readsOnlyManagedAiIndices,
+  type ManagedAiIndexAccess,
+} from './user_scope';
 
 /** Caller-scoped AI-index reads. One instance per request; shared by HTTP routes and agent tools. */
 export interface AiIndexDataReadServiceApi {
@@ -42,14 +48,36 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
       aiIndexService: Pick<AiIndexService, 'get' | 'list'>;
       logger: Logger;
       isMemoryEnabled: () => Promise<boolean>;
+      /**
+       * Reads of managed AI indices as the internal user under Kibana's visibility filter, so the
+       * caller sees their own user-scoped documents. Absent, every read runs as the caller.
+       */
+      managedReads?: {
+        internalEsClient: ElasticsearchClient;
+        resolveAccess: (indices: string[]) => Promise<ManagedAiIndexAccess>;
+      };
     }
   ) {}
 
   async query(request: QueryAiIndicesRequest): Promise<QueryAiIndicesResponse> {
-    const { esClient, spaceId, auditLogger, aiIndexService } = this.deps;
+    const { esClient, spaceId, auditLogger, aiIndexService, managedReads } = this.deps;
     try {
       const aiIndexDests = (await aiIndexService.list(spaceId)).map(({ dest }) => dest);
-      const response = await queryAiIndices({ esClient, spaceId, aiIndexDests, ...request });
+      const managedTargets = aiIndexDests
+        .filter(isManagedDest)
+        .flatMap(({ value }) => value.split(',').map((target) => target.trim()));
+      const response =
+        managedReads !== undefined && readsOnlyManagedAiIndices(request.query, managedTargets)
+          ? await queryAiIndices({
+              esClient: managedReads.internalEsClient,
+              spaceId,
+              aiIndexDests,
+              visibilityFilter: buildManagedVisibilityFilter(
+                await managedReads.resolveAccess(managedTargets)
+              ),
+              ...request,
+            })
+          : await queryAiIndices({ esClient, spaceId, aiIndexDests, ...request });
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.QUERY }));
       return response;
     } catch (error) {

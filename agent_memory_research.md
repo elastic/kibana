@@ -208,6 +208,8 @@ The same mechanism with `_user.roles` (`terms` over `{{#toJson}}_user.roles{{/to
 
 #### 1.2.2 Direction: user-scoped KIs everywhere (Option A)
 
+> **POC status (2026-10-28):** the branch implements a Kibana-enforced version without Elasticsearch changes. The principal goes into `name` (option B's encoding) as `user://<id>`, Context Engine reads managed indices as the internal user with a principal-aware filter, and administrators see through it. See `agent_memory_implementation.md` section 2.4 and decision 37. The Elasticsearch half described below is still needed for direct queries.
+
 **Decision (Peter, 2026-10-26):** user scope becomes part of the general KI permissions model, not a memory-only feature. The user id lives on the privilege elements (Option A), so any KI in any managed AI index can be limited to users, alongside its space and Kibana-action limits. This section works through what that means.
 
 ##### Proposed shape
@@ -474,6 +476,8 @@ These live in `context_engine_agent_builder/server/agent_builder/tools/{remember
 2. **System prompt** (`prompts/utils/ai_indices.ts`): the AI INDICES section lists each of the agent's indices as registry id, ES|QL target, and description. It does **not** say which ones are memory-enabled, even though the catalog entry has `memoryEnabled`.
 3. **Discovery:** the model learns it from `describe_ai_index`. For a memory-enabled index, when the global memory setting is on, the describe output includes a "Memory" block: "Memory writes are enabled…", the two memory types, use `remember` and `forget`, and an example recall query. Ordinary KI example queries then come with `EXCLUDE_MEMORY_KI_TYPES_FILTER`, which keeps memory out of normal KI retrieval.
 4. **Server-side validation** (`getWritableMemoryAiIndex`): the global setting must be on, the index (looked up by id **in the request's space**) must have `memory_enabled`, and its dest must not be a pattern. A wrong choice comes back as a tool error, and the model can retry.
+
+The full list of this design's downsides, and how the POC branch addresses each, is in `agent_memory_implementation.md` section 1.1.
 
 **Gap:** nothing checks that `aiIndexId` is one of the agent's configured AI indices. Any memory-enabled AI index in the space can be written to, as long as the caller has Elasticsearch write access on its backing index. In MCP calls the caller can name any id. The SML index is safe only because it sets `memory_enabled: false`.
 
@@ -757,7 +761,7 @@ forget({ id })
 
 | `type` | Query |
 | --- | --- |
-| `elastic_agent` (agent id) | `FROM traces-agent_builder.otel-<space> \| WHERE attributes.gen_ai.agent.id IN (<id>, <exported id>)` |
+| `elastic_agent` (agent id) | `FROM traces-agent_builder.otel-<space> \| INLINE STATS agent_runs = COUNT(*) WHERE attributes.gen_ai.agent.id IN (<id>, <exported id>) BY trace_id \| WHERE agent_runs > 0 \| DROP agent_runs`: every span of the traces the agent ran in. Originally this was `WHERE attributes.gen_ai.agent.id IN (…)`, which matched only the agent's own root span, which has no content (fixed 2026-10-27, see the implementation doc) |
 | `index` | `FROM <value>` (up to N comma-separated expressions) |
 | `esql` | The query as given |
 
@@ -844,6 +848,8 @@ Common to all three:
 ---
 
 ## 8. POC implementation (branch `context-engine-memory-poc`, 2026-10-26)
+
+> The consolidated record of everything built on this branch, with the full decision log, is [`agent_memory_implementation.md`](agent_memory_implementation.md). This section keeps the implementation notes as they were written, round by round.
 
 This implements section 7 with these decisions:
 - STM first lived in a `.chat-memory` system index. It now lives in the Elastic AI index as `memory.short_term.*` KIs (8.6).
@@ -1021,6 +1027,59 @@ A failure for one owner doesn't stop the others. Install defaults: `unusedDays` 
 - `last_used_at` doesn't extend `expires_at`. A memory used every day still expires 30 days after its last write. A sliding TTL would need to tell a default TTL from an explicit `expires_at`.
 - Dedupe revisits only owners with a write within the lookback. Duplicates older than that are seen only after that owner's next write.
 - The step approval fixtures (`workflows_extensions` Scout) still lack the three new steps.
+
+### 8.8 Memory enrichment automation (2026-10-27)
+
+A new template, `memory_enrichment`, pulls more data into the long-term memories agents read most. The data comes from the AI index's own sources: ES|QL sources, and connectors such as Google Drive. A memory about a customer gains what an index or the customer's documents say about them.
+
+**Access counting.** Long-term memory had no usage signal, so Context Engine now counts reads:
+- It records reads in a storage index, `.contextengine-ki-usage`, with one document per space and KI. The document id is a hash of the two. Fields: `access_count`, `first_accessed_at`, `last_accessed_at`, `last_enriched_at` and `access_count_at_enrichment`.
+- Counts live outside the KIs, so counting a read never writes a KI revision. Enrichment state lives there too, because ES|QL can't filter flattened attribute subfields.
+- A read is every row the agent tool `query_ai_indices` returns with an `id` column. The count is fire-and-forget, so a failure never slows or fails the query.
+- Each update reads the current counts by id (`mget` is real-time) and writes with optimistic concurrency. A lost race is retried twice. A first version read the counts with a search, and back-to-back reads were dropped because search only sees refreshed documents.
+- The start contract exposes it as `getKiUsageService()`.
+
+**New steps** (`context-engine`, same feature and privilege checks as the KI steps):
+
+| Step | Does |
+| --- | --- |
+| `getKiUsage` (`ki_ids` ≤ 1000, `min_new_accesses`, `min_days_since_enrichment`, `limit` ≤ 100) | Returns the KIs read at least `min_new_accesses` times since their last enrichment and not enriched within the window, most-read first |
+| `recordKiEnrichment` (`ki_ids`) | Marks the KIs enriched now, so their new reads count from zero |
+| `updateKi` + `add_references`, `add_attributes` | Merges into the stored KI: references are deduped by uri and relation, and attributes replace key by key |
+| `getAiIndex` | Now also outputs `sources` |
+
+**Template.** Each run:
+1. Reads the memories of `memory_types` (an ES|QL `LIKE` parameter, default `memory.entity.*`).
+2. Picks the due ones with `getKiUsage`.
+3. Runs one ephemeral `ai.agent` call per due memory. The agent gets the memory, the sources, and the tools `execute_esql`, `get_index_mapping` and `execute_connector_sub_action`, and returns `{enriched, summary, content, attributes, references}`.
+4. When `enriched` is true, `updateKi` writes the merged content and adds the attributes and references.
+5. Every memory the agent finished is recorded, including ones where nothing turned up. A failed agent run leaves the memory due.
+
+How often it happens is set in the consts (install defaults in brackets):
+- `min_new_accesses` [3];
+- `min_days_between_enrichments` [7];
+- `max_enrichments` per run [5];
+- `agent_id` [`elastic-ai-agent`];
+- the schedule [`1d`].
+
+As in the other memory templates, `connector_id` and `instructions` are consts too.
+
+**Connectors.** `execute_connector_sub_action` only reaches connectors assigned to the agent. To enrich from Google Drive, assign the Drive connector to `agent_id` (or point `agent_id` at an agent that has it). Otherwise the agent enriches from the index sources only.
+
+**Verified live** on the `test` AI index (source `FROM kibana_sample_data_ecommerce`). The Context Engine agent installed the template with its defaults (`saved_and_attached`). Then:
+
+| Step | Result |
+| --- | --- |
+| `query_ai_indices` calls reading 2 entity memories | `access_count: 4` each |
+| Manual run | Both memories enriched. "Elitelligence" gained 250 orders, €10,438.88 revenue, a price range, the countries it sells to, and dated attributes. "Women's Shoes" gained 182 orders, €19,423.31 revenue and its leading manufacturers. Both gained `index://kibana_sample_data_ecommerce`. Usage: `access_count_at_enrichment: 4` |
+| Second manual run | Nothing due; the run stops after `getKiUsage` |
+
+**Caveats and follow-ups:**
+- Only the agent query tool counts reads. Reads through the HTTP query API, the UI and workflow steps don't, so automations don't inflate their own inputs.
+- There is no Google Drive connector locally, so connector enrichment is not verified live.
+- The agent rewrites `content` whole, so a bad run could drop detail. On an index destination the update is in place and the old text is lost. A data-stream destination keeps it as an older revision.
+- Usage documents of deleted or purged KIs are never cleaned up.
+- The step approval fixtures (`workflows_extensions` Scout) still lack the two new steps.
 
 ---
 

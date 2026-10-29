@@ -28,22 +28,29 @@ import {
   agentFilter,
   agentsFilter,
   attributeField,
+  decisionAttributes,
+  decisionStatusAttribute,
+  notDeletedFilter,
   notExpiredFilter,
   ownerFilter,
   promotionAttributes,
   shortTermMemoryTypeFilter,
   spaceFilter,
   toShortTermMemory,
+  withoutDecision,
   withoutPromotion,
+  withoutPromotionSummary,
   type ShortTermMemoryKiDocument,
 } from './memory_document';
 
 export const DEFAULT_PROMOTION_LIST_LIMIT = 50;
 export const MAX_PROMOTION_LIST_LIMIT = 200;
 
-/** Memories written before promotion was recorded carry no status and count as pending. */
-const statusFilter = (statuses: string[]): QueryDslQueryContainer => {
-  const field = attributeField(MEMORY_ATTRIBUTES.promotionStatus);
+/** A memory with no recorded status, or none from this decider yet, counts as pending. */
+const statusFilter = (statuses: string[], decider: string | undefined): QueryDslQueryContainer => {
+  const field = attributeField(
+    decider !== undefined ? decisionStatusAttribute(decider) : MEMORY_ATTRIBUTES.promotionStatus
+  );
   return {
     bool: {
       should: [
@@ -52,6 +59,29 @@ const statusFilter = (statuses: string[]): QueryDslQueryContainer => {
       ],
       minimum_should_match: 1,
     },
+  };
+};
+
+/**
+ * Records a decision. With a decider it is that automation's own, and the summary follows it,
+ * except that a promotion by another automation stays the summary over a later rejection.
+ */
+const withDecision = (
+  attributes: Record<string, string>,
+  decision: ShortTermMemoryPromotion,
+  decider: string | undefined
+): Record<string, string> => {
+  if (decider === undefined) {
+    return { ...withoutPromotionSummary(attributes), ...promotionAttributes(decision) };
+  }
+  const others = withoutDecision(attributes, decider);
+  const keepSummary =
+    attributes[MEMORY_ATTRIBUTES.promotionStatus] === 'promoted' && decision.status !== 'promoted';
+  return {
+    ...(keepSummary
+      ? others
+      : { ...withoutPromotionSummary(others), ...promotionAttributes(decision) }),
+    ...decisionAttributes(decider, decision),
   };
 };
 
@@ -73,6 +103,7 @@ export class ShortTermMemorySystemClientImpl implements ShortTermMemorySystemCli
   async listForPromotion({
     spaceId,
     agentIds,
+    decider,
     statuses = ['pending'],
     since,
     limit,
@@ -81,7 +112,8 @@ export class ShortTermMemorySystemClientImpl implements ShortTermMemorySystemCli
       shortTermMemoryTypeFilter,
       spaceFilter(spaceId),
       notExpiredFilter(this.getNow()),
-      statusFilter(statuses),
+      notDeletedFilter,
+      statusFilter(statuses, decider),
       ...agentsFilter(agentIds),
       ...(since !== undefined ? [{ range: { updated_at: { gte: since } } }] : []),
     ];
@@ -103,10 +135,12 @@ export class ShortTermMemorySystemClientImpl implements ShortTermMemorySystemCli
     spaceId,
     ids,
     promotion,
+    decider,
   }: {
     spaceId: string;
     ids: string[];
     promotion: Omit<ShortTermMemoryPromotion, 'updated_at'>;
+    decider?: string;
   }): Promise<{ updated: number }> {
     if (ids.length === 0) {
       return { updated: 0 };
@@ -138,10 +172,11 @@ export class ShortTermMemorySystemClientImpl implements ShortTermMemorySystemCli
             },
             {
               ...hit._source,
-              attributes: {
-                ...withoutPromotion(hit._source.attributes),
-                ...promotionAttributes({ ...promotion, updated_at: updatedAt }),
-              },
+              attributes: withDecision(
+                hit._source.attributes,
+                { ...promotion, updated_at: updatedAt },
+                decider
+              ),
             },
           ]
         : []
@@ -166,6 +201,7 @@ export class ShortTermMemorySystemClientImpl implements ShortTermMemorySystemCli
       shortTermMemoryTypeFilter,
       spaceFilter(spaceId),
       notExpiredFilter(now),
+      notDeletedFilter,
       ...agentsFilter(agentIds),
     ];
     const changedSince =
@@ -373,12 +409,26 @@ export class ShortTermMemorySystemClientImpl implements ShortTermMemorySystemCli
     const now = this.getNow();
     const cutoff = new Date(now.getTime() - unusedDays * DAY_MS).toISOString();
     const scope = [shortTermMemoryTypeFilter, spaceFilter(spaceId), ...agentsFilter(agentIds)];
+    // Expired memories, and memories deleted through the AI index KI API (tombstones).
     const expired = await this.esClient.deleteByQuery({
       index: memoryIndexName,
       refresh: true,
       conflicts: 'proceed',
       query: {
-        bool: { filter: [...scope, { range: { expires_at: { lte: now.toISOString() } } }] },
+        bool: {
+          filter: [
+            ...scope,
+            {
+              bool: {
+                should: [
+                  { range: { expires_at: { lte: now.toISOString() } } },
+                  { term: { 'governance.lifecycle.status': 'deleted' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
       },
     });
     // A memory written without an expiry was meant to be kept, so only expiring ones decay.

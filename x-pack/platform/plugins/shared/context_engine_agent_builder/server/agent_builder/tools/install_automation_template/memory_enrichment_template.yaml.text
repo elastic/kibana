@@ -1,0 +1,191 @@
+version: "1"
+# Memory enrichment — finds the long-term memories agents read most and pulls more data about
+# them from the AI index's sources. A memory about a customer, for example, gains what an index
+# or a connected Google Drive knows about that customer.
+#
+# This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands.
+#
+# Installed by platform.context_engine.install_automation_template. The tool fills the consts.
+# Do not save this YAML yourself.
+#
+# How often it happens: Context Engine counts every time an agent's AI index query returns a
+# memory. A memory is enriched once it was read `min_new_accesses` times since its last
+# enrichment, at most every `min_days_between_enrichments` days, and at most `max_enrichments`
+# memories per run, most-read first.
+#
+# Connector sources are searched with platform.core.execute_connector_sub_action, which only
+# reaches the connectors assigned to the agent `agent_id`. Assign them to that agent in Agent
+# Builder, or the agent reports them as unavailable and enriches from the index sources only.
+name: Memory enrichment
+description: >
+  Adds what the AI index's sources (indices and connectors) know to the long-term memories
+  agents read most.
+enabled: true
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: "memory-enrichment-{{ consts.ai_index_id }}"
+    strategy: drop
+    max: 1
+
+consts:
+  # The Context Engine AI index whose long-term memory is enriched.
+  ai_index_id: __AI_INDEX_ID__
+  # The human-readable name of this automation instance.
+  automation_name: __AUTOMATION_NAME__
+  # The memory types considered, as an ES|QL LIKE pattern: entities by default.
+  memory_types: __MEMORY_TYPES__
+  # How many reads by agents since its last enrichment make a memory due.
+  min_new_accesses: __MIN_NEW_ACCESSES__
+  # The fewest days between two enrichments of the same memory.
+  min_days_between_enrichments: __MIN_DAYS_BETWEEN_ENRICHMENTS__
+  # How many memories one run enriches, most-read first. Each is one agent run.
+  max_enrichments: __MAX_ENRICHMENTS__
+  # The Agent Builder agent that searches the sources. Its assigned connectors are the ones
+  # it can search.
+  agent_id: __AGENT_ID__
+  # The model the agent uses: an AI connector id. Empty uses the model configured for the
+  # Context Engine (Model Management feature context_engine_prompt).
+  connector_id: ""
+  # What the agent is told to do. The memory and the sources are added to the message after it.
+  instructions: |
+    You enrich one long-term memory of an AI assistant with facts from the organization's
+    data. Agents read this memory often, so every reliable detail added to it saves them work.
+
+    1. Work out what the memory is about from its title and content: an entity such as a
+       customer, a product or a service, or a fact about one.
+    2. Search the sources listed below for it. For an esql source, run ES|QL on its index,
+       filtered on the memory's name or identifiers. For a connector source, use that
+       connector (for example a file search for the name). Make a few targeted calls per
+       source, not a crawl.
+    3. Keep only durable facts the data shows about this exact thing: identifiers, owners,
+       business contacts, key figures with their date, related entities. Leave out secrets and
+       personal data beyond business roles.
+
+    Return enriched=false with a short summary when nothing new and reliable turns up.
+    Otherwise return:
+    - content: the memory's full content with the new facts merged in. Keep everything it
+      already says unless the data corrects it, and date every figure.
+    - attributes: new or corrected key facts as short strings, keyed in snake_case.
+    - references: where the facts came from: index://<index> for an index, and
+      connector://<connector id>/<document id or name> for a connector document.
+
+tags:
+  - memory
+  - ce-template:memory_enrichment
+
+triggers:
+  - type: scheduled
+    with:
+      every: __INTERVAL__
+  - type: manual
+
+steps:
+  - name: ai_index
+    type: context-engine.getAiIndex
+    with:
+      ai_index_id: "{{ consts.ai_index_id }}"
+
+  # Current, active, unexpired memories only: the query step applies the KI lifecycle filters.
+  - name: candidates
+    type: context-engine.queryAiIndex
+    with:
+      query: 'FROM {{ steps.ai_index.output.dest.value }} | WHERE type LIKE ?memory_types | KEEP id, type, title, description, content, tags, attributes'
+      params:
+        memory_types: "{{ consts.memory_types }}"
+      limit: 1000
+
+  - name: due
+    type: context-engine.getKiUsage
+    with:
+      ki_ids: "${{ steps.candidates.output.rows | map: 'id' }}"
+      min_new_accesses: "${{ consts.min_new_accesses }}"
+      min_days_since_enrichment: "${{ consts.min_days_between_enrichments }}"
+      limit: "${{ consts.max_enrichments }}"
+
+  - name: enrich
+    type: foreach
+    foreach: "{{ steps.due.output.kis | json }}"
+    steps:
+      - name: memory
+        type: data.set
+        with:
+          memory_json: "{{ steps.candidates.output.rows | where: 'id', foreach.item.ki_id | first | json }}"
+
+      # A failed run leaves the memory due, so the next run tries it again.
+      - name: research
+        type: ai.agent
+        agent-id: "{{ consts.agent_id }}"
+        connector-id: "{{ consts.connector_id }}"
+        connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"
+        ephemeral: true
+        on-failure:
+          continue: true
+        with:
+          message: |
+            {{ consts.instructions }}
+
+            The memory (read {{ foreach.item.new_accesses }} times since it was last enriched):
+            {{ steps.memory.output.memory_json }}
+
+            The AI index's sources:
+            {{ steps.ai_index.output.sources | json }}
+          configuration_overrides:
+            tools:
+              - tool_ids:
+                  - platform.core.execute_esql
+                  - platform.core.get_index_mapping
+                  - platform.core.execute_connector_sub_action
+          schema:
+            type: object
+            properties:
+              enriched:
+                type: boolean
+              summary:
+                type: string
+              content:
+                type: string
+              attributes:
+                type: object
+                additionalProperties:
+                  type: string
+              references:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    uri:
+                      type: string
+                    relation:
+                      type: string
+                      enum: [derived_from]
+                    description:
+                      type: string
+                  required: [uri, relation, description]
+            required: [enriched, summary]
+
+      - name: write
+        type: if
+        condition: "${{ steps.research.output.structured_output.enriched == true }}"
+        steps:
+          - name: update_memory
+            type: context-engine.updateKi
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "{{ foreach.item.ki_id }}"
+              ki:
+                content: "{{ steps.research.output.structured_output.content }}"
+              add_attributes: "${{ steps.research.output.structured_output.attributes }}"
+              add_references: "${{ steps.research.output.structured_output.references }}"
+
+      # Also when nothing was found: the memory waits for new reads before it is tried again.
+      - name: researched
+        type: if
+        condition: "${{ steps.research.output.structured_output.enriched != nil }}"
+        steps:
+          - name: record_enrichment
+            type: context-engine.recordKiEnrichment
+            with:
+              ki_ids:
+                - "{{ foreach.item.ki_id }}"

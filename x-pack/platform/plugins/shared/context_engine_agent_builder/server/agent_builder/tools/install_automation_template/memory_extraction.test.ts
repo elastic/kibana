@@ -15,7 +15,7 @@ import {
   compileMemoryExtractionConfig,
   extractionSourcesSchema,
   memoryExtractionConfigSchema,
-  normalizeExtractionSources,
+  toStoredSources,
   type MemoryCustomExtractionConfig,
   type MemoryExtractionConfig,
 } from './memory_extraction';
@@ -99,6 +99,28 @@ const findStep = (steps: Step[], name: string): Step | undefined => {
 
 const render = (template: string, context: Record<string, unknown>) =>
   createWorkflowLiquidEngine().parseAndRenderSync(template, context);
+
+/** What the `compile` and `compiled` steps produce at run time from the consts. */
+const compileAtRunTime = (definition: { consts: Record<string, unknown>; steps: Step[] }) => {
+  const compile = findStep(definition.steps, 'compile');
+  const text = (key: string) => render(String(compile?.with?.[key]), { consts: definition.consts });
+  return {
+    node_kinds: JSON.parse(text('node_kinds_json')),
+    relationship_kinds: JSON.parse(text('relationship_kinds_json')),
+    schema: JSON.parse(text('schema_json')),
+  };
+};
+
+/** The run-time context of a write step: the compiled consts plus the given step outputs. */
+const writeContext = (
+  definition: { consts: Record<string, unknown>; steps: Step[] },
+  steps: Record<string, unknown>,
+  item: Record<string, unknown>
+) => ({
+  consts: definition.consts,
+  steps: { ...steps, compiled: { output: compileAtRunTime(definition) } },
+  foreach: { item },
+});
 
 describe('compileMemoryExtractionConfig', () => {
   it('maps facts and entities to their KI types and shared id prefixes', () => {
@@ -246,6 +268,37 @@ describe('memory extraction template', () => {
     expect(() => convertToWorkflowGraph(parsed.data)).not.toThrow();
   });
 
+  it('builds the kinds and output schema at run time, as the configuration compiles them', () => {
+    const structured = parse(renderMemoryExtractionTemplate({ ...baseValues, config: sreConfig }));
+    const custom = parse(
+      renderMemoryCustomExtractionTemplate({ ...baseValues, config: customConfig })
+    );
+    const structuredCompiled = compileMemoryExtractionConfig(sreConfig);
+    const customCompiled = compileMemoryCustomExtractionConfig(customConfig);
+
+    expect(compileAtRunTime(structured)).toEqual({
+      node_kinds: structuredCompiled.nodeKinds,
+      relationship_kinds: structuredCompiled.relationshipKinds,
+      schema: buildExtractionOutputSchema(structuredCompiled),
+    });
+    expect(compileAtRunTime(custom)).toEqual({
+      node_kinds: customCompiled.nodeKinds,
+      relationship_kinds: {},
+      schema: buildExtractionOutputSchema(customCompiled),
+    });
+  });
+
+  it('stores only what was configured: no derived consts, and the schema comes from a step', () => {
+    const definition = parse(renderMemoryExtractionTemplate({ ...baseValues, config: sreConfig }));
+
+    expect(Object.keys(definition.consts)).not.toContain('node_kinds');
+    expect(Object.keys(definition.consts)).not.toContain('relationship_kinds');
+    expect(findStep(definition.steps, 'extract')?.with?.schema).toBe(
+      '${{ steps.compiled.output.schema }}'
+    );
+    expect(definition.settings.concurrency.key).toBe('memory-extraction-{{ consts.ai_index_id }}');
+  });
+
   it('tags each variant and embeds the configuration', () => {
     const graph = parse(renderMemoryExtractionTemplate({ ...baseValues, config: sreConfig }));
     const custom = parse(
@@ -260,18 +313,16 @@ describe('memory extraction template', () => {
   it('writes a node under its shared id with references to mentions and source memories', () => {
     const definition = parse(renderMemoryExtractionTemplate({ ...baseValues, config: sreConfig }));
     const nodeStep = findStep(definition.steps, 'node');
-    const context = {
-      consts: definition.consts,
-      steps: { source_context: { output: { uri_prefix: 'stm://' } } },
-      foreach: {
-        item: {
-          type: 'service',
-          key: 'Checkout Service',
-          mentions: [{ type: 'person', key: 'jane-doe' }],
-          source_ids: ['stm-1'],
-        },
-      },
-    };
+    const context = writeContext(
+      definition,
+      { source_context: { output: { uri_prefix: 'stm://' } } },
+      {
+        type: 'service',
+        key: 'Checkout Service',
+        mentions: [{ type: 'person', key: 'jane-doe' }],
+        source_ids: ['stm-1'],
+      }
+    );
 
     expect(render(String(nodeStep?.with?.ki_id), context)).toBe(
       'memory/entity/service/checkout-service'
@@ -287,12 +338,14 @@ describe('memory extraction template', () => {
     const definition = parse(renderMemoryExtractionTemplate({ ...baseValues, config: sreConfig }));
     const relationshipStep = findStep(definition.steps, 'relationship');
     const allowed = (source: string, target: string) =>
-      render(String(relationshipStep?.with?.allowed), {
-        consts: definition.consts,
-        foreach: {
-          item: { type: 'owned_by', source: { type: source }, target: { type: target } },
-        },
-      });
+      render(
+        String(relationshipStep?.with?.allowed),
+        writeContext(
+          definition,
+          {},
+          { type: 'owned_by', source: { type: source }, target: { type: target } }
+        )
+      );
 
     expect(allowed('service', 'person')).toBe('true');
     expect(allowed('person', 'service')).toBe('false');
@@ -304,18 +357,19 @@ describe('memory extraction template', () => {
 
     expect(
       JSON.parse(
-        render(String(relationshipStep?.with?.references_json), {
-          consts: definition.consts,
-          steps: { source_context: { output: { uri_prefix: 'stm://' } } },
-          foreach: {
-            item: {
+        render(
+          String(relationshipStep?.with?.references_json),
+          writeContext(
+            definition,
+            { source_context: { output: { uri_prefix: 'stm://' } } },
+            {
               type: 'owned_by',
               source: { type: 'service', key: 'checkout-service' },
               target: { type: 'person', key: 'jane-doe' },
               source_ids: [],
-            },
-          },
-        })
+            }
+          )
+        )
       )
     ).toEqual([
       { uri: 'ki://memory/entity/service/checkout-service', relation: 'relates_to' },
@@ -324,72 +378,45 @@ describe('memory extraction template', () => {
   });
 });
 
-describe('normalizeExtractionSources', () => {
-  it('reads short-term memory with stm:// provenance', () => {
-    expect(normalizeExtractionSources([{ type: 'short_term_memory' }])).toEqual([
-      expect.objectContaining({ type: 'short_term_memory', id_column: 'id', uri_prefix: 'stm://' }),
-    ]);
-  });
-
-  it('leaves memory out of an AI index query and cites KIs', () => {
+describe('toStoredSources', () => {
+  it('stores each source as chosen, in snake_case, leaving defaults to the workflow', () => {
     expect(
-      normalizeExtractionSources([
-        { type: 'query', query: 'FROM ai-index-idx-sre | WHERE type == "incident"' },
+      toStoredSources([
+        { type: 'short_term_memory' },
+        { type: 'query', query: '  FROM ai-index-idx-sre  ' },
+        {
+          type: 'query',
+          query: 'FROM tickets',
+          idColumn: 'ticket_id',
+          uriPrefix: 'ticket://',
+          excludeMemory: false,
+          lookbackHours: 24,
+          maxRecords: 50,
+          description: 'support tickets',
+        },
       ])
     ).toEqual([
+      { type: 'short_term_memory' },
+      { type: 'query', query: 'FROM ai-index-idx-sre' },
       {
         type: 'query',
-        description: 'knowledge indicators',
-        id_column: 'id',
-        uri_prefix: 'ki://',
-        query:
-          'FROM ai-index-idx-sre | WHERE type == "incident"\n| WHERE type IS NULL OR type NOT LIKE "memory.*"',
-        max_records: 200,
-      },
-    ]);
-  });
-
-  it('cites traces by trace id and appends the time window', () => {
-    const [source] = normalizeExtractionSources([
-      { type: 'query', query: 'FROM traces-agent_builder.otel-default', lookbackHours: 24 },
-    ]);
-
-    expect(source).toMatchObject({
-      id_column: 'trace_id',
-      uri_prefix: 'trace://',
-      query: 'FROM traces-agent_builder.otel-default\n| WHERE @timestamp >= NOW() - 24 hours',
-    });
-  });
-
-  it('takes explicit citation and exclusion settings', () => {
-    const [source] = normalizeExtractionSources([
-      {
-        type: 'query',
-        query: 'FROM ai-index-idx-sre',
-        idColumn: 'ticket_id',
-        uriPrefix: 'ticket://',
-        excludeMemory: false,
-        maxRecords: 50,
+        query: 'FROM tickets',
+        id_column: 'ticket_id',
+        uri_prefix: 'ticket://',
+        exclude_memory: false,
+        lookback_hours: 24,
+        max_records: 50,
         description: 'support tickets',
       },
     ]);
-
-    expect(source).toEqual({
-      type: 'query',
-      description: 'support tickets',
-      id_column: 'ticket_id',
-      uri_prefix: 'ticket://',
-      query: 'FROM ai-index-idx-sre',
-      max_records: 50,
-    });
   });
 
   it('rejects Liquid in a query and short-term memory twice', () => {
     expect(() =>
-      normalizeExtractionSources([{ type: 'query', query: 'FROM x | WHERE a == "{{ y }}"' }])
+      toStoredSources([{ type: 'query', query: 'FROM x | WHERE a == "{{ y }}"' }])
     ).toThrow(/Liquid/);
     expect(() =>
-      normalizeExtractionSources([{ type: 'short_term_memory' }, { type: 'short_term_memory' }])
+      toStoredSources([{ type: 'short_term_memory' }, { type: 'short_term_memory' }])
     ).toThrow(/only once/);
   });
 
@@ -449,6 +476,68 @@ describe('memory extraction template with query sources', () => {
     });
   });
 
+  it.each([
+    [
+      'short-term memory',
+      { type: 'short_term_memory' },
+      { id_column: 'id', uri_prefix: 'stm://', query: '' },
+    ],
+    [
+      'an AI index query, leaving memory out',
+      { type: 'query', query: 'FROM ai-index-idx-sre | WHERE type == "incident"' },
+      {
+        description: 'knowledge indicators',
+        id_column: 'id',
+        uri_prefix: 'ki://',
+        query:
+          'FROM ai-index-idx-sre | WHERE type == "incident" | WHERE type IS NULL OR type NOT LIKE "memory.*"',
+      },
+    ],
+    [
+      'a trace query with a window',
+      { type: 'query', query: 'FROM traces-agent_builder.otel-default', lookback_hours: 24 },
+      {
+        description: 'agent traces',
+        id_column: 'trace_id',
+        uri_prefix: 'trace://',
+        query: 'FROM traces-agent_builder.otel-default | WHERE @timestamp >= NOW() - 24 hours',
+      },
+    ],
+    [
+      'explicit settings',
+      {
+        type: 'query',
+        query: 'FROM ai-index-idx-sre',
+        id_column: 'ticket_id',
+        uri_prefix: 'ticket://',
+        exclude_memory: false,
+        description: 'support tickets',
+      },
+      {
+        description: 'support tickets',
+        id_column: 'ticket_id',
+        uri_prefix: 'ticket://',
+        query: 'FROM ai-index-idx-sre',
+      },
+    ],
+  ])('applies the defaults of %s at run time', (_name, item, expected) => {
+    const definition = parse(
+      renderMemoryExtractionTemplate({ ...baseValues, config: sreConfig, sources })
+    );
+    const sourceContext = findStep(definition.steps, 'source_context');
+    const rendered = Object.fromEntries(
+      Object.keys(expected).map((key) => [
+        key,
+        render(String(sourceContext?.with?.[key]), {
+          consts: definition.consts,
+          foreach: { item },
+        }),
+      ])
+    );
+
+    expect(rendered).toEqual(expected);
+  });
+
   it('cites a query record with its source prefix', () => {
     const definition = parse(
       renderMemoryExtractionTemplate({ ...baseValues, config: sreConfig, sources })
@@ -457,11 +546,14 @@ describe('memory extraction template with query sources', () => {
 
     expect(
       JSON.parse(
-        render(String(nodeStep?.with?.references_json), {
-          consts: definition.consts,
-          steps: { source_context: { output: { uri_prefix: 'trace://' } } },
-          foreach: { item: { type: 'incident', key: 'outage', mentions: [], source_ids: ['t-1'] } },
-        })
+        render(
+          String(nodeStep?.with?.references_json),
+          writeContext(
+            definition,
+            { source_context: { output: { uri_prefix: 'trace://' } } },
+            { type: 'incident', key: 'outage', mentions: [], source_ids: ['t-1'] }
+          )
+        )
       )
     ).toEqual([{ uri: 'trace://t-1', relation: 'derived_from' }]);
   });

@@ -10,6 +10,7 @@ import { getAiIndexStepCommonDefinition } from '../../common/step_types/get_ai_i
 import type { AiIndexStepDependencies } from './helpers';
 import { assertContextEngineEnabled, assertKiReadPrivilege } from './helpers';
 import { toStepError } from './to_step_error';
+import { buildTraceQueries } from '../ai_indices/trace_queries';
 
 export const getGetAiIndexStepDefinition = ({
   getAiIndexService,
@@ -25,7 +26,8 @@ export const getGetAiIndexStepDefinition = ({
         await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
         await assertKiReadPrivilege(checkReadPrivilege, request, spaceId);
 
-        const aiIndex = await getAiIndexService().get(context.input.ai_index_id, spaceId);
+        const { ai_index_id: aiIndexId, traces_since_hours: tracesSinceHours } = context.input;
+        const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
         return {
           output: {
             id: aiIndex.id,
@@ -33,7 +35,15 @@ export const getGetAiIndexStepDefinition = ({
             managed: aiIndex.managed,
             memory_enabled: aiIndex.memory_enabled,
             dest: aiIndex.dest,
-            traces: aiIndex.traces,
+            sources: aiIndex.sources,
+            traces:
+              tracesSinceHours === undefined
+                ? aiIndex.traces
+                : buildTraceQueries(
+                    aiIndex.traces.map(({ type, value }) => ({ type, value })),
+                    spaceId,
+                    tracesSinceHours
+                  ),
           },
         };
       } catch (error) {

@@ -14,6 +14,7 @@ import CONTEXT_ENGINE_TRACE_MEMORY_EXTRACTION_TEMPLATE from './trace_memory_extr
 import CONTEXT_ENGINE_MEMORY_DISTILLATION_TEMPLATE from './memory_distillation_template.yaml.text';
 import CONTEXT_ENGINE_MEMORY_EXTRACTION_TEMPLATE from './memory_extraction_template.yaml.text';
 import CONTEXT_ENGINE_MEMORY_MAINTENANCE_TEMPLATE from './memory_maintenance_template.yaml.text';
+import CONTEXT_ENGINE_MEMORY_ENRICHMENT_TEMPLATE from './memory_enrichment_template.yaml.text';
 import {
   buildMemoryExtractionTokens,
   compileMemoryCustomExtractionConfig,
@@ -35,7 +36,8 @@ export type AutomationTemplateId =
   | 'memory_distillation'
   | 'memory_extraction'
   | 'memory_custom_extraction'
-  | 'memory_maintenance';
+  | 'memory_maintenance'
+  | 'memory_enrichment';
 
 /** Stable tag written into each installed workflow so a later call updates that workflow. */
 export const AUTOMATION_TEMPLATE_TAGS: Record<AutomationTemplateId, string> = {
@@ -49,6 +51,7 @@ export const AUTOMATION_TEMPLATE_TAGS: Record<AutomationTemplateId, string> = {
   memory_extraction: 'ce-template:memory_extraction',
   memory_custom_extraction: 'ce-template:memory_custom_extraction',
   memory_maintenance: 'ce-template:memory_maintenance',
+  memory_enrichment: 'ce-template:memory_enrichment',
 };
 
 export interface DocumentOrchestrationTemplateValues {
@@ -232,22 +235,10 @@ export interface MemoryDistillationTemplateValues {
   interval: string;
 }
 
-/**
- * The AI index id is also spliced into the workflow's concurrency key, unquoted. AI index ids are
- * restricted to a safe character set when written, so this only guards against a bypass.
- */
-const rawAiIndexId = (aiIndexId: string): string => {
-  if (!/^[a-z0-9][a-z0-9_-]*$/.test(aiIndexId)) {
-    throw new Error(`AI index id "${aiIndexId}" cannot be used in a workflow concurrency key.`);
-  }
-  return aiIndexId;
-};
-
 export const renderMemoryPromotionTemplate = (values: MemoryPromotionTemplateValues): string => {
   assertScheduleInterval(values.interval);
   return replaceTokens(CONTEXT_ENGINE_MEMORY_PROMOTION_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
-    __AI_INDEX_ID_RAW__: rawAiIndexId(values.aiIndexId),
     __AUTOMATION_NAME__: yamlString(values.automationName),
     // JSON is valid YAML flow syntax, so the list renders on the const's own line.
     __AGENT_IDS__: JSON.stringify(values.agentIds),
@@ -262,7 +253,6 @@ export const renderTraceMemoryExtractionTemplate = (
   assertScheduleInterval(values.interval);
   return replaceTokens(CONTEXT_ENGINE_TRACE_MEMORY_EXTRACTION_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
-    __AI_INDEX_ID_RAW__: rawAiIndexId(values.aiIndexId),
     __AUTOMATION_NAME__: yamlString(values.automationName),
     __LOOKBACK_HOURS__: String(values.lookbackHours),
     __MAX_ROWS__: String(values.maxRows),
@@ -276,7 +266,6 @@ export const renderMemoryDistillationTemplate = (
   assertScheduleInterval(values.interval);
   return replaceTokens(CONTEXT_ENGINE_MEMORY_DISTILLATION_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
-    __AI_INDEX_ID_RAW__: rawAiIndexId(values.aiIndexId),
     __AUTOMATION_NAME__: yamlString(values.automationName),
     __MAX_MEMORIES__: String(values.maxMemories),
     __PURGE_AFTER_DAYS__: String(values.purgeAfterDays),
@@ -294,26 +283,55 @@ export interface MemoryMaintenanceTemplateValues {
   interval: string;
 }
 
-const INTERVAL_UNIT_HOURS: Record<string, number> = { m: 1 / 60, h: 1, d: 24 };
-
-/** Twice the interval, so a late or dropped run doesn't leave changes unvisited. */
-export const maintenanceLookbackHours = (interval: string): number => {
-  assertScheduleInterval(interval);
-  const hours = Number(interval.slice(0, -1)) * INTERVAL_UNIT_HOURS[interval.slice(-1)];
-  return Math.min(Math.max(Math.ceil(hours * 2), 1), 24 * 365);
-};
-
-export const renderMemoryMaintenanceTemplate = (values: MemoryMaintenanceTemplateValues): string =>
-  replaceTokens(CONTEXT_ENGINE_MEMORY_MAINTENANCE_TEMPLATE, {
-    __AI_INDEX_ID_RAW__: rawAiIndexId(values.aiIndexId),
+export const renderMemoryMaintenanceTemplate = (
+  values: MemoryMaintenanceTemplateValues
+): string => {
+  assertScheduleInterval(values.interval);
+  return replaceTokens(CONTEXT_ENGINE_MEMORY_MAINTENANCE_TEMPLATE, {
     // JSON is valid YAML flow syntax, so the list renders on the const's own line.
     __AGENT_IDS__: JSON.stringify(values.agentIds),
     __UNUSED_DAYS__: String(values.unusedDays),
-    __LOOKBACK_HOURS__: String(maintenanceLookbackHours(values.interval)),
     __MAX_OWNERS__: String(values.maxOwners),
     __MAX_MEMORIES__: String(values.maxMemories),
     __INTERVAL__: yamlString(values.interval),
   });
+};
+
+export interface MemoryEnrichmentTemplateValues {
+  aiIndexId: string;
+  automationName: string;
+  /** The memory types enriched, as an ES|QL LIKE pattern such as `memory.entity.*`. */
+  memoryTypes: string;
+  /** Agent reads since its last enrichment that make a memory due. */
+  minNewAccesses: number;
+  minDaysBetweenEnrichments: number;
+  maxEnrichments: number;
+  /** The agent that searches the sources; it reaches only the connectors assigned to it. */
+  agentId: string;
+  interval: string;
+}
+
+/** A KI type pattern: `memory.` types only, with `*` and `?` as the LIKE wildcards. */
+export const MEMORY_TYPE_PATTERN = /^memory\.[a-z0-9_.*?-]{1,200}$/;
+
+export const renderMemoryEnrichmentTemplate = (values: MemoryEnrichmentTemplateValues): string => {
+  assertScheduleInterval(values.interval);
+  if (!MEMORY_TYPE_PATTERN.test(values.memoryTypes)) {
+    throw new Error(
+      `Memory types "${values.memoryTypes}" must be a memory.* type or LIKE pattern, such as "memory.entity.*".`
+    );
+  }
+  return replaceTokens(CONTEXT_ENGINE_MEMORY_ENRICHMENT_TEMPLATE, {
+    __AI_INDEX_ID__: yamlString(values.aiIndexId),
+    __AUTOMATION_NAME__: yamlString(values.automationName),
+    __MEMORY_TYPES__: yamlString(values.memoryTypes),
+    __MIN_NEW_ACCESSES__: String(values.minNewAccesses),
+    __MIN_DAYS_BETWEEN_ENRICHMENTS__: String(values.minDaysBetweenEnrichments),
+    __MAX_ENRICHMENTS__: String(values.maxEnrichments),
+    __AGENT_ID__: yamlString(values.agentId),
+    __INTERVAL__: yamlString(values.interval),
+  });
+};
 
 interface ExtractionTemplateBaseValues {
   aiIndexId: string;
@@ -341,7 +359,6 @@ const renderExtractionTemplate = (
   assertScheduleInterval(values.interval);
   return replaceTokens(CONTEXT_ENGINE_MEMORY_EXTRACTION_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
-    __AI_INDEX_ID_RAW__: rawAiIndexId(values.aiIndexId),
     __AGENT_IDS__: JSON.stringify(values.agentIds),
     __BATCH_SIZE__: String(values.batchSize),
     __INTERVAL__: yamlString(values.interval),
@@ -350,29 +367,26 @@ const renderExtractionTemplate = (
   });
 };
 
-export const renderMemoryExtractionTemplate = (values: MemoryExtractionTemplateValues): string =>
-  renderExtractionTemplate(
+/** The configuration is validated here; the workflow derives its kinds and schema at run time. */
+export const renderMemoryExtractionTemplate = (values: MemoryExtractionTemplateValues): string => {
+  compileMemoryExtractionConfig(values.config);
+  return renderExtractionTemplate(
     values,
     AUTOMATION_TEMPLATE_TAGS.memory_extraction,
-    buildMemoryExtractionTokens(
-      values.config,
-      compileMemoryExtractionConfig(values.config),
-      values.sources ?? DEFAULT_EXTRACTION_SOURCES
-    )
+    buildMemoryExtractionTokens(values.config, values.sources ?? DEFAULT_EXTRACTION_SOURCES)
   );
+};
 
 export const renderMemoryCustomExtractionTemplate = (
   values: MemoryCustomExtractionTemplateValues
-): string =>
-  renderExtractionTemplate(
+): string => {
+  compileMemoryCustomExtractionConfig(values.config);
+  return renderExtractionTemplate(
     values,
     AUTOMATION_TEMPLATE_TAGS.memory_custom_extraction,
-    buildMemoryExtractionTokens(
-      values.config,
-      compileMemoryCustomExtractionConfig(values.config),
-      values.sources ?? DEFAULT_EXTRACTION_SOURCES
-    )
+    buildMemoryExtractionTokens(values.config, values.sources ?? DEFAULT_EXTRACTION_SOURCES)
   );
+};
 
 export interface TargetedKiWriterTemplateValues {
   aiIndexId: string;

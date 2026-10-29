@@ -15,6 +15,15 @@ export const GET_AI_INDEX_STEP_ID = 'context-engine.getAiIndex' as const;
 
 export const getAiIndexInputSchema = z.object({
   ai_index_id: aiIndexIdSchema,
+  traces_since_hours: z
+    .number()
+    .int()
+    .min(1)
+    .max(8760)
+    .optional()
+    .describe(
+      'Limits each trace query to spans of the last N hours. The filter comes first, so a query that aggregates per trace only reads the window.'
+    ),
 });
 
 export const getAiIndexOutputSchema = z.object({
@@ -25,6 +34,11 @@ export const getAiIndexOutputSchema = z.object({
   dest: z
     .object({ type: z.enum(['data_stream', 'index']), value: z.string() })
     .describe('The backing store. `value` is the ES|QL `FROM` target'),
+  sources: z
+    .array(z.object({ type: z.enum(['esql', 'connector']), value: z.string() }))
+    .describe(
+      'The data the AI index is built from: an ES|QL query over indices, or the id of a connector to an external system'
+    ),
   traces: z
     .array(
       z.object({
@@ -58,7 +72,7 @@ export const getAiIndexStepCommonDefinition: CommonStepDefinition<
       'xpack.contextEngine.workflows.steps.getAiIndex.documentation.details',
       {
         defaultMessage:
-          'Returns the AI index definition as it is now, so an automation picks up changes to its trace sources without being reinstalled. Each trace source comes with the ES|QL query that reads it; append a time filter and a LIMIT before running it.',
+          'Returns the AI index definition as it is now, so an automation picks up changes to its trace sources without being reinstalled. Each trace source comes with the ES|QL query that reads it. Pass traces_since_hours to window it, rather than appending a time filter, and add a LIMIT before running it.',
       }
     ),
     examples: [

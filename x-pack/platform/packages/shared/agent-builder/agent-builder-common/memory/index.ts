@@ -57,5 +57,8 @@ export interface ShortTermMemory {
   expires_at?: string;
   /** When the memory was last recalled or shown to the agent. Recorded at most hourly. */
   last_used_at?: string;
+  /** The latest decision, or a promotion by any automation: what a reader is shown. */
   promotion: ShortTermMemoryPromotion;
+  /** Each deciding automation's own decision, keyed by its workflow id. */
+  decisions?: Record<string, ShortTermMemoryPromotion>;
 }

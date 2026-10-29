@@ -9,7 +9,13 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
-import { aiIndexIdSchema, kiIdSchema, kiLifecycleStatusSchema, kiPartialFieldsSchema } from './ki';
+import {
+  aiIndexIdSchema,
+  kiFieldsSchema,
+  kiIdSchema,
+  kiLifecycleStatusSchema,
+  kiPartialFieldsSchema,
+} from './ki';
 
 export const UPDATE_KI_STEP_ID = 'context-engine.updateKi' as const;
 
@@ -22,6 +28,12 @@ export const updateKiInputSchema = z.object({
     .optional()
     .describe('The lifecycle status to set'),
   force: z.boolean().optional().describe('Update the knowledge indicator even if it is deleted'),
+  add_references: kiFieldsSchema.shape.references.describe(
+    'References added to the existing ones (or to ki.references when given). A reference already present, same uri and relation, is kept once.'
+  ),
+  add_attributes: kiFieldsSchema.shape.attributes.describe(
+    'Attributes merged into the existing ones (or into ki.attributes when given): each given key replaces that key only.'
+  ),
   refresh: z
     .boolean()
     .optional()

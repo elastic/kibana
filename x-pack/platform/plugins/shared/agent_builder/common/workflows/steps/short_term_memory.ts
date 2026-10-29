@@ -65,7 +65,9 @@ const ListInputSchema = z.object({
     .array(z.enum(SHORT_TERM_MEMORY_PROMOTION_STATUSES))
     .max(SHORT_TERM_MEMORY_PROMOTION_STATUSES.length)
     .optional()
-    .meta({ description: 'Promotion statuses to include. Defaults to `pending`.' }),
+    .meta({
+      description: "This workflow's decision statuses to include. Defaults to `pending`.",
+    }),
   since: z
     .string()
     .max(64)
@@ -259,7 +261,7 @@ export const listShortTermMemoriesStepCommonDefinition: CommonStepDefinition<
       'xpack.agentBuilder.workflowSteps.listShortTermMemories.documentation.details',
       {
         defaultMessage:
-          'Reads short-term memories across all users, so it requires the workflow to run as an administrator. Expired memories are left out. Results are oldest first, so a memory that has waited longest is decided first.',
+          "Reads short-term memories across all users, so it requires the workflow to run as an administrator. Expired memories are left out. Statuses are this workflow's own decisions: a memory another workflow decided is still pending here, so several automations can each process every memory. Results are oldest first, so a memory that has waited longest is decided first.",
       }
     ),
     examples: [
@@ -299,7 +301,7 @@ export const setShortTermMemoryPromotionStepCommonDefinition: CommonStepDefiniti
       'xpack.agentBuilder.workflowSteps.setShortTermMemoryPromotion.documentation.details',
       {
         defaultMessage:
-          'Marks short-term memories as promoted or rejected so the next promotion run skips them. Requires the workflow to run as an administrator. A memory revised by its owner since it was read keeps its pending status.',
+          'Marks short-term memories as promoted or rejected for this workflow, so its next run skips them; other workflows still see them. The owner is shown the latest decision, or a promotion by any workflow. Requires the workflow to run as an administrator. A memory revised by its owner since it was read keeps its pending status, and a revision makes every workflow decide it again.',
       }
     ),
     examples: [

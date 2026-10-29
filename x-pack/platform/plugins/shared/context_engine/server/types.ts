@@ -19,6 +19,7 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { KiUsageServiceApi } from './ki_usage/ki_usage_service';
 import type { WorkflowEnablementApi } from './feedback_analysis/schedule';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
@@ -46,6 +47,8 @@ export interface ContextEnginePluginStart {
   getAiIndexService: () => AiIndexService;
   /** Caller-scoped AI-index reads (query, and later describe/list). */
   getAiIndexDataReadService: (params: GetAiIndexDataReadServiceParams) => AiIndexDataReadServiceApi;
+  /** How often agents read KIs, per space. Reads and writes as the internal user. */
+  getKiUsageService: () => KiUsageServiceApi;
   /** The signals store. */
   getSignalsService: () => SignalsServiceApi;
   /**

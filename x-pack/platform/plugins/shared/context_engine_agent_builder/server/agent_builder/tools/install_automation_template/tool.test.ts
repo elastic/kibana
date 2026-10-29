@@ -612,3 +612,64 @@ describe('install_automation_template memory sources', () => {
     ).toBe(false);
   });
 });
+
+describe('install_automation_template memory_enrichment', () => {
+  const schema = createTool().schema;
+
+  it('takes its thresholds, and rejects them on other templates', () => {
+    expect(
+      schema.safeParse({
+        template: 'memory_enrichment',
+        name: 'enrichment',
+        memoryTypes: 'memory.entity.customer',
+        minNewAccesses: 1,
+        minDaysBetweenEnrichments: 0,
+        maxEnrichments: 10,
+        enrichmentAgentId: 'research-agent',
+        interval: '6h',
+      }).success
+    ).toBe(true);
+    expect(
+      schema.safeParse({ template: 'memory_distillation', name: 'x', minNewAccesses: 3 }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({ template: 'memory_enrichment', name: 'x', agentIds: ['a'] }).success
+    ).toBe(false);
+  });
+
+  it('only enriches long-term memory types', () => {
+    expect(
+      schema.safeParse({ template: 'memory_enrichment', name: 'x', memoryTypes: 'constraint' })
+        .success
+    ).toBe(false);
+  });
+
+  it('fills the defaults', async () => {
+    const handler = createTool().handler;
+    if (!handler) {
+      throw new Error('Expected a tool handler');
+    }
+
+    await handler({ template: 'memory_enrichment', name: 'enrichment' }, {
+      request: httpServerMock.createKibanaRequest(),
+      spaceId: 'default',
+      attachments: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    expect(installHandlerMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        params: {
+          template: 'memory_enrichment',
+          name: 'enrichment',
+          memoryTypes: 'memory.entity.*',
+          minNewAccesses: 3,
+          minDaysBetweenEnrichments: 7,
+          maxEnrichments: 5,
+          agentId: 'elastic-ai-agent',
+          interval: '1d',
+        },
+      })
+    );
+  });
+});

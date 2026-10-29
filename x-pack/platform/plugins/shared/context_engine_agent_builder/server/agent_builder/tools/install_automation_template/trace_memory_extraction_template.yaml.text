@@ -9,8 +9,9 @@ version: "1"
 # Do not save this YAML yourself.
 #
 # The trace sources are read from the AI index on every run, so adding or removing a trace source
-# needs no reinstall. Each run reads the last `lookback_hours` of each source; keep it equal to the
-# schedule interval or a little longer, since overlapping windows are de-duplicated by `key`.
+# needs no reinstall. Each run reads every source since the last successful run of this workflow
+# started (`context-engine.getLastRun`), so a failed run's traces are read again; overlapping
+# windows are de-duplicated by `key`.
 #
 # Privacy: traces hold other users' conversations, and what is extracted is visible to everyone
 # who can read the AI index. The prompt keeps only facts about the systems, never about people.
@@ -24,7 +25,7 @@ enabled: true
 settings:
   timeout: 45m
   concurrency:
-    key: "trace-memory-extraction-__AI_INDEX_ID_RAW__"
+    key: "trace-memory-extraction-{{ consts.ai_index_id }}"
     strategy: drop
     max: 1
 
@@ -33,12 +34,34 @@ consts:
   ai_index_id: __AI_INDEX_ID__
   # The human-readable name of this automation instance. Prefixes every KI ID it writes.
   automation_name: __AUTOMATION_NAME__
-  # How far back each run reads.
+  # Hours read on the first run. Later runs read everything since the last successful run started.
   lookback_hours: __LOOKBACK_HOURS__
+  # Longest window a run reads, so a run after a long pause does not read every trace since.
+  max_lookback_hours: 168
   # Trace rows read per source per run. They all go into one prompt, so keep this small.
   max_rows: __MAX_ROWS__
   # Characters of trace rows sent to the prompt per source.
   max_trace_chars: 60000
+  # The model the prompts use: an AI connector id. Empty uses the model configured for the
+  # Context Engine (Model Management feature context_engine_prompt).
+  connector_id: ""
+  # What the model is told to do. The records it works on are added to the prompt after it.
+  instructions: |
+    Extract at most 10 durable facts that a future run of a similar, but not identical,
+    task in this environment would want to know ahead of time: field types and quirks,
+    which index holds what, queries that work, errors and their workarounds, naming
+    conventions, and the conventions a user states the team applies to this data. Rules:
+    - Only facts the traces show: a query that ran, a tool result or error, a convention a
+      user stated, or what the agent reported from a tool. Never infer, never generalise
+      from one failed attempt.
+    - Nothing about people: no user names, personal preferences, or personal data. No
+      secrets.
+    - Skip anything public knowledge or in the existing long-term memories, unless the
+      traces correct it; then reuse that memory's `id` as `key`.
+    - `key` is a short, stable slug for the fact (for example
+      "logs-orders-duration-ms-is-keyword"), so the same fact always gets the same key.
+    - `trace_ids` lists the trace_id values the fact is drawn from.
+    Return an empty list when nothing qualifies.
   no_tags: []
 
 tags:
@@ -52,10 +75,19 @@ triggers:
   - type: manual
 
 steps:
+  - name: last_run
+    type: context-engine.getLastRun
+    with:
+      default_hours: "${{ consts.lookback_hours }}"
+      max_hours: "${{ consts.max_lookback_hours }}"
+
+  # The trace queries come windowed to the spans since the last successful run started, so a
+  # source that groups spans by trace only reads that window.
   - name: ai_index
     type: context-engine.getAiIndex
     with:
       ai_index_id: "{{ consts.ai_index_id }}"
+      traces_since_hours: "${{ steps.last_run.output.hours_since }}"
 
   - name: extract_from_sources
     type: if
@@ -85,43 +117,51 @@ steps:
             # A source that cannot be read (missing index, no privilege) skips to the next one.
             on-failure:
               continue: true
+            # An Agent Builder source is read as conversations: the chat turns of each agent run,
+            # newest run first and its turns in order. The other spans carry no content.
             with:
               query: |
                 {{ steps.trace_source.output.query }}
-                | WHERE @timestamp >= NOW() - {{ consts.lookback_hours }} hours
+                {%- if steps.trace_source.output.type == "elastic_agent" %}
+                | INLINE STATS agent_span_ids = VALUES(span_id) WHERE name LIKE "invoke_agent *", run_started = MIN(@timestamp) BY trace_id
+                | WHERE name LIKE "chat *" AND MV_CONTAINS(agent_span_ids, parent_span_id)
+                | WHERE (attributes.gen_ai.input.messages IS NOT NULL AND attributes.gen_ai.input.messages != "[]") OR attributes.gen_ai.output.messages IS NOT NULL
+                | SORT run_started DESC, @timestamp ASC
+                | KEEP trace_id, @timestamp, attributes.gen_ai.input.messages, attributes.gen_ai.output.messages
+                {%- else %}
                 | SORT @timestamp DESC
+                {%- endif %}
               limit: "${{ consts.max_rows }}"
 
+          # A failed extraction fails the run, so the next run reads these traces again rather
+          # than starting its window after them.
           - name: extract
             type: ai.prompt
-            connector-id-by-feature: context_engine_prompt
+            connector-id: "{{ consts.connector_id }}"
+            connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"
             on-failure:
-              continue: true
+              retry:
+                max-attempts: 2
+                delay: 30s
             with:
               prompt: |
                 You maintain the long-term memory of an AI assistant that works in one
                 organization's environment. Below are recent traces of agent runs from the source
                 "{{ steps.trace_source.output.value }}" ({{ steps.trace_source.output.type }}).
 
+                {% if steps.trace_source.output.type == "elastic_agent" -%}
+                Each row is one model turn of an agent run, grouped by trace_id and in order:
+                `attributes.gen_ai.input.messages` is what the model was sent (the user's message
+                on a run's first turn), `attributes.gen_ai.output.messages` what it answered,
+                including the tool calls it made.
+                {% endif -%}
                 Trace rows (JSON, possibly truncated):
                 {{ steps.read_traces.output.rows | json | slice: 0, consts.max_trace_chars }}
 
                 Long-term memories that already exist (id, title, description):
                 {{ steps.existing_memory.output.rows | json }}
 
-                Extract at most 10 durable facts that a future run of a similar, but not identical,
-                task in this environment would want to know ahead of time: field types and quirks,
-                which index holds what, queries that work, errors and their workarounds, naming
-                conventions. Rules:
-                - Only facts a tool result in the traces shows. Never infer, never generalise from
-                  one failed attempt.
-                - Nothing about people: no user names, preferences, or personal data. No secrets.
-                - Skip anything public knowledge or in the existing long-term memories, unless the
-                  traces correct it; then reuse that memory's `id` as `key`.
-                - `key` is a short, stable slug for the fact (for example
-                  "logs-orders-duration-ms-is-keyword"), so the same fact always gets the same key.
-                - `trace_ids` lists the trace_id values the fact is drawn from.
-                Return an empty list when nothing qualifies.
+                {{ consts.instructions }}
               schema:
                 type: object
                 properties:

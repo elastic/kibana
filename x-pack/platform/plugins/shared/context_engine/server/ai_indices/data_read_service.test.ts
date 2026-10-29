@@ -273,3 +273,54 @@ describe('AiIndexDataReadService', () => {
     });
   });
 });
+
+describe('AiIndexDataReadService reads of managed AI indices', () => {
+  const elastic: AiIndexHttpItem = {
+    ...aiIndex,
+    id: 'elastic',
+    managed: true,
+    dest: { type: 'index', value: '.ai-index-idx-elastic-index' },
+  };
+  const callerQuery = jest.fn().mockResolvedValue({ columns: [], values: [] });
+  const internalQuery = jest.fn().mockResolvedValue({ columns: [], values: [] });
+  const resolveAccess = jest.fn().mockResolvedValue({
+    spaceId: 'marketing',
+    authorizedActions: [],
+    principal: 'user://u_alice',
+    isAdmin: false,
+  });
+  const service = new AiIndexDataReadService({
+    esClient: { esql: { query: callerQuery } } as unknown as ElasticsearchClient,
+    spaceId: 'marketing',
+    auditLogger: { log: jest.fn() } as unknown as AuditLogger,
+    aiIndexService: { get: jest.fn(), list: jest.fn().mockResolvedValue([elastic, aiIndex]) },
+    logger: loggingSystemMock.createLogger(),
+    isMemoryEnabled: jest.fn().mockResolvedValue(true),
+    managedReads: {
+      internalEsClient: { esql: { query: internalQuery } } as unknown as ElasticsearchClient,
+      resolveAccess,
+    },
+  });
+
+  beforeEach(() => {
+    callerQuery.mockClear();
+    internalQuery.mockClear();
+  });
+
+  it('reads only managed indices as the internal user, under the caller’s visibility filter', async () => {
+    await service.query({ query: 'FROM .ai-index-idx-elastic-index | KEEP id' });
+
+    expect(resolveAccess).toHaveBeenCalledWith(['.ai-index-idx-elastic-index']);
+    expect(callerQuery).not.toHaveBeenCalled();
+    const { filter } = internalQuery.mock.calls[0][0];
+    expect(filter.bool.filter[0]).toEqual(buildAiIndexSpaceFilter('marketing'));
+    expect(JSON.stringify(filter.bool.filter[1])).toContain('user://u_alice');
+  });
+
+  it('runs as the caller when the query reads anything else', async () => {
+    await service.query({ query: 'FROM .ai-index-idx-elastic-index, ai-index-idx-support' });
+
+    expect(internalQuery).not.toHaveBeenCalled();
+    expect(callerQuery).toHaveBeenCalled();
+  });
+});

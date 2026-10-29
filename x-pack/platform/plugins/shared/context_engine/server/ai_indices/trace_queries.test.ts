@@ -87,19 +87,26 @@ describe('buildTraceQuery', () => {
     it('matches the default built-in agent by raw id only', () => {
       const trace = { type: 'elastic_agent' as const, value: agentBuilderDefaultAgentId };
       expect(buildTraceQuery(trace, spaceId)).toBe(
-        `FROM traces-agent_builder.otel-default\n| WHERE attributes.gen_ai.agent.id IN ("${agentBuilderDefaultAgentId}")`
+        agentTracesQuery(`"${agentBuilderDefaultAgentId}"`)
       );
     });
 
     it('matches allow-listed built-in agents by raw id only', () => {
       const builtinAgentId = AGENT_BUILDER_BUILTIN_AGENTS[0];
       const trace = { type: 'elastic_agent' as const, value: builtinAgentId };
-      expect(buildTraceQuery(trace, spaceId)).toBe(
-        `FROM traces-agent_builder.otel-default\n| WHERE attributes.gen_ai.agent.id IN ("${builtinAgentId}")`
-      );
+      expect(buildTraceQuery(trace, spaceId)).toBe(agentTracesQuery(`"${builtinAgentId}"`));
     });
   });
 });
+
+/** Every span of the traces the agent ran in, not only the agent's own span. */
+const agentTracesQuery = (literals: string) =>
+  [
+    'FROM traces-agent_builder.otel-default',
+    `| INLINE STATS agent_runs = COUNT(*) WHERE attributes.gen_ai.agent.id IN (${literals}) BY trace_id`,
+    '| WHERE agent_runs > 0',
+    '| DROP agent_runs',
+  ].join('\n');
 
 describe('buildTraceQueries', () => {
   it('returns an empty array for empty input', () => {
@@ -115,6 +122,25 @@ describe('buildTraceQueries', () => {
       { type: 'index', value: 'valid-index', query: 'FROM valid-index' },
       { type: 'esql', value: 'FROM foo', query: 'FROM foo' },
     ]);
+  });
+
+  it('windows each query before anything else runs, so an agent trace is grouped over the window only', () => {
+    const traces = [
+      { type: 'elastic_agent' as const, value: 'elastic-ai-agent' },
+      { type: 'index' as const, value: 'logs-traces' },
+      { type: 'esql' as const, value: 'FROM foo | KEEP a' },
+    ];
+    const [agent, index, esql] = buildTraceQueries(traces, 'default', 6).map(({ query }) =>
+      query.split('\n')
+    );
+
+    expect(agent.slice(0, 3)).toEqual([
+      'FROM traces-agent_builder.otel-default',
+      '| WHERE @timestamp >= NOW() - 6 hours',
+      expect.stringMatching(/^\| INLINE STATS agent_runs/),
+    ]);
+    expect(index).toEqual(['FROM logs-traces', '| WHERE @timestamp >= NOW() - 6 hours']);
+    expect(esql).toEqual(['FROM foo | KEEP a', '| WHERE @timestamp >= NOW() - 6 hours']);
   });
 
   // A trace that cannot produce a usable query must not fail the whole list response.

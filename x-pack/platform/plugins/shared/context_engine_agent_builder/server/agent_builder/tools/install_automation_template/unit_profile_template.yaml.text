@@ -78,8 +78,19 @@ steps:
       method: GET
       path: /{{ consts.unit_index }}/_mapping
 
+  # The configured fields must still exist. A renamed or removed field fails the run here, with
+  # Elasticsearch naming it, instead of failing every unit inside the loop, which continues.
+  - name: check_fields
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM {{ consts.unit_index }}
+        | KEEP `{{ consts.unit_key }}`, `{{ consts.activity_field }}`, `{{ consts.breakdown_field }}`{% for field in consts.metric_fields %}, `{{ field }}`{% endfor %}
+        | LIMIT 0
+
   # All units in one query, ranked by activity descending, capped at `max_units`. No paging.
   # A pilot takes the top `pilot_size` of the same ranking, so the full run replaces its KIs.
+  # A record whose key holds several values counts once for each. An empty key is not a unit.
   - name: discover_units
     type: elasticsearch.esql.query
     with:
@@ -88,6 +99,7 @@ steps:
         | WHERE `{{ consts.unit_key }}` IS NOT NULL
         {{ consts.corpus_filter }}
         | STATS docs = COUNT(*) BY `{{ consts.unit_key }}`
+        | WHERE `{{ consts.unit_key }}` != ""
         | SORT docs DESC, `{{ consts.unit_key }}` ASC
         | LIMIT {{ inputs.pilot_size | default: consts.max_units | at_most: consts.max_units }}
         | KEEP `{{ consts.unit_key }}`
@@ -126,6 +138,8 @@ steps:
               # produce distinct, non-colliding KIs.
               ki_id: "{{ consts.automation_name }}/{{ foreach.item[0] }}"
 
+          # The unit filter is MV_CONTAINS, not ==: `==` is null on a multi-valued key, so it would
+          # leave out every record that references this unit alongside another.
           # Grounding 1: totals over every row referencing the unit, then one average per
           # `metric_fields` entry. Column names are derived from field names, so every column
           # propagates through the description and content automatically. The metrics come last
@@ -135,7 +149,7 @@ steps:
             with:
               query: |
                 FROM {{ consts.unit_index }}
-                | WHERE `{{ consts.unit_key }}` == "{{ steps.unit_context.output.unit_escaped }}"
+                | WHERE MV_CONTAINS(`{{ consts.unit_key }}`, "{{ steps.unit_context.output.unit_escaped }}")
                 {{ consts.corpus_filter }}
                 | STATS records = COUNT(*),
                         `distinct {{ consts.breakdown_field | remove: '`' }} values` = COUNT_DISTINCT(`{{ consts.breakdown_field }}`),
@@ -149,7 +163,7 @@ steps:
             with:
               query: |
                 FROM {{ consts.unit_index }}
-                | WHERE `{{ consts.unit_key }}` == "{{ steps.unit_context.output.unit_escaped }}"
+                | WHERE MV_CONTAINS(`{{ consts.unit_key }}`, "{{ steps.unit_context.output.unit_escaped }}")
                 {{ consts.corpus_filter }}
                 | STATS count = COUNT(*) BY `{{ consts.breakdown_field }}`
                 | SORT count DESC
@@ -198,7 +212,8 @@ steps:
                 nothing is not. Each entry has:
                 - question_type: a short label for the kind of question.
                 - esql_template: an ES|QL query scoped to this unit using the filter
-                  `{{ consts.unit_key }} == ?unit` — a bare named parameter without quotes.
+                  `MV_CONTAINS({{ consts.unit_key }}, ?unit)` — a bare named parameter without
+                  quotes.
                 - esql_example: the same query with ?unit replaced by the string literal
                   "{{ steps.unit_context.output.unit_escaped }}"; copy it exactly as written,
                   every backslash included.
@@ -208,7 +223,9 @@ steps:
                 - Start with `FROM {{ consts.unit_index }}`; use `|` between commands; use real field
                   names only, exactly as they appear in the mapping above, including backticks around
                   names with spaces.
-                - Scope every query to this unit with `WHERE {{ consts.unit_key }} == "..."`.
+                - Scope every query to this unit with
+                  `WHERE MV_CONTAINS({{ consts.unit_key }}, "...")`. A record can hold several
+                  {{ consts.unit_key }} values, and `==` never matches those records.
                 - Quote string literals with double quotes; do not quote numbers or booleans.
                 - Boolean fields take `COUNT(*) WHERE field == true`, never SUM()/AVG()/MIN()/MAX(),
                   which fail at runtime on a boolean. For a rate, divide that count by the total with

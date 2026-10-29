@@ -12,4 +12,7 @@ export {
   getAiIndexStepDefinition,
   queryAiIndexStepDefinition,
   purgeKisStepDefinition,
+  getLastRunStepDefinition,
+  getKiUsageStepDefinition,
+  recordKiEnrichmentStepDefinition,
 } from './ai_index_steps';

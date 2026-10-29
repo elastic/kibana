@@ -36,6 +36,7 @@ import {
   AI_INDEX_QUERY_PATH,
 } from '../../common/constants';
 import type {
+  AiIndexDest,
   CreateAiIndexResponse,
   DeleteAiIndexResponse,
   GetAiIndexResponse,
@@ -213,6 +214,13 @@ const handleReadError = (error: unknown, response: KibanaResponseFactory, logger
   return handleAiIndexError(error, response, logger);
 };
 
+export interface GetKiClientParams {
+  request: KibanaRequest;
+  dest: AiIndexDest;
+  spaceId: string;
+  scopedClient: ElasticsearchClient;
+}
+
 export const registerAiIndexRoutes = ({
   router,
   logger,
@@ -226,6 +234,7 @@ export const registerAiIndexRoutes = ({
   getWorkflowsManagementApi,
   getSpaces,
   analyticsService,
+  getKiClient = async ({ scopedClient }) => scopedClient,
 }: {
   router: IRouter;
   logger: Logger;
@@ -242,6 +251,8 @@ export const registerAiIndexRoutes = ({
   getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
   analyticsService: ContextEngineAnalyticsService;
+  /** The client KI reads and writes use: the caller's own, or a user-scope-aware one for managed AI indices. */
+  getKiClient?: (params: GetKiClientParams) => Promise<ElasticsearchClient>;
 }) => {
   const reconcileSchedule = async (aiIndexId: string, spaceId: string, request: KibanaRequest) => {
     try {
@@ -717,7 +728,12 @@ export const registerAiIndexRoutes = ({
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
-          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          const esClient = await getKiClient({
+            request,
+            dest: aiIndex.dest,
+            spaceId,
+            scopedClient: (await ctx.core).elasticsearch.client.asCurrentUser,
+          });
           const body: ListKisResponse = await getKis(esClient, {
             dest: aiIndex.dest,
             size,
@@ -763,7 +779,12 @@ export const registerAiIndexRoutes = ({
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
-          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          const esClient = await getKiClient({
+            request,
+            dest: aiIndex.dest,
+            spaceId,
+            scopedClient: (await ctx.core).elasticsearch.client.asCurrentUser,
+          });
           const body: GetKiResponse = await getKi(esClient, {
             aiIndexId,
             dest: aiIndex.dest,
@@ -830,7 +851,12 @@ export const registerAiIndexRoutes = ({
             run: async (setManaged) => {
               const { dest, managed } = await getAiIndexService().get(aiIndexId, spaceId);
               setManaged(managed);
-              const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+              const esClient = await getKiClient({
+                request,
+                dest,
+                spaceId,
+                scopedClient: (await ctx.core).elasticsearch.client.asCurrentUser,
+              });
               const writer = buildKiApiWriter('update', spaceId);
               const result = await updateKi(esClient, {
                 aiIndexId,
@@ -903,7 +929,12 @@ export const registerAiIndexRoutes = ({
             run: async (setManaged) => {
               const { dest, managed } = await getAiIndexService().get(aiIndexId, spaceId);
               setManaged(managed);
-              const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+              const esClient = await getKiClient({
+                request,
+                dest,
+                spaceId,
+                scopedClient: (await ctx.core).elasticsearch.client.asCurrentUser,
+              });
               const writer = buildKiApiWriter('delete', spaceId);
               const result = await softDeleteKi(esClient, {
                 aiIndexId,
@@ -975,7 +1006,12 @@ export const registerAiIndexRoutes = ({
             run: async (setManaged) => {
               const { dest, managed } = await getAiIndexService().get(aiIndexId, spaceId);
               setManaged(managed);
-              const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+              const esClient = await getKiClient({
+                request,
+                dest,
+                spaceId,
+                scopedClient: (await ctx.core).elasticsearch.client.asCurrentUser,
+              });
               const writer = buildKiApiWriter('restore', spaceId);
               const result = await restoreKi(esClient, {
                 aiIndexId,

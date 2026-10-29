@@ -28,12 +28,20 @@ export const createAiIndexToolDepsMock = ({
   );
 
   const getAiIndexDataReadService = jest.fn().mockReturnValue(readService);
-  const contextEngine = { getAiIndexDataReadService } as unknown as ContextEnginePluginStart;
+  const kiUsageService = {
+    recordAccess: jest.fn().mockResolvedValue(undefined),
+    getUsage: jest.fn().mockResolvedValue([]),
+    recordEnrichment: jest.fn().mockResolvedValue(undefined),
+  };
+  const contextEngine = {
+    getAiIndexDataReadService,
+    getKiUsageService: () => kiUsageService,
+  } as unknown as ContextEnginePluginStart;
 
   const deps: AiIndexToolDeps = {
     getContextEngineStart: async () => contextEngine,
     getSecurityStart: async () => security,
   };
 
-  return { deps, readService, security, getAiIndexDataReadService };
+  return { deps, readService, security, getAiIndexDataReadService, kiUsageService };
 };

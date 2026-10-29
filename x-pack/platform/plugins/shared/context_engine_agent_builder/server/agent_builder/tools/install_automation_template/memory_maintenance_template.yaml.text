@@ -20,7 +20,7 @@ enabled: true
 settings:
   timeout: 45m
   concurrency:
-    key: "memory-maintenance-__AI_INDEX_ID_RAW__"
+    key: "memory-maintenance-elastic"
     strategy: drop
     max: 1
 
@@ -30,13 +30,32 @@ consts:
   # Memories neither written nor recalled or shown to an agent for this many days are forgotten.
   # Memories written without an expiry are kept.
   unused_days: __UNUSED_DAYS__
-  # Only users whose memories changed in this window are deduplicated, so a run revisits only what
-  # changed. Keep it longer than the schedule interval.
-  lookback_hours: __LOOKBACK_HOURS__
+  # Each run deduplicates the users whose memories changed since the last successful run started;
+  # the first run looks this many hours back.
+  first_run_hours: 720
   # User and agent pairs deduplicated per run, one model call each.
   max_owners: __MAX_OWNERS__
   # Memories read per user and agent pair, newest first.
   max_memories: __MAX_MEMORIES__
+  # The model the prompts use: an AI connector id. Empty uses the model configured for the
+  # Context Engine (Model Management feature context_engine_prompt).
+  connector_id: ""
+  # What the model is told to do. The records it works on are added to the prompt after it.
+  instructions: |
+    You maintain the short-term memory one user has with one AI agent. The agent reads
+    these memories before every task, so they must be few, non-redundant and correct.
+
+    Propose:
+    - merges: memories that say the same thing, or overlap so much they read better as
+      one. keep_id is the memory that takes the merged text (prefer the newest);
+      source_ids lists the other memories merged into it, never keep_id itself. Write
+      the merged memory in full and keep every concrete detail (names, fields, queries,
+      values) the memories agree on. Where they disagree, keep the newer statement.
+    - remove: memories that a newer memory contradicts or replaces, and that are not
+      part of a merge. Give a short reason.
+    Leave a memory alone when in doubt: an unnecessary merge or removal loses what the
+    user told the agent. Never use a memory in more than one merge, and never remove a
+    memory that is part of a merge. Return empty lists when nothing needs to change.
   no_items: []
 
 tags:
@@ -50,6 +69,11 @@ triggers:
   - type: manual
 
 steps:
+  - name: last_run
+    type: context-engine.getLastRun
+    with:
+      default_hours: "${{ consts.first_run_hours }}"
+
   - name: decay
     type: ai.memory.short_term.decay
     with:
@@ -60,7 +84,7 @@ steps:
     type: ai.memory.short_term.list_by_owner
     with:
       agent_ids: "${{ consts.agent_ids }}"
-      changed_within_hours: "${{ consts.lookback_hours }}"
+      changed_within_hours: "${{ steps.last_run.output.hours_since }}"
       max_owners: "${{ consts.max_owners }}"
       max_memories: "${{ consts.max_memories }}"
 
@@ -74,29 +98,17 @@ steps:
         steps:
           - name: plan
             type: ai.prompt
-            connector-id-by-feature: context_engine_prompt
+            connector-id: "{{ consts.connector_id }}"
+            connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"
             # One owner's failure does not stop the others.
             on-failure:
               continue: true
             with:
               prompt: |
-                You maintain the short-term memory one user has with one AI agent. The agent reads
-                these memories before every task, so they must be few, non-redundant and correct.
+                {{ consts.instructions }}
 
                 The user's memories (newest first; last_used_at is when the agent last used one):
                 {{ foreach.item.memories | json }}
-
-                Propose:
-                - merges: memories that say the same thing, or overlap so much they read better as
-                  one. keep_id is the memory that takes the merged text (prefer the newest);
-                  source_ids lists the other memories merged into it, never keep_id itself. Write
-                  the merged memory in full and keep every concrete detail (names, fields, queries,
-                  values) the memories agree on. Where they disagree, keep the newer statement.
-                - remove: memories that a newer memory contradicts or replaces, and that are not
-                  part of a merge. Give a short reason.
-                Leave a memory alone when in doubt: an unnecessary merge or removal loses what the
-                user told the agent. Never use a memory in more than one merge, and never remove a
-                memory that is part of a merge. Return empty lists when nothing needs to change.
               schema:
                 type: object
                 properties:

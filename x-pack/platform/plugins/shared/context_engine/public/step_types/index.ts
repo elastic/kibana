@@ -42,4 +42,13 @@ export const registerStepDefinitions = ({
   workflowsExtensions.registerStepDefinition(async () =>
     (await isEnabled()) ? (await loadDefinitions()).purgeKisStepDefinition : undefined
   );
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await isEnabled()) ? (await loadDefinitions()).getLastRunStepDefinition : undefined
+  );
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await isEnabled()) ? (await loadDefinitions()).getKiUsageStepDefinition : undefined
+  );
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await isEnabled()) ? (await loadDefinitions()).recordKiEnrichmentStepDefinition : undefined
+  );
 };

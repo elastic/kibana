@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSpacer, useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import type { AppMenuItemType } from '@kbn/app-menu';
 import { i18n } from '@kbn/i18n';
@@ -19,6 +20,7 @@ import {
   AiIndexCreatedCallout,
   AutomationsPanel,
   DescriptionPanel,
+  KiGraphPanel,
   LockedSectionPanel,
   MemoryPanel,
   SignalsPanel,
@@ -26,6 +28,7 @@ import {
   TracesPanel,
 } from '../components/ai_index_detail';
 import { ListKiPanel } from '../components/ki';
+import { PanelBackdropProvider } from '../components/panel_backdrop';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useAiIndexDestLinks } from '../hooks/use_ai_index_dest_links';
 import { useAiIndexOverviewSections } from '../hooks/use_ai_index_overview_sections';
@@ -33,6 +36,7 @@ import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcr
 import { useListKi } from '../hooks/use_list_ki';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
+import { useStickyFrame } from '../hooks/use_sticky_frame';
 import {
   ContextEngineSubPageHeader,
   contextEngineBackDestinationLabel,
@@ -62,6 +66,13 @@ const knowledgeIndicatorsTabLabel = i18n.translate(
     defaultMessage: 'Knowledge Indicators',
   }
 );
+
+/**
+ * How far into the overlap with the panels the overview graph frames its map: the map runs behind
+ * the panels rather than shrinking into the uncovered right third.
+ */
+const OVERVIEW_GRAPH_OVERLAP_COVERED = 0.75;
+const OVERVIEW_GRAPH_MIN_HEIGHT = 480;
 
 const automationsLockedAriaLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel',
@@ -127,6 +138,59 @@ export const AiIndexDetailPage = () => {
     enabled: aiIndex !== undefined,
     notifyOnError: true,
   });
+
+  const { euiTheme } = useEuiTheme();
+  const isStacked = useIsWithinMaxBreakpoint('l');
+  const [overviewGrid, setOverviewGrid] = useState<HTMLDivElement | null>(null);
+  const graphFrame = useStickyFrame(overviewGrid, {
+    minHeight: OVERVIEW_GRAPH_MIN_HEIGHT,
+    bottomGap: euiTheme.base,
+  });
+  // The panels cover the first third of the grid, which is the graph's left edge.
+  const graphCoveredRatio = graphFrame
+    ? ((graphFrame.width / 3) * OVERVIEW_GRAPH_OVERLAP_COVERED) /
+      ((graphFrame.width * 2) / 3 + graphFrame.rightGap)
+    : 0;
+  const stackedQuery = `@media (max-width: ${euiTheme.breakpoint.l - 1}px)`;
+  const overviewGridCss = css`
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+    ${stackedQuery} {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  `;
+  // Over the graph (positioned and later in the DOM), but only the panels themselves take the
+  // pointer: the gaps between them let it through to the graph.
+  const overviewPanelsCss = css`
+    grid-column: 1 / span 2;
+    grid-row: 1;
+    position: relative;
+    pointer-events: none;
+    & > * {
+      pointer-events: auto;
+    }
+    ${stackedQuery} {
+      grid-column: 1;
+    }
+  `;
+  const overviewGraphCss = css`
+    grid-column: 2 / span 2;
+    grid-row: 1;
+    position: sticky;
+    top: ${graphFrame?.top ?? 0}px;
+    height: ${graphFrame?.height ?? OVERVIEW_GRAPH_MIN_HEIGHT}px;
+    /* Out to the edge of the app, past the page's width limit. */
+    margin-right: -${graphFrame?.rightGap ?? 0}px;
+    ${stackedQuery} {
+      grid-column: 1;
+      grid-row: 2;
+      position: relative;
+      top: auto;
+      height: ${OVERVIEW_GRAPH_MIN_HEIGHT}px;
+      margin-right: 0;
+    }
+  `;
 
   const hasLoadedKiSummary = aiIndex !== undefined && !isKiSummaryLoading;
   const hasKnowledgeIndicators = hasLoadedKiSummary && summary.total > 0;
@@ -236,7 +300,7 @@ export const AiIndexDetailPage = () => {
     summary.total,
   ]);
 
-  const overviewTabContent = (
+  const overviewPanels = (
     <>
       {showCreatedCallout && (
         <AiIndexCreatedCallout
@@ -326,6 +390,27 @@ export const AiIndexDetailPage = () => {
         ))}
     </>
   );
+
+  // With KIs to show, the graph sits behind the right of the overview: the panels take the left
+  // two thirds, the graph the right two thirds, overlapping in the middle.
+  const showOverviewGraph = aiIndex !== undefined && hasKnowledgeIndicators;
+  const overviewTabContent =
+    showOverviewGraph && aiIndex ? (
+      <div
+        css={overviewGridCss}
+        ref={setOverviewGrid}
+        data-test-subj="contextAiIndexOverviewWithGraph"
+      >
+        <div css={overviewGraphCss}>
+          <KiGraphPanel aiIndex={aiIndex} leftInsetRatio={isStacked ? 0 : graphCoveredRatio} />
+        </div>
+        <div css={overviewPanelsCss}>
+          <PanelBackdropProvider value={true}>{overviewPanels}</PanelBackdropProvider>
+        </div>
+      </div>
+    ) : (
+      overviewPanels
+    );
 
   const pageContent = error ? (
     <EuiEmptyPrompt

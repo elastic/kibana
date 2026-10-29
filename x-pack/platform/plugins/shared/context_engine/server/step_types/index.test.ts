@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KiUsageServiceApi } from '../ki_usage/ki_usage_service';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexService } from '../ai_indices/service';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
@@ -36,6 +37,16 @@ describe('registerStepDefinitions', () => {
         checkWritePrivilege: async () => true,
         logger: telemetry.logger,
       },
+      kiUsageSteps: {
+        getKiUsageService: () => ({} as KiUsageServiceApi),
+        isContextEngineEnabled: async () => true,
+        checkReadPrivilege: async () => true,
+        checkWritePrivilege: async () => true,
+      },
+      lastRunSteps: {
+        getExecutionHistory: async () => undefined,
+        isContextEngineEnabled: async () => true,
+      },
       aiIndexSteps: {
         getAiIndexService: () => ({} as AiIndexService),
         getAiIndexDataReadService: () => ({} as AiIndexDataReadServiceApi),
@@ -54,6 +65,9 @@ describe('registerStepDefinitions', () => {
       'context-engine.getAiIndex',
       'context-engine.queryAiIndex',
       'context-engine.purgeKis',
+      'context-engine.getLastRun',
+      'context-engine.getKiUsage',
+      'context-engine.recordKiEnrichment',
     ]);
   });
 });

@@ -139,6 +139,54 @@ describe('getUpdateKiStepDefinition', () => {
     );
   });
 
+  it('adds references and attributes to the stored ones, keeping a repeated reference once', async () => {
+    const stored = {
+      ...storedKi,
+      references: [{ uri: 'index://orders', relation: 'derived_from' }],
+      attributes: { customer_since: '2019' },
+    };
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index', stored)),
+      update: jest.fn().mockResolvedValue({ result: 'updated' }),
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'my-ai-index',
+        ki_id: 'ki-1',
+        ki: { content: 'Acme, a customer since 2019, owned by Jane.' },
+        add_references: [
+          { uri: 'index://orders', relation: 'derived_from' },
+          { uri: 'connector://gdrive/acme-plan', relation: 'derived_from', description: 'Plan' },
+        ],
+        add_attributes: { account_owner: 'Jane', customer_since: '2018' },
+      },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        doc: expect.objectContaining({
+          content: 'Acme, a customer since 2019, owned by Jane.',
+          references: [
+            { uri: 'index://orders', relation: 'derived_from' },
+            { uri: 'connector://gdrive/acme-plan', relation: 'derived_from', description: 'Plan' },
+          ],
+          attributes: { customer_since: '2018', account_owner: 'Jane' },
+        }),
+      }),
+      { signal: context.abortSignal }
+    );
+  });
+
   it('waits for the refresh when refresh is true', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),

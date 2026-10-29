@@ -10,6 +10,11 @@ import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { getAiIndexStepCommonDefinition } from '../../common/step_types/get_ai_index';
 import { queryAiIndexStepCommonDefinition } from '../../common/step_types/query_ai_index';
 import { purgeKisStepCommonDefinition } from '../../common/step_types/purge_kis';
+import { getLastRunStepCommonDefinition } from '../../common/step_types/get_last_run';
+import {
+  getKiUsageStepCommonDefinition,
+  recordKiEnrichmentStepCommonDefinition,
+} from '../../common/step_types/ki_usage';
 
 export const getAiIndexStepDefinition = createPublicStepDefinition({
   ...getAiIndexStepCommonDefinition,
@@ -33,6 +38,33 @@ export const purgeKisStepDefinition = createPublicStepDefinition({
   ...purgeKisStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/trash').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+});
+
+export const getLastRunStepDefinition = createPublicStepDefinition({
+  ...getLastRunStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/clock').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+});
+
+export const getKiUsageStepDefinition = createPublicStepDefinition({
+  ...getKiUsageStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/eye').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+});
+
+export const recordKiEnrichmentStepDefinition = createPublicStepDefinition({
+  ...recordKiEnrichmentStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/check').then(({ icon }) => ({
       default: icon,
     }))
   ),

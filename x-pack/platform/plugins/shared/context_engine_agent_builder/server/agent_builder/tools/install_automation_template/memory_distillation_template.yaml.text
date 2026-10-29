@@ -20,7 +20,7 @@ enabled: true
 settings:
   timeout: 45m
   concurrency:
-    key: "memory-distillation-__AI_INDEX_ID_RAW__"
+    key: "memory-distillation-{{ consts.ai_index_id }}"
     strategy: drop
     max: 1
 
@@ -33,6 +33,26 @@ consts:
   max_memories: __MAX_MEMORIES__
   # Deleted and expired memories are purged this many days after their last write.
   purge_after_days: __PURGE_AFTER_DAYS__
+  # The model the prompts use: an AI connector id. Empty uses the model configured for the
+  # Context Engine (Model Management feature context_engine_prompt).
+  connector_id: ""
+  # What the model is told to do. The records it works on are added to the prompt after it.
+  instructions: |
+    You maintain the long-term memory of an AI assistant. Memory is read before every
+    task, so it must be small, non-redundant and correct.
+
+    Propose:
+    - syntheses: one new memory that replaces two or more memories saying the same thing,
+      or several related facts that read better as one. Write the merged memory in full,
+      keep every concrete detail (field names, queries, values) the sources agree on, and
+      keep the newer one where they disagree. `source_ids` lists the memories it replaces.
+      Use type memory.session for a synthesis of what was tried and what worked across
+      sessions, otherwise memory.session_fact. `key` is a short stable slug for the topic.
+    - retire: memories that are contradicted by a newer memory, or obviously no longer
+      true. Give a short reason.
+    Leave a memory alone when in doubt; an unnecessary merge loses information. Never put
+    a memory in more than one synthesis, and never retire a memory that is a source of a
+    synthesis.
   no_items: []
 
 tags:
@@ -66,27 +86,14 @@ steps:
     steps:
       - name: plan
         type: ai.prompt
-        connector-id-by-feature: context_engine_prompt
+        connector-id: "{{ consts.connector_id }}"
+        connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"
         with:
           prompt: |
-            You maintain the long-term memory of an AI assistant. Memory is read before every
-            task, so it must be small, non-redundant and correct.
+            {{ consts.instructions }}
 
             Current long-term memories (newest first):
             {{ steps.memories.output.rows | json }}
-
-            Propose:
-            - syntheses: one new memory that replaces two or more memories saying the same thing,
-              or several related facts that read better as one. Write the merged memory in full,
-              keep every concrete detail (field names, queries, values) the sources agree on, and
-              keep the newer one where they disagree. `source_ids` lists the memories it replaces.
-              Use type memory.session for a synthesis of what was tried and what worked across
-              sessions, otherwise memory.session_fact. `key` is a short stable slug for the topic.
-            - retire: memories that are contradicted by a newer memory, or obviously no longer
-              true. Give a short reason.
-            Leave a memory alone when in doubt; an unnecessary merge loses information. Never put
-            a memory in more than one synthesis, and never retire a memory that is a source of a
-            synthesis.
           schema:
             type: object
             properties:

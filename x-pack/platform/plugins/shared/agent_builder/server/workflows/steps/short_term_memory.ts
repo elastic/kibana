@@ -55,10 +55,11 @@ export const listShortTermMemoriesStepDefinition = ({
       try {
         await assertAdmin(context, isAdmin);
         const input = context.input as ListShortTermMemoriesStepInput;
-        const { spaceId } = context.contextManager.getContext().workflow;
+        const { spaceId, id: workflowId } = context.contextManager.getContext().workflow;
         const memories = await getSystemClient().listForPromotion({
           spaceId,
           agentIds: input.agent_ids,
+          decider: workflowId,
           statuses: input.statuses,
           since: input.since,
           limit: input.limit,
@@ -80,10 +81,11 @@ export const setShortTermMemoryPromotionStepDefinition = ({
       try {
         await assertAdmin(context, isAdmin);
         const input = context.input as SetShortTermMemoryPromotionStepInput;
-        const { spaceId } = context.contextManager.getContext().workflow;
+        const { spaceId, id: workflowId } = context.contextManager.getContext().workflow;
         const result = await getSystemClient().setPromotion({
           spaceId,
           ids: input.ids,
+          decider: workflowId,
           promotion: {
             status: input.status,
             ...(input.ai_index_id !== undefined && { ai_index_id: input.ai_index_id }),

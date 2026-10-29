@@ -13,6 +13,7 @@ import {
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_PATH,
+  AI_INDEX_QUERY_PATH,
 } from '../../../common/constants';
 import type {
   AiIndexFeedbackAnalysis,
@@ -23,6 +24,8 @@ import type {
   ListAiIndexResponse,
   PutAiIndexFeedbackAnalysisResponse,
   PutAiIndexResponse,
+  QueryAiIndicesRequest,
+  QueryAiIndicesResponse,
 } from '../../../common/http_api/ai_indices';
 
 interface ListAiIndicesArgs {
@@ -126,4 +129,15 @@ export const deleteAiIndex = (
       delete_knowledge_indicators: deleteKnowledgeIndicators,
       delete_automations: deleteAutomations,
     },
+  });
+
+/** Runs ES|QL as the current user. The server applies the space filter and the KI lifecycle. */
+export const queryAiIndices = (
+  http: HttpStart,
+  { signal, ...body }: QueryAiIndicesRequest & { signal?: AbortSignal }
+): Promise<QueryAiIndicesResponse> =>
+  http.post<QueryAiIndicesResponse>(AI_INDEX_QUERY_PATH, {
+    version: AI_INDEX_API_VERSION,
+    body: JSON.stringify(body),
+    ...(signal ? { signal } : {}),
   });

@@ -13,25 +13,45 @@ import { buildAgentBuilderTracesIndexName } from '../../common/constants';
 export const toEsqlStringLiteral = (value: string): string =>
   `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 
-/** Derives an ES|QL query from a single trace entry. Values are validated when the AI index is written. */
-export const buildTraceQuery = (trace: AiIndexTrace, spaceId: string): string => {
+const windowLine = (sinceHours: number | undefined): string[] =>
+  sinceHours !== undefined ? [`| WHERE @timestamp >= NOW() - ${sinceHours} hours`] : [];
+
+/**
+ * Derives an ES|QL query from a single trace entry. Values are validated when the AI index is
+ * written. `sinceHours` keeps only spans of the last N hours, filtered before anything else runs.
+ */
+export const buildTraceQuery = (
+  trace: AiIndexTrace,
+  spaceId: string,
+  sinceHours?: number
+): string => {
   if (trace.type === 'esql') {
-    return trace.value;
+    // A custom query's shape is unknown, so its window can only go last.
+    return [trace.value, ...windowLine(sinceHours)].join('\n');
   }
 
   if (trace.type === 'index') {
-    return `FROM ${trace.value}`;
+    return [`FROM ${trace.value}`, ...windowLine(sinceHours)].join('\n');
   }
 
   const exportedAgentId = normalizeAgentIdForTelemetry(trace.value) ?? trace.value;
   // Use a Set because builtin agents are exported as their id, so the same id may appear twice.
   const literals = [...new Set([trace.value, exportedAgentId])].map(toEsqlStringLiteral).join(', ');
   const indexName = buildAgentBuilderTracesIndexName(spaceId);
-  return `FROM ${indexName}\n| WHERE attributes.gen_ai.agent.id IN (${literals})`;
+  // Only the agent's own span carries its id; the chat and tool spans that hold the content are
+  // its descendants in the same trace, so a trace is kept whole when the agent ran in it.
+  return [
+    `FROM ${indexName}`,
+    ...windowLine(sinceHours),
+    `| INLINE STATS agent_runs = COUNT(*) WHERE attributes.gen_ai.agent.id IN (${literals}) BY trace_id`,
+    '| WHERE agent_runs > 0',
+    '| DROP agent_runs',
+  ].join('\n');
 };
 
 export const buildTraceQueries = (
   traces: AiIndexTrace[],
-  spaceId: string
+  spaceId: string,
+  sinceHours?: number
 ): AiIndexTraceWithQuery[] =>
-  traces.map((trace) => ({ ...trace, query: buildTraceQuery(trace, spaceId) }));
+  traces.map((trace) => ({ ...trace, query: buildTraceQuery(trace, spaceId, sinceHours) }));

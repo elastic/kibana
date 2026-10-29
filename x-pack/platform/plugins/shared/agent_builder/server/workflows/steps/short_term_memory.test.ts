@@ -12,6 +12,9 @@ import {
   consolidateShortTermMemoriesStepDefinition,
   decayShortTermMemoriesStepDefinition,
   listShortTermMemoriesByOwnerStepDefinition,
+  listShortTermMemoriesStepDefinition,
+  setShortTermMemoryPromotionStepDefinition,
+  type ShortTermMemoryStepDeps,
 } from './short_term_memory';
 
 const createSystemClient = (): jest.Mocked<ShortTermMemorySystemClient> => ({
@@ -39,17 +42,30 @@ const contextFor = (input: unknown): StepHandlerContext =>
 
 describe('short-term memory maintenance steps', () => {
   it.each([
-    ['list_by_owner', listShortTermMemoriesByOwnerStepDefinition, {}],
-    ['consolidate', consolidateShortTermMemoriesStepDefinition, { user_id: 'u', agent_id: 'a' }],
-    ['decay', decayShortTermMemoriesStepDefinition, { unused_days: 14 }],
-  ])('%s refuses a workflow that does not run as an administrator', async (_, define, input) => {
+    [
+      'list_by_owner',
+      (deps: ShortTermMemoryStepDeps) =>
+        listShortTermMemoriesByOwnerStepDefinition(deps).handler(contextFor({})),
+    ],
+    [
+      'consolidate',
+      (deps: ShortTermMemoryStepDeps) =>
+        consolidateShortTermMemoriesStepDefinition(deps).handler(
+          contextFor({ user_id: 'u', agent_id: 'a' })
+        ),
+    ],
+    [
+      'decay',
+      (deps: ShortTermMemoryStepDeps) =>
+        decayShortTermMemoriesStepDefinition(deps).handler(contextFor({ unused_days: 14 })),
+    ],
+  ])('%s refuses a workflow that does not run as an administrator', async (_, run) => {
     const systemClient = createSystemClient();
-    const step = define({
+
+    const result = await run({
       getSystemClient: () => systemClient,
       isAdmin: async () => false,
     });
-
-    const result = await step.handler(contextFor(input));
 
     expect(result).toEqual({ error: expect.objectContaining({ type: 'PermissionError' }) });
     expect(systemClient.listByOwner).not.toHaveBeenCalled();
@@ -110,6 +126,28 @@ describe('short-term memory maintenance steps', () => {
       spaceId: 'space-1',
       agentIds: undefined,
       unusedDays: 14,
+    });
+  });
+
+  it('lists and decides memories as this workflow, so other workflows still see them', async () => {
+    const systemClient = createSystemClient();
+    systemClient.listForPromotion.mockResolvedValue([]);
+    systemClient.setPromotion.mockResolvedValue({ updated: 1 });
+    const deps = { getSystemClient: () => systemClient, isAdmin: async () => true };
+
+    await listShortTermMemoriesStepDefinition(deps).handler(contextFor({ limit: 10 }));
+    await setShortTermMemoryPromotionStepDefinition(deps).handler(
+      contextFor({ ids: ['memory-1'], status: 'rejected', reason: 'personal' })
+    );
+
+    expect(systemClient.listForPromotion).toHaveBeenCalledWith(
+      expect.objectContaining({ spaceId: 'space-1', decider: 'wf-1', limit: 10 })
+    );
+    expect(systemClient.setPromotion).toHaveBeenCalledWith({
+      spaceId: 'space-1',
+      ids: ['memory-1'],
+      decider: 'wf-1',
+      promotion: { status: 'rejected', reason: 'personal' },
     });
   });
 });

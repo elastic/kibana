@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import type { KiLifecycleStatus, KiPartialFields } from '../../common/step_types/ki';
+import type { KiFields, KiLifecycleStatus, KiPartialFields } from '../../common/step_types/ki';
 import { KiDeletedError } from './errors';
 import {
   getKiRevision,
@@ -50,9 +50,46 @@ export interface UpdateKiOptions {
   /** Bypasses the deleted-KI guard, allowing updates to an already soft-deleted KI. */
   force?: boolean;
   lifecycle?: { status: KiLifecycleStatus };
+  /** Added to the KI's references (or to `ki.references` when given); duplicates are kept once. */
+  addReferences?: KiFields['references'];
+  /** Merged into the KI's attributes (or into `ki.attributes` when given), key by key. */
+  addAttributes?: KiFields['attributes'];
   refresh?: boolean;
   abortSignal?: AbortSignal;
 }
+
+type KiReferences = NonNullable<KiFields['references']>;
+
+const uniqueReferences = (references: KiReferences): KiReferences => [
+  ...new Map(
+    references.map((reference) => [`${reference.relation ?? ''}\n${reference.uri}`, reference])
+  ).values(),
+];
+
+/** The update with `addReferences` and `addAttributes` folded into the stored KI's own values. */
+const withAdditions = (
+  ki: KiPartialFields,
+  stored: Record<string, unknown>,
+  { addReferences, addAttributes }: Pick<UpdateKiOptions, 'addReferences' | 'addAttributes'>
+): KiPartialFields => ({
+  ...ki,
+  ...(addReferences !== undefined &&
+    addReferences.length > 0 && {
+      references: uniqueReferences([
+        ...(ki.references ?? (stored.references as KiReferences | undefined) ?? []),
+        ...addReferences,
+      ]),
+    }),
+  ...(addAttributes !== undefined &&
+    Object.keys(addAttributes).length > 0 && {
+      attributes: {
+        ...(ki.attributes ??
+          (stored.attributes as NonNullable<KiFields['attributes']> | undefined) ??
+          {}),
+        ...addAttributes,
+      },
+    }),
+});
 
 /** Updates the current revision of a KI in place or appends a data-stream revision. */
 export const updateKi = async (
@@ -63,11 +100,13 @@ export const updateKi = async (
     aiIndexId,
     dest,
     kiId,
-    ki,
+    ki: requested,
     writer,
     backingIndex,
     force = false,
     lifecycle,
+    addReferences,
+    addAttributes,
     refresh = true,
     abortSignal,
   } = options;
@@ -84,6 +123,7 @@ export const updateKi = async (
   if (isKiDeleted(revision.source) && !force) {
     throw new KiDeletedError(aiIndexId, kiId, 'restore the deleted KI before updating it');
   }
+  const ki = withAdditions(requested, revision.source, { addReferences, addAttributes });
 
   if (isNoopUpdate(revision.source, ki, lifecycle)) {
     return { id: kiId, result: 'noop' };

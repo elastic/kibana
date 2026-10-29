@@ -31,6 +31,7 @@ import {
   renderIndexMetadataTemplate,
   renderMemoryCustomExtractionTemplate,
   renderMemoryDistillationTemplate,
+  renderMemoryEnrichmentTemplate,
   renderMemoryExtractionTemplate,
   renderMemoryMaintenanceTemplate,
   renderMemoryPromotionTemplate,
@@ -42,6 +43,7 @@ import {
   type IndexMetadataTemplateValues,
   type MemoryCustomExtractionTemplateValues,
   type MemoryDistillationTemplateValues,
+  type MemoryEnrichmentTemplateValues,
   type MemoryExtractionTemplateValues,
   type MemoryMaintenanceTemplateValues,
   type MemoryPromotionTemplateValues,
@@ -98,6 +100,11 @@ export type InstallAutomationTemplateParams =
     > &
       WithName)
   | ({ template: 'memory_maintenance' } & Omit<MemoryMaintenanceTemplateValues, 'aiIndexId'> &
+      WithName)
+  | ({ template: 'memory_enrichment' } & Omit<
+      MemoryEnrichmentTemplateValues,
+      'aiIndexId' | 'automationName'
+    > &
       WithName);
 
 const aiIndexIdFromAttachments = (attachments: AttachmentStateManager): string => {
@@ -148,6 +155,9 @@ const renderTemplate = (params: InstallAutomationTemplateParams, aiIndexId: stri
   }
   if (params.template === 'memory_distillation') {
     return renderMemoryDistillationTemplate({ ...params, aiIndexId, automationName: params.name });
+  }
+  if (params.template === 'memory_enrichment') {
+    return renderMemoryEnrichmentTemplate({ ...params, aiIndexId, automationName: params.name });
   }
   if (params.template === 'memory_extraction') {
     return renderMemoryExtractionTemplate({ ...params, aiIndexId });

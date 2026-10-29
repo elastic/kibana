@@ -22,7 +22,7 @@ enabled: true
 settings:
   timeout: 30m
   concurrency:
-    key: "memory-promotion-__AI_INDEX_ID_RAW__"
+    key: "memory-promotion-{{ consts.ai_index_id }}"
     strategy: drop
     max: 1
 
@@ -35,6 +35,28 @@ consts:
   agent_ids: __AGENT_IDS__
   # How many short-term memories one run decides. One model call decides them all.
   batch_size: __BATCH_SIZE__
+  # The model the prompts use: an AI connector id. Empty uses the model configured for the
+  # Context Engine (Model Management feature context_engine_prompt).
+  connector_id: ""
+  # What the model is told to do. The records it works on are added to the prompt after it.
+  instructions: |
+    You curate the long-term memory of an AI assistant. Long-term memory is shared with
+    every user and agent that can read this knowledge base, so it must hold durable,
+    generally useful knowledge about this organization's systems and work, never anything
+    about one person.
+
+    Decide every candidate exactly once, by its `id`:
+    - promote: a durable fact, convention, workaround or lesson that other users of this
+      knowledge base would benefit from (for example "duration_ms is a keyword and must
+      be cast before numeric comparisons"). Rewrite it so it reads as general knowledge:
+      drop names, personal preferences, greetings, and anything that identifies the user.
+      When it repeats or corrects an existing long-term memory, set `existing_id` to that
+      memory's id and write the merged, corrected version.
+    - reject: personal (how one user likes answers, details about a person), ephemeral
+      (true only for that session), sensitive (credentials, secrets, personal data), or
+      wrong. Give a short reason the user can read.
+    - wait: plausibly durable, but one session is not enough evidence yet. Prefer wait
+      over a guess.
   # LiquidJS has no array literal, so `| default: []` does not produce an empty array.
   no_tags: []
 
@@ -75,32 +97,17 @@ steps:
 
       - name: decide
         type: ai.prompt
-        connector-id-by-feature: context_engine_prompt
+        connector-id: "{{ consts.connector_id }}"
+        connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"
         with:
           prompt: |
-            You curate the long-term memory of an AI assistant. Long-term memory is shared with
-            every user and agent that can read this knowledge base, so it must hold durable,
-            generally useful knowledge about this organization's systems and work, never anything
-            about one person.
+            {{ consts.instructions }}
 
             Candidate short-term memories, each recorded by one user with one agent:
             {{ steps.list_pending.output.memories | json }}
 
             Long-term memories that already exist (id, type, title, description):
             {{ steps.existing_memory.output.rows | json }}
-
-            Decide every candidate exactly once, by its `id`:
-            - promote: a durable fact, convention, workaround or lesson that other users of this
-              knowledge base would benefit from (for example "duration_ms is a keyword and must
-              be cast before numeric comparisons"). Rewrite it so it reads as general knowledge:
-              drop names, personal preferences, greetings, and anything that identifies the user.
-              When it repeats or corrects an existing long-term memory, set `existing_id` to that
-              memory's id and write the merged, corrected version.
-            - reject: personal (how one user likes answers, details about a person), ephemeral
-              (true only for that session), sensitive (credentials, secrets, personal data), or
-              wrong. Give a short reason the user can read.
-            - wait: plausibly durable, but one session is not enough evidence yet. Prefer wait
-              over a guess.
           schema:
             type: object
             properties:

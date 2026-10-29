@@ -10,7 +10,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiTitle,
@@ -18,6 +17,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { BackdropAwarePanel } from '../panel_backdrop';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useCanReadConnectors } from '../../hooks/use_can_read_connectors';
@@ -55,7 +55,7 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
   const isSaving = editing?.isSaving ?? false;
 
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="contextSourcesPanel">
+    <BackdropAwarePanel hasBorder paddingSize="l" data-test-subj="contextSourcesPanel">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         {/* minWidth: 0 keeps the description from running underneath the actions column */}
         <EuiFlexItem css={{ minWidth: 0 }}>
@@ -208,6 +208,6 @@ export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: Sources
           })}
         </EuiFlexGroup>
       )}
-    </EuiPanel>
+    </BackdropAwarePanel>
   );
 };

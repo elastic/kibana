@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolType } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { CoreStart } from '@kbn/core/server';
@@ -17,7 +17,7 @@ import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indice
 import { CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID } from '../../../../common/agent_builder_tools';
 import { getSaveAutomationErrorMessage } from '../save_automation/handler';
 import { installAutomationTemplateHandler, type InstallAutomationTemplateParams } from './handler';
-import { SCHEDULE_INTERVAL_PATTERN } from './render';
+import { MEMORY_TYPE_PATTERN, SCHEDULE_INTERVAL_PATTERN } from './render';
 import {
   extractionSourcesSchema,
   memoryCustomExtractionConfigSchema,
@@ -28,6 +28,8 @@ import {
 const MAX_SHORT_TERM_MEMORY_STEP_IDS = 200;
 
 const MAX_SOURCE_INDEX_LENGTH = 1024;
+
+const DEFAULT_ENRICHMENT_AGENT_ID = agentBuilderDefaultAgentId;
 const MAX_FIELD_NAME_LENGTH = 256;
 const MAX_CORPUS_FILTER_LENGTH = 2000;
 const MAX_DOCUMENTS_LIMIT = 10_000;
@@ -52,6 +54,13 @@ const TEMPLATE_FIELDS = {
   memory_extraction: ['extraction'],
   memory_custom_extraction: ['customExtraction'],
   memory_maintenance: ['unusedDays', 'maxOwners', 'maxMemoriesPerOwner'],
+  memory_enrichment: [
+    'memoryTypes',
+    'minNewAccesses',
+    'minDaysBetweenEnrichments',
+    'maxEnrichments',
+    'enrichmentAgentId',
+  ],
 } as const;
 
 /** Fields several templates share, checked on their own rather than through `TEMPLATE_FIELDS`. */
@@ -62,6 +71,7 @@ const MEMORY_TEMPLATES: readonly string[] = [
   'memory_extraction',
   'memory_custom_extraction',
   'memory_maintenance',
+  'memory_enrichment',
 ];
 const SHORT_TERM_MEMORY_TEMPLATES: readonly string[] = [
   'memory_promotion',
@@ -89,6 +99,7 @@ const REQUIRED_TEMPLATE_FIELDS = {
   memory_extraction: ['extraction'],
   memory_custom_extraction: ['customExtraction'],
   memory_maintenance: [],
+  memory_enrichment: [],
 } as const;
 
 const findDuplicate = (values: readonly string[]): string | undefined =>
@@ -108,6 +119,7 @@ const installAutomationTemplateSchema = z
         'memory_extraction',
         'memory_custom_extraction',
         'memory_maintenance',
+        'memory_enrichment',
       ])
       .describe(
         dedent`
@@ -122,6 +134,7 @@ const installAutomationTemplateSchema = z
           memory_extraction        → name, extraction  (optional memorySources, agentIds, batchSize, interval)
           memory_custom_extraction → name, customExtraction  (optional memorySources, agentIds, batchSize, interval)
           memory_maintenance       → name  (optional agentIds, unusedDays, maxOwners, maxMemoriesPerOwner, interval; Elastic AI index only)
+          memory_enrichment        → name  (optional memoryTypes, minNewAccesses, minDaysBetweenEnrichments, maxEnrichments, enrichmentAgentId, interval)
         `
       ),
     name: z
@@ -279,7 +292,7 @@ const installAutomationTemplateSchema = z
       .max(24 * 30)
       .optional()
       .describe(
-        'Optional. trace_memory_extraction only. Hours of traces each run reads; keep it at least the interval. Defaults to 24.'
+        'Optional. trace_memory_extraction only. Hours of traces the first run reads; later runs read everything since the last successful run started, at most a week. Defaults to 24.'
       ),
     maxRows: z
       .number()
@@ -334,6 +347,48 @@ const installAutomationTemplateSchema = z
       .optional()
       .describe(
         'Optional. memory_maintenance only. Memories read per user and agent pair, newest first. Defaults to 50.'
+      ),
+    memoryTypes: z
+      .string()
+      .regex(MEMORY_TYPE_PATTERN)
+      .optional()
+      .describe(
+        'Optional. memory_enrichment only. The memory types enriched, as an ES|QL LIKE pattern. Defaults to "memory.entity.*".'
+      ),
+    minNewAccesses: z
+      .number()
+      .int()
+      .min(1)
+      .max(10000)
+      .optional()
+      .describe(
+        'Optional. memory_enrichment only. How many times agents must have read a memory since its last enrichment before it is enriched. Defaults to 3.'
+      ),
+    minDaysBetweenEnrichments: z
+      .number()
+      .int()
+      .min(0)
+      .max(3650)
+      .optional()
+      .describe(
+        'Optional. memory_enrichment only. The fewest days between two enrichments of the same memory. Defaults to 7.'
+      ),
+    maxEnrichments: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe(
+        'Optional. memory_enrichment only. Memories enriched per run, most-read first; each is one agent run. Defaults to 5.'
+      ),
+    enrichmentAgentId: z
+      .string()
+      .min(1)
+      .max(MAX_AGENT_ID_LENGTH)
+      .optional()
+      .describe(
+        `Optional. memory_enrichment only. The agent that searches the sources. It can only search the connector sources assigned to it. Defaults to "${DEFAULT_ENRICHMENT_AGENT_ID}".`
       ),
     interval: z
       .string()
@@ -563,6 +618,19 @@ const toInstallParams = (
     };
   }
 
+  if (input.template === 'memory_enrichment') {
+    return {
+      template: 'memory_enrichment',
+      memoryTypes: input.memoryTypes ?? 'memory.entity.*',
+      minNewAccesses: input.minNewAccesses ?? 3,
+      minDaysBetweenEnrichments: input.minDaysBetweenEnrichments ?? 7,
+      maxEnrichments: input.maxEnrichments ?? 5,
+      agentId: input.enrichmentAgentId ?? DEFAULT_ENRICHMENT_AGENT_ID,
+      interval: input.interval ?? '1d',
+      name,
+    };
+  }
+
   if (input.template === 'memory_extraction') {
     if (!input.extraction) {
       throw new Error('extraction is required for memory_extraction.');
@@ -681,7 +749,8 @@ export const createInstallAutomationTemplateTool = ({
       index_metadata         → name, sources  (or sourceIndex + categoryField for one index)
       unit_profile           → name, sourceIndex, unitKey, activityField, breakdownField
       targeted_ki_writer     → name, kis  (no sourceIndex)
-      memory_promotion, trace_memory_extraction, memory_distillation, memory_maintenance → name
+      memory_promotion, trace_memory_extraction, memory_distillation, memory_maintenance,
+      memory_enrichment → name
 
     name is always required. It identifies this automation within the AI index. Same template and
     name → replaces the existing automation in-place. Different name → installs an additional copy.
@@ -703,15 +772,21 @@ export const createInstallAutomationTemplateTool = ({
     ones. memory_extraction is the structured alternative to memory_promotion: it extracts the
     configured facts, entities and relationships from short-term memories into a knowledge graph
     of long-term memory; memory_custom_extraction does the same for free-form types with typed
-    attributes. Install either memory_promotion or one extraction template on an AI index, not
-    both: they decide the same pending memories. Install them only on an AI index with memory
-    enabled.
+    attributes. Each of them decides every short-term memory on its own, so several can be
+    installed together; each one installed costs model calls on the same memories. Install them
+    only on an AI index with memory enabled.
 
     memory_maintenance maintains users' short-term memory itself and installs only on the Elastic
     AI index ("elastic"), where short-term memories live: it forgets expired memories and ones not
     recalled or shown to an agent for unusedDays, then merges duplicates and removes contradicted
     memories within each user's memories of an agent. It reads and changes every user's private
     memories, so it must be installed by an administrator.
+
+    memory_enrichment adds what the AI index's sources (indices and connectors) know to the
+    long-term memories agents read most, such as a customer's documents in a connected Google
+    Drive. A memory is enriched once agents read it minNewAccesses times since its last
+    enrichment, at most every minDaysBetweenEnrichments days and maxEnrichments memories per run.
+    Connector sources are searched only when they are assigned to enrichmentAgentId.
   `,
   schema: installAutomationTemplateSchema,
   handler: async (params, { request, spaceId, attachments, logger }) => {

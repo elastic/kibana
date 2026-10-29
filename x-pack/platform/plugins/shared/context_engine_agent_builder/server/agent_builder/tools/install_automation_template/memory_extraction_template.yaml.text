@@ -6,20 +6,21 @@ version: "1"
 #
 # This is a working workflow, not a sketch. Edit the `consts` block and it runs as it stands.
 #
-# Installed by platform.context_engine.install_automation_template. The tool fills the consts and
-# builds the `extract` output schema from the extraction configuration; to add or rename a kind,
-# reinstall rather than editing the schema by hand. `extraction_config` and each source's
-# `description` and `query` may be edited in place.
+# Installed by platform.context_engine.install_automation_template. The tool fills the consts.
+# Everything that follows from `extraction_config` and `sources` (each kind's KI type and id
+# prefix, the allowed relationship ends, the model's output schema, each source's final query) is
+# built at the start of every run, so editing the consts, here or with Configure, is all it takes.
 #
 # Every extracted item is one KI with a stable id (`memory/<category>/<kind>/<key>`), shared by
 # every memory automation, so the same service or person mentioned in many records is one KI that
 # each run updates. Relationships are their own KIs whose references point at both ends.
 #
 # Sources run one after another, each with its own model call:
-# - `short_term_memory` reads pending short-term memories and marks each one promoted or rejected,
-#   so it is read once. Short-term memory is private to one user; reading every user's requires
-#   the workflow to run as an administrator, so install and enable it as one. Use either this
-#   template or memory_promotion on an AI index: both decide the same pending memories.
+# - `short_term_memory` reads the short-term memories this workflow has not decided yet and marks
+#   each one promoted or rejected for this workflow, so it reads each once. Decisions are per
+#   workflow: other memory automations still see every memory, and a revision by its owner makes
+#   every automation decide it again. Short-term memory is private to one user; reading every
+#   user's requires the workflow to run as an administrator, so install and enable it as one.
 # - `query` runs its ES|QL as the workflow owner through the AI index query step: a registered AI
 #   index only yields current, active, unexpired KIs of the workflow space. Nothing marks a row as
 #   read, so a query with `lookback_hours` re-reads the last window each run; stable KI ids make a
@@ -33,7 +34,7 @@ enabled: true
 settings:
   timeout: 45m
   concurrency:
-    key: "memory-extraction-__AI_INDEX_ID_RAW__"
+    key: "memory-extraction-{{ consts.ai_index_id }}"
     strategy: drop
     max: 1
 
@@ -44,17 +45,20 @@ consts:
   agent_ids: __AGENT_IDS__
   # How many short-term memories one run decides.
   batch_size: __BATCH_SIZE__
-  # Where records come from. `query` is the final ES|QL, filters included; `id_column` is the
-  # column that identifies a record and `uri_prefix` turns it into a provenance reference.
+  # Where records come from: `short_term_memory`, or a `query` (ES|QL) with optional
+  # `description`, `id_column` (the column identifying a record), `uri_prefix` (turns it into a
+  # provenance reference), `exclude_memory`, `lookback_hours` and `max_records`. Defaults are
+  # applied at run time: a query over an AI index leaves memory out and cites rows as ki://, a
+  # query over traces cites them as trace://.
   sources: __SOURCES__
   # Characters of records sent to the prompt per source.
   max_record_chars: 60000
-  # What to extract, as configured at install. The model reads it as written.
+  # What to extract: instructions plus the fact, entity and relationship kinds (or, for custom
+  # extraction, the types with their typed attributes). The model reads it as written.
   extraction_config: __EXTRACTION_CONFIG__
-  # Each kind's KI type and KI id prefix.
-  node_kinds: __NODE_KINDS__
-  # Each relationship kind's allowed source and target kinds.
-  relationship_kinds: __RELATIONSHIP_KINDS__
+  # The model the prompts use: an AI connector id. Empty uses the model configured for the
+  # Context Engine (Model Management feature context_engine_prompt).
+  connector_id: ""
   # LiquidJS has no array literal, so `| default: []` does not produce an empty array.
   no_items: []
 
@@ -74,6 +78,71 @@ steps:
     with:
       ai_index_id: "{{ consts.ai_index_id }}"
 
+  # Built from extraction_config on every run, as JSON text: each node kind's KI type and id
+  # prefix, each relationship kind's allowed ends, and the model's output schema, whose enums only
+  # allow the configured kinds. Facts, entities and relationships come from `memory_extraction`;
+  # `types` from `memory_custom_extraction`.
+  - name: compile
+    type: data.set
+    with:
+      node_kinds_json: >-
+        {%- assign cfg = consts.extraction_config -%}
+        {%- capture kinds -%}
+        {%- for kind in cfg.facts -%}{{ kind.type | json }}: {"ki_type": {{ 'memory.fact.' | append: kind.type | json }}, "id_prefix": {{ 'memory/fact/' | append: kind.type | append: '/' | json }}},{%- endfor -%}
+        {%- for kind in cfg.entities -%}{{ kind.type | json }}: {"ki_type": {{ 'memory.entity.' | append: kind.type | json }}, "id_prefix": {{ 'memory/entity/' | append: kind.type | append: '/' | json }}},{%- endfor -%}
+        {%- for kind in cfg.types -%}{{ kind.type | json }}: {"ki_type": {{ 'memory.' | append: kind.type | json }}, "id_prefix": {{ 'memory/' | append: kind.type | append: '/' | json }}},{%- endfor -%}
+        {%- endcapture -%}
+        { {{ kinds | remove_last: ',' }} }
+      relationship_kinds_json: >-
+        {%- capture relationships -%}
+        {%- for relationship in consts.extraction_config.relationships -%}{{ relationship.type | json }}: {"source": {{ relationship.source | json }}, "target": {{ relationship.target | json }}},{%- endfor -%}
+        {%- endcapture -%}
+        { {{ relationships | remove_last: ',' }} }
+      schema_json: >-
+        {%- assign cfg = consts.extraction_config -%}
+        {%- capture kind_names -%}
+        {%- for kind in cfg.facts -%}{{ kind.type | json }},{%- endfor -%}
+        {%- for kind in cfg.entities -%}{{ kind.type | json }},{%- endfor -%}
+        {%- for kind in cfg.types -%}{{ kind.type | json }},{%- endfor -%}
+        {%- endcapture -%}
+        {%- assign kind_names = kind_names | remove_last: ',' -%}
+        {%- capture attributes -%}
+        {%- for kind in cfg.facts -%}{%- assign named = kind.attributes | entries -%}{%- for attribute in named -%}{{ attribute.key | json }}: {"type": "string", "description": {{ kind.type | append: ': ' | append: attribute.value | json }}},{%- endfor -%}{%- endfor -%}
+        {%- for kind in cfg.entities -%}{%- assign named = kind.attributes | entries -%}{%- for attribute in named -%}{{ attribute.key | json }}: {"type": "string", "description": {{ kind.type | append: ': ' | append: attribute.value | json }}},{%- endfor -%}{%- endfor -%}
+        {%- for kind in cfg.types -%}{%- assign named = kind.attributes | entries -%}{%- for attribute in named -%}{%- assign about = attribute.value.description | default: attribute.key -%}{{ attribute.key | json }}: {"type": {{ attribute.value.type | json }}, "description": {{ kind.type | append: ': ' | append: about | json }}{% if attribute.value.enum %}, "enum": {{ attribute.value.enum | json }}{% endif %}{% if attribute.value.items %}, "items": {{ attribute.value.items | json }}{% endif %}},{%- endfor -%}{%- endfor -%}
+        {%- endcapture -%}
+        {%- capture relationship_names -%}
+        {%- for relationship in cfg.relationships -%}{{ relationship.type | json }},{%- endfor -%}
+        {%- endcapture -%}
+        {%- assign relationship_names = relationship_names | remove_last: ',' -%}
+        {%- capture node_reference -%}{"type": "object", "properties": {"type": {"type": "string", "enum": [{{ kind_names }}]}, "key": {"type": "string"}}, "required": ["type", "key"]}{%- endcapture -%}
+        {"type": "object", "properties": {
+        "nodes": {"type": "array", "items": {"type": "object", "properties": {
+        "type": {"type": "string", "enum": [{{ kind_names }}]}, "key": {"type": "string"}, "title": {"type": "string"},
+        "description": {"type": "string"}, "content": {"type": "string"},
+        "attributes": {"type": "object", "properties": { {{ attributes | remove_last: ',' }} }},
+        "mentions": {"type": "array", "items": {{ node_reference }}},
+        "source_ids": {"type": "array", "items": {"type": "string"}}},
+        "required": ["type", "key", "title", "description", "content", "source_ids"]}},
+        {%- if relationship_names != '' %}
+        "relationships": {"type": "array", "items": {"type": "object", "properties": {
+        "type": {"type": "string", "enum": [{{ relationship_names }}]},
+        "source": {{ node_reference }}, "target": {{ node_reference }},
+        "description": {"type": "string"}, "source_ids": {"type": "array", "items": {"type": "string"}}},
+        "required": ["type", "source", "target", "description", "source_ids"]}},
+        {%- endif %}
+        "decisions": {"type": "array", "items": {"type": "object", "properties": {
+        "id": {"type": "string"}, "decision": {"type": "string", "enum": ["extracted", "rejected", "wait"]},
+        "reason": {"type": "string"}}, "required": ["id", "decision", "reason"]}}},
+        "required": ["nodes", "decisions"]}
+
+  - name: compiled
+    type: data.set
+    with:
+      node_kinds: "${{ steps.compile.output.node_kinds_json | json_parse }}"
+      relationship_kinds: "${{ steps.compile.output.relationship_kinds_json | json_parse }}"
+      schema: "${{ steps.compile.output.schema_json | json_parse }}"
+
   # The facts and entities long-term memory already holds, so extraction merges into them.
   - name: existing_nodes
     type: context-engine.queryAiIndex
@@ -85,13 +154,39 @@ steps:
     type: foreach
     foreach: "{{ consts.sources | json }}"
     steps:
+      # A source's defaults and filters, applied here so the stored source is only what was chosen.
       - name: source_context
         type: data.set
         with:
           type: "{{ foreach.item.type }}"
-          description: "{{ foreach.item.description }}"
-          id_column: "{{ foreach.item.id_column }}"
-          uri_prefix: "{{ foreach.item.uri_prefix }}"
+          description: >-
+            {%- assign target = foreach.item.query | default: '' | downcase -%}
+            {%- if foreach.item.type == 'short_term_memory' -%}short-term memories users recorded with the agents, each with an `id`
+            {%- elsif foreach.item.description -%}{{ foreach.item.description }}
+            {%- elsif target contains 'ai-index-' -%}knowledge indicators
+            {%- elsif target contains 'traces-' -%}agent traces
+            {%- else -%}query results{%- endif -%}
+          id_column: >-
+            {%- assign target = foreach.item.query | default: '' | downcase -%}
+            {%- if foreach.item.id_column -%}{{ foreach.item.id_column }}
+            {%- elsif target contains 'ai-index-' -%}id
+            {%- elsif target contains 'traces-' -%}trace_id
+            {%- else -%}id{%- endif -%}
+          uri_prefix: >-
+            {%- assign target = foreach.item.query | default: '' | downcase -%}
+            {%- if foreach.item.type == 'short_term_memory' -%}stm://
+            {%- elsif foreach.item.uri_prefix -%}{{ foreach.item.uri_prefix }}
+            {%- elsif target contains 'ai-index-' -%}ki://
+            {%- elsif target contains 'traces-' -%}trace://
+            {%- else -%}record://{%- endif -%}
+          query: >-
+            {%- assign target = foreach.item.query | default: '' | downcase -%}
+            {%- assign exclude_memory = foreach.item.exclude_memory -%}
+            {%- if exclude_memory == nil -%}{%- if target contains 'ai-index-' -%}{%- assign exclude_memory = true -%}{%- else -%}{%- assign exclude_memory = false -%}{%- endif -%}{%- endif -%}
+            {{ foreach.item.query | default: '' | strip }}
+            {%- if exclude_memory %} | WHERE type IS NULL OR type NOT LIKE "memory.*"{% endif -%}
+            {%- if foreach.item.lookback_hours %} | WHERE @timestamp >= NOW() - {{ foreach.item.lookback_hours }} hours{% endif -%}
+          max_records: "${{ foreach.item.max_records | default: 200 }}"
 
       # Oldest first, so a memory that has waited longest is decided first.
       - name: list_pending
@@ -108,8 +203,8 @@ steps:
         on-failure:
           continue: true
         with:
-          query: "{{ foreach.item.query }}"
-          limit: "${{ foreach.item.max_records }}"
+          query: "{{ steps.source_context.output.query }}"
+          limit: "${{ steps.source_context.output.max_records }}"
 
       # Only the step matching this source's type ran in this iteration, so only it is read.
       - name: records
@@ -124,7 +219,8 @@ steps:
         steps:
           - name: extract
             type: ai.prompt
-            connector-id-by-feature: context_engine_prompt
+            connector-id: "{{ consts.connector_id }}"
+            connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"
             with:
               prompt: |
                 You maintain the long-term memory of an AI assistant as a small knowledge graph.
@@ -169,7 +265,7 @@ steps:
                   details, or anything the instructions say to ignore), `wait` when it might matter
                   but one memory is not enough evidence yet. For any other source, return an empty
                   `decisions` list.
-              schema: __OUTPUT_SCHEMA__
+              schema: "${{ steps.compiled.output.schema }}"
 
           - name: write_nodes
             type: parallel
@@ -181,13 +277,13 @@ steps:
               - name: node
                 type: data.set
                 with:
-                  ki_id: "{{ consts.node_kinds[foreach.item.type].id_prefix }}{{ foreach.item.key | downcase | replace: ' ', '-' | replace: '/', '-' }}"
-                  ki_type: "{{ consts.node_kinds[foreach.item.type].ki_type }}"
+                  ki_id: "{{ steps.compiled.output.node_kinds[foreach.item.type].id_prefix }}{{ foreach.item.key | downcase | replace: ' ', '-' | replace: '/', '-' }}"
+                  ki_type: "{{ steps.compiled.output.node_kinds[foreach.item.type].ki_type }}"
                   references_json: >-
                     {%- capture refs -%}
                     {%- for mention in foreach.item.mentions -%}
                     {%- assign mention_key = mention.key | downcase | replace: ' ', '-' | replace: '/', '-' -%}
-                    {%- assign mention_uri = 'ki://' | append: consts.node_kinds[mention.type].id_prefix | append: mention_key -%}
+                    {%- assign mention_uri = 'ki://' | append: steps.compiled.output.node_kinds[mention.type].id_prefix | append: mention_key -%}
                     {"uri": {{ mention_uri | json }}, "relation": "relates_to"},
                     {%- endfor -%}
                     {%- for source_id in foreach.item.source_ids -%}
@@ -221,14 +317,14 @@ steps:
               - name: relationship
                 type: data.set
                 with:
-                  allowed: "{% if consts.relationship_kinds[foreach.item.type].source == foreach.item.source.type and consts.relationship_kinds[foreach.item.type].target == foreach.item.target.type %}true{% else %}false{% endif %}"
-                  source_id: "{{ consts.node_kinds[foreach.item.source.type].id_prefix }}{{ foreach.item.source.key | downcase | replace: ' ', '-' | replace: '/', '-' }}"
-                  target_id: "{{ consts.node_kinds[foreach.item.target.type].id_prefix }}{{ foreach.item.target.key | downcase | replace: ' ', '-' | replace: '/', '-' }}"
+                  allowed: "{% if steps.compiled.output.relationship_kinds[foreach.item.type].source == foreach.item.source.type and steps.compiled.output.relationship_kinds[foreach.item.type].target == foreach.item.target.type %}true{% else %}false{% endif %}"
+                  source_id: "{{ steps.compiled.output.node_kinds[foreach.item.source.type].id_prefix }}{{ foreach.item.source.key | downcase | replace: ' ', '-' | replace: '/', '-' }}"
+                  target_id: "{{ steps.compiled.output.node_kinds[foreach.item.target.type].id_prefix }}{{ foreach.item.target.key | downcase | replace: ' ', '-' | replace: '/', '-' }}"
                   references_json: >-
                     {%- assign source_key = foreach.item.source.key | downcase | replace: ' ', '-' | replace: '/', '-' -%}
                     {%- assign target_key = foreach.item.target.key | downcase | replace: ' ', '-' | replace: '/', '-' -%}
-                    {%- assign source_uri = 'ki://' | append: consts.node_kinds[foreach.item.source.type].id_prefix | append: source_key -%}
-                    {%- assign target_uri = 'ki://' | append: consts.node_kinds[foreach.item.target.type].id_prefix | append: target_key -%}
+                    {%- assign source_uri = 'ki://' | append: steps.compiled.output.node_kinds[foreach.item.source.type].id_prefix | append: source_key -%}
+                    {%- assign target_uri = 'ki://' | append: steps.compiled.output.node_kinds[foreach.item.target.type].id_prefix | append: target_key -%}
                     {%- capture refs -%}
                     {"uri": {{ source_uri | json }}, "relation": "relates_to"},
                     {"uri": {{ target_uri | json }}, "relation": "relates_to"},

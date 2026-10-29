@@ -69,6 +69,16 @@ steps:
       method: GET
       path: /{{ consts.source_index }}/_mapping
 
+  # The configured fields must still exist. A renamed or removed field fails the run here, with
+  # Elasticsearch naming it, instead of failing every batch inside the loop, which continues.
+  - name: check_fields
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM {{ consts.source_index }}
+        | KEEP `{{ consts.title_field }}`, `{{ consts.body_field }}`
+        | LIMIT 0
+
   # Sorted by _id so a pilot's documents are the first of the full run's, and the full run
   # replaces the pilot's KIs.
   - name: discover_documents

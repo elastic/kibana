@@ -8,7 +8,6 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiSwitch,
@@ -18,6 +17,7 @@ import {
 import type { EuiSwitchProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { BackdropAwarePanel } from './panel_backdrop';
 
 interface MemorySettingsPanelProps {
   checked: boolean;
@@ -36,7 +36,7 @@ export const MemorySettingsPanel = ({
   isLoading = false,
   loadingTestSubject,
 }: MemorySettingsPanelProps) => (
-  <EuiPanel hasBorder paddingSize="l">
+  <BackdropAwarePanel hasBorder paddingSize="l">
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiTitle size="s">
@@ -77,5 +77,5 @@ export const MemorySettingsPanel = ({
         )}
       </EuiFlexItem>
     </EuiFlexGroup>
-  </EuiPanel>
+  </BackdropAwarePanel>
 );

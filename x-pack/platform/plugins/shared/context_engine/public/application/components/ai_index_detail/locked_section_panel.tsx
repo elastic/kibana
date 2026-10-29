@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { BackdropAwarePanel } from '../panel_backdrop';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 
 interface LockedSectionPanelProps {
@@ -23,7 +24,7 @@ export const LockedSectionPanel = ({
   ariaLabel,
   'data-test-subj': dataTestSubj,
 }: LockedSectionPanelProps) => (
-  <EuiPanel
+  <BackdropAwarePanel
     hasBorder
     paddingSize="l"
     color="subdued"
@@ -41,5 +42,5 @@ export const LockedSectionPanel = ({
         <AiIndexDetailPanelDescription>{description}</AiIndexDetailPanelDescription>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </EuiPanel>
+  </BackdropAwarePanel>
 );
