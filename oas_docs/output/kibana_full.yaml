@@ -48138,7 +48138,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Unenroll a specific agent, optionally revoking its enrollment API key.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Unenroll a specific agent. By default, the agent stops sending data and its API keys are invalidated after it acknowledges the unenroll action. To invalidate the API keys immediately, use `revoke`. **Force unenroll** in the UI sends `revoke: true`.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -48169,8 +48169,10 @@ paths:
               type: object
               properties:
                 force:
+                  description: Unenrolls the agent even if it is enrolled in a hosted agent policy or is a managed agent. Does not revoke API keys immediately. To do so, also set `revoke`.
                   type: boolean
                 revoke:
+                  description: Immediately invalidates the API keys of the agent without notifying it. The agent keeps running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.
                   type: boolean
       responses:
         '200':
@@ -49662,7 +49664,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Unenroll multiple agents, optionally revoking their enrollment API keys.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Unenroll multiple agents. By default, the agents stop sending data and their API keys are invalidated after they acknowledge the unenroll action. To invalidate the API keys immediately, use `revoke`. **Force unenroll** in the UI sends `revoke: true`.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49703,13 +49705,13 @@ paths:
                 dryRun:
                   type: boolean
                 force:
-                  description: Unenrolls hosted agents too
+                  description: Also unenrolls agents that are enrolled in hosted agent policies or are managed agents. Does not revoke API keys immediately. To do so, also set `revoke`.
                   type: boolean
                 includeInactive:
                   description: When passing agents by KQL query, unenrolls inactive agents too
                   type: boolean
                 revoke:
-                  description: Revokes API keys of agents
+                  description: Immediately invalidates the API keys of the agents without notifying them. The agents keep running and can still send data to outputs not covered by the invalidated keys, such as Kafka and Logstash. Remote Elasticsearch keys are invalidated by Fleet Server on a best-effort basis. This action cannot be undone. Use it only for offline or compromised agents.
                   type: boolean
               required:
                 - agents
@@ -51749,6 +51751,37 @@ paths:
                   description: Global AWS region from the Service Settings step.
                   maxLength: 64
                   type: string
+                instances:
+                  description: Service instances, including duplicates, being deployed. Used to restore the service list when the onboarding is resumed.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      instanceId:
+                        description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      isDuplicate:
+                        description: Whether the instance is a duplicate of another service.
+                        type: boolean
+                      name:
+                        description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                        maxLength: 255
+                        type: string
+                      serviceId:
+                        description: ID of the service this instance belongs to.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                    required:
+                      - instanceId
+                      - serviceId
+                      - name
+                      - isDuplicate
+                  maxItems: 1000
+                  type: array
+                  x-state: Experimental; added in 9.7.0
                 integrationName:
                   description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                   maxLength: 160
@@ -51963,6 +51996,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental; added in 9.7.0
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -52319,6 +52383,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental; added in 9.7.0
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -52565,6 +52660,37 @@ paths:
                       - templateVersion
                   maxItems: 10
                   type: array
+                instances:
+                  description: Service instances, including duplicates, from the last deployment. Replaces the stored list, so instances removed since the last deployment are dropped.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      instanceId:
+                        description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                      isDuplicate:
+                        description: Whether the instance is a duplicate of another service.
+                        type: boolean
+                      name:
+                        description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                        maxLength: 255
+                        type: string
+                      serviceId:
+                        description: ID of the service this instance belongs to.
+                        maxLength: 255
+                        minLength: 1
+                        type: string
+                    required:
+                      - instanceId
+                      - serviceId
+                      - name
+                      - isDuplicate
+                  maxItems: 1000
+                  type: array
+                  x-state: Experimental; added in 9.7.0
                 integrationName:
                   description: Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.
                   maxLength: 160
@@ -52749,6 +52875,37 @@ paths:
                         type: string
                       id:
                         type: string
+                      instances:
+                        description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            instanceId:
+                              description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                            isDuplicate:
+                              description: Whether the instance is a duplicate of another service.
+                              type: boolean
+                            name:
+                              description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                              maxLength: 255
+                              type: string
+                            serviceId:
+                              description: ID of the service this instance belongs to.
+                              maxLength: 255
+                              minLength: 1
+                              type: string
+                          required:
+                            - instanceId
+                            - serviceId
+                            - name
+                            - isDuplicate
+                        maxItems: 1000
+                        type: array
+                        x-state: Experimental; added in 9.7.0
                       integrationName:
                         description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                         type: string
@@ -53032,6 +53189,37 @@ paths:
                           type: string
                         id:
                           type: string
+                        instances:
+                          description: Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              instanceId:
+                                description: 'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.'
+                                maxLength: 255
+                                minLength: 1
+                                type: string
+                              isDuplicate:
+                                description: Whether the instance is a duplicate of another service.
+                                type: boolean
+                              name:
+                                description: Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.
+                                maxLength: 255
+                                type: string
+                              serviceId:
+                                description: ID of the service this instance belongs to.
+                                maxLength: 255
+                                minLength: 1
+                                type: string
+                            required:
+                              - instanceId
+                              - serviceId
+                              - name
+                              - isDuplicate
+                          maxItems: 1000
+                          type: array
+                          x-state: Experimental; added in 9.7.0
                         integrationName:
                           description: Integration name as entered in the Service settings step, before any per-package suffix is applied.
                           type: string
@@ -193298,6 +193486,7 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLayerESQL'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyReferenceLineLayerESQLStatic'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyReferenceLineLayerESQL'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationLayerESQL'
       description: XY chart layer types for ES|QL queries.
     Kibana_HTTP_APIs_visXyLayersNoESQL:
@@ -193665,9 +193854,168 @@ components:
         visible:
           description: When true, shows the legend table series header.
           type: boolean
+    Kibana_HTTP_APIs_visXyReferenceLineLayerESQL:
+      additionalProperties: false
+      description: Reference lines defined by numeric columns from a layer-specific ES|QL query.
+      properties:
+        data_source:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
+        ignore_global_filters:
+          default: false
+          description: When `true`, ignores global filters when fetching data for this layer. Defaults to `false`.
+          type: boolean
+        sampling:
+          default: 1
+          description: Sampling factor between 0 (no sampling) and 1 (full sampling).
+          maximum: 1
+          minimum: 0
+          type: number
+        thresholds:
+          description: Array of ES|QL-based reference line thresholds
+          items:
+            type: object
+            properties:
+              axis:
+                anyOf:
+                  - enum:
+                      - x
+                    type: string
+                  - enum:
+                      - 'y'
+                    type: string
+                  - enum:
+                      - y2
+                    type: string
+                default: 'y'
+                description: The axis this reference line is drawn on. Values match the root axis configuration keys. If omitted, defaults to the primary Y axis.
+              color:
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visStaticColor'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_visAutoColor'
+                default:
+                  type: auto
+              column:
+                description: Column to use
+                type: string
+              fill:
+                anyOf:
+                  - enum:
+                      - above
+                    type: string
+                  - enum:
+                      - below
+                    type: string
+                description: Fill direction for reference line
+              format:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_visFormatType'
+              icon:
+                anyOf:
+                  - enum:
+                      - asterisk
+                    type: string
+                  - enum:
+                      - alert
+                    type: string
+                  - enum:
+                      - bell
+                    type: string
+                  - enum:
+                      - bolt
+                    type: string
+                  - enum:
+                      - bug
+                    type: string
+                  - enum:
+                      - circle
+                    type: string
+                  - enum:
+                      - editor_comment
+                    type: string
+                  - enum:
+                      - flag
+                    type: string
+                  - enum:
+                      - heart
+                    type: string
+                  - enum:
+                      - map_marker
+                    type: string
+                  - enum:
+                      - pin_filled
+                    type: string
+                  - enum:
+                      - star_empty
+                    type: string
+                  - enum:
+                      - star_filled
+                    type: string
+                  - enum:
+                      - tag
+                    type: string
+                  - enum:
+                      - triangle
+                    type: string
+                description: Icon to display on the reference line
+              label:
+                description: Label for the operation
+                type: string
+              position:
+                anyOf:
+                  - enum:
+                      - auto
+                    type: string
+                  - enum:
+                      - left
+                    type: string
+                  - enum:
+                      - right
+                    type: string
+                description: Position of the icon and label relative to the reference line
+              stroke_dash:
+                anyOf:
+                  - enum:
+                      - solid
+                    type: string
+                  - enum:
+                      - dashed
+                    type: string
+                  - enum:
+                      - dotted
+                    type: string
+                description: Line style
+              stroke_width:
+                description: Line width in pixels
+                maximum: 10
+                minimum: 1
+                type: number
+              text:
+                additionalProperties: false
+                description: Reference line text label configuration
+                type: object
+                properties:
+                  visible:
+                    description: Show text label on the reference line
+                    type: boolean
+                required:
+                  - visible
+            required:
+              - column
+          maxItems: 100
+          minItems: 1
+          type: array
+        type:
+          enum:
+            - reference_lines
+          type: string
+      required:
+        - data_source
+        - type
+        - thresholds
+      title: ES|QL Reference Line Layer
+      type: object
     Kibana_HTTP_APIs_visXyReferenceLineLayerESQLStatic:
       additionalProperties: false
-      description: Reference line layer with static value thresholds. Field-based threshold operations are not supported on ES|QL charts yet.
+      description: Reference lines defined by constant numeric values on ES|QL charts.
       properties:
         data_source:
           discriminator:
@@ -193834,7 +194182,7 @@ components:
         - data_source
         - type
         - thresholds
-      title: Reference Line Layer (ES|QL, static values)
+      title: Static Reference Line Layer for ES|QL Charts
       type: object
     Kibana_HTTP_APIs_visXyReferenceLineLayerNoESQL:
       additionalProperties: false
