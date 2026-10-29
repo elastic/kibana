@@ -58,6 +58,14 @@ export const canOverrideExtractObservables = (owner: string): boolean =>
   OWNER_INFO[owner as Owner].features.observables.autoExtractDefault;
 
 /**
+ * Returns true when this owner may store `extractObservables: true`. Known owners follow the same
+ * rule as `canOverrideExtractObservables`, so Stack and Observability are refused. Unlike that
+ * helper, unknown owners are not guarded and may store true.
+ */
+export const canStoreExtractObservablesTrue = (owner: string): boolean =>
+  !Object.hasOwn(OWNER_INFO, owner) || canOverrideExtractObservables(owner);
+
+/**
  * Resolves the effective `extractObservables` value for a new case, applying the full precedence
  * chain when the caller omitted the field:
  *   blocked by owner → false
