@@ -141,15 +141,15 @@ describe('rule_tuning_review schedule look-backs', () => {
     });
 
   it('computes look-backs as from minus interval, in the largest whole unit', () => {
-    expect(renderLookbacks('5m', 'now-65m', '5m', 'now-6m')).toBe('1h,1m,600');
-    expect(renderLookbacks('5m', 'now-5m', '1h', 'now-90m')).toBe('0s,30m,600');
-    expect(renderLookbacks('30s', 'now-95s', '1d', 'now-2d')).toBe('65s,1d,60');
+    expect(renderLookbacks('5m', 'now-65m', '5m', 'now-6m')).toBe('1h,1m,4200,660');
+    expect(renderLookbacks('5m', 'now-5m', '1h', 'now-90m')).toBe('0s,30m,600,9000');
+    expect(renderLookbacks('30s', 'now-95s', '1d', 'now-2d')).toBe('65s,1d,125,259200');
   });
 
-  // Two runs one interval apart, each covering its own `from`: 5m + 6m. A schedule
-  // change instead reports the 2 x 5m its two schedules' runs share (above).
-  it('computes how far back the backtest reaches', () => {
-    expect(renderLookbacks('5m', 'now-6m', '', '', 'query')).toBe('1m,1m,660');
+  // Two runs one interval apart, each searching its own `from`: 5m + 6m. A rule
+  // whose schedule is not changing searches the same window twice.
+  it('computes how far back each preview searched', () => {
+    expect(renderLookbacks('5m', 'now-6m', '', '', 'query')).toBe('1m,1m,660,660');
   });
 
   it('computes no look-backs for date math it cannot reduce to a duration', () => {

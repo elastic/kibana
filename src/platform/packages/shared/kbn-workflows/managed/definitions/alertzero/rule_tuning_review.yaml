@@ -818,13 +818,11 @@ steps:
 
   # The rule details page shows a schedule's `from` as "Additional look-back time":
   # `from` minus the interval, in the largest whole unit (now-65m every 5m is 1h).
-  # Also renders how far back the backtest reaches: its runs are one interval apart
-  # and each covers its own `from`, so (runs - 1) x interval + from, in seconds. A
-  # schedule change compares two look-backs, so for it this is the period both
-  # schedules' runs share instead: runs x the current interval.
-  # Renders "<current>,<proposed>,<backtest seconds>", or nothing when either `from`
-  # is not plain now-<n><unit> or starts after its interval, so the proposal falls
-  # back to `from`.
+  # Also renders how far back each preview searched: its runs are one interval apart
+  # and each searches its own `from`, so (runs - 1) x interval + from, in seconds.
+  # Renders "<current>,<proposed>,<current seconds>,<proposed seconds>", or nothing
+  # when either `from` is not plain now-<n><unit> or starts after its interval, so
+  # the proposal falls back to `from`.
   # Every change type is backtested on a schedule, so this runs for all of them;
   # only a schedule change has a proposed schedule that differs from the current one.
   - name: compute_schedule_lookbacks
@@ -844,6 +842,8 @@ steps:
         {%- if schedules.size != 4 %}{% assign valid = false %}{% endif -%}
         {%- assign lookbacks = "" -%}
         {%- assign runs = inputs.preview_invocation_count | default: consts.preview_invocation_count -%}
+        {%- assign proposed_runs = steps.compute_schedule_preview_runs.output.proposed_invocation_count | default: runs -%}
+        {%- assign windows = "" -%}
         {%- for expression in schedules -%}
         {%- assign unit = expression | slice: -1 -%}
         {%- assign amount = expression | slice: 4, 64 | remove_last: unit | plus: 0 -%}
@@ -860,10 +860,9 @@ steps:
         {%- if is_interval == 0 -%}
         {%- assign interval_seconds = seconds -%}
         {%- else -%}
-        {%- if forloop.index0 == 1 -%}
-        {%- if steps.diagnose_rule.output.structured_output.change_type == 'schedule' %}{% assign backtest_seconds = runs | times: interval_seconds -%}
-        {%- else %}{% assign backtest_seconds = runs | minus: 1 | times: interval_seconds | plus: seconds %}{% endif -%}
-        {%- endif -%}
+        {%- if forloop.index0 == 1 %}{% assign window_runs = runs %}{% else %}{% assign window_runs = proposed_runs %}{% endif -%}
+        {%- assign window = window_runs | minus: 1 | times: interval_seconds | plus: seconds -%}
+        {%- assign windows = windows | append: "," | append: window -%}
         {%- assign lookback = seconds | minus: interval_seconds -%}
         {%- assign days = lookback | modulo: 86400 -%}
         {%- assign hours = lookback | modulo: 3600 -%}
@@ -878,7 +877,7 @@ steps:
         {%- assign lookbacks = lookbacks | append: lookback | append: "," -%}
         {%- endif -%}
         {%- endfor -%}
-        {%- if valid %}{{ lookbacks }}{{ backtest_seconds }}{% endif -%}
+        {%- if valid %}{{ lookbacks | remove_last: "," }}{{ windows }}{% endif -%}
 
   # One preview worker run backtests both queries. A single synchronous child per
   # wake-up cycle is safe; two consecutive child calls share one immediate-resume
@@ -1169,7 +1168,7 @@ steps:
         {%- if proposal.proposed_interval != rule.interval %}
         Runs every: `{{ rule.interval }}` → `{{ proposal.proposed_interval }}`
         {%- endif %}
-        {%- if lookbacks.size == 3 %}
+        {%- if lookbacks.size == 4 %}
         {%- if lookbacks[0] != lookbacks[1] %}
         Additional look-back time: `{{ lookbacks[0] }}` → `{{ lookbacks[1] }}`
         {%- endif %}
@@ -1196,15 +1195,26 @@ steps:
         {%- assign end_day = inputs.last_fp_at | date: "%B %-d, %Y", "UTC" -%}
         {%- if steps.can_preview_query_change.output.supported %}
         **Backtest**
-        {%- if lookbacks.size == 3 %}
-        {%- assign seconds = lookbacks[2] | plus: 0 %}
-        {%- assign start = inputs.last_fp_at | date: "%s" | minus: seconds %}
+        {%- if lookbacks.size == 4 %}
+        {%- assign end_seconds = inputs.last_fp_at | date: "%s" | plus: 0 %}
+        {%- assign ranges = "" %}
+        {%- for window in lookbacks offset: 2 %}
+        {%- assign seconds = window | plus: 0 %}
+        {%- assign start = end_seconds | minus: seconds %}
         {%- assign start_day = start | date: "%B %-d, %Y", "UTC" %}
         {%- if seconds < 120 %}{% assign length = seconds | append: " seconds" %}
         {%- elsif seconds < 7200 %}{% assign length = seconds | divided_by: 60 | floor | append: " minutes" %}
         {%- else %}{% assign length = seconds | divided_by: 3600 | floor | append: " hours" %}
         {%- endif %}
-        The backtest {% if proposal.change_type == 'schedule' %}ran the current and proposed schedules over the same period,{% else %}replayed the rule{% endif %} from {% if start_day == end_day %}{{ start | date: "%H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%H:%M", "UTC" }} UTC on {{ end_day }}{% else %}{{ start | date: "%B %-d, %Y at %H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%B %-d, %Y at %H:%M", "UTC" }} UTC{% endif %} ({{ length }}), ending at the newest false positive.
+        {%- capture range %}{% if start_day == end_day %}{{ start | date: "%H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%H:%M", "UTC" }} UTC on {{ end_day }}{% else %}{{ start | date: "%B %-d, %Y at %H:%M", "UTC" }} to {{ inputs.last_fp_at | date: "%B %-d, %Y at %H:%M", "UTC" }} UTC{% endif %} ({{ length }}){% endcapture %}
+        {%- assign ranges = ranges | append: range | append: "|" %}
+        {%- endfor %}
+        {%- assign ranges = ranges | split: "|" %}
+        {%- if proposal.change_type == 'schedule' %}
+        The backtest replayed the current schedule from {{ ranges[0] }}, and the proposed schedule from {{ ranges[1] }}, both ending at the newest false positive.
+        {%- else %}
+        The backtest replayed the rule from {{ ranges[0] }}, ending at the newest false positive.
+        {%- endif %}
         {%- else %}
         The backtest ends at the newest false positive, {{ inputs.last_fp_at | date: "%B %-d, %Y at %H:%M UTC", "UTC" }}.
         {%- endif %}
