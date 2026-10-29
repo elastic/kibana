@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { lookup as dnsLookup } from 'dns';
 import {
   getAllowedHosts,
+  guardedLookup,
   isAddressHostAllowed,
   isBlockedAddress,
+  isLoopbackHost,
   validateVaultAddress,
 } from './address_guard';
 import type { UptimeConfig } from '../../../config';
+
+jest.mock('dns', () => ({ lookup: jest.fn() }));
+const dnsLookupMock = dnsLookup as unknown as jest.Mock;
 
 describe('validateVaultAddress', () => {
   it.each([
@@ -49,6 +55,72 @@ describe('isBlockedAddress', () => {
 
   it.each(['127.0.0.1', '10.1.2.3', '192.168.1.1', '::1', '8.8.8.8'])('allows %s', (ip) => {
     expect(isBlockedAddress(ip)).toBe(false);
+  });
+});
+
+describe('isLoopbackHost', () => {
+  it.each(['localhost', 'LOCALHOST', '127.0.0.1', '127.1.2.3', '::1', '[::1]'])(
+    'treats %s as loopback',
+    (host) => {
+      expect(isLoopbackHost(host)).toBe(true);
+    }
+  );
+
+  it.each(['vault.example.com', '10.0.0.5', '169.254.169.254', '0.0.0.0'])(
+    'does not treat %s as loopback',
+    (host) => {
+      expect(isLoopbackHost(host)).toBe(false);
+    }
+  );
+});
+
+describe('guardedLookup', () => {
+  const resolveWith = (result: unknown, error: Error | null = null) =>
+    dnsLookupMock.mockImplementation((_host, _options, callback) => {
+      if (error) callback(error);
+      else callback(null, result, 4);
+    });
+
+  const lookup = (options = {}) =>
+    new Promise<{ err: Error | null; address: unknown }>((resolve) => {
+      guardedLookup('vault.example.com', options, (err, address) => resolve({ err, address }));
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('passes through an allowed address', async () => {
+    resolveWith('10.1.2.3');
+
+    expect(await lookup()).toEqual({ err: null, address: '10.1.2.3' });
+  });
+
+  it('rejects a name that resolves to a link-local address', async () => {
+    resolveWith('169.254.169.254');
+
+    const { err } = await lookup();
+
+    expect(err?.message).toBe('address resolves to a blocked link-local IP');
+  });
+
+  it('rejects when any of several resolved addresses is blocked', async () => {
+    resolveWith([
+      { address: '10.1.2.3', family: 4 },
+      { address: '169.254.169.254', family: 4 },
+    ]);
+
+    const { err } = await lookup({ all: true });
+
+    expect(err).toBeInstanceOf(Error);
+  });
+
+  it('forwards a resolver error', async () => {
+    resolveWith(undefined, new Error('ENOTFOUND'));
+
+    const { err } = await lookup();
+
+    expect(err?.message).toBe('ENOTFOUND');
   });
 });
 

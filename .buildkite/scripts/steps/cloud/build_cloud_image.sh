@@ -29,6 +29,7 @@ else
     --cloud \
     --skip-cdn-assets \
     --skip-docker-contexts \
+    --skip-docker-image-archive \
     --tar-zstd \
     --docker-tag-qualifier="$GIT_COMMIT"
   retag_and_push_image "$BUILD_OUTPUT_IMAGE" "$KIBANA_CLOUD_IMAGE"

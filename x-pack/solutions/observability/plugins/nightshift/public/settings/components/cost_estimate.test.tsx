@@ -18,12 +18,12 @@ import type {
   RunQuotasResponse,
 } from '@kbn/significant-events-plugin/common';
 import { useSignificantEventsCost } from '../hooks/use_significant_events_cost';
-import { useRunQuotas } from '../hooks/use_significant_events_run_quotas';
+import { useRunQuotas } from '../../data/run_quotas/use_significant_events_run_quotas';
 import { CostEstimate } from './cost_estimate';
 import type { TokenTrackingForm } from './use_token_tracking_form';
 
 jest.mock('../hooks/use_significant_events_cost');
-jest.mock('../hooks/use_significant_events_run_quotas');
+jest.mock('../../data/run_quotas/use_significant_events_run_quotas');
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   const { useState } = jest.requireActual('react') as typeof import('react');
