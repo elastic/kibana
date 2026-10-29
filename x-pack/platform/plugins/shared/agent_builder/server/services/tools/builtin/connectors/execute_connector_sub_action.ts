@@ -57,6 +57,59 @@ export const executeConnectorSubActionArgsSchema = z
   })
   .strict();
 
+const invalidRequestHint =
+  'Check the connector attachment for the correct sub-action names and required parameters.';
+
+const getNumber = (value: unknown): number | undefined =>
+  typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+
+// The connector's retry date (from the service's Retry-After or rate-limit reset) as the seconds
+// left to wait.
+const getRetryAfterSeconds = (retry: unknown): number | undefined =>
+  retry instanceof Date && !Number.isNaN(retry.getTime())
+    ? Math.max(0, Math.ceil((retry.getTime() - Date.now()) / 1000))
+    : undefined;
+
+const waitHint = (retryAfterSeconds: number) =>
+  `Wait ${retryAfterSeconds} seconds before retrying this sub-action.`;
+
+const getErrorHint = ({
+  statusCode,
+  retryAfterSeconds,
+}: {
+  statusCode?: number;
+  retryAfterSeconds?: number;
+}): string => {
+  // A 403 with a retry delay is a rate limit (GitHub sends those), not a credentials problem.
+  if (statusCode === 429 || (statusCode === 403 && retryAfterSeconds !== undefined)) {
+    const retry =
+      retryAfterSeconds !== undefined
+        ? waitHint(retryAfterSeconds)
+        : 'Retry at most once after a short wait.';
+    return (
+      `The service is rate limiting this connector. ${retry} ` +
+      'Do not change the parameters or switch to other sub-actions; if it still fails, tell the user.'
+    );
+  }
+  if (statusCode === 401 || statusCode === 403) {
+    return (
+      "The service rejected the connector's credentials or they lack the required permissions or scopes. " +
+      "Do not retry or change the parameters; tell the user to check the connector's credentials."
+    );
+  }
+  if (statusCode !== undefined && statusCode >= 500) {
+    const retry =
+      retryAfterSeconds !== undefined
+        ? `${waitHint(retryAfterSeconds)} Retry at most once`
+        : 'Retry at most once';
+    return (
+      `The service failed to handle the request. ${retry}; if it still fails, tell the user the service is unavailable. ` +
+      'Do not change the parameters or switch to other sub-actions.'
+    );
+  }
+  return invalidRequestHint;
+};
+
 /**
  * Creates the execute_connector_sub_action tool.
  *
@@ -231,8 +284,8 @@ export const createExecuteConnectorSubActionTool = ({
     }
 
     if (executeResult.status === 'error') {
+      const { errorMeta } = executeResult;
       if (executeResult.errorName === 'ConnectorAuthorizationError') {
-        const { errorMeta } = executeResult;
         const connectorName =
           typeof errorMeta?.connectorName === 'string' ? errorMeta.connectorName : undefined;
         const authResult = resolveAuthorizationResult({
@@ -243,18 +296,20 @@ export const createExecuteConnectorSubActionTool = ({
           return authResult;
         }
       }
+      const statusCode = getNumber(errorMeta?.statusCode);
+      const retryAfterSeconds = getRetryAfterSeconds(executeResult.retry);
       return {
         results: [
           createErrorResult({
-            message:
-              `Connector sub-action '${subAction}' returned an error: ${
-                executeResult.message ?? 'Unknown error'
-              }` +
-              ' — Check the connector attachment for the correct sub-action names and required parameters.',
+            message: `Connector sub-action '${subAction}' returned an error: ${
+              executeResult.message ?? 'Unknown error'
+            } — ${getErrorHint({ statusCode, retryAfterSeconds })}`,
             metadata: {
               connectorId,
               subAction,
               serviceMessage: executeResult.serviceMessage,
+              ...(statusCode !== undefined ? { statusCode } : {}),
+              ...(retryAfterSeconds !== undefined ? { retryAfterSeconds } : {}),
             },
           }),
         ],
