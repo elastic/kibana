@@ -8,7 +8,14 @@
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { XYPosition } from '@xyflow/react';
+import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Unit, UnitRepository } from '../../../../../services/unit_repository';
+import type { ProcessingNodeRef, UnitLine } from '../../../../../services/unit_graph';
+import type {
+  ProcessingFlyoutActorRef,
+  ProcessingSaveRequest,
+  ProcessingStepPosition,
+} from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
 import type { DestinationsActorRef } from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
 import type { SourcesActorRef } from '../../../../streams_layout/sources/state_machines/sources_state_machine';
 import type { SourceApiKeyGenerationDeps } from '../../../../streams_layout/sources/source_api_keys';
@@ -17,7 +24,8 @@ import type { SourceEnvironmentLoader } from '../../../../streams_layout/sources
 /** Undo steps for a source or destination create, driven by the canvas save transitions. */
 export interface CanvasCreateHistoryHandlers {
   hold: () => void;
-  commit: () => void;
+  /** Clear the stack after a successful persist so undo cannot restore revoked keys. */
+  reset: () => void;
   discard: () => void;
 }
 
@@ -35,20 +43,31 @@ export interface CanvasStateServiceDeps {
   validateUnitDefinition?: (unit: Unit) => Promise<void>;
 }
 
+export type CanvasFlyoutKind = 'destination' | 'index';
+
 export interface CanvasUrlInput {
   flyoutName: string | null;
+  flyoutKind: CanvasFlyoutKind | null;
   flyoutTab: string | null;
   query: string | null;
 }
 
 export const defaultCanvasUrlState: CanvasUrlInput = {
   flyoutName: null,
+  flyoutKind: null,
   flyoutTab: null,
   query: null,
 };
 
 export type RouteEditModes = 'processing' | 'routing';
 export type RouteEdit = [string, RouteEditModes];
+
+export interface CanvasProcessingFlyout {
+  slot: ProcessingNodeRef;
+  ref: ProcessingFlyoutActorRef;
+  /** Set when `slot` is the pipeline a shared source line moves onto when the processing saves. */
+  line?: UnitLine;
+}
 
 export interface CanvasState {
   urlState: CanvasUrlInput;
@@ -57,8 +76,14 @@ export interface CanvasState {
   savingUnit?: Unit;
   savingComponentIds?: string[];
   savingComponentKind?: 'source' | 'destination';
-  savingComponentIntent?: 'create' | 'delete' | 'connect';
+  savingComponentIntent?: 'create' | 'delete' | 'connect' | 'processing';
+  savingSecrets?: StreamsUnit.Secrets;
   editingRoute: Partial<RouteEdit>;
+  processingFlyout?: CanvasProcessingFlyout;
+  /** Staged unit to return to when a processing flyout save fails. */
+  processingRollbackUnit?: Unit;
+  /** Processor ids written for the flyout's steps, in step order, while they save. */
+  processingSaveIds?: string[];
   nodePositions: Record<string, XYPosition>;
   sourcesRef: SourcesActorRef;
   destinationsRef: DestinationsActorRef;
@@ -79,6 +104,7 @@ export type CanvasUrlEvent =
       unitDefinition: Unit;
       destinationIds: string[];
       intent: 'create' | 'delete';
+      secrets?: StreamsUnit.Secrets;
     }
   | {
       type: 'unit.changed';
@@ -98,9 +124,18 @@ export type CanvasUrlEvent =
       output: { unitDefinition: Unit };
     }
   | { type: 'xstate.error.actor.persistUnitDefinition'; error: unknown }
-  | { type: 'flyout.open'; flyoutName: string }
+  | { type: 'flyout.open'; flyoutName: string; flyoutKind?: CanvasFlyoutKind }
   | { type: 'flyout.tab'; flyoutTab: string }
   | { type: 'flyout.close' }
   | { type: 'search.change'; query: string }
   | { type: 'routing.edit.open'; edgeId: string; mode: RouteEditModes }
-  | { type: 'routing.edit.close' };
+  | { type: 'routing.edit.close' }
+  | {
+      type: 'processing.open';
+      slot: ProcessingNodeRef;
+      /** Starts creating a processor at this end of the slot's list. */
+      position?: ProcessingStepPosition;
+    }
+  | { type: 'processing.open'; line: UnitLine }
+  | { type: 'processing.close' }
+  | ProcessingSaveRequest;

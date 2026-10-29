@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
+
 // --- Shared primitives ---
 
 const EcfFamilySchema = schema.oneOf(
@@ -77,6 +79,41 @@ const RequestServiceVarsSchema = schema.recordOf(
   { meta: { description: 'Per-service config keyed by instance ID.' } }
 );
 
+const InstanceSchema = schema.object({
+  instanceId: schema.string({
+    minLength: 1,
+    maxLength: 255,
+    meta: {
+      description:
+        'Instance ID: the service ID for an original, `<serviceId>__dup-<n>` for a duplicate.',
+    },
+  }),
+  serviceId: schema.string({
+    minLength: 1,
+    maxLength: 255,
+    meta: { description: 'ID of the service this instance belongs to.' },
+  }),
+  name: schema.string({
+    maxLength: 255,
+    meta: {
+      description:
+        'Display name of the instance. Duplicates use the custom name entered when the instance was duplicated.',
+    },
+  }),
+  isDuplicate: schema.boolean({
+    meta: { description: 'Whether the instance is a duplicate of another service.' },
+  }),
+});
+
+// The field shipped after the routes (`since: '9.5.0'`), so it carries its own availability.
+const INSTANCES_AVAILABILITY = { stability: 'experimental' as const, since: '9.7.0' };
+
+const InstancesSchema = (description: string) =>
+  schema.arrayOf(InstanceSchema, {
+    maxSize: 1000,
+    meta: { description, availability: INSTANCES_AVAILABILITY },
+  });
+
 const OnboardingDeploymentIdParamSchema = schema.object({
   id: schema.string({
     maxLength: 255,
@@ -130,6 +167,32 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.string({
       meta: {
         description: 'Global AWS region from the Service Settings step.',
+      },
+    })
+  ),
+  integrationName: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Integration name as entered in the Service settings step, before any per-package suffix is applied.',
+      },
+    })
+  ),
+  description: schema.maybe(
+    schema.string({
+      meta: { description: 'Integration description from the Service settings step.' },
+    })
+  ),
+  instances: schema.maybe(
+    InstancesSchema(
+      'Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.'
+    )
+  ),
+  namespace: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
       },
     })
   ),
@@ -232,6 +295,35 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: { description: 'Global AWS region from the Service Settings step.' },
       })
     ),
+    integrationName: schema.maybe(
+      schema.string({
+        maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+        meta: {
+          description:
+            'Integration name as entered in the Service settings step, before any per-package suffix is applied.',
+        },
+      })
+    ),
+    description: schema.maybe(
+      schema.string({
+        maxLength: 2048,
+        meta: { description: 'Integration description from the Service settings step.' },
+      })
+    ),
+    instances: schema.maybe(
+      InstancesSchema(
+        'Service instances, including duplicates, being deployed. Used to restore the service list when the onboarding is resumed.'
+      )
+    ),
+    namespace: schema.maybe(
+      schema.string({
+        maxLength: 100,
+        meta: {
+          description:
+            'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+        },
+      })
+    ),
     dataFormat: schema.maybe(DataFormatSchema),
     authMethod: schema.maybe(
       schema.oneOf(
@@ -304,7 +396,43 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
+    integrationName: schema.maybe(
+      schema.string({
+        maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+        meta: {
+          description:
+            'Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.',
+        },
+      })
+    ),
+    description: schema.maybe(
+      schema.nullable(
+        schema.string({
+          maxLength: 2048,
+          meta: {
+            description:
+              'Integration description from the Service settings step. Send null to clear it.',
+          },
+        })
+      )
+    ),
+    namespace: schema.maybe(
+      schema.nullable(
+        schema.string({
+          maxLength: 100,
+          meta: {
+            description:
+              'Global data stream namespace from the Service settings step. Omit it to keep the stored value, or send null to clear it. When none is set, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+          },
+        })
+      )
+    ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
+    instances: schema.maybe(
+      InstancesSchema(
+        'Service instances, including duplicates, from the last deployment. Replaces the stored list, so instances removed since the last deployment are dropped.'
+      )
+    ),
     services: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
         minSize: 1,

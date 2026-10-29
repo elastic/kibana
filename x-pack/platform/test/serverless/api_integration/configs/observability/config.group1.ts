@@ -16,7 +16,6 @@ export default createTestConfig({
     require.resolve('../../test_suites/platform_security'),
     require.resolve('../../test_suites/reporting'),
     require.resolve('../../test_suites/telemetry'),
-    require.resolve('../../test_suites/data_usage'),
     require.resolve('../../test_suites/favorites'),
   ],
   junit: {

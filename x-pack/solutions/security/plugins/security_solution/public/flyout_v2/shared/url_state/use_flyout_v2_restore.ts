@@ -460,11 +460,15 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as unknown as EntityType.host | EntityType.user,
         value: d.value,
         entityId: d.entityId,
+        mode: d.mode,
+        scopeId: d.scopeId,
         ...originParams,
         onOpenEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.value,
           entityId: d.entityId,
+          scopeId: d.scopeId,
+          mode: d.mode,
         }),
       });
       break;
@@ -552,12 +556,14 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as EntityType,
         entityName: d.entityName,
         scopeId: d.scopeId,
+        mode: d.mode,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.entityName,
           entityId: d.entityId,
           scopeId: d.scopeId,
+          mode: d.mode,
         }),
       });
       break;

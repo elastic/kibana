@@ -10,7 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import type { QueryArgs, Row } from '../common';
-import { ANOMALY_COUNT_FIELD, getNumber } from '../common';
+import { ANOMALY_COUNT_FIELD, ENTITY_GRID_QUERY_KEY, getNumber } from '../common';
 import { findSortPageFetcher } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from '../queries/entities_in_view';
 import { createEsqlRunner } from '../queries/esql';
@@ -42,7 +42,7 @@ const GRID_QUERY_ERROR_TITLE = i18n.translate(
 export const MAX_LOADED_ROWS = 1_000;
 
 /** Prefix of every query of expanded groups' records, e.g. for `useIsFetching`. */
-export const ENTITY_GRID_CHILDREN_QUERY_KEY = ['entity-grid', 'children'] as const;
+export const ENTITY_GRID_CHILDREN_QUERY_KEY = [ENTITY_GRID_QUERY_KEY, 'children'] as const;
 
 /**
  * How long loaded rows stay fresh. A group's records rarely change while it is expanded, so
@@ -58,7 +58,7 @@ const isAnomalySort = ({ sortField }: UseEntityGridDataOptions) =>
 
 const getRowsKey = (context: GridContext, options: UseEntityGridDataOptions) =>
   [
-    'entity-grid',
+    ENTITY_GRID_QUERY_KEY,
     getKeyScope(options),
     'rows',
     {
@@ -81,15 +81,15 @@ const getCountKey = (
   countQuery: readonly string[]
 ) =>
   [
-    'entity-grid',
+    ENTITY_GRID_QUERY_KEY,
     getKeyScope(options),
     'count',
     { spaceId: context.spaceId, countQuery: countQuery.join('\n') },
   ] as const;
 
-const getFilterOverridesKey = (context: GridContext, options: UseEntityGridDataOptions) =>
+const getFilterOverridesKey = (context: GridContext, options: OverridesOptions) =>
   [
-    'entity-grid',
+    ENTITY_GRID_QUERY_KEY,
     getKeyScope(options),
     'resolved-entity-filter-overrides',
     {
@@ -138,24 +138,34 @@ const fetchRows = async (
   };
 };
 
+type OverridesOptions = Pick<
+  UseEntityGridDataOptions,
+  'rowsMode' | 'entityExpression' | 'keyScope'
+>;
+
 const fetchFilterOverrides = (
   context: GridContext,
-  options: UseEntityGridDataOptions,
+  { rowsMode, entityExpression }: OverridesOptions,
   signal?: AbortSignal
-) =>
-  fetchResolvedEntityFilterOverrides(
-    getQueryArgs(context, options),
+) => {
+  const ready = getReadyContext(context);
+  if (!ready) throw new Error('entities index not resolved');
+  return fetchResolvedEntityFilterOverrides(
+    {
+      namespace: ready.spaceId,
+      concreteEntityIndexName: ready.concreteEntityIndexName,
+      rowsMode,
+      entityExpression,
+    },
     createEsqlRunner(context.searchService, signal)
   );
+};
 
 const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
   options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
 
 /** The resolved entities the entity filters add or remove, read before any query uses them. */
-const useResolvedEntityFilterOverrides = (
-  context: GridContext,
-  options: UseEntityGridDataOptions
-) =>
+const useResolvedEntityFilterOverrides = (context: GridContext, options: OverridesOptions) =>
   useQuery(
     getFilterOverridesKey(context, options),
     ({ signal }) => fetchFilterOverrides(context, options, signal),
@@ -203,6 +213,10 @@ const usePrefetch = (context: GridContext) =>
   );
 
 /** The rows of the sort column's query, the count of the view, and the computed columns of rows in view. */
+/** The overrides the grid's rows read, for another view of the same rows (Group by). */
+export const useEntityFilterOverrides = (options: OverridesOptions) =>
+  useResolvedEntityFilterOverrides(useGridContext(), options);
+
 export const useEntityGridData = (
   requestedOptions: UseEntityGridDataOptions,
   /** Enrich only the rows the grid reports in view, through `onRowsInViewChange`. */

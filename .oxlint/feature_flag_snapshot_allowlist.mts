@@ -35,7 +35,7 @@ export const featureFlagSnapshotAllowlist: readonly string[] = [
   'x-pack/platform/plugins/shared/fleet/server/services/outputs/kafka_auth_feature_flags.ts',
   'x-pack/platform/plugins/shared/fleet/server/services/utils/iac_provisioner.ts',
   'x-pack/platform/plugins/shared/fleet/server/services/utils/sentinel_policy_version.ts',
-  'x-pack/platform/plugins/shared/ingest_hub/public/onboarding/register_onboarding_app.ts',
+  'x-pack/platform/plugins/shared/ingest_hub/public/onboarding/core/register_onboarding_app.ts',
   'x-pack/platform/plugins/shared/ingest_hub/public/plugin.tsx',
   'x-pack/platform/plugins/shared/lens/common/feature_flags.ts',
   'x-pack/platform/plugins/shared/logs_shared/public/plugin.tsx',

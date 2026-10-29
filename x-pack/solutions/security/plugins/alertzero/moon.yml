@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-solution'
   sourceRoot: x-pack/solutions/security/plugins/alertzero
 dependsOn:
+  - '@kbn/securitysolution-alerts-page-url'
+  - '@kbn/std'
   - '@kbn/security-plugin-types-server'
   - '@kbn/security-plugin'
   - '@kbn/agentic-investigations-common'
@@ -85,6 +87,10 @@ dependsOn:
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/context-engine-plugin'
   - '@kbn/task-manager-plugin'
+  - '@kbn/unsaved-changes-prompt'
+  - '@kbn/telemetry-plugin'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/core-elasticsearch-server-mocks'
 tags:
   - plugin
   - prod
@@ -97,6 +103,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -24,13 +24,21 @@ const mockUseRuleCatalog = jest.fn();
 jest.mock('../../../../hooks/use_rule_catalog', () => ({
   useRuleCatalog: () => mockUseRuleCatalog(),
 }));
+jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../../settings/components/apps_section/use_relay_app_bindings'),
+  useAllRelayAppBindings: () => ({
+    bindings: [],
+    isLoading: false,
+    isError: false,
+    isComplete: true,
+  }),
+}));
 
 const legacyPatternTrigger: TriggerFormValues = {
   kind: 'alert',
   ruleNamePattern: 'cpu',
   ruleNames: [],
   ruleTags: [],
-  alertStatus: 'any',
 };
 
 const onTriggerChange = jest.fn();
@@ -124,14 +132,8 @@ describe('AutomationTriggerSection', () => {
     fireEvent.click(await screen.findByText('CPU usage high'));
     expect(lastTrigger()).toMatchObject({ kind: 'alert', ruleNames: ['CPU usage high'] });
     expect(screen.getByTestId('automationRulePicker')).toHaveTextContent('CPU usage high');
-
-    fireEvent.click(screen.getByTestId('automationStatusPicker'));
-    fireEvent.click(await screen.findByText('Recovered'));
-    expect(lastTrigger()).toMatchObject({ alertStatus: 'inactive' });
-    expect(screen.getByTestId('automationStatusPicker')).toHaveTextContent('Recovered');
-
-    fireEvent.click(screen.getByText('Active'));
-    expect(lastTrigger()).toMatchObject({ alertStatus: 'any' });
+    expect(screen.getByText('changes to')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
   });
 
   it('selects rules and tags in the rule picker', async () => {

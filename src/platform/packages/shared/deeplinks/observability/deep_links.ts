@@ -9,6 +9,7 @@
 
 import type {
   APM_APP_ID,
+  ENTITY_INVENTORY_APP_ID,
   LOGS_APP_ID,
   METRICS_APP_ID,
   OBSERVABILITY_LOGS_EXPLORER_APP_ID,
@@ -20,6 +21,7 @@ import type {
   SLO_APP_ID,
   AI_ASSISTANT_APP_ID,
   OBLT_UX_APP_ID,
+  OBLT_DIGITAL_EXPERIENCE_APP_ID,
   OBLT_PROFILING_APP_ID,
   INVENTORY_APP_ID,
   STREAMS_APP_ID,
@@ -42,10 +44,12 @@ type ObservabilityOnboardingApp = typeof OBSERVABILITY_ONBOARDING_APP_ID;
 type SloApp = typeof SLO_APP_ID;
 type AiAssistantApp = typeof AI_ASSISTANT_APP_ID;
 type ObltUxApp = typeof OBLT_UX_APP_ID;
+type ObltDigitalExperienceApp = typeof OBLT_DIGITAL_EXPERIENCE_APP_ID;
 type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
 type InventoryApp = typeof INVENTORY_APP_ID;
 type StreamsApp = typeof STREAMS_APP_ID;
 type SignificantEventsApp = typeof SIGNIFICANT_EVENTS_APP_ID;
+type EntityInventoryApp = typeof ENTITY_INVENTORY_APP_ID;
 type IngestHubApp = typeof INGEST_HUB_APP_ID;
 type OnboardingApp = typeof ONBOARDING_APP_ID;
 type NightshiftApp = typeof NIGHTSHIFT_APP_ID;
@@ -64,6 +68,7 @@ export type AppId =
   | SloApp
   | AiAssistantApp
   | ObltUxApp
+  | ObltDigitalExperienceApp
   | ObltProfilingApp
   | InventoryApp
   | StreamsApp
@@ -71,7 +76,8 @@ export type AppId =
   | IngestHubApp
   | OnboardingApp
   | NightshiftApp
-  | ObservabilityAlertingApp;
+  | ObservabilityAlertingApp
+  | EntityInventoryApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
@@ -90,6 +96,8 @@ export type MetricsLinkId =
   | 'hosts'
   | 'settings'
   | 'assetDetails';
+
+export type EntityInventoryAppLinkId = 'allResources' | 'hosts' | 'kubernetes';
 
 export type ApmLinkId =
   | 'services'
@@ -110,7 +118,7 @@ export type StreamsLinkId = 'overview';
 
 export type SignificantEventsLinkId = 'events' | 'rules';
 
-export type NightshiftLinkId = 'knowledge_indicators' | 'sources';
+export type NightshiftLinkId = 'detections' | 'knowledge_indicators' | 'rules' | 'sources';
 
 export type ObservabilityAlertingLinkId =
   | 'alerts'
@@ -143,4 +151,5 @@ export type DeepLinkId =
   | `${StreamsApp}:${StreamsLinkId}`
   | `${SignificantEventsApp}:${SignificantEventsLinkId}`
   | `${NightshiftApp}:${NightshiftLinkId}`
-  | `${ObservabilityAlertingApp}:${ObservabilityAlertingLinkId}`;
+  | `${ObservabilityAlertingApp}:${ObservabilityAlertingLinkId}`
+  | `${EntityInventoryApp}:${EntityInventoryAppLinkId}`;

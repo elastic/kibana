@@ -9,36 +9,33 @@
 
 import { i18n } from '@kbn/i18n';
 
-const PAGE_TITLE = i18n.translate('workflowsManagement.externalResume.pageTitle', {
+const PAGE_TITLE = i18n.translate('workflows.externalResume.pageTitle', {
   defaultMessage: 'Workflow response',
 });
 
-const SUCCESS_TITLE = i18n.translate('workflowsManagement.externalResume.successTitle', {
+const SUCCESS_TITLE = i18n.translate('workflows.externalResume.successTitle', {
   defaultMessage: 'Thank you',
 });
 
-const SUCCESS_MESSAGE = i18n.translate('workflowsManagement.externalResume.successMessage', {
+const SUCCESS_MESSAGE = i18n.translate('workflows.externalResume.successMessage', {
   defaultMessage: 'Your response was received. You can close this window.',
 });
 
-const ERROR_TITLE = i18n.translate('workflowsManagement.externalResume.errorTitle', {
+const ERROR_TITLE = i18n.translate('workflows.externalResume.errorTitle', {
   defaultMessage: 'Unable to submit response',
 });
 
-const FORM_TITLE = i18n.translate('workflowsManagement.externalResume.formTitle', {
+const FORM_TITLE = i18n.translate('workflows.externalResume.formTitle', {
   defaultMessage: 'Submit your response',
 });
 
-const FORM_SUBMIT_LABEL = i18n.translate('workflowsManagement.externalResume.formSubmitLabel', {
+const FORM_SUBMIT_LABEL = i18n.translate('workflows.externalResume.formSubmitLabel', {
   defaultMessage: 'Submit',
 });
 
-const FORM_DEFAULT_MESSAGE = i18n.translate(
-  'workflowsManagement.externalResume.formDefaultMessage',
-  {
-    defaultMessage: 'Please provide the requested information below.',
-  }
-);
+const FORM_DEFAULT_MESSAGE = i18n.translate('workflows.externalResume.formDefaultMessage', {
+  defaultMessage: 'Please provide the requested information below.',
+});
 
 function escapeHtml(value: string): string {
   return value

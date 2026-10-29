@@ -47,13 +47,17 @@ export const evalGuardedTypedEuids = (outputColumn: string): string =>
   ].join('\n');
 
 /**
- * Derives one EUID per document into `entity.id` (first of user, host, service).
+ * Derives the EUIDs of every entity a document names, one row per entity, into `entity.id`: a
+ * document can carry several of the user, host and service ids, and counts as an event of each.
  * Anomaly queries use it: ML records do not carry `entity.id`.
  */
 export const buildEuidStages = (): string[] => [
   ...buildPerTypeEuidEvals(),
-  `| EVAL \`entity.id\` = COALESCE(${ALLOWED_ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`,
-  '| WHERE `entity.id` IS NOT NULL',
+  // A temp column, as the anomalies index maps its own `entity.id`, which must not be grouped on.
+  evalGuardedTypedEuids('derived_euids'),
+  '| MV_EXPAND derived_euids',
+  '| WHERE derived_euids IS NOT NULL',
+  '| RENAME derived_euids AS `entity.id`',
 ];
 
 /**

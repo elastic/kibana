@@ -30,7 +30,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
 
   async function readRuleEnabledBadge() {
-    if (await testSubjects.exists('ruleEnabledBadge')) {
+    // Race both badge variants: the header briefly drops the direct badge while it re-renders.
+    const variant = await testSubjects.waitForFirst([
+      'ruleEnabledBadge',
+      'appHeaderBadgesOverflow',
+    ]);
+    if (variant !== 'appHeaderBadgesOverflow') {
       return await testSubjects.getVisibleText('ruleEnabledBadge');
     }
     await testSubjects.click('appHeaderBadgesOverflow');

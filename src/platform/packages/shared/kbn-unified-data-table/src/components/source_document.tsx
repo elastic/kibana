@@ -16,7 +16,13 @@ import type {
 } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { formatFieldValueReact, formatHitReact } from '@kbn/discover-utils';
+import {
+  canTruncateFieldValue,
+  formatFieldValueReact,
+  formatHitReact,
+  MAX_RENDERED_FIELD_VALUE_LENGTH,
+  truncateFieldValue,
+} from '@kbn/discover-utils';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -71,8 +77,9 @@ export function SourceDocument({
         fieldFormats,
         dataSource,
         isEsql,
-        isInteractive
-      ).slice(0, maxEntries)
+        isInteractive,
+        maxEntries
+      )
     : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, dataSource, {
         ...(isEsql ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined),
         isInteractive,
@@ -110,6 +117,12 @@ export function SourceDocument({
   );
 }
 
+type UnformattedTopLevelObjectPair = [
+  fieldDisplayName: string,
+  values: unknown[],
+  fieldName: string
+];
+
 /**
  * Helper function to show top level objects
  * this is used for legacy stuff like displaying products of our ecommerce dataset
@@ -122,46 +135,73 @@ function getTopLevelObjectPairsReact(
   fieldFormats: FieldFormatsStart,
   dataSource: DataSource | undefined,
   skipNullishValues: boolean,
-  isInteractive: boolean
+  isInteractive: boolean,
+  maxEntries: number
 ): FormattedHit {
   const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
   const highlights: Record<string, unknown> = (row.raw.highlight as Record<string, unknown>) ?? {};
-  const highlightPairs: FormattedHit = [];
-  const sourcePairs: FormattedHit = [];
+  const highlightPairs: UnformattedTopLevelObjectPair[] = [];
+  const sourcePairs: UnformattedTopLevelObjectPair[] = [];
   Object.entries(innerColumns).forEach(([key, values]) => {
     if (skipNullishValues && (row.flattened[key] ?? null) === null) {
       return;
     }
 
-    const subField = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName: key });
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;
-    // Join ReactNode values with ', ' separator, using keyed Fragments to avoid React warnings
-    const formatted: ReactNode = values.map((value: unknown, idx) => (
-      <Fragment key={`${key}-${idx}`}>
-        {idx > 0 ? ', ' : null}
-        {formatFieldValueReact({
-          value,
-          hit: row.raw,
-          fieldFormats,
-          dataView,
-          field: subField,
-          options: { isInteractive },
-        })}
-      </Fragment>
-    ));
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     if (displayKey) {
       if (shouldShowFieldHandler(displayKey)) {
-        pairs.push([displayKey, formatted, key]);
+        pairs.push([displayKey, values, key]);
       }
     } else {
-      pairs.push([key, formatted, key]);
+      pairs.push([key, values, key]);
     }
   });
-  return [...highlightPairs, ...sourcePairs];
+
+  // Format only the values of pairs which will be rendered
+  return [...highlightPairs, ...sourcePairs]
+    .slice(0, maxEntries)
+    .map(([displayKey, values, key]): FormattedHit[number] => {
+      const subField = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName: key });
+      // All values of a pair share one length budget, the cut value is formatted from its original to keep highlights
+      const { value: truncatedValues } = truncateFieldValue(
+        values,
+        canTruncateFieldValue({ fieldFormats, dataView, field: subField })
+          ? MAX_RENDERED_FIELD_VALUE_LENGTH
+          : undefined
+      );
+      const shownValues = Array.isArray(truncatedValues) ? truncatedValues : values;
+      const hasHiddenValues =
+        shownValues.length < values.length &&
+        shownValues[shownValues.length - 1] === values[shownValues.length - 1];
+      // Join ReactNode values with ', ' separator, using keyed Fragments to avoid React warnings
+      const formatted: ReactNode[] = shownValues.map((shownValue: unknown, idx) => (
+        <Fragment key={`${key}-${idx}`}>
+          {idx > 0 ? ', ' : null}
+          {formatFieldValueReact({
+            value: values[idx],
+            hit: row.raw,
+            fieldFormats,
+            dataView,
+            field: subField,
+            options: { isInteractive },
+            maxDisplayLength:
+              typeof shownValue === 'string' && shownValue !== values[idx]
+                ? shownValue.length
+                : undefined,
+          })}
+        </Fragment>
+      ));
+
+      if (hasHiddenValues) {
+        formatted.push('…');
+      }
+
+      return [displayKey, formatted, key];
+    });
 }
 
 // eslint-disable-next-line import/no-default-export

@@ -9,6 +9,29 @@ import { createAlert, createSuppressionRow } from '../fixtures/test_utils';
 import { SuppressionIndex } from './suppression_index';
 
 describe('SuppressionIndex', () => {
+  it.each([
+    [{ last_snooze_action: 'snooze' }, { reason: 'snooze', action_subtype: 'snooze' }],
+    [{ last_ack_action: 'ack' }, { reason: 'ack', action_subtype: 'ack' }],
+    [
+      { last_deactivate_action: 'deactivate' },
+      { reason: 'deactivate', action_subtype: 'deactivate' },
+    ],
+    [{}, { reason: 'unknown suppression reason', action_subtype: 'unknown' }],
+  ])('returns the subtype alongside the reason for %j', (row, expected) => {
+    const index = SuppressionIndex.of([
+      createSuppressionRow({
+        rule_id: 'r1',
+        group_hash: 'h1',
+        alert_id: 'e1',
+        should_suppress: true,
+        ...row,
+      }),
+    ]);
+
+    const alert = createAlert({ rule_id: 'r1', group_hash: 'h1', alert_id: 'e1' });
+    expect(index.suppressionFor(alert)).toEqual(expected);
+  });
+
   it('suppresses by alert-level match', () => {
     const index = SuppressionIndex.of([
       createSuppressionRow({

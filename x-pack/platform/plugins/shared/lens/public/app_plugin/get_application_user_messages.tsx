@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
-import type { Dispatch } from 'redux-toolkit-v1';
+import type { Dispatch } from '@reduxjs/toolkit';
 import { partition } from 'lodash';
 import type {
   DataViewsState,
@@ -26,9 +26,11 @@ import type {
   Visualization,
   LensPublicCallbacks,
 } from '@kbn/lens-common';
+import { LENS_ERROR_CODES, type LensErrorCode } from '@kbn/lens-embeddable-utils';
 import { updateDatasourceState, updateVisualizationState } from '../state_management';
 import { getMissingIndexPattern } from '../editor_frame_service/editor_frame/state_helpers';
 import {
+  EDITOR_LOAD_ERROR,
   EDITOR_MISSING_DATAVIEW,
   EDITOR_MISSING_EXPRESSION_DATAVIEW,
   EDITOR_MISSING_VIS_TYPE,
@@ -36,6 +38,7 @@ import {
   EDITOR_UNKNOWN_VIS_TYPE,
 } from '../user_messages_ids';
 import { nonNullable } from '../utils';
+import { getLensErrorCode } from '../../common/errors';
 
 export interface UserMessageGetterProps {
   visualizationType: string | null | undefined;
@@ -85,6 +88,42 @@ export const getApplicationUserMessages = ({
 
   return messages;
 };
+
+const LOAD_ERROR_TEXTS: Record<LensErrorCode, string> = {
+  [LENS_ERROR_CODES.DATA_VIEW_NOT_FOUND]: i18n.translate('xpack.lens.loadError.dataViewNotFound', {
+    defaultMessage: 'The data view used by this visualization could not be found.',
+  }),
+  [LENS_ERROR_CODES.DATASOURCE_NOT_FOUND]: i18n.translate(
+    'xpack.lens.loadError.datasourceNotFound',
+    {
+      defaultMessage: 'Could not find datasource for the visualization',
+    }
+  ),
+  [LENS_ERROR_CODES.DATASOURCE_UNSUPPORTED]: i18n.translate(
+    'xpack.lens.loadError.datasourceUnsupported',
+    {
+      defaultMessage: 'The datasource type used by this visualization is not supported.',
+    }
+  ),
+  [LENS_ERROR_CODES.INVALID_CONFIGURATION]: i18n.translate(
+    'xpack.lens.loadError.invalidConfiguration',
+    {
+      defaultMessage: 'The visualization configuration is invalid and cannot be displayed.',
+    }
+  ),
+};
+
+export function getLoadErrorMessage(error: Error): UserMessage {
+  const code = getLensErrorCode(error);
+  return {
+    uniqueId: EDITOR_LOAD_ERROR,
+    severity: 'error',
+    displayLocations: [{ id: 'visualizationOnEmbeddable' }],
+    fixableInEditor: false,
+    shortMessage: '',
+    longMessage: code ? LOAD_ERROR_TEXTS[code] : error.message,
+  };
+}
 
 function getMissingVisTypeError(): UserMessage {
   return {

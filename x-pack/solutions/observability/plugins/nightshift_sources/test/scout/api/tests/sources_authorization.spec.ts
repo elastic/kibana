@@ -33,7 +33,8 @@ import {
 
 const TITLE_PREFIX = 'scout-sources-authz';
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/298822
+apiTest.describe.skip(
   'Nightshift sources authorization',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

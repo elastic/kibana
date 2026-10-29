@@ -26,6 +26,7 @@ cmd="node scripts/capture_oas_snapshot\
   --include-path /api/workflows \
   --include-path /api/dashboards \
   --include-path /api/visualizations \
+  --include-path /api/data_views/v2 \
   --include-path /api/discover_sessions \
   --include-path /api/markdowns \
   --include-path /api/links \

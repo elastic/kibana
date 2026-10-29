@@ -7,7 +7,16 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { UseQueryResult } from '@kbn/react-query';
-import { EuiEmptyPrompt, EuiIcon, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,7 +30,8 @@ import { encodeQuery } from '@kbn/cloud-security-posture';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import type { PosturePolicyTemplate, ComplianceDashboardDataV2 } from '../../../common/types_old';
-import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
+import { CspAppHeader } from '../../components/csp_app_header';
+import { useDashboardsBackTarget } from '../../common/navigation/use_dashboards_back_target';
 import type { CspNoDataPageProps } from '../../components/cloud_posture_page';
 import {
   CloudPosturePage,
@@ -35,7 +45,7 @@ import {
   KUBERNETES_DASHBOARD_CONTAINER,
   KUBERNETES_DASHBOARD_TAB,
   CLOUD_DASHBOARD_TAB,
-  CLOUD_POSTURE_DASHBOARD_PAGE_HEADER,
+  CLOUD_POSTURE_DASHBOARD_TABS,
 } from './test_subjects';
 import { useCspmStatsApi, useKspmStatsApi } from '../../common/api/use_stats_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
@@ -336,6 +346,8 @@ export const ComplianceDashboard = () => {
   const location = useLocation();
   const history = useHistory();
   const { services } = useKibana();
+  const { euiTheme } = useEuiTheme();
+  const backTarget = useDashboardsBackTarget();
 
   const currentTabUrlState: PosturePolicyTemplate | undefined = useMemo(() => {
     let tab: PosturePolicyTemplate | undefined;
@@ -454,38 +466,47 @@ export const ComplianceDashboard = () => {
     services.data.query.filterManager,
   ]);
 
-  // if there is more than one namespace, show the namespace selector in the header
-  const rightSideItems = useMemo(
-    () =>
-      namespaces.length > 0
-        ? [
-            <NamespaceSelector
-              data-test-subj="namespace-selector"
-              key={`namespace-selector-${currentTabUrlState}`}
-              namespaces={namespaces}
-              activeNamespace={activeNamespace}
-              onNamespaceChange={onActiveNamespaceChange}
-            />,
-          ]
-        : [],
-    [namespaces, currentTabUrlState, activeNamespace, onActiveNamespaceChange]
-  );
-
   return (
     <CloudPosturePage>
-      <EuiPageHeader
-        data-test-subj={CLOUD_POSTURE_DASHBOARD_PAGE_HEADER}
-        bottomBorder
-        pageTitle={
-          <CloudPosturePageTitle
-            title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
-              defaultMessage: 'Cloud Security Posture',
-            })}
-          />
-        }
-        rightSideItems={rightSideItems}
-        tabs={tabs.map(({ content, ...rest }) => rest)}
+      <CspAppHeader
+        title={i18n.translate('xpack.csp.dashboard.cspPageTemplate.pageTitle', {
+          defaultMessage: 'Cloud Security Posture',
+        })}
+        back={backTarget}
       />
+      {tabs.length > 0 && (
+        <EuiFlexGroup
+          data-test-subj={CLOUD_POSTURE_DASHBOARD_TABS}
+          alignItems="center"
+          gutterSize="m"
+          responsive={false}
+          css={css`
+            border-bottom: ${euiTheme.border.thin};
+          `}
+        >
+          <EuiFlexItem>
+            <EuiTabs bottomBorder={false}>
+              {tabs.map(({ content, label, ...rest }) => (
+                <EuiTab key={rest['data-test-subj']} {...rest}>
+                  {label}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </EuiFlexItem>
+          {/* if there is more than one namespace, show the namespace selector next to the tabs */}
+          {namespaces.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <NamespaceSelector
+                data-test-subj="namespace-selector"
+                key={`namespace-selector-${currentTabUrlState}`}
+                namespaces={namespaces}
+                activeNamespace={activeNamespace}
+                onNamespaceChange={onActiveNamespaceChange}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
 
       <EuiSpacer />
       <div

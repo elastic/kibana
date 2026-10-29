@@ -17,9 +17,8 @@ import {
   buildInvestigationConversation,
   buildInvestigationRound,
 } from '../decision_trees/investigation_round';
+import { investigationRoundInputsSchema, loadInvestigationRound } from '../investigation_round';
 import { DECISION_TREE_LEARNING_TOOL_IDS } from '../tools/decision_tree';
-import { withToolResults } from './cortex_optimize';
-import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
 const MAX_INPUT_CHARS = 100_000;
 
@@ -38,16 +37,12 @@ export const decisionTreeReinforceStepDefinition = ({
       "Runs the reinforcement agent with the investigator's round as conversation history (its " +
       'tool calls and their results as real tool messages), followed by the prepared turn message.',
     inputSchema: z.object({
+      ...investigationRoundInputsSchema,
       prompt: z.string().max(MAX_INPUT_CHARS).describe('The user message that started the round.'),
       response: z
         .string()
         .max(MAX_INPUT_CHARS)
         .describe("The investigator's final response for the round."),
-      round_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe("Id of the investigator's round, reused for the rebuilt history round."),
       message: z
         .string()
         .max(MAX_INPUT_CHARS)
@@ -60,10 +55,6 @@ export const decisionTreeReinforceStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector for the reinforcement run.'),
-      tool_calls: toolCallsSchema.describe('Investigator tool calls from this round.'),
-      tool_results: toolResultsSchema.describe(
-        'Results of the investigator tool calls, keyed by tool_call_id.'
-      ),
     }),
     outputSchema: z.object({
       message: z.string().describe("The reinforcement agent's final response."),
@@ -85,21 +76,37 @@ export const decisionTreeReinforceStepDefinition = ({
       const {
         prompt,
         response,
+        conversation_id: conversationId,
         round_id: roundId,
+        round_index: roundIndex,
         message,
         turn_kind: turnKind,
         connector_id: connectorId,
         tool_calls: toolCalls,
         tool_results: toolResults,
       } = context.input;
+      const request = context.contextManager.getFakeRequest();
+      const loadedRound = await loadInvestigationRound({
+        agentBuilder,
+        request,
+        conversationId: conversationId || undefined,
+        roundId: roundId || undefined,
+        roundIndex,
+        fallbackToolCalls: (toolCalls ?? []) as InvestigationToolCall[],
+        fallbackToolResults: toolResults ?? [],
+        logger: context.logger,
+        signal: context.abortSignal,
+      });
       const now = new Date().toISOString();
       const round = buildInvestigationRound({
         // Liquid renders an absent input as '', so empty strings count as unset.
-        roundId: roundId || uuidv4(),
+        roundId: loadedRound.roundId || roundId || uuidv4(),
         prompt,
         response,
-        toolCalls: withToolResults((toolCalls ?? []) as InvestigationToolCall[], toolResults ?? []),
-        startedAt: now,
+        toolCalls: loadedRound.toolCalls,
+        steps: loadedRound.source === 'persisted_round' ? loadedRound.steps : undefined,
+        rawSteps: loadedRound.source === 'persisted_round' ? loadedRound.rawSteps : undefined,
+        startedAt: loadedRound.startedAt ?? now,
       });
       // A fresh id per run: the beforeAgent hydrate namespaces the sandbox by conversation id.
       const conversation = buildInvestigationConversation({
@@ -116,7 +123,7 @@ export const decisionTreeReinforceStepDefinition = ({
 
       // The workflow step's `timeout` bounds the run: its timeout zone aborts this signal.
       const { result } = await agentBuilder.agents.runAgent({
-        request: context.contextManager.getFakeRequest(),
+        request,
         agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
         interactive: { enabled: false },
         defaultConnectorId: connectorId || undefined,

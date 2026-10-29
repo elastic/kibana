@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import {
   type AttackDiscoveryAlert,

@@ -16,7 +16,7 @@ import { useKnowledgeIndicatorsBulkDelete } from '../../data/knowledge_indicator
 import { useQueriesApi, type PromoteResult } from '../../data/rules/use_queries_api';
 import { useInvalidatePromoteRelatedQueries } from '../../data/knowledge_indicators/use_invalidate_promote_queries';
 import { useKibana } from '../../hooks/use_kibana';
-import { getFormattedError } from '../../common/errors';
+import { BULK_WRITE_CONFLICT_MESSAGE, getFormattedError } from '../../common/errors';
 import { KI_ROW_ACTION_MUTATION_KEY } from './components/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
 import { getKnowledgeIndicatorTitle } from './utils/get_knowledge_indicator_title';
@@ -169,11 +169,14 @@ export function useKnowledgeIndicatorsTable() {
 
       setIsBulkOperationInProgress(true);
       try {
-        const { failedCount } = await operation(features);
-        if (failedCount === 0) {
+        const { failedCount, conflictCount } = await operation(features);
+        if (failedCount === 0 && conflictCount === 0) {
           toasts.addSuccess({ title: successTitle });
         } else {
-          toasts.addWarning({ title: partialTitle });
+          toasts.addWarning({
+            title: partialTitle,
+            text: conflictCount > 0 ? BULK_WRITE_CONFLICT_MESSAGE : undefined,
+          });
         }
         setSelectedKnowledgeIndicators([]);
         closeFlyout();
@@ -226,8 +229,10 @@ export function useKnowledgeIndicatorsTable() {
       closeFlyout();
       await invalidatePromoteRelatedQueries();
     },
-    onError: (error) => {
+    onError: async (error) => {
       toasts.addError(getFormattedError(error), { title: BULK_PROMOTE_ERROR_TITLE });
+      // Other sources may have been promoted before this one failed.
+      await invalidatePromoteRelatedQueries();
     },
   });
 

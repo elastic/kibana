@@ -8,6 +8,7 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
+import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../../../flyout/entity_details/shared/components/right/test_ids';
 import {
   mockEntityRecord,
   mockHostRiskScoreState,
@@ -31,7 +32,7 @@ jest.mock('../../../../common/components/visualization_actions/visualization_emb
 jest.mock('../../../use_flyout_api');
 const mockFlyoutApi = createFlyoutApiMock();
 
-// Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the CSP tools.
+// Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the tools.
 jest.mock('./content', () => {
   const actual = jest.requireActual('./content');
   const { CspInsightLeftPanelSubTab, EntityDetailsLeftPanelTab } = jest.requireActual(
@@ -39,6 +40,11 @@ jest.mock('./content', () => {
   );
   const Content = (props: { openDetailsPanel: (path: EntityDetailsPath) => void }) => (
     <>
+      <button
+        type="button"
+        data-test-subj="openAnomalyInsights"
+        onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.ANOMALIES })}
+      />
       {Object.values(CspInsightLeftPanelSubTab).map((subTab) => (
         <button
           key={subTab as string}
@@ -270,6 +276,32 @@ describe('<Host />', () => {
       expect(queryByTestId('asset-criticality-edit-chevron')).not.toBeInTheDocument();
     });
 
+    it('shows the Table tab when there are no aliases', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord);
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <Host {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId(ENTITY_PANEL_TABLE_TAB_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('hides the Table tab in the group view', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <Host {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(ENTITY_PANEL_TABLE_TAB_TEST_ID)).not.toBeInTheDocument();
+    });
+
     it('shows the "Resolved from N records" badge counting the target and its aliases', () => {
       mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
       withStoreRecords(targetRecord, [aliasRecord]);
@@ -282,6 +314,25 @@ describe('<Host />', () => {
 
       expect(getByTestId('host-panel-header-observed-badge')).toHaveTextContent(
         'Resolved from 2 records'
+      );
+    });
+
+    it('counts every group member in the badge even when the loaded aliases are capped', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+      mockedUseEntityFromStore.mockReturnValue({
+        ...mockedUseEntityFromStore(),
+        aliasCount: 250,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <Host {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId('host-panel-header-observed-badge')).toHaveTextContent(
+        'Resolved from 251 records'
       );
     });
 
@@ -386,12 +437,10 @@ describe('<Host />', () => {
 
         expect(getByTestId('risk-summary-table')).toBeInTheDocument();
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
-        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent(
-          'Entity risk contributions'
-        );
+        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
       });
     });
-    describe('CSP insights tools', () => {
+    describe('detail tools', () => {
       const renderResolved = () => {
         mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
         withStoreRecords(targetRecord, [aliasRecord]);
@@ -401,6 +450,13 @@ describe('<Host />', () => {
           </TestProviders>
         );
       };
+
+      it('passes the panel mode and scope to the anomaly insights tool', () => {
+        fireEvent.click(renderResolved().getByTestId('openAnomalyInsights'));
+        expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(
+          expect.objectContaining({ value: 'test', mode: 'resolved', scopeId: 'test-scope-id' })
+        );
+      });
 
       it('passes the panel mode and scope to the alerts insights tool', () => {
         fireEvent.click(renderResolved().getByTestId('openCspInsights-alertsTabId'));
