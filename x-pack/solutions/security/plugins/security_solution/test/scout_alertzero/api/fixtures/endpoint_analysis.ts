@@ -212,10 +212,23 @@ export const readSeedIdentifiers = async (
   runMarker: string,
   indices: readonly string[]
 ): Promise<SeedIdentifiers> => {
+  // The marker is matched through a runtime field over `_source`, not the mapped
+  // `labels.ad_portable_seed`: whether that field is mapped depends on which template created the
+  // index first (the endpoint package's `dynamic: false` templates and the alerts index never map
+  // it), so a plain `term` on it can match nothing.
   const response = await esClient.search({
     index: [...indices],
     size: 1000,
-    query: { term: { 'labels.ad_portable_seed': runMarker } },
+    runtime_mappings: {
+      seed_marker: {
+        type: 'keyword',
+        script: {
+          source:
+            'def labels = params._source.labels; if (labels instanceof Map && labels.ad_portable_seed != null) { emit(labels.ad_portable_seed.toString()); }',
+        },
+      },
+    },
+    query: { term: { seed_marker: runMarker } },
   });
   const hostNames = new Set<string>();
   const destinationHosts = new Set<string>();

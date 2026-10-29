@@ -27,8 +27,8 @@ export interface SeededScenario {
 }
 
 /**
- * Indexes one AD2 attack chain (alerts + raw endpoint events) tagged with a marker owned by this
- * run, so cleanup removes only what this run wrote.
+ * Indexes one AD2 attack chain (alerts + raw endpoint events) whose ids derive from a marker owned
+ * by this run, so cleanup removes only what this run wrote.
  */
 export const seedAttackScenario = async (
   esClient: EsClient,
@@ -64,8 +64,11 @@ export const seedAttackScenario = async (
       throw new Error(`Seeding (${op}) failed: ${JSON.stringify(response.items.slice(0, 3))}`);
     }
   };
-  // Removes only what this run wrote, keyed on the run marker. Shared by the failure rollback
-  // below and the returned cleanup so a partially seeded run cannot leak documents.
+  // Removes only what this run wrote, keyed on the plan's document ids (run-scoped digests).
+  // Not on `labels.ad_portable_seed`: an index may not map it, depending on its template.
+  // Shared by the failure rollback below and the returned cleanup so a partially seeded run
+  // cannot leak documents.
+  const seededIds = [...plan.alerts, ...plan.rawEvents].map((doc) => doc.id);
   const removeSeeded = async (): Promise<void> => {
     for (const index of AD2_SCENARIO_ALL_INDICES) {
       await esClient
@@ -73,7 +76,7 @@ export const seedAttackScenario = async (
           index,
           conflicts: 'proceed',
           refresh: true,
-          query: { term: { 'labels.ad_portable_seed': runMarker } },
+          query: { ids: { values: seededIds } },
         })
         .catch((error: { statusCode?: number }) => {
           if (error.statusCode !== 404) {
