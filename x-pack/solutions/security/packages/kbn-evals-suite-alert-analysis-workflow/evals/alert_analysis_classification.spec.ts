@@ -31,6 +31,9 @@
  *
  * Evaluators:
  *   - ClassificationAccuracy (CODE, primary): predicted verdict == golden label.
+ *   - Accuracy:<class> (CODE): the same comparison per expected class, scored only on examples of
+ *     that class, so a model that never answers `inconclusive` is visible.
+ *   - MaliciousNotClosed (CODE, guardrail): 0 when a true positive is classified false_positive.
  *   - ValidVerdict (CODE): structured output conforms (enum classification + confidence in [0,1]).
  *   - trajectory (CODE, agent only): zero-tool guardrail — agent must not call tools after
  *     pre-built context. A prompt has no tools, so the guardrail is not run for it.
@@ -55,6 +58,7 @@ import {
   createAlertAnalysisTrajectoryEvaluator,
   validVerdict,
 } from '../src/evaluators';
+import { maliciousNotClosed, perClassAccuracyEvaluators } from '../src/per_class_evaluators';
 import { ALERT_ANALYSIS_EVAL_ALERTS } from '../src/synthetic_alerts';
 import { ALERTS_INDEX } from '../src/constants';
 
@@ -145,6 +149,8 @@ evaluate.describe(
 
           const selectedEvaluators = selectEvaluators([
             classificationAccuracy,
+            ...perClassAccuracyEvaluators,
+            maliciousNotClosed,
             validVerdict,
             // A prompt has no tools to call, so the zero-tool guardrail only applies to the agent.
             ...(method === 'agent' ? [createAlertAnalysisTrajectoryEvaluator()] : []),
@@ -160,7 +166,8 @@ evaluate.describe(
                   description:
                     'Runs the managed system-security-alert-analysis workflow end-to-end against ' +
                     `${ALERT_ANALYSIS_EVAL_ALERTS.length} labeled synthetic alerts spanning the four ` +
-                    'confidence tiers (Tier 1/2 → true_positive, Tier 3/4 → false_positive) and grades ' +
+                    'confidence tiers (Tier 1/2 → true_positive, Tier 3/4 → false_positive), hard ' +
+                    'boundary cases, and alerts with no observable evidence (inconclusive), and grades ' +
                     `the ${
                       method === 'agent' ? 'ai.agent' : 'ai.prompt'
                     } step's classification against the golden label.`,
