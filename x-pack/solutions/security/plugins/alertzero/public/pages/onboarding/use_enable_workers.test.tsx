@@ -21,7 +21,10 @@ jest.mock('../../service_accounts/ensure_worker_service_accounts', () => ({
   ensureWorkerServiceAccounts: (...args: unknown[]) => mockEnsureWorkerServiceAccounts(...args),
 }));
 
-jest.mock('../../telemetry', () => ({ useReportToastError: () => jest.fn() }));
+jest.mock('../../telemetry', () => ({
+  useReportToastError: () => jest.fn(),
+  classifyError: jest.fn(),
+}));
 jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
 
 type PatchCall = [url: string, options: { version: string; body: string }];
@@ -35,7 +38,9 @@ const setup = (accountResult: Record<string, unknown>) => {
       http: { patch },
       serviceAccounts: {},
       isServerless: false,
-      notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
+      notifications: {
+        toasts: { addDanger: jest.fn(), addWarning: jest.fn(), addError: jest.fn() },
+      },
     },
   });
   mockEnsureWorkerServiceAccounts.mockImplementation(
@@ -61,7 +66,11 @@ const setup = (accountResult: Record<string, unknown>) => {
     () => useEnableWorkers([WORKER_ID, OTHER_ID], { [WORKER_ID]: true, [OTHER_ID]: false }),
     { wrapper }
   );
-  return { patch, enable: () => act(async () => result.current.handleEnableAndContinue()) };
+  return {
+    patch,
+    queryClient,
+    enable: () => act(async () => result.current.handleEnableAndContinue()),
+  };
 };
 
 describe('useEnableWorkers', () => {
@@ -106,6 +115,26 @@ describe('useEnableWorkers', () => {
         settingsRevision: 8,
       },
     ]);
+  });
+
+  it('refreshes the workers cache when a clear committed but the rebind failed', async () => {
+    const { patch, queryClient, enable } = setup({
+      ok: true,
+      serviceAccountId: 'kibana/bound',
+      replacedBound: true,
+    });
+    const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
+    patch.mockImplementation(async (url: string, { body }: PatchCall[1]) => {
+      const { settings } = JSON.parse(body);
+      if (url === buildWorkerUrl(WORKER_ID) && settings?.serviceAccountId === null) {
+        return { worker: { settingsRevision: 8 } };
+      }
+      throw new Error('patch failed');
+    });
+
+    await enable();
+
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.workers.list() });
   });
 
   it('does not clear the binding when the account is unusable', async () => {

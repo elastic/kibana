@@ -87,6 +87,7 @@ export const useEnableWorkers = (
     // that would prematurely unmount OnboardingPage before all PATCHes settle.
     // allSettled keeps isSaving true for the full fan-out so a single rejection does
     // not re-enable the button while the remaining PATCHes are still in-flight.
+    let committedClear = false;
     const results = await Promise.allSettled(
       idsToPatch.map(async (id) => {
         const turningOn = workerEnabled[id] === true;
@@ -111,6 +112,7 @@ export const useEnableWorkers = (
             settings: { serviceAccountId: null },
             settingsRevision,
           });
+          committedClear = true;
           settingsRevision = cleared.worker.settingsRevision;
         }
         return patchWorker({ enabled: true, settings: { serviceAccountId }, settingsRevision });
@@ -137,10 +139,11 @@ export const useEnableWorkers = (
       }
     });
 
-    if (hadFailure && hadSuccess) {
-      // A successful enable writes settings and bumps settingsRevision. Refresh before the
-      // button can be pressed again, or the retry resends the revision from before this save
-      // and the workers that landed come back as conflicts. This stays after the fan-out:
+    if (hadFailure && (hadSuccess || committedClear)) {
+      // A successful enable, or a clear whose rebind then failed, writes settings and bumps
+      // settingsRevision. Refresh before the
+      // button can be pressed again, or the retry resends the revision and binding from before
+      // this save and the workers that landed come back as conflicts. This stays after the fan-out:
       // per-patch cache writes would let LandingPage leave onboarding early.
       await queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
     }
