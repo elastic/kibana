@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
@@ -36,6 +36,8 @@ jest.mock('@kbn/core-di-browser', () => ({
   },
   CoreStart: (key: string) => key,
 }));
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const rule = (id: string, name: string) => ({ id, metadata: { name } });
 
@@ -95,6 +97,10 @@ describe('ExecutionHistorySearchBar — rule filter combobox', () => {
     mockRules();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('renders the rule filter combobox', () => {
     setup();
     expect(screen.getByTestId('executionHistoryRuleFilter')).toBeInTheDocument();
@@ -146,6 +152,8 @@ describe('ExecutionHistorySearchBar — rule filter combobox', () => {
   });
 
   it('debounces the rule search input before triggering a fetch', async () => {
+    jest.useFakeTimers();
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     setup();
 
     // Initial call — empty search.
@@ -153,22 +161,21 @@ describe('ExecutionHistorySearchBar — rule filter combobox', () => {
       expect.objectContaining({ search: undefined })
     );
 
-    const input = await openRuleFilter();
-    await userEvent.type(input, 'cpu');
+    const combo = screen.getByTestId('executionHistoryRuleFilter');
+    const input = within(combo).getByRole('combobox');
+    await user.click(input);
+    await user.type(input, 'cpu');
 
     // While debouncing, the fetch argument should still be the previous value.
     expect(mockUseFetchRules).toHaveBeenLastCalledWith(
       expect.objectContaining({ search: undefined })
     );
 
-    await waitFor(
-      () => {
-        expect(mockUseFetchRules).toHaveBeenLastCalledWith(
-          expect.objectContaining({ search: 'cpu' })
-        );
-      },
-      { timeout: 2000 }
-    );
+    act(() => {
+      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+    });
+
+    expect(mockUseFetchRules).toHaveBeenLastCalledWith(expect.objectContaining({ search: 'cpu' }));
   });
 
   it('clears the selection when the user removes all pills', async () => {
