@@ -131,16 +131,6 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
   };
 };
 
-const analyzed = (...tokens: string[]) => ({
-  tokens: tokens.map((token, position) => ({
-    token,
-    position,
-    start_offset: 0,
-    end_offset: 0,
-    type: '<ALPHANUM>',
-  })),
-});
-
 describe('SourcesClient', () => {
   describe('assertReadable', () => {
     const hasPrivileges = (client: ReturnType<typeof setup>['dataEsClient'], granted: boolean) =>

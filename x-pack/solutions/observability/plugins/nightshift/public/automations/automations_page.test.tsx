@@ -179,8 +179,6 @@ describe('AutomationsPage', () => {
     const deleteMutate = jest.fn();
     const toggleMutate = jest.fn();
 
-    const rowOf = (name: string) => screen.getByText(name).closest('tr') as HTMLElement;
-
     beforeEach(() => {
       createMutate.mockClear();
       deleteMutate.mockClear();

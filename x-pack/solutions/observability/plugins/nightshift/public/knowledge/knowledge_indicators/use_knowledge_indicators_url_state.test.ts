@@ -49,25 +49,6 @@ function makeFeatureKI(
   };
 }
 
-function makeQueryKI(opts: {
-  id: string;
-  title?: string;
-  source_id: string;
-  backed?: boolean;
-  type?: string;
-}): KnowledgeIndicator {
-  return {
-    kind: 'query',
-    query: {
-      id: opts.id,
-      title: opts.title ?? opts.id,
-      type: opts.type ?? 'match',
-    },
-    rule: { backed: opts.backed ?? false, id: opts.id },
-    source_id: opts.source_id,
-  } as KnowledgeIndicator;
-}
-
 const defaultParams = {
   knowledgeIndicators: [] as KnowledgeIndicator[],
   isLoading: false,

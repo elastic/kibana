@@ -13,13 +13,20 @@ import {
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
 } from '@kbn/alertzero-common';
 import { mostSevereFailure, resolveHuntModels } from './hunt_models';
-import { resolveScopedModel } from './scoped_model';
+import { resolveConfiguredScopedModel, resolveScopedModel } from './scoped_model';
 
-jest.mock('./scoped_model', () => ({ resolveScopedModel: jest.fn() }));
+jest.mock('./scoped_model', () => ({
+  resolveScopedModel: jest.fn(),
+  resolveConfiguredScopedModel: jest.fn(),
+}));
 
 const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof resolveScopedModel>;
+const resolveConfiguredScopedModelMock = resolveConfiguredScopedModel as jest.MockedFunction<
+  typeof resolveConfiguredScopedModel
+>;
 
 const logger = loggingSystemMock.createLogger();
 const request = {} as KibanaRequest;
@@ -44,6 +51,7 @@ describe('resolveHuntModels', () => {
     resolveScopedModelMock
       .mockReset()
       .mockImplementation(async ({ featureId }) => ({ ok: true, model: modelFor(featureId) }));
+    resolveConfiguredScopedModelMock.mockReset().mockResolvedValue(undefined);
   });
 
   it('resolves the tiers hunts use, each on its own feature id, by default', async () => {
@@ -57,6 +65,27 @@ describe('resolveHuntModels', () => {
     expect(resolveScopedModelMock).not.toHaveBeenCalledWith(
       expect.objectContaining({ featureId: ALERTZERO_BALANCED_INFERENCE_FEATURE_ID })
     );
+  });
+
+  it('leaves the tiers on their own models when the cyber row is empty', async () => {
+    const { models } = await resolve();
+
+    expect(models.cyber).toBeUndefined();
+    expect(resolveConfiguredScopedModelMock).toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID })
+    );
+  });
+
+  it('attaches a saved cyber-domain model without replacing the tier resolutions', async () => {
+    const cyber = modelFor(ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID);
+    resolveConfiguredScopedModelMock.mockResolvedValue(cyber);
+
+    const { models, failures } = await resolve();
+
+    expect(failures).toEqual([]);
+    expect(models.cyber).toBe(cyber);
+    expect(models.frontier).toEqual(modelFor(ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID));
+    expect(models.efficient).toEqual(modelFor(ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID));
   });
 
   it('resolves only the tiers it is asked for', async () => {

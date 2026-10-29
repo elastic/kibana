@@ -6,18 +6,38 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
 import { InvestigationList } from './investigation_list';
+
+let mockBasePath = '';
 
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      agenticInvestigations: {},
+      http: { basePath: { get: () => mockBasePath } },
+      agenticInvestigations: {
+        InvestigationCard: ({ investigation: item }: { investigation: InvestigationSummary }) => (
+          <div data-test-subj="investigationCard">{item.title}</div>
+        ),
+      },
     },
   }),
 }));
+
+const investigation: InvestigationSummary = {
+  id: 'investigation-1',
+  title: 'Checkout errors',
+  title_pending: false,
+  created_at: '2026-09-11T09:00:00.000Z',
+  updated_at: '2026-09-11T09:00:00.000Z',
+  agent_id: 'nightshift.investigation',
+  metadata: { status: 'open', severity: 'critical', summary: 'Checkout errors are elevated' },
+  in_progress: false,
+  subjects: [],
+};
 
 const makeSection = (
   id: InvestigationSectionState['id'],
@@ -62,5 +82,43 @@ describe('InvestigationList', () => {
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
+  });
+
+  describe('closing sections', () => {
+    const toggle = (id: string) => screen.getByTestId(`nightshiftInvestigationSectionToggle-${id}`);
+    const renderTwoSections = () =>
+      renderSections([
+        makeSection('critical', { investigations: [investigation], total: 1 }),
+        makeSection('high', { investigations: [investigation], total: 1 }),
+      ]);
+
+    beforeEach(() => {
+      window.localStorage.clear();
+      mockBasePath = '';
+    });
+
+    it('closes one section without opening or closing another', () => {
+      renderTwoSections();
+
+      fireEvent.click(toggle('critical'));
+      fireEvent.click(toggle('high'));
+
+      expect(toggle('critical')).toHaveAttribute('aria-expanded', 'false');
+      expect(toggle('high')).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('remembers a closed section in its own space', () => {
+      renderTwoSections();
+      fireEvent.click(toggle('critical'));
+      cleanup();
+
+      renderTwoSections();
+      expect(toggle('critical')).toHaveAttribute('aria-expanded', 'false');
+      cleanup();
+
+      mockBasePath = '/s/other-space';
+      renderTwoSections();
+      expect(toggle('critical')).toHaveAttribute('aria-expanded', 'true');
+    });
   });
 });

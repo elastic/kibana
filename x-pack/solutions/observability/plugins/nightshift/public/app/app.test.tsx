@@ -75,8 +75,8 @@ const manageCapabilities = {
 };
 
 // jsdom implements neither, and scrolling to a section is how a tile and `?severity=` both work.
-const scrollIntoView = jest.fn();
-Element.prototype.scrollIntoView = scrollIntoView;
+const scrollTo = jest.fn();
+Element.prototype.scrollTo = scrollTo;
 
 function makeSection(
   id: InvestigationSectionState['id'],
@@ -177,10 +177,11 @@ describe('NightshiftApp', () => {
   beforeEach(() => {
     refetchAll.mockClear();
     reportEvent.mockClear();
-    scrollIntoView.mockClear();
+    scrollTo.mockClear();
     mockUseKibana.mockReturnValue({
       services: {
         analytics,
+        http: { basePath: { get: () => '' } },
         application: {
           capabilities: { nightshift: manageCapabilities },
           getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
@@ -241,7 +242,7 @@ describe('NightshiftApp', () => {
     ).toBeInTheDocument();
   });
 
-  it('scrolls to a severity section from its tile', () => {
+  it('scrolls to a severity section from its tile', async () => {
     setSections({
       sections: defaultSections({
         critical: { investigations: [criticalInvestigation], total: 1 },
@@ -251,11 +252,38 @@ describe('NightshiftApp', () => {
     renderApp();
 
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
-    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(scrollTo).toHaveBeenCalled());
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('?severity=critical');
   });
 
-  it('keeps a severity tile actionable when its section failed to load, since it still renders', () => {
+  it.each([
+    ['its severity tile is clicked', undefined],
+    ['a ?severity= link points at it', '/?severity=critical'],
+  ])('opens a closed section when %s', async (_how, link) => {
+    setSections({
+      sections: defaultSections({
+        critical: { investigations: [criticalInvestigation], total: 1 },
+      }),
+    });
+    window.localStorage.setItem(
+      'nightshift.investigations.collapsedSections:default',
+      JSON.stringify(['critical'])
+    );
+
+    renderApp(link ? { initialEntries: [link] } : undefined);
+    if (!link) {
+      fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
+    }
+
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftInvestigationSectionToggle-critical')).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      )
+    );
+  });
+
+  it('keeps a severity tile actionable when its section failed to load, since it still renders', async () => {
     setSections({
       sections: defaultSections({ critical: { error: new Error('boom') } }),
     });
@@ -264,7 +292,7 @@ describe('NightshiftApp', () => {
 
     expect(screen.getByTestId('nightshiftInvestigationSection-critical')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
-    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(scrollTo).toHaveBeenCalled());
   });
 
   it("opens the selected investigation's conversation details flyout and clears the URL on close", async () => {
