@@ -34,7 +34,7 @@ In {{sn}}, you need:
   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **Security incidents** (Create security incident): `sn_si_incident_write`.
   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **Delete record**: admin or equivalent role on the target table.
   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **ITOM events** (Create event): `evt_mgmt_integration`, or `evt_mgmt_operator` or `evt_mgmt_admin`.
-  - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+` **AI Agent Studio A2A** (Send A2A message): `sn_aia.integration` (or `sn_aia.admin`), `snc_platform_rest_api_access`, and any functional roles required by the target AI Agent.
+  - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.7+` **AI Agent Studio A2A** (Send A2A message): `sn_aia.integration` (or `sn_aia.admin`), `rest_service`, `snc_platform_rest_api_access`, and any functional roles required by the target AI Agent.
 
 In {{kib}}, you need:
 
@@ -328,7 +328,7 @@ Send A2A message {applies_to}`serverless: preview` {applies_to}`stack: preview 9
 :   Send a JSON-RPC 2.0 Agent-to-Agent (A2A v2) `message/send` request to a {{sn}} AI Agent via `/api/sn_aia/a2a/v2/agent/id/<agentId>`. Allows a single {{sn}} connector, including per-user OAuth 2.0 Authorization Code connectors, to invoke multiple {{sn}} AI Agents dynamically and maintain multi-turn conversation state.
 
     ::::{note}
-    Requires **{{sn}} AI Agent Studio** with external A2A v2 access enabled on the {{sn}} instance and on the target AI Agent. The connector user must have the `sn_aia.integration` (or `sn_aia.admin`) and `snc_platform_rest_api_access` roles, plus any functional roles required by the target AI Agent.
+    Requires **{{sn}} AI Agent Studio** with external A2A v2 access enabled on the {{sn}} instance and on the target AI Agent. The connector user must have the `sn_aia.integration` (or `sn_aia.admin`), `rest_service`, and `snc_platform_rest_api_access` roles, plus any functional roles required by the target AI Agent.
     ::::
 
     - `agentId` (required): The `sys_id` of the target {{sn}} AI Agent.

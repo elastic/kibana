@@ -17,6 +17,7 @@
  * - List records from any ServiceNow table with filtering
  * - Download attachment content as base64
  * - Inbound incident, journal, and change-approval events
+ * - Invoke ServiceNow AI Agent Studio agents via JSON-RPC 2.0 A2A v2
  *
  * Requires OAuth2 client credentials authentication.
  */
@@ -90,7 +91,8 @@ const extractJsonRpcError = (data: unknown): string | undefined => {
     data as
       | {
           error?:
-            string | { code?: number | string; message?: string; detail?: string; data?: unknown };
+            | string
+            | { code?: number | string; message?: string; detail?: string; data?: unknown };
         }
       | undefined
   )?.error;
