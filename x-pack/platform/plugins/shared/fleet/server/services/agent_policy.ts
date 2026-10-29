@@ -1746,6 +1746,8 @@ class AgentPolicyService {
           })
         );
 
+        // Successful updates stay applied when others fail. That's safe: a retry only finds the
+        // package policies that still reference this agent policy.
         if (failedPolicies.length > 0) {
           const failures = failedPolicies
             .map(({ update, error }) => `[${update.id}]: ${error.message}`)
