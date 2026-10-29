@@ -198,7 +198,8 @@ export const AGENT_BUILDER_RAW_AGENTS = ['nightshift.investigation'] as const;
 export type AgentBuilderRawAgent = (typeof AGENT_BUILDER_RAW_AGENTS)[number];
 
 export const isRawAgent = (agentId: string | undefined): agentId is AgentBuilderRawAgent => {
-  return agentId !== undefined && (AGENT_BUILDER_RAW_AGENTS as readonly string[]).includes(agentId);
+  // A/B experiment arm only, never merged: the agent runs on Agent Builder's default prompt and tools.
+  return false;
 };
 
 export const isAllowedBuiltinTool = (toolName: string): toolName is AgentBuilderBuiltinTool => {
