@@ -540,6 +540,67 @@ describe('ServiceAccountFakeRequests', () => {
     });
   });
 
+  describe('#refresh', () => {
+    it('is a no-op for requests it did not mint', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'Bearer foreign' },
+      });
+
+      await expect(fakeRequests.refresh(request)).resolves.toBeUndefined();
+      expect(mintToken).not.toHaveBeenCalled();
+      expect(request.headers.authorization).toBe('Bearer foreign');
+    });
+
+    it('mints a replacement even while the current token is fresh', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      mintToken.mockClear();
+
+      await fakeRequests.refresh(request);
+
+      expect(mintToken).toHaveBeenCalledTimes(1);
+      expect(request.headers.authorization).toBe('Bearer essu_token_2');
+    });
+
+    it('keeps the current token after a transient failure', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      mintToken.mockRejectedValueOnce(
+        new ServiceAccountTokenExchangeError(new Error('exchange failed'), { retryable: true })
+      );
+
+      await expect(fakeRequests.refresh(request)).resolves.toBeUndefined();
+      expect(request.headers.authorization).toBe('Bearer essu_token_1');
+
+      // Within the backoff window the current token is kept without another exchange.
+      await expect(fakeRequests.refresh(request)).resolves.toBeUndefined();
+      expect(mintToken).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('keeping the current one'));
+    });
+
+    it('rejects when the mint interceptor refuses, and keeps rejecting', async () => {
+      let refuse = false;
+      const mintInterceptor = jest.fn(async (mint: () => Promise<string>) => {
+        if (refuse) {
+          throw Boom.notFound('binding no longer exists');
+        }
+        return await mint();
+      });
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
+      refuse = true;
+
+      await expect(fakeRequests.refresh(request)).rejects.toThrowError('binding no longer exists');
+      await expect(fakeRequests.refresh(request)).rejects.toThrowError('binding no longer exists');
+    });
+
+    it('rejects once the lease has expired', async () => {
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      jest.advanceTimersByTime(REQUEST_LIFETIME_MS);
+
+      await expect(fakeRequests.refresh(request)).rejects.toThrowError(
+        'The lease on this service account bound request has expired'
+      );
+    });
+  });
+
   describe('#release', () => {
     it('reports whether the request was registered and is idempotent', async () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });

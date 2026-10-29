@@ -52,6 +52,8 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
       unbindWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       getWorkloadBinding: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       withScopedRequestForWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
+      // Without service accounts no request is bound to one, so there is nothing to refresh.
+      refreshRequestCredential: () => Promise.resolve(),
     },
     // No security delegate registered, so there are no user profiles to bind.
     fakeRequestEnricher: () => undefined,

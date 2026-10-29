@@ -333,6 +333,34 @@ export class ServiceAccountFakeRequests {
   }
 
   /**
+   * Replaces the credential of a request bound to a service account now, regardless of its age,
+   * so that whoever is handed a copy of it — a route handler, which can never renew it — gets a
+   * full token lifetime. A no-op for requests this registry did not mint. A transient mint failure
+   * keeps the current credential and is only logged; a terminal one (the binding is gone, the
+   * lease expired) rejects, since the request must not be handed on any more.
+   */
+  async refresh(request: KibanaRequest): Promise<void> {
+    const entry = this.registry.get(request);
+    if (!entry) {
+      return;
+    }
+
+    try {
+      await this.ensureFreshToken(request, 0);
+    } catch (err) {
+      if (entry.nonRetryableError || this.registry.get(request) !== entry) {
+        throw err;
+      }
+
+      this.logger.warn(
+        `Could not refresh the token of a fake request bound to service account ${
+          entry.serviceAccountId
+        }; keeping the current one: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+  }
+
+  /**
    * Drops the request from the registry and strips its credential.
    * Idempotent; returns whether the request was registered.
    */

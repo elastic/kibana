@@ -21,6 +21,7 @@ import { toExecutionError } from '../step/errors';
 // access/rawResponse flags) and drive its response-shaping contract from the mocked raw `Response`.
 const mockSelfFetch = jest.fn();
 const mockAsScoped = jest.fn(() => ({ fetch: mockSelfFetch }));
+const mockRefreshRequestCredential = jest.fn();
 
 function createMockReadableStream(payload: Uint8Array) {
   let consumed = false;
@@ -98,6 +99,9 @@ function createCoreStart({ serverBasePath = '' }: { serverBasePath?: string } = 
       },
       selfClient: { asScoped: mockAsScoped },
     },
+    security: {
+      serviceAccounts: { refreshRequestCredential: mockRefreshRequestCredential },
+    },
   } as unknown as CoreStart;
 }
 
@@ -110,6 +114,41 @@ describe('callKibanaApi', () => {
     mockSelfFetch.mockReset();
     mockAsScoped.mockClear();
     mockAsScoped.mockImplementation(() => ({ fetch: mockSelfFetch }));
+    mockRefreshRequestCredential.mockReset();
+    mockRefreshRequestCredential.mockResolvedValue(undefined);
+  });
+
+  it('refreshes the service account credential before handing it to the route handler', async () => {
+    const fakeRequest = createFakeRequest();
+    mockRefreshRequestCredential.mockImplementation(async (request: KibanaRequest) => {
+      (request.headers as Record<string, string>).authorization = 'Bearer fresh-token';
+    });
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      { fakeRequest, coreStart: createCoreStart() },
+      { method: 'GET', path: '/api/status' }
+    );
+
+    expect(mockRefreshRequestCredential).toHaveBeenCalledWith(fakeRequest);
+    expect(mockRefreshRequestCredential.mock.invocationCallOrder[0]).toBeLessThan(
+      mockSelfFetch.mock.invocationCallOrder[0]
+    );
+    expect(fakeRequest.headers.authorization).toBe('Bearer fresh-token');
+  });
+
+  it('does not call the route when the credential may not be refreshed any more', async () => {
+    mockRefreshRequestCredential.mockRejectedValue(
+      new Error('No service account is bound to workload [workflow/wf-1]')
+    );
+
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/status' }
+      )
+    ).rejects.toThrow('No service account is bound to workload [workflow/wf-1]');
+    expect(mockSelfFetch).not.toHaveBeenCalled();
   });
 
   it('forwards the path, query, and method to the self client', async () => {

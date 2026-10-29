@@ -88,6 +88,14 @@ describe('getDefaultSecurityImplementation', () => {
         (implementation.serviceAccounts[method] as () => Promise<unknown>)()
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
     });
+
+    it('refreshRequestCredential resolves without doing anything', async () => {
+      await expect(
+        implementation.serviceAccounts.refreshRequestCredential(
+          httpServerMock.createKibanaRequest()
+        )
+      ).resolves.toBeUndefined();
+    });
   });
 
   describe('fakeRequestEnricher', () => {

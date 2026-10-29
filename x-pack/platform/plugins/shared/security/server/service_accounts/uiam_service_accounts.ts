@@ -476,6 +476,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     return await this.fakeRequests.create(params);
   }
 
+  async refreshFakeRequest(request: KibanaRequest): Promise<void> {
+    await this.fakeRequests.refresh(request);
+  }
+
   releaseFakeRequest(request: KibanaRequest): void {
     this.fakeRequests.release(request);
   }

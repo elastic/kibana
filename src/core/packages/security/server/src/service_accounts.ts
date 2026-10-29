@@ -148,4 +148,16 @@ export interface CoreServiceAccountsService {
     params: ServiceAccountWorkloadRequestParams,
     fn: (request: KibanaRequest) => Promise<T>
   ): Promise<T>;
+
+  /**
+   * Mints a new credential for a request from {@link withScopedRequestForWorkload} now, whatever
+   * its age. Call it right before handing the request's credential to code that cannot renew it,
+   * such as a Kibana route handler called through the HTTP self client, so it gets a full token
+   * lifetime instead of whatever is left of the current one.
+   *
+   * Resolves without doing anything for any other request. After a transient failure it keeps the
+   * current credential. Rejects when the request may not be refreshed any more, for example
+   * because its workload was unbound or re-bound.
+   */
+  refreshRequestCredential(request: KibanaRequest): Promise<void>;
 }

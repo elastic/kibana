@@ -36,6 +36,7 @@ const createServiceAccountsStartMock = (): jest.MockedObjectDeep<CoreServiceAcco
     unbindWorkload: jest.fn(),
     getWorkloadBinding: jest.fn().mockResolvedValue(null),
     withScopedRequestForWorkload: jest.fn(),
+    refreshRequestCredential: jest.fn().mockResolvedValue(undefined),
   });
 
 const createDelegateHandleMock = (): jest.MockedObjectDeep<CoreSecurityDelegateHandle> =>

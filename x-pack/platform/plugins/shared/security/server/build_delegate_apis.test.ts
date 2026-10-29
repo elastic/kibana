@@ -316,6 +316,24 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('serviceAccounts.refreshRequestCredential', () => {
+    it('delegates to the backend', async () => {
+      const request = httpServerMock.createFakeKibanaRequest({});
+
+      await api.serviceAccounts.refreshRequestCredential(request);
+
+      expect(serviceAccounts!.backend.refreshFakeRequest).toHaveBeenCalledWith(request);
+    });
+
+    it('resolves without doing anything when service accounts are disabled', async () => {
+      serviceAccounts = null;
+
+      await expect(
+        api.serviceAccounts.refreshRequestCredential(httpServerMock.createFakeKibanaRequest({}))
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('serviceAccounts.delete', () => {
     const params = { force: false };
 
