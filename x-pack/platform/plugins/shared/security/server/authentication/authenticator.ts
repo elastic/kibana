@@ -916,11 +916,14 @@ export class Authenticator {
       existingSessionValue = null;
     }
 
-    let userProfileId = existingSessionValue?.userProfileId;
+    let userProfileId: string | undefined;
 
     // If the authentication result includes user profile grant, we should try to activate user profile for this user and
     // store user profile identifier in the session value.
-    const shouldActivateProfile = authenticationResult.userProfileGrant;
+    // Temporary E2E experiment: authenticate normally without activating a user profile.
+    const profileActivationDisabled = true;
+    const shouldActivateProfile =
+      authenticationResult.userProfileGrant && !profileActivationDisabled;
 
     if (shouldActivateProfile) {
       this.logger.debug(`Activating profile for "${authenticationResult.user?.username}".`);
