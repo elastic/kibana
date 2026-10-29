@@ -8,14 +8,15 @@
 /**
  * Source-filter ids for the unified alerts table.
  *
- * `v1` and `v2` match the row source ids used by the episodes UI
- * (`CLASSIC_EPISODE_SOURCE_ID`, `ALERTING_V2_EPISODE_SOURCE_ID`). Any other
+ * `v1` and `v2` are the row source ids. The episodes UI re-exports them as
+ * `CLASSIC_EPISODE_SOURCE_ID` and `ALERTING_V2_EPISODE_SOURCE_ID`. Any other
  * value is a connector slug stored on the episode `source` field.
  */
 
 /**
  * `source` written on events of native v2 rules. It is not a selectable
- * filter option; Universal covers it.
+ * filter option; Universal covers it. The episodes UI re-exports this as
+ * `NATIVE_RULE_SOURCE`.
  */
 export const NATIVE_EPISODE_SOURCE = 'internal';
 
@@ -44,3 +45,14 @@ export const isConnectorEpisodeSource = (source: string | null | undefined): sou
   source.length > 0 &&
   source !== NATIVE_EPISODE_SOURCE &&
   !isEpisodeSourceFilterSystemId(source);
+
+/** Classic rows can match when Classic is selected, or when the source filter is empty. */
+export const sourceFilterIncludesClassic = (sources?: readonly string[] | null): boolean =>
+  !sources?.length || sources.includes(EPISODE_SOURCE_FILTER_CLASSIC);
+
+/**
+ * The v2 pipeline can match Universal rows and connector slugs. Classic-only
+ * selections do not.
+ */
+export const sourceFilterIncludesV2 = (sources?: readonly string[] | null): boolean =>
+  !sources?.length || sources.some((source) => source !== EPISODE_SOURCE_FILTER_CLASSIC);

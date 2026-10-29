@@ -6,16 +6,23 @@
  */
 
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
-import { EuiFilterButton, EuiIcon, EuiPopover } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFilterButton, EuiIcon, EuiPopover, useEuiTheme } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { IconType } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import {
   EPISODE_SOURCE_FILTER_CLASSIC,
   EPISODE_SOURCE_FILTER_UNIVERSAL,
+  isConnectorEpisodeSource,
 } from '@kbn/alerting-v2-common-queries';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import {
+  useAdditionalEpisodesDataSource,
+  useQueryV2Source,
+} from '../../context/episode_data_source_context';
 import { useFetchEpisodeConnectorSources } from '../../hooks/use_fetch_episode_connector_sources';
 import { useEpisodeSource } from '../../source_labels';
 import { InlineFilterPopover } from './inline_filter_popover';
@@ -57,9 +64,16 @@ export function AlertEpisodesSourceFilter({
   timeRange,
   'data-test-subj': dataTestSubj = 'sourceFilter',
 }: AlertEpisodesSourceFilterProps) {
+  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
-  const { data: connectorSources = [], isLoading } = useFetchEpisodeConnectorSources({
+  const hasClassic = useAdditionalEpisodesDataSource()?.id === EPISODE_SOURCE_FILTER_CLASSIC;
+  const hasUniversal = useQueryV2Source();
+  const {
+    data: connectorSources = [],
+    isLoading,
+    isError,
+  } = useFetchEpisodeConnectorSources({
     services,
     timeRange,
   });
@@ -68,29 +82,36 @@ export function AlertEpisodesSourceFilter({
 
   const allOptions = useMemo(() => {
     const systemOptions: SourceFilterOption[] = [
-      {
-        label: universalSource.label,
-        value: EPISODE_SOURCE_FILTER_UNIVERSAL,
-        prepend: sourceIcon(universalSource.icon),
-      },
-      {
-        label: classicSource.label,
-        value: EPISODE_SOURCE_FILTER_CLASSIC,
-        prepend: sourceIcon(classicSource.icon),
-      },
+      ...(hasUniversal
+        ? [
+            {
+              label: universalSource.label,
+              value: EPISODE_SOURCE_FILTER_UNIVERSAL,
+              prepend: sourceIcon(universalSource.icon),
+            },
+          ]
+        : []),
+      ...(hasClassic
+        ? [
+            {
+              label: classicSource.label,
+              value: EPISODE_SOURCE_FILTER_CLASSIC,
+              prepend: sourceIcon(classicSource.icon),
+            },
+          ]
+        : []),
     ];
     const connectorOptions = connectorSources.map((source) => ({
       label: source,
       value: source,
       prepend: connectorIcon(source),
     }));
-    const knownValues = new Set<string>([
-      EPISODE_SOURCE_FILTER_UNIVERSAL,
-      EPISODE_SOURCE_FILTER_CLASSIC,
-      ...connectorSources,
-    ]);
+    const knownValues = new Set<string>(systemOptions.map((option) => option.value));
+    for (const source of connectorSources) {
+      knownValues.add(source);
+    }
     const missingSelected = (selectedSources ?? [])
-      .filter((source) => !knownValues.has(source))
+      .filter((source) => isConnectorEpisodeSource(source) && !knownValues.has(source))
       .map((source) => ({
         label: source,
         value: source,
@@ -101,6 +122,8 @@ export function AlertEpisodesSourceFilter({
     classicSource.icon,
     classicSource.label,
     connectorSources,
+    hasClassic,
+    hasUniversal,
     selectedSources,
     universalSource.icon,
     universalSource.label,
@@ -124,6 +147,11 @@ export function AlertEpisodesSourceFilter({
   const selectedValues = selectedSources ?? [];
   const activeCount = selectedValues.length;
 
+  const closePopover = useCallback(() => {
+    setIsOpen(false);
+    setSearch('');
+  }, []);
+
   return (
     <EuiPopover
       aria-label={i18n.SOURCE_FILTER_ARIA_LABEL}
@@ -131,7 +159,14 @@ export function AlertEpisodesSourceFilter({
         <EuiFilterButton
           iconType="chevronSingleDown"
           iconSide="right"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            setIsOpen((open) => {
+              if (open) {
+                setSearch('');
+              }
+              return !open;
+            });
+          }}
           isSelected={isOpen}
           hasActiveFilters={activeCount > 0}
           numFilters={allOptions.length}
@@ -142,10 +177,24 @@ export function AlertEpisodesSourceFilter({
         </EuiFilterButton>
       }
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={closePopover}
       anchorPosition="downLeft"
       panelPaddingSize="none"
     >
+      {isError ? (
+        <div
+          css={css`
+            padding: ${euiTheme.size.s};
+          `}
+        >
+          <KbnDangerCallout
+            announceOnMount
+            size="s"
+            title={i18n.SOURCE_FILTER_LOAD_ERROR}
+            data-test-subj={`${dataTestSubj}-error`}
+          />
+        </div>
+      ) : null}
       <InlineFilterPopover
         options={options}
         selectedValues={selectedValues}

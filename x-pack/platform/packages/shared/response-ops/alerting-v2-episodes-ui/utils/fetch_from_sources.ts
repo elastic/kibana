@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  sourceFilterIncludesClassic,
+  sourceFilterIncludesV2,
+} from '@kbn/alerting-v2-common-queries';
 import { ALERTING_V2_EPISODE_SOURCE_ID } from '../constants';
 import type { AlertEpisode } from '../queries/episodes_query';
 import type { EpisodeDataSource } from '../types/episode_data_source';
@@ -106,6 +110,26 @@ export const fetchFromV2AndSource = async <TV2, TSource>({
     errors: [...v2Fetch.errors, ...sourceFetch.errors],
   };
 };
+
+/**
+ * Decides which pipelines a source selection can match, so a Classic-only or
+ * v2-only filter does not query the pipeline that would return nothing.
+ */
+export const resolveEpisodeSourceQueries = ({
+  sources,
+  queryV2Source,
+  additionalSource,
+}: {
+  sources?: readonly string[] | null;
+  queryV2Source: boolean;
+  additionalSource: EpisodeDataSource | undefined;
+}): {
+  queryV2Source: boolean;
+  additionalSource: EpisodeDataSource | undefined;
+} => ({
+  queryV2Source: queryV2Source && sourceFilterIncludesV2(sources),
+  additionalSource: sourceFilterIncludesClassic(sources) ? additionalSource : undefined,
+});
 
 export const fetchEpisodesFromSource = async (
   source: EpisodeDataSource | undefined,

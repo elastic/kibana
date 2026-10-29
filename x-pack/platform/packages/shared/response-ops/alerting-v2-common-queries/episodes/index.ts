@@ -23,6 +23,8 @@ export {
   NATIVE_EPISODE_SOURCE,
   isEpisodeSourceFilterSystemId,
   isConnectorEpisodeSource,
+  sourceFilterIncludesClassic,
+  sourceFilterIncludesV2,
 } from './episode_source';
 export type { EpisodeSourceFilterSystemId } from './episode_source';
 

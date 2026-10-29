@@ -24,6 +24,21 @@ export interface MissingGroupsRecord {
   bucketKey: BucketKey;
 }
 
+/**
+ * A group is confirmed missing only when its search finished completely and found nothing.
+ * An error, a timeout, or failed shards says nothing about whether the group has data.
+ */
+const isConfirmedEmptySearch = (resp: estypes.MsearchResponseItem): boolean => {
+  if ('error' in resp) {
+    return false;
+  }
+  if (resp.timed_out || (resp._shards?.failed ?? 0) > 0) {
+    return false;
+  }
+  const total = get(resp, 'hits.total.value', 0) as number;
+  return total === 0;
+};
+
 export const checkMissingGroups = async (
   esClient: ElasticsearchClient,
   metricParams: CustomMetricExpressionParams,
@@ -80,13 +95,7 @@ export const checkMissingGroups = async (
   logger.trace(() => `Response: ${JSON.stringify(response)}`);
 
   const verifiedMissingGroups = response.responses
-    .map((resp, index) => {
-      const total = get(resp, 'hits.total.value', 0) as number;
-      if (!total) {
-        return missingGroups[index];
-      }
-      return null;
-    })
+    .map((resp, index) => (isConfirmedEmptySearch(resp) ? missingGroups[index] : null))
     .filter(identity) as MissingGroupsRecord[];
 
   return verifiedMissingGroups;

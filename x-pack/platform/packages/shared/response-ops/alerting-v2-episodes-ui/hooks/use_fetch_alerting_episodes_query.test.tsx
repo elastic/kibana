@@ -9,6 +9,10 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import {
+  EPISODE_SOURCE_FILTER_CLASSIC,
+  EPISODE_SOURCE_FILTER_UNIVERSAL,
+} from '@kbn/alerting-v2-common-queries';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
 import { useFetchAlertingEpisodesQuery } from './use_fetch_alerting_episodes_query';
@@ -355,5 +359,57 @@ describe('useFetchAlertingEpisodesQuery', () => {
       sourceEpisodes.map((episode) => ({ ...episode, source_id: 'test-source' }))
     );
     expect(result.current.sourceErrors).toEqual([]);
+  });
+
+  it('skips the v2 fetch when the source filter is Classic only', async () => {
+    fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
+    const fetchEpisodes = jest.fn().mockResolvedValue([]);
+    const dataSource = sourceWithEpisodes(fetchEpisodes);
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EpisodeDataSourceProvider dataSource={dataSource}>
+        {wrapper({ children })}
+      </EpisodeDataSourceProvider>
+    );
+
+    const { result } = renderHook(
+      () =>
+        useFetchAlertingEpisodesQuery({
+          pageSize: 10,
+          filterState: { sources: [EPISODE_SOURCE_FILTER_CLASSIC] },
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+        }),
+      { wrapper: Wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchAlertingEpisodesMock).not.toHaveBeenCalled();
+    expect(fetchEpisodes).toHaveBeenCalled();
+  });
+
+  it('skips the classic fetch when the source filter excludes Classic', async () => {
+    fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
+    const fetchEpisodes = jest.fn().mockResolvedValue([]);
+    const dataSource = sourceWithEpisodes(fetchEpisodes);
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EpisodeDataSourceProvider dataSource={dataSource}>
+        {wrapper({ children })}
+      </EpisodeDataSourceProvider>
+    );
+
+    const { result } = renderHook(
+      () =>
+        useFetchAlertingEpisodesQuery({
+          pageSize: 10,
+          filterState: { sources: [EPISODE_SOURCE_FILTER_UNIVERSAL] },
+          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+        }),
+      { wrapper: Wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(fetchAlertingEpisodesMock).toHaveBeenCalled();
+    expect(fetchEpisodes).not.toHaveBeenCalled();
   });
 });

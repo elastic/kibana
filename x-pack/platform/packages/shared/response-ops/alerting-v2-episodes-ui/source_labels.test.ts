@@ -7,7 +7,22 @@
 
 import { ALERTING_V2_EPISODE_SOURCE_ID } from './constants';
 import { CLASSIC_EPISODE_SOURCE_ID } from './classic_alerts/constants';
-import { ELASTIC_SOURCE_ICON, getEpisodeSourceIcon, getEpisodeSourceLabel } from './source_labels';
+import {
+  ELASTIC_SOURCE_ICON,
+  getConnectorSource,
+  getEpisodeSourceIcon,
+  getEpisodeSourceLabel,
+  NATIVE_RULE_SOURCE,
+} from './source_labels';
+
+describe('getConnectorSource', () => {
+  it('returns a connector slug and drops native and reserved ids', () => {
+    expect(getConnectorSource('zabbix')).toBe('zabbix');
+    expect(getConnectorSource(NATIVE_RULE_SOURCE)).toBeUndefined();
+    expect(getConnectorSource(ALERTING_V2_EPISODE_SOURCE_ID)).toBeUndefined();
+    expect(getConnectorSource(CLASSIC_EPISODE_SOURCE_ID)).toBeUndefined();
+  });
+});
 
 describe('getEpisodeSourceLabel', () => {
   it('names Universal when the row has no source id', () => {

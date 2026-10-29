@@ -7,6 +7,7 @@
 
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isConnectorEpisodeSource, NATIVE_EPISODE_SOURCE } from '@kbn/alerting-v2-common-queries';
 import { ALERTING_V2_EPISODE_SOURCE_ID } from './constants';
 import { CLASSIC_EPISODE_SOURCE_ID } from './classic_alerts/constants';
 import { useAdditionalEpisodesDataSource } from './context/episode_data_source_context';
@@ -33,11 +34,11 @@ export const UNIVERSAL_ALERTING_LABEL = i18n.translate(
 );
 
 /** `source` written on events of native v2 rules; it carries no information worth showing. */
-export const NATIVE_RULE_SOURCE = 'internal';
+export const NATIVE_RULE_SOURCE = NATIVE_EPISODE_SOURCE;
 
 /** The connector an alert came from (e.g. `zabbix`), or `undefined` for native Universal alerts. */
 export const getConnectorSource = (source: string | null | undefined): string | undefined =>
-  source && source !== NATIVE_RULE_SOURCE ? source : undefined;
+  isConnectorEpisodeSource(source) ? source : undefined;
 
 const resolve = <T>(
   sourceId: string | undefined,

@@ -201,3 +201,10 @@ export const SOURCE_FILTER_NO_MATCH = i18n.translate(
     defaultMessage: 'No matching sources',
   }
 );
+
+export const SOURCE_FILTER_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.sourceFilter.loadErrorMessage',
+  {
+    defaultMessage: "Couldn't load connector sources",
+  }
+);

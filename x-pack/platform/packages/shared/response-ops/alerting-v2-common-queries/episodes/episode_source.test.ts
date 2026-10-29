@@ -11,6 +11,8 @@ import {
   NATIVE_EPISODE_SOURCE,
   isConnectorEpisodeSource,
   isEpisodeSourceFilterSystemId,
+  sourceFilterIncludesClassic,
+  sourceFilterIncludesV2,
 } from './episode_source';
 
 describe('isEpisodeSourceFilterSystemId', () => {
@@ -38,5 +40,24 @@ describe('isConnectorEpisodeSource', () => {
     expect(isConnectorEpisodeSource(NATIVE_EPISODE_SOURCE)).toBe(false);
     expect(isConnectorEpisodeSource(EPISODE_SOURCE_FILTER_CLASSIC)).toBe(false);
     expect(isConnectorEpisodeSource(EPISODE_SOURCE_FILTER_UNIVERSAL)).toBe(false);
+  });
+});
+
+describe('source filter pipeline selection', () => {
+  it('includes both pipelines when nothing is selected', () => {
+    expect(sourceFilterIncludesClassic(undefined)).toBe(true);
+    expect(sourceFilterIncludesClassic([])).toBe(true);
+    expect(sourceFilterIncludesV2(null)).toBe(true);
+  });
+
+  it('includes only the classic pipeline for a Classic selection', () => {
+    expect(sourceFilterIncludesClassic([EPISODE_SOURCE_FILTER_CLASSIC])).toBe(true);
+    expect(sourceFilterIncludesV2([EPISODE_SOURCE_FILTER_CLASSIC])).toBe(false);
+  });
+
+  it('includes only the v2 pipeline for Universal and connector selections', () => {
+    const sources = [EPISODE_SOURCE_FILTER_UNIVERSAL, 'zabbix'];
+    expect(sourceFilterIncludesClassic(sources)).toBe(false);
+    expect(sourceFilterIncludesV2(sources)).toBe(true);
   });
 });

@@ -256,6 +256,26 @@ describe('EpisodesFilterBar', () => {
     });
   });
 
+  it('drops the sources key when the selection is cleared', async () => {
+    const user = userEvent.setup({ delay: null });
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    await user.click(screen.getByTestId('episodesFilterBar-source-button'));
+    const popoverProps = InlineFilterPopoverSpy.mock.calls.at(-1)?.[0];
+    if (!popoverProps) {
+      throw new Error('Source filter popover was not opened');
+    }
+    act(() => {
+      popoverProps.onSelectionChange([]);
+    });
+
+    const updateFilter = defaultProps.onFilterChange.mock.calls[0][0];
+    expect(updateFilter({ status: ['active'], sources: ['v2'] })).toEqual({
+      status: ['active'],
+    });
+  });
+
   it('renders search and all episode filters', () => {
     renderFilterBar();
 

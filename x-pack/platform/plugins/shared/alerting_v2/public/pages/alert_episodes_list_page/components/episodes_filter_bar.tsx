@@ -135,7 +135,13 @@ export const EpisodesFilterBar = ({
 
   const onSourcesChange = useCallback(
     (sources: string[] | undefined) => {
-      onFilterChange((prev) => ({ ...prev, sources }));
+      onFilterChange((prev) => {
+        if (!sources?.length) {
+          const { sources: _omit, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, sources };
+      });
     },
     [onFilterChange]
   );
