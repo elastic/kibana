@@ -20,7 +20,6 @@ NODE="${DIR}/node/default/bin/node"
 if [ -n "$KBN_NODE_HOME" ]; then
   NODE="${KBN_NODE_HOME}/bin/node"
 else
-
   if ! "$NODE" --version >/dev/null 2>&1; then
     NODE="${DIR}/node/glibc-217/bin/node"
   fi
