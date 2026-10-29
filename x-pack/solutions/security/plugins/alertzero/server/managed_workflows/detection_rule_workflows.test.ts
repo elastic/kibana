@@ -1490,7 +1490,7 @@ describe('detection rule workflows', () => {
 
         expect(probe.type).toBe('elasticsearch.request');
         expect(probe.with?.path).toBe('/_security/user/_has_privileges');
-        expect(String(probe.if)).toContain('steps.probe_names.output.csv != blank');
+        expect(String(probe.if)).toContain('steps.checkable_indices.output.csv != blank');
 
         // `-name` entries exclude indices from the search and are not index names the
         // identity could hold a privilege on, so they stay out of the probe. So do
@@ -1499,13 +1499,13 @@ describe('detection rule workflows', () => {
         // A `::failures` selector is stripped, as the API rejects any name carrying one.
         const csvOf = (indices: unknown) =>
           createWorkflowLiquidEngine().parseAndRenderSync(
-            String((byName('probe_names').with as Record<string, string>).csv),
+            String((byName('checkable_indices').with as Record<string, string>).csv),
             { inputs: { indices } }
           );
         const namesOf = (csv: string) =>
           resolveExpression(
             (probe.with?.body as { index: Array<{ names: string }> }).index[0].names,
-            { steps: { probe_names: { output: { csv } } } }
+            { steps: { checkable_indices: { output: { csv } } } }
           );
         expect(
           namesOf(

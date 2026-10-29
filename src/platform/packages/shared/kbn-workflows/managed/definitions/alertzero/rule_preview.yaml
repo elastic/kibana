@@ -73,15 +73,13 @@ steps:
   # invisible to the preview, which then reports zero alerts as if the rule matched
   # nothing. Asked up front so the caller can say which indices are the problem.
   #
-  # A `-name` entry excludes indices from the search; `_has_privileges` would read it
-  # as an index name the identity cannot access. A `cluster:name` entry is left out
-  # too: the API checks names against local grants only and answers false for a
-  # remote pattern the role does hold through `remote_indices`, and an unreadable
-  # remote still surfaces as the preview's "no matching indices" warning. A
-  # `::failures` / `::data` selector is dropped from the name, since the API rejects
-  # the whole request when any name carries one. Rendered as a JSON array body,
-  # since Liquid cannot filter an array on a prefix any other way.
-  - name: probe_names
+  # Keeps only the indices `_has_privileges` can check:
+  # - drops `-name` exclusion patterns (not a name to hold a privilege on)
+  # - drops `cluster:name` remote patterns (the API checks local grants only, so a
+  #   remote pattern the role holds through `remote_indices` would come back false)
+  # - strips `::failures` / `::data` selectors (the API rejects a request with one)
+  # Rendered as a JSON array body, since Liquid cannot filter an array otherwise.
+  - name: checkable_indices
     type: data.set
     with:
       csv: >-
@@ -93,13 +91,13 @@ steps:
 
   - name: probe_privileges
     type: elasticsearch.request
-    if: "${{ steps.probe_names.output.csv != blank }}"
+    if: "${{ steps.checkable_indices.output.csv != blank }}"
     with:
       method: POST
       path: /_security/user/_has_privileges
       body:
         index:
-          - names: "${{ steps.probe_names.output.csv | remove_first: ',' | prepend: '[' | append: ']' | json_parse }}"
+          - names: "${{ steps.checkable_indices.output.csv | remove_first: ',' | prepend: '[' | append: ']' | json_parse }}"
             privileges:
               - read
     on-failure:
