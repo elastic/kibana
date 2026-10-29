@@ -123,9 +123,9 @@ describe('Exceptions pre delete list handler', () => {
   it('fails closed when no request is present in the callback context', async () => {
     const data = getData();
 
-    await expect(
-      handler({ context: { ...context, request: undefined }, data })
-    ).rejects.toThrowError(/Unable to verify detection rule references/);
+    await expect(handler({ context: { ...context, request: undefined }, data })).rejects.toThrow(
+      /Unable to verify detection rule references/
+    );
     await expect(
       handler({ context: { ...context, request: undefined }, data })
     ).rejects.toMatchObject({ statusCode: 403 });
@@ -138,7 +138,7 @@ describe('Exceptions pre delete list handler', () => {
     alertingAuthorization.getAllAuthorizedRuleTypesFindOperation.mockResolvedValue(new Map());
     const data = getData();
 
-    await expect(handler({ context, data })).rejects.toThrowError(
+    await expect(handler({ context, data })).rejects.toThrow(
       /not authorized to read detection rules/
     );
     await expect(handler({ context, data })).rejects.toMatchObject({ statusCode: 403 });
@@ -163,7 +163,7 @@ describe('Exceptions pre delete list handler', () => {
   it('propagates a rules client failure instead of treating it as "no references"', async () => {
     rulesClient.find.mockRejectedValue(new Error('Unauthorized to find rules'));
 
-    await expect(handler({ context, data: getData() })).rejects.toThrowError(
+    await expect(handler({ context, data: getData() })).rejects.toThrow(
       'Unauthorized to find rules'
     );
   });
