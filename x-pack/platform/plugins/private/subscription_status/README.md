@@ -10,7 +10,7 @@ On Serverless, the badge appears when the organization is in trial (`cloud.serve
 
 On self-managed (`cloud.isCloudEnabled` is false, which includes ECK but not ECE), the badge follows the Elasticsearch license from `licensing.license$`:
 
-- Active trial: a meter of the trial used, the days left and the expiry date. From 3 days left it turns red.
+- Active trial: a meter of the trial used, the days left and the expiry date. From 3 days left the badge and meter turn to the warning color.
 - Expired trial: a warning badge. Non-admins are asked to contact their admin. The licensing plugin's expired-license banner still shows.
 - Trials, active or expired: users with License Management access (`management.stack.license_management`, the `manage` cluster privilege) get a Manage license action that opens License Management.
 - Basic: an outlined badge with a Start a cloud trial link.

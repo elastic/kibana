@@ -63,14 +63,17 @@ describe('resolveSelfManagedStatus', () => {
   });
 
   it.each([
-    [4, '4 days left', false],
-    [3, '3 days left', true],
-    [1, '1 day left', true],
-  ])('shows a trial with %d days left as "%s", urgent: %s', (daysLeft, value, urgent) => {
-    expect(resolve({ expiryDateInMillis: NOW + daysLeft * DAY_IN_MILLIS })).toMatchObject({
-      meter: { value, urgent },
-    });
-  });
+    [4, '4 days left', false, undefined],
+    [3, '3 days left', true, 'warning'],
+    [1, '1 day left', true, 'warning'],
+  ])(
+    'shows a trial with %d days left as "%s", urgent: %s',
+    (daysLeft, value, urgent, badgeColor) => {
+      const status = resolve({ expiryDateInMillis: NOW + daysLeft * DAY_IN_MILLIS });
+      expect(status).toMatchObject({ meter: { value, urgent } });
+      expect(status).toHaveProperty('badgeColor', badgeColor);
+    }
+  );
 
   it('asks non-admins with an expired trial to contact their admin', () => {
     expect(

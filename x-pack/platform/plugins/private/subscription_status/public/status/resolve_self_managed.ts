@@ -75,6 +75,7 @@ const resolveActiveTrial = (
     label: i18n.translate('xpack.subscriptionStatus.selfManaged.trialLabel', {
       defaultMessage: 'Trial',
     }),
+    badgeColor: urgent ? 'warning' : undefined,
     meter: {
       label: i18n.translate('xpack.subscriptionStatus.selfManaged.trialMeterLabel', {
         defaultMessage: 'Enterprise trial',

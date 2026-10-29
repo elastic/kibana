@@ -131,7 +131,7 @@ const SubscriptionPopover = ({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s" color={meter.urgent ? 'danger' : undefined}>
+                <EuiText size="s" color={meter.urgent ? 'warning' : undefined}>
                   {meter.value}
                 </EuiText>
               </EuiFlexItem>
@@ -141,7 +141,7 @@ const SubscriptionPopover = ({
               value={meter.percent}
               max={100}
               size="m"
-              color={meter.urgent ? 'danger' : 'primary'}
+              color={meter.urgent ? 'warning' : 'primary'}
               aria-label={`${meter.label}, ${meter.value}`}
             />
             <EuiSpacer size="s" />
