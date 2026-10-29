@@ -227,17 +227,20 @@ describe('diffDashboardStates', () => {
         ],
       ];
 
-      it.each(idlessLayouts)('compares identical ID-less %s layouts without mutation', (_, layout) => {
-        const baseline = state(layout('Count'));
-        const current = state(layout('Count'));
-        const originalBaseline = JSON.stringify(baseline);
-        const originalCurrent = JSON.stringify(current);
+      it.each(idlessLayouts)(
+        'compares identical ID-less %s layouts without mutation',
+        (_, layout) => {
+          const baseline = state(layout('Count'));
+          const current = state(layout('Count'));
+          const originalBaseline = JSON.stringify(baseline);
+          const originalCurrent = JSON.stringify(current);
 
-        expect(diffDashboardStates(baseline, baseline)).toStrictEqual({});
-        expect(diffDashboardStates(baseline, current)).toStrictEqual({});
-        expect(JSON.stringify(baseline)).toBe(originalBaseline);
-        expect(JSON.stringify(current)).toBe(originalCurrent);
-      });
+          expect(diffDashboardStates(baseline, baseline)).toStrictEqual({});
+          expect(diffDashboardStates(baseline, current)).toStrictEqual({});
+          expect(JSON.stringify(baseline)).toBe(originalBaseline);
+          expect(JSON.stringify(current)).toBe(originalCurrent);
+        }
+      );
 
       it.each(idlessLayouts)('detects config changes in an ID-less %s', (_, layout, key) => {
         const baseline = state(layout('Count'));
@@ -344,7 +347,9 @@ describe('diffDashboardStates', () => {
       it('continues comparing pinned panels when a panel comparator throws', () => {
         const baseline = state({
           panels: [lensPanel({ id: 'panel-1' })],
-          pinned_panels: [{ id: 'control-1', type: 'options_list_control', config: { title: 'Host' } }],
+          pinned_panels: [
+            { id: 'control-1', type: 'options_list_control', config: { title: 'Host' } },
+          ],
         });
         const current = state({
           panels: [lensPanel({ id: 'panel-1' })],
@@ -369,7 +374,10 @@ describe('diffDashboardStates', () => {
             },
           })
         ).toStrictEqual({ panels: current.panels, pinned_panels: current.pinned_panels });
-        expect(comparePinnedPanel).toHaveBeenCalledWith({ title: 'Host' }, { title: 'Updated host' });
+        expect(comparePinnedPanel).toHaveBeenCalledWith(
+          { title: 'Host' },
+          { title: 'Updated host' }
+        );
         expect(console.warn).toHaveBeenCalledWith(
           'Unable to compare serialized state for dashboard panel "panel-1".',
           error

@@ -23,7 +23,10 @@ import { getUnifiedSearchComparators } from './unified_search_manager';
 
 const getRefId = (config?: object) => (config && 'ref_id' in config ? config.ref_id : undefined);
 
-type LayoutItem = { id?: string; panels?: LayoutItem[] };
+interface LayoutItem {
+  id?: string;
+  panels?: LayoutItem[];
+}
 
 const getLayoutIds = (items: LayoutItem[] = []): string[] =>
   items.flatMap(({ id, panels }) => [...(id === undefined ? [] : [id]), ...getLayoutIds(panels)]);
