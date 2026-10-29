@@ -475,7 +475,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 
 **Alerting and cases**:
 * Make Kibana Universal Alerting generally available and turn it on by default. Universal Alerting is the {{esql}}-based alerting system. You can detect conditions in your data with {{esql}} rules, track them as alerts, and route notifications with action policies. Kibana Classic Alerting stays available next to it. Universal Alerting relies on Workflows, so to turn it off, for example because you don't have a Workflows license, set `alerting:v2:enabled` to `false` [#296546]({{kib-pull}}296546), [#297284]({{kib-pull}}297284).
-* Add quick-fix code actions, a **Prettify** shortcut, live validation, inline completions, and an {{esql}} help menu with recommended queries to the {{esql}} query sandbox in the alerting v2 rule editor [#289736]({{kib-pull}}289736), [#289532]({{kib-pull}}289532), [#290863]({{kib-pull}}290863).
 * Add a public API to create, read, update, and delete case templates [#280144]({{kib-pull}}280144).
 * Add a public API to discover the extended fields (`extended_fields`) that you can apply to a case, for a given owner and optional template [#279684]({{kib-pull}}279684).
 * Expand template defaults on the server when you create a case [#280143]({{kib-pull}}280143).
@@ -1028,6 +1027,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Fix the event rate chart in the anomaly detection wizard [#286639]({{kib-pull}}286639).
 
 % Folded into the single Kibana Universal Alerting entry for 9.6.0. Add these back only if you want separate entries.
+% * Add quick-fix code actions, a **Prettify** shortcut, live validation, inline completions, and an {{esql}} help menu with recommended queries to the {{esql}} query sandbox in the alerting v2 rule editor [#289736]({{kib-pull}}289736), [#289532]({{kib-pull}}289532), [#290863]({{kib-pull}}290863).
 % * Add the `POST /api/alerting/v2/rules/_bulk_create` API to create up to 100 {{kib}} alerting v2 rules in one request [#288950]({{kib-pull}}288950).
 % * Add the Create Alert Event API to ingest external alert events into alerting v2 [#270769]({{kib-pull}}270769).
 % * Add an **Update API key** action, for one rule or in bulk, that regenerates the API key a rule uses to query your data [#281337]({{kib-pull}}281337).
