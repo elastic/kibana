@@ -291,6 +291,8 @@ const menuItems = ({
   const { title: name } = resource;
 
   switch (resource.kind) {
+    case 'lookup':
+    case 'vector':
     case 'index':
       return [
         {

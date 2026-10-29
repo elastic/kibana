@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
+import {
+  getDataManagementPrototypeVariant,
+  subscribeDataManagementPrototypeVariant,
+  type DataManagementPrototypeVariant,
+} from '@kbn/deeplinks-management';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -18,6 +23,7 @@ import { getDataManagementCreateOverlay } from '../data_management_create_overla
 import type { DataManagementCreateOverlayId, ManagementAppMountParams } from '../types';
 import { getCreateResourceMenu } from './create_resource_menu';
 import { ResourcesTable } from './resources_table';
+import { DataManagementOverviewPageV2 } from './v2/data_management_overview_page';
 
 const pageTitle = i18n.translate('management.dataManagementOverview.pageTitle', {
   defaultMessage: 'Overview',
@@ -28,7 +34,15 @@ const pageDescription = i18n.translate('management.dataManagementOverview.pageDe
     'All data resources in one place, including indices, data streams, ES|QL views, datasets, and streams.',
 });
 
-export const DataManagementOverviewPage = ({
+const usePrototypeVariant = (): DataManagementPrototypeVariant => {
+  const [variant, setVariant] = useState(getDataManagementPrototypeVariant);
+
+  useEffect(() => subscribeDataManagementPrototypeVariant(setVariant), []);
+
+  return variant;
+};
+
+const DataManagementOverviewPageV1 = ({
   getUrlForApp,
   http,
   share,
@@ -64,7 +78,7 @@ export const DataManagementOverviewPage = ({
   const createOverlay = openCreate ? getDataManagementCreateOverlay(openCreate) : undefined;
 
   return (
-    <div data-test-subj="dataManagementOverviewPage">
+    <div data-prototype-variant="v1" data-test-subj="dataManagementOverviewPage">
       <AppHeader description={pageDescription} menu={menu} spacing="bleed" title={pageTitle} />
       <EuiSpacer size="l" />
       <ResourcesTable
@@ -76,6 +90,17 @@ export const DataManagementOverviewPage = ({
       />
       {createOverlay?.({ onClose: closeCreate, esqlViewName })}
     </div>
+  );
+};
+
+export const DataManagementOverviewPage = (
+  props: React.ComponentProps<typeof DataManagementOverviewPageV1>
+) => {
+  const variant = usePrototypeVariant();
+  return variant === 'v2' ? (
+    <DataManagementOverviewPageV2 {...props} />
+  ) : (
+    <DataManagementOverviewPageV1 {...props} />
   );
 };
 

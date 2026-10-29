@@ -8,6 +8,8 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
+import { EuiBadge, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart, CoreStart, HttpStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -23,7 +25,9 @@ import {
 } from '@kbn/content-list';
 import { getResourcePreviewHref } from './get_resource_preview_href';
 import { loadDataManagementResources } from './load_resources';
+import { ResourceStatsPanel } from './resource_stats_panel';
 import { ResourceRowActions } from './resource_row_actions';
+import type { ResourceStats } from './resource_stats';
 import { resolveResourceKind, type DataManagementResource } from './sample_resources';
 import {
   LoadedResourcesContext,
@@ -45,6 +49,37 @@ const typeColumnTitle = i18n.translate('management.dataManagementOverview.column
 const actionsColumnTitle = i18n.translate('management.dataManagementOverview.column.actions', {
   defaultMessage: 'Actions',
 });
+
+/**
+ * Pin the custom Actions column to the inline end of the scrollport.
+ *
+ * `EuiBasicTable` only applies `position: sticky` for its built-in actions
+ * column (`column.actions`). This table renders Actions as a normal field
+ * column, so the header and cells otherwise scroll away with the row.
+ * The header test subject is EUI's `tableHeaderCell_${field}_${index}`.
+ */
+const stickyActionsColumnCss = (euiTheme: EuiThemeComputed) => css`
+  th[data-test-subj^='tableHeaderCell_actions_'],
+  td[data-test-subj='dataManagementOverviewActionsColumn'] {
+    position: sticky;
+    inset-inline-end: 0;
+    background-color: var(
+      --euiTableCellStickyBackgroundColor,
+      ${euiTheme.colors.backgroundBasePlain}
+    );
+
+    @container EuiTable scroll-state(scrollable: right) {
+      &::before {
+        content: '';
+        position: absolute;
+        inset-inline-start: 0;
+        inset-block: 0;
+        inline-size: ${euiTheme.border.width.thin};
+        background-color: ${euiTheme.border.color};
+      }
+    }
+  }
+`;
 
 const tableTitle = i18n.translate('management.dataManagementOverview.tableTitle', {
   defaultMessage: 'Data resources',
@@ -107,7 +142,9 @@ const isResource = (item: ContentListItem): item is DataManagementResource =>
   item.kind === 'dataStream' ||
   item.kind === 'esqlView' ||
   item.kind === 'dataset' ||
-  item.kind === 'stream';
+  item.kind === 'stream' ||
+  item.kind === 'lookup' ||
+  item.kind === 'vector';
 
 export const ResourcesTable = ({
   getUrlForApp,
@@ -122,16 +159,21 @@ export const ResourcesTable = ({
   toasts: CoreStart['notifications']['toasts'];
   onEditEsqlView: (name: string) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const resourcesPromise = useMemo(() => loadDataManagementResources(http), [http]);
-  const resourcesRequest = useRef(resourcesPromise);
+  const resourcesRequest = useRef(resourcesPromise.then((loaded) => loaded.resources));
   const [resources, setResources] = useState<readonly DataManagementResource[]>([]);
+  const [stats, setStats] = useState<ResourceStats | undefined>();
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
-    resourcesRequest.current = resourcesPromise;
+    resourcesRequest.current = resourcesPromise.then((loaded) => loaded.resources);
     let cancelled = false;
     resourcesPromise.then((loaded) => {
       if (!cancelled) {
-        setResources(loaded);
+        setResources(loaded.resources);
+        setStats(loaded.stats);
+        setStatsLoading(false);
       }
     });
     return () => {
@@ -144,8 +186,11 @@ export const ResourcesTable = ({
       debounceMs: 0,
       onRefresh: async () => {
         const next = loadDataManagementResources(http);
-        resourcesRequest.current = next;
-        setResources(await next);
+        resourcesRequest.current = next.then((loaded) => loaded.resources);
+        const loaded = await next;
+        setResources(loaded.resources);
+        setStats(loaded.stats);
+        setStatsLoading(false);
       },
       findItems: async ({ searchQuery, filters, sort, page }) => {
         const loaded = await resourcesRequest.current;
@@ -196,35 +241,44 @@ export const ResourcesTable = ({
               <TypeFilter />
             </ContentListToolbar.Filters>
           </ContentListToolbar>
-          <ContentListTable title={tableTitle}>
-            <Column.Name columnTitle={nameColumnTitle} showDescription={false} />
-            <Column
-              data-test-subj="dataManagementOverviewTypeColumn"
-              id="type"
-              name={typeColumnTitle}
-              render={(item) => (isResource(item) ? item.type : undefined)}
-              sortable
-              width="16em"
-            />
-            <Column
-              data-test-subj="dataManagementOverviewActionsColumn"
-              id="actions"
-              name={actionsColumnTitle}
-              render={(item) =>
-                isResource(item) ? (
-                  <ResourceRowActions
-                    getUrlForApp={getUrlForApp}
-                    http={http}
-                    onEditEsqlView={onEditEsqlView}
-                    resource={item}
-                    share={share}
-                    toasts={toasts}
-                  />
-                ) : null
-              }
-              width="7em"
-            />
-          </ContentListTable>
+          <ResourceStatsPanel isLoading={statsLoading} stats={stats} />
+          <div css={stickyActionsColumnCss(euiTheme)}>
+            <ContentListTable title={tableTitle}>
+              <Column.Name columnTitle={nameColumnTitle} showDescription={false} />
+              <Column
+                data-test-subj="dataManagementOverviewTypeColumn"
+                id="type"
+                name={typeColumnTitle}
+                render={(item) =>
+                  isResource(item) ? (
+                    <EuiBadge color="hollow" data-test-subj="dataManagementOverviewTypeBadge">
+                      {item.type}
+                    </EuiBadge>
+                  ) : undefined
+                }
+                sortable
+                width="16em"
+              />
+              <Column
+                data-test-subj="dataManagementOverviewActionsColumn"
+                id="actions"
+                name={actionsColumnTitle}
+                render={(item) =>
+                  isResource(item) ? (
+                    <ResourceRowActions
+                      getUrlForApp={getUrlForApp}
+                      http={http}
+                      onEditEsqlView={onEditEsqlView}
+                      resource={item}
+                      share={share}
+                      toasts={toasts}
+                    />
+                  ) : null
+                }
+                width="7em"
+              />
+            </ContentListTable>
+          </div>
           <ContentListFooter />
         </ContentList>
       </ContentListProvider>

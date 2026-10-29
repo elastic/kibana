@@ -65,8 +65,9 @@ export interface NavigationProps {
   onToggleCollapsed?: (isCollapsed: boolean) => void;
   /**
    * (optional) Content to display inside the side panel footer.
+   * A function receives the panel opener so the footer can vary by panel.
    */
-  sidePanelFooter?: ReactNode;
+  sidePanelFooter?: ReactNode | ((openerNode: MenuItem) => ReactNode);
   /**
    * When true (the default), renders a horizontal separator at the top of the
    * side nav, between a global header and the primary menu. Pass false for
@@ -466,7 +467,12 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && openerNode && (
-        <SideNav.SidePanel footer={sidePanelFooter} openerNode={openerNode}>
+        <SideNav.SidePanel
+          footer={
+            typeof sidePanelFooter === 'function' ? sidePanelFooter(openerNode) : sidePanelFooter
+          }
+          openerNode={openerNode}
+        >
           {({ secondaryNavigationInstructionsId }) => {
             const firstNonEmptySectionIndex = openerNode.sections?.findIndex(
               (s) => s.items.length > 0

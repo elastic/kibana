@@ -20,6 +20,7 @@ import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { joinNavigationContent, resolveLinksContent } from './resolve_navigation_content';
 import { PanelStateManager } from './panel_state_manager';
+import { dataManagementPrototypeFooter } from '../prototype_variant_switch';
 
 export interface ChromeNavigationProps {
   isCollapsed: boolean;
@@ -47,6 +48,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
         onCustomizeNavigation={onCustomizeNavigation}
         activeItemId={activeItemId}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
+        sidePanelFooter={dataManagementPrototypeFooter}
       />
     </KibanaSectionErrorBoundary>
   );

@@ -113,8 +113,11 @@ export interface NavigationProps {
    * Pass false for hosts that do not sit under a global header.
    */
   showTopSeparator?: boolean;
-  /** Content to display inside the side panel footer. */
-  sidePanelFooter?: ReactNode;
+  /**
+   * Content to display inside the side panel footer.
+   * A function receives the panel opener so the footer can vary by panel.
+   */
+  sidePanelFooter?: ReactNode | ((openerNode: MenuItem) => ReactNode);
   /** Optional `data-test-subj` attribute for testing purposes. */
   'data-test-subj'?: string;
 }

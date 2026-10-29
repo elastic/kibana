@@ -23,6 +23,8 @@ export const getResourcePreviewHref = (
   const name = encodeURIComponent(resource.title);
 
   switch (resource.kind) {
+    case 'lookup':
+    case 'vector':
     case 'index':
       return getUrlForApp('management', {
         path: withDataManagementOverviewReturn(

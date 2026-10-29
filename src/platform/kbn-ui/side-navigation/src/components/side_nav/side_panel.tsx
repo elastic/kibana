@@ -128,14 +128,16 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
         >
           {renderChildren()}
         </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner
-          color="transparent"
-          data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelFooter`}
-          paddingSize="none"
-          grow={false}
-        >
-          {footer}
-        </EuiSplitPanel.Inner>
+        {footer ? (
+          <EuiSplitPanel.Inner
+            color="transparent"
+            data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelFooter`}
+            paddingSize="none"
+            grow={false}
+          >
+            {footer}
+          </EuiSplitPanel.Inner>
+        ) : null}
       </EuiSplitPanel.Outer>
     </>
   );
