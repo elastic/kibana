@@ -770,10 +770,7 @@ export const SKIP_TIP =
 
 /**
  * The comment of a refresh that found new failures: this report's numbers for the suite, as the
- * body keeps the ones it was filed with, then how to skip it. In elastic/kibana a `kibanamachine`
- * comment runs the failed-test alert of elastic/kibana-operations `triage/` (a Slack message for
- * teams opted in to existing-failure alerts), which reads the report count from the body's
- * metadata, so the metadata is updated first.
+ * body keeps the ones it was filed with, then how to skip it.
  */
 export const renderFlakySuiteIssueComment = (
   suite: FlakySuite,
