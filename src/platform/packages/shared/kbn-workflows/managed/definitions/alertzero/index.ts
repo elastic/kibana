@@ -9,6 +9,7 @@
 
 import { ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID } from './actions/action_add_rule_exception';
 import { ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID } from './actions/action_close_alerts_false_positive';
+import { ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID } from './actions/action_close_attack_discovery_investigation';
 import { ALERTZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './actions/action_create_detection_rule';
 import { ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID } from './actions/action_edit_detection_rule';
 import { ALERTZERO_ACTION_ENABLE_RULE_WORKFLOW_ID } from './actions/action_enable_detection_rule';
@@ -21,11 +22,13 @@ import {
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
 } from './actions/defend';
 import {
+  ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
 } from './attack_discovery_workflows';
+import { ALERTZERO_CLOSE_ATTACK_AND_ALERTS_WORKFLOW_ID } from './close_attack_and_alerts';
 import { ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';
 import { ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID } from './detection_rule_coverage';
 import { ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID } from './detection_rule_tuning';
@@ -33,6 +36,7 @@ import { ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID } from './floor_alert_t
 import { ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID } from './floor_alert_triage_batch';
 import { ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID } from './floor_alert_triage_review';
 import { ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID } from './floor_attack_discovery';
+import { ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID } from './forensics_close_investigation_gate';
 import { ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_endpoint_analysis';
 import { ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID } from './forensics_proposal_gate';
 import { ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID } from './forensics_run_endpoint_analysis';
@@ -86,6 +90,10 @@ export {
   ALERTZERO_ACTION_CLOSE_ALERTS_FP_WORKFLOW_ID,
 } from './actions/action_close_alerts_false_positive';
 export {
+  ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW,
+  ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
+} from './actions/action_close_attack_discovery_investigation';
+export {
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
 } from './actions/action_edit_detection_rule';
@@ -117,11 +125,17 @@ export {
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
+  ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW,
+  ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
 } from './attack_discovery_workflows';
 export {
   ALERTZERO_JOURNAL_NOTE_WORKFLOW,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
 } from './journal_note';
+export {
+  ALERTZERO_CLOSE_ATTACK_AND_ALERTS_WORKFLOW,
+  ALERTZERO_CLOSE_ATTACK_AND_ALERTS_WORKFLOW_ID,
+} from './close_attack_and_alerts';
 export {
   ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW,
   ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_ID,
@@ -178,6 +192,10 @@ export {
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
 } from './forensics_proposal_gate';
+export {
+  ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW,
+  ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
+} from './forensics_close_investigation_gate';
 
 export const ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS = [
   ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
@@ -202,25 +220,31 @@ export const ALERTZERO_RULE_WORKFLOW_IDS = [
  * out per attack, the batched generation workflow it delegates generation to, the
  * per-attack review workflow it launches, and the FP/TP analysis that review calls
  * for its verdict. Installed globally so the per-space Watch Floor worker can
- * dispatch to them.
+ * dispatch to them. The close-attack-and-alerts child is here because it retires
+ * an attack with its alerts under one reason, which the Close Investigation
+ * action does today and the review's false-positive arm is meant to share.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS = [
   ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
+  ALERTZERO_ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   ALERTZERO_JOURNAL_NOTE_WORKFLOW_ID,
+  ALERTZERO_CLOSE_ATTACK_AND_ALERTS_WORKFLOW_ID,
 ] as const;
 
 /**
- * The forensic pass the per-space Endpoint analysis worker dispatches, and the
- * per-proposal gate that pass dispatches in turn. Installed globally so every
- * space's worker shares one copy; they inherit the dispatching worker's space at
- * run time.
+ * The forensic pass the per-space Endpoint analysis worker dispatches, the
+ * per-proposal gate that pass dispatches in turn, and the close gate the
+ * per-proposal gate (or the pass, when it proposed nothing) dispatches last.
+ * Installed globally so every space's worker shares one copy; they inherit the
+ * dispatching worker's space at run time.
  */
 export const ALERTZERO_FORENSICS_WORKFLOW_IDS = [
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
+  ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
 ] as const;
 
 /**
@@ -273,6 +297,7 @@ export const ALERTZERO_ACTION_WORKFLOW_IDS = [
   ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
   ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
   ALERTZERO_ACTION_HANDOFF_TO_FORENSICS_WORKFLOW_ID,
+  ALERTZERO_ACTION_CLOSE_ATTACK_DISCOVERY_INVESTIGATION_WORKFLOW_ID,
 ] as const;
 
 /**
