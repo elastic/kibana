@@ -22,6 +22,7 @@ import {
   type AgentExecutionDeps,
 } from '../execution_runner';
 import { serializeExecutionError } from '../utils/serialize_execution_error';
+import { releaseActiveExecution } from '../utils/conversations';
 import { AbortMonitor } from './abort_monitor';
 import { HeartbeatReporter } from './heartbeat_reporter';
 import type { SurfacesService } from '../../surfaces';
@@ -71,7 +72,7 @@ class TaskHandlerImpl implements TaskHandler {
 
     if (execution.status === ExecutionStatus.aborted) {
       this.logger.info(`Execution ${executionId} was aborted before it started; skipping`);
-      await this.releaseActiveExecution({ execution, fakeRequest });
+      await this.releaseAbortedExecution({ execution, fakeRequest });
       return;
     }
 
@@ -173,7 +174,7 @@ class TaskHandlerImpl implements TaskHandler {
    * Releases the conversation an execution aborted before it started still holds: its run never
    * reaches a terminal write, which is where a run releases it.
    */
-  private async releaseActiveExecution({
+  private async releaseAbortedExecution({
     execution,
     fakeRequest,
   }: {
@@ -198,15 +199,7 @@ class TaskHandlerImpl implements TaskHandler {
         user: { ...owner, isAdmin: false },
       });
 
-      await conversationClient.update(
-        { id: conversationId },
-        {
-          source: 'execution',
-          access: 'converse',
-          retryOnConflict: true,
-          activeExecution: { action: 'release', executionId },
-        }
-      );
+      await releaseActiveExecution({ conversationClient, conversationId, executionId });
     } catch (error) {
       this.logger.warn(
         `Failed to release conversation ${conversationId} after execution ${executionId} was aborted before it started: ${error.message}`

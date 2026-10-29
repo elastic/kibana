@@ -50,6 +50,7 @@ import {
   getConversation,
   persistExecutionInterruption,
   persistUserMessage,
+  releaseActiveExecution,
 } from './conversations';
 import { userMessageEvent } from '../../conversation/client/rounds_to_events';
 
@@ -1881,6 +1882,28 @@ describe('conversations utils', () => {
         const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
         expect(call.state).toEqual({ compaction_summary: compactionSummary });
       });
+    });
+  });
+
+  describe('releaseActiveExecution', () => {
+    it('releases the execution with an update that retries on conflict', async () => {
+      const conversationClient = createConversationClientMock();
+
+      await releaseActiveExecution({
+        conversationClient,
+        conversationId: 'conv-1',
+        executionId: 'exec-1',
+      });
+
+      expect(conversationClient.update).toHaveBeenCalledWith(
+        { id: 'conv-1' },
+        {
+          source: 'execution',
+          access: 'converse',
+          retryOnConflict: true,
+          activeExecution: { action: 'release', executionId: 'exec-1' },
+        }
+      );
     });
   });
 });

@@ -75,6 +75,7 @@ import type { CallbackDeliveryService } from './callback';
 import {
   getConversation,
   persistUserMessage,
+  releaseActiveExecution,
   type ConversationWithOperation,
 } from './utils/conversations';
 import {
@@ -328,15 +329,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       // A run that never got dispatched would otherwise stay active until it goes stale.
       if (activeConversationId) {
         try {
-          await conversationClient.update(
-            { id: activeConversationId },
-            {
-              source: 'execution',
-              access: 'converse',
-              retryOnConflict: true,
-              activeExecution: { action: 'release', executionId },
-            }
-          );
+          await releaseActiveExecution({
+            conversationClient,
+            conversationId: activeConversationId,
+            executionId,
+          });
         } catch (releaseErr) {
           this.logger.warn(
             `Failed to release conversation ${activeConversationId} after execution ${executionId} failed to start: ${releaseErr.message}`

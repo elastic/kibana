@@ -439,6 +439,27 @@ export const appendResumeExecution$ = ({
   );
 };
 
+/** Clears the conversation's active execution when this execution still holds it. */
+export const releaseActiveExecution = async ({
+  conversationClient,
+  conversationId,
+  executionId,
+}: {
+  conversationClient: ConversationClient;
+  conversationId: string;
+  executionId: string;
+}): Promise<void> => {
+  await conversationClient.update(
+    { id: conversationId },
+    {
+      source: 'execution',
+      access: 'converse',
+      retryOnConflict: true,
+      activeExecution: { action: 'release', executionId },
+    }
+  );
+};
+
 /** True when the conversation's last round is paused on a prompt: the next input resumes it. */
 export const isPendingResumeConversation = (conversation: Conversation): boolean =>
   getPendingResumeRound(conversation) !== undefined;
