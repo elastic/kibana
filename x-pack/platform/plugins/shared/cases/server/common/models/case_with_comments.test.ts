@@ -716,6 +716,8 @@ describe('CaseCommentModel', () => {
       });
 
       expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+      // The add-to-existing-case modal reads an unchanged case version as "nothing was added".
+      expect(clientArgs.services.caseService.patchCase).not.toHaveBeenCalled();
     });
 
     it('remove alerts from multiple attachments', async () => {
@@ -1333,6 +1335,8 @@ describe('CaseCommentModel', () => {
       });
 
       expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+      // The add-to-existing-case modal reads an unchanged case version as "nothing was added".
+      expect(clientArgs.services.caseService.patchCase).not.toHaveBeenCalled();
     });
 
     it('drops an attack that is already attached to the case on createComment', async () => {
