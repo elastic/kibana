@@ -802,7 +802,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
           label: 'TEMP Force Failure',
           key: 'temp_force_failure',
           agents: k8sMinimalAgent(),
-        })
+        }),
       ])
     );
 
