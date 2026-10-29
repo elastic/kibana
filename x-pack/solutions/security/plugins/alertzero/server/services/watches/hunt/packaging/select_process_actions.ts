@@ -257,10 +257,12 @@ export const selectProcessActions = ({
 /**
  * Whether isolate host is warranted, on evidence local to this host. Evaluated in order, first
  * match wins; pure, no I/O.
- * `activeProcessCount` is the number of non-stale selectors on this host (protected processes
- * count: a system process being implicated is suspicious). `hostTechniqueIds` are the techniques
- * those selectors were attributed to. Nothing here reads run-wide technique or severity alone: a
- * host with no live evidence of its own is never isolated for another host's behavior.
+ * `activeProcessCount` is the number of non-stale selectors on this host. Protected processes
+ * count: a system process being implicated is suspicious. Exited processes count too: isolate
+ * contains the host, and a process that ran in the window is evidence even after it ended.
+ * `hostTechniqueIds` are the techniques those selectors were attributed to. Nothing here reads
+ * run-wide technique or severity alone: a host with no recent evidence of its own is never
+ * isolated for another host's behavior.
  */
 const selectWarrantedHostAction = ({
   host,
