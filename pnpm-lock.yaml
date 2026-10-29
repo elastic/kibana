@@ -2248,6 +2248,9 @@ importers:
       '@kbn/feature-flags-example-plugin':
         specifier: workspace:*
         version: link:examples/feature_flags_example
+      '@kbn/feature-flags-management-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/feature_flags_management
       '@kbn/feature-usage-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test
@@ -4249,6 +4252,9 @@ importers:
       '@openfeature/launchdarkly-client-provider':
         specifier: 0.4.0
         version: 0.4.0(@launchdarkly/js-client-sdk@4.11.2)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))
+      '@openfeature/ofrep-web-provider':
+        specifier: 0.4.3
+        version: 0.4.3(@openfeature/core@1.12.0)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk':
         specifier: 1.23.0
         version: 1.23.0(@openfeature/core@1.12.0)
@@ -9692,6 +9698,8 @@ importers:
 
   x-pack/solutions/observability/plugins/exploratory_view: {}
 
+  x-pack/solutions/observability/plugins/feature_flags_management: {}
+
   x-pack/solutions/observability/plugins/infra: {}
 
   x-pack/solutions/observability/plugins/metrics_data_access: {}
@@ -12818,6 +12826,16 @@ packages:
     peerDependencies:
       '@launchdarkly/js-client-sdk': ^4.7.0
       '@openfeature/web-sdk': ^1.0.0
+
+  '@openfeature/ofrep-core@2.3.0':
+    resolution: {integrity: sha512-PgUoEp0nGDYUeZ2fIU2IczEe/5B+gQVDpGXc5o05wpo3sj69pbcpq/a3p8MT/mhv9fqODiqqwu29g/YEq/huaw==}
+    peerDependencies:
+      '@openfeature/core': ^1.6.0
+
+  '@openfeature/ofrep-web-provider@0.4.3':
+    resolution: {integrity: sha512-GwSQQP2ZjS9dICRFkey+zpW5eadDF4SIhNNV0VPpO6C5G3NyUEljmHAhqSykZTYilgNQR5c8APdRQnEgBvGxdg==}
+    peerDependencies:
+      '@openfeature/web-sdk': ^1.10.0
 
   '@openfeature/server-sdk@1.23.0':
     resolution: {integrity: sha512-JWeLvltJIV0AFgOfbw7hK9b9Rw/5wWq+RMhCIU9sJtAqarxr8hSPglG+JAGGhYdElAz3Qwe9W3ApWyPNkQEyqg==}
@@ -29411,6 +29429,17 @@ snapshots:
       '@launchdarkly/js-client-sdk': 4.11.2
       '@openfeature/web-sdk': 1.10.0(@openfeature/core@1.12.0)
       lodash.isempty: 4.4.0
+
+  '@openfeature/ofrep-core@2.3.0(@openfeature/core@1.12.0)':
+    dependencies:
+      '@openfeature/core': 1.12.0
+
+  '@openfeature/ofrep-web-provider@0.4.3(@openfeature/core@1.12.0)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))':
+    dependencies:
+      '@openfeature/ofrep-core': 2.3.0(@openfeature/core@1.12.0)
+      '@openfeature/web-sdk': 1.10.0(@openfeature/core@1.12.0)
+    transitivePeerDependencies:
+      - '@openfeature/core'
 
   '@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0)':
     dependencies:

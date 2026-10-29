@@ -9,7 +9,7 @@ import { duration } from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { LaunchDarklyClientProviderMocked } from './plugin.test.mocks';
+import { LaunchDarklyClientProviderMocked, OFREPWebProviderMocked } from './plugin.test.mocks';
 import { CloudExperimentsPlugin } from './plugin';
 import { MetadataService } from '../common/metadata_service';
 
@@ -43,7 +43,7 @@ describe('Cloud Experiments public plugin', () => {
         prod: true, // ensure it's true
       };
       expect(() => new CloudExperimentsPlugin(initializerContext)).toThrow(
-        'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
+        'xpack.cloud_integrations.experiments.launch_darkly or ofrep configuration should exist'
       );
     });
   });
@@ -83,6 +83,30 @@ describe('Cloud Experiments public plugin', () => {
           bootstrap: { 'my-initial-flag': true },
         })
       );
+    });
+
+    test('uses the OFREP web provider when ofrep is configured', () => {
+      const initializerContext = coreMock.createPluginInitializerContext({
+        ofrep: {
+          base_url: 'http://localhost:8220',
+          client_id: 'ffcli-public',
+          poll_interval: '30s',
+        },
+        metadata_refresh_interval: duration(1, 'h'),
+      });
+      const ofrepPlugin = new CloudExperimentsPlugin(initializerContext);
+      ofrepPlugin.setup(coreMock.createSetup(), { cloud: cloudMock.createSetup() });
+      expect(OFREPWebProviderMocked).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseUrl: 'http://localhost:8220',
+          headers: [['Authorization', 'Bearer ffcli-public']],
+          pollInterval: 30_000,
+          changeDetection: 'polling',
+          cacheMode: 'network-first',
+        })
+      );
+      expect(LaunchDarklyClientProviderMocked).not.toHaveBeenCalled();
+      ofrepPlugin.stop();
     });
 
     test('use undefined bootstrap when creating the new client and no provided initial feature flags', () => {

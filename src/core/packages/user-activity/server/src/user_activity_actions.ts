@@ -90,6 +90,81 @@ export const userActivityActions = {
     groupName: 'Discover',
     versionAddedAt: '9.6',
   },
+  feature_flag_create: {
+    description: 'User created a feature flag.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
+  feature_flag_update: {
+    description: 'User updated the definition or evaluation rules of a feature flag.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
+  feature_flag_delete: {
+    description: 'User deleted a feature flag.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
+  feature_flag_app_create: {
+    description: 'User created an app that evaluates feature flags.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
+  feature_flag_app_update: {
+    description: 'User updated an app that evaluates feature flags.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
+  feature_flag_app_delete: {
+    description: 'User deleted an app that evaluates feature flags, along with its credentials.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
+  feature_flag_environment_create: {
+    description: 'User created a feature flag environment.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
+  feature_flag_environment_update: {
+    description: 'User updated a feature flag environment.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
+  feature_flag_environment_delete: {
+    description: 'User deleted a feature flag environment, along with its credentials.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
+  feature_flag_credential_create: {
+    description:
+      'User generated the first SDK key and client ID that an app uses to evaluate feature flags in an environment.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
+  feature_flag_credential_update: {
+    description:
+      'User rotated the SDK key (and optionally the client ID) that an app uses to evaluate feature flags in an environment.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
+  feature_flag_credential_delete: {
+    description:
+      'User revoked the SDK key and client ID that an app uses to evaluate feature flags in an environment.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Feature flags',
+    versionAddedAt: '9.7',
+  },
 } as const satisfies Record<string, UserActivityActionDefinition>;
 
 /** Closed union derived from the keys of {@link userActivityActions}. @public */

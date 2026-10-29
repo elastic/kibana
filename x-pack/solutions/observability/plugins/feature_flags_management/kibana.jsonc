@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/feature-flags-management-plugin",
+  "owner": ["@elastic/kibana-core"],
+  "group": "observability",
+  "visibility": "private",
+  "description": "Manages feature flags, the apps that evaluate them, their environments and SDK credentials. Fleet Server serves the evaluations through OFREP.",
+  "plugin": {
+    "id": "featureFlagsManagement",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "featureFlagsManagement"],
+    "requiredPlugins": ["features", "taskManager"]
+  }
+}

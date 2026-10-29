@@ -11,3 +11,10 @@ jest.doMock('@openfeature/launchdarkly-client-provider', () => {
     LaunchDarklyClientProvider: LaunchDarklyClientProviderMocked,
   };
 });
+
+export const OFREPWebProviderMocked = jest.fn();
+jest.doMock('@openfeature/ofrep-web-provider', () => {
+  return {
+    OFREPWebProvider: OFREPWebProviderMocked,
+  };
+});

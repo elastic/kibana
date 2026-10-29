@@ -66,12 +66,35 @@ describe('cloudExperiments config', () => {
 
     describe('in prod (non-dev mode)', () => {
       const ctx = { dev: false };
-      test('it enforces `launch_darkly` config if not in dev-mode', () => {
-        expect(() =>
-          config.schema.validate({ enabled: true }, ctx)
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"[launch_darkly.sdk_key]: expected value of type [string] but got [undefined]"`
-        );
+      test('the schema accepts a missing provider; the plugin constructor rejects it outside dev mode', () => {
+        expect(config.schema.validate({ enabled: true }, ctx)).toStrictEqual({
+          enabled: true,
+          metadata_refresh_interval: moment.duration(1, 'h'),
+        });
+      });
+
+      test('it accepts an ofrep provider without launch_darkly', () => {
+        expect(
+          config.schema.validate(
+            {
+              enabled: true,
+              ofrep: {
+                base_url: 'http://localhost:8220',
+                sdk_key: 'ffsdk-secret',
+                client_id: 'ffcli-public',
+              },
+            },
+            ctx
+          )
+        ).toMatchObject({
+          enabled: true,
+          ofrep: {
+            base_url: 'http://localhost:8220',
+            sdk_key: 'ffsdk-secret',
+            client_id: 'ffcli-public',
+            poll_interval: moment.duration(30, 's'),
+          },
+        });
       });
     });
   });

@@ -86,6 +86,7 @@ pageLoadAssetSize:
   expressionTagcloud: 6582
   expressionXY: 800
   features: 1481
+  featureFlagsManagement: 3000
   feedback: 5417
   fieldFormats: 4253
   fieldsMetadata: 1824
