@@ -36,6 +36,7 @@ export const DashboardLinkDestinationPicker = ({
   onDestinationPicked: (selectedDashboard?: DashboardItem) => void;
 }) => {
   const [searchString, setSearchString] = useState<string>('');
+  const [searchInputValue, setSearchInputValue] = useState<string>('');
   const [selectedOption, setSelectedOption] = useState<DashboardComboBoxOption[]>([]);
 
   const getDashboardItem = useCallback((dashboard: DashboardItem) => {
@@ -69,7 +70,11 @@ export const DashboardLinkDestinationPicker = ({
     onUnmount(selectedOption[0]?.key);
   });
 
-  const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
+  const {
+    loading: loadingDashboardList,
+    error: dashboardListError,
+    value: dashboardList,
+  } = useAsync(async () => {
     const dashboards = await fetchDashboards({
       search: searchString,
       parentDashboardId,
@@ -78,8 +83,11 @@ export const DashboardLinkDestinationPicker = ({
     const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) => {
       return getDashboardItem(dashboard);
     });
-    return dashboardOptions;
+    return { search: searchString, options: dashboardOptions };
   }, [searchString, parentDashboardId, getDashboardItem]);
+
+  // The rendered options lag the search input by the debounce plus the fetch; stay loading until they catch up.
+  const isOptionsListStale = !dashboardListError && dashboardList?.search !== searchInputValue;
 
   const debouncedSetSearch = useMemo(
     () =>
@@ -118,12 +126,13 @@ export const DashboardLinkDestinationPicker = ({
       async
       fullWidth
       className={'linksDashboardPicker'}
-      isLoading={loadingDashboardList}
+      isLoading={loadingDashboardList || isOptionsListStale}
       aria-label={DashboardLinkStrings.getDashboardPickerAriaLabel()}
       placeholder={DashboardLinkStrings.getDashboardPickerPlaceholder()}
       singleSelection={{ asPlainText: true }}
-      options={dashboardList}
+      options={dashboardList?.options}
       onSearchChange={(searchValue) => {
+        setSearchInputValue(searchValue);
         debouncedSetSearch(searchValue);
       }}
       renderOption={renderOption}
