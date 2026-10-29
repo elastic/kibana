@@ -59,7 +59,7 @@ describe('KnowledgeIndicatorsTab', () => {
 
     const callout = screen.getByTestId('nightshiftRunQuotaReached-ki_extraction');
     expect(callout).toHaveTextContent(
-      'Knowledge indicators extraction reached daily run limit for this deployment'
+      'Knowledge indicators extraction reached daily run limit of 2 for this deployment'
     );
     expect(callout).toHaveTextContent(
       'Further scheduled runs will be paused until the limit resets at midnight (UTC). You can still trigger discovery process manually.'
