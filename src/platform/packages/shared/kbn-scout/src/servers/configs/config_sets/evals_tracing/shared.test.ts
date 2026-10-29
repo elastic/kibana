@@ -37,6 +37,14 @@ describe.each([
     process.env = originalEnv;
   });
 
+  it('turns on inference token usage tracking', () => {
+    const { kbnTestServer } = loadServers(modulePath, {});
+
+    expect(kbnTestServer.serverArgs).toContain(
+      '--uiSettings.overrides.genAiSettings:tokenUsageTracking=true'
+    );
+  });
+
   it('adds no secure file without GCS_CREDENTIALS', () => {
     const { esTestCluster } = loadServers(modulePath, {});
 
