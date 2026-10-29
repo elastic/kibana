@@ -580,8 +580,18 @@ export const startWorkerSweep = async ({
 };
 
 /**
+ * How long a settled worker may show no review child before that counts as "not harvested".
+ * `run_review` is `workflow.executeAsync`: the child is persisted `pending` while the worker
+ * runs, but the task runner only picks it up (and stamps `startedAt`) after the worker has
+ * already completed — observed ~1-2s later, longer under load.
+ */
+const REVIEW_CHILD_GRACE_MS = 60_000;
+
+/**
  * Review children this run opened (started at/after our worker run). Older reviews were
- * cancelled by `cancelStaleExecutions`, so anything newer belongs to this fixture.
+ * cancelled by `cancelStaleExecutions`, so anything newer belongs to this fixture — including
+ * a child still `pending` with no `startedAt` yet, which the cancel pass would have removed
+ * had it predated this run.
  */
 const findReviewChildrenSince = async (
   fetch: HttpHandler,
@@ -596,7 +606,7 @@ const findReviewChildrenSince = async (
       query: { statuses: [...TerminalExecutionStatuses, ...NonTerminalExecutionStatuses] },
     }
   )) as unknown as WorkflowExecutionListDto;
-  return results.filter((r) => Date.parse(r.startedAt) >= startedAt);
+  return results.filter((r) => !r.startedAt || Date.parse(r.startedAt) >= startedAt);
 };
 
 /** The failure text for a sweep that settled without opening a review child. */
@@ -629,23 +639,36 @@ const noReviewChildError = (
  * failure text blamed a seeding bug that did not exist. Only a SETTLED worker with no
  * child means the rule was not harvested.
  *
+ * A settled worker that requested a review gets `REVIEW_CHILD_GRACE_MS` for that child to
+ * appear: `run_review` is fire-and-forget, so the worker routinely settles first.
+ *
  * More than one child is always fatal — it means the cancel pass missed something or the
  * stack is shared — and is reported as such rather than as a seeding problem.
  */
-const soleReviewChild = async ({
+export const soleReviewChild = async ({
   fetch,
   workflowExecutionId,
   workerStatus,
   workerOutput,
   startedAt,
+  pollIntervalMs = 2_000,
 }: {
   fetch: HttpHandler;
   workflowExecutionId: string;
   workerStatus: ExecutionStatus;
   workerOutput?: WorkerOutput;
   startedAt: number;
+  pollIntervalMs?: number;
 }): Promise<WorkflowExecutionListItemDto | undefined> => {
-  const reviewChildren = await findReviewChildrenSince(fetch, startedAt);
+  // A worker that reported zero requested reviews will never open one; don't wait for it.
+  const mayStillAppear = isTerminal(workerStatus) && (workerOutput?.reviews_requested ?? 1) > 0;
+  const graceDeadline = Date.now() + (mayStillAppear ? REVIEW_CHILD_GRACE_MS : 0);
+
+  let reviewChildren = await findReviewChildrenSince(fetch, startedAt);
+  while (reviewChildren.length === 0 && Date.now() < graceDeadline) {
+    await sleep(pollIntervalMs);
+    reviewChildren = await findReviewChildrenSince(fetch, startedAt);
+  }
 
   if (reviewChildren.length > 1) {
     throw new Error(
@@ -822,7 +845,30 @@ export const runRuleTuningWorkflow = async ({
     startedAt,
   });
 
-  const review = await getExecution(fetch, reviewChild.id);
+  // `run_review` is `workflow.executeAsync`, so the review usually starts only after the
+  // worker settled and the loop above never saw it. Drive it to a terminal status here,
+  // approving its gate, so the proposal read below sees a finished review.
+  let review = await getExecution(fetch, reviewChild.id);
+  while (!isTerminal(review.status) && Date.now() < deadline) {
+    if (!approvedReviews.has(review.id) && (await isReviewAtApprovalGate({ fetch, review }))) {
+      const decided = await decideReviewProposal({
+        fetch,
+        log,
+        stepExecutions: review.stepExecutions ?? [],
+        executionId: review.id,
+        approved: true,
+        pollIntervalMs,
+      });
+      if (decided) approvedReviews.add(review.id);
+    }
+    await sleep(pollIntervalMs);
+    review = await getExecution(fetch, reviewChild.id);
+  }
+  if (!isTerminal(review.status)) {
+    log.warning(
+      `Review execution ${review.id} did not reach a terminal status within ${maxWaitMs}ms (last status: ${review.status})`
+    );
+  }
 
   // Reachability assert: a review that produced no diagnose proposal has nothing to
   // grade; `readProposalOrThrow` names which of the two causes the step list can tell
