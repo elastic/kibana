@@ -15,7 +15,7 @@ import { READ_HUNT_RESULT_STEP_ID, RUN_HUNT_COORDINATOR_STEP_ID } from './consta
 const huntChildYaml = readFileSync(
   Path.join(
     REPO_ROOT,
-    'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt.yaml'
+    'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt/hunt.yaml'
   ),
   'utf8'
 );

@@ -26,20 +26,58 @@ Named-entity-recognition (NER) rule support still exists in the underlying schem
 (`@kbn/ai-anonymization-server`) but is intentionally not surfaced anywhere on
 this page.
 
+## Access
+
+The page is offered only to users who can change what it shows, so a user who cannot use it gets
+no Stack Management entry for it. That takes all of:
+
+- Advanced Settings **All** (`advancedSettings.save`; the pattern tester endpoint also needs
+  `manage_advanced_settings`),
+- the Connectors privilege (`actions.show` and `actions.execute`),
+- an Enterprise license.
+
+This is stricter than **GenAI Settings**, which is offered with the Connectors privilege alone and
+disables its controls for users who cannot save. The difference is intentional.
+
 ## Limitations
 
 - **Masks are pseudonyms, not encryption.** Without the per-space salt (not available in this mode),
   a mask is `<ENTITY>_<SHA-1 of the original value>`. Values from a small space (an IPv4 range, a
   list of usernames or host names) can be recovered from the mask by guessing. Do not describe the
   masks as irreversible.
-- **Built-in patterns are written to run the same on native `RegExp` and on RE2.** Do not add
-  lookahead, lookbehind, backreferences or unbounded quantifiers to them;
-  `default_builtin_regex_rules.test.ts` in `@kbn/ai-anonymization-common` fails if a rule behaves differently on the two engines or is
-  slow on long inputs.
-- **Not covered by the built-ins:** email addresses in scripts other than Latin, Greek and Cyrillic
-  (CJK, Arabic, Hebrew, ...), IPv6 addresses, and bare single-label host names (`server01`,
-  `nas.local`). Four-part version numbers (`3.11.4.2`) are indistinguishable from IPv4 addresses and
-  are masked.
+- **Custom patterns use RE2 syntax** (`re2js`), not JavaScript's. They match in linear time, so no
+  pattern or input can stall the regex worker. The page and the pattern tester's editor reject
+  lookahead, lookbehind, backreferences and `\uXXXX` escapes for new patterns (write `\x{00e9}`);
+  `(?i)`, `\p{L}` and similar are accepted. `\s` and `\w` are ASCII-only.
+  **Rules saved earlier keep working.** Custom rules ran on native `RegExp` before RE2, so a stored
+  rule that RE2 cannot compile falls back to the native engine instead of being skipped or failing
+  every request. That fallback only keeps the protection those rules always had, the worker
+  timeout; edit such a rule to RE2 syntax to remove the risk. The saved setting's schema does not
+  check patterns either, on purpose: Core also validates the stored value on read and discards the
+  whole setting (masking off) if one rule is invalid. A pattern invalid on both engines fails at
+  run time and `onFailure` decides what happens.
+- **Only a shipped built-in rule runs on the native engine by choice.** A rule counts as built-in
+  when its id and pattern equal a shipped built-in; the `builtIn` flag alone does not, because the
+  setting can be written through the API.
+- **The account rule masks only the account name.** For `DOMAIN\account` the mask covers `account`;
+  `DOMAIN\` and the backslashes stay visible. A masked value that contains backslashes does not
+  round-trip: the matched text carries the escaping of the layer it was found in, and restoring it
+  into a different layer (structured model output, tool arguments, JSON in JSON) changed the
+  number of backslashes. The rule is off by default.
+  Because only `DOMAIN\name` is matched, the same name written **bare** (for example a model
+  repeating it in its own output, which a later request such as a migration fix loop then sends
+  back) is not masked again: no built-in rule matches a bare user name.
+- **Well-known public sites are not masked as host names.** There are two lists in
+  `@kbn/ai-anonymization-common` (`builtin_match_filters.ts`). Services that are public by nature
+  are left readable **with all their subdomains**: `github.com`, `githubusercontent.com`,
+  `gitlab.com`, `stackoverflow.com`, `wikipedia.org`, `virustotal.com`, `owasp.org`, `ss64.com`.
+  Websites of organisations are left readable **only as these exact hosts**, because the same
+  organisation can be a customer with internal hosts under its domain: `attack.mitre.org`,
+  `nvd.nist.gov`, `www.cisa.gov`, `learn.microsoft.com`, `docs.microsoft.com`,
+  `www.microsoft.com`, `elastic.co`, `www.elastic.co`, `docs.elastic.co`. Everything else under
+  those organisation domains (for example `corp.mitre.org`) is masked. Keep the lists short, and a
+  test checks that every entry is listed here. Such filters apply to built-in rules only: a
+  pattern cannot express them because it must also run on RE2, which has no lookbehind.
 - **The pattern tester needs the `manage_advanced_settings` privilege** and runs on its own small
   worker pool with a short timeout, separate from the pool serving AI requests. It can be turned off
   with `xpack.aiAnonymizationSettings.patternTester.enabled: false` (default `true`), in which case

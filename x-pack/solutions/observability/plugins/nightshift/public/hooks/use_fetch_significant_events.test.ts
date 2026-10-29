@@ -7,6 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
+import { SIGNIFICANT_EVENTS_LIST_QUERY_KEY } from '../data/query_keys';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/constants';
 import {
@@ -105,7 +106,7 @@ describe('useFetchSignificantEvents', () => {
       investigations: [
         {
           workflow_execution_id: 'exec-1',
-          started_at: '2026-01-01T00:00:00.000Z',
+          started_at: new Date().toISOString(),
         },
       ],
     });
@@ -142,26 +143,30 @@ describe('markEventInvestigationCompleteInCache', () => {
       perPage: 1,
       total: 1,
     };
-    const queryClient = {
-      setQueryData: jest.fn(
-        (
-          queryKey: typeof NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-          updater: (
-            current: NightshiftSignificantEventsQueryData | undefined
-          ) => NightshiftSignificantEventsQueryData | undefined
-        ) => {
-          expect(queryKey).toEqual(NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY);
+    const setQueriesData = jest.fn(
+      (
+        { queryKey }: { queryKey: readonly string[] },
+        updater: (
+          current: NightshiftSignificantEventsQueryData | undefined
+        ) => NightshiftSignificantEventsQueryData | undefined
+      ) => {
+        if (queryKey === NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY) {
           cache = updater(cache);
         }
-      ),
-    } as unknown as QueryClient;
+      }
+    );
+    const queryClient = { setQueriesData } as unknown as QueryClient;
 
     markEventInvestigationCompleteInCache(queryClient, 'evt-1', '2026-01-01T00:05:00.000Z');
 
     expect(cache?.hits[0].investigations?.[0].completed_at).toBe('2026-01-01T00:05:00.000Z');
+    expect(setQueriesData).toHaveBeenCalledWith(
+      { queryKey: SIGNIFICANT_EVENTS_LIST_QUERY_KEY },
+      expect.any(Function)
+    );
   });
 
-  it('reapplies pending completed_at after a refetch still missing server completion', async () => {
+  it('reapplies pending completed_at until a new round reuses the investigation id', async () => {
     let cache: NightshiftSignificantEventsQueryData | undefined = {
       hits: [
         mockEvent({
@@ -178,14 +183,16 @@ describe('markEventInvestigationCompleteInCache', () => {
       total: 1,
     };
     const queryClient = {
-      setQueryData: jest.fn(
+      setQueriesData: jest.fn(
         (
-          _queryKey: typeof NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
+          { queryKey }: { queryKey: readonly string[] },
           updater: (
             current: NightshiftSignificantEventsQueryData | undefined
           ) => NightshiftSignificantEventsQueryData | undefined
         ) => {
-          cache = updater(cache);
+          if (queryKey === NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY) {
+            cache = updater(cache);
+          }
         }
       ),
     } as unknown as QueryClient;
@@ -215,5 +222,24 @@ describe('markEventInvestigationCompleteInCache', () => {
     })) as NightshiftSignificantEventsQueryData;
 
     expect(data.hits[0].investigations?.[0].completed_at).toBe('2026-01-01T00:05:00.000Z');
+
+    mockSignificantEventsFetch.mockResolvedValueOnce({
+      hits: [
+        mockEvent({
+          event_id: 'evt-1',
+          investigations: [
+            { workflow_execution_id: 'exec-1', started_at: '2026-01-01T01:00:00.000Z' },
+          ],
+        }),
+      ],
+      page: 1,
+      perPage: 1,
+      total: 1,
+    });
+    const nextRound = (await capturedQueryFn!({
+      signal: undefined,
+    })) as NightshiftSignificantEventsQueryData;
+
+    expect(nextRound.hits[0].investigations?.[0].completed_at).toBeUndefined();
   });
 });

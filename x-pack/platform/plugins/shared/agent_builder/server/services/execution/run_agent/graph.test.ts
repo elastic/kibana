@@ -11,8 +11,10 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ChatCompleteCacheControl, InferenceConnector } from '@kbn/inference-common';
 import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStepType,
+  ToolCallInvocation,
   createInjectedContextStep,
   type ConversationRoundStep,
 } from '@kbn/agent-builder-common';
@@ -24,6 +26,7 @@ import { createAgentGraph } from './graph';
 import type { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import { stepUpdates } from './step_state';
 import type { PromptFactory } from './prompts';
+import type { RunAttachmentEvents } from './run_attachment_events';
 import { RunTracker, type ToolExecutionBuffer } from './run_tracker';
 import type { StateType } from './state';
 import type { ProcessedConversation } from './utils/prepare_conversation';
@@ -54,6 +57,7 @@ const createTestGraph = ({
   sessionId,
   cacheControl,
   toolExecutionBuffer,
+  runAttachmentEvents,
   cycleHooks,
 }: {
   structuredOutput?: boolean;
@@ -61,6 +65,7 @@ const createTestGraph = ({
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
   toolExecutionBuffer?: ToolExecutionBuffer;
+  runAttachmentEvents?: RunAttachmentEvents;
   cycleHooks?: CycleHookRuntime;
 } = {}) => {
   const researchInvoke = jest.fn();
@@ -108,6 +113,7 @@ const createTestGraph = ({
     sessionId,
     cacheControl,
     toolExecutionBuffer,
+    runAttachmentEvents,
     cycleHooks,
     contextManagement: {
       connector: { connectorId: 'test-connector' } as InferenceConnector,
@@ -220,6 +226,30 @@ describe('createAgentGraph', () => {
     expect(result.toolRenderState.c1.content).toContain('"ok":true');
     expect(result.toolOutcome).toEqual({ type: 'completed' });
     expect(result.finalAnswer).toBe('done');
+  });
+
+  it('drains the attachment events of the executed tool calls into the run', async () => {
+    const event = { id: 'att-evt', type: 'attachment_added' } as unknown as AttachmentTimelineEvent;
+    const drainToolCalls = jest.fn(() => [event]);
+    const { graph, researchInvoke, promptFactory } = createTestGraph({
+      runAttachmentEvents: { drainToolCalls } as unknown as RunAttachmentEvents,
+    });
+    researchInvoke
+      .mockResolvedValueOnce(
+        new AIMessage({ content: '', tool_calls: [{ id: 'c1', name: 'my_tool', args: {} }] })
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    mockToolNodeOnce([
+      new ToolMessage({ tool_call_id: 'c1', content: '{}', artifact: { results: [] } }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(drainToolCalls).toHaveBeenCalledWith(['c1']);
+    expect(result.attachmentEvents).toEqual([event]);
+    expect(promptFactory.getMainPrompt).toHaveBeenLastCalledWith({
+      run: expect.objectContaining({ attachmentEvents: [event] }),
+    });
   });
 
   it('lets the model repair an ask_user_question call whose arguments failed validation', async () => {
@@ -777,5 +807,68 @@ describe('createAgentGraph cycle hooks', () => {
     // the note landed in its own super-step, so the last streamed state and the projection have it
     expect(tracker.latestState().steps).toEqual([note]);
     expect(tracker.executionProjection()).toEqual([note]);
+  });
+});
+
+describe('createAgentGraph - execute_dynamic_tool', () => {
+  const dynamicCall = (id: string) => ({
+    id,
+    name: internalTools.executeDynamicTool,
+    args: { tool_id: 'skill.tool', params: { q: 1 } },
+  });
+
+  it('interrupts the run on a prompt from the inner tool, with the step keyed on the inner tool', async () => {
+    const { graph, researchInvoke, toolManager } = createTestGraph();
+    researchInvoke.mockResolvedValueOnce(
+      new AIMessage({ content: '', tool_calls: [dynamicCall('c1')] })
+    );
+    const prompt = { id: 'p1', type: 'confirmation', title: 't', message: 'm' };
+    mockToolNodeOnce([new ToolMessage({ tool_call_id: 'c1', content: '', artifact: { prompt } })]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.interrupted).toBe(true);
+    expect(result.prompts).toEqual([prompt]);
+    expect(result.pendingToolCallIds).toEqual(['c1']);
+    expect(result.steps[0]).toMatchObject({
+      tool_call_id: 'c1',
+      tool_id: 'skill.tool',
+      params: { q: 1 },
+      invocation: ToolCallInvocation.dynamic,
+      results: [],
+    });
+    // the render state keeps the outer name so the paused call is re-rendered as the model made it
+    expect(result.toolRenderState.c1).toMatchObject({
+      toolName: internalTools.executeDynamicTool,
+      kind: 'server',
+    });
+    // the outer call is what reached the tool node
+    expect(toolManager.recordToolUse).toHaveBeenCalledWith(internalTools.executeDynamicTool);
+  });
+
+  it('resolves the result under the inner tool id and completes the run', async () => {
+    const { graph, researchInvoke } = createTestGraph();
+    researchInvoke
+      .mockResolvedValueOnce(new AIMessage({ content: '', tool_calls: [dynamicCall('c1')] }))
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    const results = [{ tool_result_id: 'r1', type: 'other', data: { ok: true } }];
+    mockToolNodeOnce([
+      new ToolMessage({
+        tool_call_id: 'c1',
+        content: JSON.stringify({ results }),
+        artifact: { results },
+      }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.finalAnswer).toBe('done');
+    expect(result.steps[0]).toMatchObject({
+      tool_call_id: 'c1',
+      tool_id: 'skill.tool',
+      invocation: ToolCallInvocation.dynamic,
+      results,
+    });
+    expect(result.pendingToolCallIds).toEqual([]);
   });
 });
