@@ -81,7 +81,10 @@ export const deriveLastHuntStatus = ({
  * `incomplete` says nothing against the finding, and the hit keeps its status, run id and count
  * (`last_hunted_at` still moves). And a ledger that cannot hold the whole union settles
  * `coverage_pending` instead of leaving it set: ids past the cap are dropped, so a report that
- * stayed pending would re-search the same techniques on every sweep and never gain ground.
+ * stayed pending would re-search the same techniques on every sweep and never gain ground. That
+ * settle also stamps, whatever the run found: the candidate gate retires a report only on
+ * `last_hunted_at`, so a settled flag without a stamp would leave the report in the pool, re-hunting
+ * the techniques the cap dropped on every sweep.
  */
 const EVIDENCE_SCRIPT = `
 if (!(ctx._source.evidence instanceof List)) { ctx._source.evidence = new ArrayList(); }
@@ -90,14 +93,6 @@ for (int i = 0; i < ctx._source.evidence.size(); i++) {
   if (ctx._source.evidence[i].space_id == params.space_id) {
     def el = ctx._source.evidence[i];
     boolean keepHit = !params.replayed_whole_report && el.coverage_pending == true && el.last_hunt_status == 'hit' && params.last_hunt_status != 'hit';
-    if (params.stamp) {
-      el.last_hunted_at = params.last_hunted_at;
-      if (!keepHit) {
-        el.last_hunt_status = params.last_hunt_status;
-        el.last_hunt_run_id = params.last_hunt_run_id;
-        el.last_hunt_event_hit_count = params.last_hunt_event_hit_count;
-      }
-    }
     Set ids = new LinkedHashSet();
     if (el.hunted_technique_ids instanceof List) { ids.addAll(el.hunted_technique_ids); }
     ids.addAll(params.searched_technique_ids);
@@ -105,6 +100,15 @@ for (int i = 0; i < ctx._source.evidence.size(); i++) {
     for (def id : ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
     el.hunted_technique_ids = capped;
     boolean pending = params.coverage_pending && ids.size() <= params.max_ids;
+    boolean settledByCap = params.coverage_pending && !pending;
+    if (params.stamp || settledByCap) {
+      el.last_hunted_at = params.last_hunted_at;
+      if (!keepHit) {
+        el.last_hunt_status = params.last_hunt_status;
+        el.last_hunt_run_id = params.last_hunt_run_id;
+        el.last_hunt_event_hit_count = params.last_hunt_event_hit_count;
+      }
+    }
     el.coverage_pending = pending;
     if (!pending) {
       el.pending_technique_ids = new ArrayList();
@@ -119,16 +123,17 @@ for (int i = 0; i < ctx._source.evidence.size(); i++) {
 if (!found) {
   Map el = new HashMap();
   el.space_id = params.space_id;
-  if (params.stamp) {
+  List capped = new ArrayList();
+  for (def id : params.searched_technique_ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
+  el.hunted_technique_ids = capped;
+  boolean pending = params.coverage_pending && params.searched_technique_ids.size() <= params.max_ids;
+  boolean settledByCap = params.coverage_pending && !pending;
+  if (params.stamp || settledByCap) {
     el.last_hunted_at = params.last_hunted_at;
     el.last_hunt_status = params.last_hunt_status;
     el.last_hunt_run_id = params.last_hunt_run_id;
     el.last_hunt_event_hit_count = params.last_hunt_event_hit_count;
   }
-  List capped = new ArrayList();
-  for (def id : params.searched_technique_ids) { if (capped.size() < params.max_ids) { capped.add(id); } }
-  el.hunted_technique_ids = capped;
-  boolean pending = params.coverage_pending && params.searched_technique_ids.size() <= params.max_ids;
   el.coverage_pending = pending;
   List pendingIds = new ArrayList();
   if (pending && params.pending_technique_ids != null) {
@@ -165,7 +170,9 @@ export interface WriteHuntEvidenceParams {
   pendingTechniqueIds?: string[];
   /**
    * Whether this run replayed the whole report (a manual run that skipped nothing). Its result then
-   * replaces an earlier finding even while coverage was pending; otherwise a pending `hit` is kept.
+   * replaces an earlier finding even while coverage was pending, provided the replay itself finished
+   * `complete`: a replay that left part of the report unsearched cannot overrule a hit. Otherwise a
+   * pending `hit` is kept.
    */
   replayedWholeReport?: boolean;
 }
@@ -234,7 +241,7 @@ export const writeHuntEvidence = async (
         last_hunt_event_hit_count: totalHits,
         searched_technique_ids: searchedTechniqueIds,
         pending_technique_ids: pendingTechniqueIds ?? null,
-        replayed_whole_report: replayedWholeReport,
+        replayed_whole_report: replayedWholeReport && completeness === 'complete',
         coverage_pending: coveragePending,
         max_ids: MAX_HUNT_TECHNIQUE_IDS,
       },

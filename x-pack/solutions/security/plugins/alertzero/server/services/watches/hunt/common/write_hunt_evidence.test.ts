@@ -206,8 +206,8 @@ describe('writeHuntEvidence', () => {
         searched_technique_ids: ['T1001'],
       })
     );
-    // The script applies the stamp keys only under `params.stamp`.
-    expect(script.source).toMatch(/if \(params\.stamp\)/);
+    // The script applies the stamp keys only under `params.stamp`, or when the cap settled the run.
+    expect(script.source).toMatch(/if \(params\.stamp \|\| settledByCap\)/);
   });
 
   it('writes nothing for a retryable run with no hit that searched nothing', async () => {
@@ -319,6 +319,27 @@ describe('writeHuntEvidence', () => {
     expect(script.params.coverage_pending).toBe(true);
   });
 
+  it('stamps the report when the cap is what settled a retryable run, so it leaves the sweep pool', async () => {
+    const esClient = makeEsClient();
+
+    await write(esClient, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-1',
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1001'],
+    });
+
+    const [{ script }] = esClient.update.mock.calls[0];
+    // The run itself does not stamp (it is retryable and found nothing), so the script has to.
+    expect(script.params.stamp).toBe(false);
+    expect(script.params.last_hunt_status).toBe('incomplete');
+    expect(script.source).toContain('boolean settledByCap = params.coverage_pending && !pending;');
+    expect(script.source).toContain('if (params.stamp || settledByCap) {');
+  });
+
   describe('a manual replay of the whole report', () => {
     const pendingHitRun = {
       spaceId: 'default',
@@ -338,6 +359,22 @@ describe('writeHuntEvidence', () => {
       expect(script.params.replayed_whole_report).toBe(true);
       expect(script.source).toContain('boolean keepHit = !params.replayed_whole_report &&');
     });
+
+    it.each(['incomplete_final', 'incomplete_retryable'] as const)(
+      'does not let a replay that ended %s overrule a hit, since it left part of the report unsearched',
+      async (completeness) => {
+        const esClient = makeEsClient();
+
+        await write(esClient, {
+          ...pendingHitRun,
+          completeness,
+          searchedTechniqueIds: ['T1001'],
+          replayedWholeReport: true,
+        });
+
+        expect(esClient.update.mock.calls[0][0].script.params.replayed_whole_report).toBe(false);
+      }
+    );
 
     it('keeps the guard on for a run that is not a replay', async () => {
       const esClient = makeEsClient();
