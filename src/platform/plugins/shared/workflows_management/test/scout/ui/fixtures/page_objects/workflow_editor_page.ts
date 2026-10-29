@@ -11,6 +11,7 @@
 import type { monaco } from '@kbn/monaco';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import { PLUGIN_ID } from '../../../../../common';
+import { EDITOR_READY_TIMEOUT } from '../constants';
 
 declare global {
   interface Window {
@@ -106,22 +107,21 @@ export class WorkflowEditorPage {
   }
 
   /**
-   * Navigate to the workflow editor for a new workflow. "Create workflow" opens the
-   * agentic-first landing; "Start manually" opens the blank editor.
+   * Navigate to the workflow editor for a new workflow. `startBlank=true` is the app's entry
+   * point for "Start manually", so it skips the agentic-first landing.
    */
   async gotoNewWorkflow() {
-    await this.page.gotoApp(PLUGIN_ID);
-    await this.page.testSubj.click('createWorkflowButton');
-    await this.page.testSubj.click('agenticFirstStartManuallyButton');
-    await this.waitForEditorToLoad();
+    await this.page.gotoApp(`${PLUGIN_ID}/create`, {
+      params: { startBlank: 'true' },
+      readyWhen: this.yamlEditor,
+    });
   }
 
   /**
    * Navigate to the workflow editor for an existing workflow by ID
    */
   async gotoWorkflow(workflowId: string) {
-    await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`);
-    await this.waitForEditorToLoad();
+    await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`, { readyWhen: this.yamlEditor });
   }
 
   /**
@@ -154,7 +154,7 @@ export class WorkflowEditorPage {
    * Wait for the YAML editor to be visible and ready
    */
   async waitForEditorToLoad() {
-    await this.yamlEditor.waitFor({ state: 'visible' });
+    await this.yamlEditor.waitFor({ state: 'visible', timeout: EDITOR_READY_TIMEOUT });
   }
 
   /**
