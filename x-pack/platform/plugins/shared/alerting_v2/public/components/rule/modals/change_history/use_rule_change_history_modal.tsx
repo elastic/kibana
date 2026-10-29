@@ -59,8 +59,10 @@ export const useRuleChangeHistoryModal = ({
   const adapter = createRuleChangeHistoryAdapter(api, {
     currentVersion: target?.version,
     onRestored: (rule) => {
-      // Keeps the open modal's conflict guard at the version the restore produced.
-      setTarget((current) => current && { ...current, version: rule.version });
+      // Keeps the open modal's title and conflict guard in sync with the restored rule.
+      setTarget(
+        (current) => current && { ...current, name: rule.metadata.name, version: rule.version }
+      );
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.ruleChangeHistory.restoreSuccessToast', {
           defaultMessage: 'Rule "{ruleName}" restored as version {version}',
