@@ -15,15 +15,28 @@ const PATH = '[A-Za-z_@](?:[A-Za-z0-9_@.]*[A-Za-z0-9_])?';
 const QUOTED = `\\["(${PATH})"\\]|\\['(${PATH})'\\]`;
 
 // Every way the YAML reads a field off a caller alert: the `a` alias of the prompt loop and the
-// filters, `inputs.alerts[0]`, `map` over `inputs.alerts`, and the two loops over the alerts.
+// filters, `inputs.alerts[0]`, `map` over `inputs.alerts`, and the loops over the alerts (see `FOREACH_ITEM`).
 const READS = [
   new RegExp(`\\ba(?:\\.(${PATH})|${QUOTED})`, 'g'),
   new RegExp(`inputs\\.alerts\\[0\\](?:\\.(${PATH})|${QUOTED})`, 'g'),
   new RegExp(`inputs\\.alerts \\| map: '(${PATH})'`, 'g'),
-  new RegExp(
-    `foreach\\.item\\.(host\\.name|host\\.id|user\\.name|kibana\\.alert\\.workflow_tags)`,
-    'g'
-  ),
+];
+
+const FOREACH_ITEM = new RegExp(`foreach\\.item\\.(${PATH})`, 'g');
+
+// `foreach.item` is an alert in some loops and something else in others. These are the reads of
+// the loops that are not over alerts (threat tactics and techniques) plus `size` of a list. Any
+// other `foreach.item.<path>` is taken to be an alert field, so a new one fails the test until it is
+// either added to ALERT_ANALYSIS_FIELDS or, if its loop is not over alerts, listed here.
+const NOT_ALERT_FOREACH_FIELDS = [
+  '_id',
+  '_index',
+  'size',
+  'name',
+  'id',
+  'tactic.name',
+  'tactic.id',
+  'technique',
 ];
 
 const readFields = (): Set<string> => {
@@ -31,8 +44,11 @@ const readFields = (): Set<string> => {
     [...ALERT_ANALYSIS_YAML.matchAll(pattern)].map(
       ([, dotted, double, single]) => dotted ?? double ?? single
     )
-  );
-  return new Set(found.filter((path) => path !== '_id' && path !== 'size'));
+  ).filter((path) => path !== '_id' && path !== '_index' && path !== 'size');
+  const foreachFound = [...ALERT_ANALYSIS_YAML.matchAll(FOREACH_ITEM)]
+    .map(([, path]) => path)
+    .filter((path) => !NOT_ALERT_FOREACH_FIELDS.includes(path));
+  return new Set([...found, ...foreachFound]);
 };
 
 describe('ALERT_ANALYSIS_FIELDS', () => {
