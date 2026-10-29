@@ -579,6 +579,10 @@ export class BaseValidator {
           listId: _item.list_id,
         };
 
+        // Validators can run long synchronous work (e.g. libyara compile), and the items may not
+        // trigger any I/O: release the event loop between items so Kibana keeps serving requests.
+        await new Promise<void>((resolve) => setImmediate(resolve));
+
         try {
           await validator(item);
 

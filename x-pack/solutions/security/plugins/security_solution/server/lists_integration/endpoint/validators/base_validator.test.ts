@@ -660,6 +660,21 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
         expect(validateFn).toHaveBeenCalledTimes(1);
         expect(importItems).toEqual(expectedItems);
       });
+
+      it('should release the event loop between items', async () => {
+        const events: string[] = [];
+        const validateFn = jest.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
+          events.push(`validate ${item.name}`);
+          setImmediate(() => events.push(`event loop after ${item.name}`));
+        });
+
+        await validator._validatePreImportItems(
+          { items: [item1Mock(), item2Mock()], lists: [] },
+          validateFn
+        );
+
+        expect(events).toEqual(['validate name 1', 'event loop after name 1', 'validate name 2']);
+      });
     });
 
     describe('#validateCanImportGlobalArtifacts()', () => {
