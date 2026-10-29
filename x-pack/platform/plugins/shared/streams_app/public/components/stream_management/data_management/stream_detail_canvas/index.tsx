@@ -1067,6 +1067,7 @@ const buildRoutingNode = (routing: RoutingViewModel): RoutingNode => {
           handleId: routingRuleHandleId(rule.index),
           isCatchAll: rule.when === undefined,
           action: rule.action,
+          signals: rule.telemetry,
           label,
           connected: rule.targets.length > 0,
         };

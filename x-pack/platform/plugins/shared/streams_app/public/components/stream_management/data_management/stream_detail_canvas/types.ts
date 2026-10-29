@@ -49,6 +49,7 @@ export interface RoutingNodeRule {
   isCatchAll: boolean;
   connected: boolean;
   action?: 'copy' | 'move';
+  signals?: DestinationSignal[];
 }
 
 export interface RoutingNodeData extends Record<string, unknown> {

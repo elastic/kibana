@@ -8,6 +8,7 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Unit } from '../../../services/unit_repository';
 import type { RoutingRuleViewModel, RoutingTarget, RoutingViewModel } from './types';
+import type { DestinationSignal } from '../destinations/types';
 
 interface PipelineEntries {
   sources: string[];
@@ -47,6 +48,7 @@ const toRoutingRule = (route: StreamsUnit.PipelineRoute, index: number): Routing
   when: route.when,
   action: route.action,
   targets: routeTargets(route),
+  telemetry: route.telemetry as DestinationSignal[],
 });
 
 const referencedPipelineIds = (pipelines: readonly StreamsUnit.Pipeline[]): Set<string> => {

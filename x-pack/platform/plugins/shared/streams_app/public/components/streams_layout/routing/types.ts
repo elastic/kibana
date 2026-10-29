@@ -6,6 +6,7 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
+import type { DestinationSignal } from '../destinations/types';
 
 export type RoutingAction = NonNullable<StreamsUnit.PipelineRoute['action']>;
 
@@ -22,6 +23,7 @@ export interface RoutingRuleViewModel {
   when?: string;
   action?: RoutingAction;
   targets: RoutingTarget[];
+  telemetry?: DestinationSignal[];
 }
 
 /** A pipeline that branches records, either through `routes` or as a routed child pipeline. */

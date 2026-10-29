@@ -16,6 +16,8 @@ import {
   EuiToolTip,
   useEuiTheme,
   type UseEuiTheme,
+  EuiBadge,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Position, type NodeProps } from '@xyflow/react';
@@ -23,6 +25,7 @@ import { ConnectionHandle } from './connection_handle';
 import type { RoutingNode as RoutingNodeType, RoutingNodeRule } from '../types';
 import { ROUTING_NODE_WIDTH } from '../canvas_constants';
 import { getNodeCardStyles } from './node_card_styles';
+import { DESTINATION_SIGNAL_LABELS } from '../../../../streams_layout/destinations/destination_type_config';
 
 const copyLabel = i18n.translate('xpack.streams.canvas.routingNode.copyBadgeLabel', {
   defaultMessage: 'copy',
@@ -40,9 +43,29 @@ function RoutingRuleRow({ rule }: { rule: RoutingNodeRule }) {
   const { euiTheme } = useEuiTheme();
 
   const tooltipContent = (
-    <EuiText size="m">
-      <code>{rule.label}</code>
-    </EuiText>
+    <>
+      <EuiText size="m">
+        <code>{rule.label}</code>
+      </EuiText>
+      {rule.signals ? (
+        <>
+          <EuiHorizontalRule margin="xs" />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              {rule.signals.map((signal) => (
+                <EuiBadge
+                  key={signal}
+                  color="hollow"
+                  data-test-subj="streamsCanvasSourceSignalBadge"
+                >
+                  {DESTINATION_SIGNAL_LABELS[signal]}
+                </EuiBadge>
+              ))}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ) : null}
+    </>
   );
 
   return (
