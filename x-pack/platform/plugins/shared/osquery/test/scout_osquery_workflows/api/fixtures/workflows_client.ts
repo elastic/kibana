@@ -29,9 +29,21 @@ export interface WorkflowExecution {
   stepExecutions: StepExecution[];
 }
 
+/** Workflows created and not yet deleted, so a failed test still gets them removed. */
+const pendingDeletions = new Map<string, () => Promise<unknown>>();
+
+/** Deletes every workflow a test created and did not delete, e.g. because an assertion threw. */
+export const deleteLeftoverWorkflows = async (): Promise<void> => {
+  const deletions = [...pendingDeletions.values()];
+  pendingDeletions.clear();
+  await Promise.all(deletions.map((remove) => remove().catch(() => undefined)));
+};
+
 /** Creates and runs workflows as the identity behind `headers` (an API key or a cookie). */
 export const workflowsClient = (apiClient: ApiClientFixture, headers: Record<string, string>) => {
   const allHeaders = { 'kbn-xsrf': 'true', ...headers };
+  const remove = (workflowId: string) =>
+    apiClient.delete(`api/workflows/workflow/${workflowId}`, { headers: allHeaders });
 
   const getExecution = async (executionId: string): Promise<WorkflowExecution> => {
     const response = await apiClient.get(
@@ -75,11 +87,14 @@ export const workflowsClient = (apiClient: ApiClientFixture, headers: Record<str
       const [created] = response.body.created;
       expect(created.valid).toBe(true);
 
+      pendingDeletions.set(created.id, () => remove(created.id));
+
       return created.id as string;
     },
 
     delete: async (workflowId: string) => {
-      await apiClient.delete(`api/workflows/workflow/${workflowId}`, { headers: allHeaders });
+      pendingDeletions.delete(workflowId);
+      await remove(workflowId);
     },
 
     run: async (workflowId: string): Promise<string> => {

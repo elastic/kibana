@@ -64,6 +64,11 @@ export const createSystemIndicesClient = async (
   });
 };
 
+export const deleteSystemIndicesUser = async (esClient: Client): Promise<void> => {
+  await esClient.security.deleteUser({ username: SYSTEM_USER }, { ignore: [404] });
+  await esClient.security.deleteRole({ name: SYSTEM_ROLE }, { ignore: [404] });
+};
+
 /** An agent policy with the osquery integration, so fake agents are osquery agents. */
 export const createOsqueryAgentPolicy = async (kbnClient: KbnClient, name: string) => {
   const { data: pkg } = await kbnClient.request<{ item: { version: string } }>({
@@ -144,6 +149,22 @@ export const deleteFakeAgents = async (systemEs: Client, agentIds: string[]): Pr
  * document per row. `error` makes it a failed answer. `ecsMapping` (ECS path to column) is
  * applied to each result document, as osquerybeat does with the query's `ecs_mapping`.
  */
+const answeredQueryIds = new Set<string>();
+
+/** Removes the response and result documents `answerQuery` wrote since the last call. */
+export const deleteAnsweredQueries = async (esClient: Client): Promise<void> => {
+  const ids = [...answeredQueryIds];
+  answeredQueryIds.clear();
+  if (!ids.length) return;
+
+  await esClient.deleteByQuery({
+    index: [RESPONSES_DATA_STREAM, RESULTS_DATA_STREAM],
+    refresh: true,
+    ignore_unavailable: true,
+    query: { terms: { action_id: ids } },
+  });
+};
+
 export const answerQuery = async (
   esClient: Client,
   {
@@ -161,6 +182,7 @@ export const answerQuery = async (
   }
 ): Promise<void> => {
   const now = new Date().toISOString();
+  answeredQueryIds.add(queryActionId);
   await esClient.index({
     index: RESPONSES_DATA_STREAM,
     refresh: 'wait_for',

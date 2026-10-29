@@ -13,6 +13,7 @@ import moment from 'moment';
 import {
   ACTION_RESPONSES_DATA_STREAM_INDEX,
   ACTION_RESPONSES_INDEX,
+  AGENT_CARDINALITY_PRECISION,
 } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { getQueryFilter } from '../../../../../utils/build_query';
@@ -147,6 +148,9 @@ export const buildActionResultsQuery = ({
               responding_agents: {
                 cardinality: {
                   field: 'agent_id',
+                  // Single bucket, so the sketch is cheap; exact up to 40k agents, so a fully
+                  // answered query reaches `pending === 0`.
+                  precision_threshold: AGENT_CARDINALITY_PRECISION,
                 },
               },
               responses: {

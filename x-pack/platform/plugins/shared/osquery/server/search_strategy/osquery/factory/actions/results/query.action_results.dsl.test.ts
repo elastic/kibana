@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { AGENT_CARDINALITY_PRECISION } from '../../../../../../common/constants';
 import { buildActionResultsQuery } from './query.action_results.dsl';
 
 // The agent-carried space only speaks for documents Kibana never stamped, so the
@@ -90,6 +91,7 @@ describe('buildActionResultsQuery', () => {
                   responding_agents: {
                     cardinality: {
                       field: 'agent_id',
+                      precision_threshold: AGENT_CARDINALITY_PRECISION,
                     },
                   },
                   responses: {
@@ -372,6 +374,7 @@ describe('buildActionResultsQuery', () => {
                   responding_agents: {
                     cardinality: {
                       field: 'agent_id',
+                      precision_threshold: AGENT_CARDINALITY_PRECISION,
                     },
                   },
                   responses: {

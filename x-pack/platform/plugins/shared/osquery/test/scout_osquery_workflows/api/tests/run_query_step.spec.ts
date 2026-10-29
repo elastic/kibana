@@ -15,8 +15,11 @@ import {
   createSavedQuery,
   createSystemIndicesClient,
   deleteAgentPolicy,
+  deleteAnsweredQueries,
   deleteFakeAgents,
+  deleteLeftoverWorkflows,
   deleteSavedQuery,
+  deleteSystemIndicesUser,
   indexFakeAgents,
   stepOf,
   workflowsClient,
@@ -94,7 +97,12 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
     ({ apiKeyHeader: adminHeaders } = await requestAuth.getApiKeyForAdmin());
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
+  apiTest.afterEach(async () => {
+    await deleteLeftoverWorkflows();
+  });
+
+  apiTest.afterAll(async ({ esClient, kbnClient }) => {
+    await deleteAnsweredQueries(esClient);
     for (const { id, space } of savedQueryIds) {
       await deleteSavedQuery(kbnClient, id, space);
     }
@@ -106,6 +114,7 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
     });
     await deleteFakeAgents(systemEs, [AGENT_A.id, AGENT_B.id]);
     await deleteAgentPolicy(kbnClient, policyId);
+    await deleteSystemIndicesUser(esClient);
   });
 
   apiTest(

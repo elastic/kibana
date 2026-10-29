@@ -112,6 +112,9 @@ export const collectResults = async ({
           pageSize,
           // A document still arriving during the read (after the deadline) sorts after the pages
           // already read, instead of shifting them. The route breaks ties on `_doc`.
+          // Known limit: pages are offset-based, so rows sharing an `event.ingested` value can be
+          // repeated or skipped if the pages are served by replicas with a different `_doc` order.
+          // A PIT with `search_after` would remove it, but the results route does not offer one.
           sort: 'event.ingested',
           sortOrder: 'asc',
         },
