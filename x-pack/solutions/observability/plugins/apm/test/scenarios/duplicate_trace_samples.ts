@@ -29,9 +29,9 @@ import {
   generateShortId,
 } from '@kbn/synthtrace-client';
 import type { ApmOtelFields } from '@kbn/synthtrace-client';
-import type { Scenario } from '../cli/scenario';
-import { withClient } from '../lib/utils/with_client';
-import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import type { Scenario } from '@kbn/synthtrace';
+import { getSynthtraceEnvironment } from '@kbn/synthtrace';
+import { withClient } from '@kbn/synthtrace';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const TRANSACTION_NAME = 'POST /v1/chat/completions';
