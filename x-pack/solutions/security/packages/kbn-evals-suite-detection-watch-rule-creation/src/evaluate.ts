@@ -6,6 +6,7 @@
  */
 
 import { evaluate as base } from '@kbn/evals';
+import { pinInferenceFeatures } from './model_pin';
 import { RuleCreationClient } from './rule_creation_client';
 import { seedSecurityData } from './seed_security_data';
 
@@ -17,8 +18,16 @@ import { seedSecurityData } from './seed_security_data';
 // `Record<string, never>` here. See x-pack/platform/plugins/private/logstash/test/scout.
 export const evaluate = base.extend<
   {},
-  { securityData: void; ruleCreationClient: RuleCreationClient }
+  { modelPin: void; securityData: void; ruleCreationClient: RuleCreationClient }
 >({
+  // `auto` so every spec's workflow runs the candidate, not alertzero_frontier's recommended model.
+  modelPin: [
+    async ({ kbnClient, connector, log }, use) => {
+      await pinInferenceFeatures({ kbnClient, connectorId: connector.id, log });
+      await use();
+    },
+    { scope: 'worker', auto: true },
+  ],
   // `auto` so a spec cannot silently skip seeding and score an empty stack. See
   // seed_security_data.ts for why a purpose-built fixture is used over a stock es_archive.
   securityData: [
