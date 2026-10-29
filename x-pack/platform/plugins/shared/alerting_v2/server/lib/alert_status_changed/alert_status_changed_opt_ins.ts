@@ -16,7 +16,7 @@ import {
 /**
  * An opt-in for the `alerting.alertStatusChanged` workflow trigger.
  *
- * Until at least one opt-in is registered, nothing is built or published for the trigger. The
+ * Until at least one opt-in is registered, nothing is published for the trigger. The
  * caller owns its own enablement signal, so alerting never reads settings or flags on its behalf.
  */
 export interface AlertStatusChangedOptIn {

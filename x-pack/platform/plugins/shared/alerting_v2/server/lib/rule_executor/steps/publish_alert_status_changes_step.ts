@@ -16,10 +16,8 @@ import {
 } from '../../events/alert_status_changed_event_publisher/alert_status_changed_event_publisher';
 import type { RuleResponse } from '../../rules_client';
 import type { PipelineStateStream, RuleExecutionInput, RuleExecutionStep } from '../types';
+import { RULE_EXECUTION_SOURCE } from '../build_alert_events';
 import { mapStep } from '../stream_utils';
-
-/** `source` of the alert events the rule executor writes. */
-const RULE_EXECUTION_SOURCE = 'internal';
 
 const toKey = (episodeId: string, status: string): string => `${episodeId}:${status}`;
 

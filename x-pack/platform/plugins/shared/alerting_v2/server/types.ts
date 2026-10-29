@@ -67,7 +67,7 @@ export interface AlertingServerSetup {
 
   /**
    * Opts in to the `alerting.alertStatusChanged` workflow trigger. Until a plugin opts in,
-   * nothing is built or published for it. The caller owns its own enablement signal and
+   * nothing is published for it. The caller owns its own enablement signal and
    * answers per rule run or alert write through `isEnabled`.
    */
   enableAlertStatusChanged(optIn: AlertStatusChangedOptIn): void;
