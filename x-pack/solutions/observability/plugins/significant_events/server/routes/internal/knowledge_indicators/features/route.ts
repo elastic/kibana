@@ -33,12 +33,14 @@ const MAX_INPUT_STRING_LENGTH = 255;
 // Each source write can wait for its lease, so sources run in parallel to keep the request short.
 const BULK_SOURCE_CONCURRENCY = 3;
 
-const durabilityOperationSchema = z.object({
-  durability: z.object({
-    id: z.string().max(MAX_INPUT_STRING_LENGTH),
-    durable: z.boolean(),
-  }),
-});
+const durabilityOperationSchema = lazySchema(() =>
+  z.object({
+    durability: z.object({
+      id: z.string().max(MAX_INPUT_STRING_LENGTH),
+      durable: z.boolean(),
+    }),
+  })
+);
 
 const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/features',
@@ -272,36 +274,38 @@ const bulkFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z.object({
-      operations: z.array(
-        z.union([
-          z.object({
-            index: z.object({
-              feature: featureUpsertSchema,
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.object({
+        operations: z.array(
+          z.union([
+            z.object({
+              index: z.object({
+                feature: featureUpsertSchema,
+              }),
             }),
-          }),
-          z.object({
-            delete: z.object({
-              id: z.string().max(MAX_INPUT_STRING_LENGTH),
+            z.object({
+              delete: z.object({
+                id: z.string().max(MAX_INPUT_STRING_LENGTH),
+              }),
             }),
-          }),
-          z.object({
-            exclude: z.object({
-              id: z.string().max(MAX_INPUT_STRING_LENGTH),
+            z.object({
+              exclude: z.object({
+                id: z.string().max(MAX_INPUT_STRING_LENGTH),
+              }),
             }),
-          }),
-          z.object({
-            restore: z.object({
-              id: z.string().max(MAX_INPUT_STRING_LENGTH),
+            z.object({
+              restore: z.object({
+                id: z.string().max(MAX_INPUT_STRING_LENGTH),
+              }),
             }),
-          }),
-          durabilityOperationSchema,
-        ])
-      ),
-    }),
-  }),
+            durabilityOperationSchema,
+          ])
+        ),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
@@ -359,20 +363,22 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    body: z.object({
-      operations: z
-        .array(
-          z.union([
-            z.object({ delete: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
-            z.object({ exclude: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
-            z.object({ restore: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
-            durabilityOperationSchema,
-          ])
-        )
-        .min(1),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z.object({
+        operations: z
+          .array(
+            z.union([
+              z.object({ delete: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+              z.object({ exclude: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+              z.object({ restore: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+              durabilityOperationSchema,
+            ])
+          )
+          .min(1),
+      }),
+    })
+  ),
   handler: async ({
     params,
     request,
