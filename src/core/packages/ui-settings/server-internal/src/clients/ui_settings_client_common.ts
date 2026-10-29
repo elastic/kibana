@@ -22,6 +22,7 @@ export const GET_OBSERVABLE_POLL_INTERVAL = 10_000;
 interface ReadOptions {
   autoCreateOrUpgradeIfMissing?: boolean;
   ignoreErrors?: boolean;
+  savedObjectsClient?: UiSettingsServiceOptions['savedObjectsClient'];
 }
 
 interface UserProvidedValue<T = unknown> {
@@ -41,6 +42,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private readonly savedObjectsClient: UiSettingsServiceOptions['savedObjectsClient'];
   private readonly sharedUserProvidedCache?: UiSettingsServiceOptions['sharedUserProvidedCache'];
   private readonly sharedPollReads?: UiSettingsServiceOptions['sharedPollReads'];
+  private readonly getPollClient?: UiSettingsServiceOptions['getPollClient'];
   private readonly pollTicks$: Observable<number>;
   private readonly namespace: string;
 
@@ -53,6 +55,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
       buildNum,
       sharedUserProvidedCache,
       sharedPollReads,
+      getPollClient,
       pollTicks$ = EMPTY,
       namespace,
     } = options;
@@ -62,6 +65,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     this.savedObjectsClient = savedObjectsClient;
     this.sharedUserProvidedCache = sharedUserProvidedCache;
     this.sharedPollReads = sharedPollReads;
+    this.getPollClient = getPollClient;
     this.pollTicks$ = pollTicks$;
     this.namespace = namespace;
   }
@@ -69,30 +73,39 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   get$<T = any>(key: string): Observable<T> {
     this.assertObservableKey(key);
 
-    return merge(of(undefined), this.pollTicks$).pipe(
-      exhaustMap((tick) =>
-        defer(() => this.pollUserProvided(tick)).pipe(
-          map((userProvided) => this.staticValue<T>(key, userProvided)),
-          catchError((error) => {
-            this.log.warn(`[UiSettings] get$("${key}") skipped a poll: ${error}`);
-            return EMPTY;
-          })
-        )
-      ),
-      distinctUntilChanged(isEqual)
-    );
+    return defer(() => {
+      let ownReadSucceeded = false;
+      return merge(of(undefined), this.pollTicks$).pipe(
+        exhaustMap((tick) =>
+          defer(async () => {
+            const userProvided = await this.readForPoll(tick, ownReadSucceeded);
+            ownReadSucceeded = true;
+            return userProvided;
+          }).pipe(
+            map((userProvided) => this.staticValue<T>(key, userProvided)),
+            catchError((error) => {
+              this.log.warn(`[UiSettings] get$("${key}") skipped a poll: ${error}`);
+              return EMPTY;
+            })
+          )
+        ),
+        distinctUntilChanged(isEqual)
+      );
+    });
   }
 
-  /**
-   * Reads for `get$`. Only reads for the same tick are shared, and the first read
-   * after subscribing (no tick) is never shared.
-   */
-  private async pollUserProvided(tick: number | undefined): Promise<UserProvided> {
-    const read = () => this.read({ ignoreErrors: false });
+  private async readForPoll(
+    tick: number | undefined,
+    ownReadSucceeded: boolean
+  ): Promise<UserProvided> {
+    const sharedPollReads = this.sharedPollReads;
+    const getPollClient = this.getPollClient;
     const attributes =
-      tick !== undefined && this.sharedPollReads
-        ? this.sharedPollReads.run(`${this.type}:${this.namespace}:${tick}`, read)
-        : read();
+      ownReadSucceeded && sharedPollReads && getPollClient
+        ? sharedPollReads.run(`${this.type}:${this.namespace}:${tick}`, () =>
+            this.read({ ignoreErrors: false, savedObjectsClient: getPollClient() })
+          )
+        : this.read({ ignoreErrors: false });
     return this.applyOverrides(this.onReadHook(await attributes));
   }
 
@@ -259,14 +272,15 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
   private async read({
     autoCreateOrUpgradeIfMissing = true,
     ignoreErrors = true,
+    savedObjectsClient = this.savedObjectsClient,
   }: ReadOptions = {}): Promise<Record<string, any>> {
     try {
-      const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
+      const resp = await savedObjectsClient.get<Record<string, any>>(this.type, this.id);
       return resp.attributes;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
         const failedUpgradeAttributes = await createOrUpgradeSavedConfig({
-          savedObjectsClient: this.savedObjectsClient,
+          savedObjectsClient,
           version: this.id,
           buildNum: this.buildNum,
           log: this.log,
@@ -275,7 +289,11 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
         });
 
         if (!failedUpgradeAttributes) {
-          return await this.read({ autoCreateOrUpgradeIfMissing: false, ignoreErrors });
+          return await this.read({
+            autoCreateOrUpgradeIfMissing: false,
+            ignoreErrors,
+            savedObjectsClient,
+          });
         }
 
         return failedUpgradeAttributes;

@@ -40,7 +40,8 @@ export interface IUiSettingsClient {
    * Emits the value `get(key)` would return without a request, then each later change, including a change saved on another Kibana node, within about 10 seconds.
    * The observable never errors. A failed poll is skipped and the last value stays.
    * It completes when Kibana stops.
-   * The first read uses this client's saved objects client. Later polls share one read per space on each node, which may use another subscriber's client.
+   * The first read uses this client's saved objects client and must succeed before anything is emitted.
+   * Later polls read the same space with Kibana's internal client, shared by every subscriber on the node.
    * A long-lived subscriber should scope the client with `savedObjects.getUnsafeInternalClient()` and `.asScopedToNamespace(spaceId)` for a space, then unsubscribe in the plugin `stop` method.
    * A subscription doesn't end with the request that created it. Inside a route handler, prefer `get()`. To follow changes while the request is open, subscribe before responding and use `takeUntil(request.events.completed$)`. `completed$` never fires for fake requests.
    * Throws when the key was registered with `getValue`.

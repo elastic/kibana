@@ -48,6 +48,7 @@ describe('uiSettings', () => {
   let service: UiSettingsService;
   let setupDeps: SetupDeps;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let savedObjectsStart: ReturnType<typeof savedObjectsServiceMock.createInternalStartContract>;
 
   beforeEach(() => {
     const coreContext = mockCoreContext.create();
@@ -58,6 +59,7 @@ describe('uiSettings', () => {
     const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();
     setupDeps = { http: httpSetup, savedObjects: savedObjectsSetup };
     savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsStart = savedObjectsServiceMock.createInternalStartContract();
     service = new UiSettingsService(coreContext);
   });
 
@@ -151,7 +153,9 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(service.start()).rejects.toMatchInlineSnapshot(
+        await expect(
+          service.start({ savedObjects: savedObjectsStart })
+        ).rejects.toMatchInlineSnapshot(
           `[Error: Validation schema is not provided for [custom] UI Setting]`
         );
       });
@@ -165,7 +169,9 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(service.start()).rejects.toMatchInlineSnapshot(
+        await expect(
+          service.start({ savedObjects: savedObjectsStart })
+        ).rejects.toMatchInlineSnapshot(
           `[Error: Validation schema is not provided for [custom] Global UI Setting]`
         );
       });
@@ -179,7 +185,9 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(service.start()).rejects.toMatchInlineSnapshot(
+        await expect(
+          service.start({ savedObjects: savedObjectsStart })
+        ).rejects.toMatchInlineSnapshot(
           `[Error: [ui settings defaults [custom]]: expected value of type [string] but got [number]]`
         );
       });
@@ -193,7 +201,9 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(service.start()).rejects.toMatchInlineSnapshot(
+        await expect(
+          service.start({ savedObjects: savedObjectsStart })
+        ).rejects.toMatchInlineSnapshot(
           `[Error: expected value of type [string] but got [number]]`
         );
       });
@@ -217,7 +227,9 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(customizedService.start()).rejects.toMatchInlineSnapshot(
+        await expect(
+          customizedService.start({ savedObjects: savedObjectsStart })
+        ).rejects.toMatchInlineSnapshot(
           `[Error: [ui settings overrides [custom]]: expected value of type [string] but got [number]]`
         );
       });
@@ -241,7 +253,9 @@ describe('uiSettings', () => {
           },
         });
 
-        await expect(customizedService.start()).rejects.toMatchInlineSnapshot(
+        await expect(
+          customizedService.start({ savedObjects: savedObjectsStart })
+        ).rejects.toMatchInlineSnapshot(
           `[Error: [global ui settings overrides [custom]]: expected value of type [string] but got [number]]`
         );
       });
@@ -259,7 +273,7 @@ describe('uiSettings', () => {
         const customizedService = new UiSettingsService(coreContext);
         await customizedService.setup(setupDeps);
 
-        await customizedService.start();
+        await customizedService.start({ savedObjects: savedObjectsStart });
       });
 
       it('does not throw on unknown global overrides', async () => {
@@ -275,14 +289,16 @@ describe('uiSettings', () => {
         const customizedService = new UiSettingsService(coreContext);
         await customizedService.setup(setupDeps);
 
-        await customizedService.start();
+        await customizedService.start({ savedObjects: savedObjectsStart });
       });
 
       it('throws when the allowlist contains unregistered settings', async () => {
         const { setAllowlist } = await service.setup(setupDeps);
         setAllowlist(['mySetting']);
 
-        await expect(service.start()).rejects.toMatchInlineSnapshot(
+        await expect(
+          service.start({ savedObjects: savedObjectsStart })
+        ).rejects.toMatchInlineSnapshot(
           `[Error: The uiSetting with key [mySetting] is in the allowlist but is not registered. Make sure to remove it from the allowlist in /packages/serverless/settings]`
         );
       });
@@ -307,7 +323,7 @@ describe('uiSettings', () => {
           readonlyMode: 'ui',
         };
 
-        const start = await service.start();
+        const start = await service.start({ savedObjects: savedObjectsStart });
         start.asScopedToClient(savedObjectsClient);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual({
           [settingId]: expectedSetting,
@@ -324,7 +340,7 @@ describe('uiSettings', () => {
           readonlyMode: 'strict',
         };
 
-        const start = await service.start();
+        const start = await service.start({ savedObjects: savedObjectsStart });
         start.asScopedToClient(savedObjectsClient);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual({
           [settingId]: expectedSetting,
@@ -335,7 +351,7 @@ describe('uiSettings', () => {
     describe('#asScopedToClient', () => {
       it('passes saved object type "config" to UiSettingsClient', async () => {
         await service.setup(setupDeps);
-        const start = await service.start();
+        const start = await service.start({ savedObjects: savedObjectsStart });
         start.asScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
@@ -344,7 +360,7 @@ describe('uiSettings', () => {
 
       it('passes overrides to UiSettingsClient', async () => {
         await service.setup(setupDeps);
-        const start = await service.start();
+        const start = await service.start({ savedObjects: savedObjectsStart });
         start.asScopedToClient(savedObjectsClient);
         expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].overrides).toBe(overrides);
@@ -354,7 +370,7 @@ describe('uiSettings', () => {
       it('passes a copy of set defaults to UiSettingsClient', async () => {
         const setup = await service.setup(setupDeps);
         setup.register(defaults);
-        const start = await service.start();
+        const start = await service.start({ savedObjects: savedObjectsStart });
         start.asScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsClientConstructor).toHaveBeenCalledTimes(1);
@@ -366,7 +382,7 @@ describe('uiSettings', () => {
     describe('#asScopedToGlobalClient', () => {
       it('passes saved object type "config-global" to UiSettingsGlobalClient', async () => {
         await service.setup(setupDeps);
-        const start = await service.start();
+        const start = await service.start({ savedObjects: savedObjectsStart });
         start.globalAsScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsGlobalClientConstructor).toHaveBeenCalledTimes(1);
@@ -375,7 +391,7 @@ describe('uiSettings', () => {
 
       it('passes overrides to UiSettingsGlobalClient', async () => {
         await service.setup(setupDeps);
-        const start = await service.start();
+        const start = await service.start({ savedObjects: savedObjectsStart });
         start.globalAsScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsGlobalClientConstructor).toHaveBeenCalledTimes(1);
@@ -387,7 +403,7 @@ describe('uiSettings', () => {
       it('passes a copy of set global defaults to UiSettingsGlobalClient', async () => {
         const setup = await service.setup(setupDeps);
         setup.registerGlobal(defaults);
-        const start = await service.start();
+        const start = await service.start({ savedObjects: savedObjectsStart });
         start.globalAsScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsGlobalClientConstructor).toHaveBeenCalledTimes(1);
@@ -402,15 +418,24 @@ describe('uiSettings', () => {
         const { UiSettingsClient } = jest.requireActual<
           typeof import('./clients/ui_settings_client')
         >('./clients/ui_settings_client');
+        const { UiSettingsGlobalClient } = jest.requireActual<
+          typeof import('./clients/ui_settings_global_client')
+        >('./clients/ui_settings_global_client');
         MockUiSettingsClientConstructor.mockImplementation(
           (options: ConstructorParameters<typeof UiSettingsClient>[0]) =>
             new UiSettingsClient(options)
         );
+        MockUiSettingsGlobalClientConstructor.mockImplementation(
+          (options: ConstructorParameters<typeof UiSettingsGlobalClient>[0]) =>
+            new UiSettingsGlobalClient(options)
+        );
       });
 
-      afterEach(() => {
+      afterEach(async () => {
+        await service.stop();
         jest.useRealTimers();
         MockUiSettingsClientConstructor.mockReset();
+        MockUiSettingsGlobalClientConstructor.mockReset();
       });
 
       const startWithWatchedSetting = async () => {
@@ -428,11 +453,24 @@ describe('uiSettings', () => {
           references: [],
           attributes: { watched: 'from-es' },
         });
-        const start = await service.start();
+        const start = await service.start({ savedObjects: savedObjectsStart });
         return start;
       };
 
-      it('shares one read per tick between two clients for the same space', async () => {
+      const savedObjectDoc = (attributes: Record<string, unknown>) => ({
+        type: 'config',
+        id: 'version',
+        references: [],
+        attributes,
+      });
+
+      it('shares one internal-client read per tick between two clients for the same space', async () => {
+        const internalClient = savedObjectsClientMock.create();
+        const scopedClient = savedObjectsClientMock.create();
+        savedObjectsStart.getUnsafeInternalClient.mockReturnValue(internalClient);
+        internalClient.asScopedToNamespace.mockReturnValue(scopedClient);
+        scopedClient.get.mockResolvedValue(savedObjectDoc({ watched: 'from-es' }));
+
         const start = await startWithWatchedSetting();
         const firstClient = start.asScopedToClient(savedObjectsClient);
         const secondClient = start.asScopedToClient(savedObjectsClient);
@@ -448,15 +486,109 @@ describe('uiSettings', () => {
         await jest.advanceTimersByTimeAsync(0);
         expect(firstValues).toEqual(['from-es']);
         expect(secondValues).toEqual(['from-es']);
-        const readsAfterSubscribe = savedObjectsClient.get.mock.calls.length;
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+        expect(scopedClient.get).not.toHaveBeenCalled();
+        expect(savedObjectsStart.getUnsafeInternalClient).not.toHaveBeenCalled();
 
         await jest.advanceTimersByTimeAsync(10_000);
-        expect(savedObjectsClient.get.mock.calls.length).toBe(readsAfterSubscribe + 1);
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+        expect(scopedClient.get).toHaveBeenCalledTimes(1);
         await jest.advanceTimersByTimeAsync(10_000);
-        expect(savedObjectsClient.get.mock.calls.length).toBe(readsAfterSubscribe + 2);
+        expect(scopedClient.get).toHaveBeenCalledTimes(2);
+        expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
+        expect(savedObjectsStart.getUnsafeInternalClient).toHaveBeenCalledTimes(1);
+        expect(internalClient.asScopedToNamespace).toHaveBeenCalledTimes(1);
+        expect(internalClient.asScopedToNamespace).toHaveBeenCalledWith('space-1');
 
         firstSubscription.unsubscribe();
         secondSubscription.unsubscribe();
+      });
+
+      it('creates one scoped internal client per namespace', async () => {
+        const internalClient = savedObjectsClientMock.create();
+        savedObjectsStart.getUnsafeInternalClient.mockReturnValue(internalClient);
+        const scopedClients = new Map<string, ReturnType<typeof savedObjectsClientMock.create>>();
+        internalClient.asScopedToNamespace.mockImplementation((namespace: string) => {
+          const client = savedObjectsClientMock.create();
+          client.get.mockResolvedValue(savedObjectDoc({ watched: 'from-es' }));
+          scopedClients.set(namespace, client);
+          return client;
+        });
+
+        const start = await startWithWatchedSetting();
+        const space2 = savedObjectsClientMock.create();
+        space2.getCurrentNamespace.mockReturnValue('space-2');
+        space2.get.mockResolvedValue(savedObjectDoc({ watched: 'from-es' }));
+
+        const subscriptions = [
+          start.asScopedToClient(savedObjectsClient).get$<string>('watched').subscribe(),
+          start.asScopedToClient(savedObjectsClient).get$<string>('watched').subscribe(),
+          start.asScopedToClient(savedObjectsClient).get$<string>('watched').subscribe(),
+          start.asScopedToClient(space2).get$<string>('watched').subscribe(),
+          start.asScopedToClient(space2).get$<string>('watched').subscribe(),
+        ];
+
+        await jest.advanceTimersByTimeAsync(0);
+        expect(internalClient.asScopedToNamespace).not.toHaveBeenCalled();
+
+        await jest.advanceTimersByTimeAsync(10_000);
+        expect(savedObjectsStart.getUnsafeInternalClient).toHaveBeenCalledTimes(1);
+        expect(internalClient.asScopedToNamespace).toHaveBeenCalledTimes(2);
+        expect(internalClient.asScopedToNamespace).toHaveBeenCalledWith('space-1');
+        expect(internalClient.asScopedToNamespace).toHaveBeenCalledWith('space-2');
+        expect(scopedClients.get('space-1')?.get).toHaveBeenCalledTimes(1);
+        expect(scopedClients.get('space-2')?.get).toHaveBeenCalledTimes(1);
+
+        await jest.advanceTimersByTimeAsync(10_000);
+        expect(internalClient.asScopedToNamespace).toHaveBeenCalledTimes(2);
+        expect(scopedClients.get('space-1')?.get).toHaveBeenCalledTimes(2);
+        expect(scopedClients.get('space-2')?.get).toHaveBeenCalledTimes(2);
+
+        subscriptions.forEach((subscription) => subscription.unsubscribe());
+      });
+
+      it('reads global ticks through the unscoped internal client', async () => {
+        const internalClient = savedObjectsClientMock.create();
+        savedObjectsStart.getUnsafeInternalClient.mockReturnValue(internalClient);
+        internalClient.get.mockResolvedValue({
+          type: 'config-global',
+          id: 'version',
+          references: [],
+          attributes: { watched: 'from-es' },
+        });
+
+        const { register, registerGlobal } = await service.setup(setupDeps);
+        register({
+          watched: {
+            value: 'from-default',
+            schema: schema.string(),
+          },
+        });
+        registerGlobal({
+          watched: {
+            value: 'from-default',
+            schema: schema.string(),
+          },
+        });
+        savedObjectsClient.get.mockResolvedValue(savedObjectDoc({ watched: 'from-es' }));
+        const start = await service.start({ savedObjects: savedObjectsStart });
+        const subscription = start
+          .globalAsScopedToClient(savedObjectsClient)
+          .get$<string>('watched')
+          .subscribe();
+
+        await jest.advanceTimersByTimeAsync(0);
+        expect(savedObjectsClient.get).toHaveBeenCalledWith('config-global', expect.any(String));
+        expect(internalClient.get).not.toHaveBeenCalled();
+        expect(internalClient.asScopedToNamespace).not.toHaveBeenCalled();
+
+        await jest.advanceTimersByTimeAsync(10_000);
+        expect(internalClient.get).toHaveBeenCalledTimes(1);
+        expect(internalClient.get).toHaveBeenCalledWith('config-global', expect.any(String));
+        expect(internalClient.asScopedToNamespace).not.toHaveBeenCalled();
+        expect(savedObjectsStart.getUnsafeInternalClient).toHaveBeenCalledTimes(1);
+
+        subscription.unsubscribe();
       });
 
       it('completes an open get$ on stop, and a get$ started after stop completes without another poll', async () => {

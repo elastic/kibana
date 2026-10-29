@@ -50,4 +50,6 @@ export interface UiSettingsServiceOptions {
   pollTicks$?: Observable<number>;
   /** In-flight `get$` reads shared across clients on this node */
   sharedPollReads?: InflightReads<Record<string, unknown>>;
+  /** Saved objects client used for shared `get$` polls */
+  getPollClient?: () => SavedObjectsClientContract;
 }

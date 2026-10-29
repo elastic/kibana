@@ -609,7 +609,9 @@ export class Server {
     }
 
     const capabilitiesStart = this.capabilities.start();
-    const uiSettingsStart = await this.uiSettings.start();
+    const uiSettingsStart = await this.uiSettings.start({
+      savedObjects: savedObjectsStart,
+    });
     const userStorageStart = this.userStorage.start({
       savedObjects: savedObjectsStart,
       security: securityStart,

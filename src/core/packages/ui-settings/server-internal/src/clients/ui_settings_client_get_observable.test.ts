@@ -39,6 +39,7 @@ interface SetupOptions {
   sharedUserProvidedCache?: NamespacedCache<Record<string, unknown>>;
   type?: 'config' | 'config-global';
   savedObjectsClient?: MockedSavedObjectsClient;
+  pollClient?: MockedSavedObjectsClient;
   preserveSavedObjectsMock?: boolean;
 }
 
@@ -87,16 +88,21 @@ describe('UiSettingsClient.get$', () => {
       sharedUserProvidedCache,
       type = TYPE,
       savedObjectsClient = savedObjectsClientMock.create(),
+      pollClient = savedObjectsClient,
       preserveSavedObjectsMock = false,
     } = options;
 
     if (!preserveSavedObjectsMock) {
-      savedObjectsClient.get.mockResolvedValue({
+      const doc = {
         type,
         id: ID,
         references: [],
         attributes: esDocSource,
-      });
+      };
+      savedObjectsClient.get.mockResolvedValue(doc);
+      if (pollClient !== savedObjectsClient) {
+        pollClient.get.mockResolvedValue(doc);
+      }
     }
 
     const Client = type === 'config-global' ? UiSettingsGlobalClient : UiSettingsClient;
@@ -112,9 +118,10 @@ describe('UiSettingsClient.get$', () => {
       pollTicks$,
       sharedPollReads,
       sharedUserProvidedCache,
+      getPollClient: () => pollClient,
     });
 
-    return { uiSettings, savedObjectsClient, pollTicks$, sharedPollReads };
+    return { uiSettings, savedObjectsClient, pollClient, pollTicks$, sharedPollReads };
   }
 
   it('emits the value get() would return without a request', async () => {
@@ -419,6 +426,188 @@ describe('UiSettingsClient.get$', () => {
 
     expect(seen.values).toEqual(['global-value']);
     expect(savedObjectsClient.get).toHaveBeenCalledWith('config-global', ID);
+  });
+
+  it('reads ticks through the poll client', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    const pollClient = savedObjectsClientMock.create();
+    const { uiSettings } = setup({
+      esDocSource: { [KEY]: 'one' },
+      savedObjectsClient,
+      pollClient,
+    });
+    watch<string>(uiSettings.get$(KEY));
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(pollClient.get).not.toHaveBeenCalled();
+
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL * 3);
+
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(pollClient.get).toHaveBeenCalledTimes(3);
+  });
+
+  it('keeps emitting from the poll client after the subscriber client fails, and a later subscriber is unaffected', async () => {
+    let stored = 'one';
+    const pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share());
+    const sharedPollReads = new InflightReads<Record<string, unknown>>();
+    const pollClient = savedObjectsClientMock.create();
+    pollClient.get.mockImplementation(async () => ({
+      type: TYPE,
+      id: ID,
+      references: [],
+      attributes: { [KEY]: stored },
+    }));
+
+    const brokenClient = savedObjectsClientMock.create();
+    let brokenReads = 0;
+    brokenClient.get.mockImplementation(async () => {
+      brokenReads += 1;
+      if (brokenReads > 1) {
+        throw SavedObjectsClient.errors.decorateForbiddenError(new Error('expired'));
+      }
+      return { type: TYPE, id: ID, references: [], attributes: { [KEY]: 'one' } };
+    });
+    const healthyClient = savedObjectsClientMock.create();
+    healthyClient.get.mockResolvedValue({
+      type: TYPE,
+      id: ID,
+      references: [],
+      attributes: { [KEY]: 'one' },
+    });
+
+    const shared = {
+      pollTicks$,
+      sharedPollReads,
+      pollClient,
+      preserveSavedObjectsMock: true,
+      namespace: 'space-1',
+    };
+    const broken = watch<string>(
+      setup({ ...shared, savedObjectsClient: brokenClient }).uiSettings.get$(KEY)
+    );
+    const healthy = watch<string>(
+      setup({ ...shared, savedObjectsClient: healthyClient }).uiSettings.get$(KEY)
+    );
+    await jest.advanceTimersByTimeAsync(0);
+    expect(broken.values).toEqual(['one']);
+    expect(healthy.values).toEqual(['one']);
+
+    stored = 'two';
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
+    stored = 'three';
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
+
+    expect(broken.values).toEqual(['one', 'two', 'three']);
+    expect(healthy.values).toEqual(['one', 'two', 'three']);
+    expect(brokenClient.get).toHaveBeenCalledTimes(1);
+    expect(healthyClient.get).toHaveBeenCalledTimes(1);
+    expect(pollClient.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not emit or use the poll client until the subscriber client stops returning Forbidden', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    const pollClient = savedObjectsClientMock.create();
+    savedObjectsClient.get.mockRejectedValue(
+      SavedObjectsClient.errors.decorateForbiddenError(new Error('forbidden'))
+    );
+    pollClient.get.mockResolvedValue({
+      type: TYPE,
+      id: ID,
+      references: [],
+      attributes: { [KEY]: 'from-poll' },
+    });
+    const { uiSettings } = setup({
+      savedObjectsClient,
+      pollClient,
+      preserveSavedObjectsMock: true,
+    });
+    const seen = watch<string>(uiSettings.get$(KEY));
+    await jest.advanceTimersByTimeAsync(0);
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL * 2);
+
+    expect(seen.values).toEqual([]);
+    expect(seen.error()).toBeUndefined();
+    expect(pollClient.get).not.toHaveBeenCalled();
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
+
+    savedObjectsClient.get.mockResolvedValue({
+      type: TYPE,
+      id: ID,
+      references: [],
+      attributes: { [KEY]: 'recovered' },
+    });
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
+    expect(seen.values).toEqual(['recovered']);
+    expect(pollClient.get).not.toHaveBeenCalled();
+
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
+    expect(seen.values).toEqual(['recovered', 'from-poll']);
+    expect(pollClient.get).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
+  });
+
+  it('switches to the shared poll client after Elasticsearch is available again', async () => {
+    let stored = 'one';
+    const pollTicks$ = interval(GET_OBSERVABLE_POLL_INTERVAL).pipe(share());
+    const sharedPollReads = new InflightReads<Record<string, unknown>>();
+    const pollClient = savedObjectsClientMock.create();
+    pollClient.get.mockImplementation(async () => ({
+      type: TYPE,
+      id: ID,
+      references: [],
+      attributes: { [KEY]: stored },
+    }));
+
+    const failingClient = savedObjectsClientMock.create();
+    let attempts = 0;
+    failingClient.get.mockImplementation(async () => {
+      attempts += 1;
+      if (attempts === 1) {
+        throw SavedObjectsClient.errors.decorateEsUnavailableError(new Error('unavailable'));
+      }
+      return { type: TYPE, id: ID, references: [], attributes: { [KEY]: 'one' } };
+    });
+    const otherClient = savedObjectsClientMock.create();
+    otherClient.get.mockResolvedValue({
+      type: TYPE,
+      id: ID,
+      references: [],
+      attributes: { [KEY]: 'one' },
+    });
+
+    const shared = {
+      pollTicks$,
+      sharedPollReads,
+      pollClient,
+      preserveSavedObjectsMock: true,
+      namespace: 'space-1',
+    };
+    const failing = watch<string>(
+      setup({ ...shared, savedObjectsClient: failingClient }).uiSettings.get$(KEY)
+    );
+    const other = watch<string>(
+      setup({ ...shared, savedObjectsClient: otherClient }).uiSettings.get$(KEY)
+    );
+    await jest.advanceTimersByTimeAsync(0);
+    expect(failing.values).toEqual([]);
+    expect(other.values).toEqual(['one']);
+    expect(pollClient.get).not.toHaveBeenCalled();
+
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
+    expect(failing.values).toEqual(['one']);
+    expect(other.values).toEqual(['one']);
+    expect(failingClient.get).toHaveBeenCalledTimes(2);
+    expect(pollClient.get).toHaveBeenCalledTimes(1);
+
+    stored = 'two';
+    await jest.advanceTimersByTimeAsync(GET_OBSERVABLE_POLL_INTERVAL);
+    expect(failing.values).toEqual(['one', 'two']);
+    expect(other.values).toEqual(['one', 'two']);
+    expect(failingClient.get).toHaveBeenCalledTimes(2);
+    expect(otherClient.get).toHaveBeenCalledTimes(1);
+    expect(pollClient.get).toHaveBeenCalledTimes(2);
   });
 
   it('completes when the poll ticks complete', async () => {

@@ -17,7 +17,10 @@ import { stripVersionQualifier } from '@kbn/std';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
+import type {
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart,
+} from '@kbn/core-saved-objects-server-internal';
 import type {
   ReadonlyModeType,
   ThemeName,
@@ -47,6 +50,10 @@ export interface SetupDeps {
   savedObjects: InternalSavedObjectsServiceSetup;
 }
 
+export interface StartDeps {
+  savedObjects: InternalSavedObjectsServiceStart;
+}
+
 type ClientType<T> = T extends 'global'
   ? UiSettingsGlobalClient
   : T extends 'namespace'
@@ -74,6 +81,8 @@ export class UiSettingsService
     share({ resetOnRefCountZero: false })
   );
   private readonly sharedPollReads = new InflightReads<Record<string, unknown>>();
+  private internalSavedObjectsClient?: SavedObjectsClientContract;
+  private readonly pollClients = new Map<string, SavedObjectsClientContract>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
@@ -133,7 +142,7 @@ export class UiSettingsService
     };
   }
 
-  public async start(): Promise<InternalUiSettingsServiceStart> {
+  public async start({ savedObjects }: StartDeps): Promise<InternalUiSettingsServiceStart> {
     if (this.allowlist) {
       // If we are in development mode, check if all settings in the allowlist are registered
       if (this.isDev) {
@@ -146,8 +155,8 @@ export class UiSettingsService
     this.validatesOverrides();
 
     return {
-      asScopedToClient: this.getScopedClientFactory('namespace'),
-      globalAsScopedToClient: this.getScopedClientFactory('global'),
+      asScopedToClient: this.getScopedClientFactory('namespace', savedObjects),
+      globalAsScopedToClient: this.getScopedClientFactory('global', savedObjects),
     };
   }
 
@@ -158,17 +167,19 @@ export class UiSettingsService
   }
 
   private getScopedClientFactory<T extends UiSettingsScope>(
-    scope: UiSettingsScope
+    scope: UiSettingsScope,
+    savedObjects: InternalSavedObjectsServiceStart
   ): (savedObjectsClient: SavedObjectsClientContract) => ClientType<T> {
     const { version, buildNum } = this.coreContext.env.packageInfo;
     return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
       const isNamespaceScope = scope === 'namespace';
+      const type: 'config' | 'config-global' = isNamespaceScope ? 'config' : 'config-global';
       const namespace = isNamespaceScope
         ? savedObjectsClient.getCurrentNamespace() || 'default'
         : '__global__';
 
       const options = {
-        type: (isNamespaceScope ? 'config' : 'config-global') as 'config' | 'config-global',
+        type,
         id: stripVersionQualifier(version),
         buildNum,
         savedObjectsClient,
@@ -181,9 +192,34 @@ export class UiSettingsService
         namespace,
         pollTicks$: this.pollTicks$,
         sharedPollReads: this.sharedPollReads,
+        getPollClient: () => this.pollClientFor(savedObjects, type, namespace),
       };
       return UiSettingsClientFactory.create(options) as ClientType<T>;
     };
+  }
+
+  private pollClientFor(
+    savedObjects: InternalSavedObjectsServiceStart,
+    type: 'config' | 'config-global',
+    namespace: string
+  ): SavedObjectsClientContract {
+    const key = `${type}:${namespace}`;
+    const cached = this.pollClients.get(key);
+    if (cached) {
+      return cached;
+    }
+
+    if (!this.internalSavedObjectsClient) {
+      this.internalSavedObjectsClient = savedObjects.getUnsafeInternalClient();
+    }
+
+    // config-global is namespace-agnostic, so it keeps the unscoped internal client.
+    const client =
+      type === 'config'
+        ? this.internalSavedObjectsClient.asScopedToNamespace(namespace)
+        : this.internalSavedObjectsClient;
+    this.pollClients.set(key, client);
+    return client;
   }
 
   private register = (settings: Record<string, UiSettingsParams> = {}) => {

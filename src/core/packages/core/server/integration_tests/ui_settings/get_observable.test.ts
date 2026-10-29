@@ -17,13 +17,14 @@ import {
   createRootWithCorePlugins,
   createTestServers,
   type TestElasticsearchUtils,
-  type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import type { Root } from '@kbn/core-root-server-internal';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ISavedObjectsSpacesExtension } from '@kbn/core-saved-objects-server';
-import { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
+import type {
+  ISavedObjectsSpacesExtension,
+  SavedObjectsSpacesExtensionFactory,
+} from '@kbn/core-saved-objects-server';
+import { DEFAULT_NAMESPACE_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 
 const CROSS_NODE_TIMEOUT = 25_000;
@@ -58,25 +59,28 @@ const record = <T>(value$: Observable<T>) => {
   return { values, subscription, waitForCount, isCompleted: () => completed };
 };
 
-const spacesExtensionFor = (namespace: string): ISavedObjectsSpacesExtension => ({
-  getCurrentNamespace: () => namespace,
-  getSearchableNamespaces: async (namespaces) => namespaces ?? [namespace],
-  asScopedToNamespace: (nextNamespace) => spacesExtensionFor(nextNamespace),
+const spacesExtensionFor = (spaceId: string): ISavedObjectsSpacesExtension => ({
+  getCurrentNamespace: () => SavedObjectsUtils.namespaceStringToId(spaceId),
+  getSearchableNamespaces: async (namespaces) => namespaces ?? [spaceId],
+  asScopedToNamespace: (nextSpaceId) => spacesExtensionFor(nextSpaceId),
 });
 
-const clientForNamespace = (start: InternalCoreStart, namespace: string): IUiSettingsClient => {
-  const repository = start.savedObjects.createInternalRepository(undefined, {
-    spacesExtension: spacesExtensionFor(namespace),
-  });
-  const savedObjectsClient: SavedObjectsClientContract = new SavedObjectsClient(repository);
-  return start.uiSettings.asScopedToClient(savedObjectsClient);
-};
+const spacesExtensionFactory: SavedObjectsSpacesExtensionFactory = () =>
+  spacesExtensionFor(DEFAULT_NAMESPACE_STRING);
+
+const clientForNamespace = (start: InternalCoreStart, spaceId: string): IUiSettingsClient =>
+  start.uiSettings.asScopedToClient(
+    start.savedObjects.getUnsafeInternalClient().asScopedToNamespace(spaceId)
+  );
 
 describe('IUiSettingsClient.get$ across two Kibana nodes', () => {
   let esServer: TestElasticsearchUtils;
-  let kbnA: TestKibanaUtils;
+  let rootA: Root | undefined;
   let rootB: Root | undefined;
+  let startA: InternalCoreStart;
   let startB: InternalCoreStart;
+  let setupA: InternalCoreSetup;
+  let setupB: InternalCoreSetup;
   const subscriptions: Subscription[] = [];
 
   const stringSetting = (value: string) => ({ value, schema: schema.string() });
@@ -95,14 +99,26 @@ describe('IUiSettingsClient.get$ across two Kibana nodes', () => {
     return recorder;
   };
 
+  const startNode = async () => {
+    const root = createRootWithCorePlugins({ server: { port: 0 } });
+    await root.preboot();
+    const coreSetup = await root.setup();
+    coreSetup.savedObjects.setSpacesExtension(spacesExtensionFactory);
+    const coreStart = await root.start();
+    return { root, coreSetup, coreStart };
+  };
+
   beforeAll(async () => {
     const servers = createTestServers({ adjustTimeout: (t) => jest.setTimeout(t) });
     esServer = await servers.startES();
-    kbnA = await servers.startKibana();
-    rootB = createRootWithCorePlugins({ server: { port: 0 } });
-    await rootB.preboot();
-    const setupB = await rootB.setup();
-    startB = await rootB.start();
+    const nodeA = await startNode();
+    rootA = nodeA.root;
+    setupA = nodeA.coreSetup;
+    startA = nodeA.coreStart;
+    const nodeB = await startNode();
+    rootB = nodeB.root;
+    setupB = nodeB.coreSetup;
+    startB = nodeB.coreStart;
 
     const namespaced = {
       'getobs:cross': stringSetting('default'),
@@ -115,7 +131,7 @@ describe('IUiSettingsClient.get$ across two Kibana nodes', () => {
     const global = {
       'getobs:global': stringSetting('default'),
     };
-    for (const { uiSettings } of [kbnA.coreSetup, setupB]) {
+    for (const { uiSettings } of [setupA, setupB]) {
       uiSettings.register(namespaced);
       uiSettings.registerGlobal(global);
     }
@@ -124,12 +140,12 @@ describe('IUiSettingsClient.get$ across two Kibana nodes', () => {
   afterAll(async () => {
     subscriptions.forEach((subscription) => subscription.unsubscribe());
     await rootB?.shutdown();
-    await kbnA?.stop();
+    await rootA?.shutdown();
     await esServer?.stop();
   });
 
   it('delivers a write on node A to a subscriber on node B', async () => {
-    const writer = clients(kbnA.coreStart).space;
+    const writer = clients(startA).space;
     const onB = watch(clients(startB).space, 'getobs:cross');
     expect(await onB.waitForCount(1, CROSS_NODE_TIMEOUT)).toEqual(['default']);
 
@@ -139,7 +155,7 @@ describe('IUiSettingsClient.get$ across two Kibana nodes', () => {
   });
 
   it('delivers a local set to a subscriber on the same node', async () => {
-    const local = clients(kbnA.coreStart).space;
+    const local = clients(startA).space;
     const onA = watch(local, 'getobs:local');
     expect(await onA.waitForCount(1, CROSS_NODE_TIMEOUT)).toEqual(['default']);
 
@@ -149,7 +165,7 @@ describe('IUiSettingsClient.get$ across two Kibana nodes', () => {
   });
 
   it('does not emit when a write keeps the same value', async () => {
-    const local = clients(kbnA.coreStart).space;
+    const local = clients(startA).space;
     const onSame = watch(local, 'getobs:same');
     const onOther = watch(local, 'getobs:other');
     expect(await onSame.waitForCount(1, CROSS_NODE_TIMEOUT)).toEqual(['default']);
@@ -166,7 +182,7 @@ describe('IUiSettingsClient.get$ across two Kibana nodes', () => {
   });
 
   it('emits the default after remove', async () => {
-    const local = clients(kbnA.coreStart).space;
+    const local = clients(startA).space;
     const onA = watch(local, 'getobs:remove');
     expect(await onA.waitForCount(1, CROSS_NODE_TIMEOUT)).toEqual(['default']);
 
@@ -182,7 +198,7 @@ describe('IUiSettingsClient.get$ across two Kibana nodes', () => {
     const onB = watch(clients(startB).global, 'getobs:global');
     expect(await onB.waitForCount(1, CROSS_NODE_TIMEOUT)).toEqual(['default']);
 
-    await clients(kbnA.coreStart).global.set('getobs:global', 'global-from-a');
+    await clients(startA).global.set('getobs:global', 'global-from-a');
 
     expect(await onB.waitForCount(2, CROSS_NODE_TIMEOUT)).toEqual(['default', 'global-from-a']);
   });
@@ -193,7 +209,7 @@ describe('IUiSettingsClient.get$ across two Kibana nodes', () => {
     expect(await onDefault.waitForCount(1, CROSS_NODE_TIMEOUT)).toEqual(['default']);
     expect(await onSpace.waitForCount(1, CROSS_NODE_TIMEOUT)).toEqual(['default']);
 
-    await kbnA.coreStart.savedObjects
+    await startA.savedObjects
       .createInternalRepository()
       .create(
         'config',
