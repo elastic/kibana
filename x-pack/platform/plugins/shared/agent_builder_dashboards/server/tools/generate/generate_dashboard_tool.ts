@@ -41,10 +41,10 @@ import { applyDefaultDashboardTimeRange } from './time_range';
 const newDashboardMetadataErrorMessage = 'New dashboards require a non-empty `title`.';
 
 const noDashboardCreatedErrorMessage =
-  'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardAttachmentId.';
+  'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardId.';
 
 const noControlsAddedErrorMessage =
-  'No dashboard was created because none of the requested controls could be added: controls you add on your own are left out when their field is missing or does not suit the control. Add panels, or controls on suitable fields, and call again without dashboardAttachmentId.';
+  'No dashboard was created because none of the requested controls could be added: controls you add on your own are left out when their field is missing or does not suit the control. Add panels, or controls on suitable fields, and call again without dashboardId.';
 
 /** Whether the dashboard has no panels and no controls. Empty sections do not count. */
 const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAttachmentData) =>
@@ -53,12 +53,12 @@ const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAtta
 
 const generateDashboardSchema = lazySchema(() =>
   z.object({
-    dashboardAttachmentId: z
+    dashboardId: z
       .string()
       .max(256)
       .optional()
       .describe(
-        'Id of the dashboard attachment to edit, as returned by an earlier call; pass the same id on every later edit. Omit it to create a new dashboard. The current dashboard is read from it, so send only the changes. An unknown id is an error.'
+        'Id of the dashboard to edit, e.g. the id an earlier call returned; pass the same id on every later edit. Omit it to create a new dashboard. The current dashboard is read from it, so send only the changes. An unknown id is an error.'
       ),
     ...upsertDashboardSchema.shape,
     layout: z
@@ -133,7 +133,7 @@ export interface GenerateDashboardToolDeps {
  *
  * Wraps the environment-agnostic {@link executeDashboardUpsert} core with
  * Kibana attachment persistence so the LLM works against a lightweight reference:
- * - the prior payload is read server-side from `dashboardAttachmentId`,
+ * - the prior payload is read server-side from `dashboardId`, the attachment id,
  * - the generated payload is persisted as a `dashboard` attachment,
  * - the result returns only the attachment id, version, and a compact dashboard summary.
  *
@@ -150,10 +150,10 @@ export const generateDashboardTool = ({
 
 Visualization panels are generated server-side from a plain-words \`query\`; do not write ES|QL yourself. Positions and sizes are set automatically.
 
-Persists the dashboard as an attachment and returns its id and version plus a compact summary. Use that id to render the dashboard and to edit it later. Changes are applied one by one: failed ones are listed in \`failures\` with the reason and the rest are kept, so resend only the failed ones (some controls are left out silently, see \`controls\`). A new dashboard needs \`title\`, and nothing is created when none of its requested panels and controls can be added. The result lists the ids created, updated and removed, so a mistyped id that created a new panel is visible.`,
+Returns the dashboard's id plus a compact summary. Pass that id as \`dashboardId\` to edit the dashboard later. Changes are applied one by one: failed ones are listed in \`failures\` with the reason and the rest are kept, so resend only the failed ones (some controls are left out silently, see \`controls\`). A new dashboard needs \`title\`, and nothing is created when none of its requested panels and controls can be added. The result lists the ids created, updated and removed, so a mistyped id that created a new panel is visible.`,
     schema: generateDashboardSchema,
     handler: async (
-      { dashboardAttachmentId: previousAttachmentId, layout, ...upsert },
+      { dashboardId: previousAttachmentId, layout, ...upsert },
       { logger, attachments, events, esClient, modelProvider }
     ) => {
       try {
@@ -311,7 +311,7 @@ Persists the dashboard as an attachment and returns its id and version plus a co
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId },
+                metadata: { dashboardId: previousAttachmentId },
               },
             },
           ],

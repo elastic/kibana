@@ -84,7 +84,7 @@ const keepRequestedLayout = async ({
 const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', panels: [] };
 
 const callHandler = async (
-  dashboardAttachmentId?: string,
+  dashboardId?: string,
   layout?: string,
   upsert: Record<string, unknown> = {}
 ) => {
@@ -102,7 +102,7 @@ const callHandler = async (
     esClient: { asCurrentUser: {} },
   };
   const ret = await tool.handler(
-    { dashboardAttachmentId, layout, ...upsert } as unknown as Parameters<typeof tool.handler>[0],
+    { dashboardId, layout, ...upsert } as unknown as Parameters<typeof tool.handler>[0],
     ctx as unknown as Parameters<typeof tool.handler>[1]
   );
   if (!('results' in ret)) throw new Error('Unexpected HITL return from tool handler');
@@ -411,6 +411,7 @@ describe('generateDashboardTool descriptions', () => {
   it('keeps the tool description within the 1,024 characters function-calling APIs accept', () => {
     expect(tool.description.length).toBeLessThanOrEqual(1024);
     expect(tool.description).toContain("Each field's description says how to use it well");
+    expect(tool.description).toContain('Pass that id as `dashboardId`');
   });
 
   it('says that changes apply one by one and failures are listed', () => {
