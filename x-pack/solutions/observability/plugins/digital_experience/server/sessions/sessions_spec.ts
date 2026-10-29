@@ -440,7 +440,7 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ctx.click_count = countOf(ctx.click_count);
           ctx.error_count = countOf(ctx.error_count);
           ctx.has_error = ctx.error_count > 0;
-          ctx.replay_event_count = countOf(ctx.has_replay);
+          ctx.replay_event_count = countOf(ctx.replay_events);
           ctx.has_replay = ctx.replay_event_count > 0;
           ctx.rage_click_count = countOf(ctx.rage_clicks);
           ctx.dead_click_count = countOf(ctx.dead_clicks);
@@ -528,6 +528,7 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           ctx.remove('user_seen');
           ctx.remove('user_agent_seen');
           ctx.remove('geo_seen');
+          ctx.remove('replay_events');
           ctx.remove('rage_clicks');
           ctx.remove('dead_clicks');
           ctx.remove('click_targets');
@@ -547,7 +548,7 @@ export const sessionsDestPipeline: IngestPutPipelineRequest = {
           'error_count',
           'pages',
           'exit',
-          'has_replay',
+          'replay_events',
           'rage_clicks',
           'dead_clicks',
           'error_groups',
@@ -614,7 +615,8 @@ export const buildSessionsTransform = ({
       page_view_count: { filter: PAGE_VIEW_FILTER },
       click_count: { filter: CLICK_FILTER },
       error_count: { filter: ERROR_FILTER },
-      has_replay: { filter: HAS_REPLAY_FILTER },
+      // Not named has_replay: the transform maps a pivot aggregation's name as a long.
+      replay_events: { filter: HAS_REPLAY_FILTER },
       rage_clicks: { filter: RAGE_CLICK_FILTER },
       dead_clicks: { filter: DEAD_CLICK_FILTER },
       error_groups: errorGroups,

@@ -146,7 +146,7 @@ describe('sessions transform spec', () => {
         'user_seen',
         'user_agent_seen',
         'geo_seen',
-        'has_replay',
+        'replay_events',
         'rage_clicks',
         'dead_clicks',
         'error_groups',
@@ -154,7 +154,9 @@ describe('sessions transform spec', () => {
         ...CORE_WEB_VITALS,
       ])
     );
-    expect(aggregations.has_replay.filter).toEqual({ term: { [SOURCE_HAS_REPLAY_FIELD]: true } });
+    expect(aggregations.replay_events.filter).toEqual({
+      term: { [SOURCE_HAS_REPLAY_FIELD]: true },
+    });
     expect(aggregations.error_groups.aggs?.groups.terms).toEqual({
       field: SOURCE_ERROR_GROUP_FIELD,
       size: SESSIONS_ERROR_GROUPS_SIZE,
