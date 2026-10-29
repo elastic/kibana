@@ -198,6 +198,16 @@ Add GitHub labels to trigger evals in PR CI:
 
 Model groups follow the pattern `eis/<modelId>` for EIS or `openrouter/<provider>-<model>` for OpenRouter.
 
+A suite whose results are only comparable under one fixed judge (e.g. one scored against a pinned baseline) can set `defaultJudge` to a judge connector id in its `evals.suites.json` entry:
+
+```json
+"defaultJudge": "eis-abc-1"
+```
+
+The judge is resolved in this order: `models:judge:` label (locally `--evaluation-connector-id`, then `EVAL_CONNECTOR_ID`), then the suite's `defaultJudge`, then the Vault `evaluationConnectorId`.
+
+`defaultJudge` applies to PR (label-triggered) runs and the local CLI. Weekly and on-demand runs go straight to `run_suite.sh`, where the Vault default is already exported, so they use `EVAL_CONNECTOR_ID` or the Vault default and ignore the `defaultJudge`.
+
 PRs touching the eval framework get `evals:smoke-tests` automatically
 ([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
 `evals:skip-smoke-tests` to skip it.
@@ -206,6 +216,14 @@ When the labels match, PR CI triggers the dedicated
 [`kibana-evals-pr-llm-evals`](https://buildkite.com/elastic/kibana-evals-pr-llm-evals) pipeline. Results
 surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
 results and triage.
+
+Every run logs a link to its experiments in the evals UI
+(`/app/management/ai/evals/experiments/<experiment-id>?execution_id=<execution-id>`) after the
+score table. The link points at the Kibana that received the scores: `EVAL_KBN_URL` when set
+(by CI, `--evaluations-kbn-url`, or the datasets profile's `evaluationsKbn.url`; `dev-vault` and a
+synced `config.json` point it at the golden cluster), otherwise the Kibana Scout ran against. On Buildkite (PR, weekly and on-demand builds) the same
+links are added to a `kbn-evals-experiments-<suite>` build annotation, one row per model and
+shard, so they show at the top of the build. Logged URLs never include credentials.
 
 #### Per-spec model groups
 
@@ -242,7 +260,7 @@ suite config. Drop `KBN_EVALS_WEEKLY=1` to see the PR / on-demand fanout.
 
 ```bash
 CI=x-pack/platform/packages/shared/kbn-evals/scripts/ci
-export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js significant-events)"
+export EVAL_SUITE_INFO="$(node $CI/get_suite_info.js nightshift-investigations)"
 export EVAL_MODEL_GROUPS="$(jq -r '.weeklyEisModelGroups | join(",")' <<<"$EVAL_SUITE_INFO")"
 export KIBANA_TESTING_INFERENCE_ENDPOINTS="$(jq -c '[.weeklyEisModelGroups[] | ltrimstr("eis/")]
   | map({ key: ("eis-" + gsub("[^a-zA-Z0-9]+"; "-")), value: { provider: "elastic", providerConfig: { model_id: . } } })

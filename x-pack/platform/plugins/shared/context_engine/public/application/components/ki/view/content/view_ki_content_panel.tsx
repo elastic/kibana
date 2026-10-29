@@ -5,46 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiMarkdownFormat,
-  EuiPanel,
-  EuiSkeletonText,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiMarkdownFormat, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import type { KiDocument } from '../../../../../../common/http_api/knowledge_indicators';
-import { viewKiLoadingPanelCss } from '../view_ki_constants';
 
 interface ViewKiContentPanelProps {
-  document?: KiDocument;
-  isLoading?: boolean;
+  content: string;
 }
 
-export const ViewKiContentPanel = ({ document, isLoading = false }: ViewKiContentPanelProps) => {
-  const contentValue = document?.content ?? '';
-  const hasContent = contentValue.length > 0;
-
-  if (isLoading) {
-    return (
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-        responsive={false}
-        data-test-subj="contextViewKiContentPanel"
-      >
-        <EuiPanel
-          hasBorder
-          paddingSize="l"
-          css={viewKiLoadingPanelCss}
-          data-test-subj="contextViewKiContentLoading"
-        >
-          <EuiSkeletonText lines={3} />
-        </EuiPanel>
-      </EuiFlexGroup>
-    );
-  }
+export const ViewKiContentPanel = ({ content }: ViewKiContentPanelProps) => {
+  const hasContent = content.length > 0;
 
   return (
     <EuiFlexGroup
@@ -57,7 +27,7 @@ export const ViewKiContentPanel = ({ document, isLoading = false }: ViewKiConten
       {hasContent ? (
         <EuiPanel hasBorder paddingSize="l" data-test-subj="contextViewKiContent">
           <div data-test-subj="contextViewKiMarkdownRendered">
-            <EuiMarkdownFormat textSize="s">{contentValue}</EuiMarkdownFormat>
+            <EuiMarkdownFormat textSize="s">{content}</EuiMarkdownFormat>
           </div>
         </EuiPanel>
       ) : (

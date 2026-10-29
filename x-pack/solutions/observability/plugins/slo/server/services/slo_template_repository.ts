@@ -10,13 +10,13 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { z } from '@kbn/zod';
 import { isSchema, safeParseResult } from '@kbn/zod-helpers';
 import {
-  budgetingMethodSchemaZod,
-  dashboardsWithIdSchemaZod,
-  indicatorSchemaZod,
-  objectiveSchemaZod,
-  optionalSettingsSchemaZod,
-  tagsSchemaZod,
-  timeWindowSchemaZod,
+  budgetingMethodSchema,
+  dashboardsWithIdSchema,
+  indicatorSchema,
+  objectiveSchema,
+  optionalSettingsSchema,
+  tagsSchema,
+  timeWindowSchema,
   type Paginated,
   type Pagination,
 } from '@kbn/slo-schema';
@@ -117,29 +117,29 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
       // TODO: Consider using individual indicator schemas based on indicator.type with fallback for the required fields
       // e.g. for 'sli.kql.custom' we can validate only against the custom indicator schema using
       // Object.assign({}, { filter: "", good: "", total: "", ... }, stored.indicator.params)
-      if (stored.indicator && isSchema(indicatorSchemaZod, stored.indicator)) {
+      if (stored.indicator && isSchema(indicatorSchema, stored.indicator)) {
         template.indicator = stored.indicator;
       }
 
-      if (stored.budgetingMethod && isSchema(budgetingMethodSchemaZod, stored.budgetingMethod)) {
+      if (stored.budgetingMethod && isSchema(budgetingMethodSchema, stored.budgetingMethod)) {
         template.budgetingMethod = stored.budgetingMethod;
       }
 
-      const objective = safeParseResult(stored.objective, objectiveSchemaZod);
+      const objective = safeParseResult(stored.objective, objectiveSchema);
       if (objective) {
         template.objective = objective;
       }
 
-      const timeWindow = safeParseResult(stored.timeWindow, timeWindowSchemaZod);
+      const timeWindow = safeParseResult(stored.timeWindow, timeWindowSchema);
       if (timeWindow) {
         template.timeWindow = timeWindow;
       }
 
-      if (stored.tags && isSchema(tagsSchemaZod, stored.tags)) {
+      if (stored.tags && isSchema(tagsSchema, stored.tags)) {
         template.tags = stored.tags;
       }
 
-      const settings = safeParseResult(stored.settings, optionalSettingsSchemaZod);
+      const settings = safeParseResult(stored.settings, optionalSettingsSchema);
       if (settings) {
         template.settings = settings;
       }
@@ -148,7 +148,7 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
         template.groupBy = stored.groupBy;
       }
 
-      if (stored.artifacts && isSchema(dashboardsWithIdSchemaZod, stored.artifacts)) {
+      if (stored.artifacts && isSchema(dashboardsWithIdSchema, stored.artifacts)) {
         template.artifacts = stored.artifacts;
       }
 
