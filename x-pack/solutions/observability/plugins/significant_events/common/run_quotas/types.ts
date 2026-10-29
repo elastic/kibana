@@ -36,7 +36,7 @@ export const isRunQuotaReached = ({
 
 export const DEFAULT_RUN_QUOTA_SETTINGS: Readonly<RunQuotaSettings> = {
   enabled: true,
-  limits: DEFAULT_RUN_LIMITS,
+  limits: { ...DEFAULT_RUN_LIMITS },
 };
 
 export interface RunQuotaWindow {
