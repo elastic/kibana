@@ -124,8 +124,6 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
             events,
             logger,
             esClient,
-            // A stored query that uses a dashboard control is adapted, not rewritten, and cannot be
-            // validated without the control's value.
             esqlVariables: currentData?.esql_variables,
             noQueryHint:
               'Pass an exact "index" and a more specific description, or an "esqlQuery" the user supplied.',
@@ -156,7 +154,6 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
           esqlQuery: isQueryChanging ? resolvedQuery : undefined,
           existingTemplate: currentData?.panel_template || undefined,
           hasExistingQuery: !isQueryChanging && !!resolvedQuery,
-          // The values of the controls the panel was sent with, for a query that uses one.
           esqlVariables: currentData?.esql_variables,
         }));
       } catch (err) {

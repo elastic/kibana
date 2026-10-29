@@ -47,16 +47,8 @@ const resolveContent = (
       return { type: 'success', panelContent: content.panelContent };
     case 'attachment':
       return resolveAttachmentPanel(content.attachmentId);
-    case 'request': {
-      const { request } = content;
-      // A custom content panel's queries can refer to the dashboard's ES|QL controls (`?name`), and
-      // they cannot be run, to generate or sample them, without the controls' values.
-      return resolvePanelContent(
-        request.renderer === 'custom_content' && esqlVariables.length > 0
-          ? { ...request, esqlVariables }
-          : request
-      );
-    }
+    case 'request':
+      return resolvePanelContent({ ...content.request, esqlVariables });
   }
 };
 

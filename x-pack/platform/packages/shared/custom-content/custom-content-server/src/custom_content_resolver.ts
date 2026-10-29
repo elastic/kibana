@@ -204,10 +204,7 @@ export type CustomContentTemplateResolver = (params: {
   existingTemplate?: string;
   /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
   hasExistingQuery?: boolean;
-  /**
-   * The values of the dashboard controls the panel was sent with, for a query that refers to one
-   * (`?name`): sampling it without the value is an error. Only the values the query uses are sent.
-   */
+  /** The values of the dashboard controls a query may refer to (`?name`), bound when it is sampled. */
   esqlVariables?: ESQLControlVariable[];
 }) => Promise<ResolvedCustomContentTemplate>;
 

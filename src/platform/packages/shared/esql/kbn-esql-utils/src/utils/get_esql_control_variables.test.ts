@@ -101,8 +101,7 @@ describe('getESQLControlVariablesFromState', () => {
       ]);
     });
 
-    // A live control casts these by the column type of its query, which the saved state does not
-    // keep: a keyword column with digit-like values such as `404` must stay text.
+    // The column type a live control casts by is not saved: a keyword like `404` must stay text.
     it('keeps them as saved for a control whose values come from a query', () => {
       expect(
         getESQLControlVariablesFromState([

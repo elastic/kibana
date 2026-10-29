@@ -287,8 +287,6 @@ describe('createNlToEsqlGraph — execute_query node', () => {
       { key: 'unused', value: 'nope', type: ESQLVariableType.VALUES },
     ];
 
-    // A query that refers to a dashboard control cannot run without its value, so validating one
-    // that was adapted from a panel's stored query would fail on an unbound parameter.
     it("executes a query that uses a control with the control's value, after the time range", async () => {
       const { chatModel } = createMockModel(HOST_RESPONSE);
       const graph = buildGraph(chatModel);

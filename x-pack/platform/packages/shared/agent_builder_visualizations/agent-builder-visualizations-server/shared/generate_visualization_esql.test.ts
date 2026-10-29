@@ -126,8 +126,6 @@ describe('generateVisualizationEsql', () => {
   describe('control values', () => {
     const esqlVariables = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
 
-    // A panel's stored query that uses a control is kept when the edit adapts it, and cannot be
-    // executed for validation without the control's value.
     it('forwards the values of the dashboard controls to the generator', async () => {
       mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
         ReturnType<typeof generateEsql>

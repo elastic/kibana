@@ -8,9 +8,6 @@
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { getEsqlVariables } from './get_esql_variables';
 
-// How a control's selected options become a value is tested with the conversion, in
-// `@kbn/esql-utils`. This covers what is specific to a dashboard: finding the ES|QL controls among
-// the pinned panels and reading their `config`.
 const esqlControl = (name: string, selected: string[], extra: Record<string, unknown> = {}) => ({
   id: `control-${name}`,
   type: ESQL_CONTROL,

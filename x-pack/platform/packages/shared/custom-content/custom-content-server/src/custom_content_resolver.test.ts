@@ -231,7 +231,6 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
       { key: 'unused', value: 'nope', type: ESQLVariableType.VALUES },
     ];
 
-    // Without the value, a query that refers to a control is an error: an unbound parameter.
     it('binds the control values the query uses', async () => {
       await resolve({ prompt: 'Show hits', esqlQuery: usesHost, esqlVariables });
 

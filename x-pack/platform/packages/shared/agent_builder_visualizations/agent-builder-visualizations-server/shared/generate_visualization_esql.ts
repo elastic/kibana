@@ -49,11 +49,7 @@ interface GenerateVisualizationEsqlParams {
    * only affects the validation run. Defaults to the last 24 hours.
    */
   timeRange?: TimeRange;
-  /**
-   * The values of the dashboard controls the query may refer to (`?name`). An edit seeded with a
-   * query that uses a control keeps it, and a candidate that does cannot be executed for
-   * validation without its value. Only the ones a candidate uses are bound.
-   */
+  /** The values of the dashboard controls the query may refer to (`?name`), bound when a candidate is executed. */
   esqlVariables?: ESQLControlVariable[];
   /**
    * Renderer-specific guidance appended to the shared ES|QL instructions, e.g.

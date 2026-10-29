@@ -67,7 +67,6 @@ const upsert = (
 ) =>
   executeDashboardUpsert({
     dashboardData,
-    // The upsert schema is validated before this runs; the contents here are valid by construction.
     upsert: { panels } as never,
     logger,
     resolvePanelContent,
@@ -78,9 +77,6 @@ const restyle = (id: string) => ({
   content: { source: 'request', renderer: 'custom_content', query: 'use a darker background' },
 });
 
-// A custom content panel's queries can refer to the dashboard's ES|QL controls (`?host`). Generating
-// or sampling a query needs the control's value, and the saved dashboard is the only place the tool
-// can read it from.
 describe('executeDashboardUpsert, ES|QL control values for custom content', () => {
   it('gives an edited custom content panel the values of the dashboard controls', async () => {
     const resolvePanelContent = createResolver();
@@ -122,7 +118,7 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
     );
   });
 
-  it('adds nothing to the request when the dashboard has no ES|QL controls', async () => {
+  it('gives an empty list when the dashboard has no ES|QL controls', async () => {
     const resolvePanelContent = createResolver();
 
     await upsert(
@@ -135,20 +131,20 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
       [restyle('cc-1')]
     );
 
-    expect(resolvePanelContent.mock.calls[0][0]).not.toHaveProperty('esqlVariables');
+    expect(resolvePanelContent.mock.calls[0][0]).toMatchObject({ esqlVariables: [] });
   });
 
-  it('adds nothing when the dashboard has no controls at all', async () => {
+  it('gives an empty list when the dashboard has no controls at all', async () => {
     const resolvePanelContent = createResolver();
 
     await upsert(resolvePanelContent, { title: 'Test', panels: [customContentPanel] }, [
       restyle('cc-1'),
     ]);
 
-    expect(resolvePanelContent.mock.calls[0][0]).not.toHaveProperty('esqlVariables');
+    expect(resolvePanelContent.mock.calls[0][0]).toMatchObject({ esqlVariables: [] });
   });
 
-  it('does not give them to other kinds of panel, which have their own query handling', async () => {
+  it('gives them to every kind of panel, for whichever uses them', async () => {
     const resolvePanelContent = createResolver();
 
     await upsert(
@@ -157,8 +153,10 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
       [{ id: 'lens-1', content: { source: 'request', renderer: 'lens', query: 'make it a bar' } }]
     );
 
-    expect(resolvePanelContent.mock.calls[0][0]).toMatchObject({ renderer: 'lens' });
-    expect(resolvePanelContent.mock.calls[0][0]).not.toHaveProperty('esqlVariables');
+    expect(resolvePanelContent.mock.calls[0][0]).toMatchObject({
+      renderer: 'lens',
+      esqlVariables: [{ key: 'host', value: 'web-1' }],
+    });
   });
 
   it('gives each custom content panel of one call the same values', async () => {

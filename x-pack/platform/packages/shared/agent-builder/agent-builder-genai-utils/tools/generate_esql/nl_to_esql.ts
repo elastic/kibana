@@ -119,11 +119,7 @@ export interface GenerateEsqlOptions {
    * Defaults to last 24 hours if not provided.
    */
   timeRange?: TimeRange;
-  /**
-   * The values of the dashboard controls a query may refer to (`?name`). A generated or adapted
-   * query that uses one cannot be executed for validation without its value, so a caller whose
-   * existing query uses a control passes them. Only the ones a candidate uses are bound.
-   */
+  /** The values of the dashboard controls a query may refer to (`?name`), bound when a candidate is executed. */
   esqlVariables?: ESQLControlVariable[];
   /**
    * If true, omits the instruction to use named parameters (?_tstart, ?_tend)

@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 
 /**
  * Type-agnostic primitives for inline panel content resolution: the resolution
@@ -43,4 +44,6 @@ export interface PanelAuthoringNote {
 export interface PanelResolutionRequestBase {
   /** Present when editing an existing panel; upsert has checked it matches the renderer. */
   existingPanel?: AttachmentPanel;
+  /** The values of the dashboard's ES|QL controls, for a query that refers to one (`?name`). */
+  esqlVariables?: ESQLControlVariable[];
 }

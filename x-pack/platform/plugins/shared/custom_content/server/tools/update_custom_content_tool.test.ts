@@ -243,8 +243,6 @@ describe('createUpdateCustomContentTool handler', () => {
       );
     });
 
-    // The stored query uses a dashboard control and is adapted, not rewritten: the generator executes
-    // its candidates to validate them, and cannot without the control's value.
     it('hands the control values the panel was sent with to the query generator', async () => {
       const esqlVariables = [{ key: 'host', value: 'web-1', type: 'values' }];
       await callHandler(

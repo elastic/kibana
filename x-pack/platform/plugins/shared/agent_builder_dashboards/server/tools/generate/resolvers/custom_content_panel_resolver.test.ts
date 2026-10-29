@@ -140,8 +140,6 @@ describe('createCustomContentPanelResolver', () => {
     });
   });
 
-  // A query that refers to a dashboard control (`?host`) cannot be generated or sampled without the
-  // control's value: both run it.
   describe('control values', () => {
     const esqlVariables = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
 
