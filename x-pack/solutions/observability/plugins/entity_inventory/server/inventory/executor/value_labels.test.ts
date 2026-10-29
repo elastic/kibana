@@ -36,6 +36,18 @@ describe('applyValueLabels', () => {
     ]);
   });
 
+  it('passes through unmapped values named like Object.prototype members', () => {
+    expect(
+      applyValueLabels(
+        [{ phase: 'constructor', ready: 'toString' }, { phase: ['valueOf', '__proto__', 2] }],
+        plan
+      )
+    ).toEqual([
+      { phase: 'constructor', ready: 'toString' },
+      { phase: ['valueOf', '__proto__', 'running'] },
+    ]);
+  });
+
   it('keeps null and does not add a column the row lacks', () => {
     expect(applyValueLabels([{ phase: null }], plan)).toEqual([{ phase: null }]);
   });

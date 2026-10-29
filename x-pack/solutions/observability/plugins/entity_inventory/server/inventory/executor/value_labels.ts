@@ -13,7 +13,7 @@ const labelScalar = (value: EsqlScalar, labels: Record<string, string>): EsqlSca
     return null;
   }
   const raw = String(value);
-  return labels[raw] ?? raw;
+  return Object.hasOwn(labels, raw) ? labels[raw] : raw;
 };
 
 const labelValue = (value: EsqlValue, labels: Record<string, string>): EsqlValue =>
