@@ -21,8 +21,11 @@ import * as i18n from './translations';
 interface Props {
   canUserCreateAndReadCases: () => boolean;
   onClick?: () => void;
-  /** Called once the attachments have been posted, with the case they were posted to. */
-  onSuccess?: (theCase: CaseUI, isNewCase: boolean) => void;
+  /**
+   * Called once the attachments have been posted, with the case they were posted to and, for an
+   * existing case, the case the server returned.
+   */
+  onSuccess?: (theCase: CaseUI, isNewCase: boolean, updatedCase?: CaseUI) => void;
   title: string;
 }
 
@@ -72,6 +75,11 @@ export const useAddToCase = ({
     onSuccess,
     successToaster: {
       content: i18n.ADD_TO_CASE_SUCCESS,
+    },
+    // The payload is never empty, so this only shows when the server dropped it all as duplicates.
+    noAttachmentsToaster: {
+      title: i18n.ALREADY_ATTACHED_TO_CASE_TITLE,
+      content: i18n.ALREADY_ATTACHED_TO_CASE_CONTENT,
     },
   });
 

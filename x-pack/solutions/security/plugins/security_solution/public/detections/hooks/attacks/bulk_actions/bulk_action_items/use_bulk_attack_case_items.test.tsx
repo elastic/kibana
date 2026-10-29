@@ -246,10 +246,14 @@ describe('useBulkAttackCaseItems', () => {
      * Plays out an attach to `theCase` the way the case selector does: it builds the payload for
      * the case, posts it, then reports success with the same case.
      */
-    const attachTo = (theCase: Partial<CaseUI>, isNewCase = false) => {
+    const attachTo = (
+      theCase: Partial<CaseUI>,
+      isNewCase = false,
+      updatedCase?: Partial<CaseUI>
+    ) => {
       const attachments = resolveAttachments(theCase);
       const { onSuccess } = useAddToCase.mock.lastCall[0];
-      onSuccess(theCase as CaseUI, isNewCase);
+      onSuccess(theCase as CaseUI, isNewCase, updatedCase as CaseUI | undefined);
       return attachments;
     };
 
@@ -348,6 +352,30 @@ describe('useBulkAttackCaseItems', () => {
 
       expect(attachTo({ totalAlerts: MAX_ALERTS_PER_CASE - 2 })).toEqual(expectedAttachments);
       expect(appToastsMock.addWarning).not.toHaveBeenCalled();
+    });
+
+    it('warns when the attack was already attached to the chosen case', async () => {
+      useIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      await clickAddToCase();
+
+      const caseUpdatedAt = '2026-10-29T10:00:00.000Z';
+      attachTo({ id: 'case-1', totalAlerts: 1, updatedAt: caseUpdatedAt }, false, {
+        id: 'case-1',
+        comments: [
+          {
+            id: 'comment-1',
+            type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+            attachmentId: 'attack-1',
+            metadata: { index: ATTACK_INDEX, title: 'A multi-stage attack', alertCount: 2 },
+            createdAt: '2026-10-29T09:00:00.000Z',
+          },
+        ] as unknown as CaseUI['comments'],
+      });
+
+      expect(appToastsMock.addWarning).toHaveBeenCalledWith({
+        title: '1 attack was already attached to this case and was not added again.',
+      });
     });
 
     it('does not warn before the user has picked a case', async () => {

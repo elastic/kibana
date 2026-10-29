@@ -31,7 +31,11 @@ export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRo
     title?: string;
     content?: string;
   };
-  onSuccess?: (theCase: CaseUI, isNewCase: boolean) => void;
+  /**
+   * `updatedCase` is the case returned after attaching to an existing case. It is not
+   * passed when a new case is created.
+   */
+  onSuccess?: (theCase: CaseUI, isNewCase: boolean, updatedCase?: CaseUI) => void;
 };
 
 export type GetAttachments = ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner;
@@ -99,28 +103,39 @@ export const useCasesAddToExistingCaseModal = ({
       }
 
       const attachments = getAttachments?.({ theCase }) ?? [];
+      const showNoAttachmentsToast = () =>
+        casesToasts.showInfoToast(
+          noAttachmentsToaster?.title ?? NO_ATTACHMENTS_ADDED,
+          noAttachmentsToaster?.content
+        );
 
       try {
         // add attachments to the case
         if (attachments === undefined || attachments.length === 0) {
-          const title = noAttachmentsToaster?.title ?? NO_ATTACHMENTS_ADDED;
-          const content = noAttachmentsToaster?.content;
-          casesToasts.showInfoToast(title, content);
+          showNoAttachmentsToast();
 
           return;
         }
 
         startTransaction({ appId, attachments });
 
-        await createAttachments({
+        const updatedCase = await createAttachments({
           caseId: theCase.id,
           caseOwner: theCase.owner,
           attachments,
         });
 
+        // The server drops attachments that are already on the case. If it dropped all of
+        // them, the case is not updated, so its version does not change.
+        if (updatedCase.version === theCase.version) {
+          showNoAttachmentsToast();
+
+          return;
+        }
+
         trackAttachEvents(window.location.pathname, attachments);
 
-        onSuccess?.(theCase, false);
+        onSuccess?.(theCase, false, updatedCase);
 
         casesToasts.showSuccessAttach({
           theCase,

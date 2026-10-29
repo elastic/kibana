@@ -224,6 +224,11 @@ describe('useAddToCase', () => {
         successToaster: {
           content: 'Successfully added attack discovery to the case',
         },
+        noAttachmentsToaster: {
+          title: 'Already attached to the case',
+          content:
+            'Everything you selected is already attached to this case, so nothing was added.',
+        },
       })
     );
   });

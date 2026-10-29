@@ -717,10 +717,11 @@ describe('TakeAction', () => {
       const { useAddToCase } = jest.requireMock('./use_add_to_case');
       const { onSuccess } = useAddToCase.mock.lastCall[0];
       const theCase = { id: 'case-1', totalAlerts: 3 } as CaseUI;
-      onSuccess(theCase, false);
+      const updatedCase = { id: 'case-1', totalAlerts: 5 } as CaseUI;
+      onSuccess(theCase, false, updatedCase);
 
       expect(onAttached).toHaveBeenCalledTimes(1);
-      expect(onAttached).toHaveBeenCalledWith(theCase);
+      expect(onAttached).toHaveBeenCalledWith(theCase, updatedCase);
     });
   });
 

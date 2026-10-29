@@ -57,9 +57,9 @@ export const useBulkAttackCaseItems = ({
   );
 
   const onAddToCaseSuccess = useCallback(
-    (theCase: CaseUI, isNewCase: boolean) => {
+    (theCase: CaseUI, isNewCase: boolean, updatedCase?: CaseUI) => {
       // Not raised while building the payload, which the case selector does on every render.
-      attackCaseAttachments?.onAttached(theCase);
+      attackCaseAttachments?.onAttached(theCase, updatedCase);
 
       if (telemetrySource) {
         telemetry.reportEvent(AttacksEventTypes.ActionAddedToCase, {
