@@ -178454,7 +178454,6 @@ components:
     Kibana_HTTP_APIs_visDatatableESQLMetricProgressBar:
       discriminator:
         mapping:
-          gradient: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarGradient'
           single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle'
           solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSolid'
         propertyName: fill_mode
@@ -178491,6 +178490,7 @@ components:
           description: Column to use
           type: string
         fill_mode:
+          default: gradient
           description: Reveals the palette along the bar.
           enum:
             - gradient
@@ -178543,7 +178543,6 @@ components:
       required:
         - column
         - apply_color_to
-        - fill_mode
       title: Datatable metric progress bar (ES|QL) (gradient fill)
       type: object
     Kibana_HTTP_APIs_visDatatableESQLMetricProgressBarSingle:
@@ -178713,7 +178712,6 @@ components:
     Kibana_HTTP_APIs_visDatatableESQLRowProgressBar:
       discriminator:
         mapping:
-          gradient: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarGradient'
           single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle'
           solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSolid'
         propertyName: fill_mode
@@ -178756,6 +178754,7 @@ components:
           description: Column to use
           type: string
         fill_mode:
+          default: gradient
           description: Reveals the palette along the bar.
           enum:
             - gradient
@@ -178780,7 +178779,6 @@ components:
       required:
         - column
         - apply_color_to
-        - fill_mode
       title: Datatable row progress bar (ES|QL) (gradient fill)
       type: object
     Kibana_HTTP_APIs_visDatatableESQLRowProgressBarSingle:
@@ -179136,7 +179134,6 @@ components:
     Kibana_HTTP_APIs_visDatatableProgressBar:
       discriminator:
         mapping:
-          gradient: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarGradient'
           single: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSingle'
           solid: '#/components/schemas/Kibana_HTTP_APIs_visDatatableProgressBarSolid'
         propertyName: fill_mode
@@ -179170,6 +179167,7 @@ components:
             type: auto
           description: Palette the bar takes its colors from.
         fill_mode:
+          default: gradient
           description: Reveals the palette along the bar.
           enum:
             - gradient
@@ -179216,7 +179214,6 @@ components:
           type: number
       required:
         - apply_color_to
-        - fill_mode
       title: Datatable metric progress bar (gradient fill)
       type: object
     Kibana_HTTP_APIs_visDatatableProgressBarSingle:
