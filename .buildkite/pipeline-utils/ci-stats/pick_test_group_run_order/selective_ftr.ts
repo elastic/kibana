@@ -9,9 +9,24 @@
 
 import {
   allChangedFilesInScope,
+  findModuleForPath,
+  getAffectedModulesGit,
   getAffectedPackages,
+  getDownstreamDependents,
+  getModuleLookup,
   touchedCriticalFiles,
 } from '../../affected-packages/index.ts';
+
+/** kibana.jsonc groups that own an `ftr_{group}_*_configs.yml` manifest; everything else is shared. */
+export const FTR_SOLUTION_DOMAINS: readonly string[] = [
+  'observability',
+  'search',
+  'security',
+  'vectordb',
+];
+
+/** Manifest domains every solution depends on; kept on solution-only diffs when INCLUDE_SHARED_FTR is set. */
+export const FTR_SHARED_DOMAINS: readonly string[] = ['base', 'platform'];
 
 /**
  * Modules that cannot affect FTR. When a PR only touches these (and no critical
@@ -161,4 +176,75 @@ export function shouldSkipFtrTests(
   }
 
   return false;
+}
+
+/** `narrowed` when the run can be limited to the listed domains; any other value means run every domain. */
+export type FtrNarrowingOutcome =
+  | 'narrowed'
+  | 'critical-path'
+  | 'unmapped-module'
+  | 'no-relevant-modules'
+  | 'error';
+
+export interface AffectedFtrDomains {
+  outcome: FtrNarrowingOutcome;
+  solutions: (typeof FTR_SOLUTION_DOMAINS)[number][];
+  platformAffected: boolean;
+}
+
+/**
+ * Solution domains a diff can affect, and whether it affects platform modules, through the
+ * downstream `kbn_references` closure.
+ */
+export function resolveAffectedFtrDomains(changedFiles: string[]): AffectedFtrDomains {
+  try {
+    return resolveFromModuleGraph(changedFiles);
+  } catch (error) {
+    console.error('FTR solution selection failed', error);
+    return notNarrowed('error');
+  }
+}
+
+function resolveFromModuleGraph(changedFiles: string[]): AffectedFtrDomains {
+  if (touchedCriticalFiles(changedFiles, [...FTR_CRITICAL_PATHS])) {
+    return notNarrowed('critical-path');
+  }
+
+  const directlyAffected = getAffectedModulesGit({
+    changedFiles,
+    ignorePatterns: FTR_IRRELEVANT_PATHS,
+    includeDownstream: false,
+  });
+  const relevantModules = new Set(
+    [...directlyAffected].filter((moduleId) => !FTR_EXCLUDED_MODULES.has(moduleId))
+  );
+
+  const { groupById } = getModuleLookup();
+  const solutions = new Set<string>();
+  let platformAffected = false;
+  for (const moduleId of getDownstreamDependents(relevantModules)) {
+    const group = groupById.get(moduleId);
+    if (group === 'platform') {
+      platformAffected = true;
+    } else if (group !== undefined && FTR_SOLUTION_DOMAINS.includes(group)) {
+      solutions.add(group);
+    } else {
+      return notNarrowed('unmapped-module');
+    }
+  }
+
+  if (!platformAffected && solutions.size === 0) {
+    return notNarrowed('no-relevant-modules');
+  }
+  return { outcome: 'narrowed', solutions: [...solutions].sort(), platformAffected };
+}
+
+function notNarrowed(outcome: Exclude<FtrNarrowingOutcome, 'narrowed'>): AffectedFtrDomains {
+  return { outcome, solutions: [], platformAffected: false };
+}
+
+/** True when the module owning an FTR config path is in the `platform` group, whichever manifest lists it. */
+export function isPlatformOwnedFtrConfig(configPath: string): boolean {
+  const owner = findModuleForPath(configPath);
+  return owner !== undefined && getModuleLookup().groupById.get(owner) === 'platform';
 }

@@ -89,7 +89,8 @@ export function listChangedFiles({
     .filter(Boolean);
 }
 
-function getDownstreamDependents(moduleIds: Set<string>): Set<string> {
+/** The given modules plus every module that transitively references them via `kbn_references`. */
+export function getDownstreamDependents(moduleIds: Set<string>): Set<string> {
   const downstreamMap = buildModuleDownstreamGraph();
   const result = new Set<string>(moduleIds);
   const queue = Array.from(moduleIds);

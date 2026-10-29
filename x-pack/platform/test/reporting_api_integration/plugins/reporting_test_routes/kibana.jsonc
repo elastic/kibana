@@ -2,6 +2,7 @@
   "type": "plugin",
   "id": "@kbn/reporting-test-routes",
   "owner": "@elastic/response-ops",
+  "group": "platform",
   "visibility": "private",
   "plugin": {
     "id": "reportingTestRoutes",

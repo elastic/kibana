@@ -12,9 +12,12 @@ import * as path from 'path';
 import * as JSON5 from 'json5';
 import { getKibanaDir } from '../../utils.ts';
 import { getModuleLookup } from '../../affected-packages/module_lookup.ts';
+import * as affectedPackages from '../../affected-packages/index.ts';
 import {
   FTR_EXCLUDED_MODULES,
   getFtrRelevantModules,
+  isPlatformOwnedFtrConfig,
+  resolveAffectedFtrDomains,
   shouldSkipFtrTests,
 } from './selective_ftr.ts';
 
@@ -202,6 +205,99 @@ describe('shouldSkipFtrTests', () => {
         'src/platform/plugins/shared/discover/test/scout/core/ui/tests/foo.spec.ts',
         'src/platform/plugins/shared/discover/public/application/main.tsx',
       ])
+    ).toBe(false);
+  });
+});
+
+describe('resolveAffectedFtrDomains', () => {
+  it('narrows a solution-only diff to that solution', () => {
+    expect(
+      resolveAffectedFtrDomains([
+        'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx',
+      ])
+    ).toEqual({ outcome: 'narrowed', solutions: ['security'], platformAffected: false });
+  });
+
+  it('collects every touched solution', () => {
+    expect(
+      resolveAffectedFtrDomains([
+        'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx',
+        'x-pack/solutions/observability/plugins/apm/public/plugin.ts',
+      ])
+    ).toEqual({
+      outcome: 'narrowed',
+      solutions: ['observability', 'security'],
+      platformAffected: false,
+    });
+  });
+
+  it('ignores irrelevant files and excluded modules next to a solution change', () => {
+    expect(
+      resolveAffectedFtrDomains([
+        'x-pack/solutions/search/plugins/enterprise_search/public/index.ts',
+        'x-pack/solutions/search/plugins/enterprise_search/README.md',
+        'src/platform/packages/shared/kbn-scout/src/index.ts',
+      ])
+    ).toEqual({ outcome: 'narrowed', solutions: ['search'], platformAffected: false });
+  });
+
+  it('flags platform and keeps the solutions reached downstream of a platform module', () => {
+    const { outcome, solutions, platformAffected } = resolveAffectedFtrDomains([
+      'x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts',
+    ]);
+    expect(outcome).toBe('narrowed');
+    expect(platformAffected).toBe(true);
+    expect(solutions).toContain('observability');
+  });
+
+  it.each([
+    ['a critical path', 'pnpm-lock.yaml', 'critical-path'],
+    ['a file outside any module', 'some_random_root_script.sh', 'unmapped-module'],
+  ])('does not narrow when %s changes', (_, file, outcome) => {
+    expect(
+      resolveAffectedFtrDomains([
+        'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx',
+        file,
+      ])
+    ).toEqual({ outcome, solutions: [], platformAffected: false });
+  });
+
+  it('does not narrow when resolution throws', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(affectedPackages, 'getModuleLookup').mockImplementation(() => {
+      throw new Error('boom');
+    });
+    expect(
+      resolveAffectedFtrDomains([
+        'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx',
+      ])
+    ).toEqual({ outcome: 'error', solutions: [], platformAffected: false });
+    jest.restoreAllMocks();
+  });
+
+  it('does not narrow when nothing relevant changed', () => {
+    expect(resolveAffectedFtrDomains(['docs/extend/testing.md'])).toEqual({
+      outcome: 'no-relevant-modules',
+      solutions: [],
+      platformAffected: false,
+    });
+  });
+});
+
+describe('isPlatformOwnedFtrConfig', () => {
+  it('detects platform-owned configs filed in solution manifests', () => {
+    expect(
+      isPlatformOwnedFtrConfig(
+        'x-pack/platform/test/serverless/functional/configs/security/config.group1.ts'
+      )
+    ).toBe(true);
+  });
+
+  it('rejects solution-owned configs', () => {
+    expect(
+      isPlatformOwnedFtrConfig(
+        'x-pack/solutions/security/plugins/security_solution/public/plugin.tsx'
+      )
     ).toBe(false);
   });
 });
