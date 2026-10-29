@@ -526,9 +526,9 @@ export const createVagrantHostVmClient = (
   };
 
   const destroy = async (): Promise<void> => {
-    const destroyResponse = await execa.command(`vagrant destroy -f`, execaOptions);
+    await destroyVagrantMachine(VAGRANT_CWD, log);
 
-    log.debug(`VM [${name}] was destroyed successfully`, destroyResponse);
+    log.debug(`VM [${name}] was destroyed`);
   };
 
   const info = () => {
