@@ -1092,7 +1092,7 @@ x-pack/platform/packages/shared/ingest-pipelines @elastic/kibana-management
 x-pack/platform/packages/shared/isomer/isomer @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-components @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-theme @elastic/appex-sharedux
-x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/security-solution
+x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/security-solution @elastic/nightshift
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-ml-ux @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
@@ -1415,7 +1415,6 @@ x-pack/solutions/observability/plugins/profiling @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/observability-ui
 x-pack/solutions/observability/plugins/significant_events @elastic/nightshift
-x-pack/solutions/observability/plugins/significant_events_app @elastic/nightshift
 x-pack/solutions/observability/plugins/slo @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-signals-logs-team

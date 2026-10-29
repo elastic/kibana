@@ -157,13 +157,13 @@ const alertingV2NotificationGroup: JsonSchema = {
  * `additionalProperties: true` (looseObject) is intentional: the sub-workflow builds the
  * LLM prompt by reading ECS fields directly off each caller-supplied item (event.code,
  * process.command_line, host.name, ~40 fields in the prompt template). Callers must pass
- * full alert documents, not just the required keys. Stripping extras would remove the
- * evidence the model reasons over.
+ * at least the fields the prompt and the workflow read, not just the required keys. The
+ * AlertZero Alert Triage Worker loads exactly those fields (`ALERT_ANALYSIS_FIELDS` in
+ * `managed/definitions/alertzero`, kept in step with the workflow YAML by a test), so a field
+ * the workflow starts to read must be added there.
  *
- * Per-item byte size is not enforced by this schema. The practical ceiling (~2–5 KB per
- * alert for typical Security detection-rule alerts) is set by the platform's .workflows
- * trigger, which bounds event.alerts before the Worker passes them here. `maxItems: 1000`
- * is the only hard cap this schema applies.
+ * Per-item byte size is not enforced by this schema. `maxItems: 1000` is the only hard cap
+ * this schema applies.
  *
  * @see AlertAnalysisCallerAlertItem / AlertAnalysisCallerAlerts in
  * security_solution/common/workflows/alert_analysis_workflow.ts
@@ -172,7 +172,7 @@ const securityAlertAnalysisCallerAlerts: JsonSchema = {
   type: 'array',
   title: 'Security alert analysis caller alerts',
   description:
-    'Full alert documents supplied by a workflow.execute caller (e.g. AlertZero Alert Triage Worker). Bounded to 1000 items; each item must include _id, _index (Security alerts alias or backing index), @timestamp, and kibana.alert.rule.uuid. Additional ECS/kibana.alert fields are passed through and used directly in the LLM prompt — callers should supply the complete alert document. Per-item byte size is not schema-enforced; it is bounded in practice by the platform .workflows trigger.',
+    'Alerts supplied by a workflow.execute caller (e.g. AlertZero Alert Triage Worker). Bounded to 1000 items; each item must include _id, _index (Security alerts alias or backing index), @timestamp, and kibana.alert.rule.uuid. Additional ECS/kibana.alert fields are passed through and used directly in the LLM prompt — callers should supply the fields the prompt and the workflow read. Per-item byte size is not schema-enforced.',
   maxItems: 1000,
   items: {
     type: 'object',
