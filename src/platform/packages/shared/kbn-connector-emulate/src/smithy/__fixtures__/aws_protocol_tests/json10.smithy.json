@@ -1,0 +1,2708 @@
+{
+ "smithy": "2.0",
+ "shapes": {
+  "aws.protocoltests.json10#ClientOptionalDefaults": {
+   "type": "structure",
+   "members": {
+    "member": {
+     "target": "smithy.api#Integer",
+     "traits": {
+      "smithy.api#clientOptional": {},
+      "smithy.api#default": 0
+     }
+    }
+   }
+  },
+  "aws.protocoltests.json10#ComplexError": {
+   "type": "structure",
+   "members": {
+    "TopLevel": {
+     "target": "smithy.api#String"
+    },
+    "Nested": {
+     "target": "aws.protocoltests.json10#ComplexNestedErrorData"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10ComplexError",
+      "documentation": "Parses a complex error with no message member",
+      "protocol": "aws.protocols#awsJson1_0",
+      "params": {
+       "TopLevel": "Top level",
+       "Nested": {
+        "Foo": "bar"
+       }
+      },
+      "code": 400,
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"__type\": \"aws.protocoltests.json10#ComplexError\",\n    \"TopLevel\": \"Top level\",\n    \"Nested\": {\n        \"Foo\": \"bar\"\n    }\n}",
+      "bodyMediaType": "application/json"
+     },
+     {
+      "id": "AwsJson10EmptyComplexError",
+      "documentation": "Parses a complex error with an empty body",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 400,
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"__type\": \"aws.protocoltests.json10#ComplexError\"\n}",
+      "bodyMediaType": "application/json"
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#ComplexNestedErrorData": {
+   "type": "structure",
+   "members": {
+    "Foo": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#jsonName": "Fooooo"
+     }
+    }
+   }
+  },
+  "aws.protocoltests.json10#ContentTypeParameters": {
+   "type": "operation",
+   "input": {
+    "target": "aws.protocoltests.json10#ContentTypeParametersInput"
+   },
+   "output": {
+    "target": "aws.protocoltests.json10#ContentTypeParametersOutput"
+   },
+   "traits": {
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "AwsJson10MustSupportParametersInContentType",
+      "documentation": "A server should ignore parameters added to the content type",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0; charset=utf-8",
+       "X-Amz-Target": "JsonRpc10.ContentTypeParameters"
+      },
+      "uri": "/",
+      "body": "{\"value\":5}",
+      "bodyMediaType": "application/json",
+      "params": {
+       "value": 5
+      },
+      "appliesTo": "server"
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#ContentTypeParametersInput": {
+   "type": "structure",
+   "members": {
+    "value": {
+     "target": "smithy.api#Integer"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "aws.protocoltests.json10#ContentTypeParametersOutput": {
+   "type": "structure",
+   "members": {},
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "aws.protocoltests.json10#Defaults": {
+   "type": "structure",
+   "mixins": [
+    {
+     "target": "aws.protocoltests.json10#DefaultsMixin"
+    }
+   ],
+   "members": {}
+  },
+  "aws.protocoltests.json10#DefaultsMixin": {
+   "type": "structure",
+   "members": {
+    "defaultString": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#default": "hi"
+     }
+    },
+    "defaultBoolean": {
+     "target": "smithy.api#Boolean",
+     "traits": {
+      "smithy.api#default": true
+     }
+    },
+    "defaultList": {
+     "target": "aws.protocoltests.json10#TestStringList",
+     "traits": {
+      "smithy.api#default": []
+     }
+    },
+    "defaultDocumentMap": {
+     "target": "smithy.api#Document",
+     "traits": {
+      "smithy.api#default": {}
+     }
+    },
+    "defaultDocumentString": {
+     "target": "smithy.api#Document",
+     "traits": {
+      "smithy.api#default": "hi"
+     }
+    },
+    "defaultDocumentBoolean": {
+     "target": "smithy.api#Document",
+     "traits": {
+      "smithy.api#default": true
+     }
+    },
+    "defaultDocumentList": {
+     "target": "smithy.api#Document",
+     "traits": {
+      "smithy.api#default": []
+     }
+    },
+    "defaultNullDocument": {
+     "target": "smithy.api#Document",
+     "traits": {
+      "smithy.api#default": null
+     }
+    },
+    "defaultTimestamp": {
+     "target": "smithy.api#Timestamp",
+     "traits": {
+      "smithy.api#default": 0
+     }
+    },
+    "defaultBlob": {
+     "target": "smithy.api#Blob",
+     "traits": {
+      "smithy.api#default": "YWJj"
+     }
+    },
+    "defaultByte": {
+     "target": "smithy.api#Byte",
+     "traits": {
+      "smithy.api#default": 1
+     }
+    },
+    "defaultShort": {
+     "target": "smithy.api#Short",
+     "traits": {
+      "smithy.api#default": 1
+     }
+    },
+    "defaultInteger": {
+     "target": "smithy.api#Integer",
+     "traits": {
+      "smithy.api#default": 10
+     }
+    },
+    "defaultLong": {
+     "target": "smithy.api#Long",
+     "traits": {
+      "smithy.api#default": 100
+     }
+    },
+    "defaultFloat": {
+     "target": "smithy.api#Float",
+     "traits": {
+      "smithy.api#default": 1.0
+     }
+    },
+    "defaultDouble": {
+     "target": "smithy.api#Double",
+     "traits": {
+      "smithy.api#default": 1.0
+     }
+    },
+    "defaultMap": {
+     "target": "aws.protocoltests.json10#TestStringMap",
+     "traits": {
+      "smithy.api#default": {}
+     }
+    },
+    "defaultEnum": {
+     "target": "aws.protocoltests.json10#TestEnum",
+     "traits": {
+      "smithy.api#default": "FOO"
+     }
+    },
+    "defaultIntEnum": {
+     "target": "aws.protocoltests.json10#TestIntEnum",
+     "traits": {
+      "smithy.api#default": 1
+     }
+    },
+    "emptyString": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#default": ""
+     }
+    },
+    "falseBoolean": {
+     "target": "smithy.api#Boolean",
+     "traits": {
+      "smithy.api#default": false
+     }
+    },
+    "emptyBlob": {
+     "target": "smithy.api#Blob",
+     "traits": {
+      "smithy.api#default": ""
+     }
+    },
+    "zeroByte": {
+     "target": "smithy.api#Byte",
+     "traits": {
+      "smithy.api#default": 0
+     }
+    },
+    "zeroShort": {
+     "target": "smithy.api#Short",
+     "traits": {
+      "smithy.api#default": 0
+     }
+    },
+    "zeroInteger": {
+     "target": "smithy.api#Integer",
+     "traits": {
+      "smithy.api#default": 0
+     }
+    },
+    "zeroLong": {
+     "target": "smithy.api#Long",
+     "traits": {
+      "smithy.api#default": 0
+     }
+    },
+    "zeroFloat": {
+     "target": "smithy.api#Float",
+     "traits": {
+      "smithy.api#default": 0.0
+     }
+    },
+    "zeroDouble": {
+     "target": "smithy.api#Double",
+     "traits": {
+      "smithy.api#default": 0.0
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#mixin": {}
+   }
+  },
+  "aws.protocoltests.json10#Dialog": {
+   "type": "structure",
+   "members": {
+    "language": {
+     "target": "smithy.api#String"
+    },
+    "greeting": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#default": "hi"
+     }
+    },
+    "farewell": {
+     "target": "aws.protocoltests.json10#Farewell"
+    }
+   }
+  },
+  "aws.protocoltests.json10#DialogList": {
+   "type": "list",
+   "member": {
+    "target": "aws.protocoltests.json10#Dialog"
+   }
+  },
+  "aws.protocoltests.json10#DialogMap": {
+   "type": "map",
+   "key": {
+    "target": "smithy.api#String"
+   },
+   "value": {
+    "target": "aws.protocoltests.json10#Dialog"
+   }
+  },
+  "aws.protocoltests.json10#EmptyInputAndEmptyOutput": {
+   "type": "operation",
+   "input": {
+    "target": "aws.protocoltests.json10#EmptyInputAndEmptyOutputInput"
+   },
+   "output": {
+    "target": "aws.protocoltests.json10#EmptyInputAndEmptyOutputOutput"
+   },
+   "traits": {
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "AwsJson10EmptyInputAndEmptyOutput",
+      "documentation": "Clients must always send an empty object if input is modeled.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.EmptyInputAndEmptyOutput"
+      }
+     }
+    ],
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10EmptyInputAndEmptyOutputSendJsonObject",
+      "documentation": "A service will always return a JSON object for operations with modeled output.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      }
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#EmptyInputAndEmptyOutputInput": {
+   "type": "structure",
+   "members": {},
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "aws.protocoltests.json10#EmptyInputAndEmptyOutputOutput": {
+   "type": "structure",
+   "members": {},
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "aws.protocoltests.json10#EndpointOperation": {
+   "type": "operation",
+   "input": {
+    "target": "smithy.api#Unit"
+   },
+   "output": {
+    "target": "smithy.api#Unit"
+   },
+   "traits": {
+    "smithy.api#endpoint": {
+     "hostPrefix": "foo."
+    },
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "AwsJson10EndpointTrait",
+      "documentation": "Operations can prepend to the given host if they define the\nendpoint trait.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{}",
+      "host": "example.com",
+      "resolvedHost": "foo.example.com"
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#EndpointWithHostLabelOperation": {
+   "type": "operation",
+   "input": {
+    "target": "aws.protocoltests.json10#EndpointWithHostLabelOperationInput"
+   },
+   "output": {
+    "target": "smithy.api#Unit"
+   },
+   "traits": {
+    "smithy.api#endpoint": {
+     "hostPrefix": "foo.{label}."
+    },
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "AwsJson10EndpointTraitWithHostLabel",
+      "documentation": "Operations can prepend to the given host if they define the\nendpoint trait, and can use the host label trait to define\nfurther customization based on user input.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\"label\": \"bar\"}",
+      "bodyMediaType": "application/json",
+      "host": "example.com",
+      "resolvedHost": "foo.bar.example.com",
+      "params": {
+       "label": "bar"
+      }
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#EndpointWithHostLabelOperationInput": {
+   "type": "structure",
+   "members": {
+    "label": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#hostLabel": {},
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "aws.protocoltests.json10#Farewell": {
+   "type": "structure",
+   "members": {
+    "phrase": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#default": "bye"
+     }
+    }
+   }
+  },
+  "aws.protocoltests.json10#FooError": {
+   "type": "structure",
+   "members": {},
+   "traits": {
+    "smithy.api#error": "server",
+    "smithy.api#tags": [
+     "client-only"
+    ],
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10FooErrorUsingXAmznErrorType",
+      "documentation": "Serializes the X-Amzn-ErrorType header. For an example service, see Amazon EKS.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 500,
+      "headers": {
+       "X-Amzn-Errortype": "FooError"
+      },
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10FooErrorUsingXAmznErrorTypeWithUri",
+      "documentation": "Some X-Amzn-Errortype headers contain URLs. Clients need to split the URL on ':' and take only the first half of the string. For example, 'ValidationException:http://internal.amazon.com/coral/com.amazon.coral.validate/'\nis to be interpreted as 'ValidationException'.\n\nFor an example service see Amazon Polly.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 500,
+      "headers": {
+       "X-Amzn-Errortype": "FooError:http://internal.amazon.com/coral/com.amazon.coral.validate/"
+      },
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10FooErrorUsingXAmznErrorTypeWithUriAndNamespace",
+      "documentation": "X-Amzn-Errortype might contain a URL and a namespace. Client should extract only the shape name. This is a pathalogical case that might not actually happen in any deployed AWS service.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 500,
+      "headers": {
+       "X-Amzn-Errortype": "aws.protocoltests.json10#FooError:http://internal.amazon.com/coral/com.amazon.coral.validate/"
+      },
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10FooErrorUsingCode",
+      "documentation": "This example uses the 'code' property in the output rather than X-Amzn-Errortype. Some services do this though it's preferable to send the X-Amzn-Errortype. Client implementations must first check for the X-Amzn-Errortype and then check for a top-level 'code' property.\n\nFor example service see Amazon S3 Glacier.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 500,
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"code\": \"FooError\"\n}",
+      "bodyMediaType": "application/json",
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10FooErrorUsingCodeAndNamespace",
+      "documentation": "Some services serialize errors using code, and it might contain a namespace. Clients should just take the last part of the string after '#'.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 500,
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"code\": \"aws.protocoltests.json10#FooError\"\n}",
+      "bodyMediaType": "application/json",
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10FooErrorUsingCodeUriAndNamespace",
+      "documentation": "Some services serialize errors using code, and it might contain a namespace. It also might contain a URI. Clients should just take the last part of the string after '#' and before \":\". This is a pathalogical case that might not occur in any deployed AWS service.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 500,
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"code\": \"aws.protocoltests.json10#FooError:http://internal.amazon.com/coral/com.amazon.coral.validate/\"\n}",
+      "bodyMediaType": "application/json",
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10FooErrorWithDunderType",
+      "documentation": "Some services serialize errors using __type.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 500,
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"__type\": \"FooError\"\n}",
+      "bodyMediaType": "application/json",
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10FooErrorWithDunderTypeAndNamespace",
+      "documentation": "Some services serialize errors using __type, and it might contain a namespace. Clients should just take the last part of the string after '#'.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 500,
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"__type\": \"aws.protocoltests.json10#FooError\"\n}",
+      "bodyMediaType": "application/json",
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10FooErrorWithDunderTypeAndDifferentNamespace",
+      "documentation": "Because only the part after '#' is considered, an unrecognized namespace should not make a difference.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 500,
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"__type\": \"aws.different.namespace#FooError\"\n}",
+      "bodyMediaType": "application/json",
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10FooErrorWithDunderTypeUriAndNamespace",
+      "documentation": "Some services serialize errors using __type, and it might contain a namespace. It also might contain a URI. Clients should just take the last part of the string after '#' and before \":\". This is a pathalogical case that might not occur in any deployed AWS service.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 500,
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"__type\": \"aws.protocoltests.json10#FooError:http://internal.amazon.com/coral/com.amazon.coral.validate/\"\n}",
+      "bodyMediaType": "application/json",
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10FooErrorWithNestedTypeProperty",
+      "documentation": "Some services serialize errors using __type, and if the response includes additional shapes that belong to a different namespace there'll be a nested __type property that must not be considered when determining which error to be surfaced.\n\nFor an example service see Amazon DynamoDB.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 500,
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"__type\": \"aws.protocoltests.json10#FooError\",\n    \"ErrorDetails\": [\n      {\n          \"__type\": \"com.amazon.internal#ErrorDetails\",\n          \"reason\": \"Some reason\"\n      }\n    ]\n}",
+      "bodyMediaType": "application/json",
+      "appliesTo": "client"
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#GreetingWithErrors": {
+   "type": "operation",
+   "input": {
+    "target": "aws.protocoltests.json10#GreetingWithErrorsInput"
+   },
+   "output": {
+    "target": "aws.protocoltests.json10#GreetingWithErrorsOutput"
+   },
+   "errors": [
+    {
+     "target": "aws.protocoltests.json10#ComplexError"
+    },
+    {
+     "target": "aws.protocoltests.json10#FooError"
+    },
+    {
+     "target": "aws.protocoltests.json10#InvalidGreeting"
+    }
+   ],
+   "traits": {
+    "smithy.api#idempotent": {}
+   }
+  },
+  "aws.protocoltests.json10#GreetingWithErrorsInput": {
+   "type": "structure",
+   "members": {
+    "greeting": {
+     "target": "smithy.api#String"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "aws.protocoltests.json10#GreetingWithErrorsOutput": {
+   "type": "structure",
+   "members": {
+    "greeting": {
+     "target": "smithy.api#String"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "aws.protocoltests.json10#HostWithPathOperation": {
+   "type": "operation",
+   "input": {
+    "target": "smithy.api#Unit"
+   },
+   "output": {
+    "target": "smithy.api#Unit"
+   },
+   "traits": {
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "AwsJson10HostWithPath",
+      "documentation": "Custom endpoints supplied by users can have paths",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/custom/",
+      "body": "{}",
+      "host": "example.com/custom",
+      "appliesTo": "client"
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#InvalidGreeting": {
+   "type": "structure",
+   "members": {
+    "Message": {
+     "target": "smithy.api#String"
+    }
+   },
+   "traits": {
+    "smithy.api#error": "client",
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10InvalidGreetingError",
+      "documentation": "Parses simple JSON errors",
+      "protocol": "aws.protocols#awsJson1_0",
+      "params": {
+       "Message": "Hi"
+      },
+      "code": 400,
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"__type\": \"aws.protocoltests.json10#InvalidGreeting\",\n    \"Message\": \"Hi\"\n}",
+      "bodyMediaType": "application/json"
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#JsonRpc10": {
+   "type": "service",
+   "version": "2020-07-14",
+   "operations": [
+    {
+     "target": "aws.protocoltests.json10#ContentTypeParameters"
+    },
+    {
+     "target": "aws.protocoltests.json10#EmptyInputAndEmptyOutput"
+    },
+    {
+     "target": "aws.protocoltests.json10#EndpointOperation"
+    },
+    {
+     "target": "aws.protocoltests.json10#EndpointWithHostLabelOperation"
+    },
+    {
+     "target": "aws.protocoltests.json10#GreetingWithErrors"
+    },
+    {
+     "target": "aws.protocoltests.json10#HostWithPathOperation"
+    },
+    {
+     "target": "aws.protocoltests.json10#JsonUnions"
+    },
+    {
+     "target": "aws.protocoltests.json10#NoInputAndNoOutput"
+    },
+    {
+     "target": "aws.protocoltests.json10#NoInputAndOutput"
+    },
+    {
+     "target": "aws.protocoltests.json10#OperationWithDefaults"
+    },
+    {
+     "target": "aws.protocoltests.json10#OperationWithNestedStructure"
+    },
+    {
+     "target": "aws.protocoltests.json10#OperationWithRequiredMembers"
+    },
+    {
+     "target": "aws.protocoltests.json10#OperationWithRequiredMembersWithDefaults"
+    },
+    {
+     "target": "aws.protocoltests.json10#PutWithContentEncoding"
+    },
+    {
+     "target": "aws.protocoltests.json10#QueryIncompatibleOperation"
+    },
+    {
+     "target": "aws.protocoltests.json10#SimpleScalarProperties"
+    }
+   ],
+   "traits": {
+    "aws.api#service": {
+     "sdkId": "JSON RPC 10"
+    },
+    "aws.auth#sigv4": {
+     "name": "jsonrpc10"
+    },
+    "aws.protocols#awsJson1_0": {},
+    "smithy.api#title": "Sample Json 1.0 Protocol Service"
+   }
+  },
+  "aws.protocoltests.json10#JsonUnions": {
+   "type": "operation",
+   "input": {
+    "target": "aws.protocoltests.json10#JsonUnionsInput"
+   },
+   "output": {
+    "target": "aws.protocoltests.json10#JsonUnionsOutput"
+   },
+   "traits": {
+    "smithy.api#idempotent": {},
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "AwsJson10SerializeStringUnionValue",
+      "documentation": "Serializes a string union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"contents\": {\n        \"stringValue\": \"foo\"\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.JsonUnions"
+      },
+      "params": {
+       "contents": {
+        "stringValue": "foo"
+       }
+      }
+     },
+     {
+      "id": "AwsJson10SerializeBooleanUnionValue",
+      "documentation": "Serializes a boolean union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"contents\": {\n        \"booleanValue\": true\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.JsonUnions"
+      },
+      "params": {
+       "contents": {
+        "booleanValue": true
+       }
+      }
+     },
+     {
+      "id": "AwsJson10SerializeNumberUnionValue",
+      "documentation": "Serializes a number union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"contents\": {\n        \"numberValue\": 1\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.JsonUnions"
+      },
+      "params": {
+       "contents": {
+        "numberValue": 1
+       }
+      }
+     },
+     {
+      "id": "AwsJson10SerializeBlobUnionValue",
+      "documentation": "Serializes a blob union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"contents\": {\n        \"blobValue\": \"Zm9v\"\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.JsonUnions"
+      },
+      "params": {
+       "contents": {
+        "blobValue": "foo"
+       }
+      }
+     },
+     {
+      "id": "AwsJson10SerializeTimestampUnionValue",
+      "documentation": "Serializes a timestamp union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"contents\": {\n        \"timestampValue\": 1398796238\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.JsonUnions"
+      },
+      "params": {
+       "contents": {
+        "timestampValue": 1398796238
+       }
+      }
+     },
+     {
+      "id": "AwsJson10SerializeEnumUnionValue",
+      "documentation": "Serializes an enum union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"contents\": {\n        \"enumValue\": \"Foo\"\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.JsonUnions"
+      },
+      "params": {
+       "contents": {
+        "enumValue": "Foo"
+       }
+      }
+     },
+     {
+      "id": "AwsJson10SerializeIntEnumUnionValue",
+      "documentation": "Serializes an intEnum union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"contents\": {\n        \"intEnumValue\": 1\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.JsonUnions"
+      },
+      "params": {
+       "contents": {
+        "intEnumValue": 1
+       }
+      }
+     },
+     {
+      "id": "AwsJson10SerializeListUnionValue",
+      "documentation": "Serializes a list union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"contents\": {\n        \"listValue\": [\"foo\", \"bar\"]\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.JsonUnions"
+      },
+      "params": {
+       "contents": {
+        "listValue": [
+         "foo",
+         "bar"
+        ]
+       }
+      }
+     },
+     {
+      "id": "AwsJson10SerializeMapUnionValue",
+      "documentation": "Serializes a map union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"contents\": {\n        \"mapValue\": {\n            \"foo\": \"bar\",\n            \"spam\": \"eggs\"\n        }\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.JsonUnions"
+      },
+      "params": {
+       "contents": {
+        "mapValue": {
+         "foo": "bar",
+         "spam": "eggs"
+        }
+       }
+      }
+     },
+     {
+      "id": "AwsJson10SerializeStructureUnionValue",
+      "documentation": "Serializes a structure union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"contents\": {\n        \"structureValue\": {\n            \"hi\": \"hello\"\n        }\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.JsonUnions"
+      },
+      "params": {
+       "contents": {
+        "structureValue": {
+         "hi": "hello"
+        }
+       }
+      }
+     }
+    ],
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10DeserializeStringUnionValue",
+      "documentation": "Deserializes a string union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n        \"stringValue\": \"foo\"\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "stringValue": "foo"
+       }
+      }
+     },
+     {
+      "id": "AwsJson10DeserializeBooleanUnionValue",
+      "documentation": "Deserializes a boolean union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n        \"booleanValue\": true\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "booleanValue": true
+       }
+      }
+     },
+     {
+      "id": "AwsJson10DeserializeNumberUnionValue",
+      "documentation": "Deserializes a number union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n        \"numberValue\": 1\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "numberValue": 1
+       }
+      }
+     },
+     {
+      "id": "AwsJson10DeserializeBlobUnionValue",
+      "documentation": "Deserializes a blob union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n        \"blobValue\": \"Zm9v\"\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "blobValue": "foo"
+       }
+      }
+     },
+     {
+      "id": "AwsJson10DeserializeTimestampUnionValue",
+      "documentation": "Deserializes a timestamp union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n        \"timestampValue\": 1398796238\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "timestampValue": 1398796238
+       }
+      }
+     },
+     {
+      "id": "AwsJson10DeserializeEnumUnionValue",
+      "documentation": "Deserializes an enum union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n        \"enumValue\": \"Foo\"\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "enumValue": "Foo"
+       }
+      }
+     },
+     {
+      "id": "AwsJson10DeserializeIntEnumUnionValue",
+      "documentation": "Deserializes an intEnum union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n        \"intEnumValue\": 1\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "intEnumValue": 1
+       }
+      }
+     },
+     {
+      "id": "AwsJson10DeserializeListUnionValue",
+      "documentation": "Deserializes a list union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n        \"listValue\": [\"foo\", \"bar\"]\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "listValue": [
+         "foo",
+         "bar"
+        ]
+       }
+      }
+     },
+     {
+      "id": "AwsJson10DeserializeMapUnionValue",
+      "documentation": "Deserializes a map union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n        \"mapValue\": {\n            \"foo\": \"bar\",\n            \"spam\": \"eggs\"\n        }\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "mapValue": {
+         "foo": "bar",
+         "spam": "eggs"
+        }
+       }
+      }
+     },
+     {
+      "id": "AwsJson10DeserializeStructureUnionValue",
+      "documentation": "Deserializes a structure union value",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n        \"structureValue\": {\n            \"hi\": \"hello\"\n        }\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "structureValue": {
+         "hi": "hello"
+        }
+       }
+      }
+     },
+     {
+      "id": "AwsJson10DeserializeIgnoreType",
+      "appliesTo": "client",
+      "documentation": "Ignores an unrecognized __type property",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n        \"__type\": \"aws.protocoltests.json10#MyUnion\",\n        \"structureValue\": {\n            \"hi\": \"hello\"\n        }\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "structureValue": {
+         "hi": "hello"
+        }
+       }
+      }
+     },
+     {
+      "id": "AwsJson10DeserializeAllowNulls",
+      "appliesTo": "client",
+      "documentation": "Allows for `: null` to be set for all unset fields",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"contents\": {\n      \"stringValue\": null,\n      \"booleanValue\": null,\n      \"numberValue\": null,\n      \"blobValue\": null,\n      \"timestampValue\": null,\n      \"enumValue\": null,\n      \"intEnumValue\": null,\n      \"listValue\": null,\n      \"mapValue\": null,\n      \"structureValue\": {\n          \"hi\": \"hello\"\n      }\n    }\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "contents": {
+        "structureValue": {
+         "hi": "hello"
+        }
+       }
+      }
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#JsonUnionsInput": {
+   "type": "structure",
+   "members": {
+    "contents": {
+     "target": "aws.protocoltests.json10#MyUnion"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "aws.protocoltests.json10#JsonUnionsOutput": {
+   "type": "structure",
+   "members": {
+    "contents": {
+     "target": "aws.protocoltests.json10#MyUnion"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "aws.protocoltests.json10#MyUnion": {
+   "type": "union",
+   "members": {
+    "stringValue": {
+     "target": "smithy.api#String"
+    },
+    "booleanValue": {
+     "target": "smithy.api#Boolean"
+    },
+    "numberValue": {
+     "target": "smithy.api#Integer"
+    },
+    "blobValue": {
+     "target": "smithy.api#Blob"
+    },
+    "timestampValue": {
+     "target": "smithy.api#Timestamp"
+    },
+    "enumValue": {
+     "target": "aws.protocoltests.shared#FooEnum"
+    },
+    "intEnumValue": {
+     "target": "aws.protocoltests.shared#IntegerEnum"
+    },
+    "listValue": {
+     "target": "aws.protocoltests.shared#StringList"
+    },
+    "mapValue": {
+     "target": "aws.protocoltests.shared#StringMap"
+    },
+    "structureValue": {
+     "target": "aws.protocoltests.shared#GreetingStruct"
+    }
+   }
+  },
+  "aws.protocoltests.json10#NestedDefaultsMixin": {
+   "type": "structure",
+   "members": {
+    "dialog": {
+     "target": "aws.protocoltests.json10#Dialog",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "dialogList": {
+     "target": "aws.protocoltests.json10#DialogList",
+     "traits": {
+      "smithy.api#default": []
+     }
+    },
+    "dialogMap": {
+     "target": "aws.protocoltests.json10#DialogMap",
+     "traits": {
+      "smithy.api#default": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#mixin": {}
+   }
+  },
+  "aws.protocoltests.json10#NoInputAndNoOutput": {
+   "type": "operation",
+   "input": {
+    "target": "smithy.api#Unit"
+   },
+   "output": {
+    "target": "smithy.api#Unit"
+   },
+   "traits": {
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "AwsJson10MustAlwaysSendEmptyJsonPayload",
+      "documentation": "Clients must always send an empty JSON object payload for\noperations with no input (that is, `{}`). While AWS service\nimplementations support requests with no payload or requests\nthat send `{}`, always sending `{}` from the client is\npreferred for forward compatibility in case input is ever\nadded to an operation.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.NoInputAndNoOutput"
+      },
+      "uri": "/",
+      "body": "{}",
+      "bodyMediaType": "application/json"
+     },
+     {
+      "id": "AwsJson10ServiceSupportsNoPayloadForNoInput",
+      "documentation": "Service implementations must support no payload or an empty\nobject payload for operations that define no input. However,\ndespite the lack of a payload, a Content-Type header is still\nrequired in order for the service to properly detect the\nprotocol.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.NoInputAndNoOutput"
+      },
+      "uri": "/",
+      "body": "",
+      "appliesTo": "server"
+     }
+    ],
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10HandlesEmptyOutputShape",
+      "protocol": "aws.protocols#awsJson1_0",
+      "documentation": "When no output is defined, the service is expected to return\nan empty payload, however, client must ignore a JSON payload\nif one is returned. This ensures that if output is added later,\nthen it will not break the client.",
+      "body": "{}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "code": 200,
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10HandlesUnexpectedJsonOutput",
+      "protocol": "aws.protocols#awsJson1_0",
+      "documentation": "This client-only test builds on handles_empty_output_shape,\nby including unexpected fields in the JSON. A client\nneeds to ignore JSON output that is empty or that contains\nJSON object data.",
+      "body": "{\n    \"foo\": true\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "code": 200,
+      "appliesTo": "client"
+     },
+     {
+      "id": "AwsJson10ServiceRespondsWithNoPayload",
+      "protocol": "aws.protocols#awsJson1_0",
+      "documentation": "When no output is defined, the service is expected to return\nan empty payload. Despite the lack of a payload, the service\nis expected to always send a Content-Type header. Clients must\nhandle cases where a service returns a JSON object and where\na service returns no JSON at all.",
+      "body": "",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "code": 200
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#NoInputAndOutput": {
+   "type": "operation",
+   "input": {
+    "target": "smithy.api#Unit"
+   },
+   "output": {
+    "target": "aws.protocoltests.json10#NoInputAndOutputOutput"
+   },
+   "traits": {
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "AwsJson10NoInputAndOutput",
+      "documentation": "A client should always send and empty JSON object payload.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.NoInputAndOutput"
+      },
+      "uri": "/",
+      "body": "{}",
+      "bodyMediaType": "application/json"
+     }
+    ],
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10NoInputAndOutput",
+      "documentation": "Empty output always serializes an empty object payload.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "code": 200,
+      "body": "{}",
+      "bodyMediaType": "application/json"
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#NoInputAndOutputOutput": {
+   "type": "structure",
+   "members": {},
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "aws.protocoltests.json10#OperationWithDefaults": {
+   "type": "operation",
+   "input": {
+    "target": "aws.protocoltests.json10#OperationWithDefaultsInput"
+   },
+   "output": {
+    "target": "aws.protocoltests.json10#OperationWithDefaultsOutput"
+   },
+   "traits": {
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "AwsJson10ClientPopulatesDefaultValuesInInput",
+      "documentation": "Client populates default values in input.",
+      "appliesTo": "client",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "bodyMediaType": "application/json",
+      "uri": "/",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"defaults\": {\n        \"defaultString\": \"hi\",\n        \"defaultBoolean\": true,\n        \"defaultList\": [],\n        \"defaultDocumentMap\": {},\n        \"defaultDocumentString\": \"hi\",\n        \"defaultDocumentBoolean\": true,\n        \"defaultDocumentList\": [],\n        \"defaultTimestamp\": 0,\n        \"defaultBlob\": \"YWJj\",\n        \"defaultByte\": 1,\n        \"defaultShort\": 1,\n        \"defaultInteger\": 10,\n        \"defaultLong\": 100,\n        \"defaultFloat\": 1.0,\n        \"defaultDouble\": 1.0,\n        \"defaultMap\": {},\n        \"defaultEnum\": \"FOO\",\n        \"defaultIntEnum\": 1,\n        \"emptyString\": \"\",\n        \"falseBoolean\": false,\n        \"emptyBlob\": \"\",\n        \"zeroByte\": 0,\n        \"zeroShort\": 0,\n        \"zeroInteger\": 0,\n        \"zeroLong\": 0,\n        \"zeroFloat\": 0.0,\n        \"zeroDouble\": 0.0\n    }\n}",
+      "params": {
+       "defaults": {}
+      }
+     },
+     {
+      "id": "AwsJson10ClientSkipsTopLevelDefaultValuesInInput",
+      "documentation": "Client skips top level default values in input.",
+      "appliesTo": "client",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "bodyMediaType": "application/json",
+      "uri": "/",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n}",
+      "params": {}
+     },
+     {
+      "id": "AwsJson10ClientUsesExplicitlyProvidedMemberValuesOverDefaults",
+      "documentation": "Client uses explicitly provided member values over defaults",
+      "appliesTo": "client",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "bodyMediaType": "application/json",
+      "uri": "/",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "defaults": {
+        "defaultString": "bye",
+        "defaultBoolean": true,
+        "defaultList": [
+         "a"
+        ],
+        "defaultDocumentMap": {
+         "name": "Jack"
+        },
+        "defaultDocumentString": "bye",
+        "defaultDocumentBoolean": true,
+        "defaultDocumentList": [
+         "b"
+        ],
+        "defaultNullDocument": "notNull",
+        "defaultTimestamp": 1,
+        "defaultBlob": "hi",
+        "defaultByte": 2,
+        "defaultShort": 2,
+        "defaultInteger": 20,
+        "defaultLong": 200,
+        "defaultFloat": 2.0,
+        "defaultDouble": 2.0,
+        "defaultMap": {
+         "name": "Jack"
+        },
+        "defaultEnum": "BAR",
+        "defaultIntEnum": 2,
+        "emptyString": "foo",
+        "falseBoolean": true,
+        "emptyBlob": "hi",
+        "zeroByte": 1,
+        "zeroShort": 1,
+        "zeroInteger": 1,
+        "zeroLong": 1,
+        "zeroFloat": 1.0,
+        "zeroDouble": 1.0
+       }
+      },
+      "body": "{\n    \"defaults\": {\n        \"defaultString\": \"bye\",\n        \"defaultBoolean\": true,\n        \"defaultList\": [\"a\"],\n        \"defaultDocumentMap\": {\"name\": \"Jack\"},\n        \"defaultDocumentString\": \"bye\",\n        \"defaultDocumentBoolean\": true,\n        \"defaultDocumentList\": [\"b\"],\n        \"defaultNullDocument\": \"notNull\",\n        \"defaultTimestamp\": 1,\n        \"defaultBlob\": \"aGk=\",\n        \"defaultByte\": 2,\n        \"defaultShort\": 2,\n        \"defaultInteger\": 20,\n        \"defaultLong\": 200,\n        \"defaultFloat\": 2.0,\n        \"defaultDouble\": 2.0,\n        \"defaultMap\": {\"name\": \"Jack\"},\n        \"defaultEnum\": \"BAR\",\n        \"defaultIntEnum\": 2,\n        \"emptyString\": \"foo\",\n        \"falseBoolean\": true,\n        \"emptyBlob\": \"aGk=\",\n        \"zeroByte\": 1,\n        \"zeroShort\": 1,\n        \"zeroInteger\": 1,\n        \"zeroLong\": 1,\n        \"zeroFloat\": 1.0,\n        \"zeroDouble\": 1.0\n    }\n}"
+     },
+     {
+      "id": "AwsJson10ServerPopulatesDefaultsWhenMissingInRequestBody",
+      "documentation": "Server populates default values when missing in request body.",
+      "appliesTo": "server",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "bodyMediaType": "application/json",
+      "uri": "/",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n\"defaults\": {}\n}",
+      "params": {
+       "defaults": {
+        "defaultString": "hi",
+        "defaultBoolean": true,
+        "defaultList": [],
+        "defaultDocumentMap": {},
+        "defaultDocumentString": "hi",
+        "defaultDocumentBoolean": true,
+        "defaultDocumentList": [],
+        "defaultTimestamp": 0,
+        "defaultBlob": "abc",
+        "defaultByte": 1,
+        "defaultShort": 1,
+        "defaultInteger": 10,
+        "defaultLong": 100,
+        "defaultFloat": 1.0,
+        "defaultDouble": 1.0,
+        "defaultMap": {},
+        "defaultEnum": "FOO",
+        "defaultIntEnum": 1,
+        "emptyString": "",
+        "falseBoolean": false,
+        "emptyBlob": "",
+        "zeroByte": 0,
+        "zeroShort": 0,
+        "zeroInteger": 0,
+        "zeroLong": 0,
+        "zeroFloat": 0.0,
+        "zeroDouble": 0.0
+       },
+       "topLevelDefault": "hi",
+       "otherTopLevelDefault": 0
+      }
+     },
+     {
+      "id": "AwsJson10ClientUsesExplicitlyProvidedValuesInTopLevel",
+      "documentation": "Any time a value is provided for a member in the top level of input, it is used, regardless of if its the default.",
+      "appliesTo": "client",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "bodyMediaType": "application/json",
+      "uri": "/",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"topLevelDefault\": \"hi\",\n    \"otherTopLevelDefault\": 0\n}",
+      "params": {
+       "topLevelDefault": "hi",
+       "otherTopLevelDefault": 0
+      }
+     },
+     {
+      "id": "AwsJson10ClientIgnoresNonTopLevelDefaultsOnMembersWithClientOptional",
+      "documentation": "Typically, non top-level members would have defaults filled in, but if they have the clientOptional trait, the defaults should be ignored.",
+      "appliesTo": "client",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "bodyMediaType": "application/json",
+      "uri": "/",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"clientOptionalDefaults\": {}\n}",
+      "params": {
+       "clientOptionalDefaults": {}
+      }
+     }
+    ],
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10ClientPopulatesDefaultsValuesWhenMissingInResponse",
+      "documentation": "Client populates default values when missing in response.",
+      "appliesTo": "client",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{}",
+      "params": {
+       "defaultString": "hi",
+       "defaultBoolean": true,
+       "defaultList": [],
+       "defaultDocumentMap": {},
+       "defaultDocumentString": "hi",
+       "defaultDocumentBoolean": true,
+       "defaultDocumentList": [],
+       "defaultTimestamp": 0,
+       "defaultBlob": "abc",
+       "defaultByte": 1,
+       "defaultShort": 1,
+       "defaultInteger": 10,
+       "defaultLong": 100,
+       "defaultFloat": 1.0,
+       "defaultDouble": 1.0,
+       "defaultMap": {},
+       "defaultEnum": "FOO",
+       "defaultIntEnum": 1,
+       "emptyString": "",
+       "falseBoolean": false,
+       "emptyBlob": "",
+       "zeroByte": 0,
+       "zeroShort": 0,
+       "zeroInteger": 0,
+       "zeroLong": 0,
+       "zeroFloat": 0.0,
+       "zeroDouble": 0.0
+      }
+     },
+     {
+      "id": "AwsJson10ClientIgnoresDefaultValuesIfMemberValuesArePresentInResponse",
+      "documentation": "Client ignores default values if member values are present in the response.",
+      "appliesTo": "client",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"defaultString\": \"bye\",\n    \"defaultBoolean\": false,\n    \"defaultList\": [\"a\"],\n    \"defaultDocumentMap\": {\"name\": \"Jack\"},\n    \"defaultDocumentString\": \"bye\",\n    \"defaultDocumentBoolean\": false,\n    \"defaultDocumentList\": [\"b\"],\n    \"defaultNullDocument\": \"notNull\",\n    \"defaultTimestamp\": 2,\n    \"defaultBlob\": \"aGk=\",\n    \"defaultByte\": 2,\n    \"defaultShort\": 2,\n    \"defaultInteger\": 20,\n    \"defaultLong\": 200,\n    \"defaultFloat\": 2.0,\n    \"defaultDouble\": 2.0,\n    \"defaultMap\": {\"name\": \"Jack\"},\n    \"defaultEnum\": \"BAR\",\n    \"defaultIntEnum\": 2,\n    \"emptyString\": \"foo\",\n    \"falseBoolean\": true,\n    \"emptyBlob\": \"aGk=\",\n    \"zeroByte\": 1,\n    \"zeroShort\": 1,\n    \"zeroInteger\": 1,\n    \"zeroLong\": 1,\n    \"zeroFloat\": 1.0,\n    \"zeroDouble\": 1.0\n}",
+      "params": {
+       "defaultString": "bye",
+       "defaultBoolean": false,
+       "defaultList": [
+        "a"
+       ],
+       "defaultDocumentMap": {
+        "name": "Jack"
+       },
+       "defaultDocumentString": "bye",
+       "defaultDocumentBoolean": false,
+       "defaultDocumentList": [
+        "b"
+       ],
+       "defaultNullDocument": "notNull",
+       "defaultTimestamp": 2,
+       "defaultBlob": "hi",
+       "defaultByte": 2,
+       "defaultShort": 2,
+       "defaultInteger": 20,
+       "defaultLong": 200,
+       "defaultFloat": 2.0,
+       "defaultDouble": 2.0,
+       "defaultMap": {
+        "name": "Jack"
+       },
+       "defaultEnum": "BAR",
+       "defaultIntEnum": 2,
+       "emptyString": "foo",
+       "falseBoolean": true,
+       "emptyBlob": "hi",
+       "zeroByte": 1,
+       "zeroShort": 1,
+       "zeroInteger": 1,
+       "zeroLong": 1,
+       "zeroFloat": 1.0,
+       "zeroDouble": 1.0
+      }
+     },
+     {
+      "id": "AwsJson10ServerPopulatesDefaultsInResponseWhenMissingInParams",
+      "documentation": "Server populates default values in response when missing in params.",
+      "appliesTo": "server",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"defaultString\": \"hi\",\n    \"defaultBoolean\": true,\n    \"defaultList\": [],\n    \"defaultDocumentMap\": {},\n    \"defaultDocumentString\": \"hi\",\n    \"defaultDocumentBoolean\": true,\n    \"defaultDocumentList\": [],\n    \"defaultTimestamp\": 0,\n    \"defaultBlob\": \"YWJj\",\n    \"defaultByte\": 1,\n    \"defaultShort\": 1,\n    \"defaultInteger\": 10,\n    \"defaultLong\": 100,\n    \"defaultFloat\": 1.0,\n    \"defaultDouble\": 1.0,\n    \"defaultMap\": {},\n    \"defaultEnum\": \"FOO\",\n    \"defaultIntEnum\": 1,\n    \"emptyString\": \"\",\n    \"falseBoolean\": false,\n    \"emptyBlob\": \"\",\n    \"zeroByte\": 0,\n    \"zeroShort\": 0,\n    \"zeroInteger\": 0,\n    \"zeroLong\": 0,\n    \"zeroFloat\": 0.0,\n    \"zeroDouble\": 0.0\n}",
+      "params": {}
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#OperationWithDefaultsInput": {
+   "type": "structure",
+   "members": {
+    "defaults": {
+     "target": "aws.protocoltests.json10#Defaults"
+    },
+    "clientOptionalDefaults": {
+     "target": "aws.protocoltests.json10#ClientOptionalDefaults"
+    },
+    "topLevelDefault": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#default": "hi"
+     }
+    },
+    "otherTopLevelDefault": {
+     "target": "smithy.api#Integer",
+     "traits": {
+      "smithy.api#default": 0
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "aws.protocoltests.json10#OperationWithDefaultsOutput": {
+   "type": "structure",
+   "mixins": [
+    {
+     "target": "aws.protocoltests.json10#DefaultsMixin"
+    }
+   ],
+   "members": {},
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "aws.protocoltests.json10#OperationWithNestedStructure": {
+   "type": "operation",
+   "input": {
+    "target": "aws.protocoltests.json10#OperationWithNestedStructureInput"
+   },
+   "output": {
+    "target": "aws.protocoltests.json10#OperationWithNestedStructureOutput"
+   },
+   "traits": {
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "AwsJson10ClientPopulatesNestedDefaultValuesWhenMissing",
+      "documentation": "Client populates nested default values when missing.",
+      "appliesTo": "client",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "bodyMediaType": "application/json",
+      "uri": "/",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"topLevel\": {\n        \"dialog\": {\n            \"language\": \"en\",\n            \"greeting\": \"hi\"\n        },\n        \"dialogList\": [\n            {\n                \"greeting\": \"hi\"\n            },\n            {\n                \"greeting\": \"hi\",\n                \"farewell\": {\n                    \"phrase\": \"bye\"\n                }\n            },\n            {\n                \"language\": \"it\",\n                \"greeting\": \"ciao\",\n                \"farewell\": {\n                    \"phrase\": \"arrivederci\"\n                }\n            }\n        ],\n        \"dialogMap\": {\n            \"emptyDialog\": {\n                \"greeting\": \"hi\"\n            },\n            \"partialEmptyDialog\": {\n                \"language\": \"en\",\n                \"greeting\": \"hi\",\n                \"farewell\": {\n                    \"phrase\": \"bye\"\n                }\n            },\n            \"nonEmptyDialog\": {\n                \"greeting\": \"konnichiwa\",\n                \"farewell\": {\n                    \"phrase\": \"sayonara\"\n                }\n            }\n        }\n    }\n}",
+      "params": {
+       "topLevel": {
+        "dialog": {
+         "language": "en"
+        },
+        "dialogList": [
+         {},
+         {
+          "farewell": {}
+         },
+         {
+          "language": "it",
+          "greeting": "ciao",
+          "farewell": {
+           "phrase": "arrivederci"
+          }
+         }
+        ],
+        "dialogMap": {
+         "emptyDialog": {},
+         "partialEmptyDialog": {
+          "language": "en",
+          "farewell": {}
+         },
+         "nonEmptyDialog": {
+          "greeting": "konnichiwa",
+          "farewell": {
+           "phrase": "sayonara"
+          }
+         }
+        }
+       }
+      }
+     },
+     {
+      "id": "AwsJson10ServerPopulatesNestedDefaultsWhenMissingInRequestBody",
+      "documentation": "Server populates nested default values when missing in request body.",
+      "appliesTo": "server",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "bodyMediaType": "application/json",
+      "uri": "/",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"topLevel\": {\n        \"dialog\": {\n            \"language\": \"en\"\n        },\n        \"dialogList\": [\n            {\n            },\n            {\n                \"farewell\": {}\n            },\n            {\n                \"language\": \"it\",\n                \"greeting\": \"ciao\",\n                \"farewell\": {\n                    \"phrase\": \"arrivederci\"\n                }\n            }\n        ],\n        \"dialogMap\": {\n            \"emptyDialog\": {\n            },\n            \"partialEmptyDialog\": {\n                \"language\": \"en\",\n                \"farewell\": {}\n            },\n            \"nonEmptyDialog\": {\n                \"greeting\": \"konnichiwa\",\n                \"farewell\": {\n                    \"phrase\": \"sayonara\"\n                }\n            }\n        }\n    }\n}",
+      "params": {
+       "topLevel": {
+        "dialog": {
+         "language": "en",
+         "greeting": "hi"
+        },
+        "dialogList": [
+         {
+          "greeting": "hi"
+         },
+         {
+          "greeting": "hi",
+          "farewell": {
+           "phrase": "bye"
+          }
+         },
+         {
+          "language": "it",
+          "greeting": "ciao",
+          "farewell": {
+           "phrase": "arrivederci"
+          }
+         }
+        ],
+        "dialogMap": {
+         "emptyDialog": {
+          "greeting": "hi"
+         },
+         "partialEmptyDialog": {
+          "language": "en",
+          "greeting": "hi",
+          "farewell": {
+           "phrase": "bye"
+          }
+         },
+         "nonEmptyDialog": {
+          "greeting": "konnichiwa",
+          "farewell": {
+           "phrase": "sayonara"
+          }
+         }
+        }
+       }
+      }
+     }
+    ],
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10ClientPopulatesNestedDefaultsWhenMissingInResponseBody",
+      "documentation": "Client populates nested default values when missing in response body.",
+      "appliesTo": "client",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"dialog\": {\n        \"language\": \"en\"\n    },\n    \"dialogList\": [\n        {\n        },\n        {\n            \"farewell\": {}\n        },\n        {\n            \"language\": \"it\",\n            \"greeting\": \"ciao\",\n            \"farewell\": {\n                \"phrase\": \"arrivederci\"\n            }\n        }\n    ],\n    \"dialogMap\": {\n        \"emptyDialog\": {\n        },\n        \"partialEmptyDialog\": {\n            \"language\": \"en\",\n            \"farewell\": {}\n        },\n        \"nonEmptyDialog\": {\n            \"greeting\": \"konnichiwa\",\n            \"farewell\": {\n                \"phrase\": \"sayonara\"\n            }\n        }\n    }\n}",
+      "params": {
+       "dialog": {
+        "language": "en",
+        "greeting": "hi"
+       },
+       "dialogList": [
+        {
+         "greeting": "hi"
+        },
+        {
+         "greeting": "hi",
+         "farewell": {
+          "phrase": "bye"
+         }
+        },
+        {
+         "language": "it",
+         "greeting": "ciao",
+         "farewell": {
+          "phrase": "arrivederci"
+         }
+        }
+       ],
+       "dialogMap": {
+        "emptyDialog": {
+         "greeting": "hi"
+        },
+        "partialEmptyDialog": {
+         "language": "en",
+         "greeting": "hi",
+         "farewell": {
+          "phrase": "bye"
+         }
+        },
+        "nonEmptyDialog": {
+         "greeting": "konnichiwa",
+         "farewell": {
+          "phrase": "sayonara"
+         }
+        }
+       }
+      }
+     },
+     {
+      "id": "AwsJson10ServerPopulatesNestedDefaultValuesWhenMissingInInResponseParams",
+      "documentation": "Server populates nested default values when missing in response params.",
+      "appliesTo": "server",
+      "tags": [
+       "defaults"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{\n    \"dialog\": {\n        \"language\": \"en\",\n        \"greeting\": \"hi\"\n    },\n    \"dialogList\": [\n        {\n            \"greeting\": \"hi\"\n        },\n        {\n            \"greeting\": \"hi\",\n            \"farewell\": {\n                \"phrase\": \"bye\"\n            }\n        },\n        {\n            \"language\": \"it\",\n            \"greeting\": \"ciao\",\n            \"farewell\": {\n                \"phrase\": \"arrivederci\"\n            }\n        }\n    ],\n    \"dialogMap\": {\n        \"emptyDialog\": {\n            \"greeting\": \"hi\"\n        },\n        \"partialEmptyDialog\": {\n            \"language\": \"en\",\n            \"greeting\": \"hi\",\n            \"farewell\": {\n                \"phrase\": \"bye\"\n            }\n        },\n        \"nonEmptyDialog\": {\n            \"greeting\": \"konnichiwa\",\n            \"farewell\": {\n                \"phrase\": \"sayonara\"\n            }\n        }\n    }\n}",
+      "params": {
+       "dialog": {
+        "language": "en"
+       },
+       "dialogList": [
+        {},
+        {
+         "farewell": {}
+        },
+        {
+         "language": "it",
+         "greeting": "ciao",
+         "farewell": {
+          "phrase": "arrivederci"
+         }
+        }
+       ],
+       "dialogMap": {
+        "emptyDialog": {},
+        "partialEmptyDialog": {
+         "language": "en",
+         "farewell": {}
+        },
+        "nonEmptyDialog": {
+         "greeting": "konnichiwa",
+         "farewell": {
+          "phrase": "sayonara"
+         }
+        }
+       }
+      }
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#OperationWithNestedStructureInput": {
+   "type": "structure",
+   "members": {
+    "topLevel": {
+     "target": "aws.protocoltests.json10#TopLevel",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "aws.protocoltests.json10#OperationWithNestedStructureOutput": {
+   "type": "structure",
+   "mixins": [
+    {
+     "target": "aws.protocoltests.json10#NestedDefaultsMixin"
+    }
+   ],
+   "members": {},
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "aws.protocoltests.json10#OperationWithRequiredMembers": {
+   "type": "operation",
+   "input": {
+    "target": "smithy.api#Unit"
+   },
+   "output": {
+    "target": "aws.protocoltests.json10#OperationWithRequiredMembersOutput"
+   },
+   "traits": {
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10ClientErrorCorrectsWhenServerFailsToSerializeRequiredValues",
+      "documentation": "Client error corrects when server fails to serialize required values.",
+      "appliesTo": "client",
+      "tags": [
+       "defaults",
+       "error-correction"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{}",
+      "params": {
+       "requiredString": "",
+       "requiredBoolean": false,
+       "requiredList": [],
+       "requiredTimestamp": 0,
+       "requiredBlob": "",
+       "requiredByte": 0,
+       "requiredShort": 0,
+       "requiredInteger": 0,
+       "requiredLong": 0,
+       "requiredFloat": 0.0,
+       "requiredDouble": 0.0,
+       "requiredMap": {}
+      }
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#OperationWithRequiredMembersOutput": {
+   "type": "structure",
+   "mixins": [
+    {
+     "target": "aws.protocoltests.json10#RequiredMembersMixin"
+    }
+   ],
+   "members": {},
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "aws.protocoltests.json10#OperationWithRequiredMembersWithDefaults": {
+   "type": "operation",
+   "input": {
+    "target": "smithy.api#Unit"
+   },
+   "output": {
+    "target": "aws.protocoltests.json10#OperationWithRequiredMembersWithDefaultsOutput"
+   },
+   "traits": {
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10ClientErrorCorrectsWithDefaultValuesWhenServerFailsToSerializeRequiredValues",
+      "documentation": "Client error corrects with default values when server fails to serialize required values.",
+      "appliesTo": "client",
+      "tags": [
+       "defaults",
+       "error-correction"
+      ],
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "body": "{}",
+      "params": {
+       "requiredString": "hi",
+       "requiredBoolean": true,
+       "requiredList": [],
+       "requiredTimestamp": 1,
+       "requiredBlob": "blob",
+       "requiredByte": 1,
+       "requiredShort": 1,
+       "requiredInteger": 10,
+       "requiredLong": 100,
+       "requiredFloat": 1.0,
+       "requiredDouble": 1.0,
+       "requiredMap": {},
+       "requiredEnum": "FOO",
+       "requiredIntEnum": 1
+      }
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#OperationWithRequiredMembersWithDefaultsOutput": {
+   "type": "structure",
+   "mixins": [
+    {
+     "target": "aws.protocoltests.json10#RequiredMembersWithDefaultsMixin"
+    }
+   ],
+   "members": {},
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "aws.protocoltests.json10#PutWithContentEncoding": {
+   "type": "operation",
+   "input": {
+    "target": "aws.protocoltests.json10#PutWithContentEncodingInput"
+   },
+   "output": {
+    "target": "smithy.api#Unit"
+   },
+   "traits": {
+    "smithy.api#requestCompression": {
+     "encodings": [
+      "gzip"
+     ]
+    },
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "SDKAppliedContentEncoding_awsJson1_0",
+      "documentation": "Compression algorithm encoding is appended to the Content-Encoding header.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "params": {
+       "data": "RjCEL3kBwqPivZUXGiyA5JCujtWgJAkKRlnTEsNYfBRGOS0f7LT6R3bCSOXeJ4auSHzQ4BEZZTklUyj5\n1HEojihShQC2jkQJrNdGOZNSW49yRO0XbnGmeczUHbZqZRelLFKW4xjru9uTuB8lFCtwoGgciFsgqTF8\n5HYcoqINTRxuAwGuRUMoNO473QT0BtCQoKUkAyVaypG0hBZdGNoJhunBfW0d3HWTYlzz9pXElyZhq3C1\n2PDB17GEoOYXmTxDecysmPOdo5z6T0HFhujfeJFIQQ8dirmXcG4F3v0bZdf6AZ3jsiVh6RnEXIPxPbOi\ngIXDWTMUr4Pg3f2LdYCM01eAb2qTdgsEN0MUDhEIfn68I2tnWvcozyUFpg1ez6pyWP8ssWVfFrckREIM\nMb0cTUVqSVSM8bnFiF9SoXM6ZoGMKfX1mT708OYk7SqZ1JlCTkecDJDoR5ED2q2MWKUGR6jjnEV0GtD8\nWJO6AcF0DptY9Hk16Bav3z6c5FeBvrGDrxTFVgRUk8SychzjrcqJ4qskwN8rL3zslC0oqobQRnLFOvwJ\nprSzBIwdH2yAuxokXAdVRa1u9NGNRvfWJfKkwbbVz8yV76RUF9KNhAUmwyYDrLnxNj8ROl8B7dv8Gans\n7Bit52wcdiJyjBW1pAodB7zqqVwtBx5RaSpF7kEMXexYXp9N0J1jlXzdeg5Wgg4pO7TJNr2joiPVAiFf\nefwMMCNBkYx2z7cRxVxCJZMXXzxSKMGgdTN24bJ5UgE0TxyV52RC0wGWG49S1x5jGrvmxKCIgYPs0w3Z\n0I3XcdB0WEj4x4xRztB9Cx2Mc4qFYQdzS9kOioAgNBti1rBySZ8lFZM2zqxvBsJTTJsmcKPr1crqiXjM\noVWdM4ObOO6QA7Pu4c1hT68CrTmbcecjFcxHkgsqdixnFtN6keMGL9Z2YMjZOjYYzbUEwLJqUVWalkIB\nBkgBRqZpzxx5nB5t0qDH35KjsfKM5cinQaFoRq9y9Z82xdCoKZOsUbxZkk1kVmy1jPDCBhkhixkc5PKS\nFoSKTbeK7kuCEZCtR9OfF2k2MqbygGFsFu2sgb1Zn2YdDbaRwRGeaLhswta09UNSMUo8aTixgoYVHxwy\nvraLB6olPSPegeLOnmBeWyKmEfPdbpdGm4ev4vA2AUFuLIeFz0LkCSN0NgQMrr8ALEm1UNpJLReg1ZAX\nzZh7gtQTZUaBVdMJokaJpLk6FPxSA6zkwB5TegSqhrFIsmvpY3VNWmTUq7H0iADdh3dRQ8Is97bTsbwu\nvAEOjh4FQ9wPSFzEtcSJeYQft5GfWYPisDImjjvHVFshFFkNy2nN18pJmhVPoJc456tgbdfEIdGhIADC\n6UPcSSzE1FxlPpILqZrp3i4NvvKoiOa4a8tnALd2XRHHmsvALn2Wmfu07b86gZlu4yOyuUFNoWI6tFvd\nbHnqSJYNQlFESv13gJw609DBzNnrIgBGYBAcDRrIGAnflRKwVDUnDFrUQmE8xNG6jRlyb1p2Y2RrfBtG\ncKqhuGNiT2DfxpY89ektZ98waPhJrFEPJToNH8EADzBorh3T0h4YP1IeLmaI7SOxeuVrk1kjRqMK0rUB\nlUJgJNtCE35jCyoHMwPQlyi78ZaVv8COVQ24zcGpw0MTy6JUsDzAC3jLNY6xCb40SZV9XzG7nWvXA5Ej\nYC1gTXxF4AtFexIdDZ4RJbtYMyXt8LsEJerwwpkfqvDwsiFuqYC6vIn9RoZO5kI0F35XtUITDQYKZ4eq\nWBV0itxTyyR5Rp6g30pZEmEqOusDaIh96CEmHpOBYAQZ7u1QTfzRdysIGMpzbx5gj9Dxm2PO1glWzY7P\nlVqQiBlXSGDOkBkrB6SkiAxknt9zsPdTTsf3r3nid4hdiPrZmGWNgjOO1khSxZSzBdltrCESNnQmlnP5\nZOHA0eSYXwy8j4od5ZmjA3IpFOEPW2MutMbxIbJpg5dIx2x7WxespftenRLgl3CxcpPDcnb9w8LCHBg7\nSEjrEer6Y8wVLFWsQiv6nTdCPZz9cGqwgtCaiHRy8lTWFgdfWd397vw9rduGld3uUFeFRGjYrphqEmHi\nhiG0GhE6wRFVUsGJtvOCYkVREvbEdxPFeJvlAvOcs9HKbtptlTusvYB86vR2bNcIY4f5JZu2X6sGa354\n7LRk0ps2zqYjat3hMR7XDC8KiKceBteFsXoDjfVxTYKelpedTxqWAafrKhaoAVuNM98PSnkuIWGzjSUC\nNsDJTt6vt1D1afBVPWVmnQ7ZQdtEtLIEwAWYjemAztreELIr1E9fPEILm1Ke4KctP9I0I72Dh4eylNZD\n0DEr2Hg7cWFckuZ0Av5d0IPRARXikEGDHl8uh12TXL9v2Uh0ZVSJMEYvxGSbZvkWz8TjWSk3hKA2a7GL\nJm3Ho7e1C34gE1XRGcEthxvURxt4OKBqN3ZNaMIuDTWinoQAutMcUqtm4MoL7RGPiCHUrvTwQPSirsmA\nQmOEu8nOpnP77Fivh9jLGx5ta7nL6jrsWUsBqiN1lzpdPYLRR4mUIAj6sNWiDEk4pkbHSMEcqbWw6Zl7\npsEyPDHalCNhWMA3RSK3skURzQDZ0oBV5W7vjVIZ4d3uCKsk6zrzEI9u5mx7p9RdNKodXfzqYt0ULdtc\n3RW0hIfw2KvrO3BD2QrtgAkfrFBGVvlJSUoh0MvLz8DeXxfuiuq9Ttu7wvsqVI4Piah6WNEXtHHGPJO3\nGhc75Bnv2To4VS2v8rmyKAPIIVTuYBHZN6sZ4FhFzbrslCIdk0eadaU60naqiNWU3CsxplIYGyeThmJ7\n9u4h6Y2OmiPZjFPS2bAzwgAozYTVefII9aEaWZ0hxHZeu1FW7r79dkdO73ZqRfas9u8Z7LLBPCw5pV0F\n5I0pHDgNb6MogoxF4NZJfVtIX1vCHhhVLrXjrYNJU2fD9Fw8kT8Ie2HDBJnqAvYKmryQ1r9ulo3Me3rH\nq9s2Y5uCDxu9iQNhnpwIm57WYGFeqd2fnQeY2IziD3Jgx0KSrmOH0jgi0RwJyfGXaORPq3bQQqljuACo\nkO6io9t5VI8PbNxSHTRbtYiPciUslbT0g7SpCLrRPOBRJ4DDk56pjghpeoUagJ5xJ4wjBzBuXnAGkNnP\nTfpiuz2r3oSBAi8sB9wiYK2z9sp4gZyQsqdVNzAEgKatOxBRBmJCBYpjO98ZQrF83XApPpfFg0ujB2PW\n1iYF9NkgwIKB5oB6KVTOmSKJk11mVermPgeugHbzdd2zUP6fP8fWbhseqk2t8ahGvqjs2CDHFIWXl5jc\nfCknbykE3ANt7lnAfJQ2ddduLGiqrX4HWx6jcWw08Es6BkleO0IDbaWrb95d5isvFlzJsf0TyDIXF4uq\nbBDCi0XPWqtRJ2iqmnJa2GbBe9GmAOWMkBFSilMyC4sR395WSDpD56fx0NGoU6cHrRu9xF2Bgh7RGSfl\nch2GXEeE02fDpSHFNvJBlOEqqfkIX6oCa6KY9NThqeIjYsT184XR2ZI7akXRaw1gMOGpk4FmUxk6WIuX\n4ei1SLQgSdl7OEdRtJklZ76eFrMbkJQ2TDhu8f7mVuiy53GUMIvCrP9xYGZGmCIDm2e4U2BDi3F7C5xK\n3bDZXwlQp6z4BSqTy2OVEWxXUJfjPMOL5Mc7AvDeKtxAS73pVIv0HgHIa4NBAdC7uLG0zXuu1FF6z2XY\nyUhk03fMZhYe7vVxsul3WE7U01fuN8z2y0eKwBW1RFBE1eKIaR9Y01sIWQWbSrfHfDrdZiElhmhHehfs\n0EfrR4sLYdQshJuvhTeKGJDaEhtPQwwJ9mUYGtuCL9RozWx1XI4bHNlzBTW0BVokYiJGlPe7wdxNzJD7\nJgS7Lwv6jGKngVf86imGZyzqwiteWFPdNUoWdTvUPSMO5xIUK9mo5QpwbBOAmyYzVq42o3Qs90N9khEV\nU36LB99fw8PtGHH5wsCHshfauwnNPj0blGXzke0kQ4JNCVH7Jtn0Y0aeejkSxFtwtxoYs6zHl1Lxxpsd\nsw5vBy49CEtoltDW367lVAwDjWdx20msGB7qJCkEDrzu7EXSO22782QX9NBRcN9ppX0C25I0FMA4Wnhz\n9zIpiXRrsTH35jzM8Cjt4EVLGNU3O0HuEvAer3cENnMJtngdrT86ox3fihMQbiuy4Bh4DEcP5in2VjbT\n3qbnoCNvOi8Fmmf7KlGlWAOceL5OHVE5lljjQEMzEQOCEgrk5mDKgwSBJQBNauIDSC1a5iEQjB8Xxp4C\nqeKyyWY9IOntNrtU5ny4lNprHJd36dKFeBLKcGCOvgHBXdOZloMF0YTRExw7hreEO9IoTGVHJ4teWsNr\nHdtagUHjkeZkdMMfnUGNv5aBNtFMqhcZH6EitEa9lGPkKBbJpoom3u8D8EHSIF1H5EZqqx9TLY5hWAIG\nPwJ4qwkpCGw5rCLVrjw7ARKukIFzNULANqjHUMcJ002TlUosJM4xJ4aAgckpLVGOGuPDhGAAexEcQmbg\nUsZdmqQrtuVUyyLteLbLbqtR6CTlcAIwY3xyMCmPgyefE0FEUODBoxQtRUuYTL9RC5o1sYb2PvcxUQfb\niJFi2CAl99pAzcckU2qVCxniARslIxM5pmMRGsQX9ZzYAfZrbg6ce6S74I8UMlgRQ2QVyvUjKKOE6IrJ\nLng370emHfe5m6LZULD5YiZutkD5ipjL2Bz77DvTE5kNPUhuoKBcTJcUgytfXAKUTWOcRKNlq0GImrxM\nJfr7AWbLFFNKGLeTrVDBwpcokJCv0zcOKWe8fd2xkeXkZTdmM66IgM27cyYmtQ6YF26Kd0qrWJeVZJV9\n3fyLYYvKN5csbRY2BHoYE5ERARRW65IrpkXMf48OrCXMtDIP0Z7wxI9DiTeKKeH4uuguhCJnwzR3WxLA\nVU6eBJEd7ZjS6JA83w7decq8uDI7LGKjcz1FySp3B7fE9DkHRGXxbsL7Fjar6vW2mAv8CuvI20B6jctp\n2yLDs24sPfB3sSxrrlhbuT1m6DZqiN0dl6umKx7NGZhmOTVGr20jfcxhqPQwTJfd7kel4rvxip4BqkvT\n7STy8knJ2BXGyJeNgwo1PXUZRDVy0LCTsSF1RFuRZe8cktHl9lgw8ntdPn1pVFL0MwJkJfdXBNUp5gNv\n50FTkrpo1t6wq4CVbcfj2XOrOzvBUzNH26sXGABI1gGxCdp2jEZrHgqQaWIaTJVTuguZhxqDvdYsrwFW\nYN58uuNcKHIrGdRSigyZInwQDYk0pjcqdSeU0WVU3Y9htzZBR7XRaCJr5YTZvq7fwermb5tuwb37lPLq\nB2IGg0iftkVbXaSyfCwVaRbfLBb88so0QqpmJGirFu8FcDiXOV1zTr8yW9XLdYQuUjh43xrXLdgsuYff\nCagInUk1eU1aLjVZoJRsNmStmOEpAqlYMwTvx7w6j2f421Cxr5cNZBIVlAxlXN2QiDqJ9v3sHhHkTanc\nlQuH8ptUyX8qncpBuXXBn7cSez9N0EoxCBl1GHUagbjstgJo4gzLvTmVIY6MiWYOBitzNUHfyqKwtKUr\nVoSCdZcGeA9lHUPA7PUprRRaT3m1hGKPyshtVS2ikG48w3oVerln1N1qGdtz46gZCrndw3LZ1B362RfW\nzDPuXbpsyLsRMTt1Rz1oKHRXp3iE41hkhQH6pxlvyCW2INnHt5XU8zRamOB3oW0udOhMpQFDjRkOcy06\nb4t0QTHvoRqmBna3WXzIMZyeK3GChF5eF8oDXRbjhk7BB6YKCgqwWUzEJ5K47HMSlhFkBUjaPRjdGM0z\nzOMwhW6b1NvSwP7XM1P5yi1oPvOspts1vr29SXqrMMrBhVogeodWyd69NqrO4jkyBxKmlXifoTowpfiY\n2cUCE0XMZqxUN39LCP09JqZifaEcBEo3mgtm1tWu5QR2GNq7UyQf4RIPSDOpDCAtwoPhRgdT1lJdcj4U\nlnH0wrJ8Uwu7c08L7ErnIrDATqCrOjpSbzGP1xHENABYONC4TknFPrJ8pe40A8fzGT0qBw9mAM1SKcHO\nfoiLcMC9AjHTqJzDG3xplSLPG9or2rMeq7Fzp9r0y7uJRMxgg51EbjfvYlH466A3ggvL2WQlDXjJqPW3\nBJGWAWDNN9LK8f46bADKPxakpkx23S9O47rGSXfDhVSIZsDympxWX1UOzWwMZRHkofVeKqizgbKkGgUT\nWykE9gRoRAOd9wfHZDYKa9i0LaPDiaUMvnU1gdBIqIoiVsdJ9swX47oxvMtOxtcS0zlD6llDkBuIiU5g\nPwRCYmtkkb25c8iRJXwGFPjI1wJ34I1z1ENicPdosPiUe9ZC2jnXIKzEdv01x2ER7DNDF3yxOwOhxNxI\nGqsmC92j25UQQFu9ZstOZ28AoCkuOYs0Uycm5u8jR1T39dMBwrko09rC65ENLnsxM8oebmyFCPiGJ1ED\n5Xqc9qZ237f1OnETAoEOwqUSvrdPTv56U7hV91EMTyC812MLQpr2710E3VVpsUCUMNhIxdt7UXZ1UNFb\njgzpZLXnf4DHrv6B7kq6UI50KMxcw1HZE2GpODfUTzNFLaqdrvzxKe5eUWdcojBaRbD4fFdVYJTElYDH\nNNVh6ofkoeWcs9CWGFmSBe0T4K8phFeygQg0prKMELNEy6qENzVtG9ZDcqj3a7L6ZLtvq50anWp7fAVu\nfwz55g4iM2Z2fA0pnwHDL7tt67zTxGITvsnJsZSpeq1EQsZcwtkBV9liu7Rl7jiVT1IIRtchB8TsTiaA\nwVHIQQ9RIOTiPQdKNqi1kC9iGlUqWK93gblNWlBw1eYB9Wk8FQogutwTf0caNMx8D4nPbANcmOOlskIy\nzALh15OlTrWnhP95rf08AN2J026zDE2DUF9k0eCevYBQIDjqKNW4XCZnjbHoIcKzbY5VzPbMs3ZyMz8K\nSucBmgPg6wrSK5ykbkapS5vuqvXc9GbjQJ8bPNzoxoWGyjbZvDs2OBrIqBmcQb2DLJ8v38McQ4mC4UsS\njf4PyfSCtpk274QZjvLCZbLiCBxQegk7jUU0NmTFJAcYCxd9xMWdlFkiszcltT2YzwuFFz7iA6aa4n5L\nHpBNfUA01GcAi1aCMYhmooS4zSlYcSOZkovMz36U3Fd9WtqIEOJLi7HMgHQDgNMdK6DTzAdHQtxerxVF\nHJnPrfNVG7270r3bp0bPnLNYLhObbAn6zqSAUeLtI2Y4KJDjBKCAh2vvYGbu0e2REYJWRj7MkGevsSSy\nb1kCXLt6tKGWAb7lt5c0xyJgUIJW7pdtnwgT0ZCa24BecCAwNnG5U2EwQbcjZGsFxqNGfaemd3oFEhES\nBaE0Fxms9UKTnMafu8wvZ2xymMrUduuRzOjDeX7oD5YsLC88V8CGMLxbbxIpt94KGykbr6e7L0R4oZl1\ntKMgFwQ2p9Txdbp0Y293LcsJymKizqI0F2xEp7y4SmWOJqHZtsbz80wVV9nv41CvtfxuSoGZJ5cNB7pI\nBgzNcQCeH3Jt0RaGGwboxxpuFbzilmkMFXxJm87tD4WNgu01nHfGCKeQcySEBZpVfJgi6sDFJ8uWnvKm\n9mPLHurtWzEfKqUEa1iC71bXjw5wrvhv9BYW8JSUELHmDquftQyKdq0DZXhULMHGQLf4e95WIaoA14LL\nbThz77kuhKULPTu2MNrBUKGorurhGugo5gs4ZUezSsUOe3KxYdrFMdGgny1GgTxMSMTp2RAZytKjv4kQ\nVx7XgzvpQLIbDjUPAkJv6lScwIRq1W3Ne0Rh0V6Bmn6U5uIuWnJjULmbaQiSODj3z0mAZvak0mSWIGwT\nTX83HztcC4W7e1f6a1thmcc5K61Icehla2hBELWPpixTkyC4eEVmk9Rq0m0ZXtx0JX2ZQXqXDEyePyMe\nJ70sdSzXk72zusqhY4yuOMGgbYNHqxOToK6NxujR7e4dV3Wk5JnSUthym8scjcPeCiKDNY4cHfTMnDXJ\n9zLVy01LtNKYpJ1s8FxVxigmxQNKEbIamxhx6yqwGC4aiISVOOUEjvNOdaUfXfUsE6jEwtwxyGxjlRK1\ncLyxXttq4QWN6PehgHv7jXykzPjInbEysebFvvPOOMdunmJvcCNMSvjUda8fL6xfGo0FDrLg8XZipd6S\noPVdYtyIM1Dg40KbBA3JuumPYtXuJaHrZnjZmdnM5OVo4ZNxktfCVT0c6bnD4bAeyn4bYt1ZPaX6hQHh\nJtvNYfpD0ONYlmqKuToQAMlz52Fh6bj45EbX89L5eLlSpWeyBlGotzriB0EPlclrGi5l2B5oPb1aB1ag\nyyYuu44l0F1oOVYnBIZsxIsHVITxi9lEuVPFkWASOUNuVQXfM4n5hxWR9qtuKnIcPsvbJsv1U10XlKh3\nKisqPhHU15xrCLr5gwFxPUKiNTLUBrkzgBOHXPVsHcLCiSD0YU56TRGfvEom43TWUKPPfl9Z54tgVQuT\njCRlaljAzeniQIcbbHZnn3f0HxbDG3DFYqWSxNrXabHhRsIOhhUHSPENyhGSTVO5t0XX5CdMspJPCd02\n3Oqv32ccbUK4O3YH6LEvp0WO3kSl5n50odVkI9B0i0iq4UPFGMkM8bEQJbgJoOH71P10vtdevJFQE4g2\nyhimiM53ZJRWgSZveHtENZc0Gjo0F9eioak9BnPpY1QxAFPC817svuhEstcU69bLCA4D1rO5R8AuIIBq\nyQJcifFLvbpAEYTLKJqysZrU8EEl3TSdC13A9hZvk4NC8VGEDAxcNrKw313dZp17kZPO5HSd1y6sljAW\nA9M1d6FMYV5SlBWf3WZNCUPS7qKNlda2YBsC6IUVB363f5RLGQOQHwbaijBSRCkrVoRxBHtc0Bd5J9V9\nP5uMTXkpZOxRcCQvImGgcmGuxxLb5zTqfS2xu7v3Sf3IIesSt9tVzcEcdbEvLGVJkLk4mb3G30DbIbri\nPZ09JkweDvMaQ3bxT2nfkz3Ilihkw9jqikkCCCz7E8h6z6KbhQErEW9VzJZzMCgJsyPjFam6iNwpe07S\nhyOvNVw2t9wpzL5xM11DvVzQwDaWEytNRHzDBs4KwEtpI2IpjUyVZHSwA0UGqqkzoCgrJFlNOvPlXqcS\nIcREouUIBmuttkrhPWJtSxOOgpsdvBR3kTOzAXNzSKxoaBAb0c5SDMUc6FIyGA8x5wg5DkUgjFUUodEt\nOYaB2VHVePW9mxHeBTdKWLzJow4ZZvjnoBuVigXljKCNh137ckV2y3Yg3Xi4UzJEI2V5Rw9AfnMs7xUw\nVHOFCg189maD3bmZAe7b4eaGZhyy4HVKjqCXmIH7vsEjRvbnfB0SQxxpuqBDJbHNCtW4vM643ZQQBVPP\na7oXSQIq9w2dHp0A7dtkocCZdQp9FKR9XdJAFIbVSHzIF1ZogeZlc0pXuNE0tagvD57xwDRFkAuoQyMu\nYDdZasXrpSmEE5UjHVkyYsISn8QsfXurzDybX468aoRoks654jjmRY5zi1oB8TcMdC2c3sicNaqfeuhd\nH1nPX7l4RpdqWMR7gGx9slXtG8S3KxpOi4qCD7yg3saD66nun4dzksQURoTUdXyrJR5UpHsfIlTF1aJa\nMdXyQtQnrkl00TeghQd00rRFZsCnhi0qrCSKiBfB2EVrd9RPpbgwJGZHuIQecdBmNetc2ylSEClqVBPR\nGOPPIxrnswEZjmnS0jxKW9VSM1QVxSPJnPFswCqT95SoKD6CP4xdX28WIUGiNaIKodXXJHEIsXBCxLsr\nPwWPCtoplC6hhpKmW5dQo92iCTyY2KioKzO8XR6FKm6qonMKVEwQNtlYE9c97KMtEnp25VOdMP46SQXS\nYsSVp7vm8LP87VYI8SOKcW3s2oedYFtt45rvDzoTF0GmS6wELQ9uo98HhjQAI1Dt91cgjJOwygNmLoZE\nX5K2zQiNA163uMCl5xzaBqY4YTL0wgALg3IFdYSp0RFYLWdt6IxoGI1tnoxcjlUEPo5eGIc3mS3SmaLn\nOdumfUQQ4Jgmgaa5anUVQsfBDrlAN5oaX7O0JO71SSPSWiHBsT9WIPy2J1Cace9ZZLRxblFPSXcvsuHh\nhvnhWQltEDAe7MgvkFQ8lGVFa8jhzijoF9kLmMhMILSzYnfXnZPNP7TlAAwlLHK1RqlpHskJqb6CPpGP\nQvOAhEMsM3zJ2KejZx0esxkjxA0ZufVvGAMN3vTUMplQaF4RiQkp9fzBXf3CMk01dWjOMMIEXTeKzIQe\nEcffzjixWU9FpAyGp2rVl4ETRgqljOGw4UgK31r0ZIEGnH0xGz1FtbW1OcQM008JVujRqulCucEMmntr\n"
+      },
+      "method": "POST",
+      "uri": "/",
+      "headers": {
+       "Content-Encoding": "gzip"
+      }
+     },
+     {
+      "id": "SDKAppendsGzipAndIgnoresHttpProvidedEncoding_awsJson1_0",
+      "documentation": "Compression algorithm encoding is appended to the Content-Encoding header, and the\nuser-provided content-encoding is NOT in the Content-Encoding header since HTTP binding\ntraits are ignored in the awsJson1_0 protocol.\n",
+      "protocol": "aws.protocols#awsJson1_0",
+      "params": {
+       "encoding": "custom",
+       "data": "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\n"
+      },
+      "method": "POST",
+      "uri": "/",
+      "headers": {
+       "Content-Encoding": "gzip"
+      }
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#PutWithContentEncodingInput": {
+   "type": "structure",
+   "members": {
+    "encoding": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#httpHeader": "Content-Encoding"
+     }
+    },
+    "data": {
+     "target": "smithy.api#String"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "aws.protocoltests.json10#QueryIncompatibleOperation": {
+   "type": "operation",
+   "input": {
+    "target": "smithy.api#Unit"
+   },
+   "output": {
+    "target": "smithy.api#Unit"
+   },
+   "traits": {
+    "smithy.api#idempotent": {},
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "NonQueryCompatibleAwsJson10ForbidsQueryModeHeader",
+      "documentation": "The query mode header MUST NOT be set on non-query-compatible services.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.QueryIncompatibleOperation"
+      },
+      "uri": "/",
+      "body": "{}",
+      "bodyMediaType": "application/json"
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#RequiredEnum": {
+   "type": "enum",
+   "members": {
+    "FOO": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FOO"
+     }
+    },
+    "BAR": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BAR"
+     }
+    },
+    "BAZ": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BAZ"
+     }
+    }
+   }
+  },
+  "aws.protocoltests.json10#RequiredIntEnum": {
+   "type": "intEnum",
+   "members": {
+    "ONE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": 1
+     }
+    },
+    "TWO": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": 2
+     }
+    }
+   }
+  },
+  "aws.protocoltests.json10#RequiredMembersMixin": {
+   "type": "structure",
+   "members": {
+    "requiredString": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "requiredBoolean": {
+     "target": "smithy.api#Boolean",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "requiredList": {
+     "target": "aws.protocoltests.json10#RequiredStringList",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "requiredTimestamp": {
+     "target": "smithy.api#Timestamp",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "requiredBlob": {
+     "target": "smithy.api#Blob",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "requiredByte": {
+     "target": "smithy.api#Byte",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "requiredShort": {
+     "target": "smithy.api#Short",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "requiredInteger": {
+     "target": "smithy.api#Integer",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "requiredLong": {
+     "target": "smithy.api#Long",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "requiredFloat": {
+     "target": "smithy.api#Float",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "requiredDouble": {
+     "target": "smithy.api#Double",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    },
+    "requiredMap": {
+     "target": "aws.protocoltests.json10#RequiredStringMap",
+     "traits": {
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#mixin": {}
+   }
+  },
+  "aws.protocoltests.json10#RequiredMembersWithDefaultsMixin": {
+   "type": "structure",
+   "members": {
+    "requiredString": {
+     "target": "smithy.api#String",
+     "traits": {
+      "smithy.api#default": "hi",
+      "smithy.api#required": {}
+     }
+    },
+    "requiredBoolean": {
+     "target": "smithy.api#Boolean",
+     "traits": {
+      "smithy.api#default": true,
+      "smithy.api#required": {}
+     }
+    },
+    "requiredList": {
+     "target": "aws.protocoltests.json10#RequiredStringList",
+     "traits": {
+      "smithy.api#default": [],
+      "smithy.api#required": {}
+     }
+    },
+    "requiredTimestamp": {
+     "target": "smithy.api#Timestamp",
+     "traits": {
+      "smithy.api#default": 1,
+      "smithy.api#required": {}
+     }
+    },
+    "requiredBlob": {
+     "target": "smithy.api#Blob",
+     "traits": {
+      "smithy.api#default": "YmxvYg==",
+      "smithy.api#required": {}
+     }
+    },
+    "requiredByte": {
+     "target": "smithy.api#Byte",
+     "traits": {
+      "smithy.api#default": 1,
+      "smithy.api#required": {}
+     }
+    },
+    "requiredShort": {
+     "target": "smithy.api#Short",
+     "traits": {
+      "smithy.api#default": 1,
+      "smithy.api#required": {}
+     }
+    },
+    "requiredInteger": {
+     "target": "smithy.api#Integer",
+     "traits": {
+      "smithy.api#default": 10,
+      "smithy.api#required": {}
+     }
+    },
+    "requiredLong": {
+     "target": "smithy.api#Long",
+     "traits": {
+      "smithy.api#default": 100,
+      "smithy.api#required": {}
+     }
+    },
+    "requiredFloat": {
+     "target": "smithy.api#Float",
+     "traits": {
+      "smithy.api#default": 1.0,
+      "smithy.api#required": {}
+     }
+    },
+    "requiredDouble": {
+     "target": "smithy.api#Double",
+     "traits": {
+      "smithy.api#default": 1.0,
+      "smithy.api#required": {}
+     }
+    },
+    "requiredMap": {
+     "target": "aws.protocoltests.json10#RequiredStringMap",
+     "traits": {
+      "smithy.api#default": {},
+      "smithy.api#required": {}
+     }
+    },
+    "requiredEnum": {
+     "target": "aws.protocoltests.json10#RequiredEnum",
+     "traits": {
+      "smithy.api#default": "FOO",
+      "smithy.api#required": {}
+     }
+    },
+    "requiredIntEnum": {
+     "target": "aws.protocoltests.json10#RequiredIntEnum",
+     "traits": {
+      "smithy.api#default": 1,
+      "smithy.api#required": {}
+     }
+    }
+   },
+   "traits": {
+    "smithy.api#mixin": {}
+   }
+  },
+  "aws.protocoltests.json10#RequiredStringList": {
+   "type": "list",
+   "member": {
+    "target": "smithy.api#String"
+   }
+  },
+  "aws.protocoltests.json10#RequiredStringMap": {
+   "type": "map",
+   "key": {
+    "target": "smithy.api#String"
+   },
+   "value": {
+    "target": "smithy.api#String"
+   }
+  },
+  "aws.protocoltests.json10#SimpleScalarProperties": {
+   "type": "operation",
+   "input": {
+    "target": "aws.protocoltests.json10#SimpleScalarPropertiesInput"
+   },
+   "output": {
+    "target": "aws.protocoltests.json10#SimpleScalarPropertiesOutput"
+   },
+   "traits": {
+    "smithy.test#httpRequestTests": [
+     {
+      "id": "AwsJson10SupportsNaNFloatInputs",
+      "documentation": "Supports handling NaN float values.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"floatValue\": \"NaN\",\n    \"doubleValue\": \"NaN\"\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.SimpleScalarProperties"
+      },
+      "params": {
+       "floatValue": "NaN",
+       "doubleValue": "NaN"
+      }
+     },
+     {
+      "id": "AwsJson10SupportsInfinityFloatInputs",
+      "documentation": "Supports handling Infinity float values.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"floatValue\": \"Infinity\",\n    \"doubleValue\": \"Infinity\"\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.SimpleScalarProperties"
+      },
+      "params": {
+       "floatValue": "Infinity",
+       "doubleValue": "Infinity"
+      }
+     },
+     {
+      "id": "AwsJson10SupportsNegativeInfinityFloatInputs",
+      "documentation": "Supports handling -Infinity float values.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "method": "POST",
+      "uri": "/",
+      "body": "{\n    \"floatValue\": \"-Infinity\",\n    \"doubleValue\": \"-Infinity\"\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0",
+       "X-Amz-Target": "JsonRpc10.SimpleScalarProperties"
+      },
+      "params": {
+       "floatValue": "-Infinity",
+       "doubleValue": "-Infinity"
+      }
+     }
+    ],
+    "smithy.test#httpResponseTests": [
+     {
+      "id": "AwsJson10SupportsNaNFloatInputs",
+      "documentation": "Supports handling NaN float values.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"floatValue\": \"NaN\",\n    \"doubleValue\": \"NaN\"\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "floatValue": "NaN",
+       "doubleValue": "NaN"
+      }
+     },
+     {
+      "id": "AwsJson10SupportsInfinityFloatInputs",
+      "documentation": "Supports handling Infinity float values.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"floatValue\": \"Infinity\",\n    \"doubleValue\": \"Infinity\"\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "floatValue": "Infinity",
+       "doubleValue": "Infinity"
+      }
+     },
+     {
+      "id": "AwsJson10SupportsNegativeInfinityFloatInputs",
+      "documentation": "Supports handling -Infinity float values.",
+      "protocol": "aws.protocols#awsJson1_0",
+      "code": 200,
+      "body": "{\n    \"floatValue\": \"-Infinity\",\n    \"doubleValue\": \"-Infinity\"\n}",
+      "bodyMediaType": "application/json",
+      "headers": {
+       "Content-Type": "application/x-amz-json-1.0"
+      },
+      "params": {
+       "floatValue": "-Infinity",
+       "doubleValue": "-Infinity"
+      }
+     }
+    ]
+   }
+  },
+  "aws.protocoltests.json10#SimpleScalarPropertiesInput": {
+   "type": "structure",
+   "members": {
+    "floatValue": {
+     "target": "smithy.api#Float"
+    },
+    "doubleValue": {
+     "target": "smithy.api#Double"
+    }
+   },
+   "traits": {
+    "smithy.api#input": {}
+   }
+  },
+  "aws.protocoltests.json10#SimpleScalarPropertiesOutput": {
+   "type": "structure",
+   "members": {
+    "floatValue": {
+     "target": "smithy.api#Float"
+    },
+    "doubleValue": {
+     "target": "smithy.api#Double"
+    }
+   },
+   "traits": {
+    "smithy.api#output": {}
+   }
+  },
+  "aws.protocoltests.json10#TestEnum": {
+   "type": "enum",
+   "members": {
+    "FOO": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "FOO"
+     }
+    },
+    "BAR": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BAR"
+     }
+    },
+    "BAZ": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "BAZ"
+     }
+    }
+   }
+  },
+  "aws.protocoltests.json10#TestIntEnum": {
+   "type": "intEnum",
+   "members": {
+    "ONE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": 1
+     }
+    },
+    "TWO": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": 2
+     }
+    }
+   }
+  },
+  "aws.protocoltests.json10#TestStringList": {
+   "type": "list",
+   "member": {
+    "target": "smithy.api#String"
+   }
+  },
+  "aws.protocoltests.json10#TestStringMap": {
+   "type": "map",
+   "key": {
+    "target": "smithy.api#String"
+   },
+   "value": {
+    "target": "smithy.api#String"
+   }
+  },
+  "aws.protocoltests.json10#TopLevel": {
+   "type": "structure",
+   "mixins": [
+    {
+     "target": "aws.protocoltests.json10#NestedDefaultsMixin"
+    }
+   ],
+   "members": {}
+  },
+  "aws.protocoltests.shared#FooEnum": {
+   "type": "enum",
+   "members": {
+    "FOO": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Foo"
+     }
+    },
+    "BAZ": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Baz"
+     }
+    },
+    "BAR": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "Bar"
+     }
+    },
+    "ONE": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "1"
+     }
+    },
+    "ZERO": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": "0"
+     }
+    }
+   }
+  },
+  "aws.protocoltests.shared#GreetingStruct": {
+   "type": "structure",
+   "members": {
+    "hi": {
+     "target": "smithy.api#String"
+    }
+   }
+  },
+  "aws.protocoltests.shared#IntegerEnum": {
+   "type": "intEnum",
+   "members": {
+    "A": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": 1
+     }
+    },
+    "B": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": 2
+     }
+    },
+    "C": {
+     "target": "smithy.api#Unit",
+     "traits": {
+      "smithy.api#enumValue": 3
+     }
+    }
+   }
+  },
+  "aws.protocoltests.shared#StringList": {
+   "type": "list",
+   "member": {
+    "target": "smithy.api#String"
+   }
+  },
+  "aws.protocoltests.shared#StringMap": {
+   "type": "map",
+   "key": {
+    "target": "smithy.api#String"
+   },
+   "value": {
+    "target": "smithy.api#String"
+   }
+  }
+ }
+}

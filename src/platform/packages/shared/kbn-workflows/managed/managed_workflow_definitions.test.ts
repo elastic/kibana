@@ -71,6 +71,7 @@ import {
   RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
   type WorkerSettingsDefaults,
 } from './definitions/alertzero/worker_settings_defaults';
+import BOUND_INVESTIGATION_WORKFLOW_YAML from './definitions/nightshift_investigations/investigation/bound_investigation_workflow.yaml';
 import SLACK_THREAD_WORKFLOW_YAML from './definitions/nightshift_investigations/slack_thread/slack_thread_workflow.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
@@ -245,10 +246,10 @@ it.each([
   [
     ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
     renderInputs(FLOOR_ALERT_TRIAGE_YAML, ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS),
-    '17:1ec301f5',
+    '18:1ec301f5',
   ],
-  [ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_BATCH_YAML, '9:a5c72422'],
-  [ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_REVIEW_YAML, '10:2e357388'],
+  [ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_BATCH_YAML, '11:e882bdf1'],
+  [ALERTZERO_FLOOR_ALERT_TRIAGE_REVIEW_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_REVIEW_YAML, '11:2e357388'],
   [
     ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
     renderInputs(FLOOR_ATTACK_DISCOVERY_YAML, ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS),
@@ -290,7 +291,8 @@ it.each([
   [ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID, ACTION_ISOLATE_HOST_YAML, '5:fa71b87b'],
   [ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID, ACTION_KILL_PROCESS_YAML, '6:ec92e281'],
   [ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID, ACTION_SUSPEND_PROCESS_YAML, '5:5c86922d'],
-  [NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID, SLACK_THREAD_WORKFLOW_YAML, '1:43e8bba8'],
+  [NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID, BOUND_INVESTIGATION_WORKFLOW_YAML, '2:bf40f3a2'],
+  [NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID, SLACK_THREAD_WORKFLOW_YAML, '2:47ba055e'],
 ] as const)(
   'requires bumping %s definition.version together with the fingerprint of its render inputs',
   (workflowId, inputs, expectedFingerprint) => {
