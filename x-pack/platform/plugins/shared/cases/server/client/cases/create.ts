@@ -13,6 +13,7 @@ import { CaseSeverity, UserActionTypes, CaseSchema } from '../../../common/types
 import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runtime_types';
 
 import { Operations } from '../../authorization';
+import { assertCanStoreExtractObservables } from '../../common/assert_can_store_extract_observables';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClient, CasesClientArgs } from '..';
@@ -177,6 +178,13 @@ export const create = async (
         },
       };
     }
+
+    // Checked on the final value (caller, template, space configuration or owner default), after
+    // authorization and before any write.
+    assertCanStoreExtractObservables({
+      owner: query.owner,
+      extractObservables: query.settings.extractObservables,
+    });
 
     // Global (isGlobal) field-definition defaults are applied client-side by the create-case UI
     // before submission, so UI-created cases persist them — but API and workflow-step callers
