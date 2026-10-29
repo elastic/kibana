@@ -9,8 +9,14 @@
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { coreMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
   ExecutionStatus,
@@ -1339,6 +1345,50 @@ steps:
         {},
         mockRequest
       );
+    });
+  });
+
+  describe('loadAlertDocuments', () => {
+    const index = '.alerts-security.alerts-default';
+
+    const mockSearchHit = (esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>) =>
+      esClient.search.mockResponseOnce({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [{ _id: 'a1', _index: index, _source: { 'kibana.alert.uuid': 'a1' } }] },
+      });
+
+    it('formats documents with the rule types registered in the alerting plugin', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      mockSearchHit(esClient);
+      const formatAlert = jest.fn((alert: Record<string, unknown>) => ({ ...alert, signal: {} }));
+      mockWorkflowsService.getPluginsStart = jest.fn().mockResolvedValue({
+        alerting: { listTypes: () => new Map([[QUERY_RULE_TYPE_ID, { alerts: { formatAlert } }]]) },
+      });
+
+      const result = await api.loadAlertDocuments({
+        alerts: { ids: ['a1'], index },
+        esClient,
+      });
+
+      expect(formatAlert).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({
+        alerts: [{ _id: 'a1', _index: index, kibana: { alert: { uuid: 'a1' } }, signal: {} }],
+        missingIds: [],
+      });
+    });
+
+    it('loads unformatted documents when the alerting plugin is unavailable', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      mockSearchHit(esClient);
+      mockWorkflowsService.getPluginsStart = jest.fn().mockResolvedValue({});
+
+      const result = await api.loadAlertDocuments({ alerts: { ids: ['a1'], index }, esClient });
+
+      expect(result.alerts).toEqual([
+        { _id: 'a1', _index: index, kibana: { alert: { uuid: 'a1' } } },
+      ]);
     });
   });
 
