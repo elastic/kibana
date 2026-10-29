@@ -108,7 +108,9 @@ describe('PublishAlertStatusChangesStep', () => {
         await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
         expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
-          expect.objectContaining({ alert: expect.objectContaining({ status, severity: 'critical' }) }),
+          expect.objectContaining({
+            alert: expect.objectContaining({ status, severity: 'critical' }),
+          }),
         ]);
       }
     );
