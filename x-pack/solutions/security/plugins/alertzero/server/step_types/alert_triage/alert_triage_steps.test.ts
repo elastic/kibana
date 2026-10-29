@@ -218,7 +218,7 @@ describe('triage load alerts step', () => {
       },
     });
 
-    const { output } = await getTriageLoadAlertsStepDefinition().handler(
+    const { output } = await getTriageLoadAlertsStepDefinition({ getWorkflowsManagement: () => undefined }).handler(
       createContext({ alert_ids: ['a-1', 'a-2'] }, callKibanaApi)
     );
 
@@ -250,7 +250,7 @@ describe('triage load alerts step', () => {
     const callKibanaApi = jest.fn().mockRejectedValue(error);
 
     await expect(
-      getTriageLoadAlertsStepDefinition().handler(
+      getTriageLoadAlertsStepDefinition({ getWorkflowsManagement: () => undefined }).handler(
         createContext({ alert_ids: ['a-1'] }, callKibanaApi)
       )
     ).rejects.toMatchObject({ type });
