@@ -11,7 +11,7 @@ import { EuiFilterButton, EuiPopover, EuiSelectable, useGeneratedHtmlId } from '
 import type { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../../../ebt_constants';
+import { DIGITAL_EXPERIENCE_EBT_ACTIONS } from '../ebt_constants';
 
 interface FilterOption {
   value: string;

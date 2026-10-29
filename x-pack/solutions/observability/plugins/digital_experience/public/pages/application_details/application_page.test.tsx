@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render as rtlRender, screen } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { ApplicationPage } from './application_page';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
@@ -16,6 +18,15 @@ import { useEnvironment } from '../../hooks/use_environment';
 jest.mock('../../hooks/use_kibana_services');
 jest.mock('../../hooks/use_environment');
 jest.mock('../../breadcrumbs/use_route_breadcrumb');
+jest.mock('../../hooks/use_applications_href', () => ({
+  useApplicationsHref: () => '/app/digital_experience/?rangeFrom=now-7d&rangeTo=now',
+}));
+// The Overview fetches its own data; this page only has to render it for OTel applications.
+jest.mock('./otel_overview/otel_overview', () => ({
+  OtelOverview: ({ serviceName }: { serviceName: string }) => (
+    <div data-test-subj="otelOverview">{serviceName}</div>
+  ),
+}));
 jest.mock('../../hooks/use_time_range', () => ({
   ...jest.requireActual('../../hooks/use_time_range'),
   useTimeRange: jest.fn(),
@@ -24,6 +35,8 @@ jest.mock('../../hooks/use_time_range', () => ({
 const useKibanaServicesMock = jest.mocked(useKibanaServices);
 const timeRange = { rangeFrom: 'now-7d', rangeTo: 'now' };
 const setTimeRange = jest.fn();
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: MockAppHeaderProvider });
 
 beforeEach(() => {
   jest
@@ -58,6 +71,18 @@ describe('ApplicationPage', () => {
     });
     expect(getClassicRumDashboard).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('digitalExperienceTab-overview')).toBeInTheDocument();
+  });
+
+  it('renders the application name as the title, with a back link to the Applications list', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" />);
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('my-app');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
+      'href',
+      '/app/digital_experience/?rangeFrom=now-7d&rangeTo=now'
+    );
   });
 
   it('opens the Classic RUM dashboard in the environment selected in the list', async () => {
@@ -107,7 +132,7 @@ describe('ApplicationPage', () => {
     expect(await screen.findByTestId('digitalExperienceOverviewEmpty')).toBeInTheDocument();
   });
 
-  it('renders the placeholder for an OTel application without loading the Classic dashboard', async () => {
+  it('renders the OTel Overview without loading the Classic dashboard', async () => {
     const getClassicRumDashboard = jest.fn();
     useKibanaServicesMock.mockReturnValue({
       ux: { getClassicRumDashboard },
@@ -115,10 +140,17 @@ describe('ApplicationPage', () => {
 
     render(<ApplicationPage serviceName="my-app" source="otel" />);
 
-    expect(
-      await screen.findByTestId('digitalExperienceOtelOverviewPlaceholder')
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId('otelOverview')).toHaveTextContent('my-app');
     expect(getClassicRumDashboard).not.toHaveBeenCalled();
     expect(screen.queryByTestId('classicRumDashboard')).not.toBeInTheDocument();
+  });
+
+  it('renders the OTel Overview without the ux plugin, as on serverless', async () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" />);
+
+    expect(await screen.findByTestId('otelOverview')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceOverviewEmpty')).not.toBeInTheDocument();
   });
 });

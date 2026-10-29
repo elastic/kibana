@@ -43,8 +43,10 @@ Numbers, percents, dates and the chart's time zone follow the Advanced Settings.
 ### Application details (`/{serviceName}?source=otel|classic`)
 
 Opened from the list. The Overview of a Classic RUM application renders the Classic RUM dashboard
-exposed by `@kbn/ux-plugin`; the EDOT Browser Overview is a placeholder for now. Without `source`, the
-page shows the Classic RUM application.
+exposed by `@kbn/ux-plugin`. The Overview of an EDOT Browser application shows its page loads, load
+time, JS errors and failed HTTP requests, its Core Web Vitals, and page loads and load time over
+time, from `GET /internal/digital_experience/applications/{serviceName}/overview`. Without `source`,
+the page shows the Classic RUM application.
 
 ## Sessions
 
@@ -164,7 +166,8 @@ logged and answer 500 without Elasticsearch details:
 
 - `common/`: the API types (`common/types/`), Core Web Vitals thresholds and shared constants.
 - `server/routes/applications/`: the list's route, its merge step and one folder per source (`otel/`,
-  `classic/`); helpers shared across features are in `server/lib/helpers/`.
+  `classic/`); `server/routes/overview/` is the EDOT Browser Overview's route. Helpers shared across
+  features are in `server/lib/` (`helpers/`, and `otel/` for the OTel queries).
 - `server/sessions/`: the sessions transform spec, setup, status and health task, with its routes in
   `server/routes/sessions/`.
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`) with its own
