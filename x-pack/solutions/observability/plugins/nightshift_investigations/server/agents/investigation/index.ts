@@ -22,6 +22,8 @@ import {
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
+import { getTelemetryTargets } from '../../telemetry_targets';
+import type { NightshiftInvestigationsConfig } from '../../config';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
 import knowledgeCortexSection from './instructions/knowledge_cortex.text';
@@ -95,6 +97,7 @@ export interface InvestigationAgentTypeOptions {
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
   proposalsEnabled: boolean;
   telemetryConnectorId?: string;
+  telemetryConfig?: NightshiftInvestigationsConfig['sandbox'];
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
   /**
@@ -156,6 +159,7 @@ export const buildNightshiftAgentConfiguration = ({
   investigationToolsEnabled,
   proposalsEnabled,
   telemetryConnectorId,
+  telemetryConfig,
   getCustomContextInstructions,
   resolveHookWorkflowId,
   logger,
@@ -176,7 +180,17 @@ export const buildNightshiftAgentConfiguration = ({
         },
       ],
       enable_elastic_capabilities: false,
-      connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
+      connector_ids: telemetryConfig
+        ? [
+            ...new Set(
+              getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
+                connectorId ? [connectorId] : []
+              )
+            ),
+          ]
+        : telemetryConnectorId
+        ? [telemetryConnectorId]
+        : [],
       ...(() => {
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the
@@ -225,7 +239,7 @@ export const buildNightshiftAgentConfiguration = ({
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
  * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
- * described in `/workspace/elastic.md`.
+ * described in `/workspace/.connector-docs/elastic.md`.
  */
 export const getInvestigationAgentType = ({
   decisionTreesEnabled = false,
@@ -255,6 +269,7 @@ export const registerInvestigationAgentType = (
     investigationToolsEnabled,
     proposalsEnabled,
     telemetryConnectorId,
+    telemetryConfig,
     getCustomContextInstructions,
     resolveHookWorkflowId,
     logger,
@@ -269,6 +284,7 @@ export const registerInvestigationAgentType = (
       investigationToolsEnabled,
       proposalsEnabled,
       telemetryConnectorId,
+      telemetryConfig,
       getCustomContextInstructions,
       resolveHookWorkflowId,
       logger,

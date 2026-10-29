@@ -42,7 +42,7 @@ const renderSection = ({
   total = 0,
   hasMore = false,
   error = null,
-  isExpanded = true,
+  isOpen = true,
   onToggle = jest.fn(),
   onShowMore = jest.fn(),
   onRetry = jest.fn(),
@@ -56,7 +56,7 @@ const renderSection = ({
         hasMore={hasMore}
         isInitialLoading={isInitialLoading}
         error={error}
-        isExpanded={isExpanded}
+        isOpen={isOpen}
         onToggle={onToggle}
         onShowMore={onShowMore}
         onRetry={onRetry}
@@ -64,16 +64,9 @@ const renderSection = ({
     </I18nProvider>
   );
 
-/** EUI makes the accordion arrow the keyboard control; it carries the expanded state. */
-const getToggleControl = (id: string): HTMLElement => {
-  const control = document.querySelector<HTMLElement>(
-    `[aria-controls="nightshiftInvestigationSection-${id}-accordion"][aria-expanded]`
-  );
-  if (control == null) {
-    throw new Error(`No toggle control for section ${id}`);
-  }
-  return control;
-};
+/** The whole header is the accordion's button; it carries the expanded state. */
+const getToggleControl = (id: string): HTMLElement =>
+  screen.getByTestId(`nightshiftInvestigationSectionToggle-${id}`);
 
 describe('InvestigationSection', () => {
   it('shows a skeleton, and no count, while the section is still loading', () => {
@@ -128,7 +121,7 @@ describe('InvestigationSection', () => {
   });
 
   it('keeps the heading and count while collapsed, and hides the rows from assistive tech', () => {
-    renderSection({ investigations: [investigation], total: 1, isExpanded: false });
+    renderSection({ investigations: [investigation], total: 1, isOpen: false });
 
     expect(screen.getByRole('heading', { name: 'Critical' })).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftInvestigationSectionCount-critical')).toHaveTextContent(
@@ -139,20 +132,20 @@ describe('InvestigationSection', () => {
   });
 
   it('exposes the rows while expanded', () => {
-    renderSection({ investigations: [investigation], total: 1, isExpanded: true });
+    renderSection({ investigations: [investigation], total: 1, isOpen: true });
 
     expect(getToggleControl('critical')).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByTestId('investigationCard').closest('[inert]')).toBeNull();
   });
 
-  it('toggles from the whole header and from the arrow', () => {
+  it('toggles from the whole header', () => {
     const onToggle = jest.fn();
-    renderSection({ investigations: [investigation], total: 1, onToggle });
+    renderSection({ investigations: [investigation], total: 1, isOpen: false, onToggle });
 
-    fireEvent.click(screen.getByTestId('nightshiftInvestigationSectionToggle-critical'));
     fireEvent.click(getToggleControl('critical'));
 
-    expect(onToggle).toHaveBeenCalledTimes(2);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+    expect(onToggle).toHaveBeenCalledWith(true);
   });
 
   it('titles the closed section', () => {
@@ -180,7 +173,7 @@ describe('InvestigationSection', () => {
   });
 
   it('keeps a failed load visible in the header while collapsed, with no count to mistake for empty', () => {
-    renderSection({ error: new Error('Network unavailable'), isExpanded: false });
+    renderSection({ error: new Error('Network unavailable'), isOpen: false });
 
     expect(screen.getByTestId('nightshiftInvestigationSectionError-critical')).toHaveTextContent(
       'Unable to load'
@@ -205,7 +198,7 @@ describe('InvestigationSection', () => {
       investigations: [investigation],
       total: 1,
       error: new Error('Network unavailable'),
-      isExpanded: false,
+      isOpen: false,
     });
 
     expect(screen.getByTestId('nightshiftInvestigationSectionError-critical')).toHaveTextContent(

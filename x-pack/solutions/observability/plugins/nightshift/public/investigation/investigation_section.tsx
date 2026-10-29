@@ -13,9 +13,12 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
+  EuiScreenReaderOnly,
   EuiSkeletonText,
   EuiTitle,
+  euiCanAnimate,
   useEuiTheme,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -26,6 +29,7 @@ import { getSeverityLabel } from '@kbn/significant-events-schema';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
+import type { SeverityDotColor } from '../common/severity';
 import { SEVERITY_DOT_COLOR } from '../common/severity';
 import { INVESTIGATIONS_PAGE_SIZE } from '../hooks/use_fetch_investigations';
 import type {
@@ -45,20 +49,21 @@ export interface InvestigationSectionProps {
   error?: Error | null;
   onShowMore: () => void;
   onRetry: () => void;
-  /** Collapsed sections keep their heading and count; the rows are hidden. */
-  isExpanded: boolean;
-  onToggle: () => void;
   selectedInvestigationId?: string;
   onInvestigationClick?: (investigation: InvestigationSummary) => void;
+  /** Whether the section's body is shown. Sections are open unless the list says otherwise. */
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
+  /** Briefly draws the section's border in its severity colour, after a jump lands on it. */
+  isHighlighted?: boolean;
 }
+
+/** Set on a section by the list, to the height of the sticky page header that would cover it. */
+export const STICKY_HEADER_HEIGHT_VAR = '--nightshiftStickyHeaderHeight';
 
 /** The scroll anchor a severity tile and a `?severity=` deep link both target. */
 export const getInvestigationSectionAnchorId = (id: InvestigationSectionId): string =>
   `nightshiftInvestigationSection-${id}`;
-
-/** The collapsible body of a section: the element the accordion grows when it opens. */
-export const getInvestigationSectionBodyId = (id: InvestigationSectionId): string =>
-  `${getInvestigationSectionAnchorId(id)}-accordion`;
 
 /** Everything derived from a section's id: what it is called and where it is anchored. */
 interface SectionPresentation {
@@ -142,19 +147,39 @@ export const isInvestigationSectionVisible = (section: InvestigationSectionState
     hasError: section.error != null,
   }) !== 'hidden';
 
-/** The bordered card around a section; the accordion header and rows sit inside it. */
-const SectionPanel = ({ children }: { children: React.ReactNode }): React.ReactElement => {
+/** The card the header and its content share, so the two sit flush against each other. */
+const SectionCard = ({
+  children,
+  highlightColor,
+}: {
+  children: React.ReactNode;
+  /** Set while the card is highlighted. */
+  highlightColor?: SeverityDotColor;
+}): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
+  const strongBorderColors: Record<SeverityDotColor, string> = {
+    danger: euiTheme.colors.borderStrongDanger,
+    risk: euiTheme.colors.borderStrongRisk,
+    warning: euiTheme.colors.borderStrongWarning,
+    neutral: euiTheme.colors.borderStrongNeutral,
+  };
 
   return (
     <EuiPanel
-      hasBorder
+      // The border is drawn here rather than by `hasBorder`, which paints it with a pseudo-element
+      // that the highlight could not recolor.
+      hasBorder={false}
       hasShadow={false}
       paddingSize="none"
       css={css`
         box-sizing: border-box;
         overflow: hidden;
-        border-radius: ${euiTheme.border.radius.panel};
+        border: ${euiTheme.border.width.thin} solid
+          ${highlightColor != null ? strongBorderColors[highlightColor] : euiTheme.border.color};
+
+        ${euiCanAnimate} {
+          transition: border-color ${euiTheme.animation.normal} ease;
+        }
       `}
     >
       {children}
@@ -162,12 +187,14 @@ const SectionPanel = ({ children }: { children: React.ReactNode }): React.ReactE
   );
 };
 
-/** Padding for body content that is not the row list: skeletons and callouts. */
-const SectionBodyInset = ({
+/** A part of the card's content, divided from the header (or the part above) by a rule. */
+const SectionBlock = ({
   children,
+  paddingSize = 'base',
   'data-test-subj': dataTestSubj,
 }: {
   children: React.ReactNode;
+  paddingSize?: 'none' | 'base';
   'data-test-subj'?: string;
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
@@ -176,7 +203,8 @@ const SectionBodyInset = ({
     <div
       data-test-subj={dataTestSubj}
       css={css`
-        padding: ${euiTheme.size.base};
+        border-top: ${euiTheme.border.thin};
+        padding: ${paddingSize === 'none' ? 0 : `${euiTheme.size.m} ${euiTheme.size.base}`};
       `}
     >
       {children}
@@ -185,44 +213,52 @@ const SectionBodyInset = ({
 };
 
 const SectionHeading = ({
-  presentation,
+  presentation: { id, title, severity },
   total,
   showCount,
+  isOpen,
   errorBadge,
 }: {
   presentation: SectionPresentation;
   total: number;
   showCount: boolean;
-  /** Shown beside the count, in the header, so it stays visible while the section is collapsed. */
+  isOpen: boolean;
+  /** Shown beside the count, in the header, so it stays visible while the section is closed. */
   errorBadge?: React.ReactNode;
-}): React.ReactElement => {
-  const { id, title, severity, headingId } = presentation;
-
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+}): React.ReactElement => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    {/* Drawn here rather than with EUI's arrow, which is a button of its own. */}
+    <EuiFlexItem grow={false}>
+      <EuiIcon
+        type="chevronSingleRight"
+        aria-hidden="true"
+        css={css`
+          transform: rotate(${isOpen ? '90deg' : '0deg'});
+        `}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="xxs">
+        <span>{title}</span>
+      </EuiTitle>
+    </EuiFlexItem>
+    {showCount && (
       <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h2 id={headingId}>{title}</h2>
-        </EuiTitle>
+        <EuiBadge
+          color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
+          data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
+        >
+          {total}
+        </EuiBadge>
       </EuiFlexItem>
-      {showCount && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge
-            color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
-            data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
-          >
-            {total}
-          </EuiBadge>
-        </EuiFlexItem>
-      )}
-      {errorBadge != null && <EuiFlexItem grow={false}>{errorBadge}</EuiFlexItem>}
-    </EuiFlexGroup>
-  );
-};
+    )}
+    {errorBadge != null && <EuiFlexItem grow={false}>{errorBadge}</EuiFlexItem>}
+  </EuiFlexGroup>
+);
 
 /**
  * Sits in the accordion header next to the title, outside the collapsible body, so a failed
- * request stays visible while the section is collapsed and is never mistaken for an empty section.
+ * request stays visible while the section is closed and is never mistaken for an empty section.
  */
 const SectionErrorBadge = ({
   presentation: { id },
@@ -306,43 +342,45 @@ const SectionRows = ({
   const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
 
   return (
-    <EuiFlexGroup
-      role="list"
-      direction="column"
-      gutterSize="none"
-      responsive={false}
-      css={css`
-        /* Divide the rows from the header and from each other, without a rule below the last. */
-        > * {
-          border-top: ${euiTheme.border.thin};
-        }
-      `}
-    >
-      {investigations.map((investigation) => (
-        <EuiFlexItem
-          role="listitem"
-          key={investigation.id}
-          grow={false}
-          data-test-subj="nightshiftInvestigationListItem"
-          {...(onInvestigationClick
-            ? getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
-                element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
-                detail: investigation.in_progress ? 'running' : 'complete',
-              })
-            : {})}
-        >
-          {InvestigationCard && (
-            <InvestigationCard
-              investigation={investigation}
-              isSelected={investigation.id === selectedInvestigationId}
-              onClick={onInvestigationClick}
-              actions={<InvestigationCardActions investigation={investigation} />}
-            />
-          )}
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+    <SectionBlock paddingSize="none">
+      <EuiFlexGroup
+        role="list"
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+        css={css`
+          /* Divide consecutive rows, without a rule above the first or below the last. */
+          > * + * {
+            border-top: ${euiTheme.border.thin};
+          }
+        `}
+      >
+        {investigations.map((investigation) => (
+          <EuiFlexItem
+            role="listitem"
+            key={investigation.id}
+            grow={false}
+            data-test-subj="nightshiftInvestigationListItem"
+            {...(onInvestigationClick
+              ? getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATIONS_LIST,
+                  detail: investigation.in_progress ? 'running' : 'complete',
+                })
+              : {})}
+          >
+            {InvestigationCard && (
+              <InvestigationCard
+                investigation={investigation}
+                isSelected={investigation.id === selectedInvestigationId}
+                onClick={onInvestigationClick}
+                actions={<InvestigationCardActions investigation={investigation} />}
+              />
+            )}
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </SectionBlock>
   );
 };
 
@@ -358,7 +396,6 @@ const ShowMoreButton = ({
   isLoadingMore: boolean;
   onShowMore: () => void;
 }): React.ReactElement => {
-  const { euiTheme } = useEuiTheme();
   const nextBatchCount = Math.min(INVESTIGATIONS_PAGE_SIZE, remainingCount);
   const label =
     nextBatchCount > 0
@@ -371,13 +408,7 @@ const ShowMoreButton = ({
         });
 
   return (
-    <EuiFlexGroup
-      justifyContent="center"
-      responsive={false}
-      css={css`
-        border-top: ${euiTheme.border.thin};
-      `}
-    >
+    <EuiFlexGroup justifyContent="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           data-test-subj={`nightshiftInvestigationSectionShowMore-${id}`}
@@ -412,11 +443,13 @@ export const InvestigationSection = ({
   error = null,
   onShowMore,
   onRetry,
-  isExpanded,
-  onToggle,
   selectedInvestigationId,
   onInvestigationClick,
+  isOpen = true,
+  onToggle,
+  isHighlighted = false,
 }: InvestigationSectionProps): React.ReactElement | null => {
+  const { euiTheme } = useEuiTheme();
   const presentation = getSectionPresentation(id);
   const view = getSectionView({
     isInitialLoading,
@@ -428,23 +461,23 @@ export const InvestigationSection = ({
     switch (visibleView) {
       case 'loading':
         return (
-          <SectionBodyInset data-test-subj={`nightshiftInvestigationSectionSkeleton-${id}`}>
+          <SectionBlock data-test-subj={`nightshiftInvestigationSectionSkeleton-${id}`}>
             <EuiSkeletonText lines={3} />
-          </SectionBodyInset>
+          </SectionBlock>
         );
       case 'unloadable':
         return (
-          <SectionBodyInset>
+          <SectionBlock>
             <RetryCallout presentation={presentation} isUnloadable onRetry={onRetry} />
-          </SectionBodyInset>
+          </SectionBlock>
         );
       case 'rows':
         return (
           <>
             {error != null && (
-              <SectionBodyInset>
+              <SectionBlock>
                 <RetryCallout presentation={presentation} isUnloadable={false} onRetry={onRetry} />
-              </SectionBodyInset>
+              </SectionBlock>
             )}
             <SectionRows
               investigations={investigations}
@@ -452,12 +485,14 @@ export const InvestigationSection = ({
               onInvestigationClick={onInvestigationClick}
             />
             {hasMore && (
-              <ShowMoreButton
-                presentation={presentation}
-                remainingCount={Math.max(total - investigations.length, 0)}
-                isLoadingMore={isLoadingMore}
-                onShowMore={onShowMore}
-              />
+              <SectionBlock>
+                <ShowMoreButton
+                  presentation={presentation}
+                  remainingCount={Math.max(total - investigations.length, 0)}
+                  isLoadingMore={isLoadingMore}
+                  onShowMore={onShowMore}
+                />
+              </SectionBlock>
             )}
           </>
         );
@@ -473,26 +508,56 @@ export const InvestigationSection = ({
   }
 
   return (
-    <div
+    <EuiFlexGroup
       id={presentation.anchorId}
       data-test-subj={presentation.anchorId}
       // Scrolling here also moves focus, so keyboard and screen reader users follow the jump.
       role="region"
       aria-labelledby={presentation.headingId}
       tabIndex={-1}
+      direction="column"
+      gutterSize="none"
+      responsive={false}
+      css={css`
+        /* Jumping here lands below Kibana's fixed headers and the page's sticky header bar (whose height
+           the list measures), with a little room above the card. */
+        scroll-margin-top: calc(
+          var(--euiFixedHeadersOffset, 0px) + var(${STICKY_HEADER_HEIGHT_VAR}, 0px) +
+            ${euiTheme.size.base}
+        );
+
+        /* Focus lands here programmatically after a jump; the square ring would poke out past the
+           card's rounded corners, and the highlighted border already marks the section. */
+        &:focus {
+          outline: none;
+        }
+      `}
     >
-      <SectionPanel>
+      {/* A heading cannot live inside the accordion's button, so screen readers get this one, which
+          also names the region. */}
+      <EuiScreenReaderOnly>
+        <h2 id={presentation.headingId}>{presentation.title}</h2>
+      </EuiScreenReaderOnly>
+      <SectionCard
+        highlightColor={
+          isHighlighted && presentation.severity != null
+            ? SEVERITY_DOT_COLOR[presentation.severity]
+            : undefined
+        }
+      >
         <EuiAccordion
-          id={getInvestigationSectionBodyId(id)}
-          // The heading lives in the trigger, and a heading cannot sit inside a button; EUI then
-          // makes the arrow the keyboard control and keeps the whole header clickable.
-          buttonElement="div"
+          id={`${presentation.anchorId}-accordion`}
+          forceState={isOpen ? 'open' : 'closed'}
+          arrowDisplay="none"
+          onToggle={onToggle}
+          paddingSize="none"
           buttonContent={
             <SectionHeading
               presentation={presentation}
               total={total}
-              // A count is only meaningful once rows loaded: a failed first load has nothing to count.
+              // The count comes with the rows; a failed first load has none to show.
               showCount={view === 'rows'}
+              isOpen={isOpen}
               errorBadge={
                 error != null && view !== 'loading' ? (
                   <SectionErrorBadge
@@ -504,17 +569,29 @@ export const InvestigationSection = ({
             />
           }
           buttonProps={{
-            paddingSize: 'm',
             'data-test-subj': `nightshiftInvestigationSectionToggle-${id}`,
+            // The padding is on the button, so the whole row is clickable and takes the hover.
+            css: css`
+              box-sizing: border-box;
+              align-items: center;
+              block-size: ${euiTheme.size.xxxl};
+              padding: 0 ${euiTheme.size.base};
+
+              &:hover,
+              &:focus {
+                text-decoration: none;
+              }
+
+              &:hover,
+              &:focus-visible {
+                background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+              }
+            `,
           }}
-          arrowDisplay="left"
-          paddingSize="none"
-          forceState={isExpanded ? 'open' : 'closed'}
-          onToggle={onToggle}
         >
           {renderBody(view)}
         </EuiAccordion>
-      </SectionPanel>
-    </div>
+      </SectionCard>
+    </EuiFlexGroup>
   );
 };
