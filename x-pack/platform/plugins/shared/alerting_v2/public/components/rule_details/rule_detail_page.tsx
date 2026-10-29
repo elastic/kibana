@@ -152,8 +152,8 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   }, [runRule, rule.id]);
 
   const onViewChangeHistory = React.useCallback(
-    () => openChangeHistory({ id: rule.id, name: rule.metadata.name }),
-    [openChangeHistory, rule.id, rule.metadata.name]
+    () => openChangeHistory({ id: rule.id, name: rule.metadata.name, version: rule.version }),
+    [openChangeHistory, rule.id, rule.metadata.name, rule.version]
   );
 
   const { createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted } =

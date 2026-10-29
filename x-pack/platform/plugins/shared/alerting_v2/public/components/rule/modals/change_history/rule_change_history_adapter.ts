@@ -11,7 +11,7 @@ import type {
   ChangeHistoryListItem,
   ListChangeHistoryResult,
 } from '@kbn/change-history-ui';
-import type { RuleChangeHistoryListItem } from '@kbn/alerting-v2-schemas';
+import type { RuleChangeHistoryListItem, RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleChangeHistoryApi } from '../../../../services/rule_change_history_api';
 
 const toChangeHistoryItem = (item: RuleChangeHistoryListItem): ChangeHistoryListItem => ({
@@ -29,8 +29,10 @@ const toChangeHistoryItem = (item: RuleChangeHistoryListItem): ChangeHistoryList
 });
 
 export interface RuleChangeHistoryAdapterOptions {
-  /** Called with the rule id after a restore succeeds, e.g. to refetch rule queries. */
-  onRestored?: (ruleId: string) => void;
+  /** The rule version the caller last saw, sent as the restore's conflict guard. */
+  currentVersion?: number;
+  /** Called with the restored rule after a restore succeeds, e.g. to refetch rule queries. */
+  onRestored?: (rule: RuleResponse) => void;
 }
 
 /**
@@ -41,7 +43,7 @@ export interface RuleChangeHistoryAdapterOptions {
  */
 export const createRuleChangeHistoryAdapter = (
   api: RuleChangeHistoryApi,
-  { onRestored }: RuleChangeHistoryAdapterOptions = {}
+  { currentVersion, onRestored }: RuleChangeHistoryAdapterOptions = {}
 ): ChangeHistoryAdapter => ({
   listChanges: async ({ objectId, page, signal }): Promise<ListChangeHistoryResult> => {
     const { items, total } = await api.listRuleChanges({
@@ -64,8 +66,8 @@ export const createRuleChangeHistoryAdapter = (
       reason,
     };
   },
-  restoreChange: async ({ objectId, changeId, signal }): Promise<void> => {
-    await api.restoreRuleChange({ eventId: changeId, signal });
-    onRestored?.(objectId);
+  restoreChange: async ({ changeId, signal }): Promise<void> => {
+    const rule = await api.restoreRuleChange({ eventId: changeId, currentVersion, signal });
+    onRestored?.(rule);
   },
 });

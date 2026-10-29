@@ -112,7 +112,9 @@ export const RuleSummaryFlyoutContainer = ({
         onToggleEnabled={(r) => toggleRuleEnabled({ id: r.id, enabled: !r.enabled })}
         onRun={(r) => runRule({ id: r.id })}
         onUpdateApiKey={(r) => setRuleToUpdateApiKey(r)}
-        onViewChangeHistory={(r) => openChangeHistory({ id: r.id, name: r.metadata.name })}
+        onViewChangeHistory={(r) =>
+          openChangeHistory({ id: r.id, name: r.metadata.name, version: r.version })
+        }
       />
       {changeHistoryModal}
       {ruleToDelete && (

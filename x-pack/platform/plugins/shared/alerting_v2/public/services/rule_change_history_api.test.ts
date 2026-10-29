@@ -139,15 +139,15 @@ describe('RuleChangeHistoryApi', () => {
   });
 
   describe('restoreRuleChange', () => {
-    it('POSTs to the encoded restore path of the change and forwards the abort signal', async () => {
+    it('POSTs to the encoded restore path with the version guard and abort signal', async () => {
       const { api, http } = buildApi();
       const signal = new AbortController().signal;
 
-      await api.restoreRuleChange({ eventId: 'c/d', signal });
+      await api.restoreRuleChange({ eventId: 'c/d', currentVersion: 4, signal });
 
       expect(http.post).toHaveBeenCalledWith(
         '/internal/alerting/v2/change_history/rules/c%2Fd/_restore',
-        { signal }
+        { query: { current_version: 4 }, signal }
       );
     });
 
