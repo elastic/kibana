@@ -6,8 +6,14 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
-import { resolveControls, type IdentifiedControl, type PlannedControl } from '../controls';
+import {
+  getEsqlVariables,
+  resolveControls,
+  type IdentifiedControl,
+  type PlannedControl,
+} from '../controls';
 import type { PanelContentSource, ResolvePanelContent } from '../panels';
 import type { PanelContent, PanelContentAttempt } from '../resolve_panel';
 import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from '../types';
@@ -33,15 +39,24 @@ export interface ResolvedChanges {
 
 const resolveContent = (
   content: PanelContentSource,
-  { resolvePanelContent, resolveAttachmentPanel }: PanelResolvers
+  { resolvePanelContent, resolveAttachmentPanel }: PanelResolvers,
+  esqlVariables: ESQLControlVariable[]
 ): PanelContentAttempt | Promise<PanelContentAttempt> => {
   switch (content.source) {
     case 'config':
       return { type: 'success', panelContent: content.panelContent };
     case 'attachment':
       return resolveAttachmentPanel(content.attachmentId);
-    case 'request':
-      return resolvePanelContent(content.request);
+    case 'request': {
+      const { request } = content;
+      // A custom content panel's queries can refer to the dashboard's ES|QL controls (`?name`), and
+      // they cannot be run, to generate or sample them, without the controls' values.
+      return resolvePanelContent(
+        request.renderer === 'custom_content' && esqlVariables.length > 0
+          ? { ...request, esqlVariables }
+          : request
+      );
+    }
   }
 };
 
@@ -70,8 +85,11 @@ export const resolvePlan = async ({
   resolvers: PanelResolvers;
   logger: Logger;
 }): Promise<ResolvedChanges> => {
+  const esqlVariables = getEsqlVariables(existingControls);
   const [attempts, resolvedControls] = await Promise.all([
-    Promise.all(panels.map(({ content }) => content && resolveContent(content, resolvers))),
+    Promise.all(
+      panels.map(({ content }) => content && resolveContent(content, resolvers, esqlVariables))
+    ),
     resolveControls({
       controls,
       existingControls,

@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
@@ -34,6 +35,8 @@ export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase
   hasData: boolean;
   /** Index, alias or data stream to generate the query from. */
   index?: string;
+  /** The values of the dashboard's ES|QL controls, for a query that refers to one (`?name`). */
+  esqlVariables?: ESQLControlVariable[];
   existingPanel?: undefined;
 }
 
@@ -51,6 +54,8 @@ export interface CustomContentPanelEditRequest extends PanelResolutionRequestBas
   regenerateESQL?: boolean;
   /** Index, alias or data stream to generate the query from. */
   index?: string;
+  /** The values of the dashboard's ES|QL controls, for a query that refers to one (`?name`). */
+  esqlVariables?: ESQLControlVariable[];
 }
 
 /** Request to generate or refine a custom content panel's template; `existingPanel` tells them apart. */

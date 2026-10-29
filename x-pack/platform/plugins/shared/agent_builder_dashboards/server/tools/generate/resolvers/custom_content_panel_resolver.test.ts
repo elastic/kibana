@@ -7,6 +7,7 @@
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
@@ -136,6 +137,69 @@ describe('createCustomContentPanelResolver', () => {
         type: 'failure',
         error: 'Generated template was rejected: contains a <script> tag.',
       });
+    });
+  });
+
+  // A query that refers to a dashboard control (`?host`) cannot be generated or sampled without the
+  // control's value: both run it.
+  describe('control values', () => {
+    const esqlVariables = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
+
+    it('hands them to the template resolver for a new panel whose own query uses a control', async () => {
+      await resolve(
+        addRequest({
+          esql: 'FROM logs | WHERE host.name == ?host | STATS n = COUNT(*)',
+          hasData: true,
+          esqlVariables,
+        })
+      );
+
+      expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
+    it('hands them to the query generator and the template resolver when the query is regenerated', async () => {
+      await resolve(
+        editRequest(
+          customContentPanel({
+            template: '<div>old</div>',
+            esql_query: ['FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)'],
+          }),
+          { nlQuery: 'Also show the error count', regenerateESQL: true, esqlVariables }
+        )
+      );
+
+      expect(generateEsql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          existingQueries: ['FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)'],
+          esqlVariables,
+        })
+      );
+      expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
+    it('hands them to the query generator for a new generated query too', async () => {
+      await resolve(
+        addRequest({ nlQuery: 'hits for the selected host', hasData: true, esqlVariables })
+      );
+
+      expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
+    it('sends none when the request has none', async () => {
+      await resolve(addRequest({ hasData: true }));
+      await resolve(
+        editRequest(
+          customContentPanel({ template: '<div>old</div>', esql_query: ['FROM logs-*'] }),
+          {
+            nlQuery: 'Restyle',
+          }
+        )
+      );
+
+      expect(generateEsql.mock.calls[0][0].esqlVariables).toBeUndefined();
+      for (const [call] of resolveTemplate.mock.calls) {
+        expect(call.esqlVariables).toBeUndefined();
+      }
     });
   });
 

@@ -141,6 +141,31 @@ describe('createUpdateCustomContentTool handler', () => {
       );
     });
 
+    it('hands the control values the panel was sent with to the template resolver', async () => {
+      const esqlVariables = [{ key: 'host', value: 'web-1', type: 'values' }];
+      await callHandler(
+        {
+          embeddable_id: 'p1',
+          prompt: 'Show hits for the selected host',
+          esqlQuery: 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)',
+        },
+        { ...existing, esql_variables: esqlVariables }
+      );
+
+      expect(mockResolver).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)',
+          esqlVariables,
+        })
+      );
+    });
+
+    it('hands over no control values when the panel was sent with none', async () => {
+      await callHandler({ embeddable_id: 'p1', prompt: 'Make colors more vivid' }, existing);
+
+      expect(mockResolver.mock.calls[0][0].esqlVariables).toBeUndefined();
+    });
+
     it('samples esqlQuery when query is also changing', async () => {
       await callHandler(
         { embeddable_id: 'p1', prompt: 'Show revenue by region', esqlQuery: 'FROM metrics' },
@@ -216,6 +241,31 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(mockResolver).toHaveBeenCalledWith(
         expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: true })
       );
+    });
+
+    // The stored query uses a dashboard control and is adapted, not rewritten: the generator executes
+    // its candidates to validate them, and cannot without the control's value.
+    it('hands the control values the panel was sent with to the query generator', async () => {
+      const esqlVariables = [{ key: 'host', value: 'web-1', type: 'values' }];
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Also show the error count', regenerateEsql: true },
+        {
+          ...existing,
+          esql_query: 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)',
+          esql_variables: esqlVariables,
+        }
+      );
+
+      expect(mockGenerateEsql).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
+    it('hands the query generator no control values when the panel was sent with none', async () => {
+      await callHandler(
+        { embeddable_id: 'p1', prompt: 'Also show the error count', regenerateEsql: true },
+        existing
+      );
+
+      expect(mockGenerateEsql.mock.calls[0][0].esqlVariables).toBeUndefined();
     });
 
     it('lets an explicit query win over regenerateEsql', async () => {

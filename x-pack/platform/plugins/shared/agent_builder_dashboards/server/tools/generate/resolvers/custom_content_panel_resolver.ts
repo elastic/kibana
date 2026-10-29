@@ -13,6 +13,7 @@ import {
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import type { CustomContentTemplateResolver } from '@kbn/custom-content-server';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   getErrorMessage,
   type CustomContentPanelResolutionRequest,
@@ -24,6 +25,8 @@ export type CustomContentEsqlGenerator = (params: {
   nlQuery: string;
   index?: string;
   existingQueries: string[];
+  /** The values of the dashboard's ES|QL controls, for a query that refers to one (`?name`). */
+  esqlVariables?: ESQLControlVariable[];
 }) => Promise<string>;
 
 const resolveCustomContentState = async (
@@ -32,8 +35,9 @@ const resolveCustomContentState = async (
   generateEsql: CustomContentEsqlGenerator
 ): Promise<CustomContentState> => {
   const { nlQuery, esql, hasData, index, existingPanel } = request;
+  const { esqlVariables } = request;
   const generate = (existingQueries: string[]) =>
-    generateEsql({ nlQuery: nlQuery ?? '', index, existingQueries });
+    generateEsql({ nlQuery: nlQuery ?? '', index, existingQueries, esqlVariables });
 
   if (!existingPanel) {
     // The agent always states hasData: a static panel (false) has no query unless one is supplied.
@@ -44,7 +48,11 @@ const resolveCustomContentState = async (
       isNewPanel: true,
       generate,
     });
-    const { template } = await resolveTemplate({ prompt: nlQuery, esqlQuery: query });
+    const { template } = await resolveTemplate({
+      prompt: nlQuery,
+      esqlQuery: query,
+      esqlVariables,
+    });
     return { esql_query: toEsqlQueryState(query), template };
   }
 
@@ -62,6 +70,7 @@ const resolveCustomContentState = async (
     esqlQuery: isQueryChanging ? mergedEsqlQuery : undefined,
     existingTemplate: existing.template,
     hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
+    esqlVariables,
   });
   return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
 };
