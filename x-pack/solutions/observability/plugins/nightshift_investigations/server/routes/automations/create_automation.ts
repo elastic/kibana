@@ -28,7 +28,7 @@ const executionSchema = z.object({
 });
 
 const runtimeSchema = z.object({
-  dailyDispatchLimit: z.number().int().min(0).optional(),
+  dailyDispatchLimit: z.number().int().min(1).optional(),
   timeoutSeconds: z.number().int().min(1).optional(),
   dedupeWindowSeconds: z.number().int().min(0).optional(),
   overlapPolicy: z.enum(['drop', 'cancel_in_progress', 'queue']).optional(),
@@ -92,7 +92,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     let workflowId: string;
     try {
-      const yaml = generateWorkflowYaml(created.id, attributes);
+      const yaml = generateWorkflowYaml({ automationId: created.id, automation: attributes });
       const workflow = await workflowsManagement.management.createWorkflow(
         { yaml },
         spaceId,

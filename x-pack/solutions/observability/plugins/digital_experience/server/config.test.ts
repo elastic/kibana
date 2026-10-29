@@ -8,11 +8,30 @@
 import { config } from './config';
 
 describe('digital_experience config', () => {
+  const sessionsDefaults = { frequency: '1m', partitions: 1 };
+
   it('is enabled by default', () => {
-    expect(config.schema.validate({})).toEqual({ enabled: true });
+    expect(config.schema.validate({})).toEqual({ enabled: true, sessions: sessionsDefaults });
   });
 
   it('can be disabled', () => {
-    expect(config.schema.validate({ enabled: false })).toEqual({ enabled: false });
+    expect(config.schema.validate({ enabled: false })).toEqual({
+      enabled: false,
+      sessions: sessionsDefaults,
+    });
+  });
+
+  it('accepts a sessions frequency and partition count', () => {
+    expect(
+      config.schema.validate({ sessions: { frequency: '5m', partitions: 4 } }).sessions
+    ).toEqual({ frequency: '5m', partitions: 4 });
+  });
+
+  it.each(['0m', '2h', '1d', '5 m', 'fast'])('rejects frequency %s', (frequency) => {
+    expect(() => config.schema.validate({ sessions: { frequency } })).toThrow(/frequency/);
+  });
+
+  it.each([0, 33, 1.5])('rejects %s partitions', (partitions) => {
+    expect(() => config.schema.validate({ sessions: { partitions } })).toThrow(/partitions/);
   });
 });

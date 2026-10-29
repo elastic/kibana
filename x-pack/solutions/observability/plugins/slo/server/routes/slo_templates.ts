@@ -59,7 +59,7 @@ export const findSLOTemplatesRoute = createSloServerRoute({
   }): Promise<FindSLOTemplatesResponse> => {
     await assertPlatinumLicense(plugins);
     const { templateRepository } = await getScopedClients({ request, logger });
-    const { page = 1, perPage = 20, search, tags } = params.query ?? {};
+    const { page = 1, perPage = 20, search, tags } = params?.query ?? {};
     if (page <= 0) {
       throw new IllegalArgumentError('page must be a positive integer');
     }

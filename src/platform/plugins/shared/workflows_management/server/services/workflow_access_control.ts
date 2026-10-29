@@ -48,6 +48,14 @@ export const WORKFLOW_READ_ACCESS_QUERY = {
   includeMissing: true,
 } as const;
 
+/** Workflow id stored on the executions of an unsaved workflow run from the editor. */
+export const EPHEMERAL_WORKFLOW_ID = 'ephemeral-workflow';
+
+/** Workflow id stored on the executions of an unsaved workflow test run from the editor. */
+export const INTERNAL_TEST_WORKFLOW_ID = 'internal-test-workflow';
+
+const READABLE_WORKFLOW_IDS_LIMIT = 10000;
+
 const rolePrivileges = {
   viewer: [WorkflowsManagementApiActions.read],
   executor: [WorkflowsManagementApiActions.read, WorkflowsManagementApiActions.execute],
@@ -210,9 +218,12 @@ export class WorkflowAccessControlService {
     request?: KibanaRequest,
     options?: { allowAdminOverride?: boolean; auditOverride?: boolean }
   ): Promise<void> {
-    if (!(await this.checkAccess(workflow, operation, request, options))) {
-      throw new WorkflowAccessDeniedError();
+    if (await this.checkAccess(workflow, operation, request, options)) return;
+    // A caller who cannot read the workflow must not learn that it exists.
+    if ((await this.decisions(workflow, request)).read === 'denied') {
+      throw new WorkflowNotFoundError(workflow.id);
     }
+    throw new WorkflowAccessDeniedError();
   }
 
   async readFilter(request?: KibanaRequest) {
@@ -243,12 +254,49 @@ export class WorkflowAccessControlService {
     return filter;
   }
 
+  /**
+   * Ids of the workflows in a space the caller can read, or `undefined` when nothing is hidden
+   * from them. Interim scope for surfaces that read execution data without the Kibana APIs.
+   */
+  async readableWorkflowIds(
+    spaceId: string,
+    request: KibanaRequest,
+    { includeManaged }: { includeManaged: boolean }
+  ): Promise<string[] | undefined> {
+    if (await this.isAdmin(request)) return undefined;
+    const access = await this.scanWorkflowAccess(spaceId, await this.getProfileId(request));
+    if (!access || access.hidden.length === 0) return undefined;
+    const readableIds = access.readable
+      .filter(({ managed }) => includeManaged || !managed)
+      .map(({ id }) => id);
+    // Past this size the id list no longer fits in a request body. Dropping the scope would show
+    // the options of hidden workflows, so fail instead.
+    if (readableIds.length > READABLE_WORKFLOW_IDS_LIMIT) {
+      throw new Error('Too many readable workflows to scope the execution filters.');
+    }
+    return [...readableIds, EPHEMERAL_WORKFLOW_ID, INTERNAL_TEST_WORKFLOW_ID];
+  }
+
   private async buildExecutionFilter(
     spaceId: string,
     request?: KibanaRequest
   ): Promise<estypes.QueryDslQueryContainer> {
     if (await this.isAdmin(request)) return { match_all: {} };
     const profileId = request ? await this.getProfileId(request) : undefined;
+    const access = await this.scanWorkflowAccess(spaceId, profileId);
+    if (!access) return { match_all: {} };
+    const excluded: estypes.QueryDslQueryContainer[] = [];
+    for (let offset = 0; offset < access.hidden.length; offset += 10000) {
+      excluded.push({ terms: { workflowId: access.hidden.slice(offset, offset + 10000) } });
+    }
+    return excluded.length ? { bool: { must_not: excluded } } : { match_all: {} };
+  }
+
+  /** Splits the workflows of a space by whether the profile can read them; `undefined` without a workflows index. */
+  private async scanWorkflowAccess(
+    spaceId: string,
+    profileId: string | undefined
+  ): Promise<{ readable: Array<{ id: string; managed: boolean }>; hidden: string[] } | undefined> {
     const client = this.core.elasticsearch.client.asInternalUser;
     let pitId: string;
     try {
@@ -260,18 +308,19 @@ export class WorkflowAccessControlService {
       });
       pitId = snapshot.id;
     } catch (error) {
-      if (isIndexNotFoundError(error)) return { match_all: {} };
+      if (isIndexNotFoundError(error)) return undefined;
       throw error;
     }
+    const readable: Array<{ id: string; managed: boolean }> = [];
     const hiddenIds: string[] = [];
     let searchAfter: estypes.SortResults | undefined;
     try {
       while (true) {
-        const response = await client.search<WorkflowAccessSubject>({
+        const response = await client.search<WorkflowAccessSubject & { managed?: boolean }>({
           pit: { id: pitId, keep_alive: '1m' },
           allow_partial_search_results: false,
           size: 1000,
-          _source: ['owner_id', 'access_control'],
+          _source: ['owner_id', 'access_control', 'managed'],
           sort: ['_shard_doc'],
           ...(searchAfter ? { search_after: searchAfter } : {}),
           query: { terms: { spaceId: [spaceId, GLOBAL_WORKFLOW_SPACE_ID] } },
@@ -283,12 +332,13 @@ export class WorkflowAccessControlService {
         for (const { _id: id, _source: source } of response.hits.hits) {
           if (!id || !source) throw new Error('Missing workflow execution access document.');
           const accessControl = storedWorkflowAccessControlSchema.parse(source.access_control);
-          if (
-            !getWorkflowPermissions(
-              { owner_id: source.owner_id, access_control: accessControl },
-              profileId
-            ).read
-          ) {
+          const { read } = getWorkflowPermissions(
+            { owner_id: source.owner_id, access_control: accessControl },
+            profileId
+          );
+          if (read) {
+            readable.push({ id, managed: source.managed === true });
+          } else {
             hiddenIds.push(id);
           }
         }
@@ -299,11 +349,7 @@ export class WorkflowAccessControlService {
     } finally {
       await client.closePointInTime({ id: pitId });
     }
-    const excluded: estypes.QueryDslQueryContainer[] = [];
-    for (let offset = 0; offset < hiddenIds.length; offset += 10000) {
-      excluded.push({ terms: { workflowId: hiddenIds.slice(offset, offset + 10000) } });
-    }
-    return excluded.length ? { bool: { must_not: excluded } } : { match_all: {} };
+    return { readable, hidden: hiddenIds };
   }
 
   async update(
@@ -324,9 +370,7 @@ export class WorkflowAccessControlService {
       logWorkflowAccess('denied', 'manage', { core: this.core, request, id, spaceId });
       throw new WorkflowAccessDeniedError();
     }
-    if (!(await this.checkAccess({ ...existing, id, spaceId }, 'manage', request))) {
-      throw new WorkflowAccessDeniedError();
-    }
+    await this.assertAccess({ ...existing, id, spaceId }, 'manage', request);
     if (access_mode === 'private') {
       await Promise.all(
         WORKFLOW_ACCESS_CONTROL_ROLES.map(async (role) => {

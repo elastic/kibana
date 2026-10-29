@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test } from '@kbn/scout';
+import { tags, test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { KibanaRole } from '@kbn/scout';
 
@@ -30,8 +30,7 @@ const sampleDataRole: KibanaRole = {
   ],
 };
 
-// Tagged @local-stateful-classic (not cloud) until loginWithCustomRole is supported on Cloud runs
-test.describe('Sample data install/uninstall', { tag: '@local-stateful-classic' }, () => {
+test.describe('Sample data install/uninstall', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ apiServices }) => {
     await apiServices.sampleData.remove('flights');
   });

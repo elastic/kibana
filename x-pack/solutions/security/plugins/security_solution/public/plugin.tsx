@@ -448,6 +448,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         searchSession: plugins.data.search.session,
         uiSettings: core.uiSettings,
         rendering: core.rendering,
+        spaces: plugins.spaces,
         registerImpactEntityOpener: plugins.agenticInvestigations?.registerImpactEntityOpener,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {

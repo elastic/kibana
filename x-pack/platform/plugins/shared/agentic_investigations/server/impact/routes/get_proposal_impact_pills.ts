@@ -12,8 +12,13 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { AGENTIC_INVESTIGATIONS_API_VERSION } from '../../../common/constants';
 import { IMPACT_PROPOSAL_SUMMARY_URL } from '../../../common/impact/constants';
 import type { ImpactPillsResponse } from '../../../common/impact/impact_pills';
+import {
+  INVESTIGATIONS_API_PRIVILEGE_MANAGE,
+  INVESTIGATIONS_API_PRIVILEGE_READ,
+} from '../../investigations/constants';
 import type { ImpactRouteDependencies } from '../types';
 import { handleRouteError } from './handle_route_error';
+import { fitsPillsReach, impactPillsPageShape, PILLS_REACH_MESSAGE } from './impact_pills_page';
 import { INTERNAL_ACCESS } from './shared';
 
 const PROPOSALS_API_PRIVILEGE_READ = ApiPrivileges.read('proposals');
@@ -24,16 +29,19 @@ const MAX_DECIDED_WITHIN_HOURS = 168;
 
 /** A single `categories=a` arrives as a string, repeated keys as an array. */
 export const proposalImpactPillsQuerySchema = lazySchema(() =>
-  z.object({
-    origin: proposalOriginSchema,
-    categories: z
-      .union([
-        z.string().min(1).max(MAX_QUERY_STRING_LENGTH),
-        z.array(z.string().min(1).max(MAX_QUERY_STRING_LENGTH)).min(1).max(MAX_CATEGORIES),
-      ])
-      .transform((value) => (Array.isArray(value) ? value : [value])),
-    decidedWithinHours: z.coerce.number().int().min(1).max(MAX_DECIDED_WITHIN_HOURS).optional(),
-  })
+  z
+    .object({
+      ...impactPillsPageShape(),
+      origin: proposalOriginSchema,
+      categories: z
+        .union([
+          z.string().min(1).max(MAX_QUERY_STRING_LENGTH),
+          z.array(z.string().min(1).max(MAX_QUERY_STRING_LENGTH)).min(1).max(MAX_CATEGORIES),
+        ])
+        .transform((value) => (Array.isArray(value) ? value : [value])),
+      decidedWithinHours: z.coerce.number().int().min(1).max(MAX_DECIDED_WITHIN_HOURS).optional(),
+    })
+    .refine(fitsPillsReach, { message: PILLS_REACH_MESSAGE })
 );
 
 export const registerGetProposalImpactPillsRoute = ({
@@ -45,7 +53,16 @@ export const registerGetProposalImpactPillsRoute = ({
     .get({
       path: IMPACT_PROPOSAL_SUMMARY_URL,
       access: INTERNAL_ACCESS,
-      security: { authz: { requiredPrivileges: [PROPOSALS_API_PRIVILEGE_READ] } },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            PROPOSALS_API_PRIVILEGE_READ,
+            {
+              anyRequired: [INVESTIGATIONS_API_PRIVILEGE_READ, INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+            },
+          ],
+        },
+      },
       summary: 'Get the impact entities across a proposal queue',
     })
     .addVersion(
@@ -57,8 +74,10 @@ export const registerGetProposalImpactPillsRoute = ({
       },
       async (_context, request, response) => {
         try {
-          const pills = await getImpactPillsService().forProposals(request, request.query);
-          const body: ImpactPillsResponse = { pills };
+          const body: ImpactPillsResponse = await getImpactPillsService().forProposals(
+            request,
+            request.query
+          );
           return response.ok({ body });
         } catch (error) {
           return handleRouteError(error, response, logger);

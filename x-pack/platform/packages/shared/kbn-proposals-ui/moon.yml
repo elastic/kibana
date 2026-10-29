@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/proposals-common'
   - '@kbn/i18n-react'
   - '@kbn/ui-callout'
+  - '@kbn/test-jest-helpers'
 tags:
   - shared-browser
   - package
@@ -33,6 +34,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

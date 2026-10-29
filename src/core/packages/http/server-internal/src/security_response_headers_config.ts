@@ -10,6 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PermissionsPolicyConfigType } from './permissions_policy';
+import { addReportToParameter } from './permissions_policy';
 
 export const securityResponseHeadersSchema = schema.object({
   strictTransportSecurity: schema.oneOf([schema.string(), schema.literal(null)], {
@@ -38,8 +39,11 @@ export const securityResponseHeadersSchema = schema.object({
   permissionsPolicy: schema.oneOf([schema.string(), schema.literal(null)], {
     // See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
     // Note: this currently lists all non-experimental permissions, as of May 2023
+    // `geolocation` is allowed for `self` because Maps' browser location starting view and the Canvas
+    // `location()` function call it. `fullscreen` allows Vidyard so that the videos Security Solution
+    // embeds can go fullscreen; core's CSP already allows Vidyard in `frame-src`.
     defaultValue:
-      'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()',
+      'camera=(), display-capture=(), fullscreen=(self "https://play.vidyard.com"), geolocation=(self), microphone=(), web-share=()',
   }),
   permissionsPolicyReportOnly: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
   disableEmbedding: schema.boolean({ defaultValue: false }), // is used to control X-Frame-Options and CSP headers
@@ -78,18 +82,21 @@ export function parseRawSecurityResponseHeadersConfig(
     securityResponseHeaders['Referrer-Policy'] = raw.referrerPolicy;
   }
 
-  const reportTo = rawPermissionsPolicyConfig.report_to.length
-    ? `;report-to=${rawPermissionsPolicyConfig.report_to}`
-    : '';
+  // Browsers read `report-to` as a single token, so only the first endpoint was ever used.
+  // Interpolating the whole list joined the names with commas, which split the parameter into
+  // extra members of the policy.
+  const [reportTo] = rawPermissionsPolicyConfig.report_to;
+  const withReportTo = (policy: string) =>
+    reportTo ? addReportToParameter(policy, reportTo) : policy;
 
   if (raw.permissionsPolicy) {
-    securityResponseHeaders['Permissions-Policy'] = `${raw.permissionsPolicy}${reportTo}`;
+    securityResponseHeaders['Permissions-Policy'] = withReportTo(raw.permissionsPolicy);
   }
 
   if (raw.permissionsPolicyReportOnly && reportTo) {
-    securityResponseHeaders[
-      'Permissions-Policy-Report-Only'
-    ] = `${raw.permissionsPolicyReportOnly}${reportTo}`;
+    securityResponseHeaders['Permissions-Policy-Report-Only'] = withReportTo(
+      raw.permissionsPolicyReportOnly
+    );
   }
 
   if (raw.crossOriginOpenerPolicy) {
