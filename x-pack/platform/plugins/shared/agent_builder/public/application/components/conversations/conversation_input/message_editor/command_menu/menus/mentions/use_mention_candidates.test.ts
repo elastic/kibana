@@ -9,8 +9,10 @@ import { renderHook } from '@testing-library/react';
 import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
+  EventActorType,
+  TimelineEventType,
 } from '@kbn/agent-builder-common';
-import type { Conversation } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationEvent, EventActor } from '@kbn/agent-builder-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useMentionCandidates } from './use_mention_candidates';
 
@@ -56,6 +58,14 @@ const zoe = profile('zoe', 'Zoe Adams');
 const knownProfiles = [julian, andrew, pierre, zoe, profile('me', 'Me Myself')];
 
 const round = (author?: { id: string }, origin?: { type: 'slack' }) => ({ author, origin });
+
+const userMessageEvent = (actor: EventActor): ConversationEvent => ({
+  id: `event-${actor.id}`,
+  created_at: '2026-10-28T00:00:00.000Z',
+  type: TimelineEventType.userMessage,
+  actor,
+  data: { message: 'hi' },
+});
 
 const makeConversation = (overrides: Partial<Conversation>): { conversation: Conversation } => ({
   conversation: {
@@ -135,6 +145,29 @@ describe('useMentionCandidates', () => {
 
       expect(mockUseUserProfiles).toHaveBeenCalledWith(
         expect.objectContaining({ uids: ['julian', 'andrew'] })
+      );
+    });
+
+    it('lists people who only posted to the team among the people in the chat', () => {
+      mockUseConversation.mockReturnValue({
+        conversation: {
+          ...publicChat().conversation,
+          events: [
+            userMessageEvent({ type: EventActorType.user, id: 'pierre' }),
+            userMessageEvent({ type: EventActorType.external, id: 'U123SLACK' }),
+          ],
+        },
+      });
+      mockUseSuggestUsers.mockReturnValue({ data: [zoe, pierre], isFetching: false });
+
+      expect(names('')).toEqual([
+        'Elastic AI Agent',
+        'Julian Rosado',
+        'Pierre Gayvallet',
+        'Zoe Adams',
+      ]);
+      expect(mockUseUserProfiles).toHaveBeenCalledWith(
+        expect.objectContaining({ uids: ['julian', 'pierre'] })
       );
     });
 

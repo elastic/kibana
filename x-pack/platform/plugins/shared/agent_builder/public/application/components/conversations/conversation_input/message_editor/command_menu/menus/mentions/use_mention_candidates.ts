@@ -7,8 +7,10 @@
 
 import { useMemo } from 'react';
 import {
+  EventActorType,
   isPublicConversation,
   isSharedConversation,
+  isUserMessageEvent,
   isUserProfileId,
   normalizeConversationAccessControl,
 } from '@kbn/agent-builder-common';
@@ -35,6 +37,12 @@ const getChatPersonIds = (conversation: Conversation | undefined, isPublic: bool
     conversation.rounds.forEach(({ author, origin }) => {
       if (author && !origin) {
         ids.push(author.id);
+      }
+    });
+    // A "Post to team" message is a user message event without a round
+    conversation.events?.forEach((event) => {
+      if (isUserMessageEvent(event) && event.actor.type === EventActorType.user) {
+        ids.push(event.actor.id);
       }
     });
   } else {
