@@ -221,6 +221,7 @@ export const entityRiskInputsDescriptorSchema = lazySchema(() =>
     entityName: str,
     entityId: str.optional(),
     subTab: str.optional(),
+    scopeId: str.optional(),
   })
 );
 

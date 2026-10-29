@@ -336,6 +336,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: EntityType.host,
             entityName: hostName,
             entityId: entityStoreEntityId,
+            scopeId,
             onShowEntity: onShowHost,
             title: hostName,
             subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
