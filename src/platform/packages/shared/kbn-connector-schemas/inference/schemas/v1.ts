@@ -84,6 +84,7 @@ const AITool = lazySchema(() =>
           name: z.string(),
           description: z.string().optional(),
           parameters: z.record(z.string(), z.any()).optional(),
+          strict: z.boolean().optional(),
         })
         .strict(),
     })
