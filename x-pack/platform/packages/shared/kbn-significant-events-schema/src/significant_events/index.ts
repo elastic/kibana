@@ -47,6 +47,7 @@ export type { KnowledgeIndicator } from '../queries';
 export {
   type SignificantEvent,
   type SignificantEventResponse,
+  type EventDeactivation,
   type SignificantEventInvestigation,
   type InvestigationRunStatus,
   type SignificantEventStatus,
@@ -58,6 +59,9 @@ export {
   significantEventStatusSchema,
   significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
+  operatorFallbackAssessmentNote,
+  MAX_DEACTIVATION_REASON_LENGTH,
+  INACTIVE_SERIES_LOOKBACK_HOURS,
 } from './events';
 export {
   MAX_SHORT_STRING_LENGTH,
