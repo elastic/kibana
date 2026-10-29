@@ -16,9 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getEbtProps } from '@kbn/ebt-click';
 import type { SessionPageVisit } from '../../../../common/sessions';
-import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import type { SessionWaterfallLayout } from '../utils/session_timeline';
 import { formatOffset } from '../utils/session_timeline';
@@ -39,18 +37,16 @@ export const pageColors = (pageVisits: SessionPageVisit[]): Map<string, string> 
 
 /**
  * The session on one bar: a segment per page visit, as wide as the time spent on the page, and a
- * marker at each error. Selecting a segment shows that visit in the journey.
+ * marker at each error.
  */
 export function SessionWaterfall({
   layout,
   pageVisits,
   colors,
-  onSelectVisit,
 }: {
   layout: SessionWaterfallLayout;
   pageVisits: SessionPageVisit[];
   colors: Map<string, string>;
-  onSelectVisit: (index: number) => void;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -66,11 +62,7 @@ export function SessionWaterfall({
     top: 0,
     bottom: 0,
     minWidth: 3,
-    padding: 0,
-    border: 'none',
     borderRight: `1px solid ${euiTheme.colors.emptyShade}`,
-    cursor: 'pointer',
-    '&:hover, &:focus-visible': { filter: 'brightness(1.15)' },
   });
   const markerCss = css({
     position: 'absolute',
@@ -110,13 +102,11 @@ export function SessionWaterfall({
           );
           return (
             <EuiToolTip key={index} content={label}>
-              <button
-                type="button"
+              <span
                 data-test-subj="digitalExperienceSessionWaterfallSegment"
-                {...getEbtProps({
-                  action: DIGITAL_EXPERIENCE_EBT_ACTIONS.VIEW_SESSION,
-                  element: SESSIONS_EBT_ELEMENTS.WATERFALL_PAGE,
-                })}
+                // Focusable, so keyboard users get the tooltip too.
+                tabIndex={0}
+                role="img"
                 aria-label={label}
                 css={segmentCss}
                 style={{
@@ -124,7 +114,6 @@ export function SessionWaterfall({
                   width: `${widthPercent}%`,
                   background: colors.get(page),
                 }}
-                onClick={() => onSelectVisit(index)}
               />
             </EuiToolTip>
           );

@@ -73,9 +73,7 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 - **Summary:** duration, page views, clicks and errors; when, who, browser and OS, location, entry and
   exit pages; and the session's Core Web Vitals.
 - **Timeline:** one bar for the session, with a segment per page visit as wide as the time spent on
-  the page and a marker per error. Selecting a segment scrolls to that visit.
-- **Page journey:** a card per page visit with its time, share of the session, clicks, errors and web
-  vitals, and its page views, clicks, errors and web vitals in order. Spans and logs are left out.
+  the page (its counts in a tooltip) and a marker per error.
 - **States:** a 404 leads back to the list; a timeline cut at the event limit is flagged.
 
 ## Sessions
