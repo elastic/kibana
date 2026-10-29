@@ -15,16 +15,18 @@ export {
   assertWorkerModeSpace,
   buildWorkerModePlan,
   createWorkerModeSuffix,
+  hostUserFromAlerts,
   resolveWorkerModeExample,
   WORKER_MODE_EXAMPLES,
   workerModeCleanupTargets,
 } from './plan';
-export type { WorkerModeCleanupTargets, WorkerModeSeedPlan } from './plan';
+export type { WorkerModeCleanupTargets, WorkerModeHostUser, WorkerModeSeedPlan } from './plan';
 export { toWorkerModeManifest } from './manifest';
 export type { WorkerModeManifest } from './manifest';
 export {
   cleanupWorkerModeSpace,
   ensureWorkerModePrerequisites,
   ensureWorkerModeSpace,
+  readWorkerModeHostUser,
   seedWorkerModePlan,
 } from './seed';

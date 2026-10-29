@@ -1244,6 +1244,7 @@ describe('discover session API transforms', () => {
         histogramPercentile: 'p99',
         gridSortField: 'recency',
         gridSortDirection: 'desc',
+        histogramVisualization: 'lnsHeatmap',
       };
       const savedMetricsSession = {
         ...discoverSessionAttributes,
@@ -1267,6 +1268,7 @@ describe('discover session API transforms', () => {
         counter_aggregation: 'max',
         gauge_aggregation: 'min',
         histogram_percentile: 'p99',
+        histogram_visualization: 'lnsHeatmap',
         grid_sort_field: 'recency',
         grid_sort_direction: 'desc',
       });

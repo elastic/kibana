@@ -330,6 +330,9 @@ export interface DocLinks {
     readonly attacksPage: string;
     readonly dashboardsPage: string;
     readonly detectionResponsePage: string;
+    readonly dataQualityPage: string;
+    readonly indicatorsPage: string;
+    readonly alertSummaryPage: string;
     readonly notesPage: string;
     readonly timelinesPage: string;
     readonly runAttackDiscoveryInWorkflow: string;

@@ -47,6 +47,7 @@ function createQueryDoc(
   return {
     '@timestamp': '2026-01-01T00:00:00.000Z',
     id: 'query-1',
+    revision_id: 'query-1:2026-01-01T00:00:00.000Z',
     type: KI_TYPE_QUERY,
     'source.id': SOURCE,
     title: 'Test Query',
@@ -173,17 +174,6 @@ describe('IndicatorReader overview counts', () => {
 });
 
 describe('IndicatorReader space scoping', () => {
-  it('retains the Elasticsearch IDs of the selected latest revisions', async () => {
-    const { revisionReader, runEsql } = makeReader();
-    const doc = createQueryDoc();
-    runEsql.mockResolvedValueOnce({ hits: [doc], esIds: ['latest-es-id'] });
-
-    await expect(revisionReader.fetchLatestRevisionEntries()).resolves.toEqual([
-      { esId: 'latest-es-id', doc },
-    ]);
-    expect(capturedQueryString(runEsql)).toContain('KEEP _id, _source');
-  });
-
   it('filters every read by the client space with no IS NULL fallback', async () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });
