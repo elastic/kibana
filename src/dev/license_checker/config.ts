@@ -82,7 +82,7 @@ export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0', '(MPL-2.0 OR Apache-2.0)'];
 // there are some licenses which should not be globally allowed
 // but can be brought in on a per-package basis
 export const PER_PACKAGE_ALLOWED_LICENSES = {
-  'openpgp@5.11.3': ['LGPL-3.0+'],
+  'openpgp@6.3.1': ['LGPL-3.0+'],
   // pnpm installs sharp's prebuilt libvips binaries for every platform (yarn only
   // kept the current platform), so the license check sees all of them on CI.
   '@img/sharp-libvips-darwin-arm64@1.3.4': ['LGPL-3.0-or-later'],
