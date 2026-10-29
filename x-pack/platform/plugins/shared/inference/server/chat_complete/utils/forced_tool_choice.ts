@@ -19,6 +19,7 @@ const CLAUDE_MODEL_KEYS_WITH_FORCED_TOOL_CHOICE = new Set([
   'sonnet-3-5',
   'sonnet-3-7',
   'opus-3',
+  'sonnet-3',
   'sonnet-4',
   'opus-4',
   'opus-4-1',
