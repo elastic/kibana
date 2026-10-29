@@ -18,8 +18,15 @@ export { checkSavedObjects } from './steps/check_saved_objects.ts';
 export { cpsTests } from './steps/cps_testing.ts';
 export { agentBuilderSmokeTestsSteps } from './steps/agent_builder_smoke_tests.ts';
 export { aiInfraGenAiSteps } from './steps/ai_infra_gen_ai.ts';
+export {
+  ftrBenchSteps,
+  jestBenchSteps,
+  pageLoadBenchSteps,
+  warmStartMemoryBenchSteps,
+} from './steps/benchmarks.ts';
 export { fleetCypressSteps } from './steps/fleet_cypress.ts';
 export { localCheck } from './steps/local_check.ts';
+export { postBuildSteps } from './steps/post_build.ts';
 export { renovateValidation } from './steps/renovate.ts';
 export { responseOpsCasesSteps } from './steps/response_ops_cases.ts';
 export { responseOpsSteps } from './steps/response_ops.ts';

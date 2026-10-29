@@ -20,8 +20,15 @@ import { checkSavedObjects } from './steps/check_saved_objects.ts';
 import { cpsTests } from './steps/cps_testing.ts';
 import { agentBuilderSmokeTestsSteps } from './steps/agent_builder_smoke_tests.ts';
 import { aiInfraGenAiSteps } from './steps/ai_infra_gen_ai.ts';
+import {
+  ftrBenchSteps,
+  jestBenchSteps,
+  pageLoadBenchSteps,
+  warmStartMemoryBenchSteps,
+} from './steps/benchmarks.ts';
 import { fleetCypressSteps } from './steps/fleet_cypress.ts';
 import { localCheck } from './steps/local_check.ts';
+import { postBuildSteps } from './steps/post_build.ts';
 import { renovateValidation } from './steps/renovate.ts';
 import { responseOpsCasesSteps } from './steps/response_ops_cases.ts';
 import { responseOpsSteps } from './steps/response_ops.ts';
@@ -83,12 +90,12 @@ export const FRAGMENTS: readonly Fragment[] = [
   yamlFragment('pull_request/deploy_project'),
   { ...yamlFragment('pull_request/fips'), steps: buildFipsImage },
   { ...yamlFragment('pull_request/fleet_cypress'), steps: fleetCypressSteps },
-  yamlFragment('pull_request/ftr_bench'),
-  yamlFragment('pull_request/jest_bench'),
+  { ...yamlFragment('pull_request/ftr_bench'), steps: ftrBenchSteps },
+  { ...yamlFragment('pull_request/jest_bench'), steps: jestBenchSteps },
   yamlFragment('pull_request/kbn_handlebars'),
   { ...yamlFragment('pull_request/local_check'), steps: localCheck },
-  yamlFragment('pull_request/page_load_bench'),
-  yamlFragment('pull_request/post_build'),
+  { ...yamlFragment('pull_request/page_load_bench'), steps: pageLoadBenchSteps },
+  { ...yamlFragment('pull_request/post_build'), steps: postBuildSteps },
   yamlFragment('pull_request/prompt_changes'),
   { ...yamlFragment('pull_request/renovate'), steps: renovateValidation },
   { ...yamlFragment('pull_request/response_ops'), steps: responseOpsSteps },
@@ -113,7 +120,7 @@ export const FRAGMENTS: readonly Fragment[] = [
   { ...yamlFragment('pull_request/storybooks'), steps: storybooks },
   yamlFragment('pull_request/sync_model_labels'),
   yamlFragment('pull_request/trigger_entity_store_performance'),
-  yamlFragment('pull_request/warm_start_memory_bench'),
+  { ...yamlFragment('pull_request/warm_start_memory_bench'), steps: warmStartMemoryBenchSteps },
   { ...yamlFragment('pull_request/workflows_oom_testing'), steps: workflowsOomTestingSteps },
 ];
 
