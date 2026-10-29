@@ -64,6 +64,8 @@ import type { AlertingPublisherContext } from '../events/domain_events';
 import { EventOriginActorToken } from '../event_origin/token';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
+import { RULE_UPDATED_EVENT_TYPE } from '../events/rule_event_publisher/events';
+import { RuleChangesHistoryEventLogger } from '../events/rule_changes_history_subscriber/rule_changes_history_event_logger';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -243,7 +245,9 @@ export class RulesClient {
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
     @inject(EventOriginActorToken) actor: EventOriginActor,
-    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
+    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions,
+    @inject(RuleChangesHistoryEventLogger)
+    private readonly changeHistoryEventLogger: RuleChangesHistoryEventLogger
   ) {
     this.eventContext = { request, origin: toEventOrigin(actor, request, rulesClientOptions) };
     this.config = pluginConfigAccessor.get<PluginConfig>();
@@ -1946,7 +1950,8 @@ export class RulesClient {
 
   /**
    * Replaces the rule's configuration with a change-history snapshot. The
-   * current `enabled` state is kept and the version is bumped.
+   * current `enabled` state is kept and the version is bumped. Resolves once
+   * the restore's change-history entry is searchable.
    */
   @withApm
   public async restoreRule({
@@ -1961,17 +1966,19 @@ export class RulesClient {
     const parsed = this.parseRuleData(putRuleDataSchema, toRestoreRuleData(snapshot), 'restore');
     this.artifactTypeRegistry.validate(parsed.artifacts);
 
-    return this.replaceExistingRule({ id, parsed, currentVersion });
+    return this.replaceExistingRule({ id, parsed, currentVersion, awaitChangeHistory: true });
   }
 
   private async replaceExistingRule({
     id,
     parsed,
     currentVersion,
+    awaitChangeHistory = false,
   }: {
     id: string;
     parsed: PutRuleData;
     currentVersion?: number;
+    awaitChangeHistory?: boolean;
   }): Promise<RuleResponse> {
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
@@ -2035,12 +2042,24 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
+    if (awaitChangeHistory) {
+      await this.changeHistoryEventLogger.log(
+        {
+          type: RULE_UPDATED_EVENT_TYPE,
+          payload: { ruleId: rule.id, spaceId: this.spaceId, rule },
+        },
+        this.eventContext,
+        { refresh: 'wait_for' }
+      );
+    }
+
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       {
         ruleId: rule.id,
         spaceId: this.spaceId,
         rule,
         templateId: nextAttrs.metadata.template?.id,
+        ...(awaitChangeHistory ? { changeHistoryLogged: true } : {}),
       },
     ]);
     return rule;
