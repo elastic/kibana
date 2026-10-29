@@ -432,6 +432,23 @@ describe('WorkflowDetailPage', () => {
       expect(screen.getByTestId('workflow-execution-list')).toHaveTextContent('test-workflow-123');
     });
 
+    it('keeps the editable draft in the sidebar on the executions tab with no run selected', () => {
+      mockUseWorkflowUrlState.mockReturnValue({
+        activeTab: 'executions' as const,
+        isViewingExecution: false,
+        selectedExecutionId: undefined,
+        setSelectedExecution: jest.fn(),
+        setActiveTab: jest.fn(),
+      });
+
+      const { store } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(screen.getByTestId('workflow-execution-list')).toBeInTheDocument();
+      expect(store.getState().detail.activeTab).toBe('workflow');
+    });
+
     it('should render editor layout with execution detail when selectedExecutionId is set', () => {
       mockUseWorkflowUrlState.mockReturnValue({
         activeTab: 'executions' as const,
@@ -590,7 +607,8 @@ describe('WorkflowDetailPage', () => {
       });
 
       fireEvent.click(screen.getByTestId('workflowDetailExecutionsButton'));
-      expect(setActiveTab).toHaveBeenCalledWith('workflow', { replace: true });
+      // Push, so Back reopens the list.
+      expect(setActiveTab).toHaveBeenCalledWith('workflow', { replace: false });
     });
 
     it('keeps the executions tab when the execution detail closes', () => {

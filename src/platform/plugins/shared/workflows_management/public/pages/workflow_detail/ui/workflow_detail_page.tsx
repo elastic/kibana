@@ -232,18 +232,19 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // Flyout mode keeps the list open while the URL is on the executions tab.
   const isExecutionListOpen = activeTab === 'executions';
 
-  // Both handlers also close a selected run. They must replace, or Back reopens it.
+  // Closing the list alone pushes, so Back reopens it. Closing a selected run must replace, or
+  // Back reopens the run.
+  const closeExecutionList = useCallback(() => {
+    setUrlTab('workflow', { replace: Boolean(selectedExecutionId) });
+  }, [selectedExecutionId, setUrlTab]);
+
   const onOpenExecutionList = useCallback(() => {
     if (isExecutionListOpen || selectedExecutionId) {
-      setUrlTab('workflow', { replace: true });
+      closeExecutionList();
       return;
     }
     setUrlTab('executions');
-  }, [isExecutionListOpen, selectedExecutionId, setUrlTab]);
-
-  const onCloseExecutionList = useCallback(() => {
-    setUrlTab('workflow', { replace: true });
-  }, [setUrlTab]);
+  }, [closeExecutionList, isExecutionListOpen, selectedExecutionId, setUrlTab]);
 
   // `/create` starts on the agentic-first landing. `?startBlank=true` ("Start manually"
   // on the empty list) skips it.
@@ -419,7 +420,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
             {/* Unmount while a run is open. A hidden list flyout keeps EUI's focus trap and
                 moves focus to the skip link. Filters and the highlighted row live in the URL. */}
             {canShowExecutionUi && id && isExecutionListOpen && !selectedExecutionId && (
-              <WorkflowExecutionListFlyout workflowId={id} onClose={onCloseExecutionList} />
+              <WorkflowExecutionListFlyout workflowId={id} onClose={closeExecutionList} />
             )}
             {canShowExecutionUi && selectedExecutionId && (
               <WorkflowExecutionFlyout
