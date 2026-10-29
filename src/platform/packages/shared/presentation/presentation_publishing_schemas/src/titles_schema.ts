@@ -9,6 +9,9 @@
 
 import { z } from '@kbn/zod';
 
+// unchanged from main apart from one prototype field; converting this shared schema to
+// lazySchema is out of scope for the prototype branch
+// eslint-disable-next-line @kbn/eslint/require_lazy_zod_schema
 export const serializedTitlesSchema = z
   .object({
     description: z.string().optional().meta({ description: 'A short description of the panel.' }),

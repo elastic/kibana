@@ -10,6 +10,9 @@
 import { z } from '@kbn/zod';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../constants';
 
+// unchanged from main apart from one prototype field; converting this shared schema to
+// lazySchema is out of scope for the prototype branch
+// eslint-disable-next-line @kbn/eslint/require_lazy_zod_schema
 export const optionsSchema = z
   .object({
     auto_apply_filters: z.boolean().default(DEFAULT_DASHBOARD_OPTIONS.auto_apply_filters).meta({
