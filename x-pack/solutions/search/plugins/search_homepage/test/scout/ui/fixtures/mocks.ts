@@ -12,6 +12,7 @@ const DEPLOYMENT_STATS_API_PATH = '/internal/elasticsearch_home/deployment_stats
 interface DeploymentStats {
   dataPanelAccess: { showPanel: boolean; showDocuments: boolean; showTotalSize: boolean };
   indicesCount: number | null;
+  dataStreamsCount: number | null;
   documentsCount: number | null;
   vectorCount: number | null;
   storeSizeBytes: number | null;
@@ -24,6 +25,7 @@ interface DeploymentStats {
 const EMPTY_DEPLOYMENT_STATS: DeploymentStats = {
   dataPanelAccess: { showPanel: true, showDocuments: true, showTotalSize: true },
   indicesCount: 0,
+  dataStreamsCount: 0,
   documentsCount: 0,
   vectorCount: 0,
   storeSizeBytes: 0,

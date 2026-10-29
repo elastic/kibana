@@ -34,8 +34,7 @@ export const getSearchHomeConfig = ({
   telemetryPrefix: TELEMETRY_PREFIX,
   storageKeyPrefix: STORAGE_KEY_PREFIX,
   dataCardTooltip: i18n.translate('xpack.searchHomepage.home.dataCard.tooltip', {
-    defaultMessage:
-      'These stats cover the indices and data streams you can access. Each data stream counts as one index, and its documents and size are included in the totals. System and hidden indices are not included.',
+    defaultMessage: 'Totals reflect indices and data streams you can access.',
   }),
   ideSetup: {
     prompt: IDE_PROMPT,

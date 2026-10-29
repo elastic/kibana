@@ -22,6 +22,7 @@ export interface DataPanelAccess {
 export interface DeploymentStatsResponse {
   dataPanelAccess: DataPanelAccess;
   indicesCount: number | null;
+  dataStreamsCount: number | null;
   vectorCount: number | null;
   storeSizeBytes: number | null;
   dashboardsCount: number | null;

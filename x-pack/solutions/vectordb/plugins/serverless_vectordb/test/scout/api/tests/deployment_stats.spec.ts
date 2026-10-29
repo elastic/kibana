@@ -17,6 +17,7 @@ import { apiTest, COMMON_HEADERS, DEPLOYMENT_STATS_API_PATH } from '../fixtures'
 const EXPECTED_TYPES: Record<string, 'number' | 'object'> = {
   dataPanelAccess: 'object',
   indicesCount: 'number',
+  dataStreamsCount: 'number',
   documentsCount: 'number',
   vectorCount: 'number',
   storeSizeBytes: 'number',

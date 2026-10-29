@@ -42,7 +42,15 @@ export const registerDeploymentStatsRoute = (
         );
 
         const [
-          { dataPanelAccess, indicesCount, storeSizeBytes, vectorCount, documentsCount, newIndex },
+          {
+            dataPanelAccess,
+            indicesCount,
+            dataStreamsCount,
+            storeSizeBytes,
+            vectorCount,
+            documentsCount,
+            newIndex,
+          },
           dashboardsCount,
           { total: apiKeysCount, expiring: expiringApiKeysCount },
         ] = await Promise.all([
@@ -60,6 +68,7 @@ export const registerDeploymentStatsRoute = (
           body: {
             dataPanelAccess,
             indicesCount,
+            dataStreamsCount,
             storeSizeBytes,
             vectorCount,
             documentsCount,

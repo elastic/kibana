@@ -91,8 +91,10 @@ is otherwise scoped to the indices they hold it on.
   needs. Documents need `read` or `all`. Total size needs `monitor`, `manage` or `all`, which
   `viewer` and `editor` lack.
 
-The card is dropped when fewer than two of its stats are left, as for a stateful role with only
-`view_index_metadata`. The "Manage data" action is gated separately on reaching Index Management.
+The "Data streams" stat is left out on Vector DB projects (`cloud.serverless.projectType` is
+`vectordb`), where users can not create data streams. The card is dropped when fewer than two of its 
+stats are left, as on Vector DB for a role with only `view_index_metadata`. The "Manage data" action 
+is gated separately on reaching Index Management.
 
 The Dashboards, Workflows and API Keys cards render only when the user can reach the app they link
 to: the app's nav link must exist, and for workflows the `workflowsManagement.readWorkflow`
@@ -122,8 +124,10 @@ declare its props in a helper rather than inline.
   come from `_metering/stats` on serverless. Stateful, where metering does not exist, counts with
   `_resolve/index` and sizes with the caller's `_stats`. Stateful sizes use the full data set of primary shards
   (`total_data_set_size_in_bytes`), so both report the size of the data, including frozen tier
-  indices, rather than the disk used by replicas. User-created data streams count towards the
-  index, document, and size stats, each as a single index however many backing indices it has.
+  indices, rather than the disk used by replicas. User-created data streams are counted in
+  `dataStreamsCount`, each once however many backing indices it has, and their documents and size 
+  count towards the document and size stats. The onboarding banner only looks at `indicesCount`, so a 
+  deployment holding only data streams still gets it.
   Data streams flagged `system` or hidden, dot-prefixed, or created for Elastic's own features are
   left out, and data streams are never reported as the newest index.
 - `POST /internal/elasticsearch_home/starred_dashboards_count` — resolves favorited dashboard ids

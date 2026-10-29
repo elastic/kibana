@@ -35,10 +35,19 @@ export const HomePage = () => {
   const { user } = useAuthenticatedUser();
   const { stats, isLoading } = useDeploymentStats();
   const hasData = stats.indicesCount !== 0 || (stats.vectorCount ?? 0) > 0;
+  // Vector DB projects cannot hold data streams, so the count would always be 0 there.
+  const showDataStreams = cloud?.serverless.projectType !== 'vectordb';
 
   const username = user?.full_name || user?.email;
 
-  const statCardDeps = { application, chrome, stats, getTelemetryId, dataCardTooltip };
+  const statCardDeps = {
+    application,
+    chrome,
+    stats,
+    getTelemetryId,
+    dataCardTooltip,
+    showDataStreams,
+  };
   const dataCard = getDataCard(statCardDeps);
   const secondaryCards = getSecondaryCards(statCardDeps);
 

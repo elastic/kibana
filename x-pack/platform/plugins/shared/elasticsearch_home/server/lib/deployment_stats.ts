@@ -54,7 +54,8 @@ interface RequestResult<T> {
 }
 
 interface ResolvedIndices {
-  count: number;
+  indicesCount: number;
+  dataStreamsCount: number;
   /** Regular indices plus each data stream's backing indices: the indices index stats reports a size for. */
   indexAndBackingIndexNames: string[];
 }
@@ -62,6 +63,7 @@ interface ResolvedIndices {
 interface IndexStats {
   dataPanelAccess: DataPanelAccess;
   indicesCount: number | null;
+  dataStreamsCount: number | null;
   storeSizeBytes: number | null;
   vectorCount: number | null;
   documentsCount: number | null;
@@ -240,9 +242,9 @@ const fetchMeteredIndices = async (
   }
 };
 
-/** Counts each data stream once, leaving its backing indices out of the index count. */
-const countMeteredIndices = ({ indices, dataStreams }: MeteredIndices): number =>
-  indices.filter(({ datastream }) => !datastream).length + dataStreams.length;
+/** Leaves data stream backing indices out of the index count. */
+const countMeteredIndices = ({ indices }: MeteredIndices): number =>
+  indices.filter(({ datastream }) => !datastream).length;
 
 /**
  * `_metering/stats` is serverless-only, so stateful deployments read sizes from index stats instead.
@@ -280,8 +282,8 @@ const fetchStatefulIndexSizes = async (
 };
 
 /**
- * Counts the caller's regular user indices plus their user data streams on stateful, each data
- * stream once however many backing indices it has. `_resolve/index` needs `read` or
+ * Counts the caller's regular user indices and, separately, their user data streams on stateful,
+ * each data stream once however many backing indices it has. `_resolve/index` needs `read` or
  * `view_index_metadata`, so the count is not withheld from callers who cannot see sizes. The
  * pattern leaves out backing indices, system data streams, and hidden or internal ones.
  */
@@ -298,7 +300,8 @@ const resolveUserIndices = async (
       });
 
     const resolved = {
-      count: indices.length + dataStreams.length,
+      indicesCount: indices.length,
+      dataStreamsCount: dataStreams.length,
       indexAndBackingIndexNames: [
         ...indices.map(({ name }) => name),
         ...dataStreams.flatMap(({ backing_indices: backingIndices = [] }) => backingIndices),
@@ -391,6 +394,7 @@ export const fetchNewIndex = async (
 interface IndexReads {
   dataPanelAccess: DataPanelAccess;
   indicesCount: number | null;
+  dataStreamsCount: number | null;
   documentsCount: number | null;
   indexSizes: IndexSizeStat[] | null;
 }
@@ -416,6 +420,7 @@ const fetchServerlessIndexReads = async (
       showTotalSize: metered.hasPrivilege,
     },
     indicesCount: metered.value && countMeteredIndices(metered.value),
+    dataStreamsCount: metered.value?.dataStreams.length ?? null,
     documentsCount: documents.value,
     indexSizes: metered.value?.indices ?? null,
   };
@@ -448,7 +453,8 @@ const fetchStatefulIndexReads = async (
       showDocuments: showPanel && documents.hasPrivilege,
       showTotalSize: showPanel && sizes.hasPrivilege && sizesMatchCountedIndices,
     },
-    indicesCount: indices.value?.count ?? null,
+    indicesCount: indices.value?.indicesCount ?? null,
+    dataStreamsCount: indices.value?.dataStreamsCount ?? null,
     documentsCount: documents.value,
     indexSizes: sizes.value,
   };
@@ -469,7 +475,7 @@ export const fetchIndexStats = async (
   { isServerless, vectorCountEnabled = VECTOR_COUNT_ENABLED }: IndexStatsOptions
 ): Promise<IndexStats> => {
   const [
-    { dataPanelAccess, indicesCount, documentsCount, indexSizes },
+    { dataPanelAccess, indicesCount, dataStreamsCount, documentsCount, indexSizes },
     vectorCount,
     newIndexCandidate,
   ] = await Promise.all([
@@ -497,7 +503,15 @@ export const fetchIndexStats = async (
       : null,
   };
 
-  return { dataPanelAccess, indicesCount, storeSizeBytes, vectorCount, documentsCount, newIndex };
+  return {
+    dataPanelAccess,
+    indicesCount,
+    dataStreamsCount,
+    storeSizeBytes,
+    vectorCount,
+    documentsCount,
+    newIndex,
+  };
 };
 
 /**
