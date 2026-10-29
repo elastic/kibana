@@ -18,11 +18,18 @@ describe('Auto-follow pattern validators', () => {
       const errors = validateAutoFollowPattern({
         name: undefined,
         leaderIndexPatterns: undefined,
+        leaderIndexExclusionPatterns: undefined,
         followIndexPatternPrefix: undefined,
         followIndexPatternSuffix: undefined,
       });
 
       expect(errors).toEqual({});
+    });
+
+    it('allows an empty list of leader index exclusion patterns', () => {
+      expect(validateAutoFollowPattern({ leaderIndexExclusionPatterns: [] })).toEqual({
+        leaderIndexExclusionPatterns: null,
+      });
     });
 
     it('should validate all props from auto-follow patten', () => {

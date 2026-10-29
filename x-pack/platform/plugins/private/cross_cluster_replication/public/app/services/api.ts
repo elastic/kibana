@@ -37,7 +37,7 @@ import { areAllSettingsDefault } from './follower_index_default_settings';
 
 export type AutoFollowPatternCreateConfig = Pick<
   AutoFollowPattern,
-  'remoteCluster' | 'leaderIndexPatterns' | 'followIndexPattern'
+  'remoteCluster' | 'leaderIndexPatterns' | 'leaderIndexExclusionPatterns' | 'followIndexPattern'
 >;
 export type AutoFollowPatternConfig = AutoFollowPatternCreateConfig &
   Pick<AutoFollowPattern, 'active'>;
