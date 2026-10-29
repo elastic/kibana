@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq } from '../../../../common/lib/mock';
@@ -14,6 +15,7 @@ import {
   addAttachmentV2,
   getAuthWithSuperUser,
   deleteAllCaseItems,
+  getSpaceUrlPrefix,
 } from '../../../../common/lib/api';
 
 const unifiedCommentReq = {
@@ -55,6 +57,26 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: getAuthWithSuperUser('space2'),
         expectedHttpCode: 404,
       });
+    });
+
+    it('rejects data nested deeper than the maximum depth', async () => {
+      const postedCase = await createCase(supertestWithoutAuth, postCaseReq, 200, authSpace1);
+      const depth = 10_000;
+      // Sent as a raw string because the test client can't serialize input this deep.
+      const body = `{"type":"comment","owner":"securitySolutionFixture","data":{"content":${'['.repeat(
+        depth
+      )}${']'.repeat(depth)}}}`;
+
+      const { body: response } = await supertestWithoutAuth
+        .post(`${getSpaceUrlPrefix(authSpace1.space)}${CASES_URL}/${postedCase.id}/attachments`)
+        .set('kbn-xsrf', 'true')
+        .set('content-type', 'application/json')
+        .send(body)
+        .expect(400);
+
+      expect(response.message).to.contain(
+        'The data field is nested too deeply. The maximum depth is 30.'
+      );
     });
   });
 };
