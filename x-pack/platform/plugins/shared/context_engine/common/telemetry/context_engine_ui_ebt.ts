@@ -19,6 +19,7 @@ const ebtElement = {
   aiIndexListPageToolbar: 'contextEngine.aiIndexListPage.toolbar',
   aiIndexListPageDeleteModal: 'contextEngine.aiIndexListPage.deleteModal',
   aiIndexCreatePage: 'contextEngine.aiIndexCreatePage',
+  aiIndexCreateModal: 'contextEngine.aiIndexCreateModal',
   aiIndexCreatePageTraceSelector: 'contextEngine.aiIndexCreatePage.traceSelector',
   aiIndexDetailPage: 'contextEngine.aiIndexDetailPage',
   aiIndexDetailPageDescriptionPanel: 'contextEngine.aiIndexDetailPage.descriptionPanel',
