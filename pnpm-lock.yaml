@@ -4501,6 +4501,9 @@ importers:
       '@kbn/inference-cli':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-inference-cli
+      '@kbn/jest':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-jest
       '@kbn/jest-serializers':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-jest-serializers
@@ -6752,6 +6755,8 @@ importers:
   src/platform/packages/shared/kbn-interpreter: {}
 
   src/platform/packages/shared/kbn-io-ts-utils: {}
+
+  src/platform/packages/shared/kbn-jest: {}
 
   src/platform/packages/shared/kbn-kbn-client: {}
 

@@ -145,7 +145,7 @@ function parseJestArguments(): ParsedJestArguments {
     const flagsList = unknownFlags.join(', ');
     throw createFailError(`unexpected flag: ${flagsList}
 
-  If this flag is valid you might need to update the flags in "src/platform/packages/shared/kbn-test/src/jest/run.js".
+  If this flag is valid you might need to update the flags in "src/platform/packages/shared/kbn-jest/src/run.js".
 
   Run 'pnpm exec jest --help | node scripts/read_jest_help.mjs' to update this scripts knowledge of what
   flags jest supports

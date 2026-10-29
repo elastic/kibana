@@ -680,6 +680,7 @@ packages:
   - 'src/platform/packages/shared/kbn-i18n-react'
   - 'src/platform/packages/shared/kbn-interpreter'
   - 'src/platform/packages/shared/kbn-io-ts-utils'
+  - 'src/platform/packages/shared/kbn-jest'
   - 'src/platform/packages/shared/kbn-kbn-client'
   - 'src/platform/packages/shared/kbn-lens-embeddable-utils'
   - 'src/platform/packages/shared/kbn-logging'
