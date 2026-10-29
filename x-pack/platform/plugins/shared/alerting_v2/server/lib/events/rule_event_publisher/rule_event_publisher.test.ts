@@ -84,6 +84,18 @@ describe('RuleEventPublisher', () => {
       expect((singleEvent.payload as RuleEventPayload).correlationId).toBeUndefined();
     });
 
+    it('carries changeHistoryLogged only when the publisher already logged the change', () => {
+      emit(publisher, context, [
+        { ruleId: 'rule-1', spaceId: 'space-1', changeHistoryLogged: true },
+        { ruleId: 'rule-2', spaceId: 'space-1' },
+      ]);
+
+      expect(eventBus.publish.mock.calls[0][0].payload).toMatchObject({
+        changeHistoryLogged: true,
+      });
+      expect(eventBus.publish.mock.calls[1][0].payload).not.toHaveProperty('changeHistoryLogged');
+    });
+
     it('carries the full domain rule when provided', () => {
       const rule = {
         id: 'rule-1',

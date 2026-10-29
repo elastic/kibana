@@ -39,6 +39,11 @@ export interface RuleEventPayload {
    * for bulk emits.
    */
   readonly correlationId?: string;
+  /**
+   * Set when the publisher already wrote this change to change history and
+   * waited for it, so the change-history subscriber does not log it again.
+   */
+  readonly changeHistoryLogged?: boolean;
 }
 
 /**
