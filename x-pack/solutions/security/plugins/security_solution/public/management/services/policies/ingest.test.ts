@@ -39,25 +39,24 @@ describe('ingest service', () => {
         version: API_VERSIONS.public.v1,
       });
     });
-    it('encodes the package policy id so it cannot traverse to another API path', async () => {
-      await sendGetPackagePolicy(http, '../../../internal/security/users/foo');
-      expect(http.get).toHaveBeenCalledWith(
-        `${PACKAGE_POLICY_API_ROOT}/..%2F..%2F..%2Finternal%2Fsecurity%2Fusers%2Ffoo`,
-        { version: API_VERSIONS.public.v1 }
-      );
+    it('encodes special characters in the package policy id', async () => {
+      await sendGetPackagePolicy(http, 'policy/with spaces');
+      expect(http.get).toHaveBeenCalledWith(`${PACKAGE_POLICY_API_ROOT}/policy%2Fwith%20spaces`, {
+        version: API_VERSIONS.public.v1,
+      });
     });
   });
 
   describe('sendPutPackagePolicy()', () => {
-    it('encodes the package policy id so it cannot traverse to another API path', async () => {
+    it('encodes special characters in the package policy id', async () => {
       const packagePolicy = getPolicyDataForUpdate(
         new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy()
       );
-      await sendPutPackagePolicy(http, '../../../internal/security/users/foo', packagePolicy);
-      expect(http.put).toHaveBeenCalledWith(
-        `${PACKAGE_POLICY_API_ROOT}/..%2F..%2F..%2Finternal%2Fsecurity%2Fusers%2Ffoo`,
-        { version: API_VERSIONS.public.v1, body: JSON.stringify(packagePolicy) }
-      );
+      await sendPutPackagePolicy(http, 'policy/with spaces', packagePolicy);
+      expect(http.put).toHaveBeenCalledWith(`${PACKAGE_POLICY_API_ROOT}/policy%2Fwith%20spaces`, {
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify(packagePolicy),
+      });
     });
   });
 

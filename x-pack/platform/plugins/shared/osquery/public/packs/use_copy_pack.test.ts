@@ -90,24 +90,22 @@ describe('useCopyPack', () => {
     expect(invalidateSpy).toHaveBeenCalledWith([PACKS_ID]);
   });
 
-  it('encodes the pack id so it cannot traverse to another API path', async () => {
+  it('encodes special characters in the pack id', async () => {
     mockHttp.post.mockResolvedValue({
       data: { saved_object_id: 'new-pack-id', name: 'my-pack_copy' },
     });
 
-    const { result } = renderHook(
-      () => useCopyPack({ packId: '../../../internal/security/users/foo' }),
-      { wrapper: createWrapper(queryClient) }
-    );
+    const { result } = renderHook(() => useCopyPack({ packId: 'pack/with spaces' }), {
+      wrapper: createWrapper(queryClient),
+    });
 
     await act(async () => {
       await result.current.mutateAsync();
     });
 
-    expect(mockHttp.post).toHaveBeenCalledWith(
-      '/api/osquery/packs/..%2F..%2F..%2Finternal%2Fsecurity%2Fusers%2Ffoo/copy',
-      { version: '2023-10-31' }
-    );
+    expect(mockHttp.post).toHaveBeenCalledWith('/api/osquery/packs/pack%2Fwith%20spaces/copy', {
+      version: '2023-10-31',
+    });
   });
 
   it('shows an error toast on failure', async () => {
