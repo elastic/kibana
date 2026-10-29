@@ -180,6 +180,17 @@ export type {
   HttpSelfUnauthorizedErrorHandlerRetryResult,
   HttpSelfUnauthorizedErrorHandlerToolkit,
 } from './src/self_client_unauthorized_error_handler';
+export type {
+  HttpSelfCredentialRefresher,
+  HttpSelfCredentialRefresherNotHandledResult,
+  HttpSelfCredentialRefresherOptions,
+  HttpSelfCredentialRefresherRejectParams,
+  HttpSelfCredentialRefresherRejectResult,
+  HttpSelfCredentialRefresherReplaceParams,
+  HttpSelfCredentialRefresherReplaceResult,
+  HttpSelfCredentialRefresherResult,
+  HttpSelfCredentialRefresherToolkit,
+} from './src/self_client_credential_refresher';
 
 export type {
   HttpAuth,

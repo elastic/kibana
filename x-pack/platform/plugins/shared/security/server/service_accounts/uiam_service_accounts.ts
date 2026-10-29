@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import moment from 'moment';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
@@ -17,13 +18,17 @@ import type {
   AuditServiceSetup,
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { parseCreateServiceAccountParams } from './create_params';
+import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
 import { toDescriptionField } from './description_field';
-import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import type {
+  CreateServiceAccountFakeRequestParams,
+  ServiceAccountMintedToken,
+} from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { getPlatformAssumerServiceAccountIds } from './platform_assumers';
 import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
@@ -105,13 +110,30 @@ const toDirectoryEntry = (
  * Validates the token exchange payload UIAM returns, so that a shape change fails loudly here
  * rather than leaking partially-undefined objects to consumers. Verified against image
  * `docker.elastic.co/cloud-ci/uiam:git-a67a2f75a615`, whose exchange response carries `token`
- * plus an `expires_in` ISO-8601 duration (currently `PT5M`) that is intentionally stripped:
- * token freshness is managed locally and nothing should key off the upstream TTL.
+ * plus an `expires_in` ISO-8601 duration (currently `PT5M`). The duration is advisory and read
+ * leniently, so a change to its type or format can never fail an exchange: a token whose lifetime
+ * is unknown is still usable, it is only never replaced ahead of a self call.
  */
-const exchangeTokenResponseSchema = z.object({
-  // codeql[js/kibana/unbounded-string-in-schema] upstream response — not caller-controlled input
-  token: z.string().min(1).max(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
-});
+const exchangeTokenResponseSchema = lazySchema(() =>
+  z.object({
+    // codeql[js/kibana/unbounded-string-in-schema] upstream response — not caller-controlled input
+    token: z.string().min(1).max(SERVICE_ACCOUNT_TOKEN_MAX_LENGTH),
+    expires_in: z.unknown().optional(),
+  })
+);
+
+/**
+ * Reads an ISO-8601 duration such as `PT5M` in milliseconds, or `undefined` for anything else.
+ * Bare numbers are refused rather than guessed at: `moment` reads `"300"` as 300 milliseconds.
+ */
+const parseIsoDurationMs = (value: unknown): number | undefined => {
+  if (typeof value !== 'string' || value.length > 64 || !value.startsWith('P')) {
+    return undefined;
+  }
+
+  const durationMs = moment.duration(value).asMilliseconds();
+  return Number.isFinite(durationMs) && durationMs > 0 ? durationMs : undefined;
+};
 
 const uiamErrorResponseSchema = z.object({
   error: z.object({ code: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH) }),
@@ -179,10 +201,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       logger,
       // `boundAt` is not consulted: UIAM issues a new id on every create, so a binding can never
       // name a later account than the one it was made for.
-      async (serviceAccountId) => {
-        const { token } = await this.exchangeToken(serviceAccountId);
-        return token;
-      },
+      (serviceAccountId) => this.exchangeToken(serviceAccountId),
       requestLifetimeMs
     );
   }
@@ -430,7 +449,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
    * credential. Deliberately private: the raw credential never leaves this backend — consumers
    * get a fake request bound to it instead.
    */
-  private async exchangeToken(serviceAccountId: string): Promise<{ token: string }> {
+  private async exchangeToken(serviceAccountId: string): Promise<ServiceAccountMintedToken> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot exchange a service account token: security features are disabled in Elasticsearch'
@@ -440,7 +459,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.logger.debug(
       `Attempting to exchange service account ${serviceAccountId} for an ephemeral token`
     );
-    let result: { token: string };
+    let result: { token: string; expires_in?: string };
     try {
       result = await this.uiam.exchangeServiceAccountToken(serviceAccountId);
     } catch (e) {
@@ -468,7 +487,8 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       throw new ServiceAccountTokenExchangeError(parsed.error, { retryable: false });
     }
 
-    return parsed.data;
+    const { token, expires_in: expiresIn } = parsed.data;
+    return { token, expiresInMs: parseIsoDurationMs(expiresIn) };
   }
 
   async createFakeRequest(params: CreateServiceAccountFakeRequestParams): Promise<KibanaRequest> {
@@ -488,7 +508,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   async reauthenticateFakeRequest(
     request: KibanaRequest
   ): Promise<{ authorization: string } | null> {
-    if (!this.fakeRequests.isServiceAccountRequest(request)) {
+    if (!this.fakeRequests.carriesIssuedToken(request)) {
       return null;
     }
 
@@ -499,6 +519,25 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
       return { authorization: `Bearer ${token}` };
     } catch {
+      return null;
+    }
+  }
+
+  async refreshFakeRequestBeforeUse(
+    request: KibanaRequest,
+    validForMs: number
+  ): Promise<{ authorization: string } | null> {
+    if (!this.fakeRequests.carriesIssuedToken(request)) {
+      return null;
+    }
+
+    try {
+      const token = await this.fakeRequests.ensureTokenValidFor(request, validForMs);
+      return { authorization: `Bearer ${token}` };
+    } catch (err) {
+      if (err instanceof ServiceAccountCredentialRefusedError) {
+        throw err;
+      }
       return null;
     }
   }

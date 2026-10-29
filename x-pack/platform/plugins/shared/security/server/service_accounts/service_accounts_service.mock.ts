@@ -32,6 +32,7 @@ export const serviceAccountsServiceMock = {
         })
       ),
       reauthenticateFakeRequest: jest.fn().mockResolvedValue(null),
+      refreshFakeRequestBeforeUse: jest.fn().mockResolvedValue(null),
       releaseFakeRequest: jest.fn(),
       getFakeRequestPrincipal: jest.fn().mockReturnValue(null),
       delete: jest.fn().mockResolvedValue({ warnings: [] }),
