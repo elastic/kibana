@@ -99,7 +99,7 @@ describe('ProcessingNode', () => {
     expect(isShown('streamsCanvasProcessingNodeStats')).toBe(true);
   });
 
-  it('keeps its stats area, with no numbers, while nothing is known', () => {
+  it('keeps its stats area and its accessible name, with no numbers, while nothing is known', () => {
     mockUseSlotStats.mockReturnValue({
       status: 'unknown',
       eventsRate: null,
@@ -108,6 +108,9 @@ describe('ProcessingNode', () => {
 
     renderNode(PIPELINE_NODE_DATA);
 
+    expect(screen.getByTestId('streamsCanvasProcessingNodeLabel').textContent).toBe(
+      'Parse and enrich, 2 processors'
+    );
     expect(isShown('streamsCanvasProcessingNodeStats')).toBe(true);
     expect(isShown('streamsCanvasProcessingNodeRate')).toBe(false);
     expect(isShown('streamsCanvasProcessingNodeDuration')).toBe(false);

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { PROCESSING_SLOT_KIND } from '../../../../../services/unit_graph';
@@ -20,6 +20,10 @@ import { ProcessingNodeStats } from './processing_node_stats';
 /** Compact pill for processing applied between a source, a route and a destination. */
 export function ProcessingNode({ data, selected, dragging }: NodeProps<ProcessingNodeType>) {
   const { euiTheme } = useEuiTheme();
+  const countLabel = i18n.translate('xpack.streams.canvas.processingNode.processorCount', {
+    defaultMessage: '{count, plural, one {# processor} other {# processors}}',
+    values: { count: data.processorCount },
+  });
 
   return (
     <>
@@ -58,6 +62,11 @@ export function ProcessingNode({ data, selected, dragging }: NodeProps<Processin
           <EuiIcon type="processor" size="m" aria-hidden={true} />
         </div>
         <ProcessingNodeStats slot={data.ref} />
+        <EuiScreenReaderOnly>
+          <span data-test-subj="streamsCanvasProcessingNodeLabel">
+            {data.title}, {countLabel}
+          </span>
+        </EuiScreenReaderOnly>
       </EuiPanel>
       {data.ref.kind === PROCESSING_SLOT_KIND.pipeline ? (
         <ConnectionHandle
