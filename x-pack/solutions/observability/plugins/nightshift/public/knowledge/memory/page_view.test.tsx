@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
@@ -114,6 +114,27 @@ beforeEach(() => {
 });
 
 describe('MemoryPageView', () => {
+  it('renders the title, usefulness and confidence returned by the route', () => {
+    mockUseMemoryPage.mockReturnValue(asDetail({}, { usefulness: 0.75, confidence: 0.6 }));
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryPageTitle')).toHaveTextContent('Kafka consumer lag');
+    // Usefulness and confidence are the two displayed numbers, computed
+    // server-side so the UI and the model see the same values.
+    expect(screen.getByTestId('nightshiftMemoryUsefulnessValue')).toHaveTextContent('75%');
+    expect(screen.getByTestId('nightshiftMemoryConfidenceValue')).toHaveTextContent('60%');
+  });
+
+  it('filters Memory home by a tag when the tag is clicked', async () => {
+    mockUseMemoryPage.mockReturnValue(asDetail({ tags: ['memory', 'checkout'] }));
+    const { onSelectKeyword } = renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryTag-checkout'));
+
+    // Stored tags are canonical, so the tag is handed over as-is.
+    expect(onSelectKeyword).toHaveBeenCalledWith('checkout');
+  });
+
   it('clamps a rate outside [0, 1] rather than rendering 4000%', () => {
     mockUseMemoryPage.mockReturnValue(asDetail({}, { usefulness: 4, confidence: -1 }));
     renderView();
@@ -132,6 +153,41 @@ describe('MemoryPageView', () => {
     expect(screen.queryByText('memory')).not.toBeInTheDocument();
   });
 
+  it('badges the reason a memory was retired, so archived is not just a boolean', () => {
+    mockUseMemoryPage.mockReturnValue(
+      asDetail({ archived: true, archive_reason: 'harmful' as const })
+    );
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryArchivedBadge')).toHaveTextContent(
+      'judged misleading'
+    );
+  });
+
+  it('badges an archived memory beside its title', () => {
+    // The state is the first thing a reader needs, and it is not only in the
+    // provenance row: an archived memory is out of recall.
+    mockUseMemoryPage.mockReturnValue(asDetail({ archived: true }));
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryArchivedTitleBadge')).toHaveTextContent('Archived');
+  });
+
+  it('leaves an active memory unbadged beside its title', () => {
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.queryByTestId('nightshiftMemoryArchivedTitleBadge')).not.toBeInTheDocument();
+  });
+
+  it('shows no reason badge for a legacy archived page that has none', () => {
+    // A pre-`archive_reason` document reads as archived with nothing to say why.
+    mockUseMemoryPage.mockReturnValue(asDetail({ archived: true }));
+    renderView();
+
+    expect(screen.queryByTestId('nightshiftMemoryArchivedBadge')).not.toBeInTheDocument();
+  });
+
   it('hides archive and delete from a read-only viewer', () => {
     // The routes require manage for archive and configure for delete. A viewer
     // granted neither should see the page without actions that would 403.
@@ -144,6 +200,17 @@ describe('MemoryPageView', () => {
     expect(screen.queryByTestId('nightshiftMemoryDeleteButton')).not.toBeInTheDocument();
   });
 
+  it('archives the memory when the archive button is clicked', async () => {
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryArchiveToggle'));
+
+    await waitFor(() => {
+      expect(mockSetArchived).toHaveBeenCalledWith({ id: 'memory_kafka-lag', archived: true });
+    });
+  });
+
   it('restores an archived memory rather than re-archiving it', async () => {
     mockUseMemoryPage.mockReturnValue(asDetail({ archived: true, archive_reason: 'harmful' }));
     renderView();
@@ -154,6 +221,45 @@ describe('MemoryPageView', () => {
     await waitFor(() => {
       expect(mockSetArchived).toHaveBeenCalledWith({ id: 'memory_kafka-lag', archived: false });
     });
+  });
+
+  it('round-trips archive then restore off the same toggle', async () => {
+    // The hook invalidates rather than patching, so the archived state comes back
+    // from the server. Model that by flipping what the query returns.
+    let archived = false;
+    mockUseMemoryPage.mockImplementation(() =>
+      asDetail(archived ? { archived: true, archive_reason: 'manual' as const } : {})
+    );
+    mockSetArchived.mockImplementation(
+      ({ archived: next }: { archived: boolean }, options?: { onSuccess?: () => void }) => {
+        archived = next;
+        options?.onSuccess?.();
+      }
+    );
+    const { rerenderView } = renderView();
+
+    const toggle = () => screen.getByTestId('nightshiftMemoryArchiveToggle');
+    expect(toggle()).toHaveTextContent('Archive');
+
+    await userEvent.click(toggle());
+    expect(mockSetArchived).toHaveBeenLastCalledWith({
+      id: 'memory_kafka-lag',
+      archived: true,
+    });
+    // The write invalidated the query, so the archived state arrives from the
+    // server rather than from local state: re-render to pick it up.
+    rerenderView();
+    expect(toggle()).toHaveTextContent('Restore');
+
+    await userEvent.click(toggle());
+    expect(mockSetArchived).toHaveBeenLastCalledWith({
+      id: 'memory_kafka-lag',
+      archived: false,
+    });
+    rerenderView();
+    expect(toggle()).toHaveTextContent('Archive');
+    // Archived by a person carries the manual reason, and restoring clears it.
+    expect(mockSetArchived).toHaveBeenCalledTimes(2);
   });
 
   it('writes once per click, so a failed archive is never retried behind the operator', async () => {
@@ -176,6 +282,24 @@ describe('MemoryPageView', () => {
     // The dialog is open, but nothing has been deleted yet.
     expect(screen.getByTestId('nightshiftMemoryDeleteConfirm')).toBeInTheDocument();
     expect(mockDelete).not.toHaveBeenCalled();
+  });
+
+  it('deletes the revision it read, and reports back when confirmed', async () => {
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    const { onDeleted } = renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
+    await userEvent.click(screen.getByText('Delete permanently'));
+
+    await waitFor(() => {
+      // The revision travels with the request: the delete has to be conditional
+      // on what was read, not on what the server finds when it lands.
+      expect(mockDelete).toHaveBeenCalledWith(
+        { id: 'memory_kafka-lag', version: VERSION },
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+    });
+    expect(onDeleted).toHaveBeenCalled();
   });
 
   it('deletes the revision the dialog was opened on, not one refetched while open', async () => {
@@ -203,6 +327,20 @@ describe('MemoryPageView', () => {
         expect.objectContaining({ onSuccess: expect.any(Function) })
       )
     );
+  });
+
+  it('cancelling the confirmation leaves the memory alone', async () => {
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    const { onDeleted } = renderView();
+
+    await userEvent.click(screen.getByTestId('nightshiftMemoryDeleteButton'));
+    const dialog = screen.getByRole('alertdialog', { name: /delete this memory permanently/i });
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+
+    expect(mockDelete).not.toHaveBeenCalled();
+    expect(onDeleted).not.toHaveBeenCalled();
+    // The dialog is gone, so the page is back to its normal state.
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
 
   it('stays on the page when the delete write fails', async () => {
@@ -245,6 +383,31 @@ describe('MemoryPageView', () => {
     expect(screen.queryByTestId('nightshiftMemoryDeleteButton')).not.toBeInTheDocument();
   });
 
+  it('offers both actions to a viewer with manage and configure', () => {
+    givenCapabilities({ show: true, manage: true, configure: true });
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemoryArchiveToggle')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftMemoryDeleteButton')).toBeInTheDocument();
+  });
+
+  it('links the source task to the conversation that produced the memory', () => {
+    mockUseMemoryPage.mockReturnValue(
+      asDetail({ conversation_id: 'conv-1', agent_id: 'nightshift.investigation' })
+    );
+    renderView();
+
+    // The task text is the link: it names the conversation rather than pointing
+    // at it with the word "Source task".
+    const link = screen.getByTestId('nightshiftMemorySourceTaskLink');
+    expect(link).toHaveAttribute(
+      'href',
+      '/app/agent_builder/agents/nightshift.investigation/conversations/conv-1'
+    );
+    expect(link).toHaveTextContent('Checkout latency spike');
+  });
+
   it('names the conversation itself when the memory recorded no task text', () => {
     mockUseMemoryPage.mockReturnValue(
       asDetail({ context: '', conversation_id: 'conv-1', agent_id: 'agent-1' })
@@ -254,6 +417,16 @@ describe('MemoryPageView', () => {
     expect(screen.getByTestId('nightshiftMemorySourceTaskLink')).toHaveTextContent(
       'Agent Builder conversation'
     );
+  });
+
+  it('shows the task text unlinked for a memory with no recorded conversation', () => {
+    mockUseMemoryPage.mockReturnValue(asDetail());
+    renderView();
+
+    expect(screen.getByTestId('nightshiftMemorySourceTask')).toHaveTextContent(
+      'Checkout latency spike'
+    );
+    expect(screen.queryByTestId('nightshiftMemorySourceTaskLink')).not.toBeInTheDocument();
   });
 
   it('omits the source task for a memory that recorded neither', () => {

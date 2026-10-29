@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
@@ -122,6 +122,55 @@ describe('AutomationsPage', () => {
     };
   };
 
+  it('shows the empty state and create action when no automations exist', () => {
+    renderPage();
+
+    expect(screen.getByText('Automations run on triggers you define')).toBeInTheDocument();
+    expect(screen.queryByTestId('automationsSearch')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Create custom automation' }));
+    expect(screen.getByTestId('createAutomationFlyoutStub')).toHaveTextContent('new');
+  });
+
+  it('filters automations by name and clears filters', () => {
+    mockUseFetchAutomations.mockReturnValue({
+      data: {
+        automations: [
+          {
+            id: 'automation-1',
+            name: 'Alert triage',
+            isEnabled: true,
+            trigger: { rows: [{ kind: 'alert' }] },
+            runtime: { dailyDispatchLimit: 20 },
+            author: 'alice',
+          },
+          {
+            id: 'automation-2',
+            name: 'Weekly schedule',
+            isEnabled: false,
+            trigger: { rows: [{ kind: 'schedule' }] },
+            runtime: { dailyDispatchLimit: 20 },
+            author: 'bob',
+          },
+        ],
+      },
+      isInitialLoading: false,
+    });
+
+    renderPage();
+
+    fireEvent.change(screen.getByTestId('automationsSearch'), { target: { value: 'weekly' } });
+    expect(screen.getByText('Weekly schedule')).toBeInTheDocument();
+    expect(screen.queryByText('Alert triage')).not.toBeInTheDocument();
+
+    expect(screen.getByText('Showing 1 of 2 automations')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Clear filters' })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('automationsSearch'), { target: { value: 'nothing' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search and filters' }));
+    expect(screen.getByText('Alert triage')).toBeInTheDocument();
+    expect(screen.getByText('Weekly schedule')).toBeInTheDocument();
+  });
+
   it('shows an error state and lets the user retry after loading fails', () => {
     const refetch = jest.fn();
     mockUseFetchAutomations.mockReturnValue({
@@ -179,6 +228,8 @@ describe('AutomationsPage', () => {
     const deleteMutate = jest.fn();
     const toggleMutate = jest.fn();
 
+    const rowOf = (name: string) => screen.getByText(name).closest('tr') as HTMLElement;
+
     beforeEach(() => {
       createMutate.mockClear();
       deleteMutate.mockClear();
@@ -210,6 +261,27 @@ describe('AutomationsPage', () => {
       mockUseCreateAutomation.mockReturnValue({ mutate: createMutate, isLoading: false });
       mockUseDeleteAutomation.mockReturnValue({ mutate: deleteMutate, isLoading: false });
       mockUseToggleAutomation.mockReturnValue({ mutate: toggleMutate, isLoading: false });
+    });
+
+    it('shows tags, run counts, usage, and the daily limit warning', () => {
+      renderPage();
+
+      const triageRow = rowOf('Triage incoming alerts');
+      expect(within(triageRow).getByTestId('automationTags')).toHaveTextContent('2');
+      expect(within(triageRow).getByTestId('automationRuns-succeeded-triage')).toHaveTextContent(
+        '25'
+      );
+      expect(within(triageRow).getByTestId('automationRuns-failed-triage')).toHaveTextContent('–');
+      expect(within(triageRow).getByTestId('automationRuns-skipped-triage')).toHaveTextContent('3');
+      expect(within(triageRow).getByTestId('automationUsage')).toHaveTextContent('27 / 20');
+      expect(within(triageRow).getByTestId('automationLimitReached')).toBeInTheDocument();
+      expect(within(triageRow).getByText('Emily Clarke')).toBeInTheDocument();
+      expect(within(rowOf('Daily report')).getByText('You')).toBeInTheDocument();
+
+      const reportRow = rowOf('Daily report');
+      expect(within(reportRow).queryByTestId('automationTags')).not.toBeInTheDocument();
+      expect(within(reportRow).getByTestId('automationUsage')).toHaveTextContent('1 / 5');
+      expect(within(reportRow).queryByTestId('automationLimitReached')).not.toBeInTheDocument();
     });
 
     it('toggles an automation', () => {
@@ -256,6 +328,88 @@ describe('AutomationsPage', () => {
       expect(history.location.pathname).toBe('/automations');
     });
 
+    it('opens a detail flyout and returns to the list with router navigation', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Triage incoming alerts' }));
+
+      expect(screen.getByTestId('automationDetailFlyout')).toBeInTheDocument();
+      expect(document.querySelector('.euiTableRow-isSelected')).toHaveTextContent(
+        'Triage incoming alerts'
+      );
+      fireEvent.click(screen.getByTestId('automationCloseButton'));
+      expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
+    });
+
+    it('opens run history filtered by the clicked run count', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('automationRuns-skipped-triage'));
+
+      for (const pill of screen.getAllByTestId('automationRunFilter-skipped')) {
+        expect(pill).toHaveAttribute('aria-pressed', 'true');
+      }
+    });
+
+    it('steps through automations in the table sort order', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Triage incoming alerts' }));
+      expect(screen.getByTestId('automationPreviousButton')).toBeEnabled();
+      expect(screen.getByTestId('automationNextButton')).toBeDisabled();
+
+      fireEvent.click(screen.getAllByTestId('tableHeaderSortButton')[0]);
+      expect(screen.getByTestId('automationPreviousButton')).toBeDisabled();
+      expect(screen.getByTestId('automationNextButton')).toBeEnabled();
+    });
+
+    it('moves to the next automation with the arrow key while focus is in the flyout', () => {
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Daily report' }));
+      fireEvent.keyDown(screen.getByTestId('automationCloseButton'), { key: 'ArrowDown' });
+
+      expect(screen.getByRole('heading', { name: 'Triage incoming alerts' })).toBeInTheDocument();
+    });
+
+    it('filters by status with counts and clears the selection', async () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('automationStatusFilter'));
+      const activeOption = await screen.findByRole('option', { name: /Enabled/ });
+      expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+        'Enabled1',
+        'Paused1',
+        'Rate limited1',
+      ]);
+      expect(activeOption).toHaveTextContent('1');
+      expect(
+        screen.queryByTestId('nightshiftAutomationFilterClearSelection')
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(activeOption);
+      expect(screen.queryByRole('link', { name: 'Daily report' })).not.toBeInTheDocument();
+      expect(screen.getByText('Showing 1 of 2 automations')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('nightshiftAutomationFilterClearSelection'));
+      expect(
+        screen.getAllByTestId('nightshiftAutomationName').map(({ textContent }) => textContent)
+      ).toContain('Daily report');
+    });
+
+    it('filters rate limited automations from the banner', () => {
+      renderPage();
+
+      expect(screen.getByTestId('automationsRateLimitBanner')).toHaveTextContent(
+        '1 automation reached daily run limit'
+      );
+      fireEvent.click(screen.getByTestId('automationsShowRateLimited'));
+      expect(screen.queryByTestId('automationsShowRateLimited')).not.toBeInTheDocument();
+
+      expect(screen.queryByRole('link', { name: 'Daily report' })).not.toBeInTheDocument();
+      expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
+    });
+
     it('shows only the global callout when automations are also rate limited', () => {
       mockUseRunQuotas.mockReturnValue({
         data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: 3 } },
@@ -277,6 +431,57 @@ describe('AutomationsPage', () => {
       expect(screen.queryByTestId('automationsGlobalLimitBanner')).not.toBeInTheDocument();
       expect(screen.getByTestId('automationsRateLimitBanner')).toBeInTheDocument();
       expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
+    });
+
+    it('shows the paused callout only when the global investigation limit is reached', () => {
+      const quotas = (used: number) => ({
+        data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: used } },
+      });
+      mockUseRunQuotas.mockReturnValue(quotas(2));
+      const { unmount } = renderPage();
+      expect(screen.queryByTestId('automationsGlobalLimitBanner')).not.toBeInTheDocument();
+      unmount();
+
+      mockUseRunQuotas.mockReturnValue(quotas(3));
+      renderPage();
+      expect(screen.getByTestId('automationsGlobalLimitBanner')).toBeInTheDocument();
+    });
+
+    it('links the paused callout to the investigation settings only when the user can manage limits', () => {
+      const quotas = (canManage: boolean) => ({
+        data: {
+          enabled: true,
+          limits: { investigation: 3 },
+          counts: { investigation: 3 },
+          canManage,
+        },
+      });
+      mockUseRunQuotas.mockReturnValue(quotas(false));
+      const { unmount } = renderPage();
+      expect(screen.queryByTestId('automationsGlobalLimitSettingsLink')).not.toBeInTheDocument();
+      unmount();
+
+      mockUseRunQuotas.mockReturnValue(quotas(true));
+      renderPage();
+      expect(screen.getByTestId('automationsGlobalLimitSettingsLink')).toHaveAttribute(
+        'href',
+        '/app/nightshift/settings/investigations'
+      );
+    });
+
+    it('filters by the configured triggers', async () => {
+      renderPage();
+
+      fireEvent.click(screen.getByTestId('automationTriggerFilter'));
+      expect(await screen.findByRole('option', { name: /Alert triggered/ })).toBeInTheDocument();
+      expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+        'Alert triggered1',
+        'Scheduled1',
+      ]);
+      fireEvent.click(screen.getByRole('option', { name: /Scheduled/ }));
+
+      expect(screen.queryByText('Triage incoming alerts')).not.toBeInTheDocument();
+      expect(screen.getByTestId('nightshiftAutomationName')).toHaveTextContent('Daily report');
     });
 
     it('hides management actions for read-only users', () => {

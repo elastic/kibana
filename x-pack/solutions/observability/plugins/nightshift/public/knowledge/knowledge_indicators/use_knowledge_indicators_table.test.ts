@@ -160,9 +160,19 @@ function makeQueryKI(opts: {
 }
 
 describe('getKnowledgeIndicatorTitle', () => {
+  it('returns feature title when available', () => {
+    const ki = makeFeatureKI({ id: 'f1', source_id: 's1', title: 'My Feature' });
+    expect(getKnowledgeIndicatorTitle(ki)).toBe('My Feature');
+  });
+
   it('falls back to feature id when title is missing', () => {
     const ki = makeFeatureKI({ id: 'f1', source_id: 's1', title: undefined });
     expect(getKnowledgeIndicatorTitle(ki)).toBe('f1');
+  });
+
+  it('returns query title when available', () => {
+    const ki = makeQueryKI({ id: 'q1', title: 'My Query', source_id: 's1' });
+    expect(getKnowledgeIndicatorTitle(ki)).toBe('My Query');
   });
 
   it('falls back to query id when title is missing', () => {

@@ -12,6 +12,7 @@ import {
   byCriticalityAndUpdatedAtDesc,
   getInvestigationStatusLabel,
   getLatestInvestigation,
+  getStatusColor,
   hasRunningInvestigations,
   isEventInvestigated,
   isInvestigationRunning,
@@ -92,6 +93,12 @@ describe('significant_event_status', () => {
 
     expect(() => [...events].sort(byCriticalityAndUpdatedAtDesc)).not.toThrow();
     expect([...events].sort(byCriticalityAndUpdatedAtDesc)[0].event_id).toBe('critical');
+  });
+
+  it('maps status to list dot color', () => {
+    expect(getStatusColor('active')).toBe('danger');
+    expect(getStatusColor('recovering')).toBe('danger');
+    expect(getStatusColor('inactive')).toBe('success');
   });
 
   it('derives investigation badge label from investigations, not event status', () => {

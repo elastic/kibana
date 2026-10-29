@@ -16,8 +16,12 @@ import { KnowledgePage, type KnowledgePageHeaderProps } from './page';
 
 jest.mock('../hooks/use_kibana');
 jest.mock('./hooks/use_knowledge_tabs_availability');
+const mockAppHeader = jest.fn();
 jest.mock('../app/app_header', () => ({
-  NightshiftAppHeader: () => <div data-test-subj="knowledgeHeader" />,
+  NightshiftAppHeader: (props: unknown) => {
+    mockAppHeader(props);
+    return <div data-test-subj="knowledgeHeader" />;
+  },
 }));
 jest.mock('./cortex/tab', () => ({
   CortexTab: () => <div data-test-subj="cortexTab" />,
@@ -41,17 +45,32 @@ const settledOff = { isEnabled: false, isLoading: false };
 const knowledgeIndicatorsEnabled = { isEnabled: true, isLoading: false };
 const headerProps: KnowledgePageHeaderProps = {};
 
-const renderPage = (path: string, availability: KnowledgeTabsAvailability) => {
-  mockUseKnowledgeTabsAvailability.mockReturnValue(availability);
+const renderPage = (path: string, initialAvailability: KnowledgeTabsAvailability) => {
+  let availability = initialAvailability;
+  mockUseKnowledgeTabsAvailability.mockImplementation(() => availability);
   const history = createMemoryHistory({ initialEntries: [path] });
-
-  return render(
+  const result = render(
     <Router history={history}>
       <Route path="/knowledge/:tab?">
         <KnowledgePage headerProps={headerProps} />
       </Route>
     </Router>
   );
+
+  return {
+    ...result,
+    history,
+    setAvailability: (next: KnowledgeTabsAvailability) => {
+      availability = next;
+      result.rerender(
+        <Router history={history}>
+          <Route path="/knowledge/:tab?">
+            <KnowledgePage headerProps={headerProps} />
+          </Route>
+        </Router>
+      );
+    },
+  };
 };
 
 beforeEach(() => {
@@ -75,6 +94,69 @@ it('renders an enabled deep link without waiting for unrelated gates', async () 
 
   expect(await screen.findByTestId('memoryTab')).toBeInTheDocument();
   expect(screen.queryByTestId('nightshiftKnowledgePageLoading')).not.toBeInTheDocument();
+});
+
+it('marks only the Decision Trees tab with the developer mode badge', async () => {
+  renderPage('/knowledge/decision_trees', {
+    knowledge_indicators: knowledgeIndicatorsEnabled,
+    cortex: settledOff,
+    memory: { isEnabled: true, isLoading: false },
+    decision_trees: { isEnabled: true, isLoading: false },
+  });
+
+  expect(await screen.findByTestId('decisionTreesTab')).toBeInTheDocument();
+  const { tabs } = mockAppHeader.mock.lastCall[0];
+  expect(tabs.map(({ id, badge }: { id: string; badge?: unknown }) => ({ id, badge }))).toEqual([
+    { id: 'knowledge_indicators', badge: undefined },
+    { id: 'memory', badge: undefined },
+    { id: 'decision_trees', badge: { iconType: 'code' } },
+  ]);
+});
+
+it('redirects a Decision Trees deep link when the tab is hidden', async () => {
+  const { history } = renderPage('/knowledge/decision_trees', {
+    knowledge_indicators: knowledgeIndicatorsEnabled,
+    cortex: settledOff,
+    memory: settledOff,
+    decision_trees: settledOff,
+  });
+
+  expect(history.location.pathname).toBe('/knowledge/knowledge_indicators');
+  expect(await screen.findByTestId('knowledgeIndicatorsTab')).toBeInTheDocument();
+});
+
+it('opens Knowledge Indicators immediately for a disabled deep link', async () => {
+  const page = renderPage('/knowledge/memory', {
+    knowledge_indicators: knowledgeIndicatorsEnabled,
+    cortex: { isEnabled: false, isLoading: true },
+    memory: settledOff,
+    decision_trees: settledOff,
+  });
+
+  expect(page.history.location.pathname).toBe('/knowledge/knowledge_indicators');
+  expect(await screen.findByTestId('knowledgeIndicatorsTab')).toBeInTheDocument();
+
+  page.setAvailability({
+    knowledge_indicators: knowledgeIndicatorsEnabled,
+    cortex: { isEnabled: true, isLoading: false },
+    memory: settledOff,
+    decision_trees: settledOff,
+  });
+
+  expect(page.history.location.pathname).toBe('/knowledge/knowledge_indicators');
+  expect(screen.getByTestId('knowledgeIndicatorsTab')).toBeInTheDocument();
+});
+
+it('defaults to Knowledge Indicators while optional tabs are loading', async () => {
+  const { history } = renderPage('/knowledge', {
+    knowledge_indicators: knowledgeIndicatorsEnabled,
+    cortex: { isEnabled: false, isLoading: true },
+    memory: { isEnabled: false, isLoading: true },
+    decision_trees: { isEnabled: false, isLoading: true },
+  });
+
+  expect(history.location.pathname).toBe('/knowledge/knowledge_indicators');
+  expect(await screen.findByTestId('knowledgeIndicatorsTab')).toBeInTheDocument();
 });
 
 describe('getDefaultKnowledgeTab', () => {

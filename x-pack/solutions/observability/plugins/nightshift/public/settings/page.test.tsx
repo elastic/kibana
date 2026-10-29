@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import type { AppHeaderTab } from '@kbn/app-header';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { AppHeaderBack, AppHeaderTab } from '@kbn/app-header';
 import { createMemoryHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Route, Router } from '@kbn/shared-ux-router';
@@ -18,14 +18,18 @@ import { SettingsPage } from './page';
 jest.mock('../hooks/use_kibana');
 jest.mock('./hooks/use_apps_enabled');
 jest.mock('../app/app_header', () => ({
-  NightshiftAppHeader: ({ tabs }: { tabs: AppHeaderTab[] }) => (
+  NightshiftAppHeader: ({ back, tabs }: { back: AppHeaderBack; tabs: AppHeaderTab[] }) => (
     <div>
+      <a href={back.href} data-test-subj="nightshiftSettingsBackLink">
+        {back.label}
+      </a>
       {tabs.map((tab) => (
         <a
           key={tab.id}
           href={tab.href}
           onClick={tab.onClick}
           data-test-subj={tab['data-test-subj']}
+          data-selected={tab.isSelected}
         >
           {tab.label}
         </a>
@@ -78,8 +82,28 @@ describe('SettingsPage', () => {
     } as never);
   });
 
+  it.each([
+    ['general', 'general-settings-content'],
+    ['investigations', 'investigations-settings-content'],
+    ['detections', 'detections-settings-content'],
+  ])('renders the %s tab selected from the URL', (tab, testSubject) => {
+    renderPage(`/settings/${tab}`);
+
+    expect(screen.getByTestId(testSubject)).toBeInTheDocument();
+    expect(screen.getByTestId(`nightshiftSettingsTab-${tab}`)).toHaveAttribute(
+      'data-selected',
+      'true'
+    );
+  });
+
   it('redirects the base route to General when Apps is enabled', async () => {
     const { history } = renderPage('/settings');
+
+    await waitFor(() => expect(history.location.pathname).toBe('/settings/general'));
+  });
+
+  it('redirects an unknown tab to the default tab', async () => {
+    const { history } = renderPage('/settings/unknown');
 
     await waitFor(() => expect(history.location.pathname).toBe('/settings/general'));
   });
@@ -102,4 +126,36 @@ describe('SettingsPage', () => {
     expect(screen.queryByTestId('nightshiftSettingsTab-general')).not.toBeInTheDocument();
     expect(screen.getByTestId('detections-settings-content')).toBeInTheDocument();
   });
+
+  it('uses in-app navigation when switching tabs', () => {
+    const { history } = renderPage('/settings/general');
+
+    fireEvent.click(screen.getByTestId('nightshiftSettingsTab-investigations'));
+
+    expect(history.location.pathname).toBe('/settings/investigations');
+  });
+
+  it.each([
+    {
+      path: '/settings/detections?origin=detections',
+      expectedHref: '/app/nightshift/detections/events',
+      expectedLabel: 'Detections',
+    },
+    {
+      path: '/settings/detections',
+      expectedHref: '/app/nightshift/',
+      expectedLabel: 'Nightshift',
+    },
+  ])(
+    'links back to $expectedLabel from Detections settings for the matching origin',
+    ({ path, expectedHref, expectedLabel }) => {
+      renderPage(path);
+
+      expect(screen.getByTestId('nightshiftSettingsBackLink')).toHaveAttribute(
+        'href',
+        expectedHref
+      );
+      expect(screen.getByTestId('nightshiftSettingsBackLink')).toHaveTextContent(expectedLabel);
+    }
+  );
 });

@@ -208,6 +208,18 @@ describe('SourcesClient', () => {
       });
     });
 
+    it('rejects with 403 when the local part of a mixed source is not readable', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(
+        makeSavedObject(makeAttributes({ esql: 'FROM remote:logs-*, logs-local' }))
+      );
+      hasPrivileges(dataEsClient, false);
+
+      await expect(client.assertReadable('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
+
     it('rejects with 403 when the stored query cannot be parsed', async () => {
       const { client, soClient, dataEsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ esql: 'FROM' })));
@@ -382,6 +394,64 @@ describe('SourcesClient', () => {
       expect(viewsClient.getView).toHaveBeenCalledTimes(2);
     });
 
+    it('rejects a blank title before touching saved objects or ES', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(
+        client.create({ title: '   ', tags: [], esql: 'FROM logs-*' })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects a query that mixes types before touching saved objects or ES', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(
+        client.create({ title: 't', tags: [], esql: 'FROM logs-*, traces-*' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: expect.stringContaining('mixes'),
+      });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects an invalid query before touching saved objects or ES', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(
+        client.create({ title: 't', tags: [], esql: 'FROM logs-* | STATS c = COUNT(*)' })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects a Nightshift source view before touching saved objects or ES', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(
+        client.create({ title: 't', tags: [], esql: 'FROM $.nightshift.sources.*' })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects a $ wildcard that would match Nightshift source views', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+
+      await expect(client.create({ title: 't', tags: [], esql: 'FROM $.*' })).rejects.toMatchObject(
+        { output: { statusCode: 400 } }
+      );
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
     it('does not treat Unknown index as empty when FROM names several sources', async () => {
       const { client, soClient, dataEsClient } = setup();
       dataEsClient.esql.query.mockRejectedValue(unknownIndexError());
@@ -453,6 +523,38 @@ describe('SourcesClient', () => {
   });
 
   describe('update', () => {
+    it('rejects a disallowed command without writing', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await expect(
+        client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM logs-* | STATS c = COUNT(*)',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
+    it('rejects a Nightshift source view without writing', async () => {
+      const { client, soClient, viewsClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      await expect(
+        client.update('source-1', {
+          title: 'nginx errors',
+          tags: ['nginx'],
+          esql: 'FROM $.nightshift.sources.abc',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(viewsClient.putView).not.toHaveBeenCalled();
+    });
+
     it('keeps the stored type on a title-only save', async () => {
       const { client, soClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
@@ -609,9 +711,43 @@ describe('SourcesClient', () => {
         expect.stringContaining('Skipped restoring source source-1')
       );
     });
+
+    it('maps a missing saved object to a 404 that does not leak the type name', async () => {
+      const { client, soClient } = setup();
+      soClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(NIGHTSHIFT_SOURCE_SO_TYPE, 'nope')
+      );
+
+      await expect(
+        client.update('nope', { title: 't', tags: [], esql: 'FROM logs-*' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        message: 'Source nope not found',
+      });
+    });
   });
 
   describe('delete', () => {
+    it('deletes the view first, then the saved object', async () => {
+      const { client, soClient, viewsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+
+      const callOrder: string[] = [];
+      soClient.delete.mockImplementation(async () => {
+        callOrder.push('so');
+        return {};
+      });
+      viewsClient.deleteView.mockImplementation(async () => {
+        callOrder.push('view');
+      });
+
+      await client.delete('source-1');
+
+      expect(soClient.delete).toHaveBeenCalledWith(NIGHTSHIFT_SOURCE_SO_TYPE, 'source-1');
+      expect(viewsClient.deleteView).toHaveBeenCalledWith(NGINX_VIEW_NAME);
+      expect(callOrder).toEqual(['view', 'so']);
+    });
+
     it('does not delete the view when the caller cannot write the saved object', async () => {
       const { client, soClient, viewsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
@@ -742,6 +878,18 @@ describe('SourcesClient', () => {
       await client.delete('source-1');
 
       expect(onChange).toHaveBeenCalledWith({ type: 'deleted', source: makeSource() });
+    });
+
+    it('does not report a delete whose view could not be removed', async () => {
+      const { client, soClient, viewsClient, onChange } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      viewsClient.deleteView.mockRejectedValue(forbidden('no delete_view'));
+
+      await expect(client.delete('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+
+      expect(onChange).not.toHaveBeenCalled();
     });
   });
 });

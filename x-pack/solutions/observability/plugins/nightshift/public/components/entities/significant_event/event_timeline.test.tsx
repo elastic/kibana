@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import type {
   EventLifecycleResponse,
   SignificantEventResponse,
@@ -43,12 +43,15 @@ const lifecycle: EventLifecycleResponse = {
   events: [],
 };
 
-const renderTimeline = (lifecycleData: EventLifecycleResponse = lifecycle) =>
+const renderTimeline = (
+  lifecycleData: EventLifecycleResponse = lifecycle,
+  onDetectionClick = jest.fn()
+) =>
   render(
     <EventTimeline
       event={event}
       lifecycleQuery={{ data: lifecycleData, isLoading: false, isError: false }}
-      onDetectionClick={jest.fn()}
+      onDetectionClick={onDetectionClick}
       onEventClick={jest.fn()}
     />
   );
@@ -106,5 +109,13 @@ describe('EventTimeline', () => {
     expect(screen.getByText('Significant event updated')).toBeInTheDocument();
     expect(screen.queryByText('Status changed to')).not.toBeInTheDocument();
     expect(screen.getAllByText('Active')).toHaveLength(2);
+  });
+
+  it('opens a detection through its click handler', () => {
+    const onDetectionClick = jest.fn();
+    renderTimeline(lifecycle, onDetectionClick);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Earlier detection' }));
+    expect(onDetectionClick).toHaveBeenCalledWith('earlier');
   });
 });

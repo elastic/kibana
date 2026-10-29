@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -18,6 +18,7 @@ import type {
   InvestigationRunStatus,
   SignificantEventResponse,
 } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENTS_LIST_QUERY_KEY } from '../../../data/query_keys';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
@@ -219,6 +220,22 @@ describe('EventFlyout', () => {
       ),
     });
 
+  it('renders the event title and badges', () => {
+    renderFlyout({ event: { ...mockEvent, confidence: 0.8 } });
+
+    expect(screen.getByText(mockEvent.title)).toBeInTheDocument();
+    expect(screen.getByText('Critical severity')).toBeInTheDocument();
+    expect(screen.getByText('Confidence 80%')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
+    expect(screen.queryByText('Investigating')).not.toBeInTheDocument();
+  });
+
+  it('formats the event timestamp using the dateFormat advanced setting', () => {
+    renderFlyout();
+
+    expect(screen.getAllByText(/Jul 10, 2026 @ \d{2}:\d{2}:\d{2}/).length).toBeGreaterThan(0);
+  });
+
   it('publishes the focused event and clears it by id on unmount', () => {
     const { unmount } = renderFlyout();
 
@@ -347,6 +364,38 @@ describe('EventFlyout', () => {
     expect(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem')).toBeInTheDocument();
   });
 
+  it('shows a failed outcome and clears it when a follow-up starts', () => {
+    const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'failed-follow-up'];
+    const failedEvent: SignificantEventResponse = {
+      ...mockEvent,
+      investigations: [
+        {
+          workflow_execution_id: 'conv-1',
+          started_at: new Date(Date.now() - 60_000).toISOString(),
+          completed_at: new Date().toISOString(),
+          outcome: 'failed',
+        },
+      ],
+    };
+    const onClose = jest.fn();
+    const { rerender } = renderFlyout({ event: failedEvent, onClose });
+    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+      'Investigation · Failed'
+    );
+
+    const followUp: SignificantEventResponse = {
+      ...failedEvent,
+      investigations: [{ workflow_execution_id: 'conv-1', started_at: new Date().toISOString() }],
+    };
+    act(() => queryClient.setQueryData(key, { hits: [followUp] }));
+    rerender(<EventFlyout event={followUp} onClose={onClose} />);
+
+    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+      'Investigation · In progress'
+    );
+    expect(queryClient.getQueryData(key)).toEqual({ hits: [followUp] });
+  });
+
   it.each([
     { outcome: 'completed', label: 'Completed' },
     { outcome: 'failed', label: 'Failed' },
@@ -376,6 +425,58 @@ describe('EventFlyout', () => {
       );
     }
   );
+
+  it('renders the summary section with the summary text', () => {
+    renderFlyout();
+
+    expect(screen.getByText('What happened?')).toBeInTheDocument();
+    expect(screen.getByText(/P95 latency jumped from 120ms to 890ms/)).toBeInTheDocument();
+  });
+
+  it('truncates long summaries and shows "Show more"', () => {
+    renderFlyout();
+
+    expect(screen.getByText('Show more')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Show more'));
+    expect(screen.getByText('Show less')).toBeInTheDocument();
+  });
+
+  it('hides the investigation section when the event has no investigation', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('nightshiftEventInvestigationCard')).not.toBeInTheDocument();
+  });
+
+  it('renders the investigation from the shared API and opens its conversation details', () => {
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'conv-1',
+            started_at: '2026-07-10T12:00:00Z',
+            completed_at: '2026-07-10T12:05:00Z',
+          },
+        ],
+      },
+    });
+
+    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+      'Web latency spike'
+    );
+    fireEvent.click(screen.getByTestId('nightshiftEventInvestigationCard'));
+    expect(mockOpenConversationDetails).toHaveBeenCalledWith({ conversationId: 'conv-1' });
+    // The flyout opens without `?investigationId=`, so this card reports the view itself.
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      'nightshift_investigation_viewed',
+      expect.objectContaining({
+        investigation_id: 'conv-1',
+        source: 'click',
+        status: 'open',
+        in_progress: false,
+      })
+    );
+  });
 
   it('renders an unavailable investigation as a non-interactive card', () => {
     mockUseInvestigation.mockReturnValue({
@@ -419,5 +520,46 @@ describe('EventFlyout', () => {
     });
 
     expect(screen.queryByTestId('nightshiftEventInvestigationCard')).not.toBeInTheDocument();
+  });
+
+  it('calls onClose when flyout is closed', () => {
+    const onClose = jest.fn();
+    renderFlyout({ onClose });
+
+    const closeButton = screen.getByTestId('euiFlyoutCloseButton');
+    fireEvent.click(closeButton);
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('opens the detection flyout when a detection card is clicked', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('nightshiftDetectionFlyout')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftDetectionCard'));
+    expect(screen.getByTestId('nightshiftDetectionFlyout')).toBeInTheDocument();
+  });
+
+  it('closes the detection flyout without closing the event flyout', () => {
+    const onClose = jest.fn();
+    renderFlyout({ onClose });
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionCard'));
+    const detectionFlyout = screen.getByTestId('nightshiftDetectionFlyout');
+    fireEvent.click(within(detectionFlyout).getByTestId('euiFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('nightshiftDetectionFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftEventFlyout')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('toggles the detection flyout closed when the selected card is clicked again', () => {
+    renderFlyout();
+
+    const card = screen.getByTestId('nightshiftDetectionCard');
+    fireEvent.click(card);
+    expect(screen.getByTestId('nightshiftDetectionFlyout')).toBeInTheDocument();
+
+    fireEvent.click(card);
+    expect(screen.queryByTestId('nightshiftDetectionFlyout')).not.toBeInTheDocument();
   });
 });

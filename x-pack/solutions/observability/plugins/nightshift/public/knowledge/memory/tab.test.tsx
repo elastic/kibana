@@ -112,6 +112,21 @@ const renderTab = () =>
   );
 
 describe('MemoryTab', () => {
+  it('lists memories in the sidebar and shows the overview', () => {
+    mockUseMemoryPages.mockReturnValue(
+      asQueryResult({ rows: [summary()], stats: listResult([summary()]).stats })
+    );
+    renderTab();
+    expect(screen.getByTestId('nightshiftMemoryHome')).toBeInTheDocument();
+    expect(screen.getAllByText('Kafka consumer lag').length).toBeGreaterThan(0);
+  });
+
+  it('shows an empty state when there are no memories', () => {
+    mockUseMemoryPages.mockReturnValue(asQueryResult({ rows: [], stats: listResult([]).stats }));
+    renderTab();
+    expect(screen.getByTestId('nightshiftMemorySidebarEmpty')).toBeInTheDocument();
+  });
+
   it('narrows only the sidebar when searching, not the home view', async () => {
     const stats = { total: 1, archived: 0 };
     mockUseMemoryPages.mockImplementation((_filter, search = '') =>
@@ -131,6 +146,12 @@ describe('MemoryTab', () => {
     ).toBeGreaterThan(0);
   });
 
+  it('shows an error prompt when the list fails', () => {
+    mockUseMemoryPages.mockReturnValue(asQueryResult({ isError: true }));
+    renderTab();
+    expect(screen.getByText('Could not load Semantic Memory')).toBeInTheDocument();
+  });
+
   it('keeps archived memories out of the home view but lists them in the sidebar', () => {
     mockUseMemoryPages.mockReturnValue(
       asQueryResult({
@@ -141,6 +162,18 @@ describe('MemoryTab', () => {
     renderTab();
     // The sidebar is the one place a retired memory is still reachable.
     expect(screen.getByTestId('nightshiftMemoryLink-memory_old')).toBeInTheDocument();
+  });
+
+  it('surfaces usefulness and confidence on a row', () => {
+    mockUseMemoryPages.mockReturnValue(
+      asQueryResult({
+        rows: [summary({ usefulness: 0.75, confidence: 0.5 })],
+        stats: listResult([]).stats,
+      })
+    );
+    renderTab();
+    expect(screen.getAllByText(/75% useful/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/50% confidence/).length).toBeGreaterThan(0);
   });
 
   it('answers a tag clicked on a memory by filtering home, and returns there', async () => {

@@ -28,7 +28,10 @@ jest.mock('../../../settings/components/apps_section/use_relay_app_bindings', ()
 }));
 
 describe('SlackChannelComboBox', () => {
-  it.each([[false, ['C1', 'G0123456789']]])(
+  it.each([
+    [false, ['C1', 'G0123456789']],
+    [true, ['G0123456789']],
+  ])(
     'never suggests a private channel but accepts its link (singleSelection: %s)',
     (singleSelection, expected) => {
       const onChange = jest.fn();

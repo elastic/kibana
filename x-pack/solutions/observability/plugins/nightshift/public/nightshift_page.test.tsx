@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { createMemoryHistory } from 'history';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -35,6 +36,17 @@ jest.mock('./onboarding/onboarding', () => ({
   NightshiftOnboarding: () => <div data-test-subj="nightshiftOnboardingStub" />,
 }));
 jest.mock('./onboarding/use_onboarding_visibility');
+jest.mock('./knowledge/page', () => {
+  const { NightshiftAppHeader } = jest.requireActual('./app/app_header');
+  return {
+    KnowledgePage: ({ headerProps }: { headerProps: NightshiftAppHeaderProps }) => (
+      <>
+        <NightshiftAppHeader {...headerProps} page="knowledge" />
+        <div data-test-subj="knowledgePageStub" />
+      </>
+    ),
+  };
+});
 jest.mock('./sources/page', () => {
   const { NightshiftAppHeader } = jest.requireActual('./app/app_header');
   return {
@@ -116,6 +128,7 @@ function renderPage(initialPath = '/') {
 describe('NightshiftPage', () => {
   beforeEach(() => {
     navigateToApp.mockClear();
+    navigateToUrl.mockClear();
     featureFlags.useBooleanValue.mockReturnValue(true);
     mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: true, isLoading: false });
     mockUseOnboardingVisibility.mockReturnValue({
@@ -163,6 +176,15 @@ describe('NightshiftPage', () => {
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
   });
 
+  it('renders the app when significant events are available', async () => {
+    renderPage();
+    expect(navigateToApp).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Nightshift')
+    );
+    expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
+  });
+
   it('hides the settings link without both Nightshift manage and configure', async () => {
     mockUseKibana.mockReturnValue({
       services: {
@@ -194,12 +216,86 @@ describe('NightshiftPage', () => {
     expect(screen.queryByTestId('nightshiftSettingsLink')).not.toBeInTheDocument();
   });
 
-  it.each(['/detections/unknown'])('redirects %s to the Events tab', async (path) => {
-    const { history } = renderPage(path);
+  it('links to Nightshift settings with EBT tracking', async () => {
+    renderPage();
+    await openAppMenuOverflow();
 
-    expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
-    expect(history.location.pathname).toBe('/detections/events');
+    const settingsLink = await screen.findByTestId('nightshiftSettingsLink');
+    expect(settingsLink).toHaveAttribute('href', '/app/nightshift/settings');
+
+    let trackedClick: { action: string | null; element: string | null } | undefined;
+    const captureTrackedClick = (event: MouseEvent) => {
+      const target = event.target;
+      const trackedTarget = target instanceof Element ? target.closest('[data-ebt-action]') : null;
+      trackedClick = trackedTarget
+        ? {
+            action: trackedTarget.getAttribute('data-ebt-action'),
+            element: trackedTarget.getAttribute('data-ebt-element'),
+          }
+        : undefined;
+    };
+    document.addEventListener('click', captureTrackedClick);
+    await act(async () => fireEvent.click(settingsLink));
+    document.removeEventListener('click', captureTrackedClick);
+
+    await waitFor(() =>
+      expect(trackedClick).toEqual({
+        action: 'viewSettings',
+        element: 'nightshiftPageHeader',
+      })
+    );
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/settings');
   });
+
+  it('renders Settings inside Nightshift', () => {
+    renderPage('/settings/detections');
+
+    expect(screen.getByTestId('settingsPageStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+  });
+
+  describe('Knowledge', () => {
+    it('links to Knowledge without requesting optional-tab availability', async () => {
+      renderPage();
+      await openAppMenuOverflow();
+
+      const knowledgeLink = await screen.findByTestId('nightshiftKnowledgeLink');
+      expect(knowledgeLink).toHaveAttribute('href', '/app/nightshift/knowledge');
+
+      await act(async () => fireEvent.click(knowledgeLink));
+      expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/knowledge');
+    });
+
+    it('renders the lazy page at /knowledge', async () => {
+      renderPage('/knowledge/cortex');
+
+      expect(await screen.findByTestId('knowledgePageStub')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Knowledge');
+    });
+  });
+
+  describe('Sources', () => {
+    it.each(['/sources', '/sources/new', '/sources/source-1'])(
+      'renders the lazy Sources page at %s',
+      async (path) => {
+        renderPage(path);
+
+        expect(await screen.findByTestId('sourcesPageStub')).toBeInTheDocument();
+        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Sources');
+        expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+      }
+    );
+  });
+
+  it.each(['/detections', '/detections/unknown'])(
+    'redirects %s to the Events tab',
+    async (path) => {
+      const { history } = renderPage(path);
+
+      expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
+      expect(history.location.pathname).toBe('/detections/events');
+    }
+  );
 
   it('redirects Signals to Events with the current params outside developer mode', async () => {
     const { history } = renderPage('/detections/signals?entity=checkout&signalsSearch=latency');
@@ -207,6 +303,90 @@ describe('NightshiftPage', () => {
     expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
     expect(history.location.pathname).toBe('/detections/events');
     expect(history.location.search).toBe('?entity=checkout&signalsSearch=latency');
+  });
+
+  it('shows the Detections header actions and marks Detections as the Settings origin', async () => {
+    renderPage('/detections/events');
+
+    expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detections');
+    expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+
+    await openAppMenuOverflow();
+    const knowledgeLink = await screen.findByTestId('nightshiftKnowledgeLink');
+    expect(knowledgeLink).toHaveAttribute('href', '/app/nightshift/knowledge');
+    expect(screen.getAllByRole('menuitem')[0]).toBe(knowledgeLink);
+
+    await act(async () => fireEvent.click(knowledgeLink));
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/knowledge');
+
+    const sourcesLink = screen.getByTestId('nightshiftSourcesLink');
+    expect(sourcesLink).toBeVisible();
+    expect(sourcesLink).toHaveAttribute('href', '/app/nightshift/sources');
+
+    await act(async () => fireEvent.click(sourcesLink));
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/sources');
+
+    const settingsLink = screen.getByTestId('nightshiftSettingsLink');
+    expect(settingsLink).toBeVisible();
+    expect(settingsLink).toHaveAttribute(
+      'href',
+      '/app/nightshift/settings/detections?origin=detections'
+    );
+    expect(screen.queryByTestId('nightshiftAutomationsPrimaryAction')).not.toBeInTheDocument();
+
+    await act(async () => fireEvent.click(settingsLink));
+    expect(navigateToUrl).toHaveBeenLastCalledWith(
+      '/app/nightshift/settings/detections?origin=detections'
+    );
+  });
+
+  describe('app menu', () => {
+    const withServices = (overrides: Record<string, unknown>) => {
+      const { services } = mockUseKibana();
+      mockUseKibana.mockReturnValue({
+        services: {
+          ...services,
+          ...overrides,
+          application: {
+            ...services.application,
+            capabilities: {
+              nightshift: {
+                ...services.application.capabilities.nightshift,
+                manage: true,
+              },
+            },
+          },
+        },
+      });
+    };
+
+    it('shows the Automations button when the API and feature flag are available', async () => {
+      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
+      renderPage();
+
+      expect(await screen.findByTestId('nightshiftAutomationsPrimaryAction')).toHaveAttribute(
+        'href',
+        '/app/nightshift/automations'
+      );
+    });
+
+    it('shows the automations list as its own page at /automations', async () => {
+      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
+      renderPage('/automations');
+
+      expect(await screen.findByTestId('automationsPageStub')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Automations');
+      expect(screen.queryByTestId('nightshiftTabAutomations')).not.toBeInTheDocument();
+    });
+
+    it('keeps the automations page mounted for a detail route', async () => {
+      withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
+      renderPage('/automations/automation-1');
+
+      expect(await screen.findByTestId('automationsPageStub')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Automations');
+    });
   });
 
   describe('onboarding', () => {
@@ -217,20 +397,65 @@ describe('NightshiftPage', () => {
       });
     };
 
-    it.each([['/sources', 'sourcesPageStub']])(
-      'keeps %s accessible while onboarding is active',
-      async (path, pageTestSubject) => {
-        withInvestigationsClient();
-        mockUseOnboardingVisibility.mockReturnValue({
-          isLoading: false,
-          showOnboarding: true,
-          dismiss: jest.fn(),
-        });
-        renderPage(path);
+    it('renders onboarding instead of the landing page while the space onboards', async () => {
+      withInvestigationsClient();
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: true,
+        dismiss: jest.fn(),
+      });
+      renderPage();
 
-        expect(await screen.findByTestId(pageTestSubject)).toBeInTheDocument();
-        expect(screen.queryByTestId('nightshiftOnboardingStub')).not.toBeInTheDocument();
-      }
-    );
+      expect(await screen.findByTestId('nightshiftOnboardingStub')).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+      expect(mockUseOnboardingVisibility).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isEnabled: true,
+          canUseAutomations: true,
+          forceOnboarding: false,
+        })
+      );
+    });
+
+    it('hides the Investigations action before the first investigation', async () => {
+      withInvestigationsClient();
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: true,
+        dismiss: jest.fn(),
+      });
+      renderPage();
+
+      await screen.findByTestId('nightshiftOnboardingStub');
+      expect(screen.queryByTestId('nightshiftInvestigationsPrimaryAction')).not.toBeInTheDocument();
+    });
+
+    it.each([
+      ['/sources', 'sourcesPageStub'],
+      ['/sources/new', 'sourcesPageStub'],
+      ['/knowledge/knowledge_indicators', 'knowledgePageStub'],
+      ['/settings/detections', 'settingsPageStub'],
+    ])('keeps %s accessible while onboarding is active', async (path, pageTestSubject) => {
+      withInvestigationsClient();
+      mockUseOnboardingVisibility.mockReturnValue({
+        isLoading: false,
+        showOnboarding: true,
+        dismiss: jest.fn(),
+      });
+      renderPage(path);
+
+      expect(await screen.findByTestId(pageTestSubject)).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftOnboardingStub')).not.toBeInTheDocument();
+    });
+
+    it('forces onboarding with ?onboarding=1', async () => {
+      withInvestigationsClient();
+      renderPage('/?onboarding=1');
+
+      await screen.findByTestId('nightshiftAppStub');
+      expect(mockUseOnboardingVisibility).toHaveBeenCalledWith(
+        expect.objectContaining({ forceOnboarding: true })
+      );
+    });
   });
 });

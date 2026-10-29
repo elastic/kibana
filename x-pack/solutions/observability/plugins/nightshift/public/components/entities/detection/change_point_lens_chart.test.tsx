@@ -6,12 +6,16 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { LifecycleDetection } from '@kbn/significant-events-schema';
-import { buildDetectionOccurrencesEsql, ChangePointLensChart } from './change_point_lens_chart';
+import {
+  buildDetectionOccurrencesEsql,
+  ChangePointLensChart,
+  getSourceDataTypeLabel,
+} from './change_point_lens_chart';
 
 const mockBuild = jest.fn();
 const mockGetActiveSpace = jest.fn();
@@ -69,10 +73,23 @@ const renderChart = (node: React.ReactElement) => {
   );
 };
 
+describe('getSourceDataTypeLabel', () => {
+  it('uses [Metrics] when the source FROM starts with metrics', () => {
+    expect(getSourceDataTypeLabel('FROM metrics-* | STATS count = COUNT(*)')).toBe('[Metrics]');
+    expect(getSourceDataTypeLabel('TS metrics-host')).toBe('[Metrics]');
+  });
+
+  it('uses [Logs] for any other source, including one that failed to load', () => {
+    expect(getSourceDataTypeLabel('FROM logs-*')).toBe('[Logs]');
+    expect(getSourceDataTypeLabel(undefined)).toBe('[Logs]');
+  });
+});
+
 describe('ChangePointLensChart', () => {
   beforeEach(() => {
     mockBuild.mockReset().mockResolvedValue({ title: '[Logs] Spike' });
     mockGetActiveSpace.mockReset().mockResolvedValue({ id: 'space-a' });
+    mockEmbeddableComponent.mockClear();
     mockSourcesFetch.mockReset();
     delete mockServices.nightshiftSources;
   });
@@ -100,6 +117,50 @@ describe('ChangePointLensChart', () => {
     expect(query).not.toContain('group_hash');
   });
 
+  it('renders a Lens embeddable with a bar series and change point annotation', async () => {
+    renderChart(<ChangePointLensChart detection={detection} />);
+
+    await waitFor(() => expect(mockBuild).toHaveBeenCalled());
+
+    const [config, options] = mockBuild.mock.calls[0];
+    expect(config).toEqual(
+      expect.objectContaining({
+        chartType: 'xy',
+        title: '[Logs] Spike',
+        layers: [
+          expect.objectContaining({
+            type: 'series',
+            seriesType: 'bar',
+            xAxis: { field: 'timestamp', type: 'dateHistogram' },
+          }),
+          expect.objectContaining({
+            type: 'annotation',
+            events: [
+              expect.objectContaining({
+                name: 'Spike',
+                datetime: detection['@timestamp'],
+              }),
+            ],
+          }),
+        ],
+      })
+    );
+    expect(options.query.esql).toContain('FIELD_EXTRACT(data, "metric_value")');
+    expect(options.query.esql).toContain('space_id == "space-a"');
+
+    expect(await screen.findByTestId('mockLensEmbeddable')).toHaveTextContent('[Logs] Spike');
+    expect(mockEmbeddableComponent.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        id: 'nightshift-detection-detection-1',
+        timeRange: {
+          from: '2026-07-10T11:00:00.000Z',
+          to: '2026-07-10T12:15:00.000Z',
+        },
+        withDefaultActions: true,
+      })
+    );
+  });
+
   it('prefixes the title from the source FROM', async () => {
     mockServices.nightshiftSources = {
       getClient: async () => ({ fetch: mockSourcesFetch }),
@@ -123,5 +184,12 @@ describe('ChangePointLensChart', () => {
       },
       signal: expect.any(AbortSignal),
     });
+  });
+
+  it('shows the warning callout when the detection has no rule UUID', async () => {
+    renderChart(<ChangePointLensChart detection={{ ...detection, rule_uuid: undefined }} />);
+
+    expect(await screen.findByText('Unable to load occurrence visualization')).toBeInTheDocument();
+    expect(mockBuild).not.toHaveBeenCalled();
   });
 });

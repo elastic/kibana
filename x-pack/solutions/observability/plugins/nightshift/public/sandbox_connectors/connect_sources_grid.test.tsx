@@ -31,6 +31,13 @@ const type = (id: string, overrides: Partial<ActionType> = {}): ActionType => ({
   ...overrides,
 });
 
+const forbiddenError = (): Error =>
+  Object.assign(new Error('Forbidden'), {
+    name: 'HttpFetchError',
+    request: {},
+    response: { status: 403 },
+  });
+
 const setup = ({
   types,
   canSave = true,
@@ -92,6 +99,15 @@ const setup = ({
 const githubCard = () => screen.findByRole('button', { name: /Type \.github/ });
 
 describe('ConnectSourcesGrid', () => {
+  it('renders a card per sandbox-capable type from the Nightshift API', async () => {
+    setup({ types: [type('.github'), type('.http')] });
+
+    await screen.findByTestId('nightshiftConnectSourcesGrid');
+    expect(screen.getByTestId('.github-card')).toHaveTextContent('Type .github');
+    expect(screen.getByTestId('.github-card')).toHaveTextContent('Repos');
+    expect(screen.getByTestId('.http-card')).toHaveTextContent('Type .http');
+  });
+
   it('opens the flyout preselected to the card type, then assigns the connector to the agent', async () => {
     const onConnected = jest.fn();
     const { getAddConnectorFlyout, agents } = setup({ types: [type('.github')], onConnected });
@@ -114,8 +130,36 @@ describe('ConnectSourcesGrid', () => {
     );
   });
 
+  it('disables the card when the license does not allow the type', async () => {
+    setup({ types: [type('.github', { enabledInLicense: false })] });
+
+    expect(await githubCard()).toBeDisabled();
+  });
+
+  it('shows an error with a retry when the connector types cannot be loaded', async () => {
+    mockFetchConnectorTypes.mockRejectedValueOnce(forbiddenError());
+    setup({ types: [type('.github')] });
+
+    expect(await screen.findByTestId('nightshiftConnectSourcesError')).toHaveTextContent(
+      'Could not load the connector types.'
+    );
+    expect(screen.queryByTestId('nightshiftConnectSourcesGrid')).not.toBeInTheDocument();
+
+    const callsBeforeRetry = mockFetchConnectorTypes.mock.calls.length;
+    fireEvent.click(screen.getByTestId('nightshiftConnectSourcesErrorRetry'));
+
+    expect(await githubCard()).toBeInTheDocument();
+    expect(mockFetchConnectorTypes).toHaveBeenCalledTimes(callsBeforeRetry + 1);
+  });
+
   it('disables the card when the user cannot create connectors', async () => {
     setup({ types: [type('.github')], canSave: false });
+
+    expect(await githubCard()).toBeDisabled();
+  });
+
+  it('disables the card when the user cannot edit the investigation agent', async () => {
+    setup({ types: [type('.github')], canUpdateAgent: false });
 
     expect(await githubCard()).toBeDisabled();
   });

@@ -26,6 +26,17 @@ describe('EsqlViewsClient', () => {
   };
 
   describe('getView', () => {
+    it('returns the view when ES answers with it', async () => {
+      const { esClient, client } = setup();
+      esClient.esql.getView.mockResponse({ views: [{ name: VIEW_NAME, query: 'FROM logs-*' }] });
+
+      await expect(client.getView(VIEW_NAME)).resolves.toEqual({
+        name: VIEW_NAME,
+        query: 'FROM logs-*',
+      });
+      expect(esClient.esql.getView).toHaveBeenCalledWith({ name: VIEW_NAME }, { ignore: [404] });
+    });
+
     it('reads as the current user and never as the internal user', async () => {
       const { internalEsClient, esClient, client } = setup();
       esClient.esql.getView.mockResponse({ views: [] });
@@ -33,6 +44,13 @@ describe('EsqlViewsClient', () => {
       await client.getView(VIEW_NAME);
 
       expect(internalEsClient.esql.getView).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined when ES answers 200 with no views', async () => {
+      const { esClient, client } = setup();
+      esClient.esql.getView.mockResponse({ views: [] });
+
+      await expect(client.getView(VIEW_NAME)).resolves.toBeUndefined();
     });
 
     it('returns undefined when the ignored 404 body comes back instead of a view list', async () => {

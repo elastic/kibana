@@ -6,11 +6,12 @@
  */
 
 import type { NightshiftSource } from '@kbn/nightshift-shared';
+import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import {
   RUN_SOURCE_ONBOARDING_BUTTON_LABEL,
   RUN_SOURCE_ONBOARDING_CROSS_PROJECT_TOOLTIP,
 } from './translations';
-import { filterSourcesByQuery, getOnboardSourceTooltip } from './utils';
+import { filterSourcesByQuery, getOnboardSourceTooltip, isOnboardingInProgress } from './utils';
 
 const source = (overrides: Partial<NightshiftSource> = {}): NightshiftSource => ({
   id: 'source-1',
@@ -26,6 +27,21 @@ const source = (overrides: Partial<NightshiftSource> = {}): NightshiftSource => 
   updated_at: '2026-09-01T00:00:00.000Z',
   esql_updated_at: '2026-09-01T00:00:00.000Z',
   ...overrides,
+});
+
+describe('isOnboardingInProgress', () => {
+  it('is false when the source has no status yet', () => {
+    expect(isOnboardingInProgress(undefined)).toBe(false);
+  });
+
+  it('is true only while a run is going or being canceled', () => {
+    expect(isOnboardingInProgress(SignificantEventsWorkflowStatus.InProgress)).toBe(true);
+    expect(isOnboardingInProgress(SignificantEventsWorkflowStatus.BeingCanceled)).toBe(true);
+    expect(isOnboardingInProgress(SignificantEventsWorkflowStatus.NotStarted)).toBe(false);
+    expect(isOnboardingInProgress(SignificantEventsWorkflowStatus.Completed)).toBe(false);
+    expect(isOnboardingInProgress(SignificantEventsWorkflowStatus.Failed)).toBe(false);
+    expect(isOnboardingInProgress(SignificantEventsWorkflowStatus.Canceled)).toBe(false);
+  });
 });
 
 describe('filterSourcesByQuery', () => {

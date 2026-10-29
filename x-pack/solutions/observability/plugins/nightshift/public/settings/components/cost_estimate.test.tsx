@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { focusEuiToolTipTrigger } from '@elastic/eui/lib/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
 import type {
   BudgetGroupCost,
@@ -211,6 +212,16 @@ describe('CostEstimate', () => {
     setCost();
   });
 
+  it('is hidden while privilege is unknown', () => {
+    mockUseRunQuotas.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+    } as never);
+    renderCost();
+    expect(screen.queryByTestId('nightshiftCostSection')).not.toBeInTheDocument();
+  });
+
   it('is hidden for canManage false', () => {
     mockUseRunQuotas.mockReturnValue({
       data: quotasResponse(false),
@@ -229,6 +240,35 @@ describe('CostEstimate', () => {
     } as never);
     renderCost();
     expect(screen.queryByTestId('nightshiftCostSection')).not.toBeInTheDocument();
+  });
+
+  it('stages token tracking changes without saving immediately', () => {
+    setTracking(false);
+    renderCost();
+    expect(screen.queryByTestId('nightshiftTokenTrackingCoverage')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftCostHeadline')).toBeInTheDocument();
+    const trackingSwitch = screen.getByTestId('nightshiftTokenTrackingSwitch');
+    expect(trackingSwitch).not.toBeChecked();
+    expect(mockUseSignificantEventsCost).toHaveBeenCalledWith({ enabled: true });
+
+    fireEvent.click(trackingSwitch);
+
+    expect(updateTokenTracking).toHaveBeenCalledWith(true);
+    expect(refreshCost).not.toHaveBeenCalled();
+  });
+
+  it('disables the tracking switch without Advanced Settings save permission', () => {
+    setTracking(false, false);
+    renderCost();
+    const trackingSwitch = screen.getByTestId('nightshiftTokenTrackingSwitch');
+    expect(trackingSwitch).toBeDisabled();
+    const tooltipAnchor = screen.getByTestId('nightshiftEnableTokenTrackingTooltipAnchor');
+    expect(tooltipAnchor).toHaveAttribute('tabindex', '0');
+    const restoreFocus = focusEuiToolTipTrigger(tooltipAnchor);
+    expect(screen.getByRole('tooltip')).toHaveTextContent(
+      'You need permission to save Advanced Settings before you can enable token tracking.'
+    );
+    restoreFocus();
   });
 
   it('shows cross-space token tracking coverage', () => {
@@ -300,6 +340,32 @@ describe('CostEstimate', () => {
       'Unable to determine token tracking coverage'
     );
     expect(screen.getByTestId('nightshiftCostHeadline')).toBeInTheDocument();
+  });
+
+  it('shows a loading spinner on the initial query', () => {
+    setCost({ data: undefined, isLoading: true });
+    renderCost();
+    expect(screen.getByTestId('nightshiftCostLoading')).toBeVisible();
+  });
+
+  it('renders the headline, both group columns, fixed order, and numeric formatting', () => {
+    renderCost();
+    expect(screen.getByTestId('nightshiftCostHeadline')).toHaveTextContent(
+      '~$6.90 today · ~$20.50 this month (recorded calls)'
+    );
+    const groups = screen.getAllByTestId(/^nightshiftCostGroup-/);
+    expect(groups.map((node) => node.getAttribute('data-test-subj'))).toEqual([
+      'nightshiftCostGroup-discovery',
+      'nightshiftCostGroup-investigation',
+      'nightshiftCostGroup-ki_extraction',
+    ]);
+    expect(screen.getByText('Discovery')).toBeInTheDocument();
+    expect(screen.getByText('Investigation')).toBeInTheDocument();
+    expect(screen.getByText('KI extraction')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftCostGroupToday-discovery')).toHaveTextContent('~$1.20');
+    expect(screen.getByTestId('nightshiftCostGroupMonth-ki_extraction')).toHaveTextContent(
+      '~$3.40'
+    );
   });
 
   it('shows positive sub-cent costs instead of rounding them to zero', () => {

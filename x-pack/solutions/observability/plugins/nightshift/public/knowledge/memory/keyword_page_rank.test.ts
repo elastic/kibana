@@ -127,6 +127,15 @@ describe('computeKeywordPageRank', () => {
     expect(scores['invoke-agent']).toBeGreaterThan(scores.kafka);
   });
 
+  it('leaves identifiers alone, so an index pattern is not folded into a phrase', () => {
+    const scores = computeKeywordPageRank([
+      entry({ tags: ['traces-*', 'gen_ai.conversation.id'] }),
+      entry({ tags: ['traces-*', 'ES|QL'] }),
+    ]);
+
+    expect(Object.keys(scores).sort()).toEqual(['es|ql', 'gen_ai.conversation.id', 'traces-*']);
+  });
+
   it('excludes the internal marker tag, which says nothing about the topic', () => {
     const scores = computeKeywordPageRank([
       entry({ tags: ['memory', 'kafka', 'redis'] }),
@@ -145,6 +154,13 @@ describe('toKeywordCells', () => {
     entry({ tags: ['memory', 'cart-cache', 'redis'], usefulness: 1, confidence: 1 }),
     entry({ tags: ['memory', 'redis'], usefulness: 0, confidence: 0 }),
   ];
+
+  it('ranks by PageRank and keys each cell by its canonical keyword', () => {
+    const cells = toKeywordCells(store);
+
+    expect(cells[0].keyword).toBe('agent-builder');
+    expect(cells.map((cell) => cell.keyword)).toContain('cart-cache');
+  });
 
   it('drops selected keywords rather than restyling them', () => {
     const cells = toKeywordCells(store, ['agent-builder']);

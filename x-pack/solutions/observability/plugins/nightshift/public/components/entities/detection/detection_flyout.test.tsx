@@ -14,6 +14,7 @@ import type {
   SignalEntry,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '@kbn/significant-events-plugin/common';
 import { DetectionFlyout } from './detection_flyout';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -153,6 +154,15 @@ describe('DetectionFlyout', () => {
       </I18nProvider>
     );
 
+  it('renders the rule name as the title with the detection badges', () => {
+    renderFlyout();
+
+    expect(screen.getByRole('heading', { name: 'latency-p95-spike' })).toBeInTheDocument();
+    expect(screen.getByText('Detection')).toBeInTheDocument();
+    expect(screen.getByText('Spike')).toBeInTheDocument();
+    expect(screen.getByText('Confirmed')).toBeInTheDocument();
+  });
+
   it.each([
     ['confirms', 'Confirmed'],
     ['refutes', 'Refuted'],
@@ -163,6 +173,69 @@ describe('DetectionFlyout', () => {
     renderFlyout({ signal: { ...mockSignal, verdict } });
 
     expect(screen.getByText(label)).toBeInTheDocument();
+  });
+
+  it('shows the Skipped badge, instead of a verdict, for a detection the classifier skipped', () => {
+    renderFlyout({
+      detection: { ...mockDetection, skip: { reason: 'still_breaching' } },
+      signal: undefined,
+    });
+
+    expect(screen.getByTestId('nightshiftSkippedDetectionBadge')).toHaveTextContent('Skipped');
+  });
+
+  it('shows no Skipped badge for a detection the agent handled', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('nightshiftSkippedDetectionBadge')).not.toBeInTheDocument();
+  });
+
+  it('hides the verdict badge without a signal', () => {
+    renderFlyout({ signal: undefined });
+
+    expect(screen.queryByText('Confirmed')).not.toBeInTheDocument();
+    expect(screen.queryByText('Refuted')).not.toBeInTheDocument();
+    expect(screen.queryByText('Off topic')).not.toBeInTheDocument();
+    expect(screen.queryByText('Inconclusive')).not.toBeInTheDocument();
+    expect(screen.queryByText('Not checked')).not.toBeInTheDocument();
+  });
+
+  it('formats the detection timestamp using the dateFormat advanced setting', () => {
+    renderFlyout();
+
+    expect(screen.getByText(/Jul 10, 2026 @ \d{2}:\d{2}:\d{2}/)).toBeInTheDocument();
+  });
+
+  it('renders the summary section from the signal description', () => {
+    renderFlyout();
+
+    expect(screen.getByText('Summary')).toBeInTheDocument();
+    expect(screen.getByText(mockSignal.description)).toBeInTheDocument();
+  });
+
+  it('hides the summary section without a signal description', () => {
+    renderFlyout({ signal: undefined });
+
+    expect(screen.queryByText('Summary')).not.toBeInTheDocument();
+  });
+
+  it('truncates long summaries and shows "Show more"', () => {
+    const longDescription = 'P95 latency on web-frontend rose from 120ms to 890ms. '
+      .repeat(10)
+      .trimEnd();
+    renderFlyout({
+      signal: {
+        ...mockSignal,
+        description: longDescription,
+      },
+    });
+
+    expect(screen.getByText('Show more')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Show more'));
+    expect(screen.getByText('Show less')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionFlyoutSummary')).toHaveTextContent(
+      longDescription
+    );
   });
 
   it('opens the entity flyout when an associated entity chip is clicked', () => {
@@ -188,6 +261,20 @@ describe('DetectionFlyout', () => {
     expect(screen.queryByTestId('nightshiftEntityFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('nightshiftDetectionFlyout')).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('hides the impacted services section when no entry resolves to a service', () => {
+    mockStreamFeatures.mockReturnValue({
+      features: [],
+      failedSourceIds: [],
+      isInitialLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: jest.fn(),
+    });
+    renderFlyout();
+
+    expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
   });
 
   it('includes resolved services and says when some sources failed to load', () => {
@@ -289,5 +376,48 @@ describe('DetectionFlyout', () => {
         to: '2026-07-10T12:15:00.000Z',
       },
     });
+  });
+
+  it('hides the ES|QL section without a signal query', () => {
+    renderFlyout({
+      signal: {
+        ...mockSignal,
+        evidence: undefined,
+      },
+    });
+
+    expect(screen.queryByText('ES|QL query')).not.toBeInTheDocument();
+  });
+
+  it('opens a new chat with the detection attached when Open in chat is clicked', () => {
+    renderFlyout();
+
+    const chatButton = screen.getByTestId('nightshiftDetectionFlyoutChatButton');
+    expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
+    expect(chatButton).toHaveAttribute('data-ebt-detail', 'newConversation');
+    fireEvent.click(chatButton);
+
+    expect(mockOpenChat).toHaveBeenCalledWith({
+      newConversation: true,
+      autoSendInitialMessage: false,
+      initialMessage: 'Tell me about the latency-p95-spike detection',
+      attachments: [
+        {
+          id: mockDetection.detection_id,
+          type: SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+          origin: mockDetection.detection_id,
+          description: '[Detection] latency-p95-spike',
+          data: mockDetection,
+        },
+      ],
+    });
+  });
+
+  it('calls onClose when the flyout is closed', () => {
+    const onClose = jest.fn();
+    renderFlyout({ onClose });
+
+    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    expect(onClose).toHaveBeenCalled();
   });
 });

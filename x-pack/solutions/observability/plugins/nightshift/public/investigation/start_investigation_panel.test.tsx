@@ -33,6 +33,18 @@ describe('StartInvestigationPanel', () => {
     mockUseStartInvestigation.mockReturnValue({ startInvestigation, isStarting: false });
   });
 
+  it('disables submit until a non-blank question is entered', () => {
+    renderPanel();
+
+    expect(getSubmitButton()).toBeDisabled();
+
+    fireEvent.change(getInput(), { target: { value: '   ' } });
+    expect(getSubmitButton()).toBeDisabled();
+
+    fireEvent.change(getInput(), { target: { value: 'Why is checkout slow?' } });
+    expect(getSubmitButton()).toBeEnabled();
+  });
+
   it('starts an investigation with the trimmed question', () => {
     renderPanel();
 
@@ -40,6 +52,35 @@ describe('StartInvestigationPanel', () => {
     fireEvent.click(getSubmitButton());
 
     expect(startInvestigation).toHaveBeenCalledWith('Why is checkout slow?');
+  });
+
+  it('submits with Cmd/Ctrl + Enter but not with a plain Enter', () => {
+    renderPanel();
+
+    fireEvent.change(getInput(), { target: { value: 'Why is checkout slow?' } });
+    fireEvent.keyDown(getInput(), { key: 'Enter' });
+    expect(startInvestigation).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(getInput(), { key: 'Enter', metaKey: true });
+    expect(startInvestigation).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(getInput(), { key: 'Enter', ctrlKey: true });
+    expect(startInvestigation).toHaveBeenCalledTimes(2);
+  });
+
+  it('closes with Escape', () => {
+    renderPanel();
+
+    fireEvent.keyDown(getInput(), { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders as a modal that closes from the close button', () => {
+    renderPanel();
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Closes this modal window'));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('does not submit again while an investigation is starting', () => {

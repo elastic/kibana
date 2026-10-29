@@ -9,6 +9,7 @@ import React from 'react';
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import { EVENT_BY_ID_QUERY_KEY } from '../query_keys';
 import { useFetchEventById } from './use_fetch_event_by_id';
 
 const mockSignificantEventsFetch = jest.fn();
@@ -41,11 +42,11 @@ const createPendingEvent = (): SignificantEventResponse => ({
 describe('useFetchEventById polling', () => {
   let queryClient: QueryClient;
 
-  const renderQuery = () => {
+  const renderQuery = ({ enabled = true }: { enabled?: boolean } = {}) => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
-    return renderHook(() => useFetchEventById('event-1'), { wrapper });
+    return renderHook(() => useFetchEventById('event-1', { enabled }), { wrapper });
   };
 
   const advanceTime = async (milliseconds: number) => {
@@ -128,5 +129,26 @@ describe('useFetchEventById polling', () => {
 
     expect(mockSignificantEventsFetch).toHaveBeenCalledTimes(1);
     expect(result.current.data).toEqual(pending);
+  });
+
+  it('does not poll a missing event', async () => {
+    mockSignificantEventsFetch.mockResolvedValue({ hits: [] });
+    const { result } = renderQuery();
+    await waitFor(() => expect(result.current.data).toBeNull());
+
+    await advanceTime(10_000);
+
+    expect(mockSignificantEventsFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not poll cached pending data when the caller disables the query', async () => {
+    const pending = createPendingEvent();
+    queryClient.setQueryData([...EVENT_BY_ID_QUERY_KEY, 'event-1'], pending);
+    const { result } = renderQuery({ enabled: false });
+
+    await advanceTime(10_000);
+
+    expect(result.current.data).toEqual(pending);
+    expect(mockSignificantEventsFetch).not.toHaveBeenCalled();
   });
 });

@@ -149,6 +149,23 @@ describe('InvestigationAgentAddConnectorMenu', () => {
     );
   });
 
+  it('filters the library by name or type', async () => {
+    setup({ connectors: [connector('github'), connector('datadog')] });
+
+    fireEvent.click(await screen.findByTestId('nightshiftAddConnectorButton'));
+    fireEvent.click(await screen.findByTestId('agentConnectorsAddFromLibraryMenuItem'));
+    await screen.findByRole('switch', { name: 'Connector github' });
+    fireEvent.change(screen.getByPlaceholderText('Search connectors'), {
+      target: { value: 'data' },
+    });
+
+    expect(screen.queryByRole('switch', { name: 'Connector github' })).not.toBeInTheDocument();
+    expect(screen.getByRole('switch', { name: 'Connector datadog' })).toBeInTheDocument();
+    expect(screen.getByTestId('agentConnectorLibraryFlyout')).toHaveTextContent(
+      'Showing 1-1 of 2 Connectors'
+    );
+  });
+
   it('picks a sandbox connector type, creates the connector and assigns it', async () => {
     const { agents, getAddConnectorFlyout } = setup({ connectors: [] });
 

@@ -7,7 +7,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -94,6 +94,65 @@ describe('DetectionPage', () => {
     });
   });
 
+  it('shows the Rules tab on the rules route', async () => {
+    renderPage('/detections/rules', 'rules');
+    expect(await screen.findByTestId('rulesTabStub')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionTab-rules')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    expect(screen.queryByTestId('nightshiftDetectionTab-signals')).not.toBeInTheDocument();
+  });
+
+  it('shows the Signals tab in developer mode', async () => {
+    mockUseDeveloperMode.mockReturnValue({ isDeveloperMode: true });
+
+    renderPage('/detections/signals', 'signals');
+
+    expect(await screen.findByTestId('signalsTabStub')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionTab-signals')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+  });
+
+  it('shows the paused detection process status', async () => {
+    renderPage();
+
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionStatus')).toHaveTextContent('Paused');
+    expect(screen.getByText('knowledge indicators')).toBeInTheDocument();
+    expect(screen.getByText('signals')).toBeInTheDocument();
+  });
+
+  it('moves the detection status above the entities rail while the tab body scrolls', async () => {
+    renderPage();
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    const tabBody = screen.getByTestId('nightshiftDetectionTabBody');
+    const fullSlot = screen.getByTestId('nightshiftDetectionOverviewFullSlot');
+    const compactSlot = screen.getByTestId('nightshiftDetectionOverviewCompactSlot');
+
+    expect(fullSlot).not.toHaveAttribute('data-collapsed');
+    expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
+
+    Object.defineProperties(tabBody, {
+      clientHeight: { configurable: true, value: 200 },
+      scrollHeight: { configurable: true, value: 500 },
+    });
+    Object.defineProperty(fullSlot, 'offsetHeight', { configurable: true, value: 128 });
+    Object.defineProperty(tabBody, 'scrollTop', { configurable: true, value: 9 });
+    fireEvent.scroll(tabBody);
+
+    expect(fullSlot).toHaveAttribute('data-collapsed', 'true');
+    expect(compactSlot).not.toHaveAttribute('data-collapsed');
+
+    Object.defineProperty(tabBody, 'scrollTop', { configurable: true, value: 0 });
+    fireEvent.scroll(tabBody);
+
+    expect(fullSlot).not.toHaveAttribute('data-collapsed');
+    expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
+  });
+
   it('keeps the overview expanded when collapsing it would remove the tab overflow', async () => {
     renderPage();
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
@@ -111,6 +170,24 @@ describe('DetectionPage', () => {
 
     expect(fullSlot).not.toHaveAttribute('data-collapsed');
     expect(compactSlot).toHaveAttribute('data-collapsed', 'true');
+  });
+
+  it('shows the overview error instead of zero counts', async () => {
+    mockUseDetectionOverview.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      refetch,
+    });
+
+    renderPage();
+
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionOverviewError')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('nightshiftDetectionOverview')).queryByText('0')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionOverviewEntities')).not.toBeInTheDocument();
   });
 
   it('falls back to the default time range when the URL range is malformed', async () => {

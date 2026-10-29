@@ -81,6 +81,12 @@ describe('RuleFlyout actions', () => {
     expect(screen.queryByText('Delete rule')).not.toBeInTheDocument();
   });
 
+  it('shows delete for a manager', () => {
+    renderFlyout(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    expect(screen.getByText('Delete rule')).toBeInTheDocument();
+  });
+
   it('disables delete while activity is blocked', () => {
     renderFlyout(true, true);
     fireEvent.click(screen.getByRole('button', { name: 'Actions' }));

@@ -14,6 +14,8 @@ import {
   useAutomationsRunsInRange,
   useCreateAutomation,
   useDeleteAutomation,
+  useFetchAutomations,
+  useRefreshAutomations,
   useToggleAutomation,
 } from './use_automations';
 
@@ -43,6 +45,26 @@ describe('use_automations', () => {
         notifications: { toasts: { addError, addSuccess } },
         nightshiftInvestigations: { investigationsClient: { fetch: investigationsFetch } },
       },
+    });
+  });
+
+  it('refreshes every automation query', () => {
+    const { result, invalidateQueries } = renderWithClient(() => useRefreshAutomations());
+
+    act(() => {
+      result.current();
+    });
+
+    expect(invalidateQueries).toHaveBeenCalledWith({ queryKey: AUTOMATIONS_QUERY_KEY });
+  });
+
+  it('lists automations', async () => {
+    investigationsFetch.mockResolvedValue({ automations: [], total: 0 });
+    const { result } = renderWithClient(() => useFetchAutomations());
+
+    await waitFor(() => expect(result.current.data).toEqual({ automations: [], total: 0 }));
+    expect(investigationsFetch).toHaveBeenCalledWith('GET /internal/nightshift/automations', {
+      signal: expect.anything(),
     });
   });
 

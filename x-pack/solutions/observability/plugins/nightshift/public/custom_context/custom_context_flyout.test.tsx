@@ -27,7 +27,13 @@ const SNIPPET = {
   created_at: '2026-01-01T00:00:00.000Z',
 };
 
-const setup = ({ getResponse }: { getResponse: GetCustomContextResponse }) => {
+const setup = ({
+  getResponse,
+  canEdit = true,
+}: {
+  getResponse: GetCustomContextResponse;
+  canEdit?: boolean;
+}) => {
   const fetch = jest.fn(async (endpoint: string, options?: { params?: { body: unknown } }) => {
     if (endpoint.startsWith('GET ')) return getResponse;
     const { snippets } = options?.params?.body as {
@@ -52,15 +58,32 @@ const setup = ({ getResponse }: { getResponse: GetCustomContextResponse }) => {
   render(
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
-        <CustomContextFlyout canEdit onClose={jest.fn()} />
+        <CustomContextFlyout canEdit={canEdit} onClose={jest.fn()} />
       </QueryClientProvider>
     </I18nProvider>
   );
   const getPutBody = () => fetch.mock.calls.find(([endpoint]) => endpoint.startsWith('PUT '))?.[1];
-  return { getPutBody };
+  return { fetch, getPutBody };
 };
 
 describe('CustomContextFlyout', () => {
+  it('lists snippets with their author', async () => {
+    setup({ getResponse: { snippets: [SNIPPET], version: 'v1' } });
+
+    expect(await screen.findByTestId('nightshiftCustomContextSnippetText')).toHaveTextContent(
+      SNIPPET.text
+    );
+    expect(screen.getByTestId('nightshiftCustomContextSnippetAuthor')).toHaveTextContent(
+      'Sameer Agarwal'
+    );
+  });
+
+  it('shows an empty state when no snippets exist', async () => {
+    setup({ getResponse: { snippets: [] } });
+
+    expect(await screen.findByTestId('nightshiftCustomContextEmpty')).toBeInTheDocument();
+  });
+
   it('appends a new snippet to the existing ones on save', async () => {
     const { getPutBody } = setup({ getResponse: { snippets: [SNIPPET], version: 'v1' } });
 
@@ -119,6 +142,17 @@ describe('CustomContextFlyout', () => {
     );
   });
 
+  it('marks edited snippets', async () => {
+    setup({
+      getResponse: {
+        snippets: [{ ...SNIPPET, updated_by: 'Jane', updated_at: '2026-01-02T00:00:00.000Z' }],
+        version: 'v1',
+      },
+    });
+
+    expect(await screen.findByTestId('nightshiftCustomContextEdited')).toHaveTextContent('Edited');
+  });
+
   it('removes a snippet when it is deleted', async () => {
     const { getPutBody } = setup({ getResponse: { snippets: [SNIPPET], version: 'v1' } });
 
@@ -130,5 +164,14 @@ describe('CustomContextFlyout', () => {
         signal: null,
       })
     );
+  });
+
+  it('hides add, edit, and delete for users who cannot manage Nightshift', async () => {
+    setup({ getResponse: { snippets: [SNIPPET], version: 'v1' }, canEdit: false });
+
+    await screen.findByTestId('nightshiftCustomContextSnippet');
+    expect(screen.queryByTestId('nightshiftCustomContextAdd')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftCustomContextEdit')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftCustomContextDelete')).not.toBeInTheDocument();
   });
 });

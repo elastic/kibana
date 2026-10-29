@@ -80,6 +80,87 @@ async function renderFilter(
 }
 
 describe('KnowledgeIndicatorSelectableFilter', () => {
+  describe('rendering', () => {
+    it('renders button with label and correct filter counts', async () => {
+      const kis = [
+        makeFeatureKI({ type: 'entity', id: 'f1' }),
+        makeFeatureKI({ type: 'entity', id: 'f2' }),
+        makeFeatureKI({ type: 'infrastructure', id: 'f3' }),
+      ];
+
+      await renderFilter({ knowledgeIndicators: kis });
+
+      const button = screen.getByRole('button', { name: /Test Filter/ });
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveTextContent('2');
+    });
+
+    it('renders a disabled button when disableWhenEmpty is true and no values are available', async () => {
+      await renderFilter({
+        knowledgeIndicators: [],
+        disableWhenEmpty: true,
+      });
+
+      const button = screen.getByRole('button', { name: /Test Filter/ });
+      expect(button).toBeInTheDocument();
+      expect(button).toBeDisabled();
+    });
+
+    it('shows active filter badge when items are selected', async () => {
+      const kis = [
+        makeFeatureKI({ type: 'entity', id: 'f1' }),
+        makeFeatureKI({ type: 'infrastructure', id: 'f2' }),
+      ];
+
+      await renderFilter({
+        knowledgeIndicators: kis,
+        selected: ['entity'],
+      });
+
+      const button = screen.getByRole('button', { name: /Test Filter/ });
+      expect(button).toHaveTextContent('1');
+    });
+  });
+
+  describe('popover interaction', () => {
+    it('shows popover with selectable options on click', async () => {
+      const kis = [
+        makeFeatureKI({ type: 'entity', id: 'f1' }),
+        makeFeatureKI({ type: 'infrastructure', id: 'f2' }),
+      ];
+
+      await renderFilter({ knowledgeIndicators: kis });
+
+      fireEvent.click(screen.getByRole('button', { name: /Test Filter/ }));
+
+      await waitFor(() => {
+        expect(screen.getByText('entity')).toBeInTheDocument();
+        expect(screen.getByText('infrastructure')).toBeInTheDocument();
+      });
+    });
+
+    it('calls onSelectedChange with toggled selections', async () => {
+      const onSelectedChange = jest.fn();
+      const kis = [
+        makeFeatureKI({ type: 'entity', id: 'f1' }),
+        makeFeatureKI({ type: 'infrastructure', id: 'f2' }),
+      ];
+
+      await renderFilter({ knowledgeIndicators: kis, onSelectedChange });
+
+      fireEvent.click(screen.getByRole('button', { name: /Test Filter/ }));
+      await waitFor(() => {
+        expect(screen.getByText('entity')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('entity'));
+
+      await waitFor(() => {
+        expect(onSelectedChange).toHaveBeenCalledWith(['entity']);
+      });
+    });
+  });
+
   describe('filtering logic', () => {
     it('computes available values using filterCriteria', async () => {
       const kis = [
@@ -131,6 +212,24 @@ describe('KnowledgeIndicatorSelectableFilter', () => {
         expect(screen.getByText('entity')).toBeInTheDocument();
       });
       expect(screen.queryByText('match_query')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('getLabel', () => {
+    it('applies custom getLabel to option labels', async () => {
+      const kis = [makeFeatureKI({ type: 'my_type', id: 'f1' })];
+
+      await renderFilter({
+        knowledgeIndicators: kis,
+        getLabel: (value) => value.toUpperCase(),
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /Test Filter/ }));
+
+      await waitFor(() => {
+        expect(screen.getByText('MY_TYPE')).toBeInTheDocument();
+      });
+      expect(screen.queryByText('my_type')).not.toBeInTheDocument();
     });
   });
 });

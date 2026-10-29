@@ -29,6 +29,7 @@ describe('automation form values', () => {
   });
 
   it.each<PresetSchedule>([
+    { schedulePreset: 'hourly', timezone: 'UTC' },
     { schedulePreset: 'hourly', hourWindow: { start: 0, end: 23 }, timezone: 'Asia/Kolkata' },
     { schedulePreset: 'daily', time: '09:30', timezone: 'Europe/Berlin' },
     { schedulePreset: 'weekly', time: '00:00', daysOfWeek: [0, 5, 1], timezone: 'UTC' },

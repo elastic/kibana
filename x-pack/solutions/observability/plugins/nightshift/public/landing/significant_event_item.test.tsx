@@ -44,6 +44,21 @@ describe('SignificantEventItem', () => {
       </I18nProvider>
     );
 
+  it('makes the whole row clickable when onClick is provided', () => {
+    const onClick = jest.fn();
+    renderItem({ onClick });
+
+    const row = screen.getByTestId('nightshiftSignificantEventItem');
+    expect(row).toHaveAttribute('role', 'button');
+    expect(row).toHaveAttribute('tabindex', '0');
+    expect(row).toHaveAttribute('data-ebt-action', 'viewSignificantEvent');
+    expect(row).toHaveAttribute('data-ebt-element', 'nightshiftSignificantEventsList');
+    expect(row).toHaveAttribute('data-ebt-detail', 'active');
+
+    fireEvent.click(row);
+    expect(onClick).toHaveBeenCalledWith(mockEvent);
+  });
+
   it('activates the row with Enter and Space keys', () => {
     const onClick = jest.fn();
     renderItem({ onClick });
@@ -85,6 +100,14 @@ describe('SignificantEventItem', () => {
     expect(onClick).not.toHaveBeenCalled();
 
     getSelectionSpy.mockRestore();
+  });
+
+  it('is not interactive without onClick', () => {
+    renderItem();
+
+    const row = screen.getByTestId('nightshiftSignificantEventItem');
+    expect(row).not.toHaveAttribute('role');
+    expect(row).not.toHaveAttribute('tabindex');
   });
 
   it('opens chat without triggering the row click', () => {
@@ -130,9 +153,41 @@ describe('SignificantEventItem', () => {
     expect(screen.queryByTestId('nightshiftCloseSignificantEventButton')).not.toBeInTheDocument();
   });
 
+  it('marks the row as selected when isSelected is true', () => {
+    renderItem({ onClick: jest.fn(), isSelected: true });
+
+    expect(screen.getByTestId('nightshiftSignificantEventItem')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+  });
+
+  it('marks the row as unselected when isSelected is false', () => {
+    renderItem({ onClick: jest.fn(), isSelected: false });
+
+    expect(screen.getByTestId('nightshiftSignificantEventItem')).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
+  });
+
   describe('investigation marker', () => {
+    it('leaves an event without investigations unlabeled', () => {
+      renderItem();
+
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
+    });
+
     it('falls back to completed_at while the status is still being fetched', () => {
       renderItem({ event: investigatedEvent });
+
+      expect(screen.getByTestId('nightshiftInvestigatedStatus')).toHaveTextContent('Investigated');
+      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
+    });
+
+    it('marks a complete run as investigated', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: 'complete' });
 
       expect(screen.getByTestId('nightshiftInvestigatedStatus')).toHaveTextContent('Investigated');
       expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
@@ -144,6 +199,30 @@ describe('SignificantEventItem', () => {
       expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
         'Investigation unavailable'
       );
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    });
+
+    it('marks an unreadable run as unavailable', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: 'unavailable' });
+
+      expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
+        'Investigation unavailable'
+      );
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    });
+
+    it('hides the badge when the execution does not exist', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: null });
+
+      expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigationFailedStatus')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftInvestigatingStatusDots')).not.toBeInTheDocument();
+    });
+
+    it('marks a pending run as investigating', () => {
+      renderItem({ event: investigatedEvent, investigationRunStatus: 'pending' });
+
+      expect(screen.getByTestId('nightshiftInvestigatingStatusDots')).toBeInTheDocument();
       expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
     });
   });

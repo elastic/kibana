@@ -110,6 +110,34 @@ const renderList = (props: Partial<React.ComponentProps<typeof DetectionsList>> 
   );
 
 describe('DetectionsList', () => {
+  it('shows detection skeletons while fetching for the first time', () => {
+    setLifecycle({ isLoading: true, isFetching: true });
+    renderList();
+
+    expect(screen.getAllByTestId('nightshiftDetectionCardSkeleton')).toHaveLength(2);
+    expect(screen.queryByTestId('nightshiftDetectionCard')).not.toBeInTheDocument();
+    expect(screen.queryByText('No detections found for this event.')).not.toBeInTheDocument();
+  });
+
+  it('marks a detection the classifier skipped, and only that one', () => {
+    setLifecycle({
+      detections: [
+        mockDetection({ detection_id: 'det-1', rule_name: 'handled-detection' }),
+        mockDetection({
+          detection_id: 'det-2',
+          rule_name: 'skipped-detection',
+          skip: { reason: 'still_breaching', checked_at: '2026-07-10T12:05:00Z' },
+        }),
+      ],
+    });
+    renderList();
+
+    expect(screen.getAllByTestId('nightshiftSkippedDetectionBadge')).toHaveLength(1);
+    expect(
+      screen.getByText('skipped-detection').closest('[data-test-subj="nightshiftDetectionCard"]')
+    ).toContainElement(screen.getByTestId('nightshiftSkippedDetectionBadge'));
+  });
+
   it('keeps cached detections visible while refetching', () => {
     setLifecycle({
       detections: [
@@ -126,6 +154,13 @@ describe('DetectionsList', () => {
     expect(screen.getByText('second-detection')).toBeInTheDocument();
   });
 
+  it('shows the empty state when there are no detections', () => {
+    setLifecycle({ detections: [] });
+    renderList();
+
+    expect(screen.getByText('No detections found for this event.')).toBeInTheDocument();
+  });
+
   it('shows an error state with a retry action instead of the empty state', () => {
     const { refetch } = setLifecycle({ isError: true });
     renderList();
@@ -135,6 +170,91 @@ describe('DetectionsList', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftDetectionsRetryButton'));
     expect(refetch).toHaveBeenCalled();
+  });
+
+  it('renders detection cards with translated change-point labels', () => {
+    setLifecycle({
+      detections: [
+        mockDetection(),
+        mockDetection({
+          detection_id: 'det-2',
+          rule_name: 'error-rate-trend',
+          change_point_type: 'trend_change',
+          '@timestamp': '2026-07-09T12:00:00Z',
+        }),
+      ],
+    });
+    renderList();
+
+    expect(screen.getByText('latency-p95-spike')).toBeInTheDocument();
+    expect(screen.getByText('Spike')).toBeInTheDocument();
+    expect(screen.getByText('Trend change')).toBeInTheDocument();
+    expect(screen.getAllByText('web-frontend').length).toBeGreaterThan(0);
+    expect(screen.queryByText('logs.web-frontend')).not.toBeInTheDocument();
+  });
+
+  it('passes real occurrences for the detection rule to its sparkline', () => {
+    setLifecycle({ detections: [mockDetection()] });
+    renderList({
+      occurrencesByRuleUuid: new Map([
+        [
+          'rule-1',
+          [
+            { x: new Date('2026-07-10T11:55:00.000Z').getTime(), y: 2 },
+            { x: new Date('2026-07-10T12:00:00.000Z').getTime(), y: 8 },
+          ],
+        ],
+      ]),
+    });
+
+    expect(screen.getByTestId('mockDetectionSparkline')).toHaveAttribute('data-point-count', '2');
+  });
+
+  it('shows a sparkline skeleton while occurrences load', () => {
+    setLifecycle({ detections: [mockDetection()] });
+    renderList({ isLoadingOccurrences: true });
+
+    expect(screen.getByTestId('nightshiftDetectionSparklineSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockDetectionSparkline')).not.toBeInTheDocument();
+  });
+
+  it('shows at most two entity pills plus an overflow pill', () => {
+    setLifecycle({ detections: [mockDetection()] });
+
+    renderList({
+      event: mockEvent({
+        blast_radius: [
+          {
+            type: 'entity',
+            subtype: 'service',
+            feature_id: 'entity-one',
+            name: 'entity-one',
+            source_id: 'logs.web-frontend',
+          },
+          {
+            type: 'entity',
+            subtype: 'service',
+            feature_id: 'entity-two',
+            name: 'entity-two',
+            source_id: 'logs.web-frontend',
+          },
+        ],
+        causal_features: [
+          {
+            type: 'entity',
+            subtype: 'service',
+            feature_id: 'entity-three',
+            name: 'entity-three',
+            source_id: 'logs.web-frontend',
+          },
+        ],
+      }),
+    });
+
+    expect(screen.getByText('entity-one')).toBeInTheDocument();
+    expect(screen.getByText('entity-two')).toBeInTheDocument();
+    expect(screen.queryByText('entity-three')).not.toBeInTheDocument();
+    expect(screen.getByText('+1')).toBeInTheDocument();
   });
 
   it('sorts detections with the earliest first', () => {
@@ -159,7 +279,76 @@ describe('DetectionsList', () => {
     expect(cards[1]).toHaveTextContent('newer-detection');
   });
 
+  it('calls onDetectionClick with the detection when a card is clicked', () => {
+    const detection = mockDetection();
+    const onDetectionClick = jest.fn();
+    setLifecycle({ detections: [detection] });
+    renderList({ onDetectionClick });
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionCard'));
+    expect(onDetectionClick).toHaveBeenCalledWith(detection);
+  });
+
+  it('marks the selected detection card with aria-pressed', () => {
+    setLifecycle({
+      detections: [
+        mockDetection({ detection_id: 'det-1', rule_name: 'first-detection' }),
+        mockDetection({ detection_id: 'det-2', rule_name: 'second-detection' }),
+      ],
+    });
+    renderList({ selectedDetectionId: 'det-2', onDetectionClick: jest.fn() });
+
+    const cards = screen.getAllByTestId('nightshiftDetectionCard');
+    expect(cards[0]).toHaveAttribute('aria-pressed', 'false');
+    expect(cards[1]).toHaveAttribute('aria-pressed', 'true');
+    expect(cards[1]).toHaveAttribute('data-ebt-action', 'closeFlyout');
+  });
+
+  it('only marks the clicked detection as selected when switching detections', () => {
+    setLifecycle({
+      detections: [
+        mockDetection({ detection_id: 'det-1', rule_name: 'first-detection' }),
+        mockDetection({ detection_id: 'det-2', rule_name: 'second-detection' }),
+      ],
+    });
+
+    function DetectionListHarness() {
+      const [selectedDetectionId, setSelectedDetectionId] = React.useState<string>();
+      return (
+        <DetectionsList
+          event={defaultListEvent}
+          eventId="evt-001"
+          selectedDetectionId={selectedDetectionId}
+          onDetectionClick={(detection) => setSelectedDetectionId(detection.detection_id)}
+        />
+      );
+    }
+
+    render(
+      <I18nProvider>
+        <DetectionListHarness />
+      </I18nProvider>
+    );
+
+    const cards = screen.getAllByTestId('nightshiftDetectionCard');
+    fireEvent.click(cards[0]);
+    expect(cards[0]).toHaveAttribute('aria-pressed', 'true');
+    expect(cards[1]).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(cards[1]);
+    expect(cards[0]).toHaveAttribute('aria-pressed', 'false');
+    expect(cards[1]).toHaveAttribute('aria-pressed', 'true');
+  });
+
   describe('detection overflow', () => {
+    it('renders every detection without a toggle at the cap', () => {
+      setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS) });
+      renderList();
+
+      expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
+      expect(screen.queryByTestId('nightshiftDetectionsShowMore')).not.toBeInTheDocument();
+    });
+
     it('caps the list and counts what it hides', () => {
       setLifecycle({ detections: buildDetectionsEarliestFirst(MAX_VISIBLE_DETECTIONS + 2) });
       renderList();

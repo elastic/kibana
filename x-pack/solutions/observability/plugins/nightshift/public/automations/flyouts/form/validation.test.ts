@@ -79,6 +79,10 @@ describe('automation validation', () => {
         })
       ).toBeUndefined();
     });
+
+    it('asks for a trigger before saving', () => {
+      expect(getSaveBlocker(values)).toBe('Select a trigger to save');
+    });
   });
 
   describe('canSaveAutomation', () => {

@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useSignificantEventsMaintenanceActions } from '../../data/maintenance/use_significant_events_maintenance';
 import { ResetSection } from './reset_section';
 
 jest.mock('../../data/maintenance/use_significant_events_maintenance');
-
 const reset = jest.fn();
 const actions = {
   pause: jest.fn(),
@@ -23,9 +22,9 @@ const actions = {
   isMutating: false,
 };
 
-const resetPanel = () => (
+const resetPanel = (canManage = true) => (
   <I18nProvider>
-    <ResetSection canManage />
+    <ResetSection canManage={canManage} />
   </I18nProvider>
 );
 
@@ -78,5 +77,37 @@ describe('developer reset controls', () => {
     fireEvent.click(screen.getByTestId('significantEventsResetButton'));
     expect(screen.getByTestId('significantEventsResetConfirmation')).toHaveValue('');
     expect(reset).not.toHaveBeenCalled();
+  });
+
+  it('disables reset without Nightshift engine privileges', () => {
+    render(resetPanel(false));
+    expect(screen.getByTestId('significantEventsResetButton')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('significantEventsResetButton'));
+    expect(screen.queryByTestId('significantEventsResetModal')).not.toBeInTheDocument();
+  });
+
+  it('explains missing privileges in a keyboard-accessible tooltip', async () => {
+    render(resetPanel(false));
+    act(() => screen.getByTestId('significantEventsResetTrigger').focus());
+    expect(screen.getByTestId('significantEventsResetTrigger')).toHaveFocus();
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Reset requires the Nightshift Manage engines privilege.'
+    );
+  });
+
+  it('locks reset and its open confirmation while any maintenance action is running', () => {
+    const { rerender } = render(resetPanel());
+    fireEvent.click(screen.getByTestId('significantEventsResetButton'));
+    fireEvent.change(screen.getByTestId('significantEventsResetConfirmation'), {
+      target: { value: 'RESET' },
+    });
+    jest.mocked(useSignificantEventsMaintenanceActions).mockReturnValue({
+      ...actions,
+      isMutating: true,
+    });
+    rerender(resetPanel());
+    expect(screen.getByTestId('significantEventsResetButton')).toBeDisabled();
+    expect(screen.getByTestId('significantEventsResetConfirmation')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Reset permanently' })).toBeDisabled();
   });
 });

@@ -24,6 +24,16 @@ const mockUseRuleCatalog = jest.fn();
 jest.mock('../../../../hooks/use_rule_catalog', () => ({
   useRuleCatalog: () => mockUseRuleCatalog(),
 }));
+jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../../settings/components/apps_section/use_relay_app_bindings'),
+  useAllRelayAppBindings: () => ({
+    bindings: [],
+    isLoading: false,
+    isError: false,
+    isComplete: true,
+  }),
+}));
+
 const legacyPatternTrigger: TriggerFormValues = {
   kind: 'alert',
   ruleNamePattern: 'cpu',
@@ -64,6 +74,31 @@ describe('AutomationTriggerSection', () => {
   });
 
   beforeEach(() => onTriggerChange.mockClear());
+
+  it('removes the trigger', async () => {
+    render(<TriggerSection />);
+    await selectTrigger('automationAddTrigger', 'Alert triggered');
+
+    fireEvent.click(screen.getByTestId('automationRemoveTrigger'));
+
+    expect(lastTrigger()).toBeUndefined();
+    expect(screen.getByTestId('automationAddTrigger')).toBeInTheDocument();
+  });
+
+  it('configures an alert trigger', async () => {
+    render(<TriggerSection />);
+    await selectTrigger('automationAddTrigger', 'Alert triggered');
+
+    expect(screen.getByText('When an alert')).toBeInTheDocument();
+    expect(screen.getByTestId('automationDailyLimit')).toHaveValue(20);
+
+    fireEvent.click(screen.getByTestId('automationRulePicker'));
+    fireEvent.click(await screen.findByText('CPU usage high'));
+    expect(lastTrigger()).toMatchObject({ kind: 'alert', ruleNames: ['CPU usage high'] });
+    expect(screen.getByTestId('automationRulePicker')).toHaveTextContent('CPU usage high');
+    expect(screen.getByText('changes to')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
+  });
 
   it('selects rules and tags in the rule picker', async () => {
     render(<TriggerSection />);
@@ -142,5 +177,27 @@ describe('AutomationTriggerSection', () => {
     expect(lastTrigger()).toMatchObject({ daysOfWeek: [2, 3, 4, 5] });
     fireEvent.click(screen.getByText('Sun'));
     expect(lastTrigger()).toMatchObject({ daysOfWeek: [2, 3, 4, 5, 0] });
+  });
+
+  it('lists IANA timezones with their offset', async () => {
+    render(<TriggerSection />);
+    await selectTrigger('automationAddTrigger', 'Every…');
+    fireEvent.click(screen.getByLabelText('between hours'));
+
+    fireEvent.click(screen.getByTestId('automationTimezone'));
+    fireEvent.change(await screen.findByPlaceholderText('City or timezone…'), {
+      target: { value: 'Tokyo' },
+    });
+    expect(await screen.findByText('GMT+9')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Asia/Tokyo'));
+    expect(lastTrigger()).toMatchObject({ kind: 'every', timezone: 'Asia/Tokyo' });
+  });
+
+  it('flags an invalid daily limit', async () => {
+    render(<TriggerSection />);
+    await selectTrigger('automationAddTrigger', 'Alert triggered');
+
+    fireEvent.change(screen.getByTestId('automationDailyLimit'), { target: { value: '0' } });
+    expect(screen.getByTestId('automationDailyLimit')).toBeInvalid();
   });
 });

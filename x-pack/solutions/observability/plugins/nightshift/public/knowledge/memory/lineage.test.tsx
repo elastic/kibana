@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryMergedFromRow } from './lineage';
@@ -89,6 +90,30 @@ describe('MemoryMergedFromRow', () => {
     // The server reads the page's own `merged_from`, so the browser asks once.
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0][0]).toBe('GET /internal/nightshift/memory/pages/{id}/lineage');
+  });
+
+  it('draws nothing for a page whose sources are all gone', async () => {
+    // A deleted or never-stored source is simply absent from the response, so
+    // the row is left out rather than rendered with an empty title.
+    respondWith([]);
+    renderRow(page({ merged_from: ['memory_deleted'] }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(screen.queryByText('Merged from')).not.toBeInTheDocument();
+  });
+
+  it('opens the memory a source names', async () => {
+    respondWith([
+      { id: 'memory_a', title: 'Kafka lag spikes' },
+      { id: 'memory_b', title: 'DNS resolution stalls' },
+    ]);
+    const onSelectPage = jest.fn();
+    renderRow(page({ merged_from: ['memory_a', 'memory_b'] }), onSelectPage);
+
+    await waitFor(() => expect(screen.getByText('DNS resolution stalls')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('DNS resolution stalls'));
+
+    expect(onSelectPage).toHaveBeenCalledWith('memory_b');
   });
 
   it('degrades quietly when the sources cannot be fetched', async () => {

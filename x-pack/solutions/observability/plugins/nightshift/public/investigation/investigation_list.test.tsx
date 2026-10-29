@@ -65,6 +65,26 @@ const renderSections = (sections: InvestigationSectionState[]) =>
   );
 
 describe('InvestigationList', () => {
+  it('keeps skeletons visible while a section is loading', () => {
+    renderSections([makeSection('critical', { isInitialLoading: true }), makeSection('high')]);
+
+    expect(
+      screen.getByTestId('nightshiftInvestigationSectionSkeleton-critical')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSection-high')).not.toBeInTheDocument();
+  });
+
+  it('hides a resolved empty section', () => {
+    renderSections([
+      makeSection('critical', { investigations: [investigation], total: 1 }),
+      makeSection('high'),
+    ]);
+
+    expect(screen.getByTestId('nightshiftInvestigationSection-critical')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationSection-high')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftInvestigationsEmpty')).not.toBeInTheDocument();
+  });
+
   it('keeps an empty section that failed to load so it can be retried', () => {
     renderSections([makeSection('critical', { error: new Error('Network unavailable') })]);
 
@@ -82,6 +102,23 @@ describe('InvestigationList', () => {
       screen.queryByTestId('nightshiftInvestigationSection-in-progress')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftInvestigationSection-critical')).not.toBeInTheDocument();
+  });
+
+  it('renders in progress first and not rated last', () => {
+    renderSections([
+      makeSection('in-progress', { investigations: [investigation], total: 1 }),
+      makeSection('critical', { investigations: [investigation], total: 1 }),
+      makeSection('not-rated', { investigations: [investigation], total: 1 }),
+    ]);
+
+    const titles = screen.getAllByRole('heading').map((heading) => heading.textContent);
+    expect(titles).toEqual(['In progress', 'Critical', 'Not rated']);
+  });
+
+  it('renders each investigation as the shared investigation card', () => {
+    renderSections([makeSection('critical', { investigations: [investigation], total: 1 })]);
+
+    expect(screen.getByTestId('investigationCard')).toHaveTextContent('Checkout errors');
   });
 
   describe('closing sections', () => {

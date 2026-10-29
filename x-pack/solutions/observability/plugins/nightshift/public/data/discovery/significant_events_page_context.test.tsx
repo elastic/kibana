@@ -122,6 +122,18 @@ describe('SignificantEventsPageProvider', () => {
   });
 
   describe('handleCancel', () => {
+    it('optimistically sets isCanceling and calls cancel', async () => {
+      cancel.mockImplementation(() => new Promise(() => {}));
+      const { result } = renderContext();
+
+      act(() => {
+        result.current.handleCancel();
+      });
+
+      await waitFor(() => expect(result.current.isCanceling).toBe(true));
+      expect(cancel).toHaveBeenCalledTimes(1);
+    });
+
     it('clears isCanceling and shows an error toast when cancel fails', async () => {
       cancel.mockRejectedValue(new Error('nope'));
       const { result } = renderContext();

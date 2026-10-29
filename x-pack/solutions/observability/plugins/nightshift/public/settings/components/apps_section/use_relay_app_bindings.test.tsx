@@ -56,6 +56,15 @@ describe('useRelayAppBindings', () => {
     jest.useRealTimers();
   });
 
+  it('does not fetch when enabled is false', async () => {
+    httpGet.mockResolvedValue({ bindings: [] });
+    const { wrapper } = createSetup();
+    renderHook(() => useRelayAppBindings(false), { wrapper });
+
+    await flush();
+    expect(httpGet).not.toHaveBeenCalled();
+  });
+
   it('fetches the first page (no cursor) with a perPage query and exposes nextCursor', async () => {
     const response: SlackAppBindingsResponse = {
       bindings: [
@@ -82,6 +91,44 @@ describe('useRelayAppBindings', () => {
     ]);
     expect(result.current.nextCursor).toBe('cursor-2');
     expect(result.current.isLoading).toBe(false);
+  });
+
+  it('includes the cursor in the query when paging past the first page', async () => {
+    httpGet.mockResolvedValue({ bindings: [], nextCursor: undefined });
+    const { wrapper } = createSetup();
+    renderHook(() => useRelayAppBindings(true, 'cursor-1'), { wrapper });
+
+    await flush();
+    expect(httpGet).toHaveBeenCalledWith(
+      '/internal/significant_events/apps/slack/bindings',
+      expect.objectContaining({
+        query: { perPage: 10, cursor: 'cursor-1' },
+        signal: expect.any(AbortSignal),
+      })
+    );
+  });
+
+  it('returns isLoading true while the request is pending', async () => {
+    httpGet.mockReturnValue(new Promise(() => {}));
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useRelayAppBindings(true), { wrapper });
+
+    await flush();
+    expect(result.current.isLoading).toBe(true);
+  });
+
+  it('returns empty bindings and shows an error toast on error without throwing', async () => {
+    httpGet.mockRejectedValue(new Error('relay error'));
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useRelayAppBindings(true), { wrapper });
+
+    await flush();
+    expect(result.current.bindings).toEqual([]);
+    expect(result.current.isLoading).toBe(false);
+    expect(addError).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ title: expect.stringContaining('channels') })
+    );
   });
 });
 
@@ -138,17 +185,31 @@ describe('useAllRelayAppBindings', () => {
     expect(httpGet).toHaveBeenCalledTimes(10);
     expect(result.current.isComplete).toBe(false);
   });
+
+  it('reports a load error without a toast', async () => {
+    httpGet.mockRejectedValue(new Error('relay error'));
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useAllRelayAppBindings(), { wrapper });
+
+    await flush();
+    expect(result.current.isError).toBe(true);
+    expect(result.current.bindings).toEqual([]);
+    expect(addError).not.toHaveBeenCalled();
+  });
 });
 
 describe('formatChannelValue', () => {
   const bindings = [
     { channel: 'C1', displayName: 'alerts', status: 'bound_to_self' as const },
+    { channel: 'C9', status: 'bound_to_self' as const },
     { channel: 'G7', visibility: 'private' as const, status: 'bound_to_self' as const },
   ];
 
   it.each([
     ['C1', '#alerts'],
+    ['C9', 'C9'],
     ['G7', 'Private · G7'],
+    ['#legacy', '#legacy'],
   ])('labels %s as %s', (value, label) => {
     expect(formatChannelValue(value, bindings)).toBe(label);
   });

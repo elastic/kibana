@@ -14,7 +14,10 @@ import type { SlackActionFormValues } from '../automation_form_values';
 jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../../../settings/components/apps_section/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
-    bindings: [{ channel: 'C2', displayName: 'oncall', status: 'bound_to_self' }],
+    bindings: [
+      { channel: 'C1', displayName: 'alerts', status: 'bound_to_self' },
+      { channel: 'C2', displayName: 'oncall', status: 'bound_to_self' },
+    ],
     isLoading: false,
     isError: false,
     isComplete: true,
@@ -72,6 +75,20 @@ describe('AutomationActionsSection', () => {
     fireEvent.click(screen.getByTestId('automationRemoveSlackAction'));
     expect(onSlackActionChange).toHaveBeenLastCalledWith(undefined);
     expect(screen.getByTestId('automationAddAction')).toBeInTheDocument();
+  });
+
+  it('shows the channel name when read only', () => {
+    render(
+      <I18nProvider>
+        <AutomationActionsSection
+          readOnly
+          slackAction={{ target: 'channel', destination: 'C1' }}
+          onSlackActionChange={onSlackActionChange}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('#alerts')).toBeInTheDocument();
   });
 
   it('shows a locked reply-in-thread action without edit or remove controls', () => {

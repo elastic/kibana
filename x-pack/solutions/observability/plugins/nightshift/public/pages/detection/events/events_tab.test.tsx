@@ -104,6 +104,36 @@ describe('EventsTab', () => {
     });
   });
 
+  it('opens the event from the action, labelled by investigation state', () => {
+    const investigatedEvent = {
+      ...event,
+      event_id: 'event-2',
+      title: 'Payment errors',
+      investigations: [{ workflow_execution_id: 'run-1', started_at: '2026-10-20T10:31:00.000Z' }],
+    } as SignificantEventResponse;
+    mockUseSignificantEventsList.mockReturnValue({
+      data: { hits: [event, investigatedEvent], page: 1, perPage: 25, total: 2 },
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefreshEvents,
+    });
+    const history = renderTab();
+
+    expect(screen.getByTestId('nightshiftOpenEvent-event-1')).toHaveAttribute(
+      'aria-label',
+      'Investigate'
+    );
+    expect(screen.getByTestId('nightshiftOpenEvent-event-2')).toHaveAttribute(
+      'aria-label',
+      'View investigation'
+    );
+    expect(screen.getByText('In progress')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('nightshiftOpenEvent-event-2'));
+    expect(new URLSearchParams(history.location.search).get('eventId')).toBe('event-2');
+    expect(screen.getByTestId('eventFlyoutStub')).toHaveTextContent('Payment errors');
+  });
+
   it('sorts by a column header and keeps the choice in the URL', async () => {
     const history = renderTab();
 

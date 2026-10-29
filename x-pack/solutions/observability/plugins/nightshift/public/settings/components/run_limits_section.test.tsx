@@ -25,6 +25,8 @@ import { useRunLimitsForm } from './use_run_limits_form';
 jest.mock('../../data/run_quotas/use_significant_events_run_quotas');
 jest.mock('../../hooks/use_kibana');
 
+const navigateToUrl = jest.fn();
+let automationsAvailable = true;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
@@ -121,16 +123,54 @@ describe('RunLimitsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     updateIsSaving = false;
+    automationsAvailable = true;
     mockUseKibana.mockReturnValue({
       services: {
-        featureFlags: { useBooleanValue: () => true },
+        featureFlags: { useBooleanValue: () => automationsAvailable },
         nightshiftInvestigations: { investigationsClient: {} },
         application: {
           getUrlForApp: (_appId: string, { path }: { path: string }) => `/app/nightshift${path}`,
-          navigateToUrl: jest.fn(),
+          navigateToUrl,
         },
       },
     } as never);
+  });
+
+  it('shows legacy globally disabled settings as unlimited per category', () => {
+    setup(
+      response({
+        enabled: false,
+        limits: {
+          detection: 100,
+          investigation: 30,
+          ki_extraction: 20,
+        },
+        counts: {
+          detection: 14,
+          investigation: 6,
+          ki_extraction: 25,
+        },
+      })
+    );
+
+    expect(screen.getAllByTestId(/^nightshiftRunLimitRow-/)).toHaveLength(3);
+    expect(screen.getByTestId('nightshiftRunLimitCount-detection')).toHaveTextContent(
+      '14 counted scheduled admissions today'
+    );
+    expect(screen.queryByTestId(/^nightshiftRunLimitInput-/)).not.toBeInTheDocument();
+    for (const group of ALL_GROUPS) {
+      expect(screen.getByTestId(`nightshiftRunLimitEnabledSwitch-${group}`)).not.toBeChecked();
+    }
+  });
+
+  it('prevents read-only users from editing the switch or limits', () => {
+    setup(response({ canManage: false }));
+
+    for (const group of ['detection', 'investigation', 'ki_extraction']) {
+      expect(screen.getByTestId(`nightshiftRunLimitEnabledSwitch-${group}`)).toBeDisabled();
+      expect(screen.getByTestId(`nightshiftRunLimitInput-${group}`)).toBeDisabled();
+    }
+    expect(screen.getByText('Deployment-wide privileges required')).toBeInTheDocument();
   });
 
   it('renders only the requested quota groups', () => {
@@ -146,6 +186,39 @@ describe('RunLimitsSection', () => {
     expect(
       screen.getByRole('switch', { name: 'Enforce daily limits for Investigation' })
     ).toBeInTheDocument();
+  });
+
+  it('cancels run-limit changes through the shared save bar', () => {
+    setup(response(), ['investigation']);
+    fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-investigation'), {
+      target: { value: '20' },
+    });
+
+    expect(
+      screen.getByTestId('streams-significant-events-settings-bottom-bar')
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('streams-settings-cancel-button'));
+
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(30);
+    expect(
+      screen.queryByTestId('streams-significant-events-settings-bottom-bar')
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not show the exhaustion callout for groups hidden from the tab', () => {
+    setup(
+      response({
+        counts: {
+          detection: 100,
+          investigation: 3,
+          ki_extraction: 2,
+        },
+      }),
+      ['investigation']
+    );
+
+    expect(screen.queryByTestId('nightshiftRunLimitsBanner')).not.toBeInTheDocument();
   });
 
   it('shows each reached detection callout above its limit', () => {
@@ -292,6 +365,61 @@ describe('RunLimitsSection', () => {
     });
 
     expect(screen.getByTestId('nightshiftRunLimitsBanner')).toBeInTheDocument();
+  });
+
+  it('opens the automations page from the exhaustion callout', () => {
+    setup(
+      response({
+        counts: {
+          detection: 100,
+          investigation: 3,
+          ki_extraction: 2,
+        },
+      })
+    );
+
+    const callout = screen.getByTestId('nightshiftRunLimitsBanner');
+    expect(callout).toHaveTextContent(
+      'Automations reached a daily run limit of 100 for this deployment'
+    );
+    expect(callout).toHaveTextContent(
+      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually'
+    );
+    fireEvent.click(screen.getByTestId('nightshiftRunLimitsOpenAutomations'));
+
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/automations');
+  });
+
+  it('hides the automations button when automations are unavailable', () => {
+    automationsAvailable = false;
+    setup(
+      response({
+        counts: {
+          detection: 100,
+          investigation: 3,
+          ki_extraction: 2,
+        },
+      })
+    );
+
+    expect(screen.getByTestId('nightshiftRunLimitsBanner')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftRunLimitsOpenAutomations')).not.toBeInTheDocument();
+  });
+
+  it('shows the UTC reset value supplied by the API window', () => {
+    setup(
+      response({
+        window: {
+          start: '2040-01-02T00:00:00.000Z',
+          resetsAt: '2040-01-03T00:00:00.000Z',
+          timezone: 'UTC',
+        },
+      })
+    );
+
+    expect(screen.getByTestId('nightshiftRunLimitsResetTime')).toHaveTextContent(
+      'The current UTC day resets at 2040-01-03T00:00:00.000Z.'
+    );
   });
 
   it('retains a dirty draft when the query receives a background update', () => {

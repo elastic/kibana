@@ -18,6 +18,10 @@ describe('getChangePointLabel', () => {
     expect(getChangePointLabel()).toBe('Unknown');
     expect(getChangePointLabel('not-a-real-type' as 'spike')).toBe('Unknown');
   });
+
+  it('returns a label for known change-point types', () => {
+    expect(getChangePointLabel('spike')).toBe('Spike');
+  });
 });
 
 describe('getDetectionOccurrenceTimeRange', () => {
