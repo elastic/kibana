@@ -20,8 +20,8 @@ import {
   type AlertZeroApi,
 } from './helpers';
 
-/** Space-id namespace so every throwaway space this suite creates is identifiable. */
-const NAMESPACE = 'scout-onb';
+/** Default space-id namespace so every throwaway space this suite creates is identifiable. */
+const DEFAULT_NAMESPACE = 'scout-onb';
 
 const randomSuffix = (): string =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -30,6 +30,12 @@ const randomSuffix = (): string =>
 export interface SpacesService {
   create: (args: { id: string; name: string }) => Promise<unknown>;
   delete: (id: string) => Promise<unknown>;
+}
+
+export interface OnboardingSpaceOptions {
+  withStubModel?: boolean;
+  /** Space-id prefix; lets a spec family be told apart from the onboarding specs. */
+  namespace?: string;
 }
 
 export interface OnboardingSpace {
@@ -49,9 +55,9 @@ export interface OnboardingSpace {
 const buildOnboardingSpace = async (
   api: AlertZeroApi,
   spaces: SpacesService,
-  { withStubModel = false }: { withStubModel?: boolean } = {}
+  { withStubModel = false, namespace = DEFAULT_NAMESPACE }: OnboardingSpaceOptions = {}
 ): Promise<OnboardingSpace> => {
-  const spaceId = `${NAMESPACE}-${randomSuffix()}`;
+  const spaceId = `${namespace}-${randomSuffix()}`;
   await spaces.create({ id: spaceId, name: `Onboarding ${spaceId}` });
 
   // Worker routes 404 until the per-space gate is on; seeding and every later
@@ -88,7 +94,7 @@ export const createOnboardingSpace = async (
   apiClient: ApiClientFixture,
   spaces: SpacesService,
   cookieHeader: Record<string, string>,
-  options: { withStubModel?: boolean } = {}
+  options: OnboardingSpaceOptions = {}
 ): Promise<OnboardingSpace> =>
   buildOnboardingSpace(createApi(apiClient, cookieHeader), spaces, options);
 
@@ -100,7 +106,7 @@ export const createOnboardingSpace = async (
 export const createUiOnboardingSpace = async (
   kbnClient: KbnClient,
   spaces: SpacesService,
-  options: { withStubModel?: boolean } = {}
+  options: OnboardingSpaceOptions = {}
 ): Promise<OnboardingSpace> =>
   buildOnboardingSpace(createApiFromKbnClient(kbnClient), spaces, options);
 
@@ -314,6 +320,21 @@ export const deleteSeededProposals = async (esClient: EsClient, ids: string[]): 
   await esClient.deleteByQuery({
     index: PROPOSALS_INDEX,
     query: { ids: { values: ids } },
+    refresh: true,
+    ignore_unavailable: true,
+    conflicts: 'proceed',
+  });
+};
+
+/** Matches on the conversation, so it also removes a proposal indexed after seeding gave up. */
+export const deleteConversationProposals = async (
+  esClient: EsClient,
+  spaceId: string,
+  conversationId: string
+): Promise<void> => {
+  await esClient.deleteByQuery({
+    index: PROPOSALS_INDEX,
+    query: { bool: { filter: [{ term: { spaceId } }, { term: { conversationId } }] } },
     refresh: true,
     ignore_unavailable: true,
     conflicts: 'proceed',

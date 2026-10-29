@@ -30,6 +30,9 @@ export class AlertZeroAppPage {
   // Post-enable queue and gate surfaces.
   public readonly proposalsTrendChartRow: Locator;
   public readonly privilegesGate: Locator;
+  // Investigation flyout footer.
+  public readonly investigationFlyoutOpenChat: Locator;
+  public readonly openEscalationButton: Locator;
   // Watch settings.
   public readonly watchSettingsSave: Locator;
   public readonly watchUnsavedChangesBadge: Locator;
@@ -52,8 +55,20 @@ export class AlertZeroAppPage {
     this.featureSettingsLink = this.page.testSubj.locator('alertZeroOnboardingFeatureSettingsLink');
     this.proposalsTrendChartRow = this.page.testSubj.locator('alertZeroProposalsTrendChartRow');
     this.privilegesGate = this.page.testSubj.locator('alertzeroPrivilegesGate');
+    this.investigationFlyoutOpenChat = this.page.getByTestId('investigationFlyoutOpenChat');
+    this.openEscalationButton = this.page.getByRole('button', { name: 'Open an escalation' });
     this.watchSettingsSave = this.page.testSubj.locator('alertZeroWatchSettingsSave');
     this.watchUnsavedChangesBadge = this.page.testSubj.locator('alertZeroWatchUnsavedChangesBadge');
+  }
+
+  /** Takes the page because the alerts link opens it in a new tab, not this object's `page`. */
+  noPrivilegesPage(onPage: Pick<ScoutPage, 'getByTestId'>): Locator {
+    return onPage.getByTestId('noPrivilegesPage');
+  }
+
+  /** Loaded Security Alerts page body, on a given page (the attachment link opens a new tab). */
+  alertsPageContent(onPage: Pick<ScoutPage, 'getByTestId'>): Locator {
+    return onPage.getByTestId('alerts-page-content');
   }
 
   /** Worker-selection card, keyed by worker id. */
@@ -102,5 +117,37 @@ export class AlertZeroAppPage {
   /** Queue row for a seeded proposal, keyed by its title (`aria-label`). */
   proposalRow(title: string): Locator {
     return this.page.locator(`[aria-label="${title}"]`);
+  }
+
+  /** Proposal card rendered in the Agent Builder chat, keyed by proposal id. */
+  proposalCard(proposalId: string): Locator {
+    return this.page.testSubj.locator(`proposalCard-${proposalId}`);
+  }
+
+  /** Approve button of a chat proposal card. */
+  proposalApproveButton(proposalId: string): Locator {
+    return this.page.testSubj.locator(`proposalCard-${proposalId}-confirm`);
+  }
+
+  /** Decline button of a chat proposal card. */
+  proposalDeclineButton(proposalId: string): Locator {
+    return this.page.testSubj.locator(`proposalCard-${proposalId}-dismiss`);
+  }
+
+  /** Grouped "N alerts" link row of a `security.alerts` attachment. */
+  alertsLinkRow(count: number): Locator {
+    return this.page.getByRole('link', { name: new RegExp(`${count} alerts`) });
+  }
+
+  /** Actions menu trigger (icon button labelled "Open actions menu") on a queue card. */
+  actionsMenuButton(title: string): Locator {
+    return this.proposalRow(title).getByRole('button', { name: 'Open actions menu' });
+  }
+
+  /** Item of the open actions menu (scoped to the open 'Actions menu' popover), by its visible name. */
+  actionsMenuItem(name: string): Locator {
+    return this.page
+      .getByRole('dialog', { name: 'Actions menu' })
+      .getByRole('menuitem', { name, exact: true });
   }
 }

@@ -1,5 +1,5 @@
 {
-  "sha1": "e6d48145a015e6c3d2c619aedcd523999eae7018",
+  "sha1": "6fb4700851f21892e86c75dd3958658677568d87",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_closed_window.spec.ts",
-        "line": 63,
-        "column": 30
+        "line": 31,
+        "column": 9
       }
     },
     {
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_closed_window.spec.ts",
-        "line": 77,
+        "line": 44,
         "column": 29
       }
     },
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_closed_window.spec.ts",
-        "line": 101,
-        "column": 20
+        "line": 71,
+        "column": 32
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
-        "line": 36,
-        "column": 27
+        "line": 31,
+        "column": 9
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
-        "line": 57,
-        "column": 33
+        "line": 50,
+        "column": 27
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
-        "line": 90,
-        "column": 31
+        "line": 78,
+        "column": 77
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_enable_transaction.spec.ts",
-        "line": 143,
-        "column": 29
+        "line": 125,
+        "column": 32
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_intro.spec.ts",
-        "line": 56,
-        "column": 31
+        "line": 54,
+        "column": 77
       }
     },
     {
@@ -154,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 50,
-        "column": 52
+        "line": 33,
+        "column": 9
       }
     },
     {
@@ -168,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 65,
-        "column": 33
+        "line": 44,
+        "column": 77
       }
     },
     {
@@ -182,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 80,
-        "column": 26
+        "line": 61,
+        "column": 11
       }
     },
     {
@@ -196,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 100,
-        "column": 52
+        "line": 81,
+        "column": 65
       }
     },
     {
@@ -210,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_landing.spec.ts",
-        "line": 118,
-        "column": 32
+        "line": 98,
+        "column": 19
       }
     },
     {
@@ -224,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_no_model.spec.ts",
-        "line": 53,
-        "column": 32
+        "line": 25,
+        "column": 9
       }
     },
     {
@@ -238,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_no_model.spec.ts",
-        "line": 98,
-        "column": 29
+        "line": 61,
+        "column": 30
       }
     },
     {
@@ -252,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_worker_defaults.spec.ts",
-        "line": 45,
-        "column": 26
+        "line": 43,
+        "column": 16
       }
     },
     {
@@ -266,8 +266,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_worker_defaults.spec.ts",
-        "line": 61,
-        "column": 33
+        "line": 57,
+        "column": 77
       }
     },
     {
@@ -280,8 +280,120 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/onboarding_worker_defaults.spec.ts",
-        "line": 117,
-        "column": 33
+        "line": 88,
+        "column": 27
+      }
+    },
+    {
+      "id": "b6f9b691c0a102a-4f9b7452cd295c7",
+      "title": "AlertZero permissions - alerts attachment link Alerts feature absent: the alerts link opens Privileges required",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/permission_alerts_attachment.spec.ts",
+        "line": 37,
+        "column": 53
+      }
+    },
+    {
+      "id": "b6f9b691c0a102a-7af25d6d2edfb47",
+      "title": "AlertZero permissions - alerts attachment link Alerts All (control): the alerts link opens the Alerts page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/permission_alerts_attachment.spec.ts",
+        "line": 37,
+        "column": 53
+      }
+    },
+    {
+      "id": "b115f2be5dc4831-a5e1178a7060002",
+      "title": "AlertZero permissions - investigation escalation actions AlertZero only: the investigation flyout hides Open an escalation (escalation API privilege)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/permission_investigation_actions.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "b115f2be5dc4831-8d36a45e7c15007",
+      "title": "AlertZero permissions - investigation escalation actions Manage escalations (control): the investigation flyout shows Open an escalation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/permission_investigation_actions.spec.ts",
+        "line": 77,
+        "column": 19
+      }
+    },
+    {
+      "id": "b115f2be5dc4831-c06b069cf8058ff",
+      "title": "AlertZero permissions - investigation escalation actions AlertZero only: the card menu hides escalation items (UI capability)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/permission_investigation_actions.spec.ts",
+        "line": 122,
+        "column": 21
+      }
+    },
+    {
+      "id": "b115f2be5dc4831-94c9569c381246d",
+      "title": "AlertZero permissions - investigation escalation actions Manage escalations (control): the card menu shows escalation items (UI capability)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/permission_investigation_actions.spec.ts",
+        "line": 122,
+        "column": 21
+      }
+    },
+    {
+      "id": "d126914189082de-1251a97b5c669cc",
+      "title": "AlertZero permissions - proposal card decide Proposed Actions Read: Approve and Decline are disabled on the chat card",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/permission_proposal_decide.spec.ts",
+        "line": 39,
+        "column": 23
+      }
+    },
+    {
+      "id": "d126914189082de-24bffd851adb7e3",
+      "title": "AlertZero permissions - proposal card decide Proposed Actions All (control): Approve and Decline are enabled on the chat card",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/permission_proposal_decide.spec.ts",
+        "line": 39,
+        "column": 23
       }
     },
     {
@@ -294,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/z_reset_selfcheck.spec.ts",
-        "line": 34,
-        "column": 1
+        "line": 31,
+        "column": 19
       }
     },
     {
@@ -308,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/z_reset_selfcheck.spec.ts",
-        "line": 50,
-        "column": 7
+        "line": 45,
+        "column": 35
       }
     }
   ]

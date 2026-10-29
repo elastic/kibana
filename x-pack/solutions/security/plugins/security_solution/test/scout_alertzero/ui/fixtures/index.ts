@@ -41,13 +41,27 @@ export {
   type WorkerInfo,
 } from './helpers';
 export {
+  ALERTS_ALL_ROLE,
+  ALERTS_NONE_ROLE,
+  ALERTZERO_ONLY_ROLE,
+  ESCALATIONS_ROLE,
+  PROPOSALS_ALL_ROLE,
+  PROPOSALS_READ_ROLE,
+  attachAlerts,
+  seedInvestigation,
+  type SeededInvestigation,
+  withSecuritySolution,
+} from './investigation_seed';
+export {
   createOnboardingSpace,
   createUiOnboardingSpace,
+  deleteConversationProposals,
   deleteSeededProposals,
   enableFirstWorker,
   resetOnboardingState,
   seedClosedProposal,
   type OnboardingSpace,
+  type OnboardingSpaceOptions,
   type SeededProposal,
   type SpacesService,
 } from './onboarding';
