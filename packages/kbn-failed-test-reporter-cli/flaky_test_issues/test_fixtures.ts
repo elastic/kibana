@@ -137,7 +137,7 @@ export const flakyReport = (
   flaky: FlakyTestEntry[],
   files: FlakyTestFileStats[] = []
 ): FlakyTestReport => ({
-  schemaVersion: 2,
+  schemaVersion: 1,
   generatedAt: GENERATED_AT,
   window: {
     lookbackDays: 7,

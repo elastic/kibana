@@ -689,7 +689,7 @@ describe('ScoutFlakyTests.writeToFile / fromFile', () => {
 
   it('round-trips a report through JSON, creating parent directories', () => {
     const report = FlakyTestReportSchema.parse({
-      schemaVersion: 2,
+      schemaVersion: 1,
       generatedAt: '2026-09-07T00:00:00.000Z',
       window: { lookbackDays: 7, from: '2026-08-31T00:00:00.000Z', to: '2026-09-07T00:00:00.000Z' },
       scope: { pipelines: ['kibana-on-merge'], branches: [], frameworks: ['jest'] },

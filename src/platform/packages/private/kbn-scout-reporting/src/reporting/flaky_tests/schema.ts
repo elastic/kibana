@@ -13,7 +13,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
  * Bump whenever a change to the schemas below would break a consumer reading a previously
  * written report.
  */
-export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 2;
+export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 1;
 
 export const TEST_FRAMEWORKS = ['jest', 'ftr', 'cypress', 'playwright'] as const;
 export const TestFrameworkSchema = z.enum(TEST_FRAMEWORKS);
