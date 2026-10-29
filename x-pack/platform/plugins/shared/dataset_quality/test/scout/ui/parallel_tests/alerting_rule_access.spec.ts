@@ -9,17 +9,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
-import {
-  buildDataStreamName,
-  canManageAlertsRole,
-  canManageRulesRole,
-  deleteDataStreamIfExists,
-  getLogsForDataset,
-} from '../../common';
+import { canManageAlertsRole, canManageRulesRole, getLogsForDataset } from '../../common';
 
 /** Owned by this spec, so the privilege suites cannot disturb it. */
 const DATASET = 'alertacc.logs';
-const DATA_STREAM = buildDataStreamName({ dataset: DATASET });
 const TO = '2024-01-01T12:00:00.000Z';
 
 /** Shares its test subject with the details page "Open in Discover" button, so it is matched inline. */
@@ -31,10 +24,6 @@ test.describe(
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await logsSynthtraceEsClient.index(getLogsForDataset({ to: TO, count: 4, dataset: DATASET }));
-    });
-
-    test.afterAll(async ({ esClient, log }) => {
-      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
     });
 
     test('hides the create rule button from a user who can only manage alerts', async ({
