@@ -573,11 +573,6 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 * Add the Workday connector [#275226]({{kib-pull}}275226).
 * Add the Censys connector [#274568]({{kib-pull}}274568).
 
-**Context Engine**:
-* Add a workflow YAML preview to the automation rows in Context Engine [#282233]({{kib-pull}}282233).
-* Add a **Knowledge Indicators** tab to the AI index detail page, with type filters and expandable rows that show each stored knowledge indicator as JSON [#286456]({{kib-pull}}286456).
-* Teach the workflow authoring skill about knowledge indicator steps [#287154]({{kib-pull}}287154).
-
 **Dashboards and Visualizations**:
 * Add undo and redo to dashboards, with toolbar buttons and the `Cmd+Z` or `Ctrl+Z` and `Cmd+Y` or `Ctrl+Y` shortcuts [#277103]({{kib-pull}}277103).
 * Add custom content panels with your own HTML and CSS to dashboards, and render them inside Agent Builder conversations [#286439]({{kib-pull}}286439), [#289506]({{kib-pull}}289506).
@@ -808,10 +803,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 **Connectivity**:
 * Fix the Jira Service Management and Opsgenie connectors failing when a rendered alert message is longer than 130 characters, by truncating the message [#291698]({{kib-pull}}291698).
 * Fix the email connector returning fixed content when you invoke it through HTTP [#288664]({{kib-pull}}288664).
-
-**Context Engine**:
-* Fix automations that you create from the workflow page not appearing in the list [#290819]({{kib-pull}}290819).
-* Rename the `.ai-index-*` indices to `ai-index-*` [#279660]({{kib-pull}}279660).
 
 **Dashboards and Visualizations**:
 * Fix the Dashboards API dropping {{esql}} panels whose color mapping assigns colors to `boolean`, `null`, multi-value, or open-ended range values [#298850]({{kib-pull}}298850).
@@ -1046,6 +1037,13 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Skip the no data screen in Discover and Dashboards when a federated data source exists [#279421]({{kib-pull}}279421).
 % * Fix the **Elasticsearch query** rule {{esql}} time field selector not listing the timestamp fields of federated datasets [#296021]({{kib-pull}}296021).
 % * Hide the Data Federation UI unless the license is Enterprise in stateful deployments [#294697]({{kib-pull}}294697).
+
+% Removed from 9.6.0: Context Engine is not announced yet. Add these back when the feature is announced.
+% * Fix automations that you create from the workflow page not appearing in the list [#290819]({{kib-pull}}290819).
+% * Rename the `.ai-index-*` indices to `ai-index-*` [#279660]({{kib-pull}}279660).
+% * Add a workflow YAML preview to the automation rows in Context Engine [#282233]({{kib-pull}}282233).
+% * Add a **Knowledge Indicators** tab to the AI index detail page, with type filters and expandable rows that show each stored knowledge indicator as JSON [#286456]({{kib-pull}}286456).
+% * Teach the workflow authoring skill about knowledge indicator steps [#287154]({{kib-pull}}287154).
 
 ## 9.5.0 [kibana-9.5.0-release-notes]
 
