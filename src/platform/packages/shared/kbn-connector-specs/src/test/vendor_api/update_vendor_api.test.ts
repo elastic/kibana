@@ -293,6 +293,17 @@ describe('updateVendorApi', () => {
     ]);
   });
 
+  it('reports an auth type that cannot be recorded as a problem, so no manifest lacks its operations', async () => {
+    const twoAuthTypes: ConnectorSpec = { ...connector, auth: { types: ['none', 'unavailable'] } };
+
+    const { problems } = await update({ connector: twoAuthTypes, sources: { main: SPEC_URL } });
+
+    expect(problems).toEqual([
+      expect.stringMatching(/^auth type unavailable can't be used against the contract mock/),
+    ]);
+    expect(warnings.filter((warning) => warning.includes('auth type'))).toEqual([]);
+  });
+
   it('reports list-like operations it cannot propose pagination for', async () => {
     const { problems } = await update({ connector: withTags, sources: { main: SPEC_URL } });
 

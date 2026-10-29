@@ -134,6 +134,7 @@ const describeFinding = (finding: RecordingFinding): string => {
 
 const isProblem = ({ kind }: RecordingFinding): boolean =>
   kind === 'no-auth-type' ||
+  kind === 'auth-type-error' ||
   kind === 'request-violation' ||
   kind === 'read-scope' ||
   kind === 'unused-query' ||
