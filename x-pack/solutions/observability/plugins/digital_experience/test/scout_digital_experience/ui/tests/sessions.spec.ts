@@ -32,7 +32,6 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
 
     await expect(digitalExperience.sessionsTab).toHaveAttribute('aria-selected', 'true');
     await expect(page).toHaveURL(new RegExp(`/${SESSIONS_APP}/sessions\\?`));
-    await expect(digitalExperience.breadcrumbs).toContainText('Sessions');
     // The list's 2021 range, before the mock sessions: the tab explains how sessions get there.
     await expect(digitalExperience.sessionsEmpty).toContainText('session.id');
   });
@@ -102,7 +101,9 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
     });
 
     await test.step('goes back to the list with its filters and time range', async () => {
-      await digitalExperience.breadcrumbLink('Sessions').click();
+      // The button, not the breadcrumb: serverless renders breadcrumbs in its project header.
+      // Both lead back to the same list; unit tests cover the breadcrumb's link.
+      await digitalExperience.sessionBack.click();
 
       await expect(page).toHaveURL(/hasErrors=true/);
       await expect(page).toHaveURL(

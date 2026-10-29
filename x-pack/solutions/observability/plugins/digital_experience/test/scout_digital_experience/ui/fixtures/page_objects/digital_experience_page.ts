@@ -38,6 +38,7 @@ export class DigitalExperiencePage {
   public readonly sessionsKpis: Locator;
   public readonly sessionsEmpty: Locator;
   public readonly sessionSummary: Locator;
+  public readonly sessionBack: Locator;
   public readonly sessionWaterfallSegments: Locator;
   public readonly sessionWaterfallErrors: Locator;
   public readonly breadcrumbs: Locator;
@@ -73,6 +74,7 @@ export class DigitalExperiencePage {
     this.sessionsKpis = page.getByTestId('digitalExperienceSessionsKpis');
     this.sessionsEmpty = page.getByTestId('digitalExperienceSessionsEmpty');
     this.sessionSummary = page.getByTestId('digitalExperienceSessionSummary');
+    this.sessionBack = page.getByTestId('digitalExperienceSessionBack');
     this.sessionWaterfallSegments = page.getByTestId('digitalExperienceSessionWaterfallSegment');
     this.sessionWaterfallErrors = page.getByTestId('digitalExperienceSessionWaterfallError');
     this.breadcrumbs = page.getByTestId('breadcrumbs');
