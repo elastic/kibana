@@ -32,7 +32,7 @@ const applicable = FP_TP_EXAMPLES.flatMap(({ id, checks }) => {
 const collapseWhitespace = (text: string): string => text.replace(/\s+/g, ' ').trim();
 
 describe('entity_role gold and the managed prompt', () => {
-  it('still tells the model a management server, MDM, or jump box is neutral', () => {
+  it('still tells the model a management server, MDM, jump box, or service account is neutral', () => {
     const workflow = parse(ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW.yaml) as {
       steps: Array<{ name: string; with?: { message?: string } }>;
     };
