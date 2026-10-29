@@ -17,14 +17,13 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
   euiPaletteColorBlind,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { RoundModelUsageStats } from '@kbn/agent-builder-common';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { formatCompactNumber } from '../../../../utils/format_compact_number';
 import { getModelColor } from './model_colors';
 
 const labels = {
@@ -40,17 +39,16 @@ const labels = {
   tokensSent: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.tokensSent', {
     defaultMessage: 'Tokens sent',
   }),
-  tokensSentWithCache: i18n.translate(
-    'xpack.agentBuilder.response.metadataPopover.byModel.tokensSentWithCache',
-    { defaultMessage: 'Tokens sent (cached)' }
-  ),
   tokensReceived: i18n.translate(
     'xpack.agentBuilder.response.metadataPopover.byModel.tokensReceived',
     { defaultMessage: 'Tokens received' }
   ),
-  tokensReceivedWithReasoning: i18n.translate(
-    'xpack.agentBuilder.response.metadataPopover.byModel.tokensReceivedWithReasoning',
-    { defaultMessage: 'Tokens received (reasoning)' }
+  cachedSuffix: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.cachedSuffix', {
+    defaultMessage: '(cached)',
+  }),
+  reasoningSuffix: i18n.translate(
+    'xpack.agentBuilder.response.metadataPopover.byModel.reasoningSuffix',
+    { defaultMessage: '(reasoning)' }
   ),
   allModels: i18n.translate('xpack.agentBuilder.response.metadataPopover.byModel.allModels', {
     defaultMessage: 'All models',
@@ -73,8 +71,6 @@ interface ModelRow {
 }
 
 const MODEL_PALETTE = euiPaletteColorBlind().filter((_, index) => index % 2 === 0);
-
-const formatCompactNumber = (value: number): string => numeral(value).format('0.[0]a');
 
 const removeCreatorPrefix = (name: string, creator?: string): string => {
   if (!creator) {
@@ -99,29 +95,23 @@ const ReportedTokens: React.FC<{ value?: number }> = ({ value }) =>
     <>{formatCompactNumber(value)}</>
   );
 
-const useCellPaddingStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  return css({ paddingBlock: euiTheme.size.s });
-};
-
-const Cell: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-  const paddingStyles = useCellPaddingStyles();
-  return (
-    <EuiText size="s" css={paddingStyles}>
-      {children}
-    </EuiText>
-  );
-};
+const Cell: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+  <EuiText size="xs">{children}</EuiText>
+);
 
 const wrappingHeaderStyles = css({ whiteSpace: 'normal' });
 const rightAlignedHeaderStyles = css({ whiteSpace: 'normal', textAlign: 'right' });
 
-const HeaderCell: React.FC<React.PropsWithChildren<{ isRightAligned?: boolean }>> = ({
-  children,
-  isRightAligned = false,
-}) => (
-  <EuiText size="s" css={isRightAligned ? rightAlignedHeaderStyles : wrappingHeaderStyles}>
+const HeaderCell: React.FC<
+  React.PropsWithChildren<{ isRightAligned?: boolean; subLabel?: string }>
+> = ({ children, isRightAligned = false, subLabel }) => (
+  <EuiText size="xs" css={isRightAligned ? rightAlignedHeaderStyles : wrappingHeaderStyles}>
     <strong>{children}</strong>
+    {subLabel && (
+      <div>
+        <strong>{subLabel}</strong>
+      </div>
+    )}
   </EuiText>
 );
 
@@ -135,23 +125,20 @@ const ModelName: React.FC<{ label: string; tooltip: string; color: string }> = (
   label,
   tooltip,
   color,
-}) => {
-  const paddingStyles = useCellPaddingStyles();
-  return (
-    <EuiToolTip content={tooltip} display="block">
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={paddingStyles}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="dot" color={color} aria-hidden="true" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s" css={truncatedTextStyles}>
-            {label}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
-};
+}) => (
+  <EuiToolTip content={tooltip} display="block">
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="dot" color={color} aria-hidden="true" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="xs" css={truncatedTextStyles}>
+          {label}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiToolTip>
+);
 
 const getColumns = (
   hasCache: boolean,
@@ -160,7 +147,6 @@ const getColumns = (
   {
     field: 'label',
     name: <HeaderCell>{labels.model}</HeaderCell>,
-    width: '36%',
     render: (label: string, { color, fullName }: ModelRow) =>
       color ? (
         <ModelName label={label} tooltip={fullName ?? label} color={color} />
@@ -171,7 +157,6 @@ const getColumns = (
   {
     field: 'llmCalls',
     name: <HeaderCell isRightAligned>{labels.llmCalls}</HeaderCell>,
-    width: '13%',
     align: RIGHT_ALIGNMENT,
     render: (llmCalls: number) => (
       <Cell>
@@ -182,11 +167,10 @@ const getColumns = (
   {
     field: 'inputTokens',
     name: (
-      <HeaderCell isRightAligned>
-        {hasCache ? labels.tokensSentWithCache : labels.tokensSent}
+      <HeaderCell isRightAligned subLabel={hasCache ? labels.cachedSuffix : undefined}>
+        {labels.tokensSent}
       </HeaderCell>
     ),
-    width: '30%',
     align: RIGHT_ALIGNMENT,
     render: (inputTokens: number, { cachedInputTokens }: ModelRow) => (
       <Cell>
@@ -205,11 +189,10 @@ const getColumns = (
   {
     field: 'outputTokens',
     name: (
-      <HeaderCell isRightAligned>
-        {hasReasoning ? labels.tokensReceivedWithReasoning : labels.tokensReceived}
+      <HeaderCell isRightAligned subLabel={hasReasoning ? labels.reasoningSuffix : undefined}>
+        {labels.tokensReceived}
       </HeaderCell>
     ),
-    width: '21%',
     align: RIGHT_ALIGNMENT,
     render: (outputTokens: number, { reasoningTokens }: ModelRow) => (
       <Cell>
@@ -290,7 +273,7 @@ export const ExecutionMetadataByModel: React.FC<ExecutionMetadataByModelProps> =
       tableCaption={labels.tableCaption}
       items={rows}
       columns={columns}
-      tableLayout="fixed"
+      tableLayout="auto"
       compressed
       rowProps={({ key }) => ({ 'data-test-subj': `executionMetadataModelRow-${key}` })}
       data-test-subj="executionMetadataByModelTable"

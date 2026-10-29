@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiI18nNumber,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -25,8 +24,10 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { ExecutionJsonFlyout } from './execution_json_flyout';
 import { ExecutionMetadataByModel } from './execution_metadata_by_model';
+import { formatCompactNumber } from '../../../../utils/format_compact_number';
 
-const POPOVER_WIDTH = 420;
+const POPOVER_WIDTH_WITHOUT_TABLE = 200;
+const POPOVER_MIN_WIDTH_WITH_TABLE = 430;
 const MIN_MODELS_FOR_TABS = 2;
 
 const labels = {
@@ -156,7 +157,9 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
           direction="column"
           gutterSize="s"
           css={css`
-            width: ${POPOVER_WIDTH}px;
+            ${hasSeveralModels
+              ? `min-width: ${POPOVER_MIN_WIDTH_WITH_TABLE}px;`
+              : `width: ${POPOVER_WIDTH_WITHOUT_TABLE}px;`}
             max-width: calc(100vw - 4rem);
           `}
         >
@@ -203,24 +206,24 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
               <MetadataDivider />
               <MetadataRow
                 label={labels.tokensSent}
-                value={<EuiI18nNumber value={modelUsage.input_tokens} />}
+                value={formatCompactNumber(modelUsage.input_tokens)}
               />
               {modelUsage.cached_input_tokens !== undefined && (
                 <MetadataRow
                   label={labels.cacheHitTokens}
-                  value={<EuiI18nNumber value={modelUsage.cached_input_tokens} />}
+                  value={formatCompactNumber(modelUsage.cached_input_tokens)}
                   isSubRow
                 />
               )}
               <MetadataDivider />
               <MetadataRow
                 label={labels.tokensReceived}
-                value={<EuiI18nNumber value={modelUsage.output_tokens} />}
+                value={formatCompactNumber(modelUsage.output_tokens)}
               />
               {modelUsage.reasoning_tokens !== undefined && (
                 <MetadataRow
                   label={labels.reasoningTokens}
-                  value={<EuiI18nNumber value={modelUsage.reasoning_tokens} />}
+                  value={formatCompactNumber(modelUsage.reasoning_tokens)}
                   isSubRow
                 />
               )}
@@ -275,12 +278,12 @@ const MetadataRow: React.FC<MetadataRowProps> = ({ label, value, isSubRow = fals
   <EuiFlexItem grow={false}>
     <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size="s" color={isSubRow ? 'subdued' : undefined}>
+        <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
           {isSubRow ? label : <strong>{label}</strong>}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s" color={isSubRow ? 'subdued' : undefined}>
+        <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
           {value}
         </EuiText>
       </EuiFlexItem>

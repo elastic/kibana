@@ -319,7 +319,8 @@ describe('ExecutionMetadataPopover', () => {
       const user = await openPopover();
       await user.click(screen.getByTestId('executionMetadataByModelTab'));
 
-      expect(screen.getByText('Tokens received (reasoning)')).toBeInTheDocument();
+      expect(screen.getByText('Tokens received')).toBeInTheDocument();
+      expect(screen.getByText('(reasoning)')).toBeInTheDocument();
       expect(
         within(screen.getByTestId('executionMetadataModelRow-all')).getByText(/120/)
       ).toBeInTheDocument();
@@ -349,7 +350,7 @@ describe('ExecutionMetadataPopover', () => {
       await user.click(screen.getByTestId('executionMetadataByModelTab'));
 
       expect(screen.getByText('Tokens sent')).toBeInTheDocument();
-      expect(screen.queryByText('Tokens sent (cached)')).not.toBeInTheDocument();
+      expect(screen.queryByText('(cached)')).not.toBeInTheDocument();
       expect(screen.queryByLabelText('Not reported by this model')).not.toBeInTheDocument();
     });
 
@@ -361,7 +362,7 @@ describe('ExecutionMetadataPopover', () => {
       await user.click(screen.getByTestId('executionMetadataByModelTab'));
 
       expect(screen.getByText('Tokens received')).toBeInTheDocument();
-      expect(screen.queryByText('Tokens received (reasoning)')).not.toBeInTheDocument();
+      expect(screen.queryByText('(reasoning)')).not.toBeInTheDocument();
     });
 
     it('falls back to the model, then to the connector id, when the connector name is unknown', async () => {
