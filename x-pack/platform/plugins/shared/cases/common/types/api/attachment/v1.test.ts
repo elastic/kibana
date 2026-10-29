@@ -7,6 +7,7 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import {
+  MAX_ATTACHMENT_JSON_DEPTH,
   MAX_BULK_DELETE_ATTACHMENTS,
   MAX_COMMENT_LENGTH,
   MAX_FILENAME_LENGTH,
@@ -29,19 +30,89 @@ import {
   BulkDeleteAttachmentsByAttachmentIdRequestSchema,
   BulkDeleteAttachmentsBySavedObjectIdRequestSchema,
   BulkDeleteFileAttachmentsRequestSchema,
-  FindAttachmentsQueryParamsSchema,
-  PostFileAttachmentRequestSchema,
-} from '../../api_zod/attachment/v1';
+} from './v1';
 
-describe('Attachments', () => {
-  describe('BulkDeleteFileAttachmentsRequestRt', () => {
-    it('has expected attributes in request', () => {
-      const query = BulkDeleteFileAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'] });
+const validUserComment = {
+  type: AttachmentType.user,
+  comment: 'Hello',
+  owner: 'cases',
+};
 
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ids: ['abc', 'xyz'] },
-      });
+const validAlert = {
+  type: AttachmentType.alert,
+  alertId: ['alert-1'],
+  index: ['.alerts-1'],
+  rule: { id: 'rule-1', name: 'Rule One' },
+  owner: 'cases',
+};
+
+const validEvent = {
+  type: AttachmentType.event,
+  eventId: ['evt-1'],
+  index: ['.events-1'],
+  owner: 'cases',
+};
+
+const validActions = {
+  type: AttachmentType.actions,
+  comment: 'Isolating host',
+  actions: {
+    targets: [{ hostname: 'host-1', endpointId: 'ep-1' }],
+    type: 'isolate',
+  },
+  owner: 'cases',
+};
+
+const validExternalRefNoSO = {
+  type: AttachmentType.externalReference,
+  externalReferenceId: 'ext-1',
+  externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+  externalReferenceAttachmentTypeId: 'foo',
+  externalReferenceMetadata: null,
+  owner: 'cases',
+};
+
+const validExternalRefSO = {
+  type: AttachmentType.externalReference,
+  externalReferenceId: 'ext-2',
+  externalReferenceStorage: {
+    type: ExternalReferenceStorageType.savedObject,
+    soType: 'my-so-type',
+  },
+  externalReferenceAttachmentTypeId: 'foo',
+  externalReferenceMetadata: { foo: 'bar' },
+  owner: 'cases',
+};
+
+// Builds an object nested `depth` levels deep, counting the top-level object as 1.
+const nestedObject = (depth: number): Record<string, unknown> => {
+  let value: Record<string, unknown> = { leaf: true };
+  for (let level = 1; level < depth; level++) {
+    value = { child: value };
+  }
+  return value;
+};
+
+const depthError = (field: string) =>
+  `The ${field} field is nested too deeply. The maximum depth is ${MAX_ATTACHMENT_JSON_DEPTH}.`;
+
+const validPersistableState = {
+  type: AttachmentType.persistableState,
+  persistableStateAttachmentTypeId: 'persistable-1',
+  persistableStateAttachmentState: { key: 'value' },
+  owner: 'cases',
+};
+
+describe('AttachmentRequestSchema', () => {
+  describe('user comment variant', () => {
+    it('accepts a valid user comment', () => {
+      expect(AttachmentRequestSchema.safeParse(validUserComment).success).toBe(true);
+    });
+
+    it('rejects an empty comment string', () => {
+      expect(parseErrors(AttachmentRequestSchema, { ...validUserComment, comment: '' })).toContain(
+        'The comment field cannot be an empty string.'
+      );
     });
 
     it('removes foo:bar attributes from request', () => {
@@ -170,14 +241,33 @@ describe('Attachments', () => {
       expect(result.success).toBe(false);
     });
 
-    it('zod: fails with an empty array of ids', () => {
-      const result = BulkDeleteAttachmentsBySavedObjectIdRequestSchema.safeParse({ ids: [] });
-      expect(result.success).toBe(false);
+    it('rejects externalReferenceMetadata nested deeper than the max depth', () => {
+      expect(
+        parseErrors(AttachmentRequestSchema, {
+          ...validExternalRefSO,
+          externalReferenceMetadata: nestedObject(MAX_ATTACHMENT_JSON_DEPTH + 1),
+        })
+      ).toContain(depthError('externalReferenceMetadata'));
+    });
+  });
+
+  describe('persistableState variant', () => {
+    it('accepts a valid persistableState payload', () => {
+      expect(AttachmentRequestSchema.safeParse(validPersistableState).success).toBe(true);
     });
 
-    it('zod: fails with an empty string id', () => {
-      const result = BulkDeleteAttachmentsBySavedObjectIdRequestSchema.safeParse({ ids: [''] });
-      expect(result.success).toBe(false);
+    it('rejects a missing persistableStateAttachmentState', () => {
+      const { persistableStateAttachmentState, ...rest } = validPersistableState;
+      expect(AttachmentRequestSchema.safeParse(rest).success).toBe(false);
+    });
+
+    it('rejects persistableStateAttachmentState nested deeper than the max depth', () => {
+      expect(
+        parseErrors(AttachmentRequestSchema, {
+          ...validPersistableState,
+          persistableStateAttachmentState: nestedObject(MAX_ATTACHMENT_JSON_DEPTH + 1),
+        })
+      ).toContain(depthError('persistableStateAttachmentState'));
     });
   });
 
