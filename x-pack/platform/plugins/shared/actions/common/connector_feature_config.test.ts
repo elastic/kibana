@@ -18,6 +18,10 @@ describe('areValidFeatures', () => {
     ).toBeTruthy();
   });
 
+  it('accepts the importAlerts feature', () => {
+    expect(areValidFeatures(['workflows', 'importAlerts'])).toBeTruthy();
+  });
+
   it('returns true when only one input and it is a valid feature', () => {
     expect(areValidFeatures(['alerting'])).toBeTruthy();
     expect(areValidFeatures(['cases'])).toBeTruthy();
@@ -35,6 +39,10 @@ describe('areValidFeatures', () => {
 describe('getConnectorFeatureName', () => {
   it('returns the feature name for valid feature ids', () => {
     expect(getConnectorFeatureName('siem')).toEqual('Security Solution');
+  });
+
+  it('returns the feature name for importAlerts', () => {
+    expect(getConnectorFeatureName('importAlerts')).toEqual('Import alerts');
   });
 
   it('returns the id for invalid feature ids', () => {

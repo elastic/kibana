@@ -77,6 +77,7 @@ export interface ConnectorMetadata {
     | 'workflows'
     | 'agentBuilder'
     | 'contextEngine'
+    | 'importAlerts'
   >;
 }
 

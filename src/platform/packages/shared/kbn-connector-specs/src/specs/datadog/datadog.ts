@@ -160,7 +160,7 @@ export const Datadog: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'importAlerts'],
   },
 
   auth: {
