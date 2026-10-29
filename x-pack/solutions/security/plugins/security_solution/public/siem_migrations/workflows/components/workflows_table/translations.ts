@@ -17,19 +17,9 @@ export const STATUS_FILTER = i18n.translate(
   { defaultMessage: 'Status' }
 );
 
-export const TAG_FILTER = i18n.translate(
-  'xpack.securitySolution.siemMigrations.workflows.table.tagFilter',
-  { defaultMessage: 'Tag' }
-);
-
 export const CREATED_BY_FILTER = i18n.translate(
   'xpack.securitySolution.siemMigrations.workflows.table.createdByFilter',
   { defaultMessage: 'Created by' }
-);
-
-export const MANAGED_FILTER = i18n.translate(
-  'xpack.securitySolution.siemMigrations.workflows.table.managedFilter',
-  { defaultMessage: 'Managed' }
 );
 
 export const SHOWING_ROWS = (shown: number, total: number) =>
@@ -58,11 +48,6 @@ export const STATUS_COLUMN = i18n.translate(
   { defaultMessage: 'Status' }
 );
 
-export const CONNECTORS_COLUMN = i18n.translate(
-  'xpack.securitySolution.siemMigrations.workflows.table.connectorsColumn',
-  { defaultMessage: 'Connectors' }
-);
-
 export const ACTIONS_COLUMN = i18n.translate(
   'xpack.securitySolution.siemMigrations.workflows.table.actionsColumn',
   { defaultMessage: 'Actions' }
@@ -75,7 +60,7 @@ export const INSTALL_ACTION = i18n.translate(
 
 export const VIEW_ACTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.workflows.table.viewAction',
-  { defaultMessage: 'View' }
+  { defaultMessage: 'View in workflows' }
 );
 
 export const STATUS_TRANSLATED = i18n.translate(
@@ -96,4 +81,14 @@ export const STATUS_INSTALLED = i18n.translate(
 export const STATUS_ERROR = i18n.translate(
   'xpack.securitySolution.siemMigrations.workflows.table.statusError',
   { defaultMessage: 'Error' }
+);
+
+export const UPDATED_COLUMN = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.table.updatedColumn',
+  { defaultMessage: 'Updated' }
+);
+
+export const STATUS_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.table.statusTooltipTitle',
+  { defaultMessage: 'Translation Status legend' }
 );

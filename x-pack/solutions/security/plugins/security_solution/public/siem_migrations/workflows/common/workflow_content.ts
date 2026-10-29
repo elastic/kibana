@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { MigrationComment } from '../../../../common/siem_migrations/model/common.gen';
+import { SIEM_MIGRATIONS_ASSISTANT_USER } from '../../../../common/siem_migrations/constants';
+
 export type WorkflowMigrationStatus = 'translated' | 'partially_translated' | 'installed' | 'error';
 
 export interface WorkflowMigrationRow {
@@ -20,6 +23,8 @@ export interface WorkflowMigrationRow {
   /** Number of connectors configured out of the number required */
   connectorsInstalled: number;
   connectorsTotal: number;
+  /** ISO date of the last update to the translated workflow */
+  updatedAt: string;
 }
 
 export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
@@ -33,6 +38,7 @@ export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
     migrationStatus: 'partially_translated',
     connectorsInstalled: 1,
     connectorsTotal: 2,
+    updatedAt: '2026-10-15T12:08:34.558Z',
   },
   {
     id: 'national-parks',
@@ -44,6 +50,7 @@ export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
     migrationStatus: 'partially_translated',
     connectorsInstalled: 1,
     connectorsTotal: 2,
+    updatedAt: '2026-10-15T12:08:34.558Z',
   },
   {
     id: 'trigger-workflow-from-slack-message',
@@ -55,6 +62,7 @@ export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
     migrationStatus: 'installed',
     connectorsInstalled: 1,
     connectorsTotal: 1,
+    updatedAt: '2026-10-14T16:20:11.000Z',
   },
   {
     id: 'slack-basic-demo',
@@ -66,6 +74,7 @@ export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
     migrationStatus: 'installed',
     connectorsInstalled: 2,
     connectorsTotal: 2,
+    updatedAt: '2026-10-14T16:20:11.000Z',
   },
   {
     id: 'github-pr-notification',
@@ -77,6 +86,7 @@ export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
     migrationStatus: 'translated',
     connectorsInstalled: 2,
     connectorsTotal: 2,
+    updatedAt: '2026-10-15T12:08:34.558Z',
   },
   {
     id: 'jira-issue-update',
@@ -88,6 +98,7 @@ export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
     migrationStatus: 'error',
     connectorsInstalled: 0,
     connectorsTotal: 1,
+    updatedAt: '2026-10-15T12:08:34.558Z',
   },
   {
     id: 'daily-standup-reminder',
@@ -99,6 +110,7 @@ export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
     migrationStatus: 'installed',
     connectorsInstalled: 1,
     connectorsTotal: 1,
+    updatedAt: '2026-10-13T09:02:45.000Z',
   },
   {
     id: 'draft-test',
@@ -110,6 +122,7 @@ export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
     migrationStatus: 'translated',
     connectorsInstalled: 0,
     connectorsTotal: 0,
+    updatedAt: '2026-10-15T12:08:34.558Z',
   },
   {
     id: 'new-user-signup-alert',
@@ -121,6 +134,7 @@ export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
     migrationStatus: 'installed',
     connectorsInstalled: 1,
     connectorsTotal: 1,
+    updatedAt: '2026-10-13T09:02:45.000Z',
   },
   {
     id: 'server-downtime-notification',
@@ -132,6 +146,7 @@ export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
     migrationStatus: 'installed',
     connectorsInstalled: 1,
     connectorsTotal: 1,
+    updatedAt: '2026-10-14T16:20:11.000Z',
   },
   {
     id: 'monthly-performance-review',
@@ -143,6 +158,7 @@ export const MOCK_WORKFLOW_ROWS: WorkflowMigrationRow[] = [
     migrationStatus: 'error',
     connectorsInstalled: 1,
     connectorsTotal: 2,
+    updatedAt: '2026-10-15T12:08:34.558Z',
   },
 ];
 
@@ -153,6 +169,10 @@ export interface PhishingStep {
   status: PhishingStepStatus;
   description: string;
   tag: string;
+  /** Elastic Workflows step type the original step was translated to */
+  stepType: string;
+  /** EUI icon type shown in the graph node */
+  icon: string;
 }
 
 export const PHISHING_EMAIL_STEPS: PhishingStep[] = [
@@ -161,48 +181,64 @@ export const PHISHING_EMAIL_STEPS: PhishingStep[] = [
     status: 'mapped',
     description: 'Extract sender, recipient, subject, and message-id from raw email headers',
     tag: 'utility',
+    stepType: 'elasticsearch.search',
+    icon: 'logoElasticsearch',
   },
   {
     title: 'Threat Intel Lookup — Sender',
     status: 'mapped',
     description: 'Query VirusTotal and internal blocklist for sender domain reputation',
     tag: 'ti_lookup',
+    stepType: 'http.request',
+    icon: 'globe',
   },
   {
     title: 'Extract URLs from Body',
     status: 'mapped',
     description: 'Parse all href links from HTML and plain-text email body',
     tag: 'utility',
+    stepType: 'utility.regex_extract',
+    icon: 'console',
   },
   {
     title: 'Scan URLs',
     status: 'needs_review',
     description: 'Submit URLs to VirusTotal URL scanner and wait for results',
     tag: 'ti_lookup',
+    stepType: 'http.request',
+    icon: 'globe',
   },
   {
     title: 'Quarantine Email',
     status: 'mapped',
     description: 'Move email to quarantine folder if malicious indicators found',
     tag: 'containment',
+    stepType: 'elasticsearch.update',
+    icon: 'logoElasticsearch',
   },
   {
     title: 'Notify Affected User',
     status: 'mapped',
     description: 'Send templated warning email to affected user via SMTP',
     tag: 'notification',
+    stepType: 'notification.email',
+    icon: 'email',
   },
   {
     title: 'Create Incident Case',
     status: 'needs_review',
     description: 'Open incident ticket in ServiceNow with enriched context',
     tag: 'case_management',
+    stepType: 'http.request',
+    icon: 'globe',
   },
   {
     title: 'Close Alert',
     status: 'mapped',
     description: 'Mark the originating alert as resolved',
     tag: 'alerting',
+    stepType: 'elasticsearch.update',
+    icon: 'logoElasticsearch',
   },
 ];
 
@@ -267,3 +303,31 @@ steps:
     config:
       index: .alerts-security*
 `;
+
+export const PHISHING_EMAIL_SUMMARY_COMMENTS: MigrationComment[] = [
+  {
+    message: '## Prebuilt Workflow Matching Summary\nNo matching prebuilt workflow found.',
+    created_at: '2026-10-15T12:08:34.558Z',
+    created_by: SIEM_MIGRATIONS_ASSISTANT_USER,
+  },
+  {
+    message: `## Translation Summary
+The Tines Story was partially translated into an Elastic workflow. 6 of 8 steps were mapped automatically. \`Scan URLs\` and \`Create Incident Case\` need review, because they require connector or API configuration:
+
+\`\`\`yaml
+- name: scan-urls
+  type: http.request
+  needs_review: true
+  config:
+    url: "https://www.virustotal.com/api/v3/urls"
+
+- name: create-incident-case
+  type: http.request
+  needs_review: true
+  config:
+    url: "https://servicenow.example.com/api/now/table/incident"
+\`\`\``,
+    created_at: '2026-10-15T12:08:34.558Z',
+    created_by: SIEM_MIGRATIONS_ASSISTANT_USER,
+  },
+];

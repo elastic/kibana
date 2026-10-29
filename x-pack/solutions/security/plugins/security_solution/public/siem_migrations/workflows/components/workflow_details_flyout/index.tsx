@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -34,15 +34,13 @@ export interface WorkflowDetailsFlyoutProps {
 export const WorkflowDetailsFlyout: React.FC<WorkflowDetailsFlyoutProps> = React.memo(
   ({ onClose }) => {
     const titleId = useGeneratedHtmlId({ prefix: 'workflowDetailsFlyoutTitle' });
-    const [yaml, setYaml] = useState(PHISHING_EMAIL_YAML);
-    const resetYaml = useCallback(() => setYaml(PHISHING_EMAIL_YAML), []);
 
     const tabs: EuiTabbedContentTab[] = useMemo(
       () => [
         {
           id: 'translation',
           name: i18n.TRANSLATION_TAB,
-          content: <TranslationTab yaml={yaml} />,
+          content: <TranslationTab yaml={PHISHING_EMAIL_YAML} />,
         },
         {
           id: 'summary',
@@ -50,7 +48,7 @@ export const WorkflowDetailsFlyout: React.FC<WorkflowDetailsFlyoutProps> = React
           content: <SummaryTab />,
         },
       ],
-      [yaml]
+      []
     );
 
     return (
@@ -82,16 +80,13 @@ export const WorkflowDetailsFlyout: React.FC<WorkflowDetailsFlyoutProps> = React
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={resetYaml}>{i18n.RESET_YAML}</EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton iconType="save" onClick={onClose}>
-                    {i18n.SAVE_AS_WORKFLOW}
+                  <EuiButton iconType="workflow" onClick={onClose}>
+                    {i18n.INSTALL_AND_EDIT}
                   </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton fill iconType="play" onClick={onClose}>
-                    {i18n.SAVE_AND_RUN}
+                  <EuiButton fill onClick={onClose}>
+                    {i18n.INSTALL}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

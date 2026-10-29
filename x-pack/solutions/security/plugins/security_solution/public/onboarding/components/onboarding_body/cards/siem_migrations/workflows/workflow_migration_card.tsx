@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,16 +23,14 @@ import {
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import type { OnboardingCardComponent } from '../../../../../types';
 import { OnboardingCardContentPanel } from '../../common/card_content_panel';
-import { useNavigation } from '../../../../../../common/lib/kibana';
-import { SecurityPageName } from '../../../../../../../common/constants';
+import { WorkflowDetailsFlyout } from '../../../../../../siem_migrations/workflows/components/workflow_details_flyout';
+import { TINES_VENDOR_COLOR } from '../../../../../../siem_migrations/common/utils/migration_vendor_color_config';
 import * as i18n from './translations';
 
 export const WorkflowMigrationCard: OnboardingCardComponent = () => {
-  const { navigateTo } = useNavigation();
-
-  const onOpenTranslatedWorkflows = useCallback(() => {
-    navigateTo({ deepLinkId: SecurityPageName.siemMigrationsWorkflows });
-  }, [navigateTo]);
+  const [isWorkflowDetailsOpen, setIsWorkflowDetailsOpen] = useState(false);
+  const openWorkflowDetails = useCallback(() => setIsWorkflowDetailsOpen(true), []);
+  const closeWorkflowDetails = useCallback(() => setIsWorkflowDetailsOpen(false), []);
 
   return (
     <OnboardingCardContentPanel>
@@ -61,7 +59,7 @@ export const WorkflowMigrationCard: OnboardingCardComponent = () => {
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{i18n.TINES_BADGE}</EuiBadge>
+                <EuiBadge color={TINES_VENDOR_COLOR}>{i18n.TINES_BADGE}</EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
@@ -102,7 +100,7 @@ export const WorkflowMigrationCard: OnboardingCardComponent = () => {
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{i18n.TINES_BADGE}</EuiBadge>
+                <EuiBadge color={TINES_VENDOR_COLOR}>{i18n.TINES_BADGE}</EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
@@ -131,25 +129,19 @@ export const WorkflowMigrationCard: OnboardingCardComponent = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="success">
-                  <strong>{i18n.TRANSLATION_COMPLETE}</strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.TRANSLATION_COMPLETE} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="arrowRight"
-                    aria-label={i18n.TRANSLATION_COMPLETE}
-                    onClick={onOpenTranslatedWorkflows}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiButtonEmpty
+              color="success"
+              iconType="arrowRight"
+              iconSide="right"
+              onClick={openWorkflowDetails}
+              data-test-subj="workflowMigrationTranslationCompleteButton"
+            >
+              <strong>{i18n.TRANSLATION_COMPLETE}</strong>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
+      {isWorkflowDetailsOpen && <WorkflowDetailsFlyout onClose={closeWorkflowDetails} />}
     </OnboardingCardContentPanel>
   );
 };

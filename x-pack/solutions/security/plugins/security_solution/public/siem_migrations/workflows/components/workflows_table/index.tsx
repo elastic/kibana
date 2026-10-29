@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
+import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBasicTable,
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
+  type Criteria,
+  type EuiTableSortingType,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
+  EuiHorizontalRule,
   EuiFilterGroup,
   EuiFilterButton,
   EuiText,
@@ -29,6 +35,8 @@ import {
   type WorkflowMigrationRow,
   type WorkflowMigrationStatus,
 } from '../../common/workflow_content';
+import { useKibana } from '../../../../common/lib/kibana';
+import { TableHeader } from '../../../common/components';
 import { WorkflowDetailsFlyout } from '../workflow_details_flyout';
 import * as i18n from './translations';
 
@@ -41,10 +49,26 @@ const STATUS_BADGE: Record<WorkflowMigrationStatus, { color: string; label: stri
 
 export const WorkflowsTable: React.FC = React.memo(() => {
   const { euiTheme } = useEuiTheme();
+  const { navigateToApp } = useKibana().services.application;
+  const openWorkflowsApp = useCallback(() => navigateToApp('workflows'), [navigateToApp]);
   const [rows] = useState(MOCK_WORKFLOW_ROWS);
   const [searchTerm, setSearchTerm] = useState('');
   const [openRowId, setOpenRowId] = useState<string | null>(null);
   const [selectedRows, setSelectedRows] = useState<WorkflowMigrationRow[]>([]);
+  const [sortField, setSortField] = useState<keyof WorkflowMigrationRow>('updatedAt');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const sorting: EuiTableSortingType<WorkflowMigrationRow> = useMemo(
+    () => ({ sort: { field: sortField, direction: sortDirection } }),
+    [sortField, sortDirection]
+  );
+
+  const onTableChange = useCallback(({ sort }: Criteria<WorkflowMigrationRow>) => {
+    if (sort) {
+      setSortField(sort.field);
+      setSortDirection(sort.direction);
+    }
+  }, []);
 
   const selection: EuiTableSelectionType<WorkflowMigrationRow> = useMemo(
     () => ({
@@ -57,16 +81,28 @@ export const WorkflowsTable: React.FC = React.memo(() => {
 
   const filteredRows = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
-    if (!term) {
-      return rows;
-    }
-    return rows.filter(
-      (row) => row.name.toLowerCase().includes(term) || row.description.toLowerCase().includes(term)
-    );
-  }, [rows, searchTerm]);
+    const matchingRows = term
+      ? rows.filter(
+          (row) =>
+            row.name.toLowerCase().includes(term) || row.description.toLowerCase().includes(term)
+        )
+      : rows;
+    return [...matchingRows].sort((a, b) => {
+      const order = String(a[sortField]).localeCompare(String(b[sortField]));
+      return sortDirection === 'asc' ? order : -order;
+    });
+  }, [rows, searchTerm, sortField, sortDirection]);
 
   const columns: Array<EuiBasicTableColumn<WorkflowMigrationRow>> = useMemo(
     () => [
+      {
+        field: 'updatedAt',
+        name: i18n.UPDATED_COLUMN,
+        render: (updatedAt: string) => moment(updatedAt).format('M/D/YY'),
+        sortable: true,
+        align: 'center',
+        width: '10%',
+      },
       {
         field: 'name',
         name: i18n.NAME_COLUMN,
@@ -81,7 +117,17 @@ export const WorkflowsTable: React.FC = React.memo(() => {
                 <strong>{name}</strong>
               </EuiText>
             )}
-            <EuiText size="xs" color="subdued">
+            <EuiText
+              size="xs"
+              color="subdued"
+              title={row.description}
+              css={css`
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+              `}
+            >
               {row.description}
             </EuiText>
           </div>
@@ -110,16 +156,38 @@ export const WorkflowsTable: React.FC = React.memo(() => {
         ),
       },
       {
-        name: i18n.CONNECTORS_COLUMN,
-        render: (row: WorkflowMigrationRow) => (
-          <EuiBadge color="hollow" iconType="package">
-            {`${row.connectorsInstalled}/${row.connectorsTotal}`}
-          </EuiBadge>
-        ),
-      },
-      {
         field: 'migrationStatus',
-        name: i18n.STATUS_COLUMN,
+        name: (
+          <TableHeader
+            title={i18n.STATUS_COLUMN}
+            tooltipContent={
+              <FormattedMessage
+                id="xpack.securitySolution.siemMigrations.workflows.table.statusTooltip"
+                defaultMessage={`{title}
+                {installed} - already added to Elastic Workflows. Click "View in workflows" to manage and run it.{lineBreak}
+                {translated} - ready to install. Every step was mapped to an Elastic workflow step.{lineBreak}
+                {partiallyTranslated} - some steps need review. Configure any missing connectors or APIs and check the YAML.{lineBreak}
+                {error} - the workflow could not be translated.`}
+                values={{
+                  lineBreak: <br />,
+                  title: (
+                    <EuiText size="s">
+                      <p>
+                        <b>{i18n.STATUS_TOOLTIP_TITLE}</b>
+                        <EuiHorizontalRule margin="s" />
+                      </p>
+                    </EuiText>
+                  ),
+                  installed: <b>{i18n.STATUS_INSTALLED}</b>,
+                  translated: <b>{i18n.STATUS_TRANSLATED}</b>,
+                  partiallyTranslated: <b>{i18n.STATUS_PARTIALLY_TRANSLATED}</b>,
+                  error: <b>{i18n.STATUS_ERROR}</b>,
+                }}
+              />
+            }
+          />
+        ),
+        sortable: true,
         render: (status: WorkflowMigrationStatus) => {
           const { color, label } = STATUS_BADGE[status];
           return <EuiBadge color={color}>{label}</EuiBadge>;
@@ -145,11 +213,10 @@ export const WorkflowsTable: React.FC = React.memo(() => {
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={i18n.VIEW_ACTION} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    iconType="eye"
+                    iconType="workflow"
                     aria-label={i18n.VIEW_ACTION}
-                    onClick={
-                      row.id === 'phishing-email-response' ? () => setOpenRowId(row.id) : undefined
-                    }
+                    disabled={row.migrationStatus !== 'installed'}
+                    onClick={openWorkflowsApp}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
@@ -158,7 +225,7 @@ export const WorkflowsTable: React.FC = React.memo(() => {
         },
       },
     ],
-    [euiTheme]
+    [euiTheme, openWorkflowsApp]
   );
 
   return (
@@ -175,17 +242,11 @@ export const WorkflowsTable: React.FC = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
-            <EuiFilterButton numFilters={2} hasActiveFilters={false}>
+            <EuiFilterButton numFilters={4} hasActiveFilters={false}>
               {i18n.STATUS_FILTER}
-            </EuiFilterButton>
-            <EuiFilterButton numFilters={5} hasActiveFilters={false}>
-              {i18n.TAG_FILTER}
             </EuiFilterButton>
             <EuiFilterButton numFilters={8} hasActiveFilters={false}>
               {i18n.CREATED_BY_FILTER}
-            </EuiFilterButton>
-            <EuiFilterButton numFilters={1} hasActiveFilters={false}>
-              {i18n.MANAGED_FILTER}
             </EuiFilterButton>
           </EuiFilterGroup>
         </EuiFlexItem>
@@ -202,6 +263,8 @@ export const WorkflowsTable: React.FC = React.memo(() => {
         tableCaption={i18n.TABLE_CAPTION}
         itemId="id"
         selection={selection}
+        sorting={sorting}
+        onChange={onTableChange}
       />
       {openRowId === 'phishing-email-response' && (
         <WorkflowDetailsFlyout onClose={() => setOpenRowId(null)} />

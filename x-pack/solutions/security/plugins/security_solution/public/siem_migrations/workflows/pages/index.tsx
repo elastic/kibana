@@ -22,6 +22,7 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { HeaderPage } from '../../../common/components/header_page';
 import { PageTitle } from '../../common/components/page_title';
 import { WorkflowsTable } from '../components/workflows_table';
+import { TINES_VENDOR_COLOR } from '../../common/utils/migration_vendor_color_config';
 import {
   ADD_ANOTHER_MIGRATION,
   MIGRATION_OPTION_LABEL,
@@ -72,7 +73,7 @@ export const MigrationWorkflowsPage: React.FC = React.memo(() => {
           <EuiSpacer size="xs" />
           <EuiComboBox
             aria-label={MIGRATION_SELECT_ARIA_LABEL}
-            prepend={<EuiBadge color="hollow">{TINES_BADGE}</EuiBadge>}
+            prepend={<EuiBadge color={TINES_VENDOR_COLOR}>{TINES_BADGE}</EuiBadge>}
             options={MIGRATION_OPTIONS}
             selectedOptions={selectedMigration}
             onChange={setSelectedMigration}
