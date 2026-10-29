@@ -7,11 +7,10 @@
 
 module.exports = {
   preset: '@kbn/jest/jest_integration',
-  rootDir: '../../../../../../../../../../..',
+  rootDir: '../../../../../../../../../../../../../../..',
   roots: [
-    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule',
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/rule_management/integration_tests/rules_upgrade/upgrade_rule_after_preview/fields/common',
   ],
-  testMatch: ['**/*.test.[jt]s?(x)'],
   openHandlesTimeout: 0,
   forceExit: true,
 };
