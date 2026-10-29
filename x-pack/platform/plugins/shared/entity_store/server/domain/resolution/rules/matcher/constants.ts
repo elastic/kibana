@@ -15,6 +15,9 @@ export const GROUP_SIZE_CEILING = 100;
  */
 export const MATCHER_PAGE_SIZE = 5_000;
 
+/** Candidate match values per page; each page becomes the `IN (...)` list of one group query. */
+export const MATCHER_CANDIDATE_PAGE_SIZE = 1_000;
+
 export const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 export const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 export const ENTITY_NAMESPACE_FIELD = 'entity.namespace';

@@ -189,8 +189,76 @@ describe('runCustomResolutionRules', () => {
       lastAttemptAt: expect.any(String),
       lastStartedFirstAt: expect.any(String),
       lastError: 'boom',
+      lastFailedAt: expect.any(String),
+      consecutiveFailures: 1,
+      nextAttemptAt: expect.any(String),
     });
     expect(rules['custom:a']).not.toEqual(previous['custom:a']);
+  });
+
+  it('skips a failing rule until its backoff ends, and runs the others', async () => {
+    const previous = {
+      ...watermarked('a'),
+      'custom:a': {
+        ...watermarked('a')['custom:a'],
+        lastError: 'boom',
+        consecutiveFailures: 2,
+        nextAttemptAt: new Date(Date.now() + 60_000).toISOString(),
+      },
+      ...watermarked('b'),
+    };
+    const { rules } = await run([rule('a'), rule('b')], { previous });
+
+    expect(calledRuleIds()).toEqual(['custom:b']);
+    expect(rules['custom:a']).toEqual(previous['custom:a']);
+  });
+
+  it('backs off longer after each failure in a row', async () => {
+    (runEsqlMatcherRule as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+    const previous = {
+      'custom:a': {
+        ...watermarked('a')['custom:a'],
+        consecutiveFailures: 2,
+        nextAttemptAt: new Date(Date.now() - 1_000).toISOString(),
+      },
+    };
+    const before = Date.now();
+    const { rules } = await run([rule('a')], { previous });
+
+    expect(rules['custom:a']).toMatchObject({ consecutiveFailures: 3, lastError: 'boom' });
+    // Third failure in a row: 5 min doubled twice.
+    const waitMs = Date.parse(rules['custom:a'].nextAttemptAt as string) - before;
+    expect(waitMs).toBeGreaterThanOrEqual(20 * 60_000);
+    expect(waitMs).toBeLessThan(21 * 60_000);
+  });
+
+  it('retries an edited rule straight away, even while backing off', async () => {
+    const previous = {
+      'custom:a': {
+        ...watermarked('a')['custom:a'],
+        consecutiveFailures: 3,
+        nextAttemptAt: new Date(Date.now() + 60_000).toISOString(),
+      },
+    };
+    await run([rule('a', { match_value: 'TO_LOWER(user.email)' })], { previous });
+
+    expect(calledRuleIds()).toEqual(['custom:a']);
+  });
+
+  it('clears the failure streak once the rule runs cleanly', async () => {
+    const previous = {
+      'custom:a': {
+        ...watermarked('a')['custom:a'],
+        lastError: 'boom',
+        consecutiveFailures: 3,
+        nextAttemptAt: new Date(Date.now() - 1_000).toISOString(),
+      },
+    };
+    const { rules } = await run([rule('a')], { previous });
+
+    expect(rules['custom:a']).not.toHaveProperty('consecutiveFailures');
+    expect(rules['custom:a']).not.toHaveProperty('nextAttemptAt');
+    expect(rules['custom:a']).toMatchObject({ lastError: null });
   });
 
   it('clears the last error once the rule runs cleanly', async () => {

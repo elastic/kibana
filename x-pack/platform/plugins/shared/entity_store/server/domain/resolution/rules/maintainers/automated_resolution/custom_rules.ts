@@ -22,6 +22,13 @@ import { runEsqlMatcherRule } from '../../matcher';
 import type { ResolutionRulesClient } from '../../rule_client';
 import type { EsqlExpressionMatchSpec } from '../../rule_registry';
 import { EMPTY_RULE_STATE, type CustomRuleState, type PerRuleState } from './types';
+import {
+  getBackoffUntil,
+  getConsecutiveFailures,
+  pickRuleFailure,
+  truncateRuleError,
+  withRuleFailure,
+} from './rule_backoff';
 
 /**
  * How long before the task timeout custom rules stop (the soft deadline); a run
@@ -30,8 +37,6 @@ import { EMPTY_RULE_STATE, type CustomRuleState, type PerRuleState } from './typ
 export const CUSTOM_RULES_DEADLINE_MARGIN_MS = 60 * 1000;
 
 const CUSTOM_RULE_TELEMETRY_ID = 'custom';
-
-const MAX_LAST_ERROR_LENGTH = 500;
 
 export interface RunCustomRulesDeps {
   /** Mutated in place: custom-rule entries are written and pruned. */
@@ -74,9 +79,6 @@ const orderForRun = (
   ];
 };
 
-const truncate = (message: string): string =>
-  message.length > MAX_LAST_ERROR_LENGTH ? `${message.slice(0, MAX_LAST_ERROR_LENGTH)}…` : message;
-
 const markDeferred = (
   ruleStates: Record<string, PerRuleState>,
   notStarted: CustomResolutionRule[]
@@ -96,11 +98,11 @@ const recordFailure = (
   stateKey: string,
   error: unknown
 ): void => {
-  ruleStates[stateKey] = {
-    ...EMPTY_RULE_STATE,
-    ...ruleStates[stateKey],
-    lastError: truncate(getErrorMessage(error)),
-  };
+  ruleStates[stateKey] = withRuleFailure(
+    { ...EMPTY_RULE_STATE, ...ruleStates[stateKey] },
+    getErrorMessage(error),
+    Date.now()
+  );
 };
 
 const priorStateIfDefinitionUnchanged = (
@@ -110,7 +112,11 @@ const priorStateIfDefinitionUnchanged = (
   if (!previous || asCustomState(previous).definitionFingerprint !== definitionFingerprint) {
     return EMPTY_RULE_STATE;
   }
-  return { lastProcessedTimestamp: previous.lastProcessedTimestamp, lastRun: previous.lastRun };
+  return {
+    lastProcessedTimestamp: previous.lastProcessedTimestamp,
+    lastRun: previous.lastRun,
+    ...pickRuleFailure(previous),
+  };
 };
 
 // A rule missing from the list is only pruned once a read by id confirms it's
@@ -241,6 +247,16 @@ async function runEnabledRulesUntilAborted(
     const definitionFingerprint = fingerprintDefinition(currentRule);
 
     const ruleState = priorStateIfDefinitionUnchanged(ruleStates[stateKey], definitionFingerprint);
+    // An edited rule starts from an empty state, so it retries straight away.
+    const backoffUntil = getBackoffUntil(ruleState, Date.now());
+    if (backoffUntil) {
+      logger.debug(
+        `Skipping ${stateKey} after ${getConsecutiveFailures(
+          ruleState
+        )} failure(s) in a row; next attempt at ${backoffUntil}`
+      );
+      continue;
+    }
     const lastAttemptAt = new Date().toISOString();
     const lastStartedFirstAt = anyRuleStartedThisRun
       ? asCustomState(ruleStates[stateKey]).lastStartedFirstAt ?? null
@@ -269,7 +285,7 @@ async function runEnabledRulesUntilAborted(
     } catch (error) {
       if (!reachedDeadline()) {
         logger.warn(`${stateKey} failed: ${getErrorMessage(error)}`);
-        lastError = truncate(getErrorMessage(error));
+        lastError = truncateRuleError(getErrorMessage(error));
       }
     }
 
@@ -281,7 +297,9 @@ async function runEnabledRulesUntilAborted(
 
     // Written even on failure or early stop so the next run's order sees it.
     const nextState: CustomRuleState = {
-      ...matcherResultState,
+      ...(lastError === null
+        ? matcherResultState
+        : withRuleFailure(matcherResultState, lastError, Date.now())),
       definitionFingerprint,
       lastAttemptAt,
       lastStartedFirstAt,
