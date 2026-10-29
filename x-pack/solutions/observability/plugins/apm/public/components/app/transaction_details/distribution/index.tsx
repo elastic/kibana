@@ -46,7 +46,7 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: { rangeFrom, rangeTo, showCriticalPath },
+    query: { rangeFrom, rangeTo, showCriticalPath, sampleIndex },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
@@ -62,18 +62,12 @@ export function TransactionDistribution({
 
   const traceSamples = traceSamplesFetchResult.data?.traceSamples;
 
-  // The sample's array position is carried in the URL so that samples sharing
-  // the same traceId/transactionId (e.g. paired `gen_ai.*` documents) can be
-  // navigated individually. Resolving selection by identifier alone collapses
-  // such pairs onto the first match, breaking forward pagination.
-  const selectedSampleIndex = useMemo(() => {
-    const rawSampleIndex = toQuery(history.location.search).sampleIndex;
-    if (rawSampleIndex === undefined) {
-      return undefined;
-    }
-    const parsedIndex = Number(rawSampleIndex);
-    return Number.isInteger(parsedIndex) ? parsedIndex : undefined;
-  }, [history.location.search]);
+  // The sample's array position is carried in the URL (`sampleIndex`) so that
+  // samples sharing the same traceId/transactionId (e.g. paired `gen_ai.*`
+  // documents) can be navigated individually. Resolving selection by identifier
+  // alone collapses such pairs onto the first match, breaking forward
+  // pagination.
+  const selectedSampleIndex = sampleIndex;
 
   // Derive the selected sample from the URL so the pagination index stays in
   // sync with browser back/forward navigation. Passing `selectedSample` (even
