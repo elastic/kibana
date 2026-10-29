@@ -30771,8 +30771,6 @@
     "xpack.ml.alertContext.timestampIso8601Description": "Heure du groupe de l'anomalie au format ISO8601",
     "xpack.ml.alertContext.topInfluencersDescription": "Principaux influenceurs",
     "xpack.ml.alertContext.topRecordsDescription": "Premiers enregistrements",
-    "xpack.ml.alerts.actions.addToCase": "Ajouter à un cas existant",
-    "xpack.ml.alerts.actions.addToNewCase": "Ajouter au nouveau cas",
     "xpack.ml.alertsTable.actionsPopoverAriaLabel": "Actions d'alerte",
     "xpack.ml.alertsTable.columns.anomalyScore": "Dernier score d'anomalie",
     "xpack.ml.alertsTable.columns.anomalyTime": "Dernière heure d'anomalie",

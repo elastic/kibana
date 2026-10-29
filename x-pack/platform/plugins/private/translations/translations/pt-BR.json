@@ -30924,8 +30924,6 @@
     "xpack.ml.alertContext.timestampIso8601Description": "O tempo do bucket da anomalia no formato ISO8601",
     "xpack.ml.alertContext.topInfluencersDescription": "Principais influenciadores",
     "xpack.ml.alertContext.topRecordsDescription": "Principais registros",
-    "xpack.ml.alerts.actions.addToCase": "Adicionar ao caso existente",
-    "xpack.ml.alerts.actions.addToNewCase": "Adicionar a um novo caso",
     "xpack.ml.alertsTable.actionsPopoverAriaLabel": "Ações de alerta",
     "xpack.ml.alertsTable.columns.anomalyScore": "Última pontuação de anomalia",
     "xpack.ml.alertsTable.columns.anomalyTime": "Último horário da anomalia",

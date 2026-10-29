@@ -30945,8 +30945,6 @@
     "xpack.ml.alertContext.timestampIso8601Description": "异常的存储桶时间（ISO8601 格式）",
     "xpack.ml.alertContext.topInfluencersDescription": "排名最前的影响因素",
     "xpack.ml.alertContext.topRecordsDescription": "排名最前的记录",
-    "xpack.ml.alerts.actions.addToCase": "添加到现有案例",
-    "xpack.ml.alerts.actions.addToNewCase": "添加到新案例",
     "xpack.ml.alertsTable.actionsPopoverAriaLabel": "告警操作",
     "xpack.ml.alertsTable.columns.anomalyScore": "最新异常分数",
     "xpack.ml.alertsTable.columns.anomalyTime": "最新异常时间",
