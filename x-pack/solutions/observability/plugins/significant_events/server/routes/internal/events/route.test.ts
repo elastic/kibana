@@ -26,7 +26,6 @@ const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events
 const eventsFacetsRoute = internalEventsRoutes['GET /internal/significant_events/events/_facets'];
 const lifecycleRoute =
   internalEventsRoutes['GET /internal/significant_events/events/{id}/lifecycle'];
-const eventsGetRoute = internalEventsRoutes['GET /internal/significant_events/events/{id}'];
 const eventsUpdateRoute =
   internalEventsRoutes['POST /internal/significant_events/events/{id}/update'];
 const cleanupRoute = internalEventsRoutes['POST /internal/significant_events/events/_cleanup'];
@@ -524,90 +523,6 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
     });
 
     expect(response.skipped_truncated).toBe(true);
-  });
-});
-
-describe('GET /internal/significant_events/events/{id}', () => {
-  const baseEvent = {
-    '@timestamp': '2026-01-01T00:00:00.000Z',
-    event_uuid: 'version-1',
-    event_id: 'event-1',
-    status: 'open' as const,
-    source_ids: ['logs.test'],
-    title: 'Test event',
-    summary: 'Test summary',
-    severity: '40-medium' as const,
-    confidence: 0.8,
-  };
-
-  it('returns 404 when the event id is missing', async () => {
-    await expect(
-      eventsGetRoute.handler({
-        params: { path: { id: 'missing' } },
-        request: {},
-        getScopedClients: jest.fn().mockResolvedValue({
-          licensing: {},
-          getEventSearchClient: () => ({
-            findLatestByEventId: jest.fn().mockResolvedValue(undefined),
-          }),
-        }),
-        server: {},
-      } as never)
-    ).rejects.toMatchObject({ output: { statusCode: 404 } });
-  });
-
-  it('returns the latest version in the event lineage', async () => {
-    const older = { ...baseEvent };
-    const latest = {
-      ...baseEvent,
-      assessment_note: 'Known noise',
-    };
-
-    const response = await eventsGetRoute.handler({
-      params: { path: { id: older.event_id } },
-      request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        getEventSearchClient: () => ({
-          findLatestByEventId: jest.fn().mockResolvedValue(latest),
-        }),
-      }),
-      server: {},
-    } as never);
-
-    expect(response.event_id).toBe(older.event_id);
-    expect(response.assessment_note).toBe('Known noise');
-  });
-
-  it('passes signals through to the response unchanged', async () => {
-    const signals = [
-      {
-        type: 'detection' as const,
-        source_id: 'logs.test',
-        verdict: 'false_positive',
-        metadata: {
-          rule_uuid: 'rule-uuid-1',
-          rule_name: 'Test Rule',
-          detection_id: 'det-1',
-          change_point_type: 'dip',
-        },
-      },
-    ];
-    const eventWithSignals = { ...baseEvent, signals };
-
-    const response = await eventsGetRoute.handler({
-      params: { path: { id: baseEvent.event_id } },
-      request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        getEventSearchClient: () => ({
-          findLatestByEventId: jest.fn().mockResolvedValue(eventWithSignals),
-        }),
-      }),
-      server: {},
-    } as never);
-
-    expect(response.signals).toEqual(signals);
   });
 });
 

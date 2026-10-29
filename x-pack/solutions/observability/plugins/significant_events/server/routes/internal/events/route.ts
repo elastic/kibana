@@ -492,43 +492,6 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
 });
 
-const eventsGetRoute = createServerRoute({
-  endpoint: 'GET /internal/significant_events/events/{id}',
-  options: {
-    access: 'internal',
-    summary: 'Get a significant event',
-    description: 'Fetch the latest version of a single significant event by its event_id.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<SignificantEventResponse> => {
-    const { getEventSearchClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    const eventClient = await getEventSearchClient();
-    const event = await eventClient.findLatestByEventId(params.path.id);
-    if (!event) {
-      throw notFound(`Significant event "${params.path.id}" not found.`);
-    }
-
-    return event;
-  },
-});
-
 const eventsUpdateRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/update',
   options: {
@@ -648,7 +611,6 @@ const investigationStatusesRoute = createServerRoute({
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
   ...eventsFacetsRoute,
-  ...eventsGetRoute,
   ...eventsLifecycleRoute,
   ...eventsAttachInvestigationRoute,
   ...eventsTriggerInvestigationRoute,
