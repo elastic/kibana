@@ -31,7 +31,6 @@
     "optionalPlugins": [
       "cps",
       "fleet",
-      "home",
       "lens",
       "telemetry",
       "cases",
