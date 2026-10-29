@@ -3062,6 +3062,8 @@ paths:
                 getConversationByIdResponseExample:
                   description: Example response containing the contents of a convesation with the chat agent
                   value:
+                    active_execution:
+                      execution_id: 3b0a8c1e-6f2d-4c57-9a43-1d8e5f7b2a90
                     agent_id: elastic-ai-agent
                     created_at: '2025-09-19T17:45:39.554Z'
                     id: bcc176c5-38f6-40be-be0c-898e34fa1480
@@ -156670,7 +156672,7 @@ components:
     Cases_unified_attachment_data:
       additionalProperties: true
       description: |
-        The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters).
+        The attachment's content. Required for comments, where `content` is the comment text (up to 30,000 characters). In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
       example:
         content: A new comment.
       nullable: true
@@ -156678,7 +156680,7 @@ components:
     Cases_unified_attachment_metadata:
       additionalProperties: true
       description: |
-        Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`.
+        Extra details about the attachment. For alerts, this is the alert's index and rule. Required for some types, such as `dashboard`. In requests, it can be up to 524,288 characters when serialized as JSON and nest up to 30 levels deep.
       nullable: true
       type: object
     Cases_unified_attachment_put_request:
