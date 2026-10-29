@@ -68,22 +68,10 @@ export interface InvestigationActionModalsProps<
   /** Who's approving, for the modal's "Applying"/"Declining" caption. */
   currentActorName?: string;
   /**
-   * Replaces the default rationale-only dismiss modal. Supplied when a solution's
-   * dismissal captures more than a rationale — a structured reason, say — which changes
-   * what the modal renders and what local state it owns, not just what confirming does.
-   * @deprecated Prefer `renderCloseModal`, which receives the full investigation. This
-   * prop is kept for the flyout-footer backward-compat adapter and will be removed once
-   * all callers migrate.
-   */
-  renderDismissModal?: (props: {
-    recordId?: string | null;
-    onClose: () => void;
-  }) => React.ReactNode;
-  /**
    * Renders the close-investigation confirmation modal for the 'close' action.
    * Receives the full investigation so the modal can key on `conversationId` rather than
    * `recordId` (which is the proposal id and is undefined in the flyout context).
-   * When provided, takes precedence over `renderDismissModal`.
+   * Without it the 'close' action falls back to a rationale-only dismiss modal.
    */
   renderCloseModal?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
   /**
@@ -110,7 +98,6 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
   onCloseApproval,
   onConfirmApproval,
   onDismissApproval,
-  renderDismissModal,
   renderCloseModal,
   renderEscalationModal,
   isSubmitting,
@@ -137,27 +124,25 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
       />
     ) : null}
 
-    {action === 'close'
-      ? renderCloseModal && investigation
-        ? renderCloseModal({ investigation, onClose: onCloseAction })
-        : recordId
-        ? renderDismissModal?.({ recordId, onClose: onCloseAction }) ?? (
-            <BaseActionModal
-              type="dismiss"
-              title={MODAL_TRANSLATIONS.dismiss.title}
-              recordId={recordId}
-              onClose={onCloseAction}
-              rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
-              primaryAction={{
-                color: 'danger',
-                label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
-                // TODO: use dismiss action API call hook
-                onClick: onCloseAction,
-              }}
-            />
-          )
-        : null
-      : null}
+    {action === 'close' ? (
+      renderCloseModal && investigation ? (
+        renderCloseModal({ investigation, onClose: onCloseAction })
+      ) : recordId ? (
+        <BaseActionModal
+          type="dismiss"
+          title={MODAL_TRANSLATIONS.dismiss.title}
+          recordId={recordId}
+          onClose={onCloseAction}
+          rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
+          primaryAction={{
+            color: 'danger',
+            label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
+            // TODO: use dismiss action API call hook
+            onClick: onCloseAction,
+          }}
+        />
+      ) : null
+    ) : null}
 
     {(action === 'createEscalation' || action === 'attachToEscalation') && investigation
       ? renderEscalationModal?.({
