@@ -21,7 +21,7 @@ export type OnMergeTestTypeDecision = { mode: 'selective' } | { mode: 'full'; re
 export interface OnMergeSelection {
   commit: string;
   base: string | null;
-  baseSource: 'github-activity' | 'merge-queue' | 'direct-push' | null;
+  baseSource: 'github-activity' | 'merge-queue' | null;
   commitCount: number | null;
   testTypes: Record<OnMergeTestType, OnMergeTestTypeDecision>;
 }

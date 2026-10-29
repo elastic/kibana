@@ -84,7 +84,6 @@ export const createDefaultOnMergeSelectionDeps = ({
   },
 
   git: {
-    getParents: (commit) => git(['rev-list', '--parents', '-n', '1', commit]).split(' ').slice(1),
     ensureCommit: (commit) =>
       commitExists(commit) ||
       (gitSucceeds(['fetch', '--no-tags', 'origin', commit]) && commitExists(commit)),

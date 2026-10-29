@@ -55,7 +55,6 @@ export interface OnMergeSelectionDeps {
   getMergeQueueBase(commit: string): Promise<string | null>;
   getPreviousFinishedBuild(buildNumber: number): Promise<Build | null>;
   git: {
-    getParents(commit: string): string[];
     ensureCommit(commit: string): boolean;
     isAncestor(ancestor: string, commit: string): boolean;
     countFirstParentCommits(base: string, head: string): number;
@@ -73,7 +72,6 @@ const logLookupError = (lookup: string) => (error: Error) => {
 
 const resolveBase = async ({
   commit,
-  git,
   findPushActivity,
   getMergeQueueBase,
 }: OnMergeSelectionDeps): Promise<BaseResolution> => {
@@ -93,11 +91,8 @@ const resolveBase = async ({
     return { base: mergeQueueBase, baseSource: 'merge-queue' };
   }
 
-  const parents = git.getParents(commit);
-  if (parents.length === 1) {
-    return { base: parents[0], baseSource: 'direct-push' };
-  }
-  return { reason: `cannot resolve base (commit has ${parents.length} parents)` };
+  // The parent commit is not a safe fallback: a direct push may contain several commits.
+  return { reason: 'cannot resolve push boundary' };
 };
 
 const isUnprovenJob = (job: Job): boolean =>

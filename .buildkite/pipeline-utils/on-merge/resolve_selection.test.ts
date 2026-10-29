@@ -47,7 +47,6 @@ const createDeps = (overrides: Partial<OnMergeSelectionDeps> = {}): OnMergeSelec
   getMergeQueueBase: jest.fn().mockResolvedValue(null),
   getPreviousFinishedBuild: jest.fn().mockResolvedValue(previousBuild()),
   git: {
-    getParents: jest.fn().mockReturnValue([PARENT]),
     ensureCommit: jest.fn().mockReturnValue(true),
     isAncestor: jest.fn().mockReturnValue(true),
     countFirstParentCommits: jest.fn().mockReturnValue(3),
@@ -125,22 +124,11 @@ describe('resolveOnMergeSelection', () => {
     expect(console.error).toHaveBeenCalledWith('GitHub activity lookup failed: rate limited');
   });
 
-  it('falls back to the parent commit for single-parent commits without other sources', async () => {
+  it('runs everything in full when the push boundary cannot be resolved', async () => {
     const deps = createDeps({ findPushActivity: jest.fn().mockResolvedValue(null) });
     await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
-      base: PARENT,
-      baseSource: 'direct-push',
-    });
-  });
-
-  it('runs everything in full when no base can be resolved for a merge commit', async () => {
-    const deps = createDeps({
-      findPushActivity: jest.fn().mockResolvedValue(null),
-      git: { ...createDeps().git, getParents: jest.fn().mockReturnValue([PARENT, BASE]) },
-    });
-    await expect(resolveOnMergeSelection(deps)).resolves.toMatchObject({
       base: null,
-      testTypes: allFull('cannot resolve base (commit has 2 parents)'),
+      testTypes: allFull('cannot resolve push boundary'),
     });
   });
 
