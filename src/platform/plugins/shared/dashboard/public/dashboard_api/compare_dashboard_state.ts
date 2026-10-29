@@ -42,9 +42,15 @@ const diffLayout = (
     // live panel comparators skip ref_id since it is fixed for a loaded panel
     if (getRefId(baselinePanel) !== getRefId(currentPanel)) return true;
     const child = children?.[panelId];
-    return apiComparesSerializedState(child) && apiHasType(child) && child.type === currentType
-      ? !child.compareSerializedState(baselinePanel, currentPanel)
-      : !deepEqual(baselinePanel, currentPanel);
+    try {
+      return apiComparesSerializedState(child) && apiHasType(child) && child.type === currentType
+        ? !child.compareSerializedState(baselinePanel, currentPanel)
+        : !deepEqual(baselinePanel, currentPanel);
+    } catch (error) {
+      console.warn(`Unable to compare serialized state for dashboard panel "${panelId}".`, error);
+      // A failed comparison cannot establish equality.
+      return true;
+    }
   };
 
   const { hasPanelChanges, hasPinnedPanelChanges } = getLayoutChanges(
