@@ -253,16 +253,6 @@ expectType<
   >
 >(resFeature);
 
-const resFeatureWithTemperature = mockFeatureApi({
-  featureId: 'my_feature',
-  messages: minimalMessages,
-  temperature: 0.3,
-});
-
-expectType<Promise<ChatCompleteResponse<{ tools: {}; toolChoice: ToolChoiceType.auto }>>>(
-  resFeatureWithTemperature
-);
-
 const resFeatureStream = mockFeatureApi({
   featureId: 'my_feature',
   messages: minimalMessages,

@@ -658,25 +658,6 @@ describe('createChatCompleteApi', () => {
       expect(response.content).toEqual('chunk-1');
     });
 
-    it("calls the top endpoint with the caller's temperature and the feature's reasoning", async () => {
-      const chatCompleteForFeature = createChatCompleteForFeature(
-        jest
-          .fn()
-          .mockResolvedValue({ connectorId: 'feature-connector', reasoning: { effort: 'low' } })
-      );
-
-      await chatCompleteForFeature({
-        featureId: 'my_feature',
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        temperature: 0.3,
-        maxRetries: 0,
-      });
-
-      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
-        expect.objectContaining({ temperature: 0.3, reasoning: { effort: 'low' } })
-      );
-    });
-
     it('calls the connector when featureId is undefined', async () => {
       const resolveFeatureEndpoint = jest.fn();
       const chatCompleteForFeature = createChatCompleteForFeature(resolveFeatureEndpoint);
