@@ -657,6 +657,12 @@ describe('RulesClient', () => {
       ]);
       expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-on']);
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-on']);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED },
+        })
+      );
       expect(res.items).toHaveLength(1);
       expect(res.items[0].id).toBe('rule-off');
       expect(res.errors).toEqual([
@@ -2852,6 +2858,12 @@ describe('RulesClient', () => {
         { id: 'rule-2', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
       ]);
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT },
+        })
+      );
     });
 
     it('surfaces TASK_MANAGER_DRIFT for per-task failures in the bulkRemove statuses (no throw)', async () => {
@@ -3040,6 +3052,12 @@ describe('RulesClient', () => {
 
       expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1', 'task:rule-2']);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED },
+        })
+      );
       expect(res.affected_count).toBe(0);
       expect(res.errors).toEqual([
         { id: 'rule-1', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },

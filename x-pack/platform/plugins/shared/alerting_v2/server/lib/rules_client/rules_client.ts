@@ -512,7 +512,7 @@ export class RulesClient {
 
       this.logger.error({
         error: new Error(message),
-        code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+        code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED,
       });
 
       for (const id of driftedRuleIds) {
@@ -1420,7 +1420,7 @@ export class RulesClient {
 
         this.logger.error({
           error: new Error(message),
-          code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+          code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED,
         });
 
         for (const id of driftedRuleIds) {
