@@ -1592,7 +1592,7 @@
     "monaco-yaml": "5.5.1",
     "mongodb": "6.21.0",
     "mongodb-connection-string-url": "3.0.2",
-    "mssql": "12.7.2",
+    "mssql": "12.7.9",
     "murmurhash": "2.0.1",
     "mustache": "4.2.0",
     "mysql2": "3.24.3",
