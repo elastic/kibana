@@ -336,7 +336,7 @@ exports[`pull_request fragments pull_request/base 1`] = `
     },
     {
       "agents": {
-        "image": "family/kibana-minimal-ubuntu-2604",
+        "image": "family/kibana-ubuntu-2404",
         "machineType": "n2-standard-2",
       },
       "command": ".buildkite/scripts/steps/test/pick_test_group_run_order.sh",
