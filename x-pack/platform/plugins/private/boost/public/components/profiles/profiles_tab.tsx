@@ -62,8 +62,9 @@ type FlyoutState = { profile?: BoostProfile; duplicateOf?: BoostProfile } | unde
 
 const isCustomProfile = ({ is_builtin: isBuiltin }: BoostProfile) => !isBuiltin;
 
-const DELETE_DESCRIPTION = i18n.translate('xpack.boost.profilesTab.deleteActionDescription', {
-  defaultMessage: 'Delete this boost profile',
+const EDIT_LABEL = i18n.translate('xpack.boost.profilesTab.editAction', { defaultMessage: 'Edit' });
+const DUPLICATE_LABEL = i18n.translate('xpack.boost.profilesTab.duplicateAction', {
+  defaultMessage: 'Duplicate',
 });
 
 export const USED_BY_DEFAULT_RULE_DESCRIPTIONS: Record<BoostProfileType, string> = {
@@ -114,12 +115,12 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
         </span>
       </EuiScreenReaderOnly>
     ),
+    // An icon's tooltip names its action, which a menu item's label already does, so Delete, only
+    // ever in the "All actions" menu, has none, unless it's disabled, when it says why.
     actions: [
       {
-        name: i18n.translate('xpack.boost.profilesTab.editAction', { defaultMessage: 'Edit' }),
-        description: i18n.translate('xpack.boost.profilesTab.editActionDescription', {
-          defaultMessage: 'Edit this boost profile',
-        }),
+        name: EDIT_LABEL,
+        description: EDIT_LABEL,
         icon: 'pencil',
         type: 'icon',
         isPrimary: true,
@@ -128,12 +129,8 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
         'data-test-subj': 'editBoostProfile',
       },
       {
-        name: i18n.translate('xpack.boost.profilesTab.duplicateAction', {
-          defaultMessage: 'Duplicate',
-        }),
-        description: i18n.translate('xpack.boost.profilesTab.duplicateActionDescription', {
-          defaultMessage: 'Create a new boost profile from this one',
-        }),
+        name: DUPLICATE_LABEL,
+        description: DUPLICATE_LABEL,
         icon: 'copy',
         type: 'icon',
         isPrimary: true,
@@ -143,7 +140,7 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
       {
         name: i18n.translate('xpack.boost.profilesTab.deleteAction', { defaultMessage: 'Delete' }),
         description: ({ type, usedByDefaultRule }) =>
-          usedByDefaultRule ? USED_BY_DEFAULT_RULE_DESCRIPTIONS[type] : DELETE_DESCRIPTION,
+          usedByDefaultRule ? USED_BY_DEFAULT_RULE_DESCRIPTIONS[type] : '',
         icon: 'trash',
         color: 'danger',
         type: 'icon',

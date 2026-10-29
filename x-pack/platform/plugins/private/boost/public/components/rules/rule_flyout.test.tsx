@@ -922,9 +922,7 @@ describe('RuleFlyout hidden data sources', () => {
     const matches = within(screen.getByRole('region', { name: 'Exact matches' }));
     expect(matches.queryByText('.catalog-archive')).not.toBeInTheDocument();
     // After the others, so it adds to them.
-    expect(matches.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(
-      /^\+1 hidden index not shown$/
-    );
+    expect(matches.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(/^\+1 hidden index$/);
 
     await userEvent.click(screen.getByTestId('boostRuleShowHidden'));
 
@@ -946,9 +944,7 @@ describe('RuleFlyout hidden data sources', () => {
     await userEvent.clear(screen.getByTestId('boostRulePattern'));
     await userEvent.type(screen.getByTestId('boostRulePattern'), '*');
 
-    expect(screen.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(
-      /^\+1 hidden index not shown$/
-    );
+    expect(screen.getByTestId('boostRuleHiddenNotShown')).toHaveTextContent(/^\+1 hidden index$/);
   });
 
   it('counts a pattern that only matches hidden data sources as matching', async () => {
@@ -959,7 +955,7 @@ describe('RuleFlyout hidden data sources', () => {
     expect(screen.getByTestId('boostRulePatternMatchCount')).toHaveTextContent(/^1$/);
     // With nothing before it, it adds to nothing.
     expect(screen.getByRole('region', { name: 'Exact matches' })).toHaveTextContent(
-      /^1 hidden index not shown$/
+      /^1 hidden index$/
     );
   });
 

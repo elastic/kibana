@@ -25,39 +25,6 @@ export const HiddenBadge = () => (
 );
 
 /**
- * How many hidden indices or data streams a list leaves out, such as "3 hidden indices not shown",
- * or "+3 …" after what the list shows.
- */
-export const formatHiddenNotShown = (
-  type: BoostProfileType | undefined,
-  count: number,
-  isAfterOthers: boolean
-): string => {
-  if (type === 'data_streams') {
-    return isAfterOthers
-      ? i18n.translate('xpack.boost.hiddenData.moreDataStreamsNotShown', {
-          defaultMessage:
-            '+{count, plural, one {# hidden data stream} other {# hidden data streams}} not shown',
-          values: { count },
-        })
-      : i18n.translate('xpack.boost.hiddenData.dataStreamsNotShown', {
-          defaultMessage:
-            '{count, plural, one {# hidden data stream} other {# hidden data streams}} not shown',
-          values: { count },
-        });
-  }
-  return isAfterOthers
-    ? i18n.translate('xpack.boost.hiddenData.moreIndicesNotShown', {
-        defaultMessage: '+{count, plural, one {# hidden index} other {# hidden indices}} not shown',
-        values: { count },
-      })
-    : i18n.translate('xpack.boost.hiddenData.indicesNotShown', {
-        defaultMessage: '{count, plural, one {# hidden index} other {# hidden indices}} not shown',
-        values: { count },
-      });
-};
-
-/**
  * How many hidden indices or data streams end a list that leaves them out, such as "3 hidden
  * indices", or "+3 …" after what the list shows.
  */

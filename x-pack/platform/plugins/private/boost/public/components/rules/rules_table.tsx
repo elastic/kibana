@@ -37,6 +37,11 @@ export type RuleRow = BoostRule &
 
 const isCustomRule = ({ is_builtin: isBuiltin }: BoostRule) => !isBuiltin;
 
+const EDIT_LABEL = i18n.translate('xpack.boost.rulesTab.editAction', { defaultMessage: 'Edit' });
+const DUPLICATE_LABEL = i18n.translate('xpack.boost.rulesTab.duplicateAction', {
+  defaultMessage: 'Duplicate',
+});
+
 const formatRuleCount = (count: number): string =>
   i18n.translate('xpack.boost.rulesTable.ruleCount', {
     defaultMessage: '{count, plural, one {# boost rule} other {# boost rules}}',
@@ -125,12 +130,12 @@ export const RulesTable = ({
         </span>
       </EuiScreenReaderOnly>
     ),
+    // An icon's tooltip names its action, which a menu item's label already does, so Delete, only
+    // ever in the "All actions" menu, has none.
     actions: [
       {
-        name: i18n.translate('xpack.boost.rulesTab.editAction', { defaultMessage: 'Edit' }),
-        description: i18n.translate('xpack.boost.rulesTab.editActionDescription', {
-          defaultMessage: 'Edit this boost rule',
-        }),
+        name: EDIT_LABEL,
+        description: EDIT_LABEL,
         icon: 'pencil',
         type: 'icon',
         isPrimary: true,
@@ -145,12 +150,8 @@ export const RulesTable = ({
         'data-test-subj': 'editBoostRule',
       },
       {
-        name: i18n.translate('xpack.boost.rulesTab.duplicateAction', {
-          defaultMessage: 'Duplicate',
-        }),
-        description: i18n.translate('xpack.boost.rulesTab.duplicateActionDescription', {
-          defaultMessage: 'Create a new boost rule from this one',
-        }),
+        name: DUPLICATE_LABEL,
+        description: DUPLICATE_LABEL,
         icon: 'copy',
         type: 'icon',
         isPrimary: true,
@@ -162,9 +163,7 @@ export const RulesTable = ({
       },
       {
         name: i18n.translate('xpack.boost.rulesTab.deleteAction', { defaultMessage: 'Delete' }),
-        description: i18n.translate('xpack.boost.rulesTab.deleteActionDescription', {
-          defaultMessage: 'Delete this boost rule',
-        }),
+        description: '',
         icon: 'trash',
         color: 'danger',
         type: 'icon',

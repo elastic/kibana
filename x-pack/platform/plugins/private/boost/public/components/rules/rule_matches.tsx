@@ -184,7 +184,8 @@ export const MatchesPopover = ({
             );
           })}
           {hiddenCount > 0 && (
-            <li data-test-subj="boostRuleMatchesMoreHidden">
+            // In italics, setting the count apart from the names.
+            <li css={{ fontStyle: 'italic' }} data-test-subj="boostRuleMatchesMoreHidden">
               {formatHiddenTargets(type, hiddenCount, shownNames.length > 0)}
             </li>
           )}

@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoostDataSource, BoostProfileType } from '../../../common/types';
-import { formatHiddenNotShown } from '../hidden_data';
+import { formatHiddenTargets } from '../hidden_data';
 import { SupersedingRule, TargetName } from './target_name';
 import { TargetListHeader } from './target_list_header';
 
@@ -216,16 +216,17 @@ export const PatternMatches = ({
   );
 
   // How many hidden data sources a list leaves out, in a row after any others, like them, after the
-  // icon of how they match, if they do.
+  // icon of how they match, if they do. As in the "Applies to" lists, it's in italics, setting the
+  // count apart from the names.
   const renderHiddenNote = (count: number, isAfterOthers: boolean, match?: MatchKind) =>
     count > 0 && (
       <div
         key="hiddenNote"
-        css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}
+        css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s, fontStyle: 'italic' }}
         data-test-subj="boostRuleHiddenNotShown"
       >
         <MatchIcon match={match} isLabeled={false} />
-        {formatHiddenNotShown(targetType, count, isAfterOthers)}
+        {formatHiddenTargets(targetType, count, isAfterOthers)}
       </div>
     );
 
