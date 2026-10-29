@@ -35,7 +35,7 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, log, logsSynthtraceEsClient }) => {
-      // Pre-clean the owned stream so an interrupted previous run does not double the counts.
+      // Pre-clean: a CI retry reruns this hook, and a leftover stream would double the counts.
       await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
 
       await indexLogs(logsSynthtraceEsClient, [
@@ -47,18 +47,14 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ esClient, log }) => {
-      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
+      await browserAuth.loginAsViewer();
     });
 
     test('opens the details page for a data set from the list page', async ({
       page,
       pageObjects,
     }) => {
-      await pageObjects.datasetQuality.goto();
+      await pageObjects.datasetQuality.goto({ filters: { query: DATASET } });
 
       await pageObjects.datasetQuality.getDetailsLink(DATA_STREAM).click();
 
@@ -78,7 +74,7 @@ test.describe(
 
       await expect(pageObjects.datasetQualityDetails.emptyPrompt).toBeVisible();
       // The prompt names the data stream that could not be resolved.
-      await expect(page.testSubj.locator('datasetQualityDetailsEmptyPromptBody')).toContainText(
+      await expect(page.getByTestId('datasetQualityDetailsEmptyPromptBody')).toContainText(
         MISSING_DATA_STREAM
       );
     });

@@ -14,33 +14,39 @@ import { datasetNames, getInitialTestLogs, getLogsForDataset, indexLogs } from '
 const TO = '2024-01-01T12:00:00.000Z';
 /** Recent enough to count as "active" in the default time range. */
 const ACTIVE_TO = new Date().toISOString();
+/** One namespace per test, so each one counts only the data sets it seeded. */
+const NAMESPACES = {
+  healthy: 'dqsummaryhealthy',
+  mixed: 'dqsummarymixed',
+  size: 'dqsummarysize',
+} as const;
 
 test.describe(
   'Dataset quality summary panel',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // Admin, matching the FTR suite's privileged default. The estimated-data KPI is
-    // gated on the `monitor` index privilege, which the stateful viewer lacks.
+    // Admin: the estimated data KPI needs the `monitor` index privilege, which neither `viewer`
+    // nor `editor` has.
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
-    });
-
-    test.afterEach(async ({ logsSynthtraceEsClient }) => {
-      await logsSynthtraceEsClient.clean();
     });
 
     test('reports every data set as healthy when only good data exists', async ({
       pageObjects,
       logsSynthtraceEsClient,
     }) => {
-      await logsSynthtraceEsClient.index(getInitialTestLogs({ to: TO, count: 4 }));
+      await logsSynthtraceEsClient.index(
+        getInitialTestLogs({ to: TO, count: 4, namespace: NAMESPACES.healthy })
+      );
 
-      await pageObjects.datasetQuality.goto();
+      await pageObjects.datasetQuality.goto({ filters: { namespaces: [NAMESPACES.healthy] } });
 
       // The panel can briefly render a stale count while its requests settle, so
       // poll the whole KPI set rather than reading it once.
       await expect
-        .poll(async () => pageObjects.datasetQuality.getSummaryPanelKpis())
+        .poll(async () => pageObjects.datasetQuality.getSummaryPanelKpis(), {
+          timeout: testData.STATS_LOAD_TIMEOUT_MS,
+        })
         .toStrictEqual({
           datasetHealthPoor: '0',
           datasetHealthDegraded: '0',
@@ -55,18 +61,37 @@ test.describe(
     }) => {
       await indexLogs(logsSynthtraceEsClient, [
         // Good data in all 3 datasets.
-        getInitialTestLogs({ to: TO, count: 4 }),
+        getInitialTestLogs({ to: TO, count: 4, namespace: NAMESPACES.mixed }),
         // Only malformed docs, which makes this dataset "poor".
-        getLogsForDataset({ to: ACTIVE_TO, count: 1, dataset: datasetNames[1], isMalformed: true }),
+        getLogsForDataset({
+          to: ACTIVE_TO,
+          count: 1,
+          dataset: datasetNames[1],
+          isMalformed: true,
+          namespace: NAMESPACES.mixed,
+        }),
         // Malformed plus a majority of good docs, which makes this one "degraded".
-        getLogsForDataset({ to: ACTIVE_TO, count: 1, dataset: datasetNames[2], isMalformed: true }),
-        getLogsForDataset({ to: ACTIVE_TO, count: 10, dataset: datasetNames[2] }),
+        getLogsForDataset({
+          to: ACTIVE_TO,
+          count: 1,
+          dataset: datasetNames[2],
+          isMalformed: true,
+          namespace: NAMESPACES.mixed,
+        }),
+        getLogsForDataset({
+          to: ACTIVE_TO,
+          count: 10,
+          dataset: datasetNames[2],
+          namespace: NAMESPACES.mixed,
+        }),
       ]);
 
-      await pageObjects.datasetQuality.goto();
+      await pageObjects.datasetQuality.goto({ filters: { namespaces: [NAMESPACES.mixed] } });
 
       await expect
-        .poll(async () => pageObjects.datasetQuality.getSummaryPanelKpis())
+        .poll(async () => pageObjects.datasetQuality.getSummaryPanelKpis(), {
+          timeout: testData.STATS_LOAD_TIMEOUT_MS,
+        })
         .toStrictEqual({
           datasetHealthPoor: '1',
           datasetHealthDegraded: '1',
@@ -83,13 +108,18 @@ test.describe(
       pageObjects,
       logsSynthtraceEsClient,
     }) => {
-      test.setTimeout(150_000);
+      test.setTimeout(testData.METERING_TEST_TIMEOUT_MS);
 
       await logsSynthtraceEsClient.index(
-        getLogsForDataset({ to: ACTIVE_TO, count: 10, dataset: datasetNames[0] })
+        getLogsForDataset({
+          to: ACTIVE_TO,
+          count: 10,
+          dataset: datasetNames[0],
+          namespace: NAMESPACES.size,
+        })
       );
 
-      await pageObjects.datasetQuality.goto();
+      await pageObjects.datasetQuality.goto({ filters: { namespaces: [NAMESPACES.size] } });
 
       // Sizes come from the metering API on serverless, which caches for ~30s. Reading
       // the KPI only re-reads the DOM, so reload each attempt to force a fresh request.

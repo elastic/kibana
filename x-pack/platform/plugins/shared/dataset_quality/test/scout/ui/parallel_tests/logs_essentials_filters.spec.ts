@@ -12,6 +12,7 @@ import { test } from '../fixtures';
 import { getInitialTestLogs } from '../../common';
 
 const TO = '2024-01-01T12:00:00.000Z';
+const NAMESPACE = 'dqessentials';
 
 // The logs-essentials tier only surfaces log data, so the data set type filter is not
 // rendered there. Every other filter is covered by table_filters.spec.ts.
@@ -20,15 +21,13 @@ test.describe(
   { tag: tags.serverless.observability.logs_essentials },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
-      await logsSynthtraceEsClient.index(getInitialTestLogs({ to: TO, count: 4 }));
+      await logsSynthtraceEsClient.index(
+        getInitialTestLogs({ to: TO, count: 4, namespace: NAMESPACE })
+      );
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ logsSynthtraceEsClient }) => {
-      await logsSynthtraceEsClient.clean();
+      await browserAuth.loginAsViewer();
     });
 
     test('does not render the data set type filter', async ({ pageObjects }) => {

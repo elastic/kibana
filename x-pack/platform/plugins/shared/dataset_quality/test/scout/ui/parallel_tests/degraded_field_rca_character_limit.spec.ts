@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import rison from '@kbn/rison';
 import { generateShortId, log as logDoc, timerange } from '@kbn/synthtrace-client';
 
 import { test, testData } from '../fixtures';
@@ -20,9 +18,7 @@ import {
   buildDataStreamName,
   createComponentTemplate,
   createIndexTemplate,
-  deleteComponentTemplateIfExists,
   deleteDataStreamIfExists,
-  deleteIndexTemplateIfExists,
   getWriteBackingIndexName,
   logsSynthMappings,
   rolloverDataStream,
@@ -76,40 +72,6 @@ const FLYOUT = {
   increaseCharacterLimit: 'datasetQualityDetailsFlyoutIncreaseFieldCharacterLimitAccordion',
 } as const;
 
-/**
- * Opens the details page with a quality issue expanded and/or the current quality
- * issues toggle preset from URL state.
- *
- * TODO(https://github.com/elastic/kibana/issues/287030): collapse onto
- * `pageObjects.datasetQualityDetails.goto`, which already models this state.
- */
-const gotoDetails = async (
-  page: ScoutPage,
-  {
-    field,
-    view,
-    showCurrentQualityIssues,
-  }: {
-    field?: string;
-    view?: 'classic' | 'wired';
-    showCurrentQualityIssues?: boolean;
-  } = {}
-): Promise<void> => {
-  const state = {
-    v: 2,
-    dataStream: DATA_STREAM,
-    timeRange: TIME_RANGE,
-    ...(view ? { view } : {}),
-    ...(field ? { expandedQualityIssue: { name: field, type: 'degraded' } } : {}),
-    ...(showCurrentQualityIssues === undefined ? {} : { showCurrentQualityIssues }),
-  };
-
-  await page.gotoApp(testData.DATA_QUALITY_DETAILS_APP_PATH, {
-    params: { [testData.DATA_QUALITY_URL_STATE_KEY]: rison.encode(state) },
-  });
-  await page.testSubj.locator('datasetDetailsContainer').waitFor({ state: 'visible' });
-};
-
 /** Every degraded document carries an over-long `log.level` and `test_field`. */
 const degradedDocs = (extraFields: Record<string, unknown> = {}) =>
   timerange(INGEST_FROM, INGEST_TO)
@@ -145,8 +107,8 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, log, logsSynthtraceEsClient }) => {
-      // Pre-clean before the template PUTs: a leftover stream from an interrupted run would
-      // add a third backing index and skew the exact counts asserted below.
+      // Pre-clean before the template PUTs: a CI retry reruns this hook, and a leftover stream
+      // would add a third backing index and skew the exact counts asserted below.
       await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
 
       await createComponentTemplate(esClient, {
@@ -196,19 +158,13 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsViewer();
     });
 
     // Deleting the data stream also drops its extra backing index and field-limit
     // settings.
-    test.afterAll(async ({ esClient, log }) => {
-      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
-      await deleteIndexTemplateIfExists(esClient, INDEX_TEMPLATE, log);
-      await deleteComponentTemplateIfExists(esClient, COMPONENT_TEMPLATE, log);
-    });
 
     test('lists past or current quality issues depending on the toggle', async ({
-      page,
       pageObjects,
     }) => {
       const { datasetQualityDetails } = pageObjects;
@@ -254,7 +210,11 @@ test.describe(
       });
 
       await test.step('starts toggled on when the URL state says so', async () => {
-        await gotoDetails(page, { showCurrentQualityIssues: true });
+        await datasetQualityDetails.goto({
+          dataStream: DATA_STREAM,
+          timeRange: TIME_RANGE,
+          showCurrentQualityIssues: true,
+        });
 
         await expect
           .poll(async () => datasetQualityDetails.isCurrentQualityIssuesToggleChecked())
@@ -263,13 +223,17 @@ test.describe(
     });
 
     test('closes the flyout for an issue missing from the latest backing index', async ({
-      page,
       pageObjects,
     }) => {
       const { datasetQualityDetails } = pageObjects;
 
       await test.step('when the URL expands a past issue and asks for current ones', async () => {
-        await gotoDetails(page, { field: 'cloud', showCurrentQualityIssues: true });
+        await datasetQualityDetails.goto({
+          dataStream: DATA_STREAM,
+          timeRange: TIME_RANGE,
+          expandedQualityIssue: { name: 'cloud', type: 'degraded' },
+          showCurrentQualityIssues: true,
+        });
 
         // Wait for the current-issues re-fetch to drop `cloud` (a past-only issue) from
         // the table, which is the signal the flyout's auto-close reacts to, before
@@ -282,7 +246,11 @@ test.describe(
       });
 
       await test.step('when the toggle is switched on with a past issue expanded', async () => {
-        await gotoDetails(page, { field: 'cloud' });
+        await datasetQualityDetails.goto({
+          dataStream: DATA_STREAM,
+          timeRange: TIME_RANGE,
+          expandedQualityIssue: { name: 'cloud', type: 'degraded' },
+        });
 
         await expect(datasetQualityDetails.degradedFieldFlyout).toBeVisible();
 
@@ -292,13 +260,14 @@ test.describe(
       });
     });
 
-    test('reports an exceeded field character limit as the root cause', async ({
-      page,
-      pageObjects,
-    }) => {
+    test('reports an exceeded field character limit as the root cause', async ({ pageObjects }) => {
       const { datasetQualityDetails } = pageObjects;
 
-      await gotoDetails(page, { field: CHARACTER_LIMIT_FIELD });
+      await datasetQualityDetails.goto({
+        dataStream: DATA_STREAM,
+        timeRange: TIME_RANGE,
+        expandedQualityIssue: { name: CHARACTER_LIMIT_FIELD, type: 'degraded' },
+      });
 
       await expect(datasetQualityDetails.getFlyoutSection(FLYOUT.cause)).toContainText(
         testData.TEXTS.fieldCharacterLimitExceeded
@@ -313,7 +282,7 @@ test.describe(
 
       // Both ignored values are rendered truncated, so expand the toggles of this
       // section only — the FTR suite clicked every toggle on the page.
-      for (const toggle of await values.locator('[data-test-subj="truncatedTextToggle"]').all()) {
+      for (const toggle of await values.getByTestId('truncatedTextToggle').all()) {
         await toggle.click();
       }
 
@@ -322,14 +291,17 @@ test.describe(
     });
 
     test('offers the mitigations available for the view it is opened in', async ({
-      page,
       pageObjects,
     }) => {
       const { datasetQualityDetails } = pageObjects;
       const nonIntegrationCustomName = `${LOGS_TYPE}@custom`;
 
       await test.step('manual mitigations for a data set of no integration', async () => {
-        await gotoDetails(page, { field: CHARACTER_LIMIT_FIELD });
+        await datasetQualityDetails.goto({
+          dataStream: DATA_STREAM,
+          timeRange: TIME_RANGE,
+          expandedQualityIssue: { name: CHARACTER_LIMIT_FIELD, type: 'degraded' },
+        });
         await datasetQualityDetails.waitUntilMitigationsLoaded();
 
         await expect(datasetQualityDetails.getFlyoutSection(FLYOUT.mitigationTitle)).toBeVisible();
@@ -366,7 +338,12 @@ test.describe(
       });
 
       await test.step('stream mitigations for a wired stream', async () => {
-        await gotoDetails(page, { field: CHARACTER_LIMIT_FIELD, view: 'wired' });
+        await datasetQualityDetails.goto({
+          dataStream: DATA_STREAM,
+          timeRange: TIME_RANGE,
+          view: 'wired',
+          expandedQualityIssue: { name: CHARACTER_LIMIT_FIELD, type: 'degraded' },
+        });
         await datasetQualityDetails.waitUntilMitigationsLoaded();
 
         await expect(datasetQualityDetails.getFlyoutSection(FLYOUT.mitigationTitle)).toBeVisible();
@@ -385,7 +362,12 @@ test.describe(
       });
 
       await test.step('stream mitigations for a classic stream', async () => {
-        await gotoDetails(page, { field: CHARACTER_LIMIT_FIELD, view: 'classic' });
+        await datasetQualityDetails.goto({
+          dataStream: DATA_STREAM,
+          timeRange: TIME_RANGE,
+          view: 'classic',
+          expandedQualityIssue: { name: CHARACTER_LIMIT_FIELD, type: 'degraded' },
+        });
         await datasetQualityDetails.waitUntilMitigationsLoaded();
 
         await expect(datasetQualityDetails.getFlyoutSection(FLYOUT.mitigationTitle)).toBeVisible();

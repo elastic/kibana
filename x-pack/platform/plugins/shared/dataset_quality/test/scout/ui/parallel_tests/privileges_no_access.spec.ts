@@ -10,8 +10,6 @@ import { expect } from '@kbn/scout/ui';
 
 import { test, testData } from '../fixtures';
 import {
-  buildDataStreamName,
-  deleteDataStreamIfExists,
   fullAccessRoleWithIndices,
   getLogsForDataset,
   noDatasetQualityAccessRole,
@@ -19,7 +17,6 @@ import {
 
 /** Owned by this spec, so the other privilege suites cannot disturb it. */
 const DATASET = 'privno.logs';
-const DATA_STREAM = buildDataStreamName({ dataset: DATASET });
 const TO = '2024-01-01T12:00:00.000Z';
 
 test.describe(
@@ -30,10 +27,6 @@ test.describe(
     // privilege problem rather than an empty cluster.
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await logsSynthtraceEsClient.index(getLogsForDataset({ to: TO, count: 4, dataset: DATASET }));
-    });
-
-    test.afterAll(async ({ esClient, log }) => {
-      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
     });
 
     test('shows the management landing when the user has no Data Quality privileges', async ({
@@ -51,9 +44,10 @@ test.describe(
       // classic prompt — so any of them satisfies the contract. Pinning to `managementHome`
       // would assert the classic chrome rather than the behaviour, and fails on serverless.
       await expect(
-        page.locator(
-          '[data-test-subj="cards-navigation-page"], [data-test-subj="managementHomeSolution"], [data-test-subj="managementHome"]'
-        )
+        page
+          .getByTestId('cards-navigation-page')
+          .or(page.getByTestId('managementHomeSolution'))
+          .or(page.getByTestId('managementHome'))
       ).toBeVisible();
 
       // The app's own content must stay absent: this is a missing app privilege, not the

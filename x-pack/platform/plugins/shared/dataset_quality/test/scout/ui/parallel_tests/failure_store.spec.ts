@@ -12,15 +12,10 @@ import { test, testData } from '../fixtures';
 import {
   buildDataStreamName,
   cannotReadFailureStoreRole,
-  cleanUpAll,
   createComponentTemplate,
   createFailedLogRecord,
   createIndexTemplate,
-  deleteComponentTemplateIfExists,
   deleteDataStreamIfExists,
-  deleteIndexTemplateIfExists,
-  deletePipelineIfExists,
-  disableFailureStoreIfExists,
   getLogsForDataset,
   indexLogs,
   logLevelNormalizationProcessors,
@@ -57,9 +52,8 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, log, logsSynthtraceEsClient }) => {
-      // Pre-clean: these tests toggle the failure store via the UI and that setting sticks on
-      // the stream (recreating templates does not reset it), so an interrupted run would leave
-      // the "starts disabled" streams enabled and fail every rerun until they are deleted.
+      // Pre-clean: a CI retry reruns this hook, and the failure store setting these tests toggle
+      // sticks on the stream (recreating templates does not reset it).
       for (const dataStream of [ENABLED_DATA_STREAM, DISABLED_DATA_STREAM, TABLE_DATA_STREAM]) {
         await deleteDataStreamIfExists(esClient, dataStream, log);
       }
@@ -105,29 +99,9 @@ test.describe(
       await refreshFailureStore(esClient, ENABLED_DATA_STREAM);
     });
 
+    // Admin: these tests enable and disable the failure store from the UI.
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ esClient, log }) => {
-      // Ordered, and every step runs even if an earlier one throws: a data stream the
-      // setup never created would otherwise abort the hook here and leak the templates
-      // and pipeline into the shared stack.
-      await cleanUpAll([
-        // These tests flip the failure store through the UI, so put every data stream
-        // back to the state its template describes before tearing anything down.
-        ...[DISABLED_DATA_STREAM, TABLE_DATA_STREAM].map(
-          (name) => () => disableFailureStoreIfExists(esClient, name, log)
-        ),
-        ...[ENABLED_DATA_STREAM, DISABLED_DATA_STREAM, TABLE_DATA_STREAM].map(
-          (name) => () => deleteDataStreamIfExists(esClient, name, log)
-        ),
-        () => deleteIndexTemplateIfExists(esClient, ENABLED_INDEX_TEMPLATE, log),
-        () => deleteIndexTemplateIfExists(esClient, DISABLED_INDEX_TEMPLATE, log),
-        () => deleteComponentTemplateIfExists(esClient, ENABLED_COMPONENT_TEMPLATE, log),
-        () => deleteComponentTemplateIfExists(esClient, DISABLED_COMPONENT_TEMPLATE, log),
-        () => deletePipelineIfExists(esClient, PIPELINE, log),
-      ]);
     });
 
     test('hides the failed docs card from a user without failure store privileges', async ({
@@ -208,7 +182,7 @@ test.describe(
     test('offers "Set failure store" from the table and removes the link once enabled', async ({
       pageObjects,
     }) => {
-      await pageObjects.datasetQuality.goto();
+      await pageObjects.datasetQuality.goto({ filters: { query: TABLE_DATASET } });
 
       const setFailureStoreLink =
         pageObjects.datasetQuality.getSetFailureStoreLink(TABLE_DATA_STREAM);

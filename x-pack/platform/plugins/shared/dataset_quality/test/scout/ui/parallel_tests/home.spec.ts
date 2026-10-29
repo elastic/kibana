@@ -12,17 +12,14 @@ import { test } from '../fixtures';
 import { datasetNames, getInitialTestLogs } from '../../common';
 
 const TO = '2024-01-01T12:00:00.000Z';
+const NAMESPACE = 'dqhome';
 
 test.describe(
   'Dataset quality home',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ logsSynthtraceEsClient }) => {
-      await logsSynthtraceEsClient.clean();
+      await browserAuth.loginAsViewer();
     });
 
     // The empty-state rendering is covered by the `Table` component's Jest test:
@@ -32,9 +29,11 @@ test.describe(
       pageObjects,
       logsSynthtraceEsClient,
     }) => {
-      await logsSynthtraceEsClient.index(getInitialTestLogs({ to: TO, count: 1 }));
+      await logsSynthtraceEsClient.index(
+        getInitialTestLogs({ to: TO, count: 1, namespace: NAMESPACE })
+      );
 
-      await pageObjects.datasetQuality.goto();
+      await pageObjects.datasetQuality.goto({ filters: { namespaces: [NAMESPACE] } });
 
       await expect(pageObjects.datasetQuality.table).toBeVisible();
       // Asserts the seeded name rather than a row count: EuiBasicTable renders its

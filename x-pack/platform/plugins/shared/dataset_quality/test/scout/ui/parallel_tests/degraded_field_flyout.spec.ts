@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import rison from '@kbn/rison';
 
-import { test, testData } from '../fixtures';
-import {
-  buildDataStreamName,
-  createDegradedFieldsRecord,
-  deleteDataStreamIfExists,
-} from '../../common';
+import { test } from '../fixtures';
+import { buildDataStreamName, createDegradedFieldsRecord } from '../../common';
 
 /**
  * Fixed so the ingested documents and the query window can never drift apart. The
@@ -34,29 +28,6 @@ const DATASET = 'synth.degraded.flyout';
 const DATA_STREAM = buildDataStreamName({ dataset: DATASET });
 const DEGRADED_FIELD = 'test_field';
 
-/**
- * Opens the details page with a quality issue already expanded from URL state.
- *
- * TODO(https://github.com/elastic/kibana/issues/287030): collapse onto
- * `pageObjects.datasetQualityDetails.goto`, which already models this state.
- */
-const gotoDetailsWithExpandedIssue = async (
-  page: ScoutPage,
-  { dataStream, field }: { dataStream: string; field: string }
-): Promise<void> => {
-  const state = {
-    v: 2,
-    dataStream,
-    timeRange: TIME_RANGE,
-    expandedQualityIssue: { name: field, type: 'degraded' },
-  };
-
-  await page.gotoApp(testData.DATA_QUALITY_DETAILS_APP_PATH, {
-    params: { [testData.DATA_QUALITY_URL_STATE_KEY]: rison.encode(state) },
-  });
-  await page.testSubj.locator('datasetDetailsContainer').waitFor({ state: 'visible' });
-};
-
 test.describe(
   'Dataset quality details - degraded field flyout',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -69,11 +40,7 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ esClient, log }) => {
-      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
+      await browserAuth.loginAsViewer();
     });
 
     test('opens and closes the flyout from the row expand button', async ({ pageObjects }) => {
@@ -88,26 +55,29 @@ test.describe(
       await expect(datasetQualityDetails.degradedFieldFlyout).toBeHidden();
     });
 
-    test('opens the flyout for the field named in the URL state', async ({ page, pageObjects }) => {
-      await gotoDetailsWithExpandedIssue(page, {
+    test('opens the flyout for the field named in the URL state', async ({ pageObjects }) => {
+      await pageObjects.datasetQualityDetails.goto({
         dataStream: DATA_STREAM,
-        field: DEGRADED_FIELD,
+        timeRange: TIME_RANGE,
+        expandedQualityIssue: { name: DEGRADED_FIELD, type: 'degraded' },
       });
 
       await expect(pageObjects.datasetQualityDetails.degradedFieldFlyout).toBeVisible();
     });
 
-    test('opens Discover in ES|QL mode filtered on the expanded field', async ({ page }) => {
-      await gotoDetailsWithExpandedIssue(page, {
+    test('opens Discover in ES|QL mode filtered on the expanded field', async ({
+      page,
+      pageObjects,
+    }) => {
+      await pageObjects.datasetQualityDetails.goto({
         dataStream: DATA_STREAM,
-        field: DEGRADED_FIELD,
+        timeRange: TIME_RANGE,
+        expandedQualityIssue: { name: DEGRADED_FIELD, type: 'degraded' },
       });
 
       // Not on the details page object: it exposes the page-level Discover link
       // (`datasetQualityDetailsLinkToDiscover`), not the flyout title link.
-      await page.testSubj
-        .locator('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover')
-        .click();
+      await page.getByTestId('datasetQualityDetailsDegradedFieldFlyoutTitleLinkToDiscover').click();
 
       // The link hands Discover a generated ES|QL query, so wait for the query to
       // land in the URL before reading the rest of it.

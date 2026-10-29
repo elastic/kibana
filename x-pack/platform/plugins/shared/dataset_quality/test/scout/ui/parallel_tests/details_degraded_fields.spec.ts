@@ -11,7 +11,6 @@ import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 import {
   buildDataStreamName,
-  cleanUpAll,
   createDegradedFieldsRecord,
   deleteDataStreamIfExists,
   getLogsForDataset,
@@ -48,7 +47,8 @@ test.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient, log, logsSynthtraceEsClient }) => {
-      // Pre-clean: one test ingests a third doc mid-run, so a leftover stream skews the counts.
+      // Pre-clean: a CI retry reruns this hook, and one test ingests a third doc mid-run, so a
+      // leftover stream skews the counts.
       await deleteDataStreamIfExists(esClient, DEGRADED_DATA_STREAM, log);
       await deleteDataStreamIfExists(esClient, CLEAN_DATA_STREAM, log);
 
@@ -67,14 +67,7 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ esClient, log }) => {
-      await cleanUpAll([
-        () => deleteDataStreamIfExists(esClient, DEGRADED_DATA_STREAM, log),
-        () => deleteDataStreamIfExists(esClient, CLEAN_DATA_STREAM, log),
-      ]);
+      await browserAuth.loginAsViewer();
     });
 
     test('shows the no-data state when the data set has no quality issues', async ({
@@ -226,9 +219,7 @@ test.describe(
       );
 
       // The details page owns its own date picker, so refresh through that one.
-      await pageObjects.datasetQualityDetails.container
-        .locator('[data-test-subj="querySubmitButton"]')
-        .click();
+      await pageObjects.datasetQualityDetails.container.getByTestId('querySubmitButton').click();
 
       await expect.poll(async () => documentsFor('log.level')).toBe(3);
     });

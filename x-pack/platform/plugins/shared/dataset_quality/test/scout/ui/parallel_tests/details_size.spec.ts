@@ -9,12 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test, testData } from '../fixtures';
-import {
-  buildDataStreamName,
-  deleteDataStreamIfExists,
-  getLogsForDataset,
-  indexLogs,
-} from '../../common';
+import { buildDataStreamName, getLogsForDataset, indexLogs } from '../../common';
 
 /** Size is gated on `canMonitor`, not deployment. The rest of the overview KPI coverage is in details_navigation.spec.ts. */
 const DATASET = 'synth.detailssize';
@@ -36,16 +31,13 @@ test.describe(
       ]);
     });
 
+    // Admin: the size KPI needs the `monitor` index privilege, which neither `viewer` nor `editor` has.
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ esClient, log }) => {
-      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
-    });
-
     test('renders a non-zero size for the data set', async ({ page, pageObjects }) => {
-      test.setTimeout(150_000);
+      test.setTimeout(testData.METERING_TEST_TIMEOUT_MS);
 
       await pageObjects.datasetQualityDetails.goto({
         dataStream: DATA_STREAM,

@@ -9,13 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
-import {
-  buildDataStreamName,
-  cleanUpAll,
-  deleteDataStreamIfExists,
-  getLogsForDataset,
-  indexLogs,
-} from '../../common';
+import { buildDataStreamName, getLogsForDataset, indexLogs } from '../../common';
 
 /** Prefixed so this spec cannot collide with the other details suites. */
 const DATASET = 'synth.discover';
@@ -43,14 +37,7 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
-    });
-
-    test.afterAll(async ({ esClient, log }) => {
-      await cleanUpAll([
-        () => deleteDataStreamIfExists(esClient, DATA_STREAM, log),
-        () => deleteDataStreamIfExists(esClient, DEGRADED_DATA_STREAM, log),
-      ]);
+      await browserAuth.loginAsViewer();
     });
 
     test('opens the data set in Discover from the page header', async ({ page, pageObjects }) => {
