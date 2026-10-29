@@ -16,7 +16,11 @@ import {
 } from '../controls';
 import type { PanelContentSource, ResolvePanelContent } from '../panels';
 import type { PanelContent, PanelContentAttempt } from '../resolve_panel';
-import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from '../types';
+import type {
+  ResolveAttachmentPanel,
+  ResolveControlFieldCapabilities,
+  ResolveEsqlControlColumnType,
+} from '../types';
 import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
 import type { DashboardFailure } from '../utils';
 import type { PanelChange, PlannedPanel } from './plan';
@@ -25,6 +29,7 @@ interface PanelResolvers {
   resolvePanelContent: ResolvePanelContent;
   resolveAttachmentPanel: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
+  resolveEsqlControlColumnType?: ResolveEsqlControlColumnType;
 }
 
 export type ResolvedPanel = PanelChange<PanelContent> & { authoringNote?: string };
@@ -60,6 +65,7 @@ export const resolvePlan = async ({
   panels,
   controls,
   existingControls,
+  existingPanels,
   removedControlIds,
   takenIds,
   projectRouting,
@@ -70,6 +76,8 @@ export const resolvePlan = async ({
   controls: PlannedControl[];
   /** The controls of the original dashboard. */
   existingControls: NonNullable<DashboardAttachmentData['pinned_panels']>;
+  /** The panels of the original dashboard, where an unpinned ES|QL control is. */
+  existingPanels: DashboardAttachmentData['panels'];
   removedControlIds: ReadonlySet<string>;
   /** Ids of the panels, sections, and controls the dashboard has or the call names. */
   takenIds: Iterable<string>;
@@ -77,7 +85,14 @@ export const resolvePlan = async ({
   resolvers: PanelResolvers;
   logger: Logger;
 }): Promise<ResolvedChanges> => {
-  const esqlVariables = getEsqlVariables(existingControls);
+  const needsEsqlVariables = panels.some(({ content }) => content?.source === 'request');
+  const esqlVariables = needsEsqlVariables
+    ? await getEsqlVariables({
+        pinnedPanels: existingControls,
+        panels: existingPanels,
+        resolveColumnType: resolvers.resolveEsqlControlColumnType,
+      })
+    : [];
   const [attempts, resolvedControls] = await Promise.all([
     Promise.all(
       panels.map(({ content }) => content && resolveContent(content, resolvers, esqlVariables))

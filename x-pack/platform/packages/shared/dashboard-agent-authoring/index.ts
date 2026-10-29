@@ -35,4 +35,5 @@ export type {
   ControlFieldCapability,
   ResolveAttachmentPanel,
   ResolveControlFieldCapabilities,
+  ResolveEsqlControlColumnType,
 } from './src/types';

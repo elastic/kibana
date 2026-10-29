@@ -118,6 +118,108 @@ describe('executeDashboardUpsert, ES|QL control values for custom content', () =
     );
   });
 
+  it('gives the values of a control unpinned into the grid or a section as well', async () => {
+    const resolvePanelContent = createResolver();
+    const unpinned = (id: string, name: string, selected: string) => ({
+      ...hostControl,
+      id,
+      config: { ...hostControl.config, variable_name: name, selected_options: [selected] },
+      grid: { ...grid, y: 20 },
+    });
+
+    await upsert(
+      resolvePanelContent,
+      {
+        title: 'Test',
+        panels: [
+          customContentPanel,
+          unpinned('grid-control', 'region', 'eu'),
+          {
+            id: 'section',
+            title: 'Section',
+            collapsed: false,
+            grid: { y: 30 },
+            panels: [unpinned('section-control', 'env', 'prod')],
+          },
+        ],
+        pinned_panels: [hostControl],
+      },
+      [restyle('cc-1')]
+    );
+
+    expect(resolvePanelContent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlVariables: [
+          { key: 'host', value: 'web-1', type: 'values' },
+          { key: 'region', value: 'eu', type: 'values' },
+          { key: 'env', value: 'prod', type: 'values' },
+        ],
+      })
+    );
+  });
+
+  it('casts the selection of a query-based control by the column type the resolver finds', async () => {
+    const resolvePanelContent = createResolver();
+    const resolveEsqlControlColumnType = jest.fn().mockResolvedValue('long');
+
+    await executeDashboardUpsert({
+      dashboardData: {
+        title: 'Test',
+        panels: [customContentPanel],
+        pinned_panels: [
+          {
+            id: 'control-bytes',
+            type: ESQL_CONTROL,
+            config: {
+              variable_name: 'bytes',
+              variable_type: 'values',
+              selected_options: ['100'],
+              control_type: 'VALUES_FROM_QUERY',
+              esql_query: 'FROM logs | STATS BY bytes',
+            },
+          },
+        ],
+      },
+      upsert: { panels: [restyle('cc-1')] } as never,
+      logger,
+      resolvePanelContent,
+      resolveEsqlControlColumnType,
+    });
+
+    expect(resolvePanelContent).toHaveBeenCalledWith(
+      expect.objectContaining({ esqlVariables: [{ key: 'bytes', value: 100, type: 'values' }] })
+    );
+  });
+
+  it('does not look up anything when no panel is resolved from a request', async () => {
+    const resolveEsqlControlColumnType = jest.fn();
+
+    await executeDashboardUpsert({
+      dashboardData: {
+        title: 'Test',
+        panels: [customContentPanel],
+        pinned_panels: [
+          {
+            id: 'control-bytes',
+            type: ESQL_CONTROL,
+            config: {
+              variable_name: 'bytes',
+              variable_type: 'values',
+              selected_options: ['100'],
+              control_type: 'VALUES_FROM_QUERY',
+              esql_query: 'FROM logs | STATS BY bytes',
+            },
+          },
+        ],
+      },
+      upsert: { panels: [] } as never,
+      logger,
+      resolveEsqlControlColumnType,
+    });
+
+    expect(resolveEsqlControlColumnType).not.toHaveBeenCalled();
+  });
+
   it('gives an empty list when the dashboard has no ES|QL controls', async () => {
     const resolvePanelContent = createResolver();
 

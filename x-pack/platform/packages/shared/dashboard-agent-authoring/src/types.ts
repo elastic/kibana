@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PanelContentAttempt } from './resolve_panel';
 
 /**
@@ -31,3 +32,12 @@ export type ResolveControlFieldCapabilities = (params: {
   fieldNames: readonly string[];
   projectRouting?: string;
 }) => Promise<ControlFieldCapabilities>;
+
+/**
+ * Loads the type of the one column a query-based ES|QL control's query returns, or undefined when it
+ * cannot be told. Injected like the other resolvers so dashboard authoring stays free of Elasticsearch access.
+ */
+export type ResolveEsqlControlColumnType = (params: {
+  query: string;
+  esqlVariables: ESQLControlVariable[];
+}) => Promise<string | undefined>;

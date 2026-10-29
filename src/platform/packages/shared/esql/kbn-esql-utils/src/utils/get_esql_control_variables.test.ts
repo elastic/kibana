@@ -101,8 +101,7 @@ describe('getESQLControlVariablesFromState', () => {
       ]);
     });
 
-    // The column type a live control casts by is not saved: a keyword like `404` must stay text.
-    it('keeps them as saved for a control whose values come from a query', () => {
+    it('keeps them as saved for a control whose values come from a query and has no column type', () => {
       expect(
         getESQLControlVariablesFromState([
           {
@@ -123,6 +122,47 @@ describe('getESQLControlVariablesFromState', () => {
         { key: 'code', value: '404', type: 'values' },
         { key: 'codes', value: ['404', '500'], type: 'multi_values' },
       ]);
+    });
+
+    it('casts the values of a query-based control by the column type given for it', () => {
+      const queryControl = (name: string, selected: string[], extra = {}) => ({
+        variable_name: name,
+        variable_type: 'values',
+        selected_options: selected,
+        control_type: FROM_QUERY,
+        ...extra,
+      });
+
+      expect(
+        getESQLControlVariablesFromState(
+          [
+            queryControl('bytes', ['100']),
+            queryControl('code', ['404']),
+            queryControl('sizes', ['1', '2'], { single_select: false }),
+          ],
+          { bytes: 'long', code: 'keyword', sizes: 'integer' }
+        )
+      ).toEqual([
+        { key: 'bytes', value: 100, type: 'values' },
+        { key: 'code', value: '404', type: 'values' },
+        { key: 'sizes', value: [1, 2], type: 'values' },
+      ]);
+    });
+
+    it('ignores the column type given for a control with static values', () => {
+      expect(
+        getESQLControlVariablesFromState(
+          [
+            {
+              variable_name: 'code',
+              variable_type: 'values',
+              selected_options: ['404'],
+              control_type: STATIC,
+            },
+          ],
+          { code: 'keyword' }
+        )
+      ).toEqual([{ key: 'code', value: 404, type: 'values' }]);
     });
 
     it('reads a control with no control type as one whose values come from a query', () => {

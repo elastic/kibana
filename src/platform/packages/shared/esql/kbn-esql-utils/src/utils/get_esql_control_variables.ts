@@ -14,12 +14,16 @@ import { castESQLValue } from './cast_esql_value';
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const castOption = (option: string | number): string | number =>
-  typeof option === 'string' ? castESQLValue(option) : option;
+const castOption = (option: string | number, columnType?: string): string | number =>
+  typeof option === 'string' ? castESQLValue(option, columnType) : option;
 
-/** Reads the variables published by ES|QL controls from the `config` of each saved control, for code with no live control. */
+/**
+ * Reads the variables published by ES|QL controls from the `config` of each saved control, for code with no live control.
+ * `columnTypes` gives the column type of a query-based control's values by variable name, which a live control reads from its query.
+ */
 export const getESQLControlVariablesFromState = (
-  controlStates: ReadonlyArray<unknown>
+  controlStates: ReadonlyArray<unknown>,
+  columnTypes: Readonly<Record<string, string>> = {}
 ): ESQLControlVariable[] =>
   controlStates.flatMap((state) => {
     if (!isRecord(state)) return [];
@@ -36,9 +40,12 @@ export const getESQLControlVariablesFromState = (
     const options = (Array.isArray(selectedOptions) ? selectedOptions : []).filter(
       (option): option is string | number => ['string', 'number'].includes(typeof option)
     );
-    // Like a live control, only static values are cast: the column type of a query-based one is not saved.
-    const toValue = (option: string | number) =>
-      controlType === EsqlControlType.STATIC_VALUES ? castOption(option) : option;
+    // A query-based control saves its selections as text, and without its column type they stay text.
+    const columnType = columnTypes[key];
+    const toValue = (option: string | number) => {
+      if (controlType === EsqlControlType.STATIC_VALUES) return castOption(option);
+      return columnType ? castOption(option, columnType) : option;
+    };
 
     // A control is single-select unless it says otherwise.
     const value =

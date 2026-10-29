@@ -34,6 +34,7 @@ import {
 import { retrieveLatestVersion } from './attachment_state';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
 import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
+import { createEsqlControlColumnTypeResolver } from './resolvers/esql_control_column_type_resolver';
 import { createLayoutArranger } from './layout_arranger';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
@@ -190,6 +191,9 @@ Panel positions and sizes are set automatically after the changes are applied, a
           }),
           resolveAttachmentPanel: createAttachmentPanelResolver({ attachments }),
           resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
+            esClient: esClient.asCurrentUser,
+          }),
+          resolveEsqlControlColumnType: createEsqlControlColumnTypeResolver({
             esClient: esClient.asCurrentUser,
           }),
           validator: await getDashboardValidator(),
