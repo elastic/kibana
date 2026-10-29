@@ -957,10 +957,20 @@ describe('inferenceEndpointAdapter', () => {
         });
       });
 
-      const nonStrictEndpoints: Array<[string, { provider: string; endpointModelId?: string }]> = [
+      const nonStrictEndpoints: Array<
+        [string, { provider: string; endpointModelId?: string; modelName?: string }]
+      > = [
         [
           'an EIS Claude endpoint',
           { provider: 'elastic', endpointModelId: 'anthropic-claude-4.6-sonnet' },
+        ],
+        [
+          'an EIS Claude endpoint whose modelName looks like GPT (endpointModelId wins)',
+          {
+            provider: 'elastic',
+            endpointModelId: 'anthropic-claude-4.6-sonnet',
+            modelName: '.openai-gpt-5.5-chat_completion',
+          },
         ],
         [
           'an EIS GPT-OSS endpoint',
@@ -983,6 +993,46 @@ describe('inferenceEndpointAdapter', () => {
             functionCalling: 'simulated',
           })
         ).toBeUndefined();
+      });
+
+      it('keeps the injected dummy tool non-strict on a strict endpoint when tools are omitted', () => {
+        executorMock.invoke.mockResolvedValue(
+          observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+        );
+
+        inferenceEndpointAdapter
+          .chatComplete({
+            ...defaultArgs,
+            provider: 'openai',
+            messages: [
+              { role: MessageRole.User, content: 'question' },
+              {
+                role: MessageRole.Assistant,
+                content: '',
+                toolCalls: [
+                  {
+                    toolCallId: '1',
+                    function: { name: 'myTool', arguments: {} },
+                  },
+                ],
+              },
+              {
+                role: MessageRole.Tool,
+                name: 'myTool',
+                toolCallId: '1',
+                response: { ok: true },
+              },
+            ],
+          })
+          .subscribe(noop);
+
+        const { tools } = executorMock.invoke.mock.calls[0][0].body as {
+          tools?: Array<{ function: { name: string; strict?: boolean } }>;
+        };
+
+        expect(tools).toHaveLength(1);
+        expect(tools?.[0].function.name).toBe('doNotCallThisTool');
+        expect(tools?.[0].function.strict).not.toBe(true);
       });
     });
 
