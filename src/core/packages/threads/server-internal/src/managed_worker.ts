@@ -21,6 +21,7 @@ const BOOTSTRAP_PATH = require.resolve('./worker_bootstrap');
 
 const DEFAULT_MAX_ATTEMPTS = 3;
 const DEFAULT_INITIAL_DELAY_MS = 1_000;
+const DEFAULT_MAX_DELAY_MS = 5 * 60 * 1_000;
 const DEFAULT_STABLE_UPTIME_MS = 10 * 60 * 1_000;
 const DEFAULT_READY_TIMEOUT_MS = 30_000;
 const DEFAULT_HEALTH_INTERVAL_MS = 60_000;
@@ -201,8 +202,11 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
   private scheduleRestart(failure: string, exit?: ManagedWorkerExitInfo): void {
     if (!this.running) return;
     const { name, logger, unref = true, onExit, onExhausted } = this.options;
-    const { maxAttempts = DEFAULT_MAX_ATTEMPTS, initialDelayMs = DEFAULT_INITIAL_DELAY_MS } =
-      this.options.restart ?? {};
+    const {
+      maxAttempts = DEFAULT_MAX_ATTEMPTS,
+      initialDelayMs = DEFAULT_INITIAL_DELAY_MS,
+      maxDelayMs = DEFAULT_MAX_DELAY_MS,
+    } = this.options.restart ?? {};
     if (this.restarts >= maxAttempts) {
       this.running = false;
       this.state = 'exhausted';
@@ -214,10 +218,12 @@ class ManagedWorkerHandle<TData> implements ManagedWorker {
       if (this.state === 'exhausted') this.notify('onExhausted', () => onExhausted?.());
       return;
     }
-    const delay = initialDelayMs * 2 ** this.restarts;
+    // Unlimited attempts make 2 ** restarts grow without bound; the cap keeps restarts steady.
+    const delay = Math.min(initialDelayMs * 2 ** this.restarts, maxDelayMs);
     this.restarts++;
     this.state = 'restarting';
-    logger.warn(`Worker ${name} ${failure}; restart ${this.restarts}/${maxAttempts} in ${delay}ms`);
+    const budget = maxAttempts === Infinity ? '' : `/${maxAttempts}`;
+    logger.warn(`Worker ${name} ${failure}; restart ${this.restarts}${budget} in ${delay}ms`);
     this.restartTimer = setTimeout(() => {
       this.restartTimer = undefined;
       this.spawnAfterTermination();

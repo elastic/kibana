@@ -25,10 +25,15 @@ export type ManagedWorkerExitInfo =
     };
 
 export interface ManagedWorkerRestartOptions {
-  /** Consecutive failed starts or crashes before the worker is exhausted. Defaults to 3. */
+  /**
+   * Consecutive failed starts or crashes before the worker is exhausted. Defaults to 3.
+   * `Infinity` keeps restarting at up to `maxDelayMs` apart and never exhausts.
+   */
   readonly maxAttempts?: number;
   /** Delay before the first restart; doubles on each attempt. Defaults to 1s. */
   readonly initialDelayMs?: number;
+  /** Upper bound on the delay between restarts. Defaults to 5 minutes. */
+  readonly maxDelayMs?: number;
   /** Uptime after `ready` that resets the restart counter. Defaults to 10 minutes. */
   readonly stableUptimeMs?: number;
 }
