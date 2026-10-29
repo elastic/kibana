@@ -17,6 +17,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     // Fleet setup
     loadTestFile(require.resolve('./fleet_setup')); // ~ 6s
+    loadTestFile(require.resolve('./policy_base_id_backfill')); // ~ 1m
 
     loadTestFile(require.resolve('./policy_secrets')); // ~40s
 

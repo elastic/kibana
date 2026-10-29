@@ -190,25 +190,24 @@ export class StreamsApp {
   async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
     // Use .first() because some pages (like Retention) may have multiple date pickers
     const newControlButton = this.page.testSubj.locator('dateRangePickerControlButton').first();
-    try {
-      await newControlButton.waitFor({ state: 'visible', timeout: 5_000 });
-      // New DateRangePicker stores the range as ISO strings on data-date-range
-      // for absolute dates. Compare canonical ISO on both sides to avoid the
-      // display-format differences between the legacy and new pickers.
-      const dateRange = (await newControlButton.getAttribute('data-date-range')) ?? '';
-      const [actualStart, actualEnd] = dateRange.split(' to ').map((s) => s.trim());
-      const expectedStart = moment.utc(expectedRange.from, LEGACY_DATE_FORMAT, true).toISOString();
-      const expectedEnd = moment.utc(expectedRange.to, LEGACY_DATE_FORMAT, true).toISOString();
-      expect(actualStart, `Date picker 'start date' is incorrect`).toBe(expectedStart);
-      expect(actualEnd, `Date picker 'end date' is incorrect`).toBe(expectedEnd);
+    const legacyStartButton = this.page.testSubj
+      .locator('superDatePickerstartDatePopoverButton')
+      .first();
+    // `waitFor` is not a strict-mode action, so it tolerates whichever picker variant mounted.
+    await newControlButton.or(legacyStartButton).waitFor({ state: 'visible', timeout: 10_000 });
+
+    if ((await newControlButton.count()) > 0) {
+      const toIso = (value: string) => moment.utc(value, LEGACY_DATE_FORMAT, true).toISOString();
+      await expect(newControlButton, `Date picker time range is incorrect`).toHaveAttribute(
+        'data-date-range',
+        `${toIso(expectedRange.from)} to ${toIso(expectedRange.to)}`
+      );
       return;
-    } catch {
-      // New picker not present; fall through to legacy assertions.
     }
-    await expect(
-      this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first(),
-      `Date picker 'start date' is incorrect`
-    ).toHaveText(expectedRange.from);
+
+    await expect(legacyStartButton, `Date picker 'start date' is incorrect`).toHaveText(
+      expectedRange.from
+    );
     await expect(
       this.page.testSubj.locator('superDatePickerendDatePopoverButton').first(),
       `Date picker 'end date' is incorrect`

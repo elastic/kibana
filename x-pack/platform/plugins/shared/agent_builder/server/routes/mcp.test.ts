@@ -7,13 +7,29 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { registerMCPRoutes, filterToolsByNamespace } from './mcp';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { registerMCPRoutes, filterToolsByNamespace, MCP_MAX_TOOL_INPUT_ELEMENTS } from './mcp';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import type { RouteDependencies } from './types';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
 import { MCP_SERVER_PATH } from '@kbn/agent-builder-common';
+
+jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
+  McpServer: jest.fn().mockImplementation(() => ({
+    tool: jest.fn(),
+    connect: jest.fn(),
+    close: jest.fn(),
+  })),
+}));
+
+jest.mock('../utils/mcp/kibana_mcp_http_transport', () => ({
+  KibanaMcpHttpTransport: jest.fn().mockImplementation(() => ({
+    handleRequest: jest.fn().mockResolvedValue({ status: 200 }),
+    close: jest.fn(),
+  })),
+}));
 
 const createMockTool = (
   id: string,
@@ -151,7 +167,7 @@ describe('registerMCPRoutes', () => {
 
     const mockLogger = loggingSystemMock.createLogger();
     const mockRegistry = {
-      list: jest.fn(),
+      list: jest.fn().mockResolvedValue([]),
       execute: jest.fn().mockResolvedValue({ results: [{ type: 'other', data: {} }] }),
     };
     const getInternalServices = jest.fn().mockReturnValue({
@@ -200,6 +216,20 @@ describe('registerMCPRoutes', () => {
     expect(querySchema).toBeDefined();
   });
 
+  it('creates the MCP server with a tool input element limit', async () => {
+    const { handler } = routeHandlers[routeKey];
+    await handler(
+      { licensing: Promise.resolve({ license: { status: 'active', hasAtLeast: () => true } }) },
+      { query: {}, events: { aborted$: { subscribe: jest.fn() } } },
+      { customError: jest.fn() }
+    );
+
+    expect(McpServer).toHaveBeenCalledTimes(1);
+    expect(McpServer).toHaveBeenCalledWith(expect.any(Object), {
+      maxToolInputElements: MCP_MAX_TOOL_INPUT_ELEMENTS,
+    });
+  });
+
   describe('POST (socket timeout)', () => {
     const DEFAULT_SERVER_SOCKET_TIMEOUT_MS = 120 * 1000;
 
@@ -242,5 +272,66 @@ describe('registerMCPRoutes', () => {
         expect.objectContaining({ statusCode: 405 })
       );
     });
+  });
+});
+
+describe('MCP tool input element limit', () => {
+  const connectClient = async () => {
+    const { McpServer: RealMcpServer } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/server/mcp.js')
+    >('@modelcontextprotocol/sdk/server/mcp.js');
+    const { Client } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/client/index.js')
+    >('@modelcontextprotocol/sdk/client/index.js');
+    const { InMemoryTransport } = jest.requireActual<
+      typeof import('@modelcontextprotocol/sdk/inMemory.js')
+    >('@modelcontextprotocol/sdk/inMemory.js');
+
+    const server = new RealMcpServer(
+      { name: 'test', version: '0.0.1' },
+      { maxToolInputElements: MCP_MAX_TOOL_INPUT_ELEMENTS }
+    );
+    const handler = jest.fn().mockResolvedValue({
+      content: [{ type: 'text' as const, text: 'ok' }],
+    });
+    server.tool('list_tool', 'takes a list', { items: z.array(z.string()) }, handler);
+
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    await server.connect(serverTransport);
+    const client = new Client({ name: 'test-client', version: '0.0.1' });
+    await client.connect(clientTransport);
+
+    return { client, server, handler };
+  };
+
+  it('runs a call at the limit', async () => {
+    const { client, server, handler } = await connectClient();
+
+    const result = await client.callTool({
+      name: 'list_tool',
+      arguments: { items: new Array(MCP_MAX_TOOL_INPUT_ELEMENTS - 1).fill('a') },
+    });
+
+    expect(result.isError).toBeFalsy();
+    expect(handler).toHaveBeenCalledTimes(1);
+    await client.close();
+    await server.close();
+  });
+
+  it('rejects a call above the limit without running the tool', async () => {
+    const { client, server, handler } = await connectClient();
+
+    const result = await client.callTool({
+      name: 'list_tool',
+      arguments: { items: new Array(MCP_MAX_TOOL_INPUT_ELEMENTS + 1).fill('a') },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(JSON.stringify(result.content)).toContain(
+      `more than the maximum of ${MCP_MAX_TOOL_INPUT_ELEMENTS} elements`
+    );
+    expect(handler).not.toHaveBeenCalled();
+    await client.close();
+    await server.close();
   });
 });

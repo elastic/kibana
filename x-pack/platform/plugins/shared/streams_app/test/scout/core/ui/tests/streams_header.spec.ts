@@ -39,6 +39,7 @@ test.describe(
 
     test('shows correct badges', async ({ pageObjects, config }) => {
       await pageObjects.streams.gotoDataRetentionTab(TEST_STREAM_NAME);
+
       await test.step('verify Discover badge link', async () => {
         await pageObjects.streams.verifyDiscoverButtonLink(TEST_STREAM_NAME);
       });
